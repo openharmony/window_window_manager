@@ -1,0 +1,161 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+config("libwm_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "include",
+    "//utils/system/safwk/native/include",
+    "//foundation/windowmanager/wmserver/include",
+    "//foundation/windowmanager/dm/include",
+    "//foundation/windowmanager/dmserver/include",
+    "//foundation/windowmanager/utils/include",
+
+    # for abilityContext
+    "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
+    "//base/global/resmgr_standard/interfaces/innerkits/include",
+    "//third_party/node/deps/icu-small/source/common",
+    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
+    "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/base/include",
+
+    # abilityContext end
+
+    # weston adapter
+    "//foundation/windowmanager/adapter/include",
+    "//foundation/graphic/standard/interfaces/innerkits",
+    "//foundation/graphic/standard/interfaces/innerkits/wm",
+    "//foundation/graphic/standard/interfaces/innerkits/common",
+
+    # weston adapter end
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-g3",
+  ]
+}
+
+config("libwm_public_config") {
+  include_dirs = [
+    "//foundation/windowmanager/interfaces/innerkits/wm",
+    "//foundation/windowmanager/wmserver/include",
+    "//foundation/windowmanager/dmserver/include",
+    "//foundation/windowmanager/utils/include",
+    "../interfaces/innerkits/dm",
+  ]
+}
+
+## Build libwmutil.so
+ohos_shared_library("libwmutil") {
+  sources = [
+    "../dmserver/src/display_info.cpp",
+    "//foundation/windowmanager/dmserver/src/display_manager_proxy.cpp",
+    "//foundation/windowmanager/utils/src/singleton_container.cpp",
+    "//foundation/windowmanager/wm/src/window_proxy.cpp",
+    "//foundation/windowmanager/wmserver/src/window_manager_proxy.cpp",
+    "src/window_option.cpp",
+    "src/window_property.cpp",
+  ]
+
+  configs = [ ":libwm_config" ]
+
+  public_configs = [ ":libwm_public_config" ]
+
+  deps = [
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
+    "//utils/native/base:utils",
+  ]
+
+  public_deps = [
+    # RSSurface
+    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+  ]
+
+  external_deps = [ "ipc:ipc_core" ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+## Build libwm.so
+ohos_shared_library("libwm") {
+  sources = [
+    "../dm/src/display.cpp",
+    "../dm/src/display_manager.cpp",
+    "../dm/src/display_manager_adapter.cpp",
+    "../dm/src/monitor.cpp",
+    "../utils/src/static_call.cpp",
+    "src/input_transfer_station.cpp",
+    "src/vsync_station.cpp",
+    "src/window.cpp",
+    "src/window_adapter.cpp",
+    "src/window_agent.cpp",
+    "src/window_impl.cpp",
+    "src/window_input_channel.cpp",
+    "src/window_scene.cpp",
+    "src/window_stub.cpp",
+  ]
+
+  configs = [ ":libwm_config" ]
+
+  public_configs = [ ":libwm_public_config" ]
+
+  deps = [
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
+    "//foundation/aafwk/standard/interfaces/innerkits/want:want",
+    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "//foundation/windowmanager/wm:libwmutil",
+    "//utils/native/base:utils",
+
+    # weston adapter
+    "//foundation/windowmanager/adapter:libwmadaptertest",
+
+    # ace
+    "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
+  ]
+
+  public_deps = [
+    # native value
+    # RSSurface
+    "//foundation/ace/napi:ace_napi",
+
+    # vsync
+    "//foundation/graphic/standard:libvsync_client",
+    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+
+    # IMS
+    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
+    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
+
+    # weston adapter
+    "//foundation/windowmanager/adapter:libwmadaptertest",
+  ]
+
+  external_deps = [
+    "aafwk_standard:ability_context_native",
+    "ipc:ipc_core",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
