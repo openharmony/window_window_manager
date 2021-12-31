@@ -1,0 +1,85 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+module_out_path = "window_manager/"
+
+group("unittest") {
+  testonly = true
+
+  deps = [ ":ut_window_impl_test" ]
+}
+
+## UnitTest ut_window_impl_test {{{
+ohos_unittest("ut_window_impl_test") {
+  module_out_path = module_out_path
+
+  sources = [ "src/window_impl_test.cpp" ]
+
+  deps = [ ":unittest_wmtest_common" ]
+}
+
+## UnitTest ut_window_impl_test }}}
+
+## Build unittest_wmtest_common.a {{{
+config("unittest_wmtest_common_public_config") {
+  include_dirs = [
+    "//foundation/windowmanager/wm/include",
+    "//foundation/windowmanager/wmserver/include",
+    "include",
+    "//foundation/windowmanager/interfaces/innerkits/wm",
+    "//utils/native/base/include",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//foundation/windowmanager/utils/include",
+    "//third_party/googletest/googlemock/include",
+
+    #RSSurface
+    "//foundation/graphic/standard/rosen/modules/render_service_client/core",
+    "//foundation/graphic/standard/rosen/modules/render_service_base/include",
+    "//third_party/flutter/skia",
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-g3",
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+}
+
+ohos_static_library("unittest_wmtest_common") {
+  visibility = [ ":*" ]
+  testonly = true
+
+  public_configs = [ ":unittest_wmtest_common_public_config" ]
+
+  deps = [
+    "//foundation/windowmanager/wm:libwm",
+    "//foundation/windowmanager/wm:libwmutil",
+    "//foundation/windowmanager/wmserver:libwms",
+    "//third_party/googletest:gmock",
+    "//utils/native/base:utils",
+
+    # RSSurface
+    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+  ]
+
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+  ]
+}
+## Build unittest_wmtest_common.a }}}
