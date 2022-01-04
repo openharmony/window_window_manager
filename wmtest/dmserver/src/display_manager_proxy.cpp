@@ -15,6 +15,7 @@
 
 #include "display_manager_proxy.h"
 
+#include <inttypes.h>
 #include <ipc_types.h>
 
 #include "window_manager_hilog.h"
@@ -69,7 +70,7 @@ DisplayId DisplayManagerProxy::GetDefaultDisplayId()
     }
 
     DisplayId displayId = reply.ReadUint64();
-    WLOGFI("DisplayManagerProxy::GetDefaultDisplayId %llu", displayId);
+    WLOGFI("DisplayManagerProxy::GetDefaultDisplayId %" PRIu64"", displayId);
     return displayId;
 }
 
