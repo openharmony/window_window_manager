@@ -14,6 +14,9 @@
  */
 
 #include "display_manager.h"
+
+#include <inttypes.h>
+
 #include "display_manager_adapter.h"
 #include "window_manager_hilog.h"
 
@@ -89,7 +92,7 @@ std::vector<const sptr<Display>> DisplayManager::GetAllDisplays()
         if (display != nullptr) {
             res.push_back(display);
         } else {
-            WLOGFE("DisplayManager::GetAllDisplays display %llu nullptr!", displayId);
+            WLOGFE("DisplayManager::GetAllDisplays display %" PRIu64" nullptr!", displayId);
         }
     }
     return res;
