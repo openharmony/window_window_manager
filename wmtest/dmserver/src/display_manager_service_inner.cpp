@@ -16,6 +16,7 @@
 #include "display_manager_service_inner.h"
 
 #include <cinttypes>
+#include <inttypes.h>
 #include <unistd.h>
 
 #include <ipc_skeleton.h>
@@ -81,7 +82,7 @@ std::vector<const sptr<DisplayScreen>> DisplayManagerServiceInner::GetAllDisplay
         if (display != nullptr) {
             res.push_back(display);
         } else {
-            WLOGFE("GetAllDisplays display %llu nullptr!", displayId);
+            WLOGFE("GetAllDisplays display %" PRIu64" nullptr!", displayId);
         }
     }
     return res;
