@@ -26,7 +26,9 @@ ohos_unittest("ut_window_impl_test") {
 
   sources = [ "src/window_impl_test.cpp" ]
 
-  deps = [ ":unittest_wmtest_common" ]
+  deps = [
+    ":unittest_wmtest_common"
+  ]
 }
 
 ## UnitTest ut_window_impl_test }}}
@@ -44,11 +46,11 @@ config("unittest_wmtest_common_public_config") {
     "//foundation/windowmanager/utils/include",
     "//third_party/googletest/googlemock/include",
 
-    #RSSurface
+#RSSurface
     "//foundation/graphic/standard/rosen/modules/render_service_client/core",
     "//foundation/graphic/standard/rosen/modules/render_service_base/include",
     "//third_party/flutter/skia",
-  ]
+    ]
 
   cflags = [
     "-Wall",
@@ -67,19 +69,21 @@ ohos_static_library("unittest_wmtest_common") {
 
   deps = [
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wm:libwmutil",
     "//foundation/windowmanager/wmserver:libwms",
     "//third_party/googletest:gmock",
     "//utils/native/base:utils",
+    "//foundation/windowmanager/wm:libwmutil",
 
-    # RSSurface
-    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
+# RSSurface
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
   ]
 
   external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "hiviewdfx_hilog_native:libhilog"
   ]
+
+
 }
 ## Build unittest_wmtest_common.a }}}

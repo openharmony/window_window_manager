@@ -20,7 +20,7 @@ config("rosenwmtest_config") {
   include_dirs = [
     "frameworks",
 
-    # for abilityContext
+# for abilityContext
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
     "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
     "//base/global/resmgr_standard/interfaces/innerkits/include",
@@ -30,7 +30,7 @@ config("rosenwmtest_config") {
     "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
     "//foundation/aafwk/standard/interfaces/innerkits/base/include",
 
-    # RSSurface
+# RSSurface
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
   ]
@@ -48,8 +48,8 @@ ohos_executable("rosenwmtest") {
   sources = [
     "frameworks/inative_test.cpp",
     "frameworks/main.cpp",
-    "test/dm_native_test.cpp",
     "test/wm_native_test.cpp",
+    "test/dm_native_test.cpp",
   ]
 
   configs = [ ":rosenwmtest_config" ]
@@ -59,16 +59,16 @@ ohos_executable("rosenwmtest") {
     "//foundation/graphic/standard:libvsync_client",
     "//foundation/graphic/standard:libwmclient",
     "//foundation/graphic/standard:libwmservice",
+    "//third_party/zlib:libz",
     "//foundation/windowmanager/adapter:libwmadaptertest",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wm:libwmutil",
     "//foundation/windowmanager/wmserver:libwms",
-    "//third_party/zlib:libz",
+    "//foundation/windowmanager/wm:libwmutil",
 
-    # ace
-    # native value
-    "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
+# native value
     "//foundation/ace/napi:ace_napi",
+# ace
+    "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
   ]
 
   part_name = "window_manager"

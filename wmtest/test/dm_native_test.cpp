@@ -16,12 +16,10 @@
 #include "dm_native_test.h"
 
 #include <cstdio>
-#include <inttypes.h>
 #include <unistd.h>
-
-#include "wm_common.h"
 #include "display_manager.h"
 #include "singleton_container.h"
+#include "wm_common.h"
 
 using namespace OHOS::Rosen;
 
@@ -63,13 +61,13 @@ void DMNativeTest::Run(int32_t argc, const char **argv)
     }
 
     DisplayId displayId = dms->GetDefaultDisplayId();
-    printf("defaultDisplayId: %" PRIu64"\n", displayId);
+    printf("defaultDisplayId: %llu\n", displayId);
 
     auto display = dms->GetDefaultDisplay();
     if (display == nullptr) {
         printf("GetDefaultDisplay: failed!\n");
     } else {
-        printf("GetDefaultDisplay: id %" PRIu64", w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
+        printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
             display->GetHeight(), display->GetFreshRate());
     }
 
@@ -77,9 +75,9 @@ void DMNativeTest::Run(int32_t argc, const char **argv)
     for (auto id: ids) {
         display = dms->GetDisplayById(displayId);
         if (display == nullptr) {
-            printf("GetDisplayById(%" PRIu64"): failed!\n", id);
+            printf("GetDisplayById(%llu): failed!\n", id);
         } else {
-            printf("GetDisplayById(%" PRIu64"): id %" PRIu64", w %d, h %d, fps %u\n", id, display->GetId(), display->GetWidth(),
+            printf("GetDisplayById(%llu): id %llu, w %d, h %d, fps %u\n", id, display->GetId(), display->GetWidth(),
                 display->GetHeight(), display->GetFreshRate());
         }
     }
@@ -89,7 +87,7 @@ void DMNativeTest::Run(int32_t argc, const char **argv)
         if (disp == nullptr) {
             printf("GetAllDisplays: failed!\n");
         } else {
-            printf("GetAllDisplays: id %" PRIu64", w %d, h %d, fps %u\n", disp->GetId(), disp->GetWidth(),
+            printf("GetAllDisplays: id %llu, w %d, h %d, fps %u\n", disp->GetId(), disp->GetWidth(),
                 disp->GetHeight(), disp->GetFreshRate());
         }
     }
