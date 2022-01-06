@@ -26,7 +26,7 @@ namespace OHOS {
 namespace Rosen {
 class WindowNodeContainer : public RefBase {
 public:
-    WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height)
+    WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height) : screenId_(screenId)
     {
         struct RSDisplayNodeConfig config = {screenId};
         displayNode_ = RSDisplayNode::Create(config);
@@ -49,6 +49,8 @@ public:
     WMError MinimizeOtherFullScreenAbility(); // adapt to api7
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes);
     WMError LayoutWindowNodes();
+    uint64_t GetScreenId() const;
+    Rect GetDisplayRect() const;
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
@@ -67,6 +69,7 @@ private:
     std::shared_ptr<RSDisplayNode> displayNode_;
     std::vector<uint32_t> removedIds_;
     uint32_t zOrder_ { 0 };
+    uint64_t screenId_ = 0;
     uint32_t focusedWindow_ { 0 };
     Rect displayRect_;
     WMError LayoutWindowNode(sptr<WindowNode>& node);

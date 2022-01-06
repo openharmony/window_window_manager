@@ -362,5 +362,15 @@ void WindowNodeContainer::TraverseWindowNode(sptr<WindowNode>& node, std::vector
         windowNodes.emplace_back(*iter);
     }
 }
+
+uint64_t WindowNodeContainer::GetScreenId() const
+{
+    return screenId_;
+}
+
+Rect WindowNodeContainer::GetDisplayRect() const
+{
+    return displayRect_;
+}
 }
 }
