@@ -70,10 +70,10 @@ int32_t main(int32_t argc, const char **argv)
         }
     };
     INativeTest::VisitTests(visitFunc);
-    //if (found == nullptr) {
-    //    printf("not found test %d\n", testcase);
-    //    return 1;
-    //}
+    if (found == nullptr) {
+        printf("not found test %d\n", testcase);
+        return 1;
+    }
 
     auto runner = OHOS::AppExecFwk::EventRunner::Create(false);
     auto handler = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
