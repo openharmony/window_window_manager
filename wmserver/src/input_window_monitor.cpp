@@ -44,6 +44,7 @@ void InputWindowMonitor::UpdateInputWindow(uint32_t windowId)
         WLOGFE("can not get window node container.");
         return;
     }
+    UpdateDisplaysInfo(container);
     std::vector<sptr<WindowNode>> windowNodes;
     container->TraverseContainer(windowNodes);
 
@@ -64,11 +65,66 @@ void InputWindowMonitor::UpdateInputWindow(uint32_t windowId)
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(physicalDisplays_, logicalDisplays_);
 }
 
+void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& container)
+{
+    MMI::PhysicalDisplayInfo physicalDisplayInfo = {
+        .id = static_cast<int32_t>(container->GetScreenId()),
+        .leftDisplayId = INVALID_DISPLAY_ID,
+        .upDisplayId = INVALID_DISPLAY_ID,
+        .topLeftX = container->GetDisplayRect().posX_,
+        .topLeftY = container->GetDisplayRect().posY_,
+        .width = static_cast<int32_t>(container->GetDisplayRect().width_),
+        .height = static_cast<int32_t>(container->GetDisplayRect().height_),
+        .name = "physical_display0",
+        .seatId = "seat0",
+        .seatName = "default0",
+        .logicWidth = static_cast<int32_t>(container->GetDisplayRect().width_),
+        .logicHeight = static_cast<int32_t>(container->GetDisplayRect().height_),
+        .direction = MMI::Direction0
+    };
+    auto physicalDisplayIter = std::find_if(physicalDisplays_.begin(), physicalDisplays_.end(),
+                                            [&physicalDisplayInfo](MMI::PhysicalDisplayInfo& physicalDisplay) {
+        return physicalDisplay.id = physicalDisplayInfo.id;
+    });
+    if (physicalDisplayIter != physicalDisplays_.end()) {
+        *physicalDisplayIter = physicalDisplayInfo;
+    } else {
+        physicalDisplays_.emplace_back(physicalDisplayInfo);
+    }
+
+    MMI::LogicalDisplayInfo logicalDisplayInfo = {
+        .id = static_cast<int32_t>(container->GetScreenId()),
+        .topLeftX = container->GetDisplayRect().posX_,
+        .topLeftY = container->GetDisplayRect().posY_,
+        .width = static_cast<int32_t>(container->GetDisplayRect().width_),
+        .height = static_cast<int32_t>(container->GetDisplayRect().height_),
+        .name = "logical_display0",
+        .seatId = "seat0",
+        .seatName = "default0",
+        .focusWindowId = INVALID_WINDOW_ID,
+        .windowsInfo_ = {},
+    };
+    auto logicalDisplayIter = std::find_if(logicalDisplays_.begin(), logicalDisplays_.end(),
+                                           [&logicalDisplayInfo](MMI::LogicalDisplayInfo& logicalDisplay) {
+        return logicalDisplay.id = logicalDisplayInfo.id;
+    });
+    if (logicalDisplayIter != logicalDisplays_.end()) {
+        *logicalDisplayIter = logicalDisplayInfo;
+    } else {
+        logicalDisplays_.emplace_back(logicalDisplayInfo);
+    }
+}
+
 void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>> &windowNodes,
                                               std::vector<MMI::LogicalDisplayInfo>::iterator& iter)
 {
     iter->windowsInfo_.clear();
     for (auto& windowNode: windowNodes) {
+        if (windowTypeSkipped_.find(windowNode->GetWindowProperty()->GetWindowType()) != windowTypeSkipped_.end()) {
+            WLOGFI("window has been skipped. [id: %{public}d, type: %{public}d]", windowNode->GetWindowId(),
+                   windowNode->GetWindowProperty()->GetWindowType());
+            continue;
+        }
         MMI::WindowInfo windowInfo = {
             .id = static_cast<int32_t>(windowNode->GetWindowId()),
             .pid = windowNode->GetCallingPid(),
