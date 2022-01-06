@@ -19,6 +19,8 @@
 
 #include "window_manager_hilog.h"
 
+#include "transaction/rs_interfaces.h"
+
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayManagerStub"};
@@ -33,12 +35,6 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         return -1;
     }
     switch (code) {
-        case TRANS_ID_GET_DISPLAY_INFO: {
-            DisplayType type = static_cast<DisplayType>(data.ReadInt32());
-            sptr<DisplayInfo> info = GetDisplayInfo(type);
-            reply.WriteParcelable(info.GetRefPtr());
-            break;
-        }
         case TRANS_ID_GET_DEFAULT_DISPLAY_ID: {
             DisplayId displayId = GetDefaultDisplayId();
             reply.WriteUint64(displayId);
@@ -50,6 +46,30 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteParcelable(&info);
             break;
         }
+        case TRANS_ID_CREATE_VIRTUAL_DISPLAY: {
+            VirtualDisplayInfo* virtualDisplayInfo = data.ReadParcelable<VirtualDisplayInfo>();
+            sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
+            sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
+            sptr<Surface> surface = Surface::CreateSurfaceAsProducer(bp);
+            DisplayId virtualId = CreateVirtualDisplay(*virtualDisplayInfo, surface);
+            reply.WriteUint64(virtualId);
+            virtualDisplayInfo = nullptr;
+            break;
+        }
+        case TRANS_ID_DESTROY_VIRTUAL_DISPLAY: {
+            DisplayId virtualId = static_cast<DisplayId>(data.ReadUint64());
+            bool result = DestroyVirtualDisplay(virtualId);
+            reply.WriteBool(result);
+            break;
+        }
+        // TODO: fix me
+        // case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
+        //     DisplayId displayId = data.ReadUint64();
+
+        //     sptr<Media::PixelMap> dispalySnapshot = GetDispalySnapshot(displayId);
+        //     reply.WriteParcelable(dispalySnapshot.GetRefPtr());
+        //     break;
+        // }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

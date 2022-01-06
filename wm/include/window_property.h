@@ -18,6 +18,7 @@
 
 #include <refbase.h>
 #include <string>
+#include <unordered_map>
 #include "parcel.h"
 #include "wm_common.h"
 
@@ -41,6 +42,7 @@ public:
     void SetWindowId(uint32_t windowId);
     void SetParentId(uint32_t parentId);
     void SetWindowFlags(uint32_t flags);
+    void SetSystemBarProperty(WindowType type, const SystemBarProperty& state);
 
     Rect GetWindowRect() const;
     WindowType GetWindowType() const;
@@ -55,10 +57,10 @@ public:
     uint32_t GetWindowId() const;
     uint32_t GetParentId() const;
     uint32_t GetWindowFlags() const;
+    const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static sptr<WindowProperty> Unmarshalling(Parcel& parcel);
-
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -73,6 +75,12 @@ private:
     int32_t displayId_ { 0 };
     uint32_t windowId_ { 0 };
     uint32_t parentId_ { 0 };
+    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
+        { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
+    };
+    bool MapMarshalling(Parcel& parcel) const;
+    static void MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& property);
 };
 }
 }

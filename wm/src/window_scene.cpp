@@ -39,11 +39,13 @@ WindowScene::~WindowScene()
 }
 
 WMError WindowScene::Init(int32_t displayId, std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext,
-    sptr<IWindowLifeCycle>& listener)
+    sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option)
 {
     displayId_ = displayId;
     abilityContext_ = abilityContext;
-    sptr<WindowOption> option = new WindowOption();
+    if (option == nullptr) {
+        option = new WindowOption();
+    }
     option->SetDisplayId(displayId);
 
 #ifndef _NEW_RENDERSERVER_
@@ -51,14 +53,8 @@ WMError WindowScene::Init(int32_t displayId, std::shared_ptr<AbilityRuntime::Abi
     Adapter::Init();
     mainWindow_ = CreateWindow(MAIN_WINDOW_ID, option);
 #else
-    if (abilityContext_ != nullptr) {
-        mainWindow_ = SingletonContainer::Get<StaticCall>()->CreateWindow(
-            MAIN_WINDOW_ID + std::to_string(count++), option, abilityContext_->GetAbilityToken());
-    } else {
-        mainWindow_ = SingletonContainer::Get<StaticCall>()->CreateWindow(
-            MAIN_WINDOW_ID + std::to_string(count++), option);
-    }
-
+    mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(
+        MAIN_WINDOW_ID + std::to_string(count++), option, abilityContext_);
 #endif
     if (mainWindow_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
@@ -76,7 +72,7 @@ sptr<Window> WindowScene::CreateWindow(const std::string& windowName, sptr<Windo
         return nullptr;
     }
     option->SetParentName(mainWindow_->GetWindowName());
-    return SingletonContainer::Get<StaticCall>()->CreateWindow(windowName, option);
+    return SingletonContainer::Get<StaticCall>().CreateWindow(windowName, option);
 #else
     /* weston adapter */
     if (!Adapter::CreateWestonWindow(option)) {
@@ -116,12 +112,35 @@ WMError WindowScene::GoBackground() const
     return mainWindow_->Hide();
 }
 
+WMError WindowScene::SetSystemBarProperty(WindowType type, const SystemBarProperty& property) const
+{
+    if (mainWindow_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return mainWindow_->SetSystemBarProperty(type, property);
+}
+
 WMError WindowScene::RequestFocus() const
 {
     if (mainWindow_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
     return mainWindow_->RequestFocus();
+}
+
+void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    WLOGFI("notify mainWindow winId:%{public}d", mainWindow_->GetWindowId());
+    mainWindow_->UpdateConfiguration(configuration);
+}
+
+const std::string& WindowScene::GetContentInfo() const
+{
+    if (mainWindow_ == nullptr) {
+        WLOGFE("WindowScene::GetContentInfo mainWindow_ is null");
+        return "";
+    }
+    return mainWindow_->GetContentInfo();
 }
 } // namespace Rosen
 } // namespace OHOS

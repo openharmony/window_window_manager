@@ -36,7 +36,6 @@ DECLARE_SYSTEM_ABILITY(WindowManagerService);
 DECLARE_SINGLE_INSTANCE_BASE(WindowManagerService);
 
 public:
-    ~WindowManagerService() = default;
     void OnStart() override;
     void OnStop() override;
 
@@ -49,14 +48,26 @@ public:
     WMError Resize(uint32_t windowId, uint32_t width, uint32_t height) override;
     WMError RequestFocus(uint32_t windowId) override;
     WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId) override;
-private:
+    WMError SetWindowMode(uint32_t windowId, WindowMode mode) override;
+    WMError SetWindowType(uint32_t windowId, WindowType type) override;
+    WMError SetWindowFlags(uint32_t windowId, uint32_t flags) override;
+    WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) override;
+
+    void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+
+protected:
     WindowManagerService();
+    virtual ~WindowManagerService() = default;
+
+private:
     bool Init();
     static inline SingletonDelegator<WindowManagerService> delegator;
-    std::mutex mutex_;
+    std::recursive_mutex mutex_;
     sptr<WindowRoot> windowRoot_;
     sptr<WindowController> windowController_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
+    const int WAITING_RS_TIME = 10;
 };
 }
 }

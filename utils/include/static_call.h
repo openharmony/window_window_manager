@@ -23,11 +23,11 @@
 #include "window_option.h"
 namespace OHOS {
 namespace Rosen {
-class StaticCall : public RefBase {
-    DECLARE_SINGLE_INSTANCE_BASE(StaticCall);
+class StaticCall {
+DECLARE_SINGLE_INSTANCE_BASE(StaticCall);
 public:
     virtual sptr<Window> CreateWindow(const std::string& windowName,
-        sptr<WindowOption>& option, const sptr<IRemoteObject>& abilityToken = nullptr);
+        sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr);
 protected:
     StaticCall() = default;
 private:

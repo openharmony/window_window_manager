@@ -13,32 +13,36 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_DMSERVER_DISPLAY_SCREEN_MANAGER_H
-#define FOUNDATION_DMSERVER_DISPLAY_SCREEN_MANAGER_H
+#ifndef FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_MANAGER_H
+#define FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_MANAGER_H
 
 #include <map>
-#include <refbase.h>
+#include <surface.h>
 
-#include "display_screen.h"
+#include "abstract_display.h"
 #include "single_instance.h"
 #include "transaction/rs_interfaces.h"
+#include "virtual_display_info.h"
 
 namespace OHOS::Rosen {
-class DisplayScreenManager : public RefBase {
-DECLARE_SINGLE_INSTANCE_BASE(DisplayScreenManager);
+class AbstractDisplayManager {
+DECLARE_SINGLE_INSTANCE_BASE(AbstractDisplayManager);
 public:
-    std::map<int32_t, sptr<DisplayScreen>> displayScreenMap_;
+    std::map<int32_t, sptr<AbstractDisplay>> abstractDisplayMap_;
 
     ScreenId GetDefaultScreenId();
     RSScreenModeInfo GetScreenActiveMode(ScreenId id);
+    ScreenId CreateVirtualScreen(const VirtualDisplayInfo &virtualDisplayInfo, sptr<Surface> surface);
+    bool DestroyVirtualScreen(ScreenId screenId);
+    // TODO: fix me
+    // sptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId);
 
 private:
-    DisplayScreenManager();
-    ~DisplayScreenManager();
+    AbstractDisplayManager();
+    ~AbstractDisplayManager();
     void parepareRSScreenManger();
 
     OHOS::Rosen::RSInterfaces *rsInterface_;
 };
-
 } // namespace OHOS::Rosen
-#endif // FOUNDATION_DMSERVER_DISPLAY_SCREEN_MANAGER_H
+#endif // FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_MANAGER_H

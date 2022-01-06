@@ -13,33 +13,34 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_DMSERVER_DISPLAY_SCREEN_H
-#define FOUNDATION_DMSERVER_DISPLAY_SCREEN_H
+#ifndef FOUNDATION_VIRTUAL_DISPLAY_INFO_H
+#define FOUNDATION_VIRTUAL_DISPLAY_INFO_H
 
 #include <refbase.h>
-#include "display_info.h"
+
+#include <string>
+
+#include <parcel.h>
+
+#include "display.h"
 
 namespace OHOS::Rosen {
-class DisplayScreen : public RefBase {
+class VirtualDisplayInfo : public Parcelable {
 public:
-    DisplayScreen(const DisplayInfo& info);
-    ~DisplayScreen() = default;
+    VirtualDisplayInfo();
+    VirtualDisplayInfo(const std::string &name, uint32_t width, uint32_t height,
+        DisplayId displayIdToMirror, int32_t flags);
+    ~VirtualDisplayInfo() = default;
 
-    DisplayId GetId() const;
-    int32_t GetWidth() const;
-    int32_t GetHeight() const;
-    uint32_t GetFreshRate() const;
+    virtual bool Marshalling(Parcel& parcel) const override;
+    static VirtualDisplayInfo* Unmarshalling(Parcel& parcel);
 
-    void SetId(DisplayId displayId);
-    void SetWidth(int32_t width);
-    void SetHeight(int32_t height);
-    void SetFreshRate(uint32_t freshRate);
-
-private:
-    DisplayId id_ {DISPLAY_ID_INVALD};
-    int32_t width_ {0};
-    int32_t height_ {0};
-    uint32_t freshRate_ {0};
+    std::string name_;
+    uint32_t width_;
+    uint32_t height_;
+    DisplayId displayIdToMirror_;
+    int32_t flags_;
 };
 } // namespace OHOS::Rosen
-#endif // FOUNDATION_DMSERVER_DISPLAY_SCREEN_H
+
+#endif // FOUNDATION_VIRTUAL_DISPLAY_INFO_H

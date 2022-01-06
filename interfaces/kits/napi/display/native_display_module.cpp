@@ -13,11 +13,8 @@
  * limitations under the License.
  */
 
-#include "native_display_module.h"
-
-#include <inttypes.h>
-
 #include "display_manager.h"
+#include "native_display_module.h"
 #include "wm_common.h"
 #include "wm_napi_common.h"
 
@@ -31,19 +28,13 @@ struct Param {
 
 void Async(napi_env env, std::unique_ptr<Param> &param)
 {
-    sptr<DisplayManager> dm = DisplayManager::GetInstance();
-    if (dm == nullptr) {
-        GNAPI_LOG("dm error!\n");
-        return;
-    }
-
-    param->display = dm->GetDefaultDisplay();
+    param->display = DisplayManager::GetInstance().GetDefaultDisplay();
     if (param->display == nullptr) {
         GNAPI_LOG("Get display failed!");
         param->wret = WMError::WM_ERROR_NULLPTR;
         return;
     }
-    GNAPI_LOG("GetDefaultDisplay: id %" PRIu64", w %d, h %d",
+    GNAPI_LOG("GetDefaultDisplay: id %{public}llu, w %{public}d, h %{public}d",
         param->display->GetId(), param->display->GetWidth(), param->display->GetHeight());
     param->wret = WMError::WM_OK;
 }

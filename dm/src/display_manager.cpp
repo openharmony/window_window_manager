@@ -15,7 +15,7 @@
 
 #include "display_manager.h"
 
-#include <inttypes.h>
+#include <cinttypes>
 
 #include "display_manager_adapter.h"
 #include "window_manager_hilog.h"
@@ -25,43 +25,14 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayManager"};
 }
 
-IMPLEMENT_SINGLE_INSTANCE(DisplayManager);
-
-DisplayManager::DisplayManager()
-{
-    dmsAdapter_ = SingletonContainer::Get<DisplayManagerAdapter>();
-}
-
-DisplayManager::~DisplayManager()
-{
-}
-
-const sptr<Display>& DisplayManager::GetDisplay(const DisplayType type)
-{
-    if (dmsAdapter_ == nullptr) {
-        WLOGFE("DisplayManager::GetDisplay null!");
-        return nullptr;
-    }
-    return dmsAdapter_->GetDisplay(type);
-}
-
 DisplayId DisplayManager::GetDefaultDisplayId()
 {
-    if (dmsAdapter_ == nullptr) {
-        WLOGFE("DisplayManager::GetDefaultDisplayId null!\n");
-        return DISPLAY_ID_INVALD;
-    }
-    return dmsAdapter_->GetDefaultDisplayId();
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayId();
 }
 
 const sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
 {
-    if (dmsAdapter_ == nullptr) {
-        WLOGFE("DisplayManager::GetDisplayById null!\n");
-        return nullptr;
-    }
-
-    sptr<Display> display = dmsAdapter_->GetDisplayById(displayId);
+    sptr<Display> display = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayById(displayId);
     if (display == nullptr) {
         WLOGFE("DisplayManager::GetDisplayById failed!\n");
         return nullptr;
@@ -69,6 +40,40 @@ const sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
     return display;
 }
 
+// TODO: fix me
+// sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId)
+// {
+//     sptr<Media::PixelMap> screenShot = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
+//     if (screenShot == nullptr) {
+//         WLOGFE("DisplayManager::GetScreenshot failed!\n");
+//         return nullptr;
+//     }
+
+//     return screenShot;
+// }
+
+// sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
+//                                                     const Media::Size &size, int rotation)
+// {
+//     sptr<Media::PixelMap> screenShot = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
+//     if (screenShot == nullptr) {
+//         WLOGFE("DisplayManager::GetScreenshot failed!\n");
+//         return nullptr;
+//     }
+
+//     // create crop dest pixelmap
+//     Media::InitializationOptions opt;
+//     opt.size.width = size.width;
+//     opt.size.height = size.height;
+//     opt.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+//     opt.editable = false;
+//     opt.useSourceIfMatch = true;
+
+//     auto dstScreenshot = Media::PixelMap::Create(*screenShot, rect, opt);
+//     sptr<Media::PixelMap> dstScreenshot_ = dstScreenshot.release();
+
+//     return dstScreenshot_;
+// }
 
 const sptr<Display> DisplayManager::GetDefaultDisplay()
 {
@@ -96,5 +101,19 @@ std::vector<const sptr<Display>> DisplayManager::GetAllDisplays()
         }
     }
     return res;
+}
+
+DisplayId DisplayManager::CreateVirtualDisplay(const std::string &name, uint32_t width, uint32_t height,
+    sptr<Surface> surface, DisplayId displayIdToMirror, int32_t flags)
+{
+    WLOGFI("DisplayManager::CreateVirtualDisplay multi params");
+    VirtualDisplayInfo info(name, width, height, displayIdToMirror, flags);
+    return SingletonContainer::Get<DisplayManagerAdapter>().CreateVirtualDisplay(info, surface);
+}
+
+bool DisplayManager::DestroyVirtualDisplay(DisplayId displayId)
+{
+    WLOGFI("DisplayManager::DestroyVirtualDisplay override params");
+    return SingletonContainer::Get<DisplayManagerAdapter>().DestroyVirtualDisplay(displayId);
 }
 } // namespace OHOS::Rosen

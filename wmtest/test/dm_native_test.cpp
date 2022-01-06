@@ -15,6 +15,7 @@
 
 #include "dm_native_test.h"
 
+#include <cinttypes>
 #include <cstdio>
 #include <unistd.h>
 #include "display_manager.h"
@@ -61,13 +62,13 @@ void DMNativeTest::Run(int32_t argc, const char **argv)
     }
 
     DisplayId displayId = dms->GetDefaultDisplayId();
-    printf("defaultDisplayId: %llu\n", displayId);
+    printf("defaultDisplayId: %" PRIu64"\n", displayId);
 
     auto display = dms->GetDefaultDisplay();
     if (display == nullptr) {
         printf("GetDefaultDisplay: failed!\n");
     } else {
-        printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
+        printf("GetDefaultDisplay: id %" PRIu64", w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
             display->GetHeight(), display->GetFreshRate());
     }
 
@@ -75,10 +76,10 @@ void DMNativeTest::Run(int32_t argc, const char **argv)
     for (auto id: ids) {
         display = dms->GetDisplayById(displayId);
         if (display == nullptr) {
-            printf("GetDisplayById(%llu): failed!\n", id);
+            printf("GetDisplayById(%" PRIu64"): failed!\n", id);
         } else {
-            printf("GetDisplayById(%llu): id %llu, w %d, h %d, fps %u\n", id, display->GetId(), display->GetWidth(),
-                display->GetHeight(), display->GetFreshRate());
+            printf("GetDisplayById(%" PRIu64"): id %" PRIu64", w %d, h %d, fps %u\n", id, display->GetId(),
+                display->GetWidth(), display->GetHeight(), display->GetFreshRate());
         }
     }
 
@@ -87,7 +88,7 @@ void DMNativeTest::Run(int32_t argc, const char **argv)
         if (disp == nullptr) {
             printf("GetAllDisplays: failed!\n");
         } else {
-            printf("GetAllDisplays: id %llu, w %d, h %d, fps %u\n", disp->GetId(), disp->GetWidth(),
+            printf("GetAllDisplays: id %" PRIu64", w %d, h %d, fps %u\n", disp->GetId(), disp->GetWidth(),
                 disp->GetHeight(), disp->GetFreshRate());
         }
     }

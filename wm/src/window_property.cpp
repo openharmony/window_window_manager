@@ -72,6 +72,13 @@ void WindowProperty::SetWindowFlags(uint32_t flags)
     flags_ = flags;
 }
 
+void WindowProperty::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+        sysBarPropMap_[type] = property;
+    }
+}
+
 Rect WindowProperty::GetWindowRect() const
 {
     return windowRect_;
@@ -127,6 +134,11 @@ uint32_t WindowProperty::GetWindowFlags() const
     return flags_;
 }
 
+const std::unordered_map<WindowType, SystemBarProperty>& WindowProperty::GetSystemBarProperty() const
+{
+    return sysBarPropMap_;
+}
+
 // TODO
 void WindowProperty::SetWindowId(uint32_t windowId)
 {
@@ -143,6 +155,37 @@ uint32_t WindowProperty::GetWindowId() const
 uint32_t WindowProperty::GetParentId() const
 {
     return parentId_;
+}
+
+bool WindowProperty::MapMarshalling(Parcel& parcel) const
+{
+    auto size = sysBarPropMap_.size();
+    if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
+        return false;
+    }
+    for (auto it : sysBarPropMap_) {
+        // write key(type)
+        if (!parcel.WriteUint32(static_cast<uint32_t>(it.first))) {
+            return false;
+        }
+        // write val(UIState)
+        if (!(parcel.WriteBool(it.second.enable_) && parcel.WriteUint32(it.second.backgroundColor_) &&
+            parcel.WriteUint32(it.second.contentColor_))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void WindowProperty::MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& property)
+{
+    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap;
+    uint32_t size = parcel.ReadUint32();
+    for (uint32_t i = 0; i < size; i++) {
+        WindowType type = static_cast<WindowType>(parcel.ReadUint32());
+        SystemBarProperty prop = { parcel.ReadBool(), parcel.ReadUint32(), parcel.ReadUint32() };
+        property->SetSystemBarProperty(type, prop);
+    }
 }
 
 bool WindowProperty::Marshalling(Parcel& parcel) const
@@ -212,6 +255,11 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
     if (!parcel.WriteUint32(parentId_)) {
         return false;
     }
+
+    // write sysUIStateMap_
+    if (!MapMarshalling(parcel)) {
+        return false;
+    }
     return true;
 }
 
@@ -232,6 +280,7 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetDisplayId(parcel.ReadInt32());
     property->SetWindowId(parcel.ReadUint32());
     property->SetParentId(parcel.ReadUint32());
+    MapUnmarshalling(parcel, property);
     return property;
 }
 }

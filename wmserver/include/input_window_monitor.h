@@ -34,7 +34,7 @@ private:
     sptr<WindowRoot> windowRoot_;
     std::vector<MMI::PhysicalDisplayInfo> physicalDisplays_;
     std::vector<MMI::LogicalDisplayInfo> logicalDisplays_;
-    std::unordered_set<WindowType> windowTypeSkipped_ { WindowType::WINDOW_TYPE_POINTER};
+    std::unordered_set<WindowType> windowTypeSkipped_ { WindowType::WINDOW_TYPE_POINTER };
     const int INVALID_DISPLAY_ID = -1;
     const int INVALID_WINDOW_ID = -1;
     void TraverseWindowNodes(const std::vector<sptr<WindowNode>>& windowNodes,

@@ -19,26 +19,21 @@ namespace OHOS {
 namespace Rosen {
 #define DECLARE_SINGLE_INSTANCE_BASE(className)             \
 public:                                                     \
-    static sptr<className> GetInstance();                   \
-private:                                                    \
+    static className& GetInstance()                         \
+    {                                                       \
+        static className instance;                          \
+        return instance;                                    \
+    }                                                       \
     className(const className&) = delete;                   \
     className& operator= (const className&) = delete;       \
     className(className&&) = delete;                        \
-    className& operator= (className&&) = delete;            \
-
+    className& operator= (className&&) = delete;
 
 #define DECLARE_SINGLE_INSTANCE(className)  \
     DECLARE_SINGLE_INSTANCE_BASE(className) \
-private:                                    \
+protected:                                  \
     className() = default;                  \
-    ~className() = default;                 \
-
-#define IMPLEMENT_SINGLE_INSTANCE(className) \
-sptr<className> className::GetInstance()     \
-{                                            \
-    static sptr<className> instance = new className();  \
-    return instance;                         \
-}
+    virtual ~className() = default;
 } // namespace OHOS
 }
 #endif // OHOS_SINGLE_INSTANCE_H

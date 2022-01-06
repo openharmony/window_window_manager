@@ -20,12 +20,13 @@
 #include <mutex>
 
 #include <system_ability.h>
+#include <surface.h>
 
+#include "abstract_display.h"
+#include "abstract_display_manager.h"
 #include "display_manager_stub.h"
-#include "display_screen.h"
 #include "single_instance.h"
 #include "singleton_delegator.h"
-#include "display_screen_manager.h"
 
 namespace OHOS::Rosen {
 class DisplayManagerService : public SystemAbility, public DisplayManagerStub {
@@ -36,11 +37,14 @@ DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
 public:
     void OnStart() override;
     void OnStop() override;
-    const sptr<DisplayInfo>& GetDisplayInfo(const DisplayType type) override;
+    DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
+        sptr<Surface> surface) override;
+    bool DestroyVirtualDisplay(DisplayId displayId) override;
 
     DisplayId GetDefaultDisplayId() override;
     DisplayInfo GetDisplayInfoById(DisplayId displayId) override;
-
+    // TODO: fix me
+    // sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
 private:
     DisplayManagerService();
     ~DisplayManagerService() = default;
@@ -49,8 +53,7 @@ private:
     ScreenId GetScreenIdFromDisplayId(DisplayId displayId);
 
     static inline SingletonDelegator<DisplayManagerService> delegator_;
-    std::map<int32_t, sptr<DisplayScreen>> displayScreenMap_;
-    sptr<DisplayScreenManager> displayScreenManager_;
+    std::map<int32_t, sptr<AbstractDisplay>> abstractDisplayMap_;
 };
 } // namespace OHOS::Rosen
 

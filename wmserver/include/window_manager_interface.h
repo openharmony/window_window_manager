@@ -20,6 +20,7 @@
 #include <ui/rs_surface_node.h>
 #include "window_property.h"
 #include "window_interface.h"
+#include "zidl/window_manager_agent_interface.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -35,7 +36,13 @@ public:
         TRANS_ID_MOVE,
         TRANS_ID_RESIZE,
         TRANS_ID_REQUEST_FOCUS,
+        TRANS_ID_UPDATE_TYPE,
+        TRANS_ID_UPDATE_MODE,
+        TRANS_ID_UPDATE_FLAGS,
+        TRANS_ID_UPDATE_SYSTEM_BAR_PROPERTY,
         TRANS_ID_SEND_ABILITY_TOKEN,
+        TRANS_ID_REGISTER_FOCUS_CHANGED_LISTENER,
+        TRANS_ID_UNREGISTER_FOCUS_CHANGED_LISTENER,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId)  = 0;
@@ -45,7 +52,14 @@ public:
     virtual WMError MoveTo(uint32_t windowId, int32_t x, int32_t y) = 0;
     virtual WMError Resize(uint32_t windowId, uint32_t width, uint32_t height) = 0;
     virtual WMError RequestFocus(uint32_t windowId) = 0;
+    virtual WMError SetWindowMode(uint32_t windowId, WindowMode mode) = 0;
+    virtual WMError SetWindowType(uint32_t windowId, WindowType type) = 0;
+    virtual WMError SetWindowFlags(uint32_t windowId, uint32_t flags) = 0;
+    virtual WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) = 0;
     virtual WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId) = 0;
+
+    virtual void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
+    virtual void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
 };
 }
 }

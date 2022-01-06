@@ -27,21 +27,6 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayManagerAdapter"};
 }
 
-IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapter);
-
-sptr<Display> DisplayManagerAdapter::GetDisplay(DisplayType type)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-
-    if (!InitDMSProxyLocked()) {
-        WLOGFE("displayManagerAdapter::GetDisplay: InitDMSProxyLocked failed!");
-        return nullptr;
-    }
-    sptr<DisplayInfo> info = displayManagerServiceProxy_->GetDisplayInfo(type);
-    // TODO DisplayInfo内容更新到对应的Display.displayInfo_. auto iter = displayMap_.find(info.id_);
-    return nullptr;
-}
-
 DisplayId DisplayManagerAdapter::GetDefaultDisplayId()
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -77,6 +62,40 @@ sptr<Display> DisplayManagerAdapter::GetDisplayById(DisplayId displayId)
         displayMap_[display->GetId()] = display;
     }
     return display;
+}
+
+// TODO: fix me
+// sptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId)
+// {
+//     std::lock_guard<std::mutex> lock(mutex_);
+
+//     if (!InitDMSProxyLocked()) {
+//         WLOGFE("displayManagerAdapter::GetDisplaySnapshot: InitDMSProxyLocked failed!");
+//         return nullptr;
+//     }
+
+//     sptr<Media::PixelMap> dispalySnapshot = displayManagerServiceProxy_->GetDispalySnapshot(displayId);
+
+//     return dispalySnapshot;
+// }
+
+DisplayId DisplayManagerAdapter::CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
+    sptr<Surface> surface)
+{
+    if (!InitDMSProxyLocked()) {
+        return DISPLAY_ID_INVALD;
+    }
+    WLOGFI("DisplayManagerAdapter::CreateVirtualDisplay");
+    return displayManagerServiceProxy_->CreateVirtualDisplay(virtualDisplayInfo, surface);
+}
+
+bool DisplayManagerAdapter::DestroyVirtualDisplay(DisplayId displayId)
+{
+    if (!InitDMSProxyLocked()) {
+        return false;
+    }
+    WLOGFI("DisplayManagerAdapter::DestroyVirtualDisplay");
+    return displayManagerServiceProxy_->DestroyVirtualDisplay(displayId);
 }
 
 bool DisplayManagerAdapter::InitDMSProxyLocked()
@@ -128,7 +147,7 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         WLOGFE("object is null");
         return;
     }
-    SingletonContainer::Get<DisplayManagerAdapter>().GetRefPtr()->Clear();
+    SingletonContainer::Get<DisplayManagerAdapter>().Clear();
     return;
 }
 

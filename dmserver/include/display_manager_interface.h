@@ -18,7 +18,12 @@
 
 #include <iremote_broker.h>
 
+#include <surface.h>
+
 #include "display_info.h"
+
+#include "virtual_display_info.h"
+// #include "pixel_map.h"
 
 namespace OHOS::Rosen {
 class IDisplayManager : public IRemoteBroker {
@@ -26,15 +31,23 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IDisplayManager");
 
     enum {
-        TRANS_ID_GET_DISPLAY_INFO = 1,
-        TRANS_ID_GET_DEFAULT_DISPLAY_ID = 2,
-        TRANS_ID_GET_DISPLAY_BY_ID = 3,
+        TRANS_ID_GET_DEFAULT_DISPLAY_ID = 0,
+        TRANS_ID_GET_DISPLAY_BY_ID,
+        TRANS_ID_CREATE_VIRTUAL_DISPLAY,
+        TRANS_ID_DESTROY_VIRTUAL_DISPLAY,
+        // TODO: fix me
+        // TRANS_ID_GET_DISPLAY_SNAPSHOT,
     };
-
-    virtual const sptr<DisplayInfo>& GetDisplayInfo(const DisplayType type) = 0;
 
     virtual DisplayId GetDefaultDisplayId() = 0;
     virtual DisplayInfo GetDisplayInfoById(DisplayId displayId) = 0;
+
+    virtual DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
+        sptr<Surface> surface) = 0;
+    virtual bool DestroyVirtualDisplay(DisplayId displayId) = 0;
+
+    // TODO: fix me
+    // virtual sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
 };
 } // namespace OHOS::Rosen
 

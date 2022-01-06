@@ -19,6 +19,7 @@
 #include <refbase.h>
 #include <iremote_object.h>
 #include <ability_context.h>
+#include <configuration.h>
 
 #include "window.h"
 #include "window_option.h"
@@ -34,7 +35,7 @@ public:
     ~WindowScene();
 
     WMError Init(int32_t displayId, std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext,
-        sptr<IWindowLifeCycle>& listener);
+        sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option = nullptr);
 
     sptr<Window> CreateWindow(const std::string& windowName, sptr<WindowOption>& option) const;
 
@@ -44,6 +45,10 @@ public:
     WMError GoBackground() const;
 
     WMError RequestFocus() const;
+    void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) const;
+
+    const std::string& GetContentInfo() const;
 
 private:
     static inline std::atomic<uint32_t> count { 0 };
