@@ -21,7 +21,6 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "InputTransferStation"};
 }
-IMPLEMENT_SINGLE_INSTANCE(InputTransferStation)
 void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
     WLOGFI("OnInputEvent: receive keyEvent");
@@ -30,7 +29,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) c
         return;
     }
     uint32_t windowId = keyEvent->GetAgentWindowId();
-    auto channel = InputTransferStation::GetInstance()->GetInputChannel(windowId);
+    auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
         WLOGE("OnInputEvent channel is nullptr");
         return;
@@ -56,7 +55,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
         return;
     }
     uint32_t windowId = pointerEvent->GetAgentWindowId();
-    auto channel = InputTransferStation::GetInstance()->GetInputChannel(windowId);
+    auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
         WLOGE("OnInputEvent channel is nullptr");
         return;

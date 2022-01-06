@@ -47,7 +47,6 @@ void InputWindowMonitor::UpdateInputWindow(uint32_t windowId)
     UpdateDisplaysInfo(container);
     std::vector<sptr<WindowNode>> windowNodes;
     container->TraverseContainer(windowNodes);
-
     auto iter = std::find_if(logicalDisplays_.begin(), logicalDisplays_.end(),
                              [displayId](MMI::LogicalDisplayInfo& logicalDisplay) {
         return logicalDisplay.id == displayId;
@@ -84,7 +83,7 @@ void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& con
     };
     auto physicalDisplayIter = std::find_if(physicalDisplays_.begin(), physicalDisplays_.end(),
                                             [&physicalDisplayInfo](MMI::PhysicalDisplayInfo& physicalDisplay) {
-        return physicalDisplay.id = physicalDisplayInfo.id;
+        return physicalDisplay.id == physicalDisplayInfo.id;
     });
     if (physicalDisplayIter != physicalDisplays_.end()) {
         *physicalDisplayIter = physicalDisplayInfo;
@@ -106,7 +105,7 @@ void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& con
     };
     auto logicalDisplayIter = std::find_if(logicalDisplays_.begin(), logicalDisplays_.end(),
                                            [&logicalDisplayInfo](MMI::LogicalDisplayInfo& logicalDisplay) {
-        return logicalDisplay.id = logicalDisplayInfo.id;
+        return logicalDisplay.id == logicalDisplayInfo.id;
     });
     if (logicalDisplayIter != logicalDisplays_.end()) {
         *logicalDisplayIter = logicalDisplayInfo;
@@ -116,7 +115,7 @@ void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& con
 }
 
 void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>> &windowNodes,
-                                              std::vector<MMI::LogicalDisplayInfo>::iterator& iter)
+                                             std::vector<MMI::LogicalDisplayInfo>::iterator& iter)
 {
     iter->windowsInfo_.clear();
     for (auto& windowNode: windowNodes) {
@@ -129,10 +128,10 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
             .id = static_cast<int32_t>(windowNode->GetWindowId()),
             .pid = windowNode->GetCallingPid(),
             .uid = windowNode->GetCallingUid(),
-            .topLeftX = windowNode->GetLayoutRects().rect_.posX_,
-            .topLeftY = windowNode->GetLayoutRects().rect_.posY_,
-            .width = static_cast<int32_t>(windowNode->GetLayoutRects().rect_.width_),
-            .height = static_cast<int32_t>(windowNode->GetLayoutRects().rect_.height_),
+            .topLeftX = windowNode->GetLayoutRect().posX_,
+            .topLeftY = windowNode->GetLayoutRect().posY_,
+            .width = static_cast<int32_t>(windowNode->GetLayoutRect().width_),
+            .height = static_cast<int32_t>(windowNode->GetLayoutRect().height_),
             .displayId = windowNode->GetDisplayId(),
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };

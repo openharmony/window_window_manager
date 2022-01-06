@@ -29,10 +29,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayManagerService"};
 }
 
-IMPLEMENT_SINGLE_INSTANCE(DisplayManagerService);
-
-const bool REGISTER_RESULT =
-    SystemAbility::MakeAndRegisterAbility(SingletonContainer::Get<DisplayManagerService>().GetRefPtr());
+const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<DisplayManagerService>());
 
 DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true)
 {
@@ -54,20 +51,8 @@ bool DisplayManagerService::Init()
         WLOGFW("DisplayManagerService::Init failed");
         return false;
     }
-    displayScreenManager_ = DisplayScreenManager::GetInstance();
-    if (displayScreenManager_ == nullptr) {
-        WLOGFW("Get DisplayScreenManager failed");
-        return false;
-    }
     WLOGFI("DisplayManagerService::Init success");
     return true;
-}
-
-const sptr<DisplayInfo>& DisplayManagerService::GetDisplayInfo(const DisplayType type)
-{
-    // TODO 从displayScreenMap_得到DisplayInfo
-    WLOGFI("DisplayManagerService::GetDisplayInfo");
-    return new DisplayInfo();
 }
 
 DisplayId DisplayManagerService::GetDisplayIdFromScreenId(ScreenId screenId)
@@ -82,10 +67,7 @@ ScreenId DisplayManagerService::GetScreenIdFromDisplayId(DisplayId displayId)
 
 DisplayId DisplayManagerService::GetDefaultDisplayId()
 {
-    if (displayScreenManager_ == nullptr) {
-        return DISPLAY_ID_INVALD;
-    }
-    ScreenId screenId = displayScreenManager_->GetDefaultScreenId();
+    ScreenId screenId = AbstractDisplayManager::GetInstance().GetDefaultScreenId();
     WLOGFI("GetDefaultDisplayId %{public}llu", screenId);
     return GetDisplayIdFromScreenId(screenId);
 }
@@ -93,11 +75,8 @@ DisplayId DisplayManagerService::GetDefaultDisplayId()
 DisplayInfo DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 {
     DisplayInfo displayInfo;
-    if (displayScreenManager_ == nullptr) {
-        return displayInfo;
-    }
     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
-    auto screenModeInfo = displayScreenManager_->GetScreenActiveMode(screenId);
+    auto screenModeInfo = AbstractDisplayManager::GetInstance().GetScreenActiveMode(screenId);
     displayInfo.id_ = displayId;
     displayInfo.width_ = screenModeInfo.GetScreenWidth();
     displayInfo.height_ = screenModeInfo.GetScreenHeight();
@@ -105,9 +84,33 @@ DisplayInfo DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
     return displayInfo;
 }
 
+DisplayId DisplayManagerService::CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
+    sptr<Surface> surface)
+{
+    WLOGFI("name %{public}s, width %{public}u, height %{public}u, mirrotId %{public}llu, flags %{public}d",
+        virtualDisplayInfo.name_.c_str(), virtualDisplayInfo.width_, virtualDisplayInfo.height_,
+        virtualDisplayInfo.displayIdToMirror_, virtualDisplayInfo.flags_);
+    ScreenId screenId = AbstractDisplayManager::GetInstance().CreateVirtualScreen(virtualDisplayInfo, surface);
+    return GetDisplayIdFromScreenId(screenId);
+}
+
+bool DisplayManagerService::DestroyVirtualDisplay(DisplayId displayId)
+{
+    WLOGFI("DisplayManagerService::DestroyVirtualDisplay");
+    ScreenId screenId = GetScreenIdFromDisplayId(displayId);
+    return AbstractDisplayManager::GetInstance().DestroyVirtualScreen(screenId);
+}
+
+// TODO: fix me
+// sptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
+// {
+//     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
+//     sptr<Media::PixelMap> screenSnapshot = AbstractDisplayManager::GetInstance().GetScreenSnapshot(screenId);
+//     return screenSnapshot;
+// }
+
 void DisplayManagerService::OnStop()
 {
     WLOGFI("ready to stop display service.");
-    displayScreenManager_ = nullptr;
 }
 } // namespace OHOS::Rosen

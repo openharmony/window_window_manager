@@ -53,6 +53,26 @@ void WindowProxy::UpdateWindowRect(const struct Rect& rect)
     return;
 }
 
+void WindowProxy::UpdateSystemBarProperty(const SystemBarProperty& prop)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!(data.WriteBool(prop.enable_) && data.WriteUint32(prop.backgroundColor_) &&
+        data.WriteUint32(prop.contentColor_))) {
+        WLOGFE("Write property failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_UPDATE_SYSTEM_BAR_PROPERTY, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+    return;
+}
+
 void WindowProxy::UpdateWindowMode(WindowMode mode)
 {
     MessageParcel data;

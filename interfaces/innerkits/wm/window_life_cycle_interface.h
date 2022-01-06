@@ -25,7 +25,9 @@ public:
     virtual void AfterForeground() = 0;
     virtual void AfterBackground() = 0;
     virtual void AfterFocused() = 0;
-    virtual void AfterUnFocused() = 0;
+    // TODO: need rename AfterUnFocused to AfterUnfocused
+    virtual void AfterUnFocused() {}
+    virtual void AfterUnfocused() {}
 };
 }
 }

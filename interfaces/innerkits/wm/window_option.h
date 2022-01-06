@@ -15,8 +15,9 @@
 
 #ifndef OHOS_ROSEN_WINDOW_OPTION_H
 #define OHOS_ROSEN_WINDOW_OPTION_H
-#include <string>
 #include <refbase.h>
+#include <string>
+#include <unordered_map>
 #include "wm_common.h"
 
 namespace OHOS {
@@ -37,6 +38,7 @@ public:
     void AddWindowFlag(WindowFlag flag);
     void RemoveWindowFlag(WindowFlag flag);
     void SetWindowFlags(uint32_t flags);
+    void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
 
     Rect GetWindowRect() const;
     WindowType GetWindowType() const;
@@ -47,6 +49,7 @@ public:
     const std::string& GetParentName() const;
     const std::string& GetWindowName() const;
     uint32_t GetWindowFlags() const;
+    const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -57,6 +60,10 @@ private:
     std::string parentName_ { "" };
     std::string windowName_ { "" };
     uint32_t flags_ { 0 };
+    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
+        { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
+    };
 };
 }
 }

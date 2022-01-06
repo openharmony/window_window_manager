@@ -16,19 +16,22 @@
 #ifndef FOUNDATION_DM_DISPLAY_MANAGER_H
 #define FOUNDATION_DM_DISPLAY_MANAGER_H
 
-#include <refbase.h>
 #include <vector>
+#include <surface.h>
 
 #include "display.h"
 #include "single_instance.h"
+#include "virtual_display_info.h"
+// #include "pixel_map.h"
+// #include "wm_common.h"
+
 
 namespace OHOS::Rosen {
 class DisplayManagerAdapter;
 
-class DisplayManager : public RefBase {
-DECLARE_SINGLE_INSTANCE_BASE(DisplayManager);
+class DisplayManager {
+DECLARE_SINGLE_INSTANCE(DisplayManager);
 public:
-    const sptr<Display>& GetDisplay(const DisplayType type);
     std::vector<const sptr<Display>> GetAllDisplays();
 
     DisplayId GetDefaultDisplayId();
@@ -38,10 +41,14 @@ public:
 
     std::vector<DisplayId> GetAllDisplayIds();
 
-private:
-    DisplayManager();
-    ~DisplayManager();
-    sptr<DisplayManagerAdapter> dmsAdapter_;
+    DisplayId CreateVirtualDisplay(const std::string &name, uint32_t width, uint32_t height,
+        sptr<Surface> surface, DisplayId displayIdToMirror, int32_t flags);
+
+    bool DestroyVirtualDisplay(DisplayId displayId);
+    // TODO: fix me
+    // sptr<Media::PixelMap> GetScreenshot(DisplayId displayId);
+    // sptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
+    //                                     const Media::Size &size, int rotation);
 };
 } // namespace OHOS::Rosen
 

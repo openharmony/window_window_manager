@@ -23,25 +23,34 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "VsyncStation"};
 }
 
-IMPLEMENT_SINGLE_INSTANCE(VsyncStation);
-
 void VsyncStation::RequestVsync(CallbackType type, std::shared_ptr<VsyncCallback> vsyncCallback)
 {
+    std::lock_guard<std::mutex> lock_l(lock_);
     auto iter = vsyncCallbacks_.find(type);
     if (iter == vsyncCallbacks_.end()) {
         WLOGFE("wrong callback type.");
         return;
     }
     iter->second.insert(vsyncCallback);
-    if (!hasRequestedVsync_) {
-        hasRequestedVsync_.store(true);
-        callback_.timestamp_ = 0;
-        callback_.userdata_ = this;
-        callback_.callback_ = OnVsync;
-        VsyncError ret = VsyncHelper::Current()->RequestFrameCallback(callback_);
-        if (ret != VSYNC_ERROR_OK) {
-            WLOGFE("VsyncStation::RequestNextVsync fail: %s", VsyncErrorStr(ret).c_str());
+    if (mainHandler_ == nullptr) {
+        if (AppExecFwk::EventRunner::GetMainEventRunner() == nullptr) {
+            WLOGFE("can not get main event runner.");
+            return;
         }
+        mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+    }
+    if (!hasRequestedVsync_) {
+        mainHandler_->PostTask([this]() {
+            callback_.timestamp_ = 0;
+            callback_.userdata_ = this;
+            callback_.callback_ = OnVsync;
+            WLOGFI("request vsync start.");
+            VsyncError ret = VsyncHelper::Current()->RequestFrameCallback(callback_);
+            if (ret != VSYNC_ERROR_OK) {
+                WLOGFE("VsyncStation::RequestNextVsync fail: %{public}s", VsyncErrorStr(ret).c_str());
+            }
+        });
+        hasRequestedVsync_.store(true);
     }
 }
 
@@ -58,6 +67,7 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp)
 
 void VsyncStation::OnVsync(int64_t timestamp, void* client)
 {
+    WLOGFI("on vsync callback.");
     auto vsyncClient = static_cast<VsyncStation*>(client);
     if (vsyncClient) {
         vsyncClient->VsyncCallbackInner(timestamp);

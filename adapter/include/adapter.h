@@ -27,7 +27,7 @@
 #include "wm_common.h"
 #include "window.h"
 #include "foundation/graphic/standard/interfaces/innerkits/wmclient/window_option.h"
-#include "window_manager.h"
+#include "foundation/graphic/standard/interfaces/innerkits/wmclient/window_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {

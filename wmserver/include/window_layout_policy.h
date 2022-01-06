@@ -28,25 +28,30 @@ namespace Rosen {
 class WindowLayoutPolicy : public RefBase {
 public:
     WindowLayoutPolicy() = default;
+    WindowLayoutPolicy(const sptr<WindowNode>& belowAppNode,
+        const sptr<WindowNode>& appNode, const sptr<WindowNode>& aboveAppNode);
     ~WindowLayoutPolicy() = default;
-    WMError UpdateDisplayInfo(const Rect& displayRect);
-    WMError LayoutWindow(sptr<WindowNode>& node);
+    void UpdateDisplayInfo(const Rect& displayRect);
+    void AddWindowNode(sptr<WindowNode>& node);
+    void RemoveWindowNode(sptr<WindowNode>& node);
+    void UpdateWindowNode(sptr<WindowNode>& node);
 
 private:
     Rect displayRect_ = {0, 0, 0, 0};
+    sptr<WindowNode> belowAppWindowNode_ = new WindowNode();
+    sptr<WindowNode> appWindowNode_ = new WindowNode();
+    sptr<WindowNode> aboveAppWindowNode_ = new WindowNode();
     Rect limitRect_ = {0, 0, 0, 0};
-    std::map<uint32_t, sptr<WindowNode>> aviodNodes_;
-    const std::set<WindowType> aviodTypes_ {
+    std::map<uint32_t, sptr<WindowNode>> avoidNodes_;
+    const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowType::WINDOW_TYPE_NAVIGATION_BAR,
     };
     void UpdateLimitRect(const sptr<WindowNode>& node);
     void RecordAvoidRect(const sptr<WindowNode>& node);
-    bool UpdateLayoutRects(sptr<WindowNode>& node);
-    bool IsNeedAvoidNode(const sptr<WindowNode>& node);
-    bool IsFullScreenNode(const sptr<WindowNode>& node);
-    bool IsParentLimitNode(const sptr<WindowNode>& node);
-    bool IsRectChanged(const Rect& l, const Rect& r);
+    void UpdateLayoutRect(sptr<WindowNode>& node);
+    void LayoutWindowTree();
+    void LayoutWindowNode(sptr<WindowNode>& node);
 };
 }
 }

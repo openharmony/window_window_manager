@@ -22,53 +22,46 @@
 #include <set>
 #include <string>
 
-#include <refbase.h>
-
+#include "single_instance.h"
 namespace OHOS {
 namespace Rosen {
-class SingletonContainer : public RefBase {
-public:
-    static sptr<SingletonContainer> GetInstance();
+class SingletonContainer {
+DECLARE_SINGLE_INSTANCE_BASE(SingletonContainer);
 
-    void AddSingleton(const std::string &name, const std::any &instance);
-    void SetSingleton(const std::string &name, const std::any &instance);
-    const std::any &GetSingleton(const std::string &name);
-    const std::any &DependOn(const std::string &instance, const std::string &name);
+public:
+    void AddSingleton(const std::string& name, void* instance);
+
+    void SetSingleton(const std::string& name, void* instance);
+
+    void* GetSingleton(const std::string& name);
+
+    void* DependOn(const std::string& instance, const std::string& name);
 
     template<class T>
-    static sptr<T> Get()
+    static T& Get()
     {
         std::string nameT = __PRETTY_FUNCTION__;
         nameT = nameT.substr(nameT.find("T = "));
         nameT = nameT.substr(sizeof("T ="), nameT.length() - sizeof("T = "));
-
-        using sptrT = sptr<T>;
-        sptrT ret = nullptr;
-        const std::any &instance = SingletonContainer::GetInstance()->GetSingleton(nameT);
-        auto pRet = std::any_cast<sptrT>(&instance);
-        if (pRet != nullptr) {
-            ret = *pRet;
-        }
-        return ret;
+        return *(reinterpret_cast<T*>(SingletonContainer::GetInstance().GetSingleton(nameT)));
     }
 
     template<class T>
-    static void Set(const sptr<T> &ptr)
+    static void Set(T& instance)
     {
         std::string nameT = __PRETTY_FUNCTION__;
         nameT = nameT.substr(nameT.find("T = "));
         nameT = nameT.substr(sizeof("T ="), nameT.length() - sizeof("T = "));
-
-        SingletonContainer::GetInstance()->SetSingleton(nameT, ptr);
+        SingletonContainer::GetInstance().SetSingleton(nameT, &instance);
     }
 
 private:
     SingletonContainer() = default;
-    virtual ~SingletonContainer() override;
-    static inline sptr<SingletonContainer> instance = nullptr;
+
+    virtual ~SingletonContainer();
 
     struct Singleton {
-        std::any value;
+        void* value;
         int32_t refCount;
     };
     std::map<std::string, int32_t> stringMap;
@@ -77,5 +70,4 @@ private:
 };
 } // namespace Rosen
 } // namespace OHOS
-
 #endif // FRAMEWORKS_WM_INCLUDE_SINGLETON_CONTAINER_H

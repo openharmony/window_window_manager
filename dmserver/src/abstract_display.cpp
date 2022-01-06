@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "display_screen.h"
+#include "abstract_display.h"
 
 namespace OHOS::Rosen {
-DisplayScreen::DisplayScreen(const DisplayInfo& info)
+AbstractDisplay::AbstractDisplay(const DisplayInfo& info)
     : id_(info.id_),
       width_(info.width_),
       height_(info.height_),
@@ -24,42 +24,42 @@ DisplayScreen::DisplayScreen(const DisplayInfo& info)
 {
 }
 
-DisplayId DisplayScreen::GetId() const
+DisplayId AbstractDisplay::GetId() const
 {
     return id_;
 }
 
-int32_t DisplayScreen::GetWidth() const
+int32_t AbstractDisplay::GetWidth() const
 {
     return width_;
 }
 
-int32_t DisplayScreen::GetHeight() const
+int32_t AbstractDisplay::GetHeight() const
 {
     return height_;
 }
 
-uint32_t DisplayScreen::GetFreshRate() const
+uint32_t AbstractDisplay::GetFreshRate() const
 {
     return freshRate_;
 }
 
-void DisplayScreen::SetWidth(int32_t width)
+void AbstractDisplay::SetWidth(int32_t width)
 {
     width_ = width;
 }
 
-void DisplayScreen::SetHeight(int32_t height)
+void AbstractDisplay::SetHeight(int32_t height)
 {
     height_ = height;
 }
 
-void DisplayScreen::SetFreshRate(uint32_t freshRate)
+void AbstractDisplay::SetFreshRate(uint32_t freshRate)
 {
     freshRate_ = freshRate;
 }
 
-void DisplayScreen::SetId(DisplayId id)
+void AbstractDisplay::SetId(DisplayId id)
 {
     id_ = id;
 }

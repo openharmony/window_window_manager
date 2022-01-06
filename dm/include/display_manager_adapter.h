@@ -17,7 +17,7 @@
 #define FOUNDATION_DM_DISPLAY_MANAGER_ADAPTER_H
 
 #include <map>
-#include <refbase.h>
+#include <surface.h>
 
 #include "display.h"
 #include "display_manager_interface.h"
@@ -30,13 +30,16 @@ public:
     virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
 };
 
-class DisplayManagerAdapter : public RefBase {
-    DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerAdapter);
+class DisplayManagerAdapter {
+DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerAdapter);
 public:
-    sptr<Display> GetDisplay(DisplayType type);
     DisplayId GetDefaultDisplayId();
     sptr<Display> GetDisplayById(DisplayId displayId);
-
+    DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
+        sptr<Surface> surface);
+    bool DestroyVirtualDisplay(DisplayId displayId);
+    // TODO: fix me
+    // sptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
     void Clear();
 private:
     DisplayManagerAdapter() = default;

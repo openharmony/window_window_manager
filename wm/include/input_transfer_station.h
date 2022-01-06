@@ -17,7 +17,6 @@
 #define OHOS_INPUT_TRANSFER_STATION
 
 
-#include <refbase.h>
 #include <single_instance.h>
 #include "input_manager.h"
 #include "pointer_event.h"
@@ -28,20 +27,23 @@
 namespace OHOS {
 namespace Rosen {
 class InputEventListener;
-class InputTransferStation : public RefBase {
+
+class InputTransferStation {
 DECLARE_SINGLE_INSTANCE(InputTransferStation);
 friend class InputEventListener;
 public:
     void AddInputWindow(const sptr<Window>& window);
     void RemoveInputWindow(const sptr<Window>& window);
     void SetInputListener(uint32_t windowId, std::shared_ptr<MMI::IInputEventConsumer>& listener);
+
 private:
     sptr<WindowInputChannel> GetInputChannel(uint32_t windowId);
     bool initInputListener_ = false;
     std::unordered_map<uint32_t, sptr<WindowInputChannel>> windowInputChannels_;
-    std::shared_ptr<MMI::IInputEventConsumer> inputListener_;
+    std::shared_ptr<MMI::IInputEventConsumer> inputListener_ = nullptr;
 };
-class InputEventListener: public RefBase, public MMI::IInputEventConsumer {
+
+class InputEventListener : public RefBase, public MMI::IInputEventConsumer {
 public:
     InputEventListener() = default;
     void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;

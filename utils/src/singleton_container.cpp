@@ -23,18 +23,6 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowManager_SingletonContainer"};
 } // namespace
 
-sptr<SingletonContainer> SingletonContainer::GetInstance()
-{
-    if (instance == nullptr) {
-        static std::mutex mutex;
-        std::lock_guard<std::mutex> lock(mutex);
-        if (instance == nullptr) {
-            instance = new SingletonContainer();
-        }
-    }
-    return instance;
-}
-
 SingletonContainer::~SingletonContainer()
 {
     while (singletonMap.empty() == false) {
@@ -63,7 +51,7 @@ SingletonContainer::~SingletonContainer()
     }
 }
 
-void SingletonContainer::AddSingleton(const std::string &name, const std::any &instance)
+void SingletonContainer::AddSingleton(const std::string& name, void* instance)
 {
     if (stringMap.find(name) == stringMap.end()) {
         static int32_t nextId = 0;
@@ -76,7 +64,7 @@ void SingletonContainer::AddSingleton(const std::string &name, const std::any &i
     }
 }
 
-void SingletonContainer::SetSingleton(const std::string &name, const std::any &instance)
+void SingletonContainer::SetSingleton(const std::string& name, void* instance)
 {
     if (stringMap.find(name) == stringMap.end()) {
         AddSingleton(name, instance);
@@ -86,21 +74,20 @@ void SingletonContainer::SetSingleton(const std::string &name, const std::any &i
     }
 }
 
-const std::any &SingletonContainer::GetSingleton(const std::string &name)
+void* SingletonContainer::GetSingleton(const std::string& name)
 {
     if (stringMap.find(name) == stringMap.end()) {
         WLOGFD("cannot get %{public}s", name.c_str());
-        static std::any voidAny;
-        return voidAny;
+        return nullptr;
     }
     return singletonMap[stringMap[name]].value;
 }
 
-const std::any &SingletonContainer::DependOn(const std::string &instance, const std::string &name)
+void* SingletonContainer::DependOn(const std::string& instance, const std::string& name)
 {
-    auto &instanceDependencySet = dependencySetMap[stringMap[instance]];
+    auto& instanceDependencySet = dependencySetMap[stringMap[instance]];
     if (instanceDependencySet.find(stringMap[name]) == instanceDependencySet.end()) {
-        WLOGFD("%{public}s dependon %{public}s", instance.c_str(), name.c_str());
+        WLOGFD("%{public}s DependOn %{public}s", instance.c_str(), name.c_str());
         instanceDependencySet.insert(stringMap[name]);
         singletonMap[stringMap[name]].refCount++;
     }

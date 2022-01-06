@@ -5,11 +5,10 @@
       "module_list": [
         "//foundation/windowmanager/interfaces/kits/js/declaration:window",
         "//foundation/windowmanager/sa_profile:wms_sa_profile",
-        "//foundation/windowmanager/adapter:libwmadaptertest",
+        "//foundation/windowmanager/adapter:libwmadapter",
         "//foundation/windowmanager/wm:libwm",
         "//foundation/windowmanager/wmserver:libwms",
         "//foundation/windowmanager/wm:libwmutil",
-        "//foundation/windowmanager/wmtest:rosenwmtest",
 
         "//foundation/windowmanager/interfaces/kits/napi:windowstage",
         "//foundation/windowmanager/interfaces/kits/napi:napi_packages"

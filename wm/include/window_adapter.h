@@ -17,6 +17,7 @@
 #define OHOS_WINDOW_ADAPTER_H
 
 #include <refbase.h>
+#include <zidl/window_manager_agent_interface.h>
 
 #include "window.h"
 #include "window_proxy.h"
@@ -31,10 +32,9 @@ public:
     virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
 };
 
-class WindowAdapter : public RefBase {
-    DECLARE_SINGLE_INSTANCE_BASE(WindowAdapter);
+class WindowAdapter {
+DECLARE_SINGLE_INSTANCE(WindowAdapter);
 public:
-    ~WindowAdapter() = default;
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
         std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId);
     virtual WMError AddWindow(sptr<WindowProperty>& windowProperty);
@@ -44,10 +44,13 @@ public:
     virtual WMError MoveTo(uint32_t windowId, int32_t x, int32_t y);
     virtual WMError Resize(uint32_t windowId, uint32_t width, uint32_t height);
     virtual WMError RequestFocus(uint32_t windowId);
+    virtual WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
+    virtual WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
+
+    virtual void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
+    virtual void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
 
     virtual void ClearWindowAdapter();
-protected:
-    WindowAdapter() = default;
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxyLocked();
