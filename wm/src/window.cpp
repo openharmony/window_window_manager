@@ -14,6 +14,7 @@
  */
 
 #include "window.h"
+#include "window_helper.h"
 #include "window_impl.h"
 #include "window_manager_hilog.h"
 
@@ -23,7 +24,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowImpl"};
 }
 sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& option,
-    const sptr<IRemoteObject>& abilityToken)
+    const std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext)
 {
     if (windowName.empty()) {
         WLOGFE("window name is empty");
@@ -32,9 +33,14 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
     if (option == nullptr) {
         option = new WindowOption();
     }
+    WindowType type = option->GetWindowType();
+    if (!(WindowHelper::IsAppWindow(type) || WindowHelper::IsSystemWindow(type))) {
+        WLOGFE("window type is invalid %{public}d", type);
+        return nullptr;
+    }
     option->SetWindowName(windowName);
     sptr<WindowImpl> windowImpl = new WindowImpl(option);
-    WMError error = windowImpl->Create(option->GetParentName(), abilityToken);
+    WMError error = windowImpl->Create(option->GetParentName(), abilityContext);
     if (error != WMError::WM_OK) {
         return nullptr;
     }

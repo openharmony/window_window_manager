@@ -16,6 +16,7 @@
 #include "window_controller.h"
 #include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
+#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -63,35 +64,17 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     if (res != WMError::WM_OK) {
         return res;
     }
-    res = LayoutWindowNodeTrees();
     RSTransaction::FlushImplicitTransaction();
-    WLOGFI("AddWindowNode FlushImplicitTransaction end");
 
     if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        WLOGFI("need minimize previous fullscreen window if exists");
+        WM_SCOPED_TRACE_BEGIN("controller:MinimizeOtherFullScreenAbility");
         WMError res = windowRoot_->MinimizeOtherFullScreenAbility(node);
+        WM_SCOPED_TRACE_END();
         if (res != WMError::WM_OK) {
             WLOGFE("Minimize other fullscreen window failed");
         }
     }
     return res;
-}
-
-WMError WindowController::LayoutWindowNodeTrees()
-{
-    auto& windowContainerMap = windowRoot_->GetWindowNodeContainerMap();
-    if (windowContainerMap.empty()) {
-        WLOGFE("could not find window container");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    for (auto& iter : windowContainerMap) {
-        const sptr<WindowNodeContainer>& windowContainer = iter.second;
-        WMError ret = windowContainer->LayoutWindowNodes();
-        if (ret != WMError::WM_OK) {
-            return ret;
-        }
-    }
-    return WMError::WM_OK;
 }
 
 WMError WindowController::RemoveWindowNode(uint32_t windowId)
@@ -100,9 +83,7 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
     if (res != WMError::WM_OK) {
         return res;
     }
-    res = LayoutWindowNodeTrees();
     RSTransaction::FlushImplicitTransaction();
-    WLOGFI("RemoveWindowNode FlushImplicitTransaction end");
     return res;
 }
 
@@ -112,9 +93,7 @@ WMError WindowController::DestroyWindow(uint32_t windowId)
     if (res != WMError::WM_OK) {
         return res;
     }
-    res = LayoutWindowNodeTrees();
     RSTransaction::FlushImplicitTransaction();
-    WLOGFI("DestroyWindow FlushImplicitTransaction end");
     return res;
 }
 
@@ -125,10 +104,15 @@ WMError WindowController::MoveTo(uint32_t windowId, int32_t x, int32_t y)
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    Vector2f pos(x, y);
-    node->surfaceNode_->SetBoundsPosition(pos);
+    auto property = node->GetWindowProperty();
+    Rect lastRect = property->GetWindowRect();
+    Rect newRect = { x, y, lastRect.width_, lastRect.height_ };
+    property->SetWindowRect(newRect);
+    WMError res = windowRoot_->UpdateWindowNode(windowId);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
     RSTransaction::FlushImplicitTransaction();
-    WLOGFI("MoveTo FlushImplicitTransaction end");
     return WMError::WM_OK;
 }
 
@@ -139,15 +123,102 @@ WMError WindowController::Resize(uint32_t windowId, uint32_t width, uint32_t hei
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    node->surfaceNode_->SetBoundsSize(width, height);
+    auto property = node->GetWindowProperty();
+    Rect lastRect = property->GetWindowRect();
+    Rect newRect = { lastRect.posX_, lastRect.posY_, width, height };
+    property->SetWindowRect(newRect);
+    WMError res = windowRoot_->UpdateWindowNode(windowId);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
     RSTransaction::FlushImplicitTransaction();
-    WLOGFI("Resize FlushImplicitTransaction end");
     return WMError::WM_OK;
 }
 
 WMError WindowController::RequestFocus(uint32_t windowId)
 {
     return windowRoot_->RequestFocus(windowId);
+}
+
+WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode mode)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto property = node->GetWindowProperty();
+    property->SetWindowMode(mode);
+    WMError res = windowRoot_->UpdateWindowNode(windowId);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
+    RSTransaction::FlushImplicitTransaction();
+    WLOGFI("SetWindowMode FlushImplicitTransaction end");
+    return res;
+}
+
+WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto property = node->GetWindowProperty();
+    property->SetWindowType(type);
+    WMError res = windowRoot_->UpdateWindowNode(windowId);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
+    RSTransaction::FlushImplicitTransaction();
+    WLOGFI("SetWindowType FlushImplicitTransaction end");
+    return res;
+}
+
+WMError WindowController::SetWindowFlags(uint32_t windowId, uint32_t flags)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto property = node->GetWindowProperty();
+    property->SetWindowFlags(flags);
+    WMError res = windowRoot_->UpdateWindowNode(windowId);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
+    RSTransaction::FlushImplicitTransaction();
+    WLOGFI("SetWindowFlags FlushImplicitTransaction end");
+    return res;
+}
+
+WMError WindowController::SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    node->SetSystemBarProperty(type, property);
+    WMError res = windowRoot_->UpdateWindowNode(windowId);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
+    RSTransaction::FlushImplicitTransaction();
+    WLOGFI("SetSystemBarProperty FlushImplicitTransaction end");
+    return res;
+}
+
+void WindowController::RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    windowRoot_->RegisterFocusChangedListener(windowManagerAgent);
+}
+
+void WindowController::UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    windowRoot_->UnregisterFocusChangedListener(windowManagerAgent);
 }
 }
 }

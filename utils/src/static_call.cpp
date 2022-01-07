@@ -17,12 +17,10 @@
 
 namespace OHOS {
 namespace Rosen {
-IMPLEMENT_SINGLE_INSTANCE(StaticCall);
-
 sptr<Window> StaticCall::CreateWindow(const std::string& windowName,
-    sptr<WindowOption>& option, const sptr<IRemoteObject>& abilityToken)
+    sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext)
 {
-    return Window::Create(windowName, option, abilityToken);
+    return Window::Create(windowName, option, abilityContext);
 }
 } // namespace Rosen
 } // namespace OHOS

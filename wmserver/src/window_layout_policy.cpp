@@ -14,7 +14,9 @@
  */
 
 #include "window_layout_policy.h"
+#include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -22,163 +24,167 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowLayoutPolicy"};
 }
 
-WMError WindowLayoutPolicy::UpdateDisplayInfo(const Rect& displayRect)
+WindowLayoutPolicy::WindowLayoutPolicy(const sptr<WindowNode>& belowAppNode,
+    const sptr<WindowNode>& appNode, const sptr<WindowNode>& aboveAppNode)
 {
-    if (displayRect.height_ == 0 || displayRect.width_ == 0) {
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
+    belowAppWindowNode_ = belowAppNode;
+    appWindowNode_ = appNode;
+    aboveAppWindowNode_ = aboveAppNode;
+}
+
+void WindowLayoutPolicy::UpdateDisplayInfo(const Rect& displayRect)
+{
     displayRect_ = displayRect;
-    limitRect_ = displayRect;
-    aviodNodes_.clear();
-    return WMError::WM_OK;
+    limitRect_ = displayRect_;
+    avoidNodes_.clear();
 }
 
-WMError WindowLayoutPolicy::LayoutWindow(sptr<WindowNode>& node)
+void WindowLayoutPolicy::LayoutWindowTree()
 {
-    if (node->GetWindowType() >= WindowType::SYSTEM_WINDOW_END) {
-        WLOGFE("unknown window type!");
-        return WMError::WM_ERROR_INVALID_PARAM;
+    limitRect_ = displayRect_;
+    avoidNodes_.clear();
+    std::vector<sptr<WindowNode>> rootNodes = { aboveAppWindowNode_, appWindowNode_, belowAppWindowNode_ };
+    for (auto& node : rootNodes) { // ensure that the avoid area windows are traversed first
+        LayoutWindowNode(node);
     }
-    UpdateLayoutRects(node);
-    if (aviodTypes_.find(node->GetWindowType()) != aviodTypes_.end()) {
-        RecordAvoidRect(node);
-    }
-    return WMError::WM_OK;
 }
 
-bool WindowLayoutPolicy::IsRectChanged(const Rect& l, const Rect& r)
+void WindowLayoutPolicy::LayoutWindowNode(sptr<WindowNode>& node)
+{
+    if (node == nullptr) {
+        return;
+    }
+    if (node->parent_ != nullptr) { // isn't root node
+        UpdateLayoutRect(node);
+        if (avoidTypes_.find(node->GetWindowType()) != avoidTypes_.end()) {
+            RecordAvoidRect(node);
+        }
+    }
+    for (auto& childNode : node->children_) {
+        LayoutWindowNode(childNode);
+    }
+}
+
+void WindowLayoutPolicy::AddWindowNode(sptr<WindowNode>& node)
+{
+    WM_FUNCTION_TRACE();
+    UpdateWindowNode(node); // currently, update and add do the same process
+}
+
+void WindowLayoutPolicy::RemoveWindowNode(sptr<WindowNode>& node)
+{
+    WM_FUNCTION_TRACE();
+    auto type = node->GetWindowType();
+    // affect other windows, trigger off global layout
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+        LayoutWindowTree();
+    } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
+        // TODO: change split screen
+        LayoutWindowTree();
+    }
+}
+
+void WindowLayoutPolicy::UpdateWindowNode(sptr<WindowNode>& node)
+{
+    WM_FUNCTION_TRACE();
+    auto type = node->GetWindowType();
+    // affect other windows, trigger off global layout
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+        LayoutWindowTree();
+    } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
+        // TODO: change split screen
+        LayoutWindowTree();
+    } else { // layout single window
+        LayoutWindowNode(node);
+    }
+}
+
+static bool IsLayoutChanged(const Rect& l, const Rect& r)
 {
     return !((l.posX_ == r.posX_) && (l.posY_ == r.posY_) && (l.width_ == r.width_) && (l.height_ == r.height_));
 }
 
-bool WindowLayoutPolicy::UpdateLayoutRects(sptr<WindowNode>& node)
+void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
 {
-    bool needAvoid = IsNeedAvoidNode(node);
-    bool fullScreen = IsFullScreenNode(node);
-    bool parentLimit = IsParentLimitNode(node);
-    bool subWindow = (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    bool floatingWindow = (node->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
-    WLOGFI("Id:%{public}d, avoid:%{public}d fullS:%{public}d parLimit:%{public}d float:%{public}d, types:%{public}d",
-        node->GetWindowId(), needAvoid, fullScreen, parentLimit, floatingWindow,
-        static_cast<uint32_t>(node->GetWindowType()));
-    const LayoutRects& layoutRects = node->GetLayoutRects();
-    Rect lastRect = layoutRects.rect_;
-    Rect dRect = layoutRects.displayRect_;
-    Rect pRect = layoutRects.parentRect_;
-    Rect lRect = layoutRects.limitRect_;
+    auto type = node->GetWindowType();
+    auto mode = node->GetWindowMode();
+    auto flags = node->GetWindowFlags();
+    bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    bool parentLimit = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
+    bool subWindow = WindowHelper::IsSubWindow(type);
+    bool floatingWindow = (mode == WindowMode::WINDOW_MODE_FLOATING);
+    const Rect& layoutRect = node->GetLayoutRect();
+    Rect lastRect = layoutRect;
+    Rect limitRect = displayRect_;
     Rect winRect = node->GetWindowProperty()->GetWindowRect();
+    WLOGFI("Id:%{public}d, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d," \
+        "type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+        node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow,
+        static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 
     if (needAvoid) {
-        dRect = limitRect_;
-    } else {
-        dRect = displayRect_;
+        limitRect = limitRect_;
     }
-
-    if (subWindow) {
-        pRect = node->parent_->GetLayoutRects().rect_;
-    } else {
-        pRect = dRect;
+    if (!floatingWindow) { // fullscreen window
+        winRect = limitRect;
+    } else { // floating window
+        if (subWindow && parentLimit) { // subwidow and limited by parent
+            limitRect = node->parent_->GetLayoutRect();
+            winRect.width_ = std::min(limitRect.width_, winRect.width_);
+            winRect.height_ = std::min(limitRect.height_, winRect.height_);
+            winRect.posX_ = std::max(limitRect.posX_, winRect.posX_);
+            winRect.posY_ = std::max(limitRect.posY_, winRect.posY_);
+            winRect.posX_ = std::min(
+                limitRect.posX_ + static_cast<int32_t>(limitRect.width_) - static_cast<int32_t>(winRect.width_),
+                winRect.posX_);
+            winRect.posY_ = std::min(
+                limitRect.posY_ + static_cast<int32_t>(limitRect.height_) - static_cast<int32_t>(winRect.height_),
+                winRect.posY_);
+        }
     }
-
-    if (parentLimit) {
-        lRect = pRect;
-    } else {
-        lRect = dRect;
-    }
-
-    if (fullScreen) {
-        winRect = lRect;
-    } else if (!floatingWindow) {
-        winRect.width_ = std::min(lRect.width_, winRect.width_);
-        winRect.height_ = std::min(lRect.height_, winRect.height_);
-        winRect.posX_ = std::max(lRect.posX_, winRect.posX_);
-        winRect.posY_ = std::max(lRect.posY_, winRect.posY_);
-        winRect.posX_ = std::min(
-            lRect.posX_ + static_cast<int32_t>(lRect.width_) - static_cast<int32_t>(winRect.width_),
-            winRect.posX_);
-        winRect.posY_ = std::min(
-            lRect.posY_ + static_cast<int32_t>(lRect.height_) - static_cast<int32_t>(winRect.height_),
-            winRect.posY_);
-    }
-    node->UpdateLayoutRects({ dRect, pRect, lRect, winRect });
-    if (IsRectChanged(lastRect, winRect)) {
+    // Limit window to the maximum window size
+    winRect.width_ = std::min(displayRect_.width_, winRect.width_);
+    winRect.height_ = std::min(displayRect_.height_, winRect.height_);
+    winRect.width_ = std::max(1u, winRect.width_);
+    winRect.height_ = std::max(1u, winRect.height_);
+    node->SetLayoutRect(winRect);
+    if (IsLayoutChanged(lastRect, winRect)) {
         node->GetWindowToken()->UpdateWindowRect(winRect);
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-        WLOGFI("UpdateLayoutRects for winId: %{public}d, Rect: %{public}d %{public}d %{public}d %{public}d",
-               node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-        return true;
     }
-    WLOGFI("UpdateLayoutRects rect not changed for winId: %{public}d", node->GetWindowId());
-    return false;
 }
 
 void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node)
 {
-    auto& layoutRects = node->GetLayoutRects();
+    auto& layoutRect = node->GetLayoutRect();
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) { // STATUS_BAR
         int32_t boundTop = limitRect_.posY_;
-        int32_t rectBottom = layoutRects.rect_.posY_ + layoutRects.rect_.height_;
+        int32_t rectBottom = layoutRect.posY_ + layoutRect.height_;
         int32_t offsetH = rectBottom - boundTop;
         limitRect_.posY_ += offsetH;
         limitRect_.height_ -= offsetH;
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) { // NAVIGATION_BAR
         int32_t boundBottom = limitRect_.posY_ + limitRect_.height_;
-        int32_t offsetH = boundBottom - layoutRects.rect_.posY_;
+        int32_t offsetH = boundBottom - layoutRect.posY_;
         limitRect_.height_ -= offsetH;
     }
-    WLOGFI("after add WinId: %{public}d, limitRect: %{public}d %{public}d %{public}d %{public}d",
-        node->GetWindowId(), limitRect_.posX_, limitRect_.posY_, limitRect_.width_, limitRect_.height_);
+    WLOGFI("Type: %{public}d, limitRect: %{public}d %{public}d %{public}d %{public}d",
+        node->GetWindowType(), limitRect_.posX_, limitRect_.posY_, limitRect_.width_, limitRect_.height_);
 }
 
 void WindowLayoutPolicy::RecordAvoidRect(const sptr<WindowNode>& node)
 {
     uint32_t id = node->GetWindowId();
-    if (aviodNodes_.find(id) == aviodNodes_.end()) { // new avoid rect
-        aviodNodes_.insert(std::pair<uint32_t, sptr<WindowNode>>(id, node));
+    if (avoidNodes_.find(id) == avoidNodes_.end()) { // new avoid rect
+        avoidNodes_.insert(std::pair<uint32_t, sptr<WindowNode>>(id, node));
         UpdateLimitRect(node);
     } else { // update existing avoid rect
         limitRect_ = displayRect_;
-        aviodNodes_[id] = node;
-        for (auto item : aviodNodes_) {
+        avoidNodes_[id] = node;
+        for (auto item : avoidNodes_) {
             UpdateLimitRect(item.second);
         }
     }
-}
-
-bool WindowLayoutPolicy::IsNeedAvoidNode(const sptr<WindowNode>& node)
-{
-    auto type = node->GetWindowType();
-    auto mode = node->GetWindowMode();
-    auto flags = node->GetWindowFlags();
-    if (mode == WindowMode::WINDOW_MODE_FLOATING) {
-        return false;
-    }
-    if (type >= WindowType::APP_WINDOW_BASE &&
-        type <= WindowType::APP_SUB_WINDOW_END &&
-        (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID))) {
-        return true;
-    }
-    return false;
-}
-
-bool WindowLayoutPolicy::IsFullScreenNode(const sptr<WindowNode>& node)
-{
-    auto mode = node->GetWindowMode();
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || mode == WindowMode::WINDOW_MODE_SPLIT) {
-        return true;
-    }
-    return false;
-}
-
-bool WindowLayoutPolicy::IsParentLimitNode(const sptr<WindowNode>& node)
-{
-    auto mode = node->GetWindowMode();
-    auto flags = node->GetWindowFlags();
-    if (mode != WindowMode::WINDOW_MODE_FLOATING &&
-        (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT))) {
-        return true;
-    }
-    return false;
 }
 }
 }

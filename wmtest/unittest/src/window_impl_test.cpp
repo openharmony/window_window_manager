@@ -43,5 +43,88 @@ void WindowImplTest::TearDown()
 {
 }
 
+namespace {
+/*
+ * Function: Show
+ * Type: Reliability
+ * Rank: Important(2)
+ * EnvConditions: N/A
+ * CaseDescription: 1. mock WindowAdapter
+ *                  2. mock AddWindow return WM_OK
+ *                  3. call Show to AddWindow and check return is WM_OK
+ *                  4. call Show with isAdded_=true and check return is WM_OK
+ *                  5. mock RemoveWindow return WM_OK
+ *                  6. call Destroy check return is WM_OK
+ */
+HWTEST_F(WindowImplTest, ShowWindow01, testing::ext::TestSize.Level0)
+{
+    PART("CaseShow01") {
+#ifdef _NEW_RENDERSERVER_
+        using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
+        std::unique_ptr<Mocker> m = nullptr;
+    STEP("1. mock WindowAdapter") {
+        m = std::make_unique<Mocker>();
+    }
+
+    STEP("2. mock AddWindow return WM_OK") {
+        EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    }
+
+    STEP("3. call Show and check return is WM_OK") {
+        STEP_ASSERT_EQ(WMError::WM_OK, window_->Show());
+    }
+
+    STEP("4. mock RemoveWindow return WM_OK") {
+        EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    }
+
+    STEP("5. call Destroy check return is WM_OK") {
+        STEP_ASSERT_EQ(WMError::WM_OK, window_->Destroy());
+    }
+#endif
+    }
+}
+
+/*
+ * Function: Show
+ * Type: Reliability
+ * Rank: Important(2)
+ * EnvConditions: N/A
+ * CaseDescription: 1. mock WindowAdapter
+ *                  2. mock AddWindow return WM_ERROR_DEATH_RECIPIENT
+ *                  3. call Show to AddWindow and check return is WM_ERROR_DEATH_RECIPIENT
+ *                  4. call Show with isAdded_=true and check return is WM_ERROR_DEATH_RECIPIENT
+ *                  5. mock RemoveWindow return WM_OK
+ *                  6. call Destroy check return is WM_OK
+ */
+HWTEST_F(WindowImplTest, ShowWindow02, testing::ext::TestSize.Level0)
+{
+    PART("CaseShow02") {
+#ifdef _NEW_RENDERSERVER_
+        using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
+        std::unique_ptr<Mocker> m = nullptr;
+    STEP("1. mock WindowAdapter") {
+        m = std::make_unique<Mocker>();
+    }
+
+    STEP("2. mock AddWindow return WM_ERROR_DEATH_RECIPIENT") {
+        EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_DEATH_RECIPIENT));
+    }
+
+    STEP("3. call Show and check return is WM_ERROR_DEATH_RECIPIENT") {
+        STEP_ASSERT_EQ(WMError::WM_ERROR_DEATH_RECIPIENT, window_->Show());
+    }
+
+    STEP("4. mock RemoveWindow return WM_OK") {
+        EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    }
+
+    STEP("5. call Destroy check return is WM_OK") {
+        STEP_ASSERT_EQ(WMError::WM_OK, window_->Destroy());
+    }
+#endif
+    }
+}
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -57,7 +57,11 @@ struct Param {
 
 void Async(napi_env env, std::unique_ptr<Param>& param)
 {
-    param->ability->GetScene()->GetMainWindow()->Resize(param->width, param->height);
+    if (param == nullptr || param->ability == nullptr || param->ability->GetWindow() == nullptr) {
+        GNAPI_LOG("Error, use nullptr!)");
+        return;
+    }
+    param->ability->GetWindow()->Resize(param->width, param->height);
 }
 
 napi_value MainFunc(napi_env env, napi_callback_info info)
@@ -90,7 +94,11 @@ struct Param {
 
 void Async(napi_env env, std::unique_ptr<Param>& param)
 {
-    param->ability->GetScene()->GetMainWindow()->MoveTo(param->x, param->y);
+    if (param == nullptr || param->ability == nullptr || param->ability->GetWindow() == nullptr) {
+        GNAPI_LOG("Error, use nullptr!)");
+        return;
+    }
+    param->ability->GetWindow()->MoveTo(param->x, param->y);
 }
 
 napi_value MainFunc(napi_env env, napi_callback_info info)
@@ -122,7 +130,11 @@ struct Param {
 
 void Async(napi_env env, std::unique_ptr<Param>& param)
 {
-    param->ability->GetScene()->GetMainWindow()->SetWindowType(static_cast<WindowType>(param->windowType));
+    if (param == nullptr || param->ability == nullptr || param->ability->GetWindow() == nullptr) {
+        GNAPI_LOG("Error, use nullptr!)");
+        return;
+    }
+    param->ability->GetWindow()->SetWindowType(static_cast<WindowType>(param->windowType));
 }
 
 void CreateWindowTypeObject(napi_env env, napi_value value)
@@ -163,12 +175,12 @@ struct Param {
 
 void Async(napi_env env, std::unique_ptr<Param> &param)
 {
-    param->window = param->ability->GetScene()->GetMainWindow();
-    if (param->window == nullptr) {
-        GNAPI_LOG("Get main-window failed!");
+    if (param == nullptr || param->ability == nullptr) {
+        GNAPI_LOG("Get top window failed!");
         param->wret = WMError::WM_ERROR_NULLPTR;
         return;
     }
+    param->window = param->ability->GetWindow();
     param->wret = WMError::WM_OK;
 }
 
@@ -184,6 +196,7 @@ napi_value MainFunc(napi_env env, napi_callback_info info)
     GNAPI_LOG("Window Interface: getTopWindow()");
     GNAPI_LOG("%{public}s called", __PRETTY_FUNCTION__);
     auto param = std::make_unique<Param>();
+    NAPI_CALL(env, GetAbility(env, info, param->ability));
     return CreatePromise<Param>(env, __PRETTY_FUNCTION__, Async, Resolve, param);
 }
 } // namespace getTopWindow

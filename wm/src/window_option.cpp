@@ -77,6 +77,13 @@ void WindowOption::SetWindowFlags(uint32_t flags)
     flags_ = flags;
 }
 
+void WindowOption::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+        sysBarPropMap_[type] = property;
+    }
+}
+
 Rect WindowOption::GetWindowRect() const
 {
     return windowRect_;
@@ -120,6 +127,11 @@ const std::string& WindowOption::GetWindowName() const
 uint32_t WindowOption::GetWindowFlags() const
 {
     return flags_;
+}
+
+const std::unordered_map<WindowType, SystemBarProperty>& WindowOption::GetSystemBarProperty() const
+{
+    return sysBarPropMap_;
 }
 }
 }

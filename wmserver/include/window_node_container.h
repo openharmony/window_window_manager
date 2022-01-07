@@ -24,23 +24,16 @@
 
 namespace OHOS {
 namespace Rosen {
+using UpdateFocusStatusFunc = std::function<void (uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
+    WindowType windowType, int32_t displayId, bool focused)>;
+
 class WindowNodeContainer : public RefBase {
 public:
-    WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height) : screenId_(screenId)
-    {
-        struct RSDisplayNodeConfig config = {screenId};
-        displayNode_ = RSDisplayNode::Create(config);
-        displayRect_ = {
-            .posX_ = 0,
-            .posY_ = 0,
-            .width_ = width,
-            .height_ = height
-        };
-    }
-
+    WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height, UpdateFocusStatusFunc callback);
     ~WindowNodeContainer();
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);
+    WMError UpdateWindowNode(sptr<WindowNode>& node);
     WMError DestroyWindowNode(sptr<WindowNode>& node, std::vector<uint32_t>& windowIds);
     const std::vector<uint32_t>& Destroy();
     void AssignZOrder();
@@ -48,9 +41,10 @@ public:
     uint32_t GetFocusWindow() const;
     WMError MinimizeOtherFullScreenAbility(); // adapt to api7
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes);
-    WMError LayoutWindowNodes();
     uint64_t GetScreenId() const;
     Rect GetDisplayRect() const;
+    sptr<WindowNode> GetTopImmersiveNode() const;
+    void NotifySystemBarIfChanged();
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
@@ -62,17 +56,27 @@ private:
     void UpdateWindowTree(sptr<WindowNode>& node);
     bool UpdateRSTree(sptr<WindowNode>& node, bool isAdd);
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
-    sptr<WindowLayoutPolicy> layoutPolicy_ = new WindowLayoutPolicy();
     sptr<WindowNode> belowAppWindowNode_ = new WindowNode();
     sptr<WindowNode> appWindowNode_ = new WindowNode();
     sptr<WindowNode> aboveAppWindowNode_ = new WindowNode();
+    sptr<WindowLayoutPolicy> layoutPolicy_ =
+        new WindowLayoutPolicy(belowAppWindowNode_, appWindowNode_, aboveAppWindowNode_);
     std::shared_ptr<RSDisplayNode> displayNode_;
     std::vector<uint32_t> removedIds_;
+    std::unordered_map<WindowType, sptr<WindowNode>> sysBarNodeMap_ {
+        { WindowType::WINDOW_TYPE_STATUS_BAR,     nullptr },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, nullptr },
+    };
+    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
+        { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
+    };
     uint32_t zOrder_ { 0 };
-    uint64_t screenId_ = 0;
     uint32_t focusedWindow_ { 0 };
     Rect displayRect_;
-    WMError LayoutWindowNode(sptr<WindowNode>& node);
+    uint64_t screenId_ = 0;
+    UpdateFocusStatusFunc focusStatusCallBack_;
+    void DumpScreenWindowTree();
 };
 }
 }

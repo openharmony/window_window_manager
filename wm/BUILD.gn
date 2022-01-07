@@ -43,12 +43,8 @@ config("libwm_config") {
     "//foundation/graphic/standard/interfaces/innerkits/common",
 
     # weston adapter end
-  ]
-
-  cflags = [
-    "-Wall",
-    "-Werror",
-    "-g3",
+    "//third_party/jsoncpp/include",
+    "//third_party/json/include",
   ]
 }
 
@@ -66,11 +62,12 @@ config("libwm_public_config") {
 ohos_shared_library("libwmutil") {
   sources = [
     "../dmserver/src/display_info.cpp",
+    "../dmserver/src/virtual_display_info.cpp",
+    "../utils/src/wm_trace.cpp",
     "//foundation/windowmanager/dmserver/src/display_manager_proxy.cpp",
     "//foundation/windowmanager/utils/src/singleton_container.cpp",
     "//foundation/windowmanager/wm/src/window_proxy.cpp",
     "//foundation/windowmanager/wmserver/src/window_manager_proxy.cpp",
-    "src/window_option.cpp",
     "src/window_property.cpp",
   ]
 
@@ -85,11 +82,16 @@ ohos_shared_library("libwmutil") {
 
   public_deps = [
     # RSSurface
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core:appexecfwk_core",
+    "//foundation/graphic/standard:libsurface",
     "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
   ]
 
-  external_deps = [ "ipc:ipc_core" ]
+  external_deps = [
+    "bytrace_standard:bytrace_core",
+    "ipc:ipc_core",
+  ]
 
   part_name = "window_manager"
   subsystem_name = "window"
@@ -110,8 +112,12 @@ ohos_shared_library("libwm") {
     "src/window_agent.cpp",
     "src/window_impl.cpp",
     "src/window_input_channel.cpp",
+    "src/window_manager.cpp",
+    "src/window_manager_agent.cpp",
+    "src/window_option.cpp",
     "src/window_scene.cpp",
     "src/window_stub.cpp",
+    "src/zidl/window_manager_agent_stub.cpp",
   ]
 
   configs = [ ":libwm_config" ]
@@ -120,14 +126,15 @@ ohos_shared_library("libwm") {
 
   deps = [
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
-    "//foundation/aafwk/standard/interfaces/innerkits/want:want",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//foundation/windowmanager/wm:libwmutil",
     "//utils/native/base:utils",
 
+    # TODO: fix me
+    # "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",
+
     # weston adapter
-    "//foundation/windowmanager/adapter:libwmadaptertest",
+    "//foundation/windowmanager/adapter:libwmadapter",
 
     # ace
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
@@ -137,6 +144,7 @@ ohos_shared_library("libwm") {
     # native value
     # RSSurface
     "//foundation/ace/napi:ace_napi",
+    "//foundation/graphic/standard:libsurface",
 
     # vsync
     "//foundation/graphic/standard:libvsync_client",
@@ -148,11 +156,13 @@ ohos_shared_library("libwm") {
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
 
     # weston adapter
-    "//foundation/windowmanager/adapter:libwmadaptertest",
+    "//foundation/windowmanager/adapter:libwmadapter",
+    "//foundation/windowmanager/wm:libwmutil",
   ]
 
   external_deps = [
     "aafwk_standard:ability_context_native",
+    "bytrace_standard:bytrace_core",
     "ipc:ipc_core",
   ]
 

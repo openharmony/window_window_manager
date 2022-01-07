@@ -21,6 +21,7 @@
 #include <ui_content.h>
 #include "window.h"
 #include "input_transfer_station.h"
+#include "vsync_station.h"
 #include "window_property.h"
 
 namespace OHOS {
@@ -48,10 +49,17 @@ public:
     virtual WindowMode GetMode() const override;
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() override;
+    virtual uint32_t GetWindowFlags() override;
+    virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) override;
     virtual WMError SetWindowType(WindowType type) override;
     virtual WMError SetWindowMode(WindowMode mode) override;
+    virtual WMError AddWindowFlag(WindowFlag flag) override;
+    virtual WMError RemoveWindowFlag(WindowFlag flag) override;
+    virtual WMError SetWindowFlags(uint32_t flags) override;
+    virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
 
-    WMError Create(const std::string& parentName, const sptr<IRemoteObject>& abilityToken = nullptr);
+    WMError Create(const std::string& parentName,
+        const std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext = nullptr);
     virtual WMError Destroy() override;
     virtual WMError Show() override;
     virtual WMError Hide() override;
@@ -63,15 +71,20 @@ public:
 
     virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) override;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
+    virtual void RegisterWindowSystemBarChangeListener(sptr<IWindowSystemBarChangeListener>& listener) override;
 
     void UpdateRect(const struct Rect& rect);
     void UpdateMode(WindowMode mode);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
+    virtual void RequestFrame() override;
     void UpdateFocusStatus(bool focused);
+    void UpdateSystemBarProperty(const SystemBarProperty& prop);
+    virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
     virtual WMError SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext> context,
-        std::string& url, NativeEngine* engine, NativeValue* storage) override;
+        std::string& contentInfo, NativeEngine* engine, NativeValue* storage, bool isdistributed) override;
+    virtual const std::string& GetContentInfo() override;
 
 private:
     inline void NotifyAfterForeground() const
@@ -88,7 +101,7 @@ private:
     }
     inline void NotifyAfterUnFocused() const
     {
-        CALL_LIFECYCLE_LISTENER(AfterUnFocused, UnFocus);
+        CALL_LIFECYCLE_LISTENER(AfterUnfocused, UnFocus);
     }
     inline void NotifyBeforeDestroy() const
     {
@@ -98,6 +111,7 @@ private:
     }
     void SetDefaultOption(); // for api7
     bool IsWindowValid() const;
+    void OnVsync(int64_t timeStamp);
 
     enum WindowState {
         STATE_INITIAL,
@@ -108,14 +122,23 @@ private:
         STATE_BOTTOM = STATE_DESTROYED,
     };
 
+    std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
+        std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
+    static std::map<uint32_t, std::vector<sptr<Window>>> subWindowMap_;
     sptr<WindowProperty> property_;
     WindowState state_ { STATE_INITIAL };
     sptr<IWindowLifeCycle> lifecycleListener_;
     sptr<IWindowChangeListener> windowChangeListener_;
+    sptr<IWindowSystemBarChangeListener> systemBarChangeListener_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
+    const float STATUS_BAR_RATIO = 0.07;
+    const float NAVIGATION_BAR_RATIO = 0.07;
+    const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
+    const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
 };
 }
 }
