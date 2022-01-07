@@ -19,19 +19,19 @@
 #include <vector>
 #include <system_ability.h>
 
-#include "display_screen.h"
+#include "abstract_display.h"
 #include "single_instance.h"
 #include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
-class DisplayManagerServiceInner : public RefBase {
+class DisplayManagerServiceInner {
 DECLARE_SINGLE_INSTANCE(DisplayManagerServiceInner);
 
 public:
-    std::vector<const sptr<DisplayScreen>> GetAllDisplays();
+    std::vector<const sptr<AbstractDisplay>> GetAllDisplays();
     DisplayId GetDefaultDisplayId();
-    const sptr<DisplayScreen> GetDefaultDisplay();
-    const sptr<DisplayScreen> GetDisplayById(DisplayId displayId);
+    const sptr<AbstractDisplay> GetDefaultDisplay();
+    const sptr<AbstractDisplay> GetDisplayById(DisplayId displayId);
     std::vector<DisplayId> GetAllDisplayIds();
 };
 } // namespace OHOS::Rosen

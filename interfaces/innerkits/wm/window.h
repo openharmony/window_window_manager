@@ -30,6 +30,9 @@
 
 class NativeValue;
 class NativeEngine;
+namespace OHOS::AppExecFwk {
+    class Configuration;
+}
 
 namespace OHOS::AbilityRuntime {
 class AbilityContext;
@@ -42,10 +45,15 @@ public:
     virtual void OnSizeChange(Rect rect) = 0;
 };
 
+class IWindowSystemBarChangeListener : public RefBase {
+public:
+    virtual void OnSystemBarPropertyChange(uint32_t displayId, WindowType type, const SystemBarProperty& prop) = 0;
+};
+
 class Window : public RefBase {
 public:
     static sptr<Window> Create(const std::string& windowName,
-        sptr<WindowOption>& option, const sptr<IRemoteObject>& abilityToken = nullptr);
+        sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext = nullptr);
     static sptr<Window> Find(const std::string& windowName);
 
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
@@ -55,9 +63,15 @@ public:
     virtual WindowMode GetMode() const = 0;
     virtual const std::string& GetWindowName() const = 0;
     virtual uint32_t GetWindowId() = 0;
+    virtual uint32_t GetWindowFlags() = 0;
+    virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) = 0;
 
     virtual WMError SetWindowType(WindowType type) = 0;
     virtual WMError SetWindowMode(WindowMode mode) = 0;
+    virtual WMError AddWindowFlag(WindowFlag flag) = 0;
+    virtual WMError RemoveWindowFlag(WindowFlag flag) = 0;
+    virtual WMError SetWindowFlags(uint32_t flags) = 0;
+    virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) = 0;
 
     virtual WMError Destroy() = 0;
     virtual WMError Show() = 0;
@@ -70,11 +84,15 @@ public:
     virtual void AddInputEventListener(std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) = 0; // for api 7
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) = 0;
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
+    virtual void RequestFrame() = 0;
+    virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
 
     virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) = 0;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
+    virtual void RegisterWindowSystemBarChangeListener(sptr<IWindowSystemBarChangeListener>& listener) = 0;
     virtual WMError SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext> context,
-        std::string& url, NativeEngine* engine, NativeValue* storage) = 0;
+        std::string& contentInfo, NativeEngine* engine, NativeValue* storage, bool isdistributed = false) = 0;
+    virtual const std::string& GetContentInfo() = 0;
 };
 }
 }

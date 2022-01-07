@@ -29,7 +29,7 @@
 
 namespace OHOS {
 namespace Rosen {
-class VsyncStation : public RefBase {
+class VsyncStation {
 DECLARE_SINGLE_INSTANCE_BASE(VsyncStation);
 using OnCallback = std::function<void(int64_t)>;
 public:
@@ -48,6 +48,8 @@ private:
     VsyncStation() = default;
     static void OnVsync(int64_t nanoTimestamp, void* client);
     void VsyncCallbackInner(int64_t nanoTimestamp);
+    std::shared_ptr<AppExecFwk::EventHandler> mainHandler_ = nullptr;
+    std::mutex lock_;
     std::atomic_bool hasRequestedVsync_ {false};
     std::map<CallbackType, std::unordered_set<std::shared_ptr<VsyncCallback>>> vsyncCallbacks_ = {
         {CallbackType::CALLBACK_INPUT, {}},

@@ -21,6 +21,22 @@ class WindowStage {
     setUIContent(context, url, storage) {
         return this.__window_stage__.setUIContent(context, url, storage)
     }
+
+    getMainWindow() {
+        return this.__window_stage__.getMainWindow()
+    }
+
+    on(type, callback) {
+        return this.__window_stage__.on(type, callback)
+    }
+
+    off(type) {
+        return this.__window_stage__.off(type)
+    }
+
+    off(type, callback) {
+        return this.__window_stage__.off(type, callback)
+    }
 }
 
 export default WindowStage

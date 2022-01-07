@@ -30,21 +30,19 @@ public:
         nameT = __PRETTY_FUNCTION__;
         nameT = nameT.substr(nameT.find("T = "));
         nameT = nameT.substr(sizeof("T ="), nameT.length() - sizeof("T = "));
-        SingletonContainer::GetInstance()->AddSingleton(nameT, T::GetInstance());
+        SingletonContainer::GetInstance().AddSingleton(nameT, &T::GetInstance());
     }
     ~SingletonDelegator() = default;
 
     template<class S>
-    sptr<S> Dep()
+    S& Dep()
     {
         std::string nameS = __PRETTY_FUNCTION__;
         nameS = nameS.substr(nameS.find("S = "));
         nameS = nameS.substr(sizeof("S ="), nameS.length() - sizeof("S = "));
 
         auto ret = SingletonContainer::Get<S>();
-        if (ret != nullptr) {
-            SingletonContainer::GetInstance()->DependOn(nameT, nameS);
-        }
+        SingletonContainer::GetInstance().DependOn(nameT, nameS);
         return ret;
     }
 

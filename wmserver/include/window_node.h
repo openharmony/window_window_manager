@@ -24,13 +24,6 @@
 
 namespace OHOS {
 namespace Rosen {
-struct LayoutRects {
-    Rect displayRect_ = { 0, 0, 0, 0 };
-    Rect parentRect_ = { 0, 0, 0, 0 };
-    Rect limitRect_ = { 0, 0, 0, 0 };
-    Rect rect_ = { 0, 0, 0, 0 };
-};
-
 class WindowNode : public RefBase {
 public:
     WindowNode(const sptr<WindowProperty>& property, const sptr<IWindow>& window,
@@ -48,19 +41,21 @@ public:
     ~WindowNode() = default;
 
     void SetDisplayId(int32_t displayId);
-    void UpdateLayoutRects(const LayoutRects& rects);
+    void SetLayoutRect(const Rect& rect);
     void SetWindowProperty(const sptr<WindowProperty>& property);
+    void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
 
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
     int32_t GetDisplayId() const;
-    const LayoutRects& GetLayoutRects() const;
+    const Rect& GetLayoutRect() const;
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;
     uint32_t GetWindowFlags() const;
     const sptr<WindowProperty>& GetWindowProperty() const;
     int32_t GetCallingPid() const;
     int32_t GetCallingUid() const;
+    const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
 
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;
@@ -73,7 +68,7 @@ public:
 private:
     sptr<WindowProperty> property_;
     sptr<IWindow> windowToken_;
-    LayoutRects layoutRects_;
+    Rect layoutRect_ { 0, 0, 0, 0 };
     int32_t callingPid_;
     int32_t callingUid_;
 };

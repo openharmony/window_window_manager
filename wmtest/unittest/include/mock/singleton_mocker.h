@@ -24,29 +24,21 @@ class SingletonMocker {
 public:
     SingletonMocker()
     {
-        origin = SingletonContainer::Get<T>();
-        mock = new MockT();
         SingletonContainer::Set<T>(mock);
     }
 
     ~SingletonMocker()
     {
-        SingletonContainer::Set<T>(origin);
+        SingletonContainer::Set<T>(T::GetInstance());
     }
 
-    sptr<T> Origin()
-    {
-        return origin;
-    }
-
-    sptr<MockT> Mock()
+    MockT& Mock()
     {
         return mock;
     }
 
 private:
-    sptr<T> origin = nullptr;
-    sptr<MockT> mock = nullptr;
+    MockT mock;
 };
 } // namespace Rosen
 } // namespace OHOS

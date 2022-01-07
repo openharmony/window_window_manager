@@ -26,7 +26,6 @@ namespace {
 
 int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    WLOGFI("WindowStub::OnRemoteRequest code is %{public}d", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
         return -1;
@@ -48,6 +47,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         case TRANS_ID_UPDATE_FOCUS_STATUS: {
             bool focused = data.ReadBool();
             UpdateFocusStatus(focused);
+            break;
+        }
+        case TRANS_ID_UPDATE_SYSTEM_BAR_PROPERTY: {
+            SystemBarProperty property = { data.ReadBool(), data.ReadUint32(), data.ReadUint32() };
+            UpdateSystemBarProperty(property);
             break;
         }
         default:

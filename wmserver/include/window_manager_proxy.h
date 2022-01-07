@@ -36,6 +36,13 @@ public:
     WMError Resize(uint32_t windowId, uint32_t width, uint32_t height) override;
     WMError RequestFocus(uint32_t windowId) override;
     WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId) override;
+    WMError SetWindowMode(uint32_t windowId, WindowMode mode) override;
+    WMError SetWindowType(uint32_t windowId, WindowType type) override;
+    WMError SetWindowFlags(uint32_t windowId, uint32_t flags) override;
+    WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) override;
+
+    void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent) override;
 
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;

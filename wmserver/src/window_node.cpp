@@ -23,14 +23,19 @@ void WindowNode::SetDisplayId(int32_t displayId)
     property_->SetDisplayId(displayId);
 }
 
-void WindowNode::UpdateLayoutRects(const LayoutRects& rects)
+void WindowNode::SetLayoutRect(const Rect& rect)
 {
-    layoutRects_ = rects;
+    layoutRect_ = rect;
 }
 
 void WindowNode::SetWindowProperty(const sptr<WindowProperty>& property)
 {
     property_ = property;
+}
+
+void WindowNode::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
+{
+    property_->SetSystemBarProperty(type, property);
 }
 
 const sptr<IWindow>& WindowNode::GetWindowToken() const
@@ -48,9 +53,9 @@ uint32_t WindowNode::GetWindowId() const
     return property_->GetWindowId();
 }
 
-const LayoutRects& WindowNode::GetLayoutRects() const
+const Rect& WindowNode::GetLayoutRect() const
 {
-    return layoutRects_;
+    return layoutRect_;
 }
 
 WindowType WindowNode::GetWindowType() const
@@ -81,6 +86,11 @@ int32_t WindowNode::GetCallingPid() const
 int32_t WindowNode::GetCallingUid() const
 {
     return callingUid_;
+}
+
+const std::unordered_map<WindowType, SystemBarProperty>& WindowNode::GetSystemBarProperty() const
+{
+    return property_->GetSystemBarProperty();
 }
 }
 }

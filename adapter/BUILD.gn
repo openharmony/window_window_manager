@@ -13,8 +13,8 @@
 
 import("//build/ohos.gni")
 
-## Build libwmadaptertest.so {{{
-config("libwmadaptertest_config") {
+## Build libwmadapter.so {{{
+config("libwmadapter_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
@@ -37,16 +37,12 @@ config("libwmadaptertest_config") {
     "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
     "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
     "//foundation/aafwk/standard/interfaces/innerkits/base/include",
-  ]
-
-  cflags = [
-    "-Wall",
-    "-Werror",
-    "-g3",
+    "//third_party/jsoncpp/include",
+    "//third_party/json/include",
   ]
 }
 
-config("libwmadaptertest_public_config") {
+config("libwmadapter_public_config") {
   include_dirs = [
     "//foundation/graphic/standard/interfaces/innerkits/wmclient",
     "//foundation/windowmanager/interfaces/innerkits/wm",
@@ -56,12 +52,12 @@ config("libwmadaptertest_public_config") {
   ]
 }
 
-ohos_shared_library("libwmadaptertest") {
+ohos_shared_library("libwmadapter") {
   sources = [ "src/adapter.cpp" ]
 
-  configs = [ ":libwmadaptertest_config" ]
+  configs = [ ":libwmadapter_config" ]
 
-  public_configs = [ ":libwmadaptertest_public_config" ]
+  public_configs = [ ":libwmadapter_public_config" ]
 
   deps = [
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
@@ -77,9 +73,6 @@ ohos_shared_library("libwmadaptertest") {
 
     # ace
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
-
-    # aafwk
-    "//foundation/aafwk/standard/interfaces/innerkits/want:want",
   ]
 
   public_deps = [

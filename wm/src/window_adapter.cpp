@@ -25,8 +25,6 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowAdapter"};
 }
 
-IMPLEMENT_SINGLE_INSTANCE(WindowAdapter);
-
 WMError WindowAdapter::SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -108,6 +106,46 @@ WMError WindowAdapter::RequestFocus(uint32_t windowId)
     return windowManagerServiceProxy_->RequestFocus(windowId);
 }
 
+WMError WindowAdapter::SetWindowFlags(uint32_t windowId, uint32_t flags)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    if (!InitWMSProxyLocked()) {
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return windowManagerServiceProxy_->SetWindowFlags(windowId, flags);
+}
+
+WMError WindowAdapter::SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    if (!InitWMSProxyLocked()) {
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return windowManagerServiceProxy_->SetSystemBarProperty(windowId, type, property);
+}
+
+void WindowAdapter::RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    if (!InitWMSProxyLocked()) {
+        return;
+    }
+    return windowManagerServiceProxy_->RegisterFocusChangedListener(windowManagerAgent);
+}
+
+void WindowAdapter::UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    if (!InitWMSProxyLocked()) {
+        return;
+    }
+    return windowManagerServiceProxy_->UnregisterFocusChangedListener(windowManagerAgent);
+}
+
 bool WindowAdapter::InitWMSProxyLocked()
 {
     if (!windowManagerServiceProxy_) {
@@ -136,8 +174,7 @@ bool WindowAdapter::InitWMSProxyLocked()
             return false;
         }
         if (!remoteObject->AddDeathRecipient(wmsDeath_)) {
-            WLOGFE("Failed to add death recipient");
-            return false;
+            WLOGFI("Failed to add death recipient");
         }
     }
     return true;
@@ -164,7 +201,7 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         WLOGFE("object is null");
         return;
     }
-    SingletonContainer::Get<WindowAdapter>()->ClearWindowAdapter();
+    SingletonContainer::Get<WindowAdapter>().ClearWindowAdapter();
     return;
 }
 } // namespace Rosen

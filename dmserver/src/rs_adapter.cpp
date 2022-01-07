@@ -26,8 +26,6 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "RsAdapter"};
 }
 
-IMPLEMENT_SINGLE_INSTANCE(RsAdapter);
-
 bool RsAdapter::InitRSProxyLocked()
 {
     WLOGFI("InitRProxy");

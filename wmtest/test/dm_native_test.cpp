@@ -15,13 +15,12 @@
 
 #include "dm_native_test.h"
 
+#include <cinttypes>
 #include <cstdio>
-#include <inttypes.h>
 #include <unistd.h>
-
-#include "wm_common.h"
 #include "display_manager.h"
 #include "singleton_container.h"
+#include "wm_common.h"
 
 using namespace OHOS::Rosen;
 
@@ -79,8 +78,8 @@ void DMNativeTest::Run(int32_t argc, const char **argv)
         if (display == nullptr) {
             printf("GetDisplayById(%" PRIu64"): failed!\n", id);
         } else {
-            printf("GetDisplayById(%" PRIu64"): id %" PRIu64", w %d, h %d, fps %u\n", id, display->GetId(), display->GetWidth(),
-                display->GetHeight(), display->GetFreshRate());
+            printf("GetDisplayById(%" PRIu64"): id %" PRIu64", w %d, h %d, fps %u\n", id, display->GetId(),
+                display->GetWidth(), display->GetHeight(), display->GetFreshRate());
         }
     }
 

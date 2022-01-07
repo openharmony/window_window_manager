@@ -26,7 +26,6 @@ namespace {
 int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
-    WLOGFI("WindowManagerStub::OnRemoteRequest code is %{public}d", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
         return -1;
@@ -83,12 +82,54 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-
+        case TRANS_ID_UPDATE_MODE: {
+            uint32_t windowId = data.ReadUint32();
+            WindowMode mode = static_cast<WindowMode>(data.ReadUint32());
+            WMError errCode = SetWindowMode(windowId, mode);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case TRANS_ID_UPDATE_TYPE: {
+            uint32_t windowId = data.ReadUint32();
+            WindowType type = static_cast<WindowType>(data.ReadUint32());
+            WMError errCode = SetWindowType(windowId, type);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case TRANS_ID_UPDATE_FLAGS: {
+            uint32_t windowId = data.ReadUint32();
+            uint32_t flags = data.ReadUint32();
+            WMError errCode = SetWindowFlags(windowId, flags);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case TRANS_ID_UPDATE_SYSTEM_BAR_PROPERTY: {
+            uint32_t windowId = data.ReadUint32();
+            WindowType type = static_cast<WindowType>(data.ReadUint32());
+            SystemBarProperty property = { data.ReadBool(), data.ReadUint32(), data.ReadUint32() };
+            WMError errCode = SetSystemBarProperty(windowId, type, property);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
         case TRANS_ID_SEND_ABILITY_TOKEN: {
             sptr<IRemoteObject> abilityToken = data.ReadRemoteObject();
             uint32_t windowId = data.ReadUint32();
             WMError errCode = SaveAbilityToken(abilityToken, windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case TRANS_ID_REGISTER_FOCUS_CHANGED_LISTENER: {
+            sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+            sptr<IWindowManagerAgent> windowManagerAgentProxy =
+                iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+            RegisterFocusChangedListener(windowManagerAgentProxy);
+            break;
+        }
+        case TRANS_ID_UNREGISTER_FOCUS_CHANGED_LISTENER: {
+            sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+            sptr<IWindowManagerAgent> windowManagerAgentProxy =
+                iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+            UnregisterFocusChangedListener(windowManagerAgentProxy);
             break;
         }
         default:

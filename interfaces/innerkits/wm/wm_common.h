@@ -22,18 +22,23 @@ namespace OHOS {
 namespace Rosen {
 enum class WindowType : uint32_t {
     APP_WINDOW_BASE = 1,
-    WINDOW_TYPE_APP_MAIN_WINDOW = APP_WINDOW_BASE,
-    APP_WINDOW_END = 999,
+    APP_MAIN_WINDOW_BASE = APP_WINDOW_BASE,
+    WINDOW_TYPE_APP_MAIN_WINDOW = APP_MAIN_WINDOW_BASE,
+    APP_MAIN_WINDOW_END = WINDOW_TYPE_APP_MAIN_WINDOW, // equals last window type
 
     APP_SUB_WINDOW_BASE = 1000,
     WINDOW_TYPE_MEDIA = APP_SUB_WINDOW_BASE,
     WINDOW_TYPE_APP_SUB_WINDOW,
-    APP_SUB_WINDOW_END = 1999,
+    APP_SUB_WINDOW_END = WINDOW_TYPE_APP_SUB_WINDOW, // equals last window type
+    APP_WINDOW_END = APP_SUB_WINDOW_END,
 
     SYSTEM_WINDOW_BASE = 2000,
+    BELOW_APP_SYSTEM_WINDOW_BASE = SYSTEM_WINDOW_BASE,
     WINDOW_TYPE_WALLPAPER = SYSTEM_WINDOW_BASE,
+    BELOW_APP_SYSTEM_WINDOW_END = WINDOW_TYPE_WALLPAPER, // equals last window type
+
     ABOVE_APP_SYSTEM_WINDOW_BASE = 2100,
-    WINDOW_TYPE_APP_LAUNCHING,
+    WINDOW_TYPE_APP_LAUNCHING = ABOVE_APP_SYSTEM_WINDOW_BASE,
     WINDOW_TYPE_DOCK_SLICE,
     WINDOW_TYPE_INCOMING_CALL,
     WINDOW_TYPE_SEARCHING_BAR,
@@ -48,12 +53,14 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_NAVIGATION_BAR,
     WINDOW_TYPE_DRAGGING_EFFECT,
     WINDOW_TYPE_POINTER,
-    SYSTEM_WINDOW_END = 2999,
+    ABOVE_APP_SYSTEM_WINDOW_END = WINDOW_TYPE_POINTER, // equals last window type
+    SYSTEM_WINDOW_END = ABOVE_APP_SYSTEM_WINDOW_END,
 };
 
 enum class WindowMode : uint32_t {
     WINDOW_MODE_FULLSCREEN,
-    WINDOW_MODE_SPLIT,
+    WINDOW_MODE_SPLIT_PRIMARY,
+    WINDOW_MODE_SPLIT_SECONDARY,
     WINDOW_MODE_FLOATING,
     WINDOW_MODE_PIP
 };
@@ -68,6 +75,7 @@ enum class WMError : int32_t {
     WM_ERROR_DESTROYED_OBJECT = 140,
     WM_ERROR_DEATH_RECIPIENT = 150,
     WM_ERROR_INVALID_WINDOW = 160,
+    WM_ERROR_INVALID_OPERATION = 170,
     WM_ERROR_UNKNOWN,
 
     /* weston adater */
@@ -83,6 +91,24 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_NEED_AVOID = 1,
     WINDOW_FLAG_PARENT_LIMIT = 1 << 1,
     WINDOW_FLAG_END = 1 << 2,
+};
+
+namespace {
+    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
+    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
+}
+
+struct SystemBarProperty {
+    bool enable_;
+    uint32_t backgroundColor_;
+    uint32_t contentColor_;
+    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_WHITE), contentColor_(SYSTEM_COLOR_BLACK) {}
+    SystemBarProperty(bool enable, uint32_t background, uint32_t content)
+        : enable_(enable), backgroundColor_(background), contentColor_(content) {}
+    bool operator == (const SystemBarProperty& a) const
+    {
+        return (enable_ == a.enable_ && backgroundColor_ == a.backgroundColor_ && contentColor_ == a.contentColor_);
+    }
 };
 
 struct Rect {

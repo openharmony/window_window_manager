@@ -27,10 +27,14 @@ public:
         : IRemoteProxy<IDisplayManager>(impl) {};
     ~DisplayManagerProxy() {};
 
-    const sptr<DisplayInfo>& GetDisplayInfo(const DisplayType type) override;
-
     DisplayId GetDefaultDisplayId() override;
     DisplayInfo GetDisplayInfoById(DisplayId displayId) override;
+
+    DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
+        sptr<Surface> surface) override;
+    bool DestroyVirtualDisplay(DisplayId displayId) override;
+    // TODO: fix me
+    // sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;
 };

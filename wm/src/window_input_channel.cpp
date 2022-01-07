@@ -56,8 +56,10 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
             pointerEventPool_.clear();
         }
         pointerEventPool_.emplace_back(pointerEvent);
-        VsyncStation::GetInstance()->RequestVsync(VsyncStation::CallbackType::CALLBACK_INPUT, callback_);
+        WLOGI("HandlePointerEvent RequestVsync");
+        VsyncStation::GetInstance().RequestVsync(VsyncStation::CallbackType::CALLBACK_INPUT, callback_);
     } else {
+        WLOGI("HandlePointerEvent cosume non-move");
         window_->ConsumePointerEvent(pointerEvent);
         pointerEvent->MarkProcessed();
     }
@@ -70,7 +72,8 @@ void WindowInputChannel::OnVsync(int64_t timeStamp)
         return;
     }
     auto pointerEvent = pointerEventPool_.back();
-    HandlePointerEvent(pointerEvent);
+    WLOGI("HandlePointerEvent onVsync consume move");
+    window_->ConsumePointerEvent(pointerEvent);
     pointerEvent->MarkProcessed();
     pointerEventPool_.clear();
 }

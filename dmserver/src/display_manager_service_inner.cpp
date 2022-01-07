@@ -16,14 +16,13 @@
 #include "display_manager_service_inner.h"
 
 #include <cinttypes>
-#include <inttypes.h>
 #include <unistd.h>
 
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
-#include "display_screen_manager.h"
+#include "abstract_display_manager.h"
 #include "display_manager_service.h"
 #include "window_manager_hilog.h"
 
@@ -32,28 +31,15 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayManagerServiceInner"};
 }
 
-IMPLEMENT_SINGLE_INSTANCE(DisplayManagerServiceInner);
-
 DisplayId DisplayManagerServiceInner::GetDefaultDisplayId()
 {
-    auto dms = DisplayManagerService::GetInstance();
-    if (dms == nullptr) {
-        WLOGFE("GetDefaultDisplayId null!\n");
-        return DISPLAY_ID_INVALD;
-    }
-    return dms->GetDefaultDisplayId();
+    return DisplayManagerService::GetInstance().GetDefaultDisplayId();
 }
 
-const sptr<DisplayScreen> DisplayManagerServiceInner::GetDisplayById(DisplayId displayId)
+const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDisplayById(DisplayId displayId)
 {
-    auto dms = DisplayManagerService::GetInstance();
-    if (dms == nullptr) {
-        WLOGFE("GetDisplayById null!\n");
-        return nullptr;
-    }
-    DisplayInfo displayInfo = dms->GetDisplayInfoById(displayId);
-
-    sptr<DisplayScreen> display = new DisplayScreen(displayInfo);
+    DisplayInfo displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
+    sptr<AbstractDisplay> display = new AbstractDisplay(displayInfo);
     if (display == nullptr) {
         WLOGFE("GetDisplayById failed!\n");
         return nullptr;
@@ -61,7 +47,7 @@ const sptr<DisplayScreen> DisplayManagerServiceInner::GetDisplayById(DisplayId d
     return display;
 }
 
-const sptr<DisplayScreen> DisplayManagerServiceInner::GetDefaultDisplay()
+const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDefaultDisplay()
 {
     return GetDisplayById(GetDefaultDisplayId());
 }
@@ -73,12 +59,12 @@ std::vector<DisplayId> DisplayManagerServiceInner::GetAllDisplayIds()
     return res;
 }
 
-std::vector<const sptr<DisplayScreen>> DisplayManagerServiceInner::GetAllDisplays()
+std::vector<const sptr<AbstractDisplay>> DisplayManagerServiceInner::GetAllDisplays()
 {
-    std::vector<const sptr<DisplayScreen>> res;
+    std::vector<const sptr<AbstractDisplay>> res;
     auto displayIds = GetAllDisplayIds();
     for (auto displayId: displayIds) {
-        const sptr<DisplayScreen> display = GetDisplayById(displayId);
+        const sptr<AbstractDisplay> display = GetDisplayById(displayId);
         if (display != nullptr) {
             res.push_back(display);
         } else {
