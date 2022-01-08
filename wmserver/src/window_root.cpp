@@ -251,7 +251,7 @@ void WindowRoot::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>&
     }
 }
 
-void WindowRoot::ClearWindow(const sptr<IRemoteObject>& remoteObject)
+void WindowRoot::OnRemoteDied(const sptr<IRemoteObject>& remoteObject)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = windowIdMap_.find(remoteObject);
@@ -260,7 +260,7 @@ void WindowRoot::ClearWindow(const sptr<IRemoteObject>& remoteObject)
         return;
     }
     uint32_t windowId = iter->second;
-    DestroyWindow(windowId);
+    callback_(Event::REMOTE_DIED, windowId);
 }
 
 void WindowRoot::ClearWindowManagerAgent(const sptr<IRemoteObject>& remoteObject)
@@ -271,6 +271,7 @@ void WindowRoot::ClearWindowManagerAgent(const sptr<IRemoteObject>& remoteObject
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     UnregisterFocusChangedListener(remoteObject);
+    remoteObject->RemoveDeathRecipient(windowManagerAgentDeath_);
 }
 
 void WindowDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
