@@ -168,4 +168,83 @@ sptr<Media::PixelMap> DisplayManagerProxy::GetDispalySnapshot(DisplayId displayI
     }
     return pixelMap;
 }
+
+bool DisplayManagerProxy::SuspendBegin(PowerStateChangeReason reason)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        WLOGFE("Write PowerStateChangeReason failed");
+        return false;
+    }
+    if (Remote()->SendRequest(TRANS_ID_SUSPEND_BEGIN, data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+bool DisplayManagerProxy::SetDisplayState(DisplayState state)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        WLOGFE("Write DisplayState failed");
+        return false;
+    }
+    if (Remote()->SendRequest(TRANS_ID_SET_DISPLAY_STATE, data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+DisplayState DisplayManagerProxy::GetDisplayState(uint64_t displayId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DisplayState::UNKNOWN;
+    }
+    if (!data.WriteUint64(static_cast<uint32_t>(displayId))) {
+        WLOGFE("Write displayId failed");
+        return DisplayState::UNKNOWN;
+    }
+    if (Remote()->SendRequest(TRANS_ID_GET_DISPLAY_STATE, data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return DisplayState::UNKNOWN;
+    }
+    return static_cast<DisplayState>(reply.ReadUint32());
+}
+
+void DisplayManagerProxy::NotifyDisplayEvent(DisplayEvent event)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(event))) {
+        WLOGFE("Write DisplayEvent failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_NOTIFY_DISPLAY_EVENT, data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen

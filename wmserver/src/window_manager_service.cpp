@@ -224,5 +224,20 @@ void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)
             break;
     }
 }
+
+WMError WindowManagerService::NotifyDisplaySuspend()
+{
+    WLOGFI("NotifyDisplaySuspend");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    // TODO: notify windows covered by keyguard window to hide
+    return WMError::WM_OK;
+}
+
+void WindowManagerService::RestoreSuspendedWindows()
+{
+    WLOGFI("RestoreSuspendedWindows");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    // TODO: restore windows covered by keyguard
+}
 }
 }

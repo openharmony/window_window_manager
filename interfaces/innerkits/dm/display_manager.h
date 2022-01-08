@@ -21,6 +21,7 @@
 #include <surface.h>
 
 #include "display.h"
+#include "dm_common.h"
 #include "single_instance.h"
 #include "virtual_display_info.h"
 // #include "wm_common.h"
@@ -48,6 +49,18 @@ public:
     sptr<Media::PixelMap> GetScreenshot(DisplayId displayId);
     sptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
                                         const Media::Size &size, int rotation);
+
+    bool WakeUpBegin(PowerStateChangeReason reason);
+    bool WakeUpEnd();
+    bool SuspendBegin(PowerStateChangeReason reason);
+    bool SuspendEnd();
+    bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason);
+    DisplayPowerState GetScreenPower(uint64_t screenId);
+    bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
+    DisplayState GetDisplayState(uint64_t displayId);
+    bool SetScreenBrightness(uint64_t screenId, uint32_t level);
+    uint32_t GetScreenBrightness(uint64_t screenId) const;
+    void NotifyDisplayEvent(DisplayEvent event);
 
 private:
     bool CheckRectOffsetValid(int32_t param) const;

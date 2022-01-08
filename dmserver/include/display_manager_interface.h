@@ -20,6 +20,7 @@
 #include <pixel_map.h>
 #include <surface.h>
 
+#include "dm_common.h"
 #include "display_info.h"
 #include "virtual_display_info.h"
 
@@ -34,6 +35,10 @@ public:
         TRANS_ID_CREATE_VIRTUAL_DISPLAY,
         TRANS_ID_DESTROY_VIRTUAL_DISPLAY,
         TRANS_ID_GET_DISPLAY_SNAPSHOT,
+        TRANS_ID_SUSPEND_BEGIN,
+        TRANS_ID_SET_DISPLAY_STATE,
+        TRANS_ID_GET_DISPLAY_STATE,
+        TRANS_ID_NOTIFY_DISPLAY_EVENT,
     };
 
     virtual DisplayId GetDefaultDisplayId() = 0;
@@ -42,8 +47,12 @@ public:
     virtual DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
         sptr<Surface> surface) = 0;
     virtual bool DestroyVirtualDisplay(DisplayId displayId) = 0;
-
     virtual sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
+
+    virtual bool SuspendBegin(PowerStateChangeReason reason) = 0;
+    virtual bool SetDisplayState(DisplayState state) = 0;
+    virtual DisplayState GetDisplayState(uint64_t displayId) = 0;
+    virtual void NotifyDisplayEvent(DisplayEvent event) = 0;
 };
 } // namespace OHOS::Rosen
 

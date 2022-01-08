@@ -34,6 +34,12 @@ public:
         sptr<Surface> surface) override;
     bool DestroyVirtualDisplay(DisplayId displayId) override;
     sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
+
+    bool SuspendBegin(PowerStateChangeReason reason) override;
+    bool SetDisplayState(DisplayState state) override;
+    DisplayState GetDisplayState(uint64_t displayId) override;
+    void NotifyDisplayEvent(DisplayEvent event) override;
+
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;
 };
