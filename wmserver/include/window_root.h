@@ -44,9 +44,15 @@ private:
     std::function<void (sptr<IRemoteObject>&)> callback_;
 };
 
+enum class Event : uint32_t {
+    REMOTE_DIED,
+};
+
 class WindowRoot : public RefBase {
+using Callback = std::function<void (Event event, uint32_t windowId)>;
+
 public:
-    WindowRoot(std::recursive_mutex& mutex) : mutex_(mutex) {}
+    WindowRoot(std::recursive_mutex& mutex, Callback callback) : mutex_(mutex), callback_(callback) {}
     ~WindowRoot() = default;
 
     sptr<WindowNodeContainer> GetOrCreateWindowNodeContainer(int32_t displayId);
@@ -66,7 +72,7 @@ public:
     void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
 
 private:
-    void ClearWindow(const sptr<IRemoteObject>& remoteObject);
+    void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     void ClearWindowManagerAgent(const sptr<IRemoteObject>& remoteObject);
     void UnregisterFocusChangedListener(const sptr<IRemoteObject>& windowManagerAgent);
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
@@ -80,10 +86,11 @@ private:
 
     std::vector<sptr<IWindowManagerAgent>> focusChangedListenerAgents_;
 
-    sptr<WindowDeathRecipient> windowDeath_ = new WindowDeathRecipient(std::bind(&WindowRoot::ClearWindow,
+    sptr<WindowDeathRecipient> windowDeath_ = new WindowDeathRecipient(std::bind(&WindowRoot::OnRemoteDied,
         this, std::placeholders::_1));
     sptr<WindowManagerAgentDeathRecipient> windowManagerAgentDeath_ = new WindowManagerAgentDeathRecipient(
         std::bind(&WindowRoot::ClearWindowManagerAgent, this, std::placeholders::_1));
+    Callback callback_;
 };
 }
 }

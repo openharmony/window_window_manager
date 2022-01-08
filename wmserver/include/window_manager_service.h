@@ -62,6 +62,7 @@ protected:
 
 private:
     bool Init();
+    void OnWindowEvent(Event event, uint32_t windowId);
     static inline SingletonDelegator<WindowManagerService> delegator;
     std::recursive_mutex mutex_;
     sptr<WindowRoot> windowRoot_;
