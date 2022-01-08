@@ -20,6 +20,7 @@
 #include <ipc_skeleton.h>
 #include <system_ability_definition.h>
 
+#include "dm_common.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
 
@@ -114,9 +115,14 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId)
     WLOGFI("[WMS] Destroy: %{public}d", windowId);
     WM_SCOPED_TRACE("wms:DestroyWindow(%d)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    int32_t displayId = INVALID_DISPLAY_ID;
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node != nullptr) {
+        displayId = node->GetDisplayId();
+    }
     WMError res = windowController_->DestroyWindow(windowId);
     if (res == WMError::WM_OK) {
-        inputWindowMonitor_->UpdateInputWindow(windowId);
+        inputWindowMonitor_->UpdateInputWindowByDisplayId(displayId);
     }
     return res;
 }
@@ -126,7 +132,11 @@ WMError WindowManagerService::MoveTo(uint32_t windowId, int32_t x, int32_t y)
     WLOGFI("[WMS] MoveTo: %{public}d [%{public}d, %{public}d]", windowId, x, y);
     WM_SCOPED_TRACE("wms:MoveTo");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->MoveTo(windowId, x, y);
+    WMError res = windowController_->MoveTo(windowId, x, y);
+    if (res == WMError::WM_OK) {
+        inputWindowMonitor_->UpdateInputWindow(windowId);
+    }
+    return res;
 }
 
 WMError WindowManagerService::Resize(uint32_t windowId, uint32_t width, uint32_t height)
@@ -134,7 +144,11 @@ WMError WindowManagerService::Resize(uint32_t windowId, uint32_t width, uint32_t
     WLOGFI("[WMS] Resize: %{public}d [%{public}d, %{public}d]", windowId, width, height);
     WM_SCOPED_TRACE("wms:Resize");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->Resize(windowId, width, height);
+    WMError res = windowController_->Resize(windowId, width, height);
+    if (res == WMError::WM_OK) {
+        inputWindowMonitor_->UpdateInputWindow(windowId);
+    }
+    return res;
 }
 
 WMError WindowManagerService::RequestFocus(uint32_t windowId)
