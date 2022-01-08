@@ -33,7 +33,8 @@ const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonCon
 
 WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true)
 {
-    windowRoot_ = new WindowRoot(mutex_);
+    windowRoot_ = new WindowRoot(mutex_,
+        std::bind(&WindowManagerService::OnWindowEvent, this, std::placeholders::_1, std::placeholders::_2));
     windowController_ = new WindowController(windowRoot_);
     inputWindowMonitor_ = new InputWindowMonitor(windowRoot_);
 }
@@ -197,6 +198,17 @@ void WindowManagerService::UnregisterFocusChangedListener(const sptr<IWindowMana
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     windowController_->UnregisterFocusChangedListener(windowManagerAgent);
+}
+
+void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)
+{
+    switch (event) {
+        case Event::REMOTE_DIED:
+            DestroyWindow(windowId);
+            break;
+        default:
+            break;
+    }
 }
 }
 }
