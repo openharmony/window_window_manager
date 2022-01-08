@@ -64,13 +64,31 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
         case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
             DisplayId displayId = data.ReadUint64();
-
             sptr<Media::PixelMap> dispalySnapshot = GetDispalySnapshot(displayId);
             if (dispalySnapshot == nullptr) {
                 reply.WriteParcelable(nullptr);
                 break;
             }
             reply.WriteParcelable(dispalySnapshot.GetRefPtr());
+        }
+        case TRANS_ID_SUSPEND_BEGIN: {
+            PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+            reply.WriteBool(SuspendBegin(reason));
+            break;
+        }
+        case TRANS_ID_SET_DISPLAY_STATE: {
+            DisplayState state = static_cast<DisplayState>(data.ReadUint32());
+            reply.WriteBool(SetDisplayState(state));
+            break;
+        }
+        case TRANS_ID_GET_DISPLAY_STATE: {
+            DisplayState state = GetDisplayState(data.ReadUint64());
+            reply.WriteUint32(static_cast<uint32_t>(state));
+            break;
+        }
+        case TRANS_ID_NOTIFY_DISPLAY_EVENT: {
+            DisplayEvent event = static_cast<DisplayEvent>(data.ReadUint32());
+            NotifyDisplayEvent(event);
             break;
         }
         default:

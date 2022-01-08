@@ -52,6 +52,7 @@ config("libwm_public_config") {
   include_dirs = [
     "//foundation/windowmanager/interfaces/innerkits/wm",
     "//foundation/windowmanager/wmserver/include",
+    "//foundation/windowmanager/dm/include",
     "//foundation/windowmanager/dmserver/include",
     "//foundation/windowmanager/utils/include",
     "../interfaces/innerkits/dm",
