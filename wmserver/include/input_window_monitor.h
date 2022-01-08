@@ -29,6 +29,7 @@ public:
     InputWindowMonitor(sptr<WindowRoot>& root) : windowRoot_(root) {}
     ~InputWindowMonitor() = default;
     void UpdateInputWindow(uint32_t windowId);
+    void UpdateInputWindowByDisplayId(int32_t displayId);
 
 private:
     sptr<WindowRoot> windowRoot_;

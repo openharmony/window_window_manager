@@ -19,6 +19,7 @@
 
 #include <ipc_skeleton.h>
 
+#include "dm_common.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -38,7 +39,18 @@ void InputWindowMonitor::UpdateInputWindow(uint32_t windowId)
         WLOGFE("window node could not be found.");
         return;
     }
+    if (windowTypeSkipped_.find(windowNode->GetWindowProperty()->GetWindowType()) != windowTypeSkipped_.end()) {
+        return;
+    }
     int32_t displayId = windowNode->GetDisplayId();
+    UpdateInputWindowByDisplayId(displayId);
+}
+
+void InputWindowMonitor::UpdateInputWindowByDisplayId(int32_t displayId)
+{
+    if (displayId == INVALID_DISPLAY_ID) {
+        return;
+    }
     auto container = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
     if (container == nullptr) {
         WLOGFE("can not get window node container.");
