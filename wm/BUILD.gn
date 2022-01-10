@@ -86,6 +86,7 @@ ohos_shared_library("libwmutil") {
     "//foundation/graphic/standard:libsurface",
     "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",
   ]
 
   external_deps = [
@@ -128,10 +129,8 @@ ohos_shared_library("libwm") {
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",
     "//utils/native/base:utils",
-
-    # TODO: fix me
-    # "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",
 
     # weston adapter
     "//foundation/windowmanager/adapter:libwmadapter",

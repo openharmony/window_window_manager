@@ -135,38 +135,37 @@ bool DisplayManagerProxy::DestroyVirtualDisplay(DisplayId displayId)
     return reply.ReadBool();
 }
 
-// TODO: fix me
-// sptr<Media::PixelMap> DisplayManagerProxy::GetDispalySnapshot(DisplayId displayId)
-// {
-//     sptr<IRemoteObject> remote = Remote();
-//     if (remote == nullptr) {
-//         WLOGFW("GetDispalySnapshot: remote is nullptr");
-//         return nullptr;
-//     }
+sptr<Media::PixelMap> DisplayManagerProxy::GetDispalySnapshot(DisplayId displayId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("GetDispalySnapshot: remote is nullptr");
+        return nullptr;
+    }
 
-//     MessageParcel data;
-//     MessageParcel reply;
-//     MessageOption option;
-//     if (!data.WriteInterfaceToken(GetDescriptor())) {
-//         WLOGFE("GetDispalySnapshot: WriteInterfaceToken failed");
-//         return nullptr;
-//     }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("GetDispalySnapshot: WriteInterfaceToken failed");
+        return nullptr;
+    }
 
-//     if (!data.WriteUint64(displayId)) {
-//         WLOGFE("Write dispalyId failed");
-//         return nullptr;
-//     }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("Write dispalyId failed");
+        return nullptr;
+    }
 
-//     if (remote->SendRequest(TRANS_ID_GET_DISPLAY_SNAPSHOT, data, reply, option) != ERR_NONE) {
-//         WLOGFW("GetDispalySnapshot: SendRequest failed");
-//         return nullptr;
-//     }
+    if (remote->SendRequest(TRANS_ID_GET_DISPLAY_SNAPSHOT, data, reply, option) != ERR_NONE) {
+        WLOGFW("GetDispalySnapshot: SendRequest failed");
+        return nullptr;
+    }
 
-//     sptr<Media::PixelMap> pixelMap = reply.ReadParcelable<Media::PixelMap>();
-//     if (pixelMap == nullptr) {
-//         WLOGFW("DisplayManagerProxy::GetDispalySnapshot SendRequest nullptr.");
-//         return nullptr;
-//     }
-//     return pixelMap;
-// }
+    sptr<Media::PixelMap> pixelMap = reply.ReadParcelable<Media::PixelMap>();
+    if (pixelMap == nullptr) {
+        WLOGFW("DisplayManagerProxy::GetDispalySnapshot SendRequest nullptr.");
+        return nullptr;
+    }
+    return pixelMap;
+}
 } // namespace OHOS::Rosen

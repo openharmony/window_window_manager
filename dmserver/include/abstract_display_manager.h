@@ -17,6 +17,7 @@
 #define FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_MANAGER_H
 
 #include <map>
+#include <pixel_map.h>
 #include <surface.h>
 
 #include "abstract_display.h"
@@ -34,8 +35,7 @@ public:
     RSScreenModeInfo GetScreenActiveMode(ScreenId id);
     ScreenId CreateVirtualScreen(const VirtualDisplayInfo &virtualDisplayInfo, sptr<Surface> surface);
     bool DestroyVirtualScreen(ScreenId screenId);
-    // TODO: fix me
-    // sptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId);
+    sptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId);
 
 private:
     AbstractDisplayManager();

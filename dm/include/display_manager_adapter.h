@@ -38,8 +38,7 @@ public:
     DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
         sptr<Surface> surface);
     bool DestroyVirtualDisplay(DisplayId displayId);
-    // TODO: fix me
-    // sptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
+    sptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
     void Clear();
 private:
     DisplayManagerAdapter() = default;

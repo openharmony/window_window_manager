@@ -17,13 +17,11 @@
 #define FOUNDATION_DMSERVER_DISPLAY_MANAGER_INTERFACE_H
 
 #include <iremote_broker.h>
-
+#include <pixel_map.h>
 #include <surface.h>
 
 #include "display_info.h"
-
 #include "virtual_display_info.h"
-// #include "pixel_map.h"
 
 namespace OHOS::Rosen {
 class IDisplayManager : public IRemoteBroker {
@@ -35,8 +33,7 @@ public:
         TRANS_ID_GET_DISPLAY_BY_ID,
         TRANS_ID_CREATE_VIRTUAL_DISPLAY,
         TRANS_ID_DESTROY_VIRTUAL_DISPLAY,
-        // TODO: fix me
-        // TRANS_ID_GET_DISPLAY_SNAPSHOT,
+        TRANS_ID_GET_DISPLAY_SNAPSHOT,
     };
 
     virtual DisplayId GetDefaultDisplayId() = 0;
@@ -46,8 +43,7 @@ public:
         sptr<Surface> surface) = 0;
     virtual bool DestroyVirtualDisplay(DisplayId displayId) = 0;
 
-    // TODO: fix me
-    // virtual sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
+    virtual sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
 };
 } // namespace OHOS::Rosen
 
