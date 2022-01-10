@@ -24,8 +24,6 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "AbstractDisplayManager"};
 }
 
-#define SCREENSHOT_GENERATOR
-
 AbstractDisplayManager::AbstractDisplayManager() : rsInterface_(&(RSInterfaces::GetInstance()))
 {
     parepareRSScreenManger();
@@ -79,58 +77,14 @@ bool AbstractDisplayManager::DestroyVirtualScreen(ScreenId screenId)
     return true;
 }
 
-// TODO: fix me
-// #ifdef SCREENSHOT_GENERATOR
-// sptr<Media::PixelMap> TempCreatePixelMap()
-// {
-//     // pixel_map testing code
-//     Media::InitializationOptions opt;
-//     opt.size.width = 1920;
-//     opt.size.height = 1080;
-//     opt.pixelFormat = Media::PixelFormat::RGBA_8888;
-//     opt.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
-//     opt.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
-//     opt.editable = false;
-//     opt.useSourceIfMatch = false;
+sptr<Media::PixelMap> AbstractDisplayManager::GetScreenSnapshot(ScreenId screenId)
+{
+    if (rsInterface_ == nullptr) {
+        return nullptr;
+    }
 
-//     const int bitmapDepth = 8; // color depth
-//     const int bpp = 4; // bytes per pixel
-//     const int maxByteNum = 256;
+    sptr<Media::PixelMap> screenshot = nullptr;
 
-//     auto data = (uint32_t *)malloc(opt.size.width * opt.size.height * bpp);
-//     uint8_t *pic = (uint8_t *)data;
-//     for (uint32_t i = 0; i < opt.size.width; i++) {
-//         for (uint32_t j = 0; j < opt.size.height; j++) {
-//             for (uint32_t k = 0; k < bpp; k++) {
-//                 pic[0] = rand() % maxByteNum;
-//                 pic++;
-//             }
-//         }
-//     }
-//     uint32_t colorLen = opt.size.width * opt.size.height * bpp * bitmapDepth;
-//     auto newPixelMap = Media::PixelMap::Create(data, colorLen, opt);
-//     sptr<Media::PixelMap> pixelMap_ = newPixelMap.release();
-//     if (pixelMap_ == nullptr) {
-//         WLOGFE("Failed to get pixelMap");
-//         return nullptr;
-//     }
-
-//     return pixelMap_;
-// }
-// #endif
-
-// sptr<Media::PixelMap> AbstractDisplayManager::GetScreenSnapshot(ScreenId screenId)
-// {
-//     if (rsInterface_ == nullptr) {
-//         return nullptr;
-//     }
-
-// #ifdef SCREENSHOT_GENERATOR
-//     sptr<Media::PixelMap> screenshot = TempCreatePixelMap();
-// #else
-//     sptr<Media::PixelMap> screenshot = rsInterface_->GetScreenSnapshot(screenId);
-// #endif
-
-//     return screenshot;
-// }
+    return screenshot;
+}
 } // namespace OHOS::Rosen
