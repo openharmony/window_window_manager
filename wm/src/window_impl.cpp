@@ -554,8 +554,7 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
 {
     if (uiContent_ != nullptr) {
         WLOGFD("notify ace winId:%{public}d", GetWindowId());
-        // TODO: fix me
-        // uiContent_->UpdateConfiguration(configuration);
+        uiContent_->UpdateConfiguration(configuration);
     }
     if (subWindowMap_.count(GetWindowId()) == 0) {
         return;

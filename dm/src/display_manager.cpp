@@ -16,8 +16,10 @@
 #include "display_manager.h"
 
 #include <cinttypes>
+#include <transaction/rs_interfaces.h>
 
 #include "display_manager_adapter.h"
+#include "dm_common.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -152,5 +154,87 @@ bool DisplayManager::DestroyVirtualDisplay(DisplayId displayId)
 {
     WLOGFI("DisplayManager::DestroyVirtualDisplay override params");
     return SingletonContainer::Get<DisplayManagerAdapter>().DestroyVirtualDisplay(displayId);
+}
+
+bool DisplayManager::WakeUpBegin(PowerStateChangeReason reason)
+{
+    return true;
+}
+
+bool DisplayManager::WakeUpEnd()
+{
+    return true;
+}
+
+bool DisplayManager::SuspendBegin(PowerStateChangeReason reason)
+{
+    // dms->wms notify other windows to hide
+    return SingletonContainer::Get<DisplayManagerAdapter>().SuspendBegin(reason);
+}
+
+bool DisplayManager::SuspendEnd()
+{
+    return true;
+}
+
+bool DisplayManager::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
+{
+    // TODO: should get all screen ids
+    ScreenId defaultId = GetDefaultDisplayId();
+    if (defaultId == DISPLAY_ID_INVALD) {
+        return false;
+    }
+    WLOGFI("state:%{public}u, reason:%{public}u, defaultId:%{public}" PRIu64".", state, reason, defaultId);
+    ScreenPowerStatus status;
+    switch (state) {
+        case DisplayPowerState::POWER_ON: {
+            status = ScreenPowerStatus::POWER_STATUS_ON;
+            break;
+        }
+        case DisplayPowerState::POWER_OFF: {
+            status = ScreenPowerStatus::POWER_STATUS_OFF;
+            break;
+        }
+        default: {
+            WLOGFW("SetScreenPowerStatus state not support");
+            return false;
+        }
+    }
+    RSInterfaces::GetInstance().SetScreenPowerStatus(defaultId, status);
+    return true;
+}
+
+DisplayPowerState DisplayManager::GetScreenPower(uint64_t screenId)
+{
+    DisplayPowerState res = static_cast<DisplayPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screenId));
+    WLOGFI("GetScreenPower:%{public}u, defaultId:%{public}" PRIu64".", res, screenId);
+    return res;
+}
+
+bool DisplayManager::SetDisplayState(DisplayState state, DisplayStateCallback callback)
+{
+    WLOGFI("state:%{public}u", state);
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state, callback);
+}
+
+DisplayState DisplayManager::GetDisplayState(uint64_t displayId)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayState(displayId);
+}
+
+bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
+{
+    return true;
+}
+
+uint32_t DisplayManager::GetScreenBrightness(uint64_t screenId) const
+{
+    return 0;
+}
+
+void DisplayManager::NotifyDisplayEvent(DisplayEvent event)
+{
+    // Unlock event dms->wms restore other hidden windows
+    SingletonContainer::Get<DisplayManagerAdapter>().NotifyDisplayEvent(event);
 }
 } // namespace OHOS::Rosen
