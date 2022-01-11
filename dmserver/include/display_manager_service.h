@@ -43,8 +43,7 @@ public:
 
     DisplayId GetDefaultDisplayId() override;
     DisplayInfo GetDisplayInfoById(DisplayId displayId) override;
-    // TODO: fix me
-    // sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
+    sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
 private:
     DisplayManagerService();
     ~DisplayManagerService() = default;

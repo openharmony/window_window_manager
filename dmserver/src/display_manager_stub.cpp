@@ -62,14 +62,17 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteBool(result);
             break;
         }
-        // TODO: fix me
-        // case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
-        //     DisplayId displayId = data.ReadUint64();
+        case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
+            DisplayId displayId = data.ReadUint64();
 
-        //     sptr<Media::PixelMap> dispalySnapshot = GetDispalySnapshot(displayId);
-        //     reply.WriteParcelable(dispalySnapshot.GetRefPtr());
-        //     break;
-        // }
+            sptr<Media::PixelMap> dispalySnapshot = GetDispalySnapshot(displayId);
+            if (dispalySnapshot == nullptr) {
+                reply.WriteParcelable(nullptr);
+                break;
+            }
+            reply.WriteParcelable(dispalySnapshot.GetRefPtr());
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

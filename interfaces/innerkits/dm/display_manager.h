@@ -17,12 +17,12 @@
 #define FOUNDATION_DM_DISPLAY_MANAGER_H
 
 #include <vector>
+#include <pixel_map.h>
 #include <surface.h>
 
 #include "display.h"
 #include "single_instance.h"
 #include "virtual_display_info.h"
-// #include "pixel_map.h"
 // #include "wm_common.h"
 
 
@@ -45,10 +45,16 @@ public:
         sptr<Surface> surface, DisplayId displayIdToMirror, int32_t flags);
 
     bool DestroyVirtualDisplay(DisplayId displayId);
-    // TODO: fix me
-    // sptr<Media::PixelMap> GetScreenshot(DisplayId displayId);
-    // sptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
-    //                                     const Media::Size &size, int rotation);
+    sptr<Media::PixelMap> GetScreenshot(DisplayId displayId);
+    sptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
+                                        const Media::Size &size, int rotation);
+
+private:
+    bool CheckRectOffsetValid(int32_t param) const;
+    bool CheckRectSizeValid(int32_t param) const;
+
+    const int32_t MAX_RESOLUTION_VALUE = 15260; // max resolution, 16K
+    const int32_t MIN_RESOLUTION_VALUE = 16; // min resolution
 };
 } // namespace OHOS::Rosen
 

@@ -64,20 +64,19 @@ sptr<Display> DisplayManagerAdapter::GetDisplayById(DisplayId displayId)
     return display;
 }
 
-// TODO: fix me
-// sptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId)
-// {
-//     std::lock_guard<std::mutex> lock(mutex_);
+sptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
 
-//     if (!InitDMSProxyLocked()) {
-//         WLOGFE("displayManagerAdapter::GetDisplaySnapshot: InitDMSProxyLocked failed!");
-//         return nullptr;
-//     }
+    if (!InitDMSProxyLocked()) {
+        WLOGFE("displayManagerAdapter::GetDisplaySnapshot: InitDMSProxyLocked failed!");
+        return nullptr;
+    }
 
-//     sptr<Media::PixelMap> dispalySnapshot = displayManagerServiceProxy_->GetDispalySnapshot(displayId);
+    sptr<Media::PixelMap> dispalySnapshot = displayManagerServiceProxy_->GetDispalySnapshot(displayId);
 
-//     return dispalySnapshot;
-// }
+    return dispalySnapshot;
+}
 
 DisplayId DisplayManagerAdapter::CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
     sptr<Surface> surface)

@@ -40,40 +40,77 @@ const sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
     return display;
 }
 
-// TODO: fix me
-// sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId)
-// {
-//     sptr<Media::PixelMap> screenShot = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
-//     if (screenShot == nullptr) {
-//         WLOGFE("DisplayManager::GetScreenshot failed!\n");
-//         return nullptr;
-//     }
+sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId)
+{
+    if (displayId == DISPLAY_ID_INVALD) {
+        WLOGFE("displayId invalid!");
+        return nullptr;
+    }
+    sptr<Media::PixelMap> screenShot = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
+    if (screenShot == nullptr) {
+        WLOGFE("DisplayManager::GetScreenshot failed!");
+        return nullptr;
+    }
 
-//     return screenShot;
-// }
+    return screenShot;
+}
 
-// sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
-//                                                     const Media::Size &size, int rotation)
-// {
-//     sptr<Media::PixelMap> screenShot = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
-//     if (screenShot == nullptr) {
-//         WLOGFE("DisplayManager::GetScreenshot failed!\n");
-//         return nullptr;
-//     }
+bool DisplayManager::CheckRectOffsetValid(int32_t param) const
+{
+    if (param < 0 || param > MAX_RESOLUTION_VALUE) {
+        return false;
+    }
+    return true;
+}
 
-//     // create crop dest pixelmap
-//     Media::InitializationOptions opt;
-//     opt.size.width = size.width;
-//     opt.size.height = size.height;
-//     opt.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
-//     opt.editable = false;
-//     opt.useSourceIfMatch = true;
+bool DisplayManager::CheckRectSizeValid(int32_t param) const
+{
+    if (param < MIN_RESOLUTION_VALUE || param > MAX_RESOLUTION_VALUE) {
+        return false;
+    }
+    return true;
+}
 
-//     auto dstScreenshot = Media::PixelMap::Create(*screenShot, rect, opt);
-//     sptr<Media::PixelMap> dstScreenshot_ = dstScreenshot.release();
+sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
+                                                    const Media::Size &size, int rotation)
+{
+    if (displayId == DISPLAY_ID_INVALD) {
+        WLOGFE("displayId invalid!");
+        return nullptr;
+    }
+    if (!CheckRectOffsetValid(rect.left) || !CheckRectOffsetValid(rect.top) ||
+        !CheckRectSizeValid(rect.width) || !CheckRectSizeValid(rect.height)) {
+        WLOGFE("rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
+            rect.left, rect.top, rect.width, rect.height);
+        return nullptr;
+    }
+    if (!CheckRectSizeValid(size.width) || !CheckRectSizeValid(size.height)) {
+        WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
+        return nullptr;
+    }
+    sptr<Media::PixelMap> screenShot = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
+    if (screenShot == nullptr) {
+        WLOGFE("DisplayManager::GetScreenshot failed!");
+        return nullptr;
+    }
 
-//     return dstScreenshot_;
-// }
+    // create crop dest pixelmap
+    Media::InitializationOptions opt;
+    opt.size.width = size.width;
+    opt.size.height = size.height;
+    opt.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+    opt.editable = false;
+    opt.useSourceIfMatch = true;
+
+    auto pixelMap = Media::PixelMap::Create(*screenShot, rect, opt);
+    if (pixelMap == nullptr) {
+        WLOGFE("Media::PixelMap::Create failed!");
+        return nullptr;
+    }
+    sptr<Media::PixelMap> dstScreenshot = pixelMap.release();
+
+    return dstScreenshot;
+}
 
 const sptr<Display> DisplayManager::GetDefaultDisplay()
 {

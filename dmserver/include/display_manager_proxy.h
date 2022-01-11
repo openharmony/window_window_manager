@@ -33,8 +33,7 @@ public:
     DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
         sptr<Surface> surface) override;
     bool DestroyVirtualDisplay(DisplayId displayId) override;
-    // TODO: fix me
-    // sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
+    sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;
 };

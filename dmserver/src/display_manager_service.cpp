@@ -101,13 +101,12 @@ bool DisplayManagerService::DestroyVirtualDisplay(DisplayId displayId)
     return AbstractDisplayManager::GetInstance().DestroyVirtualScreen(screenId);
 }
 
-// TODO: fix me
-// sptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
-// {
-//     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
-//     sptr<Media::PixelMap> screenSnapshot = AbstractDisplayManager::GetInstance().GetScreenSnapshot(screenId);
-//     return screenSnapshot;
-// }
+sptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
+{
+    ScreenId screenId = GetScreenIdFromDisplayId(displayId);
+    sptr<Media::PixelMap> screenSnapshot = AbstractDisplayManager::GetInstance().GetScreenSnapshot(screenId);
+    return screenSnapshot;
+}
 
 void DisplayManagerService::OnStop()
 {
