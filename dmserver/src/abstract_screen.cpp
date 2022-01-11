@@ -13,12 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_DM_MONITOR_H
-#define FOUNDATION_DM_MONITOR_H
+#include "abstract_screen.h"
 
 namespace OHOS::Rosen {
-class Monitor {
-};
-} // namespace OHOS::Rosen
+AbstractScreen::AbstractScreen(ScreenId dmsId, ScreenId rsId)
+    : dmsId_(dmsId), rsId_(rsId)
+{
+}
 
-#endif // FOUNDATION_DM_MONITOR_H
+AbstractScreen::~AbstractScreen()
+{
+}
+
+AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId) : AbstractScreen(dmsId, rsId)
+{
+}
+
+AbstractScreenGroup::~AbstractScreenGroup()
+{
+}
+} // namespace OHOS::Rosen

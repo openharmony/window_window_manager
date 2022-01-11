@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "abstract_display_manager.h"
+#include "abstract_display_controller.h"
 
 #include "window_manager_hilog.h"
 
@@ -21,24 +21,24 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "AbstractDisplayManager"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "AbstractDisplayController"};
 }
 
-AbstractDisplayManager::AbstractDisplayManager() : rsInterface_(&(RSInterfaces::GetInstance()))
+AbstractDisplayController::AbstractDisplayController() : rsInterface_(&(RSInterfaces::GetInstance()))
 {
     parepareRSScreenManger();
 }
 
-AbstractDisplayManager::~AbstractDisplayManager()
+AbstractDisplayController::~AbstractDisplayController()
 {
     rsInterface_ = nullptr;
 }
 
-void AbstractDisplayManager::parepareRSScreenManger()
+void AbstractDisplayController::parepareRSScreenManger()
 {
 }
 
-ScreenId AbstractDisplayManager::GetDefaultScreenId()
+ScreenId AbstractDisplayController::GetDefaultScreenId()
 {
     if (rsInterface_ == nullptr) {
         return INVALID_SCREEN_ID;
@@ -46,7 +46,7 @@ ScreenId AbstractDisplayManager::GetDefaultScreenId()
     return rsInterface_->GetDefaultScreenId();
 }
 
-RSScreenModeInfo AbstractDisplayManager::GetScreenActiveMode(ScreenId id)
+RSScreenModeInfo AbstractDisplayController::GetScreenActiveMode(ScreenId id)
 {
     RSScreenModeInfo screenModeInfo;
     if (rsInterface_ == nullptr) {
@@ -55,7 +55,7 @@ RSScreenModeInfo AbstractDisplayManager::GetScreenActiveMode(ScreenId id)
     return rsInterface_->GetScreenActiveMode(id);
 }
 
-ScreenId AbstractDisplayManager::CreateVirtualScreen(const VirtualDisplayInfo &virtualDisplayInfo,
+ScreenId AbstractDisplayController::CreateVirtualScreen(const VirtualDisplayInfo &virtualDisplayInfo,
     sptr<Surface> surface)
 {
     if (rsInterface_ == nullptr) {
@@ -63,21 +63,21 @@ ScreenId AbstractDisplayManager::CreateVirtualScreen(const VirtualDisplayInfo &v
     }
     ScreenId result = rsInterface_->CreateVirtualScreen(virtualDisplayInfo.name_, virtualDisplayInfo.width_,
         virtualDisplayInfo.height_, surface, virtualDisplayInfo.displayIdToMirror_, virtualDisplayInfo.flags_);
-    WLOGFI("AbstractDisplayManager::CreateVirtualDisplay id: %{public}llu", result >> 32);
+    WLOGFI("AbstractDisplayController::CreateVirtualDisplay id: %{public}llu", result);
     return result;
 }
 
-bool AbstractDisplayManager::DestroyVirtualScreen(ScreenId screenId)
+bool AbstractDisplayController::DestroyVirtualScreen(ScreenId screenId)
 {
     if (rsInterface_ == nullptr) {
         return false;
     }
-    WLOGFI("AbstractDisplayManager::DestroyVirtualScreen");
+    WLOGFI("AbstractDisplayController::DestroyVirtualScreen");
     rsInterface_->RemoveVirtualScreen(screenId);
     return true;
 }
 
-sptr<Media::PixelMap> AbstractDisplayManager::GetScreenSnapshot(ScreenId screenId)
+sptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(ScreenId screenId)
 {
     if (rsInterface_ == nullptr) {
         return nullptr;

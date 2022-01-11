@@ -67,7 +67,7 @@ ScreenId DisplayManagerService::GetScreenIdFromDisplayId(DisplayId displayId)
 
 DisplayId DisplayManagerService::GetDefaultDisplayId()
 {
-    ScreenId screenId = AbstractDisplayManager::GetInstance().GetDefaultScreenId();
+    ScreenId screenId = AbstractDisplayController::GetInstance().GetDefaultScreenId();
     WLOGFI("GetDefaultDisplayId %{public}llu", screenId);
     return GetDisplayIdFromScreenId(screenId);
 }
@@ -76,7 +76,7 @@ DisplayInfo DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 {
     DisplayInfo displayInfo;
     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
-    auto screenModeInfo = AbstractDisplayManager::GetInstance().GetScreenActiveMode(screenId);
+    auto screenModeInfo = AbstractDisplayController::GetInstance().GetScreenActiveMode(screenId);
     displayInfo.id_ = displayId;
     displayInfo.width_ = screenModeInfo.GetScreenWidth();
     displayInfo.height_ = screenModeInfo.GetScreenHeight();
@@ -90,7 +90,7 @@ DisplayId DisplayManagerService::CreateVirtualDisplay(const VirtualDisplayInfo &
     WLOGFI("name %{public}s, width %{public}u, height %{public}u, mirrotId %{public}llu, flags %{public}d",
         virtualDisplayInfo.name_.c_str(), virtualDisplayInfo.width_, virtualDisplayInfo.height_,
         virtualDisplayInfo.displayIdToMirror_, virtualDisplayInfo.flags_);
-    ScreenId screenId = AbstractDisplayManager::GetInstance().CreateVirtualScreen(virtualDisplayInfo, surface);
+    ScreenId screenId = AbstractDisplayController::GetInstance().CreateVirtualScreen(virtualDisplayInfo, surface);
     return GetDisplayIdFromScreenId(screenId);
 }
 
@@ -98,13 +98,13 @@ bool DisplayManagerService::DestroyVirtualDisplay(DisplayId displayId)
 {
     WLOGFI("DisplayManagerService::DestroyVirtualDisplay");
     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
-    return AbstractDisplayManager::GetInstance().DestroyVirtualScreen(screenId);
+    return AbstractDisplayController::GetInstance().DestroyVirtualScreen(screenId);
 }
 
 sptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
 {
     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
-    sptr<Media::PixelMap> screenSnapshot = AbstractDisplayManager::GetInstance().GetScreenSnapshot(screenId);
+    sptr<Media::PixelMap> screenSnapshot = AbstractDisplayController::GetInstance().GetScreenSnapshot(screenId);
     return screenSnapshot;
 }
 

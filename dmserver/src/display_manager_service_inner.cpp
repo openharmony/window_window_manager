@@ -22,7 +22,7 @@
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
-#include "abstract_display_manager.h"
+#include "abstract_display_controller.h"
 #include "display_manager_service.h"
 #include "window_manager_hilog.h"
 
