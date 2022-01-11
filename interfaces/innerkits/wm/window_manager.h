@@ -20,7 +20,6 @@
 #include <refbase.h>
 #include <vector>
 #include <iremote_object.h>
-#include "single_instance.h"
 #include "singleton_delegator.h"
 #include "wm_common.h"
 
