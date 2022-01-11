@@ -348,7 +348,8 @@ WMError WindowManagerProxy::SaveAbilityToken(const sptr<IRemoteObject>& abilityT
     return static_cast<WMError>(ret);
 }
 
-void WindowManagerProxy::RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+void WindowManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -358,17 +359,23 @@ void WindowManagerProxy::RegisterFocusChangedListener(const sptr<IWindowManagerA
         return;
     }
 
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+        WLOGFE("Write type failed");
+        return;
+    }
+
     if (!data.WriteRemoteObject(windowManagerAgent->AsObject())) {
         WLOGFE("Write IWindowManagerAgent failed");
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_REGISTER_FOCUS_CHANGED_LISTENER, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
 
-void WindowManagerProxy::UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+void WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -378,12 +385,17 @@ void WindowManagerProxy::UnregisterFocusChangedListener(const sptr<IWindowManage
         return;
     }
 
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+        WLOGFE("Write type failed");
+        return;
+    }
+
     if (!data.WriteRemoteObject(windowManagerAgent->AsObject())) {
         WLOGFE("Write IWindowManagerAgent failed");
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_UNREGISTER_FOCUS_CHANGED_LISTENER, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }

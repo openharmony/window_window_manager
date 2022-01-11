@@ -54,8 +54,10 @@ public:
     WMError SetWindowFlags(uint32_t windowId, uint32_t flags) override;
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) override;
 
-    void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent) override;
-    void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    void RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    void UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
 
     // Inner interfaces
     WMError NotifyDisplaySuspend();
