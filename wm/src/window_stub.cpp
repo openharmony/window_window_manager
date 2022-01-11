@@ -49,11 +49,6 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             UpdateFocusStatus(focused);
             break;
         }
-        case TRANS_ID_UPDATE_SYSTEM_BAR_PROPERTY: {
-            SystemBarProperty property = { data.ReadBool(), data.ReadUint32(), data.ReadUint32() };
-            UpdateSystemBarProperty(property);
-            break;
-        }
         default:
             break;
     }

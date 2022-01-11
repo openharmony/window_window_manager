@@ -211,14 +211,16 @@ WMError WindowController::SetSystemBarProperty(uint32_t windowId, WindowType typ
     return res;
 }
 
-void WindowController::RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+void WindowController::RegisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    windowRoot_->RegisterFocusChangedListener(windowManagerAgent);
+    windowRoot_->RegisterWindowManagerAgent(type, windowManagerAgent);
 }
 
-void WindowController::UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+void WindowController::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    windowRoot_->UnregisterFocusChangedListener(windowManagerAgent);
+    windowRoot_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 }
 }
 }

@@ -21,16 +21,23 @@
 
 namespace OHOS {
 namespace Rosen {
+enum class WindowManagerAgentType : uint32_t {
+    WINDOW_MANAGER_AGENT_TYPE_FOCUS,
+    WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR,
+};
+
 class IWindowManagerAgent : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowManagerAgent");
 
     enum {
         TRANS_ID_UPDATE_FOCUS_STATUS = 1,
+        TRANS_ID_UPDATE_SYSTEM_BAR_PROPS = 2,
     };
 
     virtual void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         int32_t displayId, bool focused) = 0;
+    virtual void UpdateSystemBarProperties(uint64_t displayId, const SystemBarProps& props) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

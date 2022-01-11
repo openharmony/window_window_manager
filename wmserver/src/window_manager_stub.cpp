@@ -118,18 +118,20 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case TRANS_ID_REGISTER_FOCUS_CHANGED_LISTENER: {
+        case TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+            WindowManagerAgentType type = static_cast<WindowManagerAgentType>(data.ReadUint32());
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
-            RegisterFocusChangedListener(windowManagerAgentProxy);
+            RegisterWindowManagerAgent(type, windowManagerAgentProxy);
             break;
         }
-        case TRANS_ID_UNREGISTER_FOCUS_CHANGED_LISTENER: {
+        case TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
+            WindowManagerAgentType type = static_cast<WindowManagerAgentType>(data.ReadUint32());
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
-            UnregisterFocusChangedListener(windowManagerAgentProxy);
+            UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
             break;
         }
         default:

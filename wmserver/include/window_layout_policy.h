@@ -50,13 +50,11 @@ private:
     sptr<WindowNode> appWindowNode_ = new WindowNode();
     sptr<WindowNode> aboveAppWindowNode_ = new WindowNode();
     Rect limitRect_ = {0, 0, 0, 0};
-    std::map<uint32_t, sptr<WindowNode>> avoidNodes_;
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowType::WINDOW_TYPE_NAVIGATION_BAR,
     };
     void UpdateLimitRect(const sptr<WindowNode>& node);
-    void RecordAvoidRect(const sptr<WindowNode>& node);
     void UpdateLayoutRect(sptr<WindowNode>& node);
     void LayoutWindowTree();
     void LayoutWindowNode(sptr<WindowNode>& node);
