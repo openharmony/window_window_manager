@@ -112,4 +112,24 @@ void DisplayManagerService::OnStop()
 {
     WLOGFI("ready to stop display service.");
 }
+
+bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
+{
+    return displayPowerController_.SuspendBegin(reason);
+}
+
+bool DisplayManagerService::SetDisplayState(DisplayState state)
+{
+    return displayPowerController_.SetDisplayState(state);
+}
+
+DisplayState DisplayManagerService::GetDisplayState(uint64_t displayId)
+{
+    return displayPowerController_.GetDisplayState(displayId);
+}
+
+void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
+{
+    displayPowerController_.NotifyDisplayEvent(event);
+}
 } // namespace OHOS::Rosen

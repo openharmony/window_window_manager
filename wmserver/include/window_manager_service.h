@@ -56,6 +56,10 @@ public:
     void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent) override;
 
+    // Inner interfaces
+    WMError NotifyDisplaySuspend();
+    void RestoreSuspendedWindows();
+
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;

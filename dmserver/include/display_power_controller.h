@@ -13,35 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_DM_COMMON_H
-#define OHOS_ROSEN_DM_COMMON_H
+#ifndef OHOS_ROSEN_DISPLAY_POWER_CONTROLLER_H
+#define OHOS_ROSEN_DISPLAY_POWER_CONTROLLER_H
+
+#include <map>
+#include <mutex>
+#include "dm_common.h"
 
 namespace OHOS {
 namespace Rosen {
-constexpr int32_t INVALID_DISPLAY_ID = -1;
-enum class PowerStateChangeReason : uint32_t {
-    POWER_BUTTON
-};
+class DisplayPowerController {
+public:
+    DisplayPowerController() = default;
+    virtual ~DisplayPowerController() = default;
 
-enum class DisplayPowerState : uint32_t {
-    POWER_ON,
-    POWER_STAND_BY,
-    POWER_SUSPEND,
-    POWER_OFF,
-    POWER_BUTT,
-    INVALID_STATE,
-};
+    bool SuspendBegin(PowerStateChangeReason reason);
+    bool SetDisplayState(DisplayState state);
+    DisplayState GetDisplayState(uint64_t displayId);
+    void NotifyDisplayEvent(DisplayEvent event);
 
-enum class DisplayState : uint32_t {
-    ON,
-    OFF,
-    UNKNOWN
+private:
+    std::recursive_mutex mutex_;
+    DisplayState displayState_ { DisplayState::ON };
 };
-
-enum class DisplayEvent : uint32_t {
-    UNLOCK
-};
-using DisplayStateCallback = std::function<void(DisplayState)>;
 }
 }
-#endif // OHOS_ROSEN_DM_COMMON_H
+#endif // OHOS_ROSEN_DISPLAY_POWER_CONTROLLER_H
