@@ -14,6 +14,9 @@
  */
 
 #include "window_root.h"
+
+#include <cinttypes>
+
 #include "display_manager_service_inner.h"
 #include "window_manager_hilog.h"
 
@@ -33,7 +36,7 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(int32_t dis
         WLOGFE("get display failed displayId:%{public}d", displayId);
         return nullptr;
     }
-    WLOGFI("create new window node container display width:%{public}d, height:%{public}d, screenId:%{public}llu",
+    WLOGFI("create new window node container display width:%{public}d, height:%{public}d, screenId:%{public}" PRIu64"",
         abstractDisplay->GetWidth(), abstractDisplay->GetHeight(), abstractDisplay->GetId());
 
     UpdateFocusStatusFunc focusStatusFunc = std::bind(&WindowRoot::UpdateFocusStatus, this, std::placeholders::_1,

@@ -14,8 +14,11 @@
  */
 
 #include "window_node_container.h"
+
 #include <algorithm>
 #include <ability_manager_client.h>
+#include <cinttypes>
+
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
@@ -428,7 +431,7 @@ void WindowNodeContainer::TraverseWindowNode(sptr<WindowNode>& node, std::vector
 
 void WindowNodeContainer::DumpScreenWindowTree()
 {
-    WLOGFI("-------- Screen %{public}llu dump window info begin---------", screenId_);
+    WLOGFI("-------- Screen %{public}" PRIu64" dump window info begin---------", screenId_);
     WLOGFI("WinId Type Mode Flag ZOrd [   x    y    w    h]");
     std::vector<sptr<WindowNode>> windowNodes;
     TraverseContainer(windowNodes);
@@ -439,7 +442,7 @@ void WindowNodeContainer::DumpScreenWindowTree()
             "%{public}4d %{public}4d]", node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
             node->GetWindowFlags(), --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
-    WLOGFI("-------- Screen %{public}llu dump window info end  ---------", screenId_);
+    WLOGFI("-------- Screen %{public}" PRIu64" dump window info end  ---------", screenId_);
 }
 
 uint64_t WindowNodeContainer::GetScreenId() const
