@@ -17,21 +17,23 @@
 #define FOUNDATION_DM_DISPLAY_MANAGER_H
 
 #include <vector>
+#include <mutex>
 #include <pixel_map.h>
 #include <surface.h>
 
 #include "display.h"
 #include "dm_common.h"
-#include "wm_single_instance.h"
+#include "singleton_delegator.h"
 #include "virtual_display_info.h"
 // #include "wm_common.h"
 
 
 namespace OHOS::Rosen {
 class DisplayManagerAdapter;
-
+class DisplayManagerAgent;
 class DisplayManager {
-WM_DECLARE_SINGLE_INSTANCE(DisplayManager);
+friend class DisplayManagerAgent;
+WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManager);
 public:
     std::vector<const sptr<Display>> GetAllDisplays();
 
@@ -50,6 +52,8 @@ public:
     sptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
                                         const Media::Size &size, int rotation);
 
+    void RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
+    void UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     bool WakeUpBegin(PowerStateChangeReason reason);
     bool WakeUpEnd();
     bool SuspendBegin(PowerStateChangeReason reason);
@@ -63,11 +67,18 @@ public:
     void NotifyDisplayEvent(DisplayEvent event);
 
 private:
+    DisplayManager();
+    ~DisplayManager();
     bool CheckRectOffsetValid(int32_t param) const;
     bool CheckRectSizeValid(int32_t param) const;
+    void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
 
+    static inline SingletonDelegator<DisplayManager> delegator;
     const int32_t MAX_RESOLUTION_VALUE = 15260; // max resolution, 16K
     const int32_t MIN_RESOLUTION_VALUE = 16; // min resolution
+    std::mutex mutex_;
+    std::vector<sptr<IDisplayPowerEventListener>> powerEventListeners_;
+    sptr<DisplayManagerAgent> powerEventListenerAgent_;
 };
 } // namespace OHOS::Rosen
 

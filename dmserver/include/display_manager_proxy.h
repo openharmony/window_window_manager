@@ -35,7 +35,15 @@ public:
     bool DestroyVirtualDisplay(DisplayId displayId) override;
     sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
 
+    void RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+        DisplayManagerAgentType type) override;
+    void UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+        DisplayManagerAgentType type) override;
+    bool WakeUpBegin(PowerStateChangeReason reason) override;
+    bool WakeUpEnd() override;
     bool SuspendBegin(PowerStateChangeReason reason) override;
+    bool SuspendEnd() override;
+    bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason) override;
     bool SetDisplayState(DisplayState state) override;
     DisplayState GetDisplayState(uint64_t displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
