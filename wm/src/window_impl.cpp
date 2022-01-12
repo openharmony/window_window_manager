@@ -191,12 +191,11 @@ WMError WindowImpl::SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext>
         WLOGFE("fail to SetUIContent id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    // TODO: fix me
-    // if (isdistributed) {
-    //     uiContent_->Restore(this, contentInfo, storage);
-    // } else {
-    //     uiContent_->Initialize(this, contentInfo, storage);
-    // }
+    if (isdistributed) {
+        uiContent_->Restore(this, contentInfo, storage);
+    } else {
+        uiContent_->Initialize(this, contentInfo, storage);
+    }
     return WMError::WM_OK;
 }
 
