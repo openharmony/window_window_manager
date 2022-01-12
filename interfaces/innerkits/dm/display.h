@@ -38,6 +38,7 @@ public:
     int32_t GetWidth() const;
     int32_t GetHeight() const;
     uint32_t GetFreshRate() const;
+    float GetVirtualPixelRatio() const;
 
     void SetId(DisplayId displayId);
     void SetWidth(int32_t width);
