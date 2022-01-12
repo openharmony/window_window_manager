@@ -32,13 +32,14 @@ config("libwms_config") {
 ohos_shared_library("libwms") {
   sources = [
     "../dmserver/src/abstract_display.cpp",
-    "../dmserver/src/abstract_display_manager.cpp",
+    "../dmserver/src/abstract_display_controller.cpp",
+    "../dmserver/src/abstract_screen.cpp",
+    "../dmserver/src/abstract_screen_controller.cpp",
     "../dmserver/src/display_manager_service.cpp",
     "../dmserver/src/display_manager_service_inner.cpp",
     "../dmserver/src/display_manager_stub.cpp",
     "../dmserver/src/display_node_control.cpp",
     "../dmserver/src/display_power_controller.cpp",
-    "../dmserver/src/screen.cpp",
     "../wm/src/zidl/window_manager_agent_proxy.cpp",
     "src/input_window_monitor.cpp",
     "src/window_controller.cpp",

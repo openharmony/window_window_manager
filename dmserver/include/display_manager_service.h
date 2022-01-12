@@ -23,7 +23,8 @@
 #include <surface.h>
 
 #include "abstract_display.h"
-#include "abstract_display_manager.h"
+#include "abstract_display_controller.h"
+#include "abstract_screen_controller.h"
 #include "display_manager_stub.h"
 #include "display_power_controller.h"
 #include "single_instance.h"
@@ -58,8 +59,10 @@ private:
     DisplayId GetDisplayIdFromScreenId(ScreenId screenId);
     ScreenId GetScreenIdFromDisplayId(DisplayId displayId);
 
+    std::recursive_mutex mutex_;
     static inline SingletonDelegator<DisplayManagerService> delegator_;
     std::map<int32_t, sptr<AbstractDisplay>> abstractDisplayMap_;
+    AbstractScreenController screenController_ = AbstractScreenController(mutex_);
     DisplayPowerController displayPowerController_;
 };
 } // namespace OHOS::Rosen
