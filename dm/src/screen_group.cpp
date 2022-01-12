@@ -15,8 +15,6 @@
 
 #include "screen_group.h"
 
-#include "wm_common.h"
-
 namespace OHOS::Rosen {
 class ScreenGroup::Impl : public RefBase {
 friend class ScreenGroup;

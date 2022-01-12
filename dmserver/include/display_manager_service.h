@@ -27,14 +27,14 @@
 #include "abstract_screen_controller.h"
 #include "display_manager_stub.h"
 #include "display_power_controller.h"
-#include "single_instance.h"
+#include "wm_single_instance.h"
 #include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
 class DisplayManagerService : public SystemAbility, public DisplayManagerStub {
 DECLARE_SYSTEM_ABILITY(DisplayManagerService);
 
-DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
+WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
 
 public:
     void OnStart() override;

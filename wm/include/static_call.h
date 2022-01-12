@@ -18,13 +18,13 @@
 
 #include <iremote_object.h>
 #include "singleton_delegator.h"
-#include "single_instance.h"
+#include "wm_single_instance.h"
 #include "window.h"
 #include "window_option.h"
 namespace OHOS {
 namespace Rosen {
 class StaticCall {
-DECLARE_SINGLE_INSTANCE_BASE(StaticCall);
+WM_DECLARE_SINGLE_INSTANCE_BASE(StaticCall);
 public:
     virtual sptr<Window> CreateWindow(const std::string& windowName,
         sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr);

@@ -20,7 +20,7 @@
 #include <refbase.h>
 #include <vector>
 #include <iremote_object.h>
-#include "singleton_delegator.h"
+#include "wm_single_instance.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -35,7 +35,7 @@ public:
 };
 
 class WindowManager : public RefBase {
-DECLARE_SINGLE_INSTANCE_BASE(WindowManager);
+WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManager);
 friend class WindowManagerAgent;
 public:
     void RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
