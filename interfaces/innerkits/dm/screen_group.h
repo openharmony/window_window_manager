@@ -13,7 +13,33 @@
  * limitations under the License.
  */
 
+#ifndef FOUNDATION_DM_SCREEN_GROUP_H
+#define FOUNDATION_DM_SCREEN_GROUP_H
+
+#include <refbase.h>
+#include <vector>
 #include "screen.h"
 
 namespace OHOS::Rosen {
+enum class ScreenType : uint32_t {
+    SCREEN_ALONE,
+    SCREEN_EXPAND,
+    SCREEN_MIRROR,
+};
+
+class ScreenGroup : public Screen {
+public:
+    ScreenType GetType() const;
+    std::vector<sptr<Screen>> GetChildren() const;
+    std::vector<Point> GetChildrenPosition() const;
+
+private:
+    ScreenGroup();
+    ~ScreenGroup();
+
+    class Impl;
+    sptr<Impl> pImpl_;
+};
 } // namespace OHOS::Rosen
+
+#endif // FOUNDATION_DM_SCREEN_GROUP_H

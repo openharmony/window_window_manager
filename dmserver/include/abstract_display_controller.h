@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_MANAGER_H
-#define FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_MANAGER_H
+#ifndef FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_CONTROLLER_H
+#define FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_CONTROLLER_H
 
 #include <map>
 #include <pixel_map.h>
@@ -26,8 +26,8 @@
 #include "virtual_display_info.h"
 
 namespace OHOS::Rosen {
-class AbstractDisplayManager {
-DECLARE_SINGLE_INSTANCE_BASE(AbstractDisplayManager);
+class AbstractDisplayController {
+DECLARE_SINGLE_INSTANCE_BASE(AbstractDisplayController);
 public:
     std::map<int32_t, sptr<AbstractDisplay>> abstractDisplayMap_;
 
@@ -38,11 +38,11 @@ public:
     sptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId);
 
 private:
-    AbstractDisplayManager();
-    ~AbstractDisplayManager();
+    AbstractDisplayController();
+    ~AbstractDisplayController();
     void parepareRSScreenManger();
 
     OHOS::Rosen::RSInterfaces *rsInterface_;
 };
 } // namespace OHOS::Rosen
-#endif // FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_MANAGER_H
+#endif // FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_CONTROLLER_H
