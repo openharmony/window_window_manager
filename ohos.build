@@ -15,6 +15,7 @@
       ],
 
       "test_list": [
+        "//foundation/windowmanager/wm:test"
       ]
     }
   }

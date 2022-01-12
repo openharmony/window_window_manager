@@ -13,34 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef UNITTEST_MOCK_SINGLETON_MOCKER_H
-#define UNITTEST_MOCK_SINGLETON_MOCKER_H
+#ifndef FRAMEWORKS_WM_TEST_UT_WINDOW_OPTION_TEST_H
+#define FRAMEWORKS_WM_TEST_UT_WINDOW_OPTION_TEST_H
 
-#include "singleton_container.h"
+#include <gtest/gtest.h>
+#include "window_option.h"
+
 namespace OHOS {
 namespace Rosen {
-template<class T, class MockT>
-class SingletonMocker {
+class WindowOptionTest : public testing::Test {
 public:
-    SingletonMocker()
-    {
-        SingletonContainer::Set<T>(mock);
-    }
-
-    ~SingletonMocker()
-    {
-        SingletonContainer::Set<T>(T::GetInstance());
-    }
-
-    MockT& Mock()
-    {
-        return mock;
-    }
-
-private:
-    MockT mock;
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    virtual void SetUp() override;
+    virtual void TearDown() override;
 };
-} // namespace Rosen
+} // namespace ROSEN
 } // namespace OHOS
-
-#endif // FRAMEWORKS_WM_TEST_UNITTEST_MOCK_SINGLETON_MOCKER_H
+#endif // FRAMEWORKS_WM_TEST_UT_WINDOW_OPTION_TEST_H
