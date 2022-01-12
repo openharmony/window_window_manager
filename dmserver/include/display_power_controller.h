@@ -33,7 +33,6 @@ public:
     void NotifyDisplayEvent(DisplayEvent event);
 
 private:
-    std::recursive_mutex mutex_;
     DisplayState displayState_ { DisplayState::ON };
 };
 }

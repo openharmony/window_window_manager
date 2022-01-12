@@ -32,6 +32,7 @@ config("libwms_config") {
 
 ohos_shared_library("libwms") {
   sources = [
+    "../dm/src/zidl/display_manager_agent_proxy.cpp",
     "../dmserver/src/abstract_display.cpp",
     "../dmserver/src/abstract_display_controller.cpp",
     "../dmserver/src/abstract_screen.cpp",
