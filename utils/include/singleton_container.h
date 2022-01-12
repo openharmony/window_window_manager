@@ -22,11 +22,11 @@
 #include <set>
 #include <string>
 
-#include "single_instance.h"
+#include "wm_single_instance.h"
 namespace OHOS {
 namespace Rosen {
 class SingletonContainer {
-DECLARE_SINGLE_INSTANCE_BASE(SingletonContainer);
+WM_DECLARE_SINGLE_INSTANCE_BASE(SingletonContainer);
 
 public:
     void AddSingleton(const std::string& name, void* instance);

@@ -21,13 +21,13 @@
 #include <surface.h>
 
 #include "abstract_display.h"
-#include "single_instance.h"
+#include "wm_single_instance.h"
 #include "transaction/rs_interfaces.h"
 #include "virtual_display_info.h"
 
 namespace OHOS::Rosen {
 class AbstractDisplayController {
-DECLARE_SINGLE_INSTANCE_BASE(AbstractDisplayController);
+WM_DECLARE_SINGLE_INSTANCE_BASE(AbstractDisplayController);
 public:
     std::map<int32_t, sptr<AbstractDisplay>> abstractDisplayMap_;
 

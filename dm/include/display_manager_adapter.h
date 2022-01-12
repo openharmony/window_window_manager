@@ -21,7 +21,6 @@
 
 #include "display.h"
 #include "display_manager_interface.h"
-#include "single_instance.h"
 #include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
@@ -31,7 +30,7 @@ public:
 };
 
 class DisplayManagerAdapter {
-DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerAdapter);
+WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerAdapter);
 public:
     DisplayId GetDefaultDisplayId();
     sptr<Display> GetDisplayById(DisplayId displayId);

@@ -59,39 +59,42 @@ config("libwm_public_config") {
   ]
 }
 
+config("libwm_public_config_test") {
+  include_dirs = [ "//foundation/windowmanager/interfaces/innerkits" ]
+}
+
+config("libwmutil_private_config") {
+  include_dirs = [
+    "include",
+    "//foundation/windowmanager/dmserver/include",
+    "../interfaces/innerkits/dm",
+    "../interfaces/innerkits/wm",
+  ]
+}
+
+config("libwmutil_public_config") {
+  include_dirs = [ "//foundation/windowmanager/utils/include" ]
+}
+
 ## Build libwmutil.so
 ohos_shared_library("libwmutil") {
   sources = [
     "../dmserver/src/display_info.cpp",
     "../dmserver/src/virtual_display_info.cpp",
+    "../utils/src/singleton_container.cpp",
     "../utils/src/wm_trace.cpp",
-    "//foundation/windowmanager/dmserver/src/display_manager_proxy.cpp",
-    "//foundation/windowmanager/utils/src/singleton_container.cpp",
-    "//foundation/windowmanager/wm/src/window_proxy.cpp",
-    "//foundation/windowmanager/wmserver/src/window_manager_proxy.cpp",
     "src/window_property.cpp",
   ]
 
-  configs = [ ":libwm_config" ]
+  configs = [ ":libwmutil_private_config" ]
 
-  public_configs = [ ":libwm_public_config" ]
+  public_configs = [ ":libwmutil_public_config" ]
 
-  deps = [
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
-    "//utils/native/base:utils",
-  ]
-
-  public_deps = [
-    # RSSurface
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core:appexecfwk_core",
-    "//foundation/graphic/standard:libsurface",
-    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",
-  ]
+  deps = [ "//utils/native/base:utils" ]
 
   external_deps = [
     "bytrace_standard:bytrace_core",
+    "hilog_native:libhilog",
     "ipc:ipc_core",
   ]
 
@@ -106,8 +109,10 @@ ohos_shared_library("libwm") {
     "../dm/src/display_manager.cpp",
     "../dm/src/display_manager_adapter.cpp",
     "../dm/src/screen.cpp",
-    "../utils/src/static_call.cpp",
+    "../dmserver/src/display_manager_proxy.cpp",
+    "../wmserver/src/window_manager_proxy.cpp",
     "src/input_transfer_station.cpp",
+    "src/static_call.cpp",
     "src/vsync_station.cpp",
     "src/window.cpp",
     "src/window_adapter.cpp",
@@ -131,6 +136,7 @@ ohos_shared_library("libwm") {
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",
+    "//foundation/windowmanager/wm:libwmutil",
     "//utils/native/base:utils",
 
     # weston adapter
@@ -138,6 +144,9 @@ ohos_shared_library("libwm") {
 
     # ace
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core:appexecfwk_core",
+    "//foundation/graphic/standard:libsurface",
+    "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",
   ]
 
   public_deps = [
@@ -157,7 +166,6 @@ ohos_shared_library("libwm") {
 
     # weston adapter
     "//foundation/windowmanager/adapter:libwmadapter",
-    "//foundation/windowmanager/wm:libwmutil",
   ]
 
   external_deps = [
