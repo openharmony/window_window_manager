@@ -47,8 +47,10 @@ public:
     virtual WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
     virtual WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
 
-    virtual void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
-    virtual void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
+    virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
+    virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
 
     virtual void ClearWindowAdapter();
 private:

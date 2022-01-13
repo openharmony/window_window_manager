@@ -62,6 +62,44 @@ void WindowManagerAgentProxy::UpdateFocusStatus(uint32_t windowId, const sptr<IR
         WLOGFE("SendRequest failed");
     }
 }
+
+void WindowManagerAgentProxy::UpdateSystemBarProperties(uint64_t displayId, const SystemBarProps& props)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("Write displayId failed");
+        return;
+    }
+
+    auto size = props.size();
+    if (!data.WriteUint32(static_cast<uint32_t>(size))) {
+        WLOGFE("Write vector size failed");
+        return;
+    }
+    for (auto it : props) {
+        // write key(type)
+        if (!data.WriteUint32(static_cast<uint32_t>(it.first))) {
+            WLOGFE("Write type failed");
+            return;
+        }
+        // write val(sysBarProps)
+        if (!(data.WriteBool(it.second.enable_) && data.WriteUint32(it.second.backgroundColor_) &&
+            data.WriteUint32(it.second.contentColor_))) {
+            WLOGFE("Write sysBarProp failed");
+            return;
+        }
+    }
+    if (Remote()->SendRequest(TRANS_ID_UPDATE_SYSTEM_BAR_PROPS, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 

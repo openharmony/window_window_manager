@@ -36,13 +36,11 @@ void WindowLayoutPolicy::UpdateDisplayInfo(const Rect& displayRect)
 {
     displayRect_ = displayRect;
     limitRect_ = displayRect_;
-    avoidNodes_.clear();
 }
 
 void WindowLayoutPolicy::LayoutWindowTree()
 {
     limitRect_ = displayRect_;
-    avoidNodes_.clear();
     std::vector<sptr<WindowNode>> rootNodes = { aboveAppWindowNode_, appWindowNode_, belowAppWindowNode_ };
     for (auto& node : rootNodes) { // ensure that the avoid area windows are traversed first
         LayoutWindowNode(node);
@@ -61,7 +59,7 @@ void WindowLayoutPolicy::LayoutWindowNode(sptr<WindowNode>& node)
         }
         UpdateLayoutRect(node);
         if (avoidTypes_.find(node->GetWindowType()) != avoidTypes_.end()) {
-            RecordAvoidRect(node);
+            UpdateLimitRect(node);
         }
     }
     for (auto& childNode : node->children_) {
@@ -80,7 +78,7 @@ void WindowLayoutPolicy::RemoveWindowNode(sptr<WindowNode>& node)
     WM_FUNCTION_TRACE();
     auto type = node->GetWindowType();
     // affect other windows, trigger off global layout
-    if (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+    if (avoidTypes_.find(type) != avoidTypes_.end()) {
         LayoutWindowTree();
     } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
         // TODO: change split screen
@@ -93,7 +91,7 @@ void WindowLayoutPolicy::UpdateWindowNode(sptr<WindowNode>& node)
     WM_FUNCTION_TRACE();
     auto type = node->GetWindowType();
     // affect other windows, trigger off global layout
-    if (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+    if (avoidTypes_.find(type) != avoidTypes_.end()) {
         LayoutWindowTree();
     } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
         // TODO: change split screen
@@ -209,21 +207,6 @@ void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node)
     }
     WLOGFI("Type: %{public}d, limitRect: %{public}d %{public}d %{public}d %{public}d",
         node->GetWindowType(), limitRect_.posX_, limitRect_.posY_, limitRect_.width_, limitRect_.height_);
-}
-
-void WindowLayoutPolicy::RecordAvoidRect(const sptr<WindowNode>& node)
-{
-    uint32_t id = node->GetWindowId();
-    if (avoidNodes_.find(id) == avoidNodes_.end()) { // new avoid rect
-        avoidNodes_.insert(std::pair<uint32_t, sptr<WindowNode>>(id, node));
-        UpdateLimitRect(node);
-    } else { // update existing avoid rect
-        limitRect_ = displayRect_;
-        avoidNodes_[id] = node;
-        for (auto item : avoidNodes_) {
-            UpdateLimitRect(item.second);
-        }
-    }
 }
 }
 }

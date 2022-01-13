@@ -68,17 +68,20 @@ public:
     WMError RequestFocus(uint32_t windowId);
     WMError MinimizeOtherFullScreenAbility(sptr<WindowNode>& node);
 
-    void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
-    void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
+    void RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
+    void UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
 
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     void ClearWindowManagerAgent(const sptr<IRemoteObject>& remoteObject);
-    void UnregisterFocusChangedListener(const sptr<IRemoteObject>& windowManagerAgent);
+    void UnregisterWindowManagerAgent(const sptr<IRemoteObject>& object);
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         int32_t displayId, bool focused);
+    void UpdateSystemBarProperties(uint64_t displayId, const SystemBarProps& props);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
 
     std::recursive_mutex& mutex_;
@@ -86,7 +89,7 @@ private:
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
 
-    std::vector<sptr<IWindowManagerAgent>> focusChangedListenerAgents_;
+    std::map<WindowManagerAgentType, std::vector<sptr<IWindowManagerAgent>>> windowManagerAgents_;
 
     sptr<WindowDeathRecipient> windowDeath_ = new WindowDeathRecipient(std::bind(&WindowRoot::OnRemoteDied,
         this, std::placeholders::_1));
