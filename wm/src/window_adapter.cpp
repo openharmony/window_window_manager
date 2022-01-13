@@ -126,24 +126,26 @@ WMError WindowAdapter::SetSystemBarProperty(uint32_t windowId, WindowType type, 
     return windowManagerServiceProxy_->SetSystemBarProperty(windowId, type, property);
 }
 
-void WindowAdapter::RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+void WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return;
     }
-    return windowManagerServiceProxy_->RegisterFocusChangedListener(windowManagerAgent);
+    return windowManagerServiceProxy_->RegisterWindowManagerAgent(type, windowManagerAgent);
 }
 
-void WindowAdapter::UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+void WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return;
     }
-    return windowManagerServiceProxy_->UnregisterFocusChangedListener(windowManagerAgent);
+    return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 }
 
 WMError WindowAdapter::SetWindowMode(uint32_t windowId, WindowMode mode)

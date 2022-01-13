@@ -93,6 +93,13 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_END = 1 << 2,
 };
 
+struct Rect {
+    int32_t posX_;
+    int32_t posY_;
+    uint32_t width_;
+    uint32_t height_;
+};
+
 namespace {
     constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
     constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
@@ -111,12 +118,7 @@ struct SystemBarProperty {
     }
 };
 
-struct Rect {
-    int32_t posX_;
-    int32_t posY_;
-    uint32_t width_;
-    uint32_t height_;
-};
+using SystemBarProps = std::vector<std::pair<WindowType, SystemBarProperty>>;
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

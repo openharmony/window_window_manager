@@ -45,11 +45,6 @@ public:
     virtual void OnSizeChange(Rect rect) = 0;
 };
 
-class IWindowSystemBarChangeListener : public RefBase {
-public:
-    virtual void OnSystemBarPropertyChange(uint32_t displayId, WindowType type, const SystemBarProperty& prop) = 0;
-};
-
 class Window : public RefBase {
 public:
     static sptr<Window> Create(const std::string& windowName,
@@ -89,7 +84,6 @@ public:
 
     virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) = 0;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
-    virtual void RegisterWindowSystemBarChangeListener(sptr<IWindowSystemBarChangeListener>& listener) = 0;
     virtual WMError SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext> context,
         std::string& contentInfo, NativeEngine* engine, NativeValue* storage, bool isdistributed = false) = 0;
     virtual const std::string& GetContentInfo() = 0;

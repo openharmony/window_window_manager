@@ -182,7 +182,7 @@ bool WindowProperty::MapMarshalling(Parcel& parcel) const
         if (!parcel.WriteUint32(static_cast<uint32_t>(it.first))) {
             return false;
         }
-        // write val(UIState)
+        // write val(sysBarProps)
         if (!(parcel.WriteBool(it.second.enable_) && parcel.WriteUint32(it.second.backgroundColor_) &&
             parcel.WriteUint32(it.second.contentColor_))) {
             return false;

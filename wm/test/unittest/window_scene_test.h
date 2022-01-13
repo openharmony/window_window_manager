@@ -13,23 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef UNITTEST_MOCK_WINDOW_ADAPTER_H
-#define UNITTEST_MOCK_WINDOW_ADAPTER_H
+#ifndef FRAMEWORKS_WM_TEST_UT_WINDOW_SCENE_TEST_H
+#define FRAMEWORKS_WM_TEST_UT_WINDOW_SCENE_TEST_H
 
-#include <gmock/gmock.h>
-
-#include "window_adapter.h"
+#include <gtest/gtest.h>
+#include "window_scene.h"
 
 namespace OHOS {
 namespace Rosen {
-class MockWindowAdapter : public WindowAdapter {
+class WindowSceneTest : public testing::Test {
 public:
-    MOCK_METHOD1(AddWindow, WMError(sptr<WindowProperty>& windowProperty));
-    MOCK_METHOD1(RemoveWindow, WMError(uint32_t windowId));
-    MOCK_METHOD0(ClearWindowAdapter, void());
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    virtual void SetUp() override;
+    virtual void TearDown() override;
+
+    static inline sptr<WindowScene> scene_ = nullptr;
+    static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
 };
-}
+} // namespace ROSEN
 } // namespace OHOS
 
-
-#endif
+#endif // FRAMEWORKS_WM_TEST_UT_WINDOW_SCENE_TEST_H

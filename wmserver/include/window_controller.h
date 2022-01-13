@@ -42,8 +42,10 @@ public:
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
     WMError MinimizeAllAppNodeAbility(uint32_t windowId);
 
-    void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
-    void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
+    void RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
+    void UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
 
 private:
     uint32_t GenWindowId();
