@@ -64,12 +64,12 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
         case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
             DisplayId displayId = data.ReadUint64();
-            sptr<Media::PixelMap> dispalySnapshot = GetDispalySnapshot(displayId);
+            std::shared_ptr<Media::PixelMap> dispalySnapshot = GetDispalySnapshot(displayId);
             if (dispalySnapshot == nullptr) {
                 reply.WriteParcelable(nullptr);
                 break;
             }
-            reply.WriteParcelable(dispalySnapshot.GetRefPtr());
+            reply.WriteParcelable(dispalySnapshot.get());
         }
         case TRANS_ID_SUSPEND_BEGIN: {
             PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());

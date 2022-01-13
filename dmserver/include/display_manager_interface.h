@@ -47,7 +47,7 @@ public:
     virtual DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
         sptr<Surface> surface) = 0;
     virtual bool DestroyVirtualDisplay(DisplayId displayId) = 0;
-    virtual sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
+    virtual std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
 
     virtual bool SuspendBegin(PowerStateChangeReason reason) = 0;
     virtual bool SetDisplayState(DisplayState state) = 0;

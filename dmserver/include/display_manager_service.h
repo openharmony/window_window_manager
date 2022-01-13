@@ -45,7 +45,7 @@ public:
 
     DisplayId GetDefaultDisplayId() override;
     DisplayInfo GetDisplayInfoById(DisplayId displayId) override;
-    sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
+    std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
 
     bool SuspendBegin(PowerStateChangeReason reason) override;
     bool SetDisplayState(DisplayState state) override;
