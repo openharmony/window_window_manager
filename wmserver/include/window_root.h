@@ -67,6 +67,8 @@ public:
 
     WMError RequestFocus(uint32_t windowId);
     WMError MinimizeOtherFullScreenAbility(sptr<WindowNode>& node);
+    WMError MinimizeAllAppNodeAbility(sptr<WindowNode>& node);
+    WMError HandleSplitWindowModeChange(sptr<WindowNode>& node, bool isChangeToSplit);
 
     void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
     void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);

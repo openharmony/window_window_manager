@@ -146,6 +146,24 @@ void WindowAdapter::UnregisterFocusChangedListener(const sptr<IWindowManagerAgen
     return windowManagerServiceProxy_->UnregisterFocusChangedListener(windowManagerAgent);
 }
 
+WMError WindowAdapter::SetWindowMode(uint32_t windowId, WindowMode mode)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!InitWMSProxyLocked()) {
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return windowManagerServiceProxy_->SetWindowMode(windowId, mode);
+}
+
+WMError WindowAdapter::MinimizeAllAppNodeAbility(uint32_t windowId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!InitWMSProxyLocked()) {
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return windowManagerServiceProxy_->MinimizeAllAppNodeAbility(windowId);
+}
+
 bool WindowAdapter::InitWMSProxyLocked()
 {
     if (!windowManagerServiceProxy_) {

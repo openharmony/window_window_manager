@@ -38,6 +38,11 @@ void WindowNode::SetSystemBarProperty(WindowType type, const SystemBarProperty& 
     property_->SetSystemBarProperty(type, property);
 }
 
+void WindowNode::SetWindowMode(WindowMode mode)
+{
+    property_->SetWindowMode(mode);
+}
+
 const sptr<IWindow>& WindowNode::GetWindowToken() const
 {
     return windowToken_;
@@ -91,6 +96,12 @@ int32_t WindowNode::GetCallingUid() const
 const std::unordered_map<WindowType, SystemBarProperty>& WindowNode::GetSystemBarProperty() const
 {
     return property_->GetSystemBarProperty();
+}
+
+bool WindowNode::IsSplitMode() const
+{
+    return (property_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        property_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
 }
 }
 }
