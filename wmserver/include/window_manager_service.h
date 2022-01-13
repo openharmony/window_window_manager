@@ -27,6 +27,7 @@
 #include "window_controller.h"
 #include "window_manager_stub.h"
 #include "window_root.h"
+#include "snapshot_controller.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -66,12 +67,14 @@ protected:
 
 private:
     bool Init();
+    void RegisterSnapshotHandler();
     void OnWindowEvent(Event event, uint32_t windowId);
     static inline SingletonDelegator<WindowManagerService> delegator;
     std::recursive_mutex mutex_;
     sptr<WindowRoot> windowRoot_;
     sptr<WindowController> windowController_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
+    sptr<SnapshotController> snapshotController_;
     const int WAITING_RS_TIME = 10;
 };
 }

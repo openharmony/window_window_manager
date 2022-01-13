@@ -254,6 +254,18 @@ void WindowRoot::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>&
     }
 }
 
+std::shared_ptr<RSSurfaceNode> WindowRoot::GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject> &abilityToken) const
+{
+    for (auto iter = windowNodeMap_.begin(); iter != windowNodeMap_.end(); iter++) {
+        if (iter->second->abilityToken_ != abilityToken) {
+            continue;
+        }
+        return iter->second->surfaceNode_;
+    }
+    WLOGFE("could not find required abilityToken!");
+    return nullptr;
+}
+
 void WindowRoot::OnRemoteDied(const sptr<IRemoteObject>& remoteObject)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
