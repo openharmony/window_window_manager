@@ -61,6 +61,7 @@
           }
         ],
         "test": [
+          "//foundation/windowmanager/wm:test"
         ]
       }
     }
