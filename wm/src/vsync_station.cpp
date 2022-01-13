@@ -33,11 +33,8 @@ void VsyncStation::RequestVsync(CallbackType type, std::shared_ptr<VsyncCallback
     }
     iter->second.insert(vsyncCallback);
     if (mainHandler_ == nullptr) {
-        if (AppExecFwk::EventRunner::GetMainEventRunner() == nullptr) {
-            WLOGFE("can not get main event runner.");
-            return;
-        }
-        mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+        auto runner = AppExecFwk::EventRunner::Create(VSYNC_THREAD_ID);
+        mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
     if (!hasRequestedVsync_) {
         mainHandler_->PostTask([this]() {
