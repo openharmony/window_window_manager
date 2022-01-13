@@ -19,7 +19,7 @@
 #include <refbase.h>
 #include "screen.h"
 #include "screen_group.h"
-#include "single_instance.h"
+#include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
 class IScreenChangeListener : public RefBase {
@@ -30,7 +30,7 @@ public:
 };
 
 class ScreenManager : public RefBase {
-DECLARE_SINGLE_INSTANCE_BASE(ScreenManager);
+WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenManager);
 public:
     sptr<Screen> GetScreenById(ScreenId id);
     std::vector<const sptr<Screen>> GetAllScreens();

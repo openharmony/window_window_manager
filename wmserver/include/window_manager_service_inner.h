@@ -16,12 +16,12 @@
 #ifndef OHOS_WINDOW_MANAGER_SERVICE_INNER_H
 #define OHOS_WINDOW_MANAGER_SERVICE_INNER_H
 
-#include "single_instance.h"
+#include "wm_single_instance.h"
 
 namespace OHOS {
 namespace Rosen {
 class WindowManagerServiceInner {
-DECLARE_SINGLE_INSTANCE(WindowManagerServiceInner)
+WM_DECLARE_SINGLE_INSTANCE(WindowManagerServiceInner)
 public:
     bool NotifyDisplaySuspend();
     void RestoreSuspendedWindows();

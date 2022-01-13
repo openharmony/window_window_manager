@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_SINGLE_INSTANCE_H
-#define OHOS_SINGLE_INSTANCE_H
+#ifndef OHOS_WM_SINGLE_INSTANCE_H
+#define OHOS_WM_SINGLE_INSTANCE_H
 namespace OHOS {
 namespace Rosen {
-#define DECLARE_SINGLE_INSTANCE_BASE(className)             \
+#define WM_DECLARE_SINGLE_INSTANCE_BASE(className)          \
 public:                                                     \
     static className& GetInstance()                         \
     {                                                       \
@@ -27,13 +27,14 @@ public:                                                     \
     className(const className&) = delete;                   \
     className& operator= (const className&) = delete;       \
     className(className&&) = delete;                        \
-    className& operator= (className&&) = delete;
+    className& operator= (className&&) = delete;            \
 
-#define DECLARE_SINGLE_INSTANCE(className)  \
-    DECLARE_SINGLE_INSTANCE_BASE(className) \
+#define WM_DECLARE_SINGLE_INSTANCE(className)  \
+    WM_DECLARE_SINGLE_INSTANCE_BASE(className) \
 protected:                                  \
     className() = default;                  \
-    virtual ~className() = default;
+    virtual ~className() = default;         \
+    
 } // namespace OHOS
 }
 #endif // OHOS_SINGLE_INSTANCE_H
