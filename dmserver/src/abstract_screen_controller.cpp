@@ -15,6 +15,7 @@
 
 #include "abstract_screen_controller.h"
 
+#include <cinttypes>
 #include <screen_manager/screen_types.h>
 #include <surface.h>
 
@@ -105,7 +106,7 @@ void AbstractScreenController::AddToGroup(sptr<AbstractScreen> newScreen)
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = dmsScreenMap_.find(defaultScreenId_);
     if (iter == dmsScreenMap_.end()) {
-        WLOGE("did not find default screen screenId:%{public}llu", defaultScreenId_);
+        WLOGE("did not find default screen screenId:%{public}" PRIu64"", defaultScreenId_);
         AddAsFirstScreenLocked(newScreen);
     } else {
         sptr<AbstractScreen> defaultScreen = iter->second;
