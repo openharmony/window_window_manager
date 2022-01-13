@@ -41,9 +41,15 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(int32_t dis
 
     UpdateFocusStatusFunc focusStatusFunc = std::bind(&WindowRoot::UpdateFocusStatus, this, std::placeholders::_1,
         std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
+    UpdateSystemBarPropsFunc sysBarUpdateFunc = std::bind(&WindowRoot::UpdateSystemBarProperties, this,
+        std::placeholders::_1, std::placeholders::_2);
+    WindowNodeContainerCallbacks callbacks = {
+        focusStatusFunc,
+        sysBarUpdateFunc
+    };
     sptr<WindowNodeContainer> container = new WindowNodeContainer(abstractDisplay->GetId(),
         static_cast<uint32_t>(abstractDisplay->GetWidth()), static_cast<uint32_t>(abstractDisplay->GetHeight()),
-        focusStatusFunc);
+        callbacks);
     windowNodeContainerMap_.insert({ displayId, container });
     return container;
 }
@@ -236,9 +242,10 @@ WMError WindowRoot::RequestFocus(uint32_t windowId)
     return container->SetFocusWindow(windowId);
 }
 
-void WindowRoot::RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+void WindowRoot::RegisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    focusChangedListenerAgents_.push_back(windowManagerAgent);
+    windowManagerAgents_[type].push_back(windowManagerAgent);
     if (windowManagerAgentDeath_ == nullptr) {
         WLOGFI("failed to create death Recipient ptr WindowManagerAgentDeathRecipient");
         return;
@@ -248,21 +255,24 @@ void WindowRoot::RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& w
     }
 }
 
-void WindowRoot::UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+void WindowRoot::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    auto iter = std::find(focusChangedListenerAgents_.begin(), focusChangedListenerAgents_.end(), windowManagerAgent);
-    if (iter == focusChangedListenerAgents_.end()) {
+    auto iter = std::find(windowManagerAgents_[type].begin(), windowManagerAgents_[type].end(), windowManagerAgent);
+    if (iter == windowManagerAgents_[type].end()) {
         WLOGFE("could not find this listener");
         return;
     }
-    focusChangedListenerAgents_.erase(iter);
+    windowManagerAgents_[type].erase(iter);
 }
 
-void WindowRoot::UnregisterFocusChangedListener(const sptr<IRemoteObject>& object)
+void WindowRoot::UnregisterWindowManagerAgent(const sptr<IRemoteObject>& object)
 {
-    for (auto iter = focusChangedListenerAgents_.begin(); iter < focusChangedListenerAgents_.end(); ++iter) {
-        if ((*iter)->AsObject() != nullptr && (*iter)->AsObject() == object) {
-            iter = focusChangedListenerAgents_.erase(iter);
+    for (auto agents : windowManagerAgents_) {
+        for (auto iter = agents.second.begin(); iter < agents.second.end(); ++iter) {
+            if ((*iter)->AsObject() != nullptr && (*iter)->AsObject() == object) {
+                iter = agents.second.erase(iter);
+            }
         }
     }
 }
@@ -270,7 +280,7 @@ void WindowRoot::UnregisterFocusChangedListener(const sptr<IRemoteObject>& objec
 void WindowRoot::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
     int32_t displayId, bool focused)
 {
-    for (auto& windowManagerAgent : focusChangedListenerAgents_) {
+    for (auto& windowManagerAgent : windowManagerAgents_[WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS]) {
         windowManagerAgent->UpdateFocusStatus(windowId, abilityToken, windowType, displayId, focused);
     }
 }
@@ -285,6 +295,16 @@ std::shared_ptr<RSSurfaceNode> WindowRoot::GetSurfaceNodeByAbilityToken(const sp
     }
     WLOGFE("could not find required abilityToken!");
     return nullptr;
+}
+
+void WindowRoot::UpdateSystemBarProperties(uint64_t displayId, const SystemBarProps& props)
+{
+    if (props.empty()) {
+        return;
+    }
+    for (auto& agent : windowManagerAgents_[WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR]) {
+        agent->UpdateSystemBarProperties(displayId, props);
+    }
 }
 
 void WindowRoot::OnRemoteDied(const sptr<IRemoteObject>& remoteObject)
@@ -306,7 +326,7 @@ void WindowRoot::ClearWindowManagerAgent(const sptr<IRemoteObject>& remoteObject
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    UnregisterFocusChangedListener(remoteObject);
+    UnregisterWindowManagerAgent(remoteObject);
     remoteObject->RemoveDeathRecipient(windowManagerAgentDeath_);
 }
 

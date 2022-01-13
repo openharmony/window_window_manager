@@ -31,7 +31,8 @@ namespace {
 }
 
 WindowNodeContainer::WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height,
-    UpdateFocusStatusFunc callback) : screenId_(screenId), focusStatusCallBack_(callback)
+    WindowNodeContainerCallbacks callbacks)
+    : screenId_(screenId), callbacks_(callbacks)
 {
     struct RSDisplayNodeConfig config = {screenId};
     displayNode_ = RSDisplayNode::Create(config);
@@ -303,7 +304,7 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
         if (node->abilityToken_ == nullptr) {
             WLOGFI("abilityToken is null, window : %{public}d", id);
         }
-        focusStatusCallBack_(node->GetWindowId(), node->abilityToken_, node->GetWindowType(),
+        callbacks_.focusStatusCallBack_(node->GetWindowId(), node->abilityToken_, node->GetWindowType(),
             node->GetDisplayId(), focused);
     }
 }
@@ -388,17 +389,19 @@ void WindowNodeContainer::NotifySystemBarIfChanged()
 {
     DumpScreenWindowTree();
     auto node = GetTopImmersiveNode();
+    SystemBarProps props;
     if (node == nullptr) { // use default system bar
+        WLOGFI("no immersive window on top");
         for (auto it : sysBarPropMap_) {
             if (it.second == SystemBarProperty()) {
                 continue;
             }
             sysBarPropMap_[it.first] = SystemBarProperty();
-            if (sysBarNodeMap_[it.first] != nullptr) {
-                sysBarNodeMap_[it.first]->GetWindowToken()->UpdateSystemBarProperty(SystemBarProperty());
-            }
+            std::pair<WindowType, SystemBarProperty> item = { it.first, SystemBarProperty() };
+            props.emplace_back(item);
         }
     } else { // use node-defined system bar
+        WLOGFI("top immersive window id: %{public}d", node->GetWindowId());
         auto& sysBarPropMap = node->GetSystemBarProperty();
         for (auto it : sysBarPropMap_) {
             if (sysBarPropMap.find(it.first) == sysBarPropMap.end()) {
@@ -413,11 +416,11 @@ void WindowNodeContainer::NotifySystemBarIfChanged()
                 node->GetWindowId(), static_cast<int32_t>(it.first),
                 prop.enable_, prop.backgroundColor_, prop.contentColor_);
             sysBarPropMap_[it.first] = prop;
-            if (sysBarNodeMap_[it.first] != nullptr) {
-                sysBarNodeMap_[it.first]->GetWindowToken()->UpdateSystemBarProperty(prop);
-            }
+            std::pair<WindowType, SystemBarProperty> item = { it.first, prop };
+            props.emplace_back(item);
         }
     }
+    callbacks_.systemBarChangedCallBack_(screenId_, props);
 }
 
 void WindowNodeContainer::TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes)
@@ -513,11 +516,11 @@ sptr<WindowNode> WindowNodeContainer::FindSplitPairNode(sptr<WindowNode>& trigge
         }
     }
     return nullptr;
-
 }
 
 void WindowNodeContainer::HandleModeChangeToSplit(sptr<WindowNode>& triggerNode)
 {
+    WM_FUNCTION_TRACE();
     WLOGFI("HandleModeChangeToSplit %{public}d", triggerNode->GetWindowId());
     auto pairNode = FindSplitPairNode(triggerNode);
     if (pairNode != nullptr) {
@@ -598,6 +601,5 @@ void WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sp
     // Rect dividerRect = displayRects_->GetDividerRect();
     // SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_CREATE_DIVIDER, screenId_, dividerRect);
 }
-
 }
 }

@@ -42,8 +42,10 @@ public:
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) override;
     WMError MinimizeAllAppNodeAbility(uint32_t windowId) override;
 
-    void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent) override;
-    void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    void RegisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    void UnregisterWindowManagerAgent(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent) override;
 
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;

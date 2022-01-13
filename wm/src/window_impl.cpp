@@ -468,10 +468,6 @@ void WindowImpl::RegisterWindowChangeListener(sptr<IWindowChangeListener>& liste
     windowChangeListener_ = listener;
 }
 
-void WindowImpl::RegisterWindowSystemBarChangeListener(sptr<IWindowSystemBarChangeListener>& listener)
-{
-    systemBarChangeListener_ = listener;
-}
 void WindowImpl::UpdateRect(const struct Rect& rect)
 {
     WLOGFI("winId:%{public}d, rect[%{public}d, %{public}d, %{public}d, %{public}d]", GetWindowId(), rect.posX_,
@@ -549,16 +545,6 @@ void WindowImpl::UpdateFocusStatus(bool focused)
         NotifyAfterFocused();
     } else {
         NotifyAfterUnFocused();
-    }
-}
-
-void WindowImpl::UpdateSystemBarProperty(const SystemBarProperty& prop)
-{
-    WLOGFI("winId:%{public}d, enable:%{public}d, backgroundColor:%{public}x, contentColor:%{public}x", GetWindowId(),
-        prop.enable_, prop.backgroundColor_, prop.contentColor_);
-    if (systemBarChangeListener_ != nullptr) {
-        systemBarChangeListener_->OnSystemBarPropertyChange(property_->GetDisplayId(),
-            property_->GetWindowType(), prop);
     }
 }
 

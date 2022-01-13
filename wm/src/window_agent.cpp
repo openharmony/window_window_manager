@@ -57,14 +57,5 @@ void WindowAgent::UpdateFocusStatus(bool focused)
     }
     window_->UpdateFocusStatus(focused);
 }
-
-void WindowAgent::UpdateSystemBarProperty(const SystemBarProperty& prop)
-{
-    if (window_ == nullptr) {
-        WLOGFE("window_ is nullptr");
-        return;
-    }
-    window_->UpdateSystemBarProperty(prop);
-}
 } // namespace Rosen
 } // namespace OHOS

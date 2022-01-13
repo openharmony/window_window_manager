@@ -1,0 +1,150 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+module_out_path = "window_manager/wm"
+
+group("unittest") {
+  testonly = true
+
+  deps = [
+    ":wm_input_transfer_station_test",
+    ":wm_window_impl_test",
+    ":wm_window_input_channel_test",
+    ":wm_window_option_test",
+    ":wm_window_scene_test",
+    ":wm_window_test",
+  ]
+}
+
+## UnitTest wm_window_impl_test {{{
+ohos_unittest("wm_window_impl_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_impl_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+}
+
+## UnitTest wm_window_impl_test }}}
+
+## UnitTest wm_input_transfer_station_test {{{
+ohos_unittest("wm_input_transfer_station_test") {
+  module_out_path = module_out_path
+
+  sources = [ "input_transfer_station_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+}
+
+## UnitTest wm_input_transfer_station_test }}}
+
+## UnitTest wm_window_input_channel_test {{{
+ohos_unittest("wm_window_input_channel_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_input_channel_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+}
+
+## UnitTest wm_window_input_channel_test }}}
+
+## UnitTest wm_window_option_test {{{
+ohos_unittest("wm_window_option_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_option_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+}
+
+## UnitTest wm_window_option_test }}}
+
+## UnitTest wm_window_scene_test {{{
+ohos_unittest("wm_window_scene_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_scene_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+}
+
+## UnitTest wm_window_scene_test }}}
+
+## UnitTest wm_window_test {{{
+ohos_unittest("wm_window_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+}
+
+## UnitTest wm_window_test }}}
+
+## Build wm_unittest_common.a {{{
+config("wm_unittest_common_public_config") {
+  include_dirs = [
+    "//foundation/windowmanager/wm/include",
+    "//foundation/windowmanager/wmserver/include",
+    "//foundation/windowmanager/interfaces/innerkits/wm",
+    "//foundation/windowmanager/utils/include",
+    "//utils/native/base/include",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//third_party/googletest/googlemock/include",
+
+    # for abilityContext
+    "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
+    "//foundation/appexecfwk/standard/kits/appkit/native/ability_runtime/context",
+    "//base/global/resmgr_standard/interfaces/innerkits/include",
+    "//third_party/node/deps/icu-small/source/common",
+    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
+    "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/base/include",
+
+    # abilityContext end
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-g3",
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+}
+
+ohos_static_library("wm_unittest_common") {
+  visibility = [ ":*" ]
+  testonly = true
+
+  public_configs = [ ":wm_unittest_common_public_config" ]
+
+  public_deps = [
+    "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
+    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
+    "//foundation/windowmanager/wm:libwm",
+    "//foundation/windowmanager/wm:libwmutil",
+    "//foundation/windowmanager/wmserver:libwms",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = [ "aafwk_standard:ability_context_native" ]
+}
+## Build wm_unittest_common.a }}}
