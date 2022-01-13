@@ -591,7 +591,8 @@ void WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sp
                 triggerNode->GetWindowId(), pairNode->GetWindowId(), triggerMode, pairMode, splitRatio);
         }
     }
-    pairedWindowMap_.insert({triggerNode->GetWindowId(), {pairNode, splitRatio}});
+
+    pairedWindowMap_.insert(std::pair<uint32_t, WindowPairInfo>(triggerNode->GetWindowId(), {pairNode, splitRatio}));
     pairedWindowMap_.insert({pairNode->GetWindowId(), {triggerNode, 1 - splitRatio}});
     // displayRects_->SetSplitRect(splitRatio);
     // Rect dividerRect = displayRects_->GetDividerRect();

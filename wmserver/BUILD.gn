@@ -20,6 +20,7 @@ config("libwms_config") {
 
   include_dirs = [
     "include",
+    "include/window_snapshot",
     "//utils/system/safwk/native/include",
     "//base/notification/ces_standard/cesfwk/innerkits/include",
     "//foundation/windowmanager/interfaces/innerkits/wm",
@@ -42,6 +43,7 @@ ohos_shared_library("libwms") {
     "../dmserver/src/display_manager_stub.cpp",
     "../dmserver/src/display_node_control.cpp",
     "../dmserver/src/display_power_controller.cpp",
+    "../wm/src/window_proxy.cpp",
     "../wm/src/zidl/window_manager_agent_proxy.cpp",
     "src/input_window_monitor.cpp",
     "src/window_controller.cpp",
@@ -52,6 +54,9 @@ ohos_shared_library("libwms") {
     "src/window_node.cpp",
     "src/window_node_container.cpp",
     "src/window_root.cpp",
+    "src/window_snapshot/snapshot_controller.cpp",
+    "src/window_snapshot/snapshot_proxy.cpp",
+    "src/window_snapshot/snapshot_stub.cpp",
     "src/window_zorder_policy.cpp",
   ]
 
@@ -62,6 +67,8 @@ ohos_shared_library("libwms") {
     "//base/notification/ces_standard/frameworks/native:cesfwk_innerkits",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "//foundation/graphic/standard:libsurface",
+    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
     "//utils/native/base:utils",
   ]
 

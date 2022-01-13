@@ -84,7 +84,7 @@ private:
     uint32_t focusedWindow_ { 0 };
     Rect displayRect_;
     uint64_t screenId_ = 0;
-    const float DEFAULT_WINDOW_SPLIT_RATIO = 0.5; //default split ratio
+    const float DEFAULT_WINDOW_SPLIT_RATIO = 0.5; // default split ratio
     UpdateFocusStatusFunc focusStatusCallBack_;
     void DumpScreenWindowTree();
 

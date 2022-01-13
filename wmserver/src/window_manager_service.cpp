@@ -19,6 +19,7 @@
 
 #include <ipc_skeleton.h>
 #include <system_ability_definition.h>
+#include <ability_manager_client.h>
 
 #include "dm_common.h"
 #include "window_manager_hilog.h"
@@ -38,6 +39,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
         std::bind(&WindowManagerService::OnWindowEvent, this, std::placeholders::_1, std::placeholders::_2));
     windowController_ = new WindowController(windowRoot_);
     inputWindowMonitor_ = new InputWindowMonitor(windowRoot_);
+    snapshotController_ = new SnapshotController(windowRoot_);
 }
 
 void WindowManagerService::OnStart()
@@ -46,6 +48,15 @@ void WindowManagerService::OnStart()
     if (!Init()) {
         return;
     }
+    RegisterSnapshotHandler();
+}
+
+void WindowManagerService::RegisterSnapshotHandler()
+{
+    if (!snapshotController_) {
+        snapshotController_ = new SnapshotController(windowRoot_);
+    }
+    AAFwk::AbilityManagerClient::GetInstance()->RegisterSnapshotHandler(snapshotController_);
 }
 
 bool WindowManagerService::Init()

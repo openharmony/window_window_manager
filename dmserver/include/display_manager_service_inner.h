@@ -20,12 +20,12 @@
 #include <system_ability.h>
 
 #include "abstract_display.h"
-#include "single_instance.h"
+#include "wm_single_instance.h"
 #include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
 class DisplayManagerServiceInner {
-DECLARE_SINGLE_INSTANCE(DisplayManagerServiceInner);
+WM_DECLARE_SINGLE_INSTANCE(DisplayManagerServiceInner);
 
 public:
     std::vector<const sptr<AbstractDisplay>> GetAllDisplays();

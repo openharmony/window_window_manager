@@ -156,7 +156,7 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
         // change split mode to other
         node->SetWindowMode(dstMode);
         res = windowRoot_->HandleSplitWindowModeChange(node, false);
-    } else if(!node->IsSplitMode() &&
+    } else if (!node->IsSplitMode() &&
         (dstMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || dstMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
         // change other mode to split
         node->SetWindowMode(dstMode);

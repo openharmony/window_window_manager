@@ -13,19 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_WINDOW_MANAGER_SERVICE_INNER_H
-#define OHOS_WINDOW_MANAGER_SERVICE_INNER_H
+#ifndef OHOS_SNAPSHOT_PROXY_H
+#define OHOS_SNAPSHOT_PROXY_H
 
-#include "wm_single_instance.h"
+#include <pixel_map.h>
+#include <snapshot.h>
+#include <iremote_proxy.h>
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
-class WindowManagerServiceInner {
-WM_DECLARE_SINGLE_INSTANCE(WindowManagerServiceInner)
+class SnapshotProxy : public IRemoteProxy<AAFwk::ISnapshotHandler> {
 public:
-    bool NotifyDisplaySuspend();
-    void RestoreSuspendedWindows();
+    explicit SnapshotProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<AAFwk::ISnapshotHandler>(impl) {};
+    ~SnapshotProxy() = default;
+    int32_t GetSnapshot(const sptr<IRemoteObject> &token, AAFwk::Snapshot& snapshot) override;
+
+private:
+    static inline BrokerDelegator<SnapshotProxy> delegator_;
 };
 }
 }
-#endif // OHOS_WINDOW_MANAGER_SERVICE_INNER_H
+#endif // OHOS_SNAPSHOT_PROXY_H

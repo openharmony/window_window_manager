@@ -25,12 +25,12 @@
 #include <refbase.h>
 #include <vsync_helper.h>
 
-#include "single_instance.h"
+#include "wm_single_instance.h"
 
 namespace OHOS {
 namespace Rosen {
 class VsyncStation {
-DECLARE_SINGLE_INSTANCE_BASE(VsyncStation);
+WM_DECLARE_SINGLE_INSTANCE_BASE(VsyncStation);
 using OnCallback = std::function<void(int64_t)>;
 public:
     enum class CallbackType {

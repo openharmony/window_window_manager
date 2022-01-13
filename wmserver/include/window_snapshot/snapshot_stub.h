@@ -13,27 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_STATIC_CALL_H
-#define OHOS_STATIC_CALL_H
+#ifndef OHOS_SNAPSHOT_STUB_H
+#define OHOS_SNAPSHOT_STUB_H
 
-#include <iremote_object.h>
-#include "singleton_delegator.h"
-#include "single_instance.h"
-#include "window.h"
-#include "window_option.h"
+#include <pixel_map.h>
+#include <snapshot.h>
+#include <iremote_stub.h>
+
 namespace OHOS {
+using namespace AAFwk;
 namespace Rosen {
-class StaticCall {
-DECLARE_SINGLE_INSTANCE_BASE(StaticCall);
+class SnapshotStub : public IRemoteStub<AAFwk::ISnapshotHandler> {
 public:
-    virtual sptr<Window> CreateWindow(const std::string& windowName,
-        sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr);
-protected:
-    StaticCall() = default;
-private:
-    static inline SingletonDelegator<StaticCall> delegator_;
+    SnapshotStub() = default;
+    ~SnapshotStub() = default;
+    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+        MessageOption &option) override;
 };
-} // namespace ROSEN
-} // namespace OHOS
-
-#endif // FRAMEWORKS_WM_TEST_UT_STATIC_CALL_H
+}
+}
+#endif // OHOS_SNAPSHOT_STUB_H
