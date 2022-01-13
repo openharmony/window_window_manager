@@ -46,6 +46,8 @@ public:
     virtual WMError RequestFocus(uint32_t windowId);
     virtual WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
     virtual WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
+    virtual WMError SetWindowMode(uint32_t windowId, WindowMode mode);
+    virtual WMError MinimizeAllAppNodeAbility(uint32_t windowId);
 
     virtual void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);

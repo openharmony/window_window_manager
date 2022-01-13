@@ -140,22 +140,51 @@ WMError WindowController::RequestFocus(uint32_t windowId)
     return windowRoot_->RequestFocus(windowId);
 }
 
-WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode mode)
+WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto property = node->GetWindowProperty();
-    property->SetWindowMode(mode);
-    WMError res = windowRoot_->UpdateWindowNode(windowId);
+
+    if (node->GetWindowMode() == dstMode) {
+        return WMError::WM_OK;
+    }
+    WMError res = WMError::WM_OK;
+    if (node->IsSplitMode()) {
+        // change split mode to other
+        node->SetWindowMode(dstMode);
+        res = windowRoot_->HandleSplitWindowModeChange(node, false);
+    } else if(!node->IsSplitMode() &&
+        (dstMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || dstMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
+        // change other mode to split
+        node->SetWindowMode(dstMode);
+        res = windowRoot_->HandleSplitWindowModeChange(node, true);
+    } else {
+        node->SetWindowMode(dstMode);
+    }
+    if (res != WMError::WM_OK) {
+        WLOGFE("HandleSplitWindowModeChange failed, resume last window mode");
+        node->GetWindowProperty()->ResumeLastWindowMode();
+        return res;
+    }
+    res = windowRoot_->UpdateWindowNode(windowId);
     if (res != WMError::WM_OK) {
         return res;
     }
     RSTransaction::FlushImplicitTransaction();
-    WLOGFI("SetWindowMode FlushImplicitTransaction end");
-    return res;
+    return WMError::WM_OK;
+}
+
+WMError WindowController::MinimizeAllAppNodeAbility(uint32_t windowId)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("Count node find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return windowRoot_->MinimizeAllAppNodeAbility(node);
 }
 
 WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)

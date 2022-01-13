@@ -40,11 +40,13 @@ public:
     WMError SetFocusWindow(uint32_t windowId);
     uint32_t GetFocusWindow() const;
     WMError MinimizeOtherFullScreenAbility(); // adapt to api7
+    WMError MinimizeAllAppNodeAbility();
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes);
     uint64_t GetScreenId() const;
     Rect GetDisplayRect() const;
     sptr<WindowNode> GetTopImmersiveNode() const;
     void NotifySystemBarIfChanged();
+    void HandleSplitWindowModeChange(sptr<WindowNode>& triggerNode, bool isChangeToSplit);
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
@@ -55,6 +57,13 @@ private:
     void UpdateFocusStatus(uint32_t id, bool focused) const;
     void UpdateWindowTree(sptr<WindowNode>& node);
     bool UpdateRSTree(sptr<WindowNode>& node, bool isAdd);
+
+    void SendSplitScreenEvent(WindowMode mode);
+    sptr<WindowNode> FindSplitPairNode(sptr<WindowNode>& node) const;
+    void HandleModeChangeToSplit(sptr<WindowNode>& triggerNode);
+    void HandleModeChangeFromSplit(sptr<WindowNode>& triggerNode);
+    void UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode);
+
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
     sptr<WindowNode> belowAppWindowNode_ = new WindowNode();
     sptr<WindowNode> appWindowNode_ = new WindowNode();
@@ -75,8 +84,15 @@ private:
     uint32_t focusedWindow_ { 0 };
     Rect displayRect_;
     uint64_t screenId_ = 0;
+    const float DEFAULT_WINDOW_SPLIT_RATIO = 0.5; //default split ratio
     UpdateFocusStatusFunc focusStatusCallBack_;
     void DumpScreenWindowTree();
+
+    struct WindowPairInfo {
+        sptr<WindowNode> pairNode;
+        float splitRatio;
+    };
+    std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
 };
 }
 }

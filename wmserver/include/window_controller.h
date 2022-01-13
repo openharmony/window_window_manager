@@ -36,10 +36,11 @@ public:
     WMError Resize(uint32_t windowId, uint32_t width, uint32_t height);
     WMError RequestFocus(uint32_t windowId);
     WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId);
-    WMError SetWindowMode(uint32_t windowId, WindowMode mode);
+    WMError SetWindowMode(uint32_t windowId, WindowMode dstMode);
     WMError SetWindowType(uint32_t windowId, WindowType type);
     WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
+    WMError MinimizeAllAppNodeAbility(uint32_t windowId);
 
     void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
     void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);

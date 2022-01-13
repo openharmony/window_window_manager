@@ -103,6 +103,16 @@ WMError WindowRoot::MinimizeOtherFullScreenAbility(sptr<WindowNode>& node)
     return container->MinimizeOtherFullScreenAbility();
 }
 
+WMError WindowRoot::MinimizeAllAppNodeAbility(sptr<WindowNode>& node)
+{
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("Minimize all app node ability failed, window container could not be found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return container->MinimizeAllAppNodeAbility();
+}
+
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
 {
     if (node == nullptr) {
@@ -148,6 +158,17 @@ WMError WindowRoot::UpdateWindowNode(uint32_t windowId)
         return WMError::WM_ERROR_NULLPTR;
     }
     return container->UpdateWindowNode(node);
+}
+
+WMError WindowRoot::HandleSplitWindowModeChange(sptr<WindowNode>& node, bool isSplitIn)
+{
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("HandleSplitWindowModeChange failed, window container could not be found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    container->HandleSplitWindowModeChange(node, isSplitIn);
+    return WMError::WM_OK;
 }
 
 WMError WindowRoot::DestroyWindow(uint32_t windowId)
