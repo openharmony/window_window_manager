@@ -35,7 +35,7 @@ public:
     RSScreenModeInfo GetScreenActiveMode(ScreenId id);
     ScreenId CreateVirtualScreen(const VirtualDisplayInfo &virtualDisplayInfo, sptr<Surface> surface);
     bool DestroyVirtualScreen(ScreenId screenId);
-    sptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId);
+    std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId, ScreenId screenId);
 
 private:
     AbstractDisplayController();
@@ -43,6 +43,30 @@ private:
     void parepareRSScreenManger();
 
     OHOS::Rosen::RSInterfaces *rsInterface_;
+
+    class ScreenshotCallback : public SurfaceCaptureCallback {
+    public:
+        ScreenshotCallback() = default;
+        ~ScreenshotCallback() {};
+        void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelmap) override
+        {
+            if (flag_ == false) {
+                flag_ = true;
+                pixelMap_ = pixelmap;
+            }
+        }
+        bool IsPixelMapOk()
+        {
+            return flag_;
+        }
+        std::shared_ptr<Media::PixelMap> GetPixelMap()
+        {
+            return pixelMap_;
+        }
+    private:
+        bool flag_ = false;
+        std::shared_ptr<Media::PixelMap> pixelMap_ = nullptr;
+    };
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_CONTROLLER_H
