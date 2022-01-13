@@ -61,6 +61,16 @@ void Display::SetFreshRate(uint32_t freshRate)
     freshRate_ = freshRate;
 }
 
+float Display::GetVirtualPixelRatio() const
+{
+    // TODO: Should get from DMS
+#ifdef PRODUCT_RK
+    return 1.0f;
+#else
+    return 2.0f;
+#endif
+}
+
 void Display::SetId(DisplayId id)
 {
     id_ = id;
