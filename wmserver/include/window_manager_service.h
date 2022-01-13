@@ -23,17 +23,18 @@
 #include <nocopyable.h>
 #include <system_ability.h>
 #include "singleton_delegator.h"
-#include "single_instance.h"
+#include "wm_single_instance.h"
 #include "window_controller.h"
 #include "window_manager_stub.h"
 #include "window_root.h"
+#include "snapshot_controller.h"
 
 namespace OHOS {
 namespace Rosen {
 class WindowManagerService : public SystemAbility, public WindowManagerStub {
 DECLARE_SYSTEM_ABILITY(WindowManagerService);
 
-DECLARE_SINGLE_INSTANCE_BASE(WindowManagerService);
+WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManagerService);
 
 public:
     void OnStart() override;
@@ -67,12 +68,14 @@ protected:
 
 private:
     bool Init();
+    void RegisterSnapshotHandler();
     void OnWindowEvent(Event event, uint32_t windowId);
     static inline SingletonDelegator<WindowManagerService> delegator;
     std::recursive_mutex mutex_;
     sptr<WindowRoot> windowRoot_;
     sptr<WindowController> windowController_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
+    sptr<SnapshotController> snapshotController_;
     const int WAITING_RS_TIME = 10;
 };
 }

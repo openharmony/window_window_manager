@@ -73,6 +73,8 @@ public:
     void RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
     void UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent);
 
+    std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
+
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     void ClearWindowManagerAgent(const sptr<IRemoteObject>& remoteObject);

@@ -13,19 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_WINDOW_MANAGER_SERVICE_INNER_H
-#define OHOS_WINDOW_MANAGER_SERVICE_INNER_H
+#ifndef OHOS_STATIC_CALL_H
+#define OHOS_STATIC_CALL_H
 
+#include <iremote_object.h>
+#include "singleton_delegator.h"
 #include "wm_single_instance.h"
-
+#include "window.h"
+#include "window_option.h"
 namespace OHOS {
 namespace Rosen {
-class WindowManagerServiceInner {
-WM_DECLARE_SINGLE_INSTANCE(WindowManagerServiceInner)
+class StaticCall {
+WM_DECLARE_SINGLE_INSTANCE_BASE(StaticCall);
 public:
-    bool NotifyDisplaySuspend();
-    void RestoreSuspendedWindows();
+    virtual sptr<Window> CreateWindow(const std::string& windowName,
+        sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr);
+protected:
+    StaticCall() = default;
+private:
+    static inline SingletonDelegator<StaticCall> delegator_;
 };
-}
-}
-#endif // OHOS_WINDOW_MANAGER_SERVICE_INNER_H
+} // namespace ROSEN
+} // namespace OHOS
+
+#endif // FRAMEWORKS_WM_TEST_UT_STATIC_CALL_H

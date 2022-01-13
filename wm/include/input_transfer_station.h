@@ -16,12 +16,11 @@
 #ifndef OHOS_INPUT_TRANSFER_STATION
 #define OHOS_INPUT_TRANSFER_STATION
 
-
-#include <single_instance.h>
 #include "input_manager.h"
 #include "pointer_event.h"
 #include "window.h"
 #include "window_input_channel.h"
+#include "wm_single_instance.h"
 #include "vsync_station.h"
 
 namespace OHOS {
@@ -29,7 +28,7 @@ namespace Rosen {
 class InputEventListener;
 
 class InputTransferStation {
-DECLARE_SINGLE_INSTANCE(InputTransferStation);
+WM_DECLARE_SINGLE_INSTANCE(InputTransferStation);
 friend class InputEventListener;
 public:
     void AddInputWindow(const sptr<Window>& window);

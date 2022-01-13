@@ -22,7 +22,7 @@
 
 #include "display.h"
 #include "dm_common.h"
-#include "single_instance.h"
+#include "wm_single_instance.h"
 #include "virtual_display_info.h"
 // #include "wm_common.h"
 
@@ -31,7 +31,7 @@ namespace OHOS::Rosen {
 class DisplayManagerAdapter;
 
 class DisplayManager {
-DECLARE_SINGLE_INSTANCE(DisplayManager);
+WM_DECLARE_SINGLE_INSTANCE(DisplayManager);
 public:
     std::vector<const sptr<Display>> GetAllDisplays();
 
