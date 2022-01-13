@@ -14,6 +14,9 @@
  */
 
 #include "display_manager.h"
+
+#include <cinttypes>
+
 #include "native_display_module.h"
 #include "wm_common.h"
 #include "wm_napi_common.h"
@@ -34,7 +37,7 @@ void Async(napi_env env, std::unique_ptr<Param> &param)
         param->wret = WMError::WM_ERROR_NULLPTR;
         return;
     }
-    GNAPI_LOG("GetDefaultDisplay: id %{public}llu, w %{public}d, h %{public}d",
+    GNAPI_LOG("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d",
         param->display->GetId(), param->display->GetWidth(), param->display->GetHeight());
     param->wret = WMError::WM_OK;
 }
@@ -50,7 +53,7 @@ napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
     DisplayId id = param->display->GetId();
     int32_t width = param->display->GetWidth();
     int32_t height = param->display->GetHeight();
-    GNAPI_LOG("id        : %{public}llu", id);
+    GNAPI_LOG("id        : %{public}" PRIu64"", id);
     GNAPI_LOG("width     : %{public}d", width);
     GNAPI_LOG("height    : %{public}d", height);
 
