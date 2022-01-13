@@ -24,6 +24,7 @@
           "//foundation/windowmanager/wm:libwm",
           "//foundation/windowmanager/wmserver:libwms",
           "//foundation/windowmanager/wm:libwmutil",
+          "//foundation/windowmanager/snapshot:snapshot_display",
           "//foundation/windowmanager/interfaces/kits/napi:windowstage",
           "//foundation/windowmanager/interfaces/kits/napi:napi_packages"
         ],
