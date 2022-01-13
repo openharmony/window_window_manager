@@ -48,6 +48,7 @@ private:
     VsyncStation() = default;
     static void OnVsync(int64_t nanoTimestamp, void* client);
     void VsyncCallbackInner(int64_t nanoTimestamp);
+    const std::string VSYNC_THREAD_ID = "vsync_thread";
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_ = nullptr;
     std::mutex lock_;
     std::atomic_bool hasRequestedVsync_ {false};
