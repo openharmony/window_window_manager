@@ -20,8 +20,8 @@
 #include <zidl/window_manager_agent_interface.h>
 
 #include "window.h"
-#include "window_proxy.h"
-#include "single_instance.h"
+#include "window_interface.h"
+#include "wm_single_instance.h"
 #include "singleton_delegator.h"
 #include "window_property.h"
 #include "window_manager_interface.h"
@@ -33,7 +33,7 @@ public:
 };
 
 class WindowAdapter {
-DECLARE_SINGLE_INSTANCE(WindowAdapter);
+WM_DECLARE_SINGLE_INSTANCE(WindowAdapter);
 public:
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
         std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId);

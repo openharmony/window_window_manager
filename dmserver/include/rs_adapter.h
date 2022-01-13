@@ -21,7 +21,7 @@
 
 #include <rs_irender_service.h>
 
-#include "single_instance.h"
+#include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
 class DMSDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -32,7 +32,7 @@ private:
 };
 
 class RsAdapter : public RefBase {
-    DECLARE_SINGLE_INSTANCE_BASE(RsAdapter);
+    WM_DECLARE_SINGLE_INSTANCE_BASE(RsAdapter);
 public:
     void Clear();
 private:
