@@ -30,14 +30,12 @@ public:
         TRANS_ID_UPDATE_WINDOW_RECT,
         TRANS_ID_UPDATE_WINDOW_MODE,
         TRANS_ID_UPDATE_FOCUS_STATUS,
-        TRANS_ID_UPDATE_SYSTEM_BAR_PROPERTY,
     };
 
     virtual void UpdateWindowProperty(const WindowProperty& windowProperty) = 0;
     virtual void UpdateWindowRect(const struct Rect& rect) = 0;
     virtual void UpdateWindowMode(WindowMode mode) = 0;
     virtual void UpdateFocusStatus(bool focused) = 0;
-    virtual void UpdateSystemBarProperty(const SystemBarProperty& prop) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

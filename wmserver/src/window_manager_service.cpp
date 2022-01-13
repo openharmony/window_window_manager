@@ -205,24 +205,25 @@ WMError WindowManagerService::SaveAbilityToken(const sptr<IRemoteObject>& abilit
     return windowController_->SaveAbilityToken(abilityToken, windowId);
 }
 
-void WindowManagerService::RegisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
-{
-    if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
-        WLOGFE("failed to get window manager agent");
-        return;
-    }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    windowController_->RegisterFocusChangedListener(windowManagerAgent);
-}
-
-void WindowManagerService::UnregisterFocusChangedListener(const sptr<IWindowManagerAgent>& windowManagerAgent)
+void WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
         WLOGFE("windowManagerAgent is null");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    windowController_->UnregisterFocusChangedListener(windowManagerAgent);
+    windowController_->RegisterWindowManagerAgent(type, windowManagerAgent);
+}
+void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    const sptr<IWindowManagerAgent>& windowManagerAgent)
+{
+    if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
+        WLOGFE("windowManagerAgent is null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    windowController_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 }
 
 void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)

@@ -71,7 +71,6 @@ public:
 
     virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) override;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
-    virtual void RegisterWindowSystemBarChangeListener(sptr<IWindowSystemBarChangeListener>& listener) override;
 
     void UpdateRect(const struct Rect& rect);
     void UpdateMode(WindowMode mode);
@@ -79,7 +78,6 @@ public:
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
     virtual void RequestFrame() override;
     void UpdateFocusStatus(bool focused);
-    void UpdateSystemBarProperty(const SystemBarProperty& prop);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
     virtual WMError SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext> context,
@@ -130,7 +128,6 @@ private:
     WindowState state_ { STATE_INITIAL };
     sptr<IWindowLifeCycle> lifecycleListener_;
     sptr<IWindowChangeListener> windowChangeListener_;
-    sptr<IWindowSystemBarChangeListener> systemBarChangeListener_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;
