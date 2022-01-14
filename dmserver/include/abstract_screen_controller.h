@@ -27,38 +27,43 @@
 
 namespace OHOS::Rosen {
 class AbstractScreenController : public RefBase {
-using OnAbstractScreenCallback = std::function<void(ScreenId)>;
-struct AbstractScreenCallback : public RefBase {
-    OnAbstractScreenCallback onConnected_;
-    OnAbstractScreenCallback onDisconnected_;
-    OnAbstractScreenCallback onChanged_;
-};
-
+using OnAbstractScreenCallback = std::function<void(sptr<AbstractScreen>)>;
 public:
+    struct AbstractScreenCallback : public RefBase {
+        OnAbstractScreenCallback onConnected_;
+        OnAbstractScreenCallback onDisconnected_;
+        OnAbstractScreenCallback onChanged_;
+    };
+
     AbstractScreenController(std::recursive_mutex& mutex);
     ~AbstractScreenController();
 
+    void Init();
     std::vector<ScreenId> GetAllScreenIds();
-    std::shared_ptr<std::vector<ScreenId>> ConvertToRsScreenId(ScreenId dmsScreenId);
-    std::shared_ptr<std::vector<ScreenId>> ConvertToDmsScreenId(ScreenId rsScreenId);
+    sptr<AbstractScreen> GetAbstractScreen(ScreenId dmsScreenId);
+    sptr<AbstractScreenGroup> GetAbstractScreenGroup(ScreenId dmsScreenId);
+    ScreenId ConvertToRsScreenId(ScreenId dmsScreenId);
+    ScreenId ConvertToDmsScreenId(ScreenId rsScreenId);
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
 
     std::map<ScreenId, sptr<AbstractScreen>> abstractDisplayMap_;
 
 private:
-    void PrepareRSScreenManger();
     void OnRsScreenChange(ScreenId rsScreenId, ScreenEvent screenEvent);
-    void AddToGroup(sptr<AbstractScreen> newScreen);
-    void AddAsFirstScreenLocked(sptr<AbstractScreen> newScreen);
+    bool FillAbstractScreen(sptr<AbstractScreen>& absScreen, ScreenId rsScreenId);
+    sptr<AbstractScreenGroup> AddToGroupLocked(sptr<AbstractScreen> newScreen);
+    sptr<AbstractScreenGroup> AddAsFirstScreenLocked(sptr<AbstractScreen> newScreen);
     void AddAsSuccedentScreenLocked(sptr<AbstractScreen> newScreen);
 
     std::recursive_mutex& mutex_;
     RSInterfaces& rsInterface_;
-    volatile ScreenId dmsScreenCount_;
-    std::map<ScreenId, std::shared_ptr<std::vector<ScreenId>>> rs2DmsScreenIdMap_;
-    std::map<ScreenId, std::shared_ptr<std::vector<ScreenId>>> dms2RsScreenIdMap_;
+    std::atomic<ScreenId> dmsScreenCount_;
+    // No AbstractScreenGroup
+    std::map<ScreenId, ScreenId> rs2DmsScreenIdMap_;
+    std::map<ScreenId, ScreenId> dms2RsScreenIdMap_;
     std::map<ScreenId, sptr<AbstractScreen>> dmsScreenMap_;
-    ScreenId defaultScreenId_ {INVALID_SCREEN_ID};
+    std::map<ScreenId, sptr<AbstractScreenGroup>> dmsScreenGroupMap_;
+    ScreenId defaultDmsScreenId_ { SCREEN_ID_INVALID };
     sptr<AbstractScreenCallback> abstractScreenCallback_;
 };
 } // namespace OHOS::Rosen

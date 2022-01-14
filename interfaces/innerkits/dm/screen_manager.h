@@ -34,6 +34,7 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenManager);
 public:
     sptr<Screen> GetScreenById(ScreenId id);
     std::vector<const sptr<Screen>> GetAllScreens();
+    void RegisterScreenChangeListener(sptr<IScreenChangeListener> listener);
     sptr<ScreenGroup> makeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     sptr<ScreenGroup> makeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     sptr<Screen> createVirtualScreen(VirtualScreenOption option);
