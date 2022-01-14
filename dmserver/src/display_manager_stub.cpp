@@ -71,9 +71,40 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             }
             reply.WriteParcelable(dispalySnapshot.GetRefPtr());
         }
+        case TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT: {
+            auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
+            auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
+            RegisterDisplayManagerAgent(agent, type);
+            break;
+        }
+        case TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT: {
+            auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
+            auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
+            UnregisterDisplayManagerAgent(agent, type);
+            break;
+        }
+        case TRANS_ID_WAKE_UP_BEGIN: {
+            PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+            reply.WriteBool(WakeUpBegin(reason));
+            break;
+        }
+        case TRANS_ID_WAKE_UP_END: {
+            reply.WriteBool(WakeUpEnd());
+            break;
+        }
         case TRANS_ID_SUSPEND_BEGIN: {
             PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
             reply.WriteBool(SuspendBegin(reason));
+            break;
+        }
+        case TRANS_ID_SUSPEND_END: {
+            reply.WriteBool(SuspendEnd());
+            break;
+        }
+        case TRANS_ID_SET_SCREEN_POWER_FOR_ALL: {
+            DisplayPowerState state = static_cast<DisplayPowerState>(data.ReadUint32());
+            PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
+            reply.WriteBool(SetScreenPowerForAll(state, reason));
             break;
         }
         case TRANS_ID_SET_DISPLAY_STATE: {
