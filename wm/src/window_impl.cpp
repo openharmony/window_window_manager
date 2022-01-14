@@ -206,8 +206,7 @@ const std::string& WindowImpl::GetContentInfo()
         WLOGFE("fail to GetContentInfo id: %{public}d", property_->GetWindowId());
         return "";
     }
-    // TODO: fix me - uiContent_->GetContentInfo()
-    return "";
+    return uiContent_->GetContentInfo();
 }
 
 WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
