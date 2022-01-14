@@ -51,6 +51,7 @@ napi_value WindowConstructor(napi_env env, napi_callback_info info)
 namespace ResetSize {
 struct Param {
     ::OHOS::AppExecFwk::Ability *ability;
+    WMError wret;
     int width;
     int height;
 };
@@ -59,9 +60,10 @@ void Async(napi_env env, std::unique_ptr<Param>& param)
 {
     if (param == nullptr || param->ability == nullptr || param->ability->GetWindow() == nullptr) {
         GNAPI_LOG("Error, use nullptr!)");
+        param->wret = WMError::WM_ERROR_NULLPTR;
         return;
     }
-    param->ability->GetWindow()->Resize(param->width, param->height);
+    param->wret = param->ability->GetWindow()->Resize(param->width, param->height);
 }
 
 napi_value MainFunc(napi_env env, napi_callback_info info)
@@ -88,6 +90,7 @@ napi_value MainFunc(napi_env env, napi_callback_info info)
 namespace MoveTo {
 struct Param {
     ::OHOS::AppExecFwk::Ability *ability;
+    WMError wret;
     int x;
     int y;
 };
@@ -96,9 +99,10 @@ void Async(napi_env env, std::unique_ptr<Param>& param)
 {
     if (param == nullptr || param->ability == nullptr || param->ability->GetWindow() == nullptr) {
         GNAPI_LOG("Error, use nullptr!)");
+        param->wret = WMError::WM_ERROR_NULLPTR;
         return;
     }
-    param->ability->GetWindow()->MoveTo(param->x, param->y);
+    param->wret = param->ability->GetWindow()->MoveTo(param->x, param->y);
 }
 
 napi_value MainFunc(napi_env env, napi_callback_info info)
@@ -125,7 +129,15 @@ napi_value MainFunc(napi_env env, napi_callback_info info)
 namespace SetWindowType {
 struct Param {
     ::OHOS::AppExecFwk::Ability *ability;
+    WMError wret;
     int windowType;
+};
+
+std::map<int32_t, WindowType> windowTypeMap {
+    { 0,  WindowType::WINDOW_TYPE_APP_MAIN_WINDOW     }, // 0  is TYPE_APP
+    { 30, WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW }, // 30 is TYPE_SYSTEM_ALERT
+    { 70, WindowType::WINDOW_TYPE_VOLUME_OVERLAY      }, // 70 is TYPE_SYSTEM_VOLUME
+    { 90, WindowType::WINDOW_TYPE_PANEL               }, // 90 is TYPE_SYSTEM_PANEL
 };
 
 void Async(napi_env env, std::unique_ptr<Param>& param)
@@ -134,7 +146,12 @@ void Async(napi_env env, std::unique_ptr<Param>& param)
         GNAPI_LOG("Error, use nullptr!)");
         return;
     }
-    param->ability->GetWindow()->SetWindowType(static_cast<WindowType>(param->windowType));
+    if (windowTypeMap.count(param->windowType) == 0) {
+        GNAPI_LOG("invalid window type");
+        param->wret = WMError::WM_ERROR_INVALID_PARAM;
+        return;
+    }
+    param->wret = param->ability->GetWindow()->SetWindowType(windowTypeMap.at(param->windowType));
 }
 
 void CreateWindowTypeObject(napi_env env, napi_value value)
