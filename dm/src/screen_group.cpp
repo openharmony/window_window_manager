@@ -24,7 +24,7 @@ private:
 
     std::vector<sptr<Screen>> children_;
     std::vector<Point> position_;
-    ScreenType type_ { ScreenType::SCREEN_ALONE };
+    ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
 };
 
 ScreenGroup::ScreenGroup()
@@ -36,9 +36,9 @@ ScreenGroup::~ScreenGroup()
 {
 }
 
-ScreenType ScreenGroup::GetType() const
+ScreenCombination ScreenGroup::GetCombination() const
 {
-    return pImpl_->type_;
+    return pImpl_->combination_;
 }
 
 std::vector<sptr<Screen>> ScreenGroup::GetChildren() const

@@ -31,7 +31,9 @@ namespace {
 
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<DisplayManagerService>());
 
-DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true)
+DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true),
+    abstractScreenController_(new AbstractScreenController(mutex_)),
+    abstractDisplayController_(new AbstractDisplayController(mutex_))
 {
 }
 
@@ -51,6 +53,8 @@ bool DisplayManagerService::Init()
         WLOGFW("DisplayManagerService::Init failed");
         return false;
     }
+    abstractScreenController_->Init();
+    abstractDisplayController_->Init(abstractScreenController_);
     WLOGFI("DisplayManagerService::Init success");
     return true;
 }
@@ -67,7 +71,7 @@ ScreenId DisplayManagerService::GetScreenIdFromDisplayId(DisplayId displayId)
 
 DisplayId DisplayManagerService::GetDefaultDisplayId()
 {
-    ScreenId screenId = AbstractDisplayController::GetInstance().GetDefaultScreenId();
+    ScreenId screenId = abstractDisplayController_->GetDefaultScreenId();
     WLOGFI("GetDefaultDisplayId %{public}" PRIu64"", screenId);
     return GetDisplayIdFromScreenId(screenId);
 }
@@ -76,7 +80,7 @@ DisplayInfo DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 {
     DisplayInfo displayInfo;
     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
-    auto screenModeInfo = AbstractDisplayController::GetInstance().GetScreenActiveMode(screenId);
+    auto screenModeInfo = abstractDisplayController_->GetScreenActiveMode(screenId);
     displayInfo.id_ = displayId;
     displayInfo.width_ = screenModeInfo.GetScreenWidth();
     displayInfo.height_ = screenModeInfo.GetScreenHeight();
@@ -90,7 +94,7 @@ DisplayId DisplayManagerService::CreateVirtualDisplay(const VirtualDisplayInfo &
     WLOGFI("name %{public}s, width %{public}u, height %{public}u, mirrotId %{public}" PRIu64", flags %{public}d",
         virtualDisplayInfo.name_.c_str(), virtualDisplayInfo.width_, virtualDisplayInfo.height_,
         virtualDisplayInfo.displayIdToMirror_, virtualDisplayInfo.flags_);
-    ScreenId screenId = AbstractDisplayController::GetInstance().CreateVirtualScreen(virtualDisplayInfo, surface);
+    ScreenId screenId = abstractDisplayController_->CreateVirtualScreen(virtualDisplayInfo, surface);
     return GetDisplayIdFromScreenId(screenId);
 }
 
@@ -98,14 +102,14 @@ bool DisplayManagerService::DestroyVirtualDisplay(DisplayId displayId)
 {
     WLOGFI("DisplayManagerService::DestroyVirtualDisplay");
     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
-    return AbstractDisplayController::GetInstance().DestroyVirtualScreen(screenId);
+    return abstractDisplayController_->DestroyVirtualScreen(screenId);
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
 {
     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
     std::shared_ptr<Media::PixelMap> screenSnapshot
-        = AbstractDisplayController::GetInstance().GetScreenSnapshot(displayId, screenId);
+        = abstractDisplayController_->GetScreenSnapshot(displayId, screenId);
     return screenSnapshot;
 }
 
@@ -233,6 +237,11 @@ void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayPowerController_.NotifyDisplayEvent(event);
+}
+
+sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenController()
+{
+    return abstractScreenController_;
 }
 
 void DMAgentDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
