@@ -46,6 +46,7 @@ ohos_shared_library("libwms") {
     "../wm/src/zidl/window_manager_agent_proxy.cpp",
     "src/input_window_monitor.cpp",
     "src/window_controller.cpp",
+    "src/window_inner_manager.cpp",
     "src/window_layout_policy.cpp",
     "src/window_manager_service.cpp",
     "src/window_manager_service_inner.cpp",
@@ -67,6 +68,7 @@ ohos_shared_library("libwms") {
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//foundation/graphic/standard:libsurface",
     "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
+    "//foundation/windowmanager/wm:libwm",
     "//utils/native/base:utils",
   ]
 
@@ -78,6 +80,7 @@ ohos_shared_library("libwms") {
     "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
 
     # RSSurface
+    "//foundation/ace/ace_engine/build/external_config/flutter/skia:ace_skia_ohos",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
 
     # IMS

@@ -14,6 +14,8 @@
  */
 
 #include "window_impl.h"
+
+#include <cmath>
 #include "display_manager.h"
 #include "singleton_container.h"
 #include "window_adapter.h"
@@ -506,8 +508,50 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
         }
     }
 }
+
+void WindowImpl::ConsumeDividerPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    static int32_t diffX = 0;
+    static int32_t diffY = 0;
+    static bool beginMove = false;
+    int32_t action = pointerEvent->GetPointerAction();
+    MMI::PointerEvent::PointerItem pointerItem;
+    switch (action) {
+        case MMI::PointerEvent::POINTER_ACTION_DOWN: {
+            if (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+                beginMove = true;
+                diffX = abs(pointerItem.GetGlobalX() - GetRect().posX_);
+                diffY = abs(pointerItem.GetGlobalY() - GetRect().posY_);
+                WLOGFI("point down divider, diff: [%{public}d, %{public}d]", diffX, diffY);
+            }
+            break;
+        }
+        case MMI::PointerEvent::POINTER_ACTION_MOVE: {
+            if (beginMove && (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem))) {
+                int32_t targetX = pointerItem.GetGlobalX() - diffX;
+                int32_t targetY = pointerItem.GetGlobalY() - diffY;
+                auto res = MoveTo(targetX, targetY);
+                if (res != WMError::WM_OK) {
+                    WLOGFE("move divider failed");
+                }
+            }
+            break;
+        }
+        case MMI::PointerEvent::POINTER_ACTION_UP:
+        case MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            beginMove = false;
+            break;
+        default:
+            break;
+    }
+}
+
 void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        ConsumeDividerPointerEvent(pointerEvent);
+        return;
+    }
     if (uiContent_ == nullptr) {
         WLOGE("ConsumePointerEvent uiContent is nullptr");
         return;
