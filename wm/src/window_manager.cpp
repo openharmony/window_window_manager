@@ -25,6 +25,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowManager"};
 }
+WM_IMPLEMENT_SINGLE_INSTANCE(WindowManager)
 
 class WindowManager::Impl {
 public:

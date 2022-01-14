@@ -18,6 +18,7 @@
 
 namespace OHOS {
 namespace Rosen {
+WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerServiceInner)
 
 bool WindowManagerServiceInner::NotifyDisplaySuspend()
 {
