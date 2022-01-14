@@ -38,6 +38,11 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             NotifyDisplayPowerEvent(event, status);
             break;
         }
+        case TRANS_ID_NOTIFY_DISPLAY_STATE_CHANGED: {
+            DisplayState state = static_cast<DisplayState>(data.ReadUint32());
+            NotifyDisplayStateChanged(state);
+            break;
+        }
         default:
             break;
     }

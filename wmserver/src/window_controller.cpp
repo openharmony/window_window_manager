@@ -261,17 +261,5 @@ std::vector<Rect> WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidA
     std::vector<Rect> avoidArea = windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
     return avoidArea;
 }
-
-void WindowController::RegisterWindowManagerAgent(WindowManagerAgentType type,
-    const sptr<IWindowManagerAgent>& windowManagerAgent)
-{
-    windowRoot_->RegisterWindowManagerAgent(type, windowManagerAgent);
-}
-
-void WindowController::UnregisterWindowManagerAgent(WindowManagerAgentType type,
-    const sptr<IWindowManagerAgent>& windowManagerAgent)
-{
-    windowRoot_->UnregisterWindowManagerAgent(type, windowManagerAgent);
-}
 }
 }
