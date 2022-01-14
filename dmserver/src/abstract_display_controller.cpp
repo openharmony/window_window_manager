@@ -26,7 +26,6 @@ namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "AbstractDisplayController"};
 }
-WM_IMPLEMENT_SINGLE_INSTANCE(AbstractDisplayController)
 
 AbstractDisplayController::AbstractDisplayController(std::recursive_mutex& mutex)
     : mutex_(mutex), rsInterface_(&(RSInterfaces::GetInstance()))
