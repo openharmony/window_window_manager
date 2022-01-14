@@ -23,6 +23,8 @@
 #include <surface.h>
 #include <transaction/rs_interfaces.h>
 
+#include "screen.h"
+#include "dm_common.h"
 #include "abstract_screen.h"
 
 namespace OHOS::Rosen {
@@ -45,6 +47,8 @@ public:
     ScreenId ConvertToRsScreenId(ScreenId dmsScreenId);
     ScreenId ConvertToDmsScreenId(ScreenId rsScreenId);
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
+    ScreenId CreateVirtualScreen(VirtualScreenOption option);
+    DMError DestroyVirtualScreen(ScreenId screenId);
 
     std::map<ScreenId, sptr<AbstractScreen>> abstractDisplayMap_;
 
@@ -56,7 +60,7 @@ private:
     void AddAsSuccedentScreenLocked(sptr<AbstractScreen> newScreen);
 
     std::recursive_mutex& mutex_;
-    RSInterfaces& rsInterface_;
+    OHOS::Rosen::RSInterfaces *rsInterface_;
     std::atomic<ScreenId> dmsScreenCount_;
     // No AbstractScreenGroup
     std::map<ScreenId, ScreenId> rs2DmsScreenIdMap_;

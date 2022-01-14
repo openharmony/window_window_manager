@@ -43,6 +43,20 @@ enum class DisplayState : uint32_t {
 enum class DisplayEvent : uint32_t {
     UNLOCK
 };
+
+enum class DMError : int32_t {
+    DM_OK = 0,
+    DM_ERROR_INIT_DMS_PROXY_LOCKED = 100,
+    DM_ERROR_IPC_FAILED = 101,
+    DM_ERROR_REMOTE_CREATE_FAILED = 110,
+    DM_ERROR_NULLPTR = 120,
+    DM_ERROR_INVALID_PARAM = 130,
+    DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED = 140,
+    DM_ERROR_DEATH_RECIPIENT = 150,
+    DM_ERROR_INVALID_MODE_ID = 160,
+    DM_ERROR_WRITE_DATA_FAILED = 170,
+    DM_ERROR_UNKNOWN,
+};
 using DisplayStateCallback = std::function<void(DisplayState)>;
 
 enum class DisplayPowerEvent : uint32_t {

@@ -20,6 +20,8 @@
 #include <surface.h>
 
 #include "display.h"
+#include "screen.h"
+#include "dm_common.h"
 #include "display_manager_interface.h"
 #include "singleton_delegator.h"
 
@@ -34,9 +36,9 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerAdapter);
 public:
     DisplayId GetDefaultDisplayId();
     sptr<Display> GetDisplayById(DisplayId displayId);
-    DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
-        sptr<Surface> surface);
-    bool DestroyVirtualDisplay(DisplayId displayId);
+
+    ScreenId CreateVirtualScreen(VirtualScreenOption option);
+    DMError DestroyVirtualScreen(ScreenId screenId);
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
 
     void RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
@@ -51,7 +53,7 @@ public:
     bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
     DisplayState GetDisplayState(uint64_t displayId);
     void NotifyDisplayEvent(DisplayEvent event);
-
+    DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId);
     void Clear();
 
 private:
