@@ -457,5 +457,10 @@ Rect WindowNodeContainer::GetDisplayRect() const
 {
     return displayRect_;
 }
+
+std::shared_ptr<RSDisplayNode> WindowNodeContainer::GetDisplayNode() const
+{
+    return displayNode_;
+}
 }
 }

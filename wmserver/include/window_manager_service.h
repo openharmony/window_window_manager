@@ -54,6 +54,7 @@ public:
     WMError SetWindowFlags(uint32_t windowId, uint32_t flags) override;
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) override;
 
+    std::shared_ptr<RSDisplayNode> GetDisplayNode(int32_t displayId) const;
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void UnregisterWindowManagerAgent(WindowManagerAgentType type,

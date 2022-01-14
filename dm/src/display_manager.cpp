@@ -51,13 +51,14 @@ const sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
     return display;
 }
 
-sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALD) {
         WLOGFE("displayId invalid!");
         return nullptr;
     }
-    sptr<Media::PixelMap> screenShot = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
+    std::shared_ptr<Media::PixelMap> screenShot =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
     if (screenShot == nullptr) {
         WLOGFE("DisplayManager::GetScreenshot failed!");
         return nullptr;
@@ -82,8 +83,8 @@ bool DisplayManager::CheckRectSizeValid(int32_t param) const
     return true;
 }
 
-sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
-                                                    const Media::Size &size, int rotation)
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
+                                                               const Media::Size &size, int rotation)
 {
     if (displayId == DISPLAY_ID_INVALD) {
         WLOGFE("displayId invalid!");
@@ -99,7 +100,8 @@ sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const M
         WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
         return nullptr;
     }
-    sptr<Media::PixelMap> screenShot = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
+    std::shared_ptr<Media::PixelMap> screenShot =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
     if (screenShot == nullptr) {
         WLOGFE("DisplayManager::GetScreenshot failed!");
         return nullptr;
@@ -118,7 +120,7 @@ sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const M
         WLOGFE("Media::PixelMap::Create failed!");
         return nullptr;
     }
-    sptr<Media::PixelMap> dstScreenshot = pixelMap.release();
+    std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
 
     return dstScreenshot;
 }

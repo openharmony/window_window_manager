@@ -135,7 +135,7 @@ bool DisplayManagerProxy::DestroyVirtualDisplay(DisplayId displayId)
     return reply.ReadBool();
 }
 
-sptr<Media::PixelMap> DisplayManagerProxy::GetDispalySnapshot(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDispalySnapshot(DisplayId displayId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -161,7 +161,7 @@ sptr<Media::PixelMap> DisplayManagerProxy::GetDispalySnapshot(DisplayId displayI
         return nullptr;
     }
 
-    sptr<Media::PixelMap> pixelMap = reply.ReadParcelable<Media::PixelMap>();
+    std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
     if (pixelMap == nullptr) {
         WLOGFW("DisplayManagerProxy::GetDispalySnapshot SendRequest nullptr.");
         return nullptr;

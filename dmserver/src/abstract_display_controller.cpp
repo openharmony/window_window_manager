@@ -19,6 +19,7 @@
 #include <surface.h>
 
 #include "window_manager_hilog.h"
+#include "window_manager_service.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -78,14 +79,32 @@ bool AbstractDisplayController::DestroyVirtualScreen(ScreenId screenId)
     return true;
 }
 
-sptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(ScreenId screenId)
+std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(DisplayId displayId, ScreenId screenId)
 {
     if (rsInterface_ == nullptr) {
         return nullptr;
     }
 
-    sptr<Media::PixelMap> screenshot = nullptr;
+    std::shared_ptr<RSDisplayNode> displayNode =
+        SingletonContainer::Get<WindowManagerService>().GetDisplayNode(displayId);
 
+    std::shared_ptr<ScreenshotCallback> callback = std::make_shared<ScreenshotCallback>();
+    rsInterface_->TakeSurfaceCapture(displayNode, callback);
+
+    int counter = 0;
+    while (!callback->IsPixelMapOk()) {
+        usleep(10000); // 10000us equals to 10ms
+        counter++;
+        if (counter >= 200) { // wait for 200 * 10ms = 2s
+            WLOGFE("Failed to get pixelmap, timeout");
+            return nullptr;
+        }
+    }
+    std::shared_ptr<Media::PixelMap> screenshot = callback->GetPixelMap();
+
+    if (screenshot == nullptr) {
+        WLOGFE("Failed to get pixelmap from RS, return nullptr!");
+    }
     return screenshot;
 }
 } // namespace OHOS::Rosen
