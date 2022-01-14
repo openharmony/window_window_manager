@@ -27,6 +27,7 @@ private:
 
     std::map<ScreenId, sptr<Screen>> monitorMap_;
 };
+WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManager)
 
 ScreenManager::ScreenManager()
 {
