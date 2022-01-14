@@ -31,7 +31,7 @@ struct Point {
 };
 
 struct VirtualScreenOption {
-    const std::string& name_;
+    const std::string name_;
     uint32_t width_;
     uint32_t height_;
     float density_;

@@ -16,18 +16,15 @@
 #ifndef FOUNDATION_DMSERVER_ABSTRACT_SCREEN_H
 #define FOUNDATION_DMSERVER_ABSTRACT_SCREEN_H
 
-#include <vector>
 
+#include <vector>
 #include <refbase.h>
 #include <screen_manager/screen_types.h>
 
+#include "screen.h"
+
 namespace OHOS::Rosen {
 constexpr static ScreenId SCREEN_ID_INVALID = INVALID_SCREEN_ID;
-
-struct Point {
-    int32_t posX_;
-    int32_t posY_;
-};
 
 enum class ScreenCombination : uint32_t {
     SCREEN_ALONE,

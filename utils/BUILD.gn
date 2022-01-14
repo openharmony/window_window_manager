@@ -31,7 +31,6 @@ ohos_shared_library("libwmutil") {
   sources = [
     "src/display_info.cpp",
     "src/singleton_container.cpp",
-    "src/virtual_display_info.cpp",
     "src/window_property.cpp",
     "src/wm_trace.cpp",
   ]

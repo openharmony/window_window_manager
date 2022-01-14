@@ -154,20 +154,6 @@ std::vector<const sptr<Display>> DisplayManager::GetAllDisplays()
     return res;
 }
 
-DisplayId DisplayManager::CreateVirtualDisplay(const std::string &name, uint32_t width, uint32_t height,
-    sptr<Surface> surface, DisplayId displayIdToMirror, int32_t flags)
-{
-    WLOGFI("DisplayManager::CreateVirtualDisplay multi params");
-    VirtualDisplayInfo info(name, width, height, displayIdToMirror, flags);
-    return SingletonContainer::Get<DisplayManagerAdapter>().CreateVirtualDisplay(info, surface);
-}
-
-bool DisplayManager::DestroyVirtualDisplay(DisplayId displayId)
-{
-    WLOGFI("DisplayManager::DestroyVirtualDisplay override params");
-    return SingletonContainer::Get<DisplayManagerAdapter>().DestroyVirtualDisplay(displayId);
-}
-
 void DisplayManager::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
 {
     if (listener == nullptr) {
