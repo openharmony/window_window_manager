@@ -23,6 +23,7 @@
 #include <napi/native_api.h>
 #include <napi/native_common.h>
 #include <napi/native_node_api.h>
+#include "wm_common.h"
 
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, 0, "NapiWindowManagerCommonLayer" };
 
@@ -95,7 +96,15 @@ napi_value CreatePromise(napi_env env,
             napi_get_undefined(env, &resolveValue);
         }
 
-        napi_resolve_deferred(env, info->deferred, resolveValue);
+        if (info->deferred) {
+            if (info->param->wret == OHOS::Rosen::WMError::WM_OK) {
+                GNAPI_LOG("CreatePromise, resolve");
+                napi_resolve_deferred(env, info->deferred, resolveValue);
+            } else {
+                GNAPI_LOG("CreatePromise, reject");
+                napi_reject_deferred(env, info->deferred, resolveValue);
+            }
+        }
         napi_delete_async_work(env, info->asyncWork);
         delete info;
     };
