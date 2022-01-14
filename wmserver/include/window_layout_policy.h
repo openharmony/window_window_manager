@@ -33,32 +33,43 @@ enum class AvoidPosType : uint32_t {
     AVOID_POS_UNKNOWN
 };
 
+struct LayoutDependRects {
+    Rect fullRect_ = {0, 0, 0, 0};
+    Rect priRect_  = {0, 0, 0, 0};
+    Rect secRect_  = {0, 0, 0, 0};
+    Rect limitFullRect_ = {0, 0, 0, 0};
+    Rect limitPriRect_  = {0, 0, 0, 0};
+    Rect limitSecRect_  = {0, 0, 0, 0};
+};
+
 class WindowLayoutPolicy : public RefBase {
 public:
     WindowLayoutPolicy() = default;
     WindowLayoutPolicy(const sptr<WindowNode>& belowAppNode,
         const sptr<WindowNode>& appNode, const sptr<WindowNode>& aboveAppNode);
     ~WindowLayoutPolicy() = default;
-    void UpdateDisplayInfo(const Rect& displayRect);
+    void UpdateDisplayInfo(const Rect& primaryRect, const Rect& secondaryRect, const Rect& displayRect);
     void AddWindowNode(sptr<WindowNode>& node);
     void RemoveWindowNode(sptr<WindowNode>& node);
     void UpdateWindowNode(sptr<WindowNode>& node);
+    void UpdateLayoutRect(sptr<WindowNode>& node);
 
 private:
-    Rect displayRect_ = {0, 0, 0, 0};
+    LayoutDependRects dependRects;
     sptr<WindowNode> belowAppWindowNode_ = new WindowNode();
     sptr<WindowNode> appWindowNode_ = new WindowNode();
     sptr<WindowNode> aboveAppWindowNode_ = new WindowNode();
-    Rect limitRect_ = {0, 0, 0, 0};
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowType::WINDOW_TYPE_NAVIGATION_BAR,
     };
-    void UpdateLimitRect(const sptr<WindowNode>& node);
-    void UpdateLayoutRect(sptr<WindowNode>& node);
+    void UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect);
     void LayoutWindowTree();
     void LayoutWindowNode(sptr<WindowNode>& node);
     AvoidPosType GetAvoidPosType(const Rect& rect);
+    void InitLimitRects();
+    Rect& GetLimitRect(const WindowMode mode);
+    Rect& GetDisplayRect(const WindowMode mode);
 };
 }
 }

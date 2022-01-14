@@ -22,6 +22,8 @@
 #include <ability_manager_client.h>
 
 #include "dm_common.h"
+#include "singleton_container.h"
+#include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
 
@@ -50,6 +52,7 @@ void WindowManagerService::OnStart()
         return;
     }
     RegisterSnapshotHandler();
+    SingletonContainer::Get<WindowInnerManager>().Init();
 }
 
 void WindowManagerService::RegisterSnapshotHandler()
@@ -75,6 +78,7 @@ bool WindowManagerService::Init()
 
 void WindowManagerService::OnStop()
 {
+    SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_THREAD);
     WLOGFI("ready to stop service.");
 }
 
