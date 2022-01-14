@@ -22,6 +22,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowManager_SingletonContainer"};
 } // namespace
+WM_IMPLEMENT_SINGLE_INSTANCE(SingletonContainer)
 
 SingletonContainer::~SingletonContainer()
 {

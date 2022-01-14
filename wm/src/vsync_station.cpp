@@ -22,6 +22,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "VsyncStation"};
 }
+WM_IMPLEMENT_SINGLE_INSTANCE(VsyncStation)
 
 void VsyncStation::RequestVsync(CallbackType type, std::shared_ptr<VsyncCallback> vsyncCallback)
 {
