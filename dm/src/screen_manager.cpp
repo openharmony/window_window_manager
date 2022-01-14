@@ -49,6 +49,10 @@ std::vector<const sptr<Screen>> ScreenManager::GetAllScreens()
     return res;
 }
 
+void ScreenManager::RegisterScreenChangeListener(sptr<IScreenChangeListener> listener)
+{
+}
+
 sptr<ScreenGroup> ScreenManager::makeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
 {
     return nullptr;
