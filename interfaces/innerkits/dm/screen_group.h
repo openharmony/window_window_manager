@@ -21,7 +21,7 @@
 #include "screen.h"
 
 namespace OHOS::Rosen {
-enum class ScreenType : uint32_t {
+enum class ScreenCombination : uint32_t {
     SCREEN_ALONE,
     SCREEN_EXPAND,
     SCREEN_MIRROR,
@@ -29,7 +29,7 @@ enum class ScreenType : uint32_t {
 
 class ScreenGroup : public Screen {
 public:
-    ScreenType GetType() const;
+    ScreenCombination GetCombination() const;
     std::vector<sptr<Screen>> GetChildren() const;
     std::vector<Point> GetChildrenPosition() const;
 

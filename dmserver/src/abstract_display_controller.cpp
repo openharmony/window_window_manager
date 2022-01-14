@@ -18,6 +18,7 @@
 #include <cinttypes>
 #include <surface.h>
 
+#include "display_manager_service.h"
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
 
@@ -26,18 +27,30 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "AbstractDisplayController"};
 }
 
-AbstractDisplayController::AbstractDisplayController() : rsInterface_(&(RSInterfaces::GetInstance()))
+AbstractDisplayController::AbstractDisplayController(std::recursive_mutex& mutex)
+    : mutex_(mutex), rsInterface_(&(RSInterfaces::GetInstance()))
 {
-    parepareRSScreenManger();
 }
 
 AbstractDisplayController::~AbstractDisplayController()
 {
     rsInterface_ = nullptr;
+    abstractScreenController_ = nullptr;
 }
 
-void AbstractDisplayController::parepareRSScreenManger()
+void AbstractDisplayController::Init(sptr<AbstractScreenController> abstractScreenController)
 {
+    WLOGFD("display controller init");
+    displayCount_ = 0;
+    abstractScreenController_ = abstractScreenController;
+    abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback();
+    abstractScreenCallback_->onConnected_
+        = std::bind(&AbstractDisplayController::OnAbstractScreenConnected, this, std::placeholders::_1);
+    abstractScreenCallback_->onDisconnected_
+        = std::bind(&AbstractDisplayController::OnAbstractScreenDisconnected, this, std::placeholders::_1);
+    abstractScreenCallback_->onChanged_
+        = std::bind(&AbstractDisplayController::OnAbstractScreenChanged, this, std::placeholders::_1);
+    abstractScreenController->RegisterAbstractScreenCallback(abstractScreenCallback_);
 }
 
 ScreenId AbstractDisplayController::GetDefaultScreenId()
@@ -61,7 +74,7 @@ ScreenId AbstractDisplayController::CreateVirtualScreen(const VirtualDisplayInfo
     sptr<Surface> surface)
 {
     if (rsInterface_ == nullptr) {
-        return INVALID_SCREEN_ID;
+        return SCREEN_ID_INVALID;
     }
     ScreenId result = rsInterface_->CreateVirtualScreen(virtualDisplayInfo.name_, virtualDisplayInfo.width_,
         virtualDisplayInfo.height_, surface, virtualDisplayInfo.displayIdToMirror_, virtualDisplayInfo.flags_);
@@ -106,5 +119,39 @@ std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(Di
         WLOGFE("Failed to get pixelmap from RS, return nullptr!");
     }
     return screenshot;
+}
+
+void AbstractDisplayController::OnAbstractScreenConnected(sptr<AbstractScreen> absScreen)
+{
+    WLOGI("connect new screen. id:%{public}" PRIu64"", absScreen->dmsId_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (absScreen->type_ == ScreenType::REAL) {
+        sptr<AbstractScreenGroup> group = absScreen->GetGroup();
+        if (group == nullptr) {
+            WLOGE("the group information of the screen is wrong");
+            return;
+        }
+        if (group->combination_ == ScreenCombination::SCREEN_ALONE) {
+            CreateAndBindDisplayLocked(absScreen);
+        } else if (group->combination_ == ScreenCombination::SCREEN_MIRROR) {
+            WLOGE("support in future. combination:%{public}ud", group->combination_);
+        } else {
+            WLOGE("support in future. combination:%{public}ud", group->combination_);
+        }
+    }
+}
+
+void AbstractDisplayController::OnAbstractScreenDisconnected(sptr<AbstractScreen> absScreen)
+{
+}
+
+void AbstractDisplayController::OnAbstractScreenChanged(sptr<AbstractScreen> absScreen)
+{
+}
+
+void AbstractDisplayController::CreateAndBindDisplayLocked(sptr<AbstractScreen> absScreen)
+{
+    WLOGI("create display for new screen id:%{public}" PRIu64"", absScreen->dmsId_);
+    displayCount_++;
 }
 } // namespace OHOS::Rosen
