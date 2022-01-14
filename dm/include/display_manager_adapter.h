@@ -37,7 +37,7 @@ public:
     DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
         sptr<Surface> surface);
     bool DestroyVirtualDisplay(DisplayId displayId);
-    sptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
 
     void RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);

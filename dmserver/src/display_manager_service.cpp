@@ -101,10 +101,11 @@ bool DisplayManagerService::DestroyVirtualDisplay(DisplayId displayId)
     return AbstractDisplayController::GetInstance().DestroyVirtualScreen(screenId);
 }
 
-sptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
 {
     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
-    sptr<Media::PixelMap> screenSnapshot = AbstractDisplayController::GetInstance().GetScreenSnapshot(screenId);
+    std::shared_ptr<Media::PixelMap> screenSnapshot
+        = AbstractDisplayController::GetInstance().GetScreenSnapshot(displayId, screenId);
     return screenSnapshot;
 }
 

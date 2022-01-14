@@ -33,7 +33,7 @@ public:
     DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
         sptr<Surface> surface) override;
     bool DestroyVirtualDisplay(DisplayId displayId) override;
-    sptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
+    std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
 
     void RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
