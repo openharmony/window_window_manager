@@ -25,18 +25,9 @@
 
 namespace OHOS {
 namespace Rosen {
-using UpdateFocusStatusFunc = std::function<void (uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-    WindowType windowType, int32_t displayId, bool focused)>;
-using UpdateSystemBarPropsFunc = std::function<void (uint64_t displayId, const SystemBarProps& props)>;
-
-struct WindowNodeContainerCallbacks {
-    UpdateFocusStatusFunc focusStatusCallBack_;
-    UpdateSystemBarPropsFunc systemBarChangedCallBack_;
-};
-
 class WindowNodeContainer : public RefBase {
 public:
-    WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height, WindowNodeContainerCallbacks callbacks);
+    WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height);
     ~WindowNodeContainer();
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);
@@ -119,8 +110,6 @@ private:
     uint32_t zOrder_ { 0 };
     uint32_t focusedWindow_ { 0 };
     uint64_t screenId_ = 0;
-    UpdateFocusStatusFunc focusStatusCallBack_;
-    WindowNodeContainerCallbacks callbacks_;
     void DumpScreenWindowTree();
 
     struct WindowPairInfo {

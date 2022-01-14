@@ -67,12 +67,15 @@ private:
     bool CheckRectValid(const Media::Rect &rect, int32_t oriHeight, int32_t oriWidth) const;
     bool CheckSizeValid(const Media::Size &size, int32_t oriHeight, int32_t oriWidth);
     void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
+    void NotifyDisplayStateChanged(DisplayState state);
 
     static inline SingletonDelegator<DisplayManager> delegator;
     const int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 15360; // max resolution, 16K
     std::mutex mutex_;
     std::vector<sptr<IDisplayPowerEventListener>> powerEventListeners_;
     sptr<DisplayManagerAgent> powerEventListenerAgent_;
+    sptr<DisplayManagerAgent> displayStateAgent_;
+    DisplayStateCallback displayStateCallback_;
 };
 } // namespace OHOS::Rosen
 

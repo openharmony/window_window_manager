@@ -22,7 +22,8 @@
 namespace OHOS {
 namespace Rosen {
 enum class DisplayManagerAgentType : uint32_t {
-    DISPLAY_POWER_EVENT_LISTENER
+    DISPLAY_POWER_EVENT_LISTENER,
+    DISPLAY_STATE_LISTENER,
 };
 
 class IDisplayManagerAgent : public IRemoteBroker {
@@ -31,8 +32,10 @@ public:
 
     enum {
         TRANS_ID_NOTIFY_DISPLAY_POWER_EVENT = 1,
+        TRANS_ID_NOTIFY_DISPLAY_STATE_CHANGED,
     };
     virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) = 0;
+    virtual void NotifyDisplayStateChanged(DisplayState state) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

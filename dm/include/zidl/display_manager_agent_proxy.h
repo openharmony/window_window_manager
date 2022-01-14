@@ -27,6 +27,7 @@ public:
     ~DisplayManagerAgentProxy() = default;
 
     virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) override;
+    virtual void NotifyDisplayStateChanged(DisplayState state) override;
 
 private:
     static inline BrokerDelegator<DisplayManagerAgentProxy> delegator_;
