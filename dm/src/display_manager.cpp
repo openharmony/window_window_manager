@@ -27,6 +27,7 @@ namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayManager"};
 }
+WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
 DisplayManager::DisplayManager()
 {

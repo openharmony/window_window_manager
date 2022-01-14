@@ -30,6 +30,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowManagerService"};
 }
+WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<WindowManagerService>());
 

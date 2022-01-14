@@ -17,6 +17,8 @@
 
 namespace OHOS {
 namespace Rosen {
+WM_IMPLEMENT_SINGLE_INSTANCE(StaticCall)
+
 sptr<Window> StaticCall::CreateWindow(const std::string& windowName,
     sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext)
 {
