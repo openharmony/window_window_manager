@@ -32,7 +32,6 @@ public:
     void SetWindowRect(const struct Rect& rect);
     void SetWindowType(WindowType type);
     void SetWindowMode(WindowMode mode);
-    void SetLastWindowMode(WindowMode mode);
     void ResumeLastWindowMode();
     void SetFullScreen(bool isFullScreen);
     void SetFocusable(bool isFocusable);

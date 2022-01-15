@@ -640,16 +640,16 @@ void WindowNodeContainer::HandleSplitWindowModeChange(sptr<WindowNode>& triggerN
 void WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode)
 {
     float splitRatio = DEFAULT_SPLIT_RATIO;
-    auto triggerMode = triggerNode->GetWindowMode();
-    auto pairMode = pairNode->GetWindowMode();
-    if (pairNode->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        pairMode = (triggerMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) ?
+    WindowMode triggerMode = triggerNode->GetWindowMode();
+    WindowMode pairSrcMode = pairNode->GetWindowMode();
+    if (pairSrcMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        WindowMode pairDstMode = (triggerMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) ?
             WindowMode::WINDOW_MODE_SPLIT_SECONDARY : WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
-        pairNode->SetWindowMode(pairMode);
-        pairNode->GetWindowToken()->UpdateWindowMode(pairMode);
+        pairNode->SetWindowMode(pairDstMode);
+        pairNode->GetWindowToken()->UpdateWindowMode(pairDstMode);
         layoutPolicy_->AddWindowNode(pairNode);
         WLOGFI("Pair FullScreen [%{public}d, %{public}d], Mode[%{public}d, %{public}d], splitRatio = %{public}f",
-            triggerNode->GetWindowId(), pairNode->GetWindowId(), triggerMode, pairMode, splitRatio);
+            triggerNode->GetWindowId(), pairNode->GetWindowId(), triggerMode, pairDstMode, splitRatio);
     } else {
         if (pairedWindowMap_.count(pairNode->GetWindowId() != 0)) {
             WindowPairInfo info = pairedWindowMap_.at(pairNode->GetWindowId());
@@ -662,7 +662,7 @@ void WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sp
 
             splitRatio = info.splitRatio;
             WLOGFI("Pair Split [%{public}d, %{public}d], Mode[%{public}d, %{public}d], splitRatio = %{public}f",
-                triggerNode->GetWindowId(), pairNode->GetWindowId(), triggerMode, pairMode, splitRatio);
+                triggerNode->GetWindowId(), pairNode->GetWindowId(), triggerMode, pairSrcMode, splitRatio);
         }
     }
 
