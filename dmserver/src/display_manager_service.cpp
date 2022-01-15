@@ -28,10 +28,12 @@ namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayManagerService"};
 }
-
+WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerService)
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<DisplayManagerService>());
 
-DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true)
+DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true),
+    abstractScreenController_(new AbstractScreenController(mutex_)),
+    abstractDisplayController_(new AbstractDisplayController(mutex_))
 {
 }
 
@@ -51,6 +53,8 @@ bool DisplayManagerService::Init()
         WLOGFW("DisplayManagerService::Init failed");
         return false;
     }
+    abstractScreenController_->Init();
+    abstractDisplayController_->Init(abstractScreenController_);
     WLOGFI("DisplayManagerService::Init success");
     return true;
 }
@@ -67,7 +71,7 @@ ScreenId DisplayManagerService::GetScreenIdFromDisplayId(DisplayId displayId)
 
 DisplayId DisplayManagerService::GetDefaultDisplayId()
 {
-    ScreenId screenId = AbstractDisplayController::GetInstance().GetDefaultScreenId();
+    ScreenId screenId = abstractDisplayController_->GetDefaultScreenId();
     WLOGFI("GetDefaultDisplayId %{public}" PRIu64"", screenId);
     return GetDisplayIdFromScreenId(screenId);
 }
@@ -76,7 +80,7 @@ DisplayInfo DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 {
     DisplayInfo displayInfo;
     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
-    auto screenModeInfo = AbstractDisplayController::GetInstance().GetScreenActiveMode(screenId);
+    auto screenModeInfo = abstractDisplayController_->GetScreenActiveMode(screenId);
     displayInfo.id_ = displayId;
     displayInfo.width_ = screenModeInfo.GetScreenWidth();
     displayInfo.height_ = screenModeInfo.GetScreenHeight();
@@ -90,7 +94,7 @@ DisplayId DisplayManagerService::CreateVirtualDisplay(const VirtualDisplayInfo &
     WLOGFI("name %{public}s, width %{public}u, height %{public}u, mirrotId %{public}" PRIu64", flags %{public}d",
         virtualDisplayInfo.name_.c_str(), virtualDisplayInfo.width_, virtualDisplayInfo.height_,
         virtualDisplayInfo.displayIdToMirror_, virtualDisplayInfo.flags_);
-    ScreenId screenId = AbstractDisplayController::GetInstance().CreateVirtualScreen(virtualDisplayInfo, surface);
+    ScreenId screenId = abstractDisplayController_->CreateVirtualScreen(virtualDisplayInfo, surface);
     return GetDisplayIdFromScreenId(screenId);
 }
 
@@ -98,13 +102,14 @@ bool DisplayManagerService::DestroyVirtualDisplay(DisplayId displayId)
 {
     WLOGFI("DisplayManagerService::DestroyVirtualDisplay");
     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
-    return AbstractDisplayController::GetInstance().DestroyVirtualScreen(screenId);
+    return abstractDisplayController_->DestroyVirtualScreen(screenId);
 }
 
-sptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
 {
     ScreenId screenId = GetScreenIdFromDisplayId(displayId);
-    sptr<Media::PixelMap> screenSnapshot = AbstractDisplayController::GetInstance().GetScreenSnapshot(screenId);
+    std::shared_ptr<Media::PixelMap> screenSnapshot
+        = abstractDisplayController_->GetScreenSnapshot(displayId, screenId);
     return screenSnapshot;
 }
 
@@ -113,23 +118,145 @@ void DisplayManagerService::OnStop()
     WLOGFI("ready to stop display service.");
 }
 
+void DisplayManagerService::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    DisplayManagerAgentType type)
+{
+    if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
+        WLOGFE("displayManagerAgent invalid");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    displayManagerAgentMap_[type].push_back(displayManagerAgent);
+    WLOGFI("agent registered");
+    if (dmAgentDeath_ == nullptr) {
+        WLOGFI("death Recipient is nullptr");
+        return;
+    }
+    if (!displayManagerAgent->AsObject()->AddDeathRecipient(dmAgentDeath_)) {
+        WLOGFI("failed to add death recipient");
+    }
+}
+
+void DisplayManagerService::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    DisplayManagerAgentType type)
+{
+    if (displayManagerAgent == nullptr || displayManagerAgentMap_.count(type) == 0) {
+        WLOGFE("displayManagerAgent invalid");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto& displayManagerAgents = displayManagerAgentMap_.at(type);
+    UnregisterDisplayManagerAgent(displayManagerAgents, displayManagerAgent->AsObject());
+}
+
+bool DisplayManagerService::UnregisterDisplayManagerAgent(std::vector<sptr<IDisplayManagerAgent>>& displayManagerAgents,
+    const sptr<IRemoteObject>& displayManagerAgent)
+{
+    auto iter = std::find_if(displayManagerAgents.begin(), displayManagerAgents.end(),
+        finder_t(displayManagerAgent));
+    if (iter == displayManagerAgents.end()) {
+        WLOGFE("could not find this listener");
+        return false;
+    }
+    displayManagerAgents.erase(iter);
+    WLOGFI("agent unregistered");
+    return true;
+}
+
+void DisplayManagerService::RemoveDisplayManagerAgent(const sptr<IRemoteObject>& remoteObject)
+{
+    WLOGFI("RemoveDisplayManagerAgent");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    for (auto& elem : displayManagerAgentMap_) {
+        if (UnregisterDisplayManagerAgent(elem.second, remoteObject)) {
+            break;
+        }
+    }
+    remoteObject->RemoveDeathRecipient(dmAgentDeath_);
+}
+
+bool DisplayManagerService::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
+{
+    if (displayManagerAgentMap_.count(DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER) == 0) {
+        WLOGFI("no display power event agent registered!");
+        return false;
+    }
+    WLOGFI("NotifyDisplayPowerEvent");
+    for (auto& agent : displayManagerAgentMap_.at(DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER)) {
+        agent->NotifyDisplayPowerEvent(event, status);
+    }
+    return true;
+}
+
+bool DisplayManagerService::WakeUpBegin(PowerStateChangeReason reason)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::BEGIN);
+}
+
+bool DisplayManagerService::WakeUpEnd()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::END);
+}
+
 bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 {
-    return displayPowerController_.SuspendBegin(reason);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    displayPowerController_.SuspendBegin(reason);
+    return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN);
+}
+
+bool DisplayManagerService::SuspendEnd()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::END);
+}
+
+bool DisplayManagerService::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
+{
+    WLOGFI("SetScreenPowerForAll");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return NotifyDisplayPowerEvent(state == DisplayPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
+        DisplayPowerEvent::DISPLAY_OFF, EventStatus::END);
 }
 
 bool DisplayManagerService::SetDisplayState(DisplayState state)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     return displayPowerController_.SetDisplayState(state);
 }
 
 DisplayState DisplayManagerService::GetDisplayState(uint64_t displayId)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     return displayPowerController_.GetDisplayState(displayId);
 }
 
 void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayPowerController_.NotifyDisplayEvent(event);
+}
+
+sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenController()
+{
+    return abstractScreenController_;
+}
+
+void DMAgentDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
+{
+    if (wptrDeath == nullptr) {
+        WLOGFE("wptrDeath is null");
+        return;
+    }
+
+    sptr<IRemoteObject> object = wptrDeath.promote();
+    if (!object) {
+        WLOGFE("object is null");
+        return;
+    }
+    WLOGFI("call OnRemoteDied callback");
+    callback_(object);
 }
 } // namespace OHOS::Rosen

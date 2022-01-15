@@ -14,7 +14,7 @@
  */
 
 #include "window_property.h"
-
+#include "window_helper.h"
 namespace OHOS {
 namespace Rosen {
 void WindowProperty::SetWindowRect(const struct Rect& rect)
@@ -29,16 +29,13 @@ void WindowProperty::SetWindowType(WindowType type)
 
 void WindowProperty::SetWindowMode(WindowMode mode)
 {
-    if (mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-        mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        SetLastWindowMode(mode);
+    if (!WindowHelper::IsValidWindowMode(mode)) {
+        return;
+    }
+    if (!WindowHelper::IsSplitWindowMode(mode_)) {
+        lastMode_ = mode_;
     }
     mode_ = mode;
-}
-
-void WindowProperty::SetLastWindowMode(WindowMode mode)
-{
-    lastMode_ = mode;
 }
 
 void WindowProperty::SetFullScreen(bool isFullScreen)
@@ -274,10 +271,6 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
     if (!MapMarshalling(parcel)) {
         return false;
     }
-    // write lastMode_
-    if (!parcel.WriteUint32(static_cast<uint32_t>(lastMode_))) {
-        return false;
-    }
     return true;
 }
 
@@ -299,7 +292,6 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowId(parcel.ReadUint32());
     property->SetParentId(parcel.ReadUint32());
     MapUnmarshalling(parcel, property);
-    property->SetLastWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     return property;
 }
 }

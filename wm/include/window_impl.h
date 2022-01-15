@@ -19,9 +19,9 @@
 #include <ability_context.h>
 #include <refbase.h>
 #include <ui_content.h>
-#include "window.h"
 #include "input_transfer_station.h"
 #include "vsync_station.h"
+#include "window.h"
 #include "window_property.h"
 
 namespace OHOS {
@@ -76,6 +76,7 @@ public:
     void UpdateMode(WindowMode mode);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
+    void ConsumeDividerPointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent);
     virtual void RequestFrame() override;
     void UpdateFocusStatus(bool focused);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;

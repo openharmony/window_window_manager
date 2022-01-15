@@ -22,6 +22,8 @@
 #include <ability_manager_client.h>
 
 #include "dm_common.h"
+#include "singleton_container.h"
+#include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
 
@@ -30,6 +32,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowManagerService"};
 }
+WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<WindowManagerService>());
 
@@ -49,6 +52,7 @@ void WindowManagerService::OnStart()
         return;
     }
     RegisterSnapshotHandler();
+    SingletonContainer::Get<WindowInnerManager>().Init();
 }
 
 void WindowManagerService::RegisterSnapshotHandler()
@@ -74,6 +78,7 @@ bool WindowManagerService::Init()
 
 void WindowManagerService::OnStop()
 {
+    SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_THREAD);
     WLOGFI("ready to stop service.");
 }
 
@@ -228,6 +233,11 @@ void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType t
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     windowController_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+}
+
+std::shared_ptr<RSDisplayNode> WindowManagerService::GetDisplayNode(int32_t displayId) const
+{
+    return windowRoot_->GetOrCreateWindowNodeContainer(displayId)->GetDisplayNode();
 }
 
 void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)

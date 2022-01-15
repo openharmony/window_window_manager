@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_DM_COMMON_H
 #define OHOS_ROSEN_DM_COMMON_H
 
+#include <refbase.h>
+
 namespace OHOS {
 namespace Rosen {
 constexpr int32_t INVALID_DISPLAY_ID = -1;
@@ -29,7 +31,7 @@ enum class DisplayPowerState : uint32_t {
     POWER_SUSPEND,
     POWER_OFF,
     POWER_BUTT,
-    INVALID_STATE,
+    INVALID_STATE
 };
 
 enum class DisplayState : uint32_t {
@@ -42,6 +44,24 @@ enum class DisplayEvent : uint32_t {
     UNLOCK
 };
 using DisplayStateCallback = std::function<void(DisplayState)>;
+
+enum class DisplayPowerEvent : uint32_t {
+    WAKE_UP,
+    SLEEP,
+    DISPLAY_ON,
+    DISPLAY_OFF,
+    DESKTOP_READY
+};
+
+enum class EventStatus : uint32_t {
+    BEGIN,
+    END
+};
+
+class IDisplayPowerEventListener : public RefBase {
+public:
+    virtual void OnDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) = 0;
+};
 }
 }
 #endif // OHOS_ROSEN_DM_COMMON_H
