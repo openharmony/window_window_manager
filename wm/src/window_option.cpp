@@ -14,6 +14,7 @@
  */
 
 #include "window_option.h"
+#include "window_helper.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -34,6 +35,9 @@ void WindowOption::SetWindowType(WindowType type)
 
 void WindowOption::SetWindowMode(WindowMode mode)
 {
+    if (!WindowHelper::IsValidWindowMode(mode)) {
+        return;
+    }
     mode_ = mode;
 }
 

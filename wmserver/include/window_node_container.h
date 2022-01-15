@@ -53,6 +53,27 @@ public:
     sptr<WindowNode> GetTopImmersiveNode() const;
     void NotifySystemBarIfChanged();
     void HandleSplitWindowModeChange(sptr<WindowNode>& triggerNode, bool isChangeToSplit);
+    std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
+    void LayoutDividerWindow(sptr<WindowNode>& node);
+    void UpdateDisplayInfo();
+
+    class DisplayRects : public RefBase {
+    public:
+        DisplayRects() = default;
+        ~DisplayRects() = default;
+
+        void InitRect(Rect& oriDisplayRect);
+        void SetSplitRect(float ratio);
+        void SetSplitRect(const Rect& rect);
+        Rect GetRectByWindowMode(const WindowMode& mode) const;
+        Rect GetDividerRect() const;
+    private:
+        Rect primaryRect_   = {0, 0, 0, 0};
+        Rect secondaryRect_ = {0, 0, 0, 0};
+        Rect displayRect_   = {0, 0, 0, 0};
+        Rect dividerRect_   = {0, 0, 0, 0};
+    };
+    static constexpr float DEFAULT_SPLIT_RATIO = 0.5;
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
@@ -88,9 +109,7 @@ private:
     };
     uint32_t zOrder_ { 0 };
     uint32_t focusedWindow_ { 0 };
-    Rect displayRect_;
     uint64_t screenId_ = 0;
-    const float DEFAULT_WINDOW_SPLIT_RATIO = 0.5; // default split ratio
     UpdateFocusStatusFunc focusStatusCallBack_;
     WindowNodeContainerCallbacks callbacks_;
     void DumpScreenWindowTree();
@@ -100,6 +119,7 @@ private:
         float splitRatio;
     };
     std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
+    sptr<DisplayRects> displayRects_ = new DisplayRects();
 };
 }
 }

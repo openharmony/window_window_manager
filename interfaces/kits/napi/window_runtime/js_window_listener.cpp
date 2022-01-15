@@ -45,12 +45,12 @@ bool JsWindowListener::AddJsListenerObject(std::string type, NativeValue* jsList
     callbackRef.reset(engine_->CreateReference(jsListenerObject, 1));
     if (IsCallbackExists(type, jsListenerObject)) {
         WLOGFI("JsWindowListener::AddJsListenerObject jsWinodwListenerObjectMap_ size: %{public}d!",
-            jsWinodwListenerObjectMap_[type].size());
+            static_cast<int32_t>(jsWinodwListenerObjectMap_[type].size()));
         return false;
     }
     jsWinodwListenerObjectMap_[type].insert(std::move(callbackRef));
     WLOGFI("JsWindowListener::AddJsListenerObject failed jsWinodwListenerObjectMap_ size: %{public}d!",
-        jsWinodwListenerObjectMap_[type].size());
+        static_cast<int32_t>(jsWinodwListenerObjectMap_[type].size()));
     return true;
 }
 
@@ -73,7 +73,7 @@ void JsWindowListener::RemoveJsListenerObject(std::string type, NativeValue* jsL
         }
     }
     WLOGFI("JsWindowListener::RemoveJsListenerObject jsWinodwListenerObjectMap_ size: %{public}d!",
-        jsWinodwListenerObjectMap_[type].size());
+        static_cast<int32_t>(jsWinodwListenerObjectMap_[type].size()));
     WLOGFI("JsWindowListener::RemoveJsListenerObject success!");
 }
 

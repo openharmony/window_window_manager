@@ -19,12 +19,22 @@
 #include <transaction/rs_interfaces.h>
 
 #include "display_manager_adapter.h"
+#include "display_manager_agent.h"
 #include "dm_common.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayManager"};
+}
+WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
+
+DisplayManager::DisplayManager()
+{
+}
+
+DisplayManager::~DisplayManager()
+{
 }
 
 DisplayId DisplayManager::GetDefaultDisplayId()
@@ -42,13 +52,14 @@ const sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
     return display;
 }
 
-sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALD) {
         WLOGFE("displayId invalid!");
         return nullptr;
     }
-    sptr<Media::PixelMap> screenShot = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
+    std::shared_ptr<Media::PixelMap> screenShot =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
     if (screenShot == nullptr) {
         WLOGFE("DisplayManager::GetScreenshot failed!");
         return nullptr;
@@ -73,8 +84,8 @@ bool DisplayManager::CheckRectSizeValid(int32_t param) const
     return true;
 }
 
-sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
-                                                    const Media::Size &size, int rotation)
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
+                                                               const Media::Size &size, int rotation)
 {
     if (displayId == DISPLAY_ID_INVALD) {
         WLOGFE("displayId invalid!");
@@ -90,7 +101,8 @@ sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const M
         WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
         return nullptr;
     }
-    sptr<Media::PixelMap> screenShot = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
+    std::shared_ptr<Media::PixelMap> screenShot =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
     if (screenShot == nullptr) {
         WLOGFE("DisplayManager::GetScreenshot failed!");
         return nullptr;
@@ -109,7 +121,7 @@ sptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const M
         WLOGFE("Media::PixelMap::Create failed!");
         return nullptr;
     }
-    sptr<Media::PixelMap> dstScreenshot = pixelMap.release();
+    std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
 
     return dstScreenshot;
 }
@@ -156,14 +168,61 @@ bool DisplayManager::DestroyVirtualDisplay(DisplayId displayId)
     return SingletonContainer::Get<DisplayManagerAdapter>().DestroyVirtualDisplay(displayId);
 }
 
+void DisplayManager::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    powerEventListeners_.push_back(listener);
+    if (powerEventListenerAgent_ == nullptr) {
+        powerEventListenerAgent_ = new DisplayManagerAgent();
+        SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(powerEventListenerAgent_,
+            DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
+    }
+    WLOGFI("RegisterDisplayPowerEventListener end");
+}
+
+void DisplayManager::UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = std::find(powerEventListeners_.begin(), powerEventListeners_.end(), listener);
+    if (iter == powerEventListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return;
+    }
+    powerEventListeners_.erase(iter);
+    if (powerEventListeners_.empty() && powerEventListenerAgent_ != nullptr) {
+        SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(powerEventListenerAgent_,
+            DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
+    }
+    WLOGFI("UnregisterDisplayPowerEventListener end");
+}
+
+void DisplayManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
+{
+    WLOGFI("NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu", event, status,
+        powerEventListeners_.size());
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto& listener : powerEventListeners_) {
+        listener->OnDisplayPowerEvent(event, status);
+    }
+}
+
 bool DisplayManager::WakeUpBegin(PowerStateChangeReason reason)
 {
-    return true;
+    return SingletonContainer::Get<DisplayManagerAdapter>().WakeUpBegin(reason);
 }
 
 bool DisplayManager::WakeUpEnd()
 {
-    return true;
+    return SingletonContainer::Get<DisplayManagerAdapter>().WakeUpEnd();
 }
 
 bool DisplayManager::SuspendBegin(PowerStateChangeReason reason)
@@ -174,7 +233,7 @@ bool DisplayManager::SuspendBegin(PowerStateChangeReason reason)
 
 bool DisplayManager::SuspendEnd()
 {
-    return true;
+    return SingletonContainer::Get<DisplayManagerAdapter>().SuspendEnd();
 }
 
 bool DisplayManager::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
@@ -201,7 +260,7 @@ bool DisplayManager::SetScreenPowerForAll(DisplayPowerState state, PowerStateCha
         }
     }
     RSInterfaces::GetInstance().SetScreenPowerStatus(defaultId, status);
-    return true;
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenPowerForAll(state, reason);
 }
 
 DisplayPowerState DisplayManager::GetScreenPower(uint64_t screenId)
@@ -224,12 +283,16 @@ DisplayState DisplayManager::GetDisplayState(uint64_t displayId)
 
 bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
+    WLOGFI("screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
     return true;
 }
 
 uint32_t DisplayManager::GetScreenBrightness(uint64_t screenId) const
 {
-    return 0;
+    uint32_t level = RSInterfaces::GetInstance().GetScreenBacklight(screenId);
+    WLOGFI("screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    return level;
 }
 
 void DisplayManager::NotifyDisplayEvent(DisplayEvent event)

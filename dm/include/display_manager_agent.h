@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#include "window_manager_service_inner.h"
-#include "window_manager_service.h"
+#ifndef OHOS_ROSEN_DISPLAY_MANAGER_AGENT_H
+#define OHOS_ROSEN_DISPLAY_MANAGER_AGENT_H
+
+#include <refbase.h>
+#include <zidl/display_manager_agent_stub.h>
 
 namespace OHOS {
 namespace Rosen {
-WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerServiceInner)
+class DisplayManagerAgent : public DisplayManagerAgentStub {
+public:
+    DisplayManagerAgent() = default;
+    ~DisplayManagerAgent() = default;
 
-bool WindowManagerServiceInner::NotifyDisplaySuspend()
-{
-    WMError ret =  WindowManagerService::GetInstance().NotifyDisplaySuspend();
-    return ret == WMError::WM_OK;
-}
-void WindowManagerServiceInner::RestoreSuspendedWindows()
-{
-    WindowManagerService::GetInstance().RestoreSuspendedWindows();
+    virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) override;
+};
 }
 }
-}
+#endif // OHOS_ROSEN_DISPLAY_MANAGER_AGENT_H

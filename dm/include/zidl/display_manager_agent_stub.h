@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,22 @@
  * limitations under the License.
  */
 
-#include "static_call.h"
+#ifndef OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H
+#define OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H
+
+#include <iremote_stub.h>
+#include "display_manager_agent_interface.h"
 
 namespace OHOS {
 namespace Rosen {
-WM_IMPLEMENT_SINGLE_INSTANCE(StaticCall)
+class DisplayManagerAgentStub : public IRemoteStub<IDisplayManagerAgent> {
+public:
+    DisplayManagerAgentStub() = default;
+    ~DisplayManagerAgentStub() = default;
 
-sptr<Window> StaticCall::CreateWindow(const std::string& windowName,
-    sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext)
-{
-    return Window::Create(windowName, option, abilityContext);
-}
+    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+        MessageOption& option) override;
+};
 } // namespace Rosen
 } // namespace OHOS
+#endif // OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H

@@ -14,7 +14,7 @@
  */
 
 #include "window_property.h"
-
+#include "window_helper.h"
 namespace OHOS {
 namespace Rosen {
 void WindowProperty::SetWindowRect(const struct Rect& rect)
@@ -29,8 +29,10 @@ void WindowProperty::SetWindowType(WindowType type)
 
 void WindowProperty::SetWindowMode(WindowMode mode)
 {
-    if (mode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-        mode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+    if (!WindowHelper::IsValidWindowMode(mode)) {
+        return;
+    }
+    if (!WindowHelper::IsSplitWindowMode(mode)) {
         SetLastWindowMode(mode);
     }
     mode_ = mode;
