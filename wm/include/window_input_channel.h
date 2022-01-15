@@ -30,6 +30,7 @@ public:
     void SetInputListener(std::shared_ptr<MMI::IInputEventConsumer>& listener);
 private:
     void OnVsync(int64_t timeStamp);
+    bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     std::vector<std::shared_ptr<MMI::PointerEvent>> pointerEventPool_;
     sptr<Window> window_;
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
