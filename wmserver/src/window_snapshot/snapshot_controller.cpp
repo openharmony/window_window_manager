@@ -54,7 +54,6 @@ int32_t SnapshotController::GetSnapshot(const sptr<IRemoteObject> &token, Snapsh
         WLOGFE("Get surfaceNode failed!");
         return static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
     }
-    TakeSnapshot(surfaceNode, snapshot);
     return static_cast<int32_t>(TakeSnapshot(surfaceNode, snapshot));
 }
 } // namespace Rosen
