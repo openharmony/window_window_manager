@@ -149,6 +149,17 @@ void WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 }
 
+WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, std::vector<Rect>& avoidRect)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    if (!InitWMSProxyLocked()) {
+        return WMError::WM_ERROR_SAMGR;
+    }
+    avoidRect = windowManagerServiceProxy_->GetAvoidAreaByType(windowId, type);
+    return WMError::WM_OK;
+}
+
 WMError WindowAdapter::SetWindowMode(uint32_t windowId, WindowMode mode)
 {
     std::lock_guard<std::mutex> lock(mutex_);

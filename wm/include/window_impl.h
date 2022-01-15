@@ -57,6 +57,7 @@ public:
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
     virtual WMError SetWindowFlags(uint32_t flags) override;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
 
     WMError Create(const std::string& parentName,
         const std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext = nullptr);
@@ -71,6 +72,8 @@ public:
 
     virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) override;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
+    virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    virtual void UnregisterAvoidAreaChangeListener() override;
 
     void UpdateRect(const struct Rect& rect);
     void UpdateMode(WindowMode mode);
@@ -80,6 +83,7 @@ public:
     virtual void RequestFrame() override;
     void UpdateFocusStatus(bool focused);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    void UpdateAvoidArea(const std::vector<Rect>& avoidAreas);
 
     virtual WMError SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext> context,
         std::string& contentInfo, NativeEngine* engine, NativeValue* storage, bool isdistributed) override;
@@ -129,6 +133,7 @@ private:
     WindowState state_ { STATE_INITIAL };
     sptr<IWindowLifeCycle> lifecycleListener_;
     sptr<IWindowChangeListener> windowChangeListener_;
+    sptr<IAvoidAreaChangedListener> avoidAreaChangeListener_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;
