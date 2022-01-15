@@ -204,24 +204,6 @@ WMError WindowImpl::SetWindowFlags(uint32_t flags)
     return ret;
 }
 
-WMError WindowImpl::SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext> context,
-    std::string& contentInfo, NativeEngine* engine, NativeValue* storage, bool isdistributed)
-{
-    WLOGFI("SetUIContent");
-    WLOGFI("contentInfo: %{public}s, context:%{public}p", contentInfo.c_str(), context.get());
-    uiContent_ = Ace::UIContent::Create(context.get(), engine);
-    if (uiContent_ == nullptr) {
-        WLOGFE("fail to SetUIContent id: %{public}d", property_->GetWindowId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if (isdistributed) {
-        uiContent_->Restore(this, contentInfo, storage);
-    } else {
-        uiContent_->Initialize(this, contentInfo, storage);
-    }
-    return WMError::WM_OK;
-}
-
 WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed)
 {

@@ -16,8 +16,7 @@
 #include "js_window_manager.h"
 #include "native_engine/native_engine.h"
 
-extern "C" __attribute__((constructor))
-void NAPI_application_windowmanager_AutoRegister()
+extern "C" __attribute__((constructor)) void NAPI_application_windowmanager_AutoRegister()
 {
     auto moduleManager = NativeModuleManager::GetInstance();
     NativeModule newModuleInfo = {

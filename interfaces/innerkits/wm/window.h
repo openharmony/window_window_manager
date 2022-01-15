@@ -93,8 +93,6 @@ public:
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
     virtual void UnregisterAvoidAreaChangeListener() = 0;
-    virtual WMError SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext> context,
-        std::string& contentInfo, NativeEngine* engine, NativeValue* storage, bool isdistributed = false) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed = false) = 0;
     virtual const std::string& GetContentInfo() = 0;
