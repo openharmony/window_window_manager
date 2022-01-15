@@ -254,6 +254,7 @@ WMError WindowRoot::RequestFocus(uint32_t windowId)
 void WindowRoot::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
+    WLOGFI("RegisterWindowManagerAgent Type:%{public}u", static_cast<uint32_t>(type));
     windowManagerAgents_[type].push_back(windowManagerAgent);
     if (windowManagerAgentDeath_ == nullptr) {
         WLOGFI("failed to create death Recipient ptr WindowManagerAgentDeathRecipient");
