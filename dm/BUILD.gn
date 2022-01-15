@@ -20,6 +20,11 @@ config("libdm_private_config") {
     "include",
     "../dmserver/include",
   ]
+
+  if (defined(product_name) &&
+      (product_name == "rk3566" || product_name == "rk3568")) {
+    defines = [ "PRODUCT_RK" ]
+  }
 }
 
 config("libdm_public_config") {
