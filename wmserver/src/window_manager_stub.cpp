@@ -119,16 +119,16 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
-            sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
             WindowManagerAgentType type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+            sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
             RegisterWindowManagerAgent(type, windowManagerAgentProxy);
             break;
         }
         case TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
-            sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
             WindowManagerAgentType type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+            sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
             UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
