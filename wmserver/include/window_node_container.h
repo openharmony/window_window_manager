@@ -60,6 +60,7 @@ public:
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void LayoutDividerWindow(sptr<WindowNode>& node);
     void UpdateDisplayInfo();
+    bool isVerticalDisplay() const;
 
     class DisplayRects : public RefBase {
     public:
@@ -71,6 +72,9 @@ public:
         void SetSplitRect(const Rect& rect);
         Rect GetRectByWindowMode(const WindowMode& mode) const;
         Rect GetDividerRect() const;
+        bool isVertical_ = false;
+        Rect displayDependRect_ = {0, 0, 0, 0};
+
     private:
         Rect primaryRect_   = {0, 0, 0, 0};
         Rect secondaryRect_ = {0, 0, 0, 0};

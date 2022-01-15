@@ -269,6 +269,16 @@ WMError WindowRoot::LayoutDividerWindow(sptr<WindowNode>& node)
     return WMError::WM_OK;
 }
 
+bool WindowRoot::isVerticalDisplay(sptr<WindowNode>& node) const
+{
+    auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("get display direction failed, window container could not be found");
+        return false;
+    }
+    return container->isVerticalDisplay();
+}
+
 WMError WindowRoot::RequestFocus(uint32_t windowId)
 {
     auto node = GetWindowNode(windowId);
