@@ -45,6 +45,8 @@ WindowNodeContainer::WindowNodeContainer(uint64_t screenId, uint32_t width, uint
     };
     displayRects_->InitRect(displayRect);
     UpdateDisplayInfo();
+    UpdateAvoidAreaFunc func = std::bind(&WindowNodeContainer::OnAvoidAreaChange, this, std::placeholders::_1);
+    avoidController_ = new AvoidAreaController(func);
 }
 
 WindowNodeContainer::~WindowNodeContainer()
@@ -123,6 +125,9 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
     UpdateFocusWindow();
+    if (avoidController_->IsAvoidAreaNode(node)) {
+        avoidController_->AddAvoidAreaNode(node);
+    }
     NotifySystemBarIfChanged();
     WLOGFI("AddWindowNode windowId: %{public}d end", node->GetWindowId());
     return WMError::WM_OK;
@@ -135,6 +140,9 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node)
         return WMError::WM_ERROR_NULLPTR;
     }
     layoutPolicy_->UpdateWindowNode(node);
+    if (avoidController_->IsAvoidAreaNode(node)) {
+        avoidController_->UpdateAvoidAreaNode(node);
+    }
     NotifySystemBarIfChanged();
     WLOGFI("UpdateWindowNode windowId: %{public}d end", node->GetWindowId());
     return WMError::WM_OK;
@@ -232,6 +240,9 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     UpdateRSTree(node, false);
     UpdateFocusWindow();
     layoutPolicy_->RemoveWindowNode(node);
+    if (avoidController_->IsAvoidAreaNode(node)) {
+        avoidController_->RemoveAvoidAreaNode(node);
+    }
     NotifySystemBarIfChanged();
     WLOGFI("RemoveWindowNode windowId: %{public}d end", node->GetWindowId());
     return WMError::WM_OK;
@@ -519,6 +530,21 @@ Rect WindowNodeContainer::DisplayRects::GetRectByWindowMode(const WindowMode& mo
         return secondaryRect_;
     } else {
         return displayRect_;
+    }
+}
+
+std::vector<Rect> WindowNodeContainer::GetAvoidAreaByType(AvoidAreaType avoidAreaType)
+{
+    return avoidController_->GetAvoidAreaByType(avoidAreaType);
+}
+
+void WindowNodeContainer::OnAvoidAreaChange(const std::vector<Rect>& avoidArea)
+{
+    for (auto& node : appWindowNode_->children_) {
+        if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && node->GetWindowToken() != nullptr) {
+            // notify client
+            node->GetWindowToken()->UpdateAvoidArea(avoidArea);
+        }
     }
 }
 

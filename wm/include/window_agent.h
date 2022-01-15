@@ -30,6 +30,7 @@ public:
     void UpdateWindowRect(const struct Rect& rect) override;
     void UpdateWindowMode(WindowMode mode) override;
     void UpdateFocusStatus(bool focused) override;
+    void UpdateAvoidArea(const std::vector<Rect>& avoidAreas) override;
 
 private:
     sptr<WindowImpl> window_;

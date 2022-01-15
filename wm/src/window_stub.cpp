@@ -14,6 +14,7 @@
  */
 
 #include "window_stub.h"
+#include <vector>
 #include "ipc_skeleton.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -47,6 +48,16 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         case TRANS_ID_UPDATE_FOCUS_STATUS: {
             bool focused = data.ReadBool();
             UpdateFocusStatus(focused);
+            break;
+        }
+        case TRANS_ID_UPDATE_AVOID_AREA: {
+            std::vector<Rect> avoidArea;
+            uint32_t len = data.ReadUint32();
+            for (uint32_t i = 0; i < len; ++i) {
+                Rect rect { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
+                avoidArea.push_back(rect);
+            }
+            UpdateAvoidArea(avoidArea);
             break;
         }
         default:

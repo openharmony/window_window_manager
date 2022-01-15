@@ -214,6 +214,13 @@ WMError WindowManagerService::SaveAbilityToken(const sptr<IRemoteObject>& abilit
     return windowController_->SaveAbilityToken(abilityToken, windowId);
 }
 
+std::vector<Rect> WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
+{
+    WLOGFI("[WMS] GetAvoidAreaByType: %{public}u, Type: %{public}u", windowId, static_cast<uint32_t>(avoidAreaType));
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->GetAvoidAreaByType(windowId, avoidAreaType);
+}
+
 void WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
@@ -224,6 +231,7 @@ void WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType typ
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     windowController_->RegisterWindowManagerAgent(type, windowManagerAgent);
 }
+
 void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
