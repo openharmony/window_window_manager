@@ -46,6 +46,11 @@ config("libwm_config") {
     "//third_party/jsoncpp/include",
     "//third_party/json/include",
   ]
+
+  if (defined(product_name) &&
+      (product_name == "rk3566" || product_name == "rk3568")) {
+    defines = [ "PRODUCT_RK" ]
+  }
 }
 
 config("libwm_public_config") {
