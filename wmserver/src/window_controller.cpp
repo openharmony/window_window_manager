@@ -16,6 +16,7 @@
 #include "window_controller.h"
 #include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
+#include "window_helper.h"
 #include "wm_trace.h"
 
 namespace OHOS {
@@ -154,22 +155,48 @@ WMError WindowController::RequestFocus(uint32_t windowId)
     return windowRoot_->RequestFocus(windowId);
 }
 
-WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode mode)
+WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
+    WindowMode srcMode = node->GetWindowMode();
     if (node == nullptr) {
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto property = node->GetWindowProperty();
-    property->SetWindowMode(mode);
-    WMError res = windowRoot_->UpdateWindowNode(windowId);
+
+    if (srcMode == dstMode) {
+        return WMError::WM_OK;
+    }
+    WMError res = WMError::WM_OK;
+    node->SetWindowMode(dstMode);
+    if (WindowHelper::IsSplitWindowMode(srcMode)) {
+        // change split mode to other
+        res = windowRoot_->HandleSplitWindowModeChange(node, false);
+    } else if (!WindowHelper::IsSplitWindowMode(srcMode) && WindowHelper::IsSplitWindowMode(dstMode)) {
+        // change other mode to split
+        res = windowRoot_->HandleSplitWindowModeChange(node, true);
+    }
     if (res != WMError::WM_OK) {
+        node->GetWindowProperty()->ResumeLastWindowMode();
+        return res;
+    }
+    res = windowRoot_->UpdateWindowNode(windowId);
+    if (res != WMError::WM_OK) {
+        WLOGFE("Set window mode failed, update node failed");
         return res;
     }
     RSTransaction::FlushImplicitTransaction();
-    WLOGFI("SetWindowMode FlushImplicitTransaction end");
-    return res;
+    return WMError::WM_OK;
+}
+
+WMError WindowController::MinimizeAllAppNodeAbility(uint32_t windowId)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("Count node find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return windowRoot_->MinimizeAllAppNodeAbility(node);
 }
 
 WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)

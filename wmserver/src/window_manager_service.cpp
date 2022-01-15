@@ -179,7 +179,11 @@ WMError WindowManagerService::SetWindowMode(uint32_t windowId, WindowMode mode)
 {
     WM_SCOPED_TRACE("wms:SetWindowMode");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->SetWindowMode(windowId, mode);
+    WMError res = windowController_->SetWindowMode(windowId, mode);
+    if (res == WMError::WM_OK) {
+        inputWindowMonitor_->UpdateInputWindow(windowId);
+    }
+    return res;
 }
 
 WMError WindowManagerService::SetWindowType(uint32_t windowId, WindowType type)
@@ -260,6 +264,13 @@ void WindowManagerService::RestoreSuspendedWindows()
     WLOGFI("RestoreSuspendedWindows");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     // TODO: restore windows covered by keyguard
+}
+
+WMError WindowManagerService::MinimizeAllAppNodeAbility(uint32_t windowId)
+{
+    WM_SCOPED_TRACE("wms:MinimizeAllAppNodeAbility");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->MinimizeAllAppNodeAbility(windowId);
 }
 }
 }

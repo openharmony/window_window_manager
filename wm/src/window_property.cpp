@@ -14,6 +14,7 @@
  */
 
 #include "window_property.h"
+#include "window_helper.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -29,6 +30,12 @@ void WindowProperty::SetWindowType(WindowType type)
 
 void WindowProperty::SetWindowMode(WindowMode mode)
 {
+    if (!WindowHelper::IsValidWindowMode(mode)) {
+        return;
+    }
+    if (!WindowHelper::IsSplitWindowMode(mode_)) {
+        lastMode_ = mode_;
+    }
     mode_ = mode;
 }
 
@@ -77,6 +84,11 @@ void WindowProperty::SetSystemBarProperty(WindowType type, const SystemBarProper
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
         sysBarPropMap_[type] = property;
     }
+}
+
+void WindowProperty::ResumeLastWindowMode()
+{
+    mode_ = lastMode_;
 }
 
 Rect WindowProperty::GetWindowRect() const

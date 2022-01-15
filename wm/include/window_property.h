@@ -32,6 +32,7 @@ public:
     void SetWindowRect(const struct Rect& rect);
     void SetWindowType(WindowType type);
     void SetWindowMode(WindowMode mode);
+    void ResumeLastWindowMode();
     void SetFullScreen(bool isFullScreen);
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
@@ -65,6 +66,7 @@ private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     WindowMode mode_ { WindowMode::WINDOW_MODE_FULLSCREEN };
+    WindowMode lastMode_ { WindowMode::WINDOW_MODE_FULLSCREEN };
     uint32_t flags_ { 0 };
     bool isFullScreen_ { true };
     bool focusable_ { true };

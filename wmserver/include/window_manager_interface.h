@@ -41,6 +41,9 @@ public:
         TRANS_ID_UPDATE_FLAGS,
         TRANS_ID_UPDATE_SYSTEM_BAR_PROPERTY,
         TRANS_ID_SEND_ABILITY_TOKEN,
+        TRANS_ID_REGISTER_FOCUS_CHANGED_LISTENER,
+        TRANS_ID_UNREGISTER_FOCUS_CHANGED_LISTENER,
+        TRANS_ID_MINIMIZE_ALL_APP_WINDOW,
         TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
     };
@@ -57,6 +60,7 @@ public:
     virtual WMError SetWindowFlags(uint32_t windowId, uint32_t flags) = 0;
     virtual WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) = 0;
     virtual WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId) = 0;
+    virtual WMError MinimizeAllAppNodeAbility(uint32_t windowId) = 0;
 
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
