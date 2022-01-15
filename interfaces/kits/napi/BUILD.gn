@@ -53,6 +53,7 @@ ohos_shared_library("windowstage") {
 group("napi_packages") {
   deps = [
     "display:display",
+    "screenshot:screenshot",
     "window:window",
     "window_runtime:windowmanager_napi",
   ]
