@@ -24,6 +24,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowAdapter"};
 }
+WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapter)
 
 WMError WindowAdapter::SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId)
 {

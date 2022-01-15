@@ -25,6 +25,7 @@ namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayManagerAdapter"};
 }
+WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapter)
 
 DisplayId DisplayManagerAdapter::GetDefaultDisplayId()
 {
@@ -63,7 +64,7 @@ sptr<Display> DisplayManagerAdapter::GetDisplayById(DisplayId displayId)
     return display;
 }
 
-sptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
@@ -72,7 +73,7 @@ sptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displa
         return nullptr;
     }
 
-    sptr<Media::PixelMap> dispalySnapshot = displayManagerServiceProxy_->GetDispalySnapshot(displayId);
+    std::shared_ptr<Media::PixelMap> dispalySnapshot = displayManagerServiceProxy_->GetDispalySnapshot(displayId);
 
     return dispalySnapshot;
 }
@@ -96,6 +97,44 @@ bool DisplayManagerAdapter::DestroyVirtualDisplay(DisplayId displayId)
     return displayManagerServiceProxy_->DestroyVirtualDisplay(displayId);
 }
 
+void DisplayManagerAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    DisplayManagerAgentType type)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!InitDMSProxyLocked()) {
+        return;
+    }
+    return displayManagerServiceProxy_->RegisterDisplayManagerAgent(displayManagerAgent, type);
+}
+
+void DisplayManagerAdapter::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    DisplayManagerAgentType type)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!InitDMSProxyLocked()) {
+        return;
+    }
+    return displayManagerServiceProxy_->UnregisterDisplayManagerAgent(displayManagerAgent, type);
+}
+
+bool DisplayManagerAdapter::WakeUpBegin(PowerStateChangeReason reason)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!InitDMSProxyLocked()) {
+        return false;
+    }
+    return displayManagerServiceProxy_->WakeUpBegin(reason);
+}
+
+bool DisplayManagerAdapter::WakeUpEnd()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!InitDMSProxyLocked()) {
+        return false;
+    }
+    return displayManagerServiceProxy_->WakeUpEnd();
+}
+
 bool DisplayManagerAdapter::SuspendBegin(PowerStateChangeReason reason)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -104,6 +143,25 @@ bool DisplayManagerAdapter::SuspendBegin(PowerStateChangeReason reason)
     }
     return displayManagerServiceProxy_->SuspendBegin(reason);
 }
+
+bool DisplayManagerAdapter::SuspendEnd()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!InitDMSProxyLocked()) {
+        return false;
+    }
+    return displayManagerServiceProxy_->SuspendEnd();
+}
+
+bool DisplayManagerAdapter::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!InitDMSProxyLocked()) {
+        return false;
+    }
+    return displayManagerServiceProxy_->SetScreenPowerForAll(state, reason);
+}
+
 
 bool DisplayManagerAdapter::SetDisplayState(DisplayState state, DisplayStateCallback callback)
 {
@@ -149,7 +207,6 @@ void DisplayManagerAdapter::NotifyDisplayChange(DisplayState state)
 
 bool DisplayManagerAdapter::InitDMSProxyLocked()
 {
-    WLOGFI("InitDMSProxy");
     if (!displayManagerServiceProxy_) {
         sptr<ISystemAbilityManager> systemAbilityManager =
                 SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();

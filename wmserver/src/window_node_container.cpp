@@ -20,6 +20,7 @@
 #include <cinttypes>
 
 #include "window_helper.h"
+#include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
 #include "common_event_manager.h"
@@ -36,13 +37,14 @@ WindowNodeContainer::WindowNodeContainer(uint64_t screenId, uint32_t width, uint
 {
     struct RSDisplayNodeConfig config = {screenId};
     displayNode_ = RSDisplayNode::Create(config);
-    displayRect_ = {
+    Rect displayRect = {
         .posX_ = 0,
         .posY_ = 0,
         .width_ = width,
         .height_ = height
     };
-    layoutPolicy_->UpdateDisplayInfo(displayRect_);
+    displayRects_->InitRect(displayRect);
+    UpdateDisplayInfo();
 }
 
 WindowNodeContainer::~WindowNodeContainer()
@@ -253,7 +255,7 @@ const std::vector<uint32_t>& WindowNodeContainer::Destroy()
 
 sptr<WindowNode> WindowNodeContainer::FindRoot(WindowType type) const
 {
-    if (WindowHelper::IsAppWindow(type)) {
+    if (WindowHelper::IsAppWindow(type) || type == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         return appWindowNode_;
     }
     if (WindowHelper::IsBelowSystemWindow(type)) {
@@ -456,6 +458,70 @@ void WindowNodeContainer::TraverseWindowNode(sptr<WindowNode>& node, std::vector
     }
 }
 
+void WindowNodeContainer::UpdateDisplayInfo()
+{
+    const Rect& primaryRect = displayRects_->GetRectByWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    const Rect& secondaryRect =  displayRects_->GetRectByWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    const Rect& displayRect =  displayRects_->GetRectByWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    layoutPolicy_->UpdateDisplayInfo(primaryRect, secondaryRect, displayRect);
+}
+
+void WindowNodeContainer::LayoutDividerWindow(sptr<WindowNode>& node)
+{
+    layoutPolicy_->UpdateLayoutRect(node);
+    auto layoutRect = node->GetLayoutRect();
+    displayRects_->SetSplitRect(layoutRect); // calculate primary/secondary depend on divider rect
+    UpdateDisplayInfo();
+    WLOGFI("UpdateDividerRects WinId: %{public}d, Rect: %{public}d %{public}d %{public}d %{public}d",
+        node->GetWindowId(), layoutRect.posX_, layoutRect.posY_, layoutRect.width_, layoutRect.height_);
+}
+
+void WindowNodeContainer::DisplayRects::InitRect(Rect& oriDisplayRect)
+{
+    displayRect_ = oriDisplayRect;
+
+    const uint32_t dividerWidth = 50;
+    dividerRect_ = { static_cast<uint32_t>((displayRect_.width_ - dividerWidth) * DEFAULT_SPLIT_RATIO), 0,
+        dividerWidth, displayRect_.height_ };
+
+    SetSplitRect(dividerRect_);
+}
+
+void WindowNodeContainer::DisplayRects::SetSplitRect(float ratio)
+{
+    dividerRect_.posX_ = static_cast<uint32_t>((displayRect_.width_ - dividerRect_.width_) * ratio);
+    SetSplitRect(dividerRect_);
+}
+
+void WindowNodeContainer::DisplayRects::SetSplitRect(const Rect& divRect)
+{
+    dividerRect_.width_ = divRect.width_;
+    dividerRect_.height_ = divRect.height_;
+
+    primaryRect_.width_ = divRect.posX_;
+    primaryRect_.height_ = displayRect_.height_;
+
+    secondaryRect_.posX_ = divRect.posX_ + dividerRect_.width_;
+    secondaryRect_.width_ = displayRect_.width_ - secondaryRect_.posX_;
+    secondaryRect_.height_ = displayRect_.height_;
+}
+
+Rect WindowNodeContainer::DisplayRects::GetDividerRect() const
+{
+    return dividerRect_;
+}
+
+Rect WindowNodeContainer::DisplayRects::GetRectByWindowMode(const WindowMode& mode) const
+{
+    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+        return primaryRect_;
+    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        return secondaryRect_;
+    } else {
+        return displayRect_;
+    }
+}
+
 void WindowNodeContainer::DumpScreenWindowTree()
 {
     WLOGFI("-------- Screen %{public}" PRIu64" dump window info begin---------", screenId_);
@@ -479,7 +545,12 @@ uint64_t WindowNodeContainer::GetScreenId() const
 
 Rect WindowNodeContainer::GetDisplayRect() const
 {
-    return displayRect_;
+    return displayRects_->GetRectByWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+}
+
+std::shared_ptr<RSDisplayNode> WindowNodeContainer::GetDisplayNode() const
+{
+    return displayNode_;
 }
 
 void WindowNodeContainer::SendSplitScreenEvent(WindowMode mode)
@@ -506,7 +577,7 @@ sptr<WindowNode> WindowNodeContainer::FindSplitPairNode(sptr<WindowNode>& trigge
         if ((*iter)->GetWindowId() == triggerNode->GetWindowId()) {
             continue;
         }
-        // Find Top FullScreen ppp main winodow or top paired split mode app main window
+        // Find Top FullScreen main winodow or top paired split mode app main window
         if ((*iter)->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN ||
             (triggerMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
             (*iter)->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) ||
@@ -528,10 +599,10 @@ void WindowNodeContainer::HandleModeChangeToSplit(sptr<WindowNode>& triggerNode)
         UpdateWindowPairInfo(triggerNode, pairNode);
     } else {
         // sent split event
-        // displayRects_->SetSplitRect();
+        displayRects_->SetSplitRect(DEFAULT_SPLIT_RATIO);
         SendSplitScreenEvent(triggerNode->GetWindowMode());
     }
-    // UpdateDisplayInfo();
+    UpdateDisplayInfo();
 }
 
 void WindowNodeContainer::HandleModeChangeFromSplit(sptr<WindowNode>& triggerNode)
@@ -553,7 +624,7 @@ void WindowNodeContainer::HandleModeChangeFromSplit(sptr<WindowNode>& triggerNod
         WLOGFE("Split out, but can not find pair in map  %{public}d", triggerNode->GetWindowId());
     }
     if (pairedWindowMap_.empty()) {
-        // SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, screenId_);
+        SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, screenId_);
     }
 }
 
@@ -568,7 +639,7 @@ void WindowNodeContainer::HandleSplitWindowModeChange(sptr<WindowNode>& triggerN
 
 void WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode)
 {
-    float splitRatio = DEFAULT_WINDOW_SPLIT_RATIO;
+    float splitRatio = DEFAULT_SPLIT_RATIO;
     auto triggerMode = triggerNode->GetWindowMode();
     auto pairMode = pairNode->GetWindowMode();
     if (pairNode->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
@@ -595,11 +666,13 @@ void WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sp
         }
     }
 
-    pairedWindowMap_.insert(std::pair<uint32_t, WindowPairInfo>(triggerNode->GetWindowId(), {pairNode, splitRatio}));
-    pairedWindowMap_.insert({pairNode->GetWindowId(), {triggerNode, 1 - splitRatio}});
-    // displayRects_->SetSplitRect(splitRatio);
-    // Rect dividerRect = displayRects_->GetDividerRect();
-    // SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_CREATE_DIVIDER, screenId_, dividerRect);
+    pairedWindowMap_.insert(std::pair<uint32_t, WindowPairInfo>(triggerNode->GetWindowId(),
+        {pairNode, splitRatio}));
+    pairedWindowMap_.insert(std::pair<uint32_t, WindowPairInfo>(pairNode->GetWindowId(),
+        {triggerNode, 1 - splitRatio}));
+    displayRects_->SetSplitRect(splitRatio);
+    Rect dividerRect = displayRects_->GetDividerRect();
+    SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_CREATE_DIVIDER, screenId_, dividerRect);
 }
 }
 }

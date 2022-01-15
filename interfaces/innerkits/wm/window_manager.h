@@ -39,7 +39,7 @@ public:
     virtual void OnSystemBarPropertyChange(uint64_t displayId, const SystemBarProps& props) = 0;
 };
 
-class WindowManager : public RefBase {
+class WindowManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManager);
 friend class WindowManagerAgent;
 public:

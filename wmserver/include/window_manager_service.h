@@ -55,6 +55,7 @@ public:
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) override;
     WMError MinimizeAllAppNodeAbility(uint32_t windowId) override;
 
+    std::shared_ptr<RSDisplayNode> GetDisplayNode(int32_t displayId) const;
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void UnregisterWindowManagerAgent(WindowManagerAgentType type,

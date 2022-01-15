@@ -27,6 +27,7 @@ private:
 
     std::map<ScreenId, sptr<Screen>> monitorMap_;
 };
+WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManager)
 
 ScreenManager::ScreenManager()
 {
@@ -46,6 +47,10 @@ std::vector<const sptr<Screen>> ScreenManager::GetAllScreens()
 {
     std::vector<const sptr<Screen>> res;
     return res;
+}
+
+void ScreenManager::RegisterScreenChangeListener(sptr<IScreenChangeListener> listener)
+{
 }
 
 sptr<ScreenGroup> ScreenManager::makeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
