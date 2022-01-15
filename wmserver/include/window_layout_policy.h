@@ -53,6 +53,7 @@ public:
     void RemoveWindowNode(sptr<WindowNode>& node);
     void UpdateWindowNode(sptr<WindowNode>& node);
     void UpdateLayoutRect(sptr<WindowNode>& node);
+    Rect GetDependDisplayRects() const;
 
 private:
     LayoutDependRects dependRects;
@@ -63,6 +64,9 @@ private:
         WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowType::WINDOW_TYPE_NAVIGATION_BAR,
     };
+    
+    void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
+    void UpdateSplitLimitRect(const Rect& limitRect, Rect& limitSplitRect);
     void UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect);
     void LayoutWindowTree();
     void LayoutWindowNode(sptr<WindowNode>& node);
@@ -70,6 +74,7 @@ private:
     void InitLimitRects();
     Rect& GetLimitRect(const WindowMode mode);
     Rect& GetDisplayRect(const WindowMode mode);
+    void LimitMoveBounds(Rect& rect);
 };
 }
 }
