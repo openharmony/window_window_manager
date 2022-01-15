@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,15 @@
  * limitations under the License.
  */
 
-#include "window_manager_service_inner.h"
-#include "window_manager_service.h"
+#include "display_manager_agent.h"
+#include "display_manager.h"
+#include "singleton_container.h"
 
 namespace OHOS {
 namespace Rosen {
-WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerServiceInner)
-
-bool WindowManagerServiceInner::NotifyDisplaySuspend()
+void DisplayManagerAgent::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
 {
-    WMError ret =  WindowManagerService::GetInstance().NotifyDisplaySuspend();
-    return ret == WMError::WM_OK;
+    SingletonContainer::Get<DisplayManager>().NotifyDisplayPowerEvent(event, status);
 }
-void WindowManagerServiceInner::RestoreSuspendedWindows()
-{
-    WindowManagerService::GetInstance().RestoreSuspendedWindows();
-}
-}
-}
+} // namespace Rosen
+} // namespace OHOS

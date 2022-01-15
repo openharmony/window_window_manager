@@ -14,7 +14,8 @@
  */
 
 #include "display_power_controller.h"
-#include "window_manager_service_inner.h"
+#include "display_manager_service.h"
+//#include "window_manager_service_inner.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -26,13 +27,13 @@ namespace {
 bool DisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 {
     WLOGFI("reason:%{public}u", reason);
-    return WindowManagerServiceInner::GetInstance().NotifyDisplaySuspend();
+    // TODO: return WindowManagerServiceInner::GetInstance().NotifyDisplaySuspend();
+    return true;
 }
 
 bool DisplayPowerController::SetDisplayState(DisplayState state)
 {
     WLOGFI("state:%{public}u", state);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (displayState_ == state) {
         WLOGFI("state is already set");
         return true;
@@ -40,11 +41,14 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
     switch (state) {
         case DisplayState::ON: {
             // TODO: open vsync and SendSystemEvent to keyguard
+            DisplayManagerService::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
+                EventStatus::BEGIN);
             break;
         }
         case DisplayState::OFF: {
-            // TODO: SendSystemEvent to keyguard
             displayState_ = state;
+            DisplayManagerService::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF,
+                EventStatus::BEGIN);
             break;
         }
         default:
@@ -55,7 +59,6 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
 
 DisplayState DisplayPowerController::GetDisplayState(uint64_t displayId)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     return displayState_;
 }
 
@@ -63,7 +66,7 @@ void DisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
 {
     if (event == DisplayEvent::UNLOCK) {
         WLOGFI("DisplayEvent UNLOCK");
-        WindowManagerServiceInner::GetInstance().RestoreSuspendedWindows();
+        // TODO: WindowManagerServiceInner::GetInstance().RestoreSuspendedWindows();
         return;
     }
     // TODO: set displayState_ ON when keyguard is drawn

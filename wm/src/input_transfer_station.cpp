@@ -21,6 +21,8 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "InputTransferStation"};
 }
+WM_IMPLEMENT_SINGLE_INSTANCE(InputTransferStation)
+
 void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
     WLOGFI("OnInputEvent: receive keyEvent");

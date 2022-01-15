@@ -135,7 +135,7 @@ bool DisplayManagerProxy::DestroyVirtualDisplay(DisplayId displayId)
     return reply.ReadBool();
 }
 
-sptr<Media::PixelMap> DisplayManagerProxy::GetDispalySnapshot(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDispalySnapshot(DisplayId displayId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -161,12 +161,100 @@ sptr<Media::PixelMap> DisplayManagerProxy::GetDispalySnapshot(DisplayId displayI
         return nullptr;
     }
 
-    sptr<Media::PixelMap> pixelMap = reply.ReadParcelable<Media::PixelMap>();
+    std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
     if (pixelMap == nullptr) {
         WLOGFW("DisplayManagerProxy::GetDispalySnapshot SendRequest nullptr.");
         return nullptr;
     }
     return pixelMap;
+}
+
+void DisplayManagerProxy::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    DisplayManagerAgentType type)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteRemoteObject(displayManagerAgent->AsObject())) {
+        WLOGFE("Write IDisplayManagerAgent failed");
+        return;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+        WLOGFE("Write DisplayManagerAgent type failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void DisplayManagerProxy::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    DisplayManagerAgentType type)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteRemoteObject(displayManagerAgent->AsObject())) {
+        WLOGFE("Write IWindowManagerAgent failed");
+        return;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+        WLOGFE("Write DisplayManagerAgent type failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+bool DisplayManagerProxy::WakeUpBegin(PowerStateChangeReason reason)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        WLOGFE("Write PowerStateChangeReason failed");
+        return false;
+    }
+    if (Remote()->SendRequest(TRANS_ID_WAKE_UP_BEGIN, data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+bool DisplayManagerProxy::WakeUpEnd()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+    if (Remote()->SendRequest(TRANS_ID_WAKE_UP_END, data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
 }
 
 bool DisplayManagerProxy::SuspendBegin(PowerStateChangeReason reason)
@@ -183,6 +271,46 @@ bool DisplayManagerProxy::SuspendBegin(PowerStateChangeReason reason)
         return false;
     }
     if (Remote()->SendRequest(TRANS_ID_SUSPEND_BEGIN, data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+bool DisplayManagerProxy::SuspendEnd()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+    if (Remote()->SendRequest(TRANS_ID_SUSPEND_END, data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+bool DisplayManagerProxy::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        WLOGFE("Write DisplayPowerState failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        WLOGFE("Write PowerStateChangeReason failed");
+        return false;
+    }
+    if (Remote()->SendRequest(TRANS_ID_SET_SCREEN_POWER_FOR_ALL, data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return false;
     }

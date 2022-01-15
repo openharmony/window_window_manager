@@ -31,11 +31,17 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(int32_t dis
     if (iter != windowNodeContainerMap_.end()) {
         return iter->second;
     }
-    auto abstractDisplay = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+    const sptr<AbstractDisplay> abstractDisplay = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
     if (abstractDisplay == nullptr) {
         WLOGFE("get display failed displayId:%{public}d", displayId);
         return nullptr;
     }
+
+    if (!CheckDisplayInfo(abstractDisplay)) {
+        WLOGFE("get display invailed infp:%{public}d", displayId);
+        return nullptr;
+    }
+
     WLOGFI("create new window node container display width:%{public}d, height:%{public}d, screenId:%{public}" PRIu64"",
         abstractDisplay->GetWidth(), abstractDisplay->GetHeight(), abstractDisplay->GetId());
 
@@ -52,6 +58,19 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(int32_t dis
         callbacks);
     windowNodeContainerMap_.insert({ displayId, container });
     return container;
+}
+
+bool WindowRoot::CheckDisplayInfo(const sptr<AbstractDisplay>& display)
+{
+    const int32_t minWidth = 50;
+    const int32_t minHeight = 50;
+    const int32_t maxWidth = 7680;
+    const int32_t maxHeight = 7680; // 8k resolution
+    if (display->GetWidth() < minWidth || display->GetWidth() > maxWidth ||
+        display->GetHeight() < minHeight || display->GetHeight() > maxHeight) {
+        return false;
+    }
+    return true;
 }
 
 void WindowRoot::NotifyDisplayRemoved(int32_t displayId)
@@ -220,6 +239,17 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
     }
 
     windowNodeMap_.erase(node->GetWindowId());
+    return WMError::WM_OK;
+}
+
+WMError WindowRoot::LayoutDividerWindow(sptr<WindowNode>& node)
+{
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("layout divider window failed, window container could not be found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    container->LayoutDividerWindow(node);
     return WMError::WM_OK;
 }
 

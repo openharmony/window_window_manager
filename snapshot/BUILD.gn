@@ -31,6 +31,7 @@ ohos_executable("snapshot_display") {
     "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",  # PixelMap
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/wm:libwm",
+    "//foundation/windowmanager/wm:libwmutil",
     "//third_party/libpng:libpng",  # png
   ]
 
