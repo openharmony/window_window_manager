@@ -137,16 +137,20 @@ WMError WindowImpl::SetWindowType(WindowType type)
 
 WMError WindowImpl::SetWindowMode(WindowMode mode)
 {
+    WLOGFI("[Client] Window %{public}d mode %{public}d", property_->GetWindowId(), static_cast<uint32_t>(mode));
     if (!IsWindowValid()) {
         WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (state_ == STATE_CREATED || state_ == STATE_HIDDEN) {
         property_->SetWindowMode(mode);
-        return WMError::WM_OK;
+    } else if (state_ == STATE_SHOWN) {
+        property_->SetWindowMode(mode);
+        return SingletonContainer::Get<WindowAdapter>().SetWindowMode(property_->GetWindowId(), mode);
     }
     if (property_->GetWindowMode() != mode) {
-        // TODO
+        WLOGFE("set window mode filed! id: %{public}d", property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
     return WMError::WM_OK;
 }
@@ -326,6 +330,15 @@ WMError WindowImpl::Show()
     if (!IsWindowValid()) {
         WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ == STATE_SHOWN && property_->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
+        WLOGFI("Minimize all app window");
+        WMError ret = SingletonContainer::Get<WindowAdapter>().MinimizeAllAppNodeAbility(property_->GetWindowId());
+        if (ret != WMError::WM_OK) {
+            WLOGFE("Minimize all app errCode:%{public}d for winId:%{public}d",
+                static_cast<int32_t>(ret), property_->GetWindowId());
+        }
+        return ret;
     }
     if (state_ == STATE_SHOWN) {
         WLOGFI("window is already shown id: %{public}d", property_->GetWindowId());

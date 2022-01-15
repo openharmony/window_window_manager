@@ -52,6 +52,18 @@ public:
         return (IsBelowSystemWindow(type) || IsAboveSystemWindow(type));
     }
 
+    static inline bool IsSplitWindowMode(WindowMode mode)
+    {
+        return mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    }
+
+    static inline bool IsValidWindowMode(WindowMode mode)
+    {
+        return mode == WindowMode::WINDOW_MODE_FULLSCREEN || mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY || mode == WindowMode::WINDOW_MODE_FLOATING ||
+            mode == WindowMode::WINDOW_MODE_PIP;
+    }
+
     WindowHelper() = default;
     ~WindowHelper() = default;
 };

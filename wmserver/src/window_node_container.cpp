@@ -23,6 +23,7 @@
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
+#include "common_event_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -68,6 +69,20 @@ WMError WindowNodeContainer::MinimizeOtherFullScreenAbility()
     return WMError::WM_OK;
 }
 
+WMError WindowNodeContainer::MinimizeAllAppNodeAbility()
+{
+    if (appWindowNode_->children_.empty()) {
+        return WMError::WM_OK;
+    }
+    for (auto iter = appWindowNode_->children_.begin(); iter != appWindowNode_->children_.end(); ++iter) {
+        if  ((*iter)->abilityToken_ != nullptr) {
+            WLOGFI("Notify ability to minimize");
+            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility((*iter)->abilityToken_);
+        }
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
 {
     if (!node->surfaceNode_ || !displayNode_) {
@@ -98,6 +113,10 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
         }
     }
     node->parent_ = parentNode;
+
+    if (node->IsSplitMode()) {
+        HandleSplitWindowModeChange(node, true);
+    }
 
     UpdateWindowTree(node);
     UpdateRSTree(node, true);
@@ -205,6 +224,11 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     for (auto& child : node->children_) {
         child->currentVisibility_ = false;
     }
+
+    if (node->IsSplitMode()) {
+        HandleSplitWindowModeChange(node, false);
+    }
+
     UpdateRSTree(node, false);
     UpdateFocusWindow();
     layoutPolicy_->RemoveWindowNode(node);
@@ -456,8 +480,8 @@ void WindowNodeContainer::DisplayRects::InitRect(Rect& oriDisplayRect)
 {
     displayRect_ = oriDisplayRect;
 
-    const uint32_t dividerWidth = 200;
-    dividerRect_ = { static_cast<uint32_t>((displayRect_.width_ - dividerWidth) * 0.5), 0,  // default ratio : 0.5
+    const uint32_t dividerWidth = 50;
+    dividerRect_ = { static_cast<uint32_t>((displayRect_.width_ - dividerWidth) * DEFAULT_SPLIT_RATIO), 0,
         dividerWidth, displayRect_.height_ };
 
     SetSplitRect(dividerRect_);
@@ -527,6 +551,128 @@ Rect WindowNodeContainer::GetDisplayRect() const
 std::shared_ptr<RSDisplayNode> WindowNodeContainer::GetDisplayNode() const
 {
     return displayNode_;
+}
+
+void WindowNodeContainer::SendSplitScreenEvent(WindowMode mode)
+{
+    // should define in common_event_support.h and @ohos.commonEvent.d.ts
+    WLOGFI("send split sceen event , trigger mode is %{public}d", mode);
+    const std::string eventName = "common.event.SPLIT_SCREEN";
+    AAFwk::Want want;
+    want.SetAction(eventName);
+    EventFwk::CommonEventData commonEventData;
+    commonEventData.SetWant(want);
+    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+        commonEventData.SetData("Secondary");
+    } else {
+        commonEventData.SetData("Primary");
+    }
+    EventFwk::CommonEventManager::PublishCommonEvent(commonEventData);
+}
+
+sptr<WindowNode> WindowNodeContainer::FindSplitPairNode(sptr<WindowNode>& triggerNode) const
+{
+    auto triggerMode = triggerNode->GetWindowMode();
+    for (auto iter = appWindowNode_->children_.rbegin(); iter != appWindowNode_->children_.rend(); iter++) {
+        if ((*iter)->GetWindowId() == triggerNode->GetWindowId()) {
+            continue;
+        }
+        // Find Top FullScreen main winodow or top paired split mode app main window
+        if ((*iter)->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN ||
+            (triggerMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
+            (*iter)->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) ||
+            (triggerMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY &&
+            (*iter)->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
+            return *iter;
+        }
+    }
+    return nullptr;
+}
+
+void WindowNodeContainer::HandleModeChangeToSplit(sptr<WindowNode>& triggerNode)
+{
+    WM_FUNCTION_TRACE();
+    WLOGFI("HandleModeChangeToSplit %{public}d", triggerNode->GetWindowId());
+    auto pairNode = FindSplitPairNode(triggerNode);
+    if (pairNode != nullptr) {
+        WLOGFI("Window %{public}d find pair %{public}d", triggerNode->GetWindowId(), pairNode->GetWindowId());
+        UpdateWindowPairInfo(triggerNode, pairNode);
+    } else {
+        // sent split event
+        displayRects_->SetSplitRect(DEFAULT_SPLIT_RATIO);
+        SendSplitScreenEvent(triggerNode->GetWindowMode());
+    }
+    UpdateDisplayInfo();
+}
+
+void WindowNodeContainer::HandleModeChangeFromSplit(sptr<WindowNode>& triggerNode)
+{
+    WLOGFI("HandleModeChangeFromSplit %{public}d", triggerNode->GetWindowId());
+    if (pairedWindowMap_.find(triggerNode->GetWindowId()) != pairedWindowMap_.end()) {
+        WindowPairInfo info = pairedWindowMap_.at(triggerNode->GetWindowId());
+        auto pairNode = info.pairNode;
+        pairNode->GetWindowProperty()->ResumeLastWindowMode();
+        pairNode->GetWindowToken()->UpdateWindowMode(pairNode->GetWindowMode());
+        triggerNode->GetWindowProperty()->ResumeLastWindowMode();
+        triggerNode->GetWindowToken()->UpdateWindowMode(pairNode->GetWindowMode());
+        pairedWindowMap_.erase(pairNode->GetWindowId());
+        pairedWindowMap_.erase(triggerNode->GetWindowId());
+        WLOGFI("Split out, Id[%{public}d, %{public}d], Mode[%{public}d, %{public}d]",
+            triggerNode->GetWindowId(), pairNode->GetWindowId(),
+            triggerNode->GetWindowMode(), pairNode->GetWindowMode());
+    } else {
+        WLOGFE("Split out, but can not find pair in map  %{public}d", triggerNode->GetWindowId());
+    }
+    if (pairedWindowMap_.empty()) {
+        SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, screenId_);
+    }
+}
+
+void WindowNodeContainer::HandleSplitWindowModeChange(sptr<WindowNode>& triggerNode, bool isChangeToSplit)
+{
+    if (isChangeToSplit) {
+        HandleModeChangeToSplit(triggerNode);
+    } else {
+        HandleModeChangeFromSplit(triggerNode);
+    }
+}
+
+void WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode)
+{
+    float splitRatio = DEFAULT_SPLIT_RATIO;
+    WindowMode triggerMode = triggerNode->GetWindowMode();
+    WindowMode pairSrcMode = pairNode->GetWindowMode();
+    if (pairSrcMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        WindowMode pairDstMode = (triggerMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) ?
+            WindowMode::WINDOW_MODE_SPLIT_SECONDARY : WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+        pairNode->SetWindowMode(pairDstMode);
+        pairNode->GetWindowToken()->UpdateWindowMode(pairDstMode);
+        layoutPolicy_->AddWindowNode(pairNode);
+        WLOGFI("Pair FullScreen [%{public}d, %{public}d], Mode[%{public}d, %{public}d], splitRatio = %{public}f",
+            triggerNode->GetWindowId(), pairNode->GetWindowId(), triggerMode, pairDstMode, splitRatio);
+    } else {
+        if (pairedWindowMap_.count(pairNode->GetWindowId() != 0)) {
+            WindowPairInfo info = pairedWindowMap_.at(pairNode->GetWindowId());
+            auto prevPairNode = info.pairNode;
+            prevPairNode->GetWindowProperty()->ResumeLastWindowMode();
+            prevPairNode->GetWindowToken()->UpdateWindowMode(prevPairNode->GetWindowMode());
+
+            pairedWindowMap_.erase(prevPairNode->GetWindowId());
+            pairedWindowMap_.erase(pairNode->GetWindowId());
+
+            splitRatio = info.splitRatio;
+            WLOGFI("Pair Split [%{public}d, %{public}d], Mode[%{public}d, %{public}d], splitRatio = %{public}f",
+                triggerNode->GetWindowId(), pairNode->GetWindowId(), triggerMode, pairSrcMode, splitRatio);
+        }
+    }
+
+    pairedWindowMap_.insert(std::pair<uint32_t, WindowPairInfo>(triggerNode->GetWindowId(),
+        {pairNode, splitRatio}));
+    pairedWindowMap_.insert(std::pair<uint32_t, WindowPairInfo>(pairNode->GetWindowId(),
+        {triggerNode, 1 - splitRatio}));
+    displayRects_->SetSplitRect(splitRatio);
+    Rect dividerRect = displayRects_->GetDividerRect();
+    SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_CREATE_DIVIDER, screenId_, dividerRect);
 }
 }
 }

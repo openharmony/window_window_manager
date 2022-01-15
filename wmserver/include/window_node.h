@@ -44,6 +44,7 @@ public:
     void SetLayoutRect(const Rect& rect);
     void SetWindowProperty(const sptr<WindowProperty>& property);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
+    void SetWindowMode(WindowMode mode);
 
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
@@ -56,6 +57,7 @@ public:
     int32_t GetCallingPid() const;
     int32_t GetCallingUid() const;
     const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
+    bool IsSplitMode() const;
 
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;
