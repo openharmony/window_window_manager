@@ -16,6 +16,7 @@
 #include "window_controller.h"
 #include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
+#include "window_helper.h"
 #include "wm_trace.h"
 
 namespace OHOS {
@@ -157,34 +158,31 @@ WMError WindowController::RequestFocus(uint32_t windowId)
 WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
+    WindowMode srcMode = node->GetWindowMode();
     if (node == nullptr) {
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    if (node->GetWindowMode() == dstMode) {
+    if (srcMode == dstMode) {
         return WMError::WM_OK;
     }
     WMError res = WMError::WM_OK;
-    if (node->IsSplitMode()) {
+    node->SetWindowMode(dstMode);
+    if (WindowHelper::IsSplitWindowMode(srcMode)) {
         // change split mode to other
-        node->SetWindowMode(dstMode);
         res = windowRoot_->HandleSplitWindowModeChange(node, false);
-    } else if (!node->IsSplitMode() &&
-        (dstMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || dstMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
+    } else if (!WindowHelper::IsSplitWindowMode(srcMode) && WindowHelper::IsSplitWindowMode(dstMode)) {
         // change other mode to split
-        node->SetWindowMode(dstMode);
         res = windowRoot_->HandleSplitWindowModeChange(node, true);
-    } else {
-        node->SetWindowMode(dstMode);
     }
     if (res != WMError::WM_OK) {
-        WLOGFE("HandleSplitWindowModeChange failed, resume last window mode");
         node->GetWindowProperty()->ResumeLastWindowMode();
         return res;
     }
     res = windowRoot_->UpdateWindowNode(windowId);
     if (res != WMError::WM_OK) {
+        WLOGFE("Set window mode failed, update node failed");
         return res;
     }
     RSTransaction::FlushImplicitTransaction();

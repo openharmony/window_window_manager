@@ -56,6 +56,7 @@ public:
     {
         return mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
     }
+
     static inline bool IsValidWindowMode(WindowMode mode)
     {
         return mode == WindowMode::WINDOW_MODE_FULLSCREEN || mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
