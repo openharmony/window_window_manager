@@ -14,7 +14,8 @@
  */
 
 #include "window_input_channel.h"
-#include <window_manager_hilog.h>
+#include <input_method_controller.h>
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -33,11 +34,20 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
         WLOGE("HandleKeyEvent keyEvent is nullptr");
         return;
     }
-    if (inputListener_ != nullptr) {
-        inputListener_->OnInputEvent(keyEvent);
-        return;
+    bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
+    bool inputMethodHasProcessed = false;
+    if (isKeyboardEvent) {
+        WLOGI("dispatch keyEvent to input method");
+        inputMethodHasProcessed = MiscServices::InputMethodController::GetInstance()->dispatchKeyEvent(keyEvent);
     }
-    window_->ConsumeKeyEvent(keyEvent);
+    if (!isKeyboardEvent || !inputMethodHasProcessed) {
+        WLOGI("dispatch keyEvent to ACE");
+        if (inputListener_ != nullptr) {
+            inputListener_->OnInputEvent(keyEvent);
+            return;
+        }
+        window_->ConsumeKeyEvent(keyEvent);
+    }
     keyEvent->MarkProcessed();
 }
 
@@ -81,6 +91,15 @@ void WindowInputChannel::OnVsync(int64_t timeStamp)
 void WindowInputChannel::SetInputListener(std::shared_ptr<MMI::IInputEventConsumer>& listener)
 {
     inputListener_ = listener;
+}
+
+bool WindowInputChannel::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
+{
+    int32_t keyCode = keyEvent->GetKeyCode();
+    bool isKeyFN = (keyCode == MMI::KeyEvent::KEYCODE_FN);
+    bool isKeyboard = (keyCode >= MMI::KeyEvent::KEYCODE_0 && keyCode <= MMI::KeyEvent::KEYCODE_NUMPAD_RIGHT_PAREN);
+    WLOGI("isKeyFN: %{public}d, isKeyboard: %{public}d", isKeyFN, isKeyboard);
+    return (isKeyFN || isKeyboard);
 }
 }
 }
