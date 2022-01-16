@@ -115,9 +115,12 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     node->parent_ = parentNode;
 
     if (node->IsSplitMode()) {
-        HandleSplitWindowModeChange(node, true);
+        WMError ret = HandleSplitWindowModeChange(node, true);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("Add split window failed!");
+            return ret;
+        }
     }
-
     UpdateWindowTree(node);
     UpdateRSTree(node, true);
     AssignZOrder();
@@ -226,9 +229,12 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     }
 
     if (node->IsSplitMode()) {
-        HandleSplitWindowModeChange(node, false);
+        WMError ret = HandleSplitWindowModeChange(node, false);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("Remove split window failed!");
+            return ret;
+        }
     }
-
     UpdateRSTree(node, false);
     UpdateFocusWindow();
     layoutPolicy_->RemoveWindowNode(node);
@@ -589,23 +595,27 @@ sptr<WindowNode> WindowNodeContainer::FindSplitPairNode(sptr<WindowNode>& trigge
     return nullptr;
 }
 
-void WindowNodeContainer::HandleModeChangeToSplit(sptr<WindowNode>& triggerNode)
+WMError WindowNodeContainer::HandleModeChangeToSplit(sptr<WindowNode>& triggerNode)
 {
     WM_FUNCTION_TRACE();
     WLOGFI("HandleModeChangeToSplit %{public}d", triggerNode->GetWindowId());
     auto pairNode = FindSplitPairNode(triggerNode);
     if (pairNode != nullptr) {
         WLOGFI("Window %{public}d find pair %{public}d", triggerNode->GetWindowId(), pairNode->GetWindowId());
-        UpdateWindowPairInfo(triggerNode, pairNode);
+        WMError ret = UpdateWindowPairInfo(triggerNode, pairNode);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
     } else {
         // sent split event
         displayRects_->SetSplitRect(DEFAULT_SPLIT_RATIO);
         SendSplitScreenEvent(triggerNode->GetWindowMode());
     }
     UpdateDisplayInfo();
+    return WMError::WM_OK;
 }
 
-void WindowNodeContainer::HandleModeChangeFromSplit(sptr<WindowNode>& triggerNode)
+WMError WindowNodeContainer::HandleModeChangeFromSplit(sptr<WindowNode>& triggerNode)
 {
     WLOGFI("HandleModeChangeFromSplit %{public}d", triggerNode->GetWindowId());
     if (pairedWindowMap_.find(triggerNode->GetWindowId()) != pairedWindowMap_.end()) {
@@ -614,7 +624,7 @@ void WindowNodeContainer::HandleModeChangeFromSplit(sptr<WindowNode>& triggerNod
         pairNode->GetWindowProperty()->ResumeLastWindowMode();
         pairNode->GetWindowToken()->UpdateWindowMode(pairNode->GetWindowMode());
         triggerNode->GetWindowProperty()->ResumeLastWindowMode();
-        triggerNode->GetWindowToken()->UpdateWindowMode(pairNode->GetWindowMode());
+        triggerNode->GetWindowToken()->UpdateWindowMode(triggerNode->GetWindowMode());
         pairedWindowMap_.erase(pairNode->GetWindowId());
         pairedWindowMap_.erase(triggerNode->GetWindowId());
         WLOGFI("Split out, Id[%{public}d, %{public}d], Mode[%{public}d, %{public}d]",
@@ -622,22 +632,21 @@ void WindowNodeContainer::HandleModeChangeFromSplit(sptr<WindowNode>& triggerNod
             triggerNode->GetWindowMode(), pairNode->GetWindowMode());
     } else {
         WLOGFE("Split out, but can not find pair in map  %{public}d", triggerNode->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (pairedWindowMap_.empty()) {
+        WLOGFI("Notify devider to destroy");
         SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, screenId_);
     }
+    return WMError::WM_OK;
 }
 
-void WindowNodeContainer::HandleSplitWindowModeChange(sptr<WindowNode>& triggerNode, bool isChangeToSplit)
+WMError WindowNodeContainer::HandleSplitWindowModeChange(sptr<WindowNode>& triggerNode, bool isChangeToSplit)
 {
-    if (isChangeToSplit) {
-        HandleModeChangeToSplit(triggerNode);
-    } else {
-        HandleModeChangeFromSplit(triggerNode);
-    }
+    return isChangeToSplit ? HandleModeChangeToSplit(triggerNode) : HandleModeChangeFromSplit(triggerNode);
 }
 
-void WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode)
+WMError WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode)
 {
     float splitRatio = DEFAULT_SPLIT_RATIO;
     WindowMode triggerMode = triggerNode->GetWindowMode();
@@ -647,7 +656,11 @@ void WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sp
             WindowMode::WINDOW_MODE_SPLIT_SECONDARY : WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
         pairNode->SetWindowMode(pairDstMode);
         pairNode->GetWindowToken()->UpdateWindowMode(pairDstMode);
-        layoutPolicy_->AddWindowNode(pairNode);
+        WMError ret = UpdateWindowNode(pairNode);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("Update window pair info failed");
+            return ret;
+        }
         WLOGFI("Pair FullScreen [%{public}d, %{public}d], Mode[%{public}d, %{public}d], splitRatio = %{public}f",
             triggerNode->GetWindowId(), pairNode->GetWindowId(), triggerMode, pairDstMode, splitRatio);
     } else {
@@ -671,8 +684,10 @@ void WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sp
     pairedWindowMap_.insert(std::pair<uint32_t, WindowPairInfo>(pairNode->GetWindowId(),
         {triggerNode, 1 - splitRatio}));
     displayRects_->SetSplitRect(splitRatio);
+    WLOGFI("Notify devider to create");
     Rect dividerRect = displayRects_->GetDividerRect();
     SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_CREATE_DIVIDER, screenId_, dividerRect);
+    return WMError::WM_OK;
 }
 }
 }
