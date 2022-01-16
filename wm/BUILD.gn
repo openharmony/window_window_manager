@@ -68,45 +68,6 @@ config("libwm_public_config_test") {
   include_dirs = [ "//foundation/windowmanager/interfaces/innerkits" ]
 }
 
-config("libwmutil_private_config") {
-  include_dirs = [
-    "include",
-    "//foundation/windowmanager/dmserver/include",
-    "../interfaces/innerkits/dm",
-    "../interfaces/innerkits/wm",
-  ]
-}
-
-config("libwmutil_public_config") {
-  include_dirs = [ "//foundation/windowmanager/utils/include" ]
-}
-
-## Build libwmutil.so
-ohos_shared_library("libwmutil") {
-  sources = [
-    "../dmserver/src/display_info.cpp",
-    "../dmserver/src/virtual_display_info.cpp",
-    "../utils/src/singleton_container.cpp",
-    "../utils/src/wm_trace.cpp",
-    "src/window_property.cpp",
-  ]
-
-  configs = [ ":libwmutil_private_config" ]
-
-  public_configs = [ ":libwmutil_public_config" ]
-
-  deps = [ "//utils/native/base:utils" ]
-
-  external_deps = [
-    "bytrace_standard:bytrace_core",
-    "hilog_native:libhilog",
-    "ipc:ipc_core",
-  ]
-
-  part_name = "window_manager"
-  subsystem_name = "window"
-}
-
 ## Build libwm.so
 ohos_shared_library("libwm") {
   sources = [
@@ -145,7 +106,7 @@ ohos_shared_library("libwm") {
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",
-    "//foundation/windowmanager/wm:libwmutil",
+    "//foundation/windowmanager/utils:libwmutil",
     "//utils/native/base:utils",
 
     # weston adapter
@@ -175,12 +136,18 @@ ohos_shared_library("libwm") {
 
     # weston adapter
     "//foundation/windowmanager/adapter:libwmadapter",
+
+    # context
+
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
+    "//foundation/appexecfwk/standard/kits:app_context",
   ]
 
   external_deps = [
     "aafwk_standard:ability_context_native",
     "bytrace_standard:bytrace_core",
     "ipc:ipc_core",
+    "window_manager:libdm",
   ]
 
   part_name = "window_manager"

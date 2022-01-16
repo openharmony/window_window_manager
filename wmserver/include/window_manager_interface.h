@@ -46,6 +46,7 @@ public:
         TRANS_ID_MINIMIZE_ALL_APP_WINDOW,
         TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
+        TRANS_ID_GET_AVOID_AREA,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId)  = 0;
@@ -60,6 +61,7 @@ public:
     virtual WMError SetWindowFlags(uint32_t windowId, uint32_t flags) = 0;
     virtual WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) = 0;
     virtual WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId) = 0;
+    virtual std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
     virtual WMError MinimizeAllAppNodeAbility(uint32_t windowId) = 0;
 
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,

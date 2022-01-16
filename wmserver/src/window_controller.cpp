@@ -122,7 +122,7 @@ WMError WindowController::MoveTo(uint32_t windowId, int32_t x, int32_t y)
         newRect = { x, y, lastRect.width_, lastRect.height_ };
         property->SetWindowRect(newRect);
     }
-    
+
     res = windowRoot_->UpdateWindowNode(windowId);
     if (res != WMError::WM_OK) {
         return res;
@@ -250,6 +250,12 @@ WMError WindowController::SetSystemBarProperty(uint32_t windowId, WindowType typ
     RSTransaction::FlushImplicitTransaction();
     WLOGFI("SetSystemBarProperty FlushImplicitTransaction end");
     return res;
+}
+
+std::vector<Rect> WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
+{
+    std::vector<Rect> avoidArea = windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
+    return avoidArea;
 }
 
 void WindowController::RegisterWindowManagerAgent(WindowManagerAgentType type,

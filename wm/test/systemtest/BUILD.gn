@@ -19,10 +19,10 @@ group("systemtest") {
   testonly = true
 
   deps = [
-    ":wm_window_split_test",
     ":wm_window_immersive_test",
     ":wm_window_layout_test",
     ":wm_window_multi_ability_test",
+    ":wm_window_split_test",
     ":wm_window_subwindow_test",
   ]
 }
@@ -128,8 +128,8 @@ ohos_static_library("wm_systemtest_common") {
   public_deps = [
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
+    "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wm:libwmutil",
     "//foundation/windowmanager/wmserver:libwms",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",

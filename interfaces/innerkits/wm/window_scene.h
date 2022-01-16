@@ -18,7 +18,6 @@
 
 #include <refbase.h>
 #include <iremote_object.h>
-#include <ability_context.h>
 #include <configuration.h>
 
 #include "window.h"
@@ -34,7 +33,7 @@ public:
     WindowScene() = default;
     ~WindowScene();
 
-    WMError Init(int32_t displayId, std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext,
+    WMError Init(int32_t displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
         sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option = nullptr);
 
     sptr<Window> CreateWindow(const std::string& windowName, sptr<WindowOption>& option) const;
@@ -55,7 +54,7 @@ private:
     sptr<Window> mainWindow_ = nullptr;
     int32_t displayId_ = DEFAULT_DISPLAY_ID;
 
-    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_ = nullptr;
+    std::shared_ptr<AbilityRuntime::Context> context_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

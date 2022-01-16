@@ -69,6 +69,7 @@ public:
 
     WMError RequestFocus(uint32_t windowId);
     WMError MinimizeOtherFullScreenAbility(sptr<WindowNode>& node);
+    std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
     WMError MinimizeAllAppNodeAbility(sptr<WindowNode>& node);
     WMError HandleSplitWindowModeChange(sptr<WindowNode>& node, bool isChangeToSplit);
 

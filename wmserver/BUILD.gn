@@ -44,6 +44,7 @@ ohos_shared_library("libwms") {
     "../dmserver/src/display_power_controller.cpp",
     "../wm/src/window_proxy.cpp",
     "../wm/src/zidl/window_manager_agent_proxy.cpp",
+    "src/avoid_area_controller.cpp",
     "src/input_window_monitor.cpp",
     "src/window_controller.cpp",
     "src/window_inner_manager.cpp",
@@ -86,7 +87,7 @@ ohos_shared_library("libwms") {
 
     # IMS
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/windowmanager/wm:libwmutil",
+    "//foundation/windowmanager/utils:libwmutil",
   ]
 
   external_deps = [

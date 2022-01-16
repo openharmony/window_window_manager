@@ -24,6 +24,7 @@
 #include <key_event.h>
 #include <pointer_event.h>
 #include <axis_event.h>
+#include "foundation/appexecfwk/standard/kits/appkit/native/ability_runtime/context/context.h"
 #include "wm_common.h"
 #include "window_option.h"
 #include "window_life_cycle_interface.h"
@@ -35,7 +36,7 @@ namespace OHOS::AppExecFwk {
 }
 
 namespace OHOS::AbilityRuntime {
-class AbilityContext;
+    class AbilityContext;
 }
 
 namespace OHOS {
@@ -45,10 +46,15 @@ public:
     virtual void OnSizeChange(Rect rect) = 0;
 };
 
+class IAvoidAreaChangedListener : public RefBase {
+public:
+    virtual void OnAvoidAreaChanged(const std::vector<Rect> avoidAreas) = 0;
+};
+
 class Window : public RefBase {
 public:
     static sptr<Window> Create(const std::string& windowName,
-        sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext = nullptr);
+        sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> Find(const std::string& windowName);
 
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
@@ -67,6 +73,7 @@ public:
     virtual WMError RemoveWindowFlag(WindowFlag flag) = 0;
     virtual WMError SetWindowFlags(uint32_t flags) = 0;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) = 0;
+    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) = 0;
 
     virtual WMError Destroy() = 0;
     virtual WMError Show() = 0;
@@ -84,8 +91,12 @@ public:
 
     virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) = 0;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
+    virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
+    virtual void UnregisterAvoidAreaChangeListener() = 0;
     virtual WMError SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext> context,
         std::string& contentInfo, NativeEngine* engine, NativeValue* storage, bool isdistributed = false) = 0;
+    virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
+        NativeValue* storage, bool isdistributed = false) = 0;
     virtual const std::string& GetContentInfo() = 0;
 };
 }

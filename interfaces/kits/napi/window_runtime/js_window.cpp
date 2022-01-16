@@ -104,6 +104,13 @@ NativeValue* JsWindow::UnRegisterWindowCallback(NativeEngine* engine, NativeCall
     return (me != nullptr) ? me->OnUnRegisterWindowCallback(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::LoadContent(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::LoadContent is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnLoadContent(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsWindow::OnShow is called");
@@ -395,6 +402,51 @@ NativeValue* JsWindow::OnUnRegisterWindowCallback(NativeEngine& engine, NativeCa
     return engine.CreateUndefined();
 }
 
+NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnLoadContent is called");
+    if (windowToken_ == nullptr || info.argc <= 0) {
+        WLOGFE("JsWindow windowToken_ is nullptr");
+        return engine.CreateUndefined();
+    }
+    std::string contextUrl;
+    if (!ConvertFromJsValue(engine, info.argv[0], contextUrl)) {
+        WLOGFE("Failed to convert parameter to context url");
+        return engine.CreateUndefined();
+    }
+    NativeValue* storage = nullptr;
+    NativeValue* callBack = nullptr;
+    if (info.argc == ARGC_TWO) {
+        NativeValue* value = info.argv[INDEX_ONE];
+        if (value->TypeOf() == NATIVE_FUNCTION) {
+            callBack = info.argv[INDEX_ONE];
+        } else {
+            storage = info.argv[INDEX_ONE];
+        }
+    } else if (info.argc == ARGC_THREE) {
+        storage = info.argv[INDEX_ONE];
+        callBack = info.argv[INDEX_TWO];
+    }
+    contentStorage_ = static_cast<void*>(storage);
+    AsyncTask::CompleteCallback complete =
+        [this, contextUrl](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            WMError ret = windowToken_->SetUIContent(contextUrl, &engine,
+                static_cast<NativeValue*>(contentStorage_), false);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+                WLOGFI("JsWindow::OnLoadContent success");
+            } else {
+                task.Reject(engine,
+                    CreateJsError(engine, static_cast<int32_t>(ret), "JsWindow::OnLoadContent failed."));
+            }
+        };
+
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, callBack, nullptr, std::move(complete), &result));
+    return result;
+}
+
 NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
 {
     WLOGFI("JsWindow::CreateJsWindow is called");
@@ -414,6 +466,7 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     BindNativeFunction(engine, *object, "getProperties", JsWindow::GetProperties);
     BindNativeFunction(engine, *object, "on", JsWindow::RegisterWindowCallback);
     BindNativeFunction(engine, *object, "off", JsWindow::UnRegisterWindowCallback);
+    BindNativeFunction(engine, *object, "loadContent", JsWindow::LoadContent);
     return objValue;
 }
 }  // namespace Rosen

@@ -128,6 +128,23 @@ WMError WindowRoot::MinimizeOtherFullScreenAbility(sptr<WindowNode>& node)
     return container->MinimizeOtherFullScreenAbility();
 }
 
+std::vector<Rect> WindowRoot::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
+{
+    std::vector<Rect> avoidArea;
+    auto node = GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return avoidArea;
+    }
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("add window failed, window container could not be found");
+        return avoidArea;
+    }
+    avoidArea = container->GetAvoidAreaByType(avoidAreaType);
+    return avoidArea;
+}
+
 WMError WindowRoot::MinimizeAllAppNodeAbility(sptr<WindowNode>& node)
 {
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
