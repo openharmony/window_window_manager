@@ -31,7 +31,17 @@ int main(int argc, char *argv[])
     }
 
     // get PixelMap from DisplayManager API
-    auto pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArgments.displayId);
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = nullptr;
+    if (cmdArgments.width <= 0 || cmdArgments.height <= 0) {
+        pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArgments.displayId); // default width & height
+    } else {
+        auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+        const Media::Rect rect = {0, 0, display->GetWidth(), display->GetHeight()};
+        const Media::Size size = {cmdArgments.width, cmdArgments.height};
+        constexpr int rotation = 0;
+        pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArgments.displayId, rect, size, rotation);
+    }
+
     bool ret = false;
     if (pixelMap != nullptr) {
         ret = SnapShotUtils::WriteToPngWithPixelMap(cmdArgments.fileName, *pixelMap);
