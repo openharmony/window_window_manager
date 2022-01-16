@@ -59,7 +59,7 @@ public:
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
 
     WMError Create(const std::string& parentName,
-        const std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext = nullptr);
+        const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy() override;
     virtual WMError Show() override;
     virtual WMError Hide() override;
@@ -81,6 +81,8 @@ public:
     void UpdateFocusStatus(bool focused);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
+    virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
+        NativeValue* storage, bool isdistributed) override;
     virtual WMError SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext> context,
         std::string& contentInfo, NativeEngine* engine, NativeValue* storage, bool isdistributed) override;
     virtual const std::string& GetContentInfo() override;
@@ -132,7 +134,8 @@ private:
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;
-    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_; // give up when context offer getToken
+    std::shared_ptr<AbilityRuntime::Context> context_;
     const float STATUS_BAR_RATIO = 0.07;
     const float NAVIGATION_BAR_RATIO = 0.07;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;

@@ -25,8 +25,10 @@ namespace Rosen {
 namespace {
     constexpr size_t ARGC_ONE = 1;
     constexpr size_t ARGC_TWO = 2;
+    constexpr size_t ARGC_THREE = 3;
     constexpr int32_t INDEX_ONE = 1;
     constexpr int32_t INDEX_TWO = 2;
+    constexpr int32_t INDEX_THREE = 3;
 }
 
     NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window);
