@@ -22,6 +22,7 @@ group("systemtest") {
     ":wm_window_immersive_test",
     ":wm_window_layout_test",
     ":wm_window_multi_ability_test",
+    ":wm_window_split_test",
     ":wm_window_subwindow_test",
   ]
 }
@@ -69,6 +70,17 @@ ohos_systemtest("wm_window_immersive_test") {
 }
 
 ## SystemTest wm_window_immersive_test }}}
+
+## SystemTest wm_window_split_test {{{
+ohos_systemtest("wm_window_split_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_split_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+}
+
+## SystemTest wm_window_split_test }}}
 
 ## Build wm_systemtest_common.a {{{
 config("wm_systemtest_common_public_config") {
