@@ -114,6 +114,22 @@ SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type)
     return curProperties[type];
 }
 
+WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
+{
+    WLOGFI("GetAvoidAreaByType  Search Type: %{public}u", static_cast<uint32_t>(type));
+    std::vector<Rect> avoidAreaVec;
+    uint32_t windowId = property_->GetWindowId();
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidAreaVec);
+    if (ret != WMError::WM_OK || avoidAreaVec.size() != 4) {    // 4: the avoid area num (left, top, right, bottom)
+        WLOGFE("GetAvoidAreaByType errCode:%{public}d winId:%{public}u Type is :%{public}u." \
+            "Or avoidArea Size != 4. Current size of avoid area: %{public}u", static_cast<int32_t>(ret),
+            property_->GetWindowId(), static_cast<uint32_t>(type), static_cast<uint32_t>(avoidAreaVec.size()));
+        return ret;
+    }
+    avoidArea = {avoidAreaVec[0], avoidAreaVec[1], avoidAreaVec[2], avoidAreaVec[3]}; // 0:left 1:top 2:right 3:bottom
+    return ret;
+}
+
 WMError WindowImpl::SetWindowType(WindowType type)
 {
     WLOGFI("window id: %{public}d, type:%{public}d", property_->GetWindowId(), static_cast<uint32_t>(type));
@@ -493,6 +509,24 @@ void WindowImpl::RegisterWindowChangeListener(sptr<IWindowChangeListener>& liste
     windowChangeListener_ = listener;
 }
 
+void WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+{
+    if (avoidAreaChangeListener_ != nullptr) {
+        WLOGFE("RegisterAvoidAreaChangeListener failed. AvoidAreaChangeListene is not nullptr");
+        return;
+    }
+    avoidAreaChangeListener_ = listener;
+}
+
+void WindowImpl::UnregisterAvoidAreaChangeListener()
+{
+    if (avoidAreaChangeListener_ == nullptr) {
+        WLOGFE("UnregisterAvoidAreaChangeListener failed. AvoidAreaChangeListene is nullptr");
+        return;
+    }
+    avoidAreaChangeListener_ = nullptr;
+}
+
 void WindowImpl::UpdateRect(const struct Rect& rect)
 {
     WLOGFI("winId:%{public}d, rect[%{public}d, %{public}d, %{public}d, %{public}d]", GetWindowId(), rect.posX_,
@@ -627,6 +661,13 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
         subWindow->UpdateConfiguration(configuration);
+    }
+}
+
+void WindowImpl::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
+{
+    if (avoidAreaChangeListener_ != nullptr) {
+        avoidAreaChangeListener_->OnAvoidAreaChanged(avoidArea);
     }
 }
 

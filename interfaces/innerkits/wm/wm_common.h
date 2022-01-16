@@ -120,6 +120,19 @@ struct SystemBarProperty {
 };
 
 using SystemBarProps = std::vector<std::pair<WindowType, SystemBarProperty>>;
+
+enum class AvoidAreaType : uint32_t {
+    TYPE_SYSTEM,           // area of SystemUI
+    TYPE_CUTOUT,           // cutout of screen
+    TYPE_SYSTEM_GESTURE,   // area for system gesture
+};
+
+struct AvoidArea {
+    Rect leftRect;
+    Rect topRect;
+    Rect rightRect;
+    Rect bottomRect;
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
