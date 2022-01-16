@@ -18,6 +18,10 @@
 
 #include "display_manager_interface.h"
 
+#include "dm_common.h"
+
+#include "screen.h"
+
 #include <iremote_proxy.h>
 
 namespace OHOS::Rosen {
@@ -30,9 +34,8 @@ public:
     DisplayId GetDefaultDisplayId() override;
     DisplayInfo GetDisplayInfoById(DisplayId displayId) override;
 
-    DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
-        sptr<Surface> surface) override;
-    bool DestroyVirtualDisplay(DisplayId displayId) override;
+    ScreenId CreateVirtualScreen(VirtualScreenOption option) override;
+    DMError DestroyVirtualScreen(ScreenId screenId) override;
     std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
 
     void RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
@@ -47,6 +50,7 @@ public:
     bool SetDisplayState(DisplayState state) override;
     DisplayState GetDisplayState(uint64_t displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
+    DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId) override;
 
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;

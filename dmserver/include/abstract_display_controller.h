@@ -16,15 +16,16 @@
 #ifndef FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_CONTROLLER_H
 #define FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_CONTROLLER_H
 
+#include "abstract_screen_controller.h"
+
 #include <map>
 #include <pixel_map.h>
 #include <surface.h>
 #include <transaction/rs_interfaces.h>
 
+#include "screen.h"
 #include "abstract_display.h"
-#include "abstract_screen_controller.h"
 #include "transaction/rs_interfaces.h"
-#include "virtual_display_info.h"
 
 namespace OHOS::Rosen {
 class AbstractDisplayController : public RefBase {
@@ -35,8 +36,7 @@ public:
     void Init(sptr<AbstractScreenController> abstractScreenController);
     ScreenId GetDefaultScreenId();
     RSScreenModeInfo GetScreenActiveMode(ScreenId id);
-    ScreenId CreateVirtualScreen(const VirtualDisplayInfo &virtualDisplayInfo, sptr<Surface> surface);
-    bool DestroyVirtualScreen(ScreenId screenId);
+
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId, ScreenId screenId);
 
 private:

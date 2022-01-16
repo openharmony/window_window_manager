@@ -21,8 +21,8 @@
 #include <surface.h>
 
 #include "dm_common.h"
+#include "screen.h"
 #include "display_info.h"
-#include "virtual_display_info.h"
 #include "zidl/display_manager_agent_interface.h"
 
 namespace OHOS::Rosen {
@@ -33,8 +33,6 @@ public:
     enum {
         TRANS_ID_GET_DEFAULT_DISPLAY_ID = 0,
         TRANS_ID_GET_DISPLAY_BY_ID,
-        TRANS_ID_CREATE_VIRTUAL_DISPLAY,
-        TRANS_ID_DESTROY_VIRTUAL_DISPLAY,
         TRANS_ID_GET_DISPLAY_SNAPSHOT,
         TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT,
         TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT,
@@ -46,14 +44,16 @@ public:
         TRANS_ID_SET_DISPLAY_STATE,
         TRANS_ID_GET_DISPLAY_STATE,
         TRANS_ID_NOTIFY_DISPLAY_EVENT,
+        TRANS_ID_CREATE_VIRTUAL_SCREEN = 100000,
+        TRANS_ID_DESTROY_VIRTUAL_SCREEN,
+        TRANS_ID_ADD_MIRROR,
     };
 
     virtual DisplayId GetDefaultDisplayId() = 0;
     virtual DisplayInfo GetDisplayInfoById(DisplayId displayId) = 0;
 
-    virtual DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
-        sptr<Surface> surface) = 0;
-    virtual bool DestroyVirtualDisplay(DisplayId displayId) = 0;
+    virtual ScreenId CreateVirtualScreen(VirtualScreenOption option) = 0;
+    virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
 
     virtual void RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
@@ -68,6 +68,7 @@ public:
     virtual bool SetDisplayState(DisplayState state) = 0;
     virtual DisplayState GetDisplayState(uint64_t displayId) = 0;
     virtual void NotifyDisplayEvent(DisplayEvent event) = 0;
+    virtual DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId) = 0;
 };
 } // namespace OHOS::Rosen
 

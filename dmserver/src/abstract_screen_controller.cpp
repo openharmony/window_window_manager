@@ -29,7 +29,7 @@ namespace {
 }
 
 AbstractScreenController::AbstractScreenController(std::recursive_mutex& mutex)
-    : mutex_(mutex), rsInterface_(RSInterfaces::GetInstance())
+    : mutex_(mutex), rsInterface_(&(RSInterfaces::GetInstance()))
 {
 }
 
@@ -41,8 +41,12 @@ void AbstractScreenController::Init()
 {
     WLOGFD("screen controller init");
     dmsScreenCount_ = 0;
-    rsInterface_.SetScreenChangeCallback(
-        std::bind(&AbstractScreenController::OnRsScreenChange, this, std::placeholders::_1, std::placeholders::_2));
+    if (rsInterface_ != nullptr) {
+        WLOGFE("rsInterface_ is nullptr, init failed");
+    } else {
+        rsInterface_->SetScreenChangeCallback(
+            std::bind(&AbstractScreenController::OnRsScreenChange, this, std::placeholders::_1, std::placeholders::_2));
+    }
 }
 
 std::vector<ScreenId> AbstractScreenController::GetAllScreenIds()
@@ -125,7 +129,11 @@ void AbstractScreenController::OnRsScreenChange(ScreenId rsScreenId, ScreenEvent
 
 bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScreen, ScreenId rsScreenId)
 {
-    std::vector<RSScreenModeInfo> allModes = rsInterface_.GetScreenSupportedModes(rsScreenId);
+    if (rsInterface_ == nullptr) {
+        WLOGFE("rsInterface_ is nullptr, FillAbstractScreen failed");
+        return false;
+    }
+    std::vector<RSScreenModeInfo> allModes = rsInterface_->GetScreenSupportedModes(rsScreenId);
     if (allModes.size() == 0) {
         WLOGE("supported screen mode is 0, screenId=%{public}" PRIu64"", rsScreenId);
         return false;
@@ -138,7 +146,7 @@ bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScree
         absScreen->infos_.push_back(info);
         WLOGD("fill screen w/h:%{public}d/%{public}d", info->width_, info->height_);
     }
-    int32_t activeModeId = rsInterface_.GetScreenActiveMode(rsScreenId).GetScreenModeId();
+    int32_t activeModeId = rsInterface_->GetScreenActiveMode(rsScreenId).GetScreenModeId();
     WLOGD("fill screen activeModeId:%{public}d", activeModeId);
     if (activeModeId >= allModes.size()) {
         WLOGE("activeModeId exceed, screenId=%{public}" PRIu64", activeModeId:%{public}d/%{public}ud",
@@ -183,5 +191,26 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsFirstScreenLocked(sptr<
 void AbstractScreenController::AddAsSuccedentScreenLocked(sptr<AbstractScreen> newScreen)
 {
     // TODO: Mirror to default screen
+}
+
+ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption option)
+{
+    if (rsInterface_ == nullptr) {
+        return SCREEN_ID_INVALID;
+    }
+    ScreenId result = rsInterface_->CreateVirtualScreen(option.name_, option.width_,
+        option.height_, option.surface_, INVALID_SCREEN_ID, option.flags_);
+    WLOGFI("AbstractScreenController::CreateVirtualScreen id: %{public}" PRIu64"", result);
+    return result;
+}
+
+DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
+{
+    if (rsInterface_ == nullptr) {
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    WLOGFI("AbstractScreenController::DestroyVirtualScreen");
+    rsInterface_->RemoveVirtualScreen(screenId);
+    return DMError::DM_OK;
 }
 } // namespace OHOS::Rosen

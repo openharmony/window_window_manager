@@ -14,11 +14,17 @@
  */
 
 #include "screen_manager.h"
+#include "window_manager_hilog.h"
+#include "display_manager_adapter.h"
+
 
 #include <map>
 #include <vector>
 
 namespace OHOS::Rosen {
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "ScreenManager"};
+}
 class ScreenManager::Impl : public RefBase {
 friend class ScreenManager;
 private:
@@ -53,18 +59,32 @@ void ScreenManager::RegisterScreenChangeListener(sptr<IScreenChangeListener> lis
 {
 }
 
-sptr<ScreenGroup> ScreenManager::makeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
+sptr<ScreenGroup> ScreenManager::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
 {
     return nullptr;
 }
 
-sptr<ScreenGroup> ScreenManager::makeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)
+sptr<ScreenGroup> ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)
 {
     return nullptr;
 }
 
-sptr<Screen> ScreenManager::createVirtualScreen(VirtualScreenOption option)
+sptr<ScreenGroup> ScreenManager::AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId)
 {
+    DMError result = SingletonContainer::Get<DisplayManagerAdapter>().AddMirror(mainScreenId, mirrorScreenId);
+    if (result == DMError::DM_OK) {
+        WLOGFI("AddMirror::Successful");
+    }
     return nullptr;
+}
+
+ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().CreateVirtualScreen(option);
+}
+
+DMError ScreenManager::DestroyVirtualScreen(ScreenId screenId)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().DestroyVirtualScreen(screenId);
 }
 } // namespace OHOS::Rosen

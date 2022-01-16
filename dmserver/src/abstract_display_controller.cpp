@@ -70,28 +70,6 @@ RSScreenModeInfo AbstractDisplayController::GetScreenActiveMode(ScreenId id)
     return rsInterface_->GetScreenActiveMode(id);
 }
 
-ScreenId AbstractDisplayController::CreateVirtualScreen(const VirtualDisplayInfo &virtualDisplayInfo,
-    sptr<Surface> surface)
-{
-    if (rsInterface_ == nullptr) {
-        return SCREEN_ID_INVALID;
-    }
-    ScreenId result = rsInterface_->CreateVirtualScreen(virtualDisplayInfo.name_, virtualDisplayInfo.width_,
-        virtualDisplayInfo.height_, surface, virtualDisplayInfo.displayIdToMirror_, virtualDisplayInfo.flags_);
-    WLOGFI("AbstractDisplayController::CreateVirtualDisplay id: %{public}" PRIu64"", result);
-    return result;
-}
-
-bool AbstractDisplayController::DestroyVirtualScreen(ScreenId screenId)
-{
-    if (rsInterface_ == nullptr) {
-        return false;
-    }
-    WLOGFI("AbstractDisplayController::DestroyVirtualScreen");
-    rsInterface_->RemoveVirtualScreen(screenId);
-    return true;
-}
-
 std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(DisplayId displayId, ScreenId screenId)
 {
     if (rsInterface_ == nullptr) {

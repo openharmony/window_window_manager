@@ -18,7 +18,9 @@
 
 #include <refbase.h>
 #include "screen.h"
+#include "dm_common.h"
 #include "screen_group.h"
+#include "wm_single_instance.h"
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
@@ -34,10 +36,13 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenManager);
 public:
     sptr<Screen> GetScreenById(ScreenId id);
     std::vector<const sptr<Screen>> GetAllScreens();
+
     void RegisterScreenChangeListener(sptr<IScreenChangeListener> listener);
-    sptr<ScreenGroup> makeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
-    sptr<ScreenGroup> makeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
-    sptr<Screen> createVirtualScreen(VirtualScreenOption option);
+    sptr<ScreenGroup> MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
+    sptr<ScreenGroup> MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
+    sptr<ScreenGroup> AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId);
+    ScreenId CreateVirtualScreen(VirtualScreenOption option);
+    DMError DestroyVirtualScreen(ScreenId screenId);
 
 private:
     ScreenManager();
