@@ -24,7 +24,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowImpl"};
 }
 sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& option,
-    const std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext)
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
     if (windowName.empty()) {
         WLOGFE("window name is empty");
@@ -40,7 +40,7 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
     }
     option->SetWindowName(windowName);
     sptr<WindowImpl> windowImpl = new WindowImpl(option);
-    WMError error = windowImpl->Create(option->GetParentName(), abilityContext);
+    WMError error = windowImpl->Create(option->GetParentName(), context);
     if (error != WMError::WM_OK) {
         return nullptr;
     }

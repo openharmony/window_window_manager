@@ -14,7 +14,7 @@
  */
 
 #include "window_test_utils.h"
-
+#include <ability_context.h>
 namespace OHOS {
 namespace Rosen {
 Rect WindowTestUtils::screenRect_ = {0, 0, 0, 0};

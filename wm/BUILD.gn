@@ -136,6 +136,11 @@ ohos_shared_library("libwm") {
 
     # weston adapter
     "//foundation/windowmanager/adapter:libwmadapter",
+
+    # context
+
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
+    "//foundation/appexecfwk/standard/kits:app_context",
   ]
 
   external_deps = [

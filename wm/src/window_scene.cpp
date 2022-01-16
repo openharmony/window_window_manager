@@ -38,11 +38,10 @@ WindowScene::~WindowScene()
     }
 }
 
-WMError WindowScene::Init(int32_t displayId, std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext,
+WMError WindowScene::Init(int32_t displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
     sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option)
 {
     displayId_ = displayId;
-    abilityContext_ = abilityContext;
     if (option == nullptr) {
         option = new WindowOption();
     }
@@ -54,7 +53,7 @@ WMError WindowScene::Init(int32_t displayId, std::shared_ptr<AbilityRuntime::Abi
     mainWindow_ = CreateWindow(MAIN_WINDOW_ID, option);
 #else
     mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(
-        MAIN_WINDOW_ID + std::to_string(count++), option, abilityContext_);
+        MAIN_WINDOW_ID + std::to_string(count++), option, context);
 #endif
     if (mainWindow_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
