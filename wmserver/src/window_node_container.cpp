@@ -495,18 +495,32 @@ void WindowNodeContainer::LayoutDividerWindow(sptr<WindowNode>& node)
 
 void WindowNodeContainer::DisplayRects::InitRect(Rect& oriDisplayRect)
 {
+    if (oriDisplayRect.width_ < oriDisplayRect.height_) {
+        isVertical_ = true;
+    }
     displayRect_ = oriDisplayRect;
-
     const uint32_t dividerWidth = 50;
-    dividerRect_ = { static_cast<uint32_t>((displayRect_.width_ - dividerWidth) * DEFAULT_SPLIT_RATIO), 0,
-        dividerWidth, displayRect_.height_ };
-
+    if (!isVertical_) {
+        dividerRect_ = { static_cast<uint32_t>((displayRect_.width_ - dividerWidth) * DEFAULT_SPLIT_RATIO), 0,
+                dividerWidth, displayRect_.height_ };
+    } else {
+        dividerRect_ = { 0, static_cast<uint32_t>((displayRect_.height_ - dividerWidth) * DEFAULT_SPLIT_RATIO),
+               displayRect_.width_, dividerWidth };
+    }
+    WLOGFI("init dividerRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
+        dividerRect_.posX_, dividerRect_.posY_, dividerRect_.width_, dividerRect_.height_);
     SetSplitRect(dividerRect_);
 }
 
 void WindowNodeContainer::DisplayRects::SetSplitRect(float ratio)
 {
-    dividerRect_.posX_ = static_cast<uint32_t>((displayRect_.width_ - dividerRect_.width_) * ratio);
+    if (!isVertical_) {
+        dividerRect_.posX_ = displayDependRect_.posX_ +  static_cast<uint32_t>(displayDependRect_.width_ * ratio);
+    } else {
+        dividerRect_.posY_ = displayDependRect_.posY_ +  static_cast<uint32_t>(displayDependRect_.height_ * ratio);
+    }
+    WLOGFI("set dividerRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
+        dividerRect_.posX_, dividerRect_.posY_, dividerRect_.width_, dividerRect_.height_);
     SetSplitRect(dividerRect_);
 }
 
@@ -514,13 +528,21 @@ void WindowNodeContainer::DisplayRects::SetSplitRect(const Rect& divRect)
 {
     dividerRect_.width_ = divRect.width_;
     dividerRect_.height_ = divRect.height_;
+    if (!isVertical_) {
+        primaryRect_.width_ = divRect.posX_;
+        primaryRect_.height_ = displayRect_.height_;
 
-    primaryRect_.width_ = divRect.posX_;
-    primaryRect_.height_ = displayRect_.height_;
+        secondaryRect_.posX_ = divRect.posX_ + dividerRect_.width_;
+        secondaryRect_.width_ = displayRect_.width_ - secondaryRect_.posX_;
+        secondaryRect_.height_ = displayRect_.height_;
+    } else {
+        primaryRect_.height_ = divRect.posY_;
+        primaryRect_.width_ = displayRect_.width_;
 
-    secondaryRect_.posX_ = divRect.posX_ + dividerRect_.width_;
-    secondaryRect_.width_ = displayRect_.width_ - secondaryRect_.posX_;
-    secondaryRect_.height_ = displayRect_.height_;
+        secondaryRect_.posY_ = divRect.posY_ + dividerRect_.height_;
+        secondaryRect_.height_ = displayRect_.height_ - secondaryRect_.posY_;
+        secondaryRect_.width_ = displayRect_.width_;
+    }
 }
 
 Rect WindowNodeContainer::DisplayRects::GetDividerRect() const
@@ -585,6 +607,11 @@ std::shared_ptr<RSDisplayNode> WindowNodeContainer::GetDisplayNode() const
     return displayNode_;
 }
 
+bool WindowNodeContainer::isVerticalDisplay() const
+{
+    return displayRects_->isVertical_;
+}
+
 void WindowNodeContainer::SendSplitScreenEvent(WindowMode mode)
 {
     // should define in common_event_support.h and @ohos.commonEvent.d.ts
@@ -626,6 +653,10 @@ WMError WindowNodeContainer::HandleModeChangeToSplit(sptr<WindowNode>& triggerNo
     WM_FUNCTION_TRACE();
     WLOGFI("HandleModeChangeToSplit %{public}d", triggerNode->GetWindowId());
     auto pairNode = FindSplitPairNode(triggerNode);
+    displayRects_->displayDependRect_ = layoutPolicy_->GetDependDisplayRects(); // get depend display rect for split
+    WLOGFI("displayDependRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
+        displayRects_->displayDependRect_.posX_, displayRects_->displayDependRect_.posY_,
+        displayRects_->displayDependRect_.width_, displayRects_->displayDependRect_.height_);
     if (pairNode != nullptr) {
         WLOGFI("Window %{public}d find pair %{public}d", triggerNode->GetWindowId(), pairNode->GetWindowId());
         WMError ret = UpdateWindowPairInfo(triggerNode, pairNode);
