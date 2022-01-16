@@ -192,8 +192,7 @@ WMError WindowRoot::HandleSplitWindowModeChange(sptr<WindowNode>& node, bool isS
         WLOGFE("HandleSplitWindowModeChange failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    container->HandleSplitWindowModeChange(node, isSplitIn);
-    return WMError::WM_OK;
+    return container->HandleSplitWindowModeChange(node, isSplitIn);
 }
 
 WMError WindowRoot::DestroyWindow(uint32_t windowId)

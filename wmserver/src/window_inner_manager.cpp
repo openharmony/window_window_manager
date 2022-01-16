@@ -187,7 +187,6 @@ void WindowInnerManager::HandleMessage()
 
 void WindowInnerManager::SendMessage(InnerWMCmd cmdType, uint32_t displayId)
 {
-    std::unique_lock<std::mutex> lk(mutex_);
     if (!hasInitThread_) {
         WLOGFI("Inner window manager thread has not been created");
         return;
@@ -204,7 +203,6 @@ void WindowInnerManager::SendMessage(InnerWMCmd cmdType, uint32_t displayId)
 
 void WindowInnerManager::SendMessage(InnerWMCmd cmdType, uint32_t displayId, const Rect& dividerRect)
 {
-    std::unique_lock<std::mutex> lk(mutex_);
     if (!hasInitThread_) {
         WLOGFI("Inner window manager thread has not been created");
         return;
