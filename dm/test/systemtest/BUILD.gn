@@ -1,0 +1,107 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+
+module_out_path = "window_manager/dm"
+
+group("systemtest") {
+  testonly = true
+
+  deps = [
+    ":dm_display_minimal_test",
+    ":dm_screenshot_cmd_test",
+    ":dm_screenshot_test",
+  ]
+}
+
+## SystemTest dm_display_minimal_test {{{
+ohos_systemtest("dm_display_minimal_test") {
+  module_out_path = module_out_path
+
+  sources = [ "display_minimal_test.cpp" ]
+
+  deps = [ ":dm_systemtest_common" ]
+}
+
+## SystemTest dm_display_minimal_test }}}
+
+## SystemTest dm_screenshot_test {{{
+ohos_systemtest("dm_screenshot_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screenshot_test.cpp" ]
+
+  deps = [ ":dm_systemtest_common" ]
+}
+
+## SystemTest dm_screenshot_test }}}
+
+## SystemTest dm_screenshot_cmd_test {{{
+ohos_systemtest("dm_screenshot_cmd_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screenshot_cmd_test.cpp" ]
+
+  deps = [ ":dm_systemtest_common" ]
+}
+
+## SystemTest dm_screenshot_cmd_test }}}
+
+## Build dm_systemtest_common.a {{{
+config("dm_systemtest_common_public_config") {
+  include_dirs = [
+    "//foundation/windowmanager/dm/include",
+    "//foundation/windowmanager/dmserver/include",
+    "//foundation/windowmanager/interfaces/innerkits/dm",
+    "//foundation/windowmanager/utils/include",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//third_party/googletest/googlemock/include",
+
+    # for abilityContext
+    "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
+    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
+    "//foundation/appexecfwk/standard/kits/appkit/native/ability_runtime/context",
+    "//base/global/resmgr_standard/interfaces/innerkits/include",
+    "//third_party/node/deps/icu-small/source/common",
+    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
+    "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/base/include",
+
+    # abilityContext end
+  ]
+}
+
+ohos_static_library("dm_systemtest_common") {
+  visibility = [ ":*" ]
+  testonly = true
+
+  sources = [ "display_test_utils.cpp" ]
+
+  public_configs = [ ":dm_systemtest_common_public_config" ]
+
+  public_deps = [
+    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
+    "//foundation/windowmanager/utils:libwmutil",
+    "//foundation/windowmanager/wm:libwm",
+    "//foundation/windowmanager/wmserver:libwms",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = [ "aafwk_standard:ability_context_native" ]
+}
+## Build dm_systemtest_common.a }}}
