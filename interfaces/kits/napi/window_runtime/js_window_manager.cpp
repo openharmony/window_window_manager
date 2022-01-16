@@ -51,43 +51,71 @@ public:
     }
 
 private:
+    std::weak_ptr<Context> context_;
+    bool GetNativeContext(NativeValue* nativeContext)
+    {
+        if (nativeContext != nullptr) {
+            // Parse info->argv[0] as abilitycontext
+            auto objContext = AbilityRuntime::ConvertNativeValueTo<NativeObject>(nativeContext);
+            if (objContext == nullptr) {
+                return false;
+            }
+            auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(objContext->GetNativePointer());
+            context_ = context->lock();
+        }
+        return true;
+    }
 
     NativeValue* OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info)
     {
         WLOGFI("JsOnCreateWindow is called");
-
-        if (info.argc < ARGC_TWO) {
-            WLOGFE("OnCreateWindow MUST set windowname");
+        if (info.argc <= 0) {
+            WLOGFE("parames num not match!");
             return engine.CreateUndefined();
         }
+        NativeValue* nativeString = nullptr;
+        NativeValue* nativeContext = nullptr;
+        NativeValue* nativeType = nullptr;
+        NativeValue* callback = nullptr;
+        if (info.argv[0]->TypeOf() == NATIVE_STRING) {
+            nativeString = info.argv[0];
+            nativeType = info.argv[ARGC_ONE];
+            callback = (info.argc == ARGC_TWO) ? nullptr : info.argv[INDEX_TWO];
+        } else {
+            nativeContext = info.argv[0];
+            nativeString = info.argv[ARGC_ONE];
+            nativeType = info.argv[ARGC_TWO];
+            callback = (info.argc == ARGC_THREE) ? nullptr : info.argv[INDEX_THREE];
+        }
         std::string windowName;
-        if (!ConvertFromJsValue(engine, info.argv[0], windowName)) {
+        if (!ConvertFromJsValue(engine, nativeString, windowName)) {
             WLOGFE("Failed to convert parameter to windowName");
             return engine.CreateUndefined();
         }
-        NativeNumber* nativeType = ConvertNativeValueTo<NativeNumber>(info.argv[1]);
-        if (nativeType == nullptr) {
+        NativeNumber* type = ConvertNativeValueTo<NativeNumber>(nativeType);
+        if (type == nullptr) {
             WLOGFE("Failed to convert parameter to windowType");
             return engine.CreateUndefined();
         }
-        WindowType winType = static_cast<WindowType>(static_cast<uint32_t>(*nativeType));
+        WindowType winType = static_cast<WindowType>(static_cast<uint32_t>(*type));
+        if (!GetNativeContext(nativeContext)) {
+            return engine.CreateUndefined();
+        }
         AsyncTask::CompleteCallback complete =
-            [windowName, winType](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            [weak = context_, windowName, winType](NativeEngine& engine, AsyncTask& task, int32_t status) {
                 sptr<WindowOption> windowOption = new WindowOption();
                 windowOption->SetWindowType(winType);
-                sptr<Window> window = Window::Create(windowName, windowOption);
+                sptr<Window> window = Window::Create(windowName, windowOption, weak.lock());
                 if (window != nullptr) {
                     task.Resolve(engine, CreateJsWindowObject(engine, window));
-                    WLOGFI("JsWindowManager::OnCreateWindow success");
                 } else {
                     task.Reject(engine, CreateJsError(engine,
                         static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnCreateWindow failed."));
                 }
             };
-        NativeValue* lastParam = (info.argc == ARGC_TWO) ? nullptr : info.argv[INDEX_TWO];
         NativeValue* result = nullptr;
         AsyncTask::Schedule(
-            engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+            engine, CreateAsyncTaskWithLastParam(engine, callback, nullptr, std::move(complete), &result));
         return result;
     }
 
