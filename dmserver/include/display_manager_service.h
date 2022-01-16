@@ -22,6 +22,8 @@
 #include <system_ability.h>
 #include <surface.h>
 
+#include "dm_common.h"
+#include "screen.h"
 #include "abstract_display.h"
 #include "abstract_display_controller.h"
 #include "abstract_screen_controller.h"
@@ -50,9 +52,8 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
 public:
     void OnStart() override;
     void OnStop() override;
-    DisplayId CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
-        sptr<Surface> surface) override;
-    bool DestroyVirtualDisplay(DisplayId displayId) override;
+    ScreenId CreateVirtualScreen(VirtualScreenOption option) override;
+    DMError DestroyVirtualScreen(ScreenId screenId) override;
 
     DisplayId GetDefaultDisplayId() override;
     DisplayInfo GetDisplayInfoById(DisplayId displayId) override;
@@ -71,8 +72,8 @@ public:
     DisplayState GetDisplayState(uint64_t displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
-
     sptr<AbstractScreenController> GetAbstractScreenController();
+    DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId) override;
 
 private:
     DisplayManagerService();
@@ -101,6 +102,7 @@ private:
     std::map<DisplayManagerAgentType, std::vector<sptr<IDisplayManagerAgent>> > displayManagerAgentMap_;
     sptr<DMAgentDeathRecipient> dmAgentDeath_ = new DMAgentDeathRecipient(
         std::bind(&DisplayManagerService::RemoveDisplayManagerAgent, this, std::placeholders::_1));
+    std::map<ScreenId, std::shared_ptr<RSDisplayNode>> displayNodeMap_;
 };
 } // namespace OHOS::Rosen
 

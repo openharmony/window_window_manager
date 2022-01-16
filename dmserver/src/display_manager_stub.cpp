@@ -15,6 +15,8 @@
 
 #include "display_manager_stub.h"
 
+#include "dm_common.h"
+
 #include <ipc_skeleton.h>
 
 #include "window_manager_hilog.h"
@@ -46,20 +48,31 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteParcelable(&info);
             break;
         }
-        case TRANS_ID_CREATE_VIRTUAL_DISPLAY: {
-            VirtualDisplayInfo* virtualDisplayInfo = data.ReadParcelable<VirtualDisplayInfo>();
+        case TRANS_ID_CREATE_VIRTUAL_SCREEN: {
+            std::string name = data.ReadString();
+            uint32_t width = data.ReadUint32();
+            uint32_t height = data.ReadUint32();
+            float density = data.ReadFloat();
             sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
             sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
             sptr<Surface> surface = Surface::CreateSurfaceAsProducer(bp);
-            DisplayId virtualId = CreateVirtualDisplay(*virtualDisplayInfo, surface);
-            reply.WriteUint64(virtualId);
-            virtualDisplayInfo = nullptr;
+            int32_t flags = data.ReadInt32();
+            VirtualScreenOption option = {
+                .name_ = name,
+                .width_ = width,
+                .height_ = height,
+                .density_ = density,
+                .surface_ = surface,
+                .flags_ = flags
+            };
+            ScreenId screenId = CreateVirtualScreen(option);
+            reply.WriteUint64(static_cast<uint64_t>(screenId));
             break;
         }
-        case TRANS_ID_DESTROY_VIRTUAL_DISPLAY: {
-            DisplayId virtualId = static_cast<DisplayId>(data.ReadUint64());
-            bool result = DestroyVirtualDisplay(virtualId);
-            reply.WriteBool(result);
+        case TRANS_ID_DESTROY_VIRTUAL_SCREEN: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            DMError result = DestroyVirtualScreen(screenId);
+            reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
         case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
@@ -120,6 +133,13 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case TRANS_ID_NOTIFY_DISPLAY_EVENT: {
             DisplayEvent event = static_cast<DisplayEvent>(data.ReadUint32());
             NotifyDisplayEvent(event);
+            break;
+        }
+        case TRANS_ID_ADD_MIRROR: {
+            ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+            ScreenId mirrorScreenId = static_cast<ScreenId>(data.ReadUint64());
+            DMError result = AddMirror(mainScreenId, mirrorScreenId);
+            reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
         default:

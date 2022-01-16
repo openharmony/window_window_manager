@@ -78,23 +78,22 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(Displ
     return dispalySnapshot;
 }
 
-DisplayId DisplayManagerAdapter::CreateVirtualDisplay(const VirtualDisplayInfo &virtualDisplayInfo,
-    sptr<Surface> surface)
+ScreenId DisplayManagerAdapter::CreateVirtualScreen(VirtualScreenOption option)
 {
     if (!InitDMSProxyLocked()) {
-        return DISPLAY_ID_INVALD;
+        return SCREEN_ID_INVALD;
     }
-    WLOGFI("DisplayManagerAdapter::CreateVirtualDisplay");
-    return displayManagerServiceProxy_->CreateVirtualDisplay(virtualDisplayInfo, surface);
+    WLOGFI("DisplayManagerAdapter::CreateVirtualScreen");
+    return displayManagerServiceProxy_->CreateVirtualScreen(option);
 }
 
-bool DisplayManagerAdapter::DestroyVirtualDisplay(DisplayId displayId)
+DMError DisplayManagerAdapter::DestroyVirtualScreen(ScreenId screenId)
 {
     if (!InitDMSProxyLocked()) {
-        return false;
+        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
     }
-    WLOGFI("DisplayManagerAdapter::DestroyVirtualDisplay");
-    return displayManagerServiceProxy_->DestroyVirtualDisplay(displayId);
+    WLOGFI("DisplayManagerAdapter::DestroyVirtualScreen");
+    return displayManagerServiceProxy_->DestroyVirtualScreen(screenId);
 }
 
 void DisplayManagerAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
@@ -264,5 +263,15 @@ void DisplayManagerAdapter::Clear()
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);
     }
     displayManagerServiceProxy_ = nullptr;
+}
+
+DMError DisplayManagerAdapter::AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId)
+{
+    if (!InitDMSProxyLocked()) {
+        WLOGFE("DisplayManagerAdapter::AddMirror: InitDMSProxyLocked failed");
+        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
+    }
+    WLOGFI("DisplayManagerAdapter::AddMirror");
+    return displayManagerServiceProxy_->AddMirror(mainScreenId, mirrorScreenId);
 }
 } // namespace OHOS::Rosen
