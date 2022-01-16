@@ -63,9 +63,9 @@ void WindowLayoutPolicy::LayoutWindowNode(sptr<WindowNode>& node)
         }
         UpdateLayoutRect(node);
         if (avoidTypes_.find(node->GetWindowType()) != avoidTypes_.end()) {
-            UpdateLimitRect(node, dependRects.limitPriRect_);
-            UpdateLimitRect(node, dependRects.limitSecRect_);
             UpdateLimitRect(node, dependRects.limitFullRect_);
+            UpdateSplitLimitRect(dependRects.limitFullRect_, dependRects.limitPriRect_);
+            UpdateSplitLimitRect(dependRects.limitFullRect_, dependRects.limitSecRect_);
         }
     }
     for (auto& childNode : node->children_) {
@@ -100,7 +100,6 @@ void WindowLayoutPolicy::UpdateWindowNode(sptr<WindowNode>& node)
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
         LayoutWindowTree();
     } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
-        // TODO: change split screen
         LayoutWindowTree();
     } else { // layout single window
         LayoutWindowNode(node);
@@ -110,6 +109,36 @@ void WindowLayoutPolicy::UpdateWindowNode(sptr<WindowNode>& node)
 static bool IsLayoutChanged(const Rect& l, const Rect& r)
 {
     return !((l.posX_ == r.posX_) && (l.posY_ == r.posY_) && (l.width_ == r.width_) && (l.height_ == r.height_));
+}
+
+void WindowLayoutPolicy::LimitMoveBounds(Rect& rect)
+{
+    Rect curRect = rect;
+    rect.posX_ = std::max(curRect.posX_, dependRects.limitFullRect_.posX_);
+    rect.posY_ = std::max(curRect.posY_, dependRects.limitFullRect_.posY_);
+    if (rect.width_ < rect.height_) {
+        rect.posX_ = std::min(curRect.posX_ + rect.width_,
+                              dependRects.limitFullRect_.posX_ + dependRects.limitFullRect_.width_) - rect.width_;
+        rect.height_ = curRect.posY_ + curRect.height_ - rect.posY_;
+    } else {
+        rect.posY_ = std::min(curRect.posY_ + rect.height_,
+                              dependRects.limitFullRect_.posY_ + dependRects.limitFullRect_.height_) - rect.height_;
+        rect.width_ = curRect.posX_ + curRect.width_ - rect.posX_;
+    }
+}
+
+void WindowLayoutPolicy::UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect)
+{
+    winRect.width_ = std::min(limitRect.width_, winRect.width_);
+    winRect.height_ = std::min(limitRect.height_, winRect.height_);
+    winRect.posX_ = std::max(limitRect.posX_, winRect.posX_);
+    winRect.posY_ = std::max(limitRect.posY_, winRect.posY_);
+    winRect.posX_ = std::min(
+        limitRect.posX_ + static_cast<int32_t>(limitRect.width_) - static_cast<int32_t>(winRect.width_),
+        winRect.posX_);
+    winRect.posY_ = std::min(
+        limitRect.posY_ + static_cast<int32_t>(limitRect.height_) - static_cast<int32_t>(winRect.height_),
+        winRect.posY_);
 }
 
 void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
@@ -140,16 +169,7 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
     } else { // floating window
         if (subWindow && parentLimit) { // subwidow and limited by parent
             limitRect = node->parent_->GetLayoutRect();
-            winRect.width_ = std::min(limitRect.width_, winRect.width_);
-            winRect.height_ = std::min(limitRect.height_, winRect.height_);
-            winRect.posX_ = std::max(limitRect.posX_, winRect.posX_);
-            winRect.posY_ = std::max(limitRect.posY_, winRect.posY_);
-            winRect.posX_ = std::min(
-                limitRect.posX_ + static_cast<int32_t>(limitRect.width_) - static_cast<int32_t>(winRect.width_),
-                winRect.posX_);
-            winRect.posY_ = std::min(
-                limitRect.posY_ + static_cast<int32_t>(limitRect.height_) - static_cast<int32_t>(winRect.height_),
-                winRect.posY_);
+            UpdateFloatingLayoutRect(limitRect, winRect);
         }
     }
     // Limit window to the maximum window size
@@ -157,6 +177,10 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
     winRect.height_ = std::min(displayRect.height_, winRect.height_);
     winRect.width_ = std::max(1u, winRect.width_);
     winRect.height_ = std::max(1u, winRect.height_);
+
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        LimitMoveBounds(winRect);
+    }
 
     node->SetLayoutRect(winRect);
     if (IsLayoutChanged(lastRect, winRect)) {
@@ -210,6 +234,29 @@ Rect& WindowLayoutPolicy::GetDisplayRect(const WindowMode mode)
     } else {
         return dependRects.fullRect_;
     }
+}
+
+Rect WindowLayoutPolicy::GetDependDisplayRects() const
+{
+    Rect displayRect = dependRects.fullRect_;
+    Rect limitDisplayRect = dependRects.limitFullRect_;
+    if (IsLayoutChanged(displayRect, limitDisplayRect)) {
+        return limitDisplayRect;
+    }
+    return displayRect;
+}
+
+void WindowLayoutPolicy::UpdateSplitLimitRect(const Rect& limitRect, Rect& limitSplitRect)
+{
+    Rect curLimitRect = limitSplitRect;
+    limitSplitRect.posX_ = std::max(limitRect.posX_, curLimitRect.posX_);
+    limitSplitRect.posY_ = std::max(limitRect.posY_, curLimitRect.posY_);
+    limitSplitRect.width_ = std::min(limitRect.posX_ + limitRect.width_,
+                                     curLimitRect.posX_ + curLimitRect.width_) -
+                                     limitSplitRect.posX_;
+    limitSplitRect.height_ = std::min(limitRect.posY_ + limitRect.height_,
+                                      curLimitRect.posY_ + curLimitRect.height_) -
+                                      limitSplitRect.posY_;
 }
 
 void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect)

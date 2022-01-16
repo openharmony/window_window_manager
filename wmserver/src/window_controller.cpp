@@ -105,13 +105,17 @@ WMError WindowController::MoveTo(uint32_t windowId, int32_t x, int32_t y)
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
+
     auto property = node->GetWindowProperty();
     Rect lastRect = property->GetWindowRect();
     Rect newRect;
     WMError res;
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        WLOGFI("Moving divider");
-        newRect = { x, lastRect.posY_, lastRect.width_, lastRect.height_ };
+        if (windowRoot_->isVerticalDisplay(node)) {
+            newRect = { lastRect.posX_, y, lastRect.width_, lastRect.height_ };
+        } else {
+            newRect = { x, lastRect.posY_, lastRect.width_, lastRect.height_ };
+        }
         property->SetWindowRect(newRect);
         res = windowRoot_->LayoutDividerWindow(node);
         if (res != WMError::WM_OK) {
