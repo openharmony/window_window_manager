@@ -24,6 +24,7 @@
 #include <key_event.h>
 #include <pointer_event.h>
 #include <axis_event.h>
+#include "foundation/appexecfwk/standard/kits/appkit/native/ability_runtime/context/context.h"
 #include "wm_common.h"
 #include "window_option.h"
 #include "window_life_cycle_interface.h"
@@ -35,7 +36,7 @@ namespace OHOS::AppExecFwk {
 }
 
 namespace OHOS::AbilityRuntime {
-class AbilityContext;
+    class AbilityContext;
 }
 
 namespace OHOS {
@@ -48,7 +49,7 @@ public:
 class Window : public RefBase {
 public:
     static sptr<Window> Create(const std::string& windowName,
-        sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext = nullptr);
+        sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> Find(const std::string& windowName);
 
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
@@ -86,6 +87,8 @@ public:
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
     virtual WMError SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext> context,
         std::string& contentInfo, NativeEngine* engine, NativeValue* storage, bool isdistributed = false) = 0;
+    virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
+        NativeValue* storage, bool isdistributed = false) = 0;
     virtual const std::string& GetContentInfo() = 0;
 };
 }

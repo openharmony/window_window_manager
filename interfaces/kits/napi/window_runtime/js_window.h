@@ -40,6 +40,7 @@ public:
     static NativeValue* GetProperties(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RegisterWindowCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* UnRegisterWindowCallback(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* LoadContent(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     NativeValue* OnShow(NativeEngine& engine, NativeCallbackInfo& info);
@@ -52,8 +53,10 @@ private:
     NativeValue* OnGetProperties(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRegisterWindowCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnUnRegisterWindowCallback(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info);
     sptr<Window> windowToken_ = nullptr;
     sptr<JsWindowListener> windowListener_ = nullptr;
+    void* contentStorage_ = nullptr;
 };
 }  // namespace Rosen
 }  // namespace OHOS

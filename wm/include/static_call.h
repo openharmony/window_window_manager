@@ -27,7 +27,7 @@ class StaticCall {
 WM_DECLARE_SINGLE_INSTANCE_BASE(StaticCall);
 public:
     virtual sptr<Window> CreateWindow(const std::string& windowName,
-        sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr);
+        sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::Context> context = nullptr);
 protected:
     StaticCall() = default;
 private:
