@@ -27,7 +27,7 @@ constexpr int BITMAP_DEPTH = 8;
 
 void SnapShotUtils::PrintUsage(const std::string &cmdLine)
 {
-    printf("usage: %s [-i displayId] [-f output_file]\n", cmdLine.c_str());
+    printf("usage: %s [-i displayId] [-f output_file] [-w width] [-h height] [-m]\n", cmdLine.c_str());
 }
 
 bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
@@ -43,11 +43,6 @@ bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
     char *realPath = realpath(fileDir.c_str(), resolvedPath);
     if (realPath == nullptr) {
         printf("error: fileName %s invalid, nullptr!\n", fileName.c_str());
-        return false;
-    }
-    std::string realPathString = realPath;
-    if (realPathString.find("/data") != 0) {
-        printf("error: fileName %s invalid, %s must dump at dir: /data \n", fileName.c_str(), realPathString.c_str());
         return false;
     }
     return true;
@@ -143,19 +138,27 @@ bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArgments &cmdA
     int opt = 0;
     const struct option longOption[] = {
         { "id", required_argument, nullptr, 'i' },
+        { "width", required_argument, nullptr, 'w' },
+        { "height", required_argument, nullptr, 'h' },
         { "file", required_argument, nullptr, 'f' },
-        { "help", required_argument, nullptr, 'h' },
+        { "help", required_argument, nullptr, 'm' },
         { nullptr, 0, nullptr, 0 }
     };
-    while ((opt = getopt_long(argc, argv, "i:f:h", longOption, nullptr)) != -1) {
+    while ((opt = getopt_long(argc, argv, "i:w:h:f:m", longOption, nullptr)) != -1) {
         switch (opt) {
             case 'i': // display id
                 cmdArgments.displayId = atoll(optarg);
                 break;
+            case 'w': // output width
+                cmdArgments.width = atoi(optarg);
+                break;
+            case 'h': // output height
+                cmdArgments.height = atoi(optarg);
+                break;
             case 'f': // output file name
                 cmdArgments.fileName = optarg;
                 break;
-            case 'h': // help
+            case 'm': // help
                 SnapShotUtils::PrintUsage(argv[0]);
                 return false;
             default:
