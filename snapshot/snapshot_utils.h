@@ -34,6 +34,8 @@ using  WriteToPngParam = struct {
 using CmdArgments = struct {
     Rosen::DisplayId displayId = Rosen::DISPLAY_ID_INVALD;
     std::string fileName;
+    int32_t width = -1;
+    int32_t height = -1;
 };
 
 class SnapShotUtils {

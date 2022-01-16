@@ -68,17 +68,34 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
     return screenShot;
 }
 
-bool DisplayManager::CheckRectOffsetValid(int32_t param) const
+bool DisplayManager::CheckRectValid(const Media::Rect &rect, int32_t oriHeight, int32_t oriWidth) const
 {
-    if (param < 0 || param > MAX_RESOLUTION_VALUE) {
+    if (!((rect.left >= 0) and (rect.left < oriWidth) and (rect.top >= 0) and (rect.top < oriHeight))) {
+        WLOGFE("CheckRectValid rect left top invalid!");
         return false;
+    }
+
+    if (!((rect.width > 0) and (rect.width <= (oriWidth - rect.left)) and
+        (rect.height > 0) and (rect.height <= (oriHeight - rect.top)))) {
+        if (!((rect.width == 0) and (rect.height == 0))) {
+            WLOGFE("CheckRectValid rect height width invalid!");
+            return false;
+        }
     }
     return true;
 }
 
-bool DisplayManager::CheckRectSizeValid(int32_t param) const
+bool DisplayManager::CheckSizeValid(const Media::Size &size, int32_t oriHeight, int32_t oriWidth)
 {
-    if (param < MIN_RESOLUTION_VALUE || param > MAX_RESOLUTION_VALUE) {
+    if (!((size.width > 0) and (size.height > 0))) {
+        if (!((size.width == 0) and (size.height == 0))) {
+            WLOGFE("CheckSizeValid width height invalid!");
+            return false;
+        }
+    }
+
+    if ((size.width > MAX_RESOLUTION_SIZE_SCREENSHOT) or (size.height > MAX_RESOLUTION_SIZE_SCREENSHOT)) {
+        WLOGFE("CheckSizeValid width and height too big!");
         return false;
     }
     return true;
@@ -91,16 +108,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
         WLOGFE("displayId invalid!");
         return nullptr;
     }
-    if (!CheckRectOffsetValid(rect.left) || !CheckRectOffsetValid(rect.top) ||
-        !CheckRectSizeValid(rect.width) || !CheckRectSizeValid(rect.height)) {
-        WLOGFE("rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
-            rect.left, rect.top, rect.width, rect.height);
-        return nullptr;
-    }
-    if (!CheckRectSizeValid(size.width) || !CheckRectSizeValid(size.height)) {
-        WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
-        return nullptr;
-    }
+    
     std::shared_ptr<Media::PixelMap> screenShot =
         SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
     if (screenShot == nullptr) {
@@ -108,14 +116,25 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
         return nullptr;
     }
 
+    // check parameters
+    int32_t oriHeight = screenShot->GetHeight();
+    int32_t oriWidth = screenShot->GetWidth();
+    if (!CheckRectValid(rect, oriHeight, oriWidth)) {
+        WLOGFE("rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
+            rect.left, rect.top, rect.width, rect.height);
+        return nullptr;
+    }
+    if (!CheckSizeValid(size, oriHeight, oriWidth)) {
+        WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
+        return nullptr;
+    }
+    
     // create crop dest pixelmap
     Media::InitializationOptions opt;
     opt.size.width = size.width;
     opt.size.height = size.height;
     opt.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
     opt.editable = false;
-    opt.useSourceIfMatch = true;
-
     auto pixelMap = Media::PixelMap::Create(*screenShot, rect, opt);
     if (pixelMap == nullptr) {
         WLOGFE("Media::PixelMap::Create failed!");
