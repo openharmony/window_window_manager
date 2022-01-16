@@ -53,6 +53,7 @@ public:
     WMError SetWindowType(uint32_t windowId, WindowType type) override;
     WMError SetWindowFlags(uint32_t windowId, uint32_t flags) override;
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) override;
+    std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) override;
     WMError MinimizeAllAppNodeAbility(uint32_t windowId) override;
 
     std::shared_ptr<RSDisplayNode> GetDisplayNode(int32_t displayId) const;

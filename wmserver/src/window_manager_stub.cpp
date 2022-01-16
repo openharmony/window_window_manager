@@ -118,6 +118,22 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case TRANS_ID_GET_AVOID_AREA: {
+            uint32_t windowId = data.ReadUint32();
+            AvoidAreaType avoidAreaType = static_cast<AvoidAreaType>(data.ReadUint32());
+            std::vector<Rect> avoidArea = GetAvoidAreaByType(windowId, avoidAreaType);
+
+            // prepare relpy data
+            uint32_t avoidAreaNum = static_cast<uint32_t>(avoidArea.size());
+            reply.WriteUint32(avoidAreaNum);
+            for (uint32_t i = 0; i < avoidAreaNum; ++i) {
+                reply.WriteInt32(avoidArea[i].posX_);
+                reply.WriteInt32(avoidArea[i].posY_);
+                reply.WriteUint32(avoidArea[i].width_);
+                reply.WriteUint32(avoidArea[i].height_);
+            }
+            break;
+        }
         case TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
             WindowManagerAgentType type = static_cast<WindowManagerAgentType>(data.ReadUint32());
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();

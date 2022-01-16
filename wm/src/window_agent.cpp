@@ -57,5 +57,14 @@ void WindowAgent::UpdateFocusStatus(bool focused)
     }
     window_->UpdateFocusStatus(focused);
 }
+
+void WindowAgent::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->UpdateAvoidArea(avoidArea);
+}
 } // namespace Rosen
 } // namespace OHOS
