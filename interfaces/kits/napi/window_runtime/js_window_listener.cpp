@@ -14,6 +14,7 @@
  */
 #include "js_window_listener.h"
 #include "js_runtime_utils.h"
+#include "js_window_utils.h"
 #include "window_manager_hilog.h"
 namespace OHOS {
 namespace Rosen {
@@ -21,65 +22,66 @@ using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsWindowListener"};
 }
-bool JsWindowListener::IsCallbackExists(std::string type, NativeValue* jsListenerObject)
-{
-    if (jsWinodwListenerObjectMap_.find(type) == jsWinodwListenerObjectMap_.end()) {
-        WLOGFE("JsWindowListener::IsCallbackExists methodName %{public}s not exist!", type.c_str());
-        return false;
-    }
-    for (auto iter = jsWinodwListenerObjectMap_[type].begin();
-            iter != jsWinodwListenerObjectMap_[type].end(); iter++) {
-        if (jsListenerObject->StrictEquals((*iter)->Get())) {
-            WLOGFI("JsWindowListener::AddJsListenerObject callback already exists!");
-            return true;
-        }
-    }
-    return false;
-}
 
-bool JsWindowListener::AddJsListenerObject(std::string type, NativeValue* jsListenerObject)
+void JsWindowListener::AddCallback(NativeValue* jsListenerObject)
 {
-    WLOGFI("JsWindowListener::AddJsListenerObject is called");
-    std::lock_guard<std::mutex> lock(listenerMutex_);
+    WLOGFI("JsWindowListener::AddCallbackAndRegister is called");
+    std::lock_guard<std::mutex> lock(mtx_);
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine_->CreateReference(jsListenerObject, 1));
-    if (IsCallbackExists(type, jsListenerObject)) {
-        WLOGFI("JsWindowListener::AddJsListenerObject jsWinodwListenerObjectMap_ size: %{public}d!",
-            static_cast<int32_t>(jsWinodwListenerObjectMap_[type].size()));
-        return false;
-    }
-    jsWinodwListenerObjectMap_[type].insert(std::move(callbackRef));
-    WLOGFI("JsWindowListener::AddJsListenerObject failed jsWinodwListenerObjectMap_ size: %{public}d!",
-        static_cast<int32_t>(jsWinodwListenerObjectMap_[type].size()));
-    return true;
+    jsCallBack_.push_back(std::move(callbackRef));
+    WLOGFI("JsWindowListener::AddCallbackAndRegister success jsCallBack_ size: %{public}d!",
+        static_cast<uint32_t>(jsCallBack_.size()));
+    return;
 }
 
-void JsWindowListener::RemoveJsListenerObject(std::string type, NativeValue* jsListenerObject)
+void JsWindowListener::RemoveAllCallback()
 {
-    WLOGFI("JsWindowListener::RemoveJsListenerObject is called");
-    std::lock_guard<std::mutex> lock(listenerMutex_);
-    if (jsWinodwListenerObjectMap_.find(type) == jsWinodwListenerObjectMap_.end()) {
-        WLOGFE("methodName %{public}s not exist!", type.c_str());
-        return;
-    }
-    if (jsListenerObject == nullptr) {
-        jsWinodwListenerObjectMap_.erase(type);
-    } else {
-        for (auto iter = jsWinodwListenerObjectMap_[type].begin();
-                iter != jsWinodwListenerObjectMap_[type].end(); iter++) {
-            if (jsListenerObject->StrictEquals((*iter)->Get())) {
-                jsWinodwListenerObjectMap_[type].erase(iter);
-            }
+    std::lock_guard<std::mutex> lock(mtx_);
+    jsCallBack_.clear();
+}
+
+void JsWindowListener::RemoveCallback(NativeValue* jsListenerObject)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    for (auto iter = jsCallBack_.begin(); iter != jsCallBack_.end();) {
+        if (jsListenerObject->StrictEquals((*iter)->Get())) {
+            jsCallBack_.erase(iter);
+        } else {
+            iter++;
         }
     }
-    WLOGFI("JsWindowListener::RemoveJsListenerObject jsWinodwListenerObjectMap_ size: %{public}d!",
-        static_cast<int32_t>(jsWinodwListenerObjectMap_[type].size()));
-    WLOGFI("JsWindowListener::RemoveJsListenerObject success!");
+    WLOGFI("JsWindowListener::AddCallbackAndRegister success jsCallBack_ size: %{public}d!",
+        static_cast<uint32_t>(jsCallBack_.size()));
+    return;
+}
+
+void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
+{
+    WLOGFI("CallJsMethod methodName = %{public}s", methodName);
+    if (engine_ == nullptr) {
+        WLOGFE("engine_ nullptr");
+        return;
+    }
+    for (auto iter = jsCallBack_.begin(); iter != jsCallBack_.end(); iter++) {
+        NativeValue* method = (*iter)->Get();
+        if (method == nullptr) {
+            WLOGFE("Failed to get method callback from object");
+            continue;
+        }
+        engine_->CallFunction(engine_->CreateUndefined(), method, argv, argc);
+    }
 }
 
 void JsWindowListener::OnSizeChange(Rect rect)
 {
     WLOGFI("JsWindowListener::OnSizeChange is called");
+    std::lock_guard<std::mutex> lock(mtx_);
+    if (jsCallBack_.empty()) {
+        WLOGFE("JsWindowListener::OnSizeChange windowSizeChanged not register!");
+        return;
+    }
+
     NativeValue* sizeValue = engine_->CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(sizeValue);
     if (object == nullptr) {
@@ -92,27 +94,24 @@ void JsWindowListener::OnSizeChange(Rect rect)
     CallJsMethod("windowSizeChange", argv, ArraySize(argv));
 }
 
-void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
+void JsWindowListener::OnSystemBarPropertyChange(uint64_t displayId, SystemBarProps props)
 {
-    WLOGFI("CallJsMethod methodName = %{public}s", methodName);
-    if (engine_ == nullptr) {
-        WLOGFE("engine_ nullptr");
+    std::lock_guard<std::mutex> lock(mtx_);
+    WLOGFI("JsWindowListener::OnSystemBarPropertyChange is called");
+    if (jsCallBack_.empty()) {
+        WLOGFE("JsWindowListener::OnSystemBarPropertyChange systemUiTintChange not register!");
         return;
     }
-    std::lock_guard<std::mutex> lock(listenerMutex_);
-    std::string type(methodName);
-    if (jsWinodwListenerObjectMap_.find(type) == jsWinodwListenerObjectMap_.end()) {
-        WLOGFE("methodName %{public}s not exist!", methodName);
+    NativeValue* propertyValue = engine_->CreateObject();
+    NativeObject* object = ConvertNativeValueTo<NativeObject>(propertyValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to convert prop to jsObject");
         return;
     }
-    for (auto iter = jsWinodwListenerObjectMap_[type].begin(); iter != jsWinodwListenerObjectMap_[type].end(); iter++) {
-        NativeValue* method = (*iter)->Get();
-        if (method == nullptr) {
-            WLOGFE("Failed to get method callback from object");
-            return;
-        }
-        engine_->CallFunction(engine_->CreateUndefined(), method, argv, argc);
-    }
+    object->SetProperty("displayId", CreateJsValue(*engine_, static_cast<uint32_t>(displayId)));
+    object->SetProperty("regionTint", CreateJsSystemBarRegionTintArrayObject(*engine_, props));
+    NativeValue* argv[] = {propertyValue};
+    CallJsMethod("systemUiTintChange", argv, ArraySize(argv));
 }
 } // namespace Rosen
 } // namespace OHOS

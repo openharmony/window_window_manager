@@ -41,7 +41,7 @@ namespace OHOS::AbilityRuntime {
 
 namespace OHOS {
 namespace Rosen {
-class IWindowChangeListener : public RefBase {
+class IWindowChangeListener : virtual public RefBase {
 public:
     virtual void OnSizeChange(Rect rect) = 0;
 };

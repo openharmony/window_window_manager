@@ -51,7 +51,7 @@ using utils = WindowTestUtils;
 class TestSystemBarChangedListener : public ISystemBarChangedListener {
 public:
     SystemBarProps props_;
-    void OnSystemBarPropertyChange(uint64_t displayId, const SystemBarProps& props) override;
+    void OnSystemBarPropertyChange(uint64_t displayId, SystemBarProps props) override;
 };
 
 class WindowImmersiveTest : public testing::Test {
@@ -111,7 +111,7 @@ bool WindowImmersiveTest::SystemBarPropsEqualsTo(const SystemBarProps& expect)
     return true;
 }
 
-void TestSystemBarChangedListener::OnSystemBarPropertyChange(uint64_t displayId, const SystemBarProps& props)
+void TestSystemBarChangedListener::OnSystemBarPropertyChange(uint64_t displayId, SystemBarProps props)
 {
     printf("TestSystemBarChangedListener Display ID: %llu\n", displayId);
     props_ = props;
