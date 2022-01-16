@@ -54,7 +54,8 @@ public:
     Rect GetDisplayRect() const;
     sptr<WindowNode> GetTopImmersiveNode() const;
     void NotifySystemBarIfChanged();
-    void HandleSplitWindowModeChange(sptr<WindowNode>& triggerNode, bool isChangeToSplit);
+    WMError HandleSplitWindowModeChange(sptr<WindowNode>& triggerNode, bool isChangeToSplit);
+
     void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas);
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void LayoutDividerWindow(sptr<WindowNode>& node);
@@ -90,9 +91,9 @@ private:
 
     void SendSplitScreenEvent(WindowMode mode);
     sptr<WindowNode> FindSplitPairNode(sptr<WindowNode>& node) const;
-    void HandleModeChangeToSplit(sptr<WindowNode>& triggerNode);
-    void HandleModeChangeFromSplit(sptr<WindowNode>& triggerNode);
-    void UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode);
+    WMError HandleModeChangeToSplit(sptr<WindowNode>& triggerNode);
+    WMError HandleModeChangeFromSplit(sptr<WindowNode>& triggerNode);
+    WMError UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode);
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
