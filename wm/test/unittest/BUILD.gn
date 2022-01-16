@@ -137,8 +137,8 @@ ohos_static_library("wm_unittest_common") {
   public_deps = [
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
+    "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wm:libwmutil",
     "//foundation/windowmanager/wmserver:libwms",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",

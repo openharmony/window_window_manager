@@ -86,7 +86,7 @@ ohos_shared_library("libwms") {
 
     # IMS
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/windowmanager/wm:libwmutil",
+    "//foundation/windowmanager/utils:libwmutil",
   ]
 
   external_deps = [

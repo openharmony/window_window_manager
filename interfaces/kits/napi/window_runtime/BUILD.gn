@@ -37,8 +37,8 @@ ohos_shared_library("windowmanager_napi") {
 
   configs = [ ":window_manager_napi_config" ]
   deps = [
+    "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wm:libwmutil",
     "//foundation/windowmanager/wmserver:libwms",
   ]
 
