@@ -1,0 +1,74 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+## Build libdms.so
+config("libdms_private_config") {
+  include_dirs = [
+    "../dm/include",
+
+    # todo need delete it
+    "../wmserver/include",
+    "../wm/include",
+    "../interfaces/innerkits/wm",
+    "../wmserver/include/window_snapshot",
+  ]
+}
+
+config("libdms_public_config") {
+  include_dirs = [ "include" ]
+}
+
+ohos_shared_library("libdms") {
+  sources = [
+    "../dm/src/zidl/display_manager_agent_proxy.cpp",
+    "src/abstract_display.cpp",
+    "src/abstract_display_controller.cpp",
+    "src/abstract_screen.cpp",
+    "src/abstract_screen_controller.cpp",
+    "src/display_manager_service.cpp",
+    "src/display_manager_service_inner.cpp",
+    "src/display_manager_stub.cpp",
+    "src/display_node_control.cpp",
+    "src/display_power_controller.cpp",
+  ]
+
+  configs = [ ":libdms_private_config" ]
+
+  public_configs = [ ":libdms_public_config" ]
+
+  deps = [
+    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "//foundation/windowmanager/utils:libwmutil",
+    "//utils/native/base:utils",
+
+    # RSSurface
+    "//foundation/graphic/standard:libsurface",
+    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
+
+    # todo need delete it
+    "//foundation/windowmanager/wmserver:libwms",
+  ]
+
+  external_deps = [
+    "bytrace_standard:bytrace_core",
+    "hilog_native:libhilog",
+    "ipc:ipc_core",
+    "window_manager:libdm",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
