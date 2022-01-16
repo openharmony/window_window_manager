@@ -33,7 +33,6 @@ public:
 
 void WindowSplitTest::SetUpTestCase()
 {
-
 }
 
 void WindowSplitTest::TearDownTestCase()
@@ -54,7 +53,6 @@ void WindowSplitTest::TearDown()
 }
 
 namespace {
-
 /**
  * @tc.name: SplitWindow01
  * @tc.desc: one primary window and one fullscreen window

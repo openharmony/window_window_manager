@@ -348,6 +348,44 @@ WMError WindowManagerProxy::SaveAbilityToken(const sptr<IRemoteObject>& abilityT
     return static_cast<WMError>(ret);
 }
 
+std::vector<Rect> WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    std::vector<Rect> avoidArea;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return avoidArea;
+    }
+
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return avoidArea;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+        WLOGFE("Write AvoidAreaType failed");
+        return avoidArea;
+    }
+
+    if (Remote()->SendRequest(TRANS_ID_GET_AVOID_AREA, data, reply, option) != ERR_NONE) {
+        return avoidArea;
+    }
+
+    uint32_t avoidNum = reply.ReadUint32();
+    for (uint32_t i = 0; i < avoidNum; ++i) {
+        int32_t x = reply.ReadInt32();
+        int32_t y = reply.ReadInt32();
+        uint32_t w = reply.ReadUint32();
+        uint32_t h = reply.ReadUint32();
+        Rect rect = {x, y, w, h};
+        avoidArea.push_back(rect);
+    }
+    return avoidArea;
+}
+
 void WindowManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {

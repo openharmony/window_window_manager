@@ -18,6 +18,7 @@
 #include <gmock/gmock.h>
 
 #include "ability_context_impl.h"
+#include "foundation/appexecfwk/standard/kits/appkit/native/ability_runtime/context/context.h"
 #include "static_call.h"
 
 namespace OHOS {
@@ -25,7 +26,7 @@ namespace Rosen {
 class MockStaticCall : public StaticCall {
 public:
     MOCK_METHOD3(CreateWindow, sptr<Window>(const std::string& windowName,
-        sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext));
+        sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::Context> abilityContext));
 };
 }
 } // namespace OHOS

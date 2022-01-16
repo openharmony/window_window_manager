@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_NODE_CONTAINER_H
 
 #include <ui/rs_display_node.h>
+#include "avoid_area_controller.h"
 #include "window_layout_policy.h"
 #include "window_node.h"
 #include "window_zorder_policy.h"
@@ -45,6 +46,7 @@ public:
     void AssignZOrder();
     WMError SetFocusWindow(uint32_t windowId);
     uint32_t GetFocusWindow() const;
+    std::vector<Rect> GetAvoidAreaByType(AvoidAreaType avoidAreaType);
     WMError MinimizeOtherFullScreenAbility(); // adapt to api7
     WMError MinimizeAllAppNodeAbility();
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes);
@@ -53,6 +55,8 @@ public:
     sptr<WindowNode> GetTopImmersiveNode() const;
     void NotifySystemBarIfChanged();
     WMError HandleSplitWindowModeChange(sptr<WindowNode>& triggerNode, bool isChangeToSplit);
+
+    void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas);
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void LayoutDividerWindow(sptr<WindowNode>& node);
     void UpdateDisplayInfo();
@@ -91,6 +95,7 @@ private:
     WMError HandleModeChangeFromSplit(sptr<WindowNode>& triggerNode);
     WMError UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode);
 
+    sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
     sptr<WindowNode> belowAppWindowNode_ = new WindowNode();
     sptr<WindowNode> appWindowNode_ = new WindowNode();

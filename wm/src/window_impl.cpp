@@ -114,6 +114,22 @@ SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type)
     return curProperties[type];
 }
 
+WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
+{
+    WLOGFI("GetAvoidAreaByType  Search Type: %{public}u", static_cast<uint32_t>(type));
+    std::vector<Rect> avoidAreaVec;
+    uint32_t windowId = property_->GetWindowId();
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidAreaVec);
+    if (ret != WMError::WM_OK || avoidAreaVec.size() != 4) {    // 4: the avoid area num (left, top, right, bottom)
+        WLOGFE("GetAvoidAreaByType errCode:%{public}d winId:%{public}u Type is :%{public}u." \
+            "Or avoidArea Size != 4. Current size of avoid area: %{public}u", static_cast<int32_t>(ret),
+            property_->GetWindowId(), static_cast<uint32_t>(type), static_cast<uint32_t>(avoidAreaVec.size()));
+        return ret;
+    }
+    avoidArea = {avoidAreaVec[0], avoidAreaVec[1], avoidAreaVec[2], avoidAreaVec[3]}; // 0:left 1:top 2:right 3:bottom
+    return ret;
+}
+
 WMError WindowImpl::SetWindowType(WindowType type)
 {
     WLOGFI("window id: %{public}d, type:%{public}d", property_->GetWindowId(), static_cast<uint32_t>(type));
@@ -192,7 +208,30 @@ WMError WindowImpl::SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext>
     std::string& contentInfo, NativeEngine* engine, NativeValue* storage, bool isdistributed)
 {
     WLOGFI("SetUIContent");
+    WLOGFI("contentInfo: %{public}s, context:%{public}p", contentInfo.c_str(), context.get());
     uiContent_ = Ace::UIContent::Create(context.get(), engine);
+    if (uiContent_ == nullptr) {
+        WLOGFE("fail to SetUIContent id: %{public}d", property_->GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (isdistributed) {
+        uiContent_->Restore(this, contentInfo, storage);
+    } else {
+        uiContent_->Initialize(this, contentInfo, storage);
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::SetUIContent(const std::string& contentInfo,
+    NativeEngine* engine, NativeValue* storage, bool isdistributed)
+{
+    WLOGFI("SetUIContent");
+    if (context_.get() == nullptr) {
+        WLOGFE("SetUIContent context_ is nullptr id: %{public}d", property_->GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WLOGFI("contentInfo: %{public}s, context_:%{public}p", contentInfo.c_str(), context_.get());
+    uiContent_ = Ace::UIContent::Create(context_.get(), engine);
     if (uiContent_ == nullptr) {
         WLOGFE("fail to SetUIContent id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
@@ -237,8 +276,7 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
     return ret;
 }
 
-WMError WindowImpl::Create(const std::string& parentName,
-    const std::shared_ptr<AbilityRuntime::AbilityContext>& abilityContext)
+WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGFI("[Client] Window Create");
 #ifdef _NEW_RENDERSERVER_
@@ -269,9 +307,11 @@ WMError WindowImpl::Create(const std::string& parentName,
         WLOGFE("create window failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return ret;
     }
-    if (abilityContext != nullptr) {
-        ret = SingletonContainer::Get<WindowAdapter>().SaveAbilityToken(abilityContext->GetAbilityToken(), windowId);
-        abilityContext_ = abilityContext;
+    context_ = context;
+    // FIX ME: use context_
+    abilityContext_ = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
+    if (abilityContext_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().SaveAbilityToken(abilityContext_->GetAbilityToken(), windowId);
         if (ret != WMError::WM_OK) {
             WLOGFE("SaveAbilityToken failed with errCode:%{public}d", static_cast<int32_t>(ret));
             return ret;
@@ -469,6 +509,24 @@ void WindowImpl::RegisterWindowChangeListener(sptr<IWindowChangeListener>& liste
     windowChangeListener_ = listener;
 }
 
+void WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+{
+    if (avoidAreaChangeListener_ != nullptr) {
+        WLOGFE("RegisterAvoidAreaChangeListener failed. AvoidAreaChangeListene is not nullptr");
+        return;
+    }
+    avoidAreaChangeListener_ = listener;
+}
+
+void WindowImpl::UnregisterAvoidAreaChangeListener()
+{
+    if (avoidAreaChangeListener_ == nullptr) {
+        WLOGFE("UnregisterAvoidAreaChangeListener failed. AvoidAreaChangeListene is nullptr");
+        return;
+    }
+    avoidAreaChangeListener_ = nullptr;
+}
+
 void WindowImpl::UpdateRect(const struct Rect& rect)
 {
     WLOGFI("winId:%{public}d, rect[%{public}d, %{public}d, %{public}d, %{public}d]", GetWindowId(), rect.posX_,
@@ -503,6 +561,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             WLOGI("ConsumeKeyEvent keyEvent is consumed");
             return;
         }
+        // FIX ME: use context_
         if (abilityContext_ != nullptr) {
             WLOGI("ConsumeKeyEvent ability TerminateSelf");
             abilityContext_->TerminateSelf();
@@ -602,6 +661,13 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
         subWindow->UpdateConfiguration(configuration);
+    }
+}
+
+void WindowImpl::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
+{
+    if (avoidAreaChangeListener_ != nullptr) {
+        avoidAreaChangeListener_->OnAvoidAreaChanged(avoidArea);
     }
 }
 
