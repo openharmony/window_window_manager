@@ -19,7 +19,7 @@ config("snapshot_config") {
 }
 
 ohos_executable("snapshot_display") {
-  install_enable = false
+  install_enable = true
   sources = [
     "snapshot_display.cpp",
     "snapshot_utils.cpp",

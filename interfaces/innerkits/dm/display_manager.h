@@ -69,13 +69,12 @@ public:
 private:
     DisplayManager();
     ~DisplayManager();
-    bool CheckRectOffsetValid(int32_t param) const;
-    bool CheckRectSizeValid(int32_t param) const;
+    bool CheckRectValid(const Media::Rect &rect, int32_t oriHeight, int32_t oriWidth) const;
+    bool CheckSizeValid(const Media::Size &size, int32_t oriHeight, int32_t oriWidth);
     void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
 
     static inline SingletonDelegator<DisplayManager> delegator;
-    const int32_t MAX_RESOLUTION_VALUE = 15260; // max resolution, 16K
-    const int32_t MIN_RESOLUTION_VALUE = 16; // min resolution
+    const int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 15360; // max resolution, 16K
     std::mutex mutex_;
     std::vector<sptr<IDisplayPowerEventListener>> powerEventListeners_;
     sptr<DisplayManagerAgent> powerEventListenerAgent_;
