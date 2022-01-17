@@ -32,33 +32,31 @@ public:
 };
 
 class DisplayManagerAdapter {
-WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerAdapter);
+WM_DECLARE_SINGLE_INSTANCE(DisplayManagerAdapter);
 public:
-    DisplayId GetDefaultDisplayId();
-    sptr<Display> GetDisplayById(DisplayId displayId);
+    virtual DisplayId GetDefaultDisplayId();
+    virtual sptr<Display> GetDisplayById(DisplayId displayId);
 
-    ScreenId CreateVirtualScreen(VirtualScreenOption option);
-    DMError DestroyVirtualScreen(ScreenId screenId);
-    std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
+    virtual ScreenId CreateVirtualScreen(VirtualScreenOption option);
+    virtual DMError DestroyVirtualScreen(ScreenId screenId);
+    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
 
-    void RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    virtual void RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
-    void UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    virtual void UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
-    bool WakeUpBegin(PowerStateChangeReason reason);
-    bool WakeUpEnd();
-    bool SuspendBegin(PowerStateChangeReason reason);
-    bool SuspendEnd();
-    bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason);
-    bool SetDisplayState(DisplayState state);
-    DisplayState GetDisplayState(uint64_t displayId);
-    void NotifyDisplayEvent(DisplayEvent event);
-    DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId);
-    void Clear();
+    virtual bool WakeUpBegin(PowerStateChangeReason reason);
+    virtual bool WakeUpEnd();
+    virtual bool SuspendBegin(PowerStateChangeReason reason);
+    virtual bool SuspendEnd();
+    virtual bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason);
+    virtual bool SetDisplayState(DisplayState state);
+    virtual DisplayState GetDisplayState(uint64_t displayId);
+    virtual void NotifyDisplayEvent(DisplayEvent event);
+    virtual DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId);
+    virtual void Clear();
 
 private:
-    DisplayManagerAdapter() = default;
-    ~DisplayManagerAdapter() = default;
     bool InitDMSProxyLocked();
 
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
