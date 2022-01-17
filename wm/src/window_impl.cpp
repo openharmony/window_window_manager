@@ -457,8 +457,15 @@ void WindowImpl::RegisterWindowChangeListener(sptr<IWindowChangeListener>& liste
 
 void WindowImpl::UpdateRect(const struct Rect& rect)
 {
-    WLOGFI("winId:%{public}d, rect[%{public}d, %{public}d, %{public}d, %{public}d]", GetWindowId(), rect.posX_,
-        rect.posY_, rect.width_, rect.height_);
+    auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("get display failed displayId:%{public}d, window id:%{public}u", property_->GetDisplayId(),
+            property_->GetWindowId());
+        return;
+    }
+    float virtualPixelRatio = display->GetVirtualPixelRatio();
+    WLOGFI("winId:%{public}d, rect[%{public}d, %{public}d, %{public}d, %{public}d], vpr:%{public}f",
+        GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, virtualPixelRatio);
     property_->SetWindowRect(rect);
     if (windowChangeListener_ != nullptr) {
         windowChangeListener_->OnSizeChange(rect);
@@ -466,6 +473,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect)
     if (uiContent_ != nullptr) {
         Ace::ViewportConfig config;
         config.SetSize(rect.width_, rect.height_);
+        config.SetDensity(virtualPixelRatio);
         uiContent_->UpdateViewportConfig(config);
         WLOGFI("notify uiContent window size change end");
     }
