@@ -23,6 +23,9 @@ using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsWindow"};
 }
+
+constexpr Rect EMPTY_RECT = {0, 0, 0, 0};
+
 JsWindow::JsWindow(const sptr<Window>& window) : windowToken_(window)
 {
 }
@@ -136,6 +139,13 @@ NativeValue* JsWindow::SetSystemBarProperties(NativeEngine* engine, NativeCallba
     WLOGFI("JsWindow::SetBarProperties is called");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetSystemBarProperties(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::GetAvoidArea(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::GetAvoidArea is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnGetAvoidArea(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
@@ -405,6 +415,10 @@ void JsWindow::RegisterWindowListenerWithType(NativeEngine& engine, std::string 
             sptr<IWindowChangeListener> thisListener(windowListener);
             windowToken_->RegisterWindowChangeListener(thisListener);
             WLOGFI("JsWindow::RegisterWindowListenerWithType windowSizeChange success");
+        } else if (type.compare("systemAvoidAreaChange") == 0) {
+            sptr<IAvoidAreaChangedListener> thisListener(windowListener);
+            windowToken_->RegisterAvoidAreaChangeListener(thisListener);
+            WLOGFI("JsWindow::RegisterWindowListenerWithType systemAvoidAreaChange success");
         } else {
             WLOGFE("JsWindow::RegisterWindowListenerWithType failed method: %{public}s not support!",
                 type.c_str());
@@ -431,6 +445,10 @@ void JsWindow::UnregisterAllWindowListenerWithType(std::string type)
         sptr<IWindowChangeListener> thisListener(nullptr);
         windowToken_->RegisterWindowChangeListener(thisListener);
         WLOGFI("JsWindow::UnregisterAllWindowListenerWithType windowSizeChange success");
+    }
+    if (type.compare("systemAvoidAreaChange") == 0) {
+        windowToken_->UnregisterAvoidAreaChangeListener();
+        WLOGFI("JsWindow::UnregisterAllWindowListenerWithType systemAvoidAreaChange success");
     }
     jsListenerMap_.erase(type);
     jsCallbackMap_.erase(type);
@@ -459,6 +477,10 @@ void JsWindow::UnregisterWindowListenerWithType(std::string type, NativeValue* v
             sptr<IWindowChangeListener> thisListener(nullptr);
             windowToken_->RegisterWindowChangeListener(thisListener);
             WLOGFI("JsWindow::UnregisterWindowListenerWithType windowSizeChange success");
+        }
+        if (type.compare("systemAvoidAreaChange") == 0) {
+            windowToken_->UnregisterAvoidAreaChangeListener();
+            WLOGFI("JsWindow::UnregisterWindowListenerWithType systemAvoidAreaChange success");
         }
         jsCallbackMap_.erase(type);
         jsListenerMap_.erase(type);
@@ -490,8 +512,8 @@ NativeValue* JsWindow::OnRegisterWindowCallback(NativeEngine& engine, NativeCall
     }
     std::lock_guard<std::mutex> lock(mtx_);
     RegisterWindowListenerWithType(engine, cbType, value);
-        return engine.CreateUndefined();
-    }
+    return engine.CreateUndefined();
+}
 
 NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
@@ -514,7 +536,7 @@ NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCa
     } else {
         NativeValue* value = info.argv[ARGC_ONE];
         if (!value->IsCallable()) {
-            WLOGFI("JsWindowManager::OnUnregisterWindowManagerCallback info->argv[1] is not callable");
+            WLOGFI("JsWindow::OnUnregisterWindowManagerCallback info->argv[1] is not callable");
             return engine.CreateUndefined();
         }
         UnregisterWindowListenerWithType(cbType, value);
@@ -719,6 +741,54 @@ NativeValue* JsWindow::OnSetSystemBarProperties(NativeEngine& engine, NativeCall
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
+
+NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnGetAvoidArea is called");
+    if (windowToken_ == nullptr || info.argc < ARGC_ONE) {
+        WLOGFE("JsWindow windowToken_ is nullptr or param is too small!");
+        return engine.CreateUndefined();
+    }
+    // Parse info->argv[0] as AvoidAreaType
+    NativeNumber* nativeMode = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
+    if (nativeMode == nullptr) {
+        WLOGFE("Failed to convert parameter to AvoidAreaType");
+        return engine.CreateUndefined();
+    }
+    AvoidAreaType avoidAreaType = static_cast<AvoidAreaType>(static_cast<uint32_t>(*nativeMode));
+    WLOGFI("JsWindow::OnGetAvoidArea get avoidAreaType success %{public}u", avoidAreaType);
+
+    AsyncTask::CompleteCallback complete =
+        [this, avoidAreaType](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            // getAvoidRect by avoidAreaType
+            AvoidArea avoidArea;
+            WMError ret = windowToken_->GetAvoidAreaByType(avoidAreaType, avoidArea);
+            if (ret == WMError::WM_OK) {
+                WLOGFI("JsWindow::OnGetAvoidArea GetAvoidAreaByType Success");
+            } else {
+                WLOGFE("JsWindow::OnGetAvoidArea GetAvoidAreaByType Failed");
+                avoidArea = { EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT }; // left, top, right, bottom
+            }
+
+            // native avoidArea -> js avoidArea
+            NativeValue* avoidAreaObj = ChangeAvoidAreaToJsValue(engine, avoidArea);
+            if (avoidAreaObj != nullptr) {
+                WLOGFI("JsWindow::OnGetAvoidArea ChangeAvoidAreaToJsValue Success");
+                task.Resolve(engine, avoidAreaObj);
+            } else {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindow::OnGetAvoidArea failed."));
+            }
+        };
+
+    WLOGFI("JsWindow::OnGetAvoidArea AsyncTask end");
+    NativeValue* lastParam = (info.argc == 0) ? nullptr : info.argv[0];
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
 {
     WLOGFI("JsWindow::CreateJsWindow is called");
@@ -743,6 +813,7 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     BindNativeFunction(engine, *object, "setLayoutFullScreen", JsWindow::SetLayoutFullScreen);
     BindNativeFunction(engine, *object, "setSystemBarEnable", JsWindow::SetSystemBarEnable);
     BindNativeFunction(engine, *object, "setSystemBarProperties", JsWindow::SetSystemBarProperties);
+    BindNativeFunction(engine, *object, "getAvoidArea", JsWindow::GetAvoidArea);
     return objValue;
 }
 }  // namespace Rosen
