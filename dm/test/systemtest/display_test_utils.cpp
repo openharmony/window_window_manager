@@ -21,6 +21,23 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayTestUtils"};
 }
 
+DisplayTestUtils::~DisplayTestUtils()
+{
+    if (prevBuffer_ != nullptr) {
+        SurfaceError ret = csurface_->ReleaseBuffer(prevBuffer_, -1);
+        if (ret != SURFACE_ERROR_OK) {
+            WLOGFE("buffer release failed");
+            return;
+        }
+        WLOGFI("prevBuffer_ release success");
+    }
+    csurface_ = nullptr;
+    psurface_ = nullptr;
+    listener_ = nullptr;
+    prevBuffer_ = nullptr;
+    bufferHandle_ = nullptr;
+}
+
 bool DisplayTestUtils::SizeEqualToDisplay(const sptr<Display>& display, const Media::Size cur)
 {
     int32_t dWidth = display->GetWidth();
@@ -28,7 +45,7 @@ bool DisplayTestUtils::SizeEqualToDisplay(const sptr<Display>& display, const Me
 
     bool res = ((cur.width == dWidth) && (cur.height == dHeight));
     if (!res) {
-        WLOGFI("DisplaySize: %d %d, CurrentSize: %d %d\n", dWidth, dHeight, cur.width, cur.height);
+        WLOGFE("DisplaySize: %d %d, CurrentSize: %d %d", dWidth, dHeight, cur.width, cur.height);
     }
     return res;
 }
@@ -37,9 +54,80 @@ bool DisplayTestUtils::SizeEqual(const Media::Size dst, const Media::Size cur)
 {
     bool res = ((cur.width == dst.width) && (cur.height == dst.height));
     if (!res) {
-        WLOGFI("Desired Size: %d %d, Current Size: %d %d\n", dst.width, dst.height, cur.width, cur.height);
+        WLOGFE("Desired Size: %d %d, Current Size: %d %d", dst.width, dst.height, cur.width, cur.height);
     }
     return res;
+}
+
+bool DisplayTestUtils::CreateSurface()
+{
+    csurface_ = Surface::CreateSurfaceAsConsumer();
+    if (csurface_ == nullptr) {
+        WLOGFE("csurface create failed");
+        return false;
+    }
+
+    auto producer = csurface_->GetProducer();
+    psurface_ = Surface::CreateSurfaceAsProducer(producer);
+    if (psurface_ == nullptr) {
+        WLOGFE("csurface create failed");
+        return false;
+    }
+
+    listener_ = new BufferListener(*this);
+    SurfaceError ret = csurface_->RegisterConsumerListener(listener_);
+    if (ret != SURFACE_ERROR_OK) {
+        WLOGFE("listener register failed");
+        return false;
+    }
+    return true;
+}
+
+void DisplayTestUtils::OnVsync()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    WLOGFI("DisplayTestUtils::OnVsyn");
+    sptr<SurfaceBuffer> cbuffer = nullptr;
+    int32_t fence = -1;
+    int64_t timestamp = 0;
+    OHOS::Rect damage;
+    if (csurface_ == nullptr) {
+        WLOGFE("csurface_ is null");
+    }
+    auto sret = csurface_->AcquireBuffer(cbuffer, fence, timestamp, damage);
+    UniqueFd fenceFd(fence);
+    if (cbuffer == nullptr || sret != OHOS::SURFACE_ERROR_OK) {
+        WLOGFE("acquire buffer failed");
+        return;
+    }
+    bufferHandle_ = cbuffer->GetBufferHandle();
+    if (bufferHandle_ == nullptr) {
+        WLOGFE("get bufferHandle failed");
+        return;
+    }
+    if (defaultWidth_ == static_cast<uint32_t>(bufferHandle_->width) &&
+        defaultHeight_ == static_cast<uint32_t>(bufferHandle_->height)) {
+        successCount_++;
+        WLOGFI("success count in OnVsync: %d", successCount_);
+    } else {
+        failCount_++;
+    }
+    if (cbuffer != prevBuffer_) {
+        if (prevBuffer_ != nullptr) {
+            SurfaceError ret = csurface_->ReleaseBuffer(prevBuffer_, -1);
+            if (ret != SURFACE_ERROR_OK) {
+                WLOGFE("buffer release failed");
+                return;
+            }
+        }
+        prevBuffer_ = cbuffer;
+    }
+}
+
+void DisplayTestUtils::SetDefaultWH(const sptr<Display>& display)
+{
+    defaultWidth_ = display->GetWidth();
+    defaultHeight_ = display->GetHeight();
 }
 } // namespace ROSEN
 } // namespace OHOS
