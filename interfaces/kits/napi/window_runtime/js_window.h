@@ -41,11 +41,12 @@ public:
     static NativeValue* RegisterWindowCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* UnregisterWindowCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* LoadContent(NativeEngine* engine, NativeCallbackInfo* info);
-
     static NativeValue* SetFullScreen(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetLayoutFullScreen(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetSystemBarEnable(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetSystemBarProperties(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* GetAvoidArea(NativeEngine* engine, NativeCallbackInfo* info);
+
 private:
     bool IfCallbackRegistered(std::string type, NativeValue* jsListenerObject);
     void RegisterWindowListenerWithType(NativeEngine& engine, std::string type, NativeValue* value);
@@ -66,6 +67,8 @@ private:
     NativeValue* OnSetSystemBarEnable(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetSystemBarProperties(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& info);
+
     sptr<Window> windowToken_ = nullptr;
     std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallbackMap_;
     std::map<std::string, sptr<JsWindowListener>> jsListenerMap_;
