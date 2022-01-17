@@ -72,7 +72,6 @@ public:
         Rect displayRect_   = {0, 0, 0, 0};
         Rect dividerRect_   = {0, 0, 0, 0};
     };
-    static constexpr float DEFAULT_SPLIT_RATIO = 0.5;
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
