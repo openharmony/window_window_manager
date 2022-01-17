@@ -46,7 +46,7 @@ public:
     virtual void OnSizeChange(Rect rect) = 0;
 };
 
-class IAvoidAreaChangedListener : public RefBase {
+class IAvoidAreaChangedListener : virtual public RefBase {
 public:
     virtual void OnAvoidAreaChanged(const std::vector<Rect> avoidAreas) = 0;
 };
