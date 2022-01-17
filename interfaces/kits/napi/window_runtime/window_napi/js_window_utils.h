@@ -32,7 +32,6 @@ namespace {
     constexpr int32_t RGB_LENGTH = 7;
     constexpr int32_t RGBA_LENGTH = 8;
 }
-
     NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect);
     NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window);
     bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,

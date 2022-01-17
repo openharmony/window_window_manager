@@ -55,6 +55,7 @@ group("napi_packages") {
     "display:display",
     "screenshot:screenshot",
     "window:window",
+    "window_runtime:window_native_kit",
     "window_runtime:windowmanager_napi",
   ]
 }

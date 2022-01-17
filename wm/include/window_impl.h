@@ -87,8 +87,6 @@ public:
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed) override;
-    virtual WMError SetUIContent(std::shared_ptr<AbilityRuntime::AbilityContext> context,
-        std::string& contentInfo, NativeEngine* engine, NativeValue* storage, bool isdistributed) override;
     virtual const std::string& GetContentInfo() override;
 
 private:
