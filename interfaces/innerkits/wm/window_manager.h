@@ -34,9 +34,9 @@ public:
         WindowType windowType, int32_t displayId) = 0;
 };
 
-class ISystemBarChangedListener : public RefBase {
+class ISystemBarChangedListener : virtual public RefBase {
 public:
-    virtual void OnSystemBarPropertyChange(uint64_t displayId, const SystemBarProps& props) = 0;
+    virtual void OnSystemBarPropertyChange(uint64_t displayId, SystemBarProps props) = 0;
 };
 
 class WindowManager {

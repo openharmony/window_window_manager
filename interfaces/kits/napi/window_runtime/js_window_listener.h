@@ -21,22 +21,28 @@
 #include <unordered_set>
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
+#include "refbase.h"
 #include "window.h"
+#include "window_manager.h"
+#include "wm_common.h"
+
 namespace OHOS {
 namespace Rosen {
-class JsWindowListener : public IWindowChangeListener {
+class JsWindowListener : public IWindowChangeListener,
+                         public ISystemBarChangedListener {
 public:
     explicit JsWindowListener(NativeEngine* engine) : engine_(engine) {}
     virtual ~JsWindowListener() = default;
+    void AddCallback(NativeValue* jsListenerObject);
+    void RemoveAllCallback();
+    void RemoveCallback(NativeValue* jsListenerObject);
+    void OnSystemBarPropertyChange(uint64_t displayId, SystemBarProps props) override;
     void OnSizeChange(Rect rect) override;
-    bool AddJsListenerObject(std::string type, NativeValue* jsListenerObject);
-    void RemoveJsListenerObject(std::string type, NativeValue* jsListenerObject);
 private:
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
-    bool IsCallbackExists(std::string type, NativeValue* jsListenerObject);
     NativeEngine* engine_ = nullptr;
-    std::map<std::string, std::unordered_set<std::unique_ptr<NativeReference>>> jsWinodwListenerObjectMap_;
-    std::mutex listenerMutex_;
+    std::mutex mtx_;
+    std::vector<std::unique_ptr<NativeReference>> jsCallBack_;
 };
 }  // namespace Rosen
 }  // namespace OHOS
