@@ -29,6 +29,9 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     std::vector<sptr<Window>> activeWindows_;
+
+private:
+    static constexpr uint32_t SPLIT_TEST_SPEEP_S = 1; // split test spleep time
 };
 
 void WindowSplitTest::SetUpTestCase()
@@ -81,17 +84,20 @@ HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
     };
     const sptr<Window>& windowFullScreen = utils::CreateTestWindow(infoFullScreen);
     ASSERT_EQ(WMError::WM_OK, windowFullScreen->Show());
-
+    sleep(SPLIT_TEST_SPEEP_S);
     activeWindows_.push_back(windowFullScreen);
     const sptr<Window>& windowPrimary = utils::CreateTestWindow(infoPrimary);
     ASSERT_EQ(WMError::WM_OK, windowPrimary->Show());
+    sleep(SPLIT_TEST_SPEEP_S);
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, windowPrimary->GetMode());
     activeWindows_.push_back(windowPrimary);
     // show one split primary window
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, windowFullScreen->GetMode());
     ASSERT_EQ(WMError::WM_OK, windowPrimary->Hide());
+    sleep(SPLIT_TEST_SPEEP_S);
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, windowFullScreen->GetMode());
     ASSERT_EQ(WMError::WM_OK, windowFullScreen->Hide());
+    sleep(SPLIT_TEST_SPEEP_S);
 }
 
 /**
@@ -111,7 +117,7 @@ HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
         .parentLimit = false,
         .parentName = "",
     };
-    utils::TestWindowInfo infoPrimary = {
+    utils::TestWindowInfo infoSecondary = {
         .name = "secondary.2",
         .rect = utils::defaultAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
@@ -122,16 +128,20 @@ HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
     };
     const sptr<Window>& windowFullScreen = utils::CreateTestWindow(infoFullScreen);
     ASSERT_EQ(WMError::WM_OK, windowFullScreen->Show());
+    sleep(SPLIT_TEST_SPEEP_S);
     activeWindows_.push_back(windowFullScreen);
-    const sptr<Window>& windowSecondary = utils::CreateTestWindow(infoPrimary);
+    const sptr<Window>& windowSecondary = utils::CreateTestWindow(infoSecondary);
     ASSERT_EQ(WMError::WM_OK, windowSecondary->Show());
+    sleep(SPLIT_TEST_SPEEP_S);
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, windowSecondary->GetMode());
     activeWindows_.push_back(windowSecondary);
-    // show one split primary window
+    // show one split secondary window
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, windowFullScreen->GetMode());
     ASSERT_EQ(WMError::WM_OK, windowFullScreen->Hide());
+    sleep(SPLIT_TEST_SPEEP_S);
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, windowSecondary->GetMode());
     ASSERT_EQ(WMError::WM_OK, windowSecondary->Hide());
+    sleep(SPLIT_TEST_SPEEP_S);
 }
 }
 } // namespace Rosen
