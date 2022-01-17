@@ -18,6 +18,7 @@
 
 #include "display_manager.h"
 #include "window.h"
+#include "window_layout_policy.h"
 #include "window_life_cycle_interface.h"
 #include "window_option.h"
 #include "window_scene.h"
@@ -25,6 +26,12 @@
 
 namespace OHOS {
 namespace Rosen {
+struct SplitRects {
+    Rect primaryRect;
+    Rect secondaryRect;
+    Rect dividerRect;
+};
+
 class WindowTestUtils {
 public:
     struct TestWindowInfo {
@@ -36,16 +43,29 @@ public:
         bool parentLimit;
         std::string parentName;
     };
-    static Rect screenRect_;
+    static Rect displayRect_;
+    static Rect limitDisplayRect_;
     static Rect statusBarRect_;
     static Rect naviBarRect_;
     static Rect defaultAppRect_;
-    static void InitByScreenRect(const Rect& screenRect);
+    static SplitRects splitRects_;
+    static bool isVerticalDisplay_;
+
+    static void InitByDisplayRect(const Rect& screenRect);
     static sptr<Window> CreateTestWindow(const TestWindowInfo& info);
     static sptr<Window> CreateStatusBarWindow();
     static sptr<Window> CreateNavigationBarWindow();
     static sptr<WindowScene> CreateWindowScene();
     static bool RectEqualTo(const sptr<Window>& window, const Rect& r);
+    static void InitSplitRects();
+    static void UpdateSplitRects(const sptr<Window>& window);
+
+private:
+    void UpdateLimitDisplayRect(Rect& avoidRect);
+    void UpdateLimitSplitRects(int32_t divPos);
+    void UpdateLimitSplitRect(Rect& limitSplitRect);
+    AvoidPosType GetAvoidPosType(const Rect& rect);
+    AvoidArea avoidArea_;
 };
 } // namespace ROSEN
 } // namespace OHOS

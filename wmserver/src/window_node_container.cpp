@@ -514,9 +514,11 @@ void WindowNodeContainer::DisplayRects::InitRect(Rect& oriDisplayRect)
 void WindowNodeContainer::DisplayRects::SetSplitRect(float ratio)
 {
     if (!isVertical_) {
-        dividerRect_.posX_ = displayDependRect_.posX_ +  static_cast<uint32_t>(displayDependRect_.width_ * ratio);
+        dividerRect_.posX_ = displayDependRect_.posX_ +
+            static_cast<uint32_t>((displayDependRect_.width_ - dividerRect_.width_) * ratio);
     } else {
-        dividerRect_.posY_ = displayDependRect_.posY_ +  static_cast<uint32_t>(displayDependRect_.height_ * ratio);
+        dividerRect_.posY_ = displayDependRect_.posY_ +
+            static_cast<uint32_t>((displayDependRect_.height_ - dividerRect_.height_) * ratio);
     }
     WLOGFI("set dividerRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
         dividerRect_.posX_, dividerRect_.posY_, dividerRect_.width_, dividerRect_.height_);
@@ -528,16 +530,22 @@ void WindowNodeContainer::DisplayRects::SetSplitRect(const Rect& divRect)
     dividerRect_.width_ = divRect.width_;
     dividerRect_.height_ = divRect.height_;
     if (!isVertical_) {
+        primaryRect_.posX_ = displayRect_.posX_;
+        primaryRect_.posY_ = displayRect_.posY_;
         primaryRect_.width_ = divRect.posX_;
         primaryRect_.height_ = displayRect_.height_;
 
         secondaryRect_.posX_ = divRect.posX_ + dividerRect_.width_;
+        secondaryRect_.posY_ = displayRect_.posY_;
         secondaryRect_.width_ = displayRect_.width_ - secondaryRect_.posX_;
         secondaryRect_.height_ = displayRect_.height_;
     } else {
+        primaryRect_.posX_ = displayRect_.posX_;
+        primaryRect_.posY_ = displayRect_.posY_;
         primaryRect_.height_ = divRect.posY_;
         primaryRect_.width_ = displayRect_.width_;
 
+        secondaryRect_.posX_ = displayRect_.posX_;
         secondaryRect_.posY_ = divRect.posY_ + dividerRect_.height_;
         secondaryRect_.height_ = displayRect_.height_ - secondaryRect_.posY_;
         secondaryRect_.width_ = displayRect_.width_;
