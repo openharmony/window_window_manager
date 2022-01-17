@@ -66,7 +66,7 @@ bool SnapShotUtils::WriteToPng(const std::string &fileName, const WriteToPngPara
     }
     FILE *fp = fopen(fileName.c_str(), "wb");
     if (fp == nullptr) {
-        printf("error: open file [%s] error, %d [%s]!\n", fileName.c_str(), errno, strerror(errno));
+        printf("error: open file [%s] error, %d!\n", fileName.c_str(), errno);
         png_destroy_write_struct(&pngStruct, &pngInfo);
         return false;
     }
@@ -100,10 +100,10 @@ bool SnapShotUtils::WriteToPng(const std::string &fileName, const WriteToPngPara
 bool SnapShotUtils::WriteToPngWithPixelMap(const std::string &fileName, PixelMap &pixelMap)
 {
     WriteToPngParam param;
-    param.width = pixelMap.GetWidth();
-    param.height = pixelMap.GetHeight();
+    param.width = static_cast<uint32_t>(pixelMap.GetWidth());
+    param.height = static_cast<uint32_t>(pixelMap.GetHeight());
     param.data = pixelMap.GetPixels();
-    param.stride = pixelMap.GetRowBytes();
+    param.stride = static_cast<uint32_t>(pixelMap.GetRowBytes());
     param.bitDepth = BITMAP_DEPTH;
     return SnapShotUtils::WriteToPng(fileName, param);
 }
@@ -124,8 +124,8 @@ static bool ProcessDisplayId(DisplayId &displayId)
         if (!validFlag) {
             printf("error: displayId %" PRIu64 " invalid!\n", displayId);
             printf("tips: supported displayIds:\n");
-            for (auto id: displayIds) {
-                printf("\t%" PRIu64 "\n", id);
+            for (auto dispId: displayIds) {
+                printf("\t%" PRIu64 "\n", dispId);
             }
             return false;
         }
@@ -147,7 +147,7 @@ bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArgments &cmdA
     while ((opt = getopt_long(argc, argv, "i:w:h:f:m", longOption, nullptr)) != -1) {
         switch (opt) {
             case 'i': // display id
-                cmdArgments.displayId = atoll(optarg);
+                cmdArgments.displayId = static_cast<DisplayId>(atoll(optarg));
                 break;
             case 'w': // output width
                 cmdArgments.width = atoi(optarg);
