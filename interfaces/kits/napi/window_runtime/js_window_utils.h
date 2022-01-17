@@ -29,9 +29,17 @@ namespace {
     constexpr int32_t INDEX_ONE = 1;
     constexpr int32_t INDEX_TWO = 2;
     constexpr int32_t INDEX_THREE = 3;
+    constexpr int32_t RGB_LENGTH = 7;
+    constexpr int32_t RGBA_LENGTH = 8;
 }
 
     NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window);
+    bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
+        std::map<WindowType, SystemBarProperty>& properties, sptr<Window>& window);
+    bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+        NativeEngine& engine, NativeCallbackInfo& info, sptr<Window>& window);
+    NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine,
+        const SystemBarProps& props);
 }
 }
 #endif

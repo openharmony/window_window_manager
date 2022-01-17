@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window);
 
 class JsWindow final {
 public:
-    JsWindow(const sptr<Window>& window, NativeEngine& engine);
+    explicit JsWindow(const sptr<Window>& window);
     ~JsWindow() = default;
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* Show(NativeEngine* engine, NativeCallbackInfo* info);
@@ -39,10 +39,18 @@ public:
     static NativeValue* SetWindowMode(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetProperties(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RegisterWindowCallback(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* UnRegisterWindowCallback(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* UnregisterWindowCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* LoadContent(NativeEngine* engine, NativeCallbackInfo* info);
 
+    static NativeValue* SetFullScreen(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetLayoutFullScreen(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetSystemBarEnable(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetSystemBarProperties(NativeEngine* engine, NativeCallbackInfo* info);
 private:
+    bool IfCallbackRegistered(std::string type, NativeValue* jsListenerObject);
+    void RegisterWindowListenerWithType(NativeEngine& engine, std::string type, NativeValue* value);
+    void UnregisterWindowListenerWithType(std::string type, NativeValue* value);
+    void UnregisterAllWindowListenerWithType(std::string type);
     NativeValue* OnShow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnDestroy(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnHide(NativeEngine& engine, NativeCallbackInfo& info);
@@ -52,10 +60,16 @@ private:
     NativeValue* OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetProperties(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRegisterWindowCallback(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnUnRegisterWindowCallback(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnUnregisterWindowCallback(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetFullScreen(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetLayoutFullScreen(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetSystemBarEnable(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetSystemBarProperties(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info);
     sptr<Window> windowToken_ = nullptr;
-    sptr<JsWindowListener> windowListener_ = nullptr;
+    std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallbackMap_;
+    std::map<std::string, sptr<JsWindowListener>> jsListenerMap_;
+    std::mutex mtx_;
     void* contentStorage_ = nullptr;
 };
 }  // namespace Rosen
