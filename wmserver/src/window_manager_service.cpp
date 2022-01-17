@@ -23,6 +23,7 @@
 
 #include "dm_common.h"
 #include "singleton_container.h"
+#include "window_manager_agent_controller.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
@@ -229,7 +230,7 @@ void WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType typ
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    windowController_->RegisterWindowManagerAgent(type, windowManagerAgent);
+    WindowManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
 }
 
 void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -240,7 +241,7 @@ void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType t
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    windowController_->UnregisterWindowManagerAgent(type, windowManagerAgent);
+    WindowManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
 }
 
 std::shared_ptr<RSDisplayNode> WindowManagerService::GetDisplayNode(int32_t displayId) const

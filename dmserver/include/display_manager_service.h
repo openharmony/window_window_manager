@@ -29,24 +29,11 @@
 #include "abstract_screen_controller.h"
 #include "display_manager_stub.h"
 #include "display_power_controller.h"
-#include "wm_single_instance.h"
 #include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
-class DMAgentDeathRecipient : public IRemoteObject::DeathRecipient {
-public:
-    DMAgentDeathRecipient(std::function<void(sptr<IRemoteObject>&)> callback) : callback_(callback) {}
-    ~DMAgentDeathRecipient() = default;
-
-    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
-
-private:
-    std::function<void(sptr<IRemoteObject>&)> callback_;
-};
-
 class DisplayManagerService : public SystemAbility, public DisplayManagerStub {
 DECLARE_SYSTEM_ABILITY(DisplayManagerService);
-
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
 
 public:
@@ -72,6 +59,7 @@ public:
     DisplayState GetDisplayState(uint64_t displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
+
     sptr<AbstractScreenController> GetAbstractScreenController();
     DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId) override;
 
@@ -81,27 +69,13 @@ private:
     bool Init();
     DisplayId GetDisplayIdFromScreenId(ScreenId screenId);
     ScreenId GetScreenIdFromDisplayId(DisplayId displayId);
-    void RemoveDisplayManagerAgent(const sptr<IRemoteObject>& remoteObject);
-    bool UnregisterDisplayManagerAgent(std::vector<sptr<IDisplayManagerAgent>>& displayManagerAgents,
-        const sptr<IRemoteObject>& displayManagerAgent);
 
-    struct finder_t {
-        finder_t(sptr<IRemoteObject> remoteObject) : remoteObject_(remoteObject) {}
-        bool operator()(sptr<IDisplayManagerAgent> displayManagerAgent)
-        {
-            return displayManagerAgent->AsObject() == remoteObject_;
-        }
-        sptr<IRemoteObject> remoteObject_;
-    };
     std::recursive_mutex mutex_;
     static inline SingletonDelegator<DisplayManagerService> delegator_;
     std::map<int32_t, sptr<AbstractDisplay>> abstractDisplayMap_;
     sptr<AbstractScreenController> abstractScreenController_;
     sptr<AbstractDisplayController> abstractDisplayController_;
     DisplayPowerController displayPowerController_;
-    std::map<DisplayManagerAgentType, std::vector<sptr<IDisplayManagerAgent>> > displayManagerAgentMap_;
-    sptr<DMAgentDeathRecipient> dmAgentDeath_ = new DMAgentDeathRecipient(
-        std::bind(&DisplayManagerService::RemoveDisplayManagerAgent, this, std::placeholders::_1));
     std::map<ScreenId, std::shared_ptr<RSDisplayNode>> displayNodeMap_;
 };
 } // namespace OHOS::Rosen

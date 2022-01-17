@@ -47,6 +47,26 @@ void DisplayManagerAgentProxy::NotifyDisplayPowerEvent(DisplayPowerEvent event, 
         WLOGFE("SendRequest failed");
     }
 }
+
+void DisplayManagerAgentProxy::NotifyDisplayStateChanged(DisplayState state)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        WLOGFE("Write DisplayState failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(TRANS_ID_NOTIFY_DISPLAY_STATE_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 

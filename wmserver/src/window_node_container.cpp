@@ -20,6 +20,7 @@
 #include <cinttypes>
 
 #include "window_helper.h"
+#include "window_manager_agent_controller.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
@@ -31,9 +32,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowNodeContainer"};
 }
 
-WindowNodeContainer::WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height,
-    WindowNodeContainerCallbacks callbacks)
-    : screenId_(screenId), callbacks_(callbacks)
+WindowNodeContainer::WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height) : screenId_(screenId)
 {
     struct RSDisplayNodeConfig config = {screenId};
     displayNode_ = RSDisplayNode::Create(config);
@@ -323,8 +322,8 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
         if (node->abilityToken_ == nullptr) {
             WLOGFI("abilityToken is null, window : %{public}d", id);
         }
-        callbacks_.focusStatusCallBack_(node->GetWindowId(), node->abilityToken_, node->GetWindowType(),
-            node->GetDisplayId(), focused);
+        WindowManagerAgentController::GetInstance().UpdateFocusStatus(
+            node->GetWindowId(), node->abilityToken_, node->GetWindowType(), node->GetDisplayId(), focused);
     }
 }
 
@@ -439,7 +438,7 @@ void WindowNodeContainer::NotifySystemBarIfChanged()
             props.emplace_back(item);
         }
     }
-    callbacks_.systemBarChangedCallBack_(screenId_, props);
+    WindowManagerAgentController::GetInstance().UpdateSystemBarProperties(screenId_, props);
 }
 
 void WindowNodeContainer::TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes)

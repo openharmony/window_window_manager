@@ -37,6 +37,7 @@ ohos_shared_library("libdms") {
     "src/abstract_display_controller.cpp",
     "src/abstract_screen.cpp",
     "src/abstract_screen_controller.cpp",
+    "src/display_manager_agent_controller.cpp",
     "src/display_manager_service.cpp",
     "src/display_manager_service_inner.cpp",
     "src/display_manager_stub.cpp",

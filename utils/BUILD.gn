@@ -29,6 +29,7 @@ config("libwmutil_public_config") {
 ## Build libwmutil.so
 ohos_shared_library("libwmutil") {
   sources = [
+    "src/agent_death_recipient.cpp",
     "src/display_info.cpp",
     "src/singleton_container.cpp",
     "src/window_property.cpp",

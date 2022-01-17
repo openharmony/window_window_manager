@@ -50,7 +50,7 @@ public:
     bool SuspendBegin(PowerStateChangeReason reason);
     bool SuspendEnd();
     bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason);
-    bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
+    bool SetDisplayState(DisplayState state);
     DisplayState GetDisplayState(uint64_t displayId);
     void NotifyDisplayEvent(DisplayEvent event);
     DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId);
@@ -60,7 +60,6 @@ private:
     DisplayManagerAdapter() = default;
     ~DisplayManagerAdapter() = default;
     bool InitDMSProxyLocked();
-    void NotifyDisplayChange(DisplayState state);
 
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 
@@ -69,7 +68,6 @@ private:
     sptr<DMSDeathRecipient> dmsDeath_ = nullptr;
     std::map<DisplayId, sptr<Display>> displayMap_;
     DisplayId defaultDisplayId_;
-    DisplayStateCallback callback_;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DM_DISPLAY_MANAGER_ADAPTER_H
