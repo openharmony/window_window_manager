@@ -65,22 +65,6 @@ config("dm_systemtest_common_public_config") {
     "//foundation/windowmanager/dmserver/include",
     "//foundation/windowmanager/interfaces/innerkits/dm",
     "//foundation/windowmanager/utils/include",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-    "//third_party/googletest/googlemock/include",
-
-    # for abilityContext
-    "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
-    "//foundation/appexecfwk/standard/kits/appkit/native/ability_runtime/context",
-    "//base/global/resmgr_standard/interfaces/innerkits/include",
-    "//third_party/node/deps/icu-small/source/common",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
-    "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/base/include",
-
-    # abilityContext end
   ]
 }
 
@@ -102,6 +86,9 @@ ohos_static_library("dm_systemtest_common") {
     "//utils/native/base:utils",
   ]
 
-  external_deps = [ "aafwk_standard:ability_context_native" ]
+  external_deps = [
+    "hilog_native:libhilog",
+    "ipc:ipc_core",
+  ]
 }
 ## Build dm_systemtest_common.a }}}
