@@ -25,7 +25,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsWindowUtils"};
 }
 
-static NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect)
+NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect)
 {
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
@@ -42,7 +42,7 @@ static NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect 
 
 NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window)
 {
-    WLOGFI("JsWindow::CreateJsWindowPropertiesObject is called");
+    WLOGFI("JsWindowUtils::CreateJsWindowPropertiesObject is called");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
@@ -76,7 +76,7 @@ static std::string GetHexColor(uint32_t color)
 static NativeValue* CreateJsSystemBarRegionTintObject(NativeEngine& engine,
     WindowType type, const SystemBarProperty& prop)
 {
-    WLOGFI("JsWindow::CreateJsSystemBarRegionTintObject is called");
+    WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintObject is called");
 
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
@@ -87,10 +87,10 @@ static NativeValue* CreateJsSystemBarRegionTintObject(NativeEngine& engine,
     object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(type)));
     object->SetProperty("isEnable", CreateJsValue(engine, prop.enable_));
     std::string bkgColor = GetHexColor(prop.backgroundColor_);
-    WLOGFI("JsWindow::CreateJsSystemBarRegionTintObject backgroundColir: %{public}s", bkgColor.c_str());
+    WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintObject backgroundColir: %{public}s", bkgColor.c_str());
     object->SetProperty("backgroundColor", CreateJsValue(engine, bkgColor));
     std::string contentColor = GetHexColor(prop.contentColor_);
-    WLOGFI("JsWindow::CreateJsSystemBarRegionTintObject contentColor: %{public}s", contentColor.c_str());
+    WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintObject contentColor: %{public}s", contentColor.c_str());
     object->SetProperty("contentColor", CreateJsValue(engine, contentColor));
     Rect rect = {0, 0, 0, 0}; // to fix on next version
     object->SetProperty("region", GetRectAndConvertToJsValue(engine, rect));
@@ -100,7 +100,7 @@ static NativeValue* CreateJsSystemBarRegionTintObject(NativeEngine& engine,
 NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine,
     const SystemBarProps& props)
 {
-    WLOGFI("JsWindow::CreateJsSystemBarRegionTintArrayObject is called");
+    WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintArrayObject is called");
     if (props.empty()) {
         return nullptr;
     }
@@ -223,6 +223,21 @@ bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
         }
     }
     return true;
+}
+
+NativeValue* ChangeAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avoidArea)
+{
+    NativeValue* objValue = engine.CreateObject();
+    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to convert rect to jsObject");
+        return engine.CreateUndefined();
+    }
+    object->SetProperty("leftRect", GetRectAndConvertToJsValue(engine, avoidArea.leftRect));
+    object->SetProperty("topRect", GetRectAndConvertToJsValue(engine, avoidArea.topRect));
+    object->SetProperty("rightRect", GetRectAndConvertToJsValue(engine, avoidArea.rightRect));
+    object->SetProperty("bottomRect", GetRectAndConvertToJsValue(engine, avoidArea.bottomRect));
+    return objValue;
 }
 } // namespace Rosen
 } // namespace OHOS

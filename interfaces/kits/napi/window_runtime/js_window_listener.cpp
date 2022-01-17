@@ -23,6 +23,8 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsWindowListener"};
 }
 
+constexpr uint32_t AVOID_AREA_NUM = 4;
+
 void JsWindowListener::AddCallback(NativeValue* jsListenerObject)
 {
     WLOGFI("JsWindowListener::AddCallbackAndRegister is called");
@@ -112,6 +114,36 @@ void JsWindowListener::OnSystemBarPropertyChange(uint64_t displayId, SystemBarPr
     object->SetProperty("regionTint", CreateJsSystemBarRegionTintArrayObject(*engine_, props));
     NativeValue* argv[] = {propertyValue};
     CallJsMethod("systemUiTintChange", argv, ArraySize(argv));
+}
+
+void JsWindowListener::OnAvoidAreaChanged(const std::vector<Rect> avoidAreas)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    WLOGFI("OnAvoidAreaChanged is called");
+    if (jsCallBack_.empty()) {
+        WLOGFE("OnAvoidAreaChanged systemAvoidAreaChange not register!");
+        return;
+    }
+
+    NativeValue* avoidAreaValue = engine_->CreateObject();
+    NativeObject* object = ConvertNativeValueTo<NativeObject>(avoidAreaValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to convert rect to jsObject");
+        return;
+    }
+
+    if (static_cast<uint32_t>(avoidAreas.size()) != AVOID_AREA_NUM) {
+        WLOGFE("AvoidAreas size is not 4 (left, top, right, bottom). Current avoidAreas size is %{public}u",
+            static_cast<uint32_t>(avoidAreas.size()));
+        return;
+    }
+
+    object->SetProperty("leftRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[0]));   // idx 0 : leftRect
+    object->SetProperty("topRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[1]));    // idx 1 : topRect
+    object->SetProperty("rightRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[2]));  // idx 2 : rightRect
+    object->SetProperty("bottomRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[3])); // idx 3 : bottomRect
+    NativeValue* argv[] = {avoidAreaValue};
+    CallJsMethod("systemAvoidAreaChange", argv, ArraySize(argv));
 }
 } // namespace Rosen
 } // namespace OHOS
