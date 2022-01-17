@@ -21,6 +21,7 @@ group("systemtest") {
   deps = [
     ":dm_display_minimal_test",
     ":dm_display_power_test",
+    ":dm_screen_manager_test",
     ":dm_screenshot_cmd_test",
     ":dm_screenshot_test",
   ]
@@ -68,6 +69,17 @@ ohos_systemtest("dm_screenshot_cmd_test") {
 
 ## SystemTest dm_screenshot_cmd_test }}}
 
+## SystemTest dm_screen_manager_test {{{
+ohos_systemtest("dm_screen_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_manager_test.cpp" ]
+
+  deps = [ ":dm_systemtest_common" ]
+}
+
+## SystemTest dm_screen_manager_test }}}
+
 ## Build dm_systemtest_common.a {{{
 config("dm_systemtest_common_public_config") {
   include_dirs = [
@@ -75,6 +87,9 @@ config("dm_systemtest_common_public_config") {
     "//foundation/windowmanager/dmserver/include",
     "//foundation/windowmanager/interfaces/innerkits/dm",
     "//foundation/windowmanager/utils/include",
+
+    # RSSurface
+    "//foundation/graphic/standard/rosen/modules/render_service_client",
   ]
 }
 
