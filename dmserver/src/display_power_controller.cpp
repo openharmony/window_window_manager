@@ -14,8 +14,7 @@
  */
 
 #include "display_power_controller.h"
-#include "display_manager_service.h"
-//#include "window_manager_service_inner.h"
+#include "display_manager_agent_controller.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -41,19 +40,23 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
     switch (state) {
         case DisplayState::ON: {
             // TODO: open vsync and SendSystemEvent to keyguard
-            DisplayManagerService::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
+            displayState_ = state;
+            DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
                 EventStatus::BEGIN);
             break;
         }
         case DisplayState::OFF: {
             displayState_ = state;
-            DisplayManagerService::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF,
+            DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_OFF,
                 EventStatus::BEGIN);
             break;
         }
-        default:
+        default: {
             WLOGFW("unknown DisplayState!");
+            return false;
+        }
     }
+    DisplayManagerAgentController::GetInstance().NotifyDisplayStateChanged(state);
     return true;
 }
 

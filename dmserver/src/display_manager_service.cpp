@@ -17,12 +17,9 @@
 #include "window_manager_service.h"
 
 #include <cinttypes>
-#include <unistd.h>
-
-#include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
-
+#include "display_manager_agent_controller.h"
 #include "window_manager_hilog.h"
 
 #include "transaction/rs_interfaces.h"
@@ -138,99 +135,49 @@ void DisplayManagerService::RegisterDisplayManagerAgent(const sptr<IDisplayManag
         WLOGFE("displayManagerAgent invalid");
         return;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    displayManagerAgentMap_[type].push_back(displayManagerAgent);
-    WLOGFI("agent registered");
-    if (dmAgentDeath_ == nullptr) {
-        WLOGFI("death Recipient is nullptr");
-        return;
-    }
-    if (!displayManagerAgent->AsObject()->AddDeathRecipient(dmAgentDeath_)) {
-        WLOGFI("failed to add death recipient");
-    }
+    DisplayManagerAgentController::GetInstance().RegisterDisplayManagerAgent(displayManagerAgent, type);
 }
 
 void DisplayManagerService::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    if (displayManagerAgent == nullptr || displayManagerAgentMap_.count(type) == 0) {
+    if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
         WLOGFE("displayManagerAgent invalid");
         return;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto& displayManagerAgents = displayManagerAgentMap_.at(type);
-    UnregisterDisplayManagerAgent(displayManagerAgents, displayManagerAgent->AsObject());
-}
-
-bool DisplayManagerService::UnregisterDisplayManagerAgent(std::vector<sptr<IDisplayManagerAgent>>& displayManagerAgents,
-    const sptr<IRemoteObject>& displayManagerAgent)
-{
-    auto iter = std::find_if(displayManagerAgents.begin(), displayManagerAgents.end(),
-        finder_t(displayManagerAgent));
-    if (iter == displayManagerAgents.end()) {
-        WLOGFE("could not find this listener");
-        return false;
-    }
-    displayManagerAgents.erase(iter);
-    WLOGFI("agent unregistered");
-    return true;
-}
-
-void DisplayManagerService::RemoveDisplayManagerAgent(const sptr<IRemoteObject>& remoteObject)
-{
-    WLOGFI("RemoveDisplayManagerAgent");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto& elem : displayManagerAgentMap_) {
-        if (UnregisterDisplayManagerAgent(elem.second, remoteObject)) {
-            break;
-        }
-    }
-    remoteObject->RemoveDeathRecipient(dmAgentDeath_);
-}
-
-bool DisplayManagerService::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
-{
-    if (displayManagerAgentMap_.count(DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER) == 0) {
-        WLOGFI("no display power event agent registered!");
-        return false;
-    }
-    WLOGFI("NotifyDisplayPowerEvent");
-    for (auto& agent : displayManagerAgentMap_.at(DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER)) {
-        agent->NotifyDisplayPowerEvent(event, status);
-    }
-    return true;
+    DisplayManagerAgentController::GetInstance().UnregisterDisplayManagerAgent(displayManagerAgent, type);
 }
 
 bool DisplayManagerService::WakeUpBegin(PowerStateChangeReason reason)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::BEGIN);
+    return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP,
+        EventStatus::BEGIN);
 }
 
 bool DisplayManagerService::WakeUpEnd()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP, EventStatus::END);
+    return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP,
+        EventStatus::END);
 }
 
 bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayPowerController_.SuspendBegin(reason);
-    return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::BEGIN);
+    return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP,
+        EventStatus::BEGIN);
 }
 
 bool DisplayManagerService::SuspendEnd()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP, EventStatus::END);
+    return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP,
+        EventStatus::END);
 }
 
 bool DisplayManagerService::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
 {
     WLOGFI("SetScreenPowerForAll");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return NotifyDisplayPowerEvent(state == DisplayPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
+    return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(
+        state == DisplayPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END);
 }
 
@@ -255,22 +202,6 @@ void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenController()
 {
     return abstractScreenController_;
-}
-
-void DMAgentDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
-{
-    if (wptrDeath == nullptr) {
-        WLOGFE("wptrDeath is null");
-        return;
-    }
-
-    sptr<IRemoteObject> object = wptrDeath.promote();
-    if (!object) {
-        WLOGFE("object is null");
-        return;
-    }
-    WLOGFI("call OnRemoteDied callback");
-    callback_(object);
 }
 
 DMError DisplayManagerService::AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId)

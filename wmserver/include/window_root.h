@@ -17,34 +17,14 @@
 
 #include <refbase.h>
 #include <iremote_object.h>
+
+#include "agent_death_recipient.h"
 #include "display_manager_service_inner.h"
 #include "window_node_container.h"
 #include "zidl/window_manager_agent_interface.h"
 
 namespace OHOS {
 namespace Rosen {
-class WindowDeathRecipient : public IRemoteObject::DeathRecipient {
-public:
-    WindowDeathRecipient(std::function<void (sptr<IRemoteObject>&)> callback) : callback_(callback) {}
-    ~WindowDeathRecipient() = default;
-
-    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
-
-private:
-    std::function<void (sptr<IRemoteObject>&)> callback_;
-};
-
-class WindowManagerAgentDeathRecipient : public IRemoteObject::DeathRecipient {
-public:
-    WindowManagerAgentDeathRecipient(std::function<void (sptr<IRemoteObject>&)> callback) : callback_(callback) {}
-    ~WindowManagerAgentDeathRecipient() = default;
-
-    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
-
-private:
-    std::function<void (sptr<IRemoteObject>&)> callback_;
-};
-
 enum class Event : uint32_t {
     REMOTE_DIED,
 };
@@ -73,21 +53,10 @@ public:
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
     WMError MinimizeAllAppNodeAbility(sptr<WindowNode>& node);
     WMError HandleSplitWindowModeChange(sptr<WindowNode>& node, bool isChangeToSplit);
-
-    void RegisterWindowManagerAgent(WindowManagerAgentType type,
-        const sptr<IWindowManagerAgent>& windowManagerAgent);
-    void UnregisterWindowManagerAgent(WindowManagerAgentType type,
-        const sptr<IWindowManagerAgent>& windowManagerAgent);
-
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
-    void ClearWindowManagerAgent(const sptr<IRemoteObject>& remoteObject);
-    void UnregisterWindowManagerAgent(const sptr<IRemoteObject>& object);
-    void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
-        int32_t displayId, bool focused);
-    void UpdateSystemBarProperties(uint64_t displayId, const SystemBarProps& props);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
     bool CheckDisplayInfo(const sptr<AbstractDisplay>& display);
 
@@ -98,10 +67,8 @@ private:
 
     std::map<WindowManagerAgentType, std::vector<sptr<IWindowManagerAgent>>> windowManagerAgents_;
 
-    sptr<WindowDeathRecipient> windowDeath_ = new WindowDeathRecipient(std::bind(&WindowRoot::OnRemoteDied,
+    sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(std::bind(&WindowRoot::OnRemoteDied,
         this, std::placeholders::_1));
-    sptr<WindowManagerAgentDeathRecipient> windowManagerAgentDeath_ = new WindowManagerAgentDeathRecipient(
-        std::bind(&WindowRoot::ClearWindowManagerAgent, this, std::placeholders::_1));
     Callback callback_;
 };
 }

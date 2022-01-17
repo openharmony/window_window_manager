@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Rosen {
 constexpr int32_t INVALID_DISPLAY_ID = -1;
 enum class PowerStateChangeReason : uint32_t {
-    POWER_BUTTON
+    POWER_BUTTON,
 };
 
 enum class DisplayPowerState : uint32_t {
@@ -31,17 +31,18 @@ enum class DisplayPowerState : uint32_t {
     POWER_SUSPEND,
     POWER_OFF,
     POWER_BUTT,
-    INVALID_STATE
+    INVALID_STATE,
 };
 
 enum class DisplayState : uint32_t {
     ON,
     OFF,
-    UNKNOWN
+    UNKNOWN,
 };
 
 enum class DisplayEvent : uint32_t {
-    UNLOCK
+    UNLOCK,
+    KEYGUARD_DRAWN,
 };
 
 enum class DMError : int32_t {
@@ -64,12 +65,12 @@ enum class DisplayPowerEvent : uint32_t {
     SLEEP,
     DISPLAY_ON,
     DISPLAY_OFF,
-    DESKTOP_READY
+    DESKTOP_READY,
 };
 
 enum class EventStatus : uint32_t {
     BEGIN,
-    END
+    END,
 };
 
 class IDisplayPowerEventListener : public RefBase {

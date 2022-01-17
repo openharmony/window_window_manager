@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -162,19 +162,13 @@ bool DisplayManagerAdapter::SetScreenPowerForAll(DisplayPowerState state, PowerS
 }
 
 
-bool DisplayManagerAdapter::SetDisplayState(DisplayState state, DisplayStateCallback callback)
+bool DisplayManagerAdapter::SetDisplayState(DisplayState state)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return false;
     }
-    callback_ = callback;
-    bool ret = displayManagerServiceProxy_->SetDisplayState(state);
-    if (state == DisplayState::OFF) {
-        NotifyDisplayChange(state);
-    }
-    // TODO: NotifyDisplayChange ON when keyguard is drawn
-    return ret;
+    return displayManagerServiceProxy_->SetDisplayState(state);
 }
 
 DisplayState DisplayManagerAdapter::GetDisplayState(uint64_t displayId)
@@ -193,15 +187,6 @@ void DisplayManagerAdapter::NotifyDisplayEvent(DisplayEvent event)
         return;
     }
     displayManagerServiceProxy_->NotifyDisplayEvent(event);
-}
-
-void DisplayManagerAdapter::NotifyDisplayChange(DisplayState state)
-{
-    if (callback_) {
-        callback_(state);
-        return;
-    }
-    WLOGFW("callback_ target is not set!");
 }
 
 bool DisplayManagerAdapter::InitDMSProxyLocked()

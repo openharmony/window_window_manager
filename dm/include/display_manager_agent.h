@@ -27,6 +27,7 @@ public:
     ~DisplayManagerAgent() = default;
 
     virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) override;
+    virtual void NotifyDisplayStateChanged(DisplayState state) override;
 };
 }
 }

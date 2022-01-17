@@ -13,20 +13,31 @@
  * limitations under the License.
  */
 
-#include "display_manager_agent.h"
-#include "display_manager.h"
-#include "singleton_container.h"
+#include "agent_death_recipient.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
-void DisplayManagerAgent::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
-{
-    SingletonContainer::Get<DisplayManager>().NotifyDisplayPowerEvent(event, status);
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "AgentDeathRecipient"};
 }
 
-void DisplayManagerAgent::NotifyDisplayStateChanged(DisplayState state)
+void AgentDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 {
-    SingletonContainer::Get<DisplayManager>().NotifyDisplayStateChanged(state);
+    if (wptrDeath == nullptr) {
+        WLOGFE("wptrDeath is null");
+        return;
+    }
+
+    sptr<IRemoteObject> object = wptrDeath.promote();
+    if (!object) {
+        WLOGFE("object is null");
+        return;
+    }
+    if (callback_ != nullptr) {
+        WLOGFI("call OnRemoteDied callback");
+        callback_(object);
+    }
 }
-} // namespace Rosen
-} // namespace OHOS
+}
+}

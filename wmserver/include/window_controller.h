@@ -43,11 +43,6 @@ public:
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
     WMError MinimizeAllAppNodeAbility(uint32_t windowId);
 
-    void RegisterWindowManagerAgent(WindowManagerAgentType type,
-        const sptr<IWindowManagerAgent>& windowManagerAgent);
-    void UnregisterWindowManagerAgent(WindowManagerAgentType type,
-        const sptr<IWindowManagerAgent>& windowManagerAgent);
-
 private:
     uint32_t GenWindowId();
 

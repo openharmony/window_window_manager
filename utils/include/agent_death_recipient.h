@@ -12,21 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef OHOS_ROSEN_AGENT_DEATH_RECIPIENT_H
+#define OHOS_ROSEN_AGENT_DEATH_RECIPIENT_H
 
-#include "display_manager_agent.h"
-#include "display_manager.h"
-#include "singleton_container.h"
+#include <iremote_object.h>
 
 namespace OHOS {
 namespace Rosen {
-void DisplayManagerAgent::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
-{
-    SingletonContainer::Get<DisplayManager>().NotifyDisplayPowerEvent(event, status);
-}
+class AgentDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    AgentDeathRecipient(std::function<void(sptr<IRemoteObject>&)> callback = nullptr) : callback_(callback) {}
+    ~AgentDeathRecipient() = default;
 
-void DisplayManagerAgent::NotifyDisplayStateChanged(DisplayState state)
-{
-    SingletonContainer::Get<DisplayManager>().NotifyDisplayStateChanged(state);
+    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+
+private:
+    std::function<void(sptr<IRemoteObject>&)> callback_;
+};
 }
-} // namespace Rosen
-} // namespace OHOS
+}
+#endif // OHOS_ROSEN_AGENT_DEATH_RECIPIENT_H
