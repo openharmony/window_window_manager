@@ -129,6 +129,8 @@ private:
     };
     std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
     sptr<DisplayRects> displayRects_ = new DisplayRects();
+    void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
+    const int32_t WINDOW_TYPE_RAISED_INPUT_METHOD = 113;
 };
 }
 }
