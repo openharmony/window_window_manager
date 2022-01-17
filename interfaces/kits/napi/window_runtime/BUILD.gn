@@ -18,25 +18,59 @@ config("window_manager_napi_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
-    "//foundation/windowmanager/interfaces/kits/napi/window_runtime",
+    "//foundation/windowmanager/interfaces/kits/napi/window_runtime/window_napi",
+    "//foundation/windowmanager/interfaces/kits/napi/window_runtime/window_manager_napi",
     "//foundation/windowmanager/interfaces/innerkits/wm",
-    "//foundation/windowmanager/interfaces/innerkits/dm",
     "//foundation/windowmanager/wm/include",
     "//foundation/windowmanager/utils/include",
   ]
 }
 
+config("window_native_kit_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "//foundation/windowmanager/interfaces/kits/napi/window_runtime/window_napi",
+    "//foundation/windowmanager/interfaces/innerkits/wm",
+    "//foundation/windowmanager/wm/include",
+    "//foundation/windowmanager/utils/include",
+  ]
+}
+
+ohos_shared_library("window_native_kit") {
+  sources = [
+    "window_napi/js_window.cpp",
+    "window_napi/js_window_listener.cpp",
+    "window_napi/js_window_utils.cpp",
+  ]
+
+  configs = [ ":window_native_kit_config" ]
+  deps = [
+    "//foundation/windowmanager/utils:libwmutil",
+    "//foundation/windowmanager/wm:libwm",
+    "//foundation/windowmanager/wmserver:libwms",
+  ]
+
+  external_deps = [
+    "aafwk_standard:runtime",
+    "hiviewdfx_hilog_native:libhilog",
+    "napi:ace_napi",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
 ohos_shared_library("windowmanager_napi") {
   sources = [
-    "js_window.cpp",
-    "js_window_listener.cpp",
-    "js_window_manager.cpp",
-    "js_window_utils.cpp",
-    "window_manager_module.cpp",
+    "window_manager_napi/js_window_manager.cpp",
+    "window_manager_napi/window_manager_module.cpp",
   ]
 
   configs = [ ":window_manager_napi_config" ]
   deps = [
+    ":window_native_kit",
+    "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
     "//foundation/appexecfwk/standard/kits:app_context",
     "//foundation/appexecfwk/standard/kits:appkit_native",
     "//foundation/windowmanager/utils:libwmutil",
