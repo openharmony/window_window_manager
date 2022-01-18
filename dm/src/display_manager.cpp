@@ -85,7 +85,7 @@ bool DisplayManager::CheckRectValid(const Media::Rect &rect, int32_t oriHeight, 
     return true;
 }
 
-bool DisplayManager::CheckSizeValid(const Media::Size &size, int32_t oriHeight, int32_t oriWidth)
+bool DisplayManager::CheckSizeValid(const Media::Size &size, int32_t oriHeight, int32_t oriWidth) const
 {
     if (!((size.width > 0) and (size.height > 0))) {
         if (!((size.width == 0) and (size.height == 0))) {
