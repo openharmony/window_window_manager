@@ -154,6 +154,7 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
     node->priority_ = zorderPolicy_->GetWindowPriority(node->GetWindowType());
+    RaiseInputMethodWindowPriorityIfNeeded(node);
     auto parentNode = node->parent_;
     auto position = parentNode->children_.end();
     for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
@@ -744,6 +745,21 @@ WMError WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode,
     Rect dividerRect = displayRects_->GetDividerRect();
     SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_CREATE_DIVIDER, screenId_, dividerRect);
     return WMError::WM_OK;
+}
+
+void WindowNodeContainer::RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const
+{
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return;
+    }
+    auto iter = std::find_if(aboveAppWindowNode_->children_.begin(), aboveAppWindowNode_->children_.end(),
+                             [](sptr<WindowNode> node) {
+        return node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD;
+    });
+    if (iter != aboveAppWindowNode_->children_.end()) {
+        WLOGFI("raise input method float window priority.");
+        node->priority_ = WINDOW_TYPE_RAISED_INPUT_METHOD;
+    }
 }
 }
 }
