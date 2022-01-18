@@ -36,13 +36,6 @@ config("libwm_config") {
 
     # abilityContext end
 
-    # weston adapter
-    "//foundation/windowmanager/adapter/include",
-    "//foundation/graphic/standard/interfaces/innerkits",
-    "//foundation/graphic/standard/interfaces/innerkits/wm",
-    "//foundation/graphic/standard/interfaces/innerkits/common",
-
-    # weston adapter end
     "//third_party/jsoncpp/include",
     "//third_party/json/include",
   ]
@@ -109,9 +102,6 @@ ohos_shared_library("libwm") {
     "//foundation/windowmanager/utils:libwmutil",
     "//utils/native/base:utils",
 
-    # weston adapter
-    "//foundation/windowmanager/adapter:libwmadapter",
-
     # ace
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
     "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core:appexecfwk_core",
@@ -133,9 +123,6 @@ ohos_shared_library("libwm") {
     # IMS
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
-
-    # weston adapter
-    "//foundation/windowmanager/adapter:libwmadapter",
 
     # context
 

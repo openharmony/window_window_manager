@@ -22,9 +22,6 @@
 #include "window_agent.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#ifndef _NEW_RENDERSERVER_
-#include "adapter.h"
-#endif
 
 namespace OHOS {
 namespace Rosen {
@@ -53,10 +50,8 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     name_ = option->GetWindowName();
     callback_->onCallback = std::bind(&WindowImpl::OnVsync, this, std::placeholders::_1);
 
-#ifdef _NEW_RENDERSERVER_
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
-#endif
 }
 
 WindowImpl::~WindowImpl()
@@ -261,7 +256,6 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGFI("[Client] Window Create");
-#ifdef _NEW_RENDERSERVER_
     // check window name, same window names are forbidden
     if (windowMap_.find(name_) != windowMap_.end()) {
         WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
@@ -306,16 +300,11 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     state_ = STATE_CREATED;
     InputTransferStation::GetInstance().AddInputWindow(this);
     return ret;
-#else
-    /* weston adapter */
-    return WMError::WM_OK;
-#endif
 }
 
 WMError WindowImpl::Destroy()
 {
     NotifyBeforeDestroy();
-#ifdef _NEW_RENDERSERVER_
     WLOGFI("[Client] Window %{public}d Destroy", property_->GetWindowId());
     // should destroy surface here
     if (!IsWindowValid()) {
@@ -338,16 +327,10 @@ WMError WindowImpl::Destroy()
     state_ = STATE_DESTROYED;
     InputTransferStation::GetInstance().RemoveInputWindow(this);
     return ret;
-#else
-    InputTransferStation::GetInstance().RemoveInputWindow(this);
-    Adapter::DestroyWestonWindow();
-#endif
-    return WMError::WM_OK;
 }
 
 WMError WindowImpl::Show()
 {
-#ifdef _NEW_RENDERSERVER_
     WLOGFI("[Client] Window %{public}d Show", property_->GetWindowId());
     if (!IsWindowValid()) {
         WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
@@ -375,24 +358,10 @@ WMError WindowImpl::Show()
         WLOGFE("show errCode:%{public}d for winId:%{public}d", static_cast<int32_t>(ret), property_->GetWindowId());
     }
     return ret;
-#else
-    /* weston adapter */
-    WMError rtn = Adapter::Show();
-    if (rtn == WMError::WM_OK) {
-        NotifyAfterForeground();
-        NotifyAfterFocused();
-        WLOGFI("Show AfterForeground was invoked");
-    } else {
-        WLOGFE("Show error=%d", static_cast<int>(rtn));
-    }
-    InputTransferStation::GetInstance().AddInputWindow(this);
-    return rtn;
-#endif
 }
 
 WMError WindowImpl::Hide()
 {
-#ifdef _NEW_RENDERSERVER_
     WLOGFI("[Client] Window %{public}d Hide", property_->GetWindowId());
     if (!IsWindowValid()) {
         WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
@@ -410,25 +379,10 @@ WMError WindowImpl::Hide()
     state_ = STATE_HIDDEN;
     NotifyAfterBackground();
     return ret;
-#else
-    /* weston adapter */
-    WMError rtn = Adapter::Hide();
-    if (rtn == WMError::WM_OK) {
-        NotifyAfterUnFocused();
-        NotifyAfterBackground();
-        WLOGFI("WindowImpl::Show AfterBackground was ivoked");
-    } else {
-        WLOGFE("WindowImpl::Show error=%d", static_cast<int>(rtn));
-    }
-    InputTransferStation::GetInstance().RemoveInputWindow(this);
-    return rtn;
-#endif
 }
 
 WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 {
-    /* weston adapter */
-#ifdef _NEW_RENDERSERVER_
     if (!IsWindowValid()) {
         WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -441,15 +395,10 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
         return WMError::WM_OK;
     }
     return SingletonContainer::Get<WindowAdapter>().MoveTo(property_->GetWindowId(), x, y);
-#else
-    return Adapter::MoveTo(x, y);
-#endif
 }
 
 WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 {
-    /* weston adapter */
-#ifdef _NEW_RENDERSERVER_
     if (!IsWindowValid()) {
         WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -462,9 +411,6 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
         return WMError::WM_OK;
     }
     return SingletonContainer::Get<WindowAdapter>().Resize(property_->GetWindowId(), width, height);
-#else
-    return Adapter::Resize(width, height);
-#endif
 }
 
 WMError WindowImpl::RequestFocus() const

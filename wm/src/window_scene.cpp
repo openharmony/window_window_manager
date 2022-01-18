@@ -17,9 +17,6 @@
 #include "static_call.h"
 #include "window_impl.h"
 #include "window_manager_hilog.h"
-#ifndef _NEW_RENDERSERVER_
-#include "adapter.h"
-#endif
 
 namespace OHOS {
 namespace Rosen {
@@ -47,14 +44,8 @@ WMError WindowScene::Init(int32_t displayId, const std::shared_ptr<AbilityRuntim
     }
     option->SetDisplayId(displayId);
 
-#ifndef _NEW_RENDERSERVER_
-    /* weston adapter */
-    Adapter::Init();
-    mainWindow_ = CreateWindow(MAIN_WINDOW_ID, option);
-#else
     mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(
         MAIN_WINDOW_ID + std::to_string(count++), option, context);
-#endif
     if (mainWindow_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
@@ -65,29 +56,12 @@ WMError WindowScene::Init(int32_t displayId, const std::shared_ptr<AbilityRuntim
 
 sptr<Window> WindowScene::CreateWindow(const std::string& windowName, sptr<WindowOption>& option) const
 {
-#ifdef _NEW_RENDERSERVER_
     if (windowName.empty() || mainWindow_ == nullptr || option == nullptr) {
         WLOGFE("WindowScene Name: %{public}s", windowName.c_str());
         return nullptr;
     }
     option->SetParentName(mainWindow_->GetWindowName());
     return SingletonContainer::Get<StaticCall>().CreateWindow(windowName, option);
-#else
-    /* weston adapter */
-    if (!Adapter::CreateWestonWindow(option)) {
-        WLOGFE("WindowScene::CreateWindow fail to CreateWestonWindow");
-        return nullptr;
-    }
-    Rect rect;
-    if (!Adapter::GetMainWindowRect(rect)) {
-        WLOGFE("WindowScene::CreateWindow fail to GetMainWindowRect");
-        return nullptr;
-    }
-    option->SetWindowName(windowName);
-    option->SetWindowRect(rect);
-    sptr<Window> window = new WindowImpl(option);
-    return window;
-#endif
 }
 
 const sptr<Window>& WindowScene::GetMainWindow() const
