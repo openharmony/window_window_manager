@@ -18,6 +18,7 @@
 
 
 #include <vector>
+#include <map>
 #include <refbase.h>
 #include <screen_manager/screen_types.h>
 #include <ui/rs_display_node.h>
@@ -66,19 +67,20 @@ public:
 
 class AbstractScreenGroup : public AbstractScreen {
 public:
-    AbstractScreenGroup(ScreenId dmsId, ScreenId rsId);
+    AbstractScreenGroup(ScreenId dmsId, ScreenId rsId, ScreenCombination combination);
     AbstractScreenGroup() = delete;
     ~AbstractScreenGroup();
 
-    bool AddChild(ScreenCombination combination, sptr<AbstractScreen>& dmsScreen, Point& startPoint);
-    bool AddChild(ScreenCombination combination,
-        std::vector<sptr<AbstractScreen>>& dmsScreens,
-        std::vector<Point>& startPoints);
+    bool AddChild(sptr<AbstractScreen>& dmsScreen, Point& startPoint);
+    bool AddChildren(std::vector<sptr<AbstractScreen>>& dmsScreens, std::vector<Point>& startPoints);
+    bool RemoveChild(sptr<AbstractScreen>& dmsScreen);
     std::vector<sptr<AbstractScreen>> GetChildren() const;
     std::vector<Point> GetChildrenPosition() const;
+    size_t GetChildCount() const;
 
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
-    std::vector<sptr<AbstractScreen>> children_;
+private:
+    std::map<ScreenId, std::pair<sptr<AbstractScreen>, Point>> abstractScreenMap_;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_SCREEN_H
