@@ -18,6 +18,7 @@
 #include <cstdio>
 #include <getopt.h>
 #include <png.h>
+#include "wm_trace.h"
 
 using namespace OHOS::Media;
 using namespace OHOS::Rosen;
@@ -36,6 +37,7 @@ void SnapShotUtils::PrintUsage(const std::string &cmdLine)
 
 bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
 {
+    WM_SCOPED_TRACE("snapshot:CheckFileNameValid(%s)", fileName.c_str());
     if (fileName.length() < strlen(VALID_SNAPSHOT_SUFFIX)) {
         printf("error: fileName %s invalid, file length too short!\n", fileName.c_str());
         return false;
@@ -95,6 +97,8 @@ bool SnapShotUtils::WriteToPng(const std::string &fileName, const WriteToPngPara
     if (!CheckParamValid(param)) {
         return false;
     }
+    
+    WM_SCOPED_TRACE("snapshot:WriteToPng(%s)", fileName.c_str());
 
     png_structp pngStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if (pngStruct == nullptr) {
@@ -153,6 +157,7 @@ bool SnapShotUtils::WriteToPngWithPixelMap(const std::string &fileName, PixelMap
 
 static bool ProcessDisplayId(DisplayId &displayId)
 {
+    WM_SCOPED_TRACE("snapshot:ProcessDisplayId(%" PRIu64")", displayId);
     if (displayId == DISPLAY_ID_INVALD) {
         displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     } else {
