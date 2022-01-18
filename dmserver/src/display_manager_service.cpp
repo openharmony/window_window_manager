@@ -102,7 +102,7 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option)
 
 DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
 {
-    WLOGFI("DisplayManagerService::DestroyVirtualScreen");
+    WLOGFI("DestroyVirtualScreen::ScreenId: %{public}" PRIu64 "", screenId);
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("DisplayManagerService: virtualScreenId is invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -114,7 +114,12 @@ DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
         return abstractScreenController_->DestroyVirtualScreen(screenId);
     }
     displayNodeMap_[screenId]->RemoveFromTree();
+    WLOGFE("DisplayManagerService: displayNode remove from tree");
     displayNodeMap_.erase(screenId);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
     return abstractScreenController_->DestroyVirtualScreen(screenId);
 }
 
@@ -209,10 +214,11 @@ sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenControlle
 
 DMError DisplayManagerService::AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId)
 {
-    if (mainScreenId == SCREEN_ID_INVALID) {
+    if (mainScreenId == SCREEN_ID_INVALID || mirrorScreenId == SCREEN_ID_INVALID) {
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     WM_SCOPED_TRACE("dms:AddMirror");
+    WLOGFI("AddMirror::ScreenId: %{public}" PRIu64 "", mirrorScreenId);
     std::shared_ptr<RSDisplayNode> displayNode =
         SingletonContainer::Get<WindowManagerService>().GetDisplayNode(mainScreenId);
     if (displayNode == nullptr) {
@@ -222,7 +228,7 @@ DMError DisplayManagerService::AddMirror(ScreenId mainScreenId, ScreenId mirrorS
     NodeId nodeId = displayNode->GetId();
 
     struct RSDisplayNodeConfig config = {mirrorScreenId, true, nodeId};
-    displayNodeMap_[mainScreenId] = RSDisplayNode::Create(config);
+    displayNodeMap_[mirrorScreenId] = RSDisplayNode::Create(config);
     auto transactionProxy = RSTransactionProxy::GetInstance();
     transactionProxy->FlushImplicitTransaction();
     WLOGFI("DisplayManagerService::AddMirror: NodeId: %{public}" PRIu64 "", nodeId >> 32);
