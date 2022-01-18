@@ -24,6 +24,10 @@ using namespace OHOS::Rosen;
 
 namespace OHOS {
 constexpr int BITMAP_DEPTH = 8;
+constexpr int BPP = 4;
+constexpr int MAX_RESOLUTION_SIZE = 15360;
+const char *VALID_SNAPSHOT_PATH = "/data";
+const char *VALID_SNAPSHOT_SUFFIX = ".png";
 
 void SnapShotUtils::PrintUsage(const std::string &cmdLine)
 {
@@ -32,17 +36,52 @@ void SnapShotUtils::PrintUsage(const std::string &cmdLine)
 
 bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
 {
+    if (fileName.length() < strlen(VALID_SNAPSHOT_SUFFIX)) {
+        printf("error: fileName %s invalid, file length too short!\n", fileName.c_str());
+        return false;
+    }
+    // check file path
     std::string fileDir = fileName;
     auto pos = fileDir.find_last_of("/");
     if (pos != std::string::npos) {
         fileDir.erase(pos + 1);
     } else {
-        fileDir = ".";
+        fileDir = "."; // current work dir
     }
     char resolvedPath[PATH_MAX] = { 0 };
     char *realPath = realpath(fileDir.c_str(), resolvedPath);
     if (realPath == nullptr) {
-        printf("error: fileName %s invalid, nullptr!\n", fileName.c_str());
+        printf("error: fileName %s invalid, realpath nullptr!\n", fileName.c_str());
+        return false;
+    }
+    if (strncmp(realPath, VALID_SNAPSHOT_PATH, strlen(VALID_SNAPSHOT_PATH)) != 0) {
+        printf("error: fileName %s invalid, realpath %s must dump at dir: %s \n",
+            fileName.c_str(), realPath, VALID_SNAPSHOT_PATH);
+        return false;
+    }
+
+    // check file suffix
+    pos = fileName.find_last_of(VALID_SNAPSHOT_SUFFIX);
+    if (pos + 1 == fileName.length()) {
+        return true; // valid suffix
+    }
+
+    printf("error: fileName %s invalid, suffix must be %s\n", fileName.c_str(), VALID_SNAPSHOT_SUFFIX);
+    return false;
+}
+
+static bool CheckParamValid(const WriteToPngParam &param)
+{
+    if (param.width > MAX_RESOLUTION_SIZE) {
+        return false;
+    }
+    if (param.height > MAX_RESOLUTION_SIZE) {
+        return false;
+    }
+    if (param.stride < BPP * param.width) {
+        return false;
+    }
+    if (param.data == nullptr) {
         return false;
     }
     return true;
@@ -53,6 +92,10 @@ bool SnapShotUtils::WriteToPng(const std::string &fileName, const WriteToPngPara
     if (!CheckFileNameValid(fileName)) {
         return false;
     }
+    if (!CheckParamValid(param)) {
+        return false;
+    }
+
     png_structp pngStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if (pngStruct == nullptr) {
         printf("error: png_create_write_struct nullptr!\n");
