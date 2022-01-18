@@ -15,6 +15,7 @@
 
 #include "window_manager_agent_controller.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -53,6 +54,15 @@ void WindowManagerAgentController::UpdateSystemBarRegionTints(DisplayId displayI
     for (auto& agent : wmAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR)) {
         agent->UpdateSystemBarRegionTints(displayId, tints);
+    }
+}
+
+void WindowManagerAgentController::UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type)
+{
+    WLOGFI("UpdateWindowStatus");
+    for (auto& agent : wmAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE)) {
+        agent->UpdateWindowStatus(windowInfo, type);
     }
 }
 }

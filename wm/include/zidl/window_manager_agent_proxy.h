@@ -30,6 +30,7 @@ public:
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         DisplayId displayId, bool focused) override;
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) override;
+    void UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type) override;
 
 private:
     static inline BrokerDelegator<WindowManagerAgentProxy> delegator_;

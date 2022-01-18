@@ -16,6 +16,7 @@
 #ifndef OHOS_WINDOW_MANAGER_AGENT_H
 #define OHOS_WINDOW_MANAGER_AGENT_H
 
+#include "window_manager.h"
 #include "zidl/window_manager_agent_stub.h"
 
 namespace OHOS {
@@ -28,6 +29,7 @@ public:
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         DisplayId displayId, bool focused) override;
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& props) override;
+    void UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type) override;
 };
 } // namespace Rosen
 } // namespace OHOS

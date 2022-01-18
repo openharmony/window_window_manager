@@ -34,6 +34,7 @@ public:
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         DisplayId displayId, bool focused);
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints);
+    void UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type);
 
 private:
     WindowManagerAgentController() {}

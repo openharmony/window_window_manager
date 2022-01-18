@@ -16,6 +16,7 @@
 #include "zidl/window_manager_agent_proxy.h"
 #include <ipc_types.h>
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -103,6 +104,30 @@ void WindowManagerAgentProxy::UpdateSystemBarRegionTints(DisplayId displayId, co
         }
     }
     if (Remote()->SendRequest(TRANS_ID_UPDATE_SYSTEM_BAR_PROPS, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void WindowManagerAgentProxy::UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteParcelable(windowInfo)) {
+        WLOGFE("Write displayId failed");
+        return;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+        WLOGFE("Write windowUpdateType failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_UPDATE_WINDOW_STATUS, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
