@@ -18,6 +18,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":avoid_area_controller_test",
     ":wm_input_transfer_station_test",
     ":wm_window_impl_test",
     ":wm_window_input_channel_test",
@@ -27,6 +28,17 @@ group("unittest") {
     ":wms_window_snapshot_test",
   ]
 }
+
+## UnitTest avoid_area_controller_test {{{
+ohos_unittest("avoid_area_controller_test") {
+  module_out_path = module_out_path
+
+  sources = [ "avoid_area_controller_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+}
+
+## UnitTest avoid_area_controller_test }}}
 
 ## UnitTest wm_window_impl_test {{{
 ohos_unittest("wm_window_impl_test") {
