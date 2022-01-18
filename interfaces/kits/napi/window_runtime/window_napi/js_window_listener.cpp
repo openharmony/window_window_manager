@@ -27,12 +27,12 @@ constexpr uint32_t AVOID_AREA_NUM = 4;
 
 void JsWindowListener::AddCallback(NativeValue* jsListenerObject)
 {
-    WLOGFI("JsWindowListener::AddCallbackAndRegister is called");
+    WLOGFI("JsWindowListener::AddCallback is called");
     std::lock_guard<std::mutex> lock(mtx_);
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine_->CreateReference(jsListenerObject, 1));
     jsCallBack_.push_back(std::move(callbackRef));
-    WLOGFI("JsWindowListener::AddCallbackAndRegister success jsCallBack_ size: %{public}d!",
+    WLOGFI("JsWindowListener::AddCallback success jsCallBack_ size: %{public}d!",
         static_cast<uint32_t>(jsCallBack_.size()));
     return;
 }
