@@ -59,7 +59,6 @@ ohos_executable("rosenwmtest") {
     "//foundation/graphic/standard:libvsync_client",
     "//foundation/graphic/standard:libwmclient",
     "//foundation/graphic/standard:libwmservice",
-    "//foundation/windowmanager/adapter:libwmadaptertest",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/wmserver:libwms",

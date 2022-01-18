@@ -19,7 +19,6 @@
         "sub_component": [
           "//foundation/windowmanager/interfaces/kits/js/declaration:window",
           "//foundation/windowmanager/sa_profile:wms_sa_profile",
-          "//foundation/windowmanager/adapter:libwmadapter",
           "//foundation/windowmanager/dm:libdm",
           "//foundation/windowmanager/dmserver:libdms",
           "//foundation/windowmanager/wm:libwm",
