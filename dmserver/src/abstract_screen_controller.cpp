@@ -41,8 +41,8 @@ void AbstractScreenController::Init()
 {
     WLOGFD("screen controller init");
     dmsScreenCount_ = 0;
-    if (rsInterface_ != nullptr) {
-        WLOGFE("rsInterface_ is nullptr, init failed");
+    if (rsInterface_ == nullptr) {
+        WLOGFE("rsInterface is null, init failed");
     } else {
         rsInterface_->SetScreenChangeCallback(
             std::bind(&AbstractScreenController::OnRsScreenChange, this, std::placeholders::_1, std::placeholders::_2));
@@ -77,6 +77,11 @@ sptr<AbstractScreenGroup> AbstractScreenController::GetAbstractScreenGroup(Scree
     return screen;
 }
 
+ScreenId AbstractScreenController::GetMainAbstractScreenId()
+{
+    return primaryDmsScreenId_;
+}
+
 ScreenId AbstractScreenController::ConvertToRsScreenId(ScreenId dmsScreenId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -98,12 +103,12 @@ void AbstractScreenController::RegisterAbstractScreenCallback(sptr<AbstractScree
 void AbstractScreenController::OnRsScreenChange(ScreenId rsScreenId, ScreenEvent screenEvent)
 {
     WLOGFI("rs screen event. id:%{public}" PRIu64", event:%{public}ud", rsScreenId, static_cast<uint32_t>(screenEvent));
-    ScreenId dmsScreenId = INVALID_SCREEN_ID;
+    ScreenId dmsScreenId = SCREEN_ID_INVALID;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (screenEvent == ScreenEvent::CONNECTED) {
         auto iter = rs2DmsScreenIdMap_.find(rsScreenId);
         if (iter == rs2DmsScreenIdMap_.end()) {
-            WLOGFD("connect new screen. dmsId:%{public}" PRIu64"", dmsScreenId);
+            WLOGFD("connect new screen");
             dmsScreenId = dmsScreenCount_;
             sptr<AbstractScreen> absScreen = new AbstractScreen(dmsScreenId, rsScreenId);
             if (!FillAbstractScreen(absScreen, rsScreenId)) {
@@ -117,6 +122,7 @@ void AbstractScreenController::OnRsScreenChange(ScreenId rsScreenId, ScreenEvent
             if (screenGroup != nullptr && abstractScreenCallback_ != nullptr) {
                 abstractScreenCallback_->onConnected_(absScreen);
             }
+            primaryDmsScreenId_ = dmsScreenId;
         } else {
             WLOGE("reconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
         }
@@ -159,8 +165,8 @@ bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScree
 
 sptr<AbstractScreenGroup> AbstractScreenController::AddToGroupLocked(sptr<AbstractScreen> newScreen)
 {
-    if (defaultDmsScreenId_ == SCREEN_ID_INVALID) {
-        WLOGE("connect the first screen");
+    if (primaryDmsScreenId_ == SCREEN_ID_INVALID) {
+        WLOGI("connect the first screen");
         return AddAsFirstScreenLocked(newScreen);
     } else {
         AddAsSuccedentScreenLocked(newScreen);
@@ -170,11 +176,14 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddToGroupLocked(sptr<Abstra
 
 sptr<AbstractScreenGroup> AbstractScreenController::AddAsFirstScreenLocked(sptr<AbstractScreen> newScreen)
 {
-    // TODO: Create default display
-    ScreenId dmsGroupScreenId = dmsScreenCount_.fetch_add(1);
+    ScreenId dmsGroupScreenId = dmsScreenCount_.load();
     sptr<AbstractScreenGroup> sreenGroup = new AbstractScreenGroup(dmsGroupScreenId, SCREEN_ID_INVALID);
     Point point;
-    sreenGroup->AddChild(ScreenCombination::SCREEN_ALONE, newScreen, point);
+    if (!sreenGroup->AddChild(ScreenCombination::SCREEN_ALONE, newScreen, point)) {
+        WLOGE("fail to add screen to group. screen=%{public}" PRIu64"", newScreen->dmsId_);
+        return nullptr;
+    }
+    dmsScreenCount_++;
     newScreen->groupDmsId_ = dmsGroupScreenId;
     auto iter = dmsScreenGroupMap_.find(dmsGroupScreenId);
     if (iter != dmsScreenGroupMap_.end()) {
@@ -183,14 +192,14 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsFirstScreenLocked(sptr<
     }
     dmsScreenGroupMap_.insert(std::make_pair(dmsGroupScreenId, sreenGroup));
     dmsScreenMap_.insert(std::make_pair(dmsGroupScreenId, sreenGroup));
-    WLOGI("connect new group screen. id=%{public}" PRIu64"/%{public}" PRIu64", combination:%{public}ud",
+    WLOGI("connect new group screen. id=%{public}" PRIu64"/%{public}" PRIu64", combination:%{public}u",
         newScreen->dmsId_, dmsGroupScreenId, newScreen->type_);
     return sreenGroup;
 }
 
 void AbstractScreenController::AddAsSuccedentScreenLocked(sptr<AbstractScreen> newScreen)
 {
-    // TODO: Mirror to default screen
+    // TODO: Mirror to main screen
 }
 
 ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption option)
