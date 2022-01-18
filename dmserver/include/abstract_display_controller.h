@@ -37,7 +37,7 @@ public:
     ScreenId GetDefaultScreenId();
     RSScreenModeInfo GetScreenActiveMode(ScreenId id);
 
-    std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId, ScreenId screenId);
+    std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId);
 
 private:
     void OnAbstractScreenConnected(sptr<AbstractScreen> absScreen);
