@@ -20,12 +20,39 @@
 #include "window_adapter.h"
 #include "window_manager_agent.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowManager"};
 }
+
+bool WindowInfo::Marshalling(Parcel &parcel) const
+{
+    return parcel.WriteInt32(wid_) && parcel.WriteUint32(windowRect_.width_) &&
+        parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(windowRect_.posX_) &&
+        parcel.WriteInt32(windowRect_.posY_) && parcel.WriteBool(focused_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(type_));
+}
+
+WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
+{
+    WindowInfo* windowInfo = new WindowInfo();
+    if (windowInfo == nullptr) {
+        return nullptr;
+    }
+    bool res = parcel.ReadInt32(windowInfo->wid_) && parcel.ReadUint32(windowInfo->windowRect_.width_) &&
+        parcel.ReadUint32(windowInfo->windowRect_.height_) && parcel.ReadInt32(windowInfo->windowRect_.posX_) &&
+        parcel.ReadInt32(windowInfo->windowRect_.posY_) && parcel.ReadBool(windowInfo->focused_);
+    if (!res) {
+        return nullptr;
+    }
+    windowInfo->mode_ = static_cast<WindowMode>(parcel.ReadUint32());
+    windowInfo->type_ = static_cast<WindowType>(parcel.ReadUint32());
+    return windowInfo;
+}
+
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManager)
 
 class WindowManager::Impl {
@@ -35,6 +62,7 @@ public:
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
         WindowType windowType, DisplayId displayId) const;
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints) const;
+    void NotifyWindowUpdate(const sptr<WindowInfo>& windowInfo, WindowUpdateType type) const;
     static inline SingletonDelegator<WindowManager> delegator_;
 
     std::recursive_mutex mutex_;
@@ -42,6 +70,8 @@ public:
     sptr<WindowManagerAgent> focusChangedListenerAgent_;
     std::vector<sptr<ISystemBarChangedListener>> systemBarChangedListeners_;
     sptr<WindowManagerAgent> systemBarChangedListenerAgent_;
+    std::vector<sptr<IWindowUpdateListener>> windowUpdateListeners_;
+    sptr<WindowManagerAgent> windowUpdateListenerAgent_;
 };
 
 void WindowManager::Impl::NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
@@ -75,6 +105,19 @@ void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const Syst
     }
     for (auto& listener : systemBarChangedListeners_) {
         listener->OnSystemBarPropertyChange(displayId, tints);
+    }
+}
+
+void WindowManager::Impl::NotifyWindowUpdate(const sptr<WindowInfo>& windowInfo, WindowUpdateType type) const
+{
+    WLOGFI("NotifyWindowUpdate: wid[%{public}d],width[%{public}d], \
+            height[%{public}d],positionX[%{public}d],positionY[%{public}d],\
+            isFocused[%{public}d],mode[%{public}d],type[%{public}d]",
+            windowInfo->wid_, windowInfo->windowRect_.width_,windowInfo->windowRect_.height_,
+            windowInfo->windowRect_.posX_,windowInfo->windowRect_.posY_,
+            windowInfo->focused_,windowInfo->mode_,windowInfo->type_);
+    for (auto& listener : windowUpdateListeners_) {
+        listener->OnWindowUpdate(windowInfo, type);
     }
 }
 
@@ -166,6 +209,41 @@ void WindowManager::MinimizeAllAppWindows(DisplayId displayId)
     WLOGFI("displayId %{public}" PRIu64"", displayId);
     SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(displayId);
 }
+void WindowManager::RegisterWindowUpdateListener(const sptr<IWindowUpdateListener> &listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    pImpl_->windowUpdateListeners_.emplace_back(listener);
+    if (pImpl_->windowUpdateListenerAgent_ == nullptr) {
+        pImpl_->windowUpdateListenerAgent_ = new WindowManagerAgent();
+        SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
+    }
+}
+
+void WindowManager::UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->windowUpdateListeners_.begin(), pImpl_->windowUpdateListeners_.end(),
+        listener);
+    if (iter == pImpl_->windowUpdateListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return;
+    }
+    pImpl_->windowUpdateListeners_.erase(iter);
+    if (pImpl_->windowUpdateListeners_.empty() && pImpl_->windowUpdateListenerAgent_ != nullptr) {
+        SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE, pImpl_->windowUpdateListenerAgent_);
+        pImpl_->windowUpdateListenerAgent_ = nullptr;
+    }
+}
 
 void WindowManager::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
     DisplayId displayId, bool focused) const
@@ -182,6 +260,11 @@ void WindowManager::UpdateSystemBarRegionTints(DisplayId displayId,
     const SystemBarRegionTints& tints) const
 {
     pImpl_->NotifySystemBarChanged(displayId, tints);
+}
+
+void WindowManager::UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type)
+{
+    pImpl_->NotifyWindowUpdate(windowInfo, type);
 }
 } // namespace Rosen
 } // namespace OHOS
