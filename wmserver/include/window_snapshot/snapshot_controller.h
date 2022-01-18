@@ -27,7 +27,9 @@ namespace Rosen {
 class SnapshotController : public SnapshotStub {
 public:
     SnapshotController(sptr<WindowRoot>& root) : windowRoot_(root), rsInterface_(RSInterfaces::GetInstance()) {};
+    SnapshotController() : windowRoot_(nullptr), rsInterface_(RSInterfaces::GetInstance()) {};
     ~SnapshotController() = default;
+    void Init(sptr<WindowRoot>& root);
 
     int32_t GetSnapshot(const sptr<IRemoteObject> &token, AAFwk::Snapshot& snapshot) override;
 
