@@ -24,35 +24,145 @@
 namespace OHOS {
 namespace Rosen {
 namespace save {
-struct Rect {
-    int32_t left = 0;
-    int32_t top = 0;
-    int32_t width = 0;
-    int32_t height = 0;
-};
-
-struct Size {
-    int32_t width = 0;
-    int32_t height = 0;
-};
-
 struct Option {
-    Rect rect;
-    Size size;
+    Media::Rect rect;
+    Media::Size size;
     int rotation = 0;
     DisplayId displayId = 0;
 };
 
 struct Param {
     WMError wret;
-    Option screenshotOptions;
+    Option option;
     std::shared_ptr<Media::PixelMap> image;
 };
 
-void Async(napi_env env, std::unique_ptr<Param> &param)
+static napi_valuetype GetType(napi_env env, napi_value root)
 {
-    param->screenshotOptions.displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
-    param->image = DisplayManager::GetInstance().GetScreenshot(param->screenshotOptions.displayId);
+    napi_valuetype res = napi_undefined;
+    napi_typeof(env, root, &res);
+    return res;
+}
+
+static void GetDisplayId(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+{
+    GNAPI_LOG("Get Screenshot Option: GetDisplayId");
+    napi_value displayId;
+    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "displayId", &displayId));
+    if (displayId != nullptr && GetType(env, displayId) == napi_number) {
+        int64_t dispId;
+        NAPI_CALL_RETURN_VOID(env, napi_get_value_int64(env, displayId, &dispId));
+        param->option.displayId = static_cast<DisplayId>(dispId);
+        GNAPI_LOG("GetDisplayId success, displayId = %{public}" PRIu64"", param->option.displayId);
+    } else {
+        GNAPI_LOG("GetDisplayId failed, invalid param, use default displayId = 0");
+    }
+}
+
+static void GetRotation(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+{
+    GNAPI_LOG("Get Screenshot Option: GetRotation");
+    napi_value rotation;
+    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "rotation", &rotation));
+    if (rotation != nullptr && GetType(env, rotation) == napi_number) {
+        NAPI_CALL_RETURN_VOID(env, napi_get_value_int32(env, rotation, &param->option.rotation));
+        GNAPI_LOG("GetRotation success, rotation = %{public}d", param->option.rotation);
+    } else {
+        GNAPI_LOG("GetRotation failed, invalid param, use default rotation = 0");
+    }
+}
+
+static void GetScreenRect(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+{
+    GNAPI_LOG("Get Screenshot Option: GetScreenRect");
+    napi_value screenRect;
+    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "screenRect", &screenRect));
+    if (screenRect != nullptr && GetType(env, screenRect) == napi_object) {
+        GNAPI_LOG("get ScreenRect success");
+
+        napi_value left;
+        NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, screenRect, "left", &left));
+        if (left != nullptr && GetType(env, left) == napi_number) {
+            NAPI_CALL_RETURN_VOID(env, napi_get_value_int32(env, left, &param->option.rect.left));
+            GNAPI_LOG("get ScreenRect.left success, left = %{public}d", param->option.rect.left);
+        } else {
+            GNAPI_LOG("get ScreenRect.left failed, invalid param, use default left = 0");
+        }
+
+        napi_value top;
+        NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, screenRect, "top", &top));
+        if (top != nullptr && GetType(env, top) == napi_number) {
+            NAPI_CALL_RETURN_VOID(env, napi_get_value_int32(env, top, &param->option.rect.top));
+            GNAPI_LOG("get ScreenRect.top success, top = %{public}d", param->option.rect.top);
+        } else {
+            GNAPI_LOG("get ScreenRect.top failed, invalid param, use default top = 0");
+        }
+
+        napi_value width;
+        NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, screenRect, "width", &width));
+        if (width != nullptr && GetType(env, width) == napi_number) {
+            NAPI_CALL_RETURN_VOID(env, napi_get_value_int32(env, width, &param->option.rect.width));
+            GNAPI_LOG("get ScreenRect.width success, width = %{public}d", param->option.rect.width);
+        } else {
+            GNAPI_LOG("get ScreenRect.width failed, invalid param, use default width = 0");
+        }
+        
+        napi_value height;
+        NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, screenRect, "height", &height));
+        if (height != nullptr && GetType(env, height) == napi_number) {
+            NAPI_CALL_RETURN_VOID(env, napi_get_value_int32(env, height, &param->option.rect.height));
+            GNAPI_LOG("get ScreenRect.height success, height = %{public}d", param->option.rect.height);
+        } else {
+            GNAPI_LOG("get ScreenRect.height failed, invalid param, use default height = 0");
+        }
+    } else {
+        GNAPI_LOG("get ScreenRect failed, use default ScreenRect param");
+    }
+}
+
+static void GetImageSize(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+{
+    GNAPI_LOG("Get Screenshot Option: ImageSize");
+    napi_value imageSize;
+    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "imageSize", &imageSize));
+    if (imageSize != nullptr && GetType(env, imageSize) == napi_object) {
+        napi_value width;
+        NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, imageSize, "width", &width));
+        if (width != nullptr && GetType(env, width) == napi_number) {
+            NAPI_CALL_RETURN_VOID(env, napi_get_value_int32(env, width, &param->option.size.width));
+            GNAPI_LOG("get ImageSize.width success, width = %{public}d", param->option.size.width);
+        } else {
+            GNAPI_LOG("get ImageSize.width failed, invalid param, use default width = 0");
+        }
+
+        napi_value height;
+        NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, imageSize, "height", &height));
+        if (height != nullptr && GetType(env, height) == napi_number) {
+            NAPI_CALL_RETURN_VOID(env, napi_get_value_int32(env, height, &param->option.size.height));
+            GNAPI_LOG("get ImageSize.height success, height = %{public}d", param->option.size.height);
+        } else {
+            GNAPI_LOG("get ImageSize.height failed, invalid param, use default height = 0");
+        }
+    }
+}
+
+static void AsyncGetScreenshotByDisplayId(napi_env env, std::unique_ptr<Param> &param)
+{
+    GNAPI_LOG("Get Screenshot by displayId");
+    param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId);
+    if (param->image == nullptr) {
+        GNAPI_LOG("Get Screenshot failed!");
+        param->wret = WMError::WM_ERROR_NULLPTR;
+        return;
+    }
+    param->wret = WMError::WM_OK;
+}
+
+static void AsyncGetScreenshotByOption(napi_env env, std::unique_ptr<Param> &param)
+{
+    GNAPI_LOG("Get Screenshot by option");
+    param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId,
+        param->option.rect, param->option.size, param->option.rotation);
     if (param->image == nullptr) {
         GNAPI_LOG("Get Screenshot failed!");
         param->wret = WMError::WM_ERROR_NULLPTR;
@@ -78,9 +188,33 @@ napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
 napi_value MainFunc(napi_env env, napi_callback_info info)
 {
     GNAPI_LOG("%{public}s called", __PRETTY_FUNCTION__);
-
+    napi_value argv[1] = {0};
+    size_t argc = 1;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     auto param = std::make_unique<Param>();
-    return CreatePromise<Param>(env, __PRETTY_FUNCTION__, Async, Resolve, param);
+    param->option.displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
+    
+    if (argc == 0) {
+        GNAPI_LOG("argc == 0");
+        return CreatePromise<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshotByDisplayId, Resolve, param);
+    } else if (argc == 1) {
+        GNAPI_LOG("argc == 1");
+        if (GetType(env, argv[0]) == napi_object) {
+            GNAPI_LOG("argv[0]'s type is napi_object");
+            GetDisplayId(env, param, argv[0]);
+            GetRotation(env, param, argv[0]);
+            GetScreenRect(env, param, argv[0]);
+            GetImageSize(env, param, argv[0]);
+            return CreatePromise<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshotByOption, Resolve, param);
+        }
+        GNAPI_LOG("argv[0]'s type is not napi_object");
+        return nullptr;
+    } else {
+        GNAPI_LOG("argc number missmatch");
+        return nullptr;
+    }
+    GNAPI_LOG("argc number missmatch");
+    return nullptr;
 }
 } // namespace save
 
