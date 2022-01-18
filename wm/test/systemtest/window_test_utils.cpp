@@ -17,6 +17,10 @@
 #include <ability_context.h>
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowTestUtils"};
+}
+
 Rect WindowTestUtils::displayRect_      = {0, 0, 0, 0};
 Rect WindowTestUtils::statusBarRect_    = {0, 0, 0, 0};
 Rect WindowTestUtils::naviBarRect_      = {0, 0, 0, 0};
@@ -27,6 +31,7 @@ SplitRects WindowTestUtils::splitRects_ = {
     .secondaryRect = {0, 0, 0, 0},
     .dividerRect   = {0, 0, 0, 0},
 };
+
 bool WindowTestUtils::isVerticalDisplay_ = false;
 
 sptr<Window> WindowTestUtils::CreateTestWindow(const TestWindowInfo& info)
@@ -105,7 +110,19 @@ bool WindowTestUtils::RectEqualTo(const sptr<Window>& window, const Rect& r)
     Rect l = window->GetRect();
     bool res = ((l.posX_ == r.posX_) && (l.posY_ == r.posY_) && (l.width_ == r.width_) && (l.height_ == r.height_));
     if (!res) {
-        printf("GetLayoutRect: %d %d %d %d, Expect: %d %d %d %d\n", l.posX_, l.posY_, l.width_, l.height_,
+        WLOGFE("GetLayoutRect: %{public}d %{public}d %{public}d %{public}d, " \
+            "Expect: %{public}d %{public}d %{public}d %{public}d", l.posX_, l.posY_, l.width_, l.height_,
+            r.posX_, r.posY_, r.width_, r.height_);
+    }
+    return res;
+}
+
+bool WindowTestUtils::RectEqualToRect(const Rect& l, const Rect& r)
+{
+    bool res = ((l.posX_ == r.posX_) && (l.posY_ == r.posY_) && (l.width_ == r.width_) && (l.height_ == r.height_));
+    if (!res) {
+        WLOGFE("GetLayoutRect: %{public}d %{public}d %{public}d %{public}d, " \
+            "Expect: %{public}d %{public}d %{public}d %{public}d", l.posX_, l.posY_, l.width_, l.height_,
             r.posX_, r.posY_, r.width_, r.height_);
     }
     return res;
@@ -133,10 +150,10 @@ void WindowTestUtils::InitSplitRects()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     if (display == nullptr) {
-        printf("GetDefaultDisplay: failed!\n");
+        WLOGFE("GetDefaultDisplay: failed!");
     } else {
-        printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
-            display->GetHeight(), display->GetFreshRate());
+        WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
+            display->GetId(), display->GetWidth(), display->GetHeight(), display->GetFreshRate());
     }
 
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
@@ -165,7 +182,7 @@ void WindowTestUtils::UpdateSplitRects(const sptr<Window>& window)
     std::unique_ptr<WindowTestUtils> testUtils = std::make_unique<WindowTestUtils>();
     auto res = window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, testUtils->avoidArea_);
     if (res != WMError::WM_OK) {
-        printf("Get avoid type failed\n");
+        WLOGFE("Get avoid type failed");
     }
     testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.leftRect);
     testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.topRect);
@@ -212,7 +229,7 @@ void WindowTestUtils::UpdateLimitDisplayRect(Rect& avoidRect)
             limitDisplayRect_.width_ -= offsetW;
             break;
         default:
-            printf("invaild avoidPosType: %d\n", avoidPosType);
+            WLOGFE("invaild avoidPosType: %{public}d", avoidPosType);
     }
 }
 
