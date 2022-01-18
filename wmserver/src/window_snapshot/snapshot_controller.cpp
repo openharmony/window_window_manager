@@ -16,11 +16,17 @@
 #include "snapshot_controller.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "SnapshotController"};
+}
+
+void SnapshotController::Init(sptr<WindowRoot>& root)
+{
+    windowRoot_ = root;
 }
 
 WMError SnapshotController::TakeSnapshot(const std::shared_ptr<RSSurfaceNode>& surfaceNode, Snapshot& snapshot)
@@ -49,6 +55,11 @@ WMError SnapshotController::TakeSnapshot(const std::shared_ptr<RSSurfaceNode>& s
 
 int32_t SnapshotController::GetSnapshot(const sptr<IRemoteObject> &token, Snapshot& snapshot)
 {
+    WM_SCOPED_TRACE("wms:GetSnapshot");
+    if (token == nullptr) {
+        WLOGFE("Get ailityToken failed!");
+        return static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+    }
     std::shared_ptr<RSSurfaceNode> surfaceNode = windowRoot_->GetSurfaceNodeByAbilityToken(token);
     if (surfaceNode == nullptr) {
         WLOGFE("Get surfaceNode failed!");
