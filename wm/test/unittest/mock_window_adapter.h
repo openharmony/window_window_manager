@@ -30,6 +30,7 @@ public:
     MOCK_METHOD0(ClearWindowAdapter, void());
     MOCK_METHOD1(DestroyWindow, WMError(uint32_t windowId));
     MOCK_METHOD2(SaveAbilityToken, WMError(const sptr<IRemoteObject>& abilityToken, uint32_t windowId));
+    MOCK_METHOD3(SetSystemBarProperty, WMError(uint32_t windowId, WindowType type, const SystemBarProperty& property));
 };
 }
 } // namespace OHOS
