@@ -44,28 +44,28 @@ void WindowLayoutTest::SetUpTestCase()
         printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
             display->GetHeight(), display->GetFreshRate());
     }
-    Rect screenRect = {0, 0, display->GetWidth(), display->GetHeight()};
-    utils::InitByScreenRect(screenRect);
+    Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
+    utils::InitByDisplayRect(displayRect);
     // calc expected rects
     Rect expected = { // 0. only statusBar
         0,
         utils::statusBarRect_.height_,
-        utils::screenRect_.width_,
-        utils::screenRect_.height_ - utils::statusBarRect_.height_,
+        utils::displayRect_.width_,
+        utils::displayRect_.height_ - utils::statusBarRect_.height_,
     };
     fullScreenExpecteds_.push_back(expected);
     expected = { // 1. both statusBar and naviBar
         0,
         utils::statusBarRect_.height_,
-        utils::screenRect_.width_,
-        utils::screenRect_.height_ - utils::statusBarRect_.height_ - utils::naviBarRect_.height_,
+        utils::displayRect_.width_,
+        utils::displayRect_.height_ - utils::statusBarRect_.height_ - utils::naviBarRect_.height_,
     };
     fullScreenExpecteds_.push_back(expected);
     expected = { // 2. only naviBar
         0,
         0,
-        utils::screenRect_.width_,
-        utils::screenRect_.height_ - utils::naviBarRect_.height_,
+        utils::displayRect_.width_,
+        utils::displayRect_.height_ - utils::naviBarRect_.height_,
     };
     fullScreenExpecteds_.push_back(expected);
 }
@@ -179,11 +179,11 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, statBar->Show());
     ASSERT_TRUE(utils::RectEqualTo(statBar, utils::statusBarRect_));
     ASSERT_EQ(WMError::WM_OK, sysWin->Show());
-    ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::screenRect_));
+    ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::displayRect_));
     ASSERT_EQ(WMError::WM_OK, naviBar->Show());
-    ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::screenRect_));
+    ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::displayRect_));
     ASSERT_EQ(WMError::WM_OK, statBar->Hide());
-    ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::screenRect_));
+    ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::displayRect_));
 }
 
 /**
