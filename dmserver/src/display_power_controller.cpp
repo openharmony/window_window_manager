@@ -34,8 +34,8 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
 {
     WLOGFI("state:%{public}u", state);
     if (displayState_ == state) {
-        WLOGFI("state is already set");
-        return true;
+        WLOGFE("state is already set");
+        return false;
     }
     switch (state) {
         case DisplayState::ON: {
