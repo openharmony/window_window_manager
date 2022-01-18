@@ -20,6 +20,7 @@ group("unittest") {
 
   deps = [
     ":dm_display_power_unit_test",
+    ":dm_screen_manager_test",
     ":dm_screenshot_test",
     ":dm_snapshot_utils_test",
   ]
@@ -61,6 +62,20 @@ ohos_unittest("dm_screenshot_test") {
 
 ## UnitTest dm_screenshot_test }}}
 
+## UnitTest dm_screen_manager_test {{{
+ohos_unittest("dm_screen_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [
+    "screen_manager_test.cpp",
+    "screen_manager_utils.cpp",
+  ]
+
+  deps = [ ":dm_unittest_common" ]
+}
+
+## UnitTest dm_screen_manager_test }}}
+
 ## Build dm_unittest_common.a {{{
 config("dm_unittest_common_public_config") {
   include_dirs = [
@@ -69,6 +84,7 @@ config("dm_unittest_common_public_config") {
     "//foundation/windowmanager/snapshot",
     "//foundation/windowmanager/interfaces/innerkits/dm",
     "//foundation/windowmanager/utils/include",
+    "//foundation/graphic/standard/rosen/modules/render_service_client",  # RSSurface
   ]
 }
 
@@ -82,6 +98,7 @@ ohos_static_library("dm_unittest_common") {
     "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",  # PixelMap
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/windowmanager/dm:libdm",
+    "//foundation/windowmanager/dmserver:libdms",
     "//foundation/windowmanager/snapshot:snapshot_display",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
