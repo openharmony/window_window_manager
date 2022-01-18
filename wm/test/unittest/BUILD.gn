@@ -24,6 +24,7 @@ group("unittest") {
     ":wm_window_option_test",
     ":wm_window_scene_test",
     ":wm_window_test",
+    ":wms_window_snapshot_test",
   ]
 }
 
@@ -93,11 +94,23 @@ ohos_unittest("wm_window_test") {
 
 ## UnitTest wm_window_test }}}
 
+## UnitTest wms_window_snapshot_test {{{
+ohos_unittest("wms_window_snapshot_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_snapshot_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+}
+
+## UnitTest wm_window_impl_test }}}
+
 ## Build wm_unittest_common.a {{{
 config("wm_unittest_common_public_config") {
   include_dirs = [
     "//foundation/windowmanager/wm/include",
     "//foundation/windowmanager/wmserver/include",
+    "//foundation/windowmanager/wmserver/include/window_snapshot",
     "//foundation/windowmanager/interfaces/innerkits/wm",
     "//foundation/windowmanager/utils/include",
     "//utils/native/base/include",
@@ -136,6 +149,7 @@ ohos_static_library("wm_unittest_common") {
 
   public_deps = [
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
+    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
