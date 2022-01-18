@@ -68,6 +68,7 @@ private:
     bool CheckSizeValid(const Media::Size &size, int32_t oriHeight, int32_t oriWidth);
     void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
     void NotifyDisplayStateChanged(DisplayState state);
+    void ClearDisplayStateCallback();
 
     static inline SingletonDelegator<DisplayManager> delegator;
     const int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 15360; // max resolution, 16K

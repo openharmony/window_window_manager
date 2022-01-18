@@ -227,15 +227,20 @@ void DisplayManager::NotifyDisplayStateChanged(DisplayState state)
     std::lock_guard<std::mutex> lock(mutex_);
     if (displayStateCallback_) {
         displayStateCallback_(state);
-        displayStateCallback_ = nullptr;
-        if (displayStateAgent_ != nullptr) {
-            SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(displayStateAgent_,
-                DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
-            displayStateAgent_ = nullptr;
-        }
+        ClearDisplayStateCallback();
         return;
     }
     WLOGFW("callback_ target is not set!");
+}
+
+void DisplayManager::ClearDisplayStateCallback()
+{
+    displayStateCallback_ = nullptr;
+    if (displayStateAgent_ != nullptr) {
+        SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(displayStateAgent_,
+            DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
+        displayStateAgent_ = nullptr;
+    }
 }
 
 bool DisplayManager::WakeUpBegin(PowerStateChangeReason reason)
@@ -296,20 +301,23 @@ DisplayPowerState DisplayManager::GetScreenPower(uint64_t screenId)
 bool DisplayManager::SetDisplayState(DisplayState state, DisplayStateCallback callback)
 {
     WLOGFI("state:%{public}u", state);
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (displayStateCallback_ != nullptr) {
-            WLOGFI("previous callback not called, can't reset");
-            return false;
-        }
-        displayStateCallback_ = callback;
-        if (displayStateAgent_ == nullptr) {
-            displayStateAgent_ = new DisplayManagerAgent();
-            SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(displayStateAgent_,
-                DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
-        }
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (displayStateCallback_ != nullptr) {
+        WLOGFI("previous callback not called, can't reset");
+        return false;
     }
-    return SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
+    displayStateCallback_ = callback;
+    if (displayStateAgent_ == nullptr) {
+        displayStateAgent_ = new DisplayManagerAgent();
+        SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(displayStateAgent_,
+            DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
+    }
+
+    bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
+    if (!ret) {
+        ClearDisplayStateCallback();
+    }
+    return ret;
 }
 
 DisplayState DisplayManager::GetDisplayState(uint64_t displayId)

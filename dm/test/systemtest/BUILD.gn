@@ -20,6 +20,7 @@ group("systemtest") {
 
   deps = [
     ":dm_display_minimal_test",
+    ":dm_display_power_test",
     ":dm_screenshot_cmd_test",
     ":dm_screenshot_test",
   ]
@@ -30,6 +31,15 @@ ohos_systemtest("dm_display_minimal_test") {
   module_out_path = module_out_path
 
   sources = [ "display_minimal_test.cpp" ]
+
+  deps = [ ":dm_systemtest_common" ]
+}
+
+## SystemTest dm_display_power_test {{{
+ohos_systemtest("dm_display_power_test") {
+  module_out_path = module_out_path
+
+  sources = [ "display_power_test.cpp" ]
 
   deps = [ ":dm_systemtest_common" ]
 }
@@ -78,6 +88,8 @@ ohos_static_library("dm_systemtest_common") {
 
   public_deps = [
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
+    "//foundation/windowmanager/dm:libdm",
+    "//foundation/windowmanager/dmserver:libdms",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/wmserver:libwms",
