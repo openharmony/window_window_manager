@@ -117,9 +117,8 @@ DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
 
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
 {
-    ScreenId screenId = GetScreenIdFromDisplayId(displayId);
     std::shared_ptr<Media::PixelMap> screenSnapshot
-        = abstractDisplayController_->GetScreenSnapshot(displayId, screenId);
+        = abstractDisplayController_->GetScreenSnapshot(displayId);
     return screenSnapshot;
 }
 

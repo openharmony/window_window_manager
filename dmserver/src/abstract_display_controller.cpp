@@ -70,7 +70,7 @@ RSScreenModeInfo AbstractDisplayController::GetScreenActiveMode(ScreenId id)
     return rsInterface_->GetScreenActiveMode(id);
 }
 
-std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(DisplayId displayId, ScreenId screenId)
+std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(DisplayId displayId)
 {
     if (rsInterface_ == nullptr) {
         return nullptr;

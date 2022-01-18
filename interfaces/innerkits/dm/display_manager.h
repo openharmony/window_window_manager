@@ -65,7 +65,7 @@ private:
     DisplayManager();
     ~DisplayManager();
     bool CheckRectValid(const Media::Rect &rect, int32_t oriHeight, int32_t oriWidth) const;
-    bool CheckSizeValid(const Media::Size &size, int32_t oriHeight, int32_t oriWidth);
+    bool CheckSizeValid(const Media::Size &size, int32_t oriHeight, int32_t oriWidth) const;
     void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
     void NotifyDisplayStateChanged(DisplayState state);
     void ClearDisplayStateCallback();
