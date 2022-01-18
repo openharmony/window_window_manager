@@ -48,7 +48,7 @@ public:
 
 class IAvoidAreaChangedListener : virtual public RefBase {
 public:
-    virtual void OnAvoidAreaChanged(const std::vector<Rect> avoidAreas) = 0;
+    virtual void OnAvoidAreaChanged(std::vector<Rect> avoidAreas) = 0;
 };
 
 class Window : public RefBase {
