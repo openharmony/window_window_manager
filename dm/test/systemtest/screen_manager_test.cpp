@@ -39,6 +39,7 @@ public:
     const uint32_t sleepUs_ = 10 * 1000;
     const uint32_t maxWaitCount_ = 2000;
     const uint32_t execTimes_ = 10;
+    const uint32_t acquireFrames_ = 1;
 };
 
 sptr<Display> ScreenManagerTest::defaultDisplay_ = nullptr;
@@ -158,7 +159,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager05, Function | MediumTest | Level1)
     ASSERT_NE(SCREEN_ID_INVALD, virtualScreenId);
     uint32_t lastCount = -1u;
     ScreenManager::GetInstance().AddMirror(static_cast<ScreenId>(defaultDisplayId_), virtualScreenId);
-    while (utils.successCount_ <= execTimes_ && waitCount_ <=  maxWaitCount_) {
+    while (utils.successCount_ < acquireFrames_ && waitCount_ <=  maxWaitCount_) {
         if (lastCount != utils.successCount_) {
             lastCount = utils.successCount_;
         }
@@ -166,10 +167,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager05, Function | MediumTest | Level1)
         waitCount_++;
         usleep(sleepUs_);
     }
+    ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId));
     ASSERT_GT(utils.successCount_, 0);
     ASSERT_GT(maxWaitCount_, waitCount_);
-    
-    ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId));
 }
 }
 } // namespace Rosen

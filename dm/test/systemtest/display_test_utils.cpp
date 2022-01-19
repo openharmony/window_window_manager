@@ -108,7 +108,7 @@ void DisplayTestUtils::OnVsync()
     if (defaultWidth_ == static_cast<uint32_t>(bufferHandle_->width) &&
         defaultHeight_ == static_cast<uint32_t>(bufferHandle_->height)) {
         successCount_++;
-        WLOGFI("success count in OnVsync: %d", successCount_);
+        WLOGFI("compareWH is successful in onVsync: %d", successCount_);
     } else {
         failCount_++;
     }
