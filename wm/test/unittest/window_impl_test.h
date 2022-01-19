@@ -18,10 +18,13 @@
 
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
+#include "mock_window_adapter.h"
+#include "singleton_mocker.h"
 #include "window_impl.h"
 
 namespace OHOS {
 namespace Rosen {
+using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 class WindowImplTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -32,6 +35,7 @@ public:
     static inline sptr<WindowImpl> window_ = nullptr;
     static inline sptr<WindowOption> option_ = nullptr;
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
+    static inline std::unique_ptr<Mocker> m_;
 };
 } // namespace ROSEN
 } // namespace OHOS

@@ -97,6 +97,8 @@ void WindowImmersiveTest::DumpFailedInfo(const SystemBarProps& expect)
 
 bool WindowImmersiveTest::SystemBarPropsEqualsTo(const SystemBarProps& expect)
 {
+    const int SLEEP_US = 100000;
+    usleep(SLEEP_US);
     auto act = testSystemBarChangedListener_->props_;
     if (act.size() != expect.size()) {
         DumpFailedInfo(expect);
