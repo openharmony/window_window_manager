@@ -26,6 +26,7 @@ config("libwm_config") {
 
     # for abilityContext
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/app_manager/include/appmgr",
     "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
     "//base/global/resmgr_standard/interfaces/innerkits/include",
     "//third_party/node/deps/icu-small/source/common",
@@ -127,12 +128,12 @@ ohos_shared_library("libwm") {
 
     # context
 
+    "//foundation/aafwk/standard/frameworks/kits/appkit:app_context",
     "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
-    "//foundation/appexecfwk/standard/kits:app_context",
   ]
 
   external_deps = [
-    "aafwk_standard:ability_context_native",
+    "ability_runtime:ability_context_native",
     "bytrace_standard:bytrace_core",
     "inputmethod_native:inputmethod_client",
     "ipc:ipc_core",
