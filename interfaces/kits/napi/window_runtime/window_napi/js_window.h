@@ -24,11 +24,11 @@
 namespace OHOS {
 namespace Rosen {
 NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window);
-
+std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName);
 class JsWindow final {
 public:
     explicit JsWindow(const sptr<Window>& window);
-    ~JsWindow() = default;
+    ~JsWindow();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* Show(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* Destroy(NativeEngine* engine, NativeCallbackInfo* info);
@@ -52,6 +52,7 @@ private:
     void RegisterWindowListenerWithType(NativeEngine& engine, std::string type, NativeValue* value);
     void UnregisterWindowListenerWithType(std::string type, NativeValue* value);
     void UnregisterAllWindowListenerWithType(std::string type);
+    std::string GetWindowName();
     NativeValue* OnShow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnDestroy(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnHide(NativeEngine& engine, NativeCallbackInfo& info);
