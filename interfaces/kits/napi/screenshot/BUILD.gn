@@ -24,7 +24,7 @@ ohos_shared_library("screenshot") {
   ]
 
   external_deps = [
-    "aafwk_standard:runtime",
+    "ability_runtime:runtime",
     "hiviewdfx_hilog_native:libhilog",
     "napi:ace_napi",
     "window_manager:libwm",

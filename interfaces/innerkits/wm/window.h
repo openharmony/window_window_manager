@@ -24,7 +24,7 @@
 #include <key_event.h>
 #include <pointer_event.h>
 #include <axis_event.h>
-#include "foundation/appexecfwk/standard/kits/appkit/native/ability_runtime/context/context.h"
+#include "foundation/aafwk/standard/frameworks/kits/appkit/native/ability_runtime/context/context.h"
 #include "wm_common.h"
 #include "window_option.h"
 #include "window_life_cycle_interface.h"

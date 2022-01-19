@@ -136,6 +136,6 @@ ohos_static_library("wm_systemtest_common") {
     "//utils/native/base:utils",
   ]
 
-  external_deps = [ "aafwk_standard:ability_context_native" ]
+  external_deps = [ "ability_runtime:ability_context_native" ]
 }
 ## Build wm_systemtest_common.a }}}
