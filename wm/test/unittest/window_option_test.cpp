@@ -82,6 +82,71 @@ HWTEST_F(WindowOptionTest, WindowMode01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: WindowMode02
+ * @tc.desc: SetWindowMode/GetWindowMode
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTV7
+ */
+HWTEST_F(WindowOptionTest, WindowMode02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    WindowMode defaultMode = option->GetWindowMode();
+    option->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    ASSERT_EQ(defaultMode, option->GetWindowMode());
+}
+
+/**
+ * @tc.name: WindowMode03
+ * @tc.desc: SetWindowMode/GetWindowMode
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTV7
+ */
+HWTEST_F(WindowOptionTest, WindowMode03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, option->GetWindowMode());
+}
+
+/**
+ * @tc.name: WindowMode04
+ * @tc.desc: SetWindowMode/GetWindowMode
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTV7
+ */
+HWTEST_F(WindowOptionTest, WindowMode04, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, option->GetWindowMode());
+}
+
+/**
+ * @tc.name: WindowMode05
+ * @tc.desc: SetWindowMode/GetWindowMode
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTV7
+ */
+HWTEST_F(WindowOptionTest, WindowMode05, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, option->GetWindowMode());
+}
+
+/**
+ * @tc.name: WindowMode06
+ * @tc.desc: SetWindowMode/GetWindowMode
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTV7
+ */
+HWTEST_F(WindowOptionTest, WindowMode06, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_PIP, option->GetWindowMode());
+}
+/**
  * @tc.name: Focusable01
  * @tc.desc: SetFocusable/GetFocusable
  * @tc.type: FUNC
