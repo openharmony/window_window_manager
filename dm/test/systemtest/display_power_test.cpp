@@ -23,7 +23,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "ScreenshotCmdTest"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayPowerTest"};
+    constexpr uint32_t MAX_TIME_WAITING_FOR_CALLBACK = 5;
 }
 
 class DisplayPowerEventListener : public IDisplayPowerEventListener {
@@ -45,10 +46,17 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+
+    static void CheckDisplayStateCallback(bool valueExpected);
+    static void CheckDisplayPowerEventCallback(bool valueExpected);
+
     static inline DisplayId defaultId_;
+    static inline uint32_t brightnessLevel_ = 80;
+    static inline uint32_t times_ = 0;
+    static inline bool isDisplayStateCallbackCalled_ = false;
     static sptr<DisplayPowerEventListener> listener_;
+
     DisplayState state_ { DisplayState::ON };
-    bool isDisplayStateCallbackCalled_ { false };
     DisplayStateCallback callback_ = [this](DisplayState state) {
         isDisplayStateCallbackCalled_ = true;
         state_ = state;
@@ -73,6 +81,8 @@ void DisplayPowerTest::TearDownTestCase()
 
 void DisplayPowerTest::SetUp()
 {
+    times_ = 0;
+
     isDisplayStateCallbackCalled_ = false;
     state_ = DisplayState::UNKNOWN;
 
@@ -83,6 +93,28 @@ void DisplayPowerTest::SetUp()
 
 void DisplayPowerTest::TearDown()
 {
+}
+
+void DisplayPowerTest::CheckDisplayStateCallback(bool valueExpected)
+{
+    do {
+        if (isDisplayStateCallbackCalled_ == valueExpected) {
+            return;
+        }
+        sleep(1);
+        ++times_;
+    } while (times_ <= MAX_TIME_WAITING_FOR_CALLBACK);
+}
+
+void DisplayPowerTest::CheckDisplayPowerEventCallback(bool valueExpected)
+{
+    do {
+        if (listener_->isCallbackCalled_ == valueExpected) {
+            return;
+        }
+        sleep(1);
+        ++times_;
+    } while (times_ <= MAX_TIME_WAITING_FOR_CALLBACK);
 }
 
 namespace {
@@ -99,6 +131,7 @@ HWTEST_F(DisplayPowerTest, SetDisplayStateValid01, Function | MediumTest | Level
     ASSERT_EQ(true, ret);
     DisplayState stateGet = DisplayManager::GetInstance().GetDisplayState(defaultId_);
     ASSERT_EQ(stateGet, stateToSet);
+    CheckDisplayStateCallback(true);
 }
 
 /**
@@ -113,6 +146,7 @@ HWTEST_F(DisplayPowerTest, SetDisplayStateValid02, Function | MediumTest | Level
     ASSERT_EQ(false, ret);
     DisplayState stateGet = DisplayManager::GetInstance().GetDisplayState(defaultId_);
     ASSERT_EQ(stateGet, initialState);
+    CheckDisplayStateCallback(false);
     ASSERT_EQ(false, isDisplayStateCallbackCalled_);
 }
 
@@ -126,7 +160,7 @@ HWTEST_F(DisplayPowerTest, SetDisplayStateCallbackValid01, Function | MediumTest
     DisplayState initialState = DisplayManager::GetInstance().GetDisplayState(defaultId_);
     DisplayState stateToSet = (initialState == DisplayState::OFF ? DisplayState::ON : DisplayState::OFF);
     DisplayManager::GetInstance().SetDisplayState(stateToSet, callback_);
-    sleep(1);
+    CheckDisplayStateCallback(true);
     ASSERT_EQ(true, isDisplayStateCallbackCalled_);
     ASSERT_EQ(state_, stateToSet);
 }
@@ -140,6 +174,7 @@ HWTEST_F(DisplayPowerTest, SetDisplayStateCallbackValid02, Function | MediumTest
 {
     DisplayState initialState = DisplayManager::GetInstance().GetDisplayState(defaultId_);
     DisplayManager::GetInstance().SetDisplayState(initialState, callback_);
+    CheckDisplayStateCallback(false);
     ASSERT_EQ(false, isDisplayStateCallbackCalled_);
 }
 
@@ -152,7 +187,7 @@ HWTEST_F(DisplayPowerTest, WakeUpBeginCallbackValid01, Function | MediumTest | L
 {
     bool ret = DisplayManager::GetInstance().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
-    sleep(1);
+    CheckDisplayPowerEventCallback(true);
     ASSERT_EQ(true, listener_->isCallbackCalled_);
     ASSERT_EQ(DisplayPowerEvent::WAKE_UP, listener_->event_);
     ASSERT_EQ(EventStatus::BEGIN, listener_->status_);
@@ -167,7 +202,7 @@ HWTEST_F(DisplayPowerTest, WakeUpEndCallbackValid01, Function | MediumTest | Lev
 {
     bool ret = DisplayManager::GetInstance().WakeUpEnd();
     ASSERT_EQ(true, ret);
-    sleep(1);
+    CheckDisplayPowerEventCallback(true);
     ASSERT_EQ(true, listener_->isCallbackCalled_);
     ASSERT_EQ(DisplayPowerEvent::WAKE_UP, listener_->event_);
     ASSERT_EQ(EventStatus::END, listener_->status_);
@@ -182,7 +217,7 @@ HWTEST_F(DisplayPowerTest, SuspendBeginCallbackValid01, Function | MediumTest | 
 {
     bool ret = DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
-    sleep(1);
+    CheckDisplayPowerEventCallback(true);
     ASSERT_EQ(true, listener_->isCallbackCalled_);
     ASSERT_EQ(DisplayPowerEvent::SLEEP, listener_->event_);
     ASSERT_EQ(EventStatus::BEGIN, listener_->status_);
@@ -197,7 +232,7 @@ HWTEST_F(DisplayPowerTest, SuspendEndCallbackValid01, Function | MediumTest | Le
 {
     bool ret = DisplayManager::GetInstance().SuspendEnd();
     ASSERT_EQ(true, ret);
-    sleep(1);
+    CheckDisplayPowerEventCallback(true);
     ASSERT_EQ(true, listener_->isCallbackCalled_);
     ASSERT_EQ(DisplayPowerEvent::SLEEP, listener_->event_);
     ASSERT_EQ(EventStatus::END, listener_->status_);
@@ -213,7 +248,7 @@ HWTEST_F(DisplayPowerTest, SetScreenPowerForAllCallbackValid01, Function | Mediu
     bool ret = DisplayManager::GetInstance().SetScreenPowerForAll(DisplayPowerState::POWER_OFF,
         PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
-    sleep(1);
+    CheckDisplayPowerEventCallback(true);
     ASSERT_EQ(true, listener_->isCallbackCalled_);
     ASSERT_EQ(DisplayPowerEvent::DISPLAY_OFF, listener_->event_);
     ASSERT_EQ(EventStatus::END, listener_->status_);
@@ -229,7 +264,7 @@ HWTEST_F(DisplayPowerTest, SetScreenPowerForAllCallbackValid02, Function | Mediu
     bool ret = DisplayManager::GetInstance().SetScreenPowerForAll(DisplayPowerState::POWER_ON,
         PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
-    sleep(1);
+    CheckDisplayPowerEventCallback(true);
     ASSERT_EQ(true, listener_->isCallbackCalled_);
     ASSERT_EQ(DisplayPowerEvent::DISPLAY_ON, listener_->event_);
     ASSERT_EQ(EventStatus::END, listener_->status_);
@@ -244,7 +279,7 @@ HWTEST_F(DisplayPowerTest, SetDisplayStatePowerCallbackValid01, Function | Mediu
 {
     bool ret = DisplayManager::GetInstance().SetDisplayState(DisplayState::OFF, callback_);
     ASSERT_EQ(true, ret);
-    sleep(1);
+    CheckDisplayPowerEventCallback(true);
     ASSERT_EQ(true, listener_->isCallbackCalled_);
     ASSERT_EQ(DisplayPowerEvent::DISPLAY_OFF, listener_->event_);
     ASSERT_EQ(EventStatus::BEGIN, listener_->status_);
@@ -259,7 +294,7 @@ HWTEST_F(DisplayPowerTest, SetDisplayStatePowerCallbackValid02, Function | Mediu
 {
     bool ret = DisplayManager::GetInstance().SetDisplayState(DisplayState::ON, callback_);
     ASSERT_EQ(true, ret);
-    sleep(1);
+    CheckDisplayPowerEventCallback(true);
     ASSERT_EQ(true, listener_->isCallbackCalled_);
     ASSERT_EQ(DisplayPowerEvent::DISPLAY_ON, listener_->event_);
     ASSERT_EQ(EventStatus::BEGIN, listener_->status_);
@@ -291,6 +326,19 @@ HWTEST_F(DisplayPowerTest, SetScreenPowerForAllValid02, Function | MediumTest | 
     ASSERT_EQ(true, ret);
     DisplayPowerState stateGet = DisplayManager::GetInstance().GetScreenPower(defaultId_);
     ASSERT_EQ(stateGet, stateToSet);
+}
+
+/**
+* @tc.name: SetScreenBrightnessValid
+* @tc.desc: Call SetScreenBrightness and check the GetScreenBrightness return value
+* @tc.type: FUNC
+*/
+HWTEST_F(DisplayPowerTest, SetScreenBrightnessValid01, Function | MediumTest | Level2)
+{
+    bool ret = DisplayManager::GetInstance().SetScreenBrightness(defaultId_, brightnessLevel_);
+    ASSERT_EQ(true, ret);
+    uint32_t level = DisplayManager::GetInstance().GetScreenBrightness(defaultId_);
+    ASSERT_EQ(level, brightnessLevel_);
 }
 } // namespace
 } // namespace Rosen
