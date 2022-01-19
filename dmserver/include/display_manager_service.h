@@ -72,7 +72,6 @@ private:
 
     std::recursive_mutex mutex_;
     static inline SingletonDelegator<DisplayManagerService> delegator_;
-    std::map<int32_t, sptr<AbstractDisplay>> abstractDisplayMap_;
     sptr<AbstractScreenController> abstractScreenController_;
     sptr<AbstractDisplayController> abstractDisplayController_;
     DisplayPowerController displayPowerController_;

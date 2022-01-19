@@ -51,6 +51,15 @@ void AbstractDisplayController::Init(sptr<AbstractScreenController> abstractScre
     abstractScreenCallback_->onChanged_
         = std::bind(&AbstractDisplayController::OnAbstractScreenChanged, this, std::placeholders::_1);
     abstractScreenController->RegisterAbstractScreenCallback(abstractScreenCallback_);
+
+    // TODO: Active the code after "rsDisplayNode_->SetScreenId(rsScreenId)" is provided.
+    /*std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (dummyDisplay_ == nullptr) {
+        sptr<AbstractDisplay> display = new AbstractDisplay(displayCount_.fetch_add(1), SCREEN_ID_INVALID,
+            AbstractDisplay::DEFAULT_WIDTH, AbstractDisplay::DEFAULT_HIGHT, AbstractDisplay::DEFAULT_FRESH_RATE);
+        abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
+        dummyDisplay_ = display;
+    }*/
 }
 
 ScreenId AbstractDisplayController::GetDefaultScreenId()
@@ -110,9 +119,9 @@ void AbstractDisplayController::OnAbstractScreenConnected(sptr<AbstractScreen> a
             return;
         }
         if (group->combination_ == ScreenCombination::SCREEN_ALONE) {
-            CreateAndBindDisplayLocked(absScreen);
+            BindAloneScreenLocked(absScreen);
         } else if (group->combination_ == ScreenCombination::SCREEN_MIRROR) {
-            WLOGE("support in future. combination:%{public}ud", group->combination_);
+            AddScreenToMirrorLocked(group, absScreen);
         } else {
             WLOGE("support in future. combination:%{public}ud", group->combination_);
         }
@@ -127,9 +136,35 @@ void AbstractDisplayController::OnAbstractScreenChanged(sptr<AbstractScreen> abs
 {
 }
 
-void AbstractDisplayController::CreateAndBindDisplayLocked(sptr<AbstractScreen> absScreen)
+void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realAbsScreen)
 {
-    WLOGI("create display for new screen id:%{public}" PRIu64"", absScreen->dmsId_);
-    displayCount_++;
+    ScreenId mainScreenId = abstractScreenController_->GetMainAbstractScreenId();
+    if (mainScreenId == SCREEN_ID_INVALID) {
+        if (dummyDisplay_ == nullptr) {
+            sptr<AbstractScreenInfo> info = realAbsScreen->GetActiveScreenInfo();
+            if (info == nullptr) {
+                WLOGE("bind alone screen error, cannot get info.");
+                return;
+            }
+            sptr<AbstractDisplay> display = new AbstractDisplay(displayCount_.fetch_add(1),
+                realAbsScreen->dmsId_, info->width_, info->height_, info->freshRate_);
+            abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
+            WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
+                realAbsScreen->dmsId_, display->GetId());
+        } else {
+            WLOGI("bind display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
+                realAbsScreen->dmsId_, dummyDisplay_->GetId());
+            dummyDisplay_->BindAbstractScreenId(realAbsScreen->dmsId_);
+            dummyDisplay_ = nullptr;
+        }
+    } else {
+        WLOGE("the succedent real screen should be ALONE. %{public}" PRIu64"", realAbsScreen->dmsId_);
+    }
+}
+
+void AbstractDisplayController::AddScreenToMirrorLocked(sptr<AbstractScreenGroup> group,
+    sptr<AbstractScreen> realAbsScreen)
+{
+    WLOGI("bind screen to mirror. screen:%{public}" PRIu64"", realAbsScreen->dmsId_);
 }
 } // namespace OHOS::Rosen

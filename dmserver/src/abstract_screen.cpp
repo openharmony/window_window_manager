@@ -17,8 +17,12 @@
 
 #include "abstract_screen_controller.h"
 #include "display_manager_service.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "AbstractScreen"};
+}
 AbstractScreen::AbstractScreen(ScreenId dmsId, ScreenId rsId)
     : dmsId_(dmsId), rsId_(rsId)
 {
@@ -26,6 +30,15 @@ AbstractScreen::AbstractScreen(ScreenId dmsId, ScreenId rsId)
 
 AbstractScreen::~AbstractScreen()
 {
+}
+
+sptr<AbstractScreenInfo> AbstractScreen::GetActiveScreenInfo() const
+{
+    if (activeIdx_ < 0 && activeIdx_ >= infos_.size()) {
+        WLOGE("active mode index is wrong: %{public}d", activeIdx_);
+        return nullptr;
+    }
+    return infos_[activeIdx_];
 }
 
 sptr<AbstractScreenGroup> AbstractScreen::GetGroup() const
@@ -40,16 +53,40 @@ AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId) : Abstra
 
 AbstractScreenGroup::~AbstractScreenGroup()
 {
+    rsDisplayNode_ = nullptr;
+    children_.clear();
 }
 
-void AbstractScreenGroup::AddChild(ScreenCombination type, sptr<AbstractScreen>& dmsScreen, Point& startPoint)
-{
+bool AbstractScreenGroup::AddChild(ScreenCombination type, sptr<AbstractScreen>& dmsScreen, Point& startPoint)
+{ 
+    struct RSDisplayNodeConfig config;
+    switch (combination_) {
+        case ScreenCombination::SCREEN_ALONE:
+        case ScreenCombination::SCREEN_EXPAND:
+            config = { dmsScreen->rsId_ };
+            break;
+        case ScreenCombination::SCREEN_MIRROR:
+            WLOGE("The feature will be supported in the future");
+            return false;
+        default:
+            WLOGE("fail to add child. invalid group combination:%{public}u", combination_);
+            return false;
+    }
+    std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
+    if (rsDisplayNode == nullptr) {
+        WLOGE("fail to add child. create rsDisplayNode fail!");
+        return false;
+    }
+    children_.push_back(dmsScreen);
+    dmsScreen->rsDisplayNode_ = rsDisplayNode;
+    return true;
 }
 
-void AbstractScreenGroup::AddChild(ScreenCombination type,
+bool AbstractScreenGroup::AddChild(ScreenCombination type,
     std::vector<sptr<AbstractScreen>>& dmsScreens,
     std::vector<Point>& startPoints)
 {
+    return true;
 }
 
 std::vector<sptr<AbstractScreen>> AbstractScreenGroup::GetChildren() const
