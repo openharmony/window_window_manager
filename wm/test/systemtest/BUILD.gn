@@ -20,6 +20,7 @@ group("systemtest") {
 
   deps = [
     ":wm_window_immersive_test",
+    ":wm_window_input_method_test",
     ":wm_window_layout_test",
     ":wm_window_multi_ability_test",
     ":wm_window_split_test",
@@ -81,6 +82,17 @@ ohos_systemtest("wm_window_split_test") {
 }
 
 ## SystemTest wm_window_split_test }}}
+
+## SystemTest window_input_method_test {{{
+ohos_systemtest("wm_window_input_method_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_input_method_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+}
+
+## SystemTest window_input_method_test }}}
 
 ## Build wm_systemtest_common.a {{{
 config("wm_systemtest_common_public_config") {
