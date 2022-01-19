@@ -29,6 +29,17 @@ public:
     MOCK_METHOD1(DestroyVirtualScreen, DMError(ScreenId screenId));
     MOCK_METHOD1(GetDisplaySnapshot, std::shared_ptr<Media::PixelMap>(DisplayId displayId));
     MOCK_METHOD0(Clear, void());
+    MOCK_METHOD2(RegisterDisplayManagerAgent, bool(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+        DisplayManagerAgentType type));
+    MOCK_METHOD2(UnregisterDisplayManagerAgent, bool(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+        DisplayManagerAgentType type));
+    MOCK_METHOD1(WakeUpBegin, bool(PowerStateChangeReason reason));
+    MOCK_METHOD0(WakeUpEnd, bool());
+    MOCK_METHOD1(SuspendBegin, bool(PowerStateChangeReason reason));
+    MOCK_METHOD0(SuspendEnd, bool());
+    MOCK_METHOD2(SetScreenPowerForAll, bool(DisplayPowerState state, PowerStateChangeReason reason));
+    MOCK_METHOD1(SetDisplayState, bool(DisplayState state));
+    MOCK_METHOD1(GetDisplayState, DisplayState(uint64_t displayId));
 };
 }
 } // namespace OHOS

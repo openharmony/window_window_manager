@@ -56,9 +56,9 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
 
-    virtual void RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    virtual bool RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) = 0;
-    virtual void UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    virtual bool UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) = 0;
     virtual bool WakeUpBegin(PowerStateChangeReason reason) = 0;
     virtual bool WakeUpEnd() = 0;

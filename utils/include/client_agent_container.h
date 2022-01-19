@@ -30,8 +30,8 @@ public:
     ClientAgentContainer(std::mutex& mutex);
     virtual ~ClientAgentContainer() = default;
 
-    void RegisterAgentLocked(const sptr<T1>& agent, T2 type);
-    void UnregisterAgentLocked(const sptr<T1>& agent, T2 type);
+    bool RegisterAgentLocked(const sptr<T1>& agent, T2 type);
+    bool UnregisterAgentLocked(const sptr<T1>& agent, T2 type);
     std::vector<sptr<T1>> GetAgentsByType(T2 type);
 
 private:
@@ -60,29 +60,27 @@ ClientAgentContainer<T1, T2>::ClientAgentContainer(std::mutex& mutex)
     std::bind(&ClientAgentContainer<T1, T2>::RemoveAgent, this, std::placeholders::_1))) {}
 
 template<typename T1, typename T2>
-void ClientAgentContainer<T1, T2>::RegisterAgentLocked(const sptr<T1>& agent, T2 type)
+bool ClientAgentContainer<T1, T2>::RegisterAgentLocked(const sptr<T1>& agent, T2 type)
 {
     agentMap_[type].push_back(agent);
     WLOG_I("ClientAgentContainer agent registered type:%{public}u", type);
-    if (deathRecipient_ == nullptr) {
-        WLOG_I("death Recipient is nullptr");
-        return;
-    }
-    if (!agent->AsObject()->AddDeathRecipient(deathRecipient_)) {
+    if (deathRecipient_ == nullptr || !agent->AsObject()->AddDeathRecipient(deathRecipient_)) {
         WLOG_I("ClientAgentContainer failed to add death recipient");
     }
+    return true;
 }
 
 template<typename T1, typename T2>
-void ClientAgentContainer<T1, T2>::UnregisterAgentLocked(const sptr<T1>& agent, T2 type)
+bool ClientAgentContainer<T1, T2>::UnregisterAgentLocked(const sptr<T1>& agent, T2 type)
 {
     if (agent == nullptr || agentMap_.count(type) == 0) {
         WLOG_E("ClientAgentContainer agent or type is invalid");
-        return;
+        return false;
     }
     auto& agents = agentMap_.at(type);
-    UnregisterAgentLocked(agents, agent->AsObject());
+    bool ret = UnregisterAgentLocked(agents, agent->AsObject());
     agent->AsObject()->RemoveDeathRecipient(deathRecipient_);
+    return ret;
 }
 
 template<typename T1, typename T2>
