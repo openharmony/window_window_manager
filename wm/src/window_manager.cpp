@@ -116,6 +116,7 @@ void WindowManager::UnregisterFocusChangedListener(const sptr<IFocusChangedListe
     if (pImpl_->focusChangedListeners_.empty() && pImpl_->focusChangedListenerAgent_ != nullptr) {
         SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);
+        pImpl_->focusChangedListenerAgent_ = nullptr;
     }
 }
 
@@ -153,6 +154,7 @@ void WindowManager::UnregisterSystemBarChangedListener(const sptr<ISystemBarChan
     if (pImpl_->systemBarChangedListeners_.empty() && pImpl_->systemBarChangedListenerAgent_ != nullptr) {
         SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR, pImpl_->systemBarChangedListenerAgent_);
+        pImpl_->systemBarChangedListenerAgent_ = nullptr;
     }
 }
 

@@ -407,6 +407,7 @@ sptr<WindowNode> WindowNodeContainer::GetTopImmersiveNode() const
 void WindowNodeContainer::NotifySystemBarIfChanged()
 {
     DumpScreenWindowTree();
+    WM_FUNCTION_TRACE();
     auto node = GetTopImmersiveNode();
     SystemBarProps props;
     if (node == nullptr) { // use default system bar
