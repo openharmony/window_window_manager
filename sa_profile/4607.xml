@@ -22,5 +22,6 @@
         <run-on-create>true</run-on-create> <!-- "true" means the system ability would start imediately, "false" means the system ability would start on demand. -->
         <distributed>false</distributed> <!-- "true" means the system ability supports distributed scheduling while "false" is not.-->
         <dump-level>1</dump-level> <!-- Declare the dump level. 1-high; 2-media; 3-low -->
+        <bootphase>CoreStartPhase</bootphase>
     </systemability>
 </info>

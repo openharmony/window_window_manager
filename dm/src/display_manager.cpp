@@ -339,7 +339,6 @@ bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
     WLOGFI("screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     if (level > MAX_SCREEN_BRIGHTNESS_VALUE) {
-        level = MAX_SCREEN_BRIGHTNESS_VALUE;
         WLOGFW("level:%{public}u, exceed max value!", level);
         return false;
     }
