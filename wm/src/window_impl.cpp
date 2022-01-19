@@ -646,6 +646,11 @@ void WindowImpl::SetDefaultOption()
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
+        case WindowType::WINDOW_TYPE_KEYGUARD: {
+            RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+            break;
+        }
         case WindowType::WINDOW_TYPE_DRAGGING_EFFECT: {
             property_->SetWindowFlags(0);
             break;

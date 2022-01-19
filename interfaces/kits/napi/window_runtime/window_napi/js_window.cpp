@@ -26,14 +26,34 @@ namespace {
 
 constexpr Rect EMPTY_RECT = {0, 0, 0, 0};
 
+static std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
 JsWindow::JsWindow(const sptr<Window>& window) : windowToken_(window)
 {
+}
+
+JsWindow::~JsWindow()
+{
+    WLOGFI("JsWindow::~JsWindow is called");
+}
+
+std::string JsWindow::GetWindowName()
+{
+    if (windowToken_ == nullptr) {
+        return "";
+    }
+    return windowToken_->GetWindowName();
 }
 
 void JsWindow::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
     WLOGFI("JsWindow::Finalizer is called");
-    std::unique_ptr<JsWindow>(static_cast<JsWindow*>(data));
+    auto jsWin = std::unique_ptr<JsWindow>(static_cast<JsWindow*>(data));
+    std::string windowName = jsWin->GetWindowName();
+    WLOGFI("JsWindow::Finalizer windowName : %{public}s", windowName.c_str());
+    if (g_jsWindowMap.find(windowName) != g_jsWindowMap.end()) {
+        WLOGFI("JsWindow::windowName %{public}s is destroyed", windowName.c_str());
+        g_jsWindowMap.erase(windowName);
+    }
 }
 
 NativeValue* JsWindow::Show(NativeEngine* engine, NativeCallbackInfo* info)
@@ -183,13 +203,18 @@ NativeValue* JsWindow::OnDestroy(NativeEngine& engine, NativeCallbackInfo& info)
     AsyncTask::CompleteCallback complete =
         [this](NativeEngine& engine, AsyncTask& task, int32_t status) {
             WMError ret = windowToken_->Destroy();
-            windowToken_ = nullptr;
-            if (ret == WMError::WM_OK) {
-                task.Resolve(engine, engine.CreateUndefined());
-                WLOGFI("JsWindow::OnDestroy success");
-            } else {
+            if (ret != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "JsWindow::OnDestroy failed."));
+                return;
             }
+            std::string windowName = windowToken_->GetWindowName();
+            if (g_jsWindowMap.find(windowName) != g_jsWindowMap.end()) {
+                g_jsWindowMap.erase(windowName);
+                WLOGFI("JsWindow::OnDestroy windowName %{public}s is destroyed", windowName.c_str());
+            }
+            // FIX ME: windowToken = nullptr in aync task and don't affect other async task
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("JsWindow::OnDestroy success");
         };
 
     NativeValue* lastParam = (info.argc == 0) ? nullptr : info.argv[0];
@@ -789,6 +814,16 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
     return result;
 }
 
+std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
+{
+    WLOGFI("JsWindow::FindJsWindowObject is called");
+    if (g_jsWindowMap.find(windowName) == g_jsWindowMap.end()) {
+        WLOGFI("JsWindow::FindJsWindowObject window %{public}s not exist!", windowName.c_str());
+        return nullptr;
+    }
+    return g_jsWindowMap[windowName];
+}
+
 NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
 {
     WLOGFI("JsWindow::CreateJsWindow is called");
@@ -814,6 +849,10 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     BindNativeFunction(engine, *object, "setSystemBarEnable", JsWindow::SetSystemBarEnable);
     BindNativeFunction(engine, *object, "setSystemBarProperties", JsWindow::SetSystemBarProperties);
     BindNativeFunction(engine, *object, "getAvoidArea", JsWindow::GetAvoidArea);
+    std::shared_ptr<NativeReference> jsWindowRef;
+    jsWindowRef.reset(engine.CreateReference(objValue, 1));
+    std::string windowName = window->GetWindowName();
+    g_jsWindowMap[windowName] = jsWindowRef;
     return objValue;
 }
 }  // namespace Rosen

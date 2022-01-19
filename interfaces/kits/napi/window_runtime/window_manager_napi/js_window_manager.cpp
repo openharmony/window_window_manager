@@ -68,6 +68,9 @@ public:
 
 private:
     std::weak_ptr<Context> context_;
+    std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
+    std::mutex mtx_;
+
     bool GetNativeContext(NativeValue* nativeContext)
     {
         if (nativeContext != nullptr) {
@@ -82,12 +85,9 @@ private:
         return true;
     }
 
-    std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
-    std::mutex mtx_;
-
     NativeValue* OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info)
     {
-        WLOGFI("JsOnCreateWindow is called");
+        WLOGFI("JsWindowManager::JsOnCreateWindow is called");
         if (info.argc <= 0) {
             WLOGFE("parames num not match!");
             return engine.CreateUndefined();
@@ -140,6 +140,7 @@ private:
 
     NativeValue* OnFindWindow(NativeEngine& engine, NativeCallbackInfo& info)
     {
+        WLOGFI("JsWindowManager::JsOnFindWindow is called");
         std::string windowName;
         if (!ConvertFromJsValue(engine, info.argv[0], windowName)) {
             WLOGFE("Failed to convert parameter to windowName");
@@ -148,9 +149,9 @@ private:
 
         AsyncTask::CompleteCallback complete =
             [windowName](NativeEngine& engine, AsyncTask& task, int32_t status) {
-                sptr<Window> window = Window::Find(windowName);
-                if (window != nullptr) {
-                    task.Resolve(engine, CreateJsWindowObject(engine, window));
+                std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
+                if (jsWindowObj != nullptr && jsWindowObj->Get() != nullptr) {
+                    task.Resolve(engine, jsWindowObj->Get());
                     WLOGFI("JsWindowManager::OnFindWindow success");
                 } else {
                     task.Reject(engine, CreateJsError(engine,

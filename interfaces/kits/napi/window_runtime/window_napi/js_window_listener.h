@@ -39,7 +39,7 @@ public:
     void RemoveCallback(NativeValue* jsListenerObject);
     void OnSystemBarPropertyChange(uint64_t displayId, SystemBarProps props) override;
     void OnSizeChange(Rect rect) override;
-    void OnAvoidAreaChanged(const std::vector<Rect> avoidAreas) override;
+    void OnAvoidAreaChanged(std::vector<Rect> avoidAreas) override;
 
 private:
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
