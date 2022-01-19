@@ -13,30 +13,17 @@
 
 import("//build/ohos.gni")
 
-config("libwm_config") {
+config("libwm_private_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
     "include",
-    "//utils/system/safwk/native/include",
-    "//foundation/windowmanager/wmserver/include",
-    "//foundation/windowmanager/dm/include",
-    "//foundation/windowmanager/dmserver/include",
-    "//foundation/windowmanager/utils/include",
+    "../wmserver/include",
 
-    # for abilityContext
+    # todo for abilitycontext need delete it
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/app_manager/include/appmgr",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
-    "//base/global/resmgr_standard/interfaces/innerkits/include",
-    "//third_party/node/deps/icu-small/source/common",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
-    "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/base/include",
-
-    # abilityContext end
-
+    "//foundation/aafwk/standard/interfaces/innerkits/app_manager/include/appmgr",
     "//third_party/jsoncpp/include",
     "//third_party/json/include",
   ]
@@ -50,31 +37,14 @@ config("libwm_config") {
 
 config("libwm_public_config") {
   include_dirs = [
-    "//foundation/windowmanager/interfaces/innerkits/wm",
-    "//foundation/windowmanager/wmserver/include",
-    "//foundation/windowmanager/dm/include",
-    "//foundation/windowmanager/dmserver/include",
-    "//foundation/windowmanager/utils/include",
-    "../interfaces/innerkits/dm",
+    "../interfaces/innerkits/wm",
+    "../utils/include",
   ]
-}
-
-config("libwm_public_config_test") {
-  include_dirs = [ "//foundation/windowmanager/interfaces/innerkits" ]
 }
 
 ## Build libwm.so
 ohos_shared_library("libwm") {
   sources = [
-    "../dm/src/display.cpp",
-    "../dm/src/display_manager.cpp",
-    "../dm/src/display_manager_adapter.cpp",
-    "../dm/src/display_manager_agent.cpp",
-    "../dm/src/screen.cpp",
-    "../dm/src/screen_group.cpp",
-    "../dm/src/screen_manager.cpp",
-    "../dm/src/zidl/display_manager_agent_stub.cpp",
-    "../dmserver/src/display_manager_proxy.cpp",
     "../wmserver/src/window_manager_proxy.cpp",
     "src/input_transfer_station.cpp",
     "src/static_call.cpp",
@@ -92,12 +62,11 @@ ohos_shared_library("libwm") {
     "src/zidl/window_manager_agent_stub.cpp",
   ]
 
-  configs = [ ":libwm_config" ]
+  configs = [ ":libwm_private_config" ]
 
   public_configs = [ ":libwm_public_config" ]
 
   deps = [
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",
@@ -108,35 +77,25 @@ ohos_shared_library("libwm") {
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
     "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core:appexecfwk_core",
     "//foundation/graphic/standard:libsurface",
-    "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",
-  ]
-
-  public_deps = [
-    # native value
-    # RSSurface
-    "//foundation/ace/napi:ace_napi",
-    "//foundation/graphic/standard:libsurface",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
 
     # vsync
     "//foundation/graphic/standard:libvsync_client",
-    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
 
-    # IMS
-    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
-
-    # context
-
-    "//foundation/aafwk/standard/frameworks/kits/appkit:app_context",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
+    # todo need delete it for abilitycontext
+    "//foundation/ace/napi:ace_napi",
   ]
 
   external_deps = [
     "ability_runtime:ability_context_native",
+    "ability_runtime:want",
+    "appexecfwk_standard:appexecfwk_base",
     "bytrace_standard:bytrace_core",
+    "hilog_native:libhilog",
     "inputmethod_native:inputmethod_client",
     "ipc:ipc_core",
+    "multimedia_image_standard:image_native",
+    "multimodalinput_base:libmmi-client",
     "window_manager:libdm",
   ]
 

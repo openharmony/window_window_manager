@@ -16,31 +16,31 @@
 #ifndef OHOS_ROSEN_WINDOW_H
 #define OHOS_ROSEN_WINDOW_H
 
-#include <i_input_event_consumer.h>
-#include <iremote_object.h>
-#include <input_event.h>
 #include <refbase.h>
-#include <ui/rs_surface_node.h>
-#include <key_event.h>
-#include <pointer_event.h>
-#include <axis_event.h>
-#include "foundation/aafwk/standard/frameworks/kits/appkit/native/ability_runtime/context/context.h"
+
 #include "wm_common.h"
 #include "window_option.h"
 #include "window_life_cycle_interface.h"
 
 class NativeValue;
 class NativeEngine;
+namespace OHOS::MMI {
+    struct IInputEventConsumer;
+    class PointerEvent;
+    class KeyEvent;
+}
 namespace OHOS::AppExecFwk {
     class Configuration;
 }
 
 namespace OHOS::AbilityRuntime {
     class AbilityContext;
+    class Context;
 }
 
 namespace OHOS {
 namespace Rosen {
+class RSSurfaceNode;
 class IWindowChangeListener : virtual public RefBase {
 public:
     virtual void OnSizeChange(Rect rect) = 0;

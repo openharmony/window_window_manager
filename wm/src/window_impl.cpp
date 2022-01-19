@@ -16,6 +16,8 @@
 #include "window_impl.h"
 
 #include <cmath>
+#include <ui/rs_surface_node.h>
+
 #include "display_manager.h"
 #include "singleton_container.h"
 #include "window_adapter.h"

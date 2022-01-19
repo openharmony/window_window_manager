@@ -19,13 +19,11 @@
 #include <vector>
 #include <mutex>
 #include <pixel_map.h>
-#include <surface.h>
 
 #include "display.h"
 #include "dm_common.h"
 #include "singleton_delegator.h"
 // #include "wm_common.h"
-
 
 namespace OHOS::Rosen {
 class DisplayManagerAdapter;
