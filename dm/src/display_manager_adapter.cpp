@@ -217,7 +217,7 @@ bool DisplayManagerAdapter::InitDMSProxyLocked()
             WLOGFE("Failed to create death Recipient ptr DMSDeathRecipient");
             return false;
         }
-        if (!remoteObject->AddDeathRecipient(dmsDeath_)) {
+        if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(dmsDeath_)) {
             WLOGFE("Failed to add death recipient");
             return false;
         }
