@@ -171,7 +171,7 @@ std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDispalySnapshot(Display
     return pixelMap;
 }
 
-void DisplayManagerProxy::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+bool DisplayManagerProxy::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
     MessageParcel data;
@@ -179,25 +179,27 @@ void DisplayManagerProxy::RegisterDisplayManagerAgent(const sptr<IDisplayManager
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return;
+        return false;
     }
 
     if (!data.WriteRemoteObject(displayManagerAgent->AsObject())) {
         WLOGFE("Write IDisplayManagerAgent failed");
-        return;
+        return false;
     }
 
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         WLOGFE("Write DisplayManagerAgent type failed");
-        return;
+        return false;
     }
 
     if (Remote()->SendRequest(TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
+        return false;
     }
+    return reply.ReadBool();
 }
 
-void DisplayManagerProxy::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+bool DisplayManagerProxy::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
     MessageParcel data;
@@ -205,22 +207,24 @@ void DisplayManagerProxy::UnregisterDisplayManagerAgent(const sptr<IDisplayManag
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return;
+        return false;
     }
 
     if (!data.WriteRemoteObject(displayManagerAgent->AsObject())) {
         WLOGFE("Write IWindowManagerAgent failed");
-        return;
+        return false;
     }
 
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         WLOGFE("Write DisplayManagerAgent type failed");
-        return;
+        return false;
     }
 
     if (Remote()->SendRequest(TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
+        return false;
     }
+    return reply.ReadBool();
 }
 
 bool DisplayManagerProxy::WakeUpBegin(PowerStateChangeReason reason)

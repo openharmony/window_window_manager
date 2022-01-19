@@ -47,8 +47,8 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
                                         const Media::Size &size, int rotation);
 
-    void RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
-    void UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
+    bool RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
+    bool UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     bool WakeUpBegin(PowerStateChangeReason reason);
     bool WakeUpEnd();
     bool SuspendBegin(PowerStateChangeReason reason);

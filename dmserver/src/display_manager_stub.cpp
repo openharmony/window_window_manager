@@ -87,13 +87,13 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
-            RegisterDisplayManagerAgent(agent, type);
+            reply.WriteBool(RegisterDisplayManagerAgent(agent, type));
             break;
         }
         case TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
-            UnregisterDisplayManagerAgent(agent, type);
+            reply.WriteBool(UnregisterDisplayManagerAgent(agent, type));
             break;
         }
         case TRANS_ID_WAKE_UP_BEGIN: {
