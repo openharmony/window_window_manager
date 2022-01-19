@@ -96,6 +96,7 @@ struct Rect {
 namespace {
     constexpr uint32_t SYSTEM_COLOR_WHITE = 0xFFFFFFE5;
     constexpr uint32_t SYSTEM_COLOR_BLACK = 0x00000066;
+    constexpr float DEFAULT_SPLIT_RATIO = 0.5;
 }
 
 struct SystemBarProperty {
