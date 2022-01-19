@@ -20,14 +20,16 @@ ohos_shared_library("screenshot") {
   deps = [
     "../common:wm_napi_common",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image",
+    "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",
+    "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/utils:libwmutil",
+    "//foundation/windowmanager/wm:libwm",
   ]
 
   external_deps = [
     "ability_runtime:runtime",
     "hiviewdfx_hilog_native:libhilog",
     "napi:ace_napi",
-    "window_manager:libwm",
   ]
 
   relative_install_dir = "module"

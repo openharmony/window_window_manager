@@ -139,7 +139,12 @@ ohos_static_library("wm_systemtest_common") {
 
   public_deps = [
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
+
+    # todo need delete it for abilitycontext
+    "//foundation/ace/napi:ace_napi",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
+    "//foundation/windowmanager/dm:libdm",
+    "//foundation/windowmanager/dmserver:libdms",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/wmserver:libwms",

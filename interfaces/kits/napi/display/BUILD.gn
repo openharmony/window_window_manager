@@ -19,6 +19,7 @@ ohos_shared_library("display") {
 
   deps = [
     "../common:wm_napi_common",
+    "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/wmserver:libwms",
   ]
