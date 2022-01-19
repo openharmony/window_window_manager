@@ -26,6 +26,7 @@
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayManager"};
+    constexpr uint32_t MAX_SCREEN_BRIGHTNESS_VALUE = 100;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -173,42 +174,50 @@ std::vector<const sptr<Display>> DisplayManager::GetAllDisplays()
     return res;
 }
 
-void DisplayManager::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
+bool DisplayManager::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
-        return;
+        return false;
     }
     std::lock_guard<std::mutex> lock(mutex_);
     powerEventListeners_.push_back(listener);
+    bool ret = true;
     if (powerEventListenerAgent_ == nullptr) {
         powerEventListenerAgent_ = new DisplayManagerAgent();
-        SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(powerEventListenerAgent_,
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(powerEventListenerAgent_,
             DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
+        if (!ret) {
+            WLOGFW("RegisterDisplayManagerAgent failed ! remove listener!");
+            powerEventListeners_.pop_back();
+        }
     }
     WLOGFI("RegisterDisplayPowerEventListener end");
+    return ret;
 }
 
-void DisplayManager::UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
+bool DisplayManager::UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
-        return;
+        return false;
     }
 
     std::lock_guard<std::mutex> lock(mutex_);
     auto iter = std::find(powerEventListeners_.begin(), powerEventListeners_.end(), listener);
     if (iter == powerEventListeners_.end()) {
         WLOGFE("could not find this listener");
-        return;
+        return false;
     }
     powerEventListeners_.erase(iter);
+    bool ret = true;
     if (powerEventListeners_.empty() && powerEventListenerAgent_ != nullptr) {
-        SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(powerEventListenerAgent_,
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(powerEventListenerAgent_,
             DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
         powerEventListenerAgent_ = nullptr;
     }
     WLOGFI("UnregisterDisplayPowerEventListener end");
+    return ret;
 }
 
 void DisplayManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
@@ -302,18 +311,19 @@ bool DisplayManager::SetDisplayState(DisplayState state, DisplayStateCallback ca
 {
     WLOGFI("state:%{public}u", state);
     std::lock_guard<std::mutex> lock(mutex_);
-    if (displayStateCallback_ != nullptr) {
-        WLOGFI("previous callback not called, can't reset");
+    if (displayStateCallback_ != nullptr || callback == nullptr) {
+        WLOGFI("previous callback not called or callback invalid");
         return false;
     }
     displayStateCallback_ = callback;
+    bool ret = true;
     if (displayStateAgent_ == nullptr) {
         displayStateAgent_ = new DisplayManagerAgent();
-        SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(displayStateAgent_,
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(displayStateAgent_,
             DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
     }
 
-    bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
+    ret &= SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
     if (!ret) {
         ClearDisplayStateCallback();
     }
@@ -328,6 +338,11 @@ DisplayState DisplayManager::GetDisplayState(uint64_t displayId)
 bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
     WLOGFI("screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    if (level > MAX_SCREEN_BRIGHTNESS_VALUE) {
+        level = MAX_SCREEN_BRIGHTNESS_VALUE;
+        WLOGFW("level:%{public}u, exceed max value!", level);
+        return false;
+    }
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
     return true;
 }
