@@ -161,6 +161,7 @@ WMError WindowController::RequestFocus(uint32_t windowId)
 
 WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
 {
+    WM_FUNCTION_TRACE();
     auto node = windowRoot_->GetWindowNode(windowId);
     WindowMode srcMode = node->GetWindowMode();
     if (node == nullptr) {
