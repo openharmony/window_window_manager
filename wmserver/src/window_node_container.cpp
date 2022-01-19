@@ -658,7 +658,6 @@ sptr<WindowNode> WindowNodeContainer::FindSplitPairNode(sptr<WindowNode>& trigge
 
 WMError WindowNodeContainer::HandleModeChangeToSplit(sptr<WindowNode>& triggerNode)
 {
-    WM_FUNCTION_TRACE();
     WLOGFI("HandleModeChangeToSplit %{public}d", triggerNode->GetWindowId());
     auto pairNode = FindSplitPairNode(triggerNode);
     displayRects_->displayDependRect_ = layoutPolicy_->GetDependDisplayRects(); // get depend display rect for split
@@ -708,6 +707,7 @@ WMError WindowNodeContainer::HandleModeChangeFromSplit(sptr<WindowNode>& trigger
 
 WMError WindowNodeContainer::HandleSplitWindowModeChange(sptr<WindowNode>& triggerNode, bool isChangeToSplit)
 {
+    WM_FUNCTION_TRACE();
     return isChangeToSplit ? HandleModeChangeToSplit(triggerNode) : HandleModeChangeFromSplit(triggerNode);
 }
 
