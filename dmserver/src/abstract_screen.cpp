@@ -21,8 +21,9 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "AbstractScreen"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "AbstractScreenGroup"};
 }
+
 AbstractScreen::AbstractScreen(ScreenId dmsId, ScreenId rsId)
     : dmsId_(dmsId), rsId_(rsId)
 {
@@ -46,7 +47,8 @@ sptr<AbstractScreenGroup> AbstractScreen::GetGroup() const
     return DisplayManagerService::GetInstance().GetAbstractScreenController()->GetAbstractScreenGroup(groupDmsId_);
 }
 
-AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId) : AbstractScreen(dmsId, rsId)
+AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId, ScreenCombination combination)
+    : AbstractScreen(dmsId, rsId), combination_(combination)
 {
     type_ = ScreenType::UNDEFINE;
 }
@@ -54,11 +56,22 @@ AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId) : Abstra
 AbstractScreenGroup::~AbstractScreenGroup()
 {
     rsDisplayNode_ = nullptr;
-    children_.clear();
+    abstractScreenMap_.clear();
 }
 
-bool AbstractScreenGroup::AddChild(ScreenCombination type, sptr<AbstractScreen>& dmsScreen, Point& startPoint)
-{ 
+bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& startPoint)
+{
+    if (dmsScreen == nullptr) {
+        WLOGE("AddChild, dmsScreen is nullptr.");
+        return false;
+    }
+    ScreenId screenId = dmsScreen->dmsId_;
+    auto iter = abstractScreenMap_.find(screenId);
+    if (iter != abstractScreenMap_.end()) {
+        WLOGE("AddChild, abstractScreenMap_ has dmsScreen:%{public}" PRIu64"", screenId);
+        return false;
+    }
+
     struct RSDisplayNodeConfig config;
     switch (combination_) {
         case ScreenCombination::SCREEN_ALONE:
@@ -77,27 +90,59 @@ bool AbstractScreenGroup::AddChild(ScreenCombination type, sptr<AbstractScreen>&
         WLOGE("fail to add child. create rsDisplayNode fail!");
         return false;
     }
-    children_.push_back(dmsScreen);
     dmsScreen->rsDisplayNode_ = rsDisplayNode;
+    abstractScreenMap_.insert(std::make_pair(screenId, std::make_pair(dmsScreen, startPoint)));
     return true;
 }
 
-bool AbstractScreenGroup::AddChild(ScreenCombination type,
-    std::vector<sptr<AbstractScreen>>& dmsScreens,
-    std::vector<Point>& startPoints)
+bool AbstractScreenGroup::AddChildren(std::vector<sptr<AbstractScreen>>& dmsScreens, std::vector<Point>& startPoints)
 {
-    return true;
+    size_t size = dmsScreens.size();
+    if (size != startPoints.size()) {
+        WLOGE("AddChildren, unequal size.");
+        return false;
+    }
+    bool res = true;
+    for (size_t i = 0; i < size; i++) {
+        res &= AddChild(dmsScreens[i], startPoints[i]);
+    }
+    return res;
+}
+
+bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
+{
+    if (dmsScreen == nullptr) {
+        WLOGE("RemoveChild, dmsScreen is nullptr.");
+        return false;
+    }
+    ScreenId screenId = dmsScreen->dmsId_;
+    bool res = abstractScreenMap_.erase(screenId);
+    if (abstractScreenMap_.size() == 1) {
+        combination_ = ScreenCombination::SCREEN_ALONE;
+    }
+    return res;
 }
 
 std::vector<sptr<AbstractScreen>> AbstractScreenGroup::GetChildren() const
 {
-    std::vector<sptr<AbstractScreen>> tmp;
-    return tmp;
+    std::vector<sptr<AbstractScreen>> res;
+    for (auto iter = abstractScreenMap_.begin(); iter != abstractScreenMap_.end(); iter++) {
+        res.push_back(iter->second.first);
+    }
+    return res;
 }
 
 std::vector<Point> AbstractScreenGroup::GetChildrenPosition() const
 {
-    std::vector<Point> tmp;
-    return tmp;
+    std::vector<Point> res;
+    for (auto iter = abstractScreenMap_.begin(); iter != abstractScreenMap_.end(); iter++) {
+        res.push_back(iter->second.second);
+    }
+    return res;
+}
+
+size_t AbstractScreenGroup::GetChildCount() const
+{
+    return abstractScreenMap_.size();
 }
 } // namespace OHOS::Rosen

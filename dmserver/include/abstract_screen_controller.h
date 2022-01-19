@@ -55,10 +55,12 @@ public:
 
 private:
     void OnRsScreenChange(ScreenId rsScreenId, ScreenEvent screenEvent);
+    void ProcessScreenDisconnected(ScreenId rsScreenId);
     bool FillAbstractScreen(sptr<AbstractScreen>& absScreen, ScreenId rsScreenId);
     sptr<AbstractScreenGroup> AddToGroupLocked(sptr<AbstractScreen> newScreen);
+    sptr<AbstractScreenGroup> RemoveFromGroupLocked(sptr<AbstractScreen> newScreen);
     sptr<AbstractScreenGroup> AddAsFirstScreenLocked(sptr<AbstractScreen> newScreen);
-    void AddAsSuccedentScreenLocked(sptr<AbstractScreen> newScreen);
+    sptr<AbstractScreenGroup> AddAsSuccedentScreenLocked(sptr<AbstractScreen> newScreen);
 
     std::recursive_mutex& mutex_;
     OHOS::Rosen::RSInterfaces *rsInterface_;
