@@ -19,10 +19,11 @@
 #include <cinttypes>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
-#include "display_manager_agent_controller.h"
-#include "window_manager_hilog.h"
 
+#include "display_manager_agent_controller.h"
 #include "transaction/rs_interfaces.h"
+#include "window_manager_hilog.h"
+#include "wm_trace.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -90,6 +91,7 @@ DisplayInfo DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 
 ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option)
 {
+    WM_SCOPED_TRACE("dms:CreateVirtualScreen(%s)", option.name_.c_str());
     ScreenId screenId = abstractScreenController_->CreateVirtualScreen(option);
     if (screenId == SCREEN_ID_INVALD) {
         WLOGFE("DisplayManagerService::CreateVirtualScreen: Get virtualScreenId failed");
@@ -100,26 +102,32 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option)
 
 DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
 {
-    WLOGFI("DisplayManagerService::DestroyVirtualScreen");
+    WLOGFI("DestroyVirtualScreen::ScreenId: %{public}" PRIu64 "", screenId);
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("DisplayManagerService: virtualScreenId is invalid");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
+    WM_SCOPED_TRACE("dms:DestroyVirtualScreen(%" PRIu64")", screenId);
     std::map<ScreenId, std::shared_ptr<RSDisplayNode>>::iterator iter = displayNodeMap_.find(screenId);
     if (iter == displayNodeMap_.end()) {
         WLOGFE("DisplayManagerService: displayNode is nullptr");
         return abstractScreenController_->DestroyVirtualScreen(screenId);
     }
     displayNodeMap_[screenId]->RemoveFromTree();
+    WLOGFE("DisplayManagerService: displayNode remove from tree");
     displayNodeMap_.erase(screenId);
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
     return abstractScreenController_->DestroyVirtualScreen(screenId);
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
 {
-    ScreenId screenId = GetScreenIdFromDisplayId(displayId);
+    WM_SCOPED_TRACE("dms:GetDispalySnapshot(%" PRIu64")", displayId);
     std::shared_ptr<Media::PixelMap> screenSnapshot
-        = abstractDisplayController_->GetScreenSnapshot(displayId, screenId);
+        = abstractDisplayController_->GetScreenSnapshot(displayId);
     return screenSnapshot;
 }
 
@@ -206,9 +214,11 @@ sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenControlle
 
 DMError DisplayManagerService::AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId)
 {
-    if (mainScreenId == SCREEN_ID_INVALID) {
+    if (mainScreenId == SCREEN_ID_INVALID || mirrorScreenId == SCREEN_ID_INVALID) {
         return DMError::DM_ERROR_INVALID_PARAM;
     }
+    WM_SCOPED_TRACE("dms:AddMirror");
+    WLOGFI("AddMirror::ScreenId: %{public}" PRIu64 "", mirrorScreenId);
     std::shared_ptr<RSDisplayNode> displayNode =
         SingletonContainer::Get<WindowManagerService>().GetDisplayNode(mainScreenId);
     if (displayNode == nullptr) {
@@ -218,7 +228,7 @@ DMError DisplayManagerService::AddMirror(ScreenId mainScreenId, ScreenId mirrorS
     NodeId nodeId = displayNode->GetId();
 
     struct RSDisplayNodeConfig config = {mirrorScreenId, true, nodeId};
-    displayNodeMap_[mainScreenId] = RSDisplayNode::Create(config);
+    displayNodeMap_[mirrorScreenId] = RSDisplayNode::Create(config);
     auto transactionProxy = RSTransactionProxy::GetInstance();
     transactionProxy->FlushImplicitTransaction();
     WLOGFI("DisplayManagerService::AddMirror: NodeId: %{public}" PRIu64 "", nodeId >> 32);

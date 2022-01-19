@@ -18,7 +18,10 @@ module_out_path = "window_manager/dm"
 group("unittest") {
   testonly = true
 
-  deps = [ ":dm_snapshot_utils_test" ]
+  deps = [
+    ":dm_screenshot_test",
+    ":dm_snapshot_utils_test",
+  ]
 }
 
 ## UnitTest dm_snapshot_utils_test {{{
@@ -34,6 +37,17 @@ ohos_unittest("dm_snapshot_utils_test") {
 }
 
 ## UnitTest dm_snapshot_utils_test }}}
+
+## UnitTest dm_screenshot_test {{{
+ohos_unittest("dm_screenshot_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screenshot_test.cpp" ]
+
+  deps = [ ":dm_unittest_common" ]
+}
+
+## UnitTest dm_screenshot_test }}}
 
 ## Build dm_unittest_common.a {{{
 config("dm_unittest_common_public_config") {

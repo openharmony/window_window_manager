@@ -303,92 +303,6 @@ HWTEST_F(WindowImplTest, SetWindowMode01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: ShowHideWindow01
- * @tc.desc: Show and hide window with add and remove window ok
- * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
- */
-HWTEST_F(WindowImplTest, ShowHideWindow01, Function | SmallTest | Level2)
-{
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-
-    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window_->Show());
-    EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window_->Hide());
-}
-
-/**
- * @tc.name: ShowHideWindow02
- * @tc.desc: Show window with add window WM_ERROR_SAMGR
- * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
- */
-HWTEST_F(WindowImplTest, ShowHideWindow02, Function | SmallTest | Level2)
-{
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-
-    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
-    ASSERT_EQ(WMError::WM_ERROR_SAMGR, window_->Show());
-}
-
-/**
- * @tc.name: ShowHideWindow03
- * @tc.desc: Show window with add window WM_ERROR_IPC_FAILED
- * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
- */
-HWTEST_F(WindowImplTest, ShowHideWindow03, Function | SmallTest | Level3)
-{
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-
-    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_IPC_FAILED));
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, window_->Show());
-}
-
-/**
- * @tc.name: ShowHideWindow04
- * @tc.desc: Show window with add window OK & Hide window with remove window WM_ERROR_SAMGR
- * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
- */
-HWTEST_F(WindowImplTest, ShowHideWindow04, Function | SmallTest | Level3)
-{
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-
-    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window_->Show());
-    EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
-    ASSERT_EQ(WMError::WM_ERROR_SAMGR, window_->Hide());
-}
-
-/**
- * @tc.name: ShowHideWindow05
- * @tc.desc: Hide window with remove window WM_ERROR_IPC_FAILED
- * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
- */
-HWTEST_F(WindowImplTest, ShowHideWindow05, Function | SmallTest | Level3)
-{
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_IPC_FAILED));
-    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, window_->Hide());
-}
-
-/**
- * @tc.name: ShowHideWindow06
- * @tc.desc: Hide window with remove window OK
- * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
- */
-HWTEST_F(WindowImplTest, ShowHideWindow06, Function | SmallTest | Level3)
-{
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window_->Hide());
-}
-
-/**
  * @tc.name: SetWindowMode02
  * @tc.desc: Set window mode to split primary
  * @tc.type: FUNC
@@ -478,6 +392,91 @@ HWTEST_F(WindowImplTest, SetWindowMode05, Function | SmallTest | Level3)
     ASSERT_EQ(WindowMode::WINDOW_MODE_PIP, window->GetMode());
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+/**
+ * @tc.name: ShowHideWindow01
+ * @tc.desc: Show and hide window with add and remove window ok
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVJ
+ */
+HWTEST_F(WindowImplTest, ShowHideWindow01, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window_->Show());
+    EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window_->Hide());
+}
+
+/**
+ * @tc.name: ShowHideWindow02
+ * @tc.desc: Show window with add window WM_ERROR_SAMGR
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVJ
+ */
+HWTEST_F(WindowImplTest, ShowHideWindow02, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, window_->Show());
+}
+
+/**
+ * @tc.name: ShowHideWindow03
+ * @tc.desc: Show window with add window WM_ERROR_IPC_FAILED
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVJ
+ */
+HWTEST_F(WindowImplTest, ShowHideWindow03, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_IPC_FAILED));
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, window_->Show());
+}
+
+/**
+ * @tc.name: ShowHideWindow04
+ * @tc.desc: Show window with add window OK & Hide window with remove window WM_ERROR_SAMGR
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVJ
+ */
+HWTEST_F(WindowImplTest, ShowHideWindow04, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window_->Show());
+    EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, window_->Hide());
+}
+
+/**
+ * @tc.name: ShowHideWindow05
+ * @tc.desc: Hide window with remove window WM_ERROR_IPC_FAILED
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVJ
+ */
+HWTEST_F(WindowImplTest, ShowHideWindow05, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_IPC_FAILED));
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, window_->Hide());
+}
+
+/**
+ * @tc.name: ShowHideWindow06
+ * @tc.desc: Hide window with remove window OK
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVJ
+ */
+HWTEST_F(WindowImplTest, ShowHideWindow06, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
 }
 } // namespace Rosen
