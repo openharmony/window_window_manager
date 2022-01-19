@@ -96,6 +96,7 @@ sptr<Window> WindowInnerManager::CreateWindow(uint32_t displayId, const WindowTy
         sptr<WindowOption> divWindowOp = new WindowOption();
         divWindowOp->SetWindowRect(rect);
         divWindowOp->SetWindowType(type);
+        divWindowOp->SetFocusable(false);
         divWindowOp->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         window = Window::Create("divider" + std::to_string(displayId), divWindowOp);
         if (window == nullptr) {
