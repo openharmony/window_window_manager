@@ -23,18 +23,18 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAgentController)
 
-void DisplayManagerAgentController::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+bool DisplayManagerAgentController::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    dmAgentContainer_.RegisterAgentLocked(displayManagerAgent, type);
+    return dmAgentContainer_.RegisterAgentLocked(displayManagerAgent, type);
 }
 
-void DisplayManagerAgentController::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+bool DisplayManagerAgentController::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    dmAgentContainer_.UnregisterAgentLocked(displayManagerAgent, type);
+    return dmAgentContainer_.UnregisterAgentLocked(displayManagerAgent, type);
 }
 
 bool DisplayManagerAgentController::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)

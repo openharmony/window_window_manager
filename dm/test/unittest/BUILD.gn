@@ -19,10 +19,22 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":dm_display_power_unit_test",
     ":dm_screenshot_test",
     ":dm_snapshot_utils_test",
   ]
 }
+
+## UnitTest dm_display_power_unit_test {{{
+ohos_unittest("dm_display_power_unit_test") {
+  module_out_path = module_out_path
+
+  sources = [ "display_power_unit_test.cpp" ]
+
+  deps = [ ":dm_unittest_common" ]
+}
+
+## UnitTest dm_snapshot_utils_test }}}
 
 ## UnitTest dm_snapshot_utils_test {{{
 ohos_unittest("dm_snapshot_utils_test") {

@@ -26,9 +26,9 @@ namespace Rosen {
 class DisplayManagerAgentController {
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerAgentController)
 public:
-    void RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    bool RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
-    void UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+    bool UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
 
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
