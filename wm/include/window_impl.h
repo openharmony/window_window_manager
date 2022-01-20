@@ -69,6 +69,12 @@ public:
     virtual WMError MoveTo(int32_t x, int32_t y) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
 
+    virtual bool IsDecorEnable() override;
+    virtual WMError Maximize() override;
+    virtual WMError Minimize() override;
+    virtual WMError Recover() override;
+    virtual WMError Close() override;
+
     virtual WMError RequestFocus() const override;
     virtual void AddInputEventListener(std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) override;
 
@@ -141,6 +147,7 @@ private:
     std::unique_ptr<Ace::UIContent> uiContent_;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_; // give up when context offer getToken
     std::shared_ptr<AbilityRuntime::Context> context_;
+    bool isDecorEnable_ = false;
     const float STATUS_BAR_RATIO = 0.07;
     const float NAVIGATION_BAR_RATIO = 0.07;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
