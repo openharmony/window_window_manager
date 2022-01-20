@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "js_window_manager.h"
+#include <ability.h>
 #include "js_runtime_utils.h"
 #include "js_window.h"
 #include "js_window_listener.h"
@@ -66,7 +67,13 @@ public:
         return (me != nullptr) ? me->OnUnregisterWindowManagerCallback(*engine, *info) : nullptr;
     }
 
+    static NativeValue* GetTopWindow(NativeEngine* engine, NativeCallbackInfo* info)
+    {
+        JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(engine, info);
+        return (me != nullptr) ? me->OnGetTopWindow(*engine, *info) : nullptr;
+    }
 private:
+    bool isNewApi_ = true;
     std::weak_ptr<Context> context_;
     std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
@@ -304,6 +311,83 @@ private:
         }
         return engine.CreateUndefined();
     }
+
+    bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability)
+    {
+        napi_value global;
+        auto env = reinterpret_cast<napi_env>(&engine);
+        if (napi_get_global(env, &global) != napi_ok) {
+            WLOGFI("JsWindowManager::GetAPI7Ability get global failed");
+            return false;
+        }
+        napi_value jsAbility;
+        if (napi_get_named_property(env, global, "ability", &jsAbility) != napi_ok) {
+            WLOGFI("JsWindowManager::GetAPI7Ability get global failed");
+            return false;
+        }
+        if (napi_get_value_external(env, jsAbility, reinterpret_cast<void **>(&ability)) != napi_ok) {
+            WLOGFI("JsWindowManager::GetAPI7Ability get global failed");
+            return false;
+        }
+        if (ability == nullptr) {
+            return false;
+        } else {
+            WLOGE("JsWindowManager::GetAPI7Ability ability is %{public}p!", ability);
+        }
+        return true;
+    }
+
+    NativeValue* OnGetTopWindow(NativeEngine& engine, NativeCallbackInfo& info)
+    {
+        NativeValue* nativeContext = nullptr;
+        NativeValue* nativeCallback = nullptr;
+        if (info.argc > 0 && info.argv[0]->TypeOf() == NATIVE_OBJECT) { // (context, callback?)
+            isNewApi_ = true;
+            nativeContext = info.argv[0];
+            nativeCallback = (info.argc == ARGC_ONE) ? nullptr : info.argv[1];
+        } else { // (callback?)
+            isNewApi_ = false;
+            nativeCallback = (info.argc == 0) ? nullptr : info.argv[0];
+        }
+
+        AsyncTask::CompleteCallback complete =
+            [this, weak = context_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+                AppExecFwk::Ability* ability = nullptr;
+                if (!isNewApi_) {
+                    if (!GetAPI7Ability(engine, ability)) {
+                        task.Reject(engine, CreateJsError(engine,
+                            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindow::onGetTopWindow failed."));
+                        WLOGE("JsWindowManager get top windowfailed");
+                        return;
+                    }
+                    sptr<Window> window = ability->GetWindow();
+                    if (window == nullptr) {
+                        task.Reject(engine, CreateJsError(engine,
+                            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindow::onGetTopWindow failed."));
+                        return;
+                    }
+                    auto windowName = window->GetWindowName();
+                    std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
+                    if (jsWindowObj != nullptr && jsWindowObj->Get() != nullptr) {
+                        task.Resolve(engine, jsWindowObj->Get());
+                    } else {
+                        task.Resolve(engine, CreateJsWindowObject(engine, window));
+                    }
+                    WLOGFI("JsWindowManager::OnGetTopWindow success");
+                } else {
+                    auto context = weak.lock();
+                    if (context == nullptr) {
+                        task.Reject(engine, CreateJsError(engine,
+                            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR),
+                                "JsWindow::onGetTopWindow newAPI failed."));
+                    }
+                }
+            };
+        NativeValue* result = nullptr;
+        AsyncTask::Schedule(
+            engine, CreateAsyncTaskWithLastParam(engine, nativeCallback, nullptr, std::move(complete), &result));
+        return result;
+    }
 };
 
 NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
@@ -328,6 +412,7 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "find", JsWindowManager::FindWindow);
     BindNativeFunction(*engine, *object, "on", JsWindowManager::RegisterWindowManagerCallback);
     BindNativeFunction(*engine, *object, "off", JsWindowManager::UnregisterWindowMangerCallback);
+    BindNativeFunction(*engine, *object, "getTopWindow", JsWindowManager::GetTopWindow);
     return engine->CreateUndefined();
 }
 }  // namespace Rosen
