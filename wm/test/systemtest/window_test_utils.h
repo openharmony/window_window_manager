@@ -59,6 +59,7 @@ public:
     static bool RectEqualTo(const sptr<Window>& window, const Rect& r);
     static void InitSplitRects();
     static void UpdateSplitRects(const sptr<Window>& window);
+    static bool RectEqualToRect(const Rect& l, const Rect& r);
 
 private:
     void UpdateLimitDisplayRect(Rect& avoidRect);
