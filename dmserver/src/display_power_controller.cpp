@@ -60,7 +60,7 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
     return true;
 }
 
-DisplayState DisplayPowerController::GetDisplayState(uint64_t displayId)
+DisplayState DisplayPowerController::GetDisplayState(DisplayId displayId)
 {
     return displayState_;
 }

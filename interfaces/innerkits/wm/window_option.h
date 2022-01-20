@@ -18,6 +18,7 @@
 #include <refbase.h>
 #include <string>
 #include <unordered_map>
+
 #include "wm_common.h"
 
 namespace OHOS {
@@ -32,7 +33,7 @@ public:
     void SetWindowMode(WindowMode mode);
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
-    void SetDisplayId(int32_t displayId);
+    void SetDisplayId(DisplayId displayId);
     void SetParentName(const std::string& parentName);
     void SetWindowName(const std::string& windowName);
     void AddWindowFlag(WindowFlag flag);
@@ -45,7 +46,7 @@ public:
     WindowMode GetWindowMode() const;
     bool GetFocusable() const;
     bool GetTouchable() const;
-    int32_t GetDisplayId() const;
+    DisplayId GetDisplayId() const;
     const std::string& GetParentName() const;
     const std::string& GetWindowName() const;
     uint32_t GetWindowFlags() const;
@@ -56,7 +57,7 @@ private:
     WindowMode mode_ { WindowMode::WINDOW_MODE_FULLSCREEN };
     bool focusable_ { true };
     bool touchable_ { true };
-    int32_t displayId_ { 0 };
+    DisplayId displayId_ { 0 };
     std::string parentName_ { "" };
     std::string windowName_ { "" };
     uint32_t flags_ { 0 };

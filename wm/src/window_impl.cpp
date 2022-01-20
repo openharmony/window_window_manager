@@ -613,7 +613,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
-        WLOGFE("get display failed displayId:%{public}d, window id:%{public}u", property_->GetDisplayId(),
+        WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
         return;
     }
@@ -765,13 +765,14 @@ void WindowImpl::SetDefaultOption()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
-        WLOGFE("get display failed displayId:%{public}d, window id:%{public}u", property_->GetDisplayId(),
+        WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
         return;
     }
     uint32_t width = display->GetWidth();
     uint32_t height = display->GetHeight();
-    WLOGFI("width:%{public}u, height:%{public}u, displayId:%{public}d", width, height, property_->GetDisplayId());
+    WLOGFI("width:%{public}u, height:%{public}u, displayId:%{public}" PRIu64"",
+        width, height, property_->GetDisplayId());
 
     Rect rect;
     switch (property_->GetWindowType()) {

@@ -42,13 +42,13 @@ void InputWindowMonitor::UpdateInputWindow(uint32_t windowId)
     if (windowTypeSkipped_.find(windowNode->GetWindowProperty()->GetWindowType()) != windowTypeSkipped_.end()) {
         return;
     }
-    int32_t displayId = windowNode->GetDisplayId();
+    DisplayId displayId = windowNode->GetDisplayId();
     UpdateInputWindowByDisplayId(displayId);
 }
 
-void InputWindowMonitor::UpdateInputWindowByDisplayId(int32_t displayId)
+void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
 {
-    if (displayId == INVALID_DISPLAY_ID) {
+    if (displayId == DISPLAY_ID_INVALD) {
         return;
     }
     auto container = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
@@ -61,7 +61,7 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(int32_t displayId)
     container->TraverseContainer(windowNodes);
     auto iter = std::find_if(logicalDisplays_.begin(), logicalDisplays_.end(),
                              [displayId](MMI::LogicalDisplayInfo& logicalDisplay) {
-        return logicalDisplay.id == displayId;
+        return logicalDisplay.id == static_cast<int32_t>(displayId);
     });
     if (iter != logicalDisplays_.end()) {
         TraverseWindowNodes(windowNodes, iter);
@@ -80,8 +80,8 @@ void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& con
 {
     MMI::PhysicalDisplayInfo physicalDisplayInfo = {
         .id = static_cast<int32_t>(container->GetScreenId()),
-        .leftDisplayId = INVALID_DISPLAY_ID,
-        .upDisplayId = INVALID_DISPLAY_ID,
+        .leftDisplayId = static_cast<int32_t>(DISPLAY_ID_INVALD),
+        .upDisplayId = static_cast<int32_t>(DISPLAY_ID_INVALD),
         .topLeftX = container->GetDisplayRect().posX_,
         .topLeftY = container->GetDisplayRect().posY_,
         .width = static_cast<int32_t>(container->GetDisplayRect().width_),
@@ -144,7 +144,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
             .topLeftY = windowNode->GetLayoutRect().posY_,
             .width = static_cast<int32_t>(windowNode->GetLayoutRect().width_),
             .height = static_cast<int32_t>(windowNode->GetLayoutRect().height_),
-            .displayId = windowNode->GetDisplayId(),
+            .displayId = static_cast<int32_t>(windowNode->GetDisplayId()),
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };
         if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {

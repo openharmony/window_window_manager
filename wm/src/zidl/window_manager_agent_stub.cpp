@@ -37,13 +37,13 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             uint32_t windowId = data.ReadUint32();
             sptr<IRemoteObject> abilityToken = data.ReadRemoteObject();
             WindowType windowType = static_cast<WindowType>(data.ReadUint32());
-            int32_t displayId = data.ReadInt32();
+            DisplayId displayId = data.ReadUint64();
             bool focused = data.ReadBool();
             UpdateFocusStatus(windowId, abilityToken, windowType, displayId, focused);
             break;
         }
         case TRANS_ID_UPDATE_SYSTEM_BAR_PROPS: {
-            uint64_t displayId = data.ReadUint64();
+            DisplayId displayId = data.ReadUint64();
             SystemBarRegionTints tints;
             uint32_t size = data.ReadUint32();
             for (uint32_t i = 0; i < size; i++) {
