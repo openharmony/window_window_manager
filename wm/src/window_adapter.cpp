@@ -205,8 +205,9 @@ bool WindowAdapter::InitWMSProxyLocked()
             WLOGFE("Failed to create death Recipient ptr WMSDeathRecipient");
             return false;
         }
-        if (!remoteObject->AddDeathRecipient(wmsDeath_)) {
-            WLOGFI("Failed to add death recipient");
+        if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(wmsDeath_)) {
+            WLOGFE("Failed to add death recipient");
+            return false;
         }
     }
     return true;
