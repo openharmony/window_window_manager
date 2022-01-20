@@ -500,13 +500,12 @@ void WindowNodeContainer::DisplayRects::InitRect(Rect& oriDisplayRect)
         isVertical_ = true;
     }
     displayRect_ = oriDisplayRect;
-    const uint32_t dividerWidth = 50;
     if (!isVertical_) {
-        dividerRect_ = { static_cast<uint32_t>((displayRect_.width_ - dividerWidth) * DEFAULT_SPLIT_RATIO), 0,
-                dividerWidth, displayRect_.height_ };
+        dividerRect_ = { static_cast<uint32_t>((displayRect_.width_ - DIVIDER_WIDTH) * DEFAULT_SPLIT_RATIO), 0,
+                DIVIDER_WIDTH, displayRect_.height_ };
     } else {
-        dividerRect_ = { 0, static_cast<uint32_t>((displayRect_.height_ - dividerWidth) * DEFAULT_SPLIT_RATIO),
-               displayRect_.width_, dividerWidth };
+        dividerRect_ = { 0, static_cast<uint32_t>((displayRect_.height_ - DIVIDER_WIDTH) * DEFAULT_SPLIT_RATIO),
+               displayRect_.width_, DIVIDER_WIDTH };
     }
     WLOGFI("init dividerRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
         dividerRect_.posX_, dividerRect_.posY_, dividerRect_.width_, dividerRect_.height_);
