@@ -17,6 +17,8 @@
 #define OHOS_ROSEN_WINDOW_IMPL_H
 #include <map>
 #include <ability_context.h>
+#include <i_input_event_consumer.h>
+#include <key_event.h>
 #include <refbase.h>
 #include <ui_content.h>
 #include "input_transfer_station.h"

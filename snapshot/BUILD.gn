@@ -33,6 +33,7 @@ ohos_executable("snapshot_display") {
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
     "//third_party/libpng:libpng",  # png
+    "//utils/native/base:utils",
   ]
 
   part_name = "window_manager"
