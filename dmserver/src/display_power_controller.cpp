@@ -70,6 +70,8 @@ void DisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
     if (event == DisplayEvent::UNLOCK) {
         WLOGFI("DisplayEvent UNLOCK");
         // TODO: WindowManagerServiceInner::GetInstance().RestoreSuspendedWindows();
+        DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DESKTOP_READY,
+            EventStatus::BEGIN);
         return;
     }
     // TODO: set displayState_ ON when keyguard is drawn

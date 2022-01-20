@@ -363,31 +363,20 @@ HWTEST_F(DisplayPowerTest, set_screen_power_for_all_003, Function | MediumTest |
 
 /**
 * @tc.name: set_display_state_power_event_callback_001
-* @tc.desc: Call SetDisplayState OFF and check the OnDisplayPowerEvent callback is called
+* @tc.desc: Call SetDisplayState with a valid value and check the OnDisplayPowerEvent callback is called
 * @tc.type: FUNC
 */
 HWTEST_F(DisplayPowerTest, set_display_state_power_event_callback_001, Function | MediumTest | Level2)
 {
-    bool ret = DisplayManager::GetInstance().SetDisplayState(DisplayState::OFF, callback_);
+    DisplayState initialState = DisplayManager::GetInstance().GetDisplayState(defaultId_);
+    DisplayState stateToSet = (initialState == DisplayState::OFF ? DisplayState::ON : DisplayState::OFF);
+    bool ret = DisplayManager::GetInstance().SetDisplayState(stateToSet, callback_);
     ASSERT_EQ(true, ret);
     CheckDisplayPowerEventCallback(true);
     ASSERT_EQ(true, listener_->isCallbackCalled_);
-    ASSERT_EQ(DisplayPowerEvent::DISPLAY_OFF, listener_->event_);
-    ASSERT_EQ(EventStatus::BEGIN, listener_->status_);
-}
-
-/**
-* @tc.name: set_display_state_power_event_callback_002
-* @tc.desc: Call SetDisplayState ON and check the OnDisplayPowerEvent callback is called
-* @tc.type: FUNC
-*/
-HWTEST_F(DisplayPowerTest, set_display_state_power_event_callback_002, Function | MediumTest | Level2)
-{
-    bool ret = DisplayManager::GetInstance().SetDisplayState(DisplayState::ON, callback_);
-    ASSERT_EQ(true, ret);
-    CheckDisplayPowerEventCallback(true);
-    ASSERT_EQ(true, listener_->isCallbackCalled_);
-    ASSERT_EQ(DisplayPowerEvent::DISPLAY_ON, listener_->event_);
+    DisplayPowerEvent expectedEvent = (stateToSet == DisplayState::OFF ? DisplayPowerEvent::DISPLAY_OFF :
+        DisplayPowerEvent::DISPLAY_ON);
+    ASSERT_EQ(expectedEvent, listener_->event_);
     ASSERT_EQ(EventStatus::BEGIN, listener_->status_);
 }
 

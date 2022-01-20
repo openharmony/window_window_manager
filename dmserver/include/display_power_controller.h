@@ -33,7 +33,7 @@ public:
     void NotifyDisplayEvent(DisplayEvent event);
 
 private:
-    DisplayState displayState_ { DisplayState::ON };
+    DisplayState displayState_ { DisplayState::UNKNOWN };
 };
 }
 }

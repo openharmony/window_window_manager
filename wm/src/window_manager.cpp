@@ -36,7 +36,7 @@ public:
     void NotifySystemBarChanged(uint64_t displayId, const SystemBarProps& props) const;
     static inline SingletonDelegator<WindowManager> delegator_;
 
-    std::mutex mutex_;
+    std::recursive_mutex mutex_;
     std::vector<sptr<IFocusChangedListener>> focusChangedListeners_;
     sptr<WindowManagerAgent> focusChangedListenerAgent_;
     std::vector<sptr<ISystemBarChangedListener>> systemBarChangedListeners_;
@@ -90,7 +90,7 @@ void WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListene
         return;
     }
 
-    std::lock_guard<std::mutex> lock(pImpl_->mutex_);
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->focusChangedListeners_.push_back(listener);
     if (pImpl_->focusChangedListenerAgent_ == nullptr) {
         pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
@@ -106,7 +106,7 @@ void WindowManager::UnregisterFocusChangedListener(const sptr<IFocusChangedListe
         return;
     }
 
-    std::lock_guard<std::mutex> lock(pImpl_->mutex_);
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     auto iter = std::find(pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(), listener);
     if (iter == pImpl_->focusChangedListeners_.end()) {
         WLOGFE("could not find this listener");
@@ -127,7 +127,7 @@ void WindowManager::RegisterSystemBarChangedListener(const sptr<ISystemBarChange
         return;
     }
 
-    std::lock_guard<std::mutex> lock(pImpl_->mutex_);
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->systemBarChangedListeners_.push_back(listener);
     if (pImpl_->systemBarChangedListenerAgent_ == nullptr) {
         pImpl_->systemBarChangedListenerAgent_ = new WindowManagerAgent();
@@ -143,7 +143,7 @@ void WindowManager::UnregisterSystemBarChangedListener(const sptr<ISystemBarChan
         return;
     }
 
-    std::lock_guard<std::mutex> lock(pImpl_->mutex_);
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     auto iter = std::find(pImpl_->systemBarChangedListeners_.begin(), pImpl_->systemBarChangedListeners_.end(),
         listener);
     if (iter == pImpl_->systemBarChangedListeners_.end()) {
