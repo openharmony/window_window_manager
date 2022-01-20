@@ -54,8 +54,7 @@ group("napi_packages") {
   deps = [
     "display:display",
     "screenshot:screenshot",
-    "window:window",
+    "window_runtime:window_napi",
     "window_runtime:window_native_kit",
-    "window_runtime:windowmanager_napi",
   ]
 }

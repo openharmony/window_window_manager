@@ -20,8 +20,8 @@ extern "C" __attribute__((constructor)) void NAPI_application_windowmanager_Auto
 {
     auto moduleManager = NativeModuleManager::GetInstance();
     NativeModule newModuleInfo = {
-        .name = "application.windowmanager",
-        .fileName = "application/libwindowmanager_napi.so/windowmanager.js",
+        .name = "window",
+        .fileName = "module/libwindow_napi.so/window.js",
         .registerCallback = OHOS::Rosen::JsWindowManagerInit,
     };
 

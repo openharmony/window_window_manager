@@ -18,7 +18,7 @@ import { Context } from  './app/context';
  * Window manager.
  * @devices tv, phone, tablet, wearable.
 */
-declare namespace windowmanager {
+declare namespace window {
   enum  WindowType {
     APP_WINDOW_BASE = 1,
     APP_MAIN_WINDOW_BASE = APP_WINDOW_BASE,
@@ -100,7 +100,7 @@ declare namespace windowmanager {
     WINDOW_MODE_PIP
   }
 
-  interface WindowManager {
+  interface Window {
     /**
      * Create a sub window with a specific id and type.
      * @param id Indicates window id.
