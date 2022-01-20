@@ -28,6 +28,13 @@ config("libwms_config") {
     "//foundation/windowmanager/dm/include",
     "//foundation/windowmanager/dmserver/include",
   ]
+
+  if ("${product_name}" == "rk3566" || "${product_name}" == "rk3568" ||
+      "${product_name}" == "Hi3516DV300" || "${product_name}" == "ohos-arm64") {
+    defines = [ "ACE_DISABLE_GL" ]
+  } else {
+    defines = [ "ACE_ENABLE_GL" ]
+  }
 }
 
 ohos_shared_library("libwms") {

@@ -123,6 +123,7 @@ void WindowInnerManager::CreateAndShowDivider()
     }
 
 #ifdef ACE_ENABLE_GL
+    WLOGFI("Draw divider on gpu");
     // init render context
     static bool hasInitRC = false;
     if (!hasInitRC) {
