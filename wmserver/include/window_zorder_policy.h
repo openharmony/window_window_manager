@@ -51,9 +51,9 @@ private:
         { WindowType::WINDOW_TYPE_TOAST,                109 },
         { WindowType::WINDOW_TYPE_STATUS_BAR,           110 },
         { WindowType::WINDOW_TYPE_PANEL,                111 },
-        { WindowType::WINDOW_TYPE_KEYGUARD,             112 },
-        { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,       113 },
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR,       114 },
+        { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,       112 },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR,       113 },
+        { WindowType::WINDOW_TYPE_KEYGUARD,             114 },
         { WindowType::WINDOW_TYPE_DRAGGING_EFFECT,      115 },
         { WindowType::WINDOW_TYPE_POINTER,              116 },
     };
