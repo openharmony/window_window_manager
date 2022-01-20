@@ -21,6 +21,7 @@
 
 #include <input_window_monitor.h>
 #include <nocopyable.h>
+#include <parameters.h>
 #include <system_ability.h>
 #include "singleton_delegator.h"
 #include "wm_single_instance.h"
@@ -80,7 +81,6 @@ private:
     sptr<WindowController> windowController_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
     sptr<SnapshotController> snapshotController_;
-    const int WAITING_RS_TIME = 10;
 };
 }
 }
