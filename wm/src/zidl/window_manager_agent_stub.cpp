@@ -44,15 +44,16 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
         }
         case TRANS_ID_UPDATE_SYSTEM_BAR_PROPS: {
             uint64_t displayId = data.ReadUint64();
-            SystemBarProps props;
+            SystemBarRegionTints tints;
             uint32_t size = data.ReadUint32();
             for (uint32_t i = 0; i < size; i++) {
                 WindowType type = static_cast<WindowType>(data.ReadUint32());
                 SystemBarProperty prop = { data.ReadBool(), data.ReadUint32(), data.ReadUint32() };
-                std::pair<WindowType, SystemBarProperty> item = { type, prop };
-                props.emplace_back(item);
+                Rect region = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
+                SystemBarRegionTint tint(type, prop, region);
+                tints.emplace_back(tint);
             }
-            UpdateSystemBarProperties(displayId, props);
+            UpdateSystemBarRegionTints(displayId, tints);
             break;
         }
         default:

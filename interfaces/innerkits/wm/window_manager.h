@@ -25,6 +25,16 @@
 
 namespace OHOS {
 namespace Rosen {
+struct SystemBarRegionTint {
+    WindowType type_;
+    SystemBarProperty prop_;
+    Rect region_;
+    SystemBarRegionTint() : prop_(SystemBarProperty()) {}
+    SystemBarRegionTint(WindowType type, SystemBarProperty prop, Rect region)
+        : type_(type), prop_(prop), region_(region) {}
+};
+using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
+
 class IFocusChangedListener : public RefBase {
 public:
     virtual void OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
@@ -36,7 +46,7 @@ public:
 
 class ISystemBarChangedListener : virtual public RefBase {
 public:
-    virtual void OnSystemBarPropertyChange(uint64_t displayId, SystemBarProps props) = 0;
+    virtual void OnSystemBarPropertyChange(uint64_t displayId, const SystemBarRegionTints& tints) = 0;
 };
 
 class WindowManager {
@@ -56,7 +66,7 @@ private:
 
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         int32_t displayId, bool focused) const;
-    void UpdateSystemBarProperties(uint64_t displayId, const SystemBarProps& props) const;
+    void UpdateSystemBarRegionTints(uint64_t displayId, const SystemBarRegionTints& tints) const;
 };
 } // namespace Rosen
 } // namespace OHOS
