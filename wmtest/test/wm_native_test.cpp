@@ -56,7 +56,7 @@ uint32_t WMNativeTest::GetLastTime() const
 
 void WMNativeTest::Run(int32_t argc, const char **argv)
 {
-    int displayId = 0;
+    DisplayId displayId = 0;
     sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;

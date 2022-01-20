@@ -171,7 +171,7 @@ bool DisplayManagerAdapter::SetDisplayState(DisplayState state)
     return displayManagerServiceProxy_->SetDisplayState(state);
 }
 
-DisplayState DisplayManagerAdapter::GetDisplayState(uint64_t displayId)
+DisplayState DisplayManagerAdapter::GetDisplayState(DisplayId displayId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {

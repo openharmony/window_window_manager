@@ -353,7 +353,7 @@ bool DisplayManager::SetDisplayState(DisplayState state, DisplayStateCallback ca
     return ret;
 }
 
-DisplayState DisplayManager::GetDisplayState(uint64_t displayId)
+DisplayState DisplayManager::GetDisplayState(DisplayId displayId)
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayState(displayId);
 }

@@ -28,7 +28,7 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    int displayId_ = 0;
+    DisplayId displayId_ = 0;
     std::vector<sptr<Window>> activeWindows_;
     static vector<Rect> fullScreenExpecteds_;
 };

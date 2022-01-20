@@ -37,8 +37,8 @@ public:
     };
 
     virtual void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
-        int32_t displayId, bool focused) = 0;
-    virtual void UpdateSystemBarRegionTints(uint64_t displayId, const SystemBarRegionTints& tints) = 0;
+        DisplayId displayId, bool focused) = 0;
+    virtual void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

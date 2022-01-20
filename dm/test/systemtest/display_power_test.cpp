@@ -70,7 +70,7 @@ sptr<DisplayPowerEventListener> DisplayPowerTest::listener_ = new DisplayPowerEv
 void DisplayPowerTest::SetUpTestCase()
 {
     defaultId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
-    if (defaultId_ == INVALID_DISPLAY_ID) {
+    if (defaultId_ == DISPLAY_ID_INVALD) {
         WLOGFE("GetDefaultDisplayId failed!");
     }
     DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener_);

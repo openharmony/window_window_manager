@@ -156,7 +156,7 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId)
     WLOGFI("[WMS] Destroy: %{public}d", windowId);
     WM_SCOPED_TRACE("wms:DestroyWindow(%d)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    int32_t displayId = INVALID_DISPLAY_ID;
+    DisplayId displayId = DISPLAY_ID_INVALD;
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node != nullptr) {
         displayId = node->GetDisplayId();
@@ -268,7 +268,7 @@ void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType t
     WindowManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
 }
 
-std::shared_ptr<RSDisplayNode> WindowManagerService::GetDisplayNode(int32_t displayId) const
+std::shared_ptr<RSDisplayNode> WindowManagerService::GetDisplayNode(DisplayId displayId) const
 {
     return windowRoot_->GetOrCreateWindowNodeContainer(displayId)->GetDisplayNode();
 }
