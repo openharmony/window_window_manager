@@ -28,7 +28,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapter)
 
 WMError WindowAdapter::SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
@@ -39,7 +39,7 @@ WMError WindowAdapter::SaveAbilityToken(const sptr<IRemoteObject>& abilityToken,
 WMError WindowAdapter::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
     std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
@@ -49,7 +49,7 @@ WMError WindowAdapter::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>&
 
 WMError WindowAdapter::AddWindow(sptr<WindowProperty>& windowProperty)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
@@ -59,7 +59,7 @@ WMError WindowAdapter::AddWindow(sptr<WindowProperty>& windowProperty)
 
 WMError WindowAdapter::RemoveWindow(uint32_t windowId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
@@ -69,7 +69,7 @@ WMError WindowAdapter::RemoveWindow(uint32_t windowId)
 
 WMError WindowAdapter::DestroyWindow(uint32_t windowId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
@@ -79,7 +79,7 @@ WMError WindowAdapter::DestroyWindow(uint32_t windowId)
 
 WMError WindowAdapter::MoveTo(uint32_t windowId, int32_t x, int32_t y)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
@@ -89,7 +89,7 @@ WMError WindowAdapter::MoveTo(uint32_t windowId, int32_t x, int32_t y)
 
 WMError WindowAdapter::Resize(uint32_t windowId, uint32_t width, uint32_t height)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
@@ -99,7 +99,7 @@ WMError WindowAdapter::Resize(uint32_t windowId, uint32_t width, uint32_t height
 
 WMError WindowAdapter::RequestFocus(uint32_t windowId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
@@ -109,7 +109,7 @@ WMError WindowAdapter::RequestFocus(uint32_t windowId)
 
 WMError WindowAdapter::SetWindowFlags(uint32_t windowId, uint32_t flags)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
@@ -119,7 +119,7 @@ WMError WindowAdapter::SetWindowFlags(uint32_t windowId, uint32_t flags)
 
 WMError WindowAdapter::SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
@@ -130,7 +130,7 @@ WMError WindowAdapter::SetSystemBarProperty(uint32_t windowId, WindowType type, 
 void WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return;
@@ -141,7 +141,7 @@ void WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
 void WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return;
@@ -151,7 +151,7 @@ void WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
 
 WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, std::vector<Rect>& avoidRect)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
@@ -162,7 +162,7 @@ WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type,
 
 WMError WindowAdapter::SetWindowMode(uint32_t windowId, WindowMode mode)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
     }
@@ -171,7 +171,7 @@ WMError WindowAdapter::SetWindowMode(uint32_t windowId, WindowMode mode)
 
 WMError WindowAdapter::MinimizeAllAppNodeAbility(uint32_t windowId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
     }
@@ -215,7 +215,7 @@ bool WindowAdapter::InitWMSProxyLocked()
 
 void WindowAdapter::ClearWindowAdapter()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((windowManagerServiceProxy_ != nullptr) && (windowManagerServiceProxy_->AsObject() != nullptr)) {
         windowManagerServiceProxy_->AsObject()->RemoveDeathRecipient(wmsDeath_);
     }

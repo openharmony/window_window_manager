@@ -29,7 +29,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapter)
 
 DisplayId DisplayManagerAdapter::GetDefaultDisplayId()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (defaultDisplayId_ != DISPLAY_ID_INVALD) {
         return defaultDisplayId_;
@@ -45,7 +45,7 @@ DisplayId DisplayManagerAdapter::GetDefaultDisplayId()
 
 sptr<Display> DisplayManagerAdapter::GetDisplayById(DisplayId displayId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     auto iter = displayMap_.find(displayId);
     if (iter != displayMap_.end()) {
@@ -66,7 +66,7 @@ sptr<Display> DisplayManagerAdapter::GetDisplayById(DisplayId displayId)
 
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitDMSProxyLocked()) {
         WLOGFE("displayManagerAdapter::GetDisplaySnapshot: InitDMSProxyLocked failed!");
@@ -99,7 +99,7 @@ DMError DisplayManagerAdapter::DestroyVirtualScreen(ScreenId screenId)
 bool DisplayManagerAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return false;
     }
@@ -109,7 +109,7 @@ bool DisplayManagerAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManag
 bool DisplayManagerAdapter::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return false;
     }
@@ -118,7 +118,7 @@ bool DisplayManagerAdapter::UnregisterDisplayManagerAgent(const sptr<IDisplayMan
 
 bool DisplayManagerAdapter::WakeUpBegin(PowerStateChangeReason reason)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return false;
     }
@@ -127,7 +127,7 @@ bool DisplayManagerAdapter::WakeUpBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerAdapter::WakeUpEnd()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return false;
     }
@@ -136,7 +136,7 @@ bool DisplayManagerAdapter::WakeUpEnd()
 
 bool DisplayManagerAdapter::SuspendBegin(PowerStateChangeReason reason)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return false;
     }
@@ -145,7 +145,7 @@ bool DisplayManagerAdapter::SuspendBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerAdapter::SuspendEnd()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return false;
     }
@@ -154,7 +154,7 @@ bool DisplayManagerAdapter::SuspendEnd()
 
 bool DisplayManagerAdapter::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return false;
     }
@@ -164,7 +164,7 @@ bool DisplayManagerAdapter::SetScreenPowerForAll(DisplayPowerState state, PowerS
 
 bool DisplayManagerAdapter::SetDisplayState(DisplayState state)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return false;
     }
@@ -173,7 +173,7 @@ bool DisplayManagerAdapter::SetDisplayState(DisplayState state)
 
 DisplayState DisplayManagerAdapter::GetDisplayState(uint64_t displayId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return DisplayState::UNKNOWN;
     }
@@ -182,7 +182,7 @@ DisplayState DisplayManagerAdapter::GetDisplayState(uint64_t displayId)
 
 void DisplayManagerAdapter::NotifyDisplayEvent(DisplayEvent event)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return;
     }
@@ -243,7 +243,7 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 void DisplayManagerAdapter::Clear()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((displayManagerServiceProxy_ != nullptr) && (displayManagerServiceProxy_->AsObject() != nullptr)) {
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);
     }

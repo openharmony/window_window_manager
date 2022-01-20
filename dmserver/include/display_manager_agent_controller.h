@@ -38,7 +38,7 @@ private:
     DisplayManagerAgentController() : dmAgentContainer_(mutex_) {}
     virtual ~DisplayManagerAgentController() = default;
 
-    std::mutex mutex_;
+    std::recursive_mutex mutex_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
 };
 }

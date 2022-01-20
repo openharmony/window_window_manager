@@ -60,7 +60,7 @@ private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxyLocked();
 
-    std::mutex mutex_;
+    std::recursive_mutex mutex_;
     sptr<IWindowManager> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
 };
