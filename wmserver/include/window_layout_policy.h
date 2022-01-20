@@ -64,7 +64,10 @@ private:
         WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowType::WINDOW_TYPE_NAVIGATION_BAR,
     };
-    
+    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
+        { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
+    };
     void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
     void UpdateSplitLimitRect(const Rect& limitRect, Rect& limitSplitRect);
     void UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect);

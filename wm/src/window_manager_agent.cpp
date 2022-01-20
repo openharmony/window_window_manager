@@ -25,9 +25,9 @@ void WindowManagerAgent::UpdateFocusStatus(uint32_t windowId, const sptr<IRemote
     SingletonContainer::Get<WindowManager>().UpdateFocusStatus(windowId, abilityToken, windowType, displayId, focused);
 }
 
-void WindowManagerAgent::UpdateSystemBarProperties(uint64_t displayId, const SystemBarProps& props)
+void WindowManagerAgent::UpdateSystemBarRegionTints(uint64_t displayId, const SystemBarRegionTints& tints)
 {
-    SingletonContainer::Get<WindowManager>().UpdateSystemBarProperties(displayId, props);
+    SingletonContainer::Get<WindowManager>().UpdateSystemBarRegionTints(displayId, tints);
 }
 } // namespace Rosen
 } // namespace OHOS
