@@ -163,16 +163,15 @@ void WindowTestUtils::InitSplitRects()
     if (displayRect_.width_ < displayRect_.height_) {
         isVerticalDisplay_ = true;
     }
-    const uint32_t dividerWidth = 50;
     if (isVerticalDisplay_) {
         splitRects_.dividerRect = { 0,
-                                    static_cast<uint32_t>((displayRect_.height_ - dividerWidth) * DEFAULT_SPLIT_RATIO),
+                                    static_cast<uint32_t>((displayRect_.height_ - DIVIDER_WIDTH) * DEFAULT_SPLIT_RATIO),
                                     displayRect_.width_,
-                                    dividerWidth, };
+                                    DIVIDER_WIDTH, };
     } else {
-        splitRects_.dividerRect = { static_cast<uint32_t>((displayRect_.width_ - dividerWidth) * DEFAULT_SPLIT_RATIO),
+        splitRects_.dividerRect = { static_cast<uint32_t>((displayRect_.width_ - DIVIDER_WIDTH) * DEFAULT_SPLIT_RATIO),
                                     0,
-                                    dividerWidth,
+                                    DIVIDER_WIDTH,
                                     displayRect_.height_ };
     }
 }

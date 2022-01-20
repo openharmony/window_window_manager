@@ -147,6 +147,16 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
             .displayId = windowNode->GetDisplayId(),
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };
+        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+            const int32_t divTouchRegion = 20;
+            if (windowInfo.width < windowInfo.height) {
+                windowInfo.topLeftX -= divTouchRegion;
+                windowInfo.width += (divTouchRegion + divTouchRegion);
+            } else {
+                windowInfo.topLeftY -= divTouchRegion;
+                windowInfo.height += (divTouchRegion + divTouchRegion);
+            }
+        }
         iter->windowsInfo_.emplace_back(windowInfo);
     }
 }
