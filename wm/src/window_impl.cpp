@@ -233,6 +233,10 @@ const std::string& WindowImpl::GetContentInfo()
 
 WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
+    WLOGFI("[Client] Window %{public}d SetSystemBarProperty type %{public}d " \
+        "enable:%{public}d, backgroundColor:%{public}x, contentColor:%{public}x ",
+        property_->GetWindowId(), static_cast<uint32_t>(type), property.enable_,
+        property.backgroundColor_, property.contentColor_);
     if (!IsWindowValid()) {
         WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;

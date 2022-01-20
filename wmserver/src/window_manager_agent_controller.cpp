@@ -47,16 +47,16 @@ void WindowManagerAgentController::UpdateFocusStatus(uint32_t windowId, const sp
     }
 }
 
-void WindowManagerAgentController::UpdateSystemBarProperties(uint64_t displayId, const SystemBarProps& props)
+void WindowManagerAgentController::UpdateSystemBarRegionTints(uint64_t displayId, const SystemBarRegionTints& tints)
 {
-    if (props.empty()) {
+    if (tints.empty()) {
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WLOGFI("UpdateSystemBarProperties");
+    WLOGFI("UpdateSystemBarRegionTints");
     for (auto& agent : wmAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR)) {
-        agent->UpdateSystemBarProperties(displayId, props);
+        agent->UpdateSystemBarRegionTints(displayId, tints);
     }
 }
 }
