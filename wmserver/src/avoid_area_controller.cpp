@@ -15,6 +15,7 @@
 
 #include "avoid_area_controller.h"
 #include "window_manager_hilog.h"
+#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -52,6 +53,7 @@ static AvoidPos GetAvoidPosType(const Rect& rect)
 
 WMError AvoidAreaController::AddAvoidAreaNode(const sptr<WindowNode>& node)
 {
+    WM_FUNCTION_TRACE();
     uint32_t windowId = node->GetWindowId();
     auto iter = avoidNodes_.find(windowId);
     if (iter != avoidNodes_.end()) {
@@ -72,6 +74,7 @@ WMError AvoidAreaController::AddAvoidAreaNode(const sptr<WindowNode>& node)
 
 WMError AvoidAreaController::RemoveAvoidAreaNode(const sptr<WindowNode>& node)
 {
+    WM_FUNCTION_TRACE();
     uint32_t windowId = node->GetWindowId();
     auto iter = avoidNodes_.find(windowId);
     if (iter == avoidNodes_.end()) {
@@ -92,6 +95,7 @@ WMError AvoidAreaController::RemoveAvoidAreaNode(const sptr<WindowNode>& node)
 
 WMError AvoidAreaController::UpdateAvoidAreaNode(const sptr<WindowNode>& node)
 {
+    WM_FUNCTION_TRACE();
     uint32_t windowId = node->GetWindowId();
     auto iter = avoidNodes_.find(windowId);
     if (iter == avoidNodes_.end()) {
