@@ -39,7 +39,7 @@ private:
     WindowManagerAgentController() : wmAgentContainer_(mutex_) {}
     virtual ~WindowManagerAgentController() = default;
 
-    std::mutex mutex_;
+    std::recursive_mutex mutex_;
     ClientAgentContainer<IWindowManagerAgent, WindowManagerAgentType> wmAgentContainer_;
 };
 }

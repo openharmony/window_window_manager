@@ -180,7 +180,7 @@ bool DisplayManager::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventLi
         WLOGFE("listener is nullptr");
         return false;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     powerEventListeners_.push_back(listener);
     bool ret = true;
     if (powerEventListenerAgent_ == nullptr) {
@@ -203,7 +203,7 @@ bool DisplayManager::UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEvent
         return false;
     }
 
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(powerEventListeners_.begin(), powerEventListeners_.end(), listener);
     if (iter == powerEventListeners_.end()) {
         WLOGFE("could not find this listener");
@@ -224,7 +224,7 @@ void DisplayManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatu
 {
     WLOGFI("NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu", event, status,
         powerEventListeners_.size());
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto& listener : powerEventListeners_) {
         listener->OnDisplayPowerEvent(event, status);
     }
@@ -233,9 +233,10 @@ void DisplayManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatu
 void DisplayManager::NotifyDisplayStateChanged(DisplayState state)
 {
     WLOGFI("state:%{public}u", state);
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (displayStateCallback_) {
         displayStateCallback_(state);
+        WLOGFW("displayStateCallback_ end");
         ClearDisplayStateCallback();
         return;
     }
@@ -276,11 +277,12 @@ bool DisplayManager::SuspendEnd()
 bool DisplayManager::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
 {
     // TODO: should get all screen ids
+    WLOGFI("state:%{public}u, reason:%{public}u", state, reason);
     ScreenId defaultId = GetDefaultDisplayId();
     if (defaultId == DISPLAY_ID_INVALD) {
+        WLOGFI("defaultId invalid!");
         return false;
     }
-    WLOGFI("state:%{public}u, reason:%{public}u, defaultId:%{public}" PRIu64".", state, reason, defaultId);
     ScreenPowerStatus status;
     switch (state) {
         case DisplayPowerState::POWER_ON: {
@@ -297,6 +299,7 @@ bool DisplayManager::SetScreenPowerForAll(DisplayPowerState state, PowerStateCha
         }
     }
     RSInterfaces::GetInstance().SetScreenPowerStatus(defaultId, status);
+    WLOGFI("SetScreenPowerStatus end");
     return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenPowerForAll(state, reason);
 }
 
@@ -310,7 +313,7 @@ DisplayPowerState DisplayManager::GetScreenPower(uint64_t screenId)
 bool DisplayManager::SetDisplayState(DisplayState state, DisplayStateCallback callback)
 {
     WLOGFI("state:%{public}u", state);
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (displayStateCallback_ != nullptr || callback == nullptr) {
         WLOGFI("previous callback not called or callback invalid");
         return false;
