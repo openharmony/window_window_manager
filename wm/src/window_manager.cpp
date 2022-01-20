@@ -33,7 +33,7 @@ public:
         WindowType windowType, int32_t displayId) const;
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
         WindowType windowType, int32_t displayId) const;
-    void NotifySystemBarChanged(uint64_t displayId, const SystemBarProps& props) const;
+    void NotifySystemBarChanged(uint64_t displayId, const SystemBarRegionTints& tints) const;
     static inline SingletonDelegator<WindowManager> delegator_;
 
     std::recursive_mutex mutex_;
@@ -63,15 +63,17 @@ void WindowManager::Impl::NotifyUnfocused(uint32_t windowId, const sptr<IRemoteO
     }
 }
 
-void WindowManager::Impl::NotifySystemBarChanged(uint64_t displayId, const SystemBarProps& props) const
+void WindowManager::Impl::NotifySystemBarChanged(uint64_t displayId, const SystemBarRegionTints& tints) const
 {
-    for (auto prop : props) {
+    for (auto tint : tints) {
         WLOGFI("type:%{public}d, enable:%{public}d," \
-            "backgroundColor:%{public}x, contentColor:%{public}x",
-            prop.first, prop.second.enable_, prop.second.backgroundColor_, prop.second.contentColor_);
+            "backgroundColor:%{public}x, contentColor:%{public}x " \
+            "region:[%{public}d, %{public}d, %{public}d, %{public}d]",
+            tint.type_, tint.prop_.enable_, tint.prop_.backgroundColor_, tint.prop_.contentColor_,
+            tint.region_.posX_, tint.region_.posY_, tint.region_.width_, tint.region_.height_);
     }
     for (auto& listener : systemBarChangedListeners_) {
-        listener->OnSystemBarPropertyChange(displayId, props);
+        listener->OnSystemBarPropertyChange(displayId, tints);
     }
 }
 
@@ -169,10 +171,10 @@ void WindowManager::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObjec
     }
 }
 
-void WindowManager::UpdateSystemBarProperties(uint64_t displayId,
-    const SystemBarProps& props) const
+void WindowManager::UpdateSystemBarRegionTints(uint64_t displayId,
+    const SystemBarRegionTints& tints) const
 {
-    pImpl_->NotifySystemBarChanged(displayId, props);
+    pImpl_->NotifySystemBarChanged(displayId, tints);
 }
 } // namespace Rosen
 } // namespace OHOS

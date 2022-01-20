@@ -73,8 +73,7 @@ static std::string GetHexColor(uint32_t color)
     return finalColor;
 }
 
-static NativeValue* CreateJsSystemBarRegionTintObject(NativeEngine& engine,
-    WindowType type, const SystemBarProperty& prop)
+static NativeValue* CreateJsSystemBarRegionTintObject(NativeEngine& engine, const SystemBarRegionTint& tint)
 {
     WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintObject is called");
 
@@ -84,35 +83,36 @@ static NativeValue* CreateJsSystemBarRegionTintObject(NativeEngine& engine,
         WLOGFE("Failed to convert SystemBarProperty to jsObject");
         return nullptr;
     }
-    object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(type)));
-    object->SetProperty("isEnable", CreateJsValue(engine, prop.enable_));
-    std::string bkgColor = GetHexColor(prop.backgroundColor_);
+    object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(tint.type_)));
+    object->SetProperty("isEnable", CreateJsValue(engine, tint.prop_.enable_));
+    std::string bkgColor = GetHexColor(tint.prop_.backgroundColor_);
     WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintObject backgroundColir: %{public}s", bkgColor.c_str());
     object->SetProperty("backgroundColor", CreateJsValue(engine, bkgColor));
-    std::string contentColor = GetHexColor(prop.contentColor_);
+    std::string contentColor = GetHexColor(tint.prop_.contentColor_);
     WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintObject contentColor: %{public}s", contentColor.c_str());
     object->SetProperty("contentColor", CreateJsValue(engine, contentColor));
-    Rect rect = {0, 0, 0, 0}; // to fix on next version
+    Rect rect = tint.region_;
     object->SetProperty("region", GetRectAndConvertToJsValue(engine, rect));
+    WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintObject rect: [%{public}d %{public}d %{public}d %{public}d]",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
     return objValue;
 }
 
-NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine,
-    const SystemBarProps& props)
+NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine, const SystemBarRegionTints& tints)
 {
     WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintArrayObject is called");
-    if (props.empty()) {
+    if (tints.empty()) {
         return nullptr;
     }
-    NativeValue* objValue = engine.CreateArray(props.size());
+    NativeValue* objValue = engine.CreateArray(tints.size());
     NativeArray* array = ConvertNativeValueTo<NativeArray>(objValue);
     if (array == nullptr) {
         WLOGFE("Failed to convert SystemBarPropertys to jsArrayObject");
         return nullptr;
     }
     uint32_t index = 0;
-    for (size_t i = 0; i < props.size(); i++) {
-        array->SetElement(index++, CreateJsSystemBarRegionTintObject(engine, props[i].first, props[i].second));
+    for (size_t i = 0; i < tints.size(); i++) {
+        array->SetElement(index++, CreateJsSystemBarRegionTintObject(engine, tints[i]));
     }
     return objValue;
 }

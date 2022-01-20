@@ -91,6 +91,10 @@ struct Rect {
     int32_t posY_;
     uint32_t width_;
     uint32_t height_;
+    bool operator == (const Rect& a) const
+    {
+        return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
+    }
 };
 
 namespace {
@@ -112,8 +116,6 @@ struct SystemBarProperty {
         return (enable_ == a.enable_ && backgroundColor_ == a.backgroundColor_ && contentColor_ == a.contentColor_);
     }
 };
-
-using SystemBarProps = std::vector<std::pair<WindowType, SystemBarProperty>>;
 
 enum class AvoidAreaType : uint32_t {
     TYPE_SYSTEM,           // area of SystemUI

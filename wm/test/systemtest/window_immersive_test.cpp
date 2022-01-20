@@ -25,28 +25,29 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowImmersiveTest"};
 
+    const Rect SYS_BAR_REGION_NULL = { 0, 0, 0, 0 };
     const SystemBarProperty SYS_BAR_PROP_DEFAULT;
     const SystemBarProperty SYS_BAR_PROP_1(true, 0xE5111111, 0xE5222222);
     const SystemBarProperty SYS_BAR_PROP_2(false, 0xE5222222, 0xE5333333);
     const SystemBarProperty SYS_BAR_PROP_3(false, 0xE5333333, 0xE5444444);
     const SystemBarProperty SYS_BAR_PROP_4(true, 0xE5444444, 0x66555555);
-    const SystemBarProps TEST_PROPS_DEFAULT = {
-        { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_DEFAULT },
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_DEFAULT },
+    const SystemBarRegionTints TEST_PROPS_DEFAULT = {
+        { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_DEFAULT, SYS_BAR_REGION_NULL },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_DEFAULT, SYS_BAR_REGION_NULL },
     };
-    const SystemBarProps TEST_PROPS_1 = {
-        { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_1 },
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_2 },
+    const SystemBarRegionTints TEST_PROPS_1 = {
+        { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_1, SYS_BAR_REGION_NULL },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_2, SYS_BAR_REGION_NULL },
     };
-    const SystemBarProps TEST_PROPS_2 = {
-        { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_1 },
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_3 },
+    const SystemBarRegionTints TEST_PROPS_2 = {
+        { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_1, SYS_BAR_REGION_NULL },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_3, SYS_BAR_REGION_NULL },
     };
-    const SystemBarProps TEST_DIFF_PROPS_1_2 = {
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_3 },
+    const SystemBarRegionTints TEST_DIFF_PROPS_1_2 = {
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_3, SYS_BAR_REGION_NULL },
     };
-    const SystemBarProps TEST_DIFF_PROPS_2_1 = {
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_2 },
+    const SystemBarRegionTints TEST_DIFF_PROPS_2_1 = {
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_2, SYS_BAR_REGION_NULL },
     };
 
     const Rect EMPTY_RECT = {0, 0, 0, 0};
@@ -58,8 +59,8 @@ const int WAIT_ASYNC_US = 100000;  // 100000us
 
 class TestSystemBarChangedListener : public ISystemBarChangedListener {
 public:
-    SystemBarProps props_;
-    void OnSystemBarPropertyChange(uint64_t displayId, SystemBarProps props) override;
+    SystemBarRegionTints tints_;
+    void OnSystemBarPropertyChange(uint64_t displayId, const SystemBarRegionTints& tints) override;
 };
 
 class TestAvoidAreaChangedListener : public IAvoidAreaChangedListener {
@@ -74,9 +75,9 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    void SetWindowSystemProps(const sptr<Window>& window, const SystemBarProps& props);
-    bool SystemBarPropsEqualsTo(const SystemBarProps& expect);
-    void DumpFailedInfo(const SystemBarProps& expect);
+    void SetWindowSystemProps(const sptr<Window>& window, const SystemBarRegionTints& props);
+    bool SystemBarPropsEqualsTo(const SystemBarRegionTints& expect);
+    void DumpFailedInfo(const SystemBarRegionTints& expect);
     int displayId_ = 0;
     std::vector<sptr<Window>> activeWindows_;
     static vector<Rect> fullScreenExpecteds_;
@@ -96,51 +97,59 @@ sptr<TestSystemBarChangedListener> WindowImmersiveTest::testSystemBarChangedList
 sptr<TestAvoidAreaChangedListener> WindowImmersiveTest::testAvoidAreaChangedListener_ =
     new TestAvoidAreaChangedListener();
 
-void WindowImmersiveTest::SetWindowSystemProps(const sptr<Window>& window, const SystemBarProps& props)
+void WindowImmersiveTest::SetWindowSystemProps(const sptr<Window>& window, const SystemBarRegionTints& tints)
 {
-    for (auto prop : props) {
-        window->SetSystemBarProperty(prop.first, prop.second);
+    for (auto tint : tints) {
+        window->SetSystemBarProperty(tint.type_, tint.prop_);
     }
 }
 
-void WindowImmersiveTest::DumpFailedInfo(const SystemBarProps& expect)
+void WindowImmersiveTest::DumpFailedInfo(const SystemBarRegionTints& expect)
 {
-    auto act = testSystemBarChangedListener_->props_;
+    auto act = testSystemBarChangedListener_->tints_;
     WLOGFI("WindowImmersiveTest Expected:");
-    for (auto prop : expect) {
+    for (auto tint : expect) {
         WLOGFI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
-            static_cast<uint32_t>(prop.first), prop.second.enable_, prop.second.backgroundColor_,
-            prop.second.contentColor_);
+            static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
+            tint.prop_.backgroundColor_, tint.prop_.contentColor_);
     }
     WLOGFI("WindowImmersiveTest Act: ");
-    for (auto prop : act) {
+    for (auto tint : act) {
         WLOGFI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
-            static_cast<uint32_t>(prop.first), prop.second.enable_, prop.second.backgroundColor_,
-            prop.second.contentColor_);
+            static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
+            tint.prop_.backgroundColor_, tint.prop_.contentColor_);
     }
 }
 
-bool WindowImmersiveTest::SystemBarPropsEqualsTo(const SystemBarProps& expect)
+bool WindowImmersiveTest::SystemBarPropsEqualsTo(const SystemBarRegionTints& expect)
 {
     usleep(WAIT_ASYNC_US);
-    auto act = testSystemBarChangedListener_->props_;
+    auto act = testSystemBarChangedListener_->tints_;
     if (act.size() != expect.size()) {
         DumpFailedInfo(expect);
         return false;
     }
     for (auto item : expect) {
-        if (std::find(act.begin(), act.end(), item) == act.end()) {
+        bool check = false;
+        for (auto tint : act) {
+            if (item.prop_ == tint.prop_ && item.type_ == tint.type_) {
+                check = true;
+                break;
+            }
+        }
+        if (!check) {
             DumpFailedInfo(expect);
             return false;
         }
+        check = false;
     }
     return true;
 }
 
-void TestSystemBarChangedListener::OnSystemBarPropertyChange(uint64_t displayId, SystemBarProps props)
+void TestSystemBarChangedListener::OnSystemBarPropertyChange(uint64_t displayId, const SystemBarRegionTints& tints)
 {
     WLOGFI("TestSystemBarChangedListener Display ID: %{public}" PRIu64"", displayId);
-    props_ = props;
+    tints_ = tints;
 }
 
 void TestAvoidAreaChangedListener::OnAvoidAreaChanged(std::vector<Rect> avoidAreas)

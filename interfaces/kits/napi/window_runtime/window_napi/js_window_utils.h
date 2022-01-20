@@ -19,6 +19,7 @@
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "window.h"
+#include "window_manager.h"
 #include "window_option.h"
 #include "wm_common.h"
 namespace OHOS {
@@ -40,7 +41,7 @@ namespace {
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         NativeEngine& engine, NativeCallbackInfo& info, sptr<Window>& window);
     NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine,
-        const SystemBarProps& props);
+        const SystemBarRegionTints& tints);
     NativeValue* ChangeAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avoidArea);
 }
 }

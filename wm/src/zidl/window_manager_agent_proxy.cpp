@@ -63,7 +63,7 @@ void WindowManagerAgentProxy::UpdateFocusStatus(uint32_t windowId, const sptr<IR
     }
 }
 
-void WindowManagerAgentProxy::UpdateSystemBarProperties(uint64_t displayId, const SystemBarProps& props)
+void WindowManagerAgentProxy::UpdateSystemBarRegionTints(uint64_t displayId, const SystemBarRegionTints& tints)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -78,21 +78,27 @@ void WindowManagerAgentProxy::UpdateSystemBarProperties(uint64_t displayId, cons
         return;
     }
 
-    auto size = props.size();
+    auto size = tints.size();
     if (!data.WriteUint32(static_cast<uint32_t>(size))) {
         WLOGFE("Write vector size failed");
         return;
     }
-    for (auto it : props) {
+    for (auto it : tints) {
         // write key(type)
-        if (!data.WriteUint32(static_cast<uint32_t>(it.first))) {
+        if (!data.WriteUint32(static_cast<uint32_t>(it.type_))) {
             WLOGFE("Write type failed");
             return;
         }
-        // write val(sysBarProps)
-        if (!(data.WriteBool(it.second.enable_) && data.WriteUint32(it.second.backgroundColor_) &&
-            data.WriteUint32(it.second.contentColor_))) {
-            WLOGFE("Write sysBarProp failed");
+        // write val(prop)
+        if (!(data.WriteBool(it.prop_.enable_) && data.WriteUint32(it.prop_.backgroundColor_) &&
+            data.WriteUint32(it.prop_.contentColor_))) {
+            WLOGFE("Write prop failed");
+            return;
+        }
+        // write val(region)
+        if (!(data.WriteInt32(it.region_.posX_) && data.WriteInt32(it.region_.posY_) &&
+            data.WriteInt32(it.region_.width_) && data.WriteInt32(it.region_.height_))) {
+            WLOGFE("Write region failed");
             return;
         }
     }
