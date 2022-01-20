@@ -26,8 +26,6 @@
 #include "screen.h"
 
 namespace OHOS::Rosen {
-constexpr static ScreenId SCREEN_ID_INVALID = INVALID_SCREEN_ID;
-
 enum class ScreenCombination : uint32_t {
     SCREEN_ALONE,
     SCREEN_EXPAND,
@@ -74,6 +72,7 @@ public:
     bool AddChild(sptr<AbstractScreen>& dmsScreen, Point& startPoint);
     bool AddChildren(std::vector<sptr<AbstractScreen>>& dmsScreens, std::vector<Point>& startPoints);
     bool RemoveChild(sptr<AbstractScreen>& dmsScreen);
+    bool HasChild(ScreenId childScreen) const;
     std::vector<sptr<AbstractScreen>> GetChildren() const;
     std::vector<Point> GetChildrenPosition() const;
     size_t GetChildCount() const;
