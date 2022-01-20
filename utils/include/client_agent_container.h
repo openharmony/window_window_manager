@@ -27,7 +27,7 @@ namespace Rosen {
 template <typename T1, typename T2>
 class ClientAgentContainer {
 public:
-    ClientAgentContainer(std::mutex& mutex);
+    ClientAgentContainer(std::recursive_mutex& mutex);
     virtual ~ClientAgentContainer() = default;
 
     bool RegisterAgentLocked(const sptr<T1>& agent, T2 type);
@@ -49,13 +49,13 @@ private:
         sptr<IRemoteObject> remoteObject_;
     };
 
-    std::mutex& mutex_;
+    std::recursive_mutex& mutex_;
     std::map<T2, std::vector<sptr<T1>>> agentMap_;
     sptr<AgentDeathRecipient> deathRecipient_;
 };
 
 template<typename T1, typename T2>
-ClientAgentContainer<T1, T2>::ClientAgentContainer(std::mutex& mutex)
+ClientAgentContainer<T1, T2>::ClientAgentContainer(std::recursive_mutex& mutex)
     : mutex_(mutex), deathRecipient_(new AgentDeathRecipient(
     std::bind(&ClientAgentContainer<T1, T2>::RemoveAgent, this, std::placeholders::_1))) {}
 
@@ -111,7 +111,7 @@ template<typename T1, typename T2>
 void ClientAgentContainer<T1, T2>::RemoveAgent(const sptr<IRemoteObject>& remoteObject)
 {
     WLOG_I("ClientAgentContainer RemoveAgent");
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto& elem : agentMap_) {
         if (UnregisterAgentLocked(elem.second, remoteObject)) {
             break;

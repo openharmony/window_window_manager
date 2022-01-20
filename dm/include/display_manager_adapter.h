@@ -17,6 +17,7 @@
 #define FOUNDATION_DM_DISPLAY_MANAGER_ADAPTER_H
 
 #include <map>
+#include <mutex>
 #include <surface.h>
 
 #include "display.h"
@@ -61,7 +62,7 @@ private:
 
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 
-    std::mutex mutex_;
+    std::recursive_mutex mutex_;
     sptr<IDisplayManager> displayManagerServiceProxy_ = nullptr;
     sptr<DMSDeathRecipient> dmsDeath_ = nullptr;
     std::map<DisplayId, sptr<Display>> displayMap_;
