@@ -74,6 +74,7 @@ ohos_shared_library("libwm") {
     "//utils/native/base:utils",
 
     # ace
+    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
     "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_core:appexecfwk_core",
     "//foundation/graphic/standard:libsurface",
