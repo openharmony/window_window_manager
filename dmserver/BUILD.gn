@@ -70,6 +70,12 @@ ohos_shared_library("libdms") {
     "ipc:ipc_core",
   ]
 
+  if (is_standard_system) {
+    external_deps += [ "startup_l2:syspara" ]
+  } else {
+    external_deps += [ "startup:syspara" ]
+  }
+
   part_name = "window_manager"
   subsystem_name = "window"
 }
