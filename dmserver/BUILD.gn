@@ -52,12 +52,13 @@ ohos_shared_library("libdms") {
   deps = [
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/utils:libwmutil",
     "//utils/native/base:utils",
 
     # RSSurface
     "//foundation/graphic/standard:libsurface",
-    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
 
     # todo need delete it
     "//foundation/windowmanager/wmserver:libwms",
@@ -67,7 +68,6 @@ ohos_shared_library("libdms") {
     "bytrace_standard:bytrace_core",
     "hilog_native:libhilog",
     "ipc:ipc_core",
-    "window_manager:libdm",
   ]
 
   part_name = "window_manager"

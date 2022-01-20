@@ -14,6 +14,8 @@
  */
 
 #include <window.h>
+#include <i_input_event_consumer.h>
+#include <key_event.h>
 #include "refbase.h"
 #include "vsync_station.h"
 #ifndef OHOS_WINDOW_INPUT_CHANNEL
