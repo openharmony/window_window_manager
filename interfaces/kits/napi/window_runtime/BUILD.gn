@@ -61,7 +61,7 @@ ohos_shared_library("window_native_kit") {
   subsystem_name = "window"
 }
 
-ohos_shared_library("windowmanager_napi") {
+ohos_shared_library("window_napi") {
   sources = [
     "window_manager_napi/js_window_manager.cpp",
     "window_manager_napi/window_manager_module.cpp",
@@ -84,7 +84,7 @@ ohos_shared_library("windowmanager_napi") {
     "napi:ace_napi",
   ]
 
-  relative_install_dir = "module/application"
+  relative_install_dir = "module"
 
   part_name = "window_manager"
   subsystem_name = "window"
