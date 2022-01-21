@@ -73,12 +73,14 @@ ohos_shared_library("window_napi") {
     "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
     "//foundation/aafwk/standard/frameworks/kits/appkit:app_context",
     "//foundation/aafwk/standard/frameworks/kits/appkit:appkit_native",
+    "//foundation/aafwk/standard/interfaces/innerkits/want:want",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/wmserver:libwms",
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "ability_runtime:runtime",
     "hiviewdfx_hilog_native:libhilog",
     "napi:ace_napi",

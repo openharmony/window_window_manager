@@ -14,6 +14,8 @@
  */
 
 #include "window_scene.h"
+#include <configuration.h>
+
 #include "static_call.h"
 #include "window_impl.h"
 #include "window_manager_hilog.h"
