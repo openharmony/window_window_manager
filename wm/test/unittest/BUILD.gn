@@ -140,6 +140,8 @@ config("wm_unittest_common_public_config") {
     "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
     "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
     "//foundation/aafwk/standard/interfaces/innerkits/base/include",
+    "//third_party/jsoncpp/include",
+    "//third_party/json/include",
 
     # abilityContext end
   ]
@@ -163,8 +165,10 @@ ohos_static_library("wm_unittest_common") {
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
 
     # todo need delete it for abilitycontext
+    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/ace/napi:ace_napi",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/dmserver:libdms",

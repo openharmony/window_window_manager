@@ -73,35 +73,29 @@ ohos_shared_library("libwms") {
   configs = [ ":libwms_config" ]
 
   deps = [
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
-    "//base/notification/ces_standard/frameworks/native:cesfwk_innerkits",
-    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//foundation/graphic/standard:libsurface",
-    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
+    "//foundation/ace/ace_engine/build/external_config/flutter/skia:ace_skia_ohos",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
-    "//utils/native/base:utils",
   ]
 
   public_deps = [
-    # ability manager
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
-    "//foundation/aafwk/standard/interfaces/innerkits/want:want",
-    "//foundation/graphic/standard:libsurface",
-    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
-
-    # RSSurface
-    "//foundation/ace/ace_engine/build/external_config/flutter/skia:ace_skia_ohos",
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
-
-    # IMS
+    # IMS libdms need delete it
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/windowmanager/utils:libwmutil",
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
+    "ability_runtime:want",
     "bytrace_standard:bytrace_core",
+    "ces_standard:cesfwk_innerkits",
+    "graphic_standard:surface",
+    "hilog_native:libhilog",
     "ipc:ipc_core",
+    "multimodalinput_base:libmmi-client",
+    "safwk:system_ability_fwk",
+    "samgr_standard:samgr_proxy",
+    "utils_base:utils",
   ]
 
   part_name = "window_manager"

@@ -14,8 +14,6 @@
 import("//build/ohos.gni")
 
 config("libdm_private_config") {
-  visibility = [ ":*" ]
-
   include_dirs = [
     "include",
     "../dmserver/include",
@@ -54,19 +52,17 @@ ohos_shared_library("libdm") {
   public_configs = [ ":libdm_public_config" ]
 
   deps = [
-    # RSSurface
-    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",
     "//foundation/windowmanager/utils:libwmutil",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "hilog_native:libhilog",
     "ipc:ipc_core",
+    "multimedia_image_standard:image_native",
+    "safwk:system_ability_fwk",
+    "samgr_standard:samgr_proxy",
+    "utils_base:utils",
   ]
 
   part_name = "window_manager"
