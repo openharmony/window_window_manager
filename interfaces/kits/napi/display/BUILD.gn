@@ -20,9 +20,12 @@ ohos_shared_library("display") {
   deps = [
     "../common:wm_napi_common",
     "//foundation/windowmanager/dm:libdm",
+    "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/wmserver:libwms",
   ]
+
+  external_deps = [ "multimedia_image_standard:image_native" ]
 
   relative_install_dir = "module"
   part_name = "window_manager"

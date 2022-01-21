@@ -12,6 +12,23 @@
       "ram": {},
       "deps": {
         "components": [
+          "libhilog",
+          "ipc_core",
+          "system_ability_fwk",
+          "samgr_proxy",
+          "image_native",
+          "utils",
+          "bytrace_core",
+          "surface",
+          "ability_context_native",
+          "ability_manager",
+          "want",
+          "ace_uicontent",
+          "appexecfwk_base",
+          "appexecfwk_core",
+          "inputmethod_client",
+          "libmmi-client",
+          "ace_napi"
         ],
         "third_party": [
         ]

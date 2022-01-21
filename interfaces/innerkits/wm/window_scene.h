@@ -18,10 +18,13 @@
 
 #include <refbase.h>
 #include <iremote_object.h>
-#include <configuration.h>
 
 #include "window.h"
 #include "window_option.h"
+
+namespace OHOS::AppExecFwk {
+    class Configuration;
+}
 
 namespace OHOS {
 namespace Rosen {
