@@ -102,6 +102,7 @@ ohos_static_library("dm_systemtest_common") {
   public_configs = [ ":dm_systemtest_common_public_config" ]
 
   public_deps = [
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/dmserver:libdms",

@@ -55,7 +55,6 @@ ohos_executable("rosenwmtest") {
   configs = [ ":rosenwmtest_config" ]
 
   deps = [
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//foundation/graphic/standard:libvsync_client",
     "//foundation/graphic/standard:libwmclient",
     "//foundation/graphic/standard:libwmservice",
@@ -69,6 +68,8 @@ ohos_executable("rosenwmtest") {
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
     "//foundation/ace/napi:ace_napi",
   ]
+
+  external_deps = [ "samgr_standard:samgr_proxy" ]
 
   part_name = "window_manager"
   subsystem_name = "window"
