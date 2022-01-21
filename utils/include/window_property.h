@@ -44,6 +44,7 @@ public:
     void SetParentId(uint32_t parentId);
     void SetWindowFlags(uint32_t flags);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& state);
+    void SetDecorEnable(bool decorEnable);
 
     Rect GetWindowRect() const;
     WindowType GetWindowType() const;
@@ -59,6 +60,7 @@ public:
     uint32_t GetParentId() const;
     uint32_t GetWindowFlags() const;
     const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
+    bool GetDecorEnable() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static sptr<WindowProperty> Unmarshalling(Parcel& parcel);
@@ -81,6 +83,7 @@ private:
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
+    bool isDecorEnable_ { false };
     bool MapMarshalling(Parcel& parcel) const;
     static void MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& property);
 };
