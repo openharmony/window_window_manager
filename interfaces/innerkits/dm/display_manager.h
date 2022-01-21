@@ -19,11 +19,11 @@
 #include <vector>
 #include <mutex>
 #include <pixel_map.h>
+#include <surface.h>
 
 #include "display.h"
 #include "dm_common.h"
-#include "singleton_delegator.h"
-// #include "wm_common.h"
+#include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
 class DisplayManagerAdapter;
@@ -62,19 +62,12 @@ public:
 private:
     DisplayManager();
     ~DisplayManager();
-    bool CheckRectValid(const Media::Rect &rect, int32_t oriHeight, int32_t oriWidth) const;
-    bool CheckSizeValid(const Media::Size &size, int32_t oriHeight, int32_t oriWidth) const;
+
+    class Impl;
+    sptr<Impl> pImpl_;
+
     void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
     void NotifyDisplayStateChanged(DisplayState state);
-    void ClearDisplayStateCallback();
-
-    static inline SingletonDelegator<DisplayManager> delegator;
-    const int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 15360; // max resolution, 16K
-    std::recursive_mutex mutex_;
-    std::vector<sptr<IDisplayPowerEventListener>> powerEventListeners_;
-    sptr<DisplayManagerAgent> powerEventListenerAgent_;
-    sptr<DisplayManagerAgent> displayStateAgent_;
-    DisplayStateCallback displayStateCallback_;
 };
 } // namespace OHOS::Rosen
 
