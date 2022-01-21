@@ -97,7 +97,7 @@ public:
         NativeValue* storage, bool isdistributed = false) = 0;
     virtual const std::string& GetContentInfo() = 0;
 
-    virtual bool IsDecorEnable() = 0;
+    virtual bool IsDecorEnable() const = 0;
     virtual WMError Maximize() = 0;
     virtual WMError Minimize() = 0;
     virtual WMError Recover() = 0;

@@ -218,9 +218,9 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         return WMError::WM_ERROR_NULLPTR;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        isDecorEnable_ = true;
+        property_->SetDecorEnable(true);
     } else {
-        isDecorEnable_ = false;
+        property_->SetDecorEnable(false);
     }
     if (isdistributed) {
         uiContent_->Restore(this, contentInfo, storage);
@@ -426,9 +426,9 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
     return SingletonContainer::Get<WindowAdapter>().Resize(property_->GetWindowId(), width, height);
 }
 
-bool WindowImpl::IsDecorEnable()
+bool WindowImpl::IsDecorEnable() const
 {
-    return isDecorEnable_;
+    return property_->GetDecorEnable();
 }
 
 WMError WindowImpl::Maximize()

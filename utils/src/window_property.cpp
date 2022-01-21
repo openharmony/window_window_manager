@@ -86,6 +86,11 @@ void WindowProperty::SetSystemBarProperty(WindowType type, const SystemBarProper
     }
 }
 
+void WindowProperty::SetDecorEnable(bool decorEnable)
+{
+    isDecorEnable_ = decorEnable;
+}
+
 void WindowProperty::ResumeLastWindowMode()
 {
     mode_ = lastMode_;
@@ -149,6 +154,11 @@ uint32_t WindowProperty::GetWindowFlags() const
 const std::unordered_map<WindowType, SystemBarProperty>& WindowProperty::GetSystemBarProperty() const
 {
     return sysBarPropMap_;
+}
+
+bool WindowProperty::GetDecorEnable() const
+{
+    return isDecorEnable_;
 }
 
 // TODO
@@ -272,6 +282,11 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
     if (!MapMarshalling(parcel)) {
         return false;
     }
+
+    // write isDecorEnable_
+    if (!parcel.WriteBool(isDecorEnable_)) {
+        return false;
+    }
     return true;
 }
 
@@ -293,6 +308,7 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowId(parcel.ReadUint32());
     property->SetParentId(parcel.ReadUint32());
     MapUnmarshalling(parcel, property);
+    property->SetDecorEnable(parcel.ReadBool());
     return property;
 }
 }
