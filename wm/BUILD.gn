@@ -90,6 +90,7 @@ ohos_shared_library("libwm") {
     "multimedia_image_standard:image_native",
     "multimodalinput_base:libmmi-client",
     "napi:ace_napi",
+    "resmgr_standard:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
     "utils_base:utils",
