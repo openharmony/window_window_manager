@@ -30,7 +30,65 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
-DisplayManager::DisplayManager()
+class DisplayManager::Impl : public RefBase {
+friend class DisplayManager;
+private:
+    constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 15360; // max resolution, 16K
+    std::recursive_mutex mutex_;
+    std::vector<sptr<IDisplayPowerEventListener>> powerEventListeners_;
+    sptr<DisplayManagerAgent> powerEventListenerAgent_;
+    sptr<DisplayManagerAgent> displayStateAgent_;
+    DisplayStateCallback displayStateCallback_;
+
+    bool CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const;
+    bool CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const;
+    void ClearDisplayStateCallback();
+};
+
+bool DisplayManager::Impl::CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const
+{
+    if (!((rect.left >= 0) and (rect.left < oriWidth) and (rect.top >= 0) and (rect.top < oriHeight))) {
+        WLOGFE("rect left or top invalid!");
+        return false;
+    }
+
+    if (!((rect.width > 0) and (rect.width <= (oriWidth - rect.left)) and
+        (rect.height > 0) and (rect.height <= (oriHeight - rect.top)))) {
+        if (!((rect.width == 0) and (rect.height == 0))) {
+            WLOGFE("rect height or width invalid!");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool DisplayManager::Impl::CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const
+{
+    if (!((size.width > 0) and (size.height > 0))) {
+        if (!((size.width == 0) and (size.height == 0))) {
+            WLOGFE("width or height invalid!");
+            return false;
+        }
+    }
+
+    if ((size.width > MAX_RESOLUTION_SIZE_SCREENSHOT) or (size.height > MAX_RESOLUTION_SIZE_SCREENSHOT)) {
+        WLOGFE("width or height too big!");
+        return false;
+    }
+    return true;
+}
+
+void DisplayManager::Impl::ClearDisplayStateCallback()
+{
+    displayStateCallback_ = nullptr;
+    if (displayStateAgent_ != nullptr) {
+        SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(displayStateAgent_,
+            DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
+        displayStateAgent_ = nullptr;
+    }
+}
+
+DisplayManager::DisplayManager() : pImpl_(new Impl())
 {
 }
 
@@ -69,39 +127,6 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
     return screenShot;
 }
 
-bool DisplayManager::CheckRectValid(const Media::Rect &rect, int32_t oriHeight, int32_t oriWidth) const
-{
-    if (!((rect.left >= 0) and (rect.left < oriWidth) and (rect.top >= 0) and (rect.top < oriHeight))) {
-        WLOGFE("CheckRectValid rect left top invalid!");
-        return false;
-    }
-
-    if (!((rect.width > 0) and (rect.width <= (oriWidth - rect.left)) and
-        (rect.height > 0) and (rect.height <= (oriHeight - rect.top)))) {
-        if (!((rect.width == 0) and (rect.height == 0))) {
-            WLOGFE("CheckRectValid rect height width invalid!");
-            return false;
-        }
-    }
-    return true;
-}
-
-bool DisplayManager::CheckSizeValid(const Media::Size &size, int32_t oriHeight, int32_t oriWidth) const
-{
-    if (!((size.width > 0) and (size.height > 0))) {
-        if (!((size.width == 0) and (size.height == 0))) {
-            WLOGFE("CheckSizeValid width height invalid!");
-            return false;
-        }
-    }
-
-    if ((size.width > MAX_RESOLUTION_SIZE_SCREENSHOT) or (size.height > MAX_RESOLUTION_SIZE_SCREENSHOT)) {
-        WLOGFE("CheckSizeValid width and height too big!");
-        return false;
-    }
-    return true;
-}
-
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
                                                                const Media::Size &size, int rotation)
 {
@@ -120,12 +145,12 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
     // check parameters
     int32_t oriHeight = screenShot->GetHeight();
     int32_t oriWidth = screenShot->GetWidth();
-    if (!CheckRectValid(rect, oriHeight, oriWidth)) {
+    if (!pImpl_->CheckRectValid(rect, oriHeight, oriWidth)) {
         WLOGFE("rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
             rect.left, rect.top, rect.width, rect.height);
         return nullptr;
     }
-    if (!CheckSizeValid(size, oriHeight, oriWidth)) {
+    if (!pImpl_->CheckSizeValid(size, oriHeight, oriWidth)) {
         WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
         return nullptr;
     }
@@ -180,16 +205,17 @@ bool DisplayManager::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventLi
         WLOGFE("listener is nullptr");
         return false;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    powerEventListeners_.push_back(listener);
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    pImpl_->powerEventListeners_.push_back(listener);
     bool ret = true;
-    if (powerEventListenerAgent_ == nullptr) {
-        powerEventListenerAgent_ = new DisplayManagerAgent();
-        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(powerEventListenerAgent_,
+    if (pImpl_->powerEventListenerAgent_ == nullptr) {
+        pImpl_->powerEventListenerAgent_ = new DisplayManagerAgent();
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            pImpl_->powerEventListenerAgent_,
             DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
         if (!ret) {
             WLOGFW("RegisterDisplayManagerAgent failed ! remove listener!");
-            powerEventListeners_.pop_back();
+            pImpl_->powerEventListeners_.pop_back();
         }
     }
     WLOGFI("RegisterDisplayPowerEventListener end");
@@ -203,18 +229,19 @@ bool DisplayManager::UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEvent
         return false;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = std::find(powerEventListeners_.begin(), powerEventListeners_.end(), listener);
-    if (iter == powerEventListeners_.end()) {
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->powerEventListeners_.begin(), pImpl_->powerEventListeners_.end(), listener);
+    if (iter == pImpl_->powerEventListeners_.end()) {
         WLOGFE("could not find this listener");
         return false;
     }
-    powerEventListeners_.erase(iter);
+    pImpl_->powerEventListeners_.erase(iter);
     bool ret = true;
-    if (powerEventListeners_.empty() && powerEventListenerAgent_ != nullptr) {
-        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(powerEventListenerAgent_,
+    if (pImpl_->powerEventListeners_.empty() && pImpl_->powerEventListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            pImpl_->powerEventListenerAgent_,
             DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
-        powerEventListenerAgent_ = nullptr;
+        pImpl_->powerEventListenerAgent_ = nullptr;
     }
     WLOGFI("UnregisterDisplayPowerEventListener end");
     return ret;
@@ -223,9 +250,9 @@ bool DisplayManager::UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEvent
 void DisplayManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
 {
     WLOGFI("NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu", event, status,
-        powerEventListeners_.size());
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto& listener : powerEventListeners_) {
+        pImpl_->powerEventListeners_.size());
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    for (auto& listener : pImpl_->powerEventListeners_) {
         listener->OnDisplayPowerEvent(event, status);
     }
 }
@@ -233,24 +260,14 @@ void DisplayManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatu
 void DisplayManager::NotifyDisplayStateChanged(DisplayState state)
 {
     WLOGFI("state:%{public}u", state);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (displayStateCallback_) {
-        displayStateCallback_(state);
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    if (pImpl_->displayStateCallback_) {
+        pImpl_->displayStateCallback_(state);
         WLOGFW("displayStateCallback_ end");
-        ClearDisplayStateCallback();
+        pImpl_->ClearDisplayStateCallback();
         return;
     }
     WLOGFW("callback_ target is not set!");
-}
-
-void DisplayManager::ClearDisplayStateCallback()
-{
-    displayStateCallback_ = nullptr;
-    if (displayStateAgent_ != nullptr) {
-        SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(displayStateAgent_,
-            DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
-        displayStateAgent_ = nullptr;
-    }
 }
 
 bool DisplayManager::WakeUpBegin(PowerStateChangeReason reason)
@@ -313,22 +330,23 @@ DisplayPowerState DisplayManager::GetScreenPower(uint64_t screenId)
 bool DisplayManager::SetDisplayState(DisplayState state, DisplayStateCallback callback)
 {
     WLOGFI("state:%{public}u", state);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (displayStateCallback_ != nullptr || callback == nullptr) {
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    if (pImpl_->displayStateCallback_ != nullptr || callback == nullptr) {
         WLOGFI("previous callback not called or callback invalid");
         return false;
     }
-    displayStateCallback_ = callback;
+    pImpl_->displayStateCallback_ = callback;
     bool ret = true;
-    if (displayStateAgent_ == nullptr) {
-        displayStateAgent_ = new DisplayManagerAgent();
-        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(displayStateAgent_,
+    if (pImpl_->displayStateAgent_ == nullptr) {
+        pImpl_->displayStateAgent_ = new DisplayManagerAgent();
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            pImpl_->displayStateAgent_,
             DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
     }
 
     ret &= SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
     if (!ret) {
-        ClearDisplayStateCallback();
+        pImpl_->ClearDisplayStateCallback();
     }
     return ret;
 }
