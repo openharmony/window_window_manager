@@ -61,7 +61,7 @@ public:
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
 
     sptr<AbstractScreenController> GetAbstractScreenController();
-    DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId) override;
+    DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
 
 private:
     DisplayManagerService();

@@ -50,7 +50,7 @@ public:
     bool SetDisplayState(DisplayState state) override;
     DisplayState GetDisplayState(uint64_t displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
-    DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId) override;
+    DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
 
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;

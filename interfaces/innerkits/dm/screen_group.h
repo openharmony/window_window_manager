@@ -31,7 +31,6 @@ class ScreenGroup : public Screen {
 public:
     ScreenCombination GetCombination() const;
     std::vector<sptr<Screen>> GetChildren() const;
-    std::vector<Point> GetChildrenPosition() const;
 
 private:
     ScreenGroup();
