@@ -23,7 +23,7 @@
 
 namespace OHOS::Rosen {
 using ScreenId = uint64_t;
-static constexpr ScreenId SCREEN_ID_INVALD = -1ULL;
+static constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
 
 struct Point {
     int32_t posX_;

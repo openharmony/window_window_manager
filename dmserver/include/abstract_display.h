@@ -40,7 +40,8 @@ public:
     uint32_t GetFreshRate() const;
     float GetVirtualPixelRatio() const;
     ScreenId GetAbstractScreenId() const;
-    bool BindAbstractScreenId(ScreenId dmsScreenId);
+    bool BindAbstractScreen(ScreenId dmsScreenId);
+    bool BindAbstractScreen(sptr<AbstractScreen> abstractDisplay);
 
     void SetId(DisplayId displayId);
     void SetWidth(int32_t width);

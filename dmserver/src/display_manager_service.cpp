@@ -93,9 +93,9 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option)
 {
     WM_SCOPED_TRACE("dms:CreateVirtualScreen(%s)", option.name_.c_str());
     ScreenId screenId = abstractScreenController_->CreateVirtualScreen(option);
-    if (screenId == SCREEN_ID_INVALD) {
+    if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("DisplayManagerService::CreateVirtualScreen: Get virtualScreenId failed");
-        return SCREEN_ID_INVALD;
+        return SCREEN_ID_INVALID;
     }
     return screenId;
 }
