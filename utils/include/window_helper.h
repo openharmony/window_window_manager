@@ -64,6 +64,11 @@ public:
             mode == WindowMode::WINDOW_MODE_PIP;
     }
 
+    static inline bool IsEmptyRect(const Rect& r)
+    {
+        return (r.posX_ == 0 && r.posY_ == 0 && r.width_ == 0 && r.height_ == 0);
+    }
+
     WindowHelper() = default;
     ~WindowHelper() = default;
 };

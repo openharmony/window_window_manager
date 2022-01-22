@@ -602,6 +602,7 @@ std::vector<Rect> WindowNodeContainer::GetAvoidAreaByType(AvoidAreaType avoidAre
 
 void WindowNodeContainer::OnAvoidAreaChange(const std::vector<Rect>& avoidArea)
 {
+    layoutPolicy_->UpdateDefaultFoatingRect();
     for (auto& node : appWindowNode_->children_) {
         if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && node->GetWindowToken() != nullptr) {
             // notify client
