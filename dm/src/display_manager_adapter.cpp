@@ -250,13 +250,11 @@ void DisplayManagerAdapter::Clear()
     displayManagerServiceProxy_ = nullptr;
 }
 
-DMError DisplayManagerAdapter::AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId)
+DMError DisplayManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)
 {
     if (!InitDMSProxyLocked()) {
-        WLOGFE("DisplayManagerAdapter::AddMirror: InitDMSProxyLocked failed");
         return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
     }
-    WLOGFI("DisplayManagerAdapter::AddMirror");
-    return displayManagerServiceProxy_->AddMirror(mainScreenId, mirrorScreenId);
+    return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId);
 }
 } // namespace OHOS::Rosen

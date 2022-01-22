@@ -17,11 +17,14 @@
 #define FOUNDATION_DM_SCREEN_H
 
 #include <string>
-#include <refbase.h>
 
+#include <refbase.h>
 #include <surface.h>
 
+#include "dm_common.h"
+
 namespace OHOS::Rosen {
+class ScreenGroup;
 using ScreenId = uint64_t;
 static constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
 
@@ -50,7 +53,9 @@ public:
     uint32_t GetVirtualWidth() const;
     uint32_t GetVirtualHeight() const;
     float GetVirtualPixelRatio() const;
-    sptr<Screen> GetParent() const;
+    bool RequestRotation(Rotation rotation);
+    Rotation GetRotation() const;
+    sptr<ScreenGroup> GetParent() const;
 
 private:
     class Impl;

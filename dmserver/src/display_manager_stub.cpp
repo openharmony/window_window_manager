@@ -135,10 +135,14 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             NotifyDisplayEvent(event);
             break;
         }
-        case TRANS_ID_ADD_MIRROR: {
+        case TRANS_ID_SCREEN_MAKE_MIRROR: {
             ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
-            ScreenId mirrorScreenId = static_cast<ScreenId>(data.ReadUint64());
-            DMError result = AddMirror(mainScreenId, mirrorScreenId);
+            std::vector<ScreenId> mirrorScreenId;
+            if (!data.ReadUInt64Vector(&mirrorScreenId)) {
+                WLOGE("fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
+                break;
+            }
+            DMError result = MakeMirror(mainScreenId, mirrorScreenId);
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }

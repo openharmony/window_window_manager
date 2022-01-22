@@ -32,14 +32,19 @@ class DisplayManager {
 friend class DisplayManagerAgent;
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManager);
 public:
-    std::vector<const sptr<Display>> GetAllDisplays();
+    class IDisplayListener : public RefBase {
+    public:
+        virtual void OnCreate(DisplayId) = 0;
+        virtual void OnDestroy(DisplayId) = 0;
+        virtual void OnChange(DisplayId) = 0;
+    };
 
+    std::vector<const sptr<Display>> GetAllDisplays();
     DisplayId GetDefaultDisplayId();
     const sptr<Display> GetDefaultDisplay();
-
     const sptr<Display> GetDisplayById(DisplayId displayId);
-
     std::vector<DisplayId> GetAllDisplayIds();
+    bool RegisterDisplayListener(sptr<IDisplayListener> listener);
 
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId);
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,

@@ -24,11 +24,11 @@
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
-class IScreenChangeListener : public RefBase {
+class IScreenListener : public RefBase {
 public:
-    virtual void OnCreate(ScreenId) = 0;
-    virtual void OnDestroy(ScreenId) = 0;
-    virtual void OnChange(std::vector<ScreenId>) = 0;
+    virtual void OnConnect(ScreenId) = 0;
+    virtual void OnDisconnect(ScreenId) = 0;
+    virtual void OnChange(std::vector<ScreenId>, ScreenChangeEvent) = 0;
 };
 
 class ScreenManager : public RefBase {
@@ -37,10 +37,9 @@ public:
     sptr<Screen> GetScreenById(ScreenId id);
     std::vector<const sptr<Screen>> GetAllScreens();
 
-    void RegisterScreenChangeListener(sptr<IScreenChangeListener> listener);
-    sptr<ScreenGroup> MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
-    sptr<ScreenGroup> MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
-    sptr<ScreenGroup> AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId);
+    void RegisterScreenListener(sptr<IScreenListener> listener);
+    ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
+    ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
 
