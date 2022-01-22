@@ -49,10 +49,15 @@ public:
     virtual Rect GetRect() const override;
     virtual WindowType GetType() const override;
     virtual WindowMode GetMode() const override;
+    virtual bool GetShowState() const override;
+    virtual bool GetFocusable() const override;
+    virtual bool GetTouchable() const override;
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() override;
-    virtual uint32_t GetWindowFlags() override;
-    virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) override;
+    virtual uint32_t GetWindowFlags() const override;
+    virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
+    virtual bool IsFullScreen() const override;
+    virtual bool IsLayoutFullScreen() const override;
     virtual WMError SetWindowType(WindowType type) override;
     virtual WMError SetWindowMode(WindowMode mode) override;
     virtual WMError AddWindowFlag(WindowFlag flag) override;
