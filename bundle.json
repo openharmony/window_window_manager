@@ -1,15 +1,22 @@
 {
-    "name": "@openharmony/window_manager",
-    "version": "3.1.0",
-    "description": "window_manager",
-    "repository": "",
+    "name": "@ohos/window_manager",
+    "description": "library for window",
+    "version": "3.1",
     "license": "Apache License 2.0",
+    "publishAs": "code-segment",
+    "segment": {
+      "destPath": "foundation/windowmanager"
+    },
+    "dirs": {},
+    "scripts": {},
     "component": {
       "name": "window_manager",
       "subsystem": "window",
+      "syscap": [],
+      "features": [],
       "adapted_system_type": [ "standard" ],
-      "rom": {},
-      "ram": {},
+      "rom": "8000KB",
+      "ram": "8000KB",
       "deps": {
         "components": [
           "libhilog",
