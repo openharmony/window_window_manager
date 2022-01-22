@@ -203,10 +203,6 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed)
 {
     WLOGFI("SetUIContent");
-    if (context_.get() == nullptr) {
-        WLOGFE("SetUIContent context_ is nullptr id: %{public}d", property_->GetWindowId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
     WLOGFI("contentInfo: %{public}s, context_:%{public}p", contentInfo.c_str(), context_.get());
     uiContent_ = Ace::UIContent::Create(context_.get(), engine);
     if (uiContent_ == nullptr) {
