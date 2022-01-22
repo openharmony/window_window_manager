@@ -42,6 +42,7 @@ public:
 
     void SetDisplayId(int32_t displayId);
     void SetLayoutRect(const Rect& rect);
+    void SetWindowRect(const Rect& rect);
     void SetWindowProperty(const sptr<WindowProperty>& property);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
     void SetWindowMode(WindowMode mode);
