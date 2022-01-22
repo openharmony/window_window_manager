@@ -54,6 +54,7 @@ public:
     void UpdateWindowNode(sptr<WindowNode>& node);
     void UpdateLayoutRect(sptr<WindowNode>& node);
     Rect GetDependDisplayRects() const;
+    void UpdateDefaultFoatingRect();
 
 private:
     LayoutDependRects dependRects;
@@ -78,6 +79,9 @@ private:
     Rect& GetLimitRect(const WindowMode mode);
     Rect& GetDisplayRect(const WindowMode mode);
     void LimitMoveBounds(Rect& rect);
+    void LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect);
+    void SetRectForFloating(const sptr<WindowNode>& node);
+    Rect defaultFloatingRect_ = { 0, 0, 0, 0 };
 };
 }
 }

@@ -213,11 +213,6 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         WLOGFE("fail to SetUIContent id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        property_->SetDecorEnable(true);
-    } else {
-        property_->SetDecorEnable(false);
-    }
     if (isdistributed) {
         uiContent_->Restore(this, contentInfo, storage);
     } else {
@@ -279,6 +274,12 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
             uint32_t parentId = windowMap_[parentName].first;
             property_->SetParentId(parentId);
         }
+    }
+
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        property_->SetDecorEnable(true);
+    } else {
+        property_->SetDecorEnable(false);
     }
 
     sptr<WindowImpl> window(this);
