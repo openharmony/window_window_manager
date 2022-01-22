@@ -294,9 +294,16 @@ void WindowNodeContainer::UpdateFocusWindow()
 {
     for (auto iter = appWindowNode_->children_.rbegin(); iter < appWindowNode_->children_.rend(); iter++) {
         if ((*iter)->GetWindowProperty()->GetFocusable()) {
-            WLOGFI("find focused id %{public}d;", (*iter)->GetWindowId());
+            WLOGFI("find appWindow focused id %{public}d;", (*iter)->GetWindowId());
             SetFocusWindow((*iter)->GetWindowId());
-            break;
+            return;
+        }
+    }
+    for (auto iter = belowAppWindowNode_->children_.rbegin(); iter < belowAppWindowNode_->children_.rend(); iter++) {
+        if ((*iter)->GetWindowProperty()->GetFocusable()) {
+            WLOGFI("find belowAppWindow focused id %{public}d;", (*iter)->GetWindowId());
+            SetFocusWindow((*iter)->GetWindowId());
+            return;
         }
     }
 }
