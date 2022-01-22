@@ -22,6 +22,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowLayoutPolicy"};
+    constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 48;
+    constexpr uint32_t WINDOW_FRAME_WIDTH = 4;
 }
 
 WindowLayoutPolicy::WindowLayoutPolicy(const sptr<WindowNode>& belowAppNode,
@@ -141,6 +143,16 @@ void WindowLayoutPolicy::UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect
         winRect.posY_);
 }
 
+static Rect ComputeDecoratedWindowRect(const Rect& winRect)
+{
+    Rect rect;
+    rect.posX_ = winRect.posX_;
+    rect.posY_ = winRect.posY_;
+    rect.width_ = winRect.width_ + WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH;
+    rect.height_ = winRect.height_ + WINDOW_TITLE_BAR_HEIGHT + WINDOW_FRAME_WIDTH;
+    return rect;
+}
+
 void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
 {
     auto type = node->GetWindowType();
@@ -167,6 +179,9 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
     if (!floatingWindow) { // fullscreen window
         winRect = limitRect;
     } else { // floating window
+        if (node->GetWindowProperty()->GetDecorEnable()) { // is decorable
+            winRect = ComputeDecoratedWindowRect(winRect);
+        }
         if (subWindow && parentLimit) { // subwidow and limited by parent
             limitRect = node->parent_->GetLayoutRect();
             UpdateFloatingLayoutRect(limitRect, winRect);
