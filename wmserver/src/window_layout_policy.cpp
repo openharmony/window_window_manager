@@ -24,6 +24,8 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowLayoutPolicy"};
     constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 48;
     constexpr uint32_t WINDOW_FRAME_WIDTH = 4;
+    constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 360;
+    constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 480;
 }
 
 WindowLayoutPolicy::WindowLayoutPolicy(const sptr<WindowNode>& belowAppNode,
@@ -42,6 +44,7 @@ void WindowLayoutPolicy::UpdateDisplayInfo(const Rect& primaryRect,
     dependRects.secRect_ = secondaryRect;
     dependRects.fullRect_ = displayRect;
     InitLimitRects();
+    UpdateDefaultFoatingRect();
 }
 
 void WindowLayoutPolicy::LayoutWindowTree()
@@ -78,7 +81,46 @@ void WindowLayoutPolicy::LayoutWindowNode(sptr<WindowNode>& node)
 void WindowLayoutPolicy::AddWindowNode(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
+    if (WindowHelper::IsEmptyRect(node->GetWindowProperty()->GetWindowRect())) {
+        SetRectForFloating(node);
+    }
     UpdateWindowNode(node); // currently, update and add do the same process
+}
+
+void WindowLayoutPolicy::UpdateDefaultFoatingRect()
+{
+    constexpr uint32_t half = 2;
+    constexpr float ratio = 0.75;  // 0.75: default height/width ratio
+
+    // calculate default H and w
+    Rect displayRect = GetDisplayRect(WindowMode::WINDOW_MODE_FLOATING);
+    uint32_t defaultW = static_cast<uint32_t>(displayRect.width_ * ratio);
+    uint32_t defaultH = static_cast<uint32_t>(displayRect.height_ * ratio);
+
+    // calculate default x and y
+    Rect limitRect = GetLimitRect(WindowMode::WINDOW_MODE_FLOATING);
+    Rect resRect = {0, 0, defaultW, defaultH};
+    if (defaultW <= limitRect.width_ && defaultH <= limitRect.height_) {
+        int32_t centerPosX = limitRect.posX_ + static_cast<int32_t>(limitRect.width_ / half);
+        resRect.posX_ = centerPosX - static_cast<int32_t>(defaultW / half);
+
+        int32_t centerPosY = limitRect.posY_ + static_cast<int32_t>(limitRect.height_ / half);
+        resRect.posY_ = centerPosY - static_cast<int32_t>(defaultH / half);
+    }
+
+    defaultFloatingRect_ = resRect;
+}
+
+void WindowLayoutPolicy::SetRectForFloating(const sptr<WindowNode>& node)
+{
+    // deduct decor size
+    Rect rect = defaultFloatingRect_;
+    if (node->GetWindowProperty()->GetDecorEnable()) {
+        rect.width_ -= (WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH);
+        rect.height_ -= (WINDOW_TITLE_BAR_HEIGHT + WINDOW_FRAME_WIDTH);
+    }
+
+    node->SetWindowRect(rect);
 }
 
 void WindowLayoutPolicy::RemoveWindowNode(sptr<WindowNode>& node)
@@ -158,6 +200,7 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
     auto type = node->GetWindowType();
     auto mode = node->GetWindowMode();
     auto flags = node->GetWindowFlags();
+    auto decorEnbale = node->GetWindowProperty()->GetDecorEnable();
     bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     bool parentLimit = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
     bool subWindow = WindowHelper::IsSubWindow(type);
@@ -168,9 +211,9 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
     Rect limitRect = displayRect;
     Rect winRect = node->GetWindowProperty()->GetWindowRect();
 
-    WLOGFI("Id:%{public}d, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d," \
-        "type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}d, %{public}d]",
-        node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow,
+    WLOGFI("Id:%{public}d, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
+        "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+        node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnbale,
         static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     if (needAvoid) {
         limitRect = GetLimitRect(mode);
@@ -188,10 +231,7 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
         }
     }
     // Limit window to the maximum window size
-    winRect.width_ = std::min(displayRect.width_, winRect.width_);
-    winRect.height_ = std::min(displayRect.height_, winRect.height_);
-    winRect.width_ = std::max(1u, winRect.width_);
-    winRect.height_ = std::max(1u, winRect.height_);
+    LimitWindowSize(node, displayRect, winRect);
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         LimitMoveBounds(winRect);
@@ -201,6 +241,28 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
     if (IsLayoutChanged(lastRect, winRect)) {
         node->GetWindowToken()->UpdateWindowRect(winRect);
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+    }
+}
+
+void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect)
+{
+    bool floatingWindow = (node->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+
+    winRect.width_ = std::min(displayRect.width_, winRect.width_);
+    winRect.height_ = std::min(displayRect.height_, winRect.height_);
+    bool isVertical = (displayRect.height_ > displayRect.width_) ? true : false;
+    WindowType windowType = node->GetWindowProperty()->GetWindowType();
+    if (floatingWindow && !WindowHelper::IsSystemWindow(windowType)) {
+        if (isVertical) {
+            winRect.width_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, winRect.width_);
+            winRect.height_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, winRect.height_);
+        } else {
+            winRect.width_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, winRect.width_);
+            winRect.height_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, winRect.height_);
+        }
+    } else {
+        winRect.width_ = std::max(1u, winRect.width_);
+        winRect.height_ = std::max(1u, winRect.height_);
     }
 }
 

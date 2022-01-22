@@ -28,6 +28,11 @@ void WindowNode::SetLayoutRect(const Rect& rect)
     layoutRect_ = rect;
 }
 
+void WindowNode::SetWindowRect(const Rect& rect)
+{
+    property_->SetWindowRect(rect);
+}
+
 void WindowNode::SetWindowProperty(const sptr<WindowProperty>& property)
 {
     property_ = property;
