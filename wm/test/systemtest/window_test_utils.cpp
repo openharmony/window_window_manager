@@ -21,12 +21,12 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowTestUtils"};
 }
 
-Rect WindowTestUtils::displayRect_      = {0, 0, 0, 0};
-Rect WindowTestUtils::statusBarRect_    = {0, 0, 0, 0};
-Rect WindowTestUtils::naviBarRect_      = {0, 0, 0, 0};
-Rect WindowTestUtils::defaultAppRect_   = {0, 0, 0, 0};
-Rect WindowTestUtils::limitDisplayRect_ = {0, 0, 0, 0};
-SplitRects WindowTestUtils::splitRects_ = {
+Rect WindowTestUtils::displayRect_        = {0, 0, 0, 0};
+Rect WindowTestUtils::statusBarRect_      = {0, 0, 0, 0};
+Rect WindowTestUtils::naviBarRect_        = {0, 0, 0, 0};
+Rect WindowTestUtils::customAppRect_     = {0, 0, 0, 0};
+Rect WindowTestUtils::limitDisplayRect_   = {0, 0, 0, 0};
+SplitRects WindowTestUtils::splitRects_   = {
     .primaryRect   = {0, 0, 0, 0},
     .secondaryRect = {0, 0, 0, 0},
     .dividerRect   = {0, 0, 0, 0},
@@ -95,14 +95,55 @@ sptr<WindowScene> WindowTestUtils::CreateWindowScene()
     return scene;
 }
 
+Rect WindowTestUtils::GetDefaultFoatingRect(const sptr<Window>& window)
+{
+    limitDisplayRect_ = displayRect_;
+    UpdateSplitRects(window);
+    constexpr uint32_t half = 2;
+    constexpr float ratio = 0.75;  // 0.75: default height/width ratio
+
+    // calculate default H and w
+    uint32_t defaultW = static_cast<uint32_t>(displayRect_.width_ * ratio);
+    uint32_t defaultH = static_cast<uint32_t>(displayRect_.height_ * ratio);
+
+    // calculate default x and y
+    Rect resRect = {0, 0, defaultW, defaultH};
+    if (defaultW <= limitDisplayRect_.width_ && defaultH <= limitDisplayRect_.height_) {
+        int32_t centerPosX = limitDisplayRect_.posX_ + static_cast<int32_t>(limitDisplayRect_.width_ / half);
+        resRect.posX_ = centerPosX - static_cast<int32_t>(defaultW / half);
+
+        int32_t centerPosY = limitDisplayRect_.posY_ + static_cast<int32_t>(limitDisplayRect_.height_ / half);
+        resRect.posY_ = centerPosY - static_cast<int32_t>(defaultH / half);
+    }
+    
+    return resRect;
+}
+
+Rect WindowTestUtils::GetLimitedDecoRect(const Rect& rect)
+{
+    constexpr uint32_t winFrameH = 52u;
+    constexpr uint32_t winFrameW = 8u;
+    bool vertical = displayRect_.width_ < displayRect_.height_;
+    uint32_t minFloatingW = vertical ? 360u : 480u;
+    uint32_t minFloatingH = vertical ? 480u : 360u;
+    Rect resRect = {
+        rect.posX_,
+        rect.posY_,
+        std::max(minFloatingW, rect.width_ + winFrameW),
+        std::max(minFloatingH, rect.height_ + winFrameH),
+    };
+    return resRect;
+}
+
 void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
 {
     const float barRatio = 0.07;
     const float appRation = 0.4;
     displayRect_ = displayRect;
+    limitDisplayRect_ = displayRect;
     statusBarRect_ = {0, 0, displayRect_.width_, displayRect_.height_ * barRatio};
     naviBarRect_ = {0, displayRect_.height_ * (1 - barRatio), displayRect_.width_, displayRect_.height_ * barRatio};
-    defaultAppRect_ = {0, 0, displayRect_.width_ * appRation, displayRect_.height_ * appRation};
+    customAppRect_ = {0, 0, displayRect_.width_ * appRation, displayRect_.height_ * appRation};
 }
 
 bool WindowTestUtils::RectEqualTo(const sptr<Window>& window, const Rect& r)

@@ -53,7 +53,7 @@ void WindowInputMethodTest::SetUp()
 {
     inputMethodWindowInfo_ = {
         .name = "",
-        .rect = utils::defaultAppRect_,
+        .rect = utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
@@ -62,7 +62,7 @@ void WindowInputMethodTest::SetUp()
     };
     keyGuardWindowInfo_ = {
         .name = "",
-        .rect = utils::defaultAppRect_,
+        .rect = utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_KEYGUARD,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = false,
@@ -121,7 +121,7 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow03, Function | MediumTest | Lev
     keyGuardWindow->Show();
     inputMethodWindow->Show();
     ASSERT_TRUE(utils::RectEqualTo(keyGuardWindow, utils::displayRect_));
-    ASSERT_TRUE(utils::RectEqualTo(inputMethodWindow, utils::defaultAppRect_));
+    ASSERT_TRUE(utils::RectEqualTo(inputMethodWindow, utils::customAppRect_));
 }
 } // namespace
 } // namespace Rosen

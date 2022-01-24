@@ -47,7 +47,8 @@ public:
     static Rect limitDisplayRect_;
     static Rect statusBarRect_;
     static Rect naviBarRect_;
-    static Rect defaultAppRect_;
+    static Rect customAppRect_;
+    static Rect customAppDecoRect_;
     static SplitRects splitRects_;
     static bool isVerticalDisplay_;
 
@@ -60,6 +61,8 @@ public:
     static void InitSplitRects();
     static void UpdateSplitRects(const sptr<Window>& window);
     static bool RectEqualToRect(const Rect& l, const Rect& r);
+    static Rect GetDefaultFoatingRect(const sptr<Window>& window);
+    static Rect GetLimitedDecoRect(const Rect& rect);
 
 private:
     void UpdateLimitDisplayRect(Rect& avoidRect);

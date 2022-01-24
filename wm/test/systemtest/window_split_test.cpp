@@ -48,7 +48,7 @@ void WindowSplitTest::SetUp()
 {
     fullInfo_ = {
         .name = "",
-        .rect = utils::defaultAppRect_,
+        .rect = utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = true,
@@ -58,7 +58,7 @@ void WindowSplitTest::SetUp()
 
     splitInfo_ = {
         .name = "",
-        .rect = utils::defaultAppRect_,
+        .rect = utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = true,

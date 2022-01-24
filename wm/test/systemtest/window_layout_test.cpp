@@ -98,7 +98,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
 {
     utils::TestWindowInfo info = {
         .name = "main",
-        .rect = utils::defaultAppRect_,
+        .rect = utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
@@ -109,7 +109,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
     activeWindows_.push_back(window);
 
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_TRUE(utils::RectEqualTo(window, utils::defaultAppRect_));
+    ASSERT_TRUE(utils::RectEqualTo(window, utils::GetLimitedDecoRect(utils::customAppRect_)));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 
@@ -124,7 +124,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
     // app window
     utils::TestWindowInfo info = {
         .name = "main",
-        .rect = utils::defaultAppRect_,
+        .rect = utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
@@ -139,12 +139,12 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
     activeWindows_.push_back(statBar);
 
     ASSERT_EQ(WMError::WM_OK, appWin->Show());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::defaultAppRect_));
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetLimitedDecoRect(utils::customAppRect_)));
     ASSERT_EQ(WMError::WM_OK, statBar->Show());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::defaultAppRect_));
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetLimitedDecoRect(utils::customAppRect_)));
     ASSERT_TRUE(utils::RectEqualTo(statBar, utils::statusBarRect_));
     ASSERT_EQ(WMError::WM_OK, statBar->Hide());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::defaultAppRect_));
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetLimitedDecoRect(utils::customAppRect_)));
 }
 
 /**
@@ -166,7 +166,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
     // sys window
     utils::TestWindowInfo info = {
         .name = "main",
-        .rect = utils::defaultAppRect_,
+        .rect = utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_PANEL,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = false,
@@ -205,7 +205,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
     // sys window
     utils::TestWindowInfo info = {
         .name = "main",
-        .rect = utils::defaultAppRect_,
+        .rect = utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_PANEL,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
@@ -218,11 +218,36 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, statBar->Show());
     ASSERT_TRUE(utils::RectEqualTo(statBar, utils::statusBarRect_));
     ASSERT_EQ(WMError::WM_OK, sysWin->Show());
-    ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::defaultAppRect_));
+    ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::customAppRect_));
     ASSERT_EQ(WMError::WM_OK, naviBar->Show());
-    ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::defaultAppRect_));
+    ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::customAppRect_));
     ASSERT_EQ(WMError::WM_OK, statBar->Hide());
-    ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::defaultAppRect_));
+    ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::customAppRect_));
+}
+
+/**
+ * @tc.name: LayoutWindow08
+ * @tc.desc: One FLOATING APP Window with on custom rect
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVJ
+ */
+HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
+{
+    utils::TestWindowInfo info = {
+        .name = "main",
+        .rect = {0, 0, 0, 0},
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentName = "",
+    };
+    const sptr<Window>& window = utils::CreateTestWindow(info);
+    activeWindows_.push_back(window);
+    Rect expect = utils::GetDefaultFoatingRect(window);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_TRUE(utils::RectEqualTo(window, expect));
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 }
 } // namespace Rosen
