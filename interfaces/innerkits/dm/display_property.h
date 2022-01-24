@@ -31,7 +31,6 @@ public:
     int height_;
     float xDpi_;
     float yDpi_;
-    // Surface surface_;
 };
 } // namespace OHOS::Rosen
 

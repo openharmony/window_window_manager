@@ -16,8 +16,9 @@
 #ifndef OHOS_WINDOW_MANAGER_STUB_H
 #define OHOS_WINDOW_MANAGER_STUB_H
 
-#include "window_manager_interface.h"
 #include <iremote_stub.h>
+#include "window_manager_interface.h"
+
 namespace OHOS {
 namespace Rosen {
 class WindowManagerStub : public IRemoteStub<IWindowManager> {

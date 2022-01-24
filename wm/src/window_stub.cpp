@@ -36,7 +36,7 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             break;
         }
         case TRANS_ID_UPDATE_WINDOW_RECT: {
-            struct Rect rect{ data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
+            struct Rect rect { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
             UpdateWindowRect(rect);
             break;
         }

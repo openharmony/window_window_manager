@@ -20,8 +20,7 @@ extern const char _binary_window_stage_js_end[];
 extern const char _binary_window_stage_abc_start[];
 extern const char _binary_window_stage_abc_end[];
 
-extern "C" __attribute__((constructor))
-void NAPI_application_WindowStage_AutoRegister()
+extern "C" __attribute__((constructor)) void NAPI_application_WindowStage_AutoRegister()
 {
     auto moduleManager = NativeModuleManager::GetInstance();
     NativeModule newModuleInfo = {
