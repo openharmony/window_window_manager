@@ -178,7 +178,7 @@ void WindowImmersiveTest::SetUp()
 {
     fullScreenAppinfo_ = {
         .name = "main",
-        .rect = utils::defaultAppRect_,
+        .rect = utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN, // immersive setting
         .needAvoid = false, // immersive setting
