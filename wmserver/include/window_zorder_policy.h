@@ -40,7 +40,8 @@ private:
         { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,        0 },
 
         // system-specific window
-        { WindowType::WINDOW_TYPE_WALLPAPER,            101 },
+        { WindowType::WINDOW_TYPE_WALLPAPER,            0 },
+        { WindowType::WINDOW_TYPE_DESKTOP,              1 },
         { WindowType::WINDOW_TYPE_APP_LAUNCHING,        102 },
         { WindowType::WINDOW_TYPE_DOCK_SLICE,           0 },
         { WindowType::WINDOW_TYPE_INCOMING_CALL,        104 },

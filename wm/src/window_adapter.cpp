@@ -178,6 +178,15 @@ WMError WindowAdapter::MinimizeAllAppNodeAbility(uint32_t windowId)
     return windowManagerServiceProxy_->MinimizeAllAppNodeAbility(windowId);
 }
 
+void WindowAdapter::ProcessWindowTouchedEvent(uint32_t windowId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!InitWMSProxyLocked()) {
+        return;
+    }
+    return windowManagerServiceProxy_->ProcessWindowTouchedEvent(windowId);
+}
+
 bool WindowAdapter::InitWMSProxyLocked()
 {
     if (!windowManagerServiceProxy_) {
