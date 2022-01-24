@@ -35,7 +35,8 @@
           "appexecfwk_core",
           "inputmethod_client",
           "libmmi-client",
-          "ace_napi"
+          "ace_napi",
+          "resmgr_standard"
         ],
         "third_party": [
         ]
