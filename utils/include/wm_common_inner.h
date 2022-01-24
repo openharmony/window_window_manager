@@ -13,19 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_WINDOW_MANAGER_SERVICE_INNER_H
-#define OHOS_WINDOW_MANAGER_SERVICE_INNER_H
+#ifndef OHOS_ROSEN_WM_COMMON_INNER_H
+#define OHOS_ROSEN_WM_COMMON_INNER_H
 
-#include "wm_single_instance.h"
+#include <cinttypes>
 
 namespace OHOS {
 namespace Rosen {
-class WindowManagerServiceInner {
-WM_DECLARE_SINGLE_INSTANCE(WindowManagerServiceInner)
-public:
-    bool NotifyDisplaySuspend();
-    void RestoreSuspendedWindows();
+enum class WindowState : uint32_t {
+    STATE_INITIAL,
+    STATE_CREATED,
+    STATE_SHOWN,
+    STATE_HIDDEN,
+    STATE_DESTROYED,
+    STATE_BOTTOM = STATE_DESTROYED,
+    STATE_FROZEN,
+    STATE_UNFROZEN,
+};
+
+enum class WindowStateChangeReason : uint32_t {
+    KEYGUARD,
 };
 }
 }
-#endif // OHOS_WINDOW_MANAGER_SERVICE_INNER_H
+#endif // OHOS_ROSEN_WM_COMMON_INNER_H

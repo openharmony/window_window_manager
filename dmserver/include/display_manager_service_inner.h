@@ -20,6 +20,7 @@
 #include <system_ability.h>
 
 #include "abstract_display.h"
+#include "display_change_listener.h"
 #include "wm_single_instance.h"
 #include "singleton_delegator.h"
 
@@ -33,6 +34,7 @@ public:
     const sptr<AbstractDisplay> GetDefaultDisplay();
     const sptr<AbstractDisplay> GetDisplayById(DisplayId displayId);
     std::vector<DisplayId> GetAllDisplayIds();
+    void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
 };
 } // namespace OHOS::Rosen
 
