@@ -21,6 +21,7 @@
 #include "display_manager_adapter.h"
 #include "display_manager_agent.h"
 #include "dm_common.h"
+#include "singleton_delegator.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -34,6 +35,7 @@ class DisplayManager::Impl : public RefBase {
 friend class DisplayManager;
 private:
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 15360; // max resolution, 16K
+    static inline SingletonDelegator<DisplayManager> delegator;
     std::recursive_mutex mutex_;
     std::vector<sptr<IDisplayPowerEventListener>> powerEventListeners_;
     sptr<DisplayManagerAgent> powerEventListenerAgent_;
