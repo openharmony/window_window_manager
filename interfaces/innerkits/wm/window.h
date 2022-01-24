@@ -64,9 +64,13 @@ public:
     virtual WindowMode GetMode() const = 0;
     virtual const std::string& GetWindowName() const = 0;
     virtual uint32_t GetWindowId() = 0;
-    virtual uint32_t GetWindowFlags() = 0;
-    virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) = 0;
-
+    virtual uint32_t GetWindowFlags() const = 0;
+    virtual bool GetShowState() const = 0;
+    virtual bool GetFocusable() const = 0;
+    virtual bool GetTouchable() const = 0;
+    virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) const = 0;
+    virtual bool IsFullScreen() const = 0;
+    virtual bool IsLayoutFullScreen() const = 0;
     virtual WMError SetWindowType(WindowType type) = 0;
     virtual WMError SetWindowMode(WindowMode mode) = 0;
     virtual WMError AddWindowFlag(WindowFlag flag) = 0;
