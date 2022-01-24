@@ -15,6 +15,7 @@
 
 #include "window_property.h"
 #include "window_helper.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -102,6 +103,11 @@ void WindowProperty::SetSystemBarProperty(WindowType type, const SystemBarProper
 void WindowProperty::SetDecorEnable(bool decorEnable)
 {
     isDecorEnable_ = decorEnable;
+}
+
+void WindowProperty::SetHitOffset(const PointInfo& offset)
+{
+    hitOffset_ = offset;
 }
 
 void WindowProperty::ResumeLastWindowMode()
@@ -200,6 +206,11 @@ uint32_t WindowProperty::GetWindowId() const
 uint32_t WindowProperty::GetParentId() const
 {
     return parentId_;
+}
+
+const PointInfo& WindowProperty::GetHitOffset() const
+{
+    return hitOffset_;
 }
 
 bool WindowProperty::MapMarshalling(Parcel& parcel) const
@@ -315,6 +326,12 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
     if (!parcel.WriteBool(isDecorEnable_)) {
         return false;
     }
+
+    // write hitOffset_
+    if (!(parcel.WriteInt32(hitOffset_.x) and parcel.WriteInt32(hitOffset_.y))) {
+        return false;
+    }
+
     return true;
 }
 
@@ -338,6 +355,8 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetParentId(parcel.ReadUint32());
     MapUnmarshalling(parcel, property);
     property->SetDecorEnable(parcel.ReadBool());
+    PointInfo offset = {parcel.ReadInt32(), parcel.ReadInt32()};
+    property->SetHitOffset(offset);
     return property;
 }
 }

@@ -24,6 +24,7 @@
 #include <parameters.h>
 #include <system_ability.h>
 #include "display_change_listener.h"
+#include "drag_controller.h"
 #include "singleton_delegator.h"
 #include "wm_single_instance.h"
 #include "window_controller.h"
@@ -88,6 +89,7 @@ private:
     sptr<WindowController> windowController_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
     sptr<SnapshotController> snapshotController_;
+    sptr<DragController> dragController_;
 };
 }
 }

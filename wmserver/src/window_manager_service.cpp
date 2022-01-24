@@ -23,10 +23,12 @@
 
 #include "dm_common.h"
 #include "display_manager_service_inner.h"
+#include "drag_controller.h"
 #include "singleton_container.h"
 #include "window_manager_agent_controller.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 #include "wm_trace.h"
 
 namespace OHOS {
@@ -45,6 +47,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     inputWindowMonitor_ = new InputWindowMonitor(windowRoot_);
     windowController_ = new WindowController(windowRoot_, inputWindowMonitor_);
     snapshotController_ = new SnapshotController(windowRoot_);
+    dragController_ = new DragController(windowRoot_);
 }
 
 void WindowManagerService::OnStart()
@@ -124,14 +127,18 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
 WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 {
     Rect rect = property->GetWindowRect();
+    uint32_t windowId = property->GetWindowId();
     WLOGFI("[WMS] Add: %{public}5d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
-        "%{public}4d %{public}4d]", property->GetWindowId(), property->GetWindowType(), property->GetWindowMode(),
+        "%{public}4d %{public}4d]", windowId, property->GetWindowType(), property->GetWindowMode(),
         property->GetWindowFlags(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 
-    WM_SCOPED_TRACE("wms:AddWindow(%d)", property->GetWindowId());
+    WM_SCOPED_TRACE("wms:AddWindow(%d)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WMError res = windowController_->AddWindowNode(property);
     system::SetParameter("persist.window.boot.inited", "1");
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
+        dragController_->StartDrag(windowId);
+    }
     return res;
 }
 
@@ -148,10 +155,9 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId)
     WLOGFI("[WMS] Destroy: %{public}d", windowId);
     WM_SCOPED_TRACE("wms:DestroyWindow(%d)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    DisplayId displayId = DISPLAY_ID_INVALD;
     auto node = windowRoot_->GetWindowNode(windowId);
-    if (node != nullptr) {
-        displayId = node->GetDisplayId();
+    if (node != nullptr && node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
+        dragController_->FinishDrag(windowId);
     }
     return windowController_->DestroyWindow(windowId);
 }
@@ -161,7 +167,12 @@ WMError WindowManagerService::MoveTo(uint32_t windowId, int32_t x, int32_t y)
     WLOGFI("[WMS] MoveTo: %{public}d [%{public}d, %{public}d]", windowId, x, y);
     WM_SCOPED_TRACE("wms:MoveTo");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->MoveTo(windowId, x, y);
+
+    WMError res = windowController_->MoveTo(windowId, x, y);
+    if (res == WMError::WM_OK) {
+        dragController_->UpdateDragInfo(windowId);
+    }
+    return res;
 }
 
 WMError WindowManagerService::Resize(uint32_t windowId, uint32_t width, uint32_t height)

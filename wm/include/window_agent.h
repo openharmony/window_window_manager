@@ -19,6 +19,7 @@
 #include "window_stub.h"
 #include "window_impl.h"
 #include "window_property.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -32,7 +33,7 @@ public:
     void UpdateFocusStatus(bool focused) override;
     void UpdateAvoidArea(const std::vector<Rect>& avoidAreas) override;
     void UpdateWindowState(WindowState state) override;
-
+    void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override;
 private:
     sptr<WindowImpl> window_;
 };
