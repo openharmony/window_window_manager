@@ -20,6 +20,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <vector>
 #ifdef ACE_ENABLE_GL
 #include "render_context/render_context.h"
 #endif
@@ -53,9 +54,9 @@ private:
     static inline SingletonDelegator<WindowInnerManager> delegator;
 
     sptr<Window> CreateWindow(uint32_t displayId, const WindowType& type, const Rect& rect);
-    void CreateAndShowDivider();
-    void HideAndDestroyDivider();
-    void DestroyThread();
+    void CreateAndShowDivider(std::unique_ptr<WindowMessage> msg);
+    void HideAndDestroyDivider(std::unique_ptr<WindowMessage> msg);
+    void DestroyThread(std::unique_ptr<WindowMessage> msg);
     void DrawSurface(const sptr<Window>& window, uint32_t color);
     sptr<Window> GetDividerWindow(uint32_t displayId) const;
 
@@ -66,7 +67,7 @@ private:
     RenderContext* rc_ = nullptr;
 #endif
     std::map<uint32_t, sptr<Window>> dividerMap_;
-    std::unique_ptr<WindowMessage> winMsg_;
+    std::vector<std::unique_ptr<WindowMessage>> messages_;
     bool hasInitThread_ = false;
     bool needDestroyThread_ = false;
 };
