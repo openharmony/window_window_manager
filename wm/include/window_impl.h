@@ -64,6 +64,8 @@ public:
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
     virtual WMError SetWindowFlags(uint32_t flags) override;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    virtual WMError SetLayoutFullScreen(bool status) override;
+    virtual WMError SetFullScreen(bool status) override;
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
 
     WMError Create(const std::string& parentName,

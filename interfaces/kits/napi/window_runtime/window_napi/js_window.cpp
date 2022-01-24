@@ -643,22 +643,10 @@ NativeValue* JsWindow::OnSetFullScreen(NativeEngine& engine, NativeCallbackInfo&
         WLOGFE("Failed to convert parameter to isFullScreen");
         return engine.CreateUndefined();
     }
-    // when false, Do nothing
     bool isFullScreen = static_cast<bool>(*nativeVal);
-    if (!isFullScreen) {
-        return engine.CreateUndefined();
-    }
     AsyncTask::CompleteCallback complete =
-        [this](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            WMError ret = windowToken_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-            SystemBarProperty statusProperty = windowToken_->GetSystemBarPropertyByType(
-                WindowType::WINDOW_TYPE_STATUS_BAR);
-            SystemBarProperty navProperty = windowToken_->GetSystemBarPropertyByType(
-                WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-            statusProperty.enable_ = false;
-            navProperty.enable_ = false;
-            ret = windowToken_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
-            ret = windowToken_->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, navProperty);
+        [&, this](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            WMError ret = windowToken_->SetFullScreen(isFullScreen);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
                 WLOGFI("JsWindow::OnSetFullScreen success");
@@ -688,14 +676,9 @@ NativeValue* JsWindow::OnSetLayoutFullScreen(NativeEngine& engine, NativeCallbac
         return engine.CreateUndefined();
     }
     bool isLayoutFullScreen = static_cast<bool>(*nativeVal);
-    // when false, Do nothing
-    if (!isLayoutFullScreen) {
-        return engine.CreateUndefined();
-    }
     AsyncTask::CompleteCallback complete =
-        [this](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            WMError ret = windowToken_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-            ret = windowToken_->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+        [&, this](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            WMError ret = windowToken_->SetLayoutFullScreen(isLayoutFullScreen);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
                 WLOGFI("JsWindow::OnSetLayoutFullScreen success");

@@ -277,6 +277,71 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
     return ret;
 }
 
+WMError WindowImpl::SetLayoutFullScreen(bool status)
+{
+    WLOGFI("[Client] Window %{public}d SetLayoutFullScreen: %{public}d", property_->GetWindowId(), status);
+    if (!IsWindowValid()) {
+        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    WMError ret = SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetWindowMode errCode:%{public}d winId:%{public}d",
+            static_cast<int32_t>(ret), property_->GetWindowId());
+        return ret;
+    }
+    if (status) {
+        ret = RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("RemoveWindowFlag errCode:%{public}d winId:%{public}d",
+                static_cast<int32_t>(ret), property_->GetWindowId());
+            return ret;
+        }
+    } else {
+        ret = AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("AddWindowFlag errCode:%{public}d winId:%{public}d",
+                static_cast<int32_t>(ret), property_->GetWindowId());
+            return ret;
+        }
+    }
+    return ret;
+}
+
+WMError WindowImpl::SetFullScreen(bool status)
+{
+    WLOGFI("[Client] Window %{public}d SetFullScreen: %{public}d", property_->GetWindowId(), status);
+    WMError ret = SetLayoutFullScreen(status);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetLayoutFullScreen errCode:%{public}d winId:%{public}d",
+            static_cast<int32_t>(ret), property_->GetWindowId());
+        return ret;
+    }
+    SystemBarProperty statusProperty = GetSystemBarPropertyByType(
+        WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty naviProperty = GetSystemBarPropertyByType(
+        WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    if (status) {
+        statusProperty.enable_ = false;
+        naviProperty.enable_ = false;
+    } else {
+        statusProperty.enable_ = true;
+        naviProperty.enable_ = true;
+    }
+    ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}d",
+            static_cast<int32_t>(ret), property_->GetWindowId());
+        return ret;
+    }
+    ret = SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, naviProperty);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}d",
+            static_cast<int32_t>(ret), property_->GetWindowId());
+    }
+    return ret;
+}
+
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGFI("[Client] Window Create");
@@ -766,10 +831,9 @@ bool WindowImpl::IsLayoutFullScreen() const
 
 bool WindowImpl::IsFullScreen() const
 {
-    auto mode = GetMode();
     auto statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    auto navProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !statusProperty.enable_ && !navProperty.enable_) {
+    auto naviProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    if (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_) {
         return true;
     }
     return false;
