@@ -32,6 +32,11 @@ uint32_t WindowController::GenWindowId()
 WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId)
 {
+    uint32_t parentId = property->GetParentId();
+    if ((parentId != INVALID_WINDOW_ID) && !WindowHelper::IsSubWindow(property->GetWindowType())) {
+        WLOGFE("create window failed, type is error");
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
     windowId = GenWindowId();
     property->SetWindowId(windowId);
 
@@ -285,6 +290,23 @@ std::vector<Rect> WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidA
 {
     std::vector<Rect> avoidArea = windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
     return avoidArea;
+}
+
+WMError WindowController::ProcessWindowTouchedEvent(uint32_t windowId)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFW("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
+    WMError focusRes = windowRoot_->RequestFocus(windowId);
+    if (zOrderRes == WMError::WM_OK || focusRes == WMError::WM_OK) {
+        RSTransaction::FlushImplicitTransaction();
+        WLOGFI("ProcessWindowTouchedEvent FlushImplicitTransaction end");
+        return WMError::WM_OK;
+    }
+    return WMError::WM_ERROR_INVALID_OPERATION;
 }
 }
 }

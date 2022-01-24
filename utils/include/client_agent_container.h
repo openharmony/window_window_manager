@@ -87,7 +87,7 @@ template<typename T1, typename T2>
 std::vector<sptr<T1>> ClientAgentContainer<T1, T2>::GetAgentsByType(T2 type)
 {
     if (agentMap_.count(type) == 0) {
-        WLOG_E("no such type of agent registered! type:%{public}u", type);
+        WLOG_W("ClientAgentContainer no such type of agent registered! type:%{public}u", type);
         return std::vector<sptr<T1>>();
     }
     return agentMap_.at(type);
