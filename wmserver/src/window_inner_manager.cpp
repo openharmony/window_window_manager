@@ -109,9 +109,9 @@ sptr<Window> WindowInnerManager::CreateWindow(uint32_t displayId, const WindowTy
     return window;
 }
 
-void WindowInnerManager::CreateAndShowDivider()
+void WindowInnerManager::CreateAndShowDivider(std::unique_ptr<WindowMessage> msg)
 {
-    auto window = CreateWindow(winMsg_->displayId, WindowType::WINDOW_TYPE_DOCK_SLICE, winMsg_->dividerRect);
+    auto window = CreateWindow(msg->displayId, WindowType::WINDOW_TYPE_DOCK_SLICE, msg->dividerRect);
     if (window == nullptr) {
         return;
     }
@@ -142,9 +142,9 @@ void WindowInnerManager::CreateAndShowDivider()
     WLOGFI("CreateAndShowDivider success");
 }
 
-void WindowInnerManager::HideAndDestroyDivider()
+void WindowInnerManager::HideAndDestroyDivider(std::unique_ptr<WindowMessage> msg)
 {
-    sptr<Window> window = GetDividerWindow(winMsg_->displayId);
+    sptr<Window> window = GetDividerWindow(msg->displayId);
     if (window == nullptr) {
         WLOGFE("Window is nullptr");
         return;
@@ -154,11 +154,11 @@ void WindowInnerManager::HideAndDestroyDivider()
         WLOGFE("Destroy window failed");
         return;
     }
-    dividerMap_.erase(winMsg_->displayId);
+    dividerMap_.erase(msg->displayId);
     WLOGFI("HideAndDestroyDivider success");
 }
 
-void WindowInnerManager::DestroyThread()
+void WindowInnerManager::DestroyThread(std::unique_ptr<WindowMessage> msg)
 {
     hasInitThread_ = false;
     needDestroyThread_ = true;
@@ -168,68 +168,77 @@ void WindowInnerManager::DestroyThread()
 void WindowInnerManager::HandleMessage()
 {
     WLOGFI("HandleMessage");
+    std::vector<std::unique_ptr<WindowMessage>> handleMsgs;
     while (!needDestroyThread_) {
-        std::unique_lock<std::mutex> lk(mutex_);
-        conVar_.wait(lk, [this] { return ready_; });
-
-        auto cmdType = winMsg_->cmdType;
-        using Func_t = void(WindowInnerManager::*)();
-        static const std::map<InnerWMCmd, Func_t> funcMap = {
-            std::make_pair(INNER_WM_CREATE_DIVIDER,  &WindowInnerManager::CreateAndShowDivider),
-            std::make_pair(INNER_WM_DESTROY_DIVIDER, &WindowInnerManager::HideAndDestroyDivider),
-            std::make_pair(INNER_WM_DESTROY_THREAD,  &WindowInnerManager::DestroyThread)
-        };
-        auto it = funcMap.find(cmdType);
-        if (it != funcMap.end()) {
-            (this->*(it->second))();
+        // lock to store massages
+        {
+            std::unique_lock<std::mutex> lk(mutex_);
+            conVar_.wait(lk, [this] { return ready_; });
+            for (auto& iter: messages_) {
+                handleMsgs.push_back(std::move(iter));
+            }
+            messages_.clear();
+            ready_ = false;
         }
-        ready_ = false;
+        // loop to handle massages
+        for (auto& msg : handleMsgs) {
+            auto cmdType = msg->cmdType;
+            using Func_t = void(WindowInnerManager::*)(std::unique_ptr<WindowMessage> winMsg);
+            static const std::map<InnerWMCmd, Func_t> funcMap = {
+                std::make_pair(INNER_WM_CREATE_DIVIDER,  &WindowInnerManager::CreateAndShowDivider),
+                std::make_pair(INNER_WM_DESTROY_DIVIDER, &WindowInnerManager::HideAndDestroyDivider),
+                std::make_pair(INNER_WM_DESTROY_THREAD,  &WindowInnerManager::DestroyThread)};
+            auto it = funcMap.find(cmdType);
+            if (it != funcMap.end()) {
+                (this->*(it->second))(std::move(msg));
+            }
+        }
+        handleMsgs.clear();
     }
 }
 
 void WindowInnerManager::SendMessage(InnerWMCmd cmdType, uint32_t displayId)
 {
+    std::unique_lock<std::mutex> lk(mutex_);
     if (!hasInitThread_) {
         WLOGFI("Inner window manager thread has not been created");
         return;
     }
-    winMsg_->cmdType = cmdType;
-    winMsg_->displayId = displayId;
-
+    std::unique_ptr<WindowMessage> winMsg = std::make_unique<WindowMessage>();
+    winMsg->cmdType = cmdType;
+    winMsg->displayId = displayId;
+    WLOGFI("SendMessage : displayId = %{public}d,  type = %{public}d",
+        winMsg->displayId, static_cast<uint32_t>(cmdType));
+    messages_.push_back(std::move(winMsg));
     ready_ = true;
     conVar_.notify_one();
-
-    WLOGFI("SendMessage : displayId = %{public}d,  type = %{public}d",
-        winMsg_->displayId, static_cast<uint32_t>(cmdType));
 }
 
 void WindowInnerManager::SendMessage(InnerWMCmd cmdType, uint32_t displayId, const Rect& dividerRect)
 {
+    std::unique_lock<std::mutex> lk(mutex_);
     if (!hasInitThread_) {
         WLOGFI("Inner window manager thread has not been created");
         return;
     }
-    winMsg_->cmdType = cmdType;
-    winMsg_->displayId = displayId;
-    winMsg_->dividerRect = dividerRect;
-
-    ready_ = true;
-    conVar_.notify_one();
-
+    std::unique_ptr<WindowMessage> winMsg = std::make_unique<WindowMessage>();
+    winMsg->cmdType = cmdType;
+    winMsg->displayId = displayId;
+    winMsg->dividerRect = dividerRect;
     WLOGFI("SendMessage : displayId = %{public}d,  type = %{public}d" \
         " Rect = [%{public}d %{public}d %{public}d %{public}d]",
-        winMsg_->displayId, static_cast<uint32_t>(cmdType),
-        winMsg_->dividerRect.posX_, winMsg_->dividerRect.posY_,
-        winMsg_->dividerRect.width_, winMsg_->dividerRect.height_);
+        winMsg->displayId, static_cast<uint32_t>(cmdType),
+        winMsg->dividerRect.posX_, winMsg->dividerRect.posY_,
+        winMsg->dividerRect.width_, winMsg->dividerRect.height_);
+    messages_.push_back(std::move(winMsg));
+    ready_ = true;
+    conVar_.notify_one();
 }
-
 
 void WindowInnerManager::Init()
 {
     std::unique_lock<std::mutex> lk(mutex_);
     needDestroyThread_ = false;
-    winMsg_ = std::make_unique<WindowMessage>();
-
     // create inner thread
     std::thread innerWMThread(&WindowInnerManager::HandleMessage, this);
     innerWMThread.detach();
