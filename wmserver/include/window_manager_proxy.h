@@ -16,8 +16,8 @@
 #ifndef OHOS_WINDOW_MANAGER_PROXY_H
 #define OHOS_WINDOW_MANAGER_PROXY_H
 
-#include "window_manager_interface.h"
 #include <iremote_proxy.h>
+#include "window_manager_interface.h"
 
 namespace OHOS {
 namespace Rosen {
