@@ -16,8 +16,6 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include <cstdint>
-
 namespace OHOS {
 namespace Rosen {
 enum class WindowType : uint32_t {
