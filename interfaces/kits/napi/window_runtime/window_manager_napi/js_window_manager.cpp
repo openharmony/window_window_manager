@@ -19,6 +19,7 @@
 #include "js_window_listener.h"
 #include "js_window_utils.h"
 #include "native_engine/native_reference.h"
+#include "window_helper.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
@@ -84,6 +85,7 @@ private:
             // Parse info->argv[0] as abilitycontext
             auto objContext = AbilityRuntime::ConvertNativeValueTo<NativeObject>(nativeContext);
             if (objContext == nullptr) {
+                WLOGFE("ConvertNativeValueTo Context Object failed");
                 return false;
             }
             auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(objContext->GetNativePointer());
@@ -92,21 +94,40 @@ private:
         return true;
     }
 
+    bool CheckJsWindowNameAndType(NativeEngine& engine, std::string& windowName, WindowType& winType,
+        NativeValue* nativeString, NativeValue* nativeType)
+    {
+        if (!ConvertFromJsValue(engine, nativeString, windowName)) {
+            WLOGFE("Failed to convert parameter to windowName");
+            return false;
+        }
+        NativeNumber* type = ConvertNativeValueTo<NativeNumber>(nativeType);
+        if (type == nullptr) {
+            WLOGFE("Failed to convert parameter to windowType");
+            return false;
+        }
+        winType = static_cast<WindowType>(static_cast<uint32_t>(*type));
+        if (!WindowHelper::IsSystemWindow(winType)) {
+            WLOGFE("Only SystemWindow support create!");
+            return false;
+        }
+        return true;
+    }
+
     NativeValue* OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info)
     {
-        WLOGFI("JsWindowManager::JsOnCreateWindow is called");
-        if (info.argc <= 0) {
-            WLOGFE("parames num not match!");
+        WLOGFI("JsWindowManager::OnCreateWindow is called");
+        if (info.argc < ARGC_THREE) {
+            WLOGFE("JsWindowManager::OnCreateWindow params less than 3!");
             return engine.CreateUndefined();
         }
         NativeValue* nativeString = nullptr;
         NativeValue* nativeContext = nullptr;
         NativeValue* nativeType = nullptr;
         NativeValue* callback = nullptr;
-        if (info.argv[0]->TypeOf() == NATIVE_STRING) {
-            nativeString = info.argv[0];
-            nativeType = info.argv[ARGC_ONE];
-            callback = (info.argc == ARGC_TWO) ? nullptr : info.argv[INDEX_TWO];
+        if (info.argv[0]->TypeOf() != NATIVE_OBJECT) {
+            WLOGFE("JsWindowManager::OnCreateWindow first should be context!");
+            return engine.CreateUndefined();
         } else {
             nativeContext = info.argv[0];
             nativeString = info.argv[ARGC_ONE];
@@ -114,17 +135,13 @@ private:
             callback = (info.argc == ARGC_THREE) ? nullptr : info.argv[INDEX_THREE];
         }
         std::string windowName;
-        if (!ConvertFromJsValue(engine, nativeString, windowName)) {
-            WLOGFE("Failed to convert parameter to windowName");
+        WindowType winType;
+        if (!CheckJsWindowNameAndType(engine, windowName, winType, nativeString, nativeType)) {
+            WLOGFE("JsWindowManager::OnCreateWindow CheckJsWindowNameAndType failed!");
             return engine.CreateUndefined();
         }
-        NativeNumber* type = ConvertNativeValueTo<NativeNumber>(nativeType);
-        if (type == nullptr) {
-            WLOGFE("Failed to convert parameter to windowType");
-            return engine.CreateUndefined();
-        }
-        WindowType winType = static_cast<WindowType>(static_cast<uint32_t>(*type));
         if (!GetNativeContext(nativeContext)) {
+            WLOGFE("JsWindowManager::OnCreateWindow convert to context failed!");
             return engine.CreateUndefined();
         }
         AsyncTask::CompleteCallback complete =
@@ -134,6 +151,7 @@ private:
                 sptr<Window> window = Window::Create(windowName, windowOption, weak.lock());
                 if (window != nullptr) {
                     task.Resolve(engine, CreateJsWindowObject(engine, window));
+                    WLOGFI("JsWindowManager::OnCreateWindow success");
                 } else {
                     task.Reject(engine, CreateJsError(engine,
                         static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnCreateWindow failed."));

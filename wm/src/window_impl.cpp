@@ -92,6 +92,21 @@ WindowMode WindowImpl::GetMode() const
     return property_->GetWindowMode();
 }
 
+bool WindowImpl::GetShowState() const
+{
+    return state_ == STATE_SHOWN;
+}
+
+bool WindowImpl::GetFocusable() const
+{
+    return property_->GetFocusable();
+}
+
+bool WindowImpl::GetTouchable() const
+{
+    return property_->GetTouchable();
+}
+
 const std::string& WindowImpl::GetWindowName() const
 {
     return name_;
@@ -102,12 +117,12 @@ uint32_t WindowImpl::GetWindowId()
     return property_->GetWindowId();
 }
 
-uint32_t WindowImpl::GetWindowFlags()
+uint32_t WindowImpl::GetWindowFlags() const
 {
     return property_->GetWindowFlags();
 }
 
-SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type)
+SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
 {
     auto curProperties = property_->GetSystemBarProperty();
     return curProperties[type];
@@ -737,6 +752,28 @@ void WindowImpl::SetDefaultOption()
 bool WindowImpl::IsWindowValid() const
 {
     return ((state_ > STATE_INITIAL) && (state_ < STATE_BOTTOM));
+}
+
+bool WindowImpl::IsLayoutFullScreen() const
+{
+    uint32_t flags = GetWindowFlags();
+    auto mode = GetMode();
+    bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !needAvoid) {
+        return true;
+    }
+    return false;
+}
+
+bool WindowImpl::IsFullScreen() const
+{
+    auto mode = GetMode();
+    auto statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    auto navProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !statusProperty.enable_ && !navProperty.enable_) {
+        return true;
+    }
+    return false;
 }
 }
 }
