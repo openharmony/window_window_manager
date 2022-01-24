@@ -47,6 +47,7 @@ public:
     void SetWindowFlags(uint32_t flags);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& state);
     void SetDecorEnable(bool decorEnable);
+    void SetHitOffset(const PointInfo& offset);
 
     const std::string& GetWindowName() const;
     Rect GetWindowRect() const;
@@ -65,6 +66,7 @@ public:
     uint32_t GetWindowFlags() const;
     const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
     bool GetDecorEnable() const;
+    const PointInfo& GetHitOffset() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static sptr<WindowProperty> Unmarshalling(Parcel& parcel);
@@ -85,6 +87,8 @@ private:
     DisplayId displayId_ { 0 };
     uint32_t windowId_ { 0 };
     uint32_t parentId_ { 0 };
+    PointInfo hitOffset_ { 0, 0 };
+
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },

@@ -18,6 +18,7 @@
 
 #include "iremote_broker.h"
 #include "window_property.h"
+#include "wm_common.h"
 #include "wm_common_inner.h"
 
 namespace OHOS {
@@ -33,6 +34,7 @@ public:
         TRANS_ID_UPDATE_FOCUS_STATUS,
         TRANS_ID_UPDATE_AVOID_AREA,
         TRANS_ID_UPDATE_WINDOW_STATE,
+        TRANS_ID_UPDATE_DRAG_EVENT,
     };
 
     virtual void UpdateWindowProperty(const WindowProperty& windowProperty) = 0;
@@ -41,6 +43,7 @@ public:
     virtual void UpdateFocusStatus(bool focused) = 0;
     virtual void UpdateAvoidArea(const std::vector<Rect>& avoidAreas) = 0;
     virtual void UpdateWindowState(WindowState state) = 0;
+    virtual void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

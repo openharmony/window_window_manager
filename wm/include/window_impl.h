@@ -29,6 +29,7 @@
 #include "window.h"
 #include "window_property.h"
 #include "wm_common_inner.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -95,6 +96,8 @@ public:
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     virtual void UnregisterAvoidAreaChangeListener() override;
+    virtual void RegisterDragListener(sptr<IWindowDragListener>& listener) override;
+    virtual void UnregisterDragListener(sptr<IWindowDragListener>& listener) override;
 
     void UpdateRect(const struct Rect& rect);
     void UpdateMode(WindowMode mode);
@@ -105,6 +108,7 @@ public:
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void UpdateAvoidArea(const std::vector<Rect>& avoidAreas);
     void UpdateWindowState(WindowState state);
+    void UpdateDragEvent(const PointInfo& point, DragEvent event);
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed) override;
@@ -153,11 +157,13 @@ private:
     sptr<IWindowLifeCycle> lifecycleListener_;
     sptr<IWindowChangeListener> windowChangeListener_;
     sptr<IAvoidAreaChangedListener> avoidAreaChangeListener_;
+    std::vector<sptr<IWindowDragListener>> windowDragListeners_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_; // give up when context offer getToken
     std::shared_ptr<AbilityRuntime::Context> context_;
+    std::recursive_mutex mutex_;
     const float STATUS_BAR_RATIO = 0.07;
     const float NAVIGATION_BAR_RATIO = 0.07;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;

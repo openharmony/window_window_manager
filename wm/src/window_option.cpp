@@ -15,6 +15,7 @@
 
 #include "window_option.h"
 #include "window_helper.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -131,6 +132,17 @@ const std::string& WindowOption::GetWindowName() const
 uint32_t WindowOption::GetWindowFlags() const
 {
     return flags_;
+}
+
+void WindowOption::SetHitOffset(int32_t x, int32_t y)
+{
+    hitOffset_.x = x;
+    hitOffset_.y = y;
+}
+
+const PointInfo& WindowOption::GetHitOffset() const
+{
+    return hitOffset_;
 }
 
 const std::unordered_map<WindowType, SystemBarProperty>& WindowOption::GetSystemBarProperty() const
