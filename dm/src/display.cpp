@@ -17,48 +17,59 @@
 #include "display_info.h"
 
 namespace OHOS::Rosen {
+class Display::Impl : public RefBase {
+friend class Display;
+private:
+    std::string name_;
+    DisplayId id_ { DISPLAY_ID_INVALD };
+    int32_t width_ { 0 };
+    int32_t height_ { 0 };
+    uint32_t freshRate_ { 0 };
+};
+
 Display::Display(const std::string& name, DisplayInfo* info)
-    : name_(name),
-      id_(info->id_),
-      width_(info->width_),
-      height_(info->height_),
-      freshRate_(info->freshRate_)
+    : pImpl_(new Impl())
 {
+    pImpl_->name_ = name;
+    pImpl_->id_ = info->id_;
+    pImpl_->width_ = info->width_;
+    pImpl_->height_ = info->height_;
+    pImpl_->freshRate_ = info->freshRate_;
 }
 
 DisplayId Display::GetId() const
 {
-    return id_;
+    return pImpl_->id_;
 }
 
 int32_t Display::GetWidth() const
 {
-    return width_;
+    return pImpl_->width_;
 }
 
 int32_t Display::GetHeight() const
 {
-    return height_;
+    return pImpl_->height_;
 }
 
 uint32_t Display::GetFreshRate() const
 {
-    return freshRate_;
+    return pImpl_->freshRate_;
 }
 
 void Display::SetWidth(int32_t width)
 {
-    width_ = width;
+    pImpl_->width_ = width;
 }
 
 void Display::SetHeight(int32_t height)
 {
-    height_ = height;
+    pImpl_->height_ = height;
 }
 
 void Display::SetFreshRate(uint32_t freshRate)
 {
-    freshRate_ = freshRate;
+    pImpl_->freshRate_ = freshRate;
 }
 
 float Display::GetVirtualPixelRatio() const
@@ -73,6 +84,6 @@ float Display::GetVirtualPixelRatio() const
 
 void Display::SetId(DisplayId id)
 {
-    id_ = id;
+    pImpl_->id_ = id;
 }
 } // namespace OHOS::Rosen

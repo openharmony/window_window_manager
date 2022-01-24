@@ -625,7 +625,6 @@ NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& i
                     CreateJsError(engine, static_cast<int32_t>(ret), "JsWindow::OnLoadContent failed."));
             }
         };
-
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, callBack, nullptr, std::move(complete), &result));
@@ -889,7 +888,6 @@ std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
 {
     WLOGFI("JsWindow::CreateJsWindow is called");
-    std::lock_guard<std::recursive_mutex> lock(g_mutex);
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 
@@ -917,6 +915,7 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     std::shared_ptr<NativeReference> jsWindowRef;
     jsWindowRef.reset(engine.CreateReference(objValue, 1));
     std::string windowName = window->GetWindowName();
+    std::lock_guard<std::recursive_mutex> lock(g_mutex);
     g_jsWindowMap[windowName] = jsWindowRef;
     return objValue;
 }

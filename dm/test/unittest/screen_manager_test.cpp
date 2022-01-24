@@ -60,11 +60,11 @@ HWTEST_F(ScreenManagerTest, CreateAndDestory01, Function | SmallTest | Level1)
     VirtualScreenOption wrongOption = {defaultName_, defaultWidth_, defaultHeight_,
                                        defaultDensity_, nullptr, defaultFlags_};
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), CreateVirtualScreen(_)).Times(1).WillOnce(Return(SCREEN_ID_INVALD));
+    EXPECT_CALL(m->Mock(), CreateVirtualScreen(_)).Times(1).WillOnce(Return(SCREEN_ID_INVALID));
     EXPECT_CALL(m->Mock(), DestroyVirtualScreen(_)).Times(1).WillOnce(Return(DMError::DM_ERROR_INVALID_PARAM));
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(wrongOption);
     DMError ret = ScreenManager::GetInstance().DestroyVirtualScreen(id);
-    ASSERT_EQ(SCREEN_ID_INVALD, id);
+    ASSERT_EQ(SCREEN_ID_INVALID, id);
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ret);
 }
 

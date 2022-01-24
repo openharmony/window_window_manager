@@ -45,6 +45,7 @@ private:
     void OnAbstractScreenChanged(sptr<AbstractScreen> absScreen);
     void BindAloneScreenLocked(sptr<AbstractScreen> absScreen);
     void AddScreenToMirrorLocked(sptr<AbstractScreenGroup> group, sptr<AbstractScreen> realAbsScreen);
+    void ProcessScreenDisconnected(sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup);
 
     std::recursive_mutex& mutex_;
     std::atomic<DisplayId> displayCount_ { 0 };

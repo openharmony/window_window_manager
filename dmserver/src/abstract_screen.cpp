@@ -116,11 +116,18 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
         return false;
     }
     ScreenId screenId = dmsScreen->dmsId_;
+    dmsScreen->groupDmsId_ = SCREEN_ID_INVALID;
     bool res = abstractScreenMap_.erase(screenId);
     if (abstractScreenMap_.size() == 1) {
         combination_ = ScreenCombination::SCREEN_ALONE;
     }
     return res;
+}
+
+bool AbstractScreenGroup::HasChild(ScreenId childScreen) const
+{
+    auto iter = abstractScreenMap_.find(childScreen);
+    return iter != abstractScreenMap_.end();
 }
 
 std::vector<sptr<AbstractScreen>> AbstractScreenGroup::GetChildren() const

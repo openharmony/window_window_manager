@@ -91,18 +91,22 @@ void AbstractDisplay::SetId(DisplayId id)
     id_ = id;
 }
 
-bool AbstractDisplay::BindAbstractScreenId(ScreenId dmsScreenId)
+bool AbstractDisplay::BindAbstractScreen(ScreenId dmsScreenId)
 {
     sptr<AbstractScreenController> screenController
         = DisplayManagerService::GetInstance().GetAbstractScreenController();
-    sptr<AbstractScreen> screen = screenController->GetAbstractScreen(dmsScreenId);
-    if (screen == nullptr) {
-        WLOGE("display bind screen error, cannot get screen. display:%{public}" PRIu64", screen:%{public}" PRIu64"",
-            id_, dmsScreenId);
+    return BindAbstractScreen(screenController->GetAbstractScreen(dmsScreenId));
+}
+
+bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
+{
+    if (abstractScreen == nullptr) {
+        WLOGE("display bind screen error, cannot get screen. display:%{public}" PRIu64"", id_);
         return false;
     }
+    ScreenId dmsScreenId = abstractScreen->dmsId_;
     // TODO: screen->rsDisplayNode_->SetScreenId(rsScreenId);
-    sptr<AbstractScreenInfo> info = screen->GetActiveScreenInfo();
+    sptr<AbstractScreenInfo> info = abstractScreen->GetActiveScreenInfo();
     if (info == nullptr) {
         WLOGE("display bind screen error, cannot get info. display:%{public}" PRIu64", screen:%{public}" PRIu64"",
             id_, dmsScreenId);

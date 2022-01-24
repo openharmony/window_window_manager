@@ -73,7 +73,6 @@ bool WindowManagerService::Init()
         return false;
     }
     WLOGFI("WindowManagerService::Init success");
-    sleep(WAITING_RS_TIME); // for RS temporary
     return true;
 }
 
@@ -111,6 +110,11 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
     WMError res = windowController_->AddWindowNode(property);
     if (res == WMError::WM_OK) {
         inputWindowMonitor_->UpdateInputWindow(property->GetWindowId());
+    }
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR
+        || property->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
+        WLOGFI("WindowManagerService::AddWindow System Window called");
+        system::SetParameter("persist.window.boot.inited", "1");
     }
     return res;
 }
