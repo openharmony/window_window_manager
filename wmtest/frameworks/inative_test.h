@@ -16,10 +16,8 @@
 #ifndef OHOS_ROSEN_INATIVE_TEST_H
 #define OHOS_ROSEN_INATIVE_TEST_H
 
-#include <cstdint>
 #include <functional>
 #include <string>
-#include <vector>
 
 namespace OHOS::Rosen {
 class INativeTest;

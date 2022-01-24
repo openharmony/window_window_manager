@@ -17,7 +17,7 @@
 
 #include <cstdio>
 #include <unistd.h>
-#include <signal.h>
+#include <csignal>
 #include "window.h"
 #include "window_life_cycle_interface.h"
 #include "window_option.h"
@@ -65,10 +65,10 @@ void WMNativeTest::Run(int32_t argc, const char **argv)
         return;
     }
 
-    while(true) {
+    while (true) {
         scene->GoForeground();
-        sleep(3);
+        sleep(3); // Sleep for 3 seconds
         scene->GoBackground();
-        sleep(3);
+        sleep(3); // Sleep for 3 seconds
     }
 }
