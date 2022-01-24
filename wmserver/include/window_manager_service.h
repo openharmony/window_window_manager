@@ -23,6 +23,7 @@
 #include <nocopyable.h>
 #include <parameters.h>
 #include <system_ability.h>
+#include "display_change_listener.h"
 #include "singleton_delegator.h"
 #include "wm_single_instance.h"
 #include "window_controller.h"
@@ -32,9 +33,13 @@
 
 namespace OHOS {
 namespace Rosen {
+class DisplayChangeListener : public IDisplayChangeListener {
+public:
+    virtual void OnDisplayStateChange(DisplayStateChangeType type) override;
+};
 class WindowManagerService : public SystemAbility, public WindowManagerStub {
+friend class DisplayChangeListener;
 DECLARE_SYSTEM_ABILITY(WindowManagerService);
-
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManagerService);
 
 public:
@@ -63,10 +68,6 @@ public:
     void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
 
-    // Inner interfaces
-    WMError NotifyDisplaySuspend();
-    void RestoreSuspendedWindows();
-
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;
@@ -75,6 +76,8 @@ private:
     bool Init();
     void RegisterSnapshotHandler();
     void OnWindowEvent(Event event, uint32_t windowId);
+    void NotifyDisplayStateChange(DisplayStateChangeType type);
+
     static inline SingletonDelegator<WindowManagerService> delegator;
     std::recursive_mutex mutex_;
     sptr<WindowRoot> windowRoot_;

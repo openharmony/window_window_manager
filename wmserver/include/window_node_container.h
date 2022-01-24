@@ -23,6 +23,7 @@
 #include "window_node.h"
 #include "window_zorder_policy.h"
 #include "wm_common.h"
+#include "wm_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -52,6 +53,8 @@ public:
     void LayoutDividerWindow(sptr<WindowNode>& node);
     void UpdateDisplayInfo();
     bool isVerticalDisplay() const;
+
+    void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
 
     class DisplayRects : public RefBase {
     public:
@@ -90,6 +93,8 @@ private:
     WMError UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode);
     void NotifyIfSystemBarTintChanged();
     void NotifyIfSystemBarRegionChanged();
+    void TraverseAndUpdateWindowState(WindowState state, int32_t topPriority);
+    void UpdateWindowState(sptr<WindowNode> node, int32_t topPriority, WindowState state);
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
