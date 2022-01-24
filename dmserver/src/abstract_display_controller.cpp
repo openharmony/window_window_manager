@@ -130,6 +130,50 @@ void AbstractDisplayController::OnAbstractScreenConnected(sptr<AbstractScreen> a
 
 void AbstractDisplayController::OnAbstractScreenDisconnected(sptr<AbstractScreen> absScreen)
 {
+    WLOGI("disconnect screen. id:%{public}" PRIu64"", absScreen->dmsId_);
+    if (absScreen == nullptr) {
+        WLOGE("the information of the screen is wrong");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    sptr<AbstractScreenGroup> screenGroup = absScreen->GetGroup();
+    if (screenGroup == nullptr) {
+        WLOGE("the group information of the screen is wrong");
+        return;
+    }
+    if (absScreen->type_ == ScreenType::REAL) {
+        if (screenGroup->combination_ == ScreenCombination::SCREEN_ALONE
+            || screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR) {
+            ProcessScreenDisconnected(absScreen, screenGroup);
+        } else {
+            WLOGE("support in future. combination:%{public}u", screenGroup->combination_);
+        }
+    } else {
+        WLOGE("support in future. type_:%{public}u", absScreen->type_);
+    }
+}
+
+void AbstractDisplayController::ProcessScreenDisconnected(
+    sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup)
+{
+    auto screens = screenGroup->GetChildren();
+    sptr<AbstractScreen> defaultScreen;
+    for (auto iter = screens.begin(); iter != screens.end(); iter++) {
+        if ((*iter)->type_ == ScreenType::REAL) {
+            defaultScreen = (*iter);
+            break;
+        }
+    }
+    for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
+        sptr<AbstractDisplay> abstractDisplay = iter->second;
+        if (abstractDisplay->GetAbstractScreenId() != absScreen->dmsId_) {
+            continue;
+        }
+        abstractDisplay->BindAbstractScreen(defaultScreen);
+        if (screenGroup->GetChildCount() == 0) {
+            abstractDisplayMap_.erase(iter);
+        }
+    }
 }
 
 void AbstractDisplayController::OnAbstractScreenChanged(sptr<AbstractScreen> absScreen)
@@ -154,7 +198,7 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
         } else {
             WLOGI("bind display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, dummyDisplay_->GetId());
-            dummyDisplay_->BindAbstractScreenId(realAbsScreen->dmsId_);
+            dummyDisplay_->BindAbstractScreen(realAbsScreen->dmsId_);
             dummyDisplay_ = nullptr;
         }
     } else {

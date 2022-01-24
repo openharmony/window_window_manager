@@ -22,7 +22,7 @@ public:
     Impl() = default;
     ~Impl() = default;
 
-    ScreenId id_ { SCREEN_ID_INVALD };
+    ScreenId id_ { SCREEN_ID_INVALID };
     uint32_t width_ { 0 };
     uint32_t height_ { 0 };
     uint32_t virtualWidth_ { 0 };

@@ -482,6 +482,31 @@ declare namespace window {
     setSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void>;
 
     /**
+     * Loads content
+     * @param path  path Path of the page to which the content will be loaded
+     * @param storage storage The data object shared within the content instance loaded by the window
+     * @devices tv, phone, tablet, wearable, car
+     * @since 7
+     */
+    loadContent(path: string, storage: ContenStorage, callback: AsyncCallback<void>): void;
+
+    /**
+     * Loads content
+     * @param path path of the page to which the content will be loaded
+     * @devices tv, phone, tablet, wearable, car
+     * @since 7
+     */
+    loadContent(path: string, callback: AsyncCallback<void>): void;
+
+    /**
+     * Loads content
+     * @param path path of the page to which the content will be loaded
+     * @devices tv, phone, tablet, wearable, car
+     * @since 7
+     */
+    loadContent(path: string, storage?: ContenStorage): Promise<void>;
+
+    /**
      * register the callback of windowSizeChange
      * @param type: 'windowSizeChange'
      * @devices tv, phone, tablet, wearable, car

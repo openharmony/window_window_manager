@@ -145,10 +145,10 @@ void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
     dmsScreenId = iter->second;
     auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
     if (dmsScreenMapIter != dmsScreenMap_.end()) {
-        sptr<AbstractScreenGroup> screenGroup = RemoveFromGroupLocked(dmsScreenMapIter->second);
-        if (screenGroup != nullptr && abstractScreenCallback_ != nullptr) {
+        if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(dmsScreenMapIter->second)) {
             abstractScreenCallback_->onDisconnected_(dmsScreenMapIter->second);
         }
+        RemoveFromGroupLocked(dmsScreenMapIter->second);
         dmsScreenMap_.erase(dmsScreenMapIter);
         auto firstIter = dmsScreenMap_.begin();
         if (firstIter == dmsScreenMap_.end()) {
@@ -222,6 +222,19 @@ sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<A
         dmsScreenMap_.erase(screenGroup->dmsId_);
     }
     return screenGroup;
+}
+
+bool AbstractScreenController::CheckScreenInScreenGroup(sptr<AbstractScreen> screen) const
+{
+    WLOGI("CheckScreenInScreenGroup.");
+    auto groupDmsId = screen->groupDmsId_;
+    auto iter = dmsScreenGroupMap_.find(groupDmsId);
+    if (iter == dmsScreenGroupMap_.end()) {
+        WLOGE("CheckScreenInScreenGroup. groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
+        return false;
+    }
+    sptr<AbstractScreenGroup> screenGroup = iter->second;
+    return screenGroup->HasChild(screen->dmsId_);
 }
 
 sptr<AbstractScreenGroup> AbstractScreenController::AddAsFirstScreenLocked(sptr<AbstractScreen> newScreen)

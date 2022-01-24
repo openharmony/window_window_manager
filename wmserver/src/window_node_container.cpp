@@ -294,9 +294,16 @@ void WindowNodeContainer::UpdateFocusWindow()
 {
     for (auto iter = appWindowNode_->children_.rbegin(); iter < appWindowNode_->children_.rend(); iter++) {
         if ((*iter)->GetWindowProperty()->GetFocusable()) {
-            WLOGFI("find focused id %{public}d;", (*iter)->GetWindowId());
+            WLOGFI("find appWindow focused id %{public}d;", (*iter)->GetWindowId());
             SetFocusWindow((*iter)->GetWindowId());
-            break;
+            return;
+        }
+    }
+    for (auto iter = belowAppWindowNode_->children_.rbegin(); iter < belowAppWindowNode_->children_.rend(); iter++) {
+        if ((*iter)->GetWindowProperty()->GetFocusable()) {
+            WLOGFI("find belowAppWindow focused id %{public}d;", (*iter)->GetWindowId());
+            SetFocusWindow((*iter)->GetWindowId());
+            return;
         }
     }
 }
@@ -602,6 +609,7 @@ std::vector<Rect> WindowNodeContainer::GetAvoidAreaByType(AvoidAreaType avoidAre
 
 void WindowNodeContainer::OnAvoidAreaChange(const std::vector<Rect>& avoidArea)
 {
+    layoutPolicy_->UpdateDefaultFoatingRect();
     for (auto& node : appWindowNode_->children_) {
         if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && node->GetWindowToken() != nullptr) {
             // notify client
