@@ -49,6 +49,7 @@ public:
         const sptr<WindowNode>& appNode, const sptr<WindowNode>& aboveAppNode);
     ~WindowLayoutPolicy() = default;
     void UpdateDisplayInfo(const Rect& primaryRect, const Rect& secondaryRect, const Rect& displayRect);
+    void UpdateSplitInfo(const Rect& primaryRect, const Rect& secondaryRect);
     void AddWindowNode(sptr<WindowNode>& node);
     void RemoveWindowNode(sptr<WindowNode>& node);
     void UpdateWindowNode(sptr<WindowNode>& node);

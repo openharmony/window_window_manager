@@ -51,6 +51,7 @@ public:
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void LayoutDividerWindow(sptr<WindowNode>& node);
     void UpdateDisplayInfo();
+    void UpdateSplitInfo();
     bool isVerticalDisplay() const;
 
     class DisplayRects : public RefBase {
