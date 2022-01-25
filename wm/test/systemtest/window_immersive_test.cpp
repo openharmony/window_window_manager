@@ -280,6 +280,58 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest03, Function | MediumTest | Level3)
 }
 
 /**
+ * @tc.name: ImmersiveTest04
+ * @tc.desc: SetLayoutFullScreen
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVD
+ */
+HWTEST_F(WindowImmersiveTest, ImmersiveTest04, Function | MediumTest | Level3)
+{
+    fullScreenAppinfo_.needAvoid = true; // no immersive setting
+    const sptr<Window>& window1 = utils::CreateTestWindow(fullScreenAppinfo_);
+    activeWindows_.push_back(window1);
+    SetWindowSystemProps(window1, TEST_PROPS_1);
+    ASSERT_EQ(WMError::WM_OK, window1->Show());
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+    ASSERT_EQ(WMError::WM_OK, window1->SetLayoutFullScreen(true));
+    ASSERT_EQ(true, window1->IsLayoutFullScreen());
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    ASSERT_EQ(WMError::WM_OK, window1->SetLayoutFullScreen(false));
+    ASSERT_EQ(false, window1->IsLayoutFullScreen());
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+    ASSERT_EQ(WMError::WM_OK, window1->SetLayoutFullScreen(true));
+    ASSERT_EQ(true, window1->IsLayoutFullScreen());
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    ASSERT_EQ(WMError::WM_OK, window1->SetLayoutFullScreen(false));
+    ASSERT_EQ(false, window1->IsLayoutFullScreen());
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+    ASSERT_EQ(WMError::WM_OK, window1->Hide());
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+}
+
+/**
+ * @tc.name: ImmersiveTest05
+ * @tc.desc: SetFullScreen
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVD
+ */
+HWTEST_F(WindowImmersiveTest, ImmersiveTest05, Function | MediumTest | Level3)
+{
+    fullScreenAppinfo_.needAvoid = true; // no immersive setting
+    const sptr<Window>& window1 = utils::CreateTestWindow(fullScreenAppinfo_);
+    activeWindows_.push_back(window1);
+    ASSERT_EQ(WMError::WM_OK, window1->Show());
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+    ASSERT_EQ(WMError::WM_OK, window1->SetFullScreen(true));
+    ASSERT_EQ(true, window1->IsFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window1->SetFullScreen(false));
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+    ASSERT_EQ(false, window1->IsFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window1->Hide());
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+}
+
+/**
  * @tc.name: GetAvoidAreaByTypeTest01
  * @tc.desc: Test GetAvoidArea use unsupport Type(TYPE_CUTOUT).
  * @tc.type: FUNC
