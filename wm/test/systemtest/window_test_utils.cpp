@@ -19,12 +19,14 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowTestUtils"};
+    constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 360;
+    constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 480;
 }
 
 Rect WindowTestUtils::displayRect_        = {0, 0, 0, 0};
 Rect WindowTestUtils::statusBarRect_      = {0, 0, 0, 0};
 Rect WindowTestUtils::naviBarRect_        = {0, 0, 0, 0};
-Rect WindowTestUtils::customAppRect_     = {0, 0, 0, 0};
+Rect WindowTestUtils::customAppRect_      = {0, 0, 0, 0};
 Rect WindowTestUtils::limitDisplayRect_   = {0, 0, 0, 0};
 SplitRects WindowTestUtils::splitRects_   = {
     .primaryRect   = {0, 0, 0, 0},
@@ -115,7 +117,7 @@ Rect WindowTestUtils::GetDefaultFoatingRect(const sptr<Window>& window)
         int32_t centerPosY = limitDisplayRect_.posY_ + static_cast<int32_t>(limitDisplayRect_.height_ / half);
         resRect.posY_ = centerPosY - static_cast<int32_t>(defaultH / half);
     }
-    
+
     return resRect;
 }
 
@@ -124,13 +126,27 @@ Rect WindowTestUtils::GetLimitedDecoRect(const Rect& rect)
     constexpr uint32_t winFrameH = 52u;
     constexpr uint32_t winFrameW = 8u;
     bool vertical = displayRect_.width_ < displayRect_.height_;
-    uint32_t minFloatingW = vertical ? 360u : 480u;
-    uint32_t minFloatingH = vertical ? 480u : 360u;
+    uint32_t minFloatingW = vertical ? MIN_VERTICAL_FLOATING_WIDTH : MIN_VERTICAL_FLOATING_HEIGHT;
+    uint32_t minFloatingH = vertical ? MIN_VERTICAL_FLOATING_HEIGHT : MIN_VERTICAL_FLOATING_WIDTH;
     Rect resRect = {
         rect.posX_,
         rect.posY_,
         std::max(minFloatingW, rect.width_ + winFrameW),
         std::max(minFloatingH, rect.height_ + winFrameH),
+    };
+    return resRect;
+}
+
+Rect WindowTestUtils::GetFloatingLimitedRect(const Rect& rect)
+{
+    bool vertical = displayRect_.width_ < displayRect_.height_;
+    uint32_t minFloatingW = vertical ? MIN_VERTICAL_FLOATING_WIDTH : MIN_VERTICAL_FLOATING_HEIGHT;
+    uint32_t minFloatingH = vertical ? MIN_VERTICAL_FLOATING_HEIGHT : MIN_VERTICAL_FLOATING_WIDTH;
+    Rect resRect = {
+        rect.posX_,
+        rect.posY_,
+        std::max(minFloatingW, rect.width_),
+        std::max(minFloatingH, rect.height_),
     };
     return resRect;
 }
