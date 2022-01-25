@@ -63,6 +63,7 @@ public:
     static bool RectEqualToRect(const Rect& l, const Rect& r);
     static Rect GetDefaultFoatingRect(const sptr<Window>& window);
     static Rect GetLimitedDecoRect(const Rect& rect);
+    static Rect GetFloatingLimitedRect(const Rect& rect);
 
 private:
     void UpdateLimitDisplayRect(Rect& avoidRect);
