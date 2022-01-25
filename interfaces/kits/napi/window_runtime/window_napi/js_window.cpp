@@ -645,7 +645,7 @@ NativeValue* JsWindow::OnSetFullScreen(NativeEngine& engine, NativeCallbackInfo&
     }
     bool isFullScreen = static_cast<bool>(*nativeVal);
     AsyncTask::CompleteCallback complete =
-        [&, this](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             WMError ret = windowToken_->SetFullScreen(isFullScreen);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
@@ -677,7 +677,7 @@ NativeValue* JsWindow::OnSetLayoutFullScreen(NativeEngine& engine, NativeCallbac
     }
     bool isLayoutFullScreen = static_cast<bool>(*nativeVal);
     AsyncTask::CompleteCallback complete =
-        [&, this](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             WMError ret = windowToken_->SetLayoutFullScreen(isLayoutFullScreen);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
