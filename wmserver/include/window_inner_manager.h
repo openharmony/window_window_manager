@@ -24,6 +24,7 @@
 #ifdef ACE_ENABLE_GL
 #include "render_context/render_context.h"
 #endif
+#include "include/core/SkBitmap.h"
 #include "single_instance.h"
 #include "singleton_delegator.h"
 #include "window.h"
@@ -57,8 +58,9 @@ private:
     void CreateAndShowDivider(std::unique_ptr<WindowMessage> msg);
     void HideAndDestroyDivider(std::unique_ptr<WindowMessage> msg);
     void DestroyThread(std::unique_ptr<WindowMessage> msg);
-    void DrawSurface(const sptr<Window>& window, uint32_t color);
+    void DrawSurface(const sptr<Window>& window);
     sptr<Window> GetDividerWindow(uint32_t displayId) const;
+    bool DecodeImageFile(const char* filename, SkBitmap* bitmap);
 
     std::mutex mutex_;
     std::condition_variable conVar_;
@@ -70,6 +72,9 @@ private:
     std::vector<std::unique_ptr<WindowMessage>> messages_;
     bool hasInitThread_ = false;
     bool needDestroyThread_ = false;
+    bool isDeviderImageLoaded = false;
+    const char *splitIconPath_ = "/etc/window/resources/bg_split_handle.png";
+    SkBitmap deviderBitmap;
 };
 }
 }

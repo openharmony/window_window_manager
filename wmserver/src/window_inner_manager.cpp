@@ -16,7 +16,9 @@
 #include "window_inner_manager.h"
 
 #include "include/core/SkCanvas.h"
-#include "include/core/SkImageInfo.h"
+#include "include/codec/SkCodec.h"
+#include "include/core/SkData.h"
+#include "include/core/SkImage.h"
 #include "transaction/rs_transaction.h"
 #include "ui/rs_surface_extractor.h"
 
@@ -32,7 +34,22 @@ namespace {
 
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowInnerManager)
 
-void WindowInnerManager::DrawSurface(const sptr<Window>& window, uint32_t color)
+bool WindowInnerManager::DecodeImageFile(const char* filename, SkBitmap* bitmap)
+{
+    sk_sp<SkData> data(SkData::MakeFromFileName(filename));
+    std::unique_ptr<SkCodec> codec = SkCodec::MakeFromData(std::move(data));
+    if (codec == nullptr) {
+        return false;
+    }
+    SkColorType colorType = kN32_SkColorType;
+    SkImageInfo info = codec->getInfo().makeColorType(colorType);
+    if (!bitmap->tryAllocPixels(info)) {
+        return false;
+    }
+    return SkCodec::kSuccess == codec->getPixels(info, bitmap->getPixels(), bitmap->rowBytes());
+}
+
+void WindowInnerManager::DrawSurface(const sptr<Window>& window)
 {
     auto surfaceNode = window->GetSurfaceNode();
     auto winRect = window->GetRect();
@@ -51,32 +68,35 @@ void WindowInnerManager::DrawSurface(const sptr<Window>& window, uint32_t color)
     rsSurface->SetRenderContext(rc_);
 #endif
     auto frame = rsSurface->RequestFrame(width, height);
-    std::unique_ptr<RSSurfaceFrame> framePtr = std::move(frame);
-    if (!framePtr) {
+    if (!frame) {
         WLOGFE("DrawSurface frameptr is nullptr");
         return;
     }
-    auto canvas = framePtr->GetCanvas();
+    auto canvas = frame->GetCanvas();
     if (!canvas) {
         WLOGFE("DrawSurface canvas is nullptr");
         return;
     }
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setStyle(SkPaint::kFill_Style);
-    const SkScalar skWidth = 20;
-    paint.setStrokeWidth(skWidth);
-    paint.setStrokeJoin(SkPaint::kRound_Join);
-    paint.setColor(color);
-
-    SkPoint rectPts[] = { {0, 0}, {static_cast<int>(width), static_cast<int>(height)} };
-    SkRect rect;
-    rect.set(rectPts[0], rectPts[1]);
-
-    canvas->drawRect(rect, paint);
-    framePtr->SetDamageRegion(0, 0, width, height);
-    auto framPtr1 = std::move(framePtr);
-    rsSurface->FlushFrame(framPtr1);
+    if (!deviderBitmap.isNull()) {
+        SkPaint paint;
+        SkMatrix matrix;
+        SkRect paintRect;
+        if (width < height) {
+            // rotate when devider is hozizon
+            matrix.setScale(static_cast<float>(height) / deviderBitmap.width(),
+                static_cast<float>(width) / deviderBitmap.height());
+            matrix.postRotate(-90.0f); // devider shader rotate -90.0
+        } else {
+            matrix.setScale(static_cast<float>(width) / deviderBitmap.width(),
+                static_cast<float>(height) / deviderBitmap.height());
+        }
+        paint.setShader(deviderBitmap.makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat));
+        paint.setShader(paint.getShader()->makeWithLocalMatrix(matrix));
+        paintRect.set(0, 0, static_cast<int>(width), static_cast<int>(height));
+        canvas->drawRect(paintRect, paint);
+    }
+    frame->SetDamageRegion(0, 0, width, height);
+    rsSurface->FlushFrame(frame);
 }
 
 
@@ -137,8 +157,13 @@ void WindowInnerManager::CreateAndShowDivider(std::unique_ptr<WindowMessage> msg
         }
     }
 #endif
-    const uint32_t colorGrey = 0xff808080;
-    DrawSurface(window, colorGrey);
+    if (!isDeviderImageLoaded) {
+        isDeviderImageLoaded = DecodeImageFile(splitIconPath_, &deviderBitmap);
+        if (!isDeviderImageLoaded) {
+            WLOGFE("Decode devider image failed");
+        }
+    }
+    DrawSurface(window);
     WLOGFI("CreateAndShowDivider success");
 }
 
@@ -162,6 +187,7 @@ void WindowInnerManager::DestroyThread(std::unique_ptr<WindowMessage> msg)
 {
     hasInitThread_ = false;
     needDestroyThread_ = true;
+    isDeviderImageLoaded = false;
     WLOGFI("DestroyThread success");
 }
 
