@@ -61,7 +61,27 @@ void WindowManagerService::RegisterSnapshotHandler()
     if (!snapshotController_) {
         snapshotController_ = new SnapshotController(windowRoot_);
     }
-    AAFwk::AbilityManagerClient::GetInstance()->RegisterSnapshotHandler(snapshotController_);
+    if (AAFwk::AbilityManagerClient::GetInstance()->RegisterSnapshotHandler(snapshotController_) != ERR_OK) {
+        WLOGFW("WindowManagerService::RegisterSnapshotHandler failed, create async thread!");
+        auto fun = [this]() {
+            WLOGFI("WindowManagerService::RegisterSnapshotHandler async thread enter!");
+            int counter = 0;
+            while (AAFwk::AbilityManagerClient::GetInstance()->RegisterSnapshotHandler(snapshotController_) != ERR_OK) {
+                usleep(10000); // 10000us equals to 10ms
+                counter++;
+                if (counter >= 2000) { // wait for 2000 * 10ms = 20s
+                    WLOGFE("WindowManagerService::RegisterSnapshotHandler timeout!");
+                    return;
+                }
+            }
+            WLOGFI("WindowManagerService::RegisterSnapshotHandler async thread register handler successfully!");
+        };
+        std::thread thread(fun);
+        thread.detach();
+        WLOGFI("WindowManagerService::RegisterSnapshotHandler async thread has been detached!");
+    } else {
+        WLOGFI("WindowManagerService::RegisterSnapshotHandler OnStart succeed!");
+    }
 }
 
 bool WindowManagerService::Init()
