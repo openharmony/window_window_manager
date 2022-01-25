@@ -34,6 +34,7 @@ public:
     WMError DestroyWindow(uint32_t windowId) override;
     WMError MoveTo(uint32_t windowId, int32_t x, int32_t y) override;
     WMError Resize(uint32_t windowId, uint32_t width, uint32_t height) override;
+    WMError Drag(uint32_t windowId, const Rect& rect) override;
     WMError RequestFocus(uint32_t windowId) override;
     WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId) override;
     WMError SetWindowMode(uint32_t windowId, WindowMode mode) override;

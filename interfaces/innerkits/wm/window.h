@@ -108,6 +108,7 @@ public:
     virtual WMError Minimize() = 0;
     virtual WMError Recover() = 0;
     virtual WMError Close() = 0;
+    virtual void StartMove() = 0;
 };
 }
 }

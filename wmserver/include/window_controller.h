@@ -37,6 +37,7 @@ public:
     WMError DestroyWindow(uint32_t windowId);
     WMError MoveTo(uint32_t windowId, int32_t x, int32_t y);
     WMError Resize(uint32_t windowId, uint32_t width, uint32_t height);
+    WMError Drag(uint32_t windowId, const Rect& rect);
     WMError RequestFocus(uint32_t windowId);
     WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId);
     WMError SetWindowMode(uint32_t windowId, WindowMode dstMode);

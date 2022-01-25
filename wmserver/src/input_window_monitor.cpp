@@ -136,27 +136,19 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
                    windowNode->GetWindowProperty()->GetWindowType());
             continue;
         }
+        Rect hotZone = windowNode->GetHotZoneRect();
+
         MMI::WindowInfo windowInfo = {
             .id = static_cast<int32_t>(windowNode->GetWindowId()),
             .pid = windowNode->GetCallingPid(),
             .uid = windowNode->GetCallingUid(),
-            .topLeftX = windowNode->GetLayoutRect().posX_,
-            .topLeftY = windowNode->GetLayoutRect().posY_,
-            .width = static_cast<int32_t>(windowNode->GetLayoutRect().width_),
-            .height = static_cast<int32_t>(windowNode->GetLayoutRect().height_),
+            .topLeftX = hotZone.posX_,
+            .topLeftY = hotZone.posY_,
+            .width = static_cast<int32_t>(hotZone.width_),
+            .height = static_cast<int32_t>(hotZone.height_),
             .displayId = static_cast<int32_t>(windowNode->GetDisplayId()),
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };
-        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-            const int32_t divTouchRegion = 20;
-            if (windowInfo.width < windowInfo.height) {
-                windowInfo.topLeftX -= divTouchRegion;
-                windowInfo.width += (divTouchRegion + divTouchRegion);
-            } else {
-                windowInfo.topLeftY -= divTouchRegion;
-                windowInfo.height += (divTouchRegion + divTouchRegion);
-            }
-        }
         iter->windowsInfo_.emplace_back(windowInfo);
     }
 }
