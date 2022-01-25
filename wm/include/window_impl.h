@@ -86,6 +86,7 @@ public:
     virtual WMError Minimize() override;
     virtual WMError Recover() override;
     virtual WMError Close() override;
+    virtual void StartMove() override;
 
     virtual WMError RequestFocus() const override;
     virtual void AddInputEventListener(std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) override;
@@ -99,7 +100,6 @@ public:
     void UpdateMode(WindowMode mode);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
-    void ConsumeDividerPointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent);
     virtual void RequestFrame() override;
     void UpdateFocusStatus(bool focused);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
@@ -138,6 +138,11 @@ private:
     bool IsWindowValid() const;
     void OnVsync(int64_t timeStamp);
     static sptr<Window> FindTopWindow(uint32_t mainWinId, uint32_t topWinId);
+    WMError Drag(const Rect& rect);
+    void ConsumeDividerPointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent);
+    void ConsumeDragOrMoveEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void HandleDragEvent(const MMI::PointerEvent::PointerItem& pointerItem);
+    void HandleMoveEvent(const MMI::PointerEvent::PointerItem& pointerItem);
 
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
         std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
@@ -157,6 +162,12 @@ private:
     const float NAVIGATION_BAR_RATIO = 0.07;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
+
+    int32_t startPointPosX_ = 0;
+    int32_t startPointPosY_ = 0;
+    Rect startPointRect_ = {0, 0, 0, 0};
+    bool startDragFlag_ = false;
+    bool startMoveFlag_ = false;
 };
 }
 }

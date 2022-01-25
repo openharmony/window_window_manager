@@ -97,6 +97,16 @@ WMError WindowAdapter::Resize(uint32_t windowId, uint32_t width, uint32_t height
     return windowManagerServiceProxy_->Resize(windowId, width, height);
 }
 
+WMError WindowAdapter::Drag(uint32_t windowId, const Rect& rect)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+    if (!InitWMSProxyLocked()) {
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return windowManagerServiceProxy_->Drag(windowId, rect);
+}
+
 WMError WindowAdapter::RequestFocus(uint32_t windowId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);

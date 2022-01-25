@@ -52,6 +52,11 @@ public:
         return (IsBelowSystemWindow(type) || IsAboveSystemWindow(type));
     }
 
+    static inline bool IsMainFloatingWindow(WindowType type, WindowMode mode)
+    {
+        return ((IsMainWindow(type)) && (mode == WindowMode::WINDOW_MODE_FLOATING));
+    }
+
     static inline bool IsSplitWindowMode(WindowMode mode)
     {
         return mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
@@ -67,6 +72,38 @@ public:
     static inline bool IsEmptyRect(const Rect& r)
     {
         return (r.posX_ == 0 && r.posY_ == 0 && r.width_ == 0 && r.height_ == 0);
+    }
+
+    static Rect GetFixedWindowRectByMinRect(const Rect& oriDstRect, const Rect& lastRect, bool isVertical)
+    {
+        Rect dstRect = oriDstRect;
+        if (isVertical) {
+            dstRect.width_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, oriDstRect.width_);
+            dstRect.height_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, oriDstRect.height_);
+        } else {
+            dstRect.width_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, oriDstRect.width_);
+            dstRect.height_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, oriDstRect.height_);
+        }
+
+        // limit position by fixed width or height
+        if (oriDstRect.posX_ != lastRect.posX_) {
+            dstRect.posX_ = oriDstRect.posX_ + oriDstRect.width_ - dstRect.width_;
+        }
+        if (oriDstRect.posY_ != lastRect.posY_) {
+            dstRect.posY_ = oriDstRect.posY_ + oriDstRect.height_ - dstRect.height_;
+        }
+        return dstRect;
+    }
+
+    static bool IsPointInWindow(int32_t pointPosX, int32_t pointPosY, Rect pointRect)
+    {
+        if ((pointPosX > pointRect.posX_) &&
+            (pointPosX < static_cast<int32_t>(pointRect.posX_ + pointRect.width_)) &&
+            (pointPosY > pointRect.posY_) &&
+            (pointPosY < static_cast<int32_t>(pointRect.posY_ + pointRect.height_))) {
+            return true;
+        }
+        return false;
     }
 
     WindowHelper() = default;

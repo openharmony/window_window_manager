@@ -24,8 +24,6 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowLayoutPolicy"};
     constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 48;
     constexpr uint32_t WINDOW_FRAME_WIDTH = 4;
-    constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 360;
-    constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 480;
 }
 WindowLayoutPolicy::WindowLayoutPolicy(const Rect& displayRect, const uint64_t& screenId,
     const sptr<WindowNode>& belowAppNode, const sptr<WindowNode>& appNode, const sptr<WindowNode>& aboveAppNode)
@@ -220,7 +218,6 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
 void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect)
 {
     bool floatingWindow = (node->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
-
     winRect.width_ = std::min(displayRect.width_, winRect.width_);
     winRect.height_ = std::min(displayRect.height_, winRect.height_);
     bool isVertical = (displayRect.height_ > displayRect.width_) ? true : false;

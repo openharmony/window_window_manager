@@ -14,6 +14,7 @@
  */
 
 #include "window_node.h"
+#include "window_helper.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -76,6 +77,25 @@ uint32_t WindowNode::GetParentId() const
 const Rect& WindowNode::GetLayoutRect() const
 {
     return layoutRect_;
+}
+
+Rect WindowNode::GetHotZoneRect() const
+{
+    Rect rect = layoutRect_;
+    if (GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        const int32_t divTouchRegion = 20;
+        if (rect.width_ < rect.height_) {
+            rect.posX_ -= divTouchRegion;
+            rect.width_ += (divTouchRegion + divTouchRegion);
+        } else {
+            rect.posY_ -= divTouchRegion;
+            rect.height_ += (divTouchRegion + divTouchRegion);
+        }
+    } else if (WindowHelper::IsMainFloatingWindow(GetWindowType(), GetWindowMode())) {
+        property_->SetWindowHotZoneRect(rect);
+        rect = property_->GetWindowHotZoneRect();
+    }
+    return rect;
 }
 
 WindowType WindowNode::GetWindowType() const

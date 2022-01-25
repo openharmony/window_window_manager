@@ -19,8 +19,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowTestUtils"};
-    constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 360;
-    constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 480;
 }
 
 Rect WindowTestUtils::displayRect_        = {0, 0, 0, 0};
