@@ -515,7 +515,7 @@ WMError WindowImpl::Maximize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+        SetFullScreen(true);
     }
     return WMError::WM_OK;
 }
