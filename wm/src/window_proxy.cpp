@@ -123,6 +123,26 @@ void WindowProxy::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
     }
     return;
 }
+
+void WindowProxy::UpdateWindowState(WindowState state)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        WLOGFE("Write isStopped");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_UPDATE_WINDOW_STATE, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+    return;
+}
 } // namespace Rosen
 } // namespace OHOS
 

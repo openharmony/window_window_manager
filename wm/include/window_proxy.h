@@ -32,6 +32,7 @@ public:
     void UpdateWindowMode(WindowMode mode) override;
     void UpdateFocusStatus(bool focused) override;
     void UpdateAvoidArea(const std::vector<Rect>& avoidAreas) override;
+    void UpdateWindowState(WindowState state) override;
 
 private:
     static inline BrokerDelegator<WindowProxy> delegator_;

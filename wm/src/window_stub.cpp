@@ -60,6 +60,10 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             UpdateAvoidArea(avoidArea);
             break;
         }
+        case TRANS_ID_UPDATE_WINDOW_STATE: {
+            UpdateWindowState(static_cast<WindowState>(data.ReadUint32()));
+            break;
+        }
         default:
             break;
     }

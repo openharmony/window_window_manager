@@ -60,6 +60,19 @@ bool DisplayManagerService::Init()
     return true;
 }
 
+void DisplayManagerService::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
+{
+    displayChangeListener_ = listener;
+    WLOGFI("IDisplayChangeListener registered");
+}
+
+void DisplayManagerService::NotifyDisplayStateChange(DisplayStateChangeType type)
+{
+    if (displayChangeListener_ != nullptr) {
+        displayChangeListener_->OnDisplayStateChange(type);
+    }
+}
+
 DisplayId DisplayManagerService::GetDisplayIdFromScreenId(ScreenId screenId)
 {
     return (DisplayId)screenId;

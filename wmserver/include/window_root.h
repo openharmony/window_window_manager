@@ -55,6 +55,8 @@ public:
     WMError HandleSplitWindowModeChange(sptr<WindowNode>& node, bool isChangeToSplit);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
 
+    void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
+
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
