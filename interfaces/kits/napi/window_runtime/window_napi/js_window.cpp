@@ -810,7 +810,7 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
         };
 
     WLOGFI("JsWindow::OnGetAvoidArea AsyncTask end");
-    NativeValue* lastParam = (info.argc == 0) ? nullptr : info.argv[0];
+    NativeValue* lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
