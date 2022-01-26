@@ -63,7 +63,7 @@ public:
     virtual WindowType GetType() const = 0;
     virtual WindowMode GetMode() const = 0;
     virtual const std::string& GetWindowName() const = 0;
-    virtual uint32_t GetWindowId() = 0;
+    virtual uint32_t GetWindowId() const = 0;
     virtual uint32_t GetWindowFlags() const = 0;
     virtual bool GetShowState() const = 0;
     virtual bool GetFocusable() const = 0;

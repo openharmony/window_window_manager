@@ -94,7 +94,7 @@ WindowMode WindowImpl::GetMode() const
 
 bool WindowImpl::GetShowState() const
 {
-    return state_ == STATE_SHOWN;
+    return state_ == WindowState::STATE_SHOWN;
 }
 
 bool WindowImpl::GetFocusable() const
@@ -112,7 +112,7 @@ const std::string& WindowImpl::GetWindowName() const
     return name_;
 }
 
-uint32_t WindowImpl::GetWindowId()
+uint32_t WindowImpl::GetWindowId() const
 {
     return property_->GetWindowId();
 }
@@ -148,10 +148,9 @@ WMError WindowImpl::SetWindowType(WindowType type)
 {
     WLOGFI("window id: %{public}d, type:%{public}d", property_->GetWindowId(), static_cast<uint32_t>(type));
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (state_ == STATE_CREATED) {
+    if (state_ == WindowState::STATE_CREATED) {
         if (!(WindowHelper::IsAppWindow(type) || WindowHelper::IsSystemWindow(type))) {
             WLOGFE("window type is invalid %{public}d", type);
             return WMError::WM_ERROR_INVALID_PARAM;
@@ -169,12 +168,11 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
 {
     WLOGFI("[Client] Window %{public}d mode %{public}d", property_->GetWindowId(), static_cast<uint32_t>(mode));
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (state_ == STATE_CREATED || state_ == STATE_HIDDEN) {
+    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
         property_->SetWindowMode(mode);
-    } else if (state_ == STATE_SHOWN) {
+    } else if (state_ == WindowState::STATE_SHOWN) {
         property_->SetWindowMode(mode);
         return SingletonContainer::Get<WindowAdapter>().SetWindowMode(property_->GetWindowId(), mode);
     }
@@ -200,14 +198,13 @@ WMError WindowImpl::RemoveWindowFlag(WindowFlag flag)
 WMError WindowImpl::SetWindowFlags(uint32_t flags)
 {
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (property_->GetWindowFlags() == flags) {
         return WMError::WM_OK;
     }
     property_->SetWindowFlags(flags);
-    if (state_ == STATE_CREATED || state_ == STATE_HIDDEN) {
+    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
         return WMError::WM_OK;
     }
     WMError ret = SingletonContainer::Get<WindowAdapter>().SetWindowFlags(property_->GetWindowId(), flags);
@@ -258,14 +255,13 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
         property_->GetWindowId(), static_cast<uint32_t>(type), property.enable_,
         property.backgroundColor_, property.contentColor_);
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetSystemBarPropertyByType(type) == property) {
         return WMError::WM_OK;
     }
     property_->SetSystemBarProperty(type, property);
-    if (state_ == STATE_CREATED || state_ == STATE_HIDDEN) {
+    if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
         return WMError::WM_OK;
     }
     WMError ret = SingletonContainer::Get<WindowAdapter>().SetSystemBarProperty(property_->GetWindowId(),
@@ -281,7 +277,6 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
 {
     WLOGFI("[Client] Window %{public}d SetLayoutFullScreen: %{public}d", property_->GetWindowId(), status);
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     WMError ret = SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -386,7 +381,7 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     if (parentName != "") { // add to subWindowMap_
         subWindowMap_[property_->GetParentId()].push_back(this);
     }
-    state_ = STATE_CREATED;
+    state_ = WindowState::STATE_CREATED;
     InputTransferStation::GetInstance().AddInputWindow(this);
     return ret;
 }
@@ -395,9 +390,7 @@ WMError WindowImpl::Destroy()
 {
     NotifyBeforeDestroy();
     WLOGFI("[Client] Window %{public}d Destroy", property_->GetWindowId());
-    // should destroy surface here
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_OK;
     }
     WLOGFI("destroy window id: %{public}d", property_->GetWindowId());
@@ -413,7 +406,7 @@ WMError WindowImpl::Destroy()
         }
     }
     subWindowMap_.erase(GetWindowId());
-    state_ = STATE_DESTROYED;
+    state_ = WindowState::STATE_DESTROYED;
     InputTransferStation::GetInstance().RemoveInputWindow(this);
     return ret;
 }
@@ -422,10 +415,9 @@ WMError WindowImpl::Show()
 {
     WLOGFI("[Client] Window %{public}d Show", property_->GetWindowId());
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (state_ == STATE_SHOWN && property_->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
+    if (state_ == WindowState::STATE_SHOWN && property_->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
         WLOGFI("Minimize all app window");
         WMError ret = SingletonContainer::Get<WindowAdapter>().MinimizeAllAppNodeAbility(property_->GetWindowId());
         if (ret != WMError::WM_OK) {
@@ -434,14 +426,14 @@ WMError WindowImpl::Show()
         }
         return ret;
     }
-    if (state_ == STATE_SHOWN) {
+    if (state_ == WindowState::STATE_SHOWN) {
         WLOGFI("window is already shown id: %{public}d", property_->GetWindowId());
         return WMError::WM_OK;
     }
     SetDefaultOption();
     WMError ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
     if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
-        state_ = STATE_SHOWN;
+        state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
     } else {
         WLOGFE("show errCode:%{public}d for winId:%{public}d", static_cast<int32_t>(ret), property_->GetWindowId());
@@ -453,10 +445,9 @@ WMError WindowImpl::Hide()
 {
     WLOGFI("[Client] Window %{public}d Hide", property_->GetWindowId());
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (state_ == STATE_HIDDEN || state_ == STATE_CREATED) {
+    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         WLOGFI("window is already hidden id: %{public}d", property_->GetWindowId());
         return WMError::WM_OK;
     }
@@ -465,7 +456,7 @@ WMError WindowImpl::Hide()
         WLOGFE("hide errCode:%{public}d for winId:%{public}d", static_cast<int32_t>(ret), property_->GetWindowId());
         return ret;
     }
-    state_ = STATE_HIDDEN;
+    state_ = WindowState::STATE_HIDDEN;
     NotifyAfterBackground();
     return ret;
 }
@@ -473,10 +464,9 @@ WMError WindowImpl::Hide()
 WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 {
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (state_ == STATE_HIDDEN || state_ == STATE_CREATED) {
+    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         Rect rect = GetRect();
         property_->SetWindowRect({ x, y, rect.width_, rect.height_ });
         WLOGFI("window is hidden or created! id: %{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
@@ -489,10 +479,9 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 {
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (state_ == STATE_HIDDEN || state_ == STATE_CREATED) {
+    if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         Rect rect = GetRect();
         property_->SetWindowRect({ rect.posX_, rect.posY_, width, height });
         WLOGFI("window is hidden or created! id: %{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
@@ -511,7 +500,6 @@ WMError WindowImpl::Maximize()
 {
     WLOGFI("[Client] Window %{public}d Maximize", property_->GetWindowId());
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
@@ -524,7 +512,6 @@ WMError WindowImpl::Minimize()
 {
     WLOGFI("[Client] Window %{public}d Minimize", property_->GetWindowId());
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
@@ -541,7 +528,6 @@ WMError WindowImpl::Recover()
 {
     WLOGFI("[Client] Window %{public}d Normalize", property_->GetWindowId());
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
@@ -554,7 +540,6 @@ WMError WindowImpl::Close()
 {
     WLOGFI("[Client] Window %{public}d Close", property_->GetWindowId());
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
@@ -570,7 +555,6 @@ WMError WindowImpl::Close()
 WMError WindowImpl::RequestFocus() const
 {
     if (!IsWindowValid()) {
-        WLOGFI("window is already destroyed or not created! id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return SingletonContainer::Get<WindowAdapter>().RequestFocus(property_->GetWindowId());
@@ -761,6 +745,34 @@ void WindowImpl::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
     }
 }
 
+void WindowImpl::UpdateWindowState(WindowState state)
+{
+    WLOGFI("[Client] Window %{public}u, WindowState to set:%{public}u", GetWindowId(), state);
+    if (!IsWindowValid()) {
+        return;
+    }
+    switch (state) {
+        case WindowState::STATE_FROZEN: {
+            state_ = WindowState::STATE_HIDDEN;
+            if (uiContent_ != nullptr) {
+                uiContent_->Background();
+            }
+            break;
+        }
+        case WindowState::STATE_UNFROZEN: {
+            state_ = WindowState::STATE_SHOWN;
+            if (uiContent_ != nullptr) {
+                uiContent_->Foreground();
+            }
+            break;
+        }
+        default: {
+            WLOGFE("windowState to set is invalid");
+            break;
+        }
+    }
+}
+
 void WindowImpl::SetDefaultOption()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
@@ -815,7 +827,11 @@ void WindowImpl::SetDefaultOption()
 }
 bool WindowImpl::IsWindowValid() const
 {
-    return ((state_ > STATE_INITIAL) && (state_ < STATE_BOTTOM));
+    bool res = ((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM));
+    if (!res) {
+        WLOGFI("window is already destroyed or not created! id: %{public}u", GetWindowId());
+    }
+    return res;
 }
 
 bool WindowImpl::IsLayoutFullScreen() const

@@ -274,22 +274,26 @@ void DisplayManager::NotifyDisplayStateChanged(DisplayState state)
 
 bool DisplayManager::WakeUpBegin(PowerStateChangeReason reason)
 {
+    WLOGFI("WakeUpBegin start, reason:%{public}u", reason);
     return SingletonContainer::Get<DisplayManagerAdapter>().WakeUpBegin(reason);
 }
 
 bool DisplayManager::WakeUpEnd()
 {
+    WLOGFI("WakeUpEnd start");
     return SingletonContainer::Get<DisplayManagerAdapter>().WakeUpEnd();
 }
 
 bool DisplayManager::SuspendBegin(PowerStateChangeReason reason)
 {
     // dms->wms notify other windows to hide
+    WLOGFI("SuspendBegin start, reason:%{public}u", reason);
     return SingletonContainer::Get<DisplayManagerAdapter>().SuspendBegin(reason);
 }
 
 bool DisplayManager::SuspendEnd()
 {
+    WLOGFI("SuspendEnd start");
     return SingletonContainer::Get<DisplayManagerAdapter>().SuspendEnd();
 }
 
@@ -379,6 +383,7 @@ uint32_t DisplayManager::GetScreenBrightness(uint64_t screenId) const
 void DisplayManager::NotifyDisplayEvent(DisplayEvent event)
 {
     // Unlock event dms->wms restore other hidden windows
+    WLOGFI("DisplayEvent:%{public}u", event);
     SingletonContainer::Get<DisplayManagerAdapter>().NotifyDisplayEvent(event);
 }
 } // namespace OHOS::Rosen
