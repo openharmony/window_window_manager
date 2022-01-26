@@ -774,7 +774,7 @@ WMError WindowNodeContainer::HandleModeChangeFromSplit(sptr<WindowNode>& trigger
             triggerNode->GetWindowMode(), pairNode->GetWindowMode());
     } else {
         WLOGFE("Split out, but can not find pair in map  %{public}d", triggerNode->GetWindowId());
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WMError::WM_OK;
     }
     if (pairedWindowMap_.empty()) {
         WLOGFI("Notify devider to destroy");
