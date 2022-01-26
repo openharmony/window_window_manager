@@ -51,6 +51,7 @@ void AbstractScreenController::Init()
 
 std::vector<ScreenId> AbstractScreenController::GetAllScreenIds()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::vector<ScreenId> res;
     for (auto iter = dmsScreenMap_.begin(); iter != dmsScreenMap_.end(); iter++) {
         res.push_back(iter->first);
@@ -60,6 +61,7 @@ std::vector<ScreenId> AbstractScreenController::GetAllScreenIds()
 
 sptr<AbstractScreen> AbstractScreenController::GetAbstractScreen(ScreenId dmsScreenId)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = dmsScreenMap_.find(dmsScreenId);
     if (iter == dmsScreenMap_.end()) {
         WLOGI("didnot find screen:%{public}" PRIu64"", dmsScreenId);
@@ -71,6 +73,7 @@ sptr<AbstractScreen> AbstractScreenController::GetAbstractScreen(ScreenId dmsScr
 
 sptr<AbstractScreenGroup> AbstractScreenController::GetAbstractScreenGroup(ScreenId dmsScreenId)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = dmsScreenGroupMap_.find(dmsScreenId);
     if (iter == dmsScreenGroupMap_.end()) {
         WLOGE("didnot find screen:%{public}" PRIu64"", dmsScreenId);
@@ -82,19 +85,28 @@ sptr<AbstractScreenGroup> AbstractScreenController::GetAbstractScreenGroup(Scree
 
 ScreenId AbstractScreenController::GetMainAbstractScreenId()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     return primaryDmsScreenId_;
 }
 
 ScreenId AbstractScreenController::ConvertToRsScreenId(ScreenId dmsScreenId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return SCREEN_ID_INVALID;
+    auto iter = dms2RsScreenIdMap_.find(dmsScreenId);
+    if (iter == dms2RsScreenIdMap_.end()) {
+        return SCREEN_ID_INVALID;
+    }
+    return iter->second;
 }
 
 ScreenId AbstractScreenController::ConvertToDmsScreenId(ScreenId rsScreenId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return SCREEN_ID_INVALID;
+    auto iter = rs2DmsScreenIdMap_.find(rsScreenId);
+    if (iter == rs2DmsScreenIdMap_.end()) {
+        return SCREEN_ID_INVALID;
+    }
+    return iter->second;
 }
 
 void AbstractScreenController::RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb)
@@ -312,5 +324,11 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
     WLOGFI("AbstractScreenController::DestroyVirtualScreen");
     rsInterface_->RemoveVirtualScreen(screenId);
     return DMError::DM_OK;
+}
+
+bool AbstractScreenController::IsScreenGroup(ScreenId screenId) const
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return dmsScreenGroupMap_.find(screenId) != dmsScreenGroupMap_.end();
 }
 } // namespace OHOS::Rosen

@@ -35,7 +35,7 @@ AbstractScreen::~AbstractScreen()
 
 sptr<AbstractScreenInfo> AbstractScreen::GetActiveScreenInfo() const
 {
-    if (activeIdx_ < 0 && activeIdx_ >= infos_.size()) {
+    if (activeIdx_ < 0 || activeIdx_ >= infos_.size()) {
         WLOGE("active mode index is wrong: %{public}d", activeIdx_);
         return nullptr;
     }
@@ -45,6 +45,28 @@ sptr<AbstractScreenInfo> AbstractScreen::GetActiveScreenInfo() const
 sptr<AbstractScreenGroup> AbstractScreen::GetGroup() const
 {
     return DisplayManagerService::GetInstance().GetAbstractScreenController()->GetAbstractScreenGroup(groupDmsId_);
+}
+
+const sptr<ScreenInfo> AbstractScreen::ConvertToScreenInfo() const
+{
+    sptr<ScreenInfo> info = new ScreenInfo();
+    FillScreenInfo(info);
+    return info;
+}
+
+void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
+{
+    info->id_ = dmsId_;
+    if (activeIdx_ >= 0 && activeIdx_ < infos_.size()) {
+        sptr<AbstractScreenInfo> abstractScreenInfo = infos_[activeIdx_];
+        info->height_ = abstractScreenInfo->height_;
+        info->width_ = abstractScreenInfo->width_;
+    }
+    info->virtualPixelRatio_ = virtualPixelRatio;
+    info->virtualHeight_ = virtualPixelRatio * info->height_;
+    info->virtualWidth_ = virtualPixelRatio * info->width_;
+    info->parent_ = groupDmsId_;
+    info->hasChild_ = DisplayManagerService::GetInstance().GetAbstractScreenController()->IsScreenGroup(dmsId_);
 }
 
 AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId, ScreenCombination combination)
@@ -57,6 +79,19 @@ AbstractScreenGroup::~AbstractScreenGroup()
 {
     rsDisplayNode_ = nullptr;
     abstractScreenMap_.clear();
+}
+
+const sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
+{
+    sptr<ScreenGroupInfo> screenGroupInfo = new ScreenGroupInfo();
+    FillScreenInfo(screenGroupInfo);
+    screenGroupInfo->combination_ = combination_;
+    for (auto iter = abstractScreenMap_.begin(); iter != abstractScreenMap_.end(); iter++) {
+        screenGroupInfo->children_.push_back(iter->first);
+    }
+    auto positions = GetChildrenPosition();
+    screenGroupInfo->position_.insert(screenGroupInfo->position_.end(), positions.begin(), positions.end());
+    return screenGroupInfo;
 }
 
 bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& startPoint)
