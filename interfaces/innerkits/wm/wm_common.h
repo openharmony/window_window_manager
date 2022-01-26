@@ -18,6 +18,7 @@
 
 namespace OHOS {
 namespace Rosen {
+using DisplayId = uint64_t;
 enum class WindowType : uint32_t {
     APP_WINDOW_BASE = 1,
     APP_MAIN_WINDOW_BASE = APP_WINDOW_BASE,

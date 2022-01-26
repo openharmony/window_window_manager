@@ -33,6 +33,38 @@ namespace {
     constexpr int32_t INDEX_THREE = 3;
     constexpr int32_t RGB_LENGTH = 7;
     constexpr int32_t RGBA_LENGTH = 8;
+    enum class ApiWindowType : uint32_t {
+        TYPE_BASE,
+        TYPE_APP = TYPE_BASE,
+        TYPE_SYSTEM_ALERT,
+        TYPE_INPUT_METHOD,
+        TYPE_STATUS_BAR,
+        TYPE_PANEL,
+        TYPE_KEYGUARD,
+        TYPE_VOLUME_OVERLAY,
+        TYPE_NAVIGATION_BAR,
+        TYPE_END = TYPE_NAVIGATION_BAR,
+    };
+    const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
+        { WindowType::APP_SUB_WINDOW_BASE,             ApiWindowType::TYPE_APP            },
+        { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, ApiWindowType::TYPE_SYSTEM_ALERT   },
+        { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,  ApiWindowType::TYPE_INPUT_METHOD   },
+        { WindowType::WINDOW_TYPE_STATUS_BAR,          ApiWindowType::TYPE_STATUS_BAR     },
+        { WindowType::WINDOW_TYPE_PANEL,               ApiWindowType::TYPE_PANEL          },
+        { WindowType::WINDOW_TYPE_KEYGUARD,            ApiWindowType::TYPE_KEYGUARD       },
+        { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,      ApiWindowType::TYPE_VOLUME_OVERLAY },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR,      ApiWindowType::TYPE_NAVIGATION_BAR },
+    };
+    const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
+        { ApiWindowType::TYPE_APP,             WindowType::APP_SUB_WINDOW_BASE            },
+        { ApiWindowType::TYPE_SYSTEM_ALERT,    WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW},
+        { ApiWindowType::TYPE_INPUT_METHOD,    WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT },
+        { ApiWindowType::TYPE_STATUS_BAR,      WindowType::WINDOW_TYPE_STATUS_BAR         },
+        { ApiWindowType::TYPE_PANEL,           WindowType::WINDOW_TYPE_PANEL              },
+        { ApiWindowType::TYPE_KEYGUARD,        WindowType::WINDOW_TYPE_KEYGUARD           },
+        { ApiWindowType::TYPE_VOLUME_OVERLAY,  WindowType::WINDOW_TYPE_VOLUME_OVERLAY     },
+        { ApiWindowType::TYPE_NAVIGATION_BAR,  WindowType::WINDOW_TYPE_NAVIGATION_BAR     },
+    };
 }
     NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect);
     NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window);

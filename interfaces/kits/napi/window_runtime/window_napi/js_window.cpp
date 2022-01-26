@@ -341,7 +341,18 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
         WLOGFE("Failed to convert parameter to windowType");
         return engine.CreateUndefined();
     }
-    WindowType winType = static_cast<WindowType>(static_cast<uint32_t>(*nativeType));
+    // adapt to the old version
+    WindowType winType;
+    if (static_cast<uint32_t>(*nativeType) >= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_BASE)) {
+        winType = static_cast<WindowType>(static_cast<uint32_t>(*nativeType));
+    } else {
+        if (JS_TO_NATIVE_WINDOW_TYPE_MAP.count(static_cast<ApiWindowType>(static_cast<uint32_t>(*nativeType))) != 0) {
+            winType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(static_cast<uint32_t>(*nativeType)));
+        } else {
+            WLOGFE("Do not surppot this type");
+            return engine.CreateUndefined();
+        }
+    }
     AsyncTask::CompleteCallback complete =
         [this, winType](NativeEngine& engine, AsyncTask& task, int32_t status) {
             WMError ret = windowToken_->SetWindowType(winType);
@@ -799,7 +810,7 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
         };
 
     WLOGFI("JsWindow::OnGetAvoidArea AsyncTask end");
-    NativeValue* lastParam = (info.argc == 0) ? nullptr : info.argv[0];
+    NativeValue* lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));

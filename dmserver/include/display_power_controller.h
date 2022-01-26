@@ -18,6 +18,7 @@
 
 #include <map>
 #include <mutex>
+#include "display.h"
 #include "dm_common.h"
 
 namespace OHOS {
@@ -29,7 +30,7 @@ public:
 
     bool SuspendBegin(PowerStateChangeReason reason);
     bool SetDisplayState(DisplayState state);
-    DisplayState GetDisplayState(uint64_t displayId);
+    DisplayState GetDisplayState(DisplayId displayId);
     void NotifyDisplayEvent(DisplayEvent event);
 
 private:
