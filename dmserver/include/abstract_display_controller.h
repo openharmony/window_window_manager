@@ -26,6 +26,7 @@
 #include "screen.h"
 #include "abstract_display.h"
 #include "transaction/rs_interfaces.h"
+#include "future.h"
 
 namespace OHOS::Rosen {
 class AbstractDisplayController : public RefBase {
@@ -55,22 +56,28 @@ private:
     sptr<AbstractScreenController::AbstractScreenCallback> abstractScreenCallback_;
     OHOS::Rosen::RSInterfaces *rsInterface_;
 
-    class ScreenshotCallback : public SurfaceCaptureCallback {
+    class ScreenshotCallback : public SurfaceCaptureCallback, public Future<std::shared_ptr<Media::PixelMap>> {
     public:
         ScreenshotCallback() = default;
         ~ScreenshotCallback() {};
         void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelmap) override
         {
-            if (flag_ == false) {
+            FutureCall(pixelmap);
+        }
+
+    protected:
+        void Call(std::shared_ptr<Media::PixelMap> pixelmap) override
+        {
+            if (!flag_) {
                 flag_ = true;
                 pixelMap_ = pixelmap;
             }
         }
-        bool IsPixelMapOk()
+        bool IsReady() override
         {
             return flag_;
         }
-        std::shared_ptr<Media::PixelMap> GetPixelMap()
+        std::shared_ptr<Media::PixelMap> FetchResult() override
         {
             return pixelMap_;
         }

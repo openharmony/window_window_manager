@@ -51,7 +51,7 @@ void WindowOption::SetTouchable(bool isTouchable)
     touchable_ = isTouchable;
 }
 
-void WindowOption::SetDisplayId(int32_t displayId)
+void WindowOption::SetDisplayId(DisplayId displayId)
 {
     displayId_ = displayId;
 }
@@ -113,7 +113,7 @@ bool WindowOption::GetTouchable() const
     return touchable_;
 }
 
-int32_t WindowOption::GetDisplayId() const
+DisplayId WindowOption::GetDisplayId() const
 {
     return displayId_;
 }

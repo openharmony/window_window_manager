@@ -40,7 +40,7 @@ enum InnerWMCmd : uint32_t {
 
 struct WindowMessage {
     InnerWMCmd cmdType;
-    uint32_t displayId;
+    DisplayId displayId;
     Rect dividerRect;
 };
 
@@ -48,13 +48,13 @@ class WindowInnerManager {
 WM_DECLARE_SINGLE_INSTANCE(WindowInnerManager);
 public:
     void Init();
-    void SendMessage(InnerWMCmd cmdType, uint32_t displayId = 0);
-    void SendMessage(InnerWMCmd cmdType, uint32_t displayId, const Rect& rect);
+    void SendMessage(InnerWMCmd cmdType, DisplayId displayId = 0);
+    void SendMessage(InnerWMCmd cmdType, DisplayId displayId, const Rect& rect);
     void HandleMessage();
 private:
     static inline SingletonDelegator<WindowInnerManager> delegator;
 
-    sptr<Window> CreateWindow(uint32_t displayId, const WindowType& type, const Rect& rect);
+    sptr<Window> CreateWindow(DisplayId displayId, const WindowType& type, const Rect& rect);
     void CreateAndShowDivider(std::unique_ptr<WindowMessage> msg);
     void HideAndDestroyDivider(std::unique_ptr<WindowMessage> msg);
     void DestroyThread(std::unique_ptr<WindowMessage> msg);

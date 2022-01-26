@@ -38,15 +38,15 @@ using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
 class IFocusChangedListener : public RefBase {
 public:
     virtual void OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
-        WindowType windowType, int32_t displayId) = 0;
+        WindowType windowType, DisplayId displayId) = 0;
 
     virtual void OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
-        WindowType windowType, int32_t displayId) = 0;
+        WindowType windowType, DisplayId displayId) = 0;
 };
 
 class ISystemBarChangedListener : virtual public RefBase {
 public:
-    virtual void OnSystemBarPropertyChange(uint64_t displayId, const SystemBarRegionTints& tints) = 0;
+    virtual void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) = 0;
 };
 
 class WindowManager {
@@ -65,8 +65,8 @@ private:
     std::unique_ptr<Impl> pImpl_;
 
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
-        int32_t displayId, bool focused) const;
-    void UpdateSystemBarRegionTints(uint64_t displayId, const SystemBarRegionTints& tints) const;
+        DisplayId displayId, bool focused) const;
+    void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) const;
 };
 } // namespace Rosen
 } // namespace OHOS

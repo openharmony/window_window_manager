@@ -22,8 +22,6 @@
 #include "display_info.h"
 
 namespace OHOS::Rosen {
-using DisplayId = uint64_t;
-
 class AbstractDisplay : public RefBase {
 public:
     constexpr static int32_t DEFAULT_WIDTH = 720;

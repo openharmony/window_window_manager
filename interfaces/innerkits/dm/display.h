@@ -17,7 +17,6 @@
 #define FOUNDATION_DM_DISPLAY_H
 
 #include <string>
-
 #include <refbase.h>
 
 namespace OHOS::Rosen {

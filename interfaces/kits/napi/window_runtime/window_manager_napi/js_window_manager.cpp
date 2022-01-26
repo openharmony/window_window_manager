@@ -106,7 +106,18 @@ private:
             WLOGFE("Failed to convert parameter to windowType");
             return false;
         }
-        winType = static_cast<WindowType>(static_cast<uint32_t>(*type));
+        // adapt to the old version
+        if (static_cast<uint32_t>(*type) >= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_BASE)) {
+            winType = static_cast<WindowType>(static_cast<uint32_t>(*type));
+        } else {
+            if (static_cast<uint32_t>(*type) >= static_cast<uint32_t>(ApiWindowType::TYPE_BASE) &&
+                static_cast<uint32_t>(*type) <= static_cast<uint32_t>(ApiWindowType::TYPE_END)) {
+                winType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(static_cast<uint32_t>(*type)));
+            } else {
+                WLOGFE("Do not surppot this type");
+                return false;
+            }
+        }
         if (!WindowHelper::IsSystemWindow(winType)) {
             WLOGFE("Only SystemWindow support create!");
             return false;

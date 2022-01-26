@@ -20,7 +20,6 @@
 
 namespace OHOS {
 namespace Rosen {
-constexpr int32_t INVALID_DISPLAY_ID = -1;
 enum class PowerStateChangeReason : uint32_t {
     POWER_BUTTON,
 };

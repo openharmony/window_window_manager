@@ -14,46 +14,49 @@
 */
 import { AsyncCallback, Callback } from './basic' ;
 import { Context } from  './app/context';
+import { ContenStorage } from './@internal/component/ets/stateManagement'
 /**
  * Window manager.
  * @devices tv, phone, tablet, wearable.
 */
 declare namespace window {
-  enum  WindowType {
-    TYPE_APP_WINDOW_BASE = 1,
-    TYPE_APP_MAIN_WINDOW_BASE = TYPE_APP_WINDOW_BASE,
-    TYPE_APP = TYPE_APP_MAIN_WINDOW_BASE,
-    TYPE_APP_MAIN_WINDOW_END = TYPE_APP, // equals last window type
-
-    TYPE_APP_SUB_WINDOW_BASE = 1000,
-    TYPE_MEDIA = TYPE_APP_SUB_WINDOW_BASE,
-    TYPE_APP_SUB_WINDOW,
-    TYPE_APP_SUB_WINDOW_END = TYPE_APP_SUB_WINDOW, // equals last window type
-    TYPE_APP_WINDOW_END = TYPE_APP_SUB_WINDOW_END,
-
-    TYPE_SYSTEM_WINDOW_BASE = 2000,
-    TYPE_BELOW_APP_SYSTEM_WINDOW_BASE = TYPE_SYSTEM_WINDOW_BASE,
-    TYPE_WALLPAPER = TYPE_SYSTEM_WINDOW_BASE,
-    TYPE_BELOW_APP_SYSTEM_WINDOW_END = TYPE_WALLPAPER, // equals last window type
-
-    TYPE_ABOVE_APP_SYSTEM_WINDOW_BASE = 2100,
-    TYPE_APP_LAUNCHING = TYPE_ABOVE_APP_SYSTEM_WINDOW_BASE,
-    TYPE_DOCK_SLICE,
-    TYPE_INCOMING_CALL,
-    TYPE_SEARCHING_BAR,
+  /**
+   * The type of a window.
+   * @devices tv, phone, tablet, wearable.
+   */
+  enum WindowType {
+    /**
+     * App.
+     */
+    TYPE_APP,
+    /**
+     * System alert.
+     */
     TYPE_SYSTEM_ALERT,
-    TYPE_INPUT_METHOD_FLOAT,
-    TYPE_FLOAT,
-    TYPE_TOAST,
+    /**
+     * Input method.
+     */
+    TYPE_INPUT_METHOD,
+    /**
+     * Status bar.
+     */
     TYPE_STATUS_BAR,
+    /**
+     * Notification hubs.
+     */
     TYPE_PANEL,
+    /**
+     * Screen lock.
+     */
     TYPE_KEYGUARD,
+    /**
+     * Volume bar.
+     */
     TYPE_VOLUME_OVERLAY,
+    /**
+     * Navigation bar.
+     */
     TYPE_NAVIGATION_BAR,
-    TYPE_DRAGGING_EFFECT,
-    TYPE_POINTER,
-    TYPE_ABOVE_APP_SYSTEM_WINDOW_END = TYPE_POINTER, // equals last window type
-    TYPE_SYSTEM_WINDOW_END = TYPE_ABOVE_APP_SYSTEM_WINDOW_END,
   }
 
   /**
@@ -556,6 +559,70 @@ declare namespace window {
      */
     off(type: 'systemBarTintChange', callback?: Callback<SystemBarTintState>): void;
   }
+
+  enum WindowStageEventType {
+    VISIBLE = 1,
+    FOCUSED,
+    UNFOCUSED,
+    INVISIBLE,
+  }
+  /**
+   * WindowStage
+   * @devices tv, phone, tablet, wearable, liteWearable.
+   */
+  interface WindowStage {
+    /**
+     * Get main window of the stage.
+     * @since 8
+     */
+    getMainWindow(): Promise<Window>;
+    /**
+     * Loads content
+     * @param path  path Path of the page to which the content will be loaded
+     * @param storage storage The data object shared within the content instance loaded by the window
+     * @devices tv, phone, tablet, wearable, car
+     * @since 8
+     */
+    loadContent(path: string, storage: ContenStorage, callback: AsyncCallback<void>): void;
+    /**
+     * Loads content
+     * @param path path of the page to which the content will be loaded
+     * @devices tv, phone, tablet, wearable, car
+     * @since 8
+     */
+    loadContent(path: string, callback: AsyncCallback<void>): void;
+    /**
+     * Loads content
+     * @param path path of the page to which the content will be loaded
+     * @devices tv, phone, tablet, wearable, car
+     * @since 8
+     */
+    loadContent(path: string, storage?: ContenStorage): Promise<void>;
+    /**
+     * get the windowmode of current window
+     * @devices tv, phone, tablet, wearable, car
+     * @systemapi
+     * @since 8
+     */
+    getWindowMode(callback: AsyncCallback<WindowMode>): void;
+    /**
+     * get the windowmode of current window
+     * @devices tv, phone, tablet, wearable, car
+     * @systemapi
+     * @since 8
+     */
+    getWindowMode(): Promise<WindowMode>;
+    /**
+     * window stage event callback on.
+     * @since 8
+     */
+    on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
+    /**
+     * window stage event callback off.
+     * @since 8
+     */
+    off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void;
+  }
 }
 
-export default windowmanager;
+export default window;

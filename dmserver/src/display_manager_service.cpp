@@ -208,7 +208,7 @@ bool DisplayManagerService::SetDisplayState(DisplayState state)
     return displayPowerController_.SetDisplayState(state);
 }
 
-DisplayState DisplayManagerService::GetDisplayState(uint64_t displayId)
+DisplayState DisplayManagerService::GetDisplayState(DisplayId displayId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return displayPowerController_.GetDisplayState(displayId);

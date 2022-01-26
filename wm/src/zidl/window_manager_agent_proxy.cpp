@@ -24,7 +24,7 @@ namespace {
 }
 
 void WindowManagerAgentProxy::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-    WindowType windowType, int32_t displayId, bool focused)
+    WindowType windowType, DisplayId displayId, bool focused)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -48,7 +48,7 @@ void WindowManagerAgentProxy::UpdateFocusStatus(uint32_t windowId, const sptr<IR
         return;
     }
 
-    if (!data.WriteInt32(displayId)) {
+    if (!data.WriteUint64(displayId)) {
         WLOGFE("Write displayId failed");
         return;
     }
@@ -63,7 +63,7 @@ void WindowManagerAgentProxy::UpdateFocusStatus(uint32_t windowId, const sptr<IR
     }
 }
 
-void WindowManagerAgentProxy::UpdateSystemBarRegionTints(uint64_t displayId, const SystemBarRegionTints& tints)
+void WindowManagerAgentProxy::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     MessageParcel data;
     MessageParcel reply;

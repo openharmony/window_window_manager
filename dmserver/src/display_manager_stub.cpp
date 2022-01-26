@@ -43,7 +43,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             break;
         }
         case TRANS_ID_GET_DISPLAY_BY_ID: {
-            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            DisplayId displayId = data.ReadUint64();
             auto info = GetDisplayInfoById(displayId);
             reply.WriteParcelable(&info);
             break;

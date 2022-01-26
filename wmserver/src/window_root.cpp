@@ -25,7 +25,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowRoot"};
 }
-sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(int32_t displayId)
+sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId displayId)
 {
     auto iter = windowNodeContainerMap_.find(displayId);
     if (iter != windowNodeContainerMap_.end()) {
@@ -33,12 +33,12 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(int32_t dis
     }
     const sptr<AbstractDisplay> abstractDisplay = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
     if (abstractDisplay == nullptr) {
-        WLOGFE("get display failed displayId:%{public}d", displayId);
+        WLOGFE("get display failed displayId:%{public}" PRId64 "", displayId);
         return nullptr;
     }
 
     if (!CheckDisplayInfo(abstractDisplay)) {
-        WLOGFE("get display invailed infp:%{public}d", displayId);
+        WLOGFE("get display invailed infp:%{public}" PRId64 "", displayId);
         return nullptr;
     }
 
@@ -63,7 +63,7 @@ bool WindowRoot::CheckDisplayInfo(const sptr<AbstractDisplay>& display)
     return true;
 }
 
-void WindowRoot::NotifyDisplayRemoved(int32_t displayId)
+void WindowRoot::NotifyDisplayRemoved(DisplayId displayId)
 {
     auto container = GetOrCreateWindowNodeContainer(displayId);
     if (container == nullptr) {
