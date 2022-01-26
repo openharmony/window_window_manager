@@ -197,6 +197,7 @@ WMError WindowImpl::RemoveWindowFlag(WindowFlag flag)
 
 WMError WindowImpl::SetWindowFlags(uint32_t flags)
 {
+    WLOGFI("[Client] Window %{public}d flags %{public}u", property_->GetWindowId(), flags);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
