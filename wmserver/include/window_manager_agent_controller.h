@@ -32,8 +32,8 @@ public:
         WindowManagerAgentType type);
 
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
-        int32_t displayId, bool focused);
-    void UpdateSystemBarRegionTints(uint64_t displayId, const SystemBarRegionTints& tints);
+        DisplayId displayId, bool focused);
+    void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints);
 
 private:
     WindowManagerAgentController() : wmAgentContainer_(mutex_) {}

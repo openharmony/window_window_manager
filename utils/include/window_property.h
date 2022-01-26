@@ -39,7 +39,7 @@ public:
     void SetPrivacyMode(bool isPrivate);
     void SetTransparent(bool isTransparent);
     void SetAlpha(float alpha);
-    void SetDisplayId(int32_t displayId);
+    void SetDisplayId(DisplayId displayId);
     void SetWindowId(uint32_t windowId);
     void SetParentId(uint32_t parentId);
     void SetWindowFlags(uint32_t flags);
@@ -55,7 +55,7 @@ public:
     bool GetPrivacyMode() const;
     bool GetTransparent() const;
     float GetAlpha() const;
-    int32_t GetDisplayId() const;
+    DisplayId GetDisplayId() const;
     uint32_t GetWindowId() const;
     uint32_t GetParentId() const;
     uint32_t GetWindowFlags() const;
@@ -76,7 +76,7 @@ private:
     bool isPrivacyMode_ { false };
     bool isTransparent_ { false };
     float alpha_ { 1.0f };
-    int32_t displayId_ { 0 };
+    DisplayId displayId_ { 0 };
     uint32_t windowId_ { 0 };
     uint32_t parentId_ { 0 };
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {

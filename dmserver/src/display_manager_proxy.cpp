@@ -67,7 +67,7 @@ DisplayInfo DisplayManagerProxy::GetDisplayInfoById(DisplayId displayId)
         WLOGFE("GetDisplayInfoById: WriteInterfaceToken failed");
         return DisplayInfo();
     }
-    data.WriteUint64(static_cast<uint64_t>(displayId));
+    data.WriteUint64(displayId);
     if (remote->SendRequest(TRANS_ID_GET_DISPLAY_BY_ID, data, reply, option) != ERR_NONE) {
         WLOGFW("GetDisplayInfoById: SendRequest failed");
         return DisplayInfo();
@@ -343,7 +343,7 @@ bool DisplayManagerProxy::SetDisplayState(DisplayState state)
     return reply.ReadBool();
 }
 
-DisplayState DisplayManagerProxy::GetDisplayState(uint64_t displayId)
+DisplayState DisplayManagerProxy::GetDisplayState(DisplayId displayId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -352,7 +352,7 @@ DisplayState DisplayManagerProxy::GetDisplayState(uint64_t displayId)
         WLOGFE("WriteInterfaceToken failed");
         return DisplayState::UNKNOWN;
     }
-    if (!data.WriteUint64(static_cast<uint32_t>(displayId))) {
+    if (!data.WriteUint64(displayId)) {
         WLOGFE("Write displayId failed");
         return DisplayState::UNKNOWN;
     }

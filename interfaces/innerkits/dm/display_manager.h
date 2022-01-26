@@ -54,7 +54,7 @@ public:
     bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason);
     DisplayPowerState GetScreenPower(uint64_t screenId);
     bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
-    DisplayState GetDisplayState(uint64_t displayId);
+    DisplayState GetDisplayState(DisplayId displayId);
     bool SetScreenBrightness(uint64_t screenId, uint32_t level);
     uint32_t GetScreenBrightness(uint64_t screenId) const;
     void NotifyDisplayEvent(DisplayEvent event);

@@ -69,7 +69,7 @@ void WindowProperty::SetAlpha(float alpha)
     alpha_ = alpha;
 }
 
-void WindowProperty::SetDisplayId(int32_t displayId)
+void WindowProperty::SetDisplayId(DisplayId displayId)
 {
     displayId_ = displayId;
 }
@@ -141,7 +141,7 @@ float WindowProperty::GetAlpha() const
     return alpha_;
 }
 
-int32_t WindowProperty::GetDisplayId() const
+DisplayId WindowProperty::GetDisplayId() const
 {
     return displayId_;
 }
@@ -264,7 +264,7 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
     }
 
     // write displayId_
-    if (!parcel.WriteInt32(displayId_)) {
+    if (!parcel.WriteUint64(displayId_)) {
         return false;
     }
 
@@ -304,7 +304,7 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetTransparent(parcel.ReadBool());
     property->SetAlpha(parcel.ReadFloat());
-    property->SetDisplayId(parcel.ReadInt32());
+    property->SetDisplayId(parcel.ReadUint64());
     property->SetWindowId(parcel.ReadUint32());
     property->SetParentId(parcel.ReadUint32());
     MapUnmarshalling(parcel, property);

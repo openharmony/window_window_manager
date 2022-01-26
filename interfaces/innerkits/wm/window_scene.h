@@ -30,13 +30,13 @@ namespace OHOS {
 namespace Rosen {
 class WindowScene : public RefBase {
 public:
-    static const int32_t DEFAULT_DISPLAY_ID = 0;
+    static const DisplayId DEFAULT_DISPLAY_ID = 0;
     static const std::string MAIN_WINDOW_ID;
 
     WindowScene() = default;
     ~WindowScene();
 
-    WMError Init(int32_t displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
+    WMError Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
         sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option = nullptr);
 
     sptr<Window> CreateWindow(const std::string& windowName, sptr<WindowOption>& option) const;
@@ -55,7 +55,7 @@ public:
 private:
     static inline std::atomic<uint32_t> count { 0 };
     sptr<Window> mainWindow_ = nullptr;
-    int32_t displayId_ = DEFAULT_DISPLAY_ID;
+    DisplayId displayId_ = DEFAULT_DISPLAY_ID;
 
     std::shared_ptr<AbilityRuntime::Context> context_ = nullptr;
 };

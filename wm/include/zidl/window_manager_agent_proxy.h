@@ -28,8 +28,8 @@ public:
     ~WindowManagerAgentProxy() {};
 
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
-        int32_t displayId, bool focused) override;
-    void UpdateSystemBarRegionTints(uint64_t displayId, const SystemBarRegionTints& tints) override;
+        DisplayId displayId, bool focused) override;
+    void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) override;
 
 private:
     static inline BrokerDelegator<WindowManagerAgentProxy> delegator_;

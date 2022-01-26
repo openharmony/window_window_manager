@@ -38,7 +38,7 @@ void WindowManagerAgentController::UnregisterWindowManagerAgent(const sptr<IWind
 }
 
 void WindowManagerAgentController::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-    WindowType windowType, int32_t displayId, bool focused)
+    WindowType windowType, DisplayId displayId, bool focused)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WLOGFI("UpdateFocusStatus");
@@ -47,7 +47,7 @@ void WindowManagerAgentController::UpdateFocusStatus(uint32_t windowId, const sp
     }
 }
 
-void WindowManagerAgentController::UpdateSystemBarRegionTints(uint64_t displayId, const SystemBarRegionTints& tints)
+void WindowManagerAgentController::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     if (tints.empty()) {
         return;

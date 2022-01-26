@@ -18,7 +18,7 @@
 
 namespace OHOS {
 namespace Rosen {
-void WindowNode::SetDisplayId(int32_t displayId)
+void WindowNode::SetDisplayId(DisplayId displayId)
 {
     property_->SetDisplayId(displayId);
 }
@@ -53,7 +53,7 @@ const sptr<IWindow>& WindowNode::GetWindowToken() const
     return windowToken_;
 }
 
-int32_t WindowNode::GetDisplayId() const
+DisplayId WindowNode::GetDisplayId() const
 {
     return property_->GetDisplayId();
 }
