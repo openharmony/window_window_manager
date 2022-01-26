@@ -27,12 +27,15 @@
 #include "abstract_display.h"
 #include "abstract_display_controller.h"
 #include "abstract_screen_controller.h"
+#include "display_change_listener.h"
 #include "display_manager_stub.h"
 #include "display_power_controller.h"
 #include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
 class DisplayManagerService : public SystemAbility, public DisplayManagerStub {
+friend class DisplayManagerServiceInner;
+friend class DisplayPowerController;
 DECLARE_SYSTEM_ABILITY(DisplayManagerService);
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
 
@@ -58,7 +61,6 @@ public:
     bool SetDisplayState(DisplayState state) override;
     DisplayState GetDisplayState(uint64_t displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
-    bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
 
     sptr<AbstractScreenController> GetAbstractScreenController();
     DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId) override;
@@ -69,6 +71,8 @@ private:
     bool Init();
     DisplayId GetDisplayIdFromScreenId(ScreenId screenId);
     ScreenId GetScreenIdFromDisplayId(DisplayId displayId);
+    void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
+    void NotifyDisplayStateChange(DisplayStateChangeType type);
 
     std::recursive_mutex mutex_;
     static inline SingletonDelegator<DisplayManagerService> delegator_;
@@ -76,6 +80,7 @@ private:
     sptr<AbstractDisplayController> abstractDisplayController_;
     DisplayPowerController displayPowerController_;
     std::map<ScreenId, std::shared_ptr<RSDisplayNode>> displayNodeMap_;
+    sptr<IDisplayChangeListener> displayChangeListener_;
 };
 } // namespace OHOS::Rosen
 

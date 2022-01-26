@@ -109,7 +109,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
     activeWindows_.push_back(window);
 
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_TRUE(utils::RectEqualTo(window, utils::GetLimitedDecoRect(utils::customAppRect_)));
+    ASSERT_TRUE(utils::RectEqualTo(window, utils::GetFloatingLimitedRect(utils::customAppRect_)));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 
@@ -139,12 +139,12 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
     activeWindows_.push_back(statBar);
 
     ASSERT_EQ(WMError::WM_OK, appWin->Show());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetLimitedDecoRect(utils::customAppRect_)));
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_)));
     ASSERT_EQ(WMError::WM_OK, statBar->Show());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetLimitedDecoRect(utils::customAppRect_)));
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_)));
     ASSERT_TRUE(utils::RectEqualTo(statBar, utils::statusBarRect_));
     ASSERT_EQ(WMError::WM_OK, statBar->Hide());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetLimitedDecoRect(utils::customAppRect_)));
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_)));
 }
 
 /**
@@ -229,7 +229,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow08
  * @tc.desc: One FLOATING APP Window with on custom rect
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
+ * @tc.require: AR000GGTV9
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
 {
@@ -247,6 +247,37 @@ HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
     Rect expect = utils::GetDefaultFoatingRect(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(utils::RectEqualTo(window, expect));
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
+}
+
+/**
+ * @tc.name: LayoutWindow09
+ * @tc.desc: Add a floating and resize(2, 2)
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTV9
+ */
+HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
+{
+    utils::TestWindowInfo info = {
+        .name = "main",
+        .rect = {0, 0, 0, 0},
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentName = "",
+    };
+    const sptr<Window>& window = utils::CreateTestWindow(info);
+    activeWindows_.push_back(window);
+    Rect expect = utils::GetDefaultFoatingRect(window);
+
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_TRUE(utils::RectEqualTo(window, expect));
+
+    ASSERT_EQ(WMError::WM_OK, window->Resize(2u, 2u));        // 2: custom min size
+    Rect finalExcept = { expect.posX_, expect.posY_, 2u, 2u}; // 2: custom min size
+    finalExcept = utils::GetFloatingLimitedRect(finalExcept);
+    ASSERT_TRUE(utils::RectEqualTo(window, finalExcept));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 }

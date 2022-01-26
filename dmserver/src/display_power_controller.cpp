@@ -14,6 +14,7 @@
  */
 
 #include "display_power_controller.h"
+#include "display_manager_service.h"
 #include "display_manager_agent_controller.h"
 #include "window_manager_hilog.h"
 
@@ -26,7 +27,7 @@ namespace {
 bool DisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 {
     WLOGFI("reason:%{public}u", reason);
-    // TODO: return WindowManagerServiceInner::GetInstance().NotifyDisplaySuspend();
+    DisplayManagerService::GetInstance().NotifyDisplayStateChange(DisplayStateChangeType::BEFORE_SUSPEND);
     return true;
 }
 
@@ -69,7 +70,7 @@ void DisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
 {
     if (event == DisplayEvent::UNLOCK) {
         WLOGFI("DisplayEvent UNLOCK");
-        // TODO: WindowManagerServiceInner::GetInstance().RestoreSuspendedWindows();
+        DisplayManagerService::GetInstance().NotifyDisplayStateChange(DisplayStateChangeType::BEFORE_UNLOCK);
         DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DESKTOP_READY,
             EventStatus::BEGIN);
         return;

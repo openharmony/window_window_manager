@@ -74,4 +74,9 @@ std::vector<const sptr<AbstractDisplay>> DisplayManagerServiceInner::GetAllDispl
     }
     return res;
 }
+
+void DisplayManagerServiceInner::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
+{
+    DisplayManagerService::GetInstance().RegisterDisplayChangeListener(listener);
+}
 } // namespace OHOS::Rosen

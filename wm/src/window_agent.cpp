@@ -66,5 +66,14 @@ void WindowAgent::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
     }
     window_->UpdateAvoidArea(avoidArea);
 }
+
+void WindowAgent::UpdateWindowState(WindowState state)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->UpdateWindowState(state);
+}
 } // namespace Rosen
 } // namespace OHOS

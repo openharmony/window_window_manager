@@ -15,16 +15,20 @@
 
 #ifndef OHOS_ROSEN_WINDOW_IMPL_H
 #define OHOS_ROSEN_WINDOW_IMPL_H
+
 #include <map>
+
 #include <ability_context.h>
 #include <i_input_event_consumer.h>
 #include <key_event.h>
 #include <refbase.h>
 #include <ui_content.h>
+
 #include "input_transfer_station.h"
 #include "vsync_station.h"
 #include "window.h"
 #include "window_property.h"
+#include "wm_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -53,7 +57,7 @@ public:
     virtual bool GetFocusable() const override;
     virtual bool GetTouchable() const override;
     virtual const std::string& GetWindowName() const override;
-    virtual uint32_t GetWindowId() override;
+    virtual uint32_t GetWindowId() const override;
     virtual uint32_t GetWindowFlags() const override;
     virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     virtual bool IsFullScreen() const override;
@@ -99,6 +103,7 @@ public:
     void UpdateFocusStatus(bool focused);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void UpdateAvoidArea(const std::vector<Rect>& avoidAreas);
+    void UpdateWindowState(WindowState state);
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed) override;
@@ -131,21 +136,12 @@ private:
     bool IsWindowValid() const;
     void OnVsync(int64_t timeStamp);
 
-    enum WindowState {
-        STATE_INITIAL,
-        STATE_CREATED,
-        STATE_SHOWN,
-        STATE_HIDDEN,
-        STATE_DESTROYED,
-        STATE_BOTTOM = STATE_DESTROYED,
-    };
-
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
         std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<Window>>> subWindowMap_;
     sptr<WindowProperty> property_;
-    WindowState state_ { STATE_INITIAL };
+    WindowState state_ { WindowState::STATE_INITIAL };
     sptr<IWindowLifeCycle> lifecycleListener_;
     sptr<IWindowChangeListener> windowChangeListener_;
     sptr<IAvoidAreaChangedListener> avoidAreaChangeListener_;
