@@ -60,7 +60,7 @@ const int WAIT_ASYNC_US = 100000;  // 100000us
 class TestSystemBarChangedListener : public ISystemBarChangedListener {
 public:
     SystemBarRegionTints tints_;
-    void OnSystemBarPropertyChange(uint64_t displayId, const SystemBarRegionTints& tints) override;
+    void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
 };
 
 class TestAvoidAreaChangedListener : public IAvoidAreaChangedListener {
@@ -78,7 +78,7 @@ public:
     void SetWindowSystemProps(const sptr<Window>& window, const SystemBarRegionTints& props);
     bool SystemBarPropsEqualsTo(const SystemBarRegionTints& expect);
     void DumpFailedInfo(const SystemBarRegionTints& expect);
-    int displayId_ = 0;
+    DisplayId displayId_ = 0;
     std::vector<sptr<Window>> activeWindows_;
     static vector<Rect> fullScreenExpecteds_;
     static sptr<TestSystemBarChangedListener> testSystemBarChangedListener_;
@@ -146,7 +146,7 @@ bool WindowImmersiveTest::SystemBarPropsEqualsTo(const SystemBarRegionTints& exp
     return true;
 }
 
-void TestSystemBarChangedListener::OnSystemBarPropertyChange(uint64_t displayId, const SystemBarRegionTints& tints)
+void TestSystemBarChangedListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     WLOGFI("TestSystemBarChangedListener Display ID: %{public}" PRIu64"", displayId);
     tints_ = tints;

@@ -15,6 +15,7 @@
 
 #include "foundation/windowmanager/interfaces/innerkits/wm/window_manager.h"
 #include <algorithm>
+#include <cinttypes>
 
 #include "window_adapter.h"
 #include "window_manager_agent.h"
@@ -30,10 +31,10 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowManager)
 class WindowManager::Impl {
 public:
     void NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-        WindowType windowType, int32_t displayId) const;
+        WindowType windowType, DisplayId displayId) const;
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-        WindowType windowType, int32_t displayId) const;
-    void NotifySystemBarChanged(uint64_t displayId, const SystemBarRegionTints& tints) const;
+        WindowType windowType, DisplayId displayId) const;
+    void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints) const;
     static inline SingletonDelegator<WindowManager> delegator_;
 
     std::recursive_mutex mutex_;
@@ -44,9 +45,9 @@ public:
 };
 
 void WindowManager::Impl::NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-    WindowType windowType, int32_t displayId) const
+    WindowType windowType, DisplayId displayId) const
 {
-    WLOGFI("NotifyFocused [%{public}d; %{public}p; %{public}d; %{public}d]", windowId, abilityToken.GetRefPtr(),
+    WLOGFI("NotifyFocused [%{public}d; %{public}p; %{public}d; %{public}" PRIu64"]", windowId, abilityToken.GetRefPtr(),
         static_cast<uint32_t>(windowType), displayId);
     for (auto& listener : focusChangedListeners_) {
         listener->OnFocused(windowId, abilityToken, windowType, displayId);
@@ -54,16 +55,16 @@ void WindowManager::Impl::NotifyFocused(uint32_t windowId, const sptr<IRemoteObj
 }
 
 void WindowManager::Impl::NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-    WindowType windowType, int32_t displayId) const
+    WindowType windowType, DisplayId displayId) const
 {
-    WLOGFI("NotifyUnfocused [%{public}d; %{public}p; %{public}d; %{public}d]", windowId, abilityToken.GetRefPtr(),
-        static_cast<uint32_t>(windowType), displayId);
+    WLOGFI("NotifyUnfocused [%{public}d; %{public}p; %{public}d; %{public}" PRIu64"]", windowId,
+        abilityToken.GetRefPtr(), static_cast<uint32_t>(windowType), displayId);
     for (auto& listener : focusChangedListeners_) {
         listener->OnUnfocused(windowId, abilityToken, windowType, displayId);
     }
 }
 
-void WindowManager::Impl::NotifySystemBarChanged(uint64_t displayId, const SystemBarRegionTints& tints) const
+void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints) const
 {
     for (auto tint : tints) {
         WLOGFI("type:%{public}d, enable:%{public}d," \
@@ -161,7 +162,7 @@ void WindowManager::UnregisterSystemBarChangedListener(const sptr<ISystemBarChan
 }
 
 void WindowManager::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
-    int32_t displayId, bool focused) const
+    DisplayId displayId, bool focused) const
 {
     WLOGFI("window focus status: %{public}d, id: %{public}d", focused, windowId);
     if (focused) {
@@ -171,7 +172,7 @@ void WindowManager::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObjec
     }
 }
 
-void WindowManager::UpdateSystemBarRegionTints(uint64_t displayId,
+void WindowManager::UpdateSystemBarRegionTints(DisplayId displayId,
     const SystemBarRegionTints& tints) const
 {
     pImpl_->NotifySystemBarChanged(displayId, tints);

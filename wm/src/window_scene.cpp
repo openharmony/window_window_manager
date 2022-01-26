@@ -37,7 +37,7 @@ WindowScene::~WindowScene()
     }
 }
 
-WMError WindowScene::Init(int32_t displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
+WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
     sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option)
 {
     displayId_ = displayId;

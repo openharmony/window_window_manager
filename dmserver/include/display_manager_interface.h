@@ -66,7 +66,7 @@ public:
     virtual bool SuspendEnd() = 0;
     virtual bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason) = 0;
     virtual bool SetDisplayState(DisplayState state) = 0;
-    virtual DisplayState GetDisplayState(uint64_t displayId) = 0;
+    virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
     virtual void NotifyDisplayEvent(DisplayEvent event) = 0;
     virtual DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId) = 0;
 };

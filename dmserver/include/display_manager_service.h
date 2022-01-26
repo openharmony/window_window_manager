@@ -59,7 +59,7 @@ public:
     bool SuspendEnd() override;
     bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason) override;
     bool SetDisplayState(DisplayState state) override;
-    DisplayState GetDisplayState(uint64_t displayId) override;
+    DisplayState GetDisplayState(DisplayId displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
 
     sptr<AbstractScreenController> GetAbstractScreenController();

@@ -40,7 +40,7 @@ public:
     }
     ~WindowNode() = default;
 
-    void SetDisplayId(int32_t displayId);
+    void SetDisplayId(DisplayId displayId);
     void SetLayoutRect(const Rect& rect);
     void SetWindowRect(const Rect& rect);
     void SetWindowProperty(const sptr<WindowProperty>& property);
@@ -49,7 +49,7 @@ public:
 
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
-    int32_t GetDisplayId() const;
+    DisplayId GetDisplayId() const;
     const Rect& GetLayoutRect() const;
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;

@@ -96,7 +96,7 @@ void JsWindowListener::OnSizeChange(Rect rect)
     CallJsMethod("windowSizeChange", argv, ArraySize(argv));
 }
 
-void JsWindowListener::OnSystemBarPropertyChange(uint64_t displayId, const SystemBarRegionTints& tints)
+void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     WLOGFI("JsWindowListener::OnSystemBarPropertyChange is called");

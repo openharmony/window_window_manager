@@ -15,6 +15,8 @@
 
 #include "window_inner_manager.h"
 
+#include <cinttypes>
+
 #include "include/core/SkCanvas.h"
 #include "include/core/SkImageInfo.h"
 #include "transaction/rs_transaction.h"
@@ -80,7 +82,7 @@ void WindowInnerManager::DrawSurface(const sptr<Window>& window, uint32_t color)
 }
 
 
-sptr<Window> WindowInnerManager::GetDividerWindow(uint32_t displayId) const
+sptr<Window> WindowInnerManager::GetDividerWindow(DisplayId displayId) const
 {
     auto iter = dividerMap_.find(displayId);
     if (iter == dividerMap_.end()) {
@@ -89,7 +91,7 @@ sptr<Window> WindowInnerManager::GetDividerWindow(uint32_t displayId) const
     return iter->second;
 }
 
-sptr<Window> WindowInnerManager::CreateWindow(uint32_t displayId, const WindowType& type, const Rect& rect)
+sptr<Window> WindowInnerManager::CreateWindow(DisplayId displayId, const WindowType& type, const Rect& rect)
 {
     sptr<Window> window = GetDividerWindow(displayId);
     if (window == nullptr) {
@@ -197,7 +199,7 @@ void WindowInnerManager::HandleMessage()
     }
 }
 
-void WindowInnerManager::SendMessage(InnerWMCmd cmdType, uint32_t displayId)
+void WindowInnerManager::SendMessage(InnerWMCmd cmdType, DisplayId displayId)
 {
     std::unique_lock<std::mutex> lk(mutex_);
     if (!hasInitThread_) {
@@ -207,14 +209,14 @@ void WindowInnerManager::SendMessage(InnerWMCmd cmdType, uint32_t displayId)
     std::unique_ptr<WindowMessage> winMsg = std::make_unique<WindowMessage>();
     winMsg->cmdType = cmdType;
     winMsg->displayId = displayId;
-    WLOGFI("SendMessage : displayId = %{public}d,  type = %{public}d",
+    WLOGFI("SendMessage : displayId = %{public}" PRIu64",  type = %{public}d",
         winMsg->displayId, static_cast<uint32_t>(cmdType));
     messages_.push_back(std::move(winMsg));
     ready_ = true;
     conVar_.notify_one();
 }
 
-void WindowInnerManager::SendMessage(InnerWMCmd cmdType, uint32_t displayId, const Rect& dividerRect)
+void WindowInnerManager::SendMessage(InnerWMCmd cmdType, DisplayId displayId, const Rect& dividerRect)
 {
     std::unique_lock<std::mutex> lk(mutex_);
     if (!hasInitThread_) {
@@ -225,7 +227,7 @@ void WindowInnerManager::SendMessage(InnerWMCmd cmdType, uint32_t displayId, con
     winMsg->cmdType = cmdType;
     winMsg->displayId = displayId;
     winMsg->dividerRect = dividerRect;
-    WLOGFI("SendMessage : displayId = %{public}d,  type = %{public}d" \
+    WLOGFI("SendMessage : displayId = %{public}" PRIu64",  type = %{public}d" \
         " Rect = [%{public}d %{public}d %{public}d %{public}d]",
         winMsg->displayId, static_cast<uint32_t>(cmdType),
         winMsg->dividerRect.posX_, winMsg->dividerRect.posY_,

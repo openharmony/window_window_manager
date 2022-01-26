@@ -26,7 +26,7 @@ namespace Rosen {
 using Mocker = SingletonMocker<StaticCall, MockStaticCall>;
 void WindowSceneTest::SetUpTestCase()
 {
-    int displayId = 0;
+    DisplayId displayId = 0;
     sptr<IWindowLifeCycle> listener = nullptr;
     scene_ = new WindowScene();
     abilityContext_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
@@ -60,7 +60,7 @@ HWTEST_F(WindowSceneTest, Init01, Function | SmallTest | Level2)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
-    int displayId = 0;
+    DisplayId displayId = 0;
     sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
@@ -78,7 +78,7 @@ HWTEST_F(WindowSceneTest, Init02, Function | SmallTest | Level2)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(nullptr));
-    int displayId = 0;
+    DisplayId displayId = 0;
     sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
@@ -96,7 +96,7 @@ HWTEST_F(WindowSceneTest, Init03, Function | SmallTest | Level2)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> optionTest = new WindowOption();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
-    int displayId = 0;
+    DisplayId displayId = 0;
     sptr<IWindowLifeCycle> listener = nullptr;
     sptr<WindowScene> scene = new WindowScene();
     ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));

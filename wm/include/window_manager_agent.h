@@ -26,8 +26,8 @@ public:
     ~WindowManagerAgent() = default;
 
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
-        int32_t displayId, bool focused) override;
-    void UpdateSystemBarRegionTints(uint64_t displayId, const SystemBarRegionTints& props) override;
+        DisplayId displayId, bool focused) override;
+    void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& props) override;
 };
 } // namespace Rosen
 } // namespace OHOS
