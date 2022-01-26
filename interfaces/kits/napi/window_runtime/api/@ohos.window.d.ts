@@ -621,12 +621,7 @@ declare namespace window {
      * window stage event callback off.
      * @since 8
      */
-    off(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
-    /**
-     * window stage event callback off.
-     * @since 8
-     */
-    off(eventType: 'windowStageEvent'): void;
+    off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void;
   }
 }
 
