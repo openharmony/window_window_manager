@@ -662,6 +662,42 @@ bool WindowNodeContainer::isVerticalDisplay() const
     return displayRects_->isVertical_;
 }
 
+void WindowNodeContainer::NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason)
+{
+    switch (reason) {
+        case WindowStateChangeReason::KEYGUARD: {
+            int32_t topPriority = zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_KEYGUARD);
+            TraverseAndUpdateWindowState(state, topPriority);
+            break;
+        }
+        default:
+            return;
+    }
+}
+
+void WindowNodeContainer::TraverseAndUpdateWindowState(WindowState state, int32_t topPriority)
+{
+    std::vector<sptr<WindowNode>> rootNodes = { belowAppWindowNode_, appWindowNode_, aboveAppWindowNode_ };
+    for (auto& node : rootNodes) {
+        UpdateWindowState(node, topPriority, state);
+    }
+}
+
+void WindowNodeContainer::UpdateWindowState(sptr<WindowNode> node, int32_t topPriority, WindowState state)
+{
+    if (node == nullptr) {
+        return;
+    }
+    if (node->parent_ != nullptr && node->currentVisibility_) {
+        if (node->priority_ < topPriority) {
+            node->GetWindowToken()->UpdateWindowState(state);
+        }
+    }
+    for (auto& childNode : node->children_) {
+        UpdateWindowState(childNode, topPriority, state);
+    }
+}
+
 void WindowNodeContainer::SendSplitScreenEvent(WindowMode mode)
 {
     // should define in common_event_support.h and @ohos.commonEvent.d.ts

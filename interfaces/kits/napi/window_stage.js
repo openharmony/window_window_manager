@@ -22,6 +22,14 @@ class WindowStage {
         return this.__window_stage__.setUIContent(context, url, storage)
     }
 
+    loadContent(url, storage) {
+        return this.__window_stage__.loadContent(url, storage)
+    }
+
+    getWindowMode() {
+        return this.__window_stage__.getWindowMode()
+    }
+
     getMainWindow() {
         return this.__window_stage__.getMainWindow()
     }

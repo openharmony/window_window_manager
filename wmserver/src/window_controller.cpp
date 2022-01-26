@@ -204,6 +204,30 @@ WMError WindowController::MinimizeAllAppNodeAbility(uint32_t windowId)
     return windowRoot_->MinimizeAllAppNodeAbility(node);
 }
 
+void WindowController::NotifyDisplayStateChange(DisplayStateChangeType type)
+{
+    WLOGFI("DisplayStateChangeType:%{public}u", type);
+    WindowState state;
+    WindowStateChangeReason reason;
+    switch (type) {
+        case DisplayStateChangeType::BEFORE_SUSPEND: {
+            state = WindowState::STATE_FROZEN;
+            reason = WindowStateChangeReason::KEYGUARD;
+            break;
+        }
+        case DisplayStateChangeType::BEFORE_UNLOCK: {
+            state = WindowState::STATE_UNFROZEN;
+            reason = WindowStateChangeReason::KEYGUARD;
+            break;
+        }
+        default: {
+            WLOGFE("unknown DisplayStateChangeType:%{public}u", type);
+            return;
+        }
+    }
+    windowRoot_->NotifyWindowStateChange(state, reason);
+}
+
 WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
 {
     auto node = windowRoot_->GetWindowNode(windowId);

@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#include "window_manager_service_inner.h"
-#include "window_manager_service.h"
+#ifndef OHOS_ROSEN_DISPLAY_CHANGE_LISTENER_H
+#define OHOS_ROSEN_DISPLAY_CHANGE_LISTENER_H
+
+#include <refbase.h>
 
 namespace OHOS {
 namespace Rosen {
-WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerServiceInner)
-
-bool WindowManagerServiceInner::NotifyDisplaySuspend()
-{
-    WMError ret =  WindowManagerService::GetInstance().NotifyDisplaySuspend();
-    return ret == WMError::WM_OK;
-}
-void WindowManagerServiceInner::RestoreSuspendedWindows()
-{
-    WindowManagerService::GetInstance().RestoreSuspendedWindows();
+enum class DisplayStateChangeType : uint32_t {
+    BEFORE_SUSPEND,
+    BEFORE_UNLOCK,
+};
+class IDisplayChangeListener : public RefBase {
+public:
+    virtual void OnDisplayStateChange(DisplayStateChangeType type) = 0;
+};
 }
 }
-}
+#endif // OHOS_ROSEN_DISPLAY_CHANGE_LISTENER_H

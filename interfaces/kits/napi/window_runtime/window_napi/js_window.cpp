@@ -170,13 +170,6 @@ NativeValue* JsWindow::GetAvoidArea(NativeEngine* engine, NativeCallbackInfo* in
     return (me != nullptr) ? me->OnGetAvoidArea(*engine, *info) : nullptr;
 }
 
-NativeValue* JsWindow::GetWindowMode(NativeEngine* engine, NativeCallbackInfo* info)
-{
-    WLOGFI("JsWindow::GetWindowMode is called");
-    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
-    return (me != nullptr) ? me->OnGetWindowMode(*engine, *info) : nullptr;
-}
-
 NativeValue* JsWindow::IsShowing(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGFI("JsWindow::IsShowing is called");
@@ -645,7 +638,7 @@ NativeValue* JsWindow::OnSetFullScreen(NativeEngine& engine, NativeCallbackInfo&
     }
     bool isFullScreen = static_cast<bool>(*nativeVal);
     AsyncTask::CompleteCallback complete =
-        [&, this](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             WMError ret = windowToken_->SetFullScreen(isFullScreen);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
@@ -677,7 +670,7 @@ NativeValue* JsWindow::OnSetLayoutFullScreen(NativeEngine& engine, NativeCallbac
     }
     bool isLayoutFullScreen = static_cast<bool>(*nativeVal);
     AsyncTask::CompleteCallback complete =
-        [&, this](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             WMError ret = windowToken_->SetLayoutFullScreen(isLayoutFullScreen);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
@@ -813,28 +806,6 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
     return result;
 }
 
-NativeValue* JsWindow::OnGetWindowMode(NativeEngine& engine, NativeCallbackInfo& info)
-{
-    WLOGFI("JsWindow::OnGetWindowMode is called");
-    AsyncTask::CompleteCallback complete =
-        [this](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR),
-                    "JsWindow::OnGetWindowMode failed."));
-                WLOGFE("JsWindow windowToken_ is nullptr");
-                return;
-            }
-            WindowMode mode = windowToken_->GetMode();
-            task.Resolve(engine, CreateJsValue(engine, mode));
-        };
-
-    NativeValue* lastParam = (info.argc == 0) ? nullptr : info.argv[0];
-    NativeValue* result = nullptr;
-    AsyncTask::Schedule(
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-    return result;
-}
-
 NativeValue* JsWindow::OnIsShowing(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsWindow::OnIsShowing is called");
@@ -893,7 +864,6 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     BindNativeFunction(engine, *object, "setSystemBarEnable", JsWindow::SetSystemBarEnable);
     BindNativeFunction(engine, *object, "setSystemBarProperties", JsWindow::SetSystemBarProperties);
     BindNativeFunction(engine, *object, "getAvoidArea", JsWindow::GetAvoidArea);
-    BindNativeFunction(engine, *object, "getWindowMode", JsWindow::GetWindowMode);
     BindNativeFunction(engine, *object, "isShowing", JsWindow::IsShowing);
     std::shared_ptr<NativeReference> jsWindowRef;
     jsWindowRef.reset(engine.CreateReference(objValue, 1));

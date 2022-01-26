@@ -22,6 +22,7 @@
 #include <ability_manager_client.h>
 
 #include "dm_common.h"
+#include "display_manager_service_inner.h"
 #include "singleton_container.h"
 #include "window_manager_agent_controller.h"
 #include "window_inner_manager.h"
@@ -54,6 +55,8 @@ void WindowManagerService::OnStart()
     }
     RegisterSnapshotHandler();
     SingletonContainer::Get<WindowInnerManager>().Init();
+    sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
+    DisplayManagerServiceInner::GetInstance().RegisterDisplayChangeListener(listener);
 }
 
 void WindowManagerService::RegisterSnapshotHandler()
@@ -284,26 +287,23 @@ void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)
     }
 }
 
-WMError WindowManagerService::NotifyDisplaySuspend()
-{
-    WLOGFI("NotifyDisplaySuspend");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    // TODO: notify windows covered by keyguard window to hide
-    return WMError::WM_OK;
-}
-
-void WindowManagerService::RestoreSuspendedWindows()
-{
-    WLOGFI("RestoreSuspendedWindows");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    // TODO: restore windows covered by keyguard
-}
-
 WMError WindowManagerService::MinimizeAllAppNodeAbility(uint32_t windowId)
 {
     WM_SCOPED_TRACE("wms:MinimizeAllAppNodeAbility");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->MinimizeAllAppNodeAbility(windowId);
+}
+
+void WindowManagerService::NotifyDisplayStateChange(DisplayStateChangeType type)
+{
+    WLOGFE("NotifyDisplayStateChange");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->NotifyDisplayStateChange(type);
+}
+
+void DisplayChangeListener::OnDisplayStateChange(DisplayStateChangeType type)
+{
+    WindowManagerService::GetInstance().NotifyDisplayStateChange(type);
 }
 }
 }

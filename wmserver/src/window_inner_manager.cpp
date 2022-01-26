@@ -34,7 +34,7 @@ namespace {
 
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowInnerManager)
 
-bool WindowInnerManager::DecodeImageFile(const char* filename, SkBitmap* bitmap)
+bool WindowInnerManager::DecodeImageFile(const char* filename, SkBitmap& bitmap)
 {
     sk_sp<SkData> data(SkData::MakeFromFileName(filename));
     std::unique_ptr<SkCodec> codec = SkCodec::MakeFromData(std::move(data));
@@ -43,10 +43,10 @@ bool WindowInnerManager::DecodeImageFile(const char* filename, SkBitmap* bitmap)
     }
     SkColorType colorType = kN32_SkColorType;
     SkImageInfo info = codec->getInfo().makeColorType(colorType);
-    if (!bitmap->tryAllocPixels(info)) {
+    if (!bitmap.tryAllocPixels(info)) {
         return false;
     }
-    return SkCodec::kSuccess == codec->getPixels(info, bitmap->getPixels(), bitmap->rowBytes());
+    return SkCodec::kSuccess == codec->getPixels(info, bitmap.getPixels(), bitmap.rowBytes());
 }
 
 void WindowInnerManager::DrawSurface(const sptr<Window>& window)
@@ -68,32 +68,36 @@ void WindowInnerManager::DrawSurface(const sptr<Window>& window)
     rsSurface->SetRenderContext(rc_);
 #endif
     auto frame = rsSurface->RequestFrame(width, height);
-    if (!frame) {
+    if (frame == nullptr) {
         WLOGFE("DrawSurface frameptr is nullptr");
         return;
     }
     auto canvas = frame->GetCanvas();
-    if (!canvas) {
+    if (canvas == nullptr) {
         WLOGFE("DrawSurface canvas is nullptr");
         return;
     }
-    if (!deviderBitmap.isNull()) {
+    if (!dividerBitmap_.isNull() && dividerBitmap_.width() != 0 && dividerBitmap_.height() != 0) {
         SkPaint paint;
         SkMatrix matrix;
         SkRect paintRect;
         if (width < height) {
             // rotate when devider is hozizon
-            matrix.setScale(static_cast<float>(height) / deviderBitmap.width(),
-                static_cast<float>(width) / deviderBitmap.height());
+            matrix.setScale(static_cast<float>(height) / dividerBitmap_.width(),
+                static_cast<float>(width) / dividerBitmap_.height());
             matrix.postRotate(-90.0f); // devider shader rotate -90.0
         } else {
-            matrix.setScale(static_cast<float>(width) / deviderBitmap.width(),
-                static_cast<float>(height) / deviderBitmap.height());
+            matrix.setScale(static_cast<float>(width) / dividerBitmap_.width(),
+                static_cast<float>(height) / dividerBitmap_.height());
         }
-        paint.setShader(deviderBitmap.makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat));
-        paint.setShader(paint.getShader()->makeWithLocalMatrix(matrix));
-        paintRect.set(0, 0, static_cast<int>(width), static_cast<int>(height));
-        canvas->drawRect(paintRect, paint);
+        paint.setShader(dividerBitmap_.makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat));
+        if (paint.getShader() != nullptr) {
+            paint.setShader(paint.getShader()->makeWithLocalMatrix(matrix));
+            paintRect.set(0, 0, static_cast<int>(width), static_cast<int>(height));
+            canvas->drawRect(paintRect, paint);
+        } else {
+            WLOGFE("Paint's shader is nullptr");
+        }
     }
     frame->SetDamageRegion(0, 0, width, height);
     rsSurface->FlushFrame(frame);
@@ -157,9 +161,9 @@ void WindowInnerManager::CreateAndShowDivider(std::unique_ptr<WindowMessage> msg
         }
     }
 #endif
-    if (!isDeviderImageLoaded) {
-        isDeviderImageLoaded = DecodeImageFile(splitIconPath_, &deviderBitmap);
-        if (!isDeviderImageLoaded) {
+    if (!isDividerImageLoaded_) {
+        isDividerImageLoaded_ = DecodeImageFile(splitIconPath_, dividerBitmap_);
+        if (!isDividerImageLoaded_) {
             WLOGFE("Decode devider image failed");
         }
     }
@@ -187,7 +191,7 @@ void WindowInnerManager::DestroyThread(std::unique_ptr<WindowMessage> msg)
 {
     hasInitThread_ = false;
     needDestroyThread_ = true;
-    isDeviderImageLoaded = false;
+    isDividerImageLoaded_ = false;
     WLOGFI("DestroyThread success");
 }
 

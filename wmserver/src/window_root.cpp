@@ -300,6 +300,16 @@ std::shared_ptr<RSSurfaceNode> WindowRoot::GetSurfaceNodeByAbilityToken(const sp
     return nullptr;
 }
 
+void WindowRoot::NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason)
+{
+    for (auto& elem : windowNodeContainerMap_) {
+        if (elem.second == nullptr) {
+            continue;
+        }
+        elem.second->NotifyWindowStateChange(state, reason);
+    }
+}
+
 void WindowRoot::OnRemoteDied(const sptr<IRemoteObject>& remoteObject)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
