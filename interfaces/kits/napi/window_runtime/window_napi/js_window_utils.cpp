@@ -56,7 +56,12 @@ NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& 
         WLOGFE("GetRect failed!");
     }
     object->SetProperty("windowRect", rectObj);
-    object->SetProperty("type", CreateJsValue(engine, window->GetType()));
+    WindowType type = window->GetType();
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
+        object->SetProperty("type", CreateJsValue(engine, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(type)));
+    } else {
+        object->SetProperty("type", CreateJsValue(engine, type));
+    }
     object->SetProperty("isLayoutFullScreen", CreateJsValue(engine, window->IsLayoutFullScreen()));
     object->SetProperty("isFullScreen", CreateJsValue(engine, window->IsFullScreen()));
     object->SetProperty("touchable", CreateJsValue(engine, window->GetTouchable()));
