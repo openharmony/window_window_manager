@@ -90,18 +90,7 @@ std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(Di
 
     std::shared_ptr<ScreenshotCallback> callback = std::make_shared<ScreenshotCallback>();
     rsInterface_->TakeSurfaceCapture(displayNode, callback);
-
-    int counter = 0;
-    while (!callback->IsPixelMapOk()) {
-        usleep(10000); // 10000us equals to 10ms
-        counter++;
-        if (counter >= 200) { // wait for 200 * 10ms = 2s
-            WLOGFE("Failed to get pixelmap, timeout");
-            return nullptr;
-        }
-    }
-    std::shared_ptr<Media::PixelMap> screenshot = callback->GetPixelMap();
-
+    std::shared_ptr<Media::PixelMap> screenshot = callback->GetResult(2000); // wait for 2000ms
     if (screenshot == nullptr) {
         WLOGFE("Failed to get pixelmap from RS, return nullptr!");
     }

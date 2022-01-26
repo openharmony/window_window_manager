@@ -51,8 +51,11 @@ void AbstractScreenController::Init()
 
 std::vector<ScreenId> AbstractScreenController::GetAllScreenIds()
 {
-    std::vector<ScreenId> tmp;
-    return tmp;
+    std::vector<ScreenId> res;
+    for (auto iter = dmsScreenMap_.begin(); iter != dmsScreenMap_.end(); iter++) {
+        res.push_back(iter->first);
+    }
+    return res;
 }
 
 sptr<AbstractScreen> AbstractScreenController::GetAbstractScreen(ScreenId dmsScreenId)
@@ -136,13 +139,12 @@ void AbstractScreenController::OnRsScreenChange(ScreenId rsScreenId, ScreenEvent
 void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
 {
     WLOGI("disconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
-    ScreenId dmsScreenId = INVALID_SCREEN_ID;
     auto iter = rs2DmsScreenIdMap_.find(rsScreenId);
     if (iter == rs2DmsScreenIdMap_.end()) {
         WLOGE("disconnect screen, screenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_", rsScreenId);
         return;
     }
-    dmsScreenId = iter->second;
+    ScreenId dmsScreenId = iter->second;
     auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
     if (dmsScreenMapIter != dmsScreenMap_.end()) {
         if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(dmsScreenMapIter->second)) {
