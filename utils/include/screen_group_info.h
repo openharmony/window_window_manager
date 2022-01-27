@@ -30,13 +30,13 @@ public:
     void Update(sptr<ScreenGroupInfo> info);
 
     virtual bool Marshalling(Parcel& parcel) const override;
-    static sptr<ScreenGroupInfo> Unmarshalling(Parcel& parcel);
+    ScreenGroupInfo* Unmarshalling(Parcel& parcel);
 
     std::vector<ScreenId> children_;
     std::vector<Point> position_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
 protected:
-    sptr<ScreenGroupInfo> InnerUnmarshalling(Parcel& parcel);
+    ScreenGroupInfo* InnerUnmarshalling(Parcel& parcel);
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_SCREEN_GROUP_INFO_H

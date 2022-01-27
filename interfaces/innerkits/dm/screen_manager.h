@@ -24,11 +24,11 @@
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
-class IScreenListener : public RefBase {
+class IScreenListener : public virtual RefBase {
 public:
     virtual void OnConnect(ScreenId) = 0;
     virtual void OnDisconnect(ScreenId) = 0;
-    virtual void OnChange(std::vector<ScreenId>, ScreenChangeEvent) = 0;
+    virtual void OnChange(const std::vector<ScreenId>&, ScreenChangeEvent) = 0;
 };
 
 class ScreenManager : public RefBase {

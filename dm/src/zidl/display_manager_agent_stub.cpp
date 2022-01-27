@@ -43,6 +43,64 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             NotifyDisplayStateChanged(state);
             break;
         }
+        case TRANS_ID_ON_SCREEN_CONNECT: {
+            sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
+            OnScreenConnect(screenInfo);
+            break;
+        }
+        case TRANS_ID_ON_SCREEN_DISCONNECT: {
+            ScreenId screenId;
+            if (!data.ReadUint64(screenId)) {
+                WLOGFE("Read ScreenId failed");
+                return -1;
+            }
+            OnScreenDisconnect(screenId);
+            break;
+        }
+        case TRANS_ID_ON_SCREEN_CHANGED: {
+            std::vector<const sptr<ScreenInfo>> screenInfos;
+            uint32_t size;
+            if (!data.ReadUint32(size)) {
+                WLOGFE("Read ScreenChangeEvent failed");
+                return -1;
+            }
+
+            for (uint32_t i = 0; i < size; i++) {
+                screenInfos.push_back(data.ReadParcelable<ScreenInfo>());
+            }
+
+            uint32_t event;
+            if (!data.ReadUint32(event)) {
+                WLOGFE("Read ScreenChangeEvent failed");
+                return -1;
+            }
+            OnScreenChange(screenInfos, static_cast<ScreenChangeEvent>(event));
+            break;
+        }
+        case TRANS_ID_ON_DISPLAY_CONNECT: {
+            sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
+            OnDisplayCreate(displayInfo);
+            break;
+        }
+        case TRANS_ID_ON_DISPLAY_DISCONNECT: {
+            DisplayId displayId;
+            if (!data.ReadUint64(displayId)) {
+                return -1;
+                WLOGFE("Read DisplayId failed");
+            }
+            OnDisplayDestroy(displayId);
+            break;
+        }
+        case TRANS_ID_ON_DISPLAY_CHANGED: {
+            sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
+            uint32_t event;
+            if (!data.ReadUint32(event)) {
+                WLOGFE("Read DisplayChangeEvent failed");
+                return -1;
+            }
+            OnDisplayChange(displayInfo, static_cast<DisplayChangeEvent>(event));
+            break;
+        }
         default:
             break;
     }

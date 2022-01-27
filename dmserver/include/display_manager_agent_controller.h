@@ -34,11 +34,17 @@ public:
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
     bool NotifyDisplayStateChanged(DisplayState state);
 
+    void OnScreenConnect(sptr<ScreenInfo> screenInfo);
+    void OnScreenDisconnect(ScreenId);
+    void OnScreenChange(const std::vector<const sptr<ScreenInfo>>&, ScreenChangeEvent);
+    void OnDisplayCreate(sptr<DisplayInfo>);
+    void OnDisplayDestroy(DisplayId);
+    void OnDisplayChange(sptr<DisplayInfo>, DisplayChangeEvent);
+
 private:
-    DisplayManagerAgentController() : dmAgentContainer_(mutex_) {}
+    DisplayManagerAgentController() {}
     virtual ~DisplayManagerAgentController() = default;
 
-    std::recursive_mutex mutex_;
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
 };
 }

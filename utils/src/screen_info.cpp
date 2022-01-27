@@ -37,13 +37,13 @@ bool ScreenInfo::Marshalling(Parcel &parcel) const
         parcel.WriteBool(hasChild_);
 }
 
-sptr<ScreenInfo> ScreenInfo::Unmarshalling(Parcel &parcel)
+ScreenInfo* ScreenInfo::Unmarshalling(Parcel &parcel)
 {
-    sptr<ScreenInfo> info = new ScreenInfo();
+    ScreenInfo* info = new ScreenInfo();
     return info->InnerUnmarshalling(parcel);
 }
 
-sptr<ScreenInfo> ScreenInfo::InnerUnmarshalling(Parcel& parcel)
+ScreenInfo* ScreenInfo::InnerUnmarshalling(Parcel& parcel)
 {
     bool res = parcel.ReadUint64(id_) &&
         parcel.ReadUint32(width_) && parcel.ReadUint32(height_) &&
