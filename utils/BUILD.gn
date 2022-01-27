@@ -31,6 +31,8 @@ ohos_shared_library("libwmutil") {
   sources = [
     "src/agent_death_recipient.cpp",
     "src/display_info.cpp",
+    "src/screen_group_info.cpp",
+    "src/screen_info.cpp",
     "src/singleton_container.cpp",
     "src/window_property.cpp",
     "src/wm_trace.cpp",
@@ -42,6 +44,7 @@ ohos_shared_library("libwmutil") {
 
   external_deps = [
     "bytrace_standard:bytrace_core",
+    "graphic_standard:surface",
     "hilog_native:libhilog",
     "ipc:ipc_core",
     "utils_base:utils",

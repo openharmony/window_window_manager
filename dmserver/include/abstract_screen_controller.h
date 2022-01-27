@@ -50,8 +50,7 @@ public:
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
-
-    std::map<ScreenId, sptr<AbstractScreen>> abstractDisplayMap_;
+    bool IsScreenGroup(ScreenId screenId) const;
 
 private:
     void OnRsScreenChange(ScreenId rsScreenId, ScreenEvent screenEvent);

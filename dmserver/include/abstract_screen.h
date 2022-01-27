@@ -24,14 +24,10 @@
 #include <ui/rs_display_node.h>
 
 #include "screen.h"
+#include "screen_group.h"
+#include "screen_group_info.h"
 
 namespace OHOS::Rosen {
-enum class ScreenCombination : uint32_t {
-    SCREEN_ALONE,
-    SCREEN_EXPAND,
-    SCREEN_MIRROR,
-};
-
 enum class ScreenType : uint32_t {
     UNDEFINE,
     REAL,
@@ -52,6 +48,7 @@ public:
     ~AbstractScreen();
     sptr<AbstractScreenInfo> GetActiveScreenInfo() const;
     sptr<AbstractScreenGroup> GetGroup() const;
+    const sptr<ScreenInfo> ConvertToScreenInfo() const;
 
     ScreenId dmsId_;
     ScreenId rsId_;
@@ -61,6 +58,8 @@ public:
     int32_t activeIdx_;
     float virtualPixelRatio = { 1.0 };
     std::vector<sptr<AbstractScreenInfo>> infos_ = {};
+protected:
+    void FillScreenInfo(sptr<ScreenInfo>) const;
 };
 
 class AbstractScreenGroup : public AbstractScreen {
@@ -76,6 +75,7 @@ public:
     std::vector<sptr<AbstractScreen>> GetChildren() const;
     std::vector<Point> GetChildrenPosition() const;
     size_t GetChildCount() const;
+    const sptr<ScreenGroupInfo> ConvertToScreenGroupInfo() const;
 
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
 private:
