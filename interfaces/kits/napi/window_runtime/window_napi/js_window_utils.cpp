@@ -172,10 +172,10 @@ static uint32_t GetColorFromJs(NativeEngine& engine, NativeObject* jsObject,
             return defaultColor;
         }
         WLOGFI("origin color: %{public}s", colorStr.c_str());
-        if (colorStr.length() == RGB_LENGTH) {
-            colorStr += "FF"; // RGB + A
-        }
         std::string color = colorStr.substr(1);
+        if (colorStr.length() == RGB_LENGTH) {
+            colorStr = "FF" + colorStr; // ARGB
+        }
         std::stringstream ss;
         uint32_t hexColor;
         ss << std::hex << color;
@@ -197,11 +197,11 @@ bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
         jsObject, "statusBarColor", statusProperty.backgroundColor_);
     properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ = GetColorFromJs(engine,
         jsObject, "navigationBarColor", navProperty.backgroundColor_);
-    NativeValue* jsStatusContentColor = jsObject->GetProperty("statusBarContenColor");
+    NativeValue* jsStatusContentColor = jsObject->GetProperty("statusBarContentColor");
     NativeValue* jsStatusIcon = jsObject->GetProperty("isStatusBarLightIcon");
     if (jsStatusContentColor->TypeOf() != NATIVE_UNDEFINED) {
         properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ =  GetColorFromJs(engine,
-            jsObject, "statusBarContenColor", statusProperty.contentColor_);
+            jsObject, "statusBarContentColor", statusProperty.contentColor_);
     } else if (jsStatusIcon->TypeOf() != NATIVE_UNDEFINED) {
         bool isStatusBarLightIcon;
         if (!ConvertFromJsValue(engine, jsStatusIcon, isStatusBarLightIcon)) {
@@ -214,11 +214,11 @@ bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
             properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
         }
     }
-    NativeValue* jsNavigationContentColor = jsObject->GetProperty("navigationBarContenColor");
+    NativeValue* jsNavigationContentColor = jsObject->GetProperty("navigationBarContentColor");
     NativeValue* jsNavigationIcon = jsObject->GetProperty("isNavigationBarLightIcon");
     if (jsNavigationContentColor->TypeOf() != NATIVE_UNDEFINED) {
         properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = GetColorFromJs(engine,
-            jsObject, "navigationBarContenColor", navProperty.contentColor_);
+            jsObject, "navigationBarContentColor", navProperty.contentColor_);
     } else if (jsNavigationIcon->TypeOf() != NATIVE_UNDEFINED) {
         bool isNavigationBarLightIcon;
         if (!ConvertFromJsValue(engine, jsNavigationIcon, isNavigationBarLightIcon)) {
