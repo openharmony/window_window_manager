@@ -26,21 +26,18 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerAgentController)
 void WindowManagerAgentController::RegisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
     WindowManagerAgentType type)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    wmAgentContainer_.RegisterAgentLocked(windowManagerAgent, type);
+    wmAgentContainer_.RegisterAgent(windowManagerAgent, type);
 }
 
 void WindowManagerAgentController::UnregisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
     WindowManagerAgentType type)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    wmAgentContainer_.UnregisterAgentLocked(windowManagerAgent, type);
+    wmAgentContainer_.UnregisterAgent(windowManagerAgent, type);
 }
 
 void WindowManagerAgentController::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
     WindowType windowType, DisplayId displayId, bool focused)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     WLOGFI("UpdateFocusStatus");
     for (auto& agent : wmAgentContainer_.GetAgentsByType(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS)) {
         agent->UpdateFocusStatus(windowId, abilityToken, windowType, displayId, focused);
@@ -52,7 +49,6 @@ void WindowManagerAgentController::UpdateSystemBarRegionTints(DisplayId displayI
     if (tints.empty()) {
         return;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     WLOGFI("UpdateSystemBarRegionTints");
     for (auto& agent : wmAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR)) {

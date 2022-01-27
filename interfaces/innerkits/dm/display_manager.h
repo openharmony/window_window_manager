@@ -32,7 +32,7 @@ class DisplayManager {
 friend class DisplayManagerAgent;
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManager);
 public:
-    class IDisplayListener : public RefBase {
+    class IDisplayListener : public virtual RefBase {
     public:
         virtual void OnCreate(DisplayId) = 0;
         virtual void OnDestroy(DisplayId) = 0;
