@@ -269,17 +269,6 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
     return WMError::WM_OK;
 }
 
-WMError WindowRoot::LayoutDividerWindow(sptr<WindowNode>& node)
-{
-    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
-    if (container == nullptr) {
-        WLOGFE("layout divider window failed, window container could not be found");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    container->LayoutDividerWindow(node);
-    return WMError::WM_OK;
-}
-
 bool WindowRoot::isVerticalDisplay(sptr<WindowNode>& node) const
 {
     auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(node->GetDisplayId());
