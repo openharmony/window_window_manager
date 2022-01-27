@@ -835,6 +835,10 @@ void WindowImpl::SetDefaultOption()
             property_->SetWindowFlags(0);
             break;
         }
+        case WindowType::WINDOW_TYPE_VOLUME_OVERLAY: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            break;
+        }
         case WindowType::WINDOW_TYPE_POINTER: {
             property_->SetFocusable(false);
             break;

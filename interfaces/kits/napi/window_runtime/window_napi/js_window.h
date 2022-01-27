@@ -15,12 +15,16 @@
 
 #ifndef OHOS_JS_WINDOW_H
 #define OHOS_JS_WINDOW_H
+
+#include "event_handler.h"
+#include "event_runner.h"
 #include "js_runtime_utils.h"
 #include "js_window_listener.h"
 #include "js_window_utils.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "window.h"
+
 namespace OHOS {
 namespace Rosen {
 NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window);
@@ -76,6 +80,9 @@ private:
     std::map<std::string, sptr<JsWindowListener>> jsListenerMap_;
     std::mutex mtx_;
     void* contentStorage_ = nullptr;
+
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> GetMainHandler();
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler_ = nullptr;
 };
 }  // namespace Rosen
 }  // namespace OHOS
