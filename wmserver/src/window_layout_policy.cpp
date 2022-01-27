@@ -260,9 +260,6 @@ void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rec
             winRect.width_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, winRect.width_);
             winRect.height_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, winRect.height_);
         }
-    } else {
-        winRect.width_ = std::max(1u, winRect.width_);
-        winRect.height_ = std::max(1u, winRect.height_);
     }
 }
 
@@ -339,6 +336,10 @@ void WindowLayoutPolicy::UpdateSplitLimitRect(const Rect& limitRect, Rect& limit
 void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect)
 {
     auto& layoutRect = node->GetLayoutRect();
+    int32_t limitH = static_cast<int32_t>(limitRect.height_);
+    int32_t limitW = static_cast<int32_t>(limitRect.width_);
+    int32_t layoutH = static_cast<int32_t>(layoutRect.height_);
+    int32_t layoutW = static_cast<int32_t>(layoutRect.width_);
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
         node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
         auto avoidPosType = GetAvoidPosType(layoutRect);
@@ -346,27 +347,29 @@ void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& lim
         int32_t offsetW = 0;
         switch (avoidPosType) {
             case AvoidPosType::AVOID_POS_TOP:
-                offsetH = layoutRect.posY_ + layoutRect.height_ - limitRect.posY_;
+                offsetH = layoutRect.posY_ + layoutH - limitRect.posY_;
                 limitRect.posY_ += offsetH;
-                limitRect.height_ -= offsetH;
+                limitH -= offsetH;
                 break;
             case AvoidPosType::AVOID_POS_BOTTOM:
-                offsetH = limitRect.posY_ + limitRect.height_ - layoutRect.posY_;
-                limitRect.height_ -= offsetH;
+                offsetH = limitRect.posY_ + limitH - layoutRect.posY_;
+                limitH -= offsetH;
                 break;
             case AvoidPosType::AVOID_POS_LEFT:
-                offsetW = layoutRect.posX_ + layoutRect.width_ - limitRect.posX_;
+                offsetW = layoutRect.posX_ + layoutW - limitRect.posX_;
                 limitRect.posX_ += offsetW;
-                limitRect.width_ -= offsetW;
+                limitW -= offsetW;
                 break;
             case AvoidPosType::AVOID_POS_RIGHT:
-                offsetW = limitRect.posX_ + limitRect.width_ - layoutRect.posX_;
-                limitRect.width_ -= offsetW;
+                offsetW = limitRect.posX_ + limitW - layoutRect.posX_;
+                limitW -= offsetW;
                 break;
             default:
                 WLOGFE("invaild avoidPosType: %{public}d", avoidPosType);
         }
     }
+    limitRect.height_ = static_cast<uint32_t>(limitH < 0 ? 0 : limitH);
+    limitRect.width_ = static_cast<uint32_t>(limitW < 0 ? 0 : limitW);
     WLOGFI("Type: %{public}d, limitRect: %{public}d %{public}d %{public}d %{public}d",
         node->GetWindowType(), limitRect.posX_, limitRect.posY_, limitRect.width_, limitRect.height_);
 }
