@@ -39,6 +39,7 @@ std::map<uint32_t, std::vector<sptr<Window>>> WindowImpl::subWindowMap_;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     property_ = new WindowProperty();
+    property_->SetWindowName(option->GetWindowName());
     property_->SetWindowRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
     property_->SetWindowMode(option->GetWindowMode());
@@ -55,6 +56,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     callback_->onCallback = std::bind(&WindowImpl::OnVsync, this, std::placeholders::_1);
 
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = property_->GetWindowName();
     surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
 }
 

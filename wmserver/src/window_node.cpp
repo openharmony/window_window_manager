@@ -58,6 +58,11 @@ DisplayId WindowNode::GetDisplayId() const
     return property_->GetDisplayId();
 }
 
+const std::string& WindowNode::GetWindowName() const
+{
+    return property_->GetWindowName();
+}
+
 uint32_t WindowNode::GetWindowId() const
 {
     return property_->GetWindowId();

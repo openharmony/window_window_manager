@@ -30,6 +30,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowNodeContainer"};
+    constexpr int WINDOW_NAME_MAX_LENGTH = 10;
 }
 
 WindowNodeContainer::WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height) : screenId_(screenId)
@@ -644,15 +645,18 @@ void WindowNodeContainer::OnAvoidAreaChange(const std::vector<Rect>& avoidArea)
 void WindowNodeContainer::DumpScreenWindowTree()
 {
     WLOGFI("-------- Screen %{public}" PRIu64" dump window info begin---------", screenId_);
-    WLOGFI("WinId Type Mode Flag ZOrd [   x    y    w    h]");
+    WLOGFI("WindowName WinId Type Mode Flag ZOrd [   x    y    w    h]");
     std::vector<sptr<WindowNode>> windowNodes;
     TraverseContainer(windowNodes);
     int zOrder = windowNodes.size();
     for (auto node : windowNodes) {
         Rect rect = node->GetLayoutRect();
-        WLOGFI("%{public}5d %{public}4d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
-            "%{public}4d %{public}4d]", node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
-            node->GetWindowFlags(), --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
+        const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
+            node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
+        WLOGFI("%{public}10s %{public}5d %{public}4d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
+            "%{public}4d %{public}4d]", windowName.c_str(), node->GetWindowId(), node->GetWindowType(),
+            node->GetWindowMode(), node->GetWindowFlags(),
+            --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
     WLOGFI("-------- Screen %{public}" PRIu64" dump window info end  ---------", screenId_);
 }

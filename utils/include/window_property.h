@@ -29,6 +29,7 @@ public:
     WindowProperty() = default;
     ~WindowProperty() = default;
 
+    void SetWindowName(const std::string& name);
     void SetWindowRect(const struct Rect& rect);
     void SetWindowType(WindowType type);
     void SetWindowMode(WindowMode mode);
@@ -46,6 +47,7 @@ public:
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& state);
     void SetDecorEnable(bool decorEnable);
 
+    const std::string& GetWindowName() const;
     Rect GetWindowRect() const;
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;
@@ -65,6 +67,7 @@ public:
     virtual bool Marshalling(Parcel& parcel) const override;
     static sptr<WindowProperty> Unmarshalling(Parcel& parcel);
 private:
+    std::string windowName_;
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     WindowMode mode_ { WindowMode::WINDOW_MODE_FULLSCREEN };
