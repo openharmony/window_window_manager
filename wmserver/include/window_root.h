@@ -56,6 +56,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
 
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
+    WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);

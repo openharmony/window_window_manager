@@ -126,7 +126,6 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     UpdateRSTree(node, true);
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
-    UpdateFocusWindow();
     if (avoidController_->IsAvoidAreaNode(node)) {
         avoidController_->AddAvoidAreaNode(node);
         NotifyIfSystemBarRegionChanged();
@@ -248,7 +247,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
         }
     }
     UpdateRSTree(node, false);
-    UpdateFocusWindow();
     layoutPolicy_->RemoveWindowNode(node);
     if (avoidController_->IsAvoidAreaNode(node)) {
         avoidController_->RemoveAvoidAreaNode(node);
@@ -288,24 +286,6 @@ sptr<WindowNode> WindowNodeContainer::FindRoot(WindowType type) const
         return aboveAppWindowNode_;
     }
     return nullptr;
-}
-
-void WindowNodeContainer::UpdateFocusWindow()
-{
-    for (auto iter = appWindowNode_->children_.rbegin(); iter < appWindowNode_->children_.rend(); iter++) {
-        if ((*iter)->GetWindowProperty()->GetFocusable()) {
-            WLOGFI("find appWindow focused id %{public}d;", (*iter)->GetWindowId());
-            SetFocusWindow((*iter)->GetWindowId());
-            return;
-        }
-    }
-    for (auto iter = belowAppWindowNode_->children_.rbegin(); iter < belowAppWindowNode_->children_.rend(); iter++) {
-        if ((*iter)->GetWindowProperty()->GetFocusable()) {
-            WLOGFI("find belowAppWindow focused id %{public}d;", (*iter)->GetWindowId());
-            SetFocusWindow((*iter)->GetWindowId());
-            return;
-        }
-    }
 }
 
 sptr<WindowNode> WindowNodeContainer::FindWindowNodeById(uint32_t id) const
@@ -476,7 +456,42 @@ void WindowNodeContainer::NotifyIfSystemBarRegionChanged()
     WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(screenId_, tints);
 }
 
-void WindowNodeContainer::TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes)
+bool WindowNodeContainer::IsTopAppWindow(uint32_t windowId) const
+{
+    auto node = *(appWindowNode_->children_.rbegin());
+    if (node == nullptr) {
+        WLOGFE("window tree does not have any node");
+        return false;
+    }
+
+    for (auto iter = node->children_.rbegin(); iter < node->children_.rend(); iter++) {
+        if ((*iter)->priority_ > 0) {
+            return (*iter)->GetWindowId() == windowId;
+        } else {
+            break;
+        }
+    }
+
+    return node->GetWindowId() == windowId;
+}
+
+void WindowNodeContainer::RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes)
+{
+    auto iter = std::find_if(windowNodes.begin(), windowNodes.end(),
+                             [windowId](sptr<WindowNode> node) {
+                                 return node->GetWindowId() == windowId;
+                             });
+    // raise app node window to top
+    if (iter != windowNodes.end()) {
+        sptr<WindowNode> node = *iter;
+        windowNodes.erase(iter);
+        UpdateWindowTree(node);
+        AssignZOrder();
+        WLOGFI("raise window to top %{public}d", node->GetWindowId());
+    }
+}
+
+void WindowNodeContainer::TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const
 {
     for (auto& node : belowAppWindowNode_->children_) {
         TraverseWindowNode(node, windowNodes);
@@ -490,7 +505,7 @@ void WindowNodeContainer::TraverseContainer(std::vector<sptr<WindowNode>>& windo
     std::reverse(windowNodes.begin(), windowNodes.end());
 }
 
-void WindowNodeContainer::TraverseWindowNode(sptr<WindowNode>& node, std::vector<sptr<WindowNode>>& windowNodes)
+void WindowNodeContainer::TraverseWindowNode(sptr<WindowNode>& node, std::vector<sptr<WindowNode>>& windowNodes) const
 {
     if (node == nullptr) {
         return;
@@ -696,6 +711,52 @@ void WindowNodeContainer::UpdateWindowState(sptr<WindowNode> node, int32_t topPr
     for (auto& childNode : node->children_) {
         UpdateWindowState(childNode, topPriority, state);
     }
+}
+
+WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
+{
+    if (node == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (IsTopAppWindow(node->GetWindowId())) {
+        WLOGFI("it is already top app window, id: %{public}d", node->GetWindowId());
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    if (WindowHelper::IsSubWindow(node->GetWindowType())) {
+        if (parentNode == nullptr) {
+            WLOGFE("window type is invalid");
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        RaiseWindowToTop(node->GetWindowId(), parentNode->children_); // raise itself
+        RaiseWindowToTop(node->GetParentId(), appWindowNode_->children_); // raise parent window
+    } else if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+        RaiseWindowToTop(node->GetWindowId(), appWindowNode_->children_);
+    } else {
+        // do nothing
+    }
+    WLOGFI("RaiseZOrderForAppWindow finished");
+    DumpScreenWindowTree();
+    return WMError::WM_OK;
+}
+
+sptr<WindowNode> WindowNodeContainer::GetNextFocusableWindow(uint32_t windowId) const
+{
+    std::vector<sptr<WindowNode>> windowNodes;
+    TraverseContainer(windowNodes);
+    auto iter = std::find_if(windowNodes.begin(), windowNodes.end(),
+                             [windowId](sptr<WindowNode>& node) {
+                                 return node->GetWindowId() == windowId;
+                             });
+    if (iter != windowNodes.end()) {
+        int index = std::distance(windowNodes.begin(), iter);
+        for (int i = index + 1; i < windowNodes.size(); i++) {
+            if (windowNodes[i]->GetWindowProperty()->GetFocusable()) {
+                return windowNodes[i];
+            }
+        }
+    }
+    WLOGFI("could not get next focusable window");
+    return nullptr;
 }
 
 void WindowNodeContainer::SendSplitScreenEvent(WindowMode mode)

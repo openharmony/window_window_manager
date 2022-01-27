@@ -34,7 +34,8 @@ enum class WindowType : uint32_t {
     SYSTEM_WINDOW_BASE = 2000,
     BELOW_APP_SYSTEM_WINDOW_BASE = SYSTEM_WINDOW_BASE,
     WINDOW_TYPE_WALLPAPER = SYSTEM_WINDOW_BASE,
-    BELOW_APP_SYSTEM_WINDOW_END = WINDOW_TYPE_WALLPAPER, // equals last window type
+    WINDOW_TYPE_DESKTOP,
+    BELOW_APP_SYSTEM_WINDOW_END = WINDOW_TYPE_DESKTOP, // equals last window type
 
     ABOVE_APP_SYSTEM_WINDOW_BASE = 2100,
     WINDOW_TYPE_APP_LAUNCHING = ABOVE_APP_SYSTEM_WINDOW_BASE,
@@ -76,6 +77,7 @@ enum class WMError : int32_t {
     WM_ERROR_DEATH_RECIPIENT = 150,
     WM_ERROR_INVALID_WINDOW = 160,
     WM_ERROR_INVALID_OPERATION = 170,
+    WM_ERROR_INVALID_TYPE = 180,
     WM_ERROR_UNKNOWN,
 };
 
@@ -101,6 +103,7 @@ namespace {
     constexpr uint32_t SYSTEM_COLOR_BLACK = 0x00000066;
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
     constexpr uint32_t DIVIDER_WIDTH = 8;
+    constexpr uint32_t INVALID_WINDOW_ID = 0;
 }
 
 struct SystemBarProperty {

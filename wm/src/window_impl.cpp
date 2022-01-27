@@ -414,7 +414,7 @@ WMError WindowImpl::Destroy()
 
 WMError WindowImpl::Show()
 {
-    WLOGFI("[Client] Window %{public}d Show", property_->GetWindowId());
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}d] Show", name_.c_str(), property_->GetWindowId());
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -694,6 +694,10 @@ void WindowImpl::ConsumeDividerPointerEvent(std::shared_ptr<MMI::PointerEvent>& 
 
 void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    int32_t action = pointerEvent->GetPointerAction();
+    if (action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        SingletonContainer::Get<WindowAdapter>().ProcessWindowTouchedEvent(property_->GetWindowId());
+    }
     if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         ConsumeDividerPointerEvent(pointerEvent);
         return;
@@ -793,6 +797,7 @@ void WindowImpl::SetDefaultOption()
             rect = { 0, 0, width, static_cast<uint32_t>((static_cast<float>(height) * STATUS_BAR_RATIO)) };
             property_->SetWindowRect(rect);
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetFocusable(false);
             break;
         }
         case WindowType::WINDOW_TYPE_NAVIGATION_BAR: {
@@ -800,6 +805,7 @@ void WindowImpl::SetDefaultOption()
             rect = { 0, static_cast<int32_t>(height - navHeight), width, navHeight };
             property_->SetWindowRect(rect);
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetFocusable(false);
             break;
         }
         case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW: {
@@ -821,6 +827,10 @@ void WindowImpl::SetDefaultOption()
         }
         case WindowType::WINDOW_TYPE_DRAGGING_EFFECT: {
             property_->SetWindowFlags(0);
+            break;
+        }
+        case WindowType::WINDOW_TYPE_POINTER: {
+            property_->SetFocusable(false);
             break;
         }
         default:

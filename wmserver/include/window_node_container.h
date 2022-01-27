@@ -42,7 +42,7 @@ public:
     std::vector<Rect> GetAvoidAreaByType(AvoidAreaType avoidAreaType);
     WMError MinimizeOtherFullScreenAbility(); // adapt to api7
     WMError MinimizeAllAppNodeAbility();
-    void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes);
+    void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
     uint64_t GetScreenId() const;
     Rect GetDisplayRect() const;
     sptr<WindowNode> GetTopImmersiveNode() const;
@@ -54,6 +54,8 @@ public:
     void UpdateDisplayInfo();
     void UpdateSplitInfo();
     bool isVerticalDisplay() const;
+    WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
+    sptr<WindowNode> GetNextFocusableWindow(uint32_t windowId) const;
 
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
 
@@ -79,9 +81,8 @@ public:
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
-    void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes);
+    void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
-    void UpdateFocusWindow();
     sptr<WindowNode> FindWindowNodeById(uint32_t id) const;
     void UpdateFocusStatus(uint32_t id, bool focused) const;
     void UpdateWindowTree(sptr<WindowNode>& node);
@@ -96,6 +97,8 @@ private:
     void NotifyIfSystemBarRegionChanged();
     void TraverseAndUpdateWindowState(WindowState state, int32_t topPriority);
     void UpdateWindowState(sptr<WindowNode> node, int32_t topPriority, WindowState state);
+    bool IsTopAppWindow(uint32_t windowId) const;
+    void RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes);
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
@@ -115,7 +118,7 @@ private:
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarRegionTint() },
     };
     uint32_t zOrder_ { 0 };
-    uint32_t focusedWindow_ { 0 };
+    uint32_t focusedWindow_ { INVALID_WINDOW_ID };
     uint64_t screenId_ = 0;
     void DumpScreenWindowTree();
 

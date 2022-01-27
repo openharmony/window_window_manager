@@ -19,6 +19,7 @@
 #include <refbase.h>
 #include "zidl/window_manager_agent_interface.h"
 #include "window_root.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -43,12 +44,13 @@ public:
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
     WMError MinimizeAllAppNodeAbility(uint32_t windowId);
     void NotifyDisplayStateChange(DisplayStateChangeType type);
+    WMError ProcessWindowTouchedEvent(uint32_t windowId);
 
 private:
     uint32_t GenWindowId();
 
     sptr<WindowRoot> windowRoot_;
-    std::atomic<uint32_t> windowId_ { 0 };
+    std::atomic<uint32_t> windowId_ { INVALID_WINDOW_ID };
 };
 }
 }

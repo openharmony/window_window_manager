@@ -452,11 +452,30 @@ WMError WindowManagerProxy::MinimizeAllAppNodeAbility(uint32_t windowId)
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(TRANS_ID_MINIMIZE_ALL_APP_WINDOW, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
+}
+
+void WindowManagerProxy::ProcessWindowTouchedEvent(uint32_t windowId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_PROCESS_WINDOW_TOUCHED_EVENT, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
 }
 }
 }
