@@ -51,5 +51,15 @@ sptr<Window> Window::Find(const std::string& windowName)
 {
     return WindowImpl::Find(windowName);
 }
+
+sptr<Window> Window::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
+{
+    return WindowImpl::GetTopWindowWithContext(context);
+}
+
+sptr<Window> Window::GetTopWindowWithId(uint32_t mainWinId)
+{
+    return WindowImpl::GetTopWindowWithId(mainWinId);
+}
 }
 }

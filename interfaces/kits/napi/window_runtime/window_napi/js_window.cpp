@@ -577,6 +577,7 @@ NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCa
         WLOGFE("Failed to convert parameter to callbackType");
         return engine.CreateUndefined();
     }
+    std::lock_guard<std::mutex> lock(mtx_);
     if (info.argc == 1) {
         UnregisterAllWindowListenerWithType(cbType);
     } else {

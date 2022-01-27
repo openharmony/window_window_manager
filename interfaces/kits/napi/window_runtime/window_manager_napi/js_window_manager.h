@@ -20,6 +20,9 @@
 namespace OHOS {
 namespace Rosen {
 NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj);
+
+
+
 }  // namespace Rosen
 }  // namespace OHOS
 

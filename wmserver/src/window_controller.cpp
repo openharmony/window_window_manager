@@ -308,5 +308,10 @@ WMError WindowController::ProcessWindowTouchedEvent(uint32_t windowId)
     }
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
+
+WMError WindowController::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
+{
+    return windowRoot_->GetTopWindowId(mainWinId, topWinId);
+}
 }
 }

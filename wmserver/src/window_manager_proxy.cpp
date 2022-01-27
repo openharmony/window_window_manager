@@ -477,5 +477,28 @@ void WindowManagerProxy::ProcessWindowTouchedEvent(uint32_t windowId)
         WLOGFE("SendRequest failed");
     }
 }
+
+WMError WindowManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+   if (!data.WriteUint32(mainWinId)) {
+        WLOGFE("Write mainWinId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(TRANS_ID_GET_TOP_WINDOW_ID, data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    topWinId = reply.ReadUint32();
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
 }
 }
