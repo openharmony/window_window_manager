@@ -305,5 +305,15 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayStateChangeType type)
 {
     WindowManagerService::GetInstance().NotifyDisplayStateChange(type);
 }
+
+void WindowManagerService::ProcessWindowTouchedEvent(uint32_t windowId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    WMError res = windowController_->ProcessWindowTouchedEvent(windowId);
+    if (res == WMError::WM_OK) {
+        inputWindowMonitor_->UpdateInputWindow(windowId);
+    }
+    return;
+}
 }
 }

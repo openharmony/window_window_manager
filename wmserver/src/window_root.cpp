@@ -18,6 +18,7 @@
 #include <cinttypes>
 
 #include "display_manager_service_inner.h"
+#include "window_helper.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -151,7 +152,6 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
         WLOGFE("add window failed, node is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto parentNode = GetWindowNode(parentId);
 
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
@@ -159,7 +159,20 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    return container->AddWindowNode(node, parentNode);
+    auto parentNode = GetWindowNode(parentId);
+    WMError res = container->AddWindowNode(node, parentNode);
+    if (WindowHelper::IsSubWindow(node->GetWindowType())) {
+        if (parentNode == nullptr) {
+            WLOGFE("window type is invalid");
+            return WMError::WM_ERROR_INVALID_TYPE;
+        }
+        sptr<WindowNode> parent = nullptr;
+        container->RaiseZOrderForAppWindow(parentNode, parent);
+    }
+    if (res == WMError::WM_OK && node->GetWindowProperty()->GetFocusable()) {
+        container->SetFocusWindow(node->GetWindowId());
+    }
+    return res;
 }
 
 WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
@@ -173,6 +186,14 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
     if (container == nullptr) {
         WLOGFE("add window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (windowId != container->GetFocusWindow()) {
+        return container->RemoveWindowNode(node);
+    }
+    auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
+    if (nextFocusableWindow != nullptr) {
+        WLOGFI("adjust focus window, pre focus window id: %{public}u", nextFocusableWindow->GetWindowId());
+        container->SetFocusWindow(nextFocusableWindow->GetWindowId());
     }
     return container->RemoveWindowNode(node);
 }
@@ -277,7 +298,7 @@ WMError WindowRoot::RequestFocus(uint32_t windowId)
         return WMError::WM_ERROR_NULLPTR;
     }
     if (!node->currentVisibility_) {
-        WLOGFE("could not request focus before it has shown");
+        WLOGFE("could not request focus before it does not be shown");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
@@ -285,7 +306,10 @@ WMError WindowRoot::RequestFocus(uint32_t windowId)
         WLOGFE("window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return container->SetFocusWindow(windowId);
+    if (node->GetWindowProperty()->GetFocusable()) {
+        return container->SetFocusWindow(windowId);
+    }
+    return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
 std::shared_ptr<RSSurfaceNode> WindowRoot::GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject> &abilityToken) const
@@ -308,6 +332,26 @@ void WindowRoot::NotifyWindowStateChange(WindowState state, WindowStateChangeRea
         }
         elem.second->NotifyWindowStateChange(state, reason);
     }
+}
+
+WMError WindowRoot::RaiseZOrderForAppWindow(sptr<WindowNode>& node)
+{
+    if (node == nullptr) {
+        WLOGFW("add window failed, node is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!WindowHelper::IsAppWindow(node->GetWindowType())) {
+        WLOGFW("window is not app window");
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFW("add window failed, window container could not be found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    auto parentNode = GetWindowNode(node->GetParentId());
+    return container->RaiseZOrderForAppWindow(node, parentNode);
 }
 
 void WindowRoot::OnRemoteDied(const sptr<IRemoteObject>& remoteObject)

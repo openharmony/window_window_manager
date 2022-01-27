@@ -63,6 +63,11 @@ uint32_t WindowNode::GetWindowId() const
     return property_->GetWindowId();
 }
 
+uint32_t WindowNode::GetParentId() const
+{
+    return property_->GetParentId();
+}
+
 const Rect& WindowNode::GetLayoutRect() const
 {
     return layoutRect_;

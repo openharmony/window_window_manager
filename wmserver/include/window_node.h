@@ -49,6 +49,7 @@ public:
 
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
+    uint32_t GetParentId() const;
     DisplayId GetDisplayId() const;
     const Rect& GetLayoutRect() const;
     WindowType GetWindowType() const;
