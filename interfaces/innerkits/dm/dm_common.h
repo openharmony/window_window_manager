@@ -76,6 +76,19 @@ class IDisplayPowerEventListener : public RefBase {
 public:
     virtual void OnDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) = 0;
 };
+
+enum class ScreenChangeEvent : uint32_t {
+    ADD_TO_GROUP,
+    REMOVE_FROM_GROUP,
+    CHANGE_GROUP,
+};
+
+enum class Rotation : uint32_t {
+    ROTATION_0,
+    ROTATION_90,
+    ROTATION_180,
+    ROTATION_270,
+};
 }
 }
 #endif // OHOS_ROSEN_DM_COMMON_H
