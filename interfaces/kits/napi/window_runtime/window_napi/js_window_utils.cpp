@@ -58,7 +58,6 @@ NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& 
     object->SetProperty("windowRect", rectObj);
     WindowType type = window->GetType();
     if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
-        object->SetProperty("type", CreateJsValue(engine, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(type)));
     } else {
         object->SetProperty("type", CreateJsValue(engine, type));
     }
@@ -197,11 +196,11 @@ bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
         jsObject, "statusBarColor", statusProperty.backgroundColor_);
     properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ = GetColorFromJs(engine,
         jsObject, "navigationBarColor", navProperty.backgroundColor_);
-    NativeValue* jsStatusContentColor = jsObject->GetProperty("statusBarContenColor");
+    NativeValue* jsStatusContentColor = jsObject->GetProperty("statusBarContentColor");
     NativeValue* jsStatusIcon = jsObject->GetProperty("isStatusBarLightIcon");
     if (jsStatusContentColor->TypeOf() != NATIVE_UNDEFINED) {
         properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ =  GetColorFromJs(engine,
-            jsObject, "statusBarContenColor", statusProperty.contentColor_);
+            jsObject, "statusBarContentColor", statusProperty.contentColor_);
     } else if (jsStatusIcon->TypeOf() != NATIVE_UNDEFINED) {
         bool isStatusBarLightIcon;
         if (!ConvertFromJsValue(engine, jsStatusIcon, isStatusBarLightIcon)) {
@@ -214,11 +213,11 @@ bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
             properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
         }
     }
-    NativeValue* jsNavigationContentColor = jsObject->GetProperty("navigationBarContenColor");
+    NativeValue* jsNavigationContentColor = jsObject->GetProperty("navigationBarContentColor");
     NativeValue* jsNavigationIcon = jsObject->GetProperty("isNavigationBarLightIcon");
     if (jsNavigationContentColor->TypeOf() != NATIVE_UNDEFINED) {
         properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = GetColorFromJs(engine,
-            jsObject, "navigationBarContenColor", navProperty.contentColor_);
+            jsObject, "navigationBarContentColor", navProperty.contentColor_);
     } else if (jsNavigationIcon->TypeOf() != NATIVE_UNDEFINED) {
         bool isNavigationBarLightIcon;
         if (!ConvertFromJsValue(engine, jsNavigationIcon, isNavigationBarLightIcon)) {

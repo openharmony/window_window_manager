@@ -246,5 +246,15 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     SingletonContainer::Get<WindowAdapter>().ClearWindowAdapter();
     return;
 }
+
+WMError WindowAdapter::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+
+    if (!InitWMSProxyLocked()) {
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return windowManagerServiceProxy_->GetTopWindowId(mainWinId, topWinId);
+}
 } // namespace Rosen
 } // namespace OHOS

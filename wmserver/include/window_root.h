@@ -54,6 +54,7 @@ public:
     WMError MinimizeAllAppNodeAbility(sptr<WindowNode>& node);
     WMError HandleSplitWindowModeChange(sptr<WindowNode>& node, bool isChangeToSplit);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
+    WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
 
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);

@@ -161,6 +161,14 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             ProcessWindowTouchedEvent(windowId);
             break;
         }
+        case TRANS_ID_GET_TOP_WINDOW_ID: {
+            uint32_t mainWinId = data.ReadUint32();
+            uint32_t topWinId;
+            WMError errCode = GetTopWindowId(mainWinId, topWinId);
+            reply.WriteUint32(topWinId);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
