@@ -517,6 +517,14 @@ void WindowNodeContainer::UpdateDisplayInfo()
     layoutPolicy_->UpdateDisplayInfo(primaryRect, secondaryRect, displayRect);
 }
 
+void WindowNodeContainer::UpdateSplitInfo()
+{
+    // update for split
+    const Rect& primaryRect = displayRects_->GetRectByWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    const Rect& secondaryRect =  displayRects_->GetRectByWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    layoutPolicy_->UpdateSplitInfo(primaryRect, secondaryRect);
+}
+
 void WindowNodeContainer::LayoutDividerWindow(sptr<WindowNode>& node)
 {
     layoutPolicy_->UpdateLayoutRect(node);
@@ -709,7 +717,7 @@ WMError WindowNodeContainer::HandleModeChangeToSplit(sptr<WindowNode>& triggerNo
         displayRects_->SetSplitRect(DEFAULT_SPLIT_RATIO);
         SendSplitScreenEvent(triggerNode->GetWindowMode());
     }
-    UpdateDisplayInfo();
+    UpdateSplitInfo();
     return WMError::WM_OK;
 }
 
