@@ -201,6 +201,11 @@ std::vector<const sptr<Display>> DisplayManager::GetAllDisplays()
     return res;
 }
 
+bool DisplayManager::RegisterDisplayListener(sptr<IDisplayListener> listener)
+{
+    return true;
+}
+
 bool DisplayManager::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
 {
     if (listener == nullptr) {
