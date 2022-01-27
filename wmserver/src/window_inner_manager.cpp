@@ -21,8 +21,6 @@
 #include "include/codec/SkCodec.h"
 #include "include/core/SkData.h"
 #include "include/core/SkImage.h"
-#include "transaction/rs_transaction.h"
-#include "ui/rs_surface_extractor.h"
 
 #include "window_life_cycle_interface.h"
 #include "window_manager_hilog.h"
@@ -69,7 +67,20 @@ void WindowInnerManager::DrawSurface(const sptr<Window>& window)
 #ifdef ACE_ENABLE_GL
     rsSurface->SetRenderContext(rc_);
 #endif
-    auto frame = rsSurface->RequestFrame(width, height);
+    if (!isDividerImageLoaded_) {
+        isDividerImageLoaded_ = DecodeImageFile(splitIconPath_, dividerBitmap_);
+    }
+    if (!dividerBitmap_.isNull() && dividerBitmap_.width() != 0 && dividerBitmap_.height() != 0) {
+        DrawBitmap(rsSurface, width, height);
+    } else {
+        DrawColor(rsSurface, width, height);
+    }
+    return;
+}
+
+void WindowInnerManager::DrawBitmap(std::shared_ptr<RSSurface>& rsSurface, uint32_t width, uint32_t height)
+{
+    std::unique_ptr<RSSurfaceFrame> frame = rsSurface->RequestFrame(width, height);
     if (frame == nullptr) {
         WLOGFE("DrawSurface frameptr is nullptr");
         return;
@@ -79,32 +90,60 @@ void WindowInnerManager::DrawSurface(const sptr<Window>& window)
         WLOGFE("DrawSurface canvas is nullptr");
         return;
     }
-    if (!dividerBitmap_.isNull() && dividerBitmap_.width() != 0 && dividerBitmap_.height() != 0) {
-        SkPaint paint;
-        SkMatrix matrix;
-        SkRect paintRect;
-        if (width < height) {
-            // rotate when devider is hozizon
-            matrix.setScale(static_cast<float>(height) / dividerBitmap_.width(),
-                static_cast<float>(width) / dividerBitmap_.height());
-            matrix.postRotate(-90.0f); // devider shader rotate -90.0
-        } else {
-            matrix.setScale(static_cast<float>(width) / dividerBitmap_.width(),
-                static_cast<float>(height) / dividerBitmap_.height());
-        }
-        paint.setShader(dividerBitmap_.makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat));
-        if (paint.getShader() != nullptr) {
-            paint.setShader(paint.getShader()->makeWithLocalMatrix(matrix));
-            paintRect.set(0, 0, static_cast<int>(width), static_cast<int>(height));
-            canvas->drawRect(paintRect, paint);
-        } else {
-            WLOGFE("Paint's shader is nullptr");
-        }
+    SkPaint paint;
+    SkMatrix matrix;
+    SkRect rect;
+    rect.set(0, 0, static_cast<int>(width), static_cast<int>(height));
+    if (width < height) {
+        // rotate when devider is hozizon
+        matrix.setScale(static_cast<float>(height) / dividerBitmap_.width(),
+            static_cast<float>(width) / dividerBitmap_.height());
+        matrix.postRotate(-90.0f); // devider shader rotate -90.0
+    } else {
+        matrix.setScale(static_cast<float>(width) / dividerBitmap_.width(),
+            static_cast<float>(height) / dividerBitmap_.height());
     }
+    paint.setShader(dividerBitmap_.makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat));
+    if (paint.getShader() == nullptr) {
+        WLOGFE("DrawBitmap shader is nullptr");
+        return;
+    }
+    paint.setShader(paint.getShader()->makeWithLocalMatrix(matrix));
+    canvas->drawRect(rect, paint);
     frame->SetDamageRegion(0, 0, width, height);
     rsSurface->FlushFrame(frame);
+    return;
 }
 
+void WindowInnerManager::DrawColor(std::shared_ptr<RSSurface>& rsSurface, uint32_t width, uint32_t height)
+{
+    std::unique_ptr<RSSurfaceFrame> frame = rsSurface->RequestFrame(width, height);
+    if (frame == nullptr) {
+        WLOGFE("DrawSurface frameptr is nullptr");
+        return;
+    }
+    auto canvas = frame->GetCanvas();
+    if (canvas == nullptr) {
+        WLOGFE("DrawSurface canvas is nullptr");
+        return;
+    }
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setStyle(SkPaint::kFill_Style);
+    const SkScalar skWidth = 20; // stroke width is 20.
+    paint.setStrokeWidth(skWidth);
+    paint.setStrokeJoin(SkPaint::kRound_Join);
+    paint.setColor(DIVIDER_HANDLE_COLOR);
+
+    SkPoint rectPts[] = { {0, 0}, {static_cast<int>(width), static_cast<int>(height)} };
+    SkRect rect;
+    rect.set(rectPts[0], rectPts[1]);
+
+    canvas->drawRect(rect, paint);
+    frame->SetDamageRegion(0, 0, width, height);
+    rsSurface->FlushFrame(frame);
+    return;
+}
 
 sptr<Window> WindowInnerManager::GetDividerWindow(DisplayId displayId) const
 {
@@ -163,12 +202,6 @@ void WindowInnerManager::CreateAndShowDivider(std::unique_ptr<WindowMessage> msg
         }
     }
 #endif
-    if (!isDividerImageLoaded_) {
-        isDividerImageLoaded_ = DecodeImageFile(splitIconPath_, dividerBitmap_);
-        if (!isDividerImageLoaded_) {
-            WLOGFE("Decode devider image failed");
-        }
-    }
     DrawSurface(window);
     WLOGFI("CreateAndShowDivider success");
 }
