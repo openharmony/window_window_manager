@@ -47,6 +47,17 @@ void WindowLayoutPolicy::UpdateDisplayInfo(const Rect& primaryRect,
     UpdateDefaultFoatingRect();
 }
 
+void WindowLayoutPolicy::UpdateSplitInfo(const Rect& primaryRect, const Rect& secondaryRect)
+{
+    dependRects.priRect_ = primaryRect;
+    dependRects.secRect_ = secondaryRect;
+    dependRects.limitPriRect_ = dependRects.priRect_;
+    dependRects.limitSecRect_ = dependRects.secRect_;
+
+    UpdateSplitLimitRect(dependRects.limitFullRect_, dependRects.limitPriRect_);
+    UpdateSplitLimitRect(dependRects.limitFullRect_, dependRects.limitSecRect_);
+}
+
 void WindowLayoutPolicy::LayoutWindowTree()
 {
     InitLimitRects();
@@ -131,7 +142,6 @@ void WindowLayoutPolicy::RemoveWindowNode(sptr<WindowNode>& node)
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
         LayoutWindowTree();
     } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
-        // TODO: change split screen
         LayoutWindowTree();
     }
 }
