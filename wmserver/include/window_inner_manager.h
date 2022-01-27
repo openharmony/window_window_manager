@@ -21,9 +21,12 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include "include/core/SkBitmap.h"
 #ifdef ACE_ENABLE_GL
 #include "render_context/render_context.h"
 #endif
+#include "transaction/rs_transaction.h"
+#include "ui/rs_surface_extractor.h"
 #include "single_instance.h"
 #include "singleton_delegator.h"
 #include "window.h"
@@ -57,8 +60,11 @@ private:
     void CreateAndShowDivider(std::unique_ptr<WindowMessage> msg);
     void HideAndDestroyDivider(std::unique_ptr<WindowMessage> msg);
     void DestroyThread(std::unique_ptr<WindowMessage> msg);
-    void DrawSurface(const sptr<Window>& window, uint32_t color);
+    void DrawSurface(const sptr<Window>& window);
+    void DrawColor(std::shared_ptr<RSSurface>& rsSurface, uint32_t width, uint32_t height);
+    void DrawBitmap(std::shared_ptr<RSSurface>& rsSurface, uint32_t width, uint32_t height);
     sptr<Window> GetDividerWindow(DisplayId displayId) const;
+    bool DecodeImageFile(const char* filename, SkBitmap& bitmap);
 
     std::mutex mutex_;
     std::condition_variable conVar_;
@@ -70,6 +76,10 @@ private:
     std::vector<std::unique_ptr<WindowMessage>> messages_;
     bool hasInitThread_ = false;
     bool needDestroyThread_ = false;
+    bool isDividerImageLoaded_ = false;
+    const char *splitIconPath_ = "/etc/window/resources/bg_split_handle.png";
+    uint32_t DIVIDER_HANDLE_COLOR = 0xff808080; // gray
+    SkBitmap dividerBitmap_;
 };
 }
 }
