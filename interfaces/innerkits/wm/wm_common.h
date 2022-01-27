@@ -87,6 +87,11 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_END = 1 << 2,
 };
 
+enum class WindowLayoutMode : uint32_t {
+    CASCADE = 0,
+    TILE = 1,
+};
+
 struct Rect {
     int32_t posX_;
     int32_t posY_;
