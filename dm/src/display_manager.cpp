@@ -27,7 +27,6 @@
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayManager"};
-    constexpr uint32_t MAX_SCREEN_BRIGHTNESS_VALUE = 100;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -370,12 +369,8 @@ DisplayState DisplayManager::GetDisplayState(DisplayId displayId)
 bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
     WLOGFI("screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
-    if (level > MAX_SCREEN_BRIGHTNESS_VALUE) {
-        WLOGFW("level:%{public}u, exceed max value!", level);
-        return false;
-    }
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
-    return true;
+    return level == GetScreenBrightness(screenId);
 }
 
 uint32_t DisplayManager::GetScreenBrightness(uint64_t screenId) const
