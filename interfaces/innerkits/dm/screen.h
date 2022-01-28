@@ -24,7 +24,7 @@
 #include "dm_common.h"
 
 namespace OHOS::Rosen {
-class ScreenGroup;
+class ScreenInfo;
 using ScreenId = uint64_t;
 static constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
 
@@ -44,7 +44,7 @@ struct VirtualScreenOption {
 
 class Screen : public RefBase {
 public:
-    Screen();
+    Screen(const ScreenInfo* info);
     ~Screen();
     bool IsGroup() const;
     ScreenId GetId() const;
@@ -55,7 +55,7 @@ public:
     float GetVirtualPixelRatio() const;
     bool RequestRotation(Rotation rotation);
     Rotation GetRotation() const;
-    sptr<ScreenGroup> GetParent() const;
+    ScreenId GetParentId() const;
 
 private:
     class Impl;

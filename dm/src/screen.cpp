@@ -14,6 +14,7 @@
  */
 
 #include "screen.h"
+#include "screen_info.h"
 
 #include "screen_group.h"
 
@@ -30,13 +31,21 @@ public:
     uint32_t virtualWidth_ { 0 };
     uint32_t virtualHeight_ { 0 };
     float virtualPixelRatio_ { 0.0 };
-    sptr<ScreenGroup> parent_ { nullptr };
+    ScreenId parent_ { SCREEN_ID_INVALID };
     bool hasChild_ { false };
 };
 
-Screen::Screen()
+Screen::Screen(const ScreenInfo* info)
+    : pImpl_(new Impl())
 {
-    pImpl_ = new Impl();
+    pImpl_->id_ = info->id_;
+    pImpl_->width_ = info->width_;
+    pImpl_->height_ = info->height_;
+    pImpl_->virtualWidth_ = info->virtualWidth_;
+    pImpl_->virtualHeight_ = info->virtualHeight_;
+    pImpl_->virtualPixelRatio_ = info->virtualPixelRatio_;
+    pImpl_->parent_ = info->parent_;
+    pImpl_->hasChild_ = info->hasChild_;
 }
 
 Screen::~Screen()
@@ -88,7 +97,7 @@ bool Screen::RequestRotation(Rotation rotation)
     return false;
 }
 
-sptr<ScreenGroup> Screen::GetParent() const
+ScreenId Screen::GetParentId() const
 {
     return pImpl_->parent_;
 }
