@@ -42,6 +42,7 @@ sptr<Window> WindowTestUtils::CreateTestWindow(const TestWindowInfo& info)
     option->SetWindowRect(info.rect);
     option->SetWindowType(info.type);
     option->SetWindowMode(info.mode);
+    option->SetFocusable(info.focusable_);
     if (info.parentName != "") {
         option->SetParentName(info.parentName);
     }
