@@ -39,7 +39,7 @@ public:
     static inline sptr<DisplayPowerEventListener> listener_ = new DisplayPowerEventListener();
     static inline DisplayId defaultId_ = 0;
     static inline uint32_t brightnessLevel_ = 80;
-    static inline uint32_t invalidBrightnessLevel_ = 180;
+    static inline uint32_t invalidBrightnessLevel_ = 10000000;
     static inline DisplayPowerState initialPowerState_;
     static inline DisplayState initialState_;
 };
@@ -249,11 +249,10 @@ HWTEST_F(DisplayPowerUnitTest, set_screen_brightness_001, Function | MediumTest 
 */
 HWTEST_F(DisplayPowerUnitTest, set_screen_brightness_002, Function | MediumTest | Level2)
 {
-    uint32_t initialLevel = DisplayManager::GetInstance().GetScreenBrightness(defaultId_);
     bool ret = DisplayManager::GetInstance().SetScreenBrightness(defaultId_, invalidBrightnessLevel_);
     ASSERT_EQ(false, ret);
     uint32_t level = DisplayManager::GetInstance().GetScreenBrightness(defaultId_);
-    ASSERT_EQ(level, initialLevel);
+    ASSERT_NE(level, invalidBrightnessLevel_);
 }
 
 /**
