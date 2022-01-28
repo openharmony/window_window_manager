@@ -18,6 +18,11 @@
 
 namespace OHOS {
 namespace Rosen {
+void WindowProperty::SetWindowName(const std::string& name)
+{
+    windowName_ = name;
+}
+
 void WindowProperty::SetWindowRect(const struct Rect& rect)
 {
     windowRect_ = rect;
@@ -94,6 +99,11 @@ void WindowProperty::SetDecorEnable(bool decorEnable)
 void WindowProperty::ResumeLastWindowMode()
 {
     mode_ = lastMode_;
+}
+
+const std::string& WindowProperty::GetWindowName() const
+{
+    return windowName_ ;
 }
 
 Rect WindowProperty::GetWindowRect() const
@@ -212,6 +222,11 @@ void WindowProperty::MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& prop
 
 bool WindowProperty::Marshalling(Parcel& parcel) const
 {
+    // write windowName_
+    if (!parcel.WriteString(windowName_)) {
+        return false;
+    }
+
     // write windowRect_
     if (!(parcel.WriteInt32(windowRect_.posX_) && parcel.WriteInt32(windowRect_.posY_) &&
         parcel.WriteUint32(windowRect_.width_) && parcel.WriteUint32(windowRect_.height_))) {
@@ -293,6 +308,7 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
 sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
 {
     sptr<WindowProperty> property(new WindowProperty());
+    property->SetWindowName(parcel.ReadString());
     Rect rect = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
     property->SetWindowRect(rect);
     property->SetWindowType(static_cast<WindowType>(parcel.ReadUint32()));

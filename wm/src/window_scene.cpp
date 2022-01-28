@@ -14,6 +14,7 @@
  */
 
 #include "window_scene.h"
+
 #include <configuration.h>
 
 #include "static_call.h"
@@ -47,13 +48,24 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     option->SetDisplayId(displayId);
 
     mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(
-        MAIN_WINDOW_ID + std::to_string(count++), option, context);
+        GenerateMainWindowName(context), option, context);
     if (mainWindow_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
     mainWindow_->RegisterLifeCycleListener(listener);
 
     return WMError::WM_OK;
+}
+
+std::string WindowScene::GenerateMainWindowName(const std::shared_ptr<AbilityRuntime::Context>& context) const
+{
+    if (context == nullptr) {
+        return MAIN_WINDOW_ID + std::to_string(count++);
+    } else {
+        std::string windowName = context->GetBundleName() + std::to_string(count++);
+        std::size_t pos = windowName.find_last_of('.');
+        return (pos < 0) ? windowName : windowName.substr(pos + 1); // skip '.'
+    }
 }
 
 sptr<Window> WindowScene::CreateWindow(const std::string& windowName, sptr<WindowOption>& option) const
