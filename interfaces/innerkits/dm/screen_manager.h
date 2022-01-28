@@ -34,8 +34,9 @@ public:
 class ScreenManager : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenManager);
 public:
-    sptr<Screen> GetScreenById(ScreenId id);
-    std::vector<const sptr<Screen>> GetAllScreens();
+    sptr<Screen> GetScreenById(ScreenId screenId);
+    sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
+    std::vector<sptr<Screen>> GetAllScreens();
 
     void RegisterScreenListener(sptr<IScreenListener> listener);
     ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);

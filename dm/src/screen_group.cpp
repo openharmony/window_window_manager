@@ -14,6 +14,8 @@
  */
 
 #include "screen_group.h"
+#include "screen.h"
+#include "screen_group_info.h"
 
 namespace OHOS::Rosen {
 class ScreenGroup::Impl : public RefBase {
@@ -22,14 +24,17 @@ private:
     Impl() = default;
     ~Impl() = default;
 
-    std::vector<sptr<Screen>> children_;
+    std::vector<ScreenId> children_;
     std::vector<Point> position_;
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
 };
 
-ScreenGroup::ScreenGroup()
+ScreenGroup::ScreenGroup(const ScreenGroupInfo* info)
+    : Screen(info), pImpl_(new Impl())
 {
-    pImpl_ = new Impl();
+    pImpl_->children_ = info->children_;
+    pImpl_->position_ = info->position_;
+    pImpl_->combination_ = info->combination_;
 }
 
 ScreenGroup::~ScreenGroup()
@@ -41,7 +46,7 @@ ScreenCombination ScreenGroup::GetCombination() const
     return pImpl_->combination_;
 }
 
-std::vector<sptr<Screen>> ScreenGroup::GetChildren() const
+std::vector<ScreenId> ScreenGroup::GetChildrenIds() const
 {
     return pImpl_->children_;
 }

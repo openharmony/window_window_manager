@@ -23,6 +23,8 @@
 #include "dm_common.h"
 #include "screen.h"
 #include "display_info.h"
+#include "screen_info.h"
+#include "screen_group_info.h"
 #include "zidl/display_manager_agent_interface.h"
 
 namespace OHOS::Rosen {
@@ -46,8 +48,12 @@ public:
         TRANS_ID_NOTIFY_DISPLAY_EVENT,
         TRANS_ID_CREATE_VIRTUAL_SCREEN = 1000,
         TRANS_ID_DESTROY_VIRTUAL_SCREEN,
+        TRANS_ID_GET_SCREEN_INFO_BY_ID,
+        TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID,
+        TRANS_ID_GET_ALL_SCREEN_INFOS,
         TRANS_ID_SCREENGROUP_BASE = 1100,
         TRANS_ID_SCREEN_MAKE_MIRROR = TRANS_ID_SCREENGROUP_BASE,
+        TRANS_ID_SCREEN_MAKE_EXPAND,
     };
 
     virtual DisplayId GetDefaultDisplayId() = 0;
@@ -70,6 +76,10 @@ public:
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
     virtual void NotifyDisplayEvent(DisplayEvent event) = 0;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) = 0;
+    virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) = 0;
+    virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) = 0;
+    virtual std::vector<sptr<ScreenInfo>> GetAllScreenInfos() = 0;
+    virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) = 0;
 };
 } // namespace OHOS::Rosen
 

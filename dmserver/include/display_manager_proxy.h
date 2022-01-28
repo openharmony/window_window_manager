@@ -51,6 +51,10 @@ public:
     DisplayState GetDisplayState(DisplayId displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
+    sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
+    sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
+    std::vector<sptr<ScreenInfo>> GetAllScreenInfos() override;
+    DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
 
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;

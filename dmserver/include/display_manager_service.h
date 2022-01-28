@@ -64,6 +64,10 @@ public:
 
     sptr<AbstractScreenController> GetAbstractScreenController();
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
+    sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
+    sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
+    std::vector<sptr<ScreenInfo>> GetAllScreenInfos() override;
+    DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
 
 private:
     DisplayManagerService();
