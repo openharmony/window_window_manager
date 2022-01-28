@@ -21,7 +21,7 @@ config("libdm_private_config") {
 
   if (defined(product_name) &&
       (product_name == "rk3566" || product_name == "rk3568" ||
-       product_name == "Hi3516DV300")) {
+       product_name == "Hi3516DV300" || product_name == "watchos")) {
     defines = [ "PRODUCT_RK" ]
   }
 }
