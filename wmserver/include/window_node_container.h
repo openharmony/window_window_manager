@@ -41,7 +41,6 @@ public:
     uint32_t GetFocusWindow() const;
     std::vector<Rect> GetAvoidAreaByType(AvoidAreaType avoidAreaType);
     WMError MinimizeOtherFullScreenAbility(); // adapt to api7
-    WMError MinimizeAllAppNodeAbility();
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
     uint64_t GetScreenId() const;
     Rect GetDisplayRect() const;
@@ -56,7 +55,7 @@ public:
     bool isVerticalDisplay() const;
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     sptr<WindowNode> GetNextFocusableWindow(uint32_t windowId) const;
-
+    void MinimizeAllAppWindows();
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
 
     class DisplayRects : public RefBase {

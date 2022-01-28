@@ -187,6 +187,15 @@ void WindowAdapter::ProcessWindowTouchedEvent(uint32_t windowId)
     return windowManagerServiceProxy_->ProcessWindowTouchedEvent(windowId);
 }
 
+void WindowAdapter::MinimizeAllAppWindows(DisplayId displayId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!InitWMSProxyLocked()) {
+        return;
+    }
+    windowManagerServiceProxy_->MinimizeAllAppWindows(displayId);
+}
+
 bool WindowAdapter::InitWMSProxyLocked()
 {
     if (!windowManagerServiceProxy_) {
