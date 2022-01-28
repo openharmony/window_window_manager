@@ -62,6 +62,7 @@ public:
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) override;
     WMError MinimizeAllAppNodeAbility(uint32_t windowId) override;
     void ProcessWindowTouchedEvent(uint32_t windowId) override;
+    void MinimizeAllAppWindows(DisplayId displayId) override;
 
     std::shared_ptr<RSDisplayNode> GetDisplayNode(DisplayId displayId) const;
     void RegisterWindowManagerAgent(WindowManagerAgentType type,

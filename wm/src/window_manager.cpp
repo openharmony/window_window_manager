@@ -161,6 +161,12 @@ void WindowManager::UnregisterSystemBarChangedListener(const sptr<ISystemBarChan
     }
 }
 
+void WindowManager::MinimizeAllAppWindows(DisplayId displayId)
+{
+    WLOGFI("displayId %{public}" PRIu64"", displayId);
+    SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(displayId);
+}
+
 void WindowManager::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
     DisplayId displayId, bool focused) const
 {

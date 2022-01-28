@@ -292,7 +292,7 @@ WMError WindowManagerService::MinimizeAllAppNodeAbility(uint32_t windowId)
 
 void WindowManagerService::NotifyDisplayStateChange(DisplayStateChangeType type)
 {
-    WLOGFE("NotifyDisplayStateChange");
+    WLOGFI("NotifyDisplayStateChange");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->NotifyDisplayStateChange(type);
 }
@@ -310,6 +310,13 @@ void WindowManagerService::ProcessWindowTouchedEvent(uint32_t windowId)
         inputWindowMonitor_->UpdateInputWindow(windowId);
     }
     return;
+}
+
+void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
+{
+    WLOGFI("displayId %{public}" PRIu64"", displayId);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    windowController_->MinimizeAllAppWindows(displayId);
 }
 }
 }
