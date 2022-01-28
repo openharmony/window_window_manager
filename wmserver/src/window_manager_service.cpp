@@ -134,11 +134,7 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
     if (res == WMError::WM_OK) {
         inputWindowMonitor_->UpdateInputWindow(property->GetWindowId());
     }
-    if (property->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR
-        || property->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
-        WLOGFI("WindowManagerService::AddWindow System Window called");
-        system::SetParameter("persist.window.boot.inited", "1");
-    }
+    system::SetParameter("persist.window.boot.inited", "1");
     return res;
 }
 
