@@ -89,6 +89,10 @@ enum class Rotation : uint32_t {
     ROTATION_180,
     ROTATION_270,
 };
+
+enum class DisplayChangeEvent : uint32_t {
+    DISPLAY_SIZE_CHANGED,
+};
 }
 }
 #endif // OHOS_ROSEN_DM_COMMON_H
