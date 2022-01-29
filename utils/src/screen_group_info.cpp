@@ -45,13 +45,13 @@ bool ScreenGroupInfo::Marshalling(Parcel &parcel) const
     return true;
 }
 
-sptr<ScreenGroupInfo> ScreenGroupInfo::Unmarshalling(Parcel &parcel)
+ScreenGroupInfo* ScreenGroupInfo::Unmarshalling(Parcel &parcel)
 {
-    sptr<ScreenGroupInfo> screenGroupInfo = new ScreenGroupInfo();
+    ScreenGroupInfo* screenGroupInfo = new ScreenGroupInfo();
     return screenGroupInfo->InnerUnmarshalling(parcel);
 }
 
-sptr<ScreenGroupInfo> ScreenGroupInfo::InnerUnmarshalling(Parcel& parcel)
+ScreenGroupInfo* ScreenGroupInfo::InnerUnmarshalling(Parcel& parcel)
 {
     uint32_t combination;
     if (!ScreenInfo::InnerUnmarshalling(parcel) || !parcel.ReadUint32(combination) ||
