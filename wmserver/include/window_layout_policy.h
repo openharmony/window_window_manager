@@ -33,55 +33,40 @@ enum class AvoidPosType : uint32_t {
     AVOID_POS_UNKNOWN
 };
 
-struct LayoutDependRects {
-    Rect fullRect_ = {0, 0, 0, 0};
-    Rect priRect_  = {0, 0, 0, 0};
-    Rect secRect_  = {0, 0, 0, 0};
-    Rect limitFullRect_ = {0, 0, 0, 0};
-    Rect limitPriRect_  = {0, 0, 0, 0};
-    Rect limitSecRect_  = {0, 0, 0, 0};
-};
-
 class WindowLayoutPolicy : public RefBase {
 public:
-    WindowLayoutPolicy() = default;
-    WindowLayoutPolicy(const sptr<WindowNode>& belowAppNode,
-        const sptr<WindowNode>& appNode, const sptr<WindowNode>& aboveAppNode);
+    WindowLayoutPolicy() = delete;
+    WindowLayoutPolicy(const Rect& displayRect, const uint64_t& screenId,
+        const sptr<WindowNode>& belowAppNode, const sptr<WindowNode>& appNode, const sptr<WindowNode>& aboveAppNode);
     ~WindowLayoutPolicy() = default;
-    void UpdateDisplayInfo(const Rect& primaryRect, const Rect& secondaryRect, const Rect& displayRect);
-    void UpdateSplitInfo(const Rect& primaryRect, const Rect& secondaryRect);
-    void AddWindowNode(sptr<WindowNode>& node);
-    void RemoveWindowNode(sptr<WindowNode>& node);
-    void UpdateWindowNode(sptr<WindowNode>& node);
-    void UpdateLayoutRect(sptr<WindowNode>& node);
-    Rect GetDependDisplayRects() const;
+    virtual void Launch();
+    virtual void Clean();
+    virtual void UpdateDisplayInfo();
+    virtual void AddWindowNode(sptr<WindowNode>& node);
+    virtual void RemoveWindowNode(sptr<WindowNode>& node);
+    virtual void UpdateWindowNode(sptr<WindowNode>& node);
+    virtual void UpdateLayoutRect(sptr<WindowNode>& node);
     void UpdateDefaultFoatingRect();
 
-private:
-    LayoutDependRects dependRects;
-    sptr<WindowNode> belowAppWindowNode_ = new WindowNode();
-    sptr<WindowNode> appWindowNode_ = new WindowNode();
-    sptr<WindowNode> aboveAppWindowNode_ = new WindowNode();
+protected:
+    const Rect& displayRect_;
+    const uint64_t& screenId_;
+    const sptr<WindowNode>& belowAppWindowNode_;
+    const sptr<WindowNode>& appWindowNode_;
+    const sptr<WindowNode>& aboveAppWindowNode_;
+    Rect limitRect_ = { 0, 0, 0, 0 };
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowType::WINDOW_TYPE_NAVIGATION_BAR,
     };
-    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
-        { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
-    };
     void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
-    void UpdateSplitLimitRect(const Rect& limitRect, Rect& limitSplitRect);
     void UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect);
-    void LayoutWindowTree();
-    void LayoutWindowNode(sptr<WindowNode>& node);
+    virtual void LayoutWindowTree();
+    virtual void LayoutWindowNode(sptr<WindowNode>& node);
     AvoidPosType GetAvoidPosType(const Rect& rect);
-    void InitLimitRects();
-    Rect& GetLimitRect(const WindowMode mode);
-    Rect& GetDisplayRect(const WindowMode mode);
-    void LimitMoveBounds(Rect& rect);
     void LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect);
     void SetRectForFloating(const sptr<WindowNode>& node);
+    Rect ComputeDecoratedWindowRect(const Rect& winRect);
     Rect defaultFloatingRect_ = { 0, 0, 0, 0 };
 };
 }

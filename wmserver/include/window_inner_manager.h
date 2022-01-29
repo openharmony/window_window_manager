@@ -51,7 +51,6 @@ WM_DECLARE_SINGLE_INSTANCE(WindowInnerManager);
 public:
     void Init();
     void SendMessage(InnerWMCmd cmdType, DisplayId displayId = 0);
-    void SendMessage(InnerWMCmd cmdType, DisplayId displayId, const Rect& rect);
     void HandleMessage();
 private:
     static inline SingletonDelegator<WindowInnerManager> delegator;

@@ -90,6 +90,7 @@ void WindowInnerManager::DrawBitmap(std::shared_ptr<RSSurface>& rsSurface, uint3
         WLOGFE("DrawSurface canvas is nullptr");
         return;
     }
+    canvas->clear(SK_ColorTRANSPARENT);
     SkPaint paint;
     SkMatrix matrix;
     SkRect rect;
@@ -127,6 +128,7 @@ void WindowInnerManager::DrawColor(std::shared_ptr<RSSurface>& rsSurface, uint32
         WLOGFE("DrawSurface canvas is nullptr");
         return;
     }
+    canvas->clear(SK_ColorTRANSPARENT);
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setStyle(SkPaint::kFill_Style);
@@ -274,27 +276,6 @@ void WindowInnerManager::SendMessage(InnerWMCmd cmdType, DisplayId displayId)
     winMsg->displayId = displayId;
     WLOGFI("SendMessage : displayId = %{public}" PRIu64",  type = %{public}d",
         winMsg->displayId, static_cast<uint32_t>(cmdType));
-    messages_.push_back(std::move(winMsg));
-    ready_ = true;
-    conVar_.notify_one();
-}
-
-void WindowInnerManager::SendMessage(InnerWMCmd cmdType, DisplayId displayId, const Rect& dividerRect)
-{
-    std::unique_lock<std::mutex> lk(mutex_);
-    if (!hasInitThread_) {
-        WLOGFI("Inner window manager thread has not been created");
-        return;
-    }
-    std::unique_ptr<WindowMessage> winMsg = std::make_unique<WindowMessage>();
-    winMsg->cmdType = cmdType;
-    winMsg->displayId = displayId;
-    winMsg->dividerRect = dividerRect;
-    WLOGFI("SendMessage : displayId = %{public}" PRIu64",  type = %{public}d" \
-        " Rect = [%{public}d %{public}d %{public}d %{public}d]",
-        winMsg->displayId, static_cast<uint32_t>(cmdType),
-        winMsg->dividerRect.posX_, winMsg->dividerRect.posY_,
-        winMsg->dividerRect.width_, winMsg->dividerRect.height_);
     messages_.push_back(std::move(winMsg));
     ready_ = true;
     conVar_.notify_one();
