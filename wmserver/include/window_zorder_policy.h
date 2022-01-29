@@ -42,8 +42,10 @@ private:
         // system-specific window
         { WindowType::WINDOW_TYPE_WALLPAPER,            0 },
         { WindowType::WINDOW_TYPE_DESKTOP,              1 },
-        { WindowType::WINDOW_TYPE_APP_LAUNCHING,        102 },
+        { WindowType::WINDOW_TYPE_APP_LAUNCHING,        101 },
         { WindowType::WINDOW_TYPE_DOCK_SLICE,           0 },
+        { WindowType::WINDOW_TYPE_LAUNCHER_RECENT,      102 },
+        { WindowType::WINDOW_TYPE_LAUNCHER_DOCK,        103 },
         { WindowType::WINDOW_TYPE_INCOMING_CALL,        104 },
         { WindowType::WINDOW_TYPE_SEARCHING_BAR,        105 },
         { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,  106 },
