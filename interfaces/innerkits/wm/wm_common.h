@@ -70,6 +70,7 @@ enum class WindowMode : uint32_t {
 
 enum class WMError : int32_t {
     WM_OK = 0,
+    WM_DO_NOTHING = 1,
     WM_ERROR_SAMGR = 100,
     WM_ERROR_IPC_FAILED = 101,
     WM_ERROR_NO_MEM = 110,
