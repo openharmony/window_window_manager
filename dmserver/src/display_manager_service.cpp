@@ -249,4 +249,45 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
     WLOGFI("create mirror. NodeId: %{public}" PRIu64"", nodeId);
     return DMError::DM_OK;
 }
+
+sptr<ScreenInfo> DisplayManagerService::GetScreenInfoById(ScreenId screenId)
+{
+    auto screen = abstractScreenController_->GetAbstractScreen(screenId);
+    if (screen == nullptr) {
+        WLOGE("cannot find screenInfo: %{public}" PRIu64"", screenId);
+        return nullptr;
+    }
+    return screen->ConvertToScreenInfo();
+}
+
+sptr<ScreenGroupInfo> DisplayManagerService::GetScreenGroupInfoById(ScreenId screenId)
+{
+    auto screenGroup = abstractScreenController_->GetAbstractScreenGroup(screenId);
+    if (screenGroup == nullptr) {
+        WLOGE("cannot find screenGroupInfo: %{public}" PRIu64"", screenId);
+        return nullptr;
+    }
+    return screenGroup->ConvertToScreenGroupInfo();
+}
+
+std::vector<sptr<ScreenInfo>> DisplayManagerService::GetAllScreenInfos()
+{
+    std::vector<ScreenId> screenIds = abstractScreenController_->GetAllScreenIds();
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    for (auto screenId: screenIds) {
+        auto screenInfo = GetScreenInfoById(screenId);
+        if (screenInfo == nullptr) {
+            WLOGE("cannot find screenInfo: %{public}" PRIu64"", screenId);
+            continue;
+        }
+        screenInfos.emplace_back(screenInfo);
+    }
+    return screenInfos;
+}
+
+DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
+{
+    // todo: make expand
+    return DMError::DM_OK;
+}
 } // namespace OHOS::Rosen

@@ -146,6 +146,43 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
+        case TRANS_ID_GET_SCREEN_INFO_BY_ID: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            auto screenInfo = GetScreenInfoById(screenId);
+            reply.WriteStrongParcelable(screenInfo);
+            break;
+        }
+        case TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            auto screenGroupInfo = GetScreenGroupInfoById(screenId);
+            reply.WriteStrongParcelable(screenGroupInfo);
+            break;
+        }
+        case TRANS_ID_GET_ALL_SCREEN_INFOS: {
+            std::vector<sptr<ScreenInfo>> screenInfos = GetAllScreenInfos();
+            uint32_t nums = static_cast<uint32_t>(screenInfos.size());
+            reply.WriteUint32(nums);
+            for (uint32_t i = 0; i < nums; ++i) {
+                reply.WriteStrongParcelable(screenInfos[i]);
+            }
+            break;
+        }
+        case TRANS_ID_SCREEN_MAKE_EXPAND: {
+            std::vector<ScreenId> screenId;
+            if (!data.ReadUInt64Vector(&screenId)) {
+                WLOGE("fail to receive expand screen in stub.");
+                break;
+            }
+            std::vector<Point> startPoint;
+            uint32_t nums = data.ReadUint32();
+            for (uint32_t i = 0; i < nums; ++i) {
+                Point point { data.ReadInt32(), data.ReadInt32() };
+                startPoint.push_back(point);
+            }
+            DMError result = MakeExpand(screenId, startPoint);
+            reply.WriteInt32(static_cast<int32_t>(result));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

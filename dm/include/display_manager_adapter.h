@@ -22,6 +22,7 @@
 
 #include "display.h"
 #include "screen.h"
+#include "screen_group.h"
 #include "dm_common.h"
 #include "display_manager_interface.h"
 #include "singleton_delegator.h"
@@ -56,6 +57,10 @@ public:
     virtual void NotifyDisplayEvent(DisplayEvent event);
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     virtual void Clear();
+    virtual sptr<Screen> GetScreenById(ScreenId screenId);
+    virtual sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
+    virtual std::vector<sptr<Screen>> GetAllScreens();
+    virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
 
 private:
     bool InitDMSProxyLocked();
@@ -66,6 +71,8 @@ private:
     sptr<IDisplayManager> displayManagerServiceProxy_ = nullptr;
     sptr<DMSDeathRecipient> dmsDeath_ = nullptr;
     std::map<DisplayId, sptr<Display>> displayMap_;
+    std::map<ScreenId, sptr<Screen>> screenMap_;
+    std::map<ScreenId, sptr<ScreenGroup>> screenGroupMap_;
     DisplayId defaultDisplayId_;
 };
 } // namespace OHOS::Rosen

@@ -409,4 +409,134 @@ DMError DisplayManagerProxy::MakeMirror(ScreenId mainScreenId, std::vector<Scree
     }
     return static_cast<DMError>(reply.ReadInt32());
 }
+
+sptr<ScreenInfo> DisplayManagerProxy::GetScreenInfoById(ScreenId screenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("GetScreenInfoById: remote is nullptr");
+        return nullptr;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("GetScreenInfoById: WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("GetScreenInfoById: Write screenId failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(TRANS_ID_GET_SCREEN_INFO_BY_ID, data, reply, option) != ERR_NONE) {
+        WLOGFW("GetScreenInfoById: SendRequest failed");
+        return nullptr;
+    }
+
+    sptr<ScreenInfo> info = reply.ReadStrongParcelable<ScreenInfo>();
+    if (info == nullptr) {
+        WLOGFW("GetScreenInfoById SendRequest nullptr.");
+        return nullptr;
+    }
+    return info;
+}
+
+sptr<ScreenGroupInfo> DisplayManagerProxy::GetScreenGroupInfoById(ScreenId screenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("GetScreenGroupInfoById: remote is nullptr");
+        return nullptr;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("GetScreenGroupInfoById: WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("GetScreenGroupInfoById: Write screenId failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID, data, reply, option) != ERR_NONE) {
+        WLOGFW("GetScreenGroupInfoById: SendRequest failed");
+        return nullptr;
+    }
+
+    sptr<ScreenGroupInfo> info = reply.ReadStrongParcelable<ScreenGroupInfo>();
+    if (info == nullptr) {
+        WLOGFW("GetScreenGroupInfoById SendRequest nullptr.");
+        return nullptr;
+    }
+    return info;
+}
+
+std::vector<sptr<ScreenInfo>> DisplayManagerProxy::GetAllScreenInfos()
+{
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("GetAllScreenInfos: remote is nullptr");
+        return screenInfos;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("GetAllScreenInfos: WriteInterfaceToken failed");
+        return screenInfos;
+    }
+    if (remote->SendRequest(TRANS_ID_GET_ALL_SCREEN_INFOS, data, reply, option) != ERR_NONE) {
+        WLOGFW("GetAllScreenInfos: SendRequest failed");
+        return screenInfos;
+    }
+
+    uint32_t nums = reply.ReadUint32();
+    for (uint32_t i = 0; i < nums; ++i) {
+        sptr<ScreenInfo> info = reply.ReadStrongParcelable<ScreenInfo>();
+        screenInfos.emplace_back(info);
+    }
+    return screenInfos;
+}
+
+DMError DisplayManagerProxy::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("MakeExpand: remote is null");
+        return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("MakeExpand: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUInt64Vector(screenId)) {
+        WLOGFE("MakeExpand: write screenId failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    uint32_t num = startPoint.size();
+    if (!data.WriteUint32(num)) {
+        WLOGFE("MakeExpand: write startPoint size failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    for (auto point: startPoint) {
+        if (!(data.WriteInt32(point.posX_) && data.WriteInt32(point.posY_))) {
+            WLOGFE("MakeExpand: write startPoint failed");
+            return DMError::DM_ERROR_WRITE_DATA_FAILED;
+        }
+    }
+    if (remote->SendRequest(TRANS_ID_SCREEN_MAKE_EXPAND, data, reply, option) != ERR_NONE) {
+        WLOGFE("MakeExpand: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

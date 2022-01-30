@@ -25,6 +25,7 @@
 
 #include "screen.h"
 #include "screen_group.h"
+#include "screen_info.h"
 #include "screen_group_info.h"
 
 namespace OHOS::Rosen {

@@ -16,6 +16,7 @@
 #include "screen_manager.h"
 #include "window_manager_hilog.h"
 #include "display_manager_adapter.h"
+#include "singleton_delegator.h"
 
 
 #include <map>
@@ -30,8 +31,7 @@ friend class ScreenManager;
 private:
     Impl() = default;
     ~Impl() = default;
-
-    std::map<ScreenId, sptr<Screen>> monitorMap_;
+    static inline SingletonDelegator<ScreenManager> delegator;
 };
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManager)
 
@@ -44,15 +44,19 @@ ScreenManager::~ScreenManager()
 {
 }
 
-sptr<Screen> ScreenManager::GetScreenById(ScreenId id)
+sptr<Screen> ScreenManager::GetScreenById(ScreenId screenId)
 {
-    return nullptr;
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenById(screenId);
 }
 
-std::vector<const sptr<Screen>> ScreenManager::GetAllScreens()
+sptr<ScreenGroup> ScreenManager::GetScreenGroupById(ScreenId screenId)
 {
-    std::vector<const sptr<Screen>> res;
-    return res;
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenGroupById(screenId);
+}
+
+std::vector<sptr<Screen>> ScreenManager::GetAllScreens()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetAllScreens();
 }
 
 void ScreenManager::RegisterScreenListener(sptr<IScreenListener> listener)
@@ -61,6 +65,10 @@ void ScreenManager::RegisterScreenListener(sptr<IScreenListener> listener)
 
 ScreenId ScreenManager::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
 {
+    DMError result = SingletonContainer::Get<DisplayManagerAdapter>().MakeExpand(screenId, startPoint);
+    if (result == DMError::DM_OK) {
+        WLOGFI("create mirror success");
+    }
     return SCREEN_ID_INVALID;
 }
 
