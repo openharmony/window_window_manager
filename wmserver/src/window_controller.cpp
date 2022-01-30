@@ -95,11 +95,16 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
 
 WMError WindowController::DestroyWindow(uint32_t windowId)
 {
+    DisplayId displayId = DISPLAY_ID_INVALD;
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node != nullptr) {
+        displayId = node->GetDisplayId();
+    }
     WMError res = windowRoot_->DestroyWindow(windowId);
     if (res != WMError::WM_OK) {
         return res;
     }
-    FlushWindowInfo(windowId);
+    FlushWindowInfoWithDisplayId(displayId);
     return res;
 }
 
@@ -314,6 +319,13 @@ void WindowController::FlushWindowInfo(uint32_t windowId)
     WLOGFI("FlushWindowInfo");
     RSTransaction::FlushImplicitTransaction();
     inputWindowMonitor_->UpdateInputWindow(windowId);
+}
+
+void WindowController::FlushWindowInfoWithDisplayId(DisplayId displayId)
+{
+    WLOGFI("FlushWindowInfoWithDisplayId");
+    RSTransaction::FlushImplicitTransaction();
+    inputWindowMonitor_->UpdateInputWindowByDisplayId(displayId);
 }
 }
 }
