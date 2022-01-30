@@ -478,6 +478,24 @@ void WindowManagerProxy::ProcessWindowTouchedEvent(uint32_t windowId)
     }
 }
 
+void WindowManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("Write displayId failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_MINIMIZE_ALL_APP_WINDOWS, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 WMError WindowManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
     MessageParcel data;

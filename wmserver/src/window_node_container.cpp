@@ -20,6 +20,8 @@
 #include <cinttypes>
 
 #include "window_helper.h"
+#include "window_layout_policy_cascade.h"
+#include "window_layout_policy_tile.h"
 #include "window_manager_agent_controller.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
@@ -30,20 +32,27 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowNodeContainer"};
+    constexpr int WINDOW_NAME_MAX_LENGTH = 10;
 }
 
 WindowNodeContainer::WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height) : screenId_(screenId)
 {
     struct RSDisplayNodeConfig config = {screenId};
     displayNode_ = RSDisplayNode::Create(config);
-    Rect displayRect = {
+    displayRect_ = {
         .posX_ = 0,
         .posY_ = 0,
         .width_ = width,
         .height_ = height
     };
-    displayRects_->InitRect(displayRect);
-    UpdateDisplayInfo();
+    layoutPolicys_[WindowLayoutMode::CASCADE] =
+        new WindowLayoutPolicyCascade(displayRect_, screenId_,
+            belowAppWindowNode_, appWindowNode_, aboveAppWindowNode_);
+    layoutPolicys_[WindowLayoutMode::TILE] =
+        new WindowLayoutPolicyTile(displayRect_, screenId_,
+            belowAppWindowNode_, appWindowNode_, aboveAppWindowNode_);
+    layoutPolicy_ = layoutPolicys_[WindowLayoutMode::CASCADE];
+    layoutPolicy_->Launch();
     UpdateAvoidAreaFunc func = std::bind(&WindowNodeContainer::OnAvoidAreaChange, this, std::placeholders::_1);
     avoidController_ = new AvoidAreaController(func);
 }
@@ -64,20 +73,6 @@ WMError WindowNodeContainer::MinimizeOtherFullScreenAbility()
         }
         if  ((*iter)->abilityToken_ != nullptr) {
             WLOGFI("Find previous fullscreen window, notify ability to minimize");
-            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility((*iter)->abilityToken_);
-        }
-    }
-    return WMError::WM_OK;
-}
-
-WMError WindowNodeContainer::MinimizeAllAppNodeAbility()
-{
-    if (appWindowNode_->children_.empty()) {
-        return WMError::WM_OK;
-    }
-    for (auto iter = appWindowNode_->children_.begin(); iter != appWindowNode_->children_.end(); ++iter) {
-        if  ((*iter)->abilityToken_ != nullptr) {
-            WLOGFI("Notify ability to minimize");
             AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility((*iter)->abilityToken_);
         }
     }
@@ -524,107 +519,6 @@ void WindowNodeContainer::TraverseWindowNode(sptr<WindowNode>& node, std::vector
     }
 }
 
-void WindowNodeContainer::UpdateDisplayInfo()
-{
-    const Rect& primaryRect = displayRects_->GetRectByWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    const Rect& secondaryRect =  displayRects_->GetRectByWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    const Rect& displayRect =  displayRects_->GetRectByWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    layoutPolicy_->UpdateDisplayInfo(primaryRect, secondaryRect, displayRect);
-}
-
-void WindowNodeContainer::UpdateSplitInfo()
-{
-    // update for split
-    const Rect& primaryRect = displayRects_->GetRectByWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    const Rect& secondaryRect =  displayRects_->GetRectByWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    layoutPolicy_->UpdateSplitInfo(primaryRect, secondaryRect);
-}
-
-void WindowNodeContainer::LayoutDividerWindow(sptr<WindowNode>& node)
-{
-    layoutPolicy_->UpdateLayoutRect(node);
-    auto layoutRect = node->GetLayoutRect();
-    displayRects_->SetSplitRect(layoutRect); // calculate primary/secondary depend on divider rect
-    UpdateDisplayInfo();
-    WLOGFI("UpdateDividerRects WinId: %{public}d, Rect: %{public}d %{public}d %{public}d %{public}d",
-        node->GetWindowId(), layoutRect.posX_, layoutRect.posY_, layoutRect.width_, layoutRect.height_);
-}
-
-void WindowNodeContainer::DisplayRects::InitRect(Rect& oriDisplayRect)
-{
-    if (oriDisplayRect.width_ < oriDisplayRect.height_) {
-        isVertical_ = true;
-    }
-    displayRect_ = oriDisplayRect;
-    if (!isVertical_) {
-        dividerRect_ = { static_cast<uint32_t>((displayRect_.width_ - DIVIDER_WIDTH) * DEFAULT_SPLIT_RATIO), 0,
-                DIVIDER_WIDTH, displayRect_.height_ };
-    } else {
-        dividerRect_ = { 0, static_cast<uint32_t>((displayRect_.height_ - DIVIDER_WIDTH) * DEFAULT_SPLIT_RATIO),
-               displayRect_.width_, DIVIDER_WIDTH };
-    }
-    WLOGFI("init dividerRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
-        dividerRect_.posX_, dividerRect_.posY_, dividerRect_.width_, dividerRect_.height_);
-    SetSplitRect(dividerRect_);
-}
-
-void WindowNodeContainer::DisplayRects::SetSplitRect(float ratio)
-{
-    if (!isVertical_) {
-        dividerRect_.posX_ = displayDependRect_.posX_ +
-            static_cast<uint32_t>((displayDependRect_.width_ - dividerRect_.width_) * ratio);
-    } else {
-        dividerRect_.posY_ = displayDependRect_.posY_ +
-            static_cast<uint32_t>((displayDependRect_.height_ - dividerRect_.height_) * ratio);
-    }
-    WLOGFI("set dividerRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
-        dividerRect_.posX_, dividerRect_.posY_, dividerRect_.width_, dividerRect_.height_);
-    SetSplitRect(dividerRect_);
-}
-
-void WindowNodeContainer::DisplayRects::SetSplitRect(const Rect& divRect)
-{
-    dividerRect_.width_ = divRect.width_;
-    dividerRect_.height_ = divRect.height_;
-    if (!isVertical_) {
-        primaryRect_.posX_ = displayRect_.posX_;
-        primaryRect_.posY_ = displayRect_.posY_;
-        primaryRect_.width_ = divRect.posX_;
-        primaryRect_.height_ = displayRect_.height_;
-
-        secondaryRect_.posX_ = divRect.posX_ + dividerRect_.width_;
-        secondaryRect_.posY_ = displayRect_.posY_;
-        secondaryRect_.width_ = displayRect_.width_ - secondaryRect_.posX_;
-        secondaryRect_.height_ = displayRect_.height_;
-    } else {
-        primaryRect_.posX_ = displayRect_.posX_;
-        primaryRect_.posY_ = displayRect_.posY_;
-        primaryRect_.height_ = divRect.posY_;
-        primaryRect_.width_ = displayRect_.width_;
-
-        secondaryRect_.posX_ = displayRect_.posX_;
-        secondaryRect_.posY_ = divRect.posY_ + dividerRect_.height_;
-        secondaryRect_.height_ = displayRect_.height_ - secondaryRect_.posY_;
-        secondaryRect_.width_ = displayRect_.width_;
-    }
-}
-
-Rect WindowNodeContainer::DisplayRects::GetDividerRect() const
-{
-    return dividerRect_;
-}
-
-Rect WindowNodeContainer::DisplayRects::GetRectByWindowMode(const WindowMode& mode) const
-{
-    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-        return primaryRect_;
-    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        return secondaryRect_;
-    } else {
-        return displayRect_;
-    }
-}
-
 std::vector<Rect> WindowNodeContainer::GetAvoidAreaByType(AvoidAreaType avoidAreaType)
 {
     return avoidController_->GetAvoidAreaByType(avoidAreaType);
@@ -644,15 +538,18 @@ void WindowNodeContainer::OnAvoidAreaChange(const std::vector<Rect>& avoidArea)
 void WindowNodeContainer::DumpScreenWindowTree()
 {
     WLOGFI("-------- Screen %{public}" PRIu64" dump window info begin---------", screenId_);
-    WLOGFI("WinId Type Mode Flag ZOrd [   x    y    w    h]");
+    WLOGFI("WindowName WinId Type Mode Flag ZOrd [   x    y    w    h]");
     std::vector<sptr<WindowNode>> windowNodes;
     TraverseContainer(windowNodes);
     int zOrder = windowNodes.size();
     for (auto node : windowNodes) {
         Rect rect = node->GetLayoutRect();
-        WLOGFI("%{public}5d %{public}4d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
-            "%{public}4d %{public}4d]", node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
-            node->GetWindowFlags(), --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
+        const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
+            node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
+        WLOGFI("%{public}10s %{public}5d %{public}4d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
+            "%{public}4d %{public}4d]", windowName.c_str(), node->GetWindowId(), node->GetWindowType(),
+            node->GetWindowMode(), node->GetWindowFlags(),
+            --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
     WLOGFI("-------- Screen %{public}" PRIu64" dump window info end  ---------", screenId_);
 }
@@ -664,7 +561,7 @@ uint64_t WindowNodeContainer::GetScreenId() const
 
 Rect WindowNodeContainer::GetDisplayRect() const
 {
-    return displayRects_->GetRectByWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    return displayRect_;
 }
 
 std::shared_ptr<RSDisplayNode> WindowNodeContainer::GetDisplayNode() const
@@ -674,7 +571,7 @@ std::shared_ptr<RSDisplayNode> WindowNodeContainer::GetDisplayNode() const
 
 bool WindowNodeContainer::isVerticalDisplay() const
 {
-    return displayRects_->isVertical_;
+    return displayRect_.width_ < displayRect_.height_;
 }
 
 void WindowNodeContainer::NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason)
@@ -759,6 +656,17 @@ sptr<WindowNode> WindowNodeContainer::GetNextFocusableWindow(uint32_t windowId) 
     return nullptr;
 }
 
+void WindowNodeContainer::MinimizeAllAppWindows()
+{
+    for (auto& appNode : appWindowNode_->children_) {
+        if (appNode->abilityToken_ == nullptr) {
+            continue;
+        }
+        WLOGFI("find app window to minimize, windowId:%{public}u", appNode->GetWindowId());
+        AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(appNode->abilityToken_);
+    }
+}
+
 void WindowNodeContainer::SendSplitScreenEvent(WindowMode mode)
 {
     // should define in common_event_support.h and @ohos.commonEvent.d.ts
@@ -799,22 +707,18 @@ WMError WindowNodeContainer::HandleModeChangeToSplit(sptr<WindowNode>& triggerNo
 {
     WLOGFI("HandleModeChangeToSplit %{public}d", triggerNode->GetWindowId());
     auto pairNode = FindSplitPairNode(triggerNode);
-    displayRects_->displayDependRect_ = layoutPolicy_->GetDependDisplayRects(); // get depend display rect for split
-    WLOGFI("displayDependRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
-        displayRects_->displayDependRect_.posX_, displayRects_->displayDependRect_.posY_,
-        displayRects_->displayDependRect_.width_, displayRects_->displayDependRect_.height_);
     if (pairNode != nullptr) {
         WLOGFI("Window %{public}d find pair %{public}d", triggerNode->GetWindowId(), pairNode->GetWindowId());
         WMError ret = UpdateWindowPairInfo(triggerNode, pairNode);
         if (ret != WMError::WM_OK) {
             return ret;
         }
+        SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
+        SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_CREATE_DIVIDER, screenId_);
     } else {
-        // sent split event
-        displayRects_->SetSplitRect(DEFAULT_SPLIT_RATIO);
         SendSplitScreenEvent(triggerNode->GetWindowMode());
+        SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
     }
-    UpdateSplitInfo();
     return WMError::WM_OK;
 }
 
@@ -838,7 +742,6 @@ WMError WindowNodeContainer::HandleModeChangeFromSplit(sptr<WindowNode>& trigger
         return WMError::WM_OK;
     }
     if (pairedWindowMap_.empty()) {
-        WLOGFI("Notify devider to destroy");
         SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, screenId_);
     }
     return WMError::WM_OK;
@@ -887,10 +790,17 @@ WMError WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode,
         {pairNode, splitRatio}));
     pairedWindowMap_.insert(std::pair<uint32_t, WindowPairInfo>(pairNode->GetWindowId(),
         {triggerNode, 1 - splitRatio}));
-    displayRects_->SetSplitRect(splitRatio);
-    WLOGFI("Notify devider to create");
-    Rect dividerRect = displayRects_->GetDividerRect();
-    SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_CREATE_DIVIDER, screenId_, dividerRect);
+    return WMError::WM_OK;
+}
+
+WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode mode)
+{
+    WLOGFI("SwitchLayoutPolicy src: %{public}d dst: %{public}d",
+        static_cast<uint32_t>(layoutMode_), static_cast<uint32_t>(mode));
+    layoutMode_ = mode;
+    layoutPolicy_->Clean();
+    layoutPolicy_ = layoutPolicys_[mode];
+    layoutPolicy_->Launch();
     return WMError::WM_OK;
 }
 

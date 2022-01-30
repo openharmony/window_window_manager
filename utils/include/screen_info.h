@@ -29,7 +29,7 @@ public:
     void Update(sptr<ScreenInfo> info);
 
     virtual bool Marshalling(Parcel& parcel) const override;
-    static sptr<ScreenInfo> Unmarshalling(Parcel& parcel);
+    static ScreenInfo* Unmarshalling(Parcel& parcel);
 
     ScreenId id_ { SCREEN_ID_INVALID };
     uint32_t width_ { 0 };
@@ -40,7 +40,7 @@ public:
     ScreenId parent_ { 0 };
     bool hasChild_ { false };
 protected:
-    sptr<ScreenInfo> InnerUnmarshalling(Parcel& parcel);
+    ScreenInfo* InnerUnmarshalling(Parcel& parcel);
     };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H

@@ -169,6 +169,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case TRANS_ID_MINIMIZE_ALL_APP_WINDOWS: {
+            MinimizeAllAppWindows(data.ReadUint64());
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

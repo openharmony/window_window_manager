@@ -58,6 +58,7 @@ private:
     DisplayId displayId_ = DEFAULT_DISPLAY_ID;
 
     std::shared_ptr<AbilityRuntime::Context> context_ = nullptr;
+    std::string GenerateMainWindowName(const std::shared_ptr<AbilityRuntime::Context>& context) const;
 };
 } // namespace Rosen
 } // namespace OHOS

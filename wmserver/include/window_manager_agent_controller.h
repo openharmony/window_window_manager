@@ -36,10 +36,9 @@ public:
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints);
 
 private:
-    WindowManagerAgentController() : wmAgentContainer_(mutex_) {}
+    WindowManagerAgentController() {}
     virtual ~WindowManagerAgentController() = default;
 
-    std::recursive_mutex mutex_;
     ClientAgentContainer<IWindowManagerAgent, WindowManagerAgentType> wmAgentContainer_;
 };
 }

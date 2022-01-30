@@ -122,11 +122,6 @@ WMError WindowController::MoveTo(uint32_t windowId, int32_t x, int32_t y)
             newRect = { x, lastRect.posY_, lastRect.width_, lastRect.height_ };
         }
         property->SetWindowRect(newRect);
-        res = windowRoot_->LayoutDividerWindow(node);
-        if (res != WMError::WM_OK) {
-            WLOGFE("layout divider window failed");
-            return res;
-        };
     } else {
         newRect = { x, y, lastRect.width_, lastRect.height_ };
         property->SetWindowRect(newRect);
@@ -307,6 +302,11 @@ WMError WindowController::ProcessWindowTouchedEvent(uint32_t windowId)
         return WMError::WM_OK;
     }
     return WMError::WM_ERROR_INVALID_OPERATION;
+}
+
+void WindowController::MinimizeAllAppWindows(DisplayId displayId)
+{
+    windowRoot_->MinimizeAllAppWindows(displayId);
 }
 
 WMError WindowController::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)

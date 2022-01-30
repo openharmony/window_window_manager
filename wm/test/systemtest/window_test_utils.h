@@ -42,6 +42,7 @@ public:
         bool needAvoid;
         bool parentLimit;
         std::string parentName;
+        bool focusable_ { true };
     };
     static Rect displayRect_;
     static Rect limitDisplayRect_;

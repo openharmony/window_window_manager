@@ -54,7 +54,7 @@ public:
     virtual bool SetDisplayState(DisplayState state);
     virtual DisplayState GetDisplayState(DisplayId displayId);
     virtual void NotifyDisplayEvent(DisplayEvent event);
-    virtual DMError AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId);
+    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     virtual void Clear();
 
 private:

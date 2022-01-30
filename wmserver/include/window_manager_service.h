@@ -63,6 +63,7 @@ public:
     WMError MinimizeAllAppNodeAbility(uint32_t windowId) override;
     void ProcessWindowTouchedEvent(uint32_t windowId) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
+    void MinimizeAllAppWindows(DisplayId displayId) override;
 
     std::shared_ptr<RSDisplayNode> GetDisplayNode(DisplayId displayId) const;
     void RegisterWindowManagerAgent(WindowManagerAgentType type,

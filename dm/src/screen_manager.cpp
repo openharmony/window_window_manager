@@ -55,27 +55,24 @@ std::vector<const sptr<Screen>> ScreenManager::GetAllScreens()
     return res;
 }
 
-void ScreenManager::RegisterScreenChangeListener(sptr<IScreenChangeListener> listener)
+void ScreenManager::RegisterScreenListener(sptr<IScreenListener> listener)
 {
 }
 
-sptr<ScreenGroup> ScreenManager::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
+ScreenId ScreenManager::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
 {
-    return nullptr;
+    return SCREEN_ID_INVALID;
 }
 
-sptr<ScreenGroup> ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)
+ScreenId ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)
 {
-    return nullptr;
-}
-
-sptr<ScreenGroup> ScreenManager::AddMirror(ScreenId mainScreenId, ScreenId mirrorScreenId)
-{
-    DMError result = SingletonContainer::Get<DisplayManagerAdapter>().AddMirror(mainScreenId, mirrorScreenId);
+    WLOGFI("create mirror for screen: %{public}" PRIu64"", mainScreenId);
+    // TODO: "record screen" should use another function, "MakeMirror" should return group id.
+    DMError result = SingletonContainer::Get<DisplayManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId);
     if (result == DMError::DM_OK) {
-        WLOGFI("AddMirror::Successful");
+        WLOGFI("create mirror success");
     }
-    return nullptr;
+    return SCREEN_ID_INVALID;
 }
 
 ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option)

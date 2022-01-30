@@ -30,11 +30,19 @@ config("libwms_config") {
   ]
 
   if ("${product_name}" == "rk3566" || "${product_name}" == "rk3568" ||
-      "${product_name}" == "Hi3516DV300" || "${product_name}" == "ohos-arm64") {
+      "${product_name}" == "Hi3516DV300" || "${product_name}" == "ohos-arm64" ||
+      "${product_name}" == "watchos") {
     defines = [ "ACE_DISABLE_GL" ]
   } else {
     defines = [ "ACE_ENABLE_GL" ]
   }
+}
+
+ohos_prebuilt_etc("window_divider_image") {
+  source = "//foundation/windowmanager/resources/bg_split_handle.png"
+  part_name = "window_manager"
+  subsystem_name = "window"
+  relative_install_dir = "window/resources"
 }
 
 ohos_shared_library("libwms") {
@@ -57,6 +65,8 @@ ohos_shared_library("libwms") {
     "src/window_controller.cpp",
     "src/window_inner_manager.cpp",
     "src/window_layout_policy.cpp",
+    "src/window_layout_policy_cascade.cpp",
+    "src/window_layout_policy_tile.cpp",
     "src/window_manager_agent_controller.cpp",
     "src/window_manager_service.cpp",
     "src/window_manager_stub.cpp",
@@ -72,6 +82,7 @@ ohos_shared_library("libwms") {
   configs = [ ":libwms_config" ]
 
   deps = [
+    ":window_divider_image",
     "//foundation/ace/ace_engine/build/external_config/flutter/skia:ace_skia_ohos",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/utils:libwmutil",

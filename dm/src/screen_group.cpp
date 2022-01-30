@@ -45,9 +45,4 @@ std::vector<sptr<Screen>> ScreenGroup::GetChildren() const
 {
     return pImpl_->children_;
 }
-
-std::vector<Point> ScreenGroup::GetChildrenPosition() const
-{
-    return pImpl_->position_;
-}
 } // namespace OHOS::Rosen

@@ -51,6 +51,7 @@ public:
     virtual WMError MinimizeAllAppNodeAbility(uint32_t windowId);
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     virtual void ProcessWindowTouchedEvent(uint32_t windowId);
+    virtual void MinimizeAllAppWindows(DisplayId displayId);
 
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);

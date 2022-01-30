@@ -44,6 +44,7 @@ public:
     WMError MinimizeAllAppNodeAbility(uint32_t windowId) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void ProcessWindowTouchedEvent(uint32_t windowId) override;
+    void MinimizeAllAppWindows(DisplayId displayId) override;
 
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;

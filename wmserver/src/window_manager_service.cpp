@@ -134,11 +134,7 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
     if (res == WMError::WM_OK) {
         inputWindowMonitor_->UpdateInputWindow(property->GetWindowId());
     }
-    if (property->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR
-        || property->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
-        WLOGFI("WindowManagerService::AddWindow System Window called");
-        system::SetParameter("persist.window.boot.inited", "1");
-    }
+    system::SetParameter("persist.window.boot.inited", "1");
     return res;
 }
 
@@ -296,7 +292,7 @@ WMError WindowManagerService::MinimizeAllAppNodeAbility(uint32_t windowId)
 
 void WindowManagerService::NotifyDisplayStateChange(DisplayStateChangeType type)
 {
-    WLOGFE("NotifyDisplayStateChange");
+    WLOGFI("NotifyDisplayStateChange");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->NotifyDisplayStateChange(type);
 }
@@ -314,6 +310,13 @@ void WindowManagerService::ProcessWindowTouchedEvent(uint32_t windowId)
         inputWindowMonitor_->UpdateInputWindow(windowId);
     }
     return;
+}
+
+void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
+{
+    WLOGFI("displayId %{public}" PRIu64"", displayId);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    windowController_->MinimizeAllAppWindows(displayId);
 }
 
 WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)

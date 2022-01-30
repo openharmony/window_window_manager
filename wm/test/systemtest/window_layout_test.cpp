@@ -280,6 +280,36 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
     ASSERT_TRUE(utils::RectEqualTo(window, finalExcept));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
+
+/**
+ * @tc.name: LayoutWindow10
+ * @tc.desc: One FLOATING APP Window do max and recovery
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVJ
+ */
+HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
+{
+    utils::TestWindowInfo info = {
+        .name = "main",
+        .rect = {0, 0, 0, 0},
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentName = "",
+    };
+    const sptr<Window>& window = utils::CreateTestWindow(info);
+    activeWindows_.push_back(window);
+    Rect expect = utils::GetDefaultFoatingRect(window);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_TRUE(utils::RectEqualTo(window, expect));
+    ASSERT_EQ(WMError::WM_OK, window->Maximize());
+    ASSERT_TRUE(utils::RectEqualTo(window, utils::displayRect_));
+    ASSERT_EQ(WMError::WM_OK, window->Recover());
+    ASSERT_TRUE(utils::RectEqualTo(window, expect));
+    ASSERT_EQ(WMError::WM_OK, window->Minimize());
+    ASSERT_EQ(WMError::WM_OK, window->Close());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

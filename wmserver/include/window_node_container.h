@@ -41,7 +41,6 @@ public:
     uint32_t GetFocusWindow() const;
     std::vector<Rect> GetAvoidAreaByType(AvoidAreaType avoidAreaType);
     WMError MinimizeOtherFullScreenAbility(); // adapt to api7
-    WMError MinimizeAllAppNodeAbility();
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
     uint64_t GetScreenId() const;
     Rect GetDisplayRect() const;
@@ -51,33 +50,11 @@ public:
     void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas);
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void LayoutDividerWindow(sptr<WindowNode>& node);
-    void UpdateDisplayInfo();
-    void UpdateSplitInfo();
     bool isVerticalDisplay() const;
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     sptr<WindowNode> GetNextFocusableWindow(uint32_t windowId) const;
-
+    void MinimizeAllAppWindows();
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
-
-    class DisplayRects : public RefBase {
-    public:
-        DisplayRects() = default;
-        ~DisplayRects() = default;
-
-        void InitRect(Rect& oriDisplayRect);
-        void SetSplitRect(float ratio);
-        void SetSplitRect(const Rect& rect);
-        Rect GetRectByWindowMode(const WindowMode& mode) const;
-        Rect GetDividerRect() const;
-        bool isVertical_ = false;
-        Rect displayDependRect_ = {0, 0, 0, 0};
-
-    private:
-        Rect primaryRect_   = {0, 0, 0, 0};
-        Rect secondaryRect_ = {0, 0, 0, 0};
-        Rect displayRect_   = {0, 0, 0, 0};
-        Rect dividerRect_   = {0, 0, 0, 0};
-    };
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
@@ -93,6 +70,7 @@ private:
     WMError HandleModeChangeToSplit(sptr<WindowNode>& triggerNode);
     WMError HandleModeChangeFromSplit(sptr<WindowNode>& triggerNode);
     WMError UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode);
+    WMError SwitchLayoutPolicy(WindowLayoutMode mode);
     void NotifyIfSystemBarTintChanged();
     void NotifyIfSystemBarRegionChanged();
     void TraverseAndUpdateWindowState(WindowState state, int32_t topPriority);
@@ -105,10 +83,10 @@ private:
     sptr<WindowNode> belowAppWindowNode_ = new WindowNode();
     sptr<WindowNode> appWindowNode_ = new WindowNode();
     sptr<WindowNode> aboveAppWindowNode_ = new WindowNode();
-    sptr<WindowLayoutPolicy> layoutPolicy_ =
-        new WindowLayoutPolicy(belowAppWindowNode_, appWindowNode_, aboveAppWindowNode_);
     std::shared_ptr<RSDisplayNode> displayNode_;
     std::vector<uint32_t> removedIds_;
+    uint64_t screenId_ = 0;
+    Rect displayRect_;
     std::unordered_map<WindowType, sptr<WindowNode>> sysBarNodeMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     nullptr },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, nullptr },
@@ -117,9 +95,11 @@ private:
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarRegionTint() },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarRegionTint() },
     };
+    std::unordered_map<WindowLayoutMode, sptr<WindowLayoutPolicy>> layoutPolicys_;
+    WindowLayoutMode layoutMode_ = WindowLayoutMode::CASCADE;
+    sptr<WindowLayoutPolicy> layoutPolicy_;
     uint32_t zOrder_ { 0 };
     uint32_t focusedWindow_ { INVALID_WINDOW_ID };
-    uint64_t screenId_ = 0;
     void DumpScreenWindowTree();
 
     struct WindowPairInfo {
@@ -127,7 +107,6 @@ private:
         float splitRatio;
     };
     std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
-    sptr<DisplayRects> displayRects_ = new DisplayRects();
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
     const int32_t WINDOW_TYPE_RAISED_INPUT_METHOD = 115;
 };

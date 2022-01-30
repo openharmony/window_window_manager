@@ -17,11 +17,11 @@
 #define OHOS_ROSEN_DISPLAY_MANAGER_AGENT_H
 
 #include <refbase.h>
-#include <zidl/display_manager_agent_stub.h>
+#include <display_manager_agent_default.h>
 
 namespace OHOS {
 namespace Rosen {
-class DisplayManagerAgent : public DisplayManagerAgentStub {
+class DisplayManagerAgent : public DisplayManagerAgentDefault {
 public:
     DisplayManagerAgent() = default;
     ~DisplayManagerAgent() = default;

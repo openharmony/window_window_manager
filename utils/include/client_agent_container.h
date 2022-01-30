@@ -27,11 +27,11 @@ namespace Rosen {
 template <typename T1, typename T2>
 class ClientAgentContainer {
 public:
-    ClientAgentContainer(std::recursive_mutex& mutex);
+    ClientAgentContainer();
     virtual ~ClientAgentContainer() = default;
 
-    bool RegisterAgentLocked(const sptr<T1>& agent, T2 type);
-    bool UnregisterAgentLocked(const sptr<T1>& agent, T2 type);
+    bool RegisterAgent(const sptr<T1>& agent, T2 type);
+    bool UnregisterAgent(const sptr<T1>& agent, T2 type);
     std::vector<sptr<T1>> GetAgentsByType(T2 type);
 
 private:
@@ -49,19 +49,19 @@ private:
         sptr<IRemoteObject> remoteObject_;
     };
 
-    std::recursive_mutex& mutex_;
+    std::recursive_mutex mutex_;
     std::map<T2, std::vector<sptr<T1>>> agentMap_;
     sptr<AgentDeathRecipient> deathRecipient_;
 };
 
 template<typename T1, typename T2>
-ClientAgentContainer<T1, T2>::ClientAgentContainer(std::recursive_mutex& mutex)
-    : mutex_(mutex), deathRecipient_(new AgentDeathRecipient(
-    std::bind(&ClientAgentContainer<T1, T2>::RemoveAgent, this, std::placeholders::_1))) {}
+ClientAgentContainer<T1, T2>::ClientAgentContainer() : deathRecipient_(
+    new AgentDeathRecipient(std::bind(&ClientAgentContainer<T1, T2>::RemoveAgent, this, std::placeholders::_1))) {}
 
 template<typename T1, typename T2>
-bool ClientAgentContainer<T1, T2>::RegisterAgentLocked(const sptr<T1>& agent, T2 type)
+bool ClientAgentContainer<T1, T2>::RegisterAgent(const sptr<T1>& agent, T2 type)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     agentMap_[type].push_back(agent);
     WLOG_I("ClientAgentContainer agent registered type:%{public}u", type);
     if (deathRecipient_ == nullptr || !agent->AsObject()->AddDeathRecipient(deathRecipient_)) {
@@ -71,8 +71,9 @@ bool ClientAgentContainer<T1, T2>::RegisterAgentLocked(const sptr<T1>& agent, T2
 }
 
 template<typename T1, typename T2>
-bool ClientAgentContainer<T1, T2>::UnregisterAgentLocked(const sptr<T1>& agent, T2 type)
+bool ClientAgentContainer<T1, T2>::UnregisterAgent(const sptr<T1>& agent, T2 type)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (agent == nullptr || agentMap_.count(type) == 0) {
         WLOG_E("ClientAgentContainer agent or type is invalid");
         return false;
@@ -86,6 +87,7 @@ bool ClientAgentContainer<T1, T2>::UnregisterAgentLocked(const sptr<T1>& agent, 
 template<typename T1, typename T2>
 std::vector<sptr<T1>> ClientAgentContainer<T1, T2>::GetAgentsByType(T2 type)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (agentMap_.count(type) == 0) {
         WLOG_W("ClientAgentContainer no such type of agent registered! type:%{public}u", type);
         return std::vector<sptr<T1>>();

@@ -45,7 +45,6 @@ public:
     WMError RemoveWindowNode(uint32_t windowId);
     WMError DestroyWindow(uint32_t windowId);
     WMError UpdateWindowNode(uint32_t windowId);
-    WMError LayoutDividerWindow(sptr<WindowNode>& node);
     bool isVerticalDisplay(sptr<WindowNode>& node) const;
 
     WMError RequestFocus(uint32_t windowId);
@@ -55,6 +54,7 @@ public:
     WMError HandleSplitWindowModeChange(sptr<WindowNode>& node, bool isChangeToSplit);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
+    void MinimizeAllAppWindows(DisplayId displayId);
 
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
