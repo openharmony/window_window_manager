@@ -42,8 +42,8 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
 {
     windowRoot_ = new WindowRoot(mutex_,
         std::bind(&WindowManagerService::OnWindowEvent, this, std::placeholders::_1, std::placeholders::_2));
-    windowController_ = new WindowController(windowRoot_);
     inputWindowMonitor_ = new InputWindowMonitor(windowRoot_);
+    windowController_ = new WindowController(windowRoot_, inputWindowMonitor_);
     snapshotController_ = new SnapshotController(windowRoot_);
 }
 
@@ -131,9 +131,6 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
     WM_SCOPED_TRACE("wms:AddWindow(%d)", property->GetWindowId());
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WMError res = windowController_->AddWindowNode(property);
-    if (res == WMError::WM_OK) {
-        inputWindowMonitor_->UpdateInputWindow(property->GetWindowId());
-    }
     system::SetParameter("persist.window.boot.inited", "1");
     return res;
 }
@@ -143,11 +140,7 @@ WMError WindowManagerService::RemoveWindow(uint32_t windowId)
     WLOGFI("[WMS] Remove: %{public}d", windowId);
     WM_SCOPED_TRACE("wms:RemoveWindow(%d)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WMError res = windowController_->RemoveWindowNode(windowId);
-    if (res == WMError::WM_OK) {
-        inputWindowMonitor_->UpdateInputWindow(windowId);
-    }
-    return res;
+    return windowController_->RemoveWindowNode(windowId);
 }
 
 WMError WindowManagerService::DestroyWindow(uint32_t windowId)
@@ -160,11 +153,7 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId)
     if (node != nullptr) {
         displayId = node->GetDisplayId();
     }
-    WMError res = windowController_->DestroyWindow(windowId);
-    if (res == WMError::WM_OK) {
-        inputWindowMonitor_->UpdateInputWindowByDisplayId(displayId);
-    }
-    return res;
+    return windowController_->DestroyWindow(windowId);
 }
 
 WMError WindowManagerService::MoveTo(uint32_t windowId, int32_t x, int32_t y)
@@ -172,11 +161,7 @@ WMError WindowManagerService::MoveTo(uint32_t windowId, int32_t x, int32_t y)
     WLOGFI("[WMS] MoveTo: %{public}d [%{public}d, %{public}d]", windowId, x, y);
     WM_SCOPED_TRACE("wms:MoveTo");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WMError res = windowController_->MoveTo(windowId, x, y);
-    if (res == WMError::WM_OK) {
-        inputWindowMonitor_->UpdateInputWindow(windowId);
-    }
-    return res;
+    return windowController_->MoveTo(windowId, x, y);
 }
 
 WMError WindowManagerService::Resize(uint32_t windowId, uint32_t width, uint32_t height)
@@ -184,11 +169,7 @@ WMError WindowManagerService::Resize(uint32_t windowId, uint32_t width, uint32_t
     WLOGFI("[WMS] Resize: %{public}d [%{public}d, %{public}d]", windowId, width, height);
     WM_SCOPED_TRACE("wms:Resize");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WMError res = windowController_->Resize(windowId, width, height);
-    if (res == WMError::WM_OK) {
-        inputWindowMonitor_->UpdateInputWindow(windowId);
-    }
-    return res;
+    return windowController_->Resize(windowId, width, height);
 }
 
 WMError WindowManagerService::RequestFocus(uint32_t windowId)
@@ -203,11 +184,7 @@ WMError WindowManagerService::SetWindowMode(uint32_t windowId, WindowMode mode)
 {
     WM_SCOPED_TRACE("wms:SetWindowMode");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WMError res = windowController_->SetWindowMode(windowId, mode);
-    if (res == WMError::WM_OK) {
-        inputWindowMonitor_->UpdateInputWindow(windowId);
-    }
-    return res;
+    return windowController_->SetWindowMode(windowId, mode);
 }
 
 WMError WindowManagerService::SetWindowType(uint32_t windowId, WindowType type)
@@ -305,11 +282,7 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayStateChangeType type)
 void WindowManagerService::ProcessWindowTouchedEvent(uint32_t windowId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WMError res = windowController_->ProcessWindowTouchedEvent(windowId);
-    if (res == WMError::WM_OK) {
-        inputWindowMonitor_->UpdateInputWindow(windowId);
-    }
-    return;
+    windowController_->ProcessWindowTouchedEvent(windowId);
 }
 
 void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)

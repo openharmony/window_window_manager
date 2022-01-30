@@ -109,7 +109,7 @@ public:
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed) override;
     virtual const std::string& GetContentInfo() override;
-    virtual std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
+    virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
 
 private:
     inline void NotifyAfterForeground() const
