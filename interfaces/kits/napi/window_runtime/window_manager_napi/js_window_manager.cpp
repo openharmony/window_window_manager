@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "js_window_manager.h"
+#include <cinttypes>
 #include <ability.h>
 #include "js_runtime_utils.h"
 #include "js_window.h"
@@ -54,6 +55,12 @@ public:
     {
         JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(engine, info);
         return (me != nullptr) ? me->OnFindWindow(*engine, *info) : nullptr;
+    }
+
+    static NativeValue* MinimizeAll(NativeEngine* engine, NativeCallbackInfo* info)
+    {
+        JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(engine, info);
+        return (me != nullptr) ? me->OnMinimizeAll(*engine, *info) : nullptr;
     }
 
     static NativeValue* RegisterWindowManagerCallback(NativeEngine* engine, NativeCallbackInfo* info)
@@ -199,6 +206,32 @@ private:
         if (lastParam == nullptr) {
             WLOGFI("JsWindowManager::OnFindWindow lastParam is nullptr");
         }
+        NativeValue* result = nullptr;
+        AsyncTask::Schedule(
+            engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+        return result;
+    }
+
+    NativeValue* OnMinimizeAll(NativeEngine& engine, NativeCallbackInfo& info)
+    {
+        WLOGFI("JsWindowManager::OnMinimizeAll is called");
+        if (info.argc < ARGC_ONE) {
+            WLOGFE("param is too small!");
+            return engine.CreateUndefined();
+        }
+        int64_t displayId;
+        if (!ConvertFromJsValue(engine, info.argv[0], displayId)) {
+            WLOGFE("Failed to convert parameter to displayId");
+            return engine.CreateUndefined();
+        }
+        WLOGFI("displayId %{public}" PRIu64"", static_cast<uint64_t>(displayId));
+        AsyncTask::CompleteCallback complete =
+            [displayId](NativeEngine& engine, AsyncTask& task, int32_t status) {
+                SingletonContainer::Get<WindowManager>().MinimizeAllAppWindows(static_cast<uint64_t>(displayId));
+                task.Resolve(engine, engine.CreateUndefined());
+                WLOGFI("JsWindowManager::OnMinimizeAll success");
+            };
+        NativeValue* lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
         NativeValue* result = nullptr;
         AsyncTask::Schedule(
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -442,6 +475,7 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "on", JsWindowManager::RegisterWindowManagerCallback);
     BindNativeFunction(*engine, *object, "off", JsWindowManager::UnregisterWindowMangerCallback);
     BindNativeFunction(*engine, *object, "getTopWindow", JsWindowManager::GetTopWindow);
+    BindNativeFunction(*engine, *object, "minimizeAll", JsWindowManager::MinimizeAll);
     return engine->CreateUndefined();
 }
 }  // namespace Rosen

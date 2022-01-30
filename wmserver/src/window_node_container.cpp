@@ -79,20 +79,6 @@ WMError WindowNodeContainer::MinimizeOtherFullScreenAbility()
     return WMError::WM_OK;
 }
 
-WMError WindowNodeContainer::MinimizeAllAppNodeAbility()
-{
-    if (appWindowNode_->children_.empty()) {
-        return WMError::WM_OK;
-    }
-    for (auto iter = appWindowNode_->children_.begin(); iter != appWindowNode_->children_.end(); ++iter) {
-        if  ((*iter)->abilityToken_ != nullptr) {
-            WLOGFI("Notify ability to minimize");
-            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility((*iter)->abilityToken_);
-        }
-    }
-    return WMError::WM_OK;
-}
-
 WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
 {
     if (!node->surfaceNode_ || !displayNode_) {
@@ -668,6 +654,17 @@ sptr<WindowNode> WindowNodeContainer::GetNextFocusableWindow(uint32_t windowId) 
     }
     WLOGFI("could not get next focusable window");
     return nullptr;
+}
+
+void WindowNodeContainer::MinimizeAllAppWindows()
+{
+    for (auto& appNode : appWindowNode_->children_) {
+        if (appNode->abilityToken_ == nullptr) {
+            continue;
+        }
+        WLOGFI("find app window to minimize, windowId:%{public}u", appNode->GetWindowId());
+        AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(appNode->abilityToken_);
+    }
 }
 
 void WindowNodeContainer::SendSplitScreenEvent(WindowMode mode)
