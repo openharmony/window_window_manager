@@ -309,6 +309,11 @@ void WindowController::MinimizeAllAppWindows(DisplayId displayId)
     windowRoot_->MinimizeAllAppWindows(displayId);
 }
 
+WMError WindowController::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
+{
+    return windowRoot_->GetTopWindowId(mainWinId, topWinId);
+}
+
 void WindowController::FlushWindowInfo(uint32_t windowId)
 {
     WLOGFI("FlushWindowInfo");

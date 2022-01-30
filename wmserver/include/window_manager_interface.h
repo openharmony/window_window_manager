@@ -47,6 +47,7 @@ public:
         TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_GET_AVOID_AREA,
+        TRANS_ID_GET_TOP_WINDOW_ID,
         TRANS_ID_PROCESS_WINDOW_TOUCHED_EVENT,
         TRANS_ID_MINIMIZE_ALL_APP_WINDOWS,
     };
@@ -65,6 +66,7 @@ public:
     virtual WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId) = 0;
     virtual std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
     virtual WMError MinimizeAllAppNodeAbility(uint32_t windowId) = 0;
+    virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
     virtual void ProcessWindowTouchedEvent(uint32_t windowId) = 0;
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
 

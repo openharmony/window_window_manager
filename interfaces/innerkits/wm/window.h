@@ -56,9 +56,10 @@ public:
     static sptr<Window> Create(const std::string& windowName,
         sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> Find(const std::string& windowName);
-
+    static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
+    static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
-
+    virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
     virtual Rect GetRect() const = 0;
     virtual WindowType GetType() const = 0;
     virtual WindowMode GetMode() const = 0;
