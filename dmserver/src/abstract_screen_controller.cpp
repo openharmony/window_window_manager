@@ -19,6 +19,7 @@
 #include <screen_manager/rs_screen_mode_info.h>
 #include <screen_manager/screen_types.h>
 #include <surface.h>
+#include <thread>
 
 #include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
@@ -233,6 +234,35 @@ void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, S
     } else {
         WLOGE("unknow message:%{public}ud", static_cast<uint8_t>(screenEvent));
     }
+}
+
+void AbstractScreenController::ProcessScreenModeChanged(ScreenId rsScreenId)
+{
+    auto iter = rs2DmsScreenIdMap_.find(rsScreenId);
+    if (iter == rs2DmsScreenIdMap_.end()) {
+        WLOGE("ProcessScreenModeChanged: screenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_", rsScreenId);
+        return;
+    }
+    WLOGFD("ProcessScreenModeChanged: process screen info changes");
+    ScreenId dmsScreenId = iter->second;
+    auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
+    if (dmsScreenMapIter == dmsScreenMap_.end()) {
+        WLOGE("ProcessScreenModeChanged: no dms screen is found, rsscreenId=%{public}" PRIu64"", rsScreenId);
+        return;
+    }
+    sptr<AbstractScreen> absScreen = dmsScreenMapIter->second;
+    int32_t activeModeId = rsInterface_.GetScreenActiveMode(rsScreenId).GetScreenModeId();
+    if (activeModeId < 0 || activeModeId >= absScreen->modes_.size()) {
+        WLOGE("activeModeId exceed, screenId=%{public}" PRIu64", activeModeId:%{public}d/%{public}u",
+            rsScreenId, activeModeId, static_cast<uint32_t>(absScreen->modes_.size()));
+        return;
+    }
+    absScreen->activeIdx_ = activeModeId;
+    if (abstractScreenCallback_ != nullptr) {
+        abstractScreenCallback_->onChange_(absScreen, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+    }
+    DisplayManagerAgentController::GetInstance().OnScreenChange(
+        absScreen->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
 }
 
 void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
@@ -557,7 +587,20 @@ bool AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t m
         WLOGFE("SetScreenActiveMode: Get AbstractScreen failed");
         return false;
     }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    uint32_t usedModeId = screen->activeIdx_;
     screen->activeIdx_ = modeId;
+    // add thread to process mode change sync event
+    // should be called by OnRsScreenChange if rs implement corresponding event callback
+    if (usedModeId != modeId) {
+        WLOGI("SetScreenActiveMode: modeId: %{public}u ->  %{public}u", usedModeId, modeId);
+        auto func = [=]() {
+            ProcessScreenModeChanged(screenId);
+            return;
+        };
+        std::thread thread(func);
+        thread.detach();
+    }
     return true;
 }
 

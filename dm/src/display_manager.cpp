@@ -82,7 +82,7 @@ public:
         }
     };
 
-    void OnDisplayChange(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event) override
+    void OnDisplayChange(const sptr<DisplayInfo> displayInfo, DisplayChangeEvent event) override
     {
         if (displayInfo == nullptr || displayInfo->id_ == DISPLAY_ID_INVALD) {
             WLOGFE("OnDisplayChange, displayInfo is invalid.");
@@ -94,7 +94,7 @@ public:
         }
         WLOGD("OnDisplayChange. display %{public}" PRIu64", event %{public}u", displayInfo->id_, event);
         for (auto listener : pImpl_->displayListeners_) {
-            listener->OnChange(displayInfo->id_);
+            listener->OnChange(displayInfo->id_, event);
         }
     };
 private:
@@ -362,6 +362,16 @@ void DisplayManager::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
         return;
     }
     WLOGFW("callback_ target is not set!");
+}
+
+void DisplayManager::NotifyDisplayChangedEvent(const sptr<DisplayInfo> info, DisplayChangeEvent event)
+{
+    WLOGI("NotifyDisplayChangedEvent event:%{public}u, size:%{public}zu", event, 
+        pImpl_->displayListeners_.size());
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    for (auto& listener : pImpl_->displayListeners_) {
+        listener->OnChange(info->id_, event);
+    }
 }
 
 bool DisplayManager::WakeUpBegin(PowerStateChangeReason reason)

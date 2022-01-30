@@ -81,6 +81,7 @@ private:
     bool CheckScreenInScreenGroup(sptr<AbstractScreen> newScreen) const;
     sptr<AbstractScreenGroup> AddAsFirstScreenLocked(sptr<AbstractScreen> newScreen);
     sptr<AbstractScreenGroup> AddAsSuccedentScreenLocked(sptr<AbstractScreen> newScreen);
+    void ProcessScreenModeChanged(ScreenId rsScreenId);
 
     std::recursive_mutex& mutex_;
     OHOS::Rosen::RSInterfaces& rsInterface_;

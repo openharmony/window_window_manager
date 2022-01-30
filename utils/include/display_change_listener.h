@@ -24,6 +24,7 @@ enum class DisplayStateChangeType : uint32_t {
     BEFORE_SUSPEND,
     BEFORE_UNLOCK,
     UPDATE_ROTATION,
+    SIZE_CHANGE,
 };
 class IDisplayChangeListener : public RefBase {
 public:
