@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_CONTROLLER_H
 
 #include <refbase.h>
+#include "input_window_monitor.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "window_root.h"
 #include "wm_common.h"
@@ -25,7 +26,8 @@ namespace OHOS {
 namespace Rosen {
 class WindowController : public RefBase {
 public:
-    WindowController(sptr<WindowRoot>& root) : windowRoot_(root) {}
+    WindowController(sptr<WindowRoot>& root, sptr<InputWindowMonitor> inputWindowMonitor) : windowRoot_(root),
+        inputWindowMonitor_(inputWindowMonitor) {}
     ~WindowController() = default;
 
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
@@ -50,8 +52,10 @@ public:
 
 private:
     uint32_t GenWindowId();
+    void FlushWindowInfo(uint32_t windowId);
 
     sptr<WindowRoot> windowRoot_;
+    sptr<InputWindowMonitor> inputWindowMonitor_;
     std::atomic<uint32_t> windowId_ { INVALID_WINDOW_ID };
 };
 }

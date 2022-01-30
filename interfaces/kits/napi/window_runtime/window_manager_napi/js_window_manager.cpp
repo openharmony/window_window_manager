@@ -457,7 +457,7 @@ private:
             auto objContext = AbilityRuntime::ConvertNativeValueTo<NativeObject>(nativeContext);
             if (objContext == nullptr) {
                 WLOGFE("ConvertNativeValueTo Context Object failed");
-                return engine.CreateUndefined();;
+                return engine.CreateUndefined();
             }
             contextPtr = objContext->GetNativePointer();
         }

@@ -74,7 +74,7 @@ sptr<Window> WindowImpl::Find(const std::string& name)
     return iter->second.second;
 }
 
-std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
+const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
 {
     return context_;
 }
@@ -107,7 +107,7 @@ sptr<Window> WindowImpl::FindTopWindow(uint32_t mainWinId, uint32_t topWinId)
 
 sptr<Window> WindowImpl::GetTopWindowWithId(uint32_t mainWinId)
 {
-    uint32_t topWinId = 0;
+    uint32_t topWinId = INVALID_WINDOW_ID;
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetTopWindowId(mainWinId, topWinId);
     if (ret != WMError::WM_OK) {
         WLOGFE("GetTopWindowId failed with errCode:%{public}d", static_cast<int32_t>(ret));
@@ -122,7 +122,7 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
         WLOGFE("Please create mainWindow First!");
         return nullptr;
     }
-    uint32_t mainWinId = 0;
+    uint32_t mainWinId = INVALID_WINDOW_ID;
     for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
         auto win = iter->second.second;
         if (context.get() == win->GetContext().get()) {
@@ -137,7 +137,7 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
         WLOGFE("Cannot find topWindow!");
         return nullptr;
     }
-    uint32_t topWinId = 0;
+    uint32_t topWinId = INVALID_WINDOW_ID;
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetTopWindowId(mainWinId, topWinId);
     if (ret != WMError::WM_OK) {
         WLOGFE("GetTopWindowId failed with errCode:%{public}d", static_cast<int32_t>(ret));

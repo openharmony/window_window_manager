@@ -506,7 +506,7 @@ WMError WindowManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinI
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-   if (!data.WriteUint32(mainWinId)) {
+    if (!data.WriteUint32(mainWinId)) {
         WLOGFE("Write mainWinId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }

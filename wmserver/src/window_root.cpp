@@ -368,7 +368,6 @@ void WindowRoot::OnRemoteDied(const sptr<IRemoteObject>& remoteObject)
 
 WMError WindowRoot::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (windowNodeMap_.find(mainWinId) == windowNodeMap_.end()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -378,8 +377,10 @@ WMError WindowRoot::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
     }
     if (!node->children_.empty()) {
         auto iter = node->children_.rbegin();
-        topWinId = (*iter)->GetWindowId();
-        return WMError::WM_OK;
+        if (WindowHelper::IsSubWindow((*iter)->GetWindowType())) {
+            topWinId = (*iter)->GetWindowId();
+            return WMError::WM_OK;
+        }
     }
     topWinId = mainWinId;
     return WMError::WM_OK;
