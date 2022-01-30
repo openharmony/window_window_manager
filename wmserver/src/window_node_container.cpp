@@ -362,7 +362,7 @@ WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
 {
     if (focusedWindow_ == windowId) {
         WLOGFI("focused window do not change");
-        return WMError::WM_OK;
+        return WMError::WM_DO_NOTHING;
     }
     UpdateFocusStatus(focusedWindow_, false);
     focusedWindow_ = windowId;
