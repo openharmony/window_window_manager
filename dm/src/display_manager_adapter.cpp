@@ -257,4 +257,85 @@ DMError DisplayManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<Scr
     }
     return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId);
 }
+
+sptr<Screen> DisplayManagerAdapter::GetScreenById(ScreenId screenId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screen id is invalid");
+        return nullptr;
+    }
+    auto iter = screenMap_.find(screenId);
+    if (iter != screenMap_.end()) {
+        WLOGFI("get screen in screen map");
+        return iter->second;
+    }
+
+    if (!InitDMSProxyLocked()) {
+        WLOGFE("InitDMSProxyLocked failed!");
+        return nullptr;
+    }
+    sptr<ScreenInfo> screenInfo = displayManagerServiceProxy_->GetScreenInfoById(screenId);
+    if (screenInfo == nullptr) {
+        WLOGFE("screenInfo is null");
+        return nullptr;
+    }
+    sptr<Screen> screen = new Screen(screenInfo.GetRefPtr());
+    screenMap_.insert(std::make_pair(screenId, screen));
+    return screen;
+}
+
+sptr<ScreenGroup> DisplayManagerAdapter::GetScreenGroupById(ScreenId screenId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screenGroup id is invalid");
+        return nullptr;
+    }
+    auto iter = screenGroupMap_.find(screenId);
+    if (iter != screenGroupMap_.end()) {
+        WLOGFI("get screenGroup in screenGroup map");
+        return iter->second;
+    }
+
+    if (!InitDMSProxyLocked()) {
+        WLOGFE("InitDMSProxyLocked failed!");
+        return nullptr;
+    }
+    sptr<ScreenGroupInfo> screenGroupInfo = displayManagerServiceProxy_->GetScreenGroupInfoById(screenId);
+    if (screenGroupInfo == nullptr) {
+        WLOGFE("screenGroupInfo is null");
+        return nullptr;
+    }
+    sptr<ScreenGroup> screenGroup = new ScreenGroup(screenGroupInfo.GetRefPtr());
+    screenGroupMap_.insert(std::make_pair(screenId, screenGroup));
+    return screenGroup;
+}
+
+std::vector<sptr<Screen>> DisplayManagerAdapter::GetAllScreens()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::vector<sptr<Screen>> screens;
+    if (!InitDMSProxyLocked()) {
+        WLOGFE("InitDMSProxyLocked failed!");
+        return screens;
+    }
+    std::vector<sptr<ScreenInfo>> screenInfos = displayManagerServiceProxy_->GetAllScreenInfos();
+    for (auto info: screenInfos) {
+        if (info == nullptr) {
+            WLOGFE("screenInfo is null");
+            continue;
+        }
+        screens.emplace_back(new Screen(info.GetRefPtr()));
+    }
+    return screens;
+}
+
+DMError DisplayManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
+{
+    if (!InitDMSProxyLocked()) {
+        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
+    }
+    return displayManagerServiceProxy_->MakeExpand(screenId, startPoint);
+}
 } // namespace OHOS::Rosen

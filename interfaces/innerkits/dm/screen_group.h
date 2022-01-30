@@ -21,6 +21,7 @@
 #include "screen.h"
 
 namespace OHOS::Rosen {
+class ScreenGroupInfo;
 enum class ScreenCombination : uint32_t {
     SCREEN_ALONE,
     SCREEN_EXPAND,
@@ -29,13 +30,12 @@ enum class ScreenCombination : uint32_t {
 
 class ScreenGroup : public Screen {
 public:
+    ScreenGroup(const ScreenGroupInfo* info);
+    ~ScreenGroup();
     ScreenCombination GetCombination() const;
-    std::vector<sptr<Screen>> GetChildren() const;
+    std::vector<ScreenId> GetChildrenIds() const;
 
 private:
-    ScreenGroup();
-    ~ScreenGroup();
-
     class Impl;
     sptr<Impl> pImpl_;
 };

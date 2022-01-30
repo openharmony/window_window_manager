@@ -30,7 +30,7 @@ public:
     void Update(sptr<ScreenGroupInfo> info);
 
     virtual bool Marshalling(Parcel& parcel) const override;
-    ScreenGroupInfo* Unmarshalling(Parcel& parcel);
+    static ScreenGroupInfo* Unmarshalling(Parcel& parcel);
 
     std::vector<ScreenId> children_;
     std::vector<Point> position_;
