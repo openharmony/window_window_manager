@@ -145,6 +145,20 @@ declare namespace window {
      * @since 7
      */
     find(id: string): Promise<Window>;
+
+    /**
+     * minimize all app windows.
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    minimizeAll(id: number, callback: AsyncCallback<void>): void;
+
+    /**
+     * minimize all app windows.
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+    minimizeAll(id: number): Promise<void>;
   }
 
   /**

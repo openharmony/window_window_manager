@@ -303,5 +303,10 @@ WMError WindowController::ProcessWindowTouchedEvent(uint32_t windowId)
     }
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
+
+void WindowController::MinimizeAllAppWindows(DisplayId displayId)
+{
+    windowRoot_->MinimizeAllAppWindows(displayId);
+}
 }
 }
