@@ -22,16 +22,20 @@ class WindowStage {
         return this.__window_stage__.setUIContent(context, url, storage)
     }
 
-    loadContent(url, storage) {
-        return this.__window_stage__.loadContent(url, storage)
+    loadContent (url, storage, asyncCallback) {
+        return this.__window_stage__.loadContent(url, storage, asyncCallback)
     }
 
-    getWindowMode() {
-        return this.__window_stage__.getWindowMode()
+    getWindowMode(asyncCallback) {
+        return this.__window_stage__.getWindowMode(asyncCallback)
     }
 
-    getMainWindow() {
-        return this.__window_stage__.getMainWindow()
+    getMainWindow(asyncCallback) {
+        return this.__window_stage__.getMainWindow(asyncCallback)
+    }
+
+    createSubWindow(windowName, asyncCallback) {
+        return this.__window_stage__.createSubWindow(windowName, asyncCallback)
     }
 
     on(type, callback) {

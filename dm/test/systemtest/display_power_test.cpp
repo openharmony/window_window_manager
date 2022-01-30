@@ -53,7 +53,7 @@ public:
 
     static inline DisplayId defaultId_;
     static inline uint32_t brightnessLevel_ = 80;
-    static inline uint32_t invalidBrightnessLevel_ = 180;
+    static inline uint32_t invalidBrightnessLevel_ = 10000000;
     static inline uint32_t times_ = 0;
     static inline bool isDisplayStateCallbackCalled_ = false;
     static sptr<DisplayPowerEventListener> listener_;
@@ -428,11 +428,10 @@ HWTEST_F(DisplayPowerTest, set_screen_brightness_001, Function | MediumTest | Le
 */
 HWTEST_F(DisplayPowerTest, set_screen_brightness_002, Function | MediumTest | Level2)
 {
-    uint32_t initialLevel = DisplayManager::GetInstance().GetScreenBrightness(defaultId_);
     bool ret = DisplayManager::GetInstance().SetScreenBrightness(defaultId_, invalidBrightnessLevel_);
     ASSERT_EQ(false, ret);
     uint32_t level = DisplayManager::GetInstance().GetScreenBrightness(defaultId_);
-    ASSERT_EQ(level, initialLevel);
+    ASSERT_NE(level, invalidBrightnessLevel_);
 }
 } // namespace
 } // namespace Rosen

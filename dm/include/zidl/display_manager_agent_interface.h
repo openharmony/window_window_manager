@@ -17,13 +17,17 @@
 #define OHOS_ROSEN_DISPLAY_MANAGER_AGENT_INTERFACE_H
 
 #include <iremote_broker.h>
+#include "display_info.h"
 #include "dm_common.h"
+#include "screen_info.h"
 
 namespace OHOS {
 namespace Rosen {
 enum class DisplayManagerAgentType : uint32_t {
     DISPLAY_POWER_EVENT_LISTENER,
     DISPLAY_STATE_LISTENER,
+    SCREEN_EVENT_LISTENER,
+    DISPLAY_EVENT_LISTENER,
 };
 
 class IDisplayManagerAgent : public IRemoteBroker {
@@ -33,9 +37,21 @@ public:
     enum {
         TRANS_ID_NOTIFY_DISPLAY_POWER_EVENT = 1,
         TRANS_ID_NOTIFY_DISPLAY_STATE_CHANGED,
+        TRANS_ID_ON_SCREEN_CONNECT,
+        TRANS_ID_ON_SCREEN_DISCONNECT,
+        TRANS_ID_ON_SCREEN_CHANGED,
+        TRANS_ID_ON_DISPLAY_CONNECT,
+        TRANS_ID_ON_DISPLAY_DISCONNECT,
+        TRANS_ID_ON_DISPLAY_CHANGED,
     };
     virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) = 0;
     virtual void NotifyDisplayStateChanged(DisplayState state) = 0;
+    virtual void OnScreenConnect(sptr<ScreenInfo>) = 0;
+    virtual void OnScreenDisconnect(ScreenId) = 0;
+    virtual void OnScreenChange(const std::vector<const sptr<ScreenInfo>>&, ScreenChangeEvent) = 0;
+    virtual void OnDisplayCreate(sptr<DisplayInfo>) = 0;
+    virtual void OnDisplayDestroy(DisplayId) = 0;
+    virtual void OnDisplayChange(sptr<DisplayInfo>, DisplayChangeEvent) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

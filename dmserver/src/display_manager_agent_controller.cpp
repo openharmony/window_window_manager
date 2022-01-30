@@ -26,20 +26,17 @@ WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAgentController)
 bool DisplayManagerAgentController::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return dmAgentContainer_.RegisterAgentLocked(displayManagerAgent, type);
+    return dmAgentContainer_.RegisterAgent(displayManagerAgent, type);
 }
 
 bool DisplayManagerAgentController::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return dmAgentContainer_.UnregisterAgentLocked(displayManagerAgent, type);
+    return dmAgentContainer_.UnregisterAgent(displayManagerAgent, type);
 }
 
 bool DisplayManagerAgentController::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
     if (agents.empty()) {
         return false;
@@ -53,7 +50,6 @@ bool DisplayManagerAgentController::NotifyDisplayPowerEvent(DisplayPowerEvent ev
 
 bool DisplayManagerAgentController::NotifyDisplayStateChanged(DisplayState state)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
     if (agents.empty()) {
         return false;
@@ -63,6 +59,79 @@ bool DisplayManagerAgentController::NotifyDisplayStateChanged(DisplayState state
         agent->NotifyDisplayStateChanged(state);
     }
     return true;
+}
+
+void DisplayManagerAgentController::OnScreenConnect(sptr<ScreenInfo> screenInfo)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGFI("OnScreenConnect");
+    for (auto& agent : agents) {
+        agent->OnScreenConnect(screenInfo);
+    }
+}
+
+void DisplayManagerAgentController::OnScreenDisconnect(ScreenId screenId)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGFI("OnScreenDisconnect");
+    for (auto& agent : agents) {
+        agent->OnScreenDisconnect(screenId);
+    }
+}
+
+void DisplayManagerAgentController::OnScreenChange(
+    const std::vector<const sptr<ScreenInfo>>& screenInfos, ScreenChangeEvent screenChangeEvent)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGFI("OnScreenChange");
+    for (auto& agent : agents) {
+        agent->OnScreenChange(screenInfos, screenChangeEvent);
+    }
+}
+
+void DisplayManagerAgentController::OnDisplayCreate(sptr<DisplayInfo> displayInfo)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGFI("OnDisplayCreate");
+    for (auto& agent : agents) {
+        agent->OnDisplayCreate(displayInfo);
+    }
+}
+
+void DisplayManagerAgentController::OnDisplayDestroy(DisplayId displayId)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGFI("OnDisplayDestroy");
+    for (auto& agent : agents) {
+        agent->OnDisplayDestroy(displayId);
+    }
+}
+
+void DisplayManagerAgentController::OnDisplayChange(sptr<DisplayInfo> displayInfo, DisplayChangeEvent screenChangeEvent)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGFI("OnDisplayChange");
+    for (auto& agent : agents) {
+        agent->OnDisplayChange(displayInfo, screenChangeEvent);
+    }
 }
 }
 }

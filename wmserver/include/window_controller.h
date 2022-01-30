@@ -46,6 +46,7 @@ public:
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void NotifyDisplayStateChange(DisplayStateChangeType type);
     WMError ProcessWindowTouchedEvent(uint32_t windowId);
+    void MinimizeAllAppWindows(DisplayId displayId);
 
 private:
     uint32_t GenWindowId();

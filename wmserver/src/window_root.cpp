@@ -136,6 +136,16 @@ std::vector<Rect> WindowRoot::GetAvoidAreaByType(uint32_t windowId, AvoidAreaTyp
     return avoidArea;
 }
 
+void WindowRoot::MinimizeAllAppWindows(DisplayId displayId)
+{
+    auto container = GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("can't find window node container, failed!");
+        return;
+    }
+    return container->MinimizeAllAppWindows();
+}
+
 WMError WindowRoot::MinimizeAllAppNodeAbility(sptr<WindowNode>& node)
 {
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
@@ -143,7 +153,8 @@ WMError WindowRoot::MinimizeAllAppNodeAbility(sptr<WindowNode>& node)
         WLOGFE("Minimize all app node ability failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return container->MinimizeAllAppNodeAbility();
+    container->MinimizeAllAppWindows();
+    return WMError::WM_OK;
 }
 
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
@@ -266,17 +277,6 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
     }
 
     windowNodeMap_.erase(node->GetWindowId());
-    return WMError::WM_OK;
-}
-
-WMError WindowRoot::LayoutDividerWindow(sptr<WindowNode>& node)
-{
-    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
-    if (container == nullptr) {
-        WLOGFE("layout divider window failed, window container could not be found");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    container->LayoutDividerWindow(node);
     return WMError::WM_OK;
 }
 

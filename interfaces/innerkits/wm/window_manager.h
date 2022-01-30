@@ -57,6 +57,7 @@ public:
     void UnregisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
     void RegisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
     void UnregisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
+    void MinimizeAllAppWindows(DisplayId displayId);
 
 private:
     WindowManager();
