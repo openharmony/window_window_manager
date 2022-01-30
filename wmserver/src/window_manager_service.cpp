@@ -291,5 +291,12 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     windowController_->MinimizeAllAppWindows(displayId);
 }
+
+WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
+{
+    WM_SCOPED_TRACE("wms:GetTopWindowId(%d)", mainWinId);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->GetTopWindowId(mainWinId, topWinId);
+}
 }
 }

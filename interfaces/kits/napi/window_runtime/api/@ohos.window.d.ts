@@ -159,6 +159,24 @@ declare namespace window {
      * @since 8
      */
     minimizeAll(id: number): Promise<void>;
+
+    /**
+     * register the callback of systemBarTintChange
+     * @param type: 'systemBarTintChange'
+     * @devices tv, phone, tablet, wearable, car
+     * @systemapi Hide this for inner system use.
+     * @since 8
+     */
+     on(type: 'systemBarTintChange', callback: Callback<SystemBarTintState>): void;
+
+     /**
+      * unregister the callback of systemBarTintChange
+      * @param type: 'systemBarTintChange'
+      * @devices tv, phone, tablet, wearable, car
+      * @systemapi Hide this for inner system use.
+      * @since 8
+      */
+     off(type: 'systemBarTintChange', callback?: Callback<SystemBarTintState>): void;
   }
 
   /**
@@ -554,24 +572,6 @@ declare namespace window {
      * @since 7
      */
     off(type: 'systemAvoidAreaChange', callback?: Callback<AvoidArea>): void;
-
-    /**
-     * register the callback of systemBarTintChange
-     * @param type: 'systemBarTintChange'
-     * @devices tv, phone, tablet, wearable, car
-     * @systemapi Hide this for inner system use.
-     * @since 8
-     */
-    on(type: 'systemBarTintChange', callback: Callback<SystemBarTintState>): void;
-
-    /**
-     * unregister the callback of systemBarTintChange
-     * @param type: 'systemBarTintChange'
-     * @devices tv, phone, tablet, wearable, car
-     * @systemapi Hide this for inner system use.
-     * @since 8
-     */
-    off(type: 'systemBarTintChange', callback?: Callback<SystemBarTintState>): void;
   }
 
   enum WindowStageEventType {

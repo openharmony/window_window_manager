@@ -48,7 +48,8 @@ public:
     ~WindowImpl();
 
     static sptr<Window> Find(const std::string& id);
-
+    static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
+    static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     virtual Rect GetRect() const override;
     virtual WindowType GetType() const override;
@@ -108,6 +109,7 @@ public:
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed) override;
     virtual const std::string& GetContentInfo() override;
+    virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
 
 private:
     inline void NotifyAfterForeground() const
@@ -135,6 +137,7 @@ private:
     void SetDefaultOption(); // for api7
     bool IsWindowValid() const;
     void OnVsync(int64_t timeStamp);
+    static sptr<Window> FindTopWindow(uint32_t mainWinId, uint32_t topWinId);
 
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
         std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
