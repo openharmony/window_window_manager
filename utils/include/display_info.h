@@ -37,6 +37,7 @@ public:
     int32_t width_ { 0 };
     int32_t height_ { 0 };
     uint32_t freshRate_ { 0 };
+    ScreenId screenId_ { SCREEN_ID_INVALID };
     float xDpi_ { 0.0 };
     float yDpi_ { 0.0 };
     Rotation rotation_ { Rotation::ROTATION_0 };

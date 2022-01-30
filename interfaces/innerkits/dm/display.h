@@ -17,12 +17,10 @@
 #define FOUNDATION_DM_DISPLAY_H
 
 #include <string>
-#include <refbase.h>
+#include "dm_common.h"
 
 namespace OHOS::Rosen {
 class DisplayInfo;
-using DisplayId = uint64_t;
-static constexpr DisplayId DISPLAY_ID_INVALD = -1ULL;
 
 typedef enum DisplayType {
     DEFAULT = 0,
@@ -37,6 +35,7 @@ public:
     int32_t GetWidth() const;
     int32_t GetHeight() const;
     uint32_t GetFreshRate() const;
+    ScreenId GetScreenId() const;
     float GetVirtualPixelRatio() const;
 
     void SetId(DisplayId displayId);

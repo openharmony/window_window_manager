@@ -47,14 +47,34 @@ sptr<Display> DisplayManagerAdapter::GetDisplayById(DisplayId displayId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
-    auto iter = displayMap_.find(displayId);
-    if (iter != displayMap_.end()) {
-        return iter->second;
+    if (!InitDMSProxyLocked()) {
+        WLOGFE("GetDisplayById: InitDMSProxyLocked failed!");
+        return nullptr;
     }
 
-    if (!InitDMSProxyLocked()) {
-        WLOGFE("displayManagerAdapter::GetDisplayById: InitDMSProxyLocked failed!");
-        return nullptr;
+    auto iter = displayMap_.find(displayId);
+    if (iter != displayMap_.end()) {
+        // Update display in map
+        // should be updated automatically
+        DisplayInfo displayInfo = displayManagerServiceProxy_->GetDisplayInfoById(displayId);
+        if (displayInfo.id_ == DISPLAY_ID_INVALD) {
+            WLOGFE("GetDisplayById: Get invalid displayInfo!");
+            return nullptr;
+        }
+        sptr<Display> display = iter->second;
+        if (displayInfo.width_ != display->GetWidth()) {
+            display->SetWidth(displayInfo.width_);
+            WLOGFI("GetDisplayById: set new width %{public}d", display->GetWidth());
+        }
+        if (displayInfo.height_ != display->GetHeight()) {
+            display->SetHeight(displayInfo.height_);
+            WLOGFI("GetDisplayById: set new height %{public}d", display->GetHeight());
+        }
+        if (displayInfo.freshRate_ != display->GetFreshRate()) {
+            display->SetFreshRate(displayInfo.freshRate_);
+            WLOGFI("GetDisplayById: set new freshRate %{public}ud", display->GetFreshRate());
+        }
+        return iter->second;
     }
     DisplayInfo displayInfo = displayManagerServiceProxy_->GetDisplayInfoById(displayId);
     sptr<Display> display = new Display("", &displayInfo);

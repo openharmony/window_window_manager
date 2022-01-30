@@ -45,9 +45,12 @@ private:
     void OnAbstractScreenConnect(sptr<AbstractScreen> absScreen);
     void OnAbstractScreenDisconnect(sptr<AbstractScreen> absScreen);
     void OnAbstractScreenChange(sptr<AbstractScreen> absScreen, DisplayChangeEvent event);
+    void ProcessDisplayUpdateRotation(sptr<AbstractScreen> absScreen);
+    void ProcessDisplaySizeChange(sptr<AbstractScreen> absScreen);
     void BindAloneScreenLocked(sptr<AbstractScreen> absScreen);
     void AddScreenToMirrorLocked(sptr<AbstractScreenGroup> group, sptr<AbstractScreen> realAbsScreen);
     void ProcessScreenDisconnected(sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup);
+    bool UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info);
 
     std::recursive_mutex& mutex_;
     std::atomic<DisplayId> displayCount_ { 0 };
