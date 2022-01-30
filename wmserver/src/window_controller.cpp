@@ -70,7 +70,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     if (res != WMError::WM_OK) {
         return res;
     }
-    RSTransaction::FlushImplicitTransaction();
+    FlushWindowInfo(property->GetWindowId());
 
     if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
         WM_SCOPED_TRACE_BEGIN("controller:MinimizeOtherFullScreenAbility");
@@ -89,7 +89,7 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
     if (res != WMError::WM_OK) {
         return res;
     }
-    RSTransaction::FlushImplicitTransaction();
+    FlushWindowInfo(windowId);
     return res;
 }
 
@@ -99,7 +99,7 @@ WMError WindowController::DestroyWindow(uint32_t windowId)
     if (res != WMError::WM_OK) {
         return res;
     }
-    RSTransaction::FlushImplicitTransaction();
+    FlushWindowInfo(windowId);
     return res;
 }
 
@@ -131,7 +131,7 @@ WMError WindowController::MoveTo(uint32_t windowId, int32_t x, int32_t y)
     if (res != WMError::WM_OK) {
         return res;
     }
-    RSTransaction::FlushImplicitTransaction();
+    FlushWindowInfo(windowId);
     return WMError::WM_OK;
 }
 
@@ -150,7 +150,7 @@ WMError WindowController::Resize(uint32_t windowId, uint32_t width, uint32_t hei
     if (res != WMError::WM_OK) {
         return res;
     }
-    RSTransaction::FlushImplicitTransaction();
+    FlushWindowInfo(windowId);
     return WMError::WM_OK;
 }
 
@@ -190,7 +190,7 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
         WLOGFE("Set window mode failed, update node failed");
         return res;
     }
-    RSTransaction::FlushImplicitTransaction();
+    FlushWindowInfo(windowId);
     return WMError::WM_OK;
 }
 
@@ -241,8 +241,8 @@ WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
     if (res != WMError::WM_OK) {
         return res;
     }
-    RSTransaction::FlushImplicitTransaction();
-    WLOGFI("SetWindowType FlushImplicitTransaction end");
+    FlushWindowInfo(windowId);
+    WLOGFI("SetWindowType end");
     return res;
 }
 
@@ -259,8 +259,8 @@ WMError WindowController::SetWindowFlags(uint32_t windowId, uint32_t flags)
     if (res != WMError::WM_OK) {
         return res;
     }
-    RSTransaction::FlushImplicitTransaction();
-    WLOGFI("SetWindowFlags FlushImplicitTransaction end");
+    FlushWindowInfo(windowId);
+    WLOGFI("SetWindowFlags end");
     return res;
 }
 
@@ -276,8 +276,8 @@ WMError WindowController::SetSystemBarProperty(uint32_t windowId, WindowType typ
     if (res != WMError::WM_OK) {
         return res;
     }
-    RSTransaction::FlushImplicitTransaction();
-    WLOGFI("SetSystemBarProperty FlushImplicitTransaction end");
+    FlushWindowInfo(windowId);
+    WLOGFI("SetSystemBarProperty end");
     return res;
 }
 
@@ -297,8 +297,8 @@ WMError WindowController::ProcessWindowTouchedEvent(uint32_t windowId)
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     WMError focusRes = windowRoot_->RequestFocus(windowId);
     if (zOrderRes == WMError::WM_OK || focusRes == WMError::WM_OK) {
-        RSTransaction::FlushImplicitTransaction();
-        WLOGFI("ProcessWindowTouchedEvent FlushImplicitTransaction end");
+        FlushWindowInfo(windowId);
+        WLOGFI("ProcessWindowTouchedEvent end");
         return WMError::WM_OK;
     }
     return WMError::WM_ERROR_INVALID_OPERATION;
@@ -307,6 +307,13 @@ WMError WindowController::ProcessWindowTouchedEvent(uint32_t windowId)
 void WindowController::MinimizeAllAppWindows(DisplayId displayId)
 {
     windowRoot_->MinimizeAllAppWindows(displayId);
+}
+
+void WindowController::FlushWindowInfo(uint32_t windowId)
+{
+    WLOGFI("FlushWindowInfo");
+    RSTransaction::FlushImplicitTransaction();
+    inputWindowMonitor_->UpdateInputWindow(windowId);
 }
 }
 }
