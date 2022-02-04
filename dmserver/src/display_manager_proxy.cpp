@@ -67,7 +67,10 @@ DisplayInfo DisplayManagerProxy::GetDisplayInfoById(DisplayId displayId)
         WLOGFE("GetDisplayInfoById: WriteInterfaceToken failed");
         return DisplayInfo();
     }
-    data.WriteUint64(displayId);
+    if (!data.WriteUint64(displayId)) {
+        WLOGFW("GetDisplayInfoById: WriteUint64 displayId failed");
+        return DisplayInfo();
+    }
     if (remote->SendRequest(TRANS_ID_GET_DISPLAY_BY_ID, data, reply, option) != ERR_NONE) {
         WLOGFW("GetDisplayInfoById: SendRequest failed");
         return DisplayInfo();
@@ -129,7 +132,10 @@ DMError DisplayManagerProxy::DestroyVirtualScreen(ScreenId screenId)
         WLOGFE("DisplayManagerProxy::DestroyVirtualScreen: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
-    data.WriteUint64(static_cast<uint64_t>(screenId));
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFW("DisplayManagerProxy::DestroyVirtualScreen: WriteUint64 screenId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
     if (remote->SendRequest(TRANS_ID_DESTROY_VIRTUAL_SCREEN, data, reply, option) != ERR_NONE) {
         WLOGFW("DisplayManagerProxy::DestroyVirtualScreen: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
@@ -169,6 +175,186 @@ std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDispalySnapshot(Display
         return nullptr;
     }
     return pixelMap;
+}
+
+DMError DisplayManagerProxy::GetScreenSupportedColorGamuts(ScreenId screenId,
+    std::vector<ScreenColorGamut>& colorGamuts)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("DisplayManagerProxy::GetScreenSupportedColorGamuts: remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFW("DisplayManagerProxy::GetScreenSupportedColorGamuts: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFW("DisplayManagerProxy::GetScreenSupportedColorGamuts: WriteUint64 screenId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS, data, reply, option) != ERR_NONE) {
+        WLOGFW("DisplayManagerProxy::GetScreenSupportedColorGamuts: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    if (ret != DMError::DM_OK) {
+        return ret;
+    }
+    uint32_t size = reply.ReadUint32();
+    colorGamuts.clear();
+    for (uint32_t i = 0; i < size; i++) {
+        ScreenColorGamut colorGamut = static_cast<ScreenColorGamut>(reply.ReadUint32());
+        colorGamuts.push_back(colorGamut);
+    }
+    return ret;
+}
+
+DMError DisplayManagerProxy::GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("DisplayManagerProxy::GetScreenColorGamut: remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFW("DisplayManagerProxy::GetScreenColorGamut: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFW("DisplayManagerProxy::GetScreenColorGamut: WriteUint64 uint64_t failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(TRANS_ID_SCREEN_GET_COLOR_GAMUT, data, reply, option) != ERR_NONE) {
+        WLOGFW("DisplayManagerProxy::GetScreenColorGamut: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    if (ret != DMError::DM_OK) {
+        return ret;
+    }
+    colorGamut = static_cast<ScreenColorGamut>(reply.ReadUint32());
+    return ret;
+}
+
+DMError DisplayManagerProxy::SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("DisplayManagerProxy::SetScreenColorGamut: remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFW("DisplayManagerProxy::SetScreenColorGamut: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId)) || !data.WriteInt32(colorGamutIdx)) {
+        WLOGFW("DisplayManagerProxy::SetScreenColorGamut: Write failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(TRANS_ID_SCREEN_SET_COLOR_GAMUT, data, reply, option) != ERR_NONE) {
+        WLOGFW("DisplayManagerProxy::SetScreenColorGamut: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    return ret;
+}
+
+DMError DisplayManagerProxy::GetScreenGamutsMap(ScreenId screenId, ScreenGamutMap& gamutMap)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("DisplayManagerProxy::GetScreenGamutsMap: remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFW("DisplayManagerProxy::GetScreenGamutsMap: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFW("DisplayManagerProxy::GetScreenGamutsMap: WriteUint64 screenId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(TRANS_ID_SCREEN_GET_GAMUT_MAP, data, reply, option) != ERR_NONE) {
+        WLOGFW("DisplayManagerProxy::GetScreenGamutsMap: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    if (ret != DMError::DM_OK) {
+        return ret;
+    }
+    gamutMap = static_cast<ScreenGamutMap>(reply.ReadUint32());
+    return ret;
+}
+
+DMError DisplayManagerProxy::SetScreenGamutsMap(ScreenId screenId, ScreenGamutMap gamutMap)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("DisplayManagerProxy::SetScreenGamutsMap: remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFW("DisplayManagerProxy::SetScreenGamutsMap: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId)) || !data.WriteUint32(static_cast<uint32_t>(gamutMap))) {
+        WLOGFW("DisplayManagerProxy::SetScreenGamutsMap: Writ failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(TRANS_ID_SCREEN_SET_GAMUT_MAP, data, reply, option) != ERR_NONE) {
+        WLOGFW("DisplayManagerProxy::SetScreenGamutsMap: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    return ret;
+}
+
+DMError DisplayManagerProxy::SetScreenColorTransform(ScreenId screenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("DisplayManagerProxy::SetScreenColorTransform: remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFW("DisplayManagerProxy::SetScreenColorTransform: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFW("DisplayManagerProxy::SetScreenColorTransform: WriteUint64 screenId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(TRANS_ID_SCREEN_SET_COLOR_TRANSFORM, data, reply, option) != ERR_NONE) {
+        WLOGFW("DisplayManagerProxy::SetScreenColorTransform: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    return ret;
 }
 
 bool DisplayManagerProxy::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,

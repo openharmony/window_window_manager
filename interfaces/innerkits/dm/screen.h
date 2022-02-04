@@ -17,9 +17,11 @@
 #define FOUNDATION_DM_SCREEN_H
 
 #include <string>
+#include <vector>
 
 #include <refbase.h>
 #include <surface.h>
+#include <screen_manager/screen_types.h>
 
 #include "dm_common.h"
 
@@ -65,6 +67,14 @@ public:
     uint32_t GetModeId() const;
     std::vector<sptr<SupportedScreenModes>> GetSupportedModes() const;
     bool SetScreenActiveMode(uint32_t modeId);
+
+    // colorspace, gamut
+    DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const;
+    DMError GetScreenColorGamut(ScreenColorGamut& colorGamut) const;
+    DMError SetScreenColorGamut(int32_t colorGamutIdx);
+    DMError GetScreenGamutsMap(ScreenGamutMap& gamutMap) const;
+    DMError SetScreenGamutsMap(ScreenGamutMap gamutMap);
+    DMError SetScreenColorTransform();
 
 private:
     class Impl;
