@@ -278,11 +278,6 @@ void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType t
     WindowManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
 }
 
-std::shared_ptr<RSDisplayNode> WindowManagerService::GetDisplayNode(DisplayId displayId) const
-{
-    return windowRoot_->GetOrCreateWindowNodeContainer(displayId)->GetDisplayNode();
-}
-
 void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)
 {
     switch (event) {

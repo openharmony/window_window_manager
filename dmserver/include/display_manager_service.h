@@ -21,6 +21,7 @@
 
 #include <system_ability.h>
 #include <surface.h>
+#include <ui/rs_display_node.h>
 
 #include "dm_common.h"
 #include "screen.h"
@@ -48,6 +49,7 @@ public:
     DisplayId GetDefaultDisplayId() override;
     DisplayInfo GetDisplayInfoById(DisplayId displayId) override;
     std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
+    ScreenId GetRSScreenId(DisplayId displayId) const;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) override;
@@ -67,10 +69,13 @@ public:
     bool SuspendEnd() override;
     bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason) override;
     bool SetDisplayState(DisplayState state) override;
+    void UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
+
     DisplayState GetDisplayState(DisplayId displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
 
     sptr<AbstractScreenController> GetAbstractScreenController();
+    sptr<AbstractDisplay> GetDisplayByDisplayId(DisplayId displayId) const;
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
@@ -86,6 +91,8 @@ private:
     ScreenId GetScreenIdFromDisplayId(DisplayId displayId);
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     void NotifyDisplayStateChange(DisplayStateChangeType type);
+    ScreenId GetScreenIdByDisplayId(DisplayId displayId) const;
+    std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByDisplayId(DisplayId displayId) const;
 
     std::recursive_mutex mutex_;
     static inline SingletonDelegator<DisplayManagerService> delegator_;

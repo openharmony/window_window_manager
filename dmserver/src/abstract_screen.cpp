@@ -59,6 +59,30 @@ const sptr<ScreenInfo> AbstractScreen::ConvertToScreenInfo() const
     return info;
 }
 
+void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd)
+{
+    if (rsDisplayNode_ == nullptr) {
+        WLOGFE("rsDisplayNode_ is nullptr");
+        return;
+    }
+    WLOGFI("AbstractScreen::UpdateRSTree");
+    if (isAdd) {
+        rsDisplayNode_->AddChild(surfaceNode, -1);
+    } else {
+        rsDisplayNode_->RemoveChild(surfaceNode);
+    }
+}
+
+void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
+{
+    std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
+    if (rsDisplayNode == nullptr) {
+        WLOGE("fail to add child. create rsDisplayNode fail!");
+        return;
+    }
+    rsDisplayNode_ = rsDisplayNode;
+}
+
 void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
 {
     info->id_ = dmsId_;
@@ -129,12 +153,7 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
             WLOGE("fail to add child. invalid group combination:%{public}u", combination_);
             return false;
     }
-    std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
-    if (rsDisplayNode == nullptr) {
-        WLOGE("fail to add child. create rsDisplayNode fail!");
-        return false;
-    }
-    dmsScreen->rsDisplayNode_ = rsDisplayNode;
+    dmsScreen->InitRSDisplayNode(config);
     abstractScreenMap_.insert(std::make_pair(screenId, std::make_pair(dmsScreen, startPoint)));
     return true;
 }

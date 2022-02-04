@@ -22,6 +22,7 @@
 #include <refbase.h>
 #include <screen_manager/screen_types.h>
 #include <ui/rs_display_node.h>
+#include <ui/rs_surface_node.h>
 
 #include "screen.h"
 #include "screen_group.h"
@@ -45,6 +46,9 @@ public:
     std::vector<sptr<SupportedScreenModes>> GetAbstractScreenModes() const;
     sptr<AbstractScreenGroup> GetGroup() const;
     const sptr<ScreenInfo> ConvertToScreenInfo() const;
+
+    void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
+    void InitRSDisplayNode(RSDisplayNodeConfig& config);
 
     ScreenId dmsId_;
     ScreenId rsId_;
