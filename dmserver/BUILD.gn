@@ -55,12 +55,6 @@ ohos_shared_library("libdms") {
 
     # RSSurface
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
-
-    # todo need delete it
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
-    "//foundation/windowmanager/wmserver:libwms",
-
-    # need delete end
   ]
 
   external_deps = [

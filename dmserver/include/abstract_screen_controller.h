@@ -42,7 +42,7 @@ public:
 
     void Init();
     std::vector<ScreenId> GetAllScreenIds();
-    sptr<AbstractScreen> GetAbstractScreen(ScreenId dmsScreenId);
+    sptr<AbstractScreen> GetAbstractScreen(ScreenId dmsScreenId) const;
     sptr<AbstractScreenGroup> GetAbstractScreenGroup(ScreenId dmsScreenId);
     ScreenId GetDefaultAbstractScreenId();
     ScreenId ConvertToRsScreenId(ScreenId dmsScreenId);
@@ -52,6 +52,8 @@ public:
     DMError DestroyVirtualScreen(ScreenId screenId);
     bool IsScreenGroup(ScreenId screenId) const;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
+    std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
+    void UpdateRSTree(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
 
 private:
     void OnRsScreenChange(ScreenId rsScreenId, ScreenEvent screenEvent);

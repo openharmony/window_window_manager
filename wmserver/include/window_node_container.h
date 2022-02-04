@@ -29,7 +29,7 @@ namespace OHOS {
 namespace Rosen {
 class WindowNodeContainer : public RefBase {
 public:
-    WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height);
+    WindowNodeContainer(uint64_t displayId, uint32_t width, uint32_t height);
     ~WindowNodeContainer();
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);
@@ -43,12 +43,12 @@ public:
     WMError MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node);
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
     uint64_t GetScreenId() const;
+    DisplayId GetDisplayId() const;
     Rect GetDisplayRect() const;
     sptr<WindowNode> GetTopImmersiveNode() const;
     void UpdateWindowStatus(const sptr<WindowNode>& windowId, WindowUpdateType type) const;
 
     void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas);
-    std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void LayoutDividerWindow(sptr<WindowNode>& node);
     bool isVerticalDisplay() const;
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
@@ -88,9 +88,8 @@ private:
     sptr<WindowNode> belowAppWindowNode_ = new WindowNode();
     sptr<WindowNode> appWindowNode_ = new WindowNode();
     sptr<WindowNode> aboveAppWindowNode_ = new WindowNode();
-    std::shared_ptr<RSDisplayNode> displayNode_;
     std::vector<uint32_t> removedIds_;
-    uint64_t screenId_ = 0;
+    DisplayId displayId_ = 0;
     Rect displayRect_;
     std::unordered_map<WindowType, sptr<WindowNode>> sysBarNodeMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     nullptr },
