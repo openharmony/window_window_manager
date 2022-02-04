@@ -55,6 +55,13 @@ public:
         TRANS_ID_SCREENGROUP_BASE = 1100,
         TRANS_ID_SCREEN_MAKE_MIRROR = TRANS_ID_SCREENGROUP_BASE,
         TRANS_ID_SCREEN_MAKE_EXPAND,
+        TRANS_ID_SCREEN_GAMUT_BASE = 1200,
+        TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS = TRANS_ID_SCREEN_GAMUT_BASE,
+        TRANS_ID_SCREEN_GET_COLOR_GAMUT,
+        TRANS_ID_SCREEN_SET_COLOR_GAMUT,
+        TRANS_ID_SCREEN_GET_GAMUT_MAP,
+        TRANS_ID_SCREEN_SET_GAMUT_MAP,
+        TRANS_ID_SCREEN_SET_COLOR_TRANSFORM,
     };
 
     virtual DisplayId GetDefaultDisplayId() = 0;
@@ -63,6 +70,14 @@ public:
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
+
+    // colorspace, gamut
+    virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) = 0;
+    virtual DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut) = 0;
+    virtual DMError SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx) = 0;
+    virtual DMError GetScreenGamutsMap(ScreenId screenId, ScreenGamutMap& gamutMap) = 0;
+    virtual DMError SetScreenGamutsMap(ScreenId screenId, ScreenGamutMap gamutMap) = 0;
+    virtual DMError SetScreenColorTransform(ScreenId screenId) = 0;
 
     virtual bool RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) = 0;

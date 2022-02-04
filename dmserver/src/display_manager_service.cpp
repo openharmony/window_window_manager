@@ -144,6 +144,86 @@ std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(Displ
     return screenSnapshot;
 }
 
+
+DMError DisplayManagerService::GetScreenSupportedColorGamuts(ScreenId screenId,
+    std::vector<ScreenColorGamut>& colorGamuts)
+{
+    WLOGFI("GetScreenSupportedColorGamuts::ScreenId: %{public}" PRIu64 "", screenId);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("DisplayManagerService: ScreenId is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    WM_SCOPED_TRACE("dms:GetScreenSupportedColorGamuts(%" PRIu64")", screenId);
+
+    colorGamuts.clear();
+    colorGamuts.push_back(COLOR_GAMUT_NATIVE);
+    return DMError::DM_OK;
+}
+
+DMError DisplayManagerService::GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut)
+{
+    WLOGFI("GetScreenColorGamut::ScreenId: %{public}" PRIu64 "", screenId);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("DisplayManagerService: ScreenId is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    WM_SCOPED_TRACE("dms:GetScreenColorGamut(%" PRIu64")", screenId);
+
+    colorGamut = COLOR_GAMUT_NATIVE;
+    return DMError::DM_OK;
+}
+
+DMError DisplayManagerService::SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx)
+{
+    WLOGFI("SetScreenColorGamut::ScreenId: %{public}" PRIu64 ", colorGamutIdx %{public}d", screenId, colorGamutIdx);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("DisplayManagerService: ScreenId is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    WM_SCOPED_TRACE("dms:SetScreenColorGamut(%" PRIu64")", screenId);
+
+    return DMError::DM_OK;
+}
+
+DMError DisplayManagerService::GetScreenGamutsMap(ScreenId screenId, ScreenGamutMap& gamutMap)
+{
+    WLOGFI("GetScreenGamutsMap::ScreenId: %{public}" PRIu64 "", screenId);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("DisplayManagerService: ScreenId is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    WM_SCOPED_TRACE("dms:GetScreenGamutsMap(%" PRIu64")", screenId);
+
+    gamutMap = GAMUT_MAP_CONSTANT;
+    return DMError::DM_OK;
+}
+
+DMError DisplayManagerService::SetScreenGamutsMap(ScreenId screenId, ScreenGamutMap gamutMap)
+{
+    WLOGFI("SetScreenGamutsMap::ScreenId: %{public}" PRIu64 ", ScreenGamutMap %{public}u",
+        screenId, static_cast<uint32_t>(gamutMap));
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("DisplayManagerService: ScreenId is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    WM_SCOPED_TRACE("dms:SetScreenGamutsMap(%" PRIu64")", screenId);
+
+    return DMError::DM_OK;
+}
+
+DMError DisplayManagerService::SetScreenColorTransform(ScreenId screenId)
+{
+    WLOGFI("SetScreenColorTransform::ScreenId: %{public}" PRIu64 "", screenId);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("DisplayManagerService: ScreenId is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    WM_SCOPED_TRACE("dms:SetScreenColorTransform(%" PRIu64")", screenId);
+
+    return DMError::DM_OK;
+}
+
+
 void DisplayManagerService::OnStop()
 {
     WLOGFI("ready to stop display service.");
