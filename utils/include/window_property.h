@@ -31,6 +31,7 @@ public:
 
     void SetWindowName(const std::string& name);
     void SetWindowRect(const struct Rect& rect);
+    void SetWindowHotZoneRect(const struct Rect& rect);
     void SetWindowType(WindowType type);
     void SetWindowMode(WindowMode mode);
     void ResumeLastWindowMode();
@@ -49,6 +50,7 @@ public:
 
     const std::string& GetWindowName() const;
     Rect GetWindowRect() const;
+    Rect GetWindowHotZoneRect() const;
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;
     bool GetFullScreen() const;
@@ -69,6 +71,7 @@ public:
 private:
     std::string windowName_;
     Rect windowRect_ { 0, 0, 0, 0 };
+    Rect hotZoneRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     WindowMode mode_ { WindowMode::WINDOW_MODE_FULLSCREEN };
     WindowMode lastMode_ { WindowMode::WINDOW_MODE_FULLSCREEN };

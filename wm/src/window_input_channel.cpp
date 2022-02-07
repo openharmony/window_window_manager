@@ -69,7 +69,7 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         WLOGI("HandlePointerEvent RequestVsync");
         VsyncStation::GetInstance().RequestVsync(VsyncStation::CallbackType::CALLBACK_INPUT, callback_);
     } else {
-        WLOGI("HandlePointerEvent cosume non-move");
+        WLOGI("HandlePointerEvent cosume non-move, windowId: %{public}d", window_->GetWindowId());
         window_->ConsumePointerEvent(pointerEvent);
         pointerEvent->MarkProcessed();
     }

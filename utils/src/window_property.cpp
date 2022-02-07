@@ -28,6 +28,14 @@ void WindowProperty::SetWindowRect(const struct Rect& rect)
     windowRect_ = rect;
 }
 
+void WindowProperty::SetWindowHotZoneRect(const struct Rect& rect)
+{
+    hotZoneRect_.posX_ = rect.posX_ - HOTZONE;
+    hotZoneRect_.posY_ = rect.posY_ - HOTZONE;
+    hotZoneRect_.width_ = rect.width_ + HOTZONE + HOTZONE;
+    hotZoneRect_.height_ = rect.height_ + HOTZONE + HOTZONE;
+}
+
 void WindowProperty::SetWindowType(WindowType type)
 {
     type_ = type;
@@ -109,6 +117,11 @@ const std::string& WindowProperty::GetWindowName() const
 Rect WindowProperty::GetWindowRect() const
 {
     return windowRect_;
+}
+
+Rect WindowProperty::GetWindowHotZoneRect() const
+{
+    return hotZoneRect_;
 }
 
 WindowType WindowProperty::GetWindowType() const

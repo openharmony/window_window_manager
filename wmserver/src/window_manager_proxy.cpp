@@ -193,6 +193,35 @@ WMError WindowManagerProxy::Resize(uint32_t windowId, uint32_t width, uint32_t h
     return static_cast<WMError>(ret);
 }
 
+WMError WindowManagerProxy::Drag(uint32_t windowId, const Rect& rect)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!(data.WriteInt32(rect.posX_) && data.WriteInt32(rect.posY_) &&
+        data.WriteUint32(rect.width_) && data.WriteUint32(rect.height_))) {
+        WLOGFE("Write rect failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(TRANS_ID_DRAG, data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
+
 WMError WindowManagerProxy::RequestFocus(uint32_t windowId)
 {
     MessageParcel data;

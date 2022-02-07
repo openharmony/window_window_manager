@@ -23,6 +23,7 @@ group("systemtest") {
     ":wm_window_immersive_test",
     ":wm_window_input_method_test",
     ":wm_window_layout_test",
+    ":wm_window_move_drag_test",
     ":wm_window_multi_ability_test",
     ":wm_window_split_test",
     ":wm_window_subwindow_test",
@@ -94,6 +95,17 @@ ohos_systemtest("wm_window_split_test") {
 }
 
 ## SystemTest wm_window_split_test }}}
+
+## SystemTest wm_window_move_drag_test {{{
+ohos_systemtest("wm_window_move_drag_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_move_drag_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+}
+
+## SystemTest wm_window_move_drag_test }}}
 
 ## SystemTest window_input_method_test {{{
 ohos_systemtest("wm_window_input_method_test") {
