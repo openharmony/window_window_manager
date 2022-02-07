@@ -56,6 +56,12 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateSystemBarRegionTints(displayId, tints);
             break;
         }
+        case TRANS_ID_UPDATE_WINDOW_STATUS: {
+            sptr<WindowInfo> windowInfo = data.ReadParcelable<WindowInfo>();
+            WindowUpdateType type = static_cast<WindowUpdateType>(data.ReadUint32());
+            UpdateWindowStatus(windowInfo, type);
+            break;
+        }
         default:
             break;
     }

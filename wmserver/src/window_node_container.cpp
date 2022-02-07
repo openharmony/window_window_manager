@@ -25,6 +25,7 @@
 #include "window_manager_agent_controller.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 #include "wm_trace.h"
 #include "common_event_manager.h"
 
@@ -127,6 +128,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     }
     NotifyIfSystemBarTintChanged();
     DumpScreenWindowTree();
+    UpdateWindowStatus(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     WLOGFI("AddWindowNode windowId: %{public}d end", node->GetWindowId());
     return WMError::WM_OK;
 }
@@ -249,6 +251,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     }
     NotifyIfSystemBarTintChanged();
     DumpScreenWindowTree();
+    UpdateWindowStatus(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     WLOGFI("RemoveWindowNode windowId: %{public}d end", node->GetWindowId());
     return WMError::WM_OK;
 }
@@ -366,6 +369,8 @@ WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
     }
     UpdateFocusStatus(focusedWindow_, false);
     focusedWindow_ = windowId;
+    sptr<WindowNode> node = FindWindowNodeById(windowId);
+    UpdateWindowStatus(node, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
     UpdateFocusStatus(focusedWindow_, true);
     return WMError::WM_OK;
 }
@@ -483,6 +488,41 @@ void WindowNodeContainer::RaiseWindowToTop(uint32_t windowId, std::vector<sptr<W
         UpdateWindowTree(node);
         AssignZOrder();
         WLOGFI("raise window to top %{public}d", node->GetWindowId());
+    }
+}
+
+void WindowNodeContainer::UpdateWindowStatus(const sptr<WindowNode>& node, WindowUpdateType type) const
+{
+    if (node == nullptr) {
+        WLOGFE("window node is null");
+        return;
+    }
+    bool isNeedNotify = false;
+    switch (type) {
+        case WindowUpdateType::WINDOW_UPDATE_ADDED:
+            if (node->currentVisibility_) {
+                isNeedNotify = true;
+            }
+            break;
+        case WindowUpdateType::WINDOW_UPDATE_FOCUSED:
+            if (node->GetWindowId() == focusedWindow_) {
+                isNeedNotify = true;
+            }
+            break;
+        case WindowUpdateType::WINDOW_UPDATE_REMOVED:
+            isNeedNotify = true;
+            break;
+        default:
+            break;
+    }
+    if (isNeedNotify) {
+        sptr<WindowInfo> windowInfo = new WindowInfo();
+        windowInfo->wid_ = node->GetWindowId();
+        windowInfo->windowRect_ = node->GetLayoutRect();
+        windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
+        windowInfo->mode_ = node->GetWindowMode();
+        windowInfo->type_ = node->GetWindowType();
+        WindowManagerAgentController::GetInstance().UpdateWindowStatus(windowInfo, type);
     }
 }
 

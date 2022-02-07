@@ -49,6 +49,25 @@ public:
     virtual void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) = 0;
 };
 
+class WindowInfo : public Parcelable {
+public:
+    WindowInfo() = default;
+    ~WindowInfo() = default;
+
+    virtual bool Marshalling(Parcel& parcel) const override;
+    static WindowInfo* Unmarshalling(Parcel& parcel);
+
+    int32_t wid_;
+    Rect windowRect_;
+    bool focused_;
+    WindowMode mode_;
+    WindowType type_;
+};
+class IWindowUpdateListener : public RefBase {
+public:
+    virtual void OnWindowUpdate(const sptr<WindowInfo>& windowInfo, WindowUpdateType type) = 0;
+};
+
 class WindowManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManager);
 friend class WindowManagerAgent;
@@ -57,6 +76,8 @@ public:
     void UnregisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
     void RegisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
     void UnregisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
+    void RegisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
+    void UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
     void MinimizeAllAppWindows(DisplayId displayId);
 
 private:
@@ -68,6 +89,7 @@ private:
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         DisplayId displayId, bool focused) const;
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) const;
+    void UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type);
 };
 } // namespace Rosen
 } // namespace OHOS
