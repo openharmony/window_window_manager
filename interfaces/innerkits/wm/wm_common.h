@@ -139,6 +139,14 @@ struct AvoidArea {
     Rect rightRect;
     Rect bottomRect;
 };
+
+enum class WindowUpdateType : int32_t {
+    WINDOW_UPDATE_ADDED = 1,
+    WINDOW_UPDATE_REMOVED,
+    WINDOW_UPDATE_FOCUSED,
+    WINDOW_UPDATE_BOUNDS,
+    WINDOW_UPDATE_ACTIVE,
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

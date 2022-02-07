@@ -16,6 +16,7 @@
 #include "window_manager_agent.h"
 #include "foundation/windowmanager/interfaces/innerkits/wm/window_manager.h"
 #include "singleton_container.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -28,6 +29,11 @@ void WindowManagerAgent::UpdateFocusStatus(uint32_t windowId, const sptr<IRemote
 void WindowManagerAgent::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     SingletonContainer::Get<WindowManager>().UpdateSystemBarRegionTints(displayId, tints);
+}
+
+void WindowManagerAgent::UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type)
+{
+    SingletonContainer::Get<WindowManager>().UpdateWindowStatus(windowInfo, type);
 }
 } // namespace Rosen
 } // namespace OHOS

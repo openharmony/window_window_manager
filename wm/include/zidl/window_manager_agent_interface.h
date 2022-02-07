@@ -25,6 +25,7 @@ namespace Rosen {
 enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_FOCUS,
     WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE,
 };
 
 class IWindowManagerAgent : public IRemoteBroker {
@@ -33,12 +34,14 @@ public:
 
     enum {
         TRANS_ID_UPDATE_FOCUS_STATUS = 1,
-        TRANS_ID_UPDATE_SYSTEM_BAR_PROPS = 2,
+        TRANS_ID_UPDATE_SYSTEM_BAR_PROPS,
+        TRANS_ID_UPDATE_WINDOW_STATUS,
     };
 
     virtual void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         DisplayId displayId, bool focused) = 0;
     virtual void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) = 0;
+    virtual void UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
