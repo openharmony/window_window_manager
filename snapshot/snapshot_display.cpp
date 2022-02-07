@@ -30,12 +30,32 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    auto display = DisplayManager::GetInstance().GetDisplayById(cmdArgments.displayId);
+    if (display == nullptr) {
+        printf("error: GetDisplayById %" PRIu64 " error!\n", cmdArgments.displayId);
+        return -1;
+    }
+
+    printf("process: display %" PRIu64 ": width %d, height %d\n",
+        cmdArgments.displayId, display->GetWidth(), display->GetHeight());
+
     // get PixelMap from DisplayManager API
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = nullptr;
-    if (cmdArgments.width <= 0 || cmdArgments.height <= 0) {
+    if (!cmdArgments.isWidthSet && !cmdArgments.isHeightSet) {
         pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArgments.displayId); // default width & height
     } else {
-        auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+        if (!cmdArgments.isWidthSet) {
+            cmdArgments.width = display->GetWidth();
+            printf("process: reset to display's width %d\n", cmdArgments.width);
+        }
+        if (!cmdArgments.isHeightSet) {
+            cmdArgments.height = display->GetHeight();
+            printf("process: reset to display's height %d\n", cmdArgments.height);
+        }
+        if (!SnapShotUtils::CheckWidthAndHeightValid(cmdArgments)) {
+            printf("error: width %d, height %d invalid!\n", cmdArgments.width, cmdArgments.height);
+            return -1;
+        }
         const Media::Rect rect = {0, 0, display->GetWidth(), display->GetHeight()};
         const Media::Size size = {cmdArgments.width, cmdArgments.height};
         constexpr int rotation = 0;
@@ -47,12 +67,12 @@ int main(int argc, char *argv[])
         ret = SnapShotUtils::WriteToPngWithPixelMap(cmdArgments.fileName, *pixelMap);
     }
     if (!ret) {
-        printf("error: snapshot display %" PRIu64 ", write to %s as png failed!\n",
+        printf("\nerror: snapshot display %" PRIu64 ", write to %s as png failed!\n",
             cmdArgments.displayId, cmdArgments.fileName.c_str());
         return -1;
     }
 
-    printf("success: snapshot display %" PRIu64 ", write to %s as png\n",
-        cmdArgments.displayId, cmdArgments.fileName.c_str());
+    printf("\nsuccess: snapshot display %" PRIu64 ", write to %s as png, width %d, height %d\n",
+        cmdArgments.displayId, cmdArgments.fileName.c_str(), pixelMap->GetWidth(), pixelMap->GetHeight());
     return 0;
 }
