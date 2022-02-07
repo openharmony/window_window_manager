@@ -346,8 +346,13 @@ NativeValue* JsWindowStage::OnGetWindowMode(NativeEngine& engine, NativeCallback
                 return;
             }
             Rosen::WindowMode mode = window->GetMode();
-            task.Resolve(engine, CreateJsValue(engine, mode));
-            WLOGFI("JsWindowStage OnGetWindowMode success");
+            if (NATIVE_TO_JS_WINDOW_MODE_MAP.count(mode) != 0) {
+                task.Resolve(engine, CreateJsValue(engine, NATIVE_TO_JS_WINDOW_MODE_MAP.at(mode)));
+                WLOGFI("JsWindowStage OnGetWindowMode success");
+            } else {
+                task.Resolve(engine, CreateJsValue(engine, mode));
+                WLOGFI("JsWindowStage OnGetWindowMode success, but not in apimode");
+            }
         };
     NativeValue* callback = info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr;
     NativeValue* result = nullptr;
