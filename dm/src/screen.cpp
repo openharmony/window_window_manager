@@ -18,8 +18,12 @@
 #include "display_manager_adapter.h"
 #include "screen_group.h"
 #include "screen_info.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "Screen"};
+}
 class Screen::Impl : public RefBase {
 friend class Screen;
 public:
@@ -39,6 +43,10 @@ public:
 Screen::Screen(const ScreenInfo* info)
     : pImpl_(new Impl())
 {
+    if (info == nullptr) {
+        WLOGFE("info is nullptr.");
+        return;
+    }
     pImpl_->id_ = info->id_;
     pImpl_->virtualWidth_ = info->virtualWidth_;
     pImpl_->virtualHeight_ = info->virtualHeight_;
