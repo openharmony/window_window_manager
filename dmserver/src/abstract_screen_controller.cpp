@@ -20,6 +20,7 @@
 #include <screen_manager/screen_types.h>
 #include <surface.h>
 
+#include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
 #include "window_manager_hilog.h"
 
@@ -83,10 +84,30 @@ sptr<AbstractScreenGroup> AbstractScreenController::GetAbstractScreenGroup(Scree
     return screen;
 }
 
-ScreenId AbstractScreenController::GetMainAbstractScreenId()
+ScreenId AbstractScreenController::GetDefaultAbstractScreenId()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return primaryDmsScreenId_;
+    ScreenId rsDefaultId = rsInterface_->GetDefaultScreenId();
+    if (rsDefaultId == INVALID_SCREEN_ID) {
+        WLOGFW("GetDefaultAbstractScreenId, rsDefaultId is invalid.");
+        return INVALID_SCREEN_ID;
+    }
+    auto iter = rs2DmsScreenIdMap_.find(rsDefaultId);
+    if (iter != rs2DmsScreenIdMap_.end()) {
+        return iter->second;
+    }
+    WLOGFI("GetDefaultAbstractScreenId, default screen is null, try to get.");
+    ScreenId dmsScreenId = dmsScreenCount_;
+    sptr<AbstractScreen> absScreen = new AbstractScreen(dmsScreenId, rsDefaultId);
+    if (!FillAbstractScreen(absScreen, rsDefaultId)) {
+        WLOGFW("GetDefaultAbstractScreenId, FillAbstractScreen failed.");
+        return INVALID_SCREEN_ID;
+    }
+    rs2DmsScreenIdMap_.insert(std::make_pair(rsDefaultId, dmsScreenId));
+    dms2RsScreenIdMap_.insert(std::make_pair(dmsScreenId, rsDefaultId));
+    dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));
+    dmsScreenCount_++;
+    return dmsScreenId;
 }
 
 ScreenId AbstractScreenController::ConvertToRsScreenId(ScreenId dmsScreenId)
@@ -132,12 +153,12 @@ void AbstractScreenController::OnRsScreenChange(ScreenId rsScreenId, ScreenEvent
             rs2DmsScreenIdMap_.insert(std::make_pair(rsScreenId, dmsScreenId));
             dms2RsScreenIdMap_.insert(std::make_pair(dmsScreenId, rsScreenId));
             dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));
+            DisplayManagerAgentController::GetInstance().OnScreenConnect(absScreen->ConvertToScreenInfo());
             dmsScreenCount_++;
             sptr<AbstractScreenGroup> screenGroup = AddToGroupLocked(absScreen);
             if (screenGroup != nullptr && abstractScreenCallback_ != nullptr) {
                 abstractScreenCallback_->onConnected_(absScreen);
             }
-            primaryDmsScreenId_ = dmsScreenId;
         } else {
             WLOGE("reconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
         }
@@ -164,15 +185,10 @@ void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
         }
         RemoveFromGroupLocked(dmsScreenMapIter->second);
         dmsScreenMap_.erase(dmsScreenMapIter);
-        auto firstIter = dmsScreenMap_.begin();
-        if (firstIter == dmsScreenMap_.end()) {
-            primaryDmsScreenId_ = SCREEN_ID_INVALID;
-        } else {
-            primaryDmsScreenId_ = firstIter->second->dmsId_;
-        }
     }
     rs2DmsScreenIdMap_.erase(iter);
     dms2RsScreenIdMap_.erase(dmsScreenId);
+    DisplayManagerAgentController::GetInstance().OnScreenDisconnect(dmsScreenId);
 }
 
 bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScreen, ScreenId rsScreenId)
@@ -207,27 +223,34 @@ bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScree
 
 sptr<AbstractScreenGroup> AbstractScreenController::AddToGroupLocked(sptr<AbstractScreen> newScreen)
 {
+    sptr<AbstractScreenGroup> res;
     if (dmsScreenGroupMap_.empty()) {
         WLOGE("connect the first screen");
-        return AddAsFirstScreenLocked(newScreen);
+        res = AddAsFirstScreenLocked(newScreen);
+    } else {
+        res = AddAsSuccedentScreenLocked(newScreen);
     }
-    return AddAsSuccedentScreenLocked(newScreen);
+    if (res != nullptr) {
+        DisplayManagerAgentController::GetInstance().OnScreenChange(
+            newScreen->ConvertToScreenInfo(), ScreenChangeEvent::ADD_TO_GROUP);
+    }
+    return res;
 }
 
-sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<AbstractScreen> newScreen)
+sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<AbstractScreen> screen)
 {
     WLOGI("RemoveFromGroupLocked.");
-    auto groupDmsId = newScreen->groupDmsId_;
+    auto groupDmsId = screen->groupDmsId_;
     auto iter = dmsScreenGroupMap_.find(groupDmsId);
     if (iter == dmsScreenGroupMap_.end()) {
         WLOGE("RemoveFromGroupLocked. groupDmsId:%{public}" PRIu64"is not in dmsScreenGroupMap_.", groupDmsId);
         return nullptr;
     }
     sptr<AbstractScreenGroup> screenGroup = iter->second;
-    bool res = screenGroup->RemoveChild(newScreen);
+    bool res = screenGroup->RemoveChild(screen);
     if (!res) {
         WLOGE("RemoveFromGroupLocked. remove screen:%{public}" PRIu64" failed from screenGroup:%{public}" PRIu64".",
-            newScreen->dmsId_, groupDmsId);
+            screen->dmsId_, groupDmsId);
         return nullptr;
     }
     if (screenGroup->GetChildCount() == 0) {
@@ -235,6 +258,8 @@ sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<A
         dmsScreenGroupMap_.erase(screenGroup->dmsId_);
         dmsScreenMap_.erase(screenGroup->dmsId_);
     }
+    DisplayManagerAgentController::GetInstance().OnScreenChange(
+        screen->ConvertToScreenInfo(), ScreenChangeEvent::REMOVE_FROM_GROUP);
     return screenGroup;
 }
 
@@ -263,7 +288,6 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsFirstScreenLocked(sptr<
     }
     dmsScreenCount_++;
     newScreen->groupDmsId_ = dmsGroupScreenId;
-    primaryDmsScreenId_ = newScreen->dmsId_;
     auto iter = dmsScreenGroupMap_.find(dmsGroupScreenId);
     if (iter != dmsScreenGroupMap_.end()) {
         WLOGE("group screen existed. id=%{public}" PRIu64"", dmsGroupScreenId);
@@ -284,11 +308,11 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsSuccedentScreenLocked(s
             newScreen->dmsId_);
         return nullptr;
     }
-    // TODO: Mirror to main screen
-    auto iter = dmsScreenMap_.find(primaryDmsScreenId_);
+    ScreenId defaultScreenId = GetDefaultAbstractScreenId();
+    auto iter = dmsScreenMap_.find(defaultScreenId);
     if (iter == dmsScreenMap_.end()) {
-        WLOGE("AddAsSuccedentScreenLocked. primaryDmsScreenId_:%{public}" PRIu64" is not in dmsScreenMap_.",
-            primaryDmsScreenId_);
+        WLOGE("AddAsSuccedentScreenLocked. defaultScreenId:%{public}" PRIu64" is not in dmsScreenMap_.",
+            defaultScreenId);
         return nullptr;
     }
     auto screen = iter->second;

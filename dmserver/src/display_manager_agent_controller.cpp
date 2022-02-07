@@ -63,6 +63,9 @@ bool DisplayManagerAgentController::NotifyDisplayStateChanged(DisplayState state
 
 void DisplayManagerAgentController::OnScreenConnect(sptr<ScreenInfo> screenInfo)
 {
+    if (screenInfo == nullptr) {
+        return;
+    }
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
     if (agents.empty()) {
         return;
@@ -85,11 +88,21 @@ void DisplayManagerAgentController::OnScreenDisconnect(ScreenId screenId)
     }
 }
 
+void DisplayManagerAgentController::OnScreenChange(sptr<ScreenInfo> screenInfo, ScreenChangeEvent screenChangeEvent)
+{
+    if (screenInfo == nullptr) {
+        return;
+    }
+    std::vector<const sptr<ScreenInfo>> screenInfos;
+    screenInfos.push_back(screenInfo);
+    OnScreenChange(screenInfos, screenChangeEvent);
+}
+
 void DisplayManagerAgentController::OnScreenChange(
     const std::vector<const sptr<ScreenInfo>>& screenInfos, ScreenChangeEvent screenChangeEvent)
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
-    if (agents.empty()) {
+    if (agents.empty() || screenInfos.empty()) {
         return;
     }
     WLOGFI("OnScreenChange");

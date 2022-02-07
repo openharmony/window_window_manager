@@ -124,4 +124,14 @@ ScreenId AbstractDisplay::GetAbstractScreenId() const
 {
     return screenId_;
 }
+
+const sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
+{
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    displayInfo->width_ = width_;
+    displayInfo->height_ = height_;
+    displayInfo->id_ = id_;
+    displayInfo->freshRate_ = freshRate_;
+    return displayInfo;
+}
 } // namespace OHOS::Rosen

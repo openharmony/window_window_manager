@@ -44,7 +44,7 @@ public:
     std::vector<ScreenId> GetAllScreenIds();
     sptr<AbstractScreen> GetAbstractScreen(ScreenId dmsScreenId);
     sptr<AbstractScreenGroup> GetAbstractScreenGroup(ScreenId dmsScreenId);
-    ScreenId GetMainAbstractScreenId();
+    ScreenId GetDefaultAbstractScreenId();
     ScreenId ConvertToRsScreenId(ScreenId dmsScreenId);
     ScreenId ConvertToDmsScreenId(ScreenId rsScreenId);
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
@@ -70,7 +70,6 @@ private:
     std::map<ScreenId, ScreenId> dms2RsScreenIdMap_;
     std::map<ScreenId, sptr<AbstractScreen>> dmsScreenMap_;
     std::map<ScreenId, sptr<AbstractScreenGroup>> dmsScreenGroupMap_;
-    ScreenId primaryDmsScreenId_ { SCREEN_ID_INVALID };
     sptr<AbstractScreenCallback> abstractScreenCallback_;
 };
 } // namespace OHOS::Rosen
