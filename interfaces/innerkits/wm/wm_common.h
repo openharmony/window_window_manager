@@ -107,8 +107,8 @@ struct Rect {
 };
 
 namespace {
-    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xFFFFFFE5;
-    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x00000066;
+    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
+    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
     constexpr uint32_t DIVIDER_WIDTH = 8;
     constexpr uint32_t INVALID_WINDOW_ID = 0;

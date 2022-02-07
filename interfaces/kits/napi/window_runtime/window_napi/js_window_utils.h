@@ -31,7 +31,7 @@ namespace {
     constexpr int32_t INDEX_ONE = 1;
     constexpr int32_t INDEX_TWO = 2;
     constexpr int32_t INDEX_THREE = 3;
-    constexpr int32_t RGB_LENGTH = 7;
+    constexpr int32_t RGB_LENGTH = 6;
     constexpr int32_t RGBA_LENGTH = 8;
     enum class ApiWindowType : uint32_t {
         TYPE_BASE,

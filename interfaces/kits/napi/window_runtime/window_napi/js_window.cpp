@@ -22,9 +22,8 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsWindow"};
+    constexpr Rect EMPTY_RECT = {0, 0, 0, 0};
 }
-
-constexpr Rect EMPTY_RECT = {0, 0, 0, 0};
 
 static std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
 std::recursive_mutex g_mutex;
@@ -43,6 +42,15 @@ std::string JsWindow::GetWindowName()
         return "";
     }
     return windowToken_->GetWindowName();
+}
+
+std::shared_ptr<OHOS::AppExecFwk::EventHandler> JsWindow::GetMainHandler()
+{
+    if (!mainHandler_) {
+        mainHandler_ =
+            std::make_shared<OHOS::AppExecFwk::EventHandler>(OHOS::AppExecFwk::EventRunner::GetMainEventRunner());
+    }
+    return mainHandler_;
 }
 
 void JsWindow::Finalizer(NativeEngine* engine, void* data, void* hint)
@@ -456,12 +464,13 @@ void JsWindow::RegisterWindowListenerWithType(NativeEngine& engine, std::string 
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     if (jsListenerMap_.find(type) == jsListenerMap_.end()) {
-        sptr<JsWindowListener> windowListener = new JsWindowListener(&engine);
-        if (type.compare("windowSizeChange") == 0) {
+        auto mainHandler = GetMainHandler();
+        sptr<JsWindowListener> windowListener = new JsWindowListener(&engine, mainHandler);
+        if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
             sptr<IWindowChangeListener> thisListener(windowListener);
             windowToken_->RegisterWindowChangeListener(thisListener);
             WLOGFI("JsWindow::RegisterWindowListenerWithType windowSizeChange success");
-        } else if (type.compare("systemAvoidAreaChange") == 0) {
+        } else if (type.compare(SYSTEM_AVOID_AREA_CHANGE_CB) == 0) {
             sptr<IAvoidAreaChangedListener> thisListener(windowListener);
             windowToken_->RegisterAvoidAreaChangeListener(thisListener);
             WLOGFI("JsWindow::RegisterWindowListenerWithType systemAvoidAreaChange success");
@@ -487,12 +496,12 @@ void JsWindow::UnregisterAllWindowListenerWithType(std::string type)
         return;
     }
     jsListenerMap_[type]->RemoveAllCallback();
-    if (type.compare("windowSizeChange") == 0) {
+    if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
         sptr<IWindowChangeListener> thisListener(nullptr);
         windowToken_->RegisterWindowChangeListener(thisListener);
         WLOGFI("JsWindow::UnregisterAllWindowListenerWithType windowSizeChange success");
     }
-    if (type.compare("systemAvoidAreaChange") == 0) {
+    if (type.compare(SYSTEM_AVOID_AREA_CHANGE_CB) == 0) {
         windowToken_->UnregisterAvoidAreaChangeListener();
         WLOGFI("JsWindow::UnregisterAllWindowListenerWithType systemAvoidAreaChange success");
     }
@@ -519,12 +528,12 @@ void JsWindow::UnregisterWindowListenerWithType(std::string type, NativeValue* v
     }
     // one type with multi jscallback, erase type when there is no callback in one type
     if (jsCallbackMap_[type].empty()) {
-        if (type.compare("windowSizeChange") == 0) {
+        if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
             sptr<IWindowChangeListener> thisListener(nullptr);
             windowToken_->RegisterWindowChangeListener(thisListener);
             WLOGFI("JsWindow::UnregisterWindowListenerWithType windowSizeChange success");
         }
-        if (type.compare("systemAvoidAreaChange") == 0) {
+        if (type.compare(SYSTEM_AVOID_AREA_CHANGE_CB) == 0) {
             windowToken_->UnregisterAvoidAreaChangeListener();
             WLOGFI("JsWindow::UnregisterWindowListenerWithType systemAvoidAreaChange success");
         }
