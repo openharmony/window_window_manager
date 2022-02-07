@@ -170,7 +170,7 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
     ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     if (defaultScreenId == SCREEN_ID_INVALID) {
         if (dummyDisplay_ == nullptr) {
-            sptr<AbstractScreenInfo> info = realAbsScreen->GetActiveScreenInfo();
+            sptr<SupportedScreenModes> info = realAbsScreen->GetActiveScreenMode();
             if (info == nullptr) {
                 WLOGE("bind alone screen error, cannot get info.");
                 return;

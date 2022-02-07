@@ -149,6 +149,10 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case TRANS_ID_GET_SCREEN_INFO_BY_ID: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenInfo = GetScreenInfoById(screenId);
+            for (int i = 0; i < screenInfo->modes_.size(); i++) {
+                WLOGFI("info modes is width: %{public}u, height: %{public}u, freshRate: %{public}u",
+                    screenInfo->modes_[i]->width_, screenInfo->modes_[i]->height_, screenInfo->modes_[i]->freshRate_);
+            }
             reply.WriteStrongParcelable(screenInfo);
             break;
         }
@@ -181,6 +185,13 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             }
             DMError result = MakeExpand(screenId, startPoint);
             reply.WriteInt32(static_cast<int32_t>(result));
+            break;
+        }
+        case TRANS_ID_SET_SCREEN_ACTIVE_MODE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            uint32_t modeId = data.ReadUint32();
+            bool res = SetScreenActiveMode(screenId, modeId);
+            reply.WriteBool(res);
             break;
         }
         default:

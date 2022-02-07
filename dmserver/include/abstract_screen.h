@@ -35,19 +35,14 @@ enum class ScreenType : uint32_t {
     VIRTUAL
 };
 
-struct AbstractScreenInfo : public RefBase {
-    int32_t width_;
-    int32_t height_;
-    uint32_t freshRate_;
-};
-
 class AbstractScreenGroup;
 class AbstractScreen : public RefBase {
 public:
     AbstractScreen(ScreenId dmsId, ScreenId rsId);
     AbstractScreen() = delete;
     ~AbstractScreen();
-    sptr<AbstractScreenInfo> GetActiveScreenInfo() const;
+    sptr<SupportedScreenModes> GetActiveScreenMode() const;
+    std::vector<sptr<SupportedScreenModes>> GetAbstractScreenModes() const;
     sptr<AbstractScreenGroup> GetGroup() const;
     const sptr<ScreenInfo> ConvertToScreenInfo() const;
 
@@ -58,7 +53,7 @@ public:
     ScreenType type_ { ScreenType::REAL };
     int32_t activeIdx_;
     float virtualPixelRatio = { 1.0 };
-    std::vector<sptr<AbstractScreenInfo>> infos_ = {};
+    std::vector<sptr<SupportedScreenModes>> modes_ = {};
 protected:
     void FillScreenInfo(sptr<ScreenInfo>) const;
 };

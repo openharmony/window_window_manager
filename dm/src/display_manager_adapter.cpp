@@ -338,4 +338,13 @@ DMError DisplayManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::v
     }
     return displayManagerServiceProxy_->MakeExpand(screenId, startPoint);
 }
+
+bool DisplayManagerAdapter::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!InitDMSProxyLocked()) {
+        return false;
+    }
+    return displayManagerServiceProxy_->SetScreenActiveMode(screenId, modeId);
+}
 } // namespace OHOS::Rosen

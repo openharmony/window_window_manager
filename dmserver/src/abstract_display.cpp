@@ -106,7 +106,7 @@ bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
     }
     ScreenId dmsScreenId = abstractScreen->dmsId_;
     // TODO: screen->rsDisplayNode_->SetScreenId(rsScreenId);
-    sptr<AbstractScreenInfo> info = abstractScreen->GetActiveScreenInfo();
+    sptr<SupportedScreenModes> info = abstractScreen->GetActiveScreenMode();
     if (info == nullptr) {
         WLOGE("display bind screen error, cannot get info. display:%{public}" PRIu64", screen:%{public}" PRIu64"",
             id_, dmsScreenId);
