@@ -15,6 +15,8 @@
 #include "js_window_manager.h"
 #include <cinttypes>
 #include <ability.h>
+#include "event_handler.h"
+#include "event_runner.h"
 #include "js_runtime_utils.h"
 #include "js_window.h"
 #include "js_window_listener.h"
@@ -84,6 +86,16 @@ private:
     std::weak_ptr<Context> context_;
     std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler_ = nullptr;
+
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> GetMainHandler()
+    {
+        if (!mainHandler_) {
+            mainHandler_ =
+                std::make_shared<OHOS::AppExecFwk::EventHandler>(OHOS::AppExecFwk::EventRunner::GetMainEventRunner());
+        }
+        return mainHandler_;
+    }
 
     bool GetNativeContext(NativeValue* nativeContext)
     {
@@ -259,11 +271,14 @@ private:
         }
         std::unique_ptr<NativeReference> callbackRef;
         callbackRef.reset(engine.CreateReference(value, 1));
-        sptr<JsWindowListener> windowManagerListener = new JsWindowListener(&engine);
-        if (type.compare("systemUiTintChange") == 0) {
+
+        auto mainHandler = GetMainHandler();
+        sptr<JsWindowListener> windowManagerListener = new JsWindowListener(&engine, mainHandler);
+
+        if (type.compare(SYSTEM_BAR_TINT_CHANGE_CB) == 0) {
             sptr<ISystemBarChangedListener> thisListener(windowManagerListener);
             SingletonContainer::Get<WindowManager>().RegisterSystemBarChangedListener(thisListener);
-            WLOGFI("JsWindowManager::RegisterWmListenerWithType systemUiTintChange success");
+            WLOGFI("JsWindowManager::RegisterWmListenerWithType systemBarTintChange success");
         } else {
             WLOGFE("JsWindowManager::RegisterWmListenerWithType failed method: %{public}s not support!",
                 type.c_str());
@@ -283,10 +298,10 @@ private:
         }
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
             it->second->RemoveAllCallback();
-            if (type.compare("systemUiTintChange") == 0) {
+            if (type.compare(SYSTEM_BAR_TINT_CHANGE_CB) == 0) {
                 sptr<ISystemBarChangedListener> thisListener(it->second);
                 SingletonContainer::Get<WindowManager>().UnregisterSystemBarChangedListener(thisListener);
-                WLOGFI("JsWindowManager::UnregisterAllWmListenerWithType systemUiTintChange success");
+                WLOGFI("JsWindowManager::UnregisterAllWmListenerWithType systemBarTintChange success");
             }
             jsCbMap_[type].erase(it++);
         }
@@ -304,10 +319,10 @@ private:
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
             if (value->StrictEquals(it->first->Get())) {
                 it->second->RemoveCallback(value);
-                if (type.compare("systemUiTintChange") == 0) {
+                if (type.compare(SYSTEM_BAR_TINT_CHANGE_CB) == 0) {
                     sptr<ISystemBarChangedListener> thisListener(it->second);
                     SingletonContainer::Get<WindowManager>().UnregisterSystemBarChangedListener(thisListener);
-                    WLOGFI("JsWindowManager::UnregisterWmListenerWithType systemUiTintChange success");
+                    WLOGFI("JsWindowManager::UnregisterWmListenerWithType systemBarTintChange success");
                 }
                 jsCbMap_[type].erase(it++);
                 break;

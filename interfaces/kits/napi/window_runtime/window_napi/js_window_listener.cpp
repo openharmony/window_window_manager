@@ -83,17 +83,20 @@ void JsWindowListener::OnSizeChange(Rect rect)
         WLOGFE("JsWindowListener::OnSizeChange windowSizeChanged not register!");
         return;
     }
+    auto task = [this, rect] () {
+        NativeValue* sizeValue = engine_->CreateObject();
+        NativeObject* object = ConvertNativeValueTo<NativeObject>(sizeValue);
+        if (object == nullptr) {
+            WLOGFE("Failed to convert rect to jsObject");
+            return;
+        }
+        object->SetProperty("width", CreateJsValue(*engine_, rect.width_));
+        object->SetProperty("height", CreateJsValue(*engine_, rect.height_));
+        NativeValue* argv[] = {sizeValue};
+        CallJsMethod(WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
 
-    NativeValue* sizeValue = engine_->CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(sizeValue);
-    if (object == nullptr) {
-        WLOGFE("Failed to convert rect to jsObject");
-        return;
-    }
-    object->SetProperty("width", CreateJsValue(*engine_, rect.width_));
-    object->SetProperty("height", CreateJsValue(*engine_, rect.height_));
-    NativeValue* argv[] = {sizeValue};
-    CallJsMethod("windowSizeChange", argv, ArraySize(argv));
+    mainHandler_->PostTask(task);
 }
 
 void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
@@ -101,49 +104,58 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
     std::lock_guard<std::mutex> lock(mtx_);
     WLOGFI("JsWindowListener::OnSystemBarPropertyChange is called");
     if (jsCallBack_.empty()) {
-        WLOGFE("JsWindowListener::OnSystemBarPropertyChange systemUiTintChange not register!");
+        WLOGFE("JsWindowListener::OnSystemBarPropertyChange systemBarTintChange not register!");
         return;
     }
-    NativeValue* propertyValue = engine_->CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(propertyValue);
-    if (object == nullptr) {
-        WLOGFE("Failed to convert prop to jsObject");
-        return;
-    }
-    object->SetProperty("displayId", CreateJsValue(*engine_, static_cast<uint32_t>(displayId)));
-    object->SetProperty("regionTint", CreateJsSystemBarRegionTintArrayObject(*engine_, tints));
-    NativeValue* argv[] = {propertyValue};
-    CallJsMethod("systemUiTintChange", argv, ArraySize(argv));
+
+    auto task = [this, displayId, tints] () {
+        NativeValue* propertyValue = engine_->CreateObject();
+        NativeObject* object = ConvertNativeValueTo<NativeObject>(propertyValue);
+        if (object == nullptr) {
+            WLOGFE("Failed to convert prop to jsObject");
+            return;
+        }
+        object->SetProperty("displayId", CreateJsValue(*engine_, static_cast<uint32_t>(displayId)));
+        object->SetProperty("regionTint", CreateJsSystemBarRegionTintArrayObject(*engine_, tints));
+        NativeValue* argv[] = {propertyValue};
+        CallJsMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+
+    mainHandler_->PostTask(task);
 }
 
 void JsWindowListener::OnAvoidAreaChanged(const std::vector<Rect> avoidAreas)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGFI("OnAvoidAreaChanged is called");
+    WLOGFI("JsWindowListener::OnAvoidAreaChanged is called");
     if (jsCallBack_.empty()) {
-        WLOGFE("OnAvoidAreaChanged systemAvoidAreaChange not register!");
+        WLOGFE("JsWindowListener::OnAvoidAreaChanged systemAvoidAreaChange not register!");
         return;
     }
 
-    NativeValue* avoidAreaValue = engine_->CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(avoidAreaValue);
-    if (object == nullptr) {
-        WLOGFE("Failed to convert rect to jsObject");
-        return;
-    }
+    auto task = [this, avoidAreas] () {
+        NativeValue* avoidAreaValue = engine_->CreateObject();
+        NativeObject* object = ConvertNativeValueTo<NativeObject>(avoidAreaValue);
+        if (object == nullptr) {
+            WLOGFE("JsWindowListener::OnAvoidAreaChanged Failed to convert rect to jsObject");
+            return;
+        }
 
-    if (static_cast<uint32_t>(avoidAreas.size()) != AVOID_AREA_NUM) {
-        WLOGFE("AvoidAreas size is not 4 (left, top, right, bottom). Current avoidAreas size is %{public}u",
-            static_cast<uint32_t>(avoidAreas.size()));
-        return;
-    }
+        if (static_cast<uint32_t>(avoidAreas.size()) != AVOID_AREA_NUM) {
+            WLOGFE("AvoidAreas size is not 4 (left, top, right, bottom). Current avoidAreas size is %{public}u",
+                static_cast<uint32_t>(avoidAreas.size()));
+            return;
+        }
 
-    object->SetProperty("leftRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[0]));   // idx 0 : leftRect
-    object->SetProperty("topRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[1]));    // idx 1 : topRect
-    object->SetProperty("rightRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[2]));  // idx 2 : rightRect
-    object->SetProperty("bottomRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[3])); // idx 3 : bottomRect
-    NativeValue* argv[] = {avoidAreaValue};
-    CallJsMethod("systemAvoidAreaChange", argv, ArraySize(argv));
+        object->SetProperty("leftRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[0]));   // idx 0 : leftRect
+        object->SetProperty("topRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[1]));    // idx 1 : topRect
+        object->SetProperty("rightRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[2]));  // idx 2 : rightRect
+        object->SetProperty("bottomRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[3])); // idx 3 : bottomRect
+        NativeValue* argv[] = {avoidAreaValue};
+        CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+
+    mainHandler_->PostTask(task);
 }
 } // namespace Rosen
 } // namespace OHOS
