@@ -18,6 +18,7 @@
 #include <cinttypes>
 #include <surface.h>
 
+#include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
@@ -145,14 +146,8 @@ void AbstractDisplayController::OnAbstractScreenDisconnected(sptr<AbstractScreen
 void AbstractDisplayController::ProcessScreenDisconnected(
     sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup)
 {
-    auto screens = screenGroup->GetChildren();
-    sptr<AbstractScreen> defaultScreen;
-    for (auto iter = screens.begin(); iter != screens.end(); iter++) {
-        if ((*iter)->type_ == ScreenType::REAL) {
-            defaultScreen = (*iter);
-            break;
-        }
-    }
+    ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
+    sptr<AbstractScreen> defaultScreen = abstractScreenController_->GetAbstractScreen(defaultScreenId);
     for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
         sptr<AbstractDisplay> abstractDisplay = iter->second;
         if (abstractDisplay->GetAbstractScreenId() != absScreen->dmsId_) {
@@ -161,6 +156,7 @@ void AbstractDisplayController::ProcessScreenDisconnected(
         abstractDisplay->BindAbstractScreen(defaultScreen);
         if (screenGroup->GetChildCount() == 0) {
             abstractDisplayMap_.erase(iter);
+            DisplayManagerAgentController::GetInstance().OnDisplayDestroy(abstractDisplay->GetId());
         }
     }
 }
@@ -171,8 +167,8 @@ void AbstractDisplayController::OnAbstractScreenChanged(sptr<AbstractScreen> abs
 
 void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realAbsScreen)
 {
-    ScreenId mainScreenId = abstractScreenController_->GetMainAbstractScreenId();
-    if (mainScreenId == SCREEN_ID_INVALID) {
+    ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
+    if (defaultScreenId == SCREEN_ID_INVALID) {
         if (dummyDisplay_ == nullptr) {
             sptr<AbstractScreenInfo> info = realAbsScreen->GetActiveScreenInfo();
             if (info == nullptr) {
@@ -184,6 +180,7 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
             abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
             WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, display->GetId());
+            DisplayManagerAgentController::GetInstance().OnDisplayCreate(display->ConvertToDisplayInfo());
         } else {
             WLOGI("bind display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, dummyDisplay_->GetId());

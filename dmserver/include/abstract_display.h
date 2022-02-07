@@ -40,6 +40,7 @@ public:
     ScreenId GetAbstractScreenId() const;
     bool BindAbstractScreen(ScreenId dmsScreenId);
     bool BindAbstractScreen(sptr<AbstractScreen> abstractDisplay);
+    const sptr<DisplayInfo> ConvertToDisplayInfo() const;
 
     void SetId(DisplayId displayId);
     void SetWidth(int32_t width);
