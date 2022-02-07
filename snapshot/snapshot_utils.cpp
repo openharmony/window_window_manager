@@ -38,7 +38,7 @@ void SnapShotUtils::PrintUsage(const std::string &cmdLine)
 bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
 {
     WM_SCOPED_TRACE("snapshot:CheckFileNameValid(%s)", fileName.c_str());
-    if (fileName.length() < strlen(VALID_SNAPSHOT_SUFFIX)) {
+    if (fileName.length() <= strlen(VALID_SNAPSHOT_SUFFIX)) {
         printf("error: fileName %s invalid, file length too short!\n", fileName.c_str());
         return false;
     }
@@ -63,8 +63,8 @@ bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
     }
 
     // check file suffix
-    pos = fileName.find_last_of(VALID_SNAPSHOT_SUFFIX);
-    if (pos + 1 == fileName.length()) {
+    const char *fileNameSuffix = fileName.c_str() + (fileName.length() - strlen(VALID_SNAPSHOT_SUFFIX));
+    if (strncmp(fileNameSuffix, VALID_SNAPSHOT_SUFFIX, strlen(VALID_SNAPSHOT_SUFFIX)) == 0) {
         return true; // valid suffix
     }
 
@@ -97,7 +97,7 @@ bool SnapShotUtils::WriteToPng(const std::string &fileName, const WriteToPngPara
     if (!CheckParamValid(param)) {
         return false;
     }
-    
+
     WM_SCOPED_TRACE("snapshot:WriteToPng(%s)", fileName.c_str());
 
     png_structp pngStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
