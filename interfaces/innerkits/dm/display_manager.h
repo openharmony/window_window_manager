@@ -26,7 +26,6 @@
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
-class DisplayManagerAdapter;
 class DisplayManagerAgent;
 class DisplayManager {
 friend class DisplayManagerAgent;
@@ -45,6 +44,7 @@ public:
     const sptr<Display> GetDisplayById(DisplayId displayId);
     std::vector<DisplayId> GetAllDisplayIds();
     bool RegisterDisplayListener(sptr<IDisplayListener> listener);
+    bool UnregisterDisplayListener(sptr<IDisplayListener> listener);
 
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId);
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
@@ -68,6 +68,8 @@ private:
     DisplayManager();
     ~DisplayManager();
 
+    class DisplayManagerListener;
+    sptr<DisplayManagerListener> displayManagerListener_;
     class Impl;
     sptr<Impl> pImpl_;
 
