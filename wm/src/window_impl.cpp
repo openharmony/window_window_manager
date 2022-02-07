@@ -323,6 +323,21 @@ std::string WindowImpl::GetContentInfo()
     return uiContent_->GetContentInfo();
 }
 
+bool WindowImpl::IsSupportWideGamut()
+{
+    return SingletonContainer::Get<WindowAdapter>().IsSupportWideGamut(property_->GetWindowId());
+}
+
+void WindowImpl::SetColorSpace(ColorSpace colorSpace)
+{
+    SingletonContainer::Get<WindowAdapter>().SetColorSpace(property_->GetWindowId(), colorSpace);
+}
+
+ColorSpace WindowImpl::GetColorSpace()
+{
+    return SingletonContainer::Get<WindowAdapter>().GetColorSpace(property_->GetWindowId());
+}
+
 WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
     WLOGFI("[Client] Window %{public}d SetSystemBarProperty type %{public}d " \
@@ -547,7 +562,8 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
     }
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         Rect rect = GetRect();
-        property_->SetWindowRect({ x, y, rect.width_, rect.height_ });
+        Rect moveRect = { x, y, rect.width_, rect.height_ };
+        property_->SetWindowRect(moveRect);
         WLOGFI("window is hidden or created! id: %{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
                property_->GetWindowId(), rect.posX_, rect.posY_, x, y);
         return WMError::WM_OK;
@@ -562,7 +578,8 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
     }
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         Rect rect = GetRect();
-        property_->SetWindowRect({ rect.posX_, rect.posY_, width, height });
+        Rect resizeRect = { rect.posX_, rect.posY_, width, height };
+        property_->SetWindowRect(resizeRect);
         WLOGFI("window is hidden or created! id: %{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
                property_->GetWindowId(), rect.posX_, rect.posY_, width, height);
         return WMError::WM_OK;

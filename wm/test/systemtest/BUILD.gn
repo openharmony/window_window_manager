@@ -20,6 +20,7 @@ group("systemtest") {
 
   deps = [
     ":wm_window_focus_test",
+    ":wm_window_gamut_test",
     ":wm_window_immersive_test",
     ":wm_window_input_method_test",
     ":wm_window_layout_test",
@@ -117,6 +118,17 @@ ohos_systemtest("wm_window_input_method_test") {
 }
 
 ## SystemTest window_input_method_test }}}
+
+## SystemTest window_gamut_test {{{
+ohos_systemtest("wm_window_gamut_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_gamut_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+}
+
+## SystemTest window_gamut_test }}}
 
 ## Build wm_systemtest_common.a {{{
 config("wm_systemtest_common_public_config") {

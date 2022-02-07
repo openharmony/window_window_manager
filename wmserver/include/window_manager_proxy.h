@@ -47,6 +47,11 @@ public:
     void ProcessWindowTouchedEvent(uint32_t windowId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
 
+    // colorspace, gamut
+    virtual bool IsSupportWideGamut(uint32_t windowId) override;
+    virtual void SetColorSpace(uint32_t windowId, ColorSpace colorSpace) override;
+    virtual ColorSpace GetColorSpace(uint32_t windowId) override;
+
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void UnregisterWindowManagerAgent(WindowManagerAgentType type,
