@@ -103,81 +103,118 @@ declare namespace window {
     WINDOW_MODE_PIP
   }
 
-  interface Window {
+  /**
+   * Describes the mode of window layout
+   * @devices tv, phone, tablet, wearable.
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  enum WindowLayoutMode {
     /**
-     * Create a sub window with a specific id and type.
-     * @param id Indicates window id.
-     * @param type Indicates window type.
-     * @permission ohos.permission.SYSTEM_FLOAT_WINDOW
-     * @since 7
-     */
-    create(id: string, type: WindowType, callback: AsyncCallback<Window>): void;
-
-    /**
-     * Create a sub window with a specific id and type.
-     * @param id Indicates window id.
-     * @param type Indicates window type.
-     * @permission ohos.permission.SYSTEM_FLOAT_WINDOW
-     * @since 7
-     */
-    create(id: string, type: WindowType): Promise<Window>;
-
-    /**
-     * Create a sub window with a specific id and type.
-     * @param ctx Indicates the context on which the window depends
-     * @param id Indicates window id.
-     * @param type Indicates window type.
-     * @permission ohos.permission.SYSTEM_FLOAT_WINDOW
-     * @since 8
-     */
-    create(ctx: Context, id: string, type: WindowType): Promise<Window>;
-
-    /**
-     * Find the sub window by id.
-     * @param id Indicates window id.
-     * @since 7
-     */
-    find(id: string, callback: AsyncCallback<Window>): void;
-
-    /**
-     * Find the sub window by id.
-     * @param id Indicates window id.
-     * @since 7
-     */
-    find(id: string): Promise<Window>;
-
-    /**
-     * minimize all app windows.
+     * CASCADE
      * @systemapi Hide this for inner system use.
      * @since 8
      */
-    minimizeAll(id: number, callback: AsyncCallback<void>): void;
-
+    WINDOW_LAYOUT_MODE_CASCADE,
     /**
-     * minimize all app windows.
+     * TILE
      * @systemapi Hide this for inner system use.
      * @since 8
      */
-    minimizeAll(id: number): Promise<void>;
-
-    /**
-     * register the callback of systemBarTintChange
-     * @param type: 'systemBarTintChange'
-     * @devices tv, phone, tablet, wearable, car
-     * @systemapi Hide this for inner system use.
-     * @since 8
-     */
-     on(type: 'systemBarTintChange', callback: Callback<SystemBarTintState>): void;
-
-     /**
-      * unregister the callback of systemBarTintChange
-      * @param type: 'systemBarTintChange'
-      * @devices tv, phone, tablet, wearable, car
-      * @systemapi Hide this for inner system use.
-      * @since 8
-      */
-     off(type: 'systemBarTintChange', callback?: Callback<SystemBarTintState>): void;
+    WINDOW_LAYOUT_MODE_TILE
   }
+
+  /**
+   * Create a sub window with a specific id and type.
+   * @param id Indicates window id.
+   * @param type Indicates window type.
+   * @permission ohos.permission.SYSTEM_FLOAT_WINDOW
+   * @since 7
+   */
+  function create(id: string, type: WindowType, callback: AsyncCallback<Window>): void;
+
+  /**
+   * Create a sub window with a specific id and type.
+   * @param id Indicates window id.
+   * @param type Indicates window type.
+   * @permission ohos.permission.SYSTEM_FLOAT_WINDOW
+   * @since 7
+   */
+  function create(id: string, type: WindowType): Promise<Window>;
+
+  /**
+   * Create a sub window with a specific id and type.
+   * @param ctx Indicates the context on which the window depends
+   * @param id Indicates window id.
+   * @param type Indicates window type.
+   * @permission ohos.permission.SYSTEM_FLOAT_WINDOW
+   * @since 8
+   */
+  function create(ctx: Context, id: string, type: WindowType): Promise<Window>;
+
+  /**
+   * Find the sub window by id.
+   * @param id Indicates window id.
+   * @since 7
+   */
+  function find(id: string, callback: AsyncCallback<Window>): void;
+
+  /**
+   * Find the sub window by id.
+   * @param id Indicates window id.
+   * @since 7
+   */
+  function find(id: string): Promise<Window>;
+
+  /**
+   * minimize all app windows.
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  function minimizeAll(id: number, callback: AsyncCallback<void>): void;
+
+  /**
+   * minimize all app windows.
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  function minimizeAll(id: number): Promise<void>;
+
+  /**
+   * Set the layout mode of a window.
+   * @param mode the layout mode of a window.
+   * @devices tv, phone, tablet, wearable, liteWearable.
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  function setWindowLayoutMode(mode: WindowLayoutMode, callback: AsyncCallback<void>): void;
+
+  /**
+   * Set the layout mode of a window.
+   * @param mode the layout mode of a window.
+   * @devices tv, phone, tablet, wearable, liteWearable.
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  function setWindowLayoutMode(mode: WindowLayoutMode): Promise<void>;
+
+  /**
+   * register the callback of systemBarTintChange
+   * @param type: 'systemBarTintChange'
+   * @devices tv, phone, tablet, wearable, car
+   * @systemapi Hide this for inner system use.
+   * @since 8
+   */
+  function on(type: 'systemBarTintChange', callback: Callback<SystemBarTintState>): void;
+
+    /**
+    * unregister the callback of systemBarTintChange
+    * @param type: 'systemBarTintChange'
+    * @devices tv, phone, tablet, wearable, car
+    * @systemapi Hide this for inner system use.
+    * @since 8
+    */
+    function off(type: 'systemBarTintChange', callback?: Callback<SystemBarTintState>): void;
 
   /**
    * Properties of status bar and navigation bar, it couldn't update automatically
