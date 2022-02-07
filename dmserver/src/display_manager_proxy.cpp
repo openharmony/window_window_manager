@@ -439,6 +439,10 @@ sptr<ScreenInfo> DisplayManagerProxy::GetScreenInfoById(ScreenId screenId)
         WLOGFW("GetScreenInfoById SendRequest nullptr.");
         return nullptr;
     }
+    for (int i = 0; i < info->modes_.size(); i++) {
+        WLOGFI("info modes is width: %{public}u, height: %{public}u, freshRate: %{public}u",
+            info->modes_[i]->width_, info->modes_[i]->height_, info->modes_[i]->freshRate_);
+    }
     return info;
 }
 
@@ -538,5 +542,31 @@ DMError DisplayManagerProxy::MakeExpand(std::vector<ScreenId> screenId, std::vec
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
+}
+
+bool DisplayManagerProxy::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("SetScreenActiveMode: remote is null");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("SetScreenActiveMode: WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint64(screenId) || !data.WriteUint32(modeId)) {
+        WLOGFE("SetScreenActiveMode: write screenId/modeId failed");
+        return false;
+    }
+    if (remote->SendRequest(TRANS_ID_SET_SCREEN_ACTIVE_MODE, data, reply, option) != ERR_NONE) {
+        WLOGFE("SetScreenActiveMode: SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
 }
 } // namespace OHOS::Rosen

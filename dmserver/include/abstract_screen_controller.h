@@ -51,6 +51,7 @@ public:
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
     bool IsScreenGroup(ScreenId screenId) const;
+    bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
 
 private:
     void OnRsScreenChange(ScreenId rsScreenId, ScreenEvent screenEvent);

@@ -61,6 +61,7 @@ public:
     virtual sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
     virtual std::vector<sptr<Screen>> GetAllScreens();
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
+    virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
 
 private:
     bool InitDMSProxyLocked();

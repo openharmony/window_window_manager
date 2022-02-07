@@ -19,22 +19,29 @@ namespace OHOS::Rosen {
 void ScreenInfo::Update(sptr<ScreenInfo> info)
 {
     id_ = info->id_;
-    width_ = info->width_;
-    height_ = info->height_;
     virtualWidth_ = info->virtualWidth_;
     virtualHeight_ = info->virtualHeight_;
     virtualPixelRatio_ = info->virtualPixelRatio_;
     parent_ = info->parent_;
     hasChild_ = info->hasChild_;
+    modeId_ = info->modeId_;
+    modes_ = info->modes_;
 }
 
 bool ScreenInfo::Marshalling(Parcel &parcel) const
 {
-    return parcel.WriteUint64(id_) &&
-        parcel.WriteUint32(width_) && parcel.WriteUint32(height_) &&
+    bool res1 = parcel.WriteUint64(id_) &&
         parcel.WriteUint32(virtualWidth_) && parcel.WriteUint32(virtualHeight_) &&
         parcel.WriteFloat(virtualPixelRatio_) && parcel.WriteUint64(parent_) &&
-        parcel.WriteBool(hasChild_);
+        parcel.WriteBool(hasChild_) && parcel.WriteUint32(modeId_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(modes_.size()));
+    bool res2 = true;
+    for (uint32_t modeIndex = 0; modeIndex < modes_.size(); modeIndex++) {
+        res2 = res2 && parcel.WriteUint32(modes_[modeIndex]->height_) &&
+            parcel.WriteUint32(modes_[modeIndex]->width_) &&
+            parcel.WriteUint32(modes_[modeIndex]->freshRate_);
+    }
+    return res1 && res2;
 }
 
 ScreenInfo* ScreenInfo::Unmarshalling(Parcel &parcel)
@@ -45,12 +52,25 @@ ScreenInfo* ScreenInfo::Unmarshalling(Parcel &parcel)
 
 ScreenInfo* ScreenInfo::InnerUnmarshalling(Parcel& parcel)
 {
-    bool res = parcel.ReadUint64(id_) &&
-        parcel.ReadUint32(width_) && parcel.ReadUint32(height_) &&
+    uint32_t size = 0;
+    bool res1 = parcel.ReadUint64(id_) &&
         parcel.ReadUint32(virtualWidth_) && parcel.ReadUint32(virtualHeight_) &&
         parcel.ReadFloat(virtualPixelRatio_) && parcel.ReadUint64(parent_) &&
-        parcel.ReadBool(hasChild_);
-    if (!res) {
+        parcel.ReadBool(hasChild_) && parcel.ReadUint32(modeId_) &&
+        parcel.ReadUint32(size);
+    if (!res1) {
+        return nullptr;
+    }
+    bool res2 = true;
+    modes_.clear();
+    for (uint32_t modeIndex = 0; modeIndex < size; modeIndex++) {
+        sptr<SupportedScreenModes> mode = new SupportedScreenModes();
+        res2 = res2 && parcel.ReadUint32(mode->height_) &&
+            parcel.ReadUint32(mode->width_) &&
+            parcel.ReadUint32(mode->freshRate_);
+        modes_.push_back(mode);
+    }
+    if (!res2) {
         return nullptr;
     }
     return this;

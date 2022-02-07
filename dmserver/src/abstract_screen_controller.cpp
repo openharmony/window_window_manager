@@ -63,6 +63,7 @@ std::vector<ScreenId> AbstractScreenController::GetAllScreenIds()
 sptr<AbstractScreen> AbstractScreenController::GetAbstractScreen(ScreenId dmsScreenId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    WLOGI("GetAbstractScreen: screenId: %{public}" PRIu64"", dmsScreenId);
     auto iter = dmsScreenMap_.find(dmsScreenId);
     if (iter == dmsScreenMap_.end()) {
         WLOGI("didnot find screen:%{public}" PRIu64"", dmsScreenId);
@@ -203,11 +204,11 @@ bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScree
         return false;
     }
     for (RSScreenModeInfo rsScreenModeInfo : allModes) {
-        sptr<AbstractScreenInfo> info = new AbstractScreenInfo();
+        sptr<SupportedScreenModes> info = new SupportedScreenModes();
         info->width_ = rsScreenModeInfo.GetScreenWidth();
         info->height_ = rsScreenModeInfo.GetScreenHeight();
         info->freshRate_ = rsScreenModeInfo.GetScreenFreshRate();
-        absScreen->infos_.push_back(info);
+        absScreen->modes_.push_back(info);
         WLOGD("fill screen w/h:%{public}d/%{public}d", info->width_, info->height_);
     }
     int32_t activeModeId = rsInterface_->GetScreenActiveMode(rsScreenId).GetScreenModeId();
@@ -354,5 +355,22 @@ bool AbstractScreenController::IsScreenGroup(ScreenId screenId) const
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return dmsScreenGroupMap_.find(screenId) != dmsScreenGroupMap_.end();
+}
+
+bool AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
+{
+    WLOGI("SetScreenActiveMode: screenId: %{public}" PRIu64", modeId: %{public}u", screenId, modeId);
+    if (rsInterface_ == nullptr) {
+        WLOGFE("SetScreenActiveMode: Get RsInterface failed");
+        return false;
+    }
+    rsInterface_->SetScreenActiveMode(screenId, modeId);
+    auto screen = GetAbstractScreen(screenId);
+    if (screen == nullptr) {
+        WLOGFE("SetScreenActiveMode: Get AbstractScreen failed");
+        return false;
+    }
+    screen->activeIdx_ = modeId;
+    return true;
 }
 } // namespace OHOS::Rosen
