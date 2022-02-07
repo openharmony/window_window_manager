@@ -34,6 +34,7 @@ config("window_native_kit_config") {
     "//foundation/windowmanager/interfaces/innerkits/wm",
     "//foundation/windowmanager/wm/include",
     "//foundation/windowmanager/utils/include",
+    "//foundation/windowmanager/wmserver/include",
   ]
 }
 
@@ -89,6 +90,30 @@ ohos_shared_library("window_napi") {
   ]
 
   relative_install_dir = "module"
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_shared_library("windowstage_kit") {
+  sources = [ "window_stage_napi/js_window_stage.cpp" ]
+
+  configs = [ ":window_native_kit_config" ]
+  include_dirs = [ "//foundation/windowmanager/interfaces/kits/napi/window_runtime/window_stage_napi" ]
+  deps = [
+    ":window_native_kit",
+    "//foundation/aafwk/standard/interfaces/innerkits/want:want",
+    "//foundation/windowmanager/utils:libwmutil",
+    "//foundation/windowmanager/wm:libwm",
+    "//foundation/windowmanager/wmserver:libwms",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "ability_runtime:runtime",
+    "hiviewdfx_hilog_native:libhilog",
+    "napi:ace_napi",
+  ]
 
   part_name = "window_manager"
   subsystem_name = "window"

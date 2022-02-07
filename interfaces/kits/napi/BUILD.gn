@@ -14,47 +14,12 @@
 import("//ark/ts2abc/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
 
-ts2abc_gen_abc("gen_window_stage_abc") {
-  src_js = rebase_path("window_stage.js")
-  dst_file = rebase_path(target_out_dir + "/window_stage.abc")
-  in_puts = [ "window_stage.js" ]
-  out_puts = [ target_out_dir + "/window_stage.abc" ]
-  extra_args = [ "--module" ]
-}
-
-gen_js_obj("window_stage_js") {
-  input = "window_stage.js"
-  output = target_out_dir + "/window_stage.o"
-}
-
-gen_js_obj("window_stage_abc") {
-  input = get_label_info(":gen_window_stage_abc", "target_out_dir") +
-          "/window_stage.abc"
-  output = target_out_dir + "/window_stage_abc.o"
-  dep = ":gen_window_stage_abc"
-}
-
-ohos_shared_library("windowstage") {
-  sources = [ "window_stage_module.cpp" ]
-
-  deps = [
-    ":window_stage_abc",
-    ":window_stage_js",
-  ]
-
-  external_deps = [ "napi:ace_napi" ]
-
-  relative_install_dir = "module/application"
-
-  part_name = "window_manager"
-  subsystem_name = "window"
-}
-
 group("napi_packages") {
   deps = [
     "display:display",
     "screenshot:screenshot",
     "window_runtime:window_napi",
     "window_runtime:window_native_kit",
+    "window_runtime:windowstage_kit",
   ]
 }
