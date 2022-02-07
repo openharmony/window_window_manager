@@ -65,6 +65,20 @@ namespace {
         { ApiWindowType::TYPE_VOLUME_OVERLAY,  WindowType::WINDOW_TYPE_VOLUME_OVERLAY     },
         { ApiWindowType::TYPE_NAVIGATION_BAR,  WindowType::WINDOW_TYPE_NAVIGATION_BAR     },
     };
+    enum class ApiWindowMode : uint32_t {
+        UNDEFINED = 1,
+        FULLSCREEN,
+        PRIMARY,
+        SECONDARY,
+        FLOATING
+    };
+    const std::map<WindowMode, ApiWindowMode> NATIVE_TO_JS_WINDOW_MODE_MAP {
+        { WindowMode::WINDOW_MODE_UNDEFINED,       ApiWindowMode::UNDEFINED  },
+        { WindowMode::WINDOW_MODE_FULLSCREEN,      ApiWindowMode::FULLSCREEN },
+        { WindowMode::WINDOW_MODE_SPLIT_PRIMARY,   ApiWindowMode::PRIMARY    },
+        { WindowMode::WINDOW_MODE_SPLIT_SECONDARY, ApiWindowMode::SECONDARY  },
+        { WindowMode::WINDOW_MODE_FLOATING,        ApiWindowMode::FLOATING   },
+    };
 }
     NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect);
     NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window);
