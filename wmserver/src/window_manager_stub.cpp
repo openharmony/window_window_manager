@@ -76,6 +76,13 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case TRANS_ID_DRAG: {
+            uint32_t windowId = data.ReadUint32();
+            Rect rect  = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
+            WMError errCode = Drag(windowId, rect);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
         case TRANS_ID_REQUEST_FOCUS: {
             uint32_t windowId = data.ReadUint32();
             WMError errCode = RequestFocus(windowId);

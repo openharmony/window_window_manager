@@ -53,6 +53,7 @@ public:
     const std::string& GetWindowName() const;
     DisplayId GetDisplayId() const;
     const Rect& GetLayoutRect() const;
+    Rect GetHotZoneRect() const;
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;
     uint32_t GetWindowFlags() const;
