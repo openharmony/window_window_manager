@@ -313,7 +313,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     return WMError::WM_OK;
 }
 
-const std::string& WindowImpl::GetContentInfo()
+std::string WindowImpl::GetContentInfo()
 {
     WLOGFI("GetContentInfo");
     if (uiContent_ == nullptr) {
