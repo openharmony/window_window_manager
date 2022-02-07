@@ -66,6 +66,11 @@ public:
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
 
+    // colorspace, gamut
+    virtual bool IsSupportWideGamut(uint32_t windowId) override;
+    virtual void SetColorSpace(uint32_t windowId, ColorSpace colorSpace) override;
+    virtual ColorSpace GetColorSpace(uint32_t windowId) override;
+
     std::shared_ptr<RSDisplayNode> GetDisplayNode(DisplayId displayId) const;
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;

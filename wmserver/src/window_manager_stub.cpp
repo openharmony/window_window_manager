@@ -180,6 +180,24 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             MinimizeAllAppWindows(data.ReadUint64());
             break;
         }
+        case TRANS_ID_IS_SUPPORT_WIDE_GAMUT: {
+            uint32_t windowId = data.ReadUint32();
+            bool ret = IsSupportWideGamut(windowId);
+            reply.WriteUint32(static_cast<uint32_t>(ret));
+            break;
+        }
+        case TRANS_ID_SET_COLOR_SPACE: {
+            uint32_t windowId = data.ReadUint32();
+            ColorSpace colorSpace = static_cast<ColorSpace>(data.ReadUint32());
+            SetColorSpace(windowId, colorSpace);
+            break;
+        }
+        case TRANS_ID_GET_COLOR_SPACE: {
+            uint32_t windowId = data.ReadUint32();
+            ColorSpace colorSpace = GetColorSpace(windowId);
+            reply.WriteUint32(static_cast<uint32_t>(colorSpace));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

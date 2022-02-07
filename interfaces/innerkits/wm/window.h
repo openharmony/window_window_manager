@@ -109,6 +109,11 @@ public:
     virtual WMError Recover() = 0;
     virtual WMError Close() = 0;
     virtual void StartMove() = 0;
+
+    // colorspace, gamut
+    virtual bool IsSupportWideGamut() = 0;
+    virtual void SetColorSpace(ColorSpace colorSpace) = 0;
+    virtual ColorSpace GetColorSpace() = 0;
 };
 }
 }

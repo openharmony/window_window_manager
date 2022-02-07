@@ -27,6 +27,7 @@
 #include "window_manager_agent_controller.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 #include "wm_trace.h"
 
 namespace OHOS {
@@ -303,6 +304,25 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
     WLOGFI("displayId %{public}" PRIu64"", displayId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     windowController_->MinimizeAllAppWindows(displayId);
+}
+
+bool WindowManagerService::IsSupportWideGamut(uint32_t windowId)
+{
+    bool ret = true;
+    WLOGFI("IsSupportWideGamut %{public}d", ret);
+    return ret;
+}
+
+void WindowManagerService::SetColorSpace(uint32_t windowId, ColorSpace colorSpace)
+{
+    WLOGFI("SetColorSpace windowId %{public}u, ColorSpace %{public}u", windowId, colorSpace);
+}
+
+ColorSpace WindowManagerService::GetColorSpace(uint32_t windowId)
+{
+    ColorSpace colorSpace = ColorSpace::COLOR_SPACE_DEFAULT;
+    WLOGFI("GetColorSpace windowId %{public}u, ColorSpace %{public}u", windowId, colorSpace);
+    return colorSpace;
 }
 
 WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
