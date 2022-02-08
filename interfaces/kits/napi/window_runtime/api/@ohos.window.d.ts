@@ -80,27 +80,17 @@ declare namespace window {
      */
     TYPE_SYSTEM_GESTURE
   }
-
+  /**
+   * Describes the window mode of an application
+   * @systemapi Hide this for inner system use.
+   * @since 7
+   */
   enum WindowMode {
-    /**
-     * FullSCREEN.
-     */
-    WINDOW_MODE_FULLSCREEN,
-
-    /**
-     * SPLIT.
-     */
-    WINDOW_MODE_SPLIT,
-
-    /**
-     * FREEFORM.
-     */
-    WINDOW_MODE_FLOATING,
-
-    /**
-     * PIP.
-     */
-    WINDOW_MODE_PIP
+    UNDEFINED = 1,
+    FULLSCREEN,
+    PRIMARY,
+    SECONDARY,
+    FLOATING
   }
 
   /**
