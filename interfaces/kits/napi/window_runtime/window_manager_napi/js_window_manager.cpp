@@ -15,8 +15,6 @@
 #include "js_window_manager.h"
 #include <cinttypes>
 #include <ability.h>
-#include "event_handler.h"
-#include "event_runner.h"
 #include "js_runtime_utils.h"
 #include "js_window.h"
 #include "js_window_listener.h"
@@ -86,16 +84,6 @@ private:
     std::weak_ptr<Context> context_;
     std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
-    std::shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler_ = nullptr;
-
-    std::shared_ptr<OHOS::AppExecFwk::EventHandler> GetMainHandler()
-    {
-        if (!mainHandler_) {
-            mainHandler_ =
-                std::make_shared<OHOS::AppExecFwk::EventHandler>(OHOS::AppExecFwk::EventRunner::GetMainEventRunner());
-        }
-        return mainHandler_;
-    }
 
     bool GetNativeContext(NativeValue* nativeContext)
     {
@@ -272,9 +260,7 @@ private:
         std::unique_ptr<NativeReference> callbackRef;
         callbackRef.reset(engine.CreateReference(value, 1));
 
-        auto mainHandler = GetMainHandler();
-        sptr<JsWindowListener> windowManagerListener = new JsWindowListener(&engine, mainHandler);
-
+        sptr<JsWindowListener> windowManagerListener = new JsWindowListener(&engine);
         if (type.compare(SYSTEM_BAR_TINT_CHANGE_CB) == 0) {
             sptr<ISystemBarChangedListener> thisListener(windowManagerListener);
             SingletonContainer::Get<WindowManager>().RegisterSystemBarChangedListener(thisListener);

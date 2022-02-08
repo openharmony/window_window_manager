@@ -44,15 +44,6 @@ std::string JsWindow::GetWindowName()
     return windowToken_->GetWindowName();
 }
 
-std::shared_ptr<OHOS::AppExecFwk::EventHandler> JsWindow::GetMainHandler()
-{
-    if (!mainHandler_) {
-        mainHandler_ =
-            std::make_shared<OHOS::AppExecFwk::EventHandler>(OHOS::AppExecFwk::EventRunner::GetMainEventRunner());
-    }
-    return mainHandler_;
-}
-
 void JsWindow::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
     WLOGFI("JsWindow::Finalizer is called");
@@ -464,8 +455,7 @@ void JsWindow::RegisterWindowListenerWithType(NativeEngine& engine, std::string 
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     if (jsListenerMap_.find(type) == jsListenerMap_.end()) {
-        auto mainHandler = GetMainHandler();
-        sptr<JsWindowListener> windowListener = new JsWindowListener(&engine, mainHandler);
+        sptr<JsWindowListener> windowListener = new JsWindowListener(&engine);
         if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
             sptr<IWindowChangeListener> thisListener(windowListener);
             windowToken_->RegisterWindowChangeListener(thisListener);
