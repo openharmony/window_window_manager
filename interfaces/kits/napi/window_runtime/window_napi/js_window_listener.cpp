@@ -83,20 +83,26 @@ void JsWindowListener::OnSizeChange(Rect rect)
         WLOGFE("JsWindowListener::OnSizeChange windowSizeChanged not register!");
         return;
     }
-    auto task = [this, rect] () {
-        NativeValue* sizeValue = engine_->CreateObject();
-        NativeObject* object = ConvertNativeValueTo<NativeObject>(sizeValue);
-        if (object == nullptr) {
-            WLOGFE("Failed to convert rect to jsObject");
-            return;
-        }
-        object->SetProperty("width", CreateJsValue(*engine_, rect.width_));
-        object->SetProperty("height", CreateJsValue(*engine_, rect.height_));
-        NativeValue* argv[] = {sizeValue};
-        CallJsMethod(WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
-    };
 
-    mainHandler_->PostTask(task);
+    // js callback should run in js thread
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [this, rect] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            NativeValue* sizeValue = engine_->CreateObject();
+            NativeObject* object = ConvertNativeValueTo<NativeObject>(sizeValue);
+            if (object == nullptr) {
+                WLOGFE("Failed to convert rect to jsObject");
+                return;
+            }
+            object->SetProperty("width", CreateJsValue(*engine_, rect.width_));
+            object->SetProperty("height", CreateJsValue(*engine_, rect.height_));
+            NativeValue* argv[] = {sizeValue};
+            CallJsMethod(WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
@@ -108,20 +114,25 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
         return;
     }
 
-    auto task = [this, displayId, tints] () {
-        NativeValue* propertyValue = engine_->CreateObject();
-        NativeObject* object = ConvertNativeValueTo<NativeObject>(propertyValue);
-        if (object == nullptr) {
-            WLOGFE("Failed to convert prop to jsObject");
-            return;
+    // js callback should run in js thread
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [this, displayId, tints] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            NativeValue* propertyValue = engine_->CreateObject();
+            NativeObject* object = ConvertNativeValueTo<NativeObject>(propertyValue);
+            if (object == nullptr) {
+                WLOGFE("Failed to convert prop to jsObject");
+                return;
+            }
+            object->SetProperty("displayId", CreateJsValue(*engine_, static_cast<uint32_t>(displayId)));
+            object->SetProperty("regionTint", CreateJsSystemBarRegionTintArrayObject(*engine_, tints));
+            NativeValue* argv[] = {propertyValue};
+            CallJsMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
-        object->SetProperty("displayId", CreateJsValue(*engine_, static_cast<uint32_t>(displayId)));
-        object->SetProperty("regionTint", CreateJsSystemBarRegionTintArrayObject(*engine_, tints));
-        NativeValue* argv[] = {propertyValue};
-        CallJsMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), argv, ArraySize(argv));
-    };
+    );
 
-    mainHandler_->PostTask(task);
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsWindowListener::OnAvoidAreaChanged(const std::vector<Rect> avoidAreas)
@@ -133,29 +144,34 @@ void JsWindowListener::OnAvoidAreaChanged(const std::vector<Rect> avoidAreas)
         return;
     }
 
-    auto task = [this, avoidAreas] () {
-        NativeValue* avoidAreaValue = engine_->CreateObject();
-        NativeObject* object = ConvertNativeValueTo<NativeObject>(avoidAreaValue);
-        if (object == nullptr) {
-            WLOGFE("JsWindowListener::OnAvoidAreaChanged Failed to convert rect to jsObject");
-            return;
+    // js callback should run in js thread
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [this, avoidAreas] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            NativeValue* avoidAreaValue = engine_->CreateObject();
+            NativeObject* object = ConvertNativeValueTo<NativeObject>(avoidAreaValue);
+            if (object == nullptr) {
+                WLOGFE("JsWindowListener::OnAvoidAreaChanged Failed to convert rect to jsObject");
+                return;
+            }
+
+            if (static_cast<uint32_t>(avoidAreas.size()) != AVOID_AREA_NUM) {
+                WLOGFE("AvoidAreas size is not 4 (left, top, right, bottom). Current avoidAreas size is %{public}u",
+                    static_cast<uint32_t>(avoidAreas.size()));
+                return;
+            }
+
+            object->SetProperty("leftRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[0]));   // idx 0 : left
+            object->SetProperty("topRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[1]));    // idx 1 : top
+            object->SetProperty("rightRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[2]));  // idx 2 : right
+            object->SetProperty("bottomRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[3])); // idx 3 : bottom
+            NativeValue* argv[] = {avoidAreaValue};
+            CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
+    );
 
-        if (static_cast<uint32_t>(avoidAreas.size()) != AVOID_AREA_NUM) {
-            WLOGFE("AvoidAreas size is not 4 (left, top, right, bottom). Current avoidAreas size is %{public}u",
-                static_cast<uint32_t>(avoidAreas.size()));
-            return;
-        }
-
-        object->SetProperty("leftRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[0]));   // idx 0 : leftRect
-        object->SetProperty("topRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[1]));    // idx 1 : topRect
-        object->SetProperty("rightRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[2]));  // idx 2 : rightRect
-        object->SetProperty("bottomRect", GetRectAndConvertToJsValue(*engine_, avoidAreas[3])); // idx 3 : bottomRect
-        NativeValue* argv[] = {avoidAreaValue};
-        CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
-    };
-
-    mainHandler_->PostTask(task);
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 } // namespace Rosen
 } // namespace OHOS
