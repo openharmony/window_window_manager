@@ -16,8 +16,12 @@
 #include "screen_group.h"
 #include "screen.h"
 #include "screen_group_info.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "ScreenGroup"};
+}
 class ScreenGroup::Impl : public RefBase {
 friend class ScreenGroup;
 private:
@@ -32,6 +36,10 @@ private:
 ScreenGroup::ScreenGroup(const ScreenGroupInfo* info)
     : Screen(info), pImpl_(new Impl())
 {
+    if (info == nullptr) {
+        WLOGFE("info is nullptr.");
+        return;
+    }
     pImpl_->children_ = info->children_;
     pImpl_->position_ = info->position_;
     pImpl_->combination_ = info->combination_;

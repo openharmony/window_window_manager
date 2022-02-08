@@ -24,21 +24,22 @@
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
-class IScreenListener : public virtual RefBase {
-public:
-    virtual void OnConnect(ScreenId) = 0;
-    virtual void OnDisconnect(ScreenId) = 0;
-    virtual void OnChange(const std::vector<ScreenId>&, ScreenChangeEvent) = 0;
-};
-
 class ScreenManager : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenManager);
 public:
+    class IScreenListener : public virtual RefBase {
+    public:
+        virtual void OnConnect(ScreenId) = 0;
+        virtual void OnDisconnect(ScreenId) = 0;
+        virtual void OnChange(const std::vector<ScreenId>&, ScreenChangeEvent) = 0;
+    };
+
     sptr<Screen> GetScreenById(ScreenId screenId);
     sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
     std::vector<sptr<Screen>> GetAllScreens();
 
-    void RegisterScreenListener(sptr<IScreenListener> listener);
+    bool RegisterScreenListener(sptr<IScreenListener> listener);
+    bool UnregisterScreenListener(sptr<IScreenListener> listener);
     ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
@@ -48,6 +49,8 @@ private:
     ScreenManager();
     ~ScreenManager();
 
+    class ScreenManagerListener;
+    sptr<ScreenManagerListener> screenManagerListener_;
     class Impl;
     sptr<Impl> pImpl_;
 };
