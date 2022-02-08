@@ -43,8 +43,8 @@ public:
 
     const sptr<Window>& GetMainWindow() const;
 
-    WMError GoForeground();
-    WMError GoBackground() const;
+    WMError GoForeground(uint32_t reason = 0);
+    WMError GoBackground(uint32_t reason = 0);
 
     WMError RequestFocus() const;
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration);

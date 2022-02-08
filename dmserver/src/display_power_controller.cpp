@@ -68,8 +68,8 @@ DisplayState DisplayPowerController::GetDisplayState(DisplayId displayId)
 
 void DisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
 {
+    WLOGFI("DisplayEvent:%{public}u", event);
     if (event == DisplayEvent::UNLOCK) {
-        WLOGFI("DisplayEvent UNLOCK");
         DisplayManagerService::GetInstance().NotifyDisplayStateChange(DisplayStateChangeType::BEFORE_UNLOCK);
         DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DESKTOP_READY,
             EventStatus::BEGIN);
