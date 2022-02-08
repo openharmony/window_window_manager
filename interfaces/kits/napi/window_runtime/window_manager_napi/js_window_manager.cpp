@@ -146,9 +146,10 @@ private:
     NativeValue* OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info)
     {
         WLOGFI("JsWindowManager::OnCreateWindow is called");
+        WMError errCode = WMError::WM_OK;
         if (info.argc < ARGC_THREE) {
             WLOGFE("JsWindowManager::OnCreateWindow params less than 3!");
-            return engine.CreateUndefined();
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
         }
         NativeValue* nativeString = nullptr;
         NativeValue* nativeContext = nullptr;
@@ -156,7 +157,7 @@ private:
         NativeValue* callback = nullptr;
         if (info.argv[0]->TypeOf() != NATIVE_OBJECT) {
             WLOGFE("JsWindowManager::OnCreateWindow first should be context!");
-            return engine.CreateUndefined();
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
         } else {
             nativeContext = info.argv[0];
             nativeString = info.argv[ARGC_ONE];
@@ -166,15 +167,17 @@ private:
         std::string windowName;
         WindowType winType;
         if (!CheckJsWindowNameAndType(engine, windowName, winType, nativeString, nativeType)) {
-            WLOGFE("JsWindowManager::OnCreateWindow CheckJsWindowNameAndType failed!");
-            return engine.CreateUndefined();
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
         }
         if (!GetNativeContext(nativeContext)) {
-            WLOGFE("JsWindowManager::OnCreateWindow convert to context failed!");
-            return engine.CreateUndefined();
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
         }
         AsyncTask::CompleteCallback complete =
-            [weak = context_, windowName, winType](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            [weak = context_, windowName, winType, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+                if (errCode != WMError::WM_OK) {
+                    task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                    return;
+                }
                 sptr<WindowOption> windowOption = new WindowOption();
                 windowOption->SetWindowType(winType);
                 sptr<Window> window = Window::Create(windowName, windowOption, weak.lock());
@@ -196,13 +199,18 @@ private:
     {
         WLOGFI("JsWindowManager::JsOnFindWindow is called");
         std::string windowName;
+        WMError errCode = WMError::WM_OK;
         if (!ConvertFromJsValue(engine, info.argv[0], windowName)) {
             WLOGFE("Failed to convert parameter to windowName");
-            return engine.CreateUndefined();
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
         }
 
         AsyncTask::CompleteCallback complete =
-            [windowName](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+                if (errCode != WMError::WM_OK) {
+                    task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                    return;
+                }
                 std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
                 if (jsWindowObj != nullptr && jsWindowObj->Get() != nullptr) {
                     task.Resolve(engine, jsWindowObj->Get());
@@ -223,18 +231,23 @@ private:
     NativeValue* OnMinimizeAll(NativeEngine& engine, NativeCallbackInfo& info)
     {
         WLOGFI("JsWindowManager::OnMinimizeAll is called");
+        WMError errCode = WMError::WM_OK;
         if (info.argc < ARGC_ONE) {
             WLOGFE("param is too small!");
-            return engine.CreateUndefined();
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
         }
         int64_t displayId;
         if (!ConvertFromJsValue(engine, info.argv[0], displayId)) {
             WLOGFE("Failed to convert parameter to displayId");
-            return engine.CreateUndefined();
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
         }
         WLOGFI("displayId %{public}" PRIu64"", static_cast<uint64_t>(displayId));
         AsyncTask::CompleteCallback complete =
-            [displayId](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+                if (errCode != WMError::WM_OK) {
+                    task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                    return;
+                }
                 SingletonContainer::Get<WindowManager>().MinimizeAllAppWindows(static_cast<uint64_t>(displayId));
                 task.Resolve(engine, engine.CreateUndefined());
                 WLOGFI("JsWindowManager::OnMinimizeAll success");
@@ -467,17 +480,22 @@ private:
             nativeCallback = (info.argc == 0) ? nullptr : info.argv[0];
         }
         void* contextPtr = nullptr;
+        WMError errCode = WMError::WM_OK;
         if (nativeContext != nullptr) {
             // Parse info->argv[0] as abilitycontext
             auto objContext = AbilityRuntime::ConvertNativeValueTo<NativeObject>(nativeContext);
             if (objContext == nullptr) {
                 WLOGFE("ConvertNativeValueTo Context Object failed");
-                return engine.CreateUndefined();
+                errCode = WMError::WM_ERROR_INVALID_PARAM;
             }
             contextPtr = objContext->GetNativePointer();
         }
         AsyncTask::CompleteCallback complete =
-            [this, contextPtr, isNewApi](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+                if (errCode != WMError::WM_OK) {
+                    task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                    return;
+                }
                 return GetTopWindowTask(contextPtr, isNewApi, engine, task, status);
             };
         NativeValue* result = nullptr;
