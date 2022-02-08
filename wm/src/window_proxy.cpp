@@ -15,7 +15,9 @@
 
 #include "window_proxy.h"
 #include <ipc_types.h>
+#include "message_option.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -141,7 +143,29 @@ void WindowProxy::UpdateWindowState(WindowState state)
     if (Remote()->SendRequest(TRANS_ID_UPDATE_WINDOW_STATE, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
-    return;
+}
+    
+void WindowProxy::UpdateWindowDragInfo(const PointInfo& point, DragEvent event)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!(data.WriteInt32(point.x) and data.WriteInt32(point.y))) {
+        WLOGFE("Write pos failed");
+        return;
+    }
+    if (!data.WriteInt32(static_cast<uint32_t>(event))) {
+        WLOGFE("Write event failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(TRANS_ID_UPDATE_DRAG_EVENT, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest TRANS_ID_UPDATE_DRAG_EVENT failed");
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

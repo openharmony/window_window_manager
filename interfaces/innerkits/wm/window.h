@@ -51,6 +51,11 @@ public:
     virtual void OnAvoidAreaChanged(std::vector<Rect> avoidAreas) = 0;
 };
 
+class IWindowDragListener : virtual public RefBase {
+public:
+    virtual void OnDrag(int32_t x, int32_t y, DragEvent event) = 0;
+};
+
 class Window : public RefBase {
 public:
     static sptr<Window> Create(const std::string& windowName,
@@ -99,6 +104,8 @@ public:
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
     virtual void UnregisterAvoidAreaChangeListener() = 0;
+    virtual void RegisterDragListener(sptr<IWindowDragListener>& listener) = 0;
+    virtual void UnregisterDragListener(sptr<IWindowDragListener>& listener) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed = false) = 0;
     virtual std::string GetContentInfo() = 0;

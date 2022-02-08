@@ -95,6 +95,13 @@ enum class WindowLayoutMode : uint32_t {
     TILE = 1,
 };
 
+enum class DragEvent : uint32_t {
+    DRAG_EVENT_IN  = 1,
+    DRAG_EVENT_OUT,
+    DRAG_EVENT_MOVE,
+    DRAG_EVENT_END,
+};
+
 struct Rect {
     int32_t posX_;
     int32_t posY_;
@@ -104,6 +111,11 @@ struct Rect {
     {
         return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
     }
+};
+
+struct PointInfo {
+    int32_t x;
+    int32_t y;
 };
 
 namespace {
