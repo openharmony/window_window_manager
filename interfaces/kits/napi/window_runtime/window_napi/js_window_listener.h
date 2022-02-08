@@ -19,7 +19,6 @@
 #include <map>
 #include <mutex>
 #include <unordered_set>
-#include "event_handler.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "refbase.h"
@@ -37,8 +36,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
                          public IAvoidAreaChangedListener {
 public:
-    JsWindowListener(NativeEngine* engine, std::shared_ptr<OHOS::AppExecFwk::EventHandler> &handler)
-        : engine_(engine), mainHandler_(handler) {}
+    explicit JsWindowListener(NativeEngine* engine) : engine_(engine) {}
     virtual ~JsWindowListener() = default;
     void AddCallback(NativeValue* jsListenerObject);
     void RemoveAllCallback();
@@ -52,7 +50,6 @@ private:
     NativeEngine* engine_ = nullptr;
     std::mutex mtx_;
     std::vector<std::unique_ptr<NativeReference>> jsCallBack_;
-    std::shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler_ = nullptr;
 };
 }  // namespace Rosen
 }  // namespace OHOS
