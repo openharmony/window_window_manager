@@ -83,20 +83,44 @@ const sptr<Window>& WindowScene::GetMainWindow() const
     return mainWindow_;
 }
 
-WMError WindowScene::GoForeground()
+WMError WindowScene::GoForeground(uint32_t reason)
 {
+    WLOGFI("GoForeground reason:%{public}u", reason);
     if (mainWindow_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
-    return mainWindow_->Show();
+    auto changeReason = static_cast<WindowStateChangeReason>(reason);
+    switch (changeReason) {
+        case WindowStateChangeReason::NORMAL: {
+            return mainWindow_->Show();
+        }
+        case WindowStateChangeReason::KEYGUARD: {
+            return WMError::WM_OK;
+        }
+        default: {
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+    }
 }
 
-WMError WindowScene::GoBackground() const
+WMError WindowScene::GoBackground(uint32_t reason)
 {
+    WLOGFI("GoBackground reason:%{public}u", reason);
     if (mainWindow_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
-    return mainWindow_->Hide();
+    auto changeReason = static_cast<WindowStateChangeReason>(reason);
+    switch (changeReason) {
+        case WindowStateChangeReason::NORMAL: {
+            return mainWindow_->Hide();
+        }
+        case WindowStateChangeReason::KEYGUARD: {
+            return WMError::WM_OK;
+        }
+        default: {
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+    }
 }
 
 WMError WindowScene::SetSystemBarProperty(WindowType type, const SystemBarProperty& property) const
