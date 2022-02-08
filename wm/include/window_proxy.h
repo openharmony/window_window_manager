@@ -18,6 +18,7 @@
 
 #include "window_interface.h"
 #include "iremote_proxy.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -33,7 +34,7 @@ public:
     void UpdateFocusStatus(bool focused) override;
     void UpdateAvoidArea(const std::vector<Rect>& avoidAreas) override;
     void UpdateWindowState(WindowState state) override;
-
+    void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override;
 private:
     static inline BrokerDelegator<WindowProxy> delegator_;
 };

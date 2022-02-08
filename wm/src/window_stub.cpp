@@ -64,6 +64,14 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             UpdateWindowState(static_cast<WindowState>(data.ReadUint32()));
             break;
         }
+        case TRANS_ID_UPDATE_DRAG_EVENT: {
+            PointInfo point;
+            point.x = data.ReadInt32();
+            point.y = data.ReadInt32();
+            DragEvent event = static_cast<DragEvent> (data.ReadUint32());
+            UpdateWindowDragInfo(point, event);
+            break;
+        }
         default:
             break;
     }

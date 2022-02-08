@@ -15,6 +15,7 @@
 
 #include "window_agent.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -74,6 +75,15 @@ void WindowAgent::UpdateWindowState(WindowState state)
         return;
     }
     window_->UpdateWindowState(state);
+}
+
+void WindowAgent::UpdateWindowDragInfo(const PointInfo& piont, DragEvent event)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window is nullptr");
+        return;
+    }
+    window_->UpdateDragEvent(piont, event);
 }
 } // namespace Rosen
 } // namespace OHOS

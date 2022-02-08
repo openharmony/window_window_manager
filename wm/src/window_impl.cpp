@@ -24,6 +24,7 @@
 #include "window_agent.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 #include <ability_manager_client.h>
 
@@ -48,6 +49,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetTouchable(option->GetTouchable());
     property_->SetDisplayId(option->GetDisplayId());
     property_->SetWindowFlags(option->GetWindowFlags());
+    property_->SetHitOffset(option->GetHitOffset());
     auto& sysBarPropMap = option->GetSystemBarProperty();
     for (auto it : sysBarPropMap) {
         property_->SetSystemBarProperty(it.first, it.second);
@@ -686,6 +688,26 @@ void WindowImpl::UnregisterAvoidAreaChangeListener()
     avoidAreaChangeListener_ = nullptr;
 }
 
+void WindowImpl::RegisterDragListener(sptr<IWindowDragListener>& listener)
+{
+    if (listener == nullptr) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    windowDragListeners_.emplace_back(listener);
+}
+
+void WindowImpl::UnregisterDragListener(sptr<IWindowDragListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(windowDragListeners_.begin(), windowDragListeners_.end(), listener);
+    if (iter ==windowDragListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return;
+    }
+    windowDragListeners_.erase(iter);
+}
+
 void WindowImpl::UpdateRect(const struct Rect& rect)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
@@ -947,6 +969,14 @@ void WindowImpl::UpdateWindowState(WindowState state)
             WLOGFE("windowState to set is invalid");
             break;
         }
+    }
+}
+
+void WindowImpl::UpdateDragEvent(const PointInfo& point, DragEvent event)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    for (auto& iter : windowDragListeners_) {
+        iter->OnDrag(point.x, point.y, event);
     }
 }
 
