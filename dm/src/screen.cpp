@@ -14,9 +14,10 @@
  */
 
 #include "screen.h"
-#include "screen_info.h"
 
+#include "display_manager_adapter.h"
 #include "screen_group.h"
+#include "screen_info.h"
 
 namespace OHOS::Rosen {
 class Screen::Impl : public RefBase {
@@ -26,26 +27,26 @@ public:
     ~Impl() = default;
 
     ScreenId id_ { SCREEN_ID_INVALID };
-    uint32_t width_ { 0 };
-    uint32_t height_ { 0 };
     uint32_t virtualWidth_ { 0 };
     uint32_t virtualHeight_ { 0 };
     float virtualPixelRatio_ { 0.0 };
     ScreenId parent_ { SCREEN_ID_INVALID };
     bool hasChild_ { false };
+    uint32_t modeId_ { 0 };
+    std::vector<sptr<SupportedScreenModes>> modes_ {};
 };
 
 Screen::Screen(const ScreenInfo* info)
     : pImpl_(new Impl())
 {
     pImpl_->id_ = info->id_;
-    pImpl_->width_ = info->width_;
-    pImpl_->height_ = info->height_;
     pImpl_->virtualWidth_ = info->virtualWidth_;
     pImpl_->virtualHeight_ = info->virtualHeight_;
     pImpl_->virtualPixelRatio_ = info->virtualPixelRatio_;
     pImpl_->parent_ = info->parent_;
     pImpl_->hasChild_ = info->hasChild_;
+    pImpl_->modeId_ = info->modeId_;
+    pImpl_->modes_ = info->modes_;
 }
 
 Screen::~Screen()
@@ -64,12 +65,22 @@ ScreenId Screen::GetId() const
 
 uint32_t Screen::GetWidth() const
 {
-    return pImpl_->width_;
+    auto modeId = pImpl_->modeId_;
+    auto modes = pImpl_->modes_;
+    if (modeId < 0 || modeId >= modes.size()) {
+        return 0;
+    }
+    return modes[modeId]->width_;
 }
 
 uint32_t Screen::GetHeight() const
 {
-    return pImpl_->height_;
+    auto modeId = pImpl_->modeId_;
+    auto modes = pImpl_->modes_;
+    if (modeId < 0 || modeId >= modes.size()) {
+        return 0;
+    }
+    return modes[modeId]->height_;
 }
 
 uint32_t Screen::GetVirtualWidth() const
@@ -100,5 +111,28 @@ bool Screen::RequestRotation(Rotation rotation)
 ScreenId Screen::GetParentId() const
 {
     return pImpl_->parent_;
+}
+
+uint32_t Screen::GetModeId() const
+{
+    return pImpl_->modeId_;
+}
+
+std::vector<sptr<SupportedScreenModes>> Screen::GetSupportedModes() const
+{
+    return pImpl_->modes_;
+}
+
+bool Screen::SetScreenActiveMode(uint32_t modeId)
+{
+    ScreenId screenId = pImpl_->id_;
+    if (modeId < 0 || modeId >= pImpl_->modes_.size()) {
+        return false;
+    }
+    if (DisplayManagerAdapter::GetInstance().SetScreenActiveMode(screenId, modeId)) {
+        pImpl_->modeId_ = modeId;
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Rosen

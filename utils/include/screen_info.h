@@ -32,15 +32,15 @@ public:
     static ScreenInfo* Unmarshalling(Parcel& parcel);
 
     ScreenId id_ { SCREEN_ID_INVALID };
-    uint32_t width_ { 0 };
-    uint32_t height_ { 0 };
     uint32_t virtualWidth_ { 0 };
     uint32_t virtualHeight_ { 0 };
     float virtualPixelRatio_ { 0.0 };
     ScreenId parent_ { 0 };
     bool hasChild_ { false };
+    uint32_t modeId_ { 0 };
+    std::vector<sptr<SupportedScreenModes>> modes_ {};
 protected:
     ScreenInfo* InnerUnmarshalling(Parcel& parcel);
-    };
+};
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H

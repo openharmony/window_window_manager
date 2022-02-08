@@ -33,6 +33,12 @@ struct Point {
     int32_t posY_;
 };
 
+struct SupportedScreenModes : public RefBase {
+    uint32_t width_;
+    uint32_t height_;
+    uint32_t freshRate_;
+};
+
 struct VirtualScreenOption {
     const std::string name_;
     uint32_t width_;
@@ -56,6 +62,9 @@ public:
     bool RequestRotation(Rotation rotation);
     Rotation GetRotation() const;
     ScreenId GetParentId() const;
+    uint32_t GetModeId() const;
+    std::vector<sptr<SupportedScreenModes>> GetSupportedModes() const;
+    bool SetScreenActiveMode(uint32_t modeId);
 
 private:
     class Impl;

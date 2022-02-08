@@ -290,4 +290,9 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> screenId, std::v
     // todo: make expand
     return DMError::DM_OK;
 }
+
+bool DisplayManagerService::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
+{
+    return abstractScreenController_->SetScreenActiveMode(screenId, modeId);
+}
 } // namespace OHOS::Rosen
