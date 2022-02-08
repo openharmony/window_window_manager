@@ -31,8 +31,7 @@ namespace {
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
 class DisplayManager::Impl : public RefBase {
-friend class DisplayManager;
-private:
+public:
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 15360; // max resolution, 16K
     static inline SingletonDelegator<DisplayManager> delegator;
     std::recursive_mutex mutex_;
@@ -41,9 +40,65 @@ private:
     sptr<DisplayManagerAgent> displayStateAgent_;
     DisplayStateCallback displayStateCallback_;
 
+    std::vector<sptr<IDisplayListener>> displayListeners_;
+
     bool CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const;
     bool CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const;
     void ClearDisplayStateCallback();
+};
+
+class DisplayManager::DisplayManagerListener : public DisplayManagerAgentDefault {
+public:
+    DisplayManagerListener(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+
+    void OnDisplayCreate(sptr<DisplayInfo> displayInfo) override
+    {
+        if (displayInfo == nullptr || displayInfo->id_ == DISPLAY_ID_INVALD) {
+            WLOGFE("OnDisplayCreate, displayInfo is invalid.");
+            return;
+        }
+        if (pImpl_ == nullptr) {
+            WLOGFE("OnDisplayCreate, impl is nullptr.");
+            return;
+        }
+        for (auto listener : pImpl_->displayListeners_) {
+            listener->OnCreate(displayInfo->id_);
+        }
+    };
+
+    void OnDisplayDestroy(DisplayId displayId) override
+    {
+        if (displayId == DISPLAY_ID_INVALD) {
+            WLOGFE("OnDisplayDestroy, displayId is invalid.");
+            return;
+        }
+        if (pImpl_ == nullptr) {
+            WLOGFE("OnDisplayDestroy, impl is nullptr.");
+            return;
+        }
+        for (auto listener : pImpl_->displayListeners_) {
+            listener->OnDestroy(displayId);
+        }
+    };
+
+    void OnDisplayChange(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event) override
+    {
+        if (displayInfo == nullptr || displayInfo->id_ == DISPLAY_ID_INVALD) {
+            WLOGFE("OnDisplayChange, displayInfo is invalid.");
+            return;
+        }
+        if (pImpl_ == nullptr) {
+            WLOGFE("OnDisplayChange, impl is nullptr.");
+            return;
+        }
+        for (auto listener : pImpl_->displayListeners_) {
+            listener->OnChange(displayInfo->id_);
+        }
+    };
+private:
+    sptr<Impl> pImpl_;
 };
 
 bool DisplayManager::Impl::CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const
@@ -202,6 +257,40 @@ std::vector<const sptr<Display>> DisplayManager::GetAllDisplays()
 
 bool DisplayManager::RegisterDisplayListener(sptr<IDisplayListener> listener)
 {
+    if (listener == nullptr) {
+        WLOGFE("RegisterDisplayListener listener is nullptr.");
+        return false;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    pImpl_->displayListeners_.push_back(listener);
+    if (displayManagerListener_ == nullptr) {
+        displayManagerListener_ = new DisplayManagerListener(pImpl_);
+        SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            displayManagerListener_,
+            DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+    }
+    return true;
+}
+
+bool DisplayManager::UnregisterDisplayListener(sptr<IDisplayListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterDisplayListener listener is nullptr.");
+        return false;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->displayListeners_.begin(), pImpl_->displayListeners_.end(), listener);
+    if (iter == pImpl_->displayListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return false;
+    }
+    pImpl_->displayListeners_.erase(iter);
+    if (pImpl_->displayListeners_.empty() && displayManagerListener_ != nullptr) {
+        SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            displayManagerListener_,
+            DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+        displayManagerListener_ = nullptr;
+    }
     return true;
 }
 
