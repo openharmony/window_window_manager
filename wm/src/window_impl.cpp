@@ -495,17 +495,12 @@ WMError WindowImpl::Show()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (state_ == WindowState::STATE_SHOWN && property_->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
-        WLOGFI("Minimize all app window");
-        WMError ret = SingletonContainer::Get<WindowAdapter>().MinimizeAllAppNodeAbility(property_->GetWindowId());
-        if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
-            if (lifecycleListener_ != nullptr) {
-                lifecycleListener_->AfterForeground();
-            }
-        } else {
-            WLOGFE("Minimize all app errCode:%{public}d for winId:%{public}d",
-                static_cast<int32_t>(ret), property_->GetWindowId());
+        WLOGFI("Minimize all app windows");
+        SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
+        if (lifecycleListener_ != nullptr) {
+            lifecycleListener_->AfterForeground();
         }
-        return ret;
+        return WMError::WM_OK;
     }
     if (state_ == WindowState::STATE_SHOWN) {
         WLOGFI("window is already shown id: %{public}d", property_->GetWindowId());
