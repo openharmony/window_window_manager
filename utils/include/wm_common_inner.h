@@ -32,6 +32,7 @@ enum class WindowState : uint32_t {
 };
 
 enum class WindowStateChangeReason : uint32_t {
+    NORMAL,
     KEYGUARD,
 };
 }
