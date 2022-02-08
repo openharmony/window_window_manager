@@ -50,7 +50,7 @@ public:
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) const;
 
-    const std::string& GetContentInfo() const;
+    std::string GetContentInfo() const;
 
 private:
     static inline std::atomic<uint32_t> count { 0 };

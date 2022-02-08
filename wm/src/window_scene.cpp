@@ -145,7 +145,7 @@ void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
     mainWindow_->UpdateConfiguration(configuration);
 }
 
-const std::string& WindowScene::GetContentInfo() const
+std::string WindowScene::GetContentInfo() const
 {
     if (mainWindow_ == nullptr) {
         WLOGFE("WindowScene::GetContentInfo mainWindow_ is null");
