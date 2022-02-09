@@ -26,7 +26,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayManager"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -358,7 +358,6 @@ void DisplayManager::NotifyDisplayStateChanged(DisplayState state)
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     if (pImpl_->displayStateCallback_) {
         pImpl_->displayStateCallback_(state);
-        WLOGFW("displayStateCallback_ end");
         pImpl_->ClearDisplayStateCallback();
         return;
     }

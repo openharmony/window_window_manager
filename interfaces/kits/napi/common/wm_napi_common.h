@@ -24,8 +24,10 @@
 #include <napi/native_common.h>
 #include <napi/native_node_api.h>
 #include "wm_common.h"
+#include "window_manager_hilog.h"
 
-constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, 0, "NapiWindowManagerCommonLayer" };
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, OHOS::Rosen::HILOG_DOMAIN_WINDOW,
+                                                "NapiWindowManagerCommonLayer" };
 
 #define GNAPI_LOG(fmt, ...) OHOS::HiviewDFX::HiLog::Info(LABEL, \
     "%{public}s:%{public}d " fmt, __func__, __LINE__, ##__VA_ARGS__)

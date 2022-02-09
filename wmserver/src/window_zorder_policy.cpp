@@ -19,7 +19,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowZorderPolicy"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowZorderPolicy"};
 }
 
 int32_t WindowZorderPolicy::GetWindowPriority(WindowType type) const

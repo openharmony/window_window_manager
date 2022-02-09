@@ -23,7 +23,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowImmersiveTest"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImmersiveTest"};
 
     const Rect SYS_BAR_REGION_NULL = { 0, 0, 0, 0 };
     const SystemBarProperty SYS_BAR_PROP_DEFAULT;

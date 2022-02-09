@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "SnapshotStub"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SnapshotStub"};
 }
 
 int32_t SnapshotStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
