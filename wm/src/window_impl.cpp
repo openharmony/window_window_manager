@@ -842,6 +842,7 @@ void WindowImpl::ConsumeDragOrMoveEvent(std::shared_ptr<MMI::PointerEvent>& poin
 void WindowImpl::ConsumeDividerPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t action = pointerEvent->GetPointerAction();
+    WLOGI("ConsumeDividerPointerEvent pointerEvent action: %{public}d, windowId: %{public}u", action, GetWindowId());
     MMI::PointerEvent::PointerItem pointerItem;
     switch (action) {
         case MMI::PointerEvent::POINTER_ACTION_DOWN: {
@@ -876,7 +877,8 @@ void WindowImpl::ConsumeDividerPointerEvent(std::shared_ptr<MMI::PointerEvent>& 
 void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t action = pointerEvent->GetPointerAction();
-    if (action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+    WLOGI("ConsumePointerEvent pointerEvent action: %{public}d, windowId: %{public}u", action, GetWindowId());
+    if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         SingletonContainer::Get<WindowAdapter>().ProcessWindowTouchedEvent(property_->GetWindowId());
     }
     if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
