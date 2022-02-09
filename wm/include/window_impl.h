@@ -150,7 +150,6 @@ private:
     void OnVsync(int64_t timeStamp);
     static sptr<Window> FindTopWindow(uint32_t topWinId);
     WMError Drag(const Rect& rect);
-    void ConsumeDividerPointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent);
     void ConsumeDragOrMoveEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleDragEvent(const MMI::PointerEvent::PointerItem& pointerItem);
     void HandleMoveEvent(const MMI::PointerEvent::PointerItem& pointerItem);
