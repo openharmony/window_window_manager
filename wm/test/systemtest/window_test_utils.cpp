@@ -18,7 +18,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowTestUtils"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowTestUtils"};
 }
 
 Rect WindowTestUtils::displayRect_        = {0, 0, 0, 0};

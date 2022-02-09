@@ -19,7 +19,9 @@
 #include "hilog/log.h"
 namespace OHOS {
 namespace Rosen {
-static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, 0, "WindowManager"};
+static constexpr unsigned int HILOG_DOMAIN_WINDOW = 0xD004200;
+static constexpr unsigned int HILOG_DOMAIN_DISPLAY = 0xD004201;
+static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManager"};
 
 #define WLOG_F(...)  (void)OHOS::HiviewDFX::HiLog::Fatal(LOG_LABEL, __VA_ARGS__)
 #define WLOG_E(...)  (void)OHOS::HiviewDFX::HiLog::Error(LOG_LABEL, __VA_ARGS__)
