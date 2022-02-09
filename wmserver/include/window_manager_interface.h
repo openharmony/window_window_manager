@@ -53,6 +53,8 @@ public:
         TRANS_ID_IS_SUPPORT_WIDE_GAMUT, // wide gamut
         TRANS_ID_SET_COLOR_SPACE, // set color space
         TRANS_ID_GET_COLOR_SPACE, // get color space
+        TRANS_ID_SET_BACKGROUND_BLUR,
+        TRANS_ID_SET_APLPHA
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId)  = 0;
@@ -64,6 +66,10 @@ public:
     virtual WMError Drag(uint32_t windowId, const Rect& rect) = 0;
     virtual WMError RequestFocus(uint32_t windowId) = 0;
     virtual WMError SetWindowMode(uint32_t windowId, WindowMode mode) = 0;
+
+    virtual WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) = 0;
+    virtual WMError SetAlpha(uint32_t windowId, float alpha) = 0;
+
     virtual WMError SetWindowType(uint32_t windowId, WindowType type) = 0;
     virtual WMError SetWindowFlags(uint32_t windowId, uint32_t flags) = 0;
     virtual WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) = 0;

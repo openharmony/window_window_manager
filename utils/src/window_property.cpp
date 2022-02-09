@@ -53,6 +53,14 @@ void WindowProperty::SetWindowMode(WindowMode mode)
     mode_ = mode;
 }
 
+void WindowProperty::SetWindowBackgroundBlur(WindowBlurLevel level)
+{
+    if (!WindowHelper::IsValidWindowBlurLevel(level)) {
+        return;
+    }
+    level_ = level;
+}
+
 void WindowProperty::SetFullScreen(bool isFullScreen)
 {
     isFullScreen_ = isFullScreen;
@@ -138,6 +146,11 @@ WindowType WindowProperty::GetWindowType() const
 WindowMode WindowProperty::GetWindowMode() const
 {
     return mode_;
+}
+
+WindowBlurLevel WindowProperty::GetWindowBackgroundBlur() const
+{
+    return level_;
 }
 
 bool WindowProperty::GetFullScreen() const
