@@ -141,14 +141,14 @@ declare namespace window {
   function create(ctx: Context, id: string, type: WindowType): Promise<Window>;
 
   /**
-   * Find the main window by id.
+   * Find the window by id.
    * @param id Indicates window id.
    * @since 7
    */
   function find(id: string, callback: AsyncCallback<Window>): void;
 
   /**
-   * Find the main window by id.
+   * Find the window by id.
    * @param id Indicates window id.
    * @since 7
    */
@@ -400,6 +400,36 @@ declare namespace window {
      * @since 7
      */
     type: WindowType;
+
+    /**
+     * window name
+     * @since 8
+     */
+    name: string;
+
+    /**
+     * Whether the window is displayed in full screen mode. The default value is false.
+     * @since 6
+     */
+    isFullScreen: boolean
+
+    /**
+     * Whether the window layout is in full screen mode(whether the window is immersive). The default value is false.
+     * @since 6
+     */
+    isLayoutFullScreen: boolean
+
+    /**
+     * Whether the window can gain focus. The default value is true
+     * @since 7
+     */
+    focusable: boolean
+
+    /**
+     * Whether the window is touchable. The default value is false
+     * @since 6
+     */
+    isFullScreen: boolean
   }
 
   interface Window {

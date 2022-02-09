@@ -31,7 +31,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowImpl"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
 }
 
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
@@ -81,7 +81,7 @@ const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
     return context_;
 }
 
-sptr<Window> WindowImpl::FindTopWindow(uint32_t mainWinId, uint32_t topWinId)
+sptr<Window> WindowImpl::FindTopWindow(uint32_t topWinId)
 {
     if (windowMap_.empty()) {
         WLOGFE("Please create mainWindow First!");
@@ -91,16 +91,6 @@ sptr<Window> WindowImpl::FindTopWindow(uint32_t mainWinId, uint32_t topWinId)
         if (topWinId == iter->second.first) {
             WLOGFI("FindTopWindow id: %{public}d", topWinId);
             return iter->second.second;
-        }
-    }
-    if (subWindowMap_.find(mainWinId) == subWindowMap_.end()) {
-        WLOGFE("Cannot find topWindow!");
-        return nullptr;
-    }
-    for (auto iter = subWindowMap_[mainWinId].begin(); iter != subWindowMap_[mainWinId].end(); iter++) {
-        if (topWinId == (*iter)->GetWindowId()) {
-            WLOGFI("FindTopWindow id: %{public}d", topWinId);
-            return *iter;
         }
     }
     WLOGFE("Cannot find topWindow!");
@@ -115,7 +105,7 @@ sptr<Window> WindowImpl::GetTopWindowWithId(uint32_t mainWinId)
         WLOGFE("GetTopWindowId failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return nullptr;
     }
-    return FindTopWindow(mainWinId, topWinId);
+    return FindTopWindow(topWinId);
 }
 
 sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
@@ -145,7 +135,7 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
         WLOGFE("GetTopWindowId failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return nullptr;
     }
-    return FindTopWindow(mainWinId, topWinId);
+    return FindTopWindow(topWinId);
 }
 
 std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
@@ -504,17 +494,12 @@ WMError WindowImpl::Show()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (state_ == WindowState::STATE_SHOWN && property_->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
-        WLOGFI("Minimize all app window");
-        WMError ret = SingletonContainer::Get<WindowAdapter>().MinimizeAllAppNodeAbility(property_->GetWindowId());
-        if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
-            if (lifecycleListener_ != nullptr) {
-                lifecycleListener_->AfterForeground();
-            }
-        } else {
-            WLOGFE("Minimize all app errCode:%{public}d for winId:%{public}d",
-                static_cast<int32_t>(ret), property_->GetWindowId());
+        WLOGFI("Minimize all app windows");
+        SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
+        if (lifecycleListener_ != nullptr) {
+            lifecycleListener_->AfterForeground();
         }
-        return ret;
+        return WMError::WM_OK;
     }
     if (state_ == WindowState::STATE_SHOWN) {
         WLOGFI("window is already shown id: %{public}d", property_->GetWindowId());

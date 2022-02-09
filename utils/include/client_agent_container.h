@@ -38,6 +38,8 @@ private:
     void RemoveAgent(const sptr<IRemoteObject>& remoteObject);
     bool UnregisterAgentLocked(std::vector<sptr<T1>>& agents, const sptr<IRemoteObject>& agent);
 
+    static constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ClientAgentContainer"};
+
     struct finder_t {
         finder_t(sptr<IRemoteObject> remoteObject) : remoteObject_(remoteObject) {}
 
@@ -63,9 +65,9 @@ bool ClientAgentContainer<T1, T2>::RegisterAgent(const sptr<T1>& agent, T2 type)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     agentMap_[type].push_back(agent);
-    WLOG_I("ClientAgentContainer agent registered type:%{public}u", type);
+    WLOGFI("agent registered type:%{public}u", type);
     if (deathRecipient_ == nullptr || !agent->AsObject()->AddDeathRecipient(deathRecipient_)) {
-        WLOG_I("ClientAgentContainer failed to add death recipient");
+        WLOGFI("failed to add death recipient");
     }
     return true;
 }
@@ -75,7 +77,7 @@ bool ClientAgentContainer<T1, T2>::UnregisterAgent(const sptr<T1>& agent, T2 typ
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (agent == nullptr || agentMap_.count(type) == 0) {
-        WLOG_E("ClientAgentContainer agent or type is invalid");
+        WLOGFE("agent or type is invalid");
         return false;
     }
     auto& agents = agentMap_.at(type);
@@ -89,7 +91,7 @@ std::vector<sptr<T1>> ClientAgentContainer<T1, T2>::GetAgentsByType(T2 type)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (agentMap_.count(type) == 0) {
-        WLOG_W("ClientAgentContainer no such type of agent registered! type:%{public}u", type);
+        WLOGFI("no such type of agent registered! type:%{public}u", type);
         return std::vector<sptr<T1>>();
     }
     return agentMap_.at(type);
@@ -101,18 +103,18 @@ bool ClientAgentContainer<T1, T2>::UnregisterAgentLocked(std::vector<sptr<T1>>& 
 {
     auto iter = std::find_if(agents.begin(), agents.end(), finder_t(agent));
     if (iter == agents.end()) {
-        WLOG_W("ClientAgentContainer could not find this agent");
+        WLOGFW("could not find this agent");
         return false;
     }
     agents.erase(iter);
-    WLOG_I("ClientAgentContainer agent unregistered");
+    WLOGFI("agent unregistered");
     return true;
 }
 
 template<typename T1, typename T2>
 void ClientAgentContainer<T1, T2>::RemoveAgent(const sptr<IRemoteObject>& remoteObject)
 {
-    WLOG_I("ClientAgentContainer RemoveAgent");
+    WLOGFI("RemoveAgent");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto& elem : agentMap_) {
         if (UnregisterAgentLocked(elem.second, remoteObject)) {

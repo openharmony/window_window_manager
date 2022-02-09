@@ -45,7 +45,6 @@ public:
     WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
-    WMError MinimizeAllAppNodeAbility(uint32_t windowId);
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void NotifyDisplayStateChange(DisplayStateChangeType type);
     WMError ProcessWindowTouchedEvent(uint32_t windowId);
