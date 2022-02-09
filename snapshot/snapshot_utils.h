@@ -34,7 +34,9 @@ using  WriteToPngParam = struct {
 using CmdArgments = struct {
     Rosen::DisplayId displayId = Rosen::DISPLAY_ID_INVALD;
     std::string fileName;
+    bool isWidthSet = false;
     int32_t width = -1;
+    bool isHeightSet = false;
     int32_t height = -1;
 };
 
@@ -45,6 +47,7 @@ public:
 
     static void PrintUsage(const std::string &cmdLine);
     static bool CheckFileNameValid(const std::string &fileName);
+    static bool CheckWidthAndHeightValid(const CmdArgments& cmdArgments);
     static bool WriteToPng(const std::string &fileName, const WriteToPngParam &param);
     static bool WriteToPngWithPixelMap(const std::string &fileName, Media::PixelMap &pixelMap);
     static bool ProcessArgs(int argc, char * const argv[], CmdArgments& cmdArgments);
