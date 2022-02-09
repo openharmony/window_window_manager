@@ -66,6 +66,7 @@ NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& 
     object->SetProperty("isFullScreen", CreateJsValue(engine, window->IsFullScreen()));
     object->SetProperty("touchable", CreateJsValue(engine, window->GetTouchable()));
     object->SetProperty("focusable", CreateJsValue(engine, window->GetFocusable()));
+    object->SetProperty("name", CreateJsValue(engine, window->GetWindowName()));
     return objValue;
 }
 static std::string GetHexColor(uint32_t color)

@@ -75,12 +75,22 @@ sptr<Window> WindowScene::CreateWindow(const std::string& windowName, sptr<Windo
         return nullptr;
     }
     option->SetParentName(mainWindow_->GetWindowName());
-    return SingletonContainer::Get<StaticCall>().CreateWindow(windowName, option);
+    return SingletonContainer::Get<StaticCall>().CreateWindow(windowName, option, mainWindow_->GetContext());
 }
 
 const sptr<Window>& WindowScene::GetMainWindow() const
 {
     return mainWindow_;
+}
+
+std::vector<sptr<Window>> WindowScene::GetSubWindow()
+{
+    if (mainWindow_ == nullptr) {
+        WLOGFE("WindowScene mainWindow_ is nullptr id: %{public}d", mainWindow_->GetWindowId());
+        return std::vector<sptr<Window>>();
+    }
+    uint32_t parentId = mainWindow_->GetWindowId();
+    return SingletonContainer::Get<StaticCall>().GetSubWindow(parentId);
 }
 
 WMError WindowScene::GoForeground(uint32_t reason)

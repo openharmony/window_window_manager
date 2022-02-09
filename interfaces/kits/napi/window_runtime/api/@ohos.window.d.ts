@@ -118,7 +118,6 @@ declare namespace window {
    * Create a sub window with a specific id and type.
    * @param id Indicates window id.
    * @param type Indicates window type.
-   * @permission ohos.permission.SYSTEM_FLOAT_WINDOW
    * @since 7
    */
   function create(id: string, type: WindowType, callback: AsyncCallback<Window>): void;
@@ -127,34 +126,60 @@ declare namespace window {
    * Create a sub window with a specific id and type.
    * @param id Indicates window id.
    * @param type Indicates window type.
-   * @permission ohos.permission.SYSTEM_FLOAT_WINDOW
    * @since 7
    */
   function create(id: string, type: WindowType): Promise<Window>;
 
   /**
-   * Create a sub window with a specific id and type.
+   * Create a system window with a specific id and type.
    * @param ctx Indicates the context on which the window depends
    * @param id Indicates window id.
    * @param type Indicates window type.
-   * @permission ohos.permission.SYSTEM_FLOAT_WINDOW
+   * @systemapi Hide this for inner system use.
    * @since 8
    */
   function create(ctx: Context, id: string, type: WindowType): Promise<Window>;
 
   /**
-   * Find the sub window by id.
+   * Find the window by id.
    * @param id Indicates window id.
    * @since 7
    */
   function find(id: string, callback: AsyncCallback<Window>): void;
 
   /**
-   * Find the sub window by id.
+   * Find the window by id.
    * @param id Indicates window id.
    * @since 7
    */
   function find(id: string): Promise<Window>;
+
+  /**
+   * Get the final show window.
+   * @param id Indicates window id.
+   * @since 6
+   */
+  function getTopWindow(callback: AsyncCallback<Window>): void;
+
+  /**
+   * Get the final show window.
+   * @since 6
+   */
+  function getTopWindow(): Promise<Window>;
+
+  /**
+   * Get the final show window.
+   * @param ctx Indicates the context on which the window depends
+   * @since 8
+   */
+  function getTopWindow(ctx: Context): Promise<Window>;
+
+  /**
+   * Get the final show window.
+   * @param ctx Indicates the context on which the window depends
+   * @since 8
+   */
+  function getTopWindow(ctx: Context, callback: AsyncCallback<Window>): void;
 
   /**
    * minimize all app windows.
@@ -375,6 +400,36 @@ declare namespace window {
      * @since 7
      */
     type: WindowType;
+
+    /**
+     * window name
+     * @since 8
+     */
+    name: string;
+
+    /**
+     * Whether the window is displayed in full screen mode. The default value is false.
+     * @since 6
+     */
+    isFullScreen: boolean
+
+    /**
+     * Whether the window layout is in full screen mode(whether the window is immersive). The default value is false.
+     * @since 6
+     */
+    isLayoutFullScreen: boolean
+
+    /**
+     * Whether the window can gain focus. The default value is true
+     * @since 7
+     */
+    focusable: boolean
+
+    /**
+     * Whether the window is touchable. The default value is false
+     * @since 6
+     */
+    isFullScreen: boolean
   }
 
   interface Window {
@@ -421,37 +476,52 @@ declare namespace window {
      * @param x Indicate the X-coordinate of the window.
      * @param y Indicate the Y-coordinate of the window.
      * @devices tv, phone, tablet, wearable, liteWearable.
-    */
+     * @since 7
+     */
     moveTo(x: number, y: number): Promise<void>;
+
+    /**
+     * Set the position of a window.
+     * @param x Indicate the X-coordinate of the window.
+     * @param y Indicate the Y-coordinate of the window.
+     * @devices tv, phone, tablet, wearable, liteWearable.
+     * @since 7
+     */
+    moveTo(x: number, y: number, callback: AsyncCallback<void>): void;
 
     /**
      * Set the size of a window .
      * @param width Indicates the width of the window.
      * @param height Indicates the height of the window.
      * @devices tv, phone, tablet, wearable, liteWearable.
+     * @since 7
      */
     resize(width: number, height: number): Promise<void>;
 
     /**
-     * Loads content to the subwindow
-     * @param path Path of the page to which the content will be loaded
+     * Set the size of a window .
+     * @param width Indicates the width of the window.
+     * @param height Indicates the height of the window.
+     * @devices tv, phone, tablet, wearable, liteWearable.
      * @since 7
      */
-    loadContent(path: string, callback: AsyncCallback<void>): void;
-
-    /**
-     * Loads content to the subwindow
-     * @param path Path of the page to which the content will be loaded
-     * @since 7
-     */
-    loadContent(path: string): Promise<void>;
+    resize(width: number, height: number, callback: AsyncCallback<void>): void;
 
     /**
      * Set the type of a window.
      * @param windowType Indicate the type of a window.
      * @devices tv, phone, tablet, wearable, liteWearable.
+     * @since 7
      */
     setWindowType(windowType: WindowType): Promise<void>;
+
+    /**
+     * Set the type of a window.
+     * @param windowType Indicate the type of a window.
+     * @devices tv, phone, tablet, wearable, liteWearable.
+     * @since 7
+     */
+    setWindowType(windowType: WindowType, callback: AsyncCallback<void>): void;
 
     /**
      * get the properties of current window
@@ -470,12 +540,14 @@ declare namespace window {
     /**
      * get the avoid area
      * @param type Type of the area
+     * @since 7
      */
     getAvoidArea(type: AvoidAreaType, callback: AsyncCallback<AvoidArea>): void;
 
     /**
      * get the avoid area
      * @param type Type of the area
+     * @since 7
      */
     getAvoidArea(type: AvoidAreaType): Promise<AvoidArea>;
 
@@ -548,7 +620,7 @@ declare namespace window {
      * @param path  path Path of the page to which the content will be loaded
      * @param storage storage The data object shared within the content instance loaded by the window
      * @devices tv, phone, tablet, wearable, car
-     * @since 7
+     * @since 8
      */
     loadContent(path: string, storage: ContenStorage, callback: AsyncCallback<void>): void;
 
@@ -617,6 +689,33 @@ declare namespace window {
      * @since 8
      */
     getMainWindow(): Promise<Window>;
+    /**
+     * Get main window of the stage.
+     * @since 8
+     */
+    getMainWindow(callback: AsyncCallback<Window>): void;
+    /**
+     * Create sub window of the stage.
+     * @param name window name of sub window
+     * @since 8
+     */
+    createSubWindow(name: string): Promise<Window>;
+    /**
+     * Create sub window of the stage.
+     * @param name window name of sub window
+     * @since 8
+     */
+    createSubWindow(name: string, callback: AsyncCallback<Window>): void;
+    /**
+     * Get sub window of the stage.
+     * @since 8
+     */
+    getSubWindow(): Promise<Array<Window>>;
+    /**
+     * Get sub window of the stage.
+     * @since 8
+     */
+    getSubWindow(callback: AsyncCallback<Array<Window>>): void;
     /**
      * Loads content
      * @param path  path Path of the page to which the content will be loaded

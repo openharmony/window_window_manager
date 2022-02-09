@@ -38,12 +38,12 @@ class WindowStage {
         return this.__window_stage__.createSubWindow(windowName, asyncCallback)
     }
 
-    on(type, callback) {
-        return this.__window_stage__.on(type, callback)
+    getSubWindow(asyncCallback) {
+        return this.__window_stage__.getSubWindow(asyncCallback)
     }
 
-    off(type) {
-        return this.__window_stage__.off(type)
+    on(type, callback) {
+        return this.__window_stage__.on(type, callback)
     }
 
     off(type, callback) {
