@@ -45,7 +45,6 @@ public:
     uint64_t GetScreenId() const;
     Rect GetDisplayRect() const;
     sptr<WindowNode> GetTopImmersiveNode() const;
-    WMError HandleSplitWindowModeChange(sptr<WindowNode>& triggerNode, bool isChangeToSplit);
     void UpdateWindowStatus(const sptr<WindowNode>& windowId, WindowUpdateType type) const;
 
     void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas);
@@ -58,6 +57,8 @@ public:
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
     WMError MinimizeAppNodeExceptOptions(const std::vector<uint32_t> &exceptionalIds = {},
                                          const std::vector<WindowMode> &exceptionalModes = {});
+    WMError EnterSplitWindowMode(sptr<WindowNode>& node);
+    WMError ExitSplitWindowMode(sptr<WindowNode>& node);
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
@@ -70,8 +71,6 @@ private:
 
     void SendSplitScreenEvent(WindowMode mode);
     sptr<WindowNode> FindSplitPairNode(sptr<WindowNode>& node) const;
-    WMError HandleModeChangeToSplit(sptr<WindowNode>& triggerNode);
-    WMError HandleModeChangeFromSplit(sptr<WindowNode>& triggerNode);
     WMError UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode);
     WMError SwitchLayoutPolicy(WindowLayoutMode mode);
 
@@ -81,6 +80,8 @@ private:
     void UpdateWindowState(sptr<WindowNode> node, int32_t topPriority, WindowState state);
     bool IsTopAppWindow(uint32_t windowId) const;
     void RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes);
+    void MinimizeWindowFromAbility(const sptr<WindowNode>& node);
+    void ResetLayoutPolicy();
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
