@@ -432,6 +432,21 @@ declare namespace window {
     isFullScreen: boolean
   }
 
+  /**
+   * Type of allowing the specified of color space.
+   * @since 8
+   */
+  enum ColorSpace {
+    /**
+     * Default color space.
+     */
+    DEFAULT,
+    /**
+     * Wide gamut color space. The specific wide color gamut depends on thr screen.
+     */
+    WIDE_GAMUT,
+  }
+
   interface Window {
     /**
      * hide sub window.
@@ -671,6 +686,44 @@ declare namespace window {
      * @since 7
      */
     off(type: 'systemAvoidAreaChange', callback?: Callback<AvoidArea>): void;
+
+    /**
+     * Whether the window supports thr wide gamut setting.
+     * @since 8
+     */
+    isSupportWideGamut(): Promise<boolean>;
+
+    /**
+     * Whether the window supports thr wide gamut setting.
+     * @since 8
+     */
+    isSupportWideGamut(callback: AsyncCallback<boolean>): void;
+
+    /**
+     * Sets the specified color space.
+     * @param colorSpace the specified color space.
+     * @since 8
+     */
+    setColorSpace(colorSpace:ColorSpace): Promise<void>;
+
+    /**
+     * Sets the specified color space.
+     * @param colorSpace the specified color space.
+     * @since 8
+     */
+    setColorSpace(colorSpace:ColorSpace, callback: AsyncCallback<void>): void;
+
+    /**
+     * Obtains thr set color space.
+     * @since 8
+     */
+    getColorSpace(): Promise<ColorSpace>;
+
+    /**
+     * Obtains thr set color space.
+     * @since 8
+     */
+    getColorSpace(callback: AsyncCallback<ColorSpace>): void;
   }
 
   enum WindowStageEventType {
