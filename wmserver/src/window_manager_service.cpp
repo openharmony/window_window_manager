@@ -284,13 +284,6 @@ void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)
     }
 }
 
-WMError WindowManagerService::MinimizeAllAppNodeAbility(uint32_t windowId)
-{
-    WM_SCOPED_TRACE("wms:MinimizeAllAppNodeAbility");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->MinimizeAllAppNodeAbility(windowId);
-}
-
 void WindowManagerService::NotifyDisplayStateChange(DisplayStateChangeType type)
 {
     WLOGFI("NotifyDisplayStateChange");

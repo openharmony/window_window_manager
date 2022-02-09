@@ -42,7 +42,6 @@ public:
     WMError SetWindowFlags(uint32_t windowId, uint32_t flags) override;
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) override;
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override;
-    WMError MinimizeAllAppNodeAbility(uint32_t windowId) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void ProcessWindowTouchedEvent(uint32_t windowId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;

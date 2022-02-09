@@ -48,9 +48,8 @@ public:
     bool isVerticalDisplay(sptr<WindowNode>& node) const;
 
     WMError RequestFocus(uint32_t windowId);
-    WMError MinimizeOtherFullScreenAbility(sptr<WindowNode>& node);
+    WMError MinimizeStructuredAppWindowsExceptSelf(sptr<WindowNode>& node);
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
-    WMError MinimizeAllAppNodeAbility(sptr<WindowNode>& node);
     WMError HandleSplitWindowModeChange(sptr<WindowNode>& node, bool isChangeToSplit);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);

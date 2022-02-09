@@ -40,7 +40,7 @@ public:
     WMError SetFocusWindow(uint32_t windowId);
     uint32_t GetFocusWindow() const;
     std::vector<Rect> GetAvoidAreaByType(AvoidAreaType avoidAreaType);
-    WMError MinimizeOtherFullScreenAbility(); // adapt to api7
+    WMError MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node);
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
     uint64_t GetScreenId() const;
     Rect GetDisplayRect() const;
@@ -56,6 +56,8 @@ public:
     sptr<WindowNode> GetNextFocusableWindow(uint32_t windowId) const;
     void MinimizeAllAppWindows();
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
+    WMError MinimizeAppNodeExceptOptions(const std::vector<uint32_t> &exceptionalIds = {},
+                                         const std::vector<WindowMode> &exceptionalModes = {});
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
@@ -72,6 +74,7 @@ private:
     WMError HandleModeChangeFromSplit(sptr<WindowNode>& triggerNode);
     WMError UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode);
     WMError SwitchLayoutPolicy(WindowLayoutMode mode);
+
     void NotifyIfSystemBarTintChanged();
     void NotifyIfSystemBarRegionChanged();
     void TraverseAndUpdateWindowState(WindowState state, int32_t topPriority);
