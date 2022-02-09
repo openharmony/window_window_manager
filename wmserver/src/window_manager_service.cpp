@@ -189,11 +189,7 @@ WMError WindowManagerService::Drag(uint32_t windowId, const Rect& rect)
            windowId, rect.posX_, rect.posY_, rect.width_, rect.height_);
     WM_SCOPED_TRACE("wms:Drag");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WMError res = windowController_->Drag(windowId, rect);
-    if (res == WMError::WM_OK) {
-        inputWindowMonitor_->UpdateInputWindow(windowId);
-    }
-    return res;
+    return windowController_->Drag(windowId, rect);
 }
 
 WMError WindowManagerService::RequestFocus(uint32_t windowId)

@@ -71,6 +71,7 @@ public:
     int32_t priority_ { 0 };
     bool requestedVisibility_ { false };
     bool currentVisibility_ { false };
+    bool hasDecorated = false;
 
 private:
     sptr<WindowProperty> property_;

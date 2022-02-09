@@ -75,7 +75,6 @@ public:
 private:
     std::string windowName_;
     Rect windowRect_ { 0, 0, 0, 0 };
-    Rect hotZoneRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     WindowMode mode_ { WindowMode::WINDOW_MODE_FULLSCREEN };
     WindowBlurLevel level_ { WindowBlurLevel::WINDOW_BLUR_OFF };
