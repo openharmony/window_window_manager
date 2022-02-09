@@ -24,5 +24,10 @@ sptr<Window> StaticCall::CreateWindow(const std::string& windowName,
 {
     return Window::Create(windowName, option, context);
 }
+
+std::vector<sptr<Window>> StaticCall::GetSubWindow(uint32_t parentId)
+{
+    return Window::GetSubWindow(parentId);
+}
 } // namespace Rosen
 } // namespace OHOS

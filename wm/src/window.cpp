@@ -61,5 +61,10 @@ sptr<Window> Window::GetTopWindowWithId(uint32_t mainWinId)
 {
     return WindowImpl::GetTopWindowWithId(mainWinId);
 }
+
+std::vector<sptr<Window>> Window::GetSubWindow(uint32_t parentId)
+{
+    return WindowImpl::GetSubWindow(parentId);
+}
 }
 }

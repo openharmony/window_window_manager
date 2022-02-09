@@ -204,6 +204,7 @@ private:
                     task.Resolve(engine, jsWindowObj->Get());
                     WLOGFI("JsWindowManager::OnFindWindow success");
                 } else {
+                    WLOGFE("JsWindow::OnFindWindow window %{public}s not exist!", windowName.c_str());
                     task.Reject(engine, CreateJsError(engine,
                         static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnFindWindow failed."));
                 }
@@ -441,13 +442,7 @@ private:
             WLOGFE("JsWindowManager::OnGetTopWindow failed");
             return;
         }
-        windowName = window->GetWindowName();
-        std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
-        if (jsWindowObj != nullptr && jsWindowObj->Get() != nullptr) {
-            task.Resolve(engine, jsWindowObj->Get());
-        } else {
-            task.Resolve(engine, CreateJsWindowObject(engine, window));
-        }
+        task.Resolve(engine, CreateJsWindowObject(engine, window));
         WLOGFI("JsWindowManager::OnGetTopWindow success");
         return;
     }
