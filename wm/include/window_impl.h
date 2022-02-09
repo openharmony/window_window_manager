@@ -51,6 +51,7 @@ public:
     static sptr<Window> Find(const std::string& id);
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
+    static std::vector<sptr<Window>> GetSubWindow(uint32_t parantId);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     virtual Rect GetRect() const override;
     virtual WindowType GetType() const override;

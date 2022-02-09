@@ -40,8 +40,8 @@ public:
         sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option = nullptr);
 
     sptr<Window> CreateWindow(const std::string& windowName, sptr<WindowOption>& option) const;
-
     const sptr<Window>& GetMainWindow() const;
+    std::vector<sptr<Window>> GetSubWindow();
 
     WMError GoForeground(uint32_t reason = 0);
     WMError GoBackground(uint32_t reason = 0);

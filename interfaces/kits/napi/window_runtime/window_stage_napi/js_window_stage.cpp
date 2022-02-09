@@ -82,6 +82,13 @@ NativeValue* JsWindowStage::CreateSubWindow(NativeEngine* engine, NativeCallback
     return (me != nullptr) ? me->OnCreateSubWindow(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindowStage::GetSubWindow(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindowStage::GetSubWindow is called");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
+    return (me != nullptr) ? me->OnGetSubWindow(*engine, *info) : nullptr;
+}
+
 void JsWindowStage::AfterForeground()
 {
     LifeCycleCallBack(WindowStageEventType::VISIBLE);
@@ -254,12 +261,6 @@ NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& i
         return engine.CreateUndefined();
     }
 
-    if (info.argc == 1) { // 1: input param nums
-        WLOGFE("JsWindowStage::OffEvent info.argc == 1");
-        eventCallbackMap_.clear();
-        return engine.CreateUndefined();
-    }
-
     WLOGFI("JsWindowStage::OffEvent info.argc == 2");
     NativeValue* value = info.argv[1];
     if (value->IsCallable()) {
@@ -382,6 +383,7 @@ NativeValue* JsWindowStage::OnCreateSubWindow(NativeEngine& engine, NativeCallba
             }
             sptr<Rosen::WindowOption> windowOption = new Rosen::WindowOption();
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+            windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
             auto window = windowScene_->CreateWindow(windowName, windowOption);
             if (window == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(Rosen::WMError::WM_ERROR_NULLPTR),
@@ -393,6 +395,45 @@ NativeValue* JsWindowStage::OnCreateSubWindow(NativeEngine& engine, NativeCallba
             WLOGFI("JsWindowStage OnCreateSubWindow success");
         };
     NativeValue* callback = info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr;
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, callback, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindowStage::CreateJsSubWindowArrayObject(NativeEngine& engine,
+    std::vector<sptr<Window>> subWinVec)
+{
+    WLOGFI("JsWindowUtils::CreateJsSubWindowArrayObject is called");
+    NativeValue* objValue = engine.CreateArray(subWinVec.size());
+    NativeArray* array = ConvertNativeValueTo<NativeArray>(objValue);
+    if (array == nullptr) {
+        WLOGFE("Failed to convert subWinVec to jsArrayObject");
+        return nullptr;
+    }
+    uint32_t index = 0;
+    for (size_t i = 0; i < subWinVec.size(); i++) {
+        array->SetElement(index++, CreateJsWindowObject(engine, subWinVec[i]));
+    }
+    return objValue;
+}
+
+NativeValue* JsWindowStage::OnGetSubWindow(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindowStage::OnGetSubWindow is called");
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            std::vector<sptr<Window>> subWindowVec = windowScene_->GetSubWindow();
+            if (subWindowVec.empty()) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_INVALID_OPERATION),
+                    "JsWindowStage::OnGetSubWindow failed."));
+                WLOGFE("JsWindowStage subWindow is empty");
+                return;
+            }
+            task.Resolve(engine, CreateJsSubWindowArrayObject(engine, subWindowVec));
+            WLOGFI("JsWindowStage OnGetSubWindow success");
+        };
+    NativeValue* callback = info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr;
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, callback, nullptr, std::move(complete), &result));
@@ -420,6 +461,8 @@ NativeValue* CreateJsWindowStage(NativeEngine& engine,
         *object, "getWindowMode", JsWindowStage::GetWindowMode);
     BindNativeFunction(engine,
         *object, "createSubWindow", JsWindowStage::CreateSubWindow);
+    BindNativeFunction(engine,
+        *object, "getSubWindow", JsWindowStage::GetSubWindow);
     BindNativeFunction(engine, *object, "on", JsWindowStage::On);
     BindNativeFunction(engine, *object, "off", JsWindowStage::Off);
 

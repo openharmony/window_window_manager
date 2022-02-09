@@ -914,7 +914,6 @@ std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
     WLOGFI("JsWindow::FindJsWindowObject is called");
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_jsWindowMap.find(windowName) == g_jsWindowMap.end()) {
-        WLOGFI("JsWindow::FindJsWindowObject window %{public}s not exist!", windowName.c_str());
         return nullptr;
     }
     return g_jsWindowMap[windowName];
@@ -923,6 +922,13 @@ std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
 {
     WLOGFI("JsWindow::CreateJsWindow is called");
+    std::string windowName = window->GetWindowName();
+    // avoid repeatly creat js window when getWindow
+    std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
+    if (jsWindowObj != nullptr && jsWindowObj->Get() != nullptr) {
+        WLOGFI("JsWindow::CreateJsWindow FindJsWindowObject %{public}s", windowName.c_str());
+        return jsWindowObj->Get();
+    }
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 
@@ -948,7 +954,6 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     BindNativeFunction(engine, *object, "isShowing", JsWindow::IsShowing);
     std::shared_ptr<NativeReference> jsWindowRef;
     jsWindowRef.reset(engine.CreateReference(objValue, 1));
-    std::string windowName = window->GetWindowName();
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     g_jsWindowMap[windowName] = jsWindowRef;
     return objValue;
