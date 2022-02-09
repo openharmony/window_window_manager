@@ -229,6 +229,32 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
     return WMError::WM_OK;
 }
 
+WMError WindowController::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    node->SetWindowBackgroundBlur(level);
+
+    FlushWindowInfo(windowId);
+    return WMError::WM_OK;
+}
+
+WMError WindowController::SetAlpha(uint32_t windowId, float alpha)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    node->SetAlpha(alpha);
+
+    FlushWindowInfo(windowId);
+    return WMError::WM_OK;
+}
+
 void WindowController::NotifyDisplayStateChange(DisplayStateChangeType type)
 {
     WLOGFI("DisplayStateChangeType:%{public}u", type);

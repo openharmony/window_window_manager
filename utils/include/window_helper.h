@@ -69,6 +69,11 @@ public:
             mode == WindowMode::WINDOW_MODE_PIP;
     }
 
+    static inline bool IsValidWindowBlurLevel(WindowBlurLevel level)
+    {
+        return (level >= WindowBlurLevel::WINDOW_BLUR_OFF && level <= WindowBlurLevel::WINDOW_BLUR_HIGH);
+    }
+
     static inline bool IsEmptyRect(const Rect& r)
     {
         return (r.posX_ == 0 && r.posY_ == 0 && r.width_ == 0 && r.height_ == 0);

@@ -79,6 +79,8 @@ public:
     virtual bool IsLayoutFullScreen() const = 0;
     virtual WMError SetWindowType(WindowType type) = 0;
     virtual WMError SetWindowMode(WindowMode mode) = 0;
+    virtual WMError SetWindowBackgroundBlur(WindowBlurLevel level) = 0;
+    virtual WMError SetAlpha(float alpha) = 0;
     virtual WMError AddWindowFlag(WindowFlag flag) = 0;
     virtual WMError RemoveWindowFlag(WindowFlag flag) = 0;
     virtual WMError SetWindowFlags(uint32_t flags) = 0;

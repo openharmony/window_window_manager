@@ -46,7 +46,8 @@ public:
     void SetWindowProperty(const sptr<WindowProperty>& property);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
     void SetWindowMode(WindowMode mode);
-
+    void SetWindowBackgroundBlur(WindowBlurLevel level);
+    void SetAlpha(float alpha);
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
     uint32_t GetParentId() const;

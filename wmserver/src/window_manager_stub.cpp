@@ -96,6 +96,20 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case TRANS_ID_SET_BACKGROUND_BLUR: {
+            uint32_t windowId = data.ReadUint32();
+            WindowBlurLevel level = static_cast<WindowBlurLevel>(data.ReadUint32());
+            WMError errCode = SetWindowBackgroundBlur(windowId, level);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case TRANS_ID_SET_APLPHA: {
+            uint32_t windowId = data.ReadUint32();
+            float alpha = data.ReadFloat();
+            WMError errCode = SetAlpha(windowId, alpha);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
         case TRANS_ID_UPDATE_TYPE: {
             uint32_t windowId = data.ReadUint32();
             WindowType type = static_cast<WindowType>(data.ReadUint32());
