@@ -115,6 +115,10 @@ public:
     virtual std::string GetContentInfo() override;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
 
+    // colorspace, gamut
+    virtual bool IsSupportWideGamut() override;
+    virtual void SetColorSpace(ColorSpace colorSpace) override;
+    virtual ColorSpace GetColorSpace() override;
 private:
     inline void NotifyAfterForeground() const
     {

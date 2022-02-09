@@ -148,6 +148,11 @@ enum class AvoidAreaType : uint32_t {
     TYPE_SYSTEM_GESTURE,   // area for system gesture
 };
 
+enum class ColorSpace : uint32_t {
+    COLOR_SPACE_DEFAULT = 0, // Default color space.
+    COLOR_SPACE_WIDE_GAMUT,  // Wide gamut color space. The specific wide color gamut depends on thr screen.
+};
+
 struct AvoidArea {
     Rect leftRect;
     Rect topRect;

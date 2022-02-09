@@ -309,6 +309,25 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
     windowController_->MinimizeAllAppWindows(displayId);
 }
 
+bool WindowManagerService::IsSupportWideGamut(uint32_t windowId)
+{
+    bool ret = true;
+    WLOGFI("IsSupportWideGamut %{public}d", ret);
+    return ret;
+}
+
+void WindowManagerService::SetColorSpace(uint32_t windowId, ColorSpace colorSpace)
+{
+    WLOGFI("SetColorSpace windowId %{public}u, ColorSpace %{public}u", windowId, colorSpace);
+}
+
+ColorSpace WindowManagerService::GetColorSpace(uint32_t windowId)
+{
+    ColorSpace colorSpace = ColorSpace::COLOR_SPACE_DEFAULT;
+    WLOGFI("GetColorSpace windowId %{public}u, ColorSpace %{public}u", windowId, colorSpace);
+    return colorSpace;
+}
+
 WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
     WM_SCOPED_TRACE("wms:GetTopWindowId(%d)", mainWinId);

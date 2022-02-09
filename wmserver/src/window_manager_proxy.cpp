@@ -503,6 +503,73 @@ void WindowManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
     }
 }
 
+bool WindowManagerProxy::IsSupportWideGamut(uint32_t windowId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return false;
+    }
+    if (Remote()->SendRequest(TRANS_ID_IS_SUPPORT_WIDE_GAMUT, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return false;
+    }
+
+    int32_t ret = reply.ReadUint32();
+    return static_cast<bool>(ret);
+}
+
+void WindowManagerProxy::SetColorSpace(uint32_t windowId, ColorSpace colorSpace)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(colorSpace))) {
+        WLOGFE("Write colorSpace failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_SET_COLOR_SPACE, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+ColorSpace WindowManagerProxy::GetColorSpace(uint32_t windowId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    }
+    if (Remote()->SendRequest(TRANS_ID_GET_COLOR_SPACE, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    }
+
+    int32_t ret = reply.ReadUint32();
+    return static_cast<ColorSpace>(ret);
+}
+
 WMError WindowManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
     MessageParcel data;
