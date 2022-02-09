@@ -68,6 +68,13 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_PIP
 };
 
+enum class WindowBlurLevel : uint32_t {
+    WINDOW_BLUR_OFF = 0,
+    WINDOW_BLUR_LOW,
+    WINDOW_BLUR_MEDIUM,
+    WINDOW_BLUR_HIGH
+};
+
 enum class WMError : int32_t {
     WM_OK = 0,
     WM_DO_NOTHING = 1,

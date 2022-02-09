@@ -58,6 +58,10 @@ public:
     WMError RequestFocus(uint32_t windowId) override;
     WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId) override;
     WMError SetWindowMode(uint32_t windowId, WindowMode mode) override;
+
+    WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) override;
+    WMError SetAlpha(uint32_t windowId, float alpha) override;
+
     WMError SetWindowType(uint32_t windowId, WindowType type) override;
     WMError SetWindowFlags(uint32_t windowId, uint32_t flags) override;
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) override;
