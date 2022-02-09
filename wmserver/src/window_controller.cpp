@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowController"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowController"};
 }
 uint32_t WindowController::GenWindowId()
 {
@@ -72,12 +72,13 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     }
     FlushWindowInfo(property->GetWindowId());
 
-    if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        WM_SCOPED_TRACE_BEGIN("controller:MinimizeOtherFullScreenAbility");
-        WMError res = windowRoot_->MinimizeOtherFullScreenAbility(node);
+    if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        WindowHelper::IsAppWindow(node->GetWindowType())) {
+        WM_SCOPED_TRACE_BEGIN("controller:MinimizeStructuredAppWindowsExceptSelf");
+        res = windowRoot_->MinimizeStructuredAppWindowsExceptSelf(node);
         WM_SCOPED_TRACE_END();
         if (res != WMError::WM_OK) {
-            WLOGFE("Minimize other fullscreen window failed");
+            WLOGFE("Minimize other structured window failed");
         }
     }
     return res;
@@ -211,6 +212,14 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
         node->GetWindowProperty()->ResumeLastWindowMode();
         return res;
     }
+    if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        WindowHelper::IsAppWindow(node->GetWindowType())) {
+        // minimize other app window
+        res = windowRoot_->MinimizeStructuredAppWindowsExceptSelf(node);
+        if (res != WMError::WM_OK) {
+            return res;
+        }
+    }
     res = windowRoot_->UpdateWindowNode(windowId);
     if (res != WMError::WM_OK) {
         WLOGFE("Set window mode failed, update node failed");
@@ -218,16 +227,6 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
     }
     FlushWindowInfo(windowId);
     return WMError::WM_OK;
-}
-
-WMError WindowController::MinimizeAllAppNodeAbility(uint32_t windowId)
-{
-    auto node = windowRoot_->GetWindowNode(windowId);
-    if (node == nullptr) {
-        WLOGFE("Count node find window");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    return windowRoot_->MinimizeAllAppNodeAbility(node);
 }
 
 void WindowController::NotifyDisplayStateChange(DisplayStateChangeType type)

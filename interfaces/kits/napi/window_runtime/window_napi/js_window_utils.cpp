@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsWindowUtils"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowUtils"};
 }
 
 NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect)
@@ -66,6 +66,7 @@ NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& 
     object->SetProperty("isFullScreen", CreateJsValue(engine, window->IsFullScreen()));
     object->SetProperty("touchable", CreateJsValue(engine, window->GetTouchable()));
     object->SetProperty("focusable", CreateJsValue(engine, window->GetFocusable()));
+    object->SetProperty("name", CreateJsValue(engine, window->GetWindowName()));
     return objValue;
 }
 static std::string GetHexColor(uint32_t color)

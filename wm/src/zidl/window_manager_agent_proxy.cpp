@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowManagerAgentProxy"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerAgentProxy"};
 }
 
 void WindowManagerAgentProxy::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,

@@ -34,7 +34,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowManagerService"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerService"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
@@ -282,13 +282,6 @@ void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)
         default:
             break;
     }
-}
-
-WMError WindowManagerService::MinimizeAllAppNodeAbility(uint32_t windowId)
-{
-    WM_SCOPED_TRACE("wms:MinimizeAllAppNodeAbility");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->MinimizeAllAppNodeAbility(windowId);
 }
 
 void WindowManagerService::NotifyDisplayStateChange(DisplayStateChangeType type)

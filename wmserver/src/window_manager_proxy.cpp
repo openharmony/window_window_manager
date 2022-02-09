@@ -20,7 +20,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowManagerProxy"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerProxy"};
 }
 
 
@@ -465,28 +465,6 @@ void WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType typ
     if (Remote()->SendRequest(TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
-}
-
-WMError WindowManagerProxy::MinimizeAllAppNodeAbility(uint32_t windowId)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(windowId)) {
-        WLOGFE("Write windowId failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (Remote()->SendRequest(TRANS_ID_MINIMIZE_ALL_APP_WINDOW, data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WMError>(ret);
 }
 
 void WindowManagerProxy::ProcessWindowTouchedEvent(uint32_t windowId)

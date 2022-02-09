@@ -142,7 +142,7 @@ private:
     void SetDefaultOption(); // for api7
     bool IsWindowValid() const;
     void OnVsync(int64_t timeStamp);
-    static sptr<Window> FindTopWindow(uint32_t mainWinId, uint32_t topWinId);
+    static sptr<Window> FindTopWindow(uint32_t topWinId);
     WMError Drag(const Rect& rect);
     void ConsumeDividerPointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent);
     void ConsumeDragOrMoveEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);

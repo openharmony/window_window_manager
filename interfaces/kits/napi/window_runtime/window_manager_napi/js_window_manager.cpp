@@ -29,7 +29,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsWindowManager"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowManager"};
 }
 
 class JsWindowManager {
@@ -204,9 +204,7 @@ private:
                     task.Resolve(engine, jsWindowObj->Get());
                     WLOGFI("JsWindowManager::OnFindWindow success");
                 } else {
-                    WLOGFE
-
-                    ("JsWindow::OnFindWindow window %{public}s not exist!", windowName.c_str());
+                    WLOGFE("JsWindow::OnFindWindow window %{public}s not exist!", windowName.c_str());
                     task.Reject(engine, CreateJsError(engine,
                         static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnFindWindow failed."));
                 }

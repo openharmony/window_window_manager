@@ -19,7 +19,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "AgentDeathRecipient"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AgentDeathRecipient"};
 }
 
 void AgentDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)

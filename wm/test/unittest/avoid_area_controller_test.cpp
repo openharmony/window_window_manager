@@ -26,7 +26,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "AvoidAreaControllerTest"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AvoidAreaControllerTest"};
 
     const Rect EMPTY_RECT = {0, 0, 0, 0};
     const uint32_t LEFT = 0;

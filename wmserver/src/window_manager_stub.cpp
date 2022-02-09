@@ -20,7 +20,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowManagerStub"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerStub"};
 }
 
 int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -155,12 +155,6 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
             UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
-            break;
-        }
-        case TRANS_ID_MINIMIZE_ALL_APP_WINDOW: {
-            uint32_t windowId = data.ReadUint32();
-            WMError errCode = MinimizeAllAppNodeAbility(windowId);
-            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         case TRANS_ID_PROCESS_WINDOW_TOUCHED_EVENT: {

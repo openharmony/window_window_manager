@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowAdapter"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAdapter"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapter)
 
@@ -177,15 +177,6 @@ WMError WindowAdapter::SetWindowMode(uint32_t windowId, WindowMode mode)
         return WMError::WM_ERROR_SAMGR;
     }
     return windowManagerServiceProxy_->SetWindowMode(windowId, mode);
-}
-
-WMError WindowAdapter::MinimizeAllAppNodeAbility(uint32_t windowId)
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (!InitWMSProxyLocked()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
-    return windowManagerServiceProxy_->MinimizeAllAppNodeAbility(windowId);
 }
 
 void WindowAdapter::ProcessWindowTouchedEvent(uint32_t windowId)
