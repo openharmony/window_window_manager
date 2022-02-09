@@ -37,7 +37,8 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         }
         case TRANS_ID_UPDATE_WINDOW_RECT: {
             struct Rect rect { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
-            UpdateWindowRect(rect);
+            WindowSizeChangeReason reason = static_cast<WindowSizeChangeReason>(data.ReadUint32());
+            UpdateWindowRect(rect, reason);
             break;
         }
         case TRANS_ID_UPDATE_WINDOW_MODE: {

@@ -148,6 +148,7 @@ WMError WindowController::Resize(uint32_t windowId, uint32_t width, uint32_t hei
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
+    node->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
     auto property = node->GetWindowProperty();
     Rect lastRect = property->GetWindowRect();
     Rect newRect = { lastRect.posX_, lastRect.posY_, width, height };
@@ -167,6 +168,7 @@ WMError WindowController::Drag(uint32_t windowId, const Rect& rect)
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
+    node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
     auto property = node->GetWindowProperty();
 
     // fix rect in case of moving window when dragging
@@ -201,6 +203,13 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
     }
     WMError res = WMError::WM_OK;
     node->SetWindowMode(dstMode);
+    if ((srcMode == WindowMode::WINDOW_MODE_FULLSCREEN) && (dstMode == WindowMode::WINDOW_MODE_FLOATING)) {
+        node->SetWindowSizeChangeReason(WindowSizeChangeReason::RECOVER);
+    } else if (dstMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        node->SetWindowSizeChangeReason(WindowSizeChangeReason::MAXIMIZE);
+    } else {
+        node->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
+    }
     if (WindowHelper::IsSplitWindowMode(srcMode)) {
         // change split mode to other
         res = windowRoot_->HandleSplitWindowModeChange(node, false);

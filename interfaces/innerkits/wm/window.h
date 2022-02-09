@@ -43,7 +43,7 @@ namespace Rosen {
 class RSSurfaceNode;
 class IWindowChangeListener : virtual public RefBase {
 public:
-    virtual void OnSizeChange(Rect rect) = 0;
+    virtual void OnSizeChange(Rect rect, WindowSizeChangeReason reason) = 0;
 };
 
 class IAvoidAreaChangedListener : virtual public RefBase {

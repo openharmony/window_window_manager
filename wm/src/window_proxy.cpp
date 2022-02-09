@@ -34,7 +34,7 @@ void WindowProxy::UpdateWindowProperty(const WindowProperty& windowProperty)
     }
 }
 
-void WindowProxy::UpdateWindowRect(const struct Rect& rect)
+void WindowProxy::UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -46,6 +46,11 @@ void WindowProxy::UpdateWindowRect(const struct Rect& rect)
     if (!(data.WriteInt32(rect.posX_) && data.WriteInt32(rect.posY_) &&
         data.WriteUint32(rect.width_) && data.WriteUint32(rect.height_))) {
         WLOGFE("Write WindowRect failed");
+        return;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        WLOGFE("Write WindowSizeChangeReason failed");
         return;
     }
 

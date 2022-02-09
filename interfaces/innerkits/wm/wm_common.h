@@ -97,6 +97,15 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_END = 1 << 2,
 };
 
+enum class WindowSizeChangeReason : uint32_t {
+    UNDEFINED = 0,
+    MAXIMIZE,
+    RECOVER,
+    ROTATION,
+    DRAG,
+    RESIZE,
+};
+
 enum class WindowLayoutMode : uint32_t {
     CASCADE = 0,
     TILE = 1,
