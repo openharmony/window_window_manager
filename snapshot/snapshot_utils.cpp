@@ -72,6 +72,22 @@ bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
     return false;
 }
 
+static bool CheckWHValid(int32_t param)
+{
+    if ((param <= 0) || (param > MAX_RESOLUTION_SIZE)) {
+        return false;
+    }
+    return true;
+}
+
+bool SnapShotUtils::CheckWidthAndHeightValid(const CmdArgments& cmdArgments)
+{
+    if (!CheckWHValid(cmdArgments.width) || !CheckWHValid(cmdArgments.height)) {
+        return false;
+    }
+    return true;
+}
+
 static bool CheckParamValid(const WriteToPngParam &param)
 {
     if (param.width > MAX_RESOLUTION_SIZE) {
@@ -199,9 +215,11 @@ bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArgments &cmdA
                 break;
             case 'w': // output width
                 cmdArgments.width = atoi(optarg);
+                cmdArgments.isWidthSet = true;
                 break;
             case 'h': // output height
                 cmdArgments.height = atoi(optarg);
+                cmdArgments.isHeightSet = true;
                 break;
             case 'f': // output file name
                 cmdArgments.fileName = optarg;
