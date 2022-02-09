@@ -44,6 +44,8 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetWindowRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
     property_->SetWindowMode(option->GetWindowMode());
+    property_->SetWindowBackgroundBlur(option->GetWindowBackgroundBlur());
+    property_->SetAlpha(option->GetAlpha());
     property_->SetFullScreen(option->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     property_->SetFocusable(option->GetFocusable());
     property_->SetTouchable(option->GetTouchable());
@@ -257,6 +259,26 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     return WMError::WM_OK;
+}
+
+WMError WindowImpl::SetWindowBackgroundBlur(WindowBlurLevel level)
+{
+    WLOGFI("[Client] Window %{public}d blurlevel %{public}u", property_->GetWindowId(), static_cast<uint32_t>(level));
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetWindowBackgroundBlur(level);
+    return SingletonContainer::Get<WindowAdapter>().SetWindowBackgroundBlur(property_->GetWindowId(), level);
+}
+
+WMError WindowImpl::SetAlpha(float alpha)
+{
+    WLOGFI("[Client] Window %{public}d alpha %{public}f", property_->GetWindowId(), alpha);
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    property_->SetAlpha(alpha);
+    return SingletonContainer::Get<WindowAdapter>().SetAlpha(property_->GetWindowId(), alpha);
 }
 
 WMError WindowImpl::AddWindowFlag(WindowFlag flag)

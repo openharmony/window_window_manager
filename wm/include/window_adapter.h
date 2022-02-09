@@ -49,6 +49,8 @@ public:
     virtual WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
     virtual WMError GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, std::vector<Rect>& avoidRect);
     virtual WMError SetWindowMode(uint32_t windowId, WindowMode mode);
+    virtual WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level);
+    virtual WMError SetAlpha(uint32_t windowId, float alpha);
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     virtual void ProcessWindowTouchedEvent(uint32_t windowId);
     virtual void MinimizeAllAppWindows(DisplayId displayId);

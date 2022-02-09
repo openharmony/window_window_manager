@@ -42,6 +42,19 @@ void WindowOption::SetWindowMode(WindowMode mode)
     mode_ = mode;
 }
 
+void WindowOption::SetWindowBackgroundBlur(WindowBlurLevel level)
+{
+    if (!WindowHelper::IsValidWindowBlurLevel(level)) {
+        return;
+    }
+    level_ = level;
+}
+
+void WindowOption::SetAlpha(float alpha)
+{
+    alpha_ = alpha;
+}
+
 void WindowOption::SetFocusable(bool isFocusable)
 {
     focusable_ = isFocusable;
@@ -102,6 +115,16 @@ WindowType WindowOption::GetWindowType() const
 WindowMode WindowOption::GetWindowMode() const
 {
     return mode_;
+}
+
+WindowBlurLevel WindowOption::GetWindowBackgroundBlur() const
+{
+    return level_;
+}
+
+float WindowOption::GetAlpha() const
+{
+    return alpha_;
 }
 
 bool WindowOption::GetFocusable() const

@@ -49,6 +49,41 @@ void WindowNode::SetWindowMode(WindowMode mode)
     property_->SetWindowMode(mode);
 }
 
+void WindowNode::SetWindowBackgroundBlur(WindowBlurLevel level)
+{
+    float blurRadiusX;
+    float blurRadiusY;
+    const float OFF_BLUR_RADIUS = 0.0f;
+    const float LOW_BLUR_RADIUS = 3.0f;
+    const float MEDIUM_BLUR_RADIUS = 11.0f;
+    const float HIGH_BLUR_RADIUS = 19.0f;
+
+    switch (level) {
+        case WindowBlurLevel::WINDOW_BLUR_LOW:
+            blurRadiusX = LOW_BLUR_RADIUS;
+            blurRadiusY = LOW_BLUR_RADIUS;
+            break;
+        case WindowBlurLevel::WINDOW_BLUR_MEDIUM:
+            blurRadiusX = MEDIUM_BLUR_RADIUS;
+            blurRadiusY = MEDIUM_BLUR_RADIUS;
+            break;
+        case WindowBlurLevel::WINDOW_BLUR_HIGH:
+            blurRadiusX = HIGH_BLUR_RADIUS;
+            blurRadiusY = HIGH_BLUR_RADIUS;
+            break;
+        default:
+            blurRadiusX = OFF_BLUR_RADIUS;
+            blurRadiusY = OFF_BLUR_RADIUS;
+            break;
+    }
+    surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(blurRadiusX, blurRadiusY));
+}
+
+void WindowNode::SetAlpha(float alpha)
+{
+    surfaceNode_->SetAlpha(alpha);
+}
+
 const sptr<IWindow>& WindowNode::GetWindowToken() const
 {
     return windowToken_;

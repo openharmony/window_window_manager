@@ -66,6 +66,8 @@ public:
     virtual bool IsLayoutFullScreen() const override;
     virtual WMError SetWindowType(WindowType type) override;
     virtual WMError SetWindowMode(WindowMode mode) override;
+    virtual WMError SetWindowBackgroundBlur(WindowBlurLevel level) override;
+    virtual WMError SetAlpha(float alpha) override;
     virtual WMError AddWindowFlag(WindowFlag flag) override;
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
     virtual WMError SetWindowFlags(uint32_t flags) override;

@@ -179,6 +179,24 @@ WMError WindowAdapter::SetWindowMode(uint32_t windowId, WindowMode mode)
     return windowManagerServiceProxy_->SetWindowMode(windowId, mode);
 }
 
+WMError WindowAdapter::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!InitWMSProxyLocked()) {
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return windowManagerServiceProxy_->SetWindowBackgroundBlur(windowId, level);
+}
+
+WMError WindowAdapter::SetAlpha(uint32_t windowId, float alpha)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!InitWMSProxyLocked()) {
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return windowManagerServiceProxy_->SetAlpha(windowId, alpha);
+}
+
 void WindowAdapter::ProcessWindowTouchedEvent(uint32_t windowId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);

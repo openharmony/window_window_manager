@@ -211,6 +211,20 @@ WMError WindowManagerService::SetWindowMode(uint32_t windowId, WindowMode mode)
     return windowController_->SetWindowMode(windowId, mode);
 }
 
+WMError WindowManagerService::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level)
+{
+    WM_SCOPED_TRACE("wms:SetWindowBackgroundBlur");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->SetWindowBackgroundBlur(windowId, level);
+}
+
+WMError WindowManagerService::SetAlpha(uint32_t windowId, float alpha)
+{
+    WM_SCOPED_TRACE("wms:SetAlpha");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->SetAlpha(windowId, alpha);
+}
+
 WMError WindowManagerService::SetWindowType(uint32_t windowId, WindowType type)
 {
     WM_SCOPED_TRACE("wms:SetWindowType");
