@@ -42,7 +42,7 @@ public:
     void RemoveAllCallback();
     void RemoveCallback(NativeValue* jsListenerObject);
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
-    void OnSizeChange(Rect rect) override;
+    void OnSizeChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnAvoidAreaChanged(std::vector<Rect> avoidAreas) override;
 
 private:

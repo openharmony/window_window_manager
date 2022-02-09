@@ -38,7 +38,7 @@ public:
     };
 
     virtual void UpdateWindowProperty(const WindowProperty& windowProperty) = 0;
-    virtual void UpdateWindowRect(const struct Rect& rect) = 0;
+    virtual void UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason) = 0;
     virtual void UpdateWindowMode(WindowMode mode) = 0;
     virtual void UpdateFocusStatus(bool focused) = 0;
     virtual void UpdateAvoidArea(const std::vector<Rect>& avoidAreas) = 0;
