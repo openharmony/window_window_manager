@@ -160,11 +160,17 @@ bool ScreenManager::UnregisterScreenListener(sptr<IScreenListener> listener)
     return true;
 }
 
-ScreenId ScreenManager::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
+ScreenId ScreenManager::MakeExpand(const std::vector<ExpandOption>& options)
 {
-    DMError result = SingletonContainer::Get<DisplayManagerAdapter>().MakeExpand(screenId, startPoint);
+    std::vector<ScreenId> screenIds;
+    std::vector<Point> startPoints;
+    for (auto& option: options) {
+        screenIds.emplace_back(option.screenId_);
+        startPoints.emplace_back(Point(option.startX_, option.startY_));
+    }
+    DMError result = SingletonContainer::Get<DisplayManagerAdapter>().MakeExpand(screenIds, startPoints);
     if (result == DMError::DM_OK) {
-        WLOGFI("create mirror success");
+        WLOGFI("make expand success");
     }
     return SCREEN_ID_INVALID;
 }
