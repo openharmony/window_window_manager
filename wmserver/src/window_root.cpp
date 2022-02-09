@@ -109,14 +109,14 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
     return WMError::WM_OK;
 }
 
-WMError WindowRoot::MinimizeOtherFullScreenAbility(sptr<WindowNode>& node)
+WMError WindowRoot::MinimizeStructuredAppWindowsExceptSelf(sptr<WindowNode>& node)
 {
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
         WLOGFE("MinimizeAbility failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return container->MinimizeOtherFullScreenAbility();
+    return container->MinimizeStructuredAppWindowsExceptSelf(node);
 }
 
 std::vector<Rect> WindowRoot::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
@@ -144,17 +144,6 @@ void WindowRoot::MinimizeAllAppWindows(DisplayId displayId)
         return;
     }
     return container->MinimizeAllAppWindows();
-}
-
-WMError WindowRoot::MinimizeAllAppNodeAbility(sptr<WindowNode>& node)
-{
-    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
-    if (container == nullptr) {
-        WLOGFE("Minimize all app node ability failed, window container could not be found");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    container->MinimizeAllAppWindows();
-    return WMError::WM_OK;
 }
 
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)

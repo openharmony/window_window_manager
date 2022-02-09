@@ -63,21 +63,11 @@ WindowNodeContainer::~WindowNodeContainer()
     Destroy();
 }
 
-WMError WindowNodeContainer::MinimizeOtherFullScreenAbility()
+WMError WindowNodeContainer::MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node)
 {
-    if (appWindowNode_->children_.empty()) {
-        return WMError::WM_OK;
-    }
-    for (auto iter = appWindowNode_->children_.begin(); iter < appWindowNode_->children_.end() - 1; ++iter) {
-        if ((*iter)->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
-            continue;
-        }
-        if  ((*iter)->abilityToken_ != nullptr) {
-            WLOGFI("Find previous fullscreen window, notify ability to minimize");
-            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility((*iter)->abilityToken_);
-        }
-    }
-    return WMError::WM_OK;
+    std::vector<uint32_t> exceptionalIds = { node->GetWindowId() };
+    std::vector<WindowMode> exceptionalModes = { WindowMode::WINDOW_MODE_FLOATING, WindowMode::WINDOW_MODE_PIP };
+    return MinimizeAppNodeExceptOptions(exceptionalIds, exceptionalModes);
 }
 
 WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
@@ -698,13 +688,11 @@ sptr<WindowNode> WindowNodeContainer::GetNextFocusableWindow(uint32_t windowId) 
 
 void WindowNodeContainer::MinimizeAllAppWindows()
 {
-    for (auto& appNode : appWindowNode_->children_) {
-        if (appNode->abilityToken_ == nullptr) {
-            continue;
-        }
-        WLOGFI("find app window to minimize, windowId:%{public}u", appNode->GetWindowId());
-        AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(appNode->abilityToken_);
+    WMError ret =  MinimizeAppNodeExceptOptions();
+    if (ret != WMError::WM_OK) {
+        WLOGFE("Minimize all app window failed");
     }
+    return;
 }
 
 void WindowNodeContainer::SendSplitScreenEvent(WindowMode mode)
@@ -743,6 +731,30 @@ sptr<WindowNode> WindowNodeContainer::FindSplitPairNode(sptr<WindowNode>& trigge
     return nullptr;
 }
 
+WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(const std::vector<uint32_t> &exceptionalIds,
+                                                          const std::vector<WindowMode> &exceptionalModes)
+{
+    if (appWindowNode_->children_.empty()) {
+        return WMError::WM_OK;
+    }
+    for (auto& appNode : appWindowNode_->children_) {
+        if (appNode->abilityToken_ == nullptr) {
+            continue;
+        }
+        // exclude exceptional window
+        if (std::find(exceptionalIds.begin(), exceptionalIds.end(), appNode->GetWindowId()) != exceptionalIds.end() ||
+            std::find(exceptionalModes.begin(), exceptionalModes.end(),
+                appNode->GetWindowMode()) != exceptionalModes.end() ||
+                appNode->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            continue;
+        }
+        // minimize window
+        WLOGFI("Minimize with exceptional options, windowId:%{public}u", appNode->GetWindowId());
+        AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(appNode->abilityToken_);
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowNodeContainer::HandleModeChangeToSplit(sptr<WindowNode>& triggerNode)
 {
     WLOGFI("HandleModeChangeToSplit %{public}d", triggerNode->GetWindowId());
@@ -755,6 +767,15 @@ WMError WindowNodeContainer::HandleModeChangeToSplit(sptr<WindowNode>& triggerNo
         }
         SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
         SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_CREATE_DIVIDER, screenId_);
+        std::vector<uint32_t> exceptionalIds;
+        for (auto iter = pairedWindowMap_.begin(); iter != pairedWindowMap_.end(); iter++) {
+            exceptionalIds.emplace_back(iter->first);
+        }
+        std::vector<WindowMode> exceptionalModes = { WindowMode::WINDOW_MODE_FLOATING, WindowMode::WINDOW_MODE_PIP };
+        ret = MinimizeAppNodeExceptOptions(exceptionalIds, exceptionalModes);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
     } else {
         SendSplitScreenEvent(triggerNode->GetWindowMode());
         SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
