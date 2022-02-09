@@ -291,5 +291,9 @@ void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& lim
     WLOGFI("Type: %{public}d, limitRect: %{public}d %{public}d %{public}d %{public}d",
         node->GetWindowType(), limitRect.posX_, limitRect.posY_, limitRect.width_, limitRect.height_);
 }
+
+void WindowLayoutPolicy::Reset()
+{
+}
 }
 }

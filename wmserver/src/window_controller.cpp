@@ -203,10 +203,10 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
     node->SetWindowMode(dstMode);
     if (WindowHelper::IsSplitWindowMode(srcMode)) {
         // change split mode to other
-        res = windowRoot_->HandleSplitWindowModeChange(node, false);
+        res = windowRoot_->ExitSplitWindowMode(node);
     } else if (!WindowHelper::IsSplitWindowMode(srcMode) && WindowHelper::IsSplitWindowMode(dstMode)) {
         // change other mode to split
-        res = windowRoot_->HandleSplitWindowModeChange(node, true);
+        res = windowRoot_->EnterSplitWindowMode(node);
     }
     if (res != WMError::WM_OK) {
         node->GetWindowProperty()->ResumeLastWindowMode();
