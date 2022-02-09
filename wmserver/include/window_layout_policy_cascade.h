@@ -46,6 +46,8 @@ private:
     Rect dividerRect_ = {0, 0, 0, 0};
     Rect primaryLimitRect_ = {0, 0, 0, 0};
     Rect secondaryLimitRect_ = {0, 0, 0, 0};
+    Rect firstCascadeRect = {0, 0, 0, 0};
+    Rect curCascadeRect = {0, 0, 0, 0};
     void InitSplitRects();
     void SetSplitRectByRatio(float ratio);
     void SetSplitRect(const Rect& rect);
@@ -59,6 +61,11 @@ private:
     Rect GetDisplayRect(const WindowMode mode) const;
     void LimitMoveBounds(Rect& rect);
     bool IsVertical() const;
+    void InitCascadeRect();
+    void SetCascadeRect(const sptr<WindowNode>& node);
+    void ReOrderWindowNode(const sptr<WindowNode>& node);
+    Rect GetCurCascadeRect(const sptr<WindowNode>& node);
+    Rect StepCascadeRect(Rect rect);
 };
 }
 }
