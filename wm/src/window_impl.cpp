@@ -148,6 +148,15 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
     return FindTopWindow(mainWinId, topWinId);
 }
 
+std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
+{
+    if (subWindowMap_.find(parentId) == subWindowMap_.end()) {
+        WLOGFE("Cannot parentWindow with id: %{public}d!", parentId);
+        return std::vector<sptr<Window>>();
+    }
+    return subWindowMap_[parentId];
+}
+
 std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
 {
     return surfaceNode_;
@@ -1032,6 +1041,10 @@ void WindowImpl::SetDefaultOption()
             break;
         }
         case WindowType::WINDOW_TYPE_VOLUME_OVERLAY: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            break;
+        }
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }

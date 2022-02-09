@@ -38,12 +38,14 @@ public:
     static NativeValue* LoadContent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetWindowMode(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* CreateSubWindow(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* GetSubWindow(NativeEngine* engine, NativeCallbackInfo* info);
     virtual void AfterForeground() override;
     virtual void AfterBackground() override;
     virtual void AfterFocused() override;
     virtual void AfterUnFocused() override;
 
 private:
+    NativeValue* CreateJsSubWindowArrayObject(NativeEngine& engine, std::vector<sptr<Window>> subWinVec);
     NativeValue* OnSetUIContent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetMainWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnEvent(NativeEngine& engine, NativeCallbackInfo& info);
@@ -51,6 +53,7 @@ private:
     NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetWindowMode(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnCreateSubWindow(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnGetSubWindow(NativeEngine& engine, NativeCallbackInfo& info);
     enum class WindowStageEventType : uint32_t {
         VISIBLE = 1,
         FOCUSED,
