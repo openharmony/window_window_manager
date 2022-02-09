@@ -116,6 +116,36 @@ bool Screen::RequestRotation(Rotation rotation)
     return false;
 }
 
+DMError Screen::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenSupportedColorGamuts(pImpl_->id_, colorGamuts);
+}
+
+DMError Screen::GetScreenColorGamut(ScreenColorGamut& colorGamut) const
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenColorGamut(pImpl_->id_, colorGamut);
+}
+
+DMError Screen::SetScreenColorGamut(int32_t colorGamutIdx)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenColorGamut(pImpl_->id_, colorGamutIdx);
+}
+
+DMError Screen::GetScreenGamutsMap(ScreenGamutMap& gamutMap) const
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenGamutsMap(pImpl_->id_, gamutMap);
+}
+
+DMError Screen::SetScreenGamutsMap(ScreenGamutMap gamutMap)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenGamutsMap(pImpl_->id_, gamutMap);
+}
+
+DMError Screen::SetScreenColorTransform()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenColorTransform(pImpl_->id_);
+}
+
 ScreenId Screen::GetParentId() const
 {
     return pImpl_->parent_;

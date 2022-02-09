@@ -42,6 +42,8 @@ ohos_shared_library("libwmutil") {
 
   public_configs = [ ":libwmutil_public_config" ]
 
+  deps = [ "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base" ]
+
   external_deps = [
     "bytrace_standard:bytrace_core",
     "graphic_standard:surface",
