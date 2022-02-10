@@ -41,6 +41,7 @@ public:
     ~WindowLayoutPolicy() = default;
     virtual void Launch();
     virtual void Clean();
+    virtual void Reset();
     virtual void UpdateDisplayInfo();
     virtual void AddWindowNode(sptr<WindowNode>& node);
     virtual void RemoveWindowNode(sptr<WindowNode>& node);

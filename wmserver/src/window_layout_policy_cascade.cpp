@@ -41,6 +41,13 @@ void WindowLayoutPolicyCascade::Clean()
     WLOGFI("WindowLayoutPolicyCascade::Clean");
 }
 
+void WindowLayoutPolicyCascade::Reset()
+{
+    InitSplitRects();
+    InitLimitRects();
+    UpdateDefaultFoatingRect();
+}
+
 void WindowLayoutPolicyCascade::UpdateDisplayInfo()
 {
     InitSplitRects();

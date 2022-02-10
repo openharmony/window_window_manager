@@ -213,14 +213,24 @@ WMError WindowRoot::UpdateWindowNode(uint32_t windowId)
     return container->UpdateWindowNode(node);
 }
 
-WMError WindowRoot::HandleSplitWindowModeChange(sptr<WindowNode>& node, bool isSplitIn)
+WMError WindowRoot::EnterSplitWindowMode(sptr<WindowNode>& node)
 {
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("HandleSplitWindowModeChange failed, window container could not be found");
+        WLOGFE("Enter split window mode failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return container->HandleSplitWindowModeChange(node, isSplitIn);
+    return container->EnterSplitWindowMode(node);
+}
+
+WMError WindowRoot::ExitSplitWindowMode(sptr<WindowNode>& node)
+{
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("Exit split window mode failed, window container could not be found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return container->ExitSplitWindowMode(node);
 }
 
 WMError WindowRoot::DestroyWindow(uint32_t windowId)
