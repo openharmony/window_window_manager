@@ -170,8 +170,10 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(sptr<WindowNode>& node)
     if (!floatingWindow) { // fullscreen window
         winRect = limitRect;
     } else { // floating window
-        if (node->GetWindowProperty()->GetDecorEnable()) { // is decorable
+        // decorate window only once in case of changing width or height continuously
+        if (!node->hasDecorated && node->GetWindowProperty()->GetDecorEnable()) {
             winRect = ComputeDecoratedWindowRect(winRect);
+            node->hasDecorated = true;
         }
         if (subWindow && parentLimit) { // subwidow and limited by parent
             limitRect = node->parent_->GetLayoutRect();
