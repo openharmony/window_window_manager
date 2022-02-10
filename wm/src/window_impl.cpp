@@ -169,6 +169,16 @@ WindowMode WindowImpl::GetMode() const
     return property_->GetWindowMode();
 }
 
+WindowBlurLevel WindowImpl::GetWindowBackgroundBlur() const
+{
+    return property_->GetWindowBackgroundBlur();
+}
+
+float WindowImpl::GetAlpha() const
+{
+    return property_->GetAlpha();
+}
+
 bool WindowImpl::GetShowState() const
 {
     return state_ == WindowState::STATE_SHOWN;

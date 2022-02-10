@@ -239,27 +239,37 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
     return WMError::WM_OK;
 }
 
-WMError WindowController::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level)
+WMError WindowController::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel dstLevel)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    node->SetWindowBackgroundBlur(level);
+
+    WindowBlurLevel srcLevel = node->GetWindowBackgroundBlur();
+    if (srcLevel == dstLevel) {
+        return WMError::WM_OK;
+    }
+    node->SetWindowBackgroundBlur(dstLevel);
 
     FlushWindowInfo(windowId);
     return WMError::WM_OK;
 }
 
-WMError WindowController::SetAlpha(uint32_t windowId, float alpha)
+WMError WindowController::SetAlpha(uint32_t windowId, float dstAlpha)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    node->SetAlpha(alpha);
+
+    float srcAlpha = node->GetAlpha();
+    if (srcAlpha == dstAlpha) {
+        return WMError::WM_OK;
+    }
+    node->SetAlpha(dstAlpha);
 
     FlushWindowInfo(windowId);
     return WMError::WM_OK;

@@ -76,11 +76,13 @@ void WindowNode::SetWindowBackgroundBlur(WindowBlurLevel level)
             blurRadiusY = OFF_BLUR_RADIUS;
             break;
     }
+    property_->SetWindowBackgroundBlur(level);
     surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(blurRadiusX, blurRadiusY));
 }
 
 void WindowNode::SetAlpha(float alpha)
 {
+    property_->SetAlpha(alpha);
     surfaceNode_->SetAlpha(alpha);
 }
 
@@ -148,6 +150,16 @@ WindowType WindowNode::GetWindowType() const
 WindowMode WindowNode::GetWindowMode() const
 {
     return property_->GetWindowMode();
+}
+
+WindowBlurLevel WindowNode::GetWindowBackgroundBlur() const
+{
+    return property_->GetWindowBackgroundBlur();
+}
+
+float WindowNode::GetAlpha() const
+{
+    return property_->GetAlpha();
 }
 
 uint32_t WindowNode::GetWindowFlags() const
