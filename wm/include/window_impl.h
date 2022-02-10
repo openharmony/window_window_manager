@@ -180,11 +180,11 @@ private:
 
     int32_t startPointPosX_ = 0;
     int32_t startPointPosY_ = 0;
-    int32_t  startPointerId_ = 0;
+    int32_t startPointerId_ = 0;
     bool startDragFlag_ = false;
     bool startMoveFlag_ = false;
     bool pointEventStarted_ = false;
-    Rect startPointRect_ = {0, 0, 0, 0};
+    Rect startPointRect_ = { 0, 0, 0, 0 };
 };
 }
 }
