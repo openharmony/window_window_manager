@@ -120,17 +120,18 @@ std::shared_ptr<MMI::PointerEvent> WindowMoveDragTest::CreatePointerEvent(int32_
 
 void WindowMoveDragTest::DoMoveOrDrag()
 {
+    pointerId_++;
     std::shared_ptr<MMI::PointerEvent> pointerEvent =
-        CreatePointerEvent(startPointX_, startPointY_, pointerId_++, MMI::PointerEvent::POINTER_ACTION_DOWN);
+        CreatePointerEvent(startPointX_, startPointY_, pointerId_, MMI::PointerEvent::POINTER_ACTION_DOWN);
     window_->ConsumePointerEvent(pointerEvent);
     ASSERT_TRUE(utils::RectEqualToRect(window_->GetRect(), startPointRect_));
 
-    pointerEvent = CreatePointerEvent(pointX_, pointY_, pointerId_++, MMI::PointerEvent::POINTER_ACTION_MOVE);
+    pointerEvent = CreatePointerEvent(pointX_, pointY_, pointerId_, MMI::PointerEvent::POINTER_ACTION_MOVE);
     window_->ConsumePointerEvent(pointerEvent);
     CalExpectRects();
     ASSERT_TRUE(utils::RectEqualToRect(window_->GetRect(), expectRect_));
 
-    pointerEvent = CreatePointerEvent(pointX_, pointY_, pointerId_++, MMI::PointerEvent::POINTER_ACTION_UP);
+    pointerEvent = CreatePointerEvent(pointX_, pointY_, pointerId_, MMI::PointerEvent::POINTER_ACTION_UP);
     window_->ConsumePointerEvent(pointerEvent);
     ASSERT_TRUE(utils::RectEqualToRect(window_->GetRect(), expectRect_));
 }
@@ -314,6 +315,25 @@ HWTEST_F(WindowMoveDragTest, DragWindow08, Function | MediumTest | Level3)
     startPointRect_ = window_->GetRect();
     startPointX_ = startPointRect_.posX_ + startPointRect_.width_ * POINT_HOTZONE_RATIO;
     startPointY_ = startPointRect_.posY_ + startPointRect_.height_ + HOTZONE * POINT_HOTZONE_RATIO;
+
+    pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
+    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + HOTZONE * DRAG_HOTZONE_RATIO;
+    DoMoveOrDrag();
+    ASSERT_EQ(WMError::WM_OK, window_->Hide());
+}
+
+/**
+ * @tc.name: DragWindow09
+ * @tc.desc: point in decorZone, uiContent is nullptr
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTV8
+ */
+HWTEST_F(WindowMoveDragTest, DragWindow09, Function | MediumTest | Level3)
+{
+    ASSERT_EQ(WMError::WM_OK, window_->Show());
+    startPointRect_ = window_->GetRect();
+    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ * POINT_HOTZONE_RATIO;
+    startPointY_ = startPointRect_.posY_ + 1;
 
     pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
     pointY_ = startPointRect_.posY_ + startPointRect_.height_ + HOTZONE * DRAG_HOTZONE_RATIO;

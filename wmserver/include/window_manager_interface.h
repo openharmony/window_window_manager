@@ -33,9 +33,7 @@ public:
         TRANS_ID_ADD_WINDOW,
         TRANS_ID_REMOVE_WINDOW,
         TRANS_ID_DESTROY_WINDOW,
-        TRANS_ID_MOVE,
-        TRANS_ID_RESIZE,
-        TRANS_ID_DRAG,
+        TRANS_ID_RESIZE_RECT,
         TRANS_ID_REQUEST_FOCUS,
         TRANS_ID_UPDATE_TYPE,
         TRANS_ID_UPDATE_MODE,
@@ -62,9 +60,7 @@ public:
     virtual WMError AddWindow(sptr<WindowProperty>& property) = 0;
     virtual WMError RemoveWindow(uint32_t windowId) = 0;
     virtual WMError DestroyWindow(uint32_t windowId) = 0;
-    virtual WMError MoveTo(uint32_t windowId, int32_t x, int32_t y) = 0;
-    virtual WMError Resize(uint32_t windowId, uint32_t width, uint32_t height) = 0;
-    virtual WMError Drag(uint32_t windowId, const Rect& rect) = 0;
+    virtual WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason) = 0;
     virtual WMError RequestFocus(uint32_t windowId) = 0;
     virtual WMError SetWindowMode(uint32_t windowId, WindowMode mode) = 0;
 

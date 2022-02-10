@@ -41,9 +41,7 @@ public:
     virtual WMError RemoveWindow(uint32_t windowId);
     virtual WMError DestroyWindow(uint32_t windowId);
     virtual WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId);
-    virtual WMError MoveTo(uint32_t windowId, int32_t x, int32_t y);
-    virtual WMError Resize(uint32_t windowId, uint32_t width, uint32_t height);
-    virtual WMError Drag(uint32_t windowId, const Rect& rect);
+    virtual WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
     virtual WMError RequestFocus(uint32_t windowId);
     virtual WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
     virtual WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
