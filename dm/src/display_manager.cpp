@@ -32,7 +32,6 @@ WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
 class DisplayManager::Impl : public RefBase {
 public:
-    constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 15360; // max resolution, 16K
     static inline SingletonDelegator<DisplayManager> delegator;
     std::recursive_mutex mutex_;
     std::vector<sptr<IDisplayPowerEventListener>> powerEventListeners_;
@@ -190,7 +189,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
         WLOGFE("displayId invalid!");
         return nullptr;
     }
-    
+
     std::shared_ptr<Media::PixelMap> screenShot =
         SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId);
     if (screenShot == nullptr) {
@@ -210,7 +209,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
         WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
         return nullptr;
     }
-    
+
     // create crop dest pixelmap
     Media::InitializationOptions opt;
     opt.size.width = size.width;

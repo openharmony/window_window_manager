@@ -26,7 +26,7 @@ using namespace OHOS::Rosen;
 namespace OHOS {
 constexpr int BITMAP_DEPTH = 8;
 constexpr int BPP = 4;
-constexpr int MAX_RESOLUTION_SIZE = 15360;
+
 const char *VALID_SNAPSHOT_PATH = "/data";
 const char *VALID_SNAPSHOT_SUFFIX = ".png";
 
@@ -74,7 +74,7 @@ bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
 
 static bool CheckWHValid(int32_t param)
 {
-    if ((param <= 0) || (param > MAX_RESOLUTION_SIZE)) {
+    if ((param <= 0) || (param > DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT)) {
         return false;
     }
     return true;
@@ -90,10 +90,10 @@ bool SnapShotUtils::CheckWidthAndHeightValid(const CmdArgments& cmdArgments)
 
 static bool CheckParamValid(const WriteToPngParam &param)
 {
-    if (param.width > MAX_RESOLUTION_SIZE) {
+    if (param.width > DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT) {
         return false;
     }
-    if (param.height > MAX_RESOLUTION_SIZE) {
+    if (param.height > DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT) {
         return false;
     }
     if (param.stride < BPP * param.width) {
