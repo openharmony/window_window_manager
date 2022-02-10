@@ -741,7 +741,7 @@ void WindowImpl::UnregisterDragListener(sptr<IWindowDragListener>& listener)
     windowDragListeners_.erase(iter);
 }
 
-void WindowImpl::UpdateRect(const struct Rect& rect)
+void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reason)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
@@ -750,11 +750,11 @@ void WindowImpl::UpdateRect(const struct Rect& rect)
         return;
     }
     float virtualPixelRatio = display->GetVirtualPixelRatio();
-    WLOGFI("winId:%{public}d, rect[%{public}d, %{public}d, %{public}d, %{public}d], vpr:%{public}f",
-        GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, virtualPixelRatio);
+    WLOGFI("winId:%{public}d, rect[%{public}d, %{public}d, %{public}d, %{public}d], vpr:%{public}f, reason:%{public}u",
+        GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, virtualPixelRatio, reason);
     property_->SetWindowRect(rect);
     if (windowChangeListener_ != nullptr) {
-        windowChangeListener_->OnSizeChange(rect);
+        windowChangeListener_->OnSizeChange(rect, reason);
     }
     if (uiContent_ != nullptr) {
         Ace::ViewportConfig config;

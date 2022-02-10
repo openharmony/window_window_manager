@@ -210,7 +210,7 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
 
     node->SetLayoutRect(winRect);
     if (!(lastRect == winRect)) {
-        node->GetWindowToken()->UpdateWindowRect(winRect);
+        node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     }
 }

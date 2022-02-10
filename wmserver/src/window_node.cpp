@@ -84,6 +84,11 @@ void WindowNode::SetAlpha(float alpha)
     surfaceNode_->SetAlpha(alpha);
 }
 
+void WindowNode::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
+{
+    windowSizeChangeReason_ = reason;
+}
+
 const sptr<IWindow>& WindowNode::GetWindowToken() const
 {
     return windowToken_;
@@ -174,6 +179,11 @@ bool WindowNode::IsSplitMode() const
 {
     return (property_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
         property_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+}
+
+WindowSizeChangeReason WindowNode::GetWindowSizeChangeReason() const
+{
+    return windowSizeChangeReason_;
 }
 }
 }

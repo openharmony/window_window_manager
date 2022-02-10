@@ -75,7 +75,7 @@ void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* 
     }
 }
 
-void JsWindowListener::OnSizeChange(Rect rect)
+void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason)
 {
     WLOGFI("JsWindowListener::OnSizeChange is called");
     std::lock_guard<std::mutex> lock(mtx_);

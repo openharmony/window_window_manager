@@ -48,6 +48,7 @@ public:
     void SetWindowMode(WindowMode mode);
     void SetWindowBackgroundBlur(WindowBlurLevel level);
     void SetAlpha(float alpha);
+    void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
     uint32_t GetParentId() const;
@@ -63,6 +64,7 @@ public:
     int32_t GetCallingUid() const;
     const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
     bool IsSplitMode() const;
+    WindowSizeChangeReason GetWindowSizeChangeReason() const;
 
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;
@@ -79,6 +81,7 @@ private:
     Rect layoutRect_ { 0, 0, 0, 0 };
     int32_t callingPid_;
     int32_t callingUid_;
+    WindowSizeChangeReason windowSizeChangeReason_ {WindowSizeChangeReason::UNDEFINED};
 };
 }
 }
