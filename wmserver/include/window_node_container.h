@@ -45,7 +45,7 @@ public:
     uint64_t GetScreenId() const;
     DisplayId GetDisplayId() const;
     Rect GetDisplayRect() const;
-    sptr<WindowNode> GetTopImmersiveNode() const;
+    std::unordered_map<WindowType, SystemBarProperty> GetExpectImmersiveProperty() const;
     void UpdateWindowStatus(const sptr<WindowNode>& windowId, WindowUpdateType type) const;
     void UpdateDisplayRect(uint32_t width, uint32_t height);
 
@@ -84,6 +84,8 @@ private:
     void RaiseZOrderForSplitWindow(sptr<WindowNode>& node);
     void MinimizeWindowFromAbility(const sptr<WindowNode>& node);
     void ResetLayoutPolicy();
+    bool IsFullImmersiveNode(sptr<WindowNode> node) const;
+    bool IsSplitImmersiveNode(sptr<WindowNode> node) const;
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
