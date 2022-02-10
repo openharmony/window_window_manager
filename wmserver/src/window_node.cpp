@@ -118,17 +118,19 @@ Rect WindowNode::GetHotZoneRect() const
 {
     Rect rect = layoutRect_;
     if (GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        const int32_t divTouchRegion = 20;
+        const int32_t divHotZone = 20;
         if (rect.width_ < rect.height_) {
-            rect.posX_ -= divTouchRegion;
-            rect.width_ += (divTouchRegion + divTouchRegion);
+            rect.posX_ -= divHotZone;
+            rect.width_ += (divHotZone + divHotZone);
         } else {
-            rect.posY_ -= divTouchRegion;
-            rect.height_ += (divTouchRegion + divTouchRegion);
+            rect.posY_ -= divHotZone;
+            rect.height_ += (divHotZone + divHotZone);
         }
     } else if (WindowHelper::IsMainFloatingWindow(GetWindowType(), GetWindowMode())) {
-        property_->SetWindowHotZoneRect(rect);
-        rect = property_->GetWindowHotZoneRect();
+        rect.posX_ -= HOTZONE;
+        rect.posY_ -= HOTZONE;
+        rect.width_ += (HOTZONE + HOTZONE);
+        rect.height_ += (HOTZONE + HOTZONE);
     }
     return rect;
 }

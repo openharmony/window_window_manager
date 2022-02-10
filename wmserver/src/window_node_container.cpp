@@ -222,6 +222,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     }
     node->requestedVisibility_ = false;
     node->currentVisibility_ = false;
+    node->hasDecorated = false;
     for (auto& child : node->children_) {
         child->currentVisibility_ = false;
     }
