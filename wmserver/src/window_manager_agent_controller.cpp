@@ -47,10 +47,10 @@ void WindowManagerAgentController::UpdateFocusStatus(uint32_t windowId, const sp
 
 void WindowManagerAgentController::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
+    WLOGFI("UpdateSystemBarRegionTints, tints size: %{public}u", static_cast<uint32_t>(tints.size()));
     if (tints.empty()) {
         return;
     }
-    WLOGFI("UpdateSystemBarRegionTints");
     for (auto& agent : wmAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR)) {
         agent->UpdateSystemBarRegionTints(displayId, tints);
