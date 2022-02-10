@@ -102,7 +102,7 @@ public:
     virtual void RegisterDragListener(sptr<IWindowDragListener>& listener) override;
     virtual void UnregisterDragListener(sptr<IWindowDragListener>& listener) override;
 
-    void UpdateRect(const struct Rect& rect);
+    void UpdateRect(const struct Rect& rect, WindowSizeChangeReason reason);
     void UpdateMode(WindowMode mode);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) override;

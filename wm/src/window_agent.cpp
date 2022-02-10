@@ -32,13 +32,13 @@ void WindowAgent::UpdateWindowProperty(const WindowProperty& windowProperty)
 {
 }
 
-void WindowAgent::UpdateWindowRect(const struct Rect& rect)
+void WindowAgent::UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
         return;
     }
-    window_->UpdateRect(rect);
+    window_->UpdateRect(rect, reason);
 }
 
 void WindowAgent::UpdateWindowMode(WindowMode mode)
