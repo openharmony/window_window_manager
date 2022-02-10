@@ -35,6 +35,7 @@ public:
 
 private:
     DisplayState displayState_ { DisplayState::UNKNOWN };
+    bool isKeyguardDrawn_ { false };
 };
 }
 }
