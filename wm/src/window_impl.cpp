@@ -805,7 +805,6 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 void WindowImpl::HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId)
 {
     if (!startMoveFlag_ || (pointId != startPointerId_)) {
-        WLOGI("Window move event is not ready");
         return;
     }
     int32_t targetX = startPointRect_.posX_ + (posX - startPointPosX_);
@@ -819,7 +818,6 @@ void WindowImpl::HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId)
 void WindowImpl::HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId)
 {
     if (!startDragFlag_ || (pointId != startPointerId_)) {
-        WLOGI("Window drag event is not ready");
         return;
     }
     int32_t diffX = posX - startPointPosX_;
@@ -889,12 +887,12 @@ void WindowImpl::ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& poin
         case MMI::PointerEvent::POINTER_ACTION_DOWN:
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN: {
             ReadyToMoveOrDragWindow(pointGlobalX, pointGlobalY, pointId);
-            WLOGFI("[Point Button Down]: %{public}d failed", GetWindowId());
+            WLOGFI("[Point Button Down]: %{public}d", GetWindowId());
             break;
         }
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
             // Start to move or darg
-            WLOGFI("[Point Move]: %{public}d failed", GetWindowId());
+            WLOGFI("[Point Move]: %{public}d", GetWindowId());
             HandleMoveEvent(pointGlobalX, pointGlobalY, pointId);
             HandleDragEvent(pointGlobalX, pointGlobalY, pointId);
             break;
@@ -903,7 +901,7 @@ void WindowImpl::ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& poin
         case MMI::PointerEvent::POINTER_ACTION_UP:
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
         case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
-            WLOGFI("[Point End]: %{public}d failed", GetWindowId());
+            WLOGFI("[Point End]: %{public}d", GetWindowId());
             EndMoveOrDragWindow(pointId);
             break;
         }
