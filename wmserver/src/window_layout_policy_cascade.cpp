@@ -25,7 +25,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicyCascade"};
 }
 WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const Rect& displayRect, const uint64_t& screenId,
-    const sptr<WindowNode>& belowAppNode, const sptr<WindowNode>& appNode, const sptr<WindowNode>& aboveAppNode)
+    sptr<WindowNode>& belowAppNode, sptr<WindowNode>& appNode, sptr<WindowNode>& aboveAppNode)
     : WindowLayoutPolicy(displayRect, screenId, belowAppNode, appNode, aboveAppNode)
 {
 }
@@ -33,6 +33,7 @@ WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const Rect& displayRect, co
 void WindowLayoutPolicyCascade::Launch()
 {
     UpdateDisplayInfo();
+    LayoutWindowNode(aboveAppWindowNode_);
     WLOGFI("WindowLayoutPolicyCascade::Launch");
 }
 
@@ -248,11 +249,6 @@ void WindowLayoutPolicyCascade::InitSplitRects()
     WLOGFI("init dividerRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
         dividerRect_.posX_, dividerRect_.posY_, dividerRect_.width_, dividerRect_.height_);
     SetSplitRect(dividerRect_);
-}
-
-bool WindowLayoutPolicyCascade::IsVertical() const
-{
-    return displayRect_.width_ < displayRect_.height_;
 }
 
 void WindowLayoutPolicyCascade::SetSplitRectByRatio(float ratio)

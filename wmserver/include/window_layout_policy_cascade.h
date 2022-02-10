@@ -30,7 +30,7 @@ class WindowLayoutPolicyCascade : public WindowLayoutPolicy {
 public:
     WindowLayoutPolicyCascade() = delete;
     WindowLayoutPolicyCascade(const Rect& displayRect, const uint64_t& screenId,
-        const sptr<WindowNode>& belowAppNode, const sptr<WindowNode>& appNode, const sptr<WindowNode>& aboveAppNode);
+        sptr<WindowNode>& belowAppNode, sptr<WindowNode>& appNode, sptr<WindowNode>& aboveAppNode);
     ~WindowLayoutPolicyCascade() = default;
     void Launch() override;
     void Clean() override;
@@ -59,7 +59,6 @@ private:
     Rect GetLimitRect(const WindowMode mode) const;
     Rect GetDisplayRect(const WindowMode mode) const;
     void LimitMoveBounds(Rect& rect);
-    bool IsVertical() const;
 };
 }
 }
