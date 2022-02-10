@@ -91,22 +91,22 @@ NativeValue* JsWindowStage::GetSubWindow(NativeEngine* engine, NativeCallbackInf
 
 void JsWindowStage::AfterForeground()
 {
-    LifeCycleCallBack(WindowStageEventType::VISIBLE);
+    LifeCycleCallBack(WindowStageEventType::FOREGROUND);
 }
 
 void JsWindowStage::AfterBackground()
 {
-    LifeCycleCallBack(WindowStageEventType::INVISIBLE);
+    LifeCycleCallBack(WindowStageEventType::BACKGROUND);
 }
 
 void JsWindowStage::AfterFocused()
 {
-    LifeCycleCallBack(WindowStageEventType::FOCUSED);
+    LifeCycleCallBack(WindowStageEventType::ACTIVE);
 }
 
 void JsWindowStage::AfterUnFocused()
 {
-    LifeCycleCallBack(WindowStageEventType::UNFOCUSED);
+    LifeCycleCallBack(WindowStageEventType::INACTIVE);
 }
 
 void JsWindowStage::LifeCycleCallBack(WindowStageEventType type)

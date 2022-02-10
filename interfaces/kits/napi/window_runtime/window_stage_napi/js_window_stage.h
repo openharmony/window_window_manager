@@ -55,10 +55,10 @@ private:
     NativeValue* OnCreateSubWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetSubWindow(NativeEngine& engine, NativeCallbackInfo& info);
     enum class WindowStageEventType : uint32_t {
-        VISIBLE = 1,
-        FOCUSED,
-        UNFOCUSED,
-        INVISIBLE,
+        FOREGROUND = 1,
+        ACTIVE,
+        INACTIVE,
+        BACKGROUND,
     };
     void LifeCycleCallBack(WindowStageEventType type);
 
