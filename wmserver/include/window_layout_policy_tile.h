@@ -30,8 +30,23 @@ class WindowLayoutPolicyTile : public WindowLayoutPolicy {
 public:
     WindowLayoutPolicyTile() = delete;
     WindowLayoutPolicyTile(const Rect& displayRect, const uint64_t& screenId,
-        const sptr<WindowNode>& belowAppNode, const sptr<WindowNode>& appNode, const sptr<WindowNode>& aboveAppNode);
+        sptr<WindowNode>& belowAppNode, sptr<WindowNode>& appNode, sptr<WindowNode>& aboveAppNode);
     ~WindowLayoutPolicyTile() = default;
+    void Launch() override;
+    void AddWindowNode(sptr<WindowNode>& node) override;
+
+private:
+    Rect singleRect_ = { 0, 0, 0, 0 };
+    std::vector<Rect> doubleRects_ = std::vector<Rect>(2);
+    std::vector<Rect> tripleRects_ = std::vector<Rect>(3);
+    std::vector<sptr<WindowNode>> foregroundNodes_;
+    uint32_t lastForegroundNodeId_ = 0;
+    void UpdateDisplayInfo() override;
+    void InitTileWindowRects();
+    void AssignNodePropertyForTileWindows();
+    void LayoutForegroundNodeQueue();
+    void InitForegroundNodeQueue();
+    void UpdateForegroundNodeQueue(sptr<WindowNode>& node);
 };
 }
 }

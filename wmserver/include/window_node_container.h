@@ -59,6 +59,7 @@ public:
                                          const std::vector<WindowMode> &exceptionalModes = {});
     WMError EnterSplitWindowMode(sptr<WindowNode>& node);
     WMError ExitSplitWindowMode(sptr<WindowNode>& node);
+    WMError SwitchLayoutPolicy(WindowLayoutMode mode, bool reorder = false);
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
@@ -72,8 +73,6 @@ private:
     void SendSplitScreenEvent(WindowMode mode);
     sptr<WindowNode> FindSplitPairNode(sptr<WindowNode>& node) const;
     WMError UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode);
-    WMError SwitchLayoutPolicy(WindowLayoutMode mode);
-
     void NotifyIfSystemBarTintChanged();
     void NotifyIfSystemBarRegionChanged();
     void TraverseAndUpdateWindowState(WindowState state, int32_t topPriority);
