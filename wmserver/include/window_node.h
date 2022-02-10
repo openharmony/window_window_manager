@@ -58,6 +58,8 @@ public:
     Rect GetHotZoneRect() const;
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;
+    WindowBlurLevel GetWindowBackgroundBlur() const;
+    float GetAlpha() const;
     uint32_t GetWindowFlags() const;
     const sptr<WindowProperty>& GetWindowProperty() const;
     int32_t GetCallingPid() const;

@@ -267,6 +267,11 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         return false;
     }
 
+    // write blur level_
+    if (!parcel.WriteUint32(static_cast<uint32_t>(level_))) {
+        return false;
+    }
+
     // write flags_
     if (!parcel.WriteUint32(flags_)) {
         return false;
@@ -343,6 +348,7 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowRect(rect);
     property->SetWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
+    property->SetWindowBackgroundBlur(static_cast<WindowBlurLevel>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetFullScreen(parcel.ReadBool());
     property->SetFocusable(parcel.ReadBool());
