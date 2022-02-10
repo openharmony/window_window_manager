@@ -34,6 +34,7 @@ public:
     ~WindowLayoutPolicyCascade() = default;
     void Launch() override;
     void Clean() override;
+    void Reset() override;
     void UpdateDisplayInfo() override;
     void AddWindowNode(sptr<WindowNode>& node) override;
     void UpdateWindowNode(sptr<WindowNode>& node) override;

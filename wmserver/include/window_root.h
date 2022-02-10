@@ -50,7 +50,8 @@ public:
     WMError RequestFocus(uint32_t windowId);
     WMError MinimizeStructuredAppWindowsExceptSelf(sptr<WindowNode>& node);
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
-    WMError HandleSplitWindowModeChange(sptr<WindowNode>& node, bool isChangeToSplit);
+    WMError EnterSplitWindowMode(sptr<WindowNode>& node);
+    WMError ExitSplitWindowMode(sptr<WindowNode>& node);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void MinimizeAllAppWindows(DisplayId displayId);
