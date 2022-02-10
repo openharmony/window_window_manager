@@ -150,10 +150,12 @@ private:
     void OnVsync(int64_t timeStamp);
     static sptr<Window> FindTopWindow(uint32_t topWinId);
     WMError Drag(const Rect& rect);
-    void ConsumeDividerPointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent);
-    void ConsumeDragOrMoveEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void HandleDragEvent(const MMI::PointerEvent::PointerItem& pointerItem);
-    void HandleMoveEvent(const MMI::PointerEvent::PointerItem& pointerItem);
+    void ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId);
+    void HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId);
+    void ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId);
+    void EndMoveOrDragWindow(int32_t pointId);
+    bool IsPointerEventConsumed();
 
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
         std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
@@ -178,9 +180,11 @@ private:
 
     int32_t startPointPosX_ = 0;
     int32_t startPointPosY_ = 0;
-    Rect startPointRect_ = {0, 0, 0, 0};
+    int32_t  startPointerId_ = 0;
     bool startDragFlag_ = false;
     bool startMoveFlag_ = false;
+    bool pointEventStarted_ = false;
+    Rect startPointRect_ = {0, 0, 0, 0};
 };
 }
 }

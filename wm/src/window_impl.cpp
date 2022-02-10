@@ -802,20 +802,28 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
     }
 }
 
-void WindowImpl::HandleMoveEvent(const MMI::PointerEvent::PointerItem& pointerItem)
+void WindowImpl::HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId)
 {
-    int32_t targetX = startPointRect_.posX_ + (pointerItem.GetGlobalX() - startPointPosX_);
-    int32_t targetY = startPointRect_.posY_ + (pointerItem.GetGlobalY() - startPointPosY_);
+    if (!startMoveFlag_ || (pointId != startPointerId_)) {
+        WLOGI("Window move event is not ready");
+        return;
+    }
+    int32_t targetX = startPointRect_.posX_ + (posX - startPointPosX_);
+    int32_t targetY = startPointRect_.posY_ + (posY - startPointPosY_);
     auto res = MoveTo(targetX, targetY);
     if (res != WMError::WM_OK) {
         WLOGFE("move window: %{public}d failed", GetWindowId());
     }
 }
 
-void WindowImpl::HandleDragEvent(const MMI::PointerEvent::PointerItem& pointerItem)
+void WindowImpl::HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId)
 {
-    int32_t diffX = pointerItem.GetGlobalX() - startPointPosX_;
-    int32_t diffY = pointerItem.GetGlobalY() - startPointPosY_;
+    if (!startDragFlag_ || (pointId != startPointerId_)) {
+        WLOGI("Window drag event is not ready");
+        return;
+    }
+    int32_t diffX = posX - startPointPosX_;
+    int32_t diffY = posY - startPointPosY_;
     Rect newRect = startPointRect_;
     if (startPointPosX_ <= startPointRect_.posX_) {
         newRect.posX_  += diffX;
@@ -835,81 +843,78 @@ void WindowImpl::HandleDragEvent(const MMI::PointerEvent::PointerItem& pointerIt
     }
 }
 
-void WindowImpl::ConsumeDragOrMoveEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void WindowImpl::EndMoveOrDragWindow(int32_t pointId)
 {
-    int32_t action = pointerEvent->GetPointerAction();
+    if (pointId != startPointerId_) {
+        return;
+    }
+    startDragFlag_ = false;
+    startMoveFlag_ = false;
+    pointEventStarted_ = false;
+    return;
+}
+
+void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId)
+{
+    if (pointEventStarted_) {
+        return;
+    }
+    startPointRect_ = GetRect();
+    startPointPosX_ = globalX;
+    startPointPosY_ =  globalY;
+    startPointerId_ = pointId;
+    pointEventStarted_ = true;
+    if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        // Or point is in decor area
+        startMoveFlag_ = true;
+    } else if (!WindowHelper::IsPointInWindow(startPointPosX_, startPointPosY_, startPointRect_)) {
+        startDragFlag_ = true;
+    }
+    return;
+}
+
+void WindowImpl::ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
     MMI::PointerEvent::PointerItem pointerItem;
+    int32_t pointId = pointerEvent->GetPointerId();
+    if (!pointerEvent->GetPointerItem(pointId, pointerItem)) {
+        WLOGFW("Point item is invalid");
+        return;
+    }
+    int32_t pointGlobalX = pointerItem.GetGlobalX();
+    int32_t pointGlobalY = pointerItem.GetGlobalY();
+    int32_t action = pointerEvent->GetPointerAction();
     switch (action) {
-        case MMI::PointerEvent::POINTER_ACTION_DOWN: {
-            if (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-                startPointRect_ = GetRect();
-                startPointPosX_ = pointerItem.GetGlobalX();
-                startPointPosY_ = pointerItem.GetGlobalY();
-                if (!WindowHelper::IsPointInWindow(startPointPosX_, startPointPosY_, startPointRect_)) {
-                    startDragFlag_ = true;
-                }
-                WLOGFI("[PointDown] windowId: %{public}d, pointPos: [%{public}d, %{public}d], winRect: "
-                       "[%{public}d, %{public}d, %{public}d, %{public}d], startDragFlag: %{public}d",
-                       GetWindowId(), startPointPosX_, startPointPosY_, startPointRect_.posX_, startPointRect_.posY_,
-                       startPointRect_.width_, startPointRect_.height_, startDragFlag_);
-            }
+        // Ready to move or drag
+        case MMI::PointerEvent::POINTER_ACTION_DOWN:
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN: {
+            ReadyToMoveOrDragWindow(pointGlobalX, pointGlobalY, pointId);
+            WLOGFI("[Point Button Down]: %{public}d failed", GetWindowId());
             break;
         }
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
-            if (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-                if (startMoveFlag_) {
-                    HandleMoveEvent(pointerItem);
-                }
-                if (startDragFlag_) {
-                    HandleDragEvent(pointerItem);
-                }
-            }
+            // Start to move or darg
+            WLOGFI("[Point Move]: %{public}d failed", GetWindowId());
+            HandleMoveEvent(pointGlobalX, pointGlobalY, pointId);
+            HandleDragEvent(pointGlobalX, pointGlobalY, pointId);
             break;
         }
+        // End move or drag
         case MMI::PointerEvent::POINTER_ACTION_UP:
-        case MMI::PointerEvent::POINTER_ACTION_CANCEL:
-            startDragFlag_ = false;
-            startMoveFlag_ = false;
-            WLOGFE("[Point Up/Cancel] windowId: %{public}d", GetWindowId());
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+        case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
+            WLOGFI("[Point End]: %{public}d failed", GetWindowId());
+            EndMoveOrDragWindow(pointId);
             break;
+        }
         default:
             break;
     }
 }
 
-void WindowImpl::ConsumeDividerPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+bool WindowImpl::IsPointerEventConsumed()
 {
-    int32_t action = pointerEvent->GetPointerAction();
-    WLOGI("ConsumeDividerPointerEvent pointerEvent action: %{public}d, windowId: %{public}u", action, GetWindowId());
-    MMI::PointerEvent::PointerItem pointerItem;
-    switch (action) {
-        case MMI::PointerEvent::POINTER_ACTION_DOWN: {
-            if (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-                startMoveFlag_ = true;
-                startPointRect_ = GetRect();
-                startPointPosX_ = pointerItem.GetGlobalX();
-                startPointPosY_ = pointerItem.GetGlobalY();
-                WLOGFI("[Point divider] point pos: [%{public}d, %{public}d], "
-                       "winRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-                       startPointPosX_, startPointPosY_, startPointRect_.posX_, startPointRect_.posY_,
-                       startPointRect_.width_, startPointRect_.height_);
-            }
-            break;
-        }
-        case MMI::PointerEvent::POINTER_ACTION_MOVE: {
-            if (startMoveFlag_ && (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem))) {
-                HandleMoveEvent(pointerItem);
-            }
-            break;
-        }
-        case MMI::PointerEvent::POINTER_ACTION_UP:
-        case MMI::PointerEvent::POINTER_ACTION_CANCEL:
-            startMoveFlag_ = false;
-            WLOGFE("[Point divider Up/Cancel] windowId: %{public}d", GetWindowId());
-            break;
-        default:
-            break;
-    }
+    return startDragFlag_ || startMoveFlag_;
 }
 
 void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -919,18 +924,15 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         SingletonContainer::Get<WindowAdapter>().ProcessWindowTouchedEvent(property_->GetWindowId());
     }
-    if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        ConsumeDividerPointerEvent(pointerEvent);
+    if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ||
+        GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        ConsumeMoveOrDragEvent(pointerEvent);
+    }
+
+    if (IsPointerEventConsumed()) {
+        WLOGI("PointerEvent is consumed, do not trans to uicontent");
         return;
     }
-
-    if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
-        ConsumeDragOrMoveEvent(pointerEvent);
-        if (startDragFlag_ || startMoveFlag_) {
-            return;
-        }
-    }
-
     if (uiContent_ == nullptr) {
         WLOGE("ConsumePointerEvent uiContent is nullptr, windowId: %{public}d", GetWindowId());
         return;
