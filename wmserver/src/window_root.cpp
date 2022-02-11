@@ -233,7 +233,7 @@ WMError WindowRoot::ExitSplitWindowMode(sptr<WindowNode>& node)
     return container->ExitSplitWindowMode(node);
 }
 
-WMError WindowRoot::DestroyWindow(uint32_t windowId)
+WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     auto node = GetWindowNode(windowId);
     if (node == nullptr) {
@@ -242,13 +242,22 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId)
     WMError res;
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container != nullptr) {
-        std::vector<uint32_t> windowIds;
-        res = container->DestroyWindowNode(node, windowIds);
-        for (auto id : windowIds) {
-            node = GetWindowNode(id);
-            DestroyWindowInner(node);
+        if (onlySelf) {
+            for (auto& child : node->children_) {
+                child->parent_ = nullptr;
+            }
+            return DestroyWindowInner(node);
+        } else {
+            std::vector<uint32_t> windowIds;
+            res = container->DestroyWindowNode(node, windowIds);
+            for (auto id : windowIds) {
+                node = GetWindowNode(id);
+                if (node != nullptr) {
+                    DestroyWindowInner(node);
+                }
+            }
+            return res;
         }
-        return res;
     }
     res = DestroyWindowInner(node);
     WLOGFI("destroy window failed, window container could not be found");

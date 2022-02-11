@@ -43,7 +43,7 @@ public:
     WMError SaveWindow(const sptr<WindowNode>& node);
     WMError AddWindowNode(uint32_t parentId, sptr<WindowNode>& node);
     WMError RemoveWindowNode(uint32_t windowId);
-    WMError DestroyWindow(uint32_t windowId);
+    WMError DestroyWindow(uint32_t windowId, bool onlySelf);
     WMError UpdateWindowNode(uint32_t windowId);
     bool isVerticalDisplay(sptr<WindowNode>& node) const;
 

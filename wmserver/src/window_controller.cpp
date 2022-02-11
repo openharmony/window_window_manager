@@ -105,14 +105,14 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
     return res;
 }
 
-WMError WindowController::DestroyWindow(uint32_t windowId)
+WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     DisplayId displayId = DISPLAY_ID_INVALD;
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node != nullptr) {
         displayId = node->GetDisplayId();
     }
-    WMError res = windowRoot_->DestroyWindow(windowId);
+    WMError res = windowRoot_->DestroyWindow(windowId, onlySelf);
     if (res != WMError::WM_OK) {
         return res;
     }
