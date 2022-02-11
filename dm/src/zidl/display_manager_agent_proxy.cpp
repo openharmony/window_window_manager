@@ -48,7 +48,7 @@ void DisplayManagerAgentProxy::NotifyDisplayPowerEvent(DisplayPowerEvent event, 
     }
 }
 
-void DisplayManagerAgentProxy::NotifyDisplayStateChanged(DisplayState state)
+void DisplayManagerAgentProxy::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -60,6 +60,11 @@ void DisplayManagerAgentProxy::NotifyDisplayStateChanged(DisplayState state)
 
     if (!data.WriteUint32(static_cast<uint32_t>(state))) {
         WLOGFE("Write DisplayState failed");
+        return;
+    }
+
+    if (!data.WriteUint64(static_cast<uint64_t>(id))) {
+        WLOGFE("Write displayId failed");
         return;
     }
 

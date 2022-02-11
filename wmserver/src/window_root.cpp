@@ -333,6 +333,17 @@ void WindowRoot::NotifyWindowStateChange(WindowState state, WindowStateChangeRea
     }
 }
 
+void WindowRoot::NotifyDisplayChange(sptr<AbstractDisplay> abstractDisplay)
+{
+    WLOGFD("window should be updated for display changed");
+    auto container = GetOrCreateWindowNodeContainer(abstractDisplay->GetId());
+    if (container == nullptr) {
+        WLOGFE("can't find window node container, failed!");
+        return;
+    }
+    container->UpdateDisplayRect(abstractDisplay->GetWidth(), abstractDisplay->GetHeight());
+}
+
 WMError WindowRoot::RaiseZOrderForAppWindow(sptr<WindowNode>& node)
 {
     if (node == nullptr) {

@@ -23,18 +23,19 @@
 #include <surface.h>
 #include <transaction/rs_interfaces.h>
 
-#include "screen.h"
-#include "dm_common.h"
 #include "abstract_screen.h"
+#include "dm_common.h"
+#include "screen.h"
 
 namespace OHOS::Rosen {
 class AbstractScreenController : public RefBase {
-using OnAbstractScreenCallback = std::function<void(sptr<AbstractScreen>)>;
+using OnAbstractScreenConnectCb = std::function<void(sptr<AbstractScreen>)>;
+using OnAbstractScreenChangeCb = std::function<void(sptr<AbstractScreen>, DisplayChangeEvent event)>;
 public:
     struct AbstractScreenCallback : public RefBase {
-        OnAbstractScreenCallback onConnected_;
-        OnAbstractScreenCallback onDisconnected_;
-        OnAbstractScreenCallback onChanged_;
+        OnAbstractScreenConnectCb onConnect_;
+        OnAbstractScreenConnectCb onDisconnect_;
+        OnAbstractScreenChangeCb onChange_;
     };
 
     AbstractScreenController(std::recursive_mutex& mutex);
@@ -52,6 +53,9 @@ public:
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
+    bool RequestRotation(ScreenId screenId, Rotation rotation);
+
+    void OnScreenRotate(ScreenId dmsScreenId, Rotation before, Rotation after);
     bool IsScreenGroup(ScreenId screenId) const;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
@@ -60,7 +64,7 @@ public:
     void DumpScreenInfo() const;
     void DumpScreenGroupInfo() const;
 private:
-    void OnRsScreenChange(ScreenId rsScreenId, ScreenEvent screenEvent);
+    void OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent);
     void ProcessScreenDisconnected(ScreenId rsScreenId);
     bool FillAbstractScreen(sptr<AbstractScreen>& absScreen, ScreenId rsScreenId);
     sptr<AbstractScreenGroup> AddToGroupLocked(sptr<AbstractScreen> newScreen);
@@ -70,7 +74,7 @@ private:
     sptr<AbstractScreenGroup> AddAsSuccedentScreenLocked(sptr<AbstractScreen> newScreen);
 
     std::recursive_mutex& mutex_;
-    OHOS::Rosen::RSInterfaces *rsInterface_;
+    OHOS::Rosen::RSInterfaces& rsInterface_;
     std::atomic<ScreenId> dmsScreenCount_;
     // No AbstractScreenGroup
     std::map<ScreenId, ScreenId> rs2DmsScreenIdMap_;

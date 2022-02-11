@@ -92,6 +92,7 @@ public:
             WLOGFE("OnDisplayChange, impl is nullptr.");
             return;
         }
+        WLOGD("OnDisplayChange. display %{public}" PRIu64", event %{public}u", displayInfo->id_, event);
         for (auto listener : pImpl_->displayListeners_) {
             listener->OnChange(displayInfo->id_);
         }
@@ -351,7 +352,7 @@ void DisplayManager::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatu
     }
 }
 
-void DisplayManager::NotifyDisplayStateChanged(DisplayState state)
+void DisplayManager::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 {
     WLOGFI("state:%{public}u", state);
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);

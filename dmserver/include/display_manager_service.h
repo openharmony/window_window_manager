@@ -37,6 +37,9 @@ namespace OHOS::Rosen {
 class DisplayManagerService : public SystemAbility, public DisplayManagerStub {
 friend class DisplayManagerServiceInner;
 friend class DisplayPowerController;
+friend class AbstractDisplay;
+friend class AbstractDisplayController;
+friend class AbstractScreen;
 DECLARE_SYSTEM_ABILITY(DisplayManagerService);
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
 
@@ -48,6 +51,7 @@ public:
 
     DisplayId GetDefaultDisplayId() override;
     DisplayInfo GetDisplayInfoById(DisplayId displayId) override;
+    bool RequestRotation(ScreenId screenId, Rotation rotation) override;
     std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
     ScreenId GetRSScreenId(DisplayId displayId) const;
 
@@ -74,6 +78,7 @@ public:
     DisplayState GetDisplayState(DisplayId displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
 
+    sptr<AbstractDisplay> GetAbstractDisplay(DisplayId displayId);
     sptr<AbstractScreenController> GetAbstractScreenController();
     sptr<AbstractDisplay> GetDisplayByDisplayId(DisplayId displayId) const;
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
@@ -90,14 +95,14 @@ private:
     DisplayId GetDisplayIdFromScreenId(ScreenId screenId);
     ScreenId GetScreenIdFromDisplayId(DisplayId displayId);
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
-    void NotifyDisplayStateChange(DisplayStateChangeType type);
+    void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
     ScreenId GetScreenIdByDisplayId(DisplayId displayId) const;
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByDisplayId(DisplayId displayId) const;
 
     std::recursive_mutex mutex_;
     static inline SingletonDelegator<DisplayManagerService> delegator_;
-    sptr<AbstractScreenController> abstractScreenController_;
     sptr<AbstractDisplayController> abstractDisplayController_;
+    sptr<AbstractScreenController> abstractScreenController_;
     DisplayPowerController displayPowerController_;
     std::map<ScreenId, std::shared_ptr<RSDisplayNode>> displayNodeMap_;
     sptr<IDisplayChangeListener> displayChangeListener_;

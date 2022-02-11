@@ -58,6 +58,7 @@ public:
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
+    void NotifyDisplayChange(sptr<AbstractDisplay> abstractDisplay);
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
 
 private:

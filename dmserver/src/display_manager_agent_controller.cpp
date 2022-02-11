@@ -48,7 +48,7 @@ bool DisplayManagerAgentController::NotifyDisplayPowerEvent(DisplayPowerEvent ev
     return true;
 }
 
-bool DisplayManagerAgentController::NotifyDisplayStateChanged(DisplayState state)
+bool DisplayManagerAgentController::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
     if (agents.empty()) {
@@ -56,7 +56,7 @@ bool DisplayManagerAgentController::NotifyDisplayStateChanged(DisplayState state
     }
     WLOGFI("NotifyDisplayStateChanged");
     for (auto& agent : agents) {
-        agent->NotifyDisplayStateChanged(state);
+        agent->NotifyDisplayStateChanged(id, state);
     }
     return true;
 }

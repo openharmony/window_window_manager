@@ -81,6 +81,7 @@ public:
             WLOGFE("OnScreenChange, impl is nullptr.");
             return;
         }
+        WLOGFD("OnScreenChange. event %{public}u", event);
         std::vector<ScreenId> screenIds;
         for (auto screenInfo : screenInfos) {
             if (screenInfo->id_ != SCREEN_ID_INVALID) {

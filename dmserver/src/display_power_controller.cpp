@@ -27,7 +27,7 @@ namespace {
 bool DisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 {
     WLOGFI("reason:%{public}u", reason);
-    DisplayManagerService::GetInstance().NotifyDisplayStateChange(DisplayStateChangeType::BEFORE_SUSPEND);
+    DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALD, DisplayStateChangeType::BEFORE_SUSPEND);
     return true;
 }
 
@@ -42,7 +42,8 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
         case DisplayState::ON: {
             displayState_ = state;
             if (!isKeyguardDrawn_) {
-                DisplayManagerService::GetInstance().NotifyDisplayStateChange(DisplayStateChangeType::BEFORE_UNLOCK);
+                DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALD,
+                    DisplayStateChangeType::BEFORE_UNLOCK);
             }
             DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
                 EventStatus::BEGIN);
@@ -59,7 +60,7 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
             return false;
         }
     }
-    DisplayManagerAgentController::GetInstance().NotifyDisplayStateChanged(state);
+    DisplayManagerAgentController::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALD, state);
     return true;
 }
 
@@ -72,7 +73,8 @@ void DisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
 {
     WLOGFI("DisplayEvent:%{public}u", event);
     if (event == DisplayEvent::UNLOCK) {
-        DisplayManagerService::GetInstance().NotifyDisplayStateChange(DisplayStateChangeType::BEFORE_UNLOCK);
+        DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALD,
+            DisplayStateChangeType::BEFORE_UNLOCK);
         DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DESKTOP_READY,
             EventStatus::BEGIN);
         isKeyguardDrawn_ = false;

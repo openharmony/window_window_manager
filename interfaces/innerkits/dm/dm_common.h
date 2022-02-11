@@ -81,6 +81,7 @@ enum class ScreenChangeEvent : uint32_t {
     ADD_TO_GROUP,
     REMOVE_FROM_GROUP,
     CHANGE_GROUP,
+    UPDATE_ROTATION,
 };
 
 enum class Rotation : uint32_t {
@@ -91,6 +92,7 @@ enum class Rotation : uint32_t {
 };
 
 enum class DisplayChangeEvent : uint32_t {
+    UPDATE_ROTATION,
     DISPLAY_SIZE_CHANGED,
 };
 }
