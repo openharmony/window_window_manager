@@ -143,6 +143,36 @@ DMError DisplayManagerProxy::DestroyVirtualScreen(ScreenId screenId)
     return static_cast<DMError>(reply.ReadInt32());
 }
 
+bool DisplayManagerProxy::RequestRotation(ScreenId screenId, Rotation rotation)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("fail to request rotation: remote is null");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("fail to request rotation: WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFW("fail to request rotation: Write screenId failed");
+        return false;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(rotation))) {
+        WLOGFW("fail to request rotation: Write rotation failed");
+        return false;
+    }
+    if (remote->SendRequest(TRANS_ID_REQUEST_ROTATION, data, reply, option) != ERR_NONE) {
+        WLOGFW("fail to request rotation: SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
 std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDispalySnapshot(DisplayId displayId)
 {
     sptr<IRemoteObject> remote = Remote();

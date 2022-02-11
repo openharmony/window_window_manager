@@ -19,6 +19,7 @@
 #include <parcel.h>
 
 #include "display.h"
+#include "dm_common.h"
 
 namespace OHOS::Rosen {
 class DisplayInfo : public Parcelable {
@@ -31,13 +32,14 @@ public:
     virtual bool Marshalling(Parcel& parcel) const override;
     static DisplayInfo *Unmarshalling(Parcel& parcel);
 
-    DisplayId id_ {DISPLAY_ID_INVALD};
-    DisplayType type_ {DisplayType::DEFAULT};
-    int32_t width_ {0};
-    int32_t height_ {0};
-    uint32_t freshRate_ {0};
-    float xDpi_ {0.0};
-    float yDpi_ {0.0};
+    DisplayId id_ { DISPLAY_ID_INVALD };
+    DisplayType type_  {DisplayType::DEFAULT };
+    int32_t width_ { 0 };
+    int32_t height_ { 0 };
+    uint32_t freshRate_ { 0 };
+    float xDpi_ { 0.0 };
+    float yDpi_ { 0.0 };
+    Rotation rotation_ { Rotation::ROTATION_0 };
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H

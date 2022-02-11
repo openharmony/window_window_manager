@@ -25,7 +25,7 @@ namespace {
 }
 
 AbstractScreen::AbstractScreen(ScreenId dmsId, ScreenId rsId)
-    : dmsId_(dmsId), rsId_(rsId)
+    : dmsId_(dmsId), rsId_(rsId), screenController_(DisplayManagerService::GetInstance().abstractScreenController_)
 {
 }
 
@@ -105,15 +105,27 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
     info->virtualHeight_ = virtualPixelRatio * height;
     info->virtualWidth_ = virtualPixelRatio * width;
     info->parent_ = groupDmsId_;
-    info->hasChild_ = DisplayManagerService::GetInstance().GetAbstractScreenController()->IsScreenGroup(dmsId_);
+    info->canHasChild_ = canHasChild_;
+    info->rotation_ = rotation_;
     info->modeId_ = activeIdx_;
     info->modes_ = modes_;
 }
 
+Rotation AbstractScreen::GetRotation() const
+{
+    return rotation_;
+}
+
+void AbstractScreen::RequestRotation(Rotation rotation)
+{
+    rotation_ = rotation;
+}
+
 AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId, ScreenCombination combination)
-    : AbstractScreen(dmsId, rsId), combination_(combination)
+    : AbstractScreen(dmsId, rsId), combination_(combination) 
 {
     type_ = ScreenType::UNDEFINE;
+    canHasChild_ = true;
 }
 
 AbstractScreenGroup::~AbstractScreenGroup()

@@ -23,10 +23,11 @@ namespace Rosen {
 enum class DisplayStateChangeType : uint32_t {
     BEFORE_SUSPEND,
     BEFORE_UNLOCK,
+    UPDATE_ROTATION,
 };
 class IDisplayChangeListener : public RefBase {
 public:
-    virtual void OnDisplayStateChange(DisplayStateChangeType type) = 0;
+    virtual void OnDisplayStateChange(DisplayId id, DisplayStateChangeType type) = 0;
 };
 }
 }

@@ -32,8 +32,8 @@ WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerService)
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<DisplayManagerService>());
 
 DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true),
-    abstractScreenController_(new AbstractScreenController(mutex_)),
-    abstractDisplayController_(new AbstractDisplayController(mutex_))
+    abstractDisplayController_(new AbstractDisplayController(mutex_)),
+    abstractScreenController_(new AbstractScreenController(mutex_))
 {
 }
 
@@ -65,10 +65,10 @@ void DisplayManagerService::RegisterDisplayChangeListener(sptr<IDisplayChangeLis
     WLOGFI("IDisplayChangeListener registered");
 }
 
-void DisplayManagerService::NotifyDisplayStateChange(DisplayStateChangeType type)
+void DisplayManagerService::NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type)
 {
     if (displayChangeListener_ != nullptr) {
-        displayChangeListener_->OnDisplayStateChange(type);
+        displayChangeListener_->OnDisplayStateChange(id, type);
     }
 }
 
@@ -101,6 +101,11 @@ DisplayInfo DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
     return displayInfo;
 }
 
+sptr<AbstractDisplay> DisplayManagerService::GetAbstractDisplay(DisplayId displayId)
+{
+    return abstractDisplayController_->GetAbstractDisplay(displayId);
+}
+ 
 ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option)
 {
     WM_SCOPED_TRACE("dms:CreateVirtualScreen(%s)", option.name_.c_str());
@@ -137,6 +142,12 @@ DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
         transactionProxy->FlushImplicitTransaction();
     }
     return abstractScreenController_->DestroyVirtualScreen(screenId);
+}
+
+bool DisplayManagerService::RequestRotation(ScreenId screenId, Rotation rotation)
+{
+    WM_SCOPED_TRACE("dms:RequestRotation(%" PRIu64")", screenId);
+    return abstractScreenController_->RequestRotation(screenId, rotation);
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)

@@ -26,7 +26,7 @@ public:
     ~DisplayManagerAgentDefault() = default;
 
     void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) override {};
-    void NotifyDisplayStateChanged(DisplayState state) override {};
+    void NotifyDisplayStateChanged(DisplayId id, DisplayState state) override {};
     void OnScreenConnect(sptr<ScreenInfo>) override {};
     void OnScreenDisconnect(ScreenId) override {};
     void OnScreenChange(const std::vector<const sptr<ScreenInfo>>&, ScreenChangeEvent) override {};

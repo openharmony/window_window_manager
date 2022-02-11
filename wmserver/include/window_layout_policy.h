@@ -45,6 +45,7 @@ public:
     virtual void Reorder();
     virtual void UpdateDisplayInfo();
     virtual void AddWindowNode(sptr<WindowNode>& node);
+    virtual void LayoutWindowTree();
     virtual void RemoveWindowNode(sptr<WindowNode>& node);
     virtual void UpdateWindowNode(sptr<WindowNode>& node);
     virtual void UpdateLayoutRect(sptr<WindowNode>& node);
@@ -63,7 +64,6 @@ protected:
     };
     void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
     void UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect);
-    virtual void LayoutWindowTree();
     virtual void LayoutWindowNode(sptr<WindowNode>& node);
     AvoidPosType GetAvoidPosType(const Rect& rect);
     void LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect);

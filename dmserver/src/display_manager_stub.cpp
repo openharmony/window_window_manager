@@ -77,6 +77,12 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
+        case TRANS_ID_REQUEST_ROTATION: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            Rotation rotation = static_cast<Rotation>(data.ReadUint32());
+            reply.WriteBool(RequestRotation(screenId, rotation));
+            break;
+        }
         case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
             DisplayId displayId = data.ReadUint64();
             std::shared_ptr<Media::PixelMap> dispalySnapshot = GetDispalySnapshot(displayId);

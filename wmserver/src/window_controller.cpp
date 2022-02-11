@@ -78,6 +78,11 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     }
     FlushWindowInfo(property->GetWindowId());
 
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
+        node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+        sysBarWinId_[node->GetWindowType()] = node->GetWindowId();
+    }
+
     if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
         WindowHelper::IsAppWindow(node->GetWindowType())) {
         WM_SCOPED_TRACE_BEGIN("controller:MinimizeStructuredAppWindowsExceptSelf");
@@ -281,20 +286,36 @@ WMError WindowController::SetAlpha(uint32_t windowId, float dstAlpha)
     return WMError::WM_OK;
 }
 
-void WindowController::NotifyDisplayStateChange(DisplayStateChangeType type)
+void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStateChangeType type)
 {
     WLOGFD("DisplayStateChangeType:%{public}u", type);
-    WindowState state;
-    WindowStateChangeReason reason;
     switch (type) {
         case DisplayStateChangeType::BEFORE_SUSPEND: {
-            state = WindowState::STATE_FROZEN;
-            reason = WindowStateChangeReason::KEYGUARD;
+            windowRoot_->NotifyWindowStateChange(WindowState::STATE_FROZEN, WindowStateChangeReason::KEYGUARD);
             break;
         }
         case DisplayStateChangeType::BEFORE_UNLOCK: {
-            state = WindowState::STATE_UNFROZEN;
-            reason = WindowStateChangeReason::KEYGUARD;
+            windowRoot_->NotifyWindowStateChange(WindowState::STATE_UNFROZEN, WindowStateChangeReason::KEYGUARD);
+            break;
+        }
+        case DisplayStateChangeType::UPDATE_ROTATION: {
+            const sptr<AbstractDisplay> abstractDisplay
+                = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+            if (abstractDisplay == nullptr) {
+                WLOGFE("get display failed displayId:%{public}" PRId64 "", displayId);
+                return;
+            }
+            windowRoot_->NotifyDisplayChange(abstractDisplay);
+
+            // TODO: Remove 'sysBarWinId_' after SystemUI resize 'systembar'
+            uint32_t width = abstractDisplay->GetWidth();
+            uint32_t height = abstractDisplay->GetHeight() * SYSTEM_BAR_HEIGHT_RATIO;
+            Resize(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], width, height);
+            MoveTo(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], 0, 0);
+            Resize(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], width, height);
+            MoveTo(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], 0, abstractDisplay->GetHeight() - height);
+
+            FlushWindowInfoWithDisplayId(displayId);
             break;
         }
         default: {
@@ -302,7 +323,6 @@ void WindowController::NotifyDisplayStateChange(DisplayStateChangeType type)
             return;
         }
     }
-    windowRoot_->NotifyWindowStateChange(state, reason);
 }
 
 WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
