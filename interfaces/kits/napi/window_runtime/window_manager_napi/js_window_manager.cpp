@@ -71,6 +71,12 @@ NativeValue* JsWindowManager::GetTopWindow(NativeEngine* engine, NativeCallbackI
     return (me != nullptr) ? me->OnGetTopWindow(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindowManager::SetWindowLayoutMode(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(engine, info);
+    return (me != nullptr) ? me->OnSetWindowLayoutMode(*engine, *info) : nullptr;
+}
+
 static bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability)
 {
     napi_value global;
@@ -477,6 +483,48 @@ NativeValue* JsWindowManager::OnGetTopWindow(NativeEngine& engine, NativeCallbac
     return result;
 }
 
+NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindowManager::OnSetWindowLayoutMode is called");
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < ARGC_TWO) {
+        WLOGFE("JsWindowManager::OnSetWindowLayoutMode params too small");
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    WindowLayoutMode winLayoutMode = WindowLayoutMode::CASCADE;
+    int64_t displayId = 0;
+    if (errCode == WMError::WM_OK) {
+        NativeNumber* nativeMode = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
+        if (nativeMode == nullptr) {
+            WLOGFE("Failed to convert parameter to windowLayoutMode");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            winLayoutMode = static_cast<WindowLayoutMode>(static_cast<uint32_t>(*nativeMode));
+        }
+
+        if (!ConvertFromJsValue(engine, info.argv[1], displayId)) {
+            WLOGFE("Failed to convert parameter to displayId");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        }
+    }
+    
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(winLayoutMode,
+                static_cast<uint64_t>(displayId));
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("JsWindowManager::OnSetWindowLayoutMode success");
+        };
+    NativeValue* lastParam = (info.argc < ARGC_THREE) ? nullptr : info.argv[INDEX_TWO];
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
 
 NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
 {
@@ -502,6 +550,7 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "off", JsWindowManager::UnregisterWindowMangerCallback);
     BindNativeFunction(*engine, *object, "getTopWindow", JsWindowManager::GetTopWindow);
     BindNativeFunction(*engine, *object, "minimizeAll", JsWindowManager::MinimizeAll);
+    BindNativeFunction(*engine, *object, "setWindowLayoutMode", JsWindowManager::SetWindowLayoutMode);
     return engine->CreateUndefined();
 }
 }  // namespace Rosen
