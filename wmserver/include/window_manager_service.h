@@ -75,7 +75,6 @@ public:
     virtual void SetColorSpace(uint32_t windowId, ColorSpace colorSpace) override;
     virtual ColorSpace GetColorSpace(uint32_t windowId) override;
 
-    std::shared_ptr<RSDisplayNode> GetDisplayNode(DisplayId displayId) const;
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void UnregisterWindowManagerAgent(WindowManagerAgentType type,
