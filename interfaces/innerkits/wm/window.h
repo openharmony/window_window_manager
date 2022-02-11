@@ -126,6 +126,8 @@ public:
     virtual bool IsSupportWideGamut() = 0;
     virtual void SetColorSpace(ColorSpace colorSpace) = 0;
     virtual ColorSpace GetColorSpace() = 0;
+
+    virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 };
 }
 }

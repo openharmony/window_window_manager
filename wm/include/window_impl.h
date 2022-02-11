@@ -124,6 +124,9 @@ public:
     virtual bool IsSupportWideGamut() override;
     virtual void SetColorSpace(ColorSpace colorSpace) override;
     virtual ColorSpace GetColorSpace() override;
+
+    virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+
 private:
     inline void NotifyAfterForeground() const
     {
