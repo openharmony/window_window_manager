@@ -66,11 +66,16 @@ void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, b
         return;
     }
     WLOGFI("AbstractScreen::UpdateRSTree");
-    if (isAdd) {
-        rsDisplayNode_->AddChild(surfaceNode, -1);
-    } else {
-        rsDisplayNode_->RemoveChild(surfaceNode);
-    }
+
+    // add or remove window with transition animation, default duration 100ms
+    static RSAnimationTimingProtocol timingProtocol(100);
+    RSNode::Animate(timingProtocol, Rosen::RSAnimationTimingCurve::EASE_OUT, [=]() {
+        if (isAdd) {
+            rsDisplayNode_->AddChild(surfaceNode, -1);
+        } else {
+            rsDisplayNode_->RemoveChild(surfaceNode);
+        }
+    });
 }
 
 void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
