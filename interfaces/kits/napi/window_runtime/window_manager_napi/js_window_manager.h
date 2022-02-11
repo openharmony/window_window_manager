@@ -36,6 +36,7 @@ public:
     static NativeValue* RegisterWindowManagerCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* UnregisterWindowMangerCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetTopWindow(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetWindowLayoutMode(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     bool GetNativeContext(NativeValue* nativeContext);
@@ -50,6 +51,7 @@ private:
     NativeValue* OnRegisterWindowMangerCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnUnregisterWindowManagerCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetTopWindow(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetWindowLayoutMode(NativeEngine& engine, NativeCallbackInfo& info);
     std::weak_ptr<AbilityRuntime::Context> context_;
     std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;

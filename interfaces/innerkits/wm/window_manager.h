@@ -79,6 +79,7 @@ public:
     void RegisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
     void UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
     void MinimizeAllAppWindows(DisplayId displayId);
+    void SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId);
 
 private:
     WindowManager();
