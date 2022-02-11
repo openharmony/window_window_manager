@@ -223,8 +223,13 @@ NativeValue* JsWindowManager::OnFindWindow(NativeEngine& engine, NativeCallbackI
                 task.Resolve(engine, jsWindowObj->Get());
                 WLOGFI("JsWindowManager::OnFindWindow success");
             } else {
-                task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnFindWindow failed."));
+                sptr<Window> window = Window::Find(windowName);
+                if (window == nullptr) {
+                    task.Reject(engine, CreateJsError(engine,
+                        static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnFindWindow failed."));
+                } else {
+                    task.Resolve(engine, CreateJsWindowObject(engine, window));
+                }
             }
         };
 
