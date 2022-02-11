@@ -79,7 +79,9 @@ private:
     void TraverseAndUpdateWindowState(WindowState state, int32_t topPriority);
     void UpdateWindowState(sptr<WindowNode> node, int32_t topPriority, WindowState state);
     bool IsTopAppWindow(uint32_t windowId) const;
+    sptr<WindowNode> FindDividerNode() const;
     void RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes);
+    void RaiseZOrderForSplitWindow(sptr<WindowNode>& node);
     void MinimizeWindowFromAbility(const sptr<WindowNode>& node);
     void ResetLayoutPolicy();
 
@@ -108,8 +110,8 @@ private:
     void DumpScreenWindowTree();
 
     struct WindowPairInfo {
-        sptr<WindowNode> pairNode;
-        float splitRatio;
+        sptr<WindowNode> pairNode_;
+        float splitRatio_;
     };
     std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
