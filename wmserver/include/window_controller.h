@@ -34,7 +34,7 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId);
     WMError AddWindowNode(sptr<WindowProperty>& property);
     WMError RemoveWindowNode(uint32_t windowId);
-    WMError DestroyWindow(uint32_t windowId);
+    WMError DestroyWindow(uint32_t windowId, bool onlySelf);
     WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
     WMError RequestFocus(uint32_t windowId);
     WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId);

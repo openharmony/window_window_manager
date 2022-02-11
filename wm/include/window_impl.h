@@ -159,11 +159,13 @@ private:
     void EndMoveOrDragWindow(int32_t pointId);
     bool IsPointerEventConsumed();
     void AdjustWindowAnimationFlag();
+    void MapFloatingWindowToAppIfNeeded();
 
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
         std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<Window>>> subWindowMap_;
+    static std::map<uint32_t, std::vector<sptr<Window>>> appFloatingWindowMap_;
     sptr<WindowProperty> property_;
     WindowState state_ { WindowState::STATE_INITIAL };
     sptr<IWindowLifeCycle> lifecycleListener_;

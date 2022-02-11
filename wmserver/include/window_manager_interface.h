@@ -59,7 +59,7 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId)  = 0;
     virtual WMError AddWindow(sptr<WindowProperty>& property) = 0;
     virtual WMError RemoveWindow(uint32_t windowId) = 0;
-    virtual WMError DestroyWindow(uint32_t windowId) = 0;
+    virtual WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) = 0;
     virtual WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason) = 0;
     virtual WMError RequestFocus(uint32_t windowId) = 0;
     virtual WMError SetWindowMode(uint32_t windowId, WindowMode mode) = 0;

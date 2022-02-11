@@ -36,6 +36,7 @@ namespace {
 
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
 std::map<uint32_t, std::vector<sptr<Window>>> WindowImpl::subWindowMap_;
+std::map<uint32_t, std::vector<sptr<Window>>> WindowImpl::appFloatingWindowMap_;
 
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
@@ -462,6 +463,23 @@ WMError WindowImpl::SetFullScreen(bool status)
     return ret;
 }
 
+void WindowImpl::MapFloatingWindowToAppIfNeeded()
+{
+    if (GetType() != WindowType::WINDOW_TYPE_FLOAT || context_.get() == nullptr) {
+        return;
+    }
+
+    for (auto& winPair : windowMap_) {
+        auto win = winPair.second.second;
+        if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+            context_.get() == win->GetContext().get()) {
+            appFloatingWindowMap_[win->GetWindowId()].push_back(this);
+            WLOGFI("Map FloatingWindow %{public}d to AppMainWindow %{public}d", GetWindowId(), win->GetWindowId());
+            return;
+        }
+    }
+}
+
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGFI("[Client] Window Create");
@@ -506,6 +524,9 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     if (parentName != "") { // add to subWindowMap_
         subWindowMap_[property_->GetParentId()].push_back(this);
     }
+
+    MapFloatingWindowToAppIfNeeded();
+
     state_ = WindowState::STATE_CREATED;
     InputTransferStation::GetInstance().AddInputWindow(this);
     return ret;
@@ -513,12 +534,13 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
 
 WMError WindowImpl::Destroy()
 {
-    NotifyBeforeDestroy();
-    WLOGFI("[Client] Window %{public}d Destroy", property_->GetWindowId());
     if (!IsWindowValid()) {
         return WMError::WM_OK;
     }
-    WLOGFI("destroy window id: %{public}d", property_->GetWindowId());
+
+    WLOGFI("[Client] Window %{public}d Destroy", property_->GetWindowId());
+
+    // FixMe: Remove "NotifyBeforeDestroy()" because of ACE bug, add when fixed
     WMError ret = SingletonContainer::Get<WindowAdapter>().DestroyWindow(property_->GetWindowId());
     windowMap_.erase(GetWindowName());
     if (subWindowMap_.count(property_->GetParentId()) > 0) { // remove from subWindowMap_
@@ -531,6 +553,20 @@ WMError WindowImpl::Destroy()
         }
     }
     subWindowMap_.erase(GetWindowId());
+
+    // Destroy app floating window if exist
+    if (appFloatingWindowMap_.count(GetWindowId()) > 0) {
+        for (auto& floatingWindow : appFloatingWindowMap_.at(GetWindowId())) {
+            WMError fltRet = SingletonContainer::Get<WindowAdapter>().DestroyWindow(floatingWindow->GetWindowId());
+            if (fltRet == WMError::WM_OK) {
+                WLOGFI("Destroy App %{public}d FltWindow %{public}d", GetWindowId(), floatingWindow->GetWindowId());
+            } else {
+                WLOGFE("Floating Window %{public}d Destroy Failed", floatingWindow->GetWindowId());
+            }
+        }
+        appFloatingWindowMap_.erase(GetWindowId());
+    }
+
     state_ = WindowState::STATE_DESTROYED;
     InputTransferStation::GetInstance().RemoveInputWindow(this);
     return ret;
@@ -656,7 +692,7 @@ WMError WindowImpl::Minimize()
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         if (abilityContext_ != nullptr) {
-            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(abilityContext_->GetToken());
+            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(abilityContext_->GetToken(), true);
         } else {
             Hide();
         }
