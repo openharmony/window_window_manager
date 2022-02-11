@@ -50,6 +50,11 @@ public:
     static NativeValue* GetAvoidArea(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* IsShowing(NativeEngine* engine, NativeCallbackInfo* info);
 
+    // colorspace, gamut
+    static NativeValue* IsSupportWideGamut(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetColorSpace(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* GetColorSpace(NativeEngine* engine, NativeCallbackInfo* info);
+
 private:
     bool IfCallbackRegistered(std::string type, NativeValue* jsListenerObject);
     void RegisterWindowListenerWithType(NativeEngine& engine, std::string type, NativeValue* value);
@@ -73,6 +78,12 @@ private:
     NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnIsShowing(NativeEngine& engine, NativeCallbackInfo& info);
+
+    // colorspace, gamut
+    NativeValue* OnIsSupportWideGamut(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetColorSpace(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnGetColorSpace(NativeEngine& engine, NativeCallbackInfo& info);
+
     sptr<Window> windowToken_ = nullptr;
     std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallbackMap_;
     std::map<std::string, sptr<JsWindowListener>> jsListenerMap_;
