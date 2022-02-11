@@ -21,7 +21,6 @@
 #include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
 #include "window_manager_hilog.h"
-#include "window_manager_service.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -80,14 +79,30 @@ RSScreenModeInfo AbstractDisplayController::GetScreenActiveMode(ScreenId id)
     return rsInterface_->GetScreenActiveMode(id);
 }
 
+sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplay(DisplayId displayId) const
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = abstractDisplayMap_.find(displayId);
+    if (iter == abstractDisplayMap_.end()) {
+        WLOGFE("Failed to get AbstractDisplay, return nullptr!");
+        return nullptr;
+    }
+    return iter->second;
+}
+
 std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(DisplayId displayId)
 {
     if (rsInterface_ == nullptr) {
         return nullptr;
     }
 
-    std::shared_ptr<RSDisplayNode> displayNode =
-        SingletonContainer::Get<WindowManagerService>().GetDisplayNode(displayId);
+    sptr<AbstractDisplay> abstractDisplay = GetAbstractDisplay(displayId);
+    if (abstractDisplay == nullptr) {
+        WLOGFE("DisplayManagerService::GetScreenSnapshot: GetAbstarctDisplay failed");
+        return nullptr;
+    }
+    ScreenId dmsScreenId = abstractDisplay->GetAbstractScreenId();
+    std::shared_ptr<RSDisplayNode> displayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(dmsScreenId);
 
     std::shared_ptr<ScreenshotCallback> callback = std::make_shared<ScreenshotCallback>();
     rsInterface_->TakeSurfaceCapture(displayNode, callback);
@@ -168,7 +183,11 @@ void AbstractDisplayController::OnAbstractScreenChanged(sptr<AbstractScreen> abs
 void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realAbsScreen)
 {
     ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
-    if (defaultScreenId == SCREEN_ID_INVALID) {
+    if (defaultScreenId != SCREEN_ID_INVALID) {
+        if (defaultScreenId != realAbsScreen->dmsId_) {
+            WLOGE("The first real screen should be default for Phone. %{public}" PRIu64"", realAbsScreen->dmsId_);
+            return;
+        }
         if (dummyDisplay_ == nullptr) {
             sptr<SupportedScreenModes> info = realAbsScreen->GetActiveScreenMode();
             if (info == nullptr) {

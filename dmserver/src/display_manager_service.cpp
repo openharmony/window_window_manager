@@ -14,7 +14,6 @@
  */
 
 #include "display_manager_service.h"
-#include "window_manager_service.h"
 
 #include <cinttypes>
 #include <iservice_registry.h>
@@ -144,6 +143,11 @@ std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(Displ
     return screenSnapshot;
 }
 
+ScreenId DisplayManagerService::GetRSScreenId(DisplayId displayId) const
+{
+    ScreenId dmsScreenId = GetScreenIdByDisplayId(displayId);
+    return abstractScreenController_->ConvertToRsScreenId(dmsScreenId);
+}
 
 DMError DisplayManagerService::GetScreenSupportedColorGamuts(ScreenId screenId,
     std::vector<ScreenColorGamut>& colorGamuts)
@@ -288,6 +292,28 @@ bool DisplayManagerService::SetDisplayState(DisplayState state)
     return displayPowerController_.SetDisplayState(state);
 }
 
+ScreenId DisplayManagerService::GetScreenIdByDisplayId(DisplayId displayId) const
+{
+    sptr<AbstractDisplay> abstractDisplay = abstractDisplayController_->GetAbstractDisplay(displayId);
+    if (abstractDisplay == nullptr) {
+        WLOGFE("DisplayManagerService::GetScreenIdByDisplayId: GetAbstarctDisplay failed");
+        return SCREEN_ID_INVALID;
+    }
+    ScreenId dmsScreenId = abstractDisplay->GetAbstractScreenId();
+    return dmsScreenId;
+}
+
+sptr<AbstractDisplay> DisplayManagerService::GetDisplayByDisplayId(DisplayId displayId) const
+{
+    sptr<AbstractDisplay> abstractDisplay = abstractDisplayController_->GetAbstractDisplay(displayId);
+    return abstractDisplay;
+}
+
+sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenController()
+{
+    return abstractScreenController_;
+}
+
 DisplayState DisplayManagerService::GetDisplayState(DisplayId displayId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -300,9 +326,15 @@ void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
     displayPowerController_.NotifyDisplayEvent(event);
 }
 
-sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenController()
+
+std::shared_ptr<RSDisplayNode> DisplayManagerService::GetRSDisplayNodeByDisplayId(DisplayId displayId) const
 {
-    return abstractScreenController_;
+    ScreenId dmsScreenId = GetScreenIdByDisplayId(displayId);
+    if (dmsScreenId == SCREEN_ID_INVALID) {
+        WLOGFE("DisplayManagerService::GetRSDisplayNodeByDisplayId: ScreenId invalid");
+        return nullptr;
+    }
+    return abstractScreenController_->GetRSDisplayNodeByScreenId(dmsScreenId);
 }
 
 DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds)
@@ -313,8 +345,7 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
     }
     WM_SCOPED_TRACE("dms:MakeMirror");
     WLOGFI("create mirror. Screen: %{public}" PRIu64"", mainScreenId);
-    std::shared_ptr<RSDisplayNode> displayNode =
-        SingletonContainer::Get<WindowManagerService>().GetDisplayNode(mainScreenId);
+    std::shared_ptr<RSDisplayNode> displayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(mainScreenId);
     if (displayNode == nullptr) {
         WLOGFE("create mirror fail, cannot get DisplayNode");
         return DMError::DM_ERROR_NULLPTR;
@@ -328,6 +359,17 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
     transactionProxy->FlushImplicitTransaction();
     WLOGFI("create mirror. NodeId: %{public}" PRIu64"", nodeId);
     return DMError::DM_OK;
+}
+
+void DisplayManagerService::UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
+    bool isAdd)
+{
+    WLOGI("DisplayManagerService::UpdateRSTree");
+    ScreenId dmsScreenId = GetScreenIdByDisplayId(displayId);
+    if (dmsScreenId == SCREEN_ID_INVALID) {
+        return;
+    }
+    abstractScreenController_->UpdateRSTree(dmsScreenId, surfaceNode, isAdd);
 }
 
 sptr<ScreenInfo> DisplayManagerService::GetScreenInfoById(ScreenId screenId)
