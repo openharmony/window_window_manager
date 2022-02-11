@@ -39,11 +39,11 @@ DisplayId DisplayManagerServiceInner::GetDefaultDisplayId()
 
 const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDisplayById(DisplayId displayId)
 {
-    DisplayInfo displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
-    sptr<AbstractDisplay> display = new AbstractDisplay(displayInfo);
+    sptr<AbstractDisplay> display = DisplayManagerService::GetInstance().GetDisplayByDisplayId(displayId);
     if (display == nullptr) {
-        WLOGFE("GetDisplayById failed!\n");
-        return nullptr;
+        DisplayInfo displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
+        display = new AbstractDisplay(displayInfo);
+        WLOGFE("GetDisplayById create new!\n");
     }
     return display;
 }
@@ -73,6 +73,17 @@ std::vector<const sptr<AbstractDisplay>> DisplayManagerServiceInner::GetAllDispl
         }
     }
     return res;
+}
+
+void DisplayManagerServiceInner::UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
+    bool isAdd)
+{
+    DisplayManagerService::GetInstance().UpdateRSTree(displayId, surfaceNode, isAdd);
+}
+
+ScreenId DisplayManagerServiceInner::GetRSScreenId(DisplayId displayId) const
+{
+    return DisplayManagerService::GetInstance().GetRSScreenId(displayId);
 }
 
 void DisplayManagerServiceInner::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
