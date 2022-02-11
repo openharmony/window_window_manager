@@ -60,13 +60,33 @@ std::vector<ScreenId> AbstractScreenController::GetAllScreenIds()
     return res;
 }
 
-sptr<AbstractScreen> AbstractScreenController::GetAbstractScreen(ScreenId dmsScreenId)
+std::shared_ptr<RSDisplayNode> AbstractScreenController::GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const
+{
+    sptr<AbstractScreen> screen = GetAbstractScreen(dmsScreenId);
+    if (screen == nullptr) {
+        return nullptr;
+    }
+    return screen->rsDisplayNode_;
+}
+
+void AbstractScreenController::UpdateRSTree(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
+    bool isAdd)
+{
+    sptr<AbstractScreen> abstractScreen = GetAbstractScreen(dmsScreenId);
+    if (abstractScreen == nullptr) {
+        WLOGE("AbstractScreenController::UpdateRSTree can not find abstractScreen");
+        return;
+    }
+    abstractScreen->UpdateRSTree(surfaceNode, isAdd);
+}
+
+sptr<AbstractScreen> AbstractScreenController::GetAbstractScreen(ScreenId dmsScreenId) const
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WLOGI("GetAbstractScreen: screenId: %{public}" PRIu64"", dmsScreenId);
     auto iter = dmsScreenMap_.find(dmsScreenId);
     if (iter == dmsScreenMap_.end()) {
-        WLOGI("didnot find screen:%{public}" PRIu64"", dmsScreenId);
+        WLOGE("did not find screen:%{public}" PRIu64"", dmsScreenId);
         return nullptr;
     }
     sptr<AbstractScreen> screen = iter->second;

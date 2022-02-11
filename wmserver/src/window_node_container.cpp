@@ -19,6 +19,7 @@
 #include <ability_manager_client.h>
 #include <cinttypes>
 
+#include "display_manager_service_inner.h"
 #include "window_helper.h"
 #include "window_layout_policy_cascade.h"
 #include "window_layout_policy_tile.h"
@@ -36,10 +37,8 @@ namespace {
     constexpr int WINDOW_NAME_MAX_LENGTH = 10;
 }
 
-WindowNodeContainer::WindowNodeContainer(uint64_t screenId, uint32_t width, uint32_t height) : screenId_(screenId)
+WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height) : displayId_(displayId)
 {
-    struct RSDisplayNodeConfig config = {screenId};
-    displayNode_ = RSDisplayNode::Create(config);
     displayRect_ = {
         .posX_ = 0,
         .posY_ = 0,
@@ -47,10 +46,10 @@ WindowNodeContainer::WindowNodeContainer(uint64_t screenId, uint32_t width, uint
         .height_ = height
     };
     layoutPolicys_[WindowLayoutMode::CASCADE] =
-        new WindowLayoutPolicyCascade(displayRect_, screenId_,
+        new WindowLayoutPolicyCascade(displayRect_, displayId_,
             belowAppWindowNode_, appWindowNode_, aboveAppWindowNode_);
     layoutPolicys_[WindowLayoutMode::TILE] =
-        new WindowLayoutPolicyTile(displayRect_, screenId_,
+        new WindowLayoutPolicyTile(displayRect_, displayId_,
             belowAppWindowNode_, appWindowNode_, aboveAppWindowNode_);
     layoutPolicy_ = layoutPolicys_[WindowLayoutMode::CASCADE];
     layoutPolicy_->Launch();
@@ -72,8 +71,8 @@ WMError WindowNodeContainer::MinimizeStructuredAppWindowsExceptSelf(const sptr<W
 
 WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
 {
-    if (!node->surfaceNode_ || !displayNode_) {
-        WLOGFE("surface node or display node is nullptr!");
+    if (!node->surfaceNode_) {
+        WLOGFE("surface node is nullptr!");
         return WMError::WM_ERROR_NULLPTR;
     }
     sptr<WindowNode> root = FindRoot(node->GetWindowType());
@@ -109,6 +108,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
         }
     }
     UpdateWindowTree(node);
+
     UpdateRSTree(node, true);
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
@@ -125,8 +125,8 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
 
 WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node)
 {
-    if (!node->surfaceNode_ || !displayNode_) {
-        WLOGFE("surface node or display node is nullptr!");
+    if (!node->surfaceNode_) {
+        WLOGFE("surface node is nullptr!");
         return WMError::WM_ERROR_NULLPTR;
     }
     layoutPolicy_->UpdateWindowNode(node);
@@ -159,21 +159,17 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
 bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, bool isAdd)
 {
     WM_FUNCTION_TRACE();
-    if (displayNode_ == nullptr) {
-        WLOGFE("displayNode_ is nullptr");
-        return false;
-    }
     if (isAdd) {
-        displayNode_->AddChild(node->surfaceNode_, -1);
+        DisplayManagerServiceInner::GetInstance().UpdateRSTree(displayId_, node->surfaceNode_, true);
         for (auto& child : node->children_) {
             if (child->currentVisibility_) {
-                displayNode_->AddChild(child->surfaceNode_, -1);
+                DisplayManagerServiceInner::GetInstance().UpdateRSTree(displayId_, child->surfaceNode_, true);
             }
         }
     } else {
-        displayNode_->RemoveChild(node->surfaceNode_);
+        DisplayManagerServiceInner::GetInstance().UpdateRSTree(displayId_, node->surfaceNode_, false);
         for (auto& child : node->children_) {
-            displayNode_->RemoveChild(child->surfaceNode_);
+            DisplayManagerServiceInner::GetInstance().UpdateRSTree(displayId_, child->surfaceNode_, false);
         }
     }
     return true;
@@ -192,8 +188,8 @@ WMError WindowNodeContainer::DestroyWindowNode(sptr<WindowNode>& node, std::vect
     for (auto& child : node->children_) { // destroy sub window if exists
         windowIds.push_back(child->GetWindowId());
         child->parent_ = nullptr;
-        if (child->surfaceNode_ != nullptr && displayNode_ != nullptr) {
-            displayNode_->RemoveChild(child->surfaceNode_);
+        if (child->surfaceNode_ != nullptr) {
+            WLOGFI("child surfaceNode set nullptr");
             child->surfaceNode_ = nullptr;
         }
     }
@@ -234,6 +230,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
             return ret;
         }
     }
+
     UpdateRSTree(node, false);
     layoutPolicy_->RemoveWindowNode(node);
     if (avoidController_->IsAvoidAreaNode(node)) {
@@ -259,7 +256,6 @@ const std::vector<uint32_t>& WindowNodeContainer::Destroy()
     for (auto& node : aboveAppWindowNode_->children_) {
         DestroyWindowNode(node, removedIds_);
     }
-    displayNode_ = nullptr;
     return removedIds_;
 }
 
@@ -424,7 +420,7 @@ void WindowNodeContainer::NotifyIfSystemBarTintChanged()
             tints.emplace_back(sysBarTintMap_[it.first]);
         }
     }
-    WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(screenId_, tints);
+    WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId_, tints);
 }
 
 void WindowNodeContainer::NotifyIfSystemBarRegionChanged()
@@ -444,7 +440,7 @@ void WindowNodeContainer::NotifyIfSystemBarRegionChanged()
             "region: [%{public}d, %{public}d, %{public}d, %{public}d]",
             static_cast<int32_t>(it.first), newRegion.posX_, newRegion.posY_, newRegion.width_, newRegion.height_);
     }
-    WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(screenId_, tints);
+    WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId_, tints);
 }
 
 bool WindowNodeContainer::IsTopAppWindow(uint32_t windowId) const
@@ -568,7 +564,7 @@ void WindowNodeContainer::OnAvoidAreaChange(const std::vector<Rect>& avoidArea)
 
 void WindowNodeContainer::DumpScreenWindowTree()
 {
-    WLOGFI("-------- Screen %{public}" PRIu64" dump window info begin---------", screenId_);
+    WLOGFI("-------- Screen %{public}" PRIu64" dump window info begin---------", displayId_);
     WLOGFI("WindowName WinId Type Mode Flag ZOrd [   x    y    w    h]");
     std::vector<sptr<WindowNode>> windowNodes;
     TraverseContainer(windowNodes);
@@ -582,22 +578,22 @@ void WindowNodeContainer::DumpScreenWindowTree()
             node->GetWindowMode(), node->GetWindowFlags(),
             --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
-    WLOGFI("-------- Screen %{public}" PRIu64" dump window info end  ---------", screenId_);
+    WLOGFI("-------- Screen %{public}" PRIu64" dump window info end  ---------", displayId_);
 }
 
 uint64_t WindowNodeContainer::GetScreenId() const
 {
-    return screenId_;
+    return DisplayManagerServiceInner::GetInstance().GetRSScreenId(displayId_);
+}
+
+DisplayId WindowNodeContainer::GetDisplayId() const
+{
+    return displayId_;
 }
 
 Rect WindowNodeContainer::GetDisplayRect() const
 {
     return displayRect_;
-}
-
-std::shared_ptr<RSDisplayNode> WindowNodeContainer::GetDisplayNode() const
-{
-    return displayNode_;
 }
 
 bool WindowNodeContainer::isVerticalDisplay() const
@@ -775,7 +771,7 @@ WMError WindowNodeContainer::EnterSplitWindowMode(sptr<WindowNode>& node)
         if (ret != WMError::WM_OK) {
             return ret;
         }
-        SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_CREATE_DIVIDER, screenId_);
+        SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_CREATE_DIVIDER, displayId_);
         std::vector<uint32_t> exceptionalIds;
         for (auto iter = pairedWindowMap_.begin(); iter != pairedWindowMap_.end(); iter++) {
             exceptionalIds.emplace_back(iter->first);
@@ -817,7 +813,7 @@ WMError WindowNodeContainer::ExitSplitWindowMode(sptr<WindowNode>& node)
         return WMError::WM_OK;
     }
     if (pairedWindowMap_.empty()) {
-        SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, screenId_);
+        SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, displayId_);
     }
     ResetLayoutPolicy();
     return WMError::WM_OK;

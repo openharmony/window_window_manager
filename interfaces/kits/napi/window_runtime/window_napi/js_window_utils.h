@@ -25,12 +25,17 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr size_t ARGC_ONE = 1;
-    constexpr size_t ARGC_TWO = 2;
-    constexpr size_t ARGC_THREE = 3;
-    constexpr int32_t INDEX_ONE = 1;
-    constexpr int32_t INDEX_TWO = 2;
-    constexpr int32_t INDEX_THREE = 3;
+    enum class ArgcNum : uint32_t {
+        ARGC_ONE = 1;
+        ARGC_TWO,
+        ARGC_THREE
+    }
+
+    enum class ArgvIndex : uint32_t {
+        INDEX_ONE = 1;
+        INDEX_TWO,
+        INDEX_THREE
+    }
     constexpr int32_t RGB_LENGTH = 6;
     constexpr int32_t RGBA_LENGTH = 8;
     enum class ApiWindowType : uint32_t {
