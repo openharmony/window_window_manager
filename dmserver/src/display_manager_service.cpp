@@ -255,6 +255,7 @@ bool DisplayManagerService::UnregisterDisplayManagerAgent(const sptr<IDisplayMan
 
 bool DisplayManagerService::WakeUpBegin(PowerStateChangeReason reason)
 {
+    WM_SCOPED_TRACE("dms:WakeUpBegin(%u)", reason);
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP,
         EventStatus::BEGIN);
 }
@@ -267,6 +268,7 @@ bool DisplayManagerService::WakeUpEnd()
 
 bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 {
+    WM_SCOPED_TRACE("dms:SuspendBegin(%u)", reason);
     displayPowerController_.SuspendBegin(reason);
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP,
         EventStatus::BEGIN);
