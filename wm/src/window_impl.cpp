@@ -52,6 +52,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetDisplayId(option->GetDisplayId());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetHitOffset(option->GetHitOffset());
+    AdjustWindowAnimationFlag();
     auto& sysBarPropMap = option->GetSystemBarProperty();
     for (auto it : sysBarPropMap) {
         property_->SetSystemBarProperty(it.first, it.second);
@@ -243,6 +244,7 @@ WMError WindowImpl::SetWindowType(WindowType type)
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         property_->SetWindowType(type);
+        AdjustWindowAnimationFlag();
         return WMError::WM_OK;
     }
     if (property_->GetWindowType() != type) {
@@ -923,6 +925,15 @@ void WindowImpl::ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& poin
 bool WindowImpl::IsPointerEventConsumed()
 {
     return startDragFlag_ || startMoveFlag_;
+}
+
+void WindowImpl::AdjustWindowAnimationFlag()
+{
+    WindowType winType = property_->GetWindowType();
+    if (winType == WindowType::WINDOW_TYPE_WALLPAPER || winType == WindowType::WINDOW_TYPE_DESKTOP ||
+        winType == WindowType::WINDOW_TYPE_STATUS_BAR || winType == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+        property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
+    }
 }
 
 void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)

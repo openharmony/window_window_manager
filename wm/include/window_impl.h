@@ -158,6 +158,7 @@ private:
     void ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId);
     void EndMoveOrDragWindow(int32_t pointId);
     bool IsPointerEventConsumed();
+    void AdjustWindowAnimationFlag();
 
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
         std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
