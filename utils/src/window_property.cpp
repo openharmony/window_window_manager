@@ -110,6 +110,11 @@ void WindowProperty::SetHitOffset(const PointInfo& offset)
     hitOffset_ = offset;
 }
 
+void WindowProperty::SetAnimationFlag(uint32_t animationFlag)
+{
+    animationFlag_ = animationFlag;
+}
+
 void WindowProperty::ResumeLastWindowMode()
 {
     mode_ = lastMode_;
@@ -211,6 +216,11 @@ uint32_t WindowProperty::GetParentId() const
 const PointInfo& WindowProperty::GetHitOffset() const
 {
     return hitOffset_;
+}
+
+uint32_t WindowProperty::GetAnimationFlag() const
+{
+    return animationFlag_;
 }
 
 bool WindowProperty::MapMarshalling(Parcel& parcel) const
@@ -337,6 +347,10 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         return false;
     }
 
+    // write parentId_
+    if (!parcel.WriteUint32(animationFlag_)) {
+        return false;
+    }
     return true;
 }
 
@@ -363,6 +377,7 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetDecorEnable(parcel.ReadBool());
     PointInfo offset = {parcel.ReadInt32(), parcel.ReadInt32()};
     property->SetHitOffset(offset);
+    property->SetAnimationFlag(parcel.ReadUint32());
     return property;
 }
 }
