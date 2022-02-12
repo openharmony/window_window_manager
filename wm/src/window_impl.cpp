@@ -615,7 +615,7 @@ WMError WindowImpl::Show()
 
 WMError WindowImpl::Hide()
 {
-    WLOGFI("[Client] Window %{public}d Hide", property_->GetWindowId());
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}d] Hide", name_.c_str(), property_->GetWindowId());
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
