@@ -986,7 +986,7 @@ NativeValue* JsWindow::OnSetColorSpace(NativeEngine& engine, NativeCallbackInfo&
                 return;
             }
             windowToken_->SetColorSpace(colorSpace);
-            task.Resolve(engine, CreateJsValue(engine, engine.CreateUndefined()));
+            task.Resolve(engine, engine.CreateUndefined());
         };
 
     NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
