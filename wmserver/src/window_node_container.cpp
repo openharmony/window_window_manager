@@ -204,7 +204,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
         WLOGFE("window node or surface node is nullptr, invalid");
         return WMError::WM_ERROR_DESTROYED_OBJECT;
     }
-    SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
     if (node->parent_ == nullptr) {
         WLOGFW("can't find parent of this node");
     } else {
@@ -219,7 +218,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     }
     node->requestedVisibility_ = false;
     node->currentVisibility_ = false;
-    node->hasDecorated = false;
+    node->hasDecorated_ = false;
     for (auto& child : node->children_) {
         child->currentVisibility_ = false;
     }
@@ -650,6 +649,7 @@ sptr<WindowNode> WindowNodeContainer::FindDividerNode() const
 void WindowNodeContainer::RaiseZOrderForSplitWindow(sptr<WindowNode>& node)
 {
     auto divider = FindDividerNode();
+    WLOGFI("start raise split window zorder id: %{public}d", node->GetWindowId());
     if (pairedWindowMap_.count(node->GetWindowId()) != 0 && (divider != nullptr)) {
         auto pairNode = pairedWindowMap_.at(node->GetWindowId()).pairNode_;
         // remove split related node from tree
@@ -693,7 +693,7 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
             RaiseWindowToTop(node->GetParentId(), appWindowNode_->children_); // raise parent window
         }
     } else if (WindowHelper::IsMainWindow(node->GetWindowType())) {
-        if (parentNode->IsSplitMode()) {
+        if (node->IsSplitMode()) {
             RaiseZOrderForSplitWindow(node);
         } else {
             RaiseWindowToTop(node->GetWindowId(), appWindowNode_->children_);
@@ -730,6 +730,7 @@ sptr<WindowNode> WindowNodeContainer::GetNextFocusableWindow(uint32_t windowId) 
 void WindowNodeContainer::MinimizeAllAppWindows()
 {
     WMError ret =  MinimizeAppNodeExceptOptions();
+    SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
     if (ret != WMError::WM_OK) {
         WLOGFE("Minimize all app window failed");
     }
@@ -916,11 +917,13 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode mode, bool reor
         layoutPolicy_->Clean();
         layoutPolicy_ = layoutPolicys_[mode];
         layoutPolicy_->Launch();
+        DumpScreenWindowTree();
     } else {
-        WLOGFI("curret layout mode is allready: %{public}d", static_cast<uint32_t>(mode));
+        WLOGFI("Curret layout mode is allready: %{public}d", static_cast<uint32_t>(mode));
     }
     if (reorder) {
         layoutPolicy_->Reorder();
+        DumpScreenWindowTree();
     }
     return WMError::WM_OK;
 }
