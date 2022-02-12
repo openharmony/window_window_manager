@@ -291,6 +291,7 @@ void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)
 
 void WindowManagerService::NotifyDisplayStateChange(DisplayStateChangeType type)
 {
+    WM_SCOPED_TRACE("wms:NotifyDisplayStateChange(%u)", type);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->NotifyDisplayStateChange(type);
 }
