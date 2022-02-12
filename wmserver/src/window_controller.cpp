@@ -40,6 +40,12 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     windowId = GenWindowId();
     property->SetWindowId(windowId);
 
+    // set default transition effect for window
+    static auto effect = RSTransitionEffect::Create()->Scale({ 0.0f, 0.0f, 0.0f })->Opacity(0.0f);
+    if (surfaceNode != nullptr) {
+        surfaceNode->SetTransitionEffect(effect);
+    }
+
     sptr<WindowNode> node = new WindowNode(property, window, surfaceNode);
     return windowRoot_->SaveWindow(node);
 }
