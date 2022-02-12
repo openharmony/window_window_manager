@@ -770,7 +770,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reas
         Ace::ViewportConfig config;
         config.SetSize(rect.width_, rect.height_);
         config.SetDensity(virtualPixelRatio);
-        uiContent_->UpdateViewportConfig(config);
+        uiContent_->UpdateViewportConfig(config, reason);
         WLOGFI("notify uiContent window size change end");
     }
 }
