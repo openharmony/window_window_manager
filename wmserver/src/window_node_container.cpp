@@ -474,7 +474,6 @@ void WindowNodeContainer::RaiseWindowToTop(uint32_t windowId, std::vector<sptr<W
         sptr<WindowNode> node = *iter;
         windowNodes.erase(iter);
         UpdateWindowTree(node);
-        AssignZOrder();
         WLOGFI("raise window to top %{public}d", node->GetWindowId());
     }
 }
@@ -638,6 +637,41 @@ void WindowNodeContainer::UpdateWindowState(sptr<WindowNode> node, int32_t topPr
     }
 }
 
+sptr<WindowNode> WindowNodeContainer::FindDividerNode() const
+{
+    for (auto iter = appWindowNode_->children_.begin(); iter != appWindowNode_->children_.end(); iter++) {
+        if ((*iter)->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+            return *iter;
+        }
+    }
+    return nullptr;
+}
+
+void WindowNodeContainer::RaiseZOrderForSplitWindow(sptr<WindowNode>& node)
+{
+    auto divider = FindDividerNode();
+    if (pairedWindowMap_.count(node->GetWindowId()) != 0 && (divider != nullptr)) {
+        auto pairNode = pairedWindowMap_.at(node->GetWindowId()).pairNode_;
+        // remove split related node from tree
+        for (auto iter = appWindowNode_->children_.begin(); iter != appWindowNode_->children_.end();) {
+            uint32_t wid = (*iter)->GetWindowId();
+            if (wid == node->GetWindowId() ||
+                wid == pairNode->GetWindowId() ||
+                wid == divider->GetWindowId()) {
+                iter = appWindowNode_->children_.erase(iter);
+            } else {
+                iter++;
+            }
+        }
+        UpdateWindowTree(pairNode); // raise pair node
+        UpdateWindowTree(node); // raise self
+        UpdateWindowTree(divider); // devider
+    } else {
+        // raise self if not paired
+        RaiseWindowToTop(node->GetWindowId(), appWindowNode_->children_);
+    }
+}
+
 WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
 {
     if (node == nullptr) {
@@ -653,12 +687,21 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
             return WMError::WM_ERROR_NULLPTR;
         }
         RaiseWindowToTop(node->GetWindowId(), parentNode->children_); // raise itself
-        RaiseWindowToTop(node->GetParentId(), appWindowNode_->children_); // raise parent window
+        if (parentNode->IsSplitMode()) {
+            RaiseZOrderForSplitWindow(parentNode);
+        } else {
+            RaiseWindowToTop(node->GetParentId(), appWindowNode_->children_); // raise parent window
+        }
     } else if (WindowHelper::IsMainWindow(node->GetWindowType())) {
-        RaiseWindowToTop(node->GetWindowId(), appWindowNode_->children_);
+        if (parentNode->IsSplitMode()) {
+            RaiseZOrderForSplitWindow(node);
+        } else {
+            RaiseWindowToTop(node->GetWindowId(), appWindowNode_->children_);
+        }
     } else {
         // do nothing
     }
+    AssignZOrder();
     WLOGFI("RaiseZOrderForAppWindow finished");
     DumpScreenWindowTree();
     return WMError::WM_OK;
@@ -800,7 +843,7 @@ WMError WindowNodeContainer::ExitSplitWindowMode(sptr<WindowNode>& node)
     WLOGFI("exit split window mode %{public}d", node->GetWindowId());
     if (pairedWindowMap_.find(node->GetWindowId()) != pairedWindowMap_.end()) {
         WindowPairInfo info = pairedWindowMap_.at(node->GetWindowId());
-        auto pairNode = info.pairNode;
+        auto pairNode = info.pairNode_;
         pairNode->GetWindowProperty()->ResumeLastWindowMode();
         pairNode->GetWindowToken()->UpdateWindowMode(pairNode->GetWindowMode());
         node->GetWindowProperty()->ResumeLastWindowMode();
@@ -841,7 +884,7 @@ WMError WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode,
     } else {
         if (pairedWindowMap_.count(pairNode->GetWindowId()) != 0) {
             WindowPairInfo info = pairedWindowMap_.at(pairNode->GetWindowId());
-            auto prevPairNode = info.pairNode;
+            auto prevPairNode = info.pairNode_;
             WLOGFI("%{public}d node is paird , pre paired id is %{public}d,",
                 pairNode->GetWindowId(), prevPairNode->GetWindowId());
             prevPairNode->GetWindowProperty()->ResumeLastWindowMode();
@@ -850,14 +893,13 @@ WMError WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode,
             pairedWindowMap_.erase(prevPairNode->GetWindowId());
             pairedWindowMap_.erase(pairNode->GetWindowId());
 
-            splitRatio = info.splitRatio;
+            splitRatio = info.splitRatio_;
             WLOGFI("Pair Split [%{public}d, %{public}d], Mode[%{public}d, %{public}d], splitRatio = %{public}f",
                 triggerNode->GetWindowId(), pairNode->GetWindowId(), triggerMode, pairSrcMode, splitRatio);
         } else {
             WLOGFI("%{public}d node is not paird", pairNode->GetWindowId());
         }
     }
-    WLOGFI("layout get splitRatio = %{public}f", splitRatio);
     pairedWindowMap_.insert(std::pair<uint32_t, WindowPairInfo>(triggerNode->GetWindowId(),
         {pairNode, splitRatio}));
     pairedWindowMap_.insert(std::pair<uint32_t, WindowPairInfo>(pairNode->GetWindowId(),
