@@ -338,5 +338,12 @@ WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWi
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->GetTopWindowId(mainWinId, topWinId);
 }
+
+WMError WindowManagerService::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode)
+{
+    WM_SCOPED_TRACE("wms:SetWindowLayoutMode");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->SetWindowLayoutMode(displayId, mode);
+}
 }
 }

@@ -384,5 +384,19 @@ WMError WindowRoot::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
     topWinId = mainWinId;
     return WMError::WM_OK;
 }
+
+WMError WindowRoot::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode)
+{
+    auto container = GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("window container could not be found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WMError ret = container->SwitchLayoutPolicy(mode, true);
+    if (ret != WMError::WM_OK) {
+        WLOGFW("set windoe layout mode failed displayId: %{public}" PRId64 ", ret: %{public}d", displayId, ret);
+    }
+    return ret;
+}
 }
 }

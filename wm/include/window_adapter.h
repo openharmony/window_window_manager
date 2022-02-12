@@ -54,6 +54,7 @@ public:
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     virtual void ProcessWindowTouchedEvent(uint32_t windowId);
     virtual void MinimizeAllAppWindows(DisplayId displayId);
+    virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
     // colorspace, gamut
     virtual bool IsSupportWideGamut(uint32_t windowId);
