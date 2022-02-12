@@ -51,6 +51,7 @@ public:
     void NotifyDisplayStateChange(DisplayStateChangeType type);
     WMError ProcessWindowTouchedEvent(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
+    WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
 private:
     uint32_t GenWindowId();

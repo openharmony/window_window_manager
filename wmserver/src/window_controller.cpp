@@ -398,5 +398,15 @@ void WindowController::FlushWindowInfoWithDisplayId(DisplayId displayId)
     RSTransaction::FlushImplicitTransaction();
     inputWindowMonitor_->UpdateInputWindowByDisplayId(displayId);
 }
+
+WMError WindowController::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode)
+{
+    WMError res = windowRoot_->SetWindowLayoutMode(displayId, mode);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
+    FlushWindowInfoWithDisplayId(displayId);
+    return res;
+}
 }
 }
