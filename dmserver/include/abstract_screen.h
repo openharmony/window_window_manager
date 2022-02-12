@@ -53,6 +53,14 @@ public:
     void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     void InitRSDisplayNode(RSDisplayNodeConfig& config);
 
+    // colorspace, gamut
+    DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);
+    DMError GetScreenColorGamut(ScreenColorGamut& colorGamut);
+    DMError SetScreenColorGamut(int32_t colorGamutIdx);
+    DMError GetScreenGamutMap(ScreenGamutMap& gamutMap);
+    DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
+    DMError SetScreenColorTransform();
+
     ScreenId dmsId_;
     ScreenId rsId_;
     bool canHasChild_ { false };

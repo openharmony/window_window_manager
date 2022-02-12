@@ -133,14 +133,14 @@ DMError Screen::SetScreenColorGamut(int32_t colorGamutIdx)
     return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenColorGamut(pImpl_->id_, colorGamutIdx);
 }
 
-DMError Screen::GetScreenGamutsMap(ScreenGamutMap& gamutMap) const
+DMError Screen::GetScreenGamutMap(ScreenGamutMap& gamutMap) const
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenGamutsMap(pImpl_->id_, gamutMap);
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenGamutMap(pImpl_->id_, gamutMap);
 }
 
-DMError Screen::SetScreenGamutsMap(ScreenGamutMap gamutMap)
+DMError Screen::SetScreenGamutMap(ScreenGamutMap gamutMap)
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenGamutsMap(pImpl_->id_, gamutMap);
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenGamutMap(pImpl_->id_, gamutMap);
 }
 
 DMError Screen::SetScreenColorTransform()

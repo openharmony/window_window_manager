@@ -87,10 +87,10 @@ HWTEST_F(ScreenGamutTest, ScreenGamut02, Function | MediumTest | Level1)
     DMError ret;
     ScreenGamutMap gamutMap;
 
-    ret = defaultScreen_->GetScreenGamutsMap(gamutMap);
+    ret = defaultScreen_->GetScreenGamutMap(gamutMap);
     ASSERT_EQ(ret, DMError::DM_OK);
 
-    ret = defaultScreen_->SetScreenGamutsMap(gamutMap);
+    ret = defaultScreen_->SetScreenGamutMap(gamutMap);
     ASSERT_EQ(ret, DMError::DM_OK);
 }
 

@@ -487,6 +487,61 @@ void AbstractScreenController::OnScreenRotate(ScreenId dmsId, Rotation before, R
     }
 }
 
+DMError AbstractScreenController::GetScreenSupportedColorGamuts(ScreenId screenId,
+    std::vector<ScreenColorGamut>& colorGamuts)
+{
+    sptr<AbstractScreen> screen = GetAbstractScreen(screenId);
+    if (screen == nullptr) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screen->GetScreenSupportedColorGamuts(colorGamuts);
+}
+
+DMError AbstractScreenController::GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut)
+{
+    sptr<AbstractScreen> screen = GetAbstractScreen(screenId);
+    if (screen == nullptr) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screen->GetScreenColorGamut(colorGamut);
+}
+
+DMError AbstractScreenController::SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx)
+{
+    sptr<AbstractScreen> screen = GetAbstractScreen(screenId);
+    if (screen == nullptr) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screen->SetScreenColorGamut(colorGamutIdx);
+}
+
+DMError AbstractScreenController::GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap)
+{
+    sptr<AbstractScreen> screen = GetAbstractScreen(screenId);
+    if (screen == nullptr) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screen->GetScreenGamutMap(gamutMap);
+}
+
+DMError AbstractScreenController::SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap)
+{
+    sptr<AbstractScreen> screen = GetAbstractScreen(screenId);
+    if (screen == nullptr) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screen->SetScreenGamutMap(gamutMap);
+}
+
+DMError AbstractScreenController::SetScreenColorTransform(ScreenId screenId)
+{
+    sptr<AbstractScreen> screen = GetAbstractScreen(screenId);
+    if (screen == nullptr) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return screen->SetScreenColorTransform();
+}
+
 bool AbstractScreenController::IsScreenGroup(ScreenId screenId) const
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
