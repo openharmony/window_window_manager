@@ -1001,12 +1001,22 @@ void WindowImpl::UpdateWindowState(WindowState state)
             if (uiContent_ != nullptr) {
                 uiContent_->Background();
             }
+            if (abilityContext_ != nullptr) {
+                WLOGFD("DoAbilityBackground KEYGUARD, id: %{public}d", GetWindowId());
+                AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(abilityContext_->GetToken(),
+                    static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
+            }
             break;
         }
         case WindowState::STATE_UNFROZEN: {
             state_ = WindowState::STATE_SHOWN;
             if (uiContent_ != nullptr) {
                 uiContent_->Foreground();
+            }
+            if (abilityContext_ != nullptr) {
+                WLOGFD("DoAbilityForeground KEYGUARD, id: %{public}d", GetWindowId());
+                AAFwk::AbilityManagerClient::GetInstance()->DoAbilityForeground(abilityContext_->GetToken(),
+                    static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
             }
             break;
         }

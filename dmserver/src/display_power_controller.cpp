@@ -40,8 +40,10 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
     }
     switch (state) {
         case DisplayState::ON: {
-            // TODO: open vsync and SendSystemEvent to keyguard
             displayState_ = state;
+            if (!isKeyguardDrawn_) {
+                DisplayManagerService::GetInstance().NotifyDisplayStateChange(DisplayStateChangeType::BEFORE_UNLOCK);
+            }
             DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
                 EventStatus::BEGIN);
             break;
@@ -73,9 +75,12 @@ void DisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
         DisplayManagerService::GetInstance().NotifyDisplayStateChange(DisplayStateChangeType::BEFORE_UNLOCK);
         DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DESKTOP_READY,
             EventStatus::BEGIN);
+        isKeyguardDrawn_ = false;
         return;
     }
-    // TODO: set displayState_ ON when keyguard is drawn
+    if (event == DisplayEvent::KEYGUARD_DRAWN) {
+        isKeyguardDrawn_ = true;
+    }
 }
 }
 }

@@ -277,7 +277,7 @@ WMError WindowController::SetAlpha(uint32_t windowId, float dstAlpha)
 
 void WindowController::NotifyDisplayStateChange(DisplayStateChangeType type)
 {
-    WLOGFI("DisplayStateChangeType:%{public}u", type);
+    WLOGFD("DisplayStateChangeType:%{public}u", type);
     WindowState state;
     WindowStateChangeReason reason;
     switch (type) {
