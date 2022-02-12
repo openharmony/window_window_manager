@@ -55,6 +55,7 @@ enum class DMError : int32_t {
     DM_ERROR_DEATH_RECIPIENT = 150,
     DM_ERROR_INVALID_MODE_ID = 160,
     DM_ERROR_WRITE_DATA_FAILED = 170,
+    DM_ERROR_RENDER_SERVICE_FAILED = 180,
     DM_ERROR_UNKNOWN,
 };
 using DisplayStateCallback = std::function<void(DisplayState)>;

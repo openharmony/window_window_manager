@@ -73,8 +73,8 @@ public:
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const;
     DMError GetScreenColorGamut(ScreenColorGamut& colorGamut) const;
     DMError SetScreenColorGamut(int32_t colorGamutIdx);
-    DMError GetScreenGamutsMap(ScreenGamutMap& gamutMap) const;
-    DMError SetScreenGamutsMap(ScreenGamutMap gamutMap);
+    DMError GetScreenGamutMap(ScreenGamutMap& gamutMap) const;
+    DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
 
 private:
