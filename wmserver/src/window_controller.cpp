@@ -257,7 +257,6 @@ WMError WindowController::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurL
     if (srcLevel == dstLevel) {
         return WMError::WM_OK;
     }
-    node->SetWindowBackgroundBlur(dstLevel);
 
     FlushWindowInfo(windowId);
     return WMError::WM_OK;

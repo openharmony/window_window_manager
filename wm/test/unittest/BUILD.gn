@@ -20,6 +20,7 @@ group("unittest") {
   deps = [
     ":avoid_area_controller_test",
     ":wm_input_transfer_station_test",
+    ":wm_window_effect_test",
     ":wm_window_impl_test",
     ":wm_window_input_channel_test",
     ":wm_window_option_test",
@@ -50,6 +51,17 @@ ohos_unittest("wm_window_impl_test") {
 }
 
 ## UnitTest wm_window_impl_test }}}
+
+## UnitTest wm_window_effect_test {{{
+ohos_unittest("wm_window_effect_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_effect_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+}
+
+## UnitTest wm_window_effect_test }}}
 
 ## UnitTest wm_input_transfer_station_test {{{
 ohos_unittest("wm_input_transfer_station_test") {
