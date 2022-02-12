@@ -735,7 +735,8 @@ void WindowNodeContainer::MinimizeWindowFromAbility(const sptr<WindowNode>& node
         WLOGFW("Target abilityToken is nullptr, windowId:%{public}u", node->GetWindowId());
         return;
     }
-    AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(node->abilityToken_);
+    AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(node->abilityToken_,
+        static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
 }
 
 WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(const std::vector<uint32_t> &exceptionalIds,
@@ -753,7 +754,7 @@ WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(const std::vector<uint
             continue;
         }
         // minimize window
-        WLOGFI("Minimize with exceptional options, windowId:%{public}u", appNode->GetWindowId());
+        WLOGFI("minimize window, windowId:%{public}u", appNode->GetWindowId());
         MinimizeWindowFromAbility(appNode);
     }
     return WMError::WM_OK;
