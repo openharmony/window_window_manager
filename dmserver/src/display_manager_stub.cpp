@@ -238,7 +238,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case TRANS_ID_SCREEN_GET_GAMUT_MAP: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             ScreenGamutMap gamutMap;
-            DMError ret = GetScreenGamutsMap(screenId, gamutMap);
+            DMError ret = GetScreenGamutMap(screenId, gamutMap);
             reply.WriteInt32(static_cast<int32_t>(ret));
             if (ret != DMError::DM_OK) {
                 break;
@@ -249,7 +249,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case TRANS_ID_SCREEN_SET_GAMUT_MAP: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             ScreenGamutMap gamutMap = static_cast<ScreenGamutMap>(data.ReadUint32());
-            DMError ret = SetScreenGamutsMap(screenId, gamutMap);
+            DMError ret = SetScreenGamutMap(screenId, gamutMap);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
