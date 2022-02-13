@@ -28,6 +28,7 @@ public:
 
     virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) override;
     virtual void NotifyDisplayStateChanged(DisplayId id, DisplayState state) override;
+    virtual void OnDisplayChange(const sptr<DisplayInfo>, DisplayChangeEvent) override;
 };
 }
 }

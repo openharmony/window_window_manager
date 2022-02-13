@@ -135,7 +135,8 @@ void DisplayManagerAgentController::OnDisplayDestroy(DisplayId displayId)
     }
 }
 
-void DisplayManagerAgentController::OnDisplayChange(sptr<DisplayInfo> displayInfo, DisplayChangeEvent screenChangeEvent)
+void DisplayManagerAgentController::OnDisplayChange(
+    sptr<DisplayInfo> displayInfo, DisplayChangeEvent displayChangeEvent)
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
     if (agents.empty()) {
@@ -143,7 +144,7 @@ void DisplayManagerAgentController::OnDisplayChange(sptr<DisplayInfo> displayInf
     }
     WLOGFI("OnDisplayChange");
     for (auto& agent : agents) {
-        agent->OnDisplayChange(displayInfo, screenChangeEvent);
+        agent->OnDisplayChange(displayInfo, displayChangeEvent);
     }
 }
 }

@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-#include <refbase.h>
 #include <surface.h>
 #include <screen_manager/screen_types.h>
 
@@ -27,8 +26,6 @@
 
 namespace OHOS::Rosen {
 class ScreenInfo;
-using ScreenId = uint64_t;
-static constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
 
 struct Point {
     int32_t posX_;
