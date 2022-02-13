@@ -53,7 +53,8 @@ public:
     ScreenId dmsId_;
     ScreenId rsId_;
     std::shared_ptr<RSDisplayNode> rsDisplayNode_;
-    ScreenId groupDmsId_;
+    RSDisplayNodeConfig rSDisplayNodeConfig_;
+    ScreenId groupDmsId_ {INVALID_SCREEN_ID};
     ScreenType type_ { ScreenType::REAL };
     int32_t activeIdx_;
     float virtualPixelRatio = { 1.0 };
@@ -78,6 +79,7 @@ public:
     const sptr<ScreenGroupInfo> ConvertToScreenGroupInfo() const;
 
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
+    ScreenId mirrorScreenId_ {INVALID_SCREEN_ID};
 private:
     std::map<ScreenId, std::pair<sptr<AbstractScreen>, Point>> abstractScreenMap_;
 };

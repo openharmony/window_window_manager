@@ -84,7 +84,7 @@ sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplay(DisplayId di
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = abstractDisplayMap_.find(displayId);
     if (iter == abstractDisplayMap_.end()) {
-        WLOGFE("Failed to get AbstractDisplay, return nullptr!");
+        WLOGFE("Failed to get AbstractDisplay %{public}" PRIu64", return nullptr!", displayId);
         return nullptr;
     }
     return iter->second;
@@ -117,19 +117,23 @@ void AbstractDisplayController::OnAbstractScreenConnected(sptr<AbstractScreen> a
 {
     WLOGI("connect new screen. id:%{public}" PRIu64"", absScreen->dmsId_);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (absScreen->type_ == ScreenType::REAL) {
-        sptr<AbstractScreenGroup> group = absScreen->GetGroup();
-        if (group == nullptr) {
-            WLOGE("the group information of the screen is wrong");
-            return;
-        }
-        if (group->combination_ == ScreenCombination::SCREEN_ALONE) {
+    sptr<AbstractScreenGroup> group = absScreen->GetGroup();
+    if (group == nullptr) {
+        WLOGE("the group information of the screen is wrong");
+        return;
+    }
+    if (group->combination_ == ScreenCombination::SCREEN_ALONE) {
+        BindAloneScreenLocked(absScreen);
+    } else if (group->combination_ == ScreenCombination::SCREEN_MIRROR) {
+        if (group->GetChildCount() == 1) {
+            WLOGI("OnAbstractScreenConnected, ScreenCombination::SCREEN_MIRROR, BindAloneScreenLocked");
             BindAloneScreenLocked(absScreen);
-        } else if (group->combination_ == ScreenCombination::SCREEN_MIRROR) {
-            AddScreenToMirrorLocked(group, absScreen);
         } else {
-            WLOGE("support in future. combination:%{public}ud", group->combination_);
+            WLOGI("OnAbstractScreenConnected, ScreenCombination::SCREEN_MIRROR, AddScreenToMirrorLocked");
+            AddScreenToMirrorLocked(group, absScreen);
         }
+    } else {
+        WLOGE("support in future. combination:%{public}u", group->combination_);
     }
 }
 
@@ -146,15 +150,11 @@ void AbstractDisplayController::OnAbstractScreenDisconnected(sptr<AbstractScreen
         WLOGE("the group information of the screen is wrong");
         return;
     }
-    if (absScreen->type_ == ScreenType::REAL) {
-        if (screenGroup->combination_ == ScreenCombination::SCREEN_ALONE
-            || screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR) {
-            ProcessScreenDisconnected(absScreen, screenGroup);
-        } else {
-            WLOGE("support in future. combination:%{public}u", screenGroup->combination_);
-        }
+    if (screenGroup->combination_ == ScreenCombination::SCREEN_ALONE
+        || screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR) {
+        ProcessScreenDisconnected(absScreen, screenGroup);
     } else {
-        WLOGE("support in future. type_:%{public}u", absScreen->type_);
+        WLOGE("support in future. combination:%{public}u", screenGroup->combination_);
     }
 }
 

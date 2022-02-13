@@ -57,13 +57,15 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
             sptr<Surface> surface = Surface::CreateSurfaceAsProducer(bp);
             int32_t flags = data.ReadInt32();
+            bool isForShot = data.ReadBool();
             VirtualScreenOption option = {
                 .name_ = name,
                 .width_ = width,
                 .height_ = height,
                 .density_ = density,
                 .surface_ = surface,
-                .flags_ = flags
+                .flags_ = flags,
+                .isForShot = isForShot
             };
             ScreenId screenId = CreateVirtualScreen(option);
             reply.WriteUint64(static_cast<uint64_t>(screenId));
