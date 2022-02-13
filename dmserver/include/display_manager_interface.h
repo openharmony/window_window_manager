@@ -46,12 +46,14 @@ public:
         TRANS_ID_SET_DISPLAY_STATE,
         TRANS_ID_GET_DISPLAY_STATE,
         TRANS_ID_NOTIFY_DISPLAY_EVENT,
-        TRANS_ID_CREATE_VIRTUAL_SCREEN = 1000,
+        TRANS_ID_SCREEN_BASE = 1000,
+        TRANS_ID_CREATE_VIRTUAL_SCREEN = TRANS_ID_SCREEN_BASE,
         TRANS_ID_DESTROY_VIRTUAL_SCREEN,
         TRANS_ID_GET_SCREEN_INFO_BY_ID,
         TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID,
         TRANS_ID_SET_SCREEN_ACTIVE_MODE,
         TRANS_ID_GET_ALL_SCREEN_INFOS,
+        TRANS_ID_REQUEST_ROTATION,
         TRANS_ID_SCREENGROUP_BASE = 1100,
         TRANS_ID_SCREEN_MAKE_MIRROR = TRANS_ID_SCREENGROUP_BASE,
         TRANS_ID_SCREEN_MAKE_EXPAND,
@@ -69,6 +71,7 @@ public:
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
+    virtual bool RequestRotation(ScreenId screenId, Rotation rotation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
 
     // colorspace, gamut
@@ -91,10 +94,10 @@ public:
     virtual bool SetDisplayState(DisplayState state) = 0;
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
     virtual void NotifyDisplayEvent(DisplayEvent event) = 0;
-    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) = 0;
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) = 0;
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) = 0;
     virtual std::vector<sptr<ScreenInfo>> GetAllScreenInfos() = 0;
+    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) = 0;
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) = 0;
     virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
 };

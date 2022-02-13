@@ -56,10 +56,10 @@ void WindowManagerService::OnStart()
     if (!Init()) {
         return;
     }
-    RegisterSnapshotHandler();
     SingletonContainer::Get<WindowInnerManager>().Init();
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     DisplayManagerServiceInner::GetInstance().RegisterDisplayChangeListener(listener);
+    RegisterSnapshotHandler();
 }
 
 void WindowManagerService::RegisterSnapshotHandler()
@@ -289,16 +289,16 @@ void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)
     }
 }
 
-void WindowManagerService::NotifyDisplayStateChange(DisplayStateChangeType type)
+void WindowManagerService::NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type)
 {
     WM_SCOPED_TRACE("wms:NotifyDisplayStateChange(%u)", type);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->NotifyDisplayStateChange(type);
+    return windowController_->NotifyDisplayStateChange(id, type);
 }
 
-void DisplayChangeListener::OnDisplayStateChange(DisplayStateChangeType type)
+void DisplayChangeListener::OnDisplayStateChange(DisplayId id, DisplayStateChangeType type)
 {
-    WindowManagerService::GetInstance().NotifyDisplayStateChange(type);
+    WindowManagerService::GetInstance().NotifyDisplayStateChange(id, type);
 }
 
 void WindowManagerService::ProcessWindowTouchedEvent(uint32_t windowId)

@@ -32,7 +32,7 @@ public:
         DisplayManagerAgentType type);
 
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
-    bool NotifyDisplayStateChanged(DisplayState state);
+    bool NotifyDisplayStateChanged(DisplayId id, DisplayState state);
 
     void OnScreenConnect(sptr<ScreenInfo> screenInfo);
     void OnScreenDisconnect(ScreenId);

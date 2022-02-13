@@ -47,6 +47,7 @@ public:
     Rect GetDisplayRect() const;
     sptr<WindowNode> GetTopImmersiveNode() const;
     void UpdateWindowStatus(const sptr<WindowNode>& windowId, WindowUpdateType type) const;
+    void UpdateDisplayRect(uint32_t width, uint32_t height);
 
     void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas);
     void LayoutDividerWindow(sptr<WindowNode>& node);

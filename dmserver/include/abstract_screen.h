@@ -26,8 +26,8 @@
 
 #include "screen.h"
 #include "screen_group.h"
-#include "screen_info.h"
 #include "screen_group_info.h"
+#include "screen_info.h"
 
 namespace OHOS::Rosen {
 enum class ScreenType : uint32_t {
@@ -37,6 +37,7 @@ enum class ScreenType : uint32_t {
 };
 
 class AbstractScreenGroup;
+class AbstractScreenController;
 class AbstractScreen : public RefBase {
 public:
     AbstractScreen(ScreenId dmsId, ScreenId rsId);
@@ -46,12 +47,15 @@ public:
     std::vector<sptr<SupportedScreenModes>> GetAbstractScreenModes() const;
     sptr<AbstractScreenGroup> GetGroup() const;
     const sptr<ScreenInfo> ConvertToScreenInfo() const;
+    void RequestRotation(Rotation rotation);
+    Rotation GetRotation() const;
 
     void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     void InitRSDisplayNode(RSDisplayNodeConfig& config);
 
     ScreenId dmsId_;
     ScreenId rsId_;
+    bool canHasChild_ { false };
     std::shared_ptr<RSDisplayNode> rsDisplayNode_;
     RSDisplayNodeConfig rSDisplayNodeConfig_;
     ScreenId groupDmsId_ {INVALID_SCREEN_ID};
@@ -59,8 +63,10 @@ public:
     int32_t activeIdx_;
     float virtualPixelRatio = { 1.0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};
+    Rotation rotation_ { Rotation::ROTATION_0 };
 protected:
     void FillScreenInfo(sptr<ScreenInfo>) const;
+    sptr<AbstractScreenController>& screenController_;
 };
 
 class AbstractScreenGroup : public AbstractScreen {

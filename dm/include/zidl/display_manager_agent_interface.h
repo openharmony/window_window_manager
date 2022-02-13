@@ -45,7 +45,7 @@ public:
         TRANS_ID_ON_DISPLAY_CHANGED,
     };
     virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) = 0;
-    virtual void NotifyDisplayStateChanged(DisplayState state) = 0;
+    virtual void NotifyDisplayStateChanged(DisplayId id, DisplayState state) = 0;
     virtual void OnScreenConnect(sptr<ScreenInfo>) = 0;
     virtual void OnScreenDisconnect(ScreenId) = 0;
     virtual void OnScreenChange(const std::vector<const sptr<ScreenInfo>>&, ScreenChangeEvent) = 0;

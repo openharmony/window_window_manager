@@ -42,9 +42,9 @@ public:
     sptr<AbstractDisplay> GetAbstractDisplay(DisplayId displayId) const;
 
 private:
-    void OnAbstractScreenConnected(sptr<AbstractScreen> absScreen);
-    void OnAbstractScreenDisconnected(sptr<AbstractScreen> absScreen);
-    void OnAbstractScreenChanged(sptr<AbstractScreen> absScreen);
+    void OnAbstractScreenConnect(sptr<AbstractScreen> absScreen);
+    void OnAbstractScreenDisconnect(sptr<AbstractScreen> absScreen);
+    void OnAbstractScreenChange(sptr<AbstractScreen> absScreen, DisplayChangeEvent event);
     void BindAloneScreenLocked(sptr<AbstractScreen> absScreen);
     void AddScreenToMirrorLocked(sptr<AbstractScreenGroup> group, sptr<AbstractScreen> realAbsScreen);
     void ProcessScreenDisconnected(sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup);
@@ -55,7 +55,7 @@ private:
     std::map<DisplayId, sptr<AbstractDisplay>> abstractDisplayMap_;
     sptr<AbstractScreenController> abstractScreenController_;
     sptr<AbstractScreenController::AbstractScreenCallback> abstractScreenCallback_;
-    OHOS::Rosen::RSInterfaces *rsInterface_;
+    OHOS::Rosen::RSInterfaces& rsInterface_;
 
     class ScreenshotCallback : public SurfaceCaptureCallback, public Future<std::shared_ptr<Media::PixelMap>> {
     public:

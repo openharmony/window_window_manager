@@ -35,9 +35,10 @@ public:
     uint32_t virtualHeight_ { 0 };
     float virtualPixelRatio_ { 0.0 };
     ScreenId parent_ { SCREEN_ID_INVALID };
-    bool hasChild_ { false };
+    bool canHasChild_ { false };
     uint32_t modeId_ { 0 };
     std::vector<sptr<SupportedScreenModes>> modes_ {};
+    Rotation rotation_ { Rotation::ROTATION_0 };
 };
 
 Screen::Screen(const ScreenInfo* info)
@@ -52,7 +53,7 @@ Screen::Screen(const ScreenInfo* info)
     pImpl_->virtualHeight_ = info->virtualHeight_;
     pImpl_->virtualPixelRatio_ = info->virtualPixelRatio_;
     pImpl_->parent_ = info->parent_;
-    pImpl_->hasChild_ = info->hasChild_;
+    pImpl_->canHasChild_ = info->canHasChild_;
     pImpl_->modeId_ = info->modeId_;
     pImpl_->modes_ = info->modes_;
 }
@@ -63,7 +64,7 @@ Screen::~Screen()
 
 bool Screen::IsGroup() const
 {
-    return pImpl_->hasChild_;
+    return pImpl_->canHasChild_;
 }
 
 ScreenId Screen::GetId() const
@@ -108,12 +109,13 @@ float Screen::GetVirtualPixelRatio() const
 
 Rotation Screen::GetRotation() const
 {
-    return Rotation::ROTATION_0;
+    return pImpl_->rotation_;
 }
 
 bool Screen::RequestRotation(Rotation rotation)
 {
-    return false;
+    WLOGFD("rotation the screen");
+    return SingletonContainer::Get<DisplayManagerAdapter>().RequestRotation(pImpl_->id_, rotation);
 }
 
 DMError Screen::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const

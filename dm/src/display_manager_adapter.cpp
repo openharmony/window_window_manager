@@ -64,6 +64,17 @@ sptr<Display> DisplayManagerAdapter::GetDisplayById(DisplayId displayId)
     return display;
 }
 
+bool DisplayManagerAdapter::RequestRotation(ScreenId screenId, Rotation rotation)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!InitDMSProxyLocked()) {
+        WLOGFE("fail to request rotation: InitDMSProxyLocked failed!");
+        return false;
+    }
+
+    return displayManagerServiceProxy_->RequestRotation(screenId, rotation);
+}
+
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -85,7 +96,7 @@ DMError DisplayManagerAdapter::GetScreenSupportedColorGamuts(ScreenId screenId,
 
     if (!InitDMSProxyLocked()) {
         WLOGFE("displayManagerAdapter::GetScreenSupportedColorGamuts: InitDMSProxyLocked failed!");
-        return  DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
+        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
     }
 
     DMError ret = displayManagerServiceProxy_->GetScreenSupportedColorGamuts(screenId, colorGamuts);
@@ -98,7 +109,7 @@ DMError DisplayManagerAdapter::GetScreenColorGamut(ScreenId screenId, ScreenColo
 
     if (!InitDMSProxyLocked()) {
         WLOGFE("displayManagerAdapter::GetScreenColorGamut: InitDMSProxyLocked failed!");
-        return  DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
+        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
     }
 
     DMError ret = displayManagerServiceProxy_->GetScreenColorGamut(screenId, colorGamut);
@@ -111,7 +122,7 @@ DMError DisplayManagerAdapter::SetScreenColorGamut(ScreenId screenId, int32_t co
 
     if (!InitDMSProxyLocked()) {
         WLOGFE("displayManagerAdapter::SetScreenColorGamut: InitDMSProxyLocked failed!");
-        return  DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
+        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
     }
 
     DMError ret = displayManagerServiceProxy_->SetScreenColorGamut(screenId, colorGamutIdx);
@@ -124,7 +135,7 @@ DMError DisplayManagerAdapter::GetScreenGamutsMap(ScreenId screenId, ScreenGamut
 
     if (!InitDMSProxyLocked()) {
         WLOGFE("displayManagerAdapter::GetScreenGamutsMap: InitDMSProxyLocked failed!");
-        return  DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
+        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
     }
 
     DMError ret = displayManagerServiceProxy_->GetScreenGamutsMap(screenId, gamutMap);
@@ -137,7 +148,7 @@ DMError DisplayManagerAdapter::SetScreenGamutsMap(ScreenId screenId, ScreenGamut
 
     if (!InitDMSProxyLocked()) {
         WLOGFE("displayManagerAdapter::SetScreenGamutsMap: InitDMSProxyLocked failed!");
-        return  DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
+        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
     }
 
     DMError ret = displayManagerServiceProxy_->SetScreenGamutsMap(screenId, gamutMap);
@@ -150,7 +161,7 @@ DMError DisplayManagerAdapter::SetScreenColorTransform(ScreenId screenId)
 
     if (!InitDMSProxyLocked()) {
         WLOGFE("displayManagerAdapter::SetScreenColorTransform: InitDMSProxyLocked failed!");
-        return  DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
+        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
     }
 
     DMError ret = displayManagerServiceProxy_->SetScreenColorTransform(screenId);
