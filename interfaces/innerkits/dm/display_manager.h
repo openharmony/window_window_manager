@@ -74,7 +74,7 @@ private:
     sptr<Impl> pImpl_;
 
     void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
-    void NotifyDisplayStateChanged(DisplayState state);
+    void NotifyDisplayStateChanged(DisplayId id, DisplayState state);
 };
 } // namespace OHOS::Rosen
 

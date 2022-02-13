@@ -31,7 +31,10 @@ public:
     AbstractDisplay(const DisplayInfo& info);
     AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t freshRate);
     ~AbstractDisplay() = default;
-
+    static inline bool IsVertical(Rotation rotation)
+    {
+        return (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
+    }
     DisplayId GetId() const;
     int32_t GetWidth() const;
     int32_t GetHeight() const;
@@ -47,6 +50,7 @@ public:
     void SetHeight(int32_t height);
     void SetFreshRate(uint32_t freshRate);
     void SetVirtualPixelRatio(float virtualPixelRatio);
+    bool RequestRotation(Rotation rotation);
 
 private:
     DisplayId id_ { DISPLAY_ID_INVALD };
@@ -55,6 +59,7 @@ private:
     int32_t height_ { 0 };
     uint32_t freshRate_ { 0 };
     float virtualPixelRatio_ { 1.0 };
+    Rotation rotation_ { Rotation::ROTATION_0 };
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_H

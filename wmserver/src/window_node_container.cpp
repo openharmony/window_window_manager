@@ -40,7 +40,7 @@ namespace {
 WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height) : displayId_(displayId)
 {
     displayRect_ = {
-        .posX_ = 0,
+        .posX_ = 0, 
         .posY_ = 0,
         .width_ = width,
         .height_ = height
@@ -60,6 +60,18 @@ WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, ui
 WindowNodeContainer::~WindowNodeContainer()
 {
     Destroy();
+}
+
+void WindowNodeContainer::UpdateDisplayRect(uint32_t width, uint32_t height)
+{
+    WLOGFI("update display rect, w/h=%{public}u/%{public}u", width, height);
+    displayRect_ = {
+        .posX_ = 0, 
+        .posY_ = 0,
+        .width_ = width,
+        .height_ = height
+    };
+    layoutPolicy_->LayoutWindowTree();
 }
 
 WMError WindowNodeContainer::MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node)

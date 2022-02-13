@@ -36,7 +36,8 @@ public:
     uint32_t virtualHeight_ { 0 };
     float virtualPixelRatio_ { 0.0 };
     ScreenId parent_ { 0 };
-    bool hasChild_ { false };
+    bool canHasChild_ { false };
+    Rotation rotation_ { Rotation::ROTATION_0 };
     uint32_t modeId_ { 0 };
     std::vector<sptr<SupportedScreenModes>> modes_ {};
 protected:
