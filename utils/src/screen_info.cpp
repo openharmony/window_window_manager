@@ -30,18 +30,23 @@ void ScreenInfo::Update(sptr<ScreenInfo> info)
 
 bool ScreenInfo::Marshalling(Parcel &parcel) const
 {
-    bool res1 = parcel.WriteUint64(id_) &&
+    bool res = parcel.WriteUint64(id_) &&
         parcel.WriteUint32(virtualWidth_) && parcel.WriteUint32(virtualHeight_) &&
         parcel.WriteFloat(virtualPixelRatio_) && parcel.WriteUint64(parent_) &&
         parcel.WriteBool(hasChild_) && parcel.WriteUint32(modeId_) &&
         parcel.WriteUint32(static_cast<uint32_t>(modes_.size()));
-    bool res2 = true;
-    for (uint32_t modeIndex = 0; modeIndex < modes_.size(); modeIndex++) {
-        res2 = res2 && parcel.WriteUint32(modes_[modeIndex]->height_) &&
-            parcel.WriteUint32(modes_[modeIndex]->width_) &&
-            parcel.WriteUint32(modes_[modeIndex]->freshRate_);
+    if (!res) {
+        return false;
     }
-    return res1 && res2;
+    for (uint32_t modeIndex = 0; modeIndex < modes_.size(); modeIndex++) {
+        if (parcel.WriteUint32(modes_[modeIndex]->height_) &&
+            parcel.WriteUint32(modes_[modeIndex]->width_) &&
+            parcel.WriteUint32(modes_[modeIndex]->freshRate_)) {
+            continue;
+        }
+        return false;
+    }
+    return true;
 }
 
 ScreenInfo* ScreenInfo::Unmarshalling(Parcel &parcel)
@@ -61,17 +66,16 @@ ScreenInfo* ScreenInfo::InnerUnmarshalling(Parcel& parcel)
     if (!res1) {
         return nullptr;
     }
-    bool res2 = true;
     modes_.clear();
     for (uint32_t modeIndex = 0; modeIndex < size; modeIndex++) {
         sptr<SupportedScreenModes> mode = new SupportedScreenModes();
-        res2 = res2 && parcel.ReadUint32(mode->height_) &&
+        if (parcel.ReadUint32(mode->height_) &&
             parcel.ReadUint32(mode->width_) &&
-            parcel.ReadUint32(mode->freshRate_);
-        modes_.push_back(mode);
-    }
-    if (!res2) {
-        return nullptr;
+            parcel.ReadUint32(mode->freshRate_)) {
+            modes_.push_back(mode);
+        } else {
+            return nullptr;
+        }
     }
     return this;
 }

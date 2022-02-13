@@ -102,7 +102,7 @@ ScreenId DisplayManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOpt
     bool res = data.WriteString(virtualOption.name_) && data.WriteUint32(virtualOption.width_) &&
         data.WriteUint32(virtualOption.height_) && data.WriteFloat(virtualOption.density_) &&
         data.WriteRemoteObject(virtualOption.surface_->GetProducer()->AsObject()) &&
-        data.WriteInt32(virtualOption.flags_);
+        data.WriteInt32(virtualOption.flags_) && data.WriteBool(virtualOption.isForShot);
     if (!res) {
         WLOGFE("DisplayManagerProxy::Write data failed");
         return SCREEN_ID_INVALID;

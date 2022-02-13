@@ -48,6 +48,7 @@ struct VirtualScreenOption {
     float density_;
     sptr<Surface> surface_;
     int32_t flags_;
+    bool isForShot {true};
 };
 
 class Screen : public RefBase {
