@@ -148,6 +148,7 @@ const sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->height_ = height_;
     displayInfo->id_ = id_;
     displayInfo->freshRate_ = freshRate_;
+    displayInfo->screenId_ = screenId_;
     return displayInfo;
 }
 } // namespace OHOS::Rosen

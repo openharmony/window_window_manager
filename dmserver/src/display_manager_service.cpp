@@ -92,12 +92,16 @@ DisplayId DisplayManagerService::GetDefaultDisplayId()
 DisplayInfo DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 {
     DisplayInfo displayInfo;
-    ScreenId screenId = GetScreenIdFromDisplayId(displayId);
-    auto screenModeInfo = abstractDisplayController_->GetScreenActiveMode(screenId);
+    sptr<AbstractDisplay> display = GetDisplayByDisplayId(displayId);
+    if (display == nullptr) {
+        WLOGFE("GetDisplayById: Get invalid display!");
+        return displayInfo;
+    }
     displayInfo.id_ = displayId;
-    displayInfo.width_ = screenModeInfo.GetScreenWidth();
-    displayInfo.height_ = screenModeInfo.GetScreenHeight();
-    displayInfo.freshRate_ = screenModeInfo.GetScreenFreshRate();
+    displayInfo.width_ = display->GetWidth();
+    displayInfo.height_ = display->GetHeight();
+    displayInfo.freshRate_ = display->GetFreshRate();
+    displayInfo.screenId_ = display->GetAbstractScreenId();
     return displayInfo;
 }
 

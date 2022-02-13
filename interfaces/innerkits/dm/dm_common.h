@@ -20,6 +20,11 @@
 
 namespace OHOS {
 namespace Rosen {
+using DisplayId = uint64_t;
+using ScreenId = uint64_t;
+static constexpr DisplayId DISPLAY_ID_INVALD = -1ULL;
+static constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+
 enum class PowerStateChangeReason : uint32_t {
     POWER_BUTTON,
 };
@@ -83,6 +88,7 @@ enum class ScreenChangeEvent : uint32_t {
     REMOVE_FROM_GROUP,
     CHANGE_GROUP,
     UPDATE_ROTATION,
+    CHANGE_MODE,
 };
 
 enum class Rotation : uint32_t {
@@ -95,6 +101,7 @@ enum class Rotation : uint32_t {
 enum class DisplayChangeEvent : uint32_t {
     UPDATE_ROTATION,
     DISPLAY_SIZE_CHANGED,
+    UNKNOWN,
 };
 }
 }

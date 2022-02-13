@@ -25,6 +25,7 @@ private:
     int32_t width_ { 0 };
     int32_t height_ { 0 };
     uint32_t freshRate_ { 0 };
+    ScreenId screenId_ {SCREEN_ID_INVALID};
 };
 
 Display::Display(const std::string& name, DisplayInfo* info)
@@ -35,6 +36,7 @@ Display::Display(const std::string& name, DisplayInfo* info)
     pImpl_->width_ = info->width_;
     pImpl_->height_ = info->height_;
     pImpl_->freshRate_ = info->freshRate_;
+    pImpl_->screenId_ = info->screenId_;
 }
 
 DisplayId Display::GetId() const
@@ -55,6 +57,11 @@ int32_t Display::GetHeight() const
 uint32_t Display::GetFreshRate() const
 {
     return pImpl_->freshRate_;
+}
+
+ScreenId Display::GetScreenId() const
+{
+    return pImpl_->screenId_;
 }
 
 void Display::SetWidth(int32_t width)

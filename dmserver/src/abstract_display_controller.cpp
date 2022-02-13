@@ -168,10 +168,22 @@ void AbstractDisplayController::ProcessScreenDisconnected(
 
 void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absScreen, DisplayChangeEvent event)
 {
-    if (event != DisplayChangeEvent::UPDATE_ROTATION) {
-        WLOGFE("unknown display event: %{public}u", event);
+    if (absScreen == nullptr) {
+        WLOGE("OnAbstractScreenChanged::the information of the screen is wrong");
         return;
     }
+    WLOGI("screen changes. id:%{public}" PRIu64"", absScreen->dmsId_);
+
+    if (event == DisplayChangeEvent::UPDATE_ROTATION) {
+        ProcessDisplayUpdateRotation(absScreen);
+    }
+    if (event == DisplayChangeEvent::DISPLAY_SIZE_CHANGED) {
+        ProcessDisplaySizeChange(absScreen);
+    }
+}
+
+void AbstractDisplayController::ProcessDisplayUpdateRotation(sptr<AbstractScreen> absScreen)
+{
     sptr<AbstractDisplay> abstractDisplay = nullptr;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = abstractDisplayMap_.begin();
@@ -212,6 +224,43 @@ void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absS
         DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo,
             DisplayChangeEvent::UPDATE_ROTATION);
     }
+}
+
+void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> absScreen)
+{
+    sptr<SupportedScreenModes> info = absScreen->GetActiveScreenMode();
+    if (info == nullptr) {
+        WLOGE("cannot get active screen info.");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
+        sptr<AbstractDisplay> absDisplay = iter->second;
+        if (absDisplay->GetAbstractScreenId() != absScreen->dmsId_) {
+            continue;
+        }
+        if (UpdateDisplaySize(absDisplay, info)) {
+            WLOGFI("Notify display size change");
+            DisplayManagerService::GetInstance().NotifyDisplayStateChange(
+                iter->first, DisplayStateChangeType::SIZE_CHANGE);
+            DisplayManagerAgentController::GetInstance().OnDisplayChange(
+                absDisplay->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+        }
+    }
+}
+
+bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info)
+{
+    if (info->height_ == absDisplay->GetHeight() && info->width_ == absDisplay->GetWidth()) {
+        WLOGI("keep display size. display:%{public}" PRIu64"", absDisplay->GetId());
+        return false;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    absDisplay->SetHeight(info->height_);
+    absDisplay->SetWidth(info->width_);
+    WLOGI("update display size. id %{public}" PRIu64", size: %{public}d %{public}d",
+          absDisplay->GetId(), absDisplay->GetWidth(), absDisplay->GetHeight());
+    return true;
 }
 
 void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realAbsScreen)
