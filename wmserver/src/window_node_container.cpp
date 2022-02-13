@@ -564,7 +564,7 @@ void WindowNodeContainer::OnAvoidAreaChange(const std::vector<Rect>& avoidArea)
 
 void WindowNodeContainer::DumpScreenWindowTree()
 {
-    WLOGFI("-------- Screen %{public}" PRIu64" dump window info begin---------", displayId_);
+    WLOGFI("-------- display %{public}" PRIu64" dump window info begin---------", displayId_);
     WLOGFI("WindowName WinId Type Mode Flag ZOrd [   x    y    w    h]");
     std::vector<sptr<WindowNode>> windowNodes;
     TraverseContainer(windowNodes);
@@ -578,7 +578,7 @@ void WindowNodeContainer::DumpScreenWindowTree()
             node->GetWindowMode(), node->GetWindowFlags(),
             --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
-    WLOGFI("-------- Screen %{public}" PRIu64" dump window info end  ---------", displayId_);
+    WLOGFI("-------- display %{public}" PRIu64" dump window info end  ---------", displayId_);
 }
 
 uint64_t WindowNodeContainer::GetScreenId() const

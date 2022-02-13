@@ -29,7 +29,7 @@ namespace OHOS {
 namespace Rosen {
 class WindowNodeContainer : public RefBase {
 public:
-    WindowNodeContainer(uint64_t displayId, uint32_t width, uint32_t height);
+    WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height);
     ~WindowNodeContainer();
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);

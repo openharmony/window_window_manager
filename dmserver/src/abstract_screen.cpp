@@ -81,6 +81,9 @@ void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
         return;
     }
     rsDisplayNode_ = rsDisplayNode;
+    rSDisplayNodeConfig_ = config;
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    transactionProxy->FlushImplicitTransaction();
 }
 
 void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
@@ -146,14 +149,35 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
         case ScreenCombination::SCREEN_EXPAND:
             config = { dmsScreen->rsId_ };
             break;
-        case ScreenCombination::SCREEN_MIRROR:
-            WLOGE("The feature will be supported in the future");
-            return false;
+        case ScreenCombination::SCREEN_MIRROR: {
+            if (GetChildCount() == 0 || mirrorScreenId_ == dmsScreen->dmsId_) {
+                WLOGI("AddChild, SCREEN_MIRROR, config is not mirror");
+                config = { dmsScreen->rsId_ };
+                break;
+            }
+            if (mirrorScreenId_ == INVALID_SCREEN_ID || !HasChild(mirrorScreenId_)) {
+                WLOGI("AddChild, mirrorScreenId_ is invalid, use default screen");
+                mirrorScreenId_ =
+                    DisplayManagerService::GetInstance().GetAbstractScreenController()->GetDefaultAbstractScreenId();
+            }
+            std::shared_ptr<RSDisplayNode> displayNode = SingletonContainer::Get<DisplayManagerService>().
+                GetAbstractScreenController()->GetRSDisplayNodeByScreenId(mirrorScreenId_);
+            if (displayNode == nullptr) {
+                WLOGFE("AddChild fail, displayNode is nullptr, cannot get DisplayNode");
+                return false;
+            }
+            NodeId nodeId = displayNode->GetId();
+            WLOGI("AddChild, mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", nodeId:%{public}" PRIu64"",
+                mirrorScreenId_, dmsScreen->rsId_, nodeId);
+            config = {dmsScreen->rsId_, true, nodeId};
+            break;
+        }
         default:
             WLOGE("fail to add child. invalid group combination:%{public}u", combination_);
             return false;
     }
     dmsScreen->InitRSDisplayNode(config);
+    dmsScreen->groupDmsId_ = dmsId_;
     abstractScreenMap_.insert(std::make_pair(screenId, std::make_pair(dmsScreen, startPoint)));
     return true;
 }
@@ -180,11 +204,7 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
     }
     ScreenId screenId = dmsScreen->dmsId_;
     dmsScreen->groupDmsId_ = SCREEN_ID_INVALID;
-    bool res = abstractScreenMap_.erase(screenId);
-    if (abstractScreenMap_.size() == 1) {
-        combination_ = ScreenCombination::SCREEN_ALONE;
-    }
-    return res;
+    return abstractScreenMap_.erase(screenId);
 }
 
 bool AbstractScreenGroup::HasChild(ScreenId childScreen) const
