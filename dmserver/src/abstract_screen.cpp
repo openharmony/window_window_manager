@@ -17,6 +17,7 @@
 
 #include "abstract_screen_controller.h"
 #include "display_manager_service.h"
+#include "dm_common.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -91,6 +92,78 @@ void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
     transactionProxy->FlushImplicitTransaction();
 }
 
+DMError AbstractScreen::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenSupportedColorGamuts(rsId_, colorGamuts);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetScreenSupportedColorGamuts fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetScreenSupportedColorGamuts ok! rsId %{public}" PRIu64", size %{public}u",
+        rsId_, static_cast<uint32_t>(colorGamuts.size()));
+
+    return DMError::DM_OK;
+}
+
+DMError AbstractScreen::GetScreenColorGamut(ScreenColorGamut& colorGamut)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenColorGamut(rsId_, colorGamut);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetScreenColorGamut fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetScreenColorGamut ok! rsId %{public}" PRIu64", colorGamut %{public}u",
+        rsId_, static_cast<uint32_t>(colorGamut));
+
+    return DMError::DM_OK;
+}
+
+DMError AbstractScreen::SetScreenColorGamut(int32_t colorGamutIdx)
+{
+    auto ret = RSInterfaces::GetInstance().SetScreenColorGamut(rsId_, colorGamutIdx);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SetScreenColorGamut fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetScreenColorGamut ok! rsId %{public}" PRIu64", colorGamutIdx %{public}u",
+        rsId_, colorGamutIdx);
+
+    return DMError::DM_OK;
+}
+
+DMError AbstractScreen::GetScreenGamutMap(ScreenGamutMap& gamutMap)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenGamutMap(rsId_, gamutMap);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetScreenGamutMap fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetScreenGamutMap ok! rsId %{public}" PRIu64", gamutMap %{public}u",
+        rsId_, static_cast<uint32_t>(gamutMap));
+
+    return DMError::DM_OK;
+}
+
+DMError AbstractScreen::SetScreenGamutMap(ScreenGamutMap gamutMap)
+{
+    auto ret = RSInterfaces::GetInstance().SetScreenGamutMap(rsId_, gamutMap);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SetScreenGamutMap fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetScreenGamutMap ok! rsId %{public}" PRIu64", gamutMap %{public}u",
+        rsId_, static_cast<uint32_t>(gamutMap));
+
+    return DMError::DM_OK;
+}
+
+DMError AbstractScreen::SetScreenColorTransform()
+{
+    WLOGI("SetScreenColorTransform ok! rsId %{public}" PRIu64"", rsId_);
+
+    return DMError::DM_OK;
+}
+
 void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
 {
     info->id_ = dmsId_;
@@ -122,7 +195,7 @@ void AbstractScreen::RequestRotation(Rotation rotation)
 }
 
 AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId, ScreenCombination combination)
-    : AbstractScreen(dmsId, rsId), combination_(combination) 
+    : AbstractScreen(dmsId, rsId), combination_(combination)
 {
     type_ = ScreenType::UNDEFINE;
     canHasChild_ = true;

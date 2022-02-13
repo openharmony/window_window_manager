@@ -63,6 +63,15 @@ public:
     bool MakeMirror(ScreenId, std::vector<ScreenId> screens);
     void DumpScreenInfo() const;
     void DumpScreenGroupInfo() const;
+
+    // colorspace, gamut
+    DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);
+    DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut);
+    DMError SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx);
+    DMError GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap);
+    DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap);
+    DMError SetScreenColorTransform(ScreenId screenId);
+
 private:
     void OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent);
     void ProcessScreenDisconnected(ScreenId rsScreenId);

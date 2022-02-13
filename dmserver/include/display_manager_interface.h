@@ -78,8 +78,8 @@ public:
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) = 0;
     virtual DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut) = 0;
     virtual DMError SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx) = 0;
-    virtual DMError GetScreenGamutsMap(ScreenId screenId, ScreenGamutMap& gamutMap) = 0;
-    virtual DMError SetScreenGamutsMap(ScreenId screenId, ScreenGamutMap gamutMap) = 0;
+    virtual DMError GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap) = 0;
+    virtual DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap) = 0;
     virtual DMError SetScreenColorTransform(ScreenId screenId) = 0;
 
     virtual bool RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
