@@ -73,7 +73,8 @@ std::vector<ScreenId> AbstractScreenController::GetShotScreenIds(std::vector<Scr
     return screenIds;
 }
 
-std::vector<ScreenId> AbstractScreenController::GetAllMirrorScreenIds(std::vector<ScreenId> mirrorScreenIds) const
+std::vector<ScreenId> AbstractScreenController::GetAllExpandOrMirrorScreenIds(
+    std::vector<ScreenId> mirrorScreenIds) const
 {
     std::vector<ScreenId> screenIds;
     for (ScreenId screenId : mirrorScreenIds) {
@@ -83,7 +84,7 @@ std::vector<ScreenId> AbstractScreenController::GetAllMirrorScreenIds(std::vecto
         }
     }
     if (screenIds.empty()) {
-        WLOGI("GetAllMirrorScreenIds, screenIds is empty");
+        WLOGI("GetAllExpandOrMirrorScreenIds, screenIds is empty");
         return screenIds;
     }
     for (auto iter = dmsScreenMap_.begin(); iter != dmsScreenMap_.end(); iter++) {
@@ -93,7 +94,7 @@ std::vector<ScreenId> AbstractScreenController::GetAllMirrorScreenIds(std::vecto
         auto screenIdIter = std::find(screenIds.begin(), screenIds.end(), iter->first);
         if (screenIdIter == screenIds.end()) {
             screenIds.emplace_back(iter->first);
-            WLOGI("GetAllMirrorScreenIds: screenId: %{public}" PRIu64"", iter->first);
+            WLOGI("GetAllExpandOrMirrorScreenIds: screenId: %{public}" PRIu64"", iter->first);
         }
     }
     return screenIds;
@@ -428,7 +429,7 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
     ScreenId dmsScreenId = SCREEN_ID_INVALID;
     auto iter = rs2DmsScreenIdMap_.find(result);
     if (iter == rs2DmsScreenIdMap_.end()) {
-        if (!option.isForShot) {
+        if (!option.isForShot_) {
             WLOGI("CreateVirtualScreen is not shot");
             dmsScreenId = dmsScreenCount_;
             sptr<AbstractScreen> absScreen = new AbstractScreen(dmsScreenId, result);
@@ -620,7 +621,6 @@ bool AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenI
         return false;
     }
     WLOGFI("GetAbstractScreenGroup start");
-    GetRSDisplayNodeByScreenId(screenId);
     auto group = GetAbstractScreenGroup(screen->groupDmsId_);
     if (group == nullptr) {
         WLOGFE("group is nullptr, try to get");
@@ -637,7 +637,6 @@ bool AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenI
         }
     }
     WLOGFI("GetAbstractScreenGroup end");
-    GetRSDisplayNodeByScreenId(screenId);
     group->combination_ = ScreenCombination::SCREEN_MIRROR;
     group->mirrorScreenId_ = screen->dmsId_;
     Point point;
@@ -656,6 +655,40 @@ bool AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenI
         group->AddChild(mirrorScreen, point);
     }
     WLOGFI("MakeMirror success");
+    return true;
+}
+
+bool AbstractScreenController::MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints)
+{
+    ScreenId defaultScreenId = GetDefaultAbstractScreenId();
+    WLOGI("MakeExpand, defaultScreenId:%{public}" PRIu64"", defaultScreenId);
+    auto defaultScreen = GetAbstractScreen(defaultScreenId);
+    if (defaultScreen == nullptr) {
+        return false;
+    }
+    auto group = GetAbstractScreenGroup(defaultScreen->groupDmsId_);
+    if (group == nullptr) {
+        return false;
+    }
+    group->combination_ = ScreenCombination::SCREEN_EXPAND;
+    for (uint64_t i = 0; i != screenIds.size(); i++) {
+        ScreenId expandScreenId = screenIds[i];
+        Point expandPoint = startPoints[i];
+        WLOGFI("expandScreenId: %{public}" PRIu64", Point: %{public}d, %{public}d",
+            expandScreenId, expandPoint.posX_, expandPoint.posY_);
+        auto expandScreen = GetAbstractScreen(expandScreenId);
+        if (expandScreen == nullptr) {
+            WLOGFE("expandScreen:%{public}" PRIu64" is nullptr", expandScreenId);
+            continue;
+        }
+        WLOGI("expandScreen->groupDmsId_: %{public}" PRIu64"", expandScreen->groupDmsId_);
+        auto originGroup = GetAbstractScreenGroup(expandScreen->groupDmsId_);
+        if (originGroup != nullptr) {
+            originGroup->RemoveChild(expandScreen);
+        }
+        group->AddChild(expandScreen, expandPoint);
+    }
+    WLOGI("MakeExpand success");
     return true;
 }
 
@@ -684,7 +717,7 @@ void AbstractScreenController::DumpScreenInfo() const
         std::string isGroup = (dmsScreenGroupMap_.find(screen->dmsId_) != dmsScreenGroupMap_.end()) ? "true" : "false";
         NodeId nodeId = (screen->rsDisplayNode_ == nullptr) ? INVALID_SCREEN_ID : screen->rsDisplayNode_->GetId();
         WLOGI("%{public}20" PRIu64" %{public}20" PRIu64" %{public}20" PRIu64" %{public}10s %{public}10s %{public}20"
-            PRIu64" %{public}10s %{public}20" PRIu64" ", screen->dmsId_,screen->rsId_, screen->groupDmsId_,
+            PRIu64" %{public}10s %{public}20" PRIu64" ", screen->dmsId_, screen->rsId_, screen->groupDmsId_,
             isGroup.c_str(), screenType.c_str(), nodeId, isMirrored.c_str(), screen->rSDisplayNodeConfig_.mirrorNodeId);
     }
 }

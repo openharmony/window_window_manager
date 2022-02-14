@@ -371,6 +371,7 @@ void DisplayManagerAdapter::Clear()
 
 DMError DisplayManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
     }
@@ -452,6 +453,7 @@ std::vector<sptr<Screen>> DisplayManagerAdapter::GetAllScreens()
 
 DMError DisplayManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
     }

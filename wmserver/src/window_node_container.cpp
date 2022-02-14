@@ -20,6 +20,7 @@
 #include <cinttypes>
 
 #include "display_manager_service_inner.h"
+#include "dm_common.h"
 #include "window_helper.h"
 #include "window_layout_policy_cascade.h"
 #include "window_layout_policy_tile.h"
@@ -965,6 +966,47 @@ void WindowNodeContainer::RaiseInputMethodWindowPriorityIfNeeded(const sptr<Wind
         WLOGFI("raise input method float window priority.");
         node->priority_ = WINDOW_TYPE_RAISED_INPUT_METHOD;
     }
+}
+
+void WindowNodeContainer::MoveWindowNode(sptr<WindowNodeContainer>& container)
+{
+    WLOGFI("MoveWindowNode: disconnect expand display, move window node");
+    sptr<WindowNode> belowAppNode = container->GetBelowAppWindowNode();
+    sptr<WindowNode> appNode = container->GetAppWindowNode();
+    sptr<WindowNode> aboveAppNode = container->GetAboveAppWindowNode();
+    for (auto& node : belowAppNode->children_) {
+        WLOGFI("belowAppWindowNode_: move windowNode: {public}%d from displayId: %{public}" PRId64 ""
+            " to displayID %{public}" PRId64 "", node->GetWindowId(), node->GetDisplayId(), displayId_);
+        node->SetDisplayId(displayId_);
+        belowAppWindowNode_->children_.push_back(node);
+    }
+    for (auto& node : appNode->children_) {
+        WLOGFI("appWindowNode_: move windowNode: {public}%d from displayId: %{public}" PRId64 ""
+            " to displayID %{public}" PRId64 "", node->GetWindowId(), node->GetDisplayId(), displayId_);
+        node->SetDisplayId(displayId_);
+        appWindowNode_->children_.push_back(node);
+    }
+    for (auto& node : aboveAppNode->children_) {
+        WLOGFI("aboveAppWindowNode_: move windowNode: {public}%d from displayId: %{public}" PRId64 ""
+            " to displayID %{public}" PRId64 "", node->GetWindowId(), node->GetDisplayId(), displayId_);
+        node->SetDisplayId(displayId_);
+        aboveAppWindowNode_->children_.push_back(node);
+    }
+}
+
+sptr<WindowNode> WindowNodeContainer::GetBelowAppWindowNode() const
+{
+    return belowAppWindowNode_;
+}
+
+sptr<WindowNode> WindowNodeContainer::GetAppWindowNode() const
+{
+    return appWindowNode_;
+}
+
+sptr<WindowNode> WindowNodeContainer::GetAboveAppWindowNode() const
+{
+    return aboveAppWindowNode_;
 }
 }
 }

@@ -65,7 +65,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 .density_ = density,
                 .surface_ = surface,
                 .flags_ = flags,
-                .isForShot = isForShot
+                .isForShot_ = isForShot
             };
             ScreenId screenId = CreateVirtualScreen(option);
             reply.WriteUint64(static_cast<uint64_t>(screenId));
