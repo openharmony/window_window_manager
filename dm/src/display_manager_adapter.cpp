@@ -206,6 +206,15 @@ DMError DisplayManagerAdapter::DestroyVirtualScreen(ScreenId screenId)
     return displayManagerServiceProxy_->DestroyVirtualScreen(screenId);
 }
 
+DMError DisplayManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
+{
+    if (!InitDMSProxyLocked()) {
+        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
+    }
+    WLOGFI("DisplayManagerAdapter::SetVirtualScreenSurface");
+    return displayManagerServiceProxy_->SetVirtualScreenSurface(screenId, surface);
+}
+
 bool DisplayManagerAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
