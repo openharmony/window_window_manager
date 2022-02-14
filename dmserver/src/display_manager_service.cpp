@@ -455,6 +455,7 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> screenId, std::v
 
 bool DisplayManagerService::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
+    WM_SCOPED_TRACE("dms:SetScreenActiveMode(%" PRIu64", %u)", screenId, modeId);
     return abstractScreenController_->SetScreenActiveMode(screenId, modeId);
 }
 } // namespace OHOS::Rosen
