@@ -48,7 +48,7 @@ public:
     virtual void LayoutWindowTree();
     virtual void RemoveWindowNode(sptr<WindowNode>& node);
     virtual void UpdateWindowNode(sptr<WindowNode>& node);
-    virtual void UpdateLayoutRect(sptr<WindowNode>& node);
+    virtual void UpdateLayoutRect(sptr<WindowNode>& node) = 0;
     void UpdateDefaultFoatingRect();
 
 protected:
