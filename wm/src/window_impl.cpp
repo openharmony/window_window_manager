@@ -930,8 +930,7 @@ bool WindowImpl::IsPointerEventConsumed()
 void WindowImpl::AdjustWindowAnimationFlag()
 {
     WindowType winType = property_->GetWindowType();
-    if (winType == WindowType::WINDOW_TYPE_WALLPAPER || winType == WindowType::WINDOW_TYPE_DESKTOP ||
-        winType == WindowType::WINDOW_TYPE_STATUS_BAR || winType == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+    if (!WindowHelper::IsAppWindow(winType)) {
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
     }
 }
