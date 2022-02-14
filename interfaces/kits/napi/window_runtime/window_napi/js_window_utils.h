@@ -36,6 +36,7 @@ namespace {
     enum class ApiWindowType : uint32_t {
         TYPE_BASE,
         TYPE_APP = TYPE_BASE,
+        TYPE_APP_SUB_WINDOW,
         TYPE_SYSTEM_ALERT,
         TYPE_INPUT_METHOD,
         TYPE_STATUS_BAR,
@@ -54,6 +55,7 @@ namespace {
         { WindowType::WINDOW_TYPE_KEYGUARD,            ApiWindowType::TYPE_KEYGUARD       },
         { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,      ApiWindowType::TYPE_VOLUME_OVERLAY },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR,      ApiWindowType::TYPE_NAVIGATION_BAR },
+        { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      ApiWindowType::TYPE_APP_SUB_WINDOW },
     };
     const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
         { ApiWindowType::TYPE_APP,             WindowType::APP_SUB_WINDOW_BASE            },
@@ -64,6 +66,7 @@ namespace {
         { ApiWindowType::TYPE_KEYGUARD,        WindowType::WINDOW_TYPE_KEYGUARD           },
         { ApiWindowType::TYPE_VOLUME_OVERLAY,  WindowType::WINDOW_TYPE_VOLUME_OVERLAY     },
         { ApiWindowType::TYPE_NAVIGATION_BAR,  WindowType::WINDOW_TYPE_NAVIGATION_BAR     },
+        { ApiWindowType::TYPE_APP_SUB_WINDOW,  WindowType::WINDOW_TYPE_APP_SUB_WINDOW     },
     };
     enum class ApiWindowMode : uint32_t {
         UNDEFINED = 1,

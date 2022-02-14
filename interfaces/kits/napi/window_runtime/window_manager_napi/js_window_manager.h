@@ -39,7 +39,6 @@ public:
     static NativeValue* SetWindowLayoutMode(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
-    bool GetNativeContext(NativeValue* nativeContext);
     bool IfCallbackRegistered(std::string type, NativeValue* jsListenerObject);
     void RegisterWmListenerWithType(NativeEngine& engine, std::string type, NativeValue* value);
     void UnregisterAllWmListenerWithType(std::string type);

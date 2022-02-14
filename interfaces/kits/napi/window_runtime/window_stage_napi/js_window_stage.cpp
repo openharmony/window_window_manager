@@ -120,7 +120,7 @@ void JsWindowStage::LifeCycleCallBack(WindowStageEventType type)
         std::shared_ptr<NativeReference> callback = iter->first;
         int argc = 1;
         NativeValue* argv[1];
-        argv[0] = engine_->CreateNumber((int32_t)type);
+        argv[0] = engine_->CreateNumber(static_cast<int32_t>(type));
         engine_->CallFunction(object_, callback->Get(), argv, argc);
     }
 }
