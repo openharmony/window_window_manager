@@ -143,6 +143,33 @@ DMError DisplayManagerProxy::DestroyVirtualScreen(ScreenId screenId)
     return static_cast<DMError>(reply.ReadInt32());
 }
 
+DMError DisplayManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("SetVirtualScreenSurface: remote is nullptr");
+        return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("SetVirtualScreenSurface: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId)) ||
+        !data.WriteRemoteObject(surface->GetProducer()->AsObject())) {
+        WLOGFW("SetVirtualScreenSurface: Write screenId/surface failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE, data, reply, option) != ERR_NONE) {
+        WLOGFW("SetVirtualScreenSurface: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
 bool DisplayManagerProxy::RequestRotation(ScreenId screenId, Rotation rotation)
 {
     sptr<IRemoteObject> remote = Remote();

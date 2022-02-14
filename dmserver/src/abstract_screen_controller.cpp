@@ -474,6 +474,17 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
     return DMError::DM_OK;
 }
 
+DMError AbstractScreenController::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
+{
+    WLOGFI("AbstractScreenController::SetVirtualScreenSurface");
+    int32_t res = rsInterface_.SetVirtualScreenSurface(screenId, surface);
+    if (res != 0) {
+        WLOGE("SetVirtualScreenSurface failed in RenderService");
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    return DMError::DM_OK;
+}
+
 bool AbstractScreenController::RequestRotation(ScreenId screenId, Rotation rotation)
 {
     WLOGD("request rotation: screen %{public}" PRIu64"", screenId);
