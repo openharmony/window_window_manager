@@ -48,6 +48,7 @@ public:
     void OnStop() override;
     ScreenId CreateVirtualScreen(VirtualScreenOption option) override;
     DMError DestroyVirtualScreen(ScreenId screenId) override;
+    DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
 
     DisplayId GetDefaultDisplayId() override;
     DisplayInfo GetDisplayInfoById(DisplayId displayId) override;

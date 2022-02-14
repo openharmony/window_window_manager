@@ -49,6 +49,7 @@ public:
         TRANS_ID_SCREEN_BASE = 1000,
         TRANS_ID_CREATE_VIRTUAL_SCREEN = TRANS_ID_SCREEN_BASE,
         TRANS_ID_DESTROY_VIRTUAL_SCREEN,
+        TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE,
         TRANS_ID_GET_SCREEN_INFO_BY_ID,
         TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID,
         TRANS_ID_SET_SCREEN_ACTIVE_MODE,
@@ -71,6 +72,7 @@ public:
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
+    virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) = 0;
     virtual bool RequestRotation(ScreenId screenId, Rotation rotation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
 

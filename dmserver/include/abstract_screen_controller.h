@@ -53,6 +53,7 @@ public:
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
+    DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     bool RequestRotation(ScreenId screenId, Rotation rotation);
 
     void OnScreenRotate(ScreenId dmsScreenId, Rotation before, Rotation after);

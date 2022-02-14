@@ -148,6 +148,17 @@ DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
     return abstractScreenController_->DestroyVirtualScreen(screenId);
 }
 
+DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
+{
+    WLOGFI("SetVirtualScreenSurface::ScreenId: %{public}" PRIu64 "", screenId);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("SetVirtualScreenSurface: virtualScreenId is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    WM_SCOPED_TRACE("dms:SetVirtualScreenSurface(%" PRIu64")", screenId);
+    return abstractScreenController_->SetVirtualScreenSurface(screenId, surface);
+}
+
 bool DisplayManagerService::RequestRotation(ScreenId screenId, Rotation rotation)
 {
     WM_SCOPED_TRACE("dms:RequestRotation(%" PRIu64")", screenId);

@@ -189,4 +189,9 @@ DMError ScreenManager::DestroyVirtualScreen(ScreenId screenId)
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().DestroyVirtualScreen(screenId);
 }
+
+DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenSurface(screenId, surface);
+}
 } // namespace OHOS::Rosen
