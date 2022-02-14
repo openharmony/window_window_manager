@@ -272,6 +272,10 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             FlushWindowInfoWithDisplayId(displayId);
             break;
         }
+        case DisplayStateChangeType::DESTROY: {
+            windowRoot_->NotifyDisplayDestory(displayId);
+            break;
+        }
         default: {
             WLOGFE("unknown DisplayStateChangeType:%{public}u", type);
             return;
