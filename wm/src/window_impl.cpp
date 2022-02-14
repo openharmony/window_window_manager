@@ -52,6 +52,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetDisplayId(option->GetDisplayId());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetHitOffset(option->GetHitOffset());
+    AdjustWindowAnimationFlag();
     auto& sysBarPropMap = option->GetSystemBarProperty();
     for (auto it : sysBarPropMap) {
         property_->SetSystemBarProperty(it.first, it.second);
@@ -243,6 +244,7 @@ WMError WindowImpl::SetWindowType(WindowType type)
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         property_->SetWindowType(type);
+        AdjustWindowAnimationFlag();
         return WMError::WM_OK;
     }
     if (property_->GetWindowType() != type) {
@@ -770,7 +772,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reas
         Ace::ViewportConfig config;
         config.SetSize(rect.width_, rect.height_);
         config.SetDensity(virtualPixelRatio);
-        uiContent_->UpdateViewportConfig(config);
+        uiContent_->UpdateViewportConfig(config, reason);
         WLOGFI("notify uiContent window size change end");
     }
 }
@@ -925,6 +927,15 @@ bool WindowImpl::IsPointerEventConsumed()
     return startDragFlag_ || startMoveFlag_;
 }
 
+void WindowImpl::AdjustWindowAnimationFlag()
+{
+    WindowType winType = property_->GetWindowType();
+    if (winType == WindowType::WINDOW_TYPE_WALLPAPER || winType == WindowType::WINDOW_TYPE_DESKTOP ||
+        winType == WindowType::WINDOW_TYPE_STATUS_BAR || winType == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+        property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
+    }
+}
+
 void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     int32_t action = pointerEvent->GetPointerAction();
@@ -1001,12 +1012,22 @@ void WindowImpl::UpdateWindowState(WindowState state)
             if (uiContent_ != nullptr) {
                 uiContent_->Background();
             }
+            if (abilityContext_ != nullptr) {
+                WLOGFD("DoAbilityBackground KEYGUARD, id: %{public}d", GetWindowId());
+                AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(abilityContext_->GetToken(),
+                    static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
+            }
             break;
         }
         case WindowState::STATE_UNFROZEN: {
             state_ = WindowState::STATE_SHOWN;
             if (uiContent_ != nullptr) {
                 uiContent_->Foreground();
+            }
+            if (abilityContext_ != nullptr) {
+                WLOGFD("DoAbilityForeground KEYGUARD, id: %{public}d", GetWindowId());
+                AAFwk::AbilityManagerClient::GetInstance()->DoAbilityForeground(abilityContext_->GetToken(),
+                    static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
             }
             break;
         }

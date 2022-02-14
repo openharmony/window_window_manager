@@ -86,8 +86,8 @@ ohos_shared_library("libwms") {
   ]
 
   external_deps = [
+    "ability_base:want",
     "ability_runtime:ability_manager",
-    "ability_runtime:want",
     "bytrace_standard:bytrace_core",
     "ces_standard:cesfwk_innerkits",
     "graphic_standard:surface",

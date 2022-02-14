@@ -24,9 +24,14 @@ void DisplayManagerAgent::NotifyDisplayPowerEvent(DisplayPowerEvent event, Event
     SingletonContainer::Get<DisplayManager>().NotifyDisplayPowerEvent(event, status);
 }
 
-void DisplayManagerAgent::NotifyDisplayStateChanged(DisplayState state)
+void DisplayManagerAgent::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 {
-    SingletonContainer::Get<DisplayManager>().NotifyDisplayStateChanged(state);
+    SingletonContainer::Get<DisplayManager>().NotifyDisplayStateChanged(id, state);
+}
+
+void DisplayManagerAgent::OnDisplayChange(const sptr<DisplayInfo> info, DisplayChangeEvent event)
+{
+    SingletonContainer::Get<DisplayManager>().NotifyDisplayChangedEvent(info, event);
 }
 } // namespace Rosen
 } // namespace OHOS

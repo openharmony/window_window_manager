@@ -23,18 +23,19 @@
 #include <surface.h>
 #include <transaction/rs_interfaces.h>
 
-#include "screen.h"
-#include "dm_common.h"
 #include "abstract_screen.h"
+#include "dm_common.h"
+#include "screen.h"
 
 namespace OHOS::Rosen {
 class AbstractScreenController : public RefBase {
-using OnAbstractScreenCallback = std::function<void(sptr<AbstractScreen>)>;
+using OnAbstractScreenConnectCb = std::function<void(sptr<AbstractScreen>)>;
+using OnAbstractScreenChangeCb = std::function<void(sptr<AbstractScreen>, DisplayChangeEvent event)>;
 public:
     struct AbstractScreenCallback : public RefBase {
-        OnAbstractScreenCallback onConnected_;
-        OnAbstractScreenCallback onDisconnected_;
-        OnAbstractScreenCallback onChanged_;
+        OnAbstractScreenConnectCb onConnect_;
+        OnAbstractScreenConnectCb onDisconnect_;
+        OnAbstractScreenChangeCb onChange_;
     };
 
     AbstractScreenController(std::recursive_mutex& mutex);
@@ -43,6 +44,8 @@ public:
     void Init();
     std::vector<ScreenId> GetAllScreenIds();
     sptr<AbstractScreen> GetAbstractScreen(ScreenId dmsScreenId) const;
+    std::vector<ScreenId> GetShotScreenIds(std::vector<ScreenId>) const;
+    std::vector<ScreenId> GetAllMirrorScreenIds(std::vector<ScreenId>) const;
     sptr<AbstractScreenGroup> GetAbstractScreenGroup(ScreenId dmsScreenId);
     ScreenId GetDefaultAbstractScreenId();
     ScreenId ConvertToRsScreenId(ScreenId dmsScreenId);
@@ -50,13 +53,27 @@ public:
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
+    bool RequestRotation(ScreenId screenId, Rotation rotation);
+
+    void OnScreenRotate(ScreenId dmsScreenId, Rotation before, Rotation after);
     bool IsScreenGroup(ScreenId screenId) const;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
     void UpdateRSTree(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
+    bool MakeMirror(ScreenId, std::vector<ScreenId> screens);
+    void DumpScreenInfo() const;
+    void DumpScreenGroupInfo() const;
+
+    // colorspace, gamut
+    DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);
+    DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut);
+    DMError SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx);
+    DMError GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap);
+    DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap);
+    DMError SetScreenColorTransform(ScreenId screenId);
 
 private:
-    void OnRsScreenChange(ScreenId rsScreenId, ScreenEvent screenEvent);
+    void OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent);
     void ProcessScreenDisconnected(ScreenId rsScreenId);
     bool FillAbstractScreen(sptr<AbstractScreen>& absScreen, ScreenId rsScreenId);
     sptr<AbstractScreenGroup> AddToGroupLocked(sptr<AbstractScreen> newScreen);
@@ -64,9 +81,10 @@ private:
     bool CheckScreenInScreenGroup(sptr<AbstractScreen> newScreen) const;
     sptr<AbstractScreenGroup> AddAsFirstScreenLocked(sptr<AbstractScreen> newScreen);
     sptr<AbstractScreenGroup> AddAsSuccedentScreenLocked(sptr<AbstractScreen> newScreen);
+    void ProcessScreenModeChanged(ScreenId rsScreenId);
 
     std::recursive_mutex& mutex_;
-    OHOS::Rosen::RSInterfaces *rsInterface_;
+    OHOS::Rosen::RSInterfaces& rsInterface_;
     std::atomic<ScreenId> dmsScreenCount_;
     // No AbstractScreenGroup
     std::map<ScreenId, ScreenId> rs2DmsScreenIdMap_;

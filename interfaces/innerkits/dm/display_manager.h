@@ -35,7 +35,7 @@ public:
     public:
         virtual void OnCreate(DisplayId) = 0;
         virtual void OnDestroy(DisplayId) = 0;
-        virtual void OnChange(DisplayId) = 0;
+        virtual void OnChange(DisplayId, DisplayChangeEvent) = 0;
     };
 
     std::vector<const sptr<Display>> GetAllDisplays();
@@ -64,6 +64,7 @@ public:
     uint32_t GetScreenBrightness(uint64_t screenId) const;
     void NotifyDisplayEvent(DisplayEvent event);
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
+
 private:
     DisplayManager();
     ~DisplayManager();
@@ -74,7 +75,8 @@ private:
     sptr<Impl> pImpl_;
 
     void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
-    void NotifyDisplayStateChanged(DisplayState state);
+    void NotifyDisplayStateChanged(DisplayId id, DisplayState state);
+    void NotifyDisplayChangedEvent(const sptr<DisplayInfo> info, DisplayChangeEvent event);
 };
 } // namespace OHOS::Rosen
 

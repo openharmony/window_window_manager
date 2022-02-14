@@ -54,7 +54,8 @@ public:
         TRANS_ID_SET_COLOR_SPACE, // set color space
         TRANS_ID_GET_COLOR_SPACE, // get color space
         TRANS_ID_SET_BACKGROUND_BLUR,
-        TRANS_ID_SET_APLPHA
+        TRANS_ID_SET_APLPHA,
+        TRANS_ID_UPDATE_LAYOUT_MODE,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId)  = 0;
@@ -78,6 +79,7 @@ public:
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
     virtual void ProcessWindowTouchedEvent(uint32_t windowId) = 0;
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
+    virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) = 0;
 
     // colorspace, gamut
     virtual bool IsSupportWideGamut(uint32_t windowId) = 0;

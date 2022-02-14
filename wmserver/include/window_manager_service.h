@@ -36,7 +36,7 @@ namespace OHOS {
 namespace Rosen {
 class DisplayChangeListener : public IDisplayChangeListener {
 public:
-    virtual void OnDisplayStateChange(DisplayStateChangeType type) override;
+    virtual void OnDisplayStateChange(DisplayId id, DisplayStateChangeType type) override;
 };
 class WindowManagerService : public SystemAbility, public WindowManagerStub {
 friend class DisplayChangeListener;
@@ -69,6 +69,7 @@ public:
     void ProcessWindowTouchedEvent(uint32_t windowId) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
+    WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) override;
 
     // colorspace, gamut
     virtual bool IsSupportWideGamut(uint32_t windowId) override;
@@ -88,7 +89,7 @@ private:
     bool Init();
     void RegisterSnapshotHandler();
     void OnWindowEvent(Event event, uint32_t windowId);
-    void NotifyDisplayStateChange(DisplayStateChangeType type);
+    void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
 
     static inline SingletonDelegator<WindowManagerService> delegator;
     std::recursive_mutex mutex_;

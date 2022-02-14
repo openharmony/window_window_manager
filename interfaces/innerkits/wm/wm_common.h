@@ -169,6 +169,11 @@ enum class ColorSpace : uint32_t {
     COLOR_SPACE_WIDE_GAMUT,  // Wide gamut color space. The specific wide color gamut depends on thr screen.
 };
 
+enum class WindowAnimation : uint32_t {
+    NONE,
+    DEFAULT,
+};
+
 struct AvoidArea {
     Rect leftRect;
     Rect topRect;

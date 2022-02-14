@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-#include <refbase.h>
 #include <surface.h>
 #include <screen_manager/screen_types.h>
 
@@ -27,8 +26,6 @@
 
 namespace OHOS::Rosen {
 class ScreenInfo;
-using ScreenId = uint64_t;
-static constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
 
 struct Point {
     int32_t posX_;
@@ -48,6 +45,7 @@ struct VirtualScreenOption {
     float density_;
     sptr<Surface> surface_;
     int32_t flags_;
+    bool isForShot {true};
 };
 
 class Screen : public RefBase {
@@ -72,8 +70,8 @@ public:
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const;
     DMError GetScreenColorGamut(ScreenColorGamut& colorGamut) const;
     DMError SetScreenColorGamut(int32_t colorGamutIdx);
-    DMError GetScreenGamutsMap(ScreenGamutMap& gamutMap) const;
-    DMError SetScreenGamutsMap(ScreenGamutMap gamutMap);
+    DMError GetScreenGamutMap(ScreenGamutMap& gamutMap) const;
+    DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
 
 private:

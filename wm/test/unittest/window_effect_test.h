@@ -13,23 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_DISPLAY_MANAGER_AGENT_H
-#define OHOS_ROSEN_DISPLAY_MANAGER_AGENT_H
+#ifndef FRAMEWORKS_WM_TEST_UT_WINDOW_Effect_TEST_H
+#define FRAMEWORKS_WM_TEST_UT_WINDOW_Effect_TEST_H
 
-#include <refbase.h>
-#include <display_manager_agent_default.h>
+#include <gtest/gtest.h>
+#include "mock_window_adapter.h"
+#include "singleton_mocker.h"
+#include "window_impl.h"
 
 namespace OHOS {
 namespace Rosen {
-class DisplayManagerAgent : public DisplayManagerAgentDefault {
+using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
+class WindowEffectTest : public testing::Test {
 public:
-    DisplayManagerAgent() = default;
-    ~DisplayManagerAgent() = default;
-
-    virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) override;
-    virtual void NotifyDisplayStateChanged(DisplayId id, DisplayState state) override;
-    virtual void OnDisplayChange(const sptr<DisplayInfo>, DisplayChangeEvent) override;
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    virtual void SetUp() override;
+    virtual void TearDown() override;
 };
-}
-}
-#endif // OHOS_ROSEN_DISPLAY_MANAGER_AGENT_H
+} // namespace ROSEN
+} // namespace OHOS
+
+#endif // FRAMEWORKS_WM_TEST_UT_WINDOW_Effect_TEST_H

@@ -27,7 +27,7 @@ public:
     ~DisplayManagerAgentProxy() = default;
 
     virtual void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) override;
-    virtual void NotifyDisplayStateChanged(DisplayState state) override;
+    virtual void NotifyDisplayStateChanged(DisplayId id, DisplayState state) override;
     virtual void OnScreenConnect(sptr<ScreenInfo>) override;
     virtual void OnScreenDisconnect(ScreenId) override;
     virtual void OnScreenChange(const std::vector<const sptr<ScreenInfo>>&, ScreenChangeEvent) override;

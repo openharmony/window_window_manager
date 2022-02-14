@@ -37,13 +37,15 @@ class WindowLayoutPolicy : public RefBase {
 public:
     WindowLayoutPolicy() = delete;
     WindowLayoutPolicy(const Rect& displayRect, const uint64_t& screenId,
-        const sptr<WindowNode>& belowAppNode, const sptr<WindowNode>& appNode, const sptr<WindowNode>& aboveAppNode);
+        sptr<WindowNode>& belowAppNode, sptr<WindowNode>& appNode, sptr<WindowNode>& aboveAppNode);
     ~WindowLayoutPolicy() = default;
     virtual void Launch();
     virtual void Clean();
     virtual void Reset();
+    virtual void Reorder();
     virtual void UpdateDisplayInfo();
     virtual void AddWindowNode(sptr<WindowNode>& node);
+    virtual void LayoutWindowTree();
     virtual void RemoveWindowNode(sptr<WindowNode>& node);
     virtual void UpdateWindowNode(sptr<WindowNode>& node);
     virtual void UpdateLayoutRect(sptr<WindowNode>& node);
@@ -52,9 +54,9 @@ public:
 protected:
     const Rect& displayRect_;
     const uint64_t& screenId_;
-    const sptr<WindowNode>& belowAppWindowNode_;
-    const sptr<WindowNode>& appWindowNode_;
-    const sptr<WindowNode>& aboveAppWindowNode_;
+    sptr<WindowNode>& belowAppWindowNode_;
+    sptr<WindowNode>& appWindowNode_;
+    sptr<WindowNode>& aboveAppWindowNode_;
     Rect limitRect_ = { 0, 0, 0, 0 };
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
@@ -62,12 +64,12 @@ protected:
     };
     void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
     void UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect);
-    virtual void LayoutWindowTree();
     virtual void LayoutWindowNode(sptr<WindowNode>& node);
     AvoidPosType GetAvoidPosType(const Rect& rect);
     void LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect);
     void SetRectForFloating(const sptr<WindowNode>& node);
     Rect ComputeDecoratedWindowRect(const Rect& winRect);
+    bool IsVertical() const;
     Rect defaultFloatingRect_ = { 0, 0, 0, 0 };
 };
 }
