@@ -42,7 +42,7 @@ public:
     virtual void AfterForeground() override;
     virtual void AfterBackground() override;
     virtual void AfterFocused() override;
-    virtual void AfterUnFocused() override;
+    virtual void AfterUnfocused() override;
 
 private:
     NativeValue* CreateJsSubWindowArrayObject(NativeEngine& engine, std::vector<sptr<Window>> subWinVec);
@@ -69,6 +69,7 @@ private:
     sptr<IWindowLifeCycle> lifecycleListener_ = nullptr;
     std::map<std::shared_ptr<NativeReference>, int> eventCallbackMap_;
     bool regLifeCycleListenerFlag_ = false;
+    std::recursive_mutex mtx_;
 };
 }  // namespace Rosen
 }  // namespace OHOS
