@@ -39,14 +39,8 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     }
     windowId = GenWindowId();
     property->SetWindowId(windowId);
-
-    // set default transition effect for window
-    static auto effect = RSTransitionEffect::Create()->Scale({ 0.0f, 0.0f, 0.0f })->Opacity(0.0f);
-    if (surfaceNode != nullptr) {
-        surfaceNode->SetTransitionEffect(effect);
-    }
-
     sptr<WindowNode> node = new WindowNode(property, window, surfaceNode);
+    UpdateWindowAnimation(node);
     return windowRoot_->SaveWindow(node);
 }
 
@@ -333,6 +327,7 @@ WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
     }
     auto property = node->GetWindowProperty();
     property->SetWindowType(type);
+    UpdateWindowAnimation(node);
     WMError res = windowRoot_->UpdateWindowNode(windowId);
     if (res != WMError::WM_OK) {
         return res;
@@ -422,6 +417,25 @@ void WindowController::FlushWindowInfoWithDisplayId(DisplayId displayId)
     WLOGFI("FlushWindowInfoWithDisplayId");
     RSTransaction::FlushImplicitTransaction();
     inputWindowMonitor_->UpdateInputWindowByDisplayId(displayId);
+}
+
+void WindowController::UpdateWindowAnimation(const sptr<WindowNode>& node)
+{
+    if (node == nullptr || node->surfaceNode_ == nullptr) {
+        WLOGFE("windowNode or surfaceNode is nullptr");
+        return;
+    }
+
+    uint32_t animationFlag = node->GetWindowProperty()->GetAnimationFlag();
+    uint32_t windowId = node->GetWindowProperty()->GetWindowId();
+    WLOGFI("windowId: %{public}u, animationFlag: %{public}u", windowId, animationFlag);
+    if (animationFlag == static_cast<uint32_t>(WindowAnimation::DEFAULT)) {
+        // set default transition effect for window: scale from 1.0 to 0.7, fade from 1.0 to 0.0
+        static const auto effect = RSTransitionEffect::Create()->Scale(Vector3f(0.7f, 0.7f, 0.0f))->Opacity(0.0f);
+        node->surfaceNode_->SetTransitionEffect(effect);
+    } else {
+        node->surfaceNode_->SetTransitionEffect(nullptr);
+    }
 }
 
 WMError WindowController::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode)
