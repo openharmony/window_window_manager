@@ -34,6 +34,7 @@ public:
     ~WindowLayoutPolicyTile() = default;
     void Launch() override;
     void AddWindowNode(sptr<WindowNode>& node) override;
+    void UpdateLayoutRect(sptr<WindowNode>& node) override;
 
 private:
     Rect singleRect_ = { 0, 0, 0, 0 };
