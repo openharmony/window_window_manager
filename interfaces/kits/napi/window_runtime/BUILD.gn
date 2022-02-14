@@ -21,6 +21,7 @@ config("window_manager_napi_config") {
     "//foundation/windowmanager/interfaces/kits/napi/window_runtime/window_napi",
     "//foundation/windowmanager/interfaces/kits/napi/window_runtime/window_manager_napi",
     "//foundation/windowmanager/interfaces/innerkits/wm",
+    "//foundation/windowmanager/interfaces/innerkits/dm",
     "//foundation/windowmanager/wm/include",
     "//foundation/windowmanager/utils/include",
   ]
