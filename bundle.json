@@ -19,6 +19,7 @@
       "ram": "8000KB",
       "deps": {
         "components": [
+          "ability_base",
           "libhilog",
           "ipc_core",
           "system_ability_fwk",
@@ -28,7 +29,7 @@
           "bytrace_core",
           "surface",
           "ability_context_native",
-          "ability_manager",
+          "ability_runtime",
           "want",
           "ace_uicontent",
           "appexecfwk_base",
