@@ -518,7 +518,7 @@ void WindowManagerProxy::SetColorSpace(uint32_t windowId, ColorSpace colorSpace)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;

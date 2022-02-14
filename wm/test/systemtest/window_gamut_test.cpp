@@ -83,6 +83,10 @@ HWTEST_F(WindowGamutTest, SetGetColorSpace01, Function | MediumTest | Level3)
     const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
 
     window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
+    window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+    ColorSpace invalidColorSpace =
+        static_cast<ColorSpace>(static_cast<uint32_t>(ColorSpace::COLOR_SPACE_WIDE_GAMUT) + 1);
+    window->SetColorSpace(invalidColorSpace);  // invalid param
     ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
 
     window->Destroy();
