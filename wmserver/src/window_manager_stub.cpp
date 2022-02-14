@@ -60,26 +60,11 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case TRANS_ID_MOVE: {
-            uint32_t windowId = data.ReadUint32();
-            int32_t x = data.ReadInt32();
-            int32_t y = data.ReadInt32();
-            WMError errCode = MoveTo(windowId, x, y);
-            reply.WriteInt32(static_cast<int32_t>(errCode));
-            break;
-        }
-        case TRANS_ID_RESIZE: {
-            uint32_t windowId = data.ReadUint32();
-            uint32_t width = data.ReadUint32();
-            uint32_t height = data.ReadUint32();
-            WMError errCode = Resize(windowId, width, height);
-            reply.WriteInt32(static_cast<int32_t>(errCode));
-            break;
-        }
-        case TRANS_ID_DRAG: {
+        case TRANS_ID_RESIZE_RECT: {
             uint32_t windowId = data.ReadUint32();
             Rect rect  = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
-            WMError errCode = Drag(windowId, rect);
+            WindowSizeChangeReason reason = static_cast<WindowSizeChangeReason>(data.ReadUint32());
+            WMError errCode = ResizeRect(windowId, rect, reason);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }

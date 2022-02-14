@@ -127,73 +127,7 @@ WMError WindowManagerProxy::DestroyWindow(uint32_t windowId)
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::MoveTo(uint32_t windowId, int32_t x, int32_t y)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteUint32(windowId)) {
-        WLOGFE("Write windowId failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteInt32(x)) {
-        WLOGFE("Write posX failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteInt32(y)) {
-        WLOGFE("Write posY failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    if (Remote()->SendRequest(TRANS_ID_MOVE, data, reply, option) != ERR_NONE) {
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WMError>(ret);
-}
-
-WMError WindowManagerProxy::Resize(uint32_t windowId, uint32_t width, uint32_t height)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteUint32(windowId)) {
-        WLOGFE("Write windowId failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteUint32(width)) {
-        WLOGFE("Write width failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteUint32(height)) {
-        WLOGFE("Write height failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    if (Remote()->SendRequest(TRANS_ID_RESIZE, data, reply, option) != ERR_NONE) {
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WMError>(ret);
-}
-
-WMError WindowManagerProxy::Drag(uint32_t windowId, const Rect& rect)
+WMError WindowManagerProxy::ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -214,7 +148,12 @@ WMError WindowManagerProxy::Drag(uint32_t windowId, const Rect& rect)
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_DRAG, data, reply, option) != ERR_NONE) {
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        WLOGFE("Write WindowSizeChangeReason failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(TRANS_ID_RESIZE_RECT, data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
 

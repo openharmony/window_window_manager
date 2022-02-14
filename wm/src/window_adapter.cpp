@@ -77,34 +77,14 @@ WMError WindowAdapter::DestroyWindow(uint32_t windowId)
     return windowManagerServiceProxy_->DestroyWindow(windowId);
 }
 
-WMError WindowAdapter::MoveTo(uint32_t windowId, int32_t x, int32_t y)
+WMError WindowAdapter::ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     if (!InitWMSProxyLocked()) {
         return WMError::WM_ERROR_SAMGR;
     }
-    return windowManagerServiceProxy_->MoveTo(windowId, x, y);
-}
-
-WMError WindowAdapter::Resize(uint32_t windowId, uint32_t width, uint32_t height)
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-
-    if (!InitWMSProxyLocked()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
-    return windowManagerServiceProxy_->Resize(windowId, width, height);
-}
-
-WMError WindowAdapter::Drag(uint32_t windowId, const Rect& rect)
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-
-    if (!InitWMSProxyLocked()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
-    return windowManagerServiceProxy_->Drag(windowId, rect);
+    return windowManagerServiceProxy_->ResizeRect(windowId, rect, reason);
 }
 
 WMError WindowAdapter::RequestFocus(uint32_t windowId)

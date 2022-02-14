@@ -71,8 +71,8 @@ void WindowLayoutPolicyCascade::LayoutWindowNode(sptr<WindowNode>& node)
             UpdateLimitRect(node, limitRect_);
             UpdateSplitLimitRect(limitRect_, primaryLimitRect_);
             UpdateSplitLimitRect(limitRect_, secondaryLimitRect_);
-            WLOGFI("priLimitRect: %{public}d %{public}d %{public}d %{public}d, " \
-                "secLimitRect: %{public}d %{public}d %{public}d %{public}d", primaryLimitRect_.posX_,
+            WLOGFI("priLimitRect: %{public}d %{public}d %{public}u %{public}u, " \
+                "secLimitRect: %{public}d %{public}d %{public}u %{public}u", primaryLimitRect_.posX_,
                 primaryLimitRect_.posY_, primaryLimitRect_.width_, primaryLimitRect_.height_, secondaryLimitRect_.posX_,
                 secondaryLimitRect_.posY_, secondaryLimitRect_.width_, secondaryLimitRect_.height_);
         }
@@ -102,7 +102,7 @@ void WindowLayoutPolicyCascade::UpdateWindowNode(sptr<WindowNode>& node)
         UpdateLayoutRect(node);
         auto splitDockerRect = node->GetLayoutRect();
         SetSplitRect(splitDockerRect); // calculate primary/secondary depend on divider rect
-        WLOGFI("UpdateDividerRects WinId: %{public}d, Rect: %{public}d %{public}d %{public}d %{public}d",
+        WLOGFI("UpdateDividerRects WinId: %{public}u, Rect: %{public}d %{public}d %{public}u %{public}u",
             node->GetWindowId(), splitDockerRect.posX_, splitDockerRect.posY_,
             splitDockerRect.width_, splitDockerRect.height_);
         LayoutWindowTree();
@@ -183,8 +183,8 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(sptr<WindowNode>& node)
     Rect limitRect = displayRect;
     Rect winRect = node->GetWindowProperty()->GetWindowRect();
 
-    WLOGFI("Id:%{public}d, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
-        "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFI("Id:%{public}u, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
+        "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnbale,
         static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     if (needAvoid) {
@@ -269,7 +269,7 @@ void WindowLayoutPolicyCascade::InitSplitRects()
         dividerRect_ = { 0, static_cast<uint32_t>((displayRect_.height_ - DIVIDER_WIDTH) * DEFAULT_SPLIT_RATIO),
                displayRect_.width_, DIVIDER_WIDTH };
     }
-    WLOGFI("init dividerRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFI("init dividerRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
         dividerRect_.posX_, dividerRect_.posY_, dividerRect_.width_, dividerRect_.height_);
     SetSplitRect(dividerRect_);
 }
@@ -283,7 +283,7 @@ void WindowLayoutPolicyCascade::SetSplitRectByRatio(float ratio)
         dividerRect_.posY_ = limitRect_.posY_ +
             static_cast<uint32_t>((limitRect_.height_ - dividerRect_.height_) * ratio);
     }
-    WLOGFI("set dividerRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFI("set dividerRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
         dividerRect_.posX_, dividerRect_.posY_, dividerRect_.width_, dividerRect_.height_);
     SetSplitRect(dividerRect_);
 }

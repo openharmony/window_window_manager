@@ -155,7 +155,7 @@ private:
     void ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId);
     void HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId);
-    void ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId);
+    void ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId, const Rect& rect);
     void EndMoveOrDragWindow(int32_t pointId);
     bool IsPointerEventConsumed();
     void AdjustWindowAnimationFlag();

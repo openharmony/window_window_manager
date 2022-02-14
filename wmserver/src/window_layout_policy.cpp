@@ -70,7 +70,7 @@ void WindowLayoutPolicy::LayoutWindowNode(sptr<WindowNode>& node)
     }
     if (node->parent_ != nullptr) { // isn't root node
         if (!node->currentVisibility_) {
-            WLOGFI("window[%{public}d] currently not visible, no need layout", node->GetWindowId());
+            WLOGFI("window[%{public}u] currently not visible, no need layout", node->GetWindowId());
             return;
         }
         UpdateLayoutRect(node);
@@ -196,8 +196,8 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
     Rect limitRect = displayRect;
     Rect winRect = node->GetWindowProperty()->GetWindowRect();
 
-    WLOGFI("Id:%{public}d, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
-        "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFI("Id:%{public}u, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
+        "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnbale,
         static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     if (needAvoid) {
@@ -227,12 +227,12 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
 
 void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect)
 {
-    bool floatingWindow = (node->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
     winRect.width_ = std::min(displayRect.width_ - winRect.posX_, winRect.width_);
     winRect.height_ = std::min(displayRect.height_ - winRect.posY_, winRect.height_);
     bool isVertical = (displayRect.height_ > displayRect.width_) ? true : false;
-    WindowType windowType = node->GetWindowProperty()->GetWindowType();
-    if (floatingWindow && !WindowHelper::IsSystemWindow(windowType)) {
+    WindowType windowType = node->GetWindowType();
+    WindowMode windowMode = node->GetWindowMode();
+    if ((windowMode == WindowMode::WINDOW_MODE_FLOATING) && !WindowHelper::IsSystemWindow(windowType)) {
         if (isVertical) {
             winRect.width_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, winRect.width_);
             winRect.height_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, winRect.height_);
@@ -240,6 +240,10 @@ void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rec
             winRect.width_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, winRect.width_);
             winRect.height_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, winRect.height_);
         }
+    }
+    if (WindowHelper::IsMainFloatingWindow(windowType, windowMode)) {
+        winRect.posY_ = std::max(limitRect_.posY_, winRect.posY_);
+        winRect.posY_ = std::min(limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_), winRect.posY_);
     }
 }
 
@@ -298,7 +302,7 @@ void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& lim
     }
     limitRect.height_ = static_cast<uint32_t>(limitH < 0 ? 0 : limitH);
     limitRect.width_ = static_cast<uint32_t>(limitW < 0 ? 0 : limitW);
-    WLOGFI("Type: %{public}d, limitRect: %{public}d %{public}d %{public}d %{public}d",
+    WLOGFI("Type: %{public}d, limitRect: %{public}d %{public}d %{public}u %{public}u",
         node->GetWindowType(), limitRect.posX_, limitRect.posY_, limitRect.width_, limitRect.height_);
 }
 
