@@ -23,8 +23,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicyCascade"};
-    constexpr uint32_t WINDOW_CASCADE_HEIGHT = 48;
-    constexpr uint32_t WINDOW_CASCADE_WIDTH = 48;
+    constexpr int32_t WINDOW_CASCADE_HEIGHT = 48;
+    constexpr int32_t WINDOW_CASCADE_WIDTH = 48;
 }
 WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const Rect& displayRect, const uint64_t& screenId,
     sptr<WindowNode>& belowAppNode, sptr<WindowNode>& appNode, sptr<WindowNode>& aboveAppNode)
@@ -130,17 +130,20 @@ static bool IsLayoutChanged(const Rect& l, const Rect& r)
 
 void WindowLayoutPolicyCascade::LimitMoveBounds(Rect& rect)
 {
-    Rect curRect = rect;
-    rect.posX_ = std::max(curRect.posX_, limitRect_.posX_);
-    rect.posY_ = std::max(curRect.posY_, limitRect_.posY_);
     if (rect.width_ < rect.height_) {
-        rect.posX_ = std::min(curRect.posX_ + rect.width_,
-                              limitRect_.posX_ + limitRect_.width_) - rect.width_;
-        rect.height_ = curRect.posY_ + curRect.height_ - rect.posY_;
+        if (rect.posX_ < (limitRect_.posX_ + static_cast<int32_t>(MIN_HORIZONTAL_SPLIT_WIDTH))) {
+            rect.posX_ = limitRect_.posX_ + static_cast<int32_t>(MIN_HORIZONTAL_SPLIT_WIDTH);
+        } else if (rect.posX_ >
+            (limitRect_.posX_ + limitRect_.width_ - static_cast<int32_t>(MIN_HORIZONTAL_SPLIT_WIDTH))) {
+            rect.posX_ = limitRect_.posX_ + static_cast<int32_t>(limitRect_.width_ - MIN_HORIZONTAL_SPLIT_WIDTH);
+        }
     } else {
-        rect.posY_ = std::min(curRect.posY_ + rect.height_,
-                              limitRect_.posY_ + limitRect_.height_) - rect.height_;
-        rect.width_ = curRect.posX_ + curRect.width_ - rect.posX_;
+        if (rect.posY_ < (limitRect_.posY_ + static_cast<int32_t>(MIN_VERTICAL_SPLIT_HEIGHT))) {
+            rect.posY_ = limitRect_.posY_ + static_cast<int32_t>(MIN_VERTICAL_SPLIT_HEIGHT);
+        } else if (rect.posY_ >
+            (limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_ - MIN_VERTICAL_SPLIT_HEIGHT))) {
+            rect.posY_ = limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_ - MIN_VERTICAL_SPLIT_HEIGHT);
+        }
     }
 }
 
@@ -205,7 +208,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(sptr<WindowNode>& node)
         }
     }
     // Limit window to the maximum window size
-    LimitWindowSize(node, displayRect, winRect);
+    LimitWindowSize(node, displayRect_, winRect);
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         LimitMoveBounds(winRect);
