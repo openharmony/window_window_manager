@@ -61,46 +61,42 @@ std::vector<ScreenId> AbstractScreenController::GetAllScreenIds()
 std::vector<ScreenId> AbstractScreenController::GetShotScreenIds(std::vector<ScreenId> mirrorScreenIds) const
 {
     WLOGI("GetShotScreenIds");
-    std::vector<ScreenId> result;
+    std::vector<ScreenId> screenIds;
     for (ScreenId screenId : mirrorScreenIds) {
         auto dmsScreenIdIter = dms2RsScreenIdMap_.find(screenId);
         auto dmsScreenIter = dmsScreenMap_.find(screenId);
         if (dmsScreenIdIter != dms2RsScreenIdMap_.end() && dmsScreenIter == dmsScreenMap_.end()) {
-            result.emplace_back(screenId);
+            screenIds.emplace_back(screenId);
+            WLOGI("GetShotScreenIds: screenId: %{public}" PRIu64"", screenId);
         }
     }
-    for (ScreenId screenId : result) {
-        WLOGI("GetShotScreenIds: screenId: %{public}" PRIu64"", screenId);
-    }
-    return result;
+    return screenIds;
 }
 
 std::vector<ScreenId> AbstractScreenController::GetAllMirrorScreenIds(std::vector<ScreenId> mirrorScreenIds) const
 {
-    std::vector<ScreenId> result;
+    std::vector<ScreenId> screenIds;
     for (ScreenId screenId : mirrorScreenIds) {
         auto iter = dmsScreenMap_.find(screenId);
         if (iter != dmsScreenMap_.end()) {
-            result.emplace_back(screenId);
+            screenIds.emplace_back(screenId);
         }
     }
-    if (result.empty()) {
-        WLOGI("GetAllMirrorScreenIds, result is empty");
-        return result;
+    if (screenIds.empty()) {
+        WLOGI("GetAllMirrorScreenIds, screenIds is empty");
+        return screenIds;
     }
     for (auto iter = dmsScreenMap_.begin(); iter != dmsScreenMap_.end(); iter++) {
         if (iter->second->type_ != ScreenType::REAL) {
             continue;
         }
-        auto screenIdIter = std::find(result.begin(), result.end(), iter->first);
-        if (screenIdIter == result.end()) {
-            result.emplace_back(iter->first);
+        auto screenIdIter = std::find(screenIds.begin(), screenIds.end(), iter->first);
+        if (screenIdIter == screenIds.end()) {
+            screenIds.emplace_back(iter->first);
+            WLOGI("GetAllMirrorScreenIds: screenId: %{public}" PRIu64"", iter->first);
         }
     }
-    for (ScreenId screenId : result) {
-        WLOGI("GetAllMirrorScreenIds: screenId: %{public}" PRIu64"", screenId);
-    }
-    return result;
+    return screenIds;
 }
 
 std::shared_ptr<RSDisplayNode> AbstractScreenController::GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const
@@ -425,10 +421,10 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsSuccedentScreenLocked(s
 
 ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption option)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     ScreenId result = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
         option.height_, option.surface_, INVALID_SCREEN_ID, option.flags_);
     WLOGFI("AbstractScreenController::CreateVirtualScreen id: %{public}" PRIu64"", result);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     ScreenId dmsScreenId = SCREEN_ID_INVALID;
     auto iter = rs2DmsScreenIdMap_.find(result);
     if (iter == rs2DmsScreenIdMap_.end()) {
@@ -608,8 +604,8 @@ bool AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenI
 {
     WLOGI("AbstractScreenController::MakeMirror, screenId:%{public}" PRIu64"", screenId);
     sptr<AbstractScreen> screen = GetAbstractScreen(screenId);
-    if (screen == nullptr) {
-        WLOGFE("screen is nullptr");
+    if (screen == nullptr || screen->type_ != ScreenType::REAL) {
+        WLOGFE("screen is nullptr, or screenType is not real.");
         return false;
     }
     WLOGFI("GetAbstractScreenGroup start");
