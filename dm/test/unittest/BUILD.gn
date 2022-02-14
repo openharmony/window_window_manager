@@ -21,6 +21,7 @@ group("unittest") {
   deps = [
     ":dm_display_power_unit_test",
     ":dm_screen_manager_test",
+    ":dm_screen_test",
     ":dm_screenshot_test",
     ":dm_snapshot_utils_test",
   ]
@@ -75,6 +76,20 @@ ohos_unittest("dm_screen_manager_test") {
 }
 
 ## UnitTest dm_screen_manager_test }}}
+
+## UnitTest dm_screen_test {{{
+ohos_unittest("dm_screen_test") {
+  module_out_path = module_out_path
+
+  sources = [
+    "screen_manager_utils.cpp",
+    "screen_test.cpp",
+  ]
+
+  deps = [ ":dm_unittest_common" ]
+}
+
+## UnitTest dm_screen_test }}}
 
 ## Build dm_unittest_common.a {{{
 config("dm_unittest_common_public_config") {
