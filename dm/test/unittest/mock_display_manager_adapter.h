@@ -40,6 +40,7 @@ public:
     MOCK_METHOD2(SetScreenPowerForAll, bool(DisplayPowerState state, PowerStateChangeReason reason));
     MOCK_METHOD1(SetDisplayState, bool(DisplayState state));
     MOCK_METHOD1(GetDisplayState, DisplayState(uint64_t displayId));
+    MOCK_METHOD2(SetScreenActiveMode, bool(ScreenId screenId, uint32_t modeId));
 };
 }
 } // namespace OHOS

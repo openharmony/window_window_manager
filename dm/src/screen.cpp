@@ -169,7 +169,7 @@ bool Screen::SetScreenActiveMode(uint32_t modeId)
     if (modeId < 0 || modeId >= pImpl_->modes_.size()) {
         return false;
     }
-    if (DisplayManagerAdapter::GetInstance().SetScreenActiveMode(screenId, modeId)) {
+    if (SingletonContainer::Get<DisplayManagerAdapter>().SetScreenActiveMode(screenId, modeId)) {
         pImpl_->modeId_ = modeId;
         return true;
     }
