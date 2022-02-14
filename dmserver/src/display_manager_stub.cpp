@@ -77,6 +77,15 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
+        case TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
+            sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
+            sptr<Surface> surface = Surface::CreateSurfaceAsProducer(bp);
+            DMError result = SetVirtualScreenSurface(screenId, surface);
+            reply.WriteInt32(static_cast<int32_t>(result));
+            break;
+        }
         case TRANS_ID_REQUEST_ROTATION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             Rotation rotation = static_cast<Rotation>(data.ReadUint32());

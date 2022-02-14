@@ -44,6 +44,7 @@ public:
     ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
+    DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
 
 private:
     ScreenManager();
