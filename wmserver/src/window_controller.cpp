@@ -225,11 +225,8 @@ WMError WindowController::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurL
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    WindowBlurLevel srcLevel = node->GetWindowBackgroundBlur();
-    if (srcLevel == dstLevel) {
-        return WMError::WM_OK;
-    }
-
+    WLOGFI("WindowEffect WindowController SetWindowBackgroundBlur level: %{public}u", dstLevel);
+    node->SetWindowBackgroundBlur(dstLevel);
     FlushWindowInfo(windowId);
     return WMError::WM_OK;
 }
@@ -242,10 +239,7 @@ WMError WindowController::SetAlpha(uint32_t windowId, float dstAlpha)
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    float srcAlpha = node->GetAlpha();
-    if (srcAlpha == dstAlpha) {
-        return WMError::WM_OK;
-    }
+    WLOGFI("WindowEffect WindowController SetAlpha alpha: %{public}f", dstAlpha);
     node->SetAlpha(dstAlpha);
 
     FlushWindowInfo(windowId);

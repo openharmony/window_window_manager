@@ -19,6 +19,9 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowNode"};
+}
 void WindowNode::SetDisplayId(DisplayId displayId)
 {
     property_->SetDisplayId(displayId);
@@ -77,12 +80,14 @@ void WindowNode::SetWindowBackgroundBlur(WindowBlurLevel level)
             break;
     }
     property_->SetWindowBackgroundBlur(level);
+    WLOGFI("WindowEffect WindowNode Setblur X:%{public}f  Y:%{public}f!", blurRadiusX, blurRadiusY);
     surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(blurRadiusX, blurRadiusY));
 }
 
 void WindowNode::SetAlpha(float alpha)
 {
     property_->SetAlpha(alpha);
+    WLOGFI("WindowEffect WinodwNode SetAlpha alpha:%{public}f", alpha);
     surfaceNode_->SetAlpha(alpha);
 }
 
