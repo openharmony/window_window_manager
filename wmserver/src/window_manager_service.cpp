@@ -162,34 +162,18 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId)
     return windowController_->DestroyWindow(windowId);
 }
 
-WMError WindowManagerService::MoveTo(uint32_t windowId, int32_t x, int32_t y)
+WMError WindowManagerService::ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason)
 {
-    WLOGFI("[WMS] MoveTo: %{public}d [%{public}d, %{public}d]", windowId, x, y);
-    WM_SCOPED_TRACE("wms:MoveTo");
+    WLOGFI("[WMS] ResizeRect windowId: %{public}u, reason: %{public}u, resizeRect: "
+           "[%{public}d, %{public}d, %{public}u, %{public}u]",
+           windowId, reason, rect.posX_, rect.posY_, rect.width_, rect.height_);
+    WM_SCOPED_TRACE("wms:ResizeRect");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-
-    WMError res = windowController_->MoveTo(windowId, x, y);
-    if (res == WMError::WM_OK) {
+    WMError res = windowController_->ResizeRect(windowId, rect, reason);
+    if (res == WMError::WM_OK && reason == WindowSizeChangeReason::MOVE) {
         dragController_->UpdateDragInfo(windowId);
     }
     return res;
-}
-
-WMError WindowManagerService::Resize(uint32_t windowId, uint32_t width, uint32_t height)
-{
-    WLOGFI("[WMS] Resize: %{public}d [%{public}d, %{public}d]", windowId, width, height);
-    WM_SCOPED_TRACE("wms:Resize");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->Resize(windowId, width, height);
-}
-
-WMError WindowManagerService::Drag(uint32_t windowId, const Rect& rect)
-{
-    WLOGFI("[WMS] Drag: %{public}d [%{public}d, %{public}d, %{public}d, %{public}d]",
-           windowId, rect.posX_, rect.posY_, rect.width_, rect.height_);
-    WM_SCOPED_TRACE("wms:Drag");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->Drag(windowId, rect);
 }
 
 WMError WindowManagerService::RequestFocus(uint32_t windowId)

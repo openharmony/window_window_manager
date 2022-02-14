@@ -120,72 +120,39 @@ WMError WindowController::DestroyWindow(uint32_t windowId)
     return res;
 }
 
-WMError WindowController::MoveTo(uint32_t windowId, int32_t x, int32_t y)
+WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-
     auto property = node->GetWindowProperty();
     Rect lastRect = property->GetWindowRect();
     Rect newRect;
-    WMError res;
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        if (windowRoot_->isVerticalDisplay(node)) {
-            newRect = { lastRect.posX_, y, lastRect.width_, lastRect.height_ };
-        } else {
-            newRect = { x, lastRect.posY_, lastRect.width_, lastRect.height_ };
+    node->SetWindowSizeChangeReason(reason);
+    if (reason == WindowSizeChangeReason::MOVE) {
+        newRect = { rect.posX_, rect.posY_, lastRect.width_, lastRect.height_ };
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+            if (windowRoot_->isVerticalDisplay(node)) {
+                newRect.posX_ = lastRect.posX_;
+            } else {
+                newRect.posY_ = lastRect.posY_;
+            }
         }
-        property->SetWindowRect(newRect);
-    } else {
-        newRect = { x, y, lastRect.width_, lastRect.height_ };
-        property->SetWindowRect(newRect);
+    } else if (reason == WindowSizeChangeReason::RESIZE) {
+        node->hasDecorated_ = false;
+        newRect = { lastRect.posX_, lastRect.posY_, rect.width_, rect.height_ };
+    } else if (reason == WindowSizeChangeReason::DRAG) {
+        if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+            // fix rect in case of moving window when dragging
+            newRect = WindowHelper::GetFixedWindowRectByMinRect(rect,
+                property->GetWindowRect(), windowRoot_->isVerticalDisplay(node));
+        } else {
+            newRect = rect;
+        }
     }
 
-    res = windowRoot_->UpdateWindowNode(windowId);
-    if (res != WMError::WM_OK) {
-        return res;
-    }
-    FlushWindowInfo(windowId);
-    return WMError::WM_OK;
-}
-
-WMError WindowController::Resize(uint32_t windowId, uint32_t width, uint32_t height)
-{
-    auto node = windowRoot_->GetWindowNode(windowId);
-    if (node == nullptr) {
-        WLOGFE("could not find window");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    node->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
-    auto property = node->GetWindowProperty();
-    Rect lastRect = property->GetWindowRect();
-    Rect newRect = { lastRect.posX_, lastRect.posY_, width, height };
-    property->SetWindowRect(newRect);
-    node->hasDecorated_ = false;
-    WMError res = windowRoot_->UpdateWindowNode(windowId);
-    if (res != WMError::WM_OK) {
-        return res;
-    }
-    FlushWindowInfo(windowId);
-    return WMError::WM_OK;
-}
-
-WMError WindowController::Drag(uint32_t windowId, const Rect& rect)
-{
-    auto node = windowRoot_->GetWindowNode(windowId);
-    if (node == nullptr) {
-        WLOGFE("could not find window");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
-    auto property = node->GetWindowProperty();
-
-    // fix rect in case of moving window when dragging
-    Rect newRect = WindowHelper::GetFixedWindowRectByMinRect(rect,
-        property->GetWindowRect(), windowRoot_->isVerticalDisplay(node));
     property->SetWindowRect(newRect);
     WMError res = windowRoot_->UpdateWindowNode(windowId);
     if (res != WMError::WM_OK) {
@@ -309,10 +276,10 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             // TODO: Remove 'sysBarWinId_' after SystemUI resize 'systembar'
             uint32_t width = abstractDisplay->GetWidth();
             uint32_t height = abstractDisplay->GetHeight() * SYSTEM_BAR_HEIGHT_RATIO;
-            Resize(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], width, height);
-            MoveTo(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], 0, 0);
-            Resize(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], width, height);
-            MoveTo(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], 0, abstractDisplay->GetHeight() - height);
+            Rect newRect = { 0, 0, width, height };
+            ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
+            newRect = { 0, abstractDisplay->GetHeight() - height, width, height };
+            ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
 
             FlushWindowInfoWithDisplayId(displayId);
             break;
