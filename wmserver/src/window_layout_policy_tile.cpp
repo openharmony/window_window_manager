@@ -41,6 +41,7 @@ void WindowLayoutPolicyTile::Launch()
     InitTileWindowRects();
     // select app min win in queue, and minimize others
     InitForegroundNodeQueue();
+    AssignNodePropertyForTileWindows();
     LayoutForegroundNodeQueue();
     LayoutWindowNode(belowAppWindowNode_);
     WLOGFI("WindowLayoutPolicyTile::Launch");
@@ -85,6 +86,7 @@ void WindowLayoutPolicyTile::AddWindowNode(sptr<WindowNode>& node)
     WM_FUNCTION_TRACE();
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         UpdateForegroundNodeQueue(node);
+        AssignNodePropertyForTileWindows();
         LayoutForegroundNodeQueue();
     } else {
         UpdateWindowNode(node); // currently, update and add do the same process
@@ -110,19 +112,10 @@ void WindowLayoutPolicyTile::LayoutForegroundNodeQueue()
 void WindowLayoutPolicyTile::InitForegroundNodeQueue()
 {
     foregroundNodes_.clear();
-    uint32_t maxTileWinNum = IsVertical() ? MAX_WIN_NUM_VERTICAL : MAX_WIN_NUM_HORIZONTAL;
+    lastForegroundNodeId_ = 0;
     for (auto& node : appWindowNode_->children_) {
-        if (WindowHelper::IsMainWindow(node->GetWindowType())) {
-            if (foregroundNodes_.size() < maxTileWinNum) {
-                foregroundNodes_.push_back(node);
-                lastForegroundNodeId_ = ((++lastForegroundNodeId_) % maxTileWinNum);
-            } else {
-                AAFwk::AbilityManagerClient::GetInstance()->
-                    MinimizeAbility(node->abilityToken_);
-            }
-        }
+        UpdateForegroundNodeQueue(node);
     }
-    AssignNodePropertyForTileWindows();
 }
 
 void WindowLayoutPolicyTile::UpdateForegroundNodeQueue(sptr<WindowNode>& node)
@@ -140,7 +133,6 @@ void WindowLayoutPolicyTile::UpdateForegroundNodeQueue(sptr<WindowNode>& node)
         foregroundNodes_[lastForegroundNodeId_] = node;
         lastForegroundNodeId_ = ((++lastForegroundNodeId_) % maxTileWinNum);
     }
-    AssignNodePropertyForTileWindows();
 }
 
 void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows()
