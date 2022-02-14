@@ -105,6 +105,11 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason)
     AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
+void JsWindowListener::OnModeChange(WindowMode mode)
+{
+    WLOGFI("JsWindowListener::OnModeChange is called");
+}
+
 void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     std::lock_guard<std::mutex> lock(mtx_);
