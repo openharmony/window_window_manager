@@ -23,16 +23,19 @@ void DisplayInfo::Update(DisplayInfo* info)
     width_ = info->width_;
     height_ = info->height_;
     freshRate_ = info->freshRate_;
+    screenId_ = info->screenId_;
     xDpi_ = info->xDpi_;
     yDpi_ = info->yDpi_;
+    rotation_ = info->rotation_;
 }
 
 bool DisplayInfo::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteUint64(id_) && parcel.WriteUint32(type_) &&
         parcel.WriteInt32(width_) && parcel.WriteInt32(height_) &&
-        parcel.WriteUint32(freshRate_) &&
-        parcel.WriteFloat(xDpi_) && parcel.WriteFloat(yDpi_);
+        parcel.WriteUint32(freshRate_) && parcel.WriteUint64(screenId_) &&
+        parcel.WriteFloat(xDpi_) && parcel.WriteFloat(yDpi_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(rotation_));
 }
 
 DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
@@ -42,14 +45,17 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     uint32_t type = (uint32_t)DisplayType::DEFAULT;
+    uint32_t rotation;
     bool res = parcel.ReadUint64(displayInfo->id_) && parcel.ReadUint32(type) &&
         parcel.ReadInt32(displayInfo->width_) && parcel.ReadInt32(displayInfo->height_) &&
-        parcel.ReadUint32(displayInfo->freshRate_) &&
-        parcel.ReadFloat(displayInfo->xDpi_) && parcel.ReadFloat(displayInfo->yDpi_);
+        parcel.ReadUint32(displayInfo->freshRate_) && parcel.ReadUint64(displayInfo->screenId_) &&
+        parcel.ReadFloat(displayInfo->xDpi_) && parcel.ReadFloat(displayInfo->yDpi_) &&
+        parcel.ReadUint32(rotation);
     if (!res) {
         displayInfo = nullptr;
     } else {
         displayInfo->type_ = (DisplayType)type;
+        displayInfo->rotation_ = static_cast<Rotation>(rotation);
     }
     return displayInfo;
 }

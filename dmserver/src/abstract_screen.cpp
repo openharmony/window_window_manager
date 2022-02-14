@@ -17,6 +17,7 @@
 
 #include "abstract_screen_controller.h"
 #include "display_manager_service.h"
+#include "dm_common.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -25,7 +26,7 @@ namespace {
 }
 
 AbstractScreen::AbstractScreen(ScreenId dmsId, ScreenId rsId)
-    : dmsId_(dmsId), rsId_(rsId)
+    : dmsId_(dmsId), rsId_(rsId), screenController_(DisplayManagerService::GetInstance().abstractScreenController_)
 {
 }
 
@@ -66,11 +67,16 @@ void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, b
         return;
     }
     WLOGFI("AbstractScreen::UpdateRSTree");
-    if (isAdd) {
-        rsDisplayNode_->AddChild(surfaceNode, -1);
-    } else {
-        rsDisplayNode_->RemoveChild(surfaceNode);
-    }
+
+    // add or remove window with transition animation, default duration 100ms
+    static RSAnimationTimingProtocol timingProtocol(100);
+    RSNode::Animate(timingProtocol, Rosen::RSAnimationTimingCurve::EASE_OUT, [=]() {
+        if (isAdd) {
+            rsDisplayNode_->AddChild(surfaceNode, -1);
+        } else {
+            rsDisplayNode_->RemoveChild(surfaceNode);
+        }
+    });
 }
 
 void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
@@ -81,6 +87,81 @@ void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
         return;
     }
     rsDisplayNode_ = rsDisplayNode;
+    rSDisplayNodeConfig_ = config;
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    transactionProxy->FlushImplicitTransaction();
+}
+
+DMError AbstractScreen::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenSupportedColorGamuts(rsId_, colorGamuts);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetScreenSupportedColorGamuts fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetScreenSupportedColorGamuts ok! rsId %{public}" PRIu64", size %{public}u",
+        rsId_, static_cast<uint32_t>(colorGamuts.size()));
+
+    return DMError::DM_OK;
+}
+
+DMError AbstractScreen::GetScreenColorGamut(ScreenColorGamut& colorGamut)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenColorGamut(rsId_, colorGamut);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetScreenColorGamut fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetScreenColorGamut ok! rsId %{public}" PRIu64", colorGamut %{public}u",
+        rsId_, static_cast<uint32_t>(colorGamut));
+
+    return DMError::DM_OK;
+}
+
+DMError AbstractScreen::SetScreenColorGamut(int32_t colorGamutIdx)
+{
+    auto ret = RSInterfaces::GetInstance().SetScreenColorGamut(rsId_, colorGamutIdx);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SetScreenColorGamut fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetScreenColorGamut ok! rsId %{public}" PRIu64", colorGamutIdx %{public}u",
+        rsId_, colorGamutIdx);
+
+    return DMError::DM_OK;
+}
+
+DMError AbstractScreen::GetScreenGamutMap(ScreenGamutMap& gamutMap)
+{
+    auto ret = RSInterfaces::GetInstance().GetScreenGamutMap(rsId_, gamutMap);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("GetScreenGamutMap fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("GetScreenGamutMap ok! rsId %{public}" PRIu64", gamutMap %{public}u",
+        rsId_, static_cast<uint32_t>(gamutMap));
+
+    return DMError::DM_OK;
+}
+
+DMError AbstractScreen::SetScreenGamutMap(ScreenGamutMap gamutMap)
+{
+    auto ret = RSInterfaces::GetInstance().SetScreenGamutMap(rsId_, gamutMap);
+    if (ret != StatusCode::SUCCESS) {
+        WLOGE("SetScreenGamutMap fail! rsId %{public}" PRIu64"", rsId_);
+        return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    }
+    WLOGI("SetScreenGamutMap ok! rsId %{public}" PRIu64", gamutMap %{public}u",
+        rsId_, static_cast<uint32_t>(gamutMap));
+
+    return DMError::DM_OK;
+}
+
+DMError AbstractScreen::SetScreenColorTransform()
+{
+    WLOGI("SetScreenColorTransform ok! rsId %{public}" PRIu64"", rsId_);
+
+    return DMError::DM_OK;
 }
 
 void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
@@ -97,15 +178,27 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
     info->virtualHeight_ = virtualPixelRatio * height;
     info->virtualWidth_ = virtualPixelRatio * width;
     info->parent_ = groupDmsId_;
-    info->hasChild_ = DisplayManagerService::GetInstance().GetAbstractScreenController()->IsScreenGroup(dmsId_);
+    info->canHasChild_ = canHasChild_;
+    info->rotation_ = rotation_;
     info->modeId_ = activeIdx_;
     info->modes_ = modes_;
+}
+
+Rotation AbstractScreen::GetRotation() const
+{
+    return rotation_;
+}
+
+void AbstractScreen::RequestRotation(Rotation rotation)
+{
+    rotation_ = rotation;
 }
 
 AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId, ScreenCombination combination)
     : AbstractScreen(dmsId, rsId), combination_(combination)
 {
     type_ = ScreenType::UNDEFINE;
+    canHasChild_ = true;
 }
 
 AbstractScreenGroup::~AbstractScreenGroup()
@@ -146,14 +239,35 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
         case ScreenCombination::SCREEN_EXPAND:
             config = { dmsScreen->rsId_ };
             break;
-        case ScreenCombination::SCREEN_MIRROR:
-            WLOGE("The feature will be supported in the future");
-            return false;
+        case ScreenCombination::SCREEN_MIRROR: {
+            if (GetChildCount() == 0 || mirrorScreenId_ == dmsScreen->dmsId_) {
+                WLOGI("AddChild, SCREEN_MIRROR, config is not mirror");
+                config = { dmsScreen->rsId_ };
+                break;
+            }
+            if (mirrorScreenId_ == INVALID_SCREEN_ID || !HasChild(mirrorScreenId_)) {
+                WLOGI("AddChild, mirrorScreenId_ is invalid, use default screen");
+                mirrorScreenId_ =
+                    DisplayManagerService::GetInstance().GetAbstractScreenController()->GetDefaultAbstractScreenId();
+            }
+            std::shared_ptr<RSDisplayNode> displayNode = SingletonContainer::Get<DisplayManagerService>().
+                GetAbstractScreenController()->GetRSDisplayNodeByScreenId(mirrorScreenId_);
+            if (displayNode == nullptr) {
+                WLOGFE("AddChild fail, displayNode is nullptr, cannot get DisplayNode");
+                return false;
+            }
+            NodeId nodeId = displayNode->GetId();
+            WLOGI("AddChild, mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", nodeId:%{public}" PRIu64"",
+                mirrorScreenId_, dmsScreen->rsId_, nodeId);
+            config = {dmsScreen->rsId_, true, nodeId};
+            break;
+        }
         default:
             WLOGE("fail to add child. invalid group combination:%{public}u", combination_);
             return false;
     }
     dmsScreen->InitRSDisplayNode(config);
+    dmsScreen->groupDmsId_ = dmsId_;
     abstractScreenMap_.insert(std::make_pair(screenId, std::make_pair(dmsScreen, startPoint)));
     return true;
 }
@@ -180,11 +294,7 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
     }
     ScreenId screenId = dmsScreen->dmsId_;
     dmsScreen->groupDmsId_ = SCREEN_ID_INVALID;
-    bool res = abstractScreenMap_.erase(screenId);
-    if (abstractScreenMap_.size() == 1) {
-        combination_ = ScreenCombination::SCREEN_ALONE;
-    }
-    return res;
+    return abstractScreenMap_.erase(screenId);
 }
 
 bool AbstractScreenGroup::HasChild(ScreenId childScreen) const

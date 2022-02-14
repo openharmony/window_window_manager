@@ -213,6 +213,11 @@ void WindowManager::MinimizeAllAppWindows(DisplayId displayId)
 void WindowManager::SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId)
 {
     WLOGFI("set window layout mode: %{public}d, displayId %{public}" PRIu64"", mode, displayId);
+    WMError ret  = SingletonContainer::Get<WindowAdapter>().SetWindowLayoutMode(displayId, mode);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("set layout mode failed");
+    }
+    return;
 }
 
 void WindowManager::RegisterWindowUpdateListener(const sptr<IWindowUpdateListener> &listener)

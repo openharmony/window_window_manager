@@ -312,5 +312,14 @@ WMError WindowAdapter::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
     }
     return windowManagerServiceProxy_->GetTopWindowId(mainWinId, topWinId);
 }
+
+WMError WindowAdapter::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!InitWMSProxyLocked()) {
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return windowManagerServiceProxy_->SetWindowLayoutMode(displayId, mode);
+}
 } // namespace Rosen
 } // namespace OHOS

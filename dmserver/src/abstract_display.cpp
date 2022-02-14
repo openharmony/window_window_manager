@@ -91,6 +91,22 @@ void AbstractDisplay::SetId(DisplayId id)
     id_ = id;
 }
 
+bool AbstractDisplay::RequestRotation(Rotation rotation)
+{
+    WLOGD("request rotation from %{public}u to %{public}u, display %{public}" PRIu64"", rotation_, rotation, id_);
+    if (rotation_ == rotation) {
+        WLOGFE("rotation not change %{public}u", rotation);
+        return false;
+    }
+    if (IsVertical(rotation) != IsVertical(rotation_)) {
+        int32_t tmp = width_;
+        width_ = height_;
+        height_ = tmp;
+    }
+    rotation_ = rotation;
+    return true;
+}
+
 bool AbstractDisplay::BindAbstractScreen(ScreenId dmsScreenId)
 {
     sptr<AbstractScreenController> screenController
@@ -132,6 +148,7 @@ const sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->height_ = height_;
     displayInfo->id_ = id_;
     displayInfo->freshRate_ = freshRate_;
+    displayInfo->screenId_ = screenId_;
     return displayInfo;
 }
 } // namespace OHOS::Rosen

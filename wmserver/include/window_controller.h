@@ -48,9 +48,10 @@ public:
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
-    void NotifyDisplayStateChange(DisplayStateChangeType type);
+    void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
     WMError ProcessWindowTouchedEvent(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
+    WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
 private:
     uint32_t GenWindowId();
@@ -60,6 +61,12 @@ private:
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
     std::atomic<uint32_t> windowId_ { INVALID_WINDOW_ID };
+    // TODO: Remove 'sysBarWinId_' after SystemUI resize 'systembar'
+    std::unordered_map<WindowType, uint32_t> sysBarWinId_ {
+        { WindowType::WINDOW_TYPE_STATUS_BAR,     INVALID_WINDOW_ID },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, INVALID_WINDOW_ID },
+    };
+    constexpr static float SYSTEM_BAR_HEIGHT_RATIO = 0.08;
 };
 }
 }

@@ -176,6 +176,27 @@ NativeValue* JsWindow::IsShowing(NativeEngine* engine, NativeCallbackInfo* info)
     return (me != nullptr) ? me->OnIsShowing(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::IsSupportWideGamut(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::IsSupportWideGamut is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnIsSupportWideGamut(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::SetColorSpace(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::SetColorSpace is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetColorSpace(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::GetColorSpace(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::GetColorSpace is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnGetColorSpace(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsWindow::OnShow is called");
@@ -941,6 +962,96 @@ NativeValue* JsWindow::OnIsShowing(NativeEngine& engine, NativeCallbackInfo& inf
     return result;
 }
 
+NativeValue* JsWindow::OnIsSupportWideGamut(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnIsSupportWideGamut is called");
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (windowToken_ == nullptr) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR),
+                    "JsWindow::OnIsSupportWideGamut failed."));
+                WLOGFE("JsWindow windowToken_ is nullptr");
+                return;
+            }
+            bool flag = windowToken_->IsSupportWideGamut();
+            task.Resolve(engine, CreateJsValue(engine, flag));
+        };
+
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnSetColorSpace(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnSetColorSpace is called");
+    WMError errCode = WMError::WM_OK;
+    ColorSpace colorSpace = ColorSpace::COLOR_SPACE_DEFAULT;
+    if (windowToken_ == nullptr) {
+        WLOGFE("JsWindow windowToken_ is nullptr");
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if (info.argc < 1) {
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        WLOGFE("JsWindow::OnSetColorSpace argc < 1");
+    } else {
+        NativeNumber* nativeType = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
+        if (nativeType == nullptr) {
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+            WLOGFE("JsWindow::OnSetColorSpace Failed to convert parameter to ColorSpace");
+        } else {
+            colorSpace = static_cast<ColorSpace>(static_cast<uint32_t>(*nativeType));
+            WLOGFI("JsWindow::OnSetColorSpace %{public}u", static_cast<uint32_t>(colorSpace));
+        }
+    }
+
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR),
+                    "JsWindow::OnSetColorSpace failed."));
+                WLOGFE("JsWindow windowToken_ is nullptr or args error");
+                return;
+            }
+            windowToken_->SetColorSpace(colorSpace);
+            task.Resolve(engine, engine.CreateUndefined());
+        };
+
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnGetColorSpace(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnGetColorSpace is called");
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (windowToken_ == nullptr) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR),
+                    "JsWindow::OnGetColorSpace failed."));
+                WLOGFE("JsWindow windowToken_ is nullptr");
+                return;
+            }
+            ColorSpace colorSpace = windowToken_->GetColorSpace();
+            task.Resolve(engine, CreateJsValue(engine, static_cast<uint32_t>(colorSpace)));
+        };
+
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 {
     WLOGFI("JsWindow::FindJsWindowObject is called");
@@ -984,6 +1095,9 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     BindNativeFunction(engine, *object, "setSystemBarProperties", JsWindow::SetSystemBarProperties);
     BindNativeFunction(engine, *object, "getAvoidArea", JsWindow::GetAvoidArea);
     BindNativeFunction(engine, *object, "isShowing", JsWindow::IsShowing);
+    BindNativeFunction(engine, *object, "isSupportWideGamut", JsWindow::IsSupportWideGamut);
+    BindNativeFunction(engine, *object, "setColorSpace", JsWindow::SetColorSpace);
+    BindNativeFunction(engine, *object, "getColorSpace", JsWindow::GetColorSpace);
     std::shared_ptr<NativeReference> jsWindowRef;
     jsWindowRef.reset(engine.CreateReference(objValue, 1));
     std::lock_guard<std::recursive_mutex> lock(g_mutex);

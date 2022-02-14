@@ -49,6 +49,7 @@ public:
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void ProcessWindowTouchedEvent(uint32_t windowId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
+    WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) override;
 
     // colorspace, gamut
     virtual bool IsSupportWideGamut(uint32_t windowId) override;

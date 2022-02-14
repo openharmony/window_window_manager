@@ -57,13 +57,15 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
             sptr<Surface> surface = Surface::CreateSurfaceAsProducer(bp);
             int32_t flags = data.ReadInt32();
+            bool isForShot = data.ReadBool();
             VirtualScreenOption option = {
                 .name_ = name,
                 .width_ = width,
                 .height_ = height,
                 .density_ = density,
                 .surface_ = surface,
-                .flags_ = flags
+                .flags_ = flags,
+                .isForShot = isForShot
             };
             ScreenId screenId = CreateVirtualScreen(option);
             reply.WriteUint64(static_cast<uint64_t>(screenId));
@@ -73,6 +75,12 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             DMError result = DestroyVirtualScreen(screenId);
             reply.WriteInt32(static_cast<int32_t>(result));
+            break;
+        }
+        case TRANS_ID_REQUEST_ROTATION: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            Rotation rotation = static_cast<Rotation>(data.ReadUint32());
+            reply.WriteBool(RequestRotation(screenId, rotation));
             break;
         }
         case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
@@ -230,7 +238,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case TRANS_ID_SCREEN_GET_GAMUT_MAP: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             ScreenGamutMap gamutMap;
-            DMError ret = GetScreenGamutsMap(screenId, gamutMap);
+            DMError ret = GetScreenGamutMap(screenId, gamutMap);
             reply.WriteInt32(static_cast<int32_t>(ret));
             if (ret != DMError::DM_OK) {
                 break;
@@ -241,7 +249,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case TRANS_ID_SCREEN_SET_GAMUT_MAP: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             ScreenGamutMap gamutMap = static_cast<ScreenGamutMap>(data.ReadUint32());
-            DMError ret = SetScreenGamutsMap(screenId, gamutMap);
+            DMError ret = SetScreenGamutMap(screenId, gamutMap);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }

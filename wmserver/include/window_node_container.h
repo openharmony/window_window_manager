@@ -29,7 +29,7 @@ namespace OHOS {
 namespace Rosen {
 class WindowNodeContainer : public RefBase {
 public:
-    WindowNodeContainer(uint64_t displayId, uint32_t width, uint32_t height);
+    WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height);
     ~WindowNodeContainer();
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);
@@ -47,6 +47,7 @@ public:
     Rect GetDisplayRect() const;
     sptr<WindowNode> GetTopImmersiveNode() const;
     void UpdateWindowStatus(const sptr<WindowNode>& windowId, WindowUpdateType type) const;
+    void UpdateDisplayRect(uint32_t width, uint32_t height);
 
     void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas);
     void LayoutDividerWindow(sptr<WindowNode>& node);
@@ -59,6 +60,7 @@ public:
                                          const std::vector<WindowMode> &exceptionalModes = {});
     WMError EnterSplitWindowMode(sptr<WindowNode>& node);
     WMError ExitSplitWindowMode(sptr<WindowNode>& node);
+    WMError SwitchLayoutPolicy(WindowLayoutMode mode, bool reorder = false);
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
@@ -72,14 +74,14 @@ private:
     void SendSplitScreenEvent(WindowMode mode);
     sptr<WindowNode> FindSplitPairNode(sptr<WindowNode>& node) const;
     WMError UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode);
-    WMError SwitchLayoutPolicy(WindowLayoutMode mode);
-
     void NotifyIfSystemBarTintChanged();
     void NotifyIfSystemBarRegionChanged();
     void TraverseAndUpdateWindowState(WindowState state, int32_t topPriority);
     void UpdateWindowState(sptr<WindowNode> node, int32_t topPriority, WindowState state);
     bool IsTopAppWindow(uint32_t windowId) const;
+    sptr<WindowNode> FindDividerNode() const;
     void RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes);
+    void RaiseZOrderForSplitWindow(sptr<WindowNode>& node);
     void MinimizeWindowFromAbility(const sptr<WindowNode>& node);
     void ResetLayoutPolicy();
 
@@ -107,8 +109,8 @@ private:
     void DumpScreenWindowTree();
 
     struct WindowPairInfo {
-        sptr<WindowNode> pairNode;
-        float splitRatio;
+        sptr<WindowNode> pairNode_;
+        float splitRatio_;
     };
     std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;

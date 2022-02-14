@@ -20,6 +20,11 @@
 
 namespace OHOS {
 namespace Rosen {
+using DisplayId = uint64_t;
+using ScreenId = uint64_t;
+static constexpr DisplayId DISPLAY_ID_INVALD = -1ULL;
+static constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+
 enum class PowerStateChangeReason : uint32_t {
     POWER_BUTTON,
 };
@@ -55,6 +60,7 @@ enum class DMError : int32_t {
     DM_ERROR_DEATH_RECIPIENT = 150,
     DM_ERROR_INVALID_MODE_ID = 160,
     DM_ERROR_WRITE_DATA_FAILED = 170,
+    DM_ERROR_RENDER_SERVICE_FAILED = 180,
     DM_ERROR_UNKNOWN,
 };
 using DisplayStateCallback = std::function<void(DisplayState)>;
@@ -81,6 +87,8 @@ enum class ScreenChangeEvent : uint32_t {
     ADD_TO_GROUP,
     REMOVE_FROM_GROUP,
     CHANGE_GROUP,
+    UPDATE_ROTATION,
+    CHANGE_MODE,
 };
 
 enum class Rotation : uint32_t {
@@ -91,7 +99,9 @@ enum class Rotation : uint32_t {
 };
 
 enum class DisplayChangeEvent : uint32_t {
+    UPDATE_ROTATION,
     DISPLAY_SIZE_CHANGED,
+    UNKNOWN,
 };
 }
 }

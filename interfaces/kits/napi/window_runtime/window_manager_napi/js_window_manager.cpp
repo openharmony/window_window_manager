@@ -15,6 +15,7 @@
 #include "js_window_manager.h"
 #include <ability.h>
 #include <cinttypes>
+#include "dm_common.h"
 #include "js_window.h"
 #include "js_window_utils.h"
 #include "window_helper.h"
@@ -249,7 +250,8 @@ NativeValue* JsWindowManager::OnMinimizeAll(NativeEngine& engine, NativeCallback
         WLOGFE("param is too small!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    int64_t displayId = 0;
+    // TODO: use DisplayId instead of int64_t when engine supported
+    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALD);
     if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[0], displayId)) {
         WLOGFE("Failed to convert parameter to displayId");
         errCode = WMError::WM_ERROR_INVALID_PARAM;

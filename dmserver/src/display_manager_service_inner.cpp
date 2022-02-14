@@ -39,7 +39,7 @@ DisplayId DisplayManagerServiceInner::GetDefaultDisplayId()
 
 const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDisplayById(DisplayId displayId)
 {
-    sptr<AbstractDisplay> display = DisplayManagerService::GetInstance().GetDisplayByDisplayId(displayId);
+    sptr<AbstractDisplay> display = DisplayManagerService::GetInstance().GetAbstractDisplay(displayId);
     if (display == nullptr) {
         DisplayInfo displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
         display = new AbstractDisplay(displayInfo);
