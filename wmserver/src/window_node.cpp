@@ -22,6 +22,12 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowNode"};
 }
+
+const WindowNode::ColorSpaceConvertMap WindowNode::colorSpaceConvertMap[] = {
+    { ColorSpace::COLOR_SPACE_DEFAULT, COLOR_GAMUT_SRGB },
+    { ColorSpace::COLOR_SPACE_WIDE_GAMUT, COLOR_GAMUT_DCI_P3 },
+};
+
 void WindowNode::SetDisplayId(DisplayId displayId)
 {
     property_->SetDisplayId(displayId);
@@ -201,6 +207,43 @@ bool WindowNode::IsSplitMode() const
 WindowSizeChangeReason WindowNode::GetWindowSizeChangeReason() const
 {
     return windowSizeChangeReason_;
+}
+
+ColorSpace WindowNode::GetColorSpaceFromSurfaceGamut(SurfaceColorGamut surfaceColorGamut)
+{
+    for (auto item: colorSpaceConvertMap) {
+        if (item.sufaceColorGamut == surfaceColorGamut) {
+            return item.colorSpace;
+        }
+    }
+    return ColorSpace::COLOR_SPACE_DEFAULT;
+}
+
+SurfaceColorGamut WindowNode::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
+{
+    for (auto item: colorSpaceConvertMap) {
+        if (item.colorSpace == colorSpace) {
+            return item.sufaceColorGamut;
+        }
+    }
+    return SurfaceColorGamut::COLOR_GAMUT_SRGB;
+}
+
+bool WindowNode::IsSupportWideGamut() const
+{
+    return true;
+}
+
+void WindowNode::SetColorSpace(ColorSpace colorSpace)
+{
+    auto surfaceGamut = GetSurfaceGamutFromColorSpace(colorSpace);
+    surfaceNode_->SetColorSpace(surfaceGamut);
+}
+
+ColorSpace WindowNode::GetColorSpace() const
+{
+    auto surfaceGamut = surfaceNode_->GetColorSpace();
+    return GetColorSpaceFromSurfaceGamut(surfaceGamut);
 }
 }
 }
