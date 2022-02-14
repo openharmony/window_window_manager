@@ -373,6 +373,14 @@ ColorSpace WindowImpl::GetColorSpace()
     return SingletonContainer::Get<WindowAdapter>().GetColorSpace(property_->GetWindowId());
 }
 
+void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    WLOGFI("Ace:DumpInfo");
+    if (uiContent_ != nullptr) {
+        uiContent_->DumpInfo(params, info);
+    }
+}
+
 WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
     WLOGFI("[Client] Window %{public}d SetSystemBarProperty type %{public}d " \
