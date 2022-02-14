@@ -164,7 +164,7 @@ WMError WindowController::Resize(uint32_t windowId, uint32_t width, uint32_t hei
     Rect lastRect = property->GetWindowRect();
     Rect newRect = { lastRect.posX_, lastRect.posY_, width, height };
     property->SetWindowRect(newRect);
-    node->hasDecorated = false;
+    node->hasDecorated_ = false;
     WMError res = windowRoot_->UpdateWindowNode(windowId);
     if (res != WMError::WM_OK) {
         return res;
