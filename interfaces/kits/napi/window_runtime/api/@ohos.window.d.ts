@@ -17,12 +17,12 @@ import { Context } from  './app/context';
 import { ContenStorage } from './@internal/component/ets/stateManagement'
 /**
  * Window manager.
- * @devices tv, phone, tablet, wearable.
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
 */
 declare namespace window {
   /**
    * The type of a window.
-   * @devices tv, phone, tablet, wearable.
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    */
   enum WindowType {
     /**
@@ -61,7 +61,7 @@ declare namespace window {
 
   /**
    * Describes the type of avoid area
-   * @devices tv, phone, tablet, wearable.
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @since 7
    */
   enum AvoidAreaType {
@@ -95,7 +95,7 @@ declare namespace window {
 
   /**
    * Describes the mode of window layout
-   * @devices tv, phone, tablet, wearable.
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @systemapi Hide this for inner system use.
    * @since 8
    */
@@ -198,7 +198,6 @@ declare namespace window {
   /**
    * Set the layout mode of a window.
    * @param mode the layout mode of a window.
-   * @devices tv, phone, tablet, wearable, liteWearable.
    * @systemapi Hide this for inner system use.
    * @since 8
    */
@@ -207,7 +206,6 @@ declare namespace window {
   /**
    * Set the layout mode of a window.
    * @param mode the layout mode of a window.
-   * @devices tv, phone, tablet, wearable, liteWearable.
    * @systemapi Hide this for inner system use.
    * @since 8
    */
@@ -216,24 +214,22 @@ declare namespace window {
   /**
    * register the callback of systemBarTintChange
    * @param type: 'systemBarTintChange'
-   * @devices tv, phone, tablet, wearable, car
    * @systemapi Hide this for inner system use.
    * @since 8
    */
   function on(type: 'systemBarTintChange', callback: Callback<SystemBarTintState>): void;
 
-    /**
-    * unregister the callback of systemBarTintChange
-    * @param type: 'systemBarTintChange'
-    * @devices tv, phone, tablet, wearable, car
-    * @systemapi Hide this for inner system use.
-    * @since 8
-    */
-    function off(type: 'systemBarTintChange', callback?: Callback<SystemBarTintState>): void;
+  /**
+  * unregister the callback of systemBarTintChange
+  * @param type: 'systemBarTintChange'
+  * @systemapi Hide this for inner system use.
+  * @since 8
+  */
+  function off(type: 'systemBarTintChange', callback?: Callback<SystemBarTintState>): void;
 
   /**
    * Properties of status bar and navigation bar, it couldn't update automatically
-   * @devices tv, phone, tablet, wearable, car
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @since 6
    */
   interface SystemBarProperties {
@@ -276,7 +272,7 @@ declare namespace window {
 
   /**
    * system bar tint of region
-   * @devices tv, phone, tablet, wearable, car
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @systemapi Hide this for inner system use.
    * @since 8
    */
@@ -309,7 +305,7 @@ declare namespace window {
 
   /**
    * system bar tint state for systemui
-   * @devices tv, phone, tablet, wearable, car
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @systemapi Hide this for inner system use.
    * @since 8
    */
@@ -326,7 +322,7 @@ declare namespace window {
 
   /**
    * Rectangle
-   * @devices tv, phone, tablet, wearable, car
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @since 7
    */
   interface Rect {
@@ -341,7 +337,7 @@ declare namespace window {
 
   /**
    * avoid area
-   * @devices tv, phone, tablet, wearable, car
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @since 7
    */
   interface AvoidArea {
@@ -368,7 +364,7 @@ declare namespace window {
 
   /**
    * window size
-   * @devices tv, phone, tablet, wearable, car
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @since 7
    */
   interface Size {
@@ -385,7 +381,7 @@ declare namespace window {
 
   /**
    * Properties of window, it couldn't update automatically
-   * @devices tv, phone, tablet, wearable, car
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @since 6
    */
   interface WindowProperties {
@@ -429,7 +425,7 @@ declare namespace window {
      * Whether the window is touchable. The default value is false
      * @since 6
      */
-    isFullScreen: boolean
+    touchable: boolean
   }
 
   /**
@@ -490,7 +486,7 @@ declare namespace window {
      * Set the position of a window.
      * @param x Indicate the X-coordinate of the window.
      * @param y Indicate the Y-coordinate of the window.
-     * @devices tv, phone, tablet, wearable, liteWearable.
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     moveTo(x: number, y: number): Promise<void>;
@@ -499,7 +495,7 @@ declare namespace window {
      * Set the position of a window.
      * @param x Indicate the X-coordinate of the window.
      * @param y Indicate the Y-coordinate of the window.
-     * @devices tv, phone, tablet, wearable, liteWearable.
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     moveTo(x: number, y: number, callback: AsyncCallback<void>): void;
@@ -508,7 +504,7 @@ declare namespace window {
      * Set the size of a window .
      * @param width Indicates the width of the window.
      * @param height Indicates the height of the window.
-     * @devices tv, phone, tablet, wearable, liteWearable.
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     resize(width: number, height: number): Promise<void>;
@@ -517,7 +513,7 @@ declare namespace window {
      * Set the size of a window .
      * @param width Indicates the width of the window.
      * @param height Indicates the height of the window.
-     * @devices tv, phone, tablet, wearable, liteWearable.
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     resize(width: number, height: number, callback: AsyncCallback<void>): void;
@@ -525,7 +521,7 @@ declare namespace window {
     /**
      * Set the type of a window.
      * @param windowType Indicate the type of a window.
-     * @devices tv, phone, tablet, wearable, liteWearable.
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     setWindowType(windowType: WindowType): Promise<void>;
@@ -533,21 +529,21 @@ declare namespace window {
     /**
      * Set the type of a window.
      * @param windowType Indicate the type of a window.
-     * @devices tv, phone, tablet, wearable, liteWearable.
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     setWindowType(windowType: WindowType, callback: AsyncCallback<void>): void;
 
     /**
      * get the properties of current window
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 6
      */
     getProperties(callback: AsyncCallback<WindowProperties>): void;
 
      /**
       * get the properties of current window
-      * @devices tv, phone, tablet, wearable, car
+      * @syscap SystemCapability.WindowManager.WindowManager.Core
       * @since 6
       */
     getProperties(): Promise<WindowProperties>;
@@ -569,7 +565,7 @@ declare namespace window {
     /**
      * set the flag of the window is shown full screen
      * @param isFullScreen the flag of the window is shown full screen
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 6
      */
     setFullScreen(isFullScreen: boolean, callback: AsyncCallback<void>): void;
@@ -577,7 +573,7 @@ declare namespace window {
     /**
      * set the flag of the window is shown full screen
      * @param isFullScreen the flag of the window is shown full screen
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 6
      */
     setFullScreen(isFullScreen: boolean): Promise<void>;
@@ -585,7 +581,7 @@ declare namespace window {
     /**
      * set the property of the window can layout in full screen
      * @param isLayoutFullScreen the window can layout in full screen
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     setLayoutFullScreen(isLayoutFullScreen: boolean, callback: AsyncCallback<void>): void;
@@ -593,7 +589,7 @@ declare namespace window {
     /**
      * set the property of the window can layout in full screen
      * @param isLayoutFullScreen the window can layout in full screen
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     setLayoutFullScreen(isLayoutFullScreen: boolean): Promise<void>;
@@ -601,7 +597,7 @@ declare namespace window {
     /**
      * set the system bar to have visible.
      * @param names the set of system bar
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     setSystemBarEnable(names: Array<'status'|'navigation'>, callback: AsyncCallback<void>): void;
@@ -609,7 +605,7 @@ declare namespace window {
     /**
      * set the system bar to have visible.
      * @param names the set of system bar
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     setSystemBarEnable(names: Array<'status'|'navigation'>): Promise<void>;
@@ -617,7 +613,7 @@ declare namespace window {
     /**
      * set the background color of statusbar
      * @param color the background color of statusbar
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 6
      */
     setSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<void>): void;
@@ -625,7 +621,7 @@ declare namespace window {
     /**
      * set the background color of statusbar
      * @param color the background color of statusbar
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 6
      */
     setSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void>;
@@ -634,7 +630,7 @@ declare namespace window {
      * Loads content
      * @param path  path Path of the page to which the content will be loaded
      * @param storage storage The data object shared within the content instance loaded by the window
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 8
      */
     loadContent(path: string, storage: ContenStorage, callback: AsyncCallback<void>): void;
@@ -642,7 +638,7 @@ declare namespace window {
     /**
      * Loads content
      * @param path path of the page to which the content will be loaded
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     loadContent(path: string, callback: AsyncCallback<void>): void;
@@ -650,7 +646,7 @@ declare namespace window {
     /**
      * Loads content
      * @param path path of the page to which the content will be loaded
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     loadContent(path: string, storage?: ContenStorage): Promise<void>;
@@ -658,7 +654,7 @@ declare namespace window {
     /**
      * register the callback of windowSizeChange
      * @param type: 'windowSizeChange'
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     on(type: 'windowSizeChange', callback: Callback<Size>): void;
@@ -666,7 +662,7 @@ declare namespace window {
     /**
      * unregister the callback of windowSizeChange
      * @param type: 'windowSizeChange'
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     off(type: 'windowSizeChange', callback?: Callback<Size>): void;
@@ -674,7 +670,7 @@ declare namespace window {
     /**
      * register the callback of systemAvoidAreaChange
      * @param type: 'systemAvoidAreaChange'
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     on(type: 'systemAvoidAreaChange', callback: Callback<AvoidArea>): void;
@@ -682,7 +678,7 @@ declare namespace window {
     /**
      * unregister the callback of systemAvoidAreaChange
      * @param type: 'systemAvoidAreaChange'
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     off(type: 'systemAvoidAreaChange', callback?: Callback<AvoidArea>): void;
@@ -727,14 +723,14 @@ declare namespace window {
   }
 
   enum WindowStageEventType {
-    VISIBLE = 1,
-    FOCUSED,
-    UNFOCUSED,
-    INVISIBLE,
+    FOREGROUND = 1,
+    ACTIVE,
+    INACTIVE,
+    BACKGROUND,
   }
   /**
    * WindowStage
-   * @devices tv, phone, tablet, wearable, liteWearable.
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    */
   interface WindowStage {
     /**
@@ -773,34 +769,34 @@ declare namespace window {
      * Loads content
      * @param path  path Path of the page to which the content will be loaded
      * @param storage storage The data object shared within the content instance loaded by the window
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 8
      */
     loadContent(path: string, storage: ContenStorage, callback: AsyncCallback<void>): void;
     /**
      * Loads content
      * @param path path of the page to which the content will be loaded
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 8
      */
     loadContent(path: string, callback: AsyncCallback<void>): void;
     /**
      * Loads content
      * @param path path of the page to which the content will be loaded
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 8
      */
     loadContent(path: string, storage?: ContenStorage): Promise<void>;
     /**
      * get the windowmode of current window
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @systemapi
      * @since 8
      */
     getWindowMode(callback: AsyncCallback<WindowMode>): void;
     /**
      * get the windowmode of current window
-     * @devices tv, phone, tablet, wearable, car
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @systemapi
      * @since 8
      */

@@ -220,7 +220,8 @@ NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
             }
         };
 
-    NativeValue* lastParam = (info.argc == 0) ? nullptr : info.argv[0];
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -257,7 +258,8 @@ NativeValue* JsWindow::OnDestroy(NativeEngine& engine, NativeCallbackInfo& info)
             WLOGFI("JsWindow::OnDestroy success");
         };
 
-    NativeValue* lastParam = (info.argc == 0) ? nullptr : info.argv[0];
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -287,7 +289,8 @@ NativeValue* JsWindow::OnHide(NativeEngine& engine, NativeCallbackInfo& info)
             }
         };
 
-    NativeValue* lastParam = (info.argc == 0) ? nullptr : info.argv[0];
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -298,18 +301,18 @@ NativeValue* JsWindow::OnMoveTo(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsWindow::OnMoveTo is called");
     WMError errCode = WMError::WM_OK;
-    if (windowToken_ == nullptr) {
-        WLOGFE("JsWindow windowToken_ is nullptr");
+    if (windowToken_ == nullptr || info.argc < ARGC_TWO) {
+        WLOGFE("JsWindow windowToken_ is nullptr or params not match");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    int32_t x;
-    if (!ConvertFromJsValue(engine, info.argv[0], x)) {
+    int32_t x = 0;
+    if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[0], x)) {
         WLOGFE("Failed to convert parameter to x");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    int32_t y;
-    if (!ConvertFromJsValue(engine, info.argv[ARGC_ONE], y)) {
+    int32_t y = 0;
+    if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[ARGC_ONE], y)) {
         WLOGFE("Failed to convert parameter to y");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -328,7 +331,8 @@ NativeValue* JsWindow::OnMoveTo(NativeEngine& engine, NativeCallbackInfo& info)
             }
         };
 
-    NativeValue* lastParam = (info.argc == ARGC_TWO) ? nullptr : info.argv[INDEX_TWO];
+    NativeValue* lastParam = (info.argc <= ARGC_TWO) ? nullptr :
+        (info.argv[INDEX_TWO]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_TWO] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -339,18 +343,18 @@ NativeValue* JsWindow::OnResize(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsWindow::OnResize is called");
     WMError errCode = WMError::WM_OK;
-    if (windowToken_ == nullptr) {
-        WLOGFE("JsWindow windowToken_ is nullptr");
+    if (windowToken_ == nullptr || info.argc < ARGC_TWO) {
+        WLOGFE("JsWindow windowToken_ is nullptr or params not match");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    uint32_t width;
-    if (!ConvertFromJsValue(engine, info.argv[0], width)) {
+    uint32_t width = 0;
+    if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[0], width)) {
         WLOGFE("Failed to convert parameter to width");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    uint32_t height;
-    if (!ConvertFromJsValue(engine, info.argv[ARGC_ONE], height)) {
+    uint32_t height = 0;
+    if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[ARGC_ONE], height)) {
         WLOGFE("Failed to convert parameter to height");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -367,7 +371,8 @@ NativeValue* JsWindow::OnResize(NativeEngine& engine, NativeCallbackInfo& info)
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "JsWindow::OnResize failed."));
             }
         };
-    NativeValue* lastParam = (info.argc == ARGC_TWO) ? nullptr : info.argv[INDEX_TWO];
+    NativeValue* lastParam = (info.argc <= ARGC_TWO) ? nullptr :
+        (info.argv[INDEX_TWO]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_TWO] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -378,25 +383,29 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
 {
     WLOGFI("JsWindow::OnSetWindowType is called");
     WMError errCode = WMError::WM_OK;
-    if (windowToken_ == nullptr) {
-        WLOGFE("JsWindow windowToken_ is nullptr");
+    if (windowToken_ == nullptr || info.argc < ARGC_ONE) {
+        WLOGFE("JsWindow windowToken_ is nullptr or params not match");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    NativeNumber* nativeType = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
-    if (nativeType == nullptr) {
-        WLOGFE("Failed to convert parameter to windowType");
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
-    }
-    // adapt to the old version
     WindowType winType = WindowType::SYSTEM_WINDOW_BASE;
-    if (static_cast<uint32_t>(*nativeType) >= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_BASE)) {
-        winType = static_cast<WindowType>(static_cast<uint32_t>(*nativeType));
-    } else {
-        if (JS_TO_NATIVE_WINDOW_TYPE_MAP.count(static_cast<ApiWindowType>(static_cast<uint32_t>(*nativeType))) != 0) {
-            winType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(static_cast<uint32_t>(*nativeType)));
-        } else {
-            WLOGFE("Do not surppot this type");
+    if (errCode == WMError::WM_OK) {
+        NativeNumber* nativeType = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
+        if (nativeType == nullptr) {
+            WLOGFE("Failed to convert parameter to windowType");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
+        }
+        // adapt to the old version
+        if (static_cast<uint32_t>(*nativeType) >= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_BASE)) {
+            winType = static_cast<WindowType>(static_cast<uint32_t>(*nativeType));
+        } else {
+            if (JS_TO_NATIVE_WINDOW_TYPE_MAP.count(
+                static_cast<ApiWindowType>(static_cast<uint32_t>(*nativeType))) != 0) {
+                winType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(
+                    static_cast<ApiWindowType>(static_cast<uint32_t>(*nativeType)));
+            } else {
+                WLOGFE("Do not surppot this type");
+                errCode = WMError::WM_ERROR_INVALID_PARAM;
+            }
         }
     }
     AsyncTask::CompleteCallback complete =
@@ -415,7 +424,8 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
             }
         };
 
-    NativeValue* lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -426,16 +436,20 @@ NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo&
 {
     WLOGFI("JsWindow::OnSetWindowMode is called");
     WMError errCode = WMError::WM_OK;
-    if (windowToken_ == nullptr) {
-        WLOGFE("JsWindow windowToken_ is nullptr");
+    if (windowToken_ == nullptr || info.argc < ARGC_ONE) {
+        WLOGFE("JsWindow windowToken_ is nullptr or params not match");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    NativeNumber* nativeMode = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
-    if (nativeMode == nullptr) {
-        WLOGFE("Failed to convert parameter to windowMode");
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    WindowMode winMode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    if (errCode == WMError::WM_OK) {
+        NativeNumber* nativeMode = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
+        if (nativeMode == nullptr) {
+            WLOGFE("Failed to convert parameter to windowMode");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        }
+        winMode = static_cast<WindowMode>(static_cast<uint32_t>(*nativeMode));
     }
-    WindowMode winMode = static_cast<WindowMode>(static_cast<uint32_t>(*nativeMode));
+
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (errCode != WMError::WM_OK) {
@@ -452,7 +466,8 @@ NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo&
             }
         };
 
-    NativeValue* lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
+    NativeValue* lastParam = (info.argc == ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -484,7 +499,8 @@ NativeValue* JsWindow::OnGetProperties(NativeEngine& engine, NativeCallbackInfo&
             }
         };
 
-    NativeValue* lastParam = (info.argc == 0) ? nullptr : info.argv[0];
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -656,12 +672,12 @@ NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& i
 {
     WLOGFI("JsWindow::OnLoadContent is called");
     WMError errCode = WMError::WM_OK;
-    if (windowToken_ == nullptr || info.argc <= 0) {
-        WLOGFE("JsWindow windowToken_ is nullptr");
+    if (windowToken_ == nullptr || info.argc < ARGC_ONE) {
+        WLOGFE("JsWindow windowToken_ is nullptr or params not match");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     std::string contextUrl;
-    if (!ConvertFromJsValue(engine, info.argv[0], contextUrl)) {
+    if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[0], contextUrl)) {
         WLOGFE("Failed to convert parameter to context url");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -676,7 +692,7 @@ NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& i
         }
     } else if (info.argc == ARGC_THREE) {
         storage = info.argv[INDEX_ONE];
-        callBack = info.argv[INDEX_TWO];
+        callBack = (info.argv[INDEX_TWO]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_TWO] : nullptr);
     }
     contentStorage_ = static_cast<void*>(storage);
     AsyncTask::CompleteCallback complete =
@@ -709,12 +725,16 @@ NativeValue* JsWindow::OnSetFullScreen(NativeEngine& engine, NativeCallbackInfo&
         WLOGFE("JsWindow windowToken_ is nullptr or param is too small!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
-    if (nativeVal == nullptr) {
-        WLOGFE("Failed to convert parameter to isFullScreen");
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    bool isFullScreen = false;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("Failed to convert parameter to isFullScreen");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        }
+        isFullScreen = static_cast<bool>(*nativeVal);
     }
-    bool isFullScreen = static_cast<bool>(*nativeVal);
+
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (errCode != WMError::WM_OK) {
@@ -731,7 +751,8 @@ NativeValue* JsWindow::OnSetFullScreen(NativeEngine& engine, NativeCallbackInfo&
             }
         };
 
-    NativeValue* lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -746,12 +767,15 @@ NativeValue* JsWindow::OnSetLayoutFullScreen(NativeEngine& engine, NativeCallbac
         WLOGFE("JsWindow windowToken_ is nullptr or param is too small!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
-    if (nativeVal == nullptr) {
-        WLOGFE("Failed to convert parameter to isLayoutFullScreen");
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    bool isLayoutFullScreen = false;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("Failed to convert parameter to isLayoutFullScreen");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        }
+        isLayoutFullScreen = static_cast<bool>(*nativeVal);
     }
-    bool isLayoutFullScreen = static_cast<bool>(*nativeVal);
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (errCode != WMError::WM_OK) {
@@ -767,7 +791,8 @@ NativeValue* JsWindow::OnSetLayoutFullScreen(NativeEngine& engine, NativeCallbac
                     static_cast<int32_t>(ret), "JsWindow::OnSetLayoutFullScreen failed."));
             }
         };
-    NativeValue* lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -783,7 +808,7 @@ NativeValue* JsWindow::OnSetSystemBarEnable(NativeEngine& engine, NativeCallback
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     std::map<WindowType, SystemBarProperty> systemBarProperties;
-    if (!GetSystemBarStatus(systemBarProperties, engine, info, windowToken_)) {
+    if (errCode == WMError::WM_OK && !GetSystemBarStatus(systemBarProperties, engine, info, windowToken_)) {
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     AsyncTask::CompleteCallback complete =
@@ -805,7 +830,8 @@ NativeValue* JsWindow::OnSetSystemBarEnable(NativeEngine& engine, NativeCallback
             }
         };
 
-    NativeValue* lastParam = (info.argc == ARGC_TWO) ?  info.argv[INDEX_ONE] : nullptr;
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ?  nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -820,15 +846,18 @@ NativeValue* JsWindow::OnSetSystemBarProperties(NativeEngine& engine, NativeCall
         WLOGFE("JsWindow windowToken_ is nullptr or param is too small!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
-    if (nativeObj == nullptr) {
-        WLOGFE("Failed to convert object to SystemBarProperties");
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
-    }
     std::map<WindowType, SystemBarProperty> systemBarProperties;
-    if (!SetSystemBarPropertiesFromJs(engine, nativeObj, systemBarProperties, windowToken_)) {
-        WLOGFE("Failed to GetSystemBarProperties From Js Object");
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    if (errCode == WMError::WM_OK) {
+        NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
+        if (nativeObj == nullptr) {
+            WLOGFE("Failed to convert object to SystemBarProperties");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        }
+
+        if (!SetSystemBarPropertiesFromJs(engine, nativeObj, systemBarProperties, windowToken_)) {
+            WLOGFE("Failed to GetSystemBarProperties From Js Object");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        }
     }
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
@@ -849,7 +878,8 @@ NativeValue* JsWindow::OnSetSystemBarProperties(NativeEngine& engine, NativeCall
             }
         };
 
-    NativeValue* lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -864,15 +894,17 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
         WLOGFE("JsWindow windowToken_ is nullptr or param is too small!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    // Parse info->argv[0] as AvoidAreaType
-    NativeNumber* nativeMode = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
-    if (nativeMode == nullptr) {
-        WLOGFE("Failed to convert parameter to AvoidAreaType");
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
+    if (errCode == WMError::WM_OK) {
+        // Parse info->argv[0] as AvoidAreaType
+        NativeNumber* nativeMode = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
+        if (nativeMode == nullptr) {
+            WLOGFE("Failed to convert parameter to AvoidAreaType");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        }
+        avoidAreaType = static_cast<AvoidAreaType>(static_cast<uint32_t>(*nativeMode));
+        WLOGFI("JsWindow::OnGetAvoidArea get avoidAreaType success %{public}u", avoidAreaType);
     }
-    AvoidAreaType avoidAreaType = static_cast<AvoidAreaType>(static_cast<uint32_t>(*nativeMode));
-    WLOGFI("JsWindow::OnGetAvoidArea get avoidAreaType success %{public}u", avoidAreaType);
-
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (errCode != WMError::WM_OK) {
@@ -888,7 +920,6 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
                 WLOGFE("JsWindow::OnGetAvoidArea GetAvoidAreaByType Failed");
                 avoidArea = { EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT }; // left, top, right, bottom
             }
-
             // native avoidArea -> js avoidArea
             NativeValue* avoidAreaObj = ChangeAvoidAreaToJsValue(engine, avoidArea);
             if (avoidAreaObj != nullptr) {
@@ -899,9 +930,9 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindow::OnGetAvoidArea failed."));
             }
         };
-
     WLOGFI("JsWindow::OnGetAvoidArea AsyncTask end");
-    NativeValue* lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -923,7 +954,8 @@ NativeValue* JsWindow::OnIsShowing(NativeEngine& engine, NativeCallbackInfo& inf
             task.Resolve(engine, CreateJsValue(engine, state));
         };
 
-    NativeValue* lastParam = (info.argc == 0) ? nullptr : info.argv[0];
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
