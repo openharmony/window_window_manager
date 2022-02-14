@@ -120,10 +120,9 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
     uint32_t mainWinId = INVALID_WINDOW_ID;
     for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
         auto win = iter->second.second;
-        if (context.get() == win->GetContext().get()) {
-            WLOGFI("GetTopWindow %{public}p, window context %{public}p!", context.get(), win->GetContext().get());
+        if (context.get() == win->GetContext().get() && WindowHelper::IsMainWindow(win->GetType())) {
             mainWinId = win->GetWindowId();
-            WLOGFI("GetTopWindow Find MainWinId:%{public}d with context!", mainWinId);
+            WLOGFI("GetTopWindow Find MainWinId:%{public}d with context %{public}p!", mainWinId, context.get());
             break;
         }
     }
