@@ -107,7 +107,7 @@ float Screen::GetVirtualPixelRatio() const
     return pImpl_->virtualPixelRatio_;
 }
 
-Rotation Screen::GetRotation() const
+Rotation Screen::GetRotation()
 {
     return pImpl_->rotation_;
 }
