@@ -405,7 +405,7 @@ WMError WindowRoot::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mo
     }
     WMError ret = container->SwitchLayoutPolicy(mode, true);
     if (ret != WMError::WM_OK) {
-        WLOGFW("set windoe layout mode failed displayId: %{public}" PRId64 ", ret: %{public}d", displayId, ret);
+        WLOGFW("set window layout mode failed displayId: %{public}" PRId64 ", ret: %{public}d", displayId, ret);
     }
     return ret;
 }
