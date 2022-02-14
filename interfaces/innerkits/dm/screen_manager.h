@@ -40,7 +40,7 @@ public:
 
     bool RegisterScreenListener(sptr<IScreenListener> listener);
     bool UnregisterScreenListener(sptr<IScreenListener> listener);
-    ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
+    ScreenId MakeExpand(const std::vector<ExpandOption>& options);
     ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);

@@ -30,6 +30,8 @@ class ScreenInfo;
 struct Point {
     int32_t posX_;
     int32_t posY_;
+    Point() {};
+    Point(int32_t posX, int32_t posY) : posX_(posX), posY_(posY) {};
 };
 
 struct SupportedScreenModes : public RefBase {
@@ -48,6 +50,12 @@ struct VirtualScreenOption {
     bool isForShot {true};
 };
 
+struct ExpandOption {
+    uint32_t screenId_;
+    uint32_t startX_;
+    uint32_t startY_;
+};
+
 class Screen : public RefBase {
 public:
     Screen(const ScreenInfo* info);
@@ -60,7 +68,7 @@ public:
     uint32_t GetVirtualHeight() const;
     float GetVirtualPixelRatio() const;
     bool RequestRotation(Rotation rotation);
-    Rotation GetRotation() const;
+    Rotation GetRotation();
     ScreenId GetParentId() const;
     uint32_t GetModeId() const;
     std::vector<sptr<SupportedScreenModes>> GetSupportedModes() const;
