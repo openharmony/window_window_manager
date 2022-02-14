@@ -920,20 +920,29 @@ WMError WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode,
     return WMError::WM_OK;
 }
 
-WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode mode, bool reorder)
+WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, bool reorder)
 {
     WLOGFI("SwitchLayoutPolicy src: %{public}d dst: %{public}d reorder: %{public}d",
-        static_cast<uint32_t>(layoutMode_), static_cast<uint32_t>(mode), static_cast<uint32_t>(reorder));
-    if (layoutMode_ != mode) {
-        layoutMode_ = mode;
+        static_cast<uint32_t>(layoutMode_), static_cast<uint32_t>(dstMode), static_cast<uint32_t>(reorder));
+    if (layoutMode_ != dstMode) {
+        if (layoutMode_ == WindowLayoutMode::CASCADE && !pairedWindowMap_.empty()) {
+            pairedWindowMap_.clear();
+            SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, displayId_);
+        }
+        layoutMode_ = dstMode;
         layoutPolicy_->Clean();
-        layoutPolicy_ = layoutPolicys_[mode];
+        layoutPolicy_ = layoutPolicys_[dstMode];
         layoutPolicy_->Launch();
         DumpScreenWindowTree();
     } else {
-        WLOGFI("Curret layout mode is allready: %{public}d", static_cast<uint32_t>(mode));
+        WLOGFI("Curret layout mode is allready: %{public}d", static_cast<uint32_t>(dstMode));
     }
     if (reorder) {
+        if (!pairedWindowMap_.empty()) {
+            // exit divider window when reorder
+            pairedWindowMap_.clear();
+            SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, displayId_);
+        }
         layoutPolicy_->Reorder();
         DumpScreenWindowTree();
     }

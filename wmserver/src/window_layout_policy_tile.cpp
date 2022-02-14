@@ -114,7 +114,9 @@ void WindowLayoutPolicyTile::InitForegroundNodeQueue()
     foregroundNodes_.clear();
     lastForegroundNodeId_ = 0;
     for (auto& node : appWindowNode_->children_) {
-        UpdateForegroundNodeQueue(node);
+        if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+            UpdateForegroundNodeQueue(node);
+        }
     }
 }
 
@@ -123,11 +125,13 @@ void WindowLayoutPolicyTile::UpdateForegroundNodeQueue(sptr<WindowNode>& node)
     if (node == nullptr) {
         return;
     }
+    WLOGFI("add win in tile for win id: %{public}d", node->GetWindowId());
     uint32_t maxTileWinNum = IsVertical() ? MAX_WIN_NUM_VERTICAL : MAX_WIN_NUM_HORIZONTAL;
     if (foregroundNodes_.size() < maxTileWinNum) {
         foregroundNodes_.push_back(node);
         lastForegroundNodeId_ = ((++lastForegroundNodeId_) % maxTileWinNum);
     } else {
+        WLOGFI("minimize win %{public}d in tile", foregroundNodes_[lastForegroundNodeId_]->GetWindowId());
         AAFwk::AbilityManagerClient::GetInstance()->
             MinimizeAbility(foregroundNodes_[lastForegroundNodeId_]->abilityToken_);
         foregroundNodes_[lastForegroundNodeId_] = node;
@@ -142,7 +146,9 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows()
     if (num == 1) {
         WLOGFI("set rect for win id: %{public}d", foregroundNodes_[0]->GetWindowMode());
         foregroundNodes_[0]->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        foregroundNodes_[0]->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         foregroundNodes_[0]->SetWindowRect(singleRect_);
+        foregroundNodes_[0]->hasDecorated_ = true;
         WLOGFI("set rect for win id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
             foregroundNodes_[0]->GetWindowId(),
             singleRect_.posX_, singleRect_.posY_, singleRect_.width_, singleRect_.height_);
@@ -150,11 +156,57 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows()
         auto& rects = (num == MAX_WIN_NUM_HORIZONTAL) ? tripleRects_ : doubleRects_;
         for (uint32_t i = 0; i < foregroundNodes_.size(); i++) {
             foregroundNodes_[(lastForegroundNodeId_ + i) % num]->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            foregroundNodes_[(lastForegroundNodeId_ + i) % num]->GetWindowToken()->
+                UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             foregroundNodes_[(lastForegroundNodeId_ + i) % num]->SetWindowRect(rects[i]);
+            foregroundNodes_[(lastForegroundNodeId_ + i) % num]->hasDecorated_ = true;
             WLOGFI("set rect for qwin id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
                 foregroundNodes_[(lastForegroundNodeId_ + i) % num]->GetWindowId(),
                 rects[i].posX_, rects[i].posY_, rects[i].width_, rects[i].height_);
         }
+    }
+}
+
+void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
+{
+    auto type = node->GetWindowType();
+    auto mode = node->GetWindowMode();
+    auto flags = node->GetWindowFlags();
+    auto decorEnbale = node->GetWindowProperty()->GetDecorEnable();
+    bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    bool parentLimit = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
+    bool subWindow = WindowHelper::IsSubWindow(type);
+    bool floatingWindow = (mode == WindowMode::WINDOW_MODE_FLOATING);
+    const Rect& layoutRect = node->GetLayoutRect();
+    Rect lastRect = layoutRect;
+    Rect displayRect = displayRect_;
+    Rect limitRect = displayRect;
+    Rect winRect = node->GetWindowProperty()->GetWindowRect();
+
+    WLOGFI("Id:%{public}d, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
+        "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+        node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnbale,
+        static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+    if (needAvoid) {
+        limitRect = limitRect_;
+    }
+
+    if (!floatingWindow) { // fullscreen window
+        winRect = limitRect;
+    } else { // floating window
+        if (node->GetWindowProperty()->GetDecorEnable()) { // is decorable
+            winRect = ComputeDecoratedWindowRect(winRect);
+        }
+        if (subWindow && parentLimit) { // subwidow and limited by parent
+            limitRect = node->parent_->GetLayoutRect();
+            UpdateFloatingLayoutRect(limitRect, winRect);
+        }
+    }
+    LimitWindowSize(node, displayRect, winRect);
+    node->SetLayoutRect(winRect);
+    if (!(lastRect == winRect)) {
+        node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
+        node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     }
 }
 }
