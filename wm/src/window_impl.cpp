@@ -263,7 +263,12 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
         property_->SetWindowMode(mode);
     } else if (state_ == WindowState::STATE_SHOWN) {
         property_->SetWindowMode(mode);
-        return SingletonContainer::Get<WindowAdapter>().SetWindowMode(property_->GetWindowId(), mode);
+        WMError ret = SingletonContainer::Get<WindowAdapter>().SetWindowMode(property_->GetWindowId(), mode);
+        if (ret == WMError::WM_OK && windowChangeListener_ != nullptr) {
+            WLOGFE("notify window mode changed");
+            windowChangeListener_->OnModeChange(mode);
+        }
+        return ret;
     }
     if (property_->GetWindowMode() != mode) {
         WLOGFE("set window mode filed! id: %{public}d", property_->GetWindowId());
@@ -723,6 +728,7 @@ void WindowImpl::RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener)
 
 void WindowImpl::RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener)
 {
+    WLOGFE("RegisterWindowChangeListener, windowId %{public}u", GetWindowId());
     windowChangeListener_ = listener;
 }
 
@@ -790,7 +796,11 @@ void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reas
 
 void WindowImpl::UpdateMode(WindowMode mode)
 {
+    WLOGI("UpdateMode %{public}d", mode);
     property_->SetWindowMode(mode);
+    if (windowChangeListener_ != nullptr) {
+        windowChangeListener_->OnModeChange(mode);
+    }
 }
 
 void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
