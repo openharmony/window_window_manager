@@ -252,13 +252,28 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             windowRoot_->NotifyWindowStateChange(WindowState::STATE_UNFROZEN, WindowStateChangeReason::KEYGUARD);
             break;
         }
+        case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION: {
-            const sptr<AbstractDisplay> abstractDisplay
-                = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
-            if (abstractDisplay == nullptr) {
-                WLOGFE("get display failed displayId:%{public}" PRId64 "", displayId);
-                return;
-            }
+            ProcessDisplayChange(displayId, type);
+            break;
+        }
+        default: {
+            WLOGFE("unknown DisplayStateChangeType:%{public}u", type);
+            return;
+        }
+    }
+}
+
+void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type)
+{
+    const sptr<AbstractDisplay> abstractDisplay = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+    if (abstractDisplay == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRId64 "", displayId);
+        return;
+    }
+    
+    switch (type) {
+        case DisplayStateChangeType::UPDATE_ROTATION: {
             windowRoot_->NotifyDisplayChange(abstractDisplay);
 
             // TODO: Remove 'sysBarWinId_' after SystemUI resize 'systembar'
@@ -268,8 +283,13 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
             newRect = { 0, abstractDisplay->GetHeight() - height, width, height };
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
-
-            FlushWindowInfoWithDisplayId(displayId);
+            break;
+        }
+        case DisplayStateChangeType::SIZE_CHANGE: {
+            // Should request different window resolution change but not directly apply resize
+            // show logs of updated display
+            windowRoot_->NotifyDisplayChange(abstractDisplay);
+            WLOGFI("display w/h: %{public}u %{public}u", abstractDisplay->GetWidth(), abstractDisplay->GetHeight());
             break;
         }
         default: {
@@ -277,6 +297,8 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             return;
         }
     }
+    FlushWindowInfoWithDisplayId(displayId);
+    WLOGFI("Finish ProcessDisplayChange");
 }
 
 WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)

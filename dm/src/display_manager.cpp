@@ -263,13 +263,18 @@ bool DisplayManager::RegisterDisplayListener(sptr<IDisplayListener> listener)
     }
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->displayListeners_.push_back(listener);
+    bool ret = true;
     if (displayManagerListener_ == nullptr) {
         displayManagerListener_ = new DisplayManagerListener(pImpl_);
-        SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
             displayManagerListener_,
             DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+        if (!ret) {
+            WLOGFW("RegisterDisplayManagerAgent failed ! remove listener!");
+            pImpl_->displayListeners_.pop_back();
+        }
     }
-    return true;
+    return ret;
 }
 
 bool DisplayManager::UnregisterDisplayListener(sptr<IDisplayListener> listener)
@@ -285,13 +290,14 @@ bool DisplayManager::UnregisterDisplayListener(sptr<IDisplayListener> listener)
         return false;
     }
     pImpl_->displayListeners_.erase(iter);
+    bool ret = true;
     if (pImpl_->displayListeners_.empty() && displayManagerListener_ != nullptr) {
-        SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
             displayManagerListener_,
             DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
         displayManagerListener_ = nullptr;
     }
-    return true;
+    return ret;
 }
 
 bool DisplayManager::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
