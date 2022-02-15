@@ -86,6 +86,12 @@ ScreenId DisplayManagerServiceInner::GetRSScreenId(DisplayId displayId) const
     return DisplayManagerService::GetInstance().GetRSScreenId(displayId);
 }
 
+const sptr<ScreenInfo> DisplayManagerServiceInner::GetScreenInfoByDisplayId(DisplayId displayId) const
+{
+    return DisplayManagerService::GetInstance().GetScreenInfoById(
+        DisplayManagerService::GetInstance().GetScreenIdByDisplayId(displayId));
+}
+
 void DisplayManagerServiceInner::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
 {
     DisplayManagerService::GetInstance().RegisterDisplayChangeListener(listener);
