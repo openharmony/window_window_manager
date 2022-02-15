@@ -363,6 +363,28 @@ std::shared_ptr<RSDisplayNode> DisplayManagerService::GetRSDisplayNodeByDisplayI
     return abstractScreenController_->GetRSDisplayNodeByScreenId(dmsScreenId);
 }
 
+void DisplayManagerService::SetShotScreen(ScreenId mainScreenId, std::vector<ScreenId> shotScreenIds)
+{
+    WLOGFI("SetShotScreen. mainScreenId: %{public}" PRIu64"", mainScreenId);
+    std::shared_ptr<RSDisplayNode> displayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(mainScreenId);
+    if (displayNode == nullptr) {
+        WLOGFE("SetShotScreen error, cannot get DisplayNode");
+        return;
+    }
+    NodeId nodeId = displayNode->GetId();
+    WLOGI("SetShotScreen, mainScreen nodeId:%{public}" PRIu64"", nodeId);
+    for (ScreenId shotScreenId : shotScreenIds) {
+        shotScreenId = abstractScreenController_->ConvertToRsScreenId(shotScreenId);
+        if (shotScreenId == INVALID_SCREEN_ID) {
+            continue;
+        }
+        struct RSDisplayNodeConfig config = {shotScreenId, true, nodeId};
+        displayNodeMap_[shotScreenId] = RSDisplayNode::Create(config);
+    }
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    transactionProxy->FlushImplicitTransaction();
+}
+
 DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds)
 {
     WLOGFI("MakeMirror. mainScreenId :%{public}" PRIu64"", mainScreenId);
@@ -372,7 +394,7 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
     if (iter != shotScreenIds.end()) {
         shotScreenIds.erase(iter);
     }
-    auto allMirrorScreenIds = abstractScreenController_->GetAllMirrorScreenIds(mirrorScreenIds);
+    auto allMirrorScreenIds = abstractScreenController_->GetAllExpandOrMirrorScreenIds(mirrorScreenIds);
     iter = std::find(allMirrorScreenIds.begin(), allMirrorScreenIds.end(), mainScreenId);
     if (iter != allMirrorScreenIds.end()) {
         allMirrorScreenIds.erase(iter);
@@ -381,31 +403,12 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
         WLOGFI("create mirror fail, screen is invalid. Screen :%{public}" PRIu64"", mainScreenId);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
+    SetShotScreen(mainScreenId, shotScreenIds);
     WM_SCOPED_TRACE("dms:MakeMirror");
-    WLOGFI("create mirror. Screen: %{public}" PRIu64"", mainScreenId);
-    std::shared_ptr<RSDisplayNode> displayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(mainScreenId);
-    if (displayNode == nullptr) {
-        WLOGFE("create mirror fail, cannot get DisplayNode");
-        return DMError::DM_ERROR_NULLPTR;
-    }
-    NodeId nodeId = displayNode->GetId();
-    WLOGI("MakeMirror, nodeId:%{public}" PRIu64"", nodeId);
-    for (ScreenId mirrorScreenId : shotScreenIds) {
-        mirrorScreenId = abstractScreenController_->ConvertToRsScreenId(mirrorScreenId);
-        if (mirrorScreenId == INVALID_SCREEN_ID) {
-            continue;
-        }
-        struct RSDisplayNodeConfig config = {mirrorScreenId, true, nodeId};
-        displayNodeMap_[mirrorScreenId] = RSDisplayNode::Create(config);
-    }
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    transactionProxy->FlushImplicitTransaction();
-
     if (!allMirrorScreenIds.empty() && !abstractScreenController_->MakeMirror(mainScreenId, allMirrorScreenIds)) {
         WLOGFE("make mirror failed.");
         return DMError::DM_ERROR_NULLPTR;
     }
-    WLOGFI("create mirror. NodeId: %{public}" PRIu64"", nodeId);
     abstractScreenController_->DumpScreenInfo();
     return DMError::DM_OK;
 }
@@ -456,9 +459,39 @@ std::vector<sptr<ScreenInfo>> DisplayManagerService::GetAllScreenInfos()
     return screenInfos;
 }
 
-DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
+DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds, std::vector<Point> startPoints)
 {
-    // todo: make expand
+    WLOGI("MakeExpand");
+    if (expandScreenIds.empty() || startPoints.empty() || expandScreenIds.size() != startPoints.size()) {
+        WLOGFI("create expand fail, input params is invalid. "
+            "screenId vector size :%{public}ud, startPoint vector size :%{public}ud",
+            static_cast<uint32_t>(expandScreenIds.size()), static_cast<uint32_t>(startPoints.size()));
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    abstractScreenController_->DumpScreenInfo();
+    ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
+    WLOGI("MakeExpand, defaultScreenId:%{public}" PRIu64"", defaultScreenId);
+    auto shotScreenIds = abstractScreenController_->GetShotScreenIds(expandScreenIds);
+    auto iter = std::find(shotScreenIds.begin(), shotScreenIds.end(), defaultScreenId);
+    if (iter != shotScreenIds.end()) {
+        shotScreenIds.erase(iter);
+    }
+    auto allExpandScreenIds = abstractScreenController_->GetAllExpandOrMirrorScreenIds(expandScreenIds);
+    iter = std::find(allExpandScreenIds.begin(), allExpandScreenIds.end(), defaultScreenId);
+    if (iter != allExpandScreenIds.end()) {
+        allExpandScreenIds.erase(iter);
+    }
+    for (ScreenId expandScreenId : allExpandScreenIds) {
+        auto expandScreen = abstractScreenController_->GetAbstractScreen(expandScreenId);
+        abstractDisplayController_->AddDisplayForExpandScreen(expandScreen);
+    }
+    SetShotScreen(defaultScreenId, shotScreenIds);
+    WM_SCOPED_TRACE("dms:MakeExpand");
+    if (!allExpandScreenIds.empty() && !abstractScreenController_->MakeExpand(allExpandScreenIds, startPoints)) {
+        WLOGFE("make expand failed.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    abstractScreenController_->DumpScreenInfo();
     return DMError::DM_OK;
 }
 

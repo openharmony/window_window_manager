@@ -91,9 +91,11 @@ public:
     std::vector<Point> GetChildrenPosition() const;
     size_t GetChildCount() const;
     const sptr<ScreenGroupInfo> ConvertToScreenGroupInfo() const;
+    bool SetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config);
 
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     ScreenId mirrorScreenId_ {INVALID_SCREEN_ID};
+
 private:
     std::map<ScreenId, std::pair<sptr<AbstractScreen>, Point>> abstractScreenMap_;
 };

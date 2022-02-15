@@ -61,6 +61,10 @@ public:
     WMError EnterSplitWindowMode(sptr<WindowNode>& node);
     WMError ExitSplitWindowMode(sptr<WindowNode>& node);
     WMError SwitchLayoutPolicy(WindowLayoutMode mode, bool reorder = false);
+    void MoveWindowNode(sptr<WindowNodeContainer>& container);
+    sptr<WindowNode> GetBelowAppWindowNode() const;
+    sptr<WindowNode> GetAppWindowNode() const;
+    sptr<WindowNode> GetAboveAppWindowNode() const;
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
