@@ -89,7 +89,7 @@ std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(Di
 {
     sptr<AbstractDisplay> abstractDisplay = GetAbstractDisplay(displayId);
     if (abstractDisplay == nullptr) {
-        WLOGFE("DisplayManagerService::GetScreenSnapshot: GetAbstarctDisplay failed");
+        WLOGFE("GetScreenSnapshot: GetAbstarctDisplay failed");
         return nullptr;
     }
     ScreenId dmsScreenId = abstractDisplay->GetAbstractScreenId();
