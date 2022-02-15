@@ -97,6 +97,7 @@ private:
     ScreenId GetScreenIdFromDisplayId(DisplayId displayId);
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
+    void SetShotScreen(ScreenId mainScreenId, std::vector<ScreenId> shotScreenIds);
     ScreenId GetScreenIdByDisplayId(DisplayId displayId) const;
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByDisplayId(DisplayId displayId) const;
 
