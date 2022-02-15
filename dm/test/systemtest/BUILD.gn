@@ -110,6 +110,7 @@ config("dm_systemtest_common_public_config") {
     "//foundation/windowmanager/dm/include",
     "//foundation/windowmanager/dmserver/include",
     "//foundation/windowmanager/interfaces/innerkits/dm",
+    "//foundation/windowmanager/interfaces/innerkits/wm",
     "//foundation/windowmanager/utils/include",
 
     # RSSurface

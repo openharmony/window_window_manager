@@ -324,17 +324,15 @@ ScreenId DisplayManagerService::GetScreenIdByDisplayId(DisplayId displayId) cons
 {
     sptr<AbstractDisplay> abstractDisplay = abstractDisplayController_->GetAbstractDisplay(displayId);
     if (abstractDisplay == nullptr) {
-        WLOGFE("DisplayManagerService::GetScreenIdByDisplayId: GetAbstarctDisplay failed");
+        WLOGFE("GetScreenIdByDisplayId: GetAbstarctDisplay failed");
         return SCREEN_ID_INVALID;
     }
-    ScreenId dmsScreenId = abstractDisplay->GetAbstractScreenId();
-    return dmsScreenId;
+    return abstractDisplay->GetAbstractScreenId();
 }
 
 sptr<AbstractDisplay> DisplayManagerService::GetDisplayByDisplayId(DisplayId displayId) const
 {
-    sptr<AbstractDisplay> abstractDisplay = abstractDisplayController_->GetAbstractDisplay(displayId);
-    return abstractDisplay;
+    return abstractDisplayController_->GetAbstractDisplay(displayId);
 }
 
 sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenController()
@@ -359,7 +357,7 @@ std::shared_ptr<RSDisplayNode> DisplayManagerService::GetRSDisplayNodeByDisplayI
 {
     ScreenId dmsScreenId = GetScreenIdByDisplayId(displayId);
     if (dmsScreenId == SCREEN_ID_INVALID) {
-        WLOGFE("DisplayManagerService::GetRSDisplayNodeByDisplayId: ScreenId invalid");
+        WLOGFE("GetRSDisplayNodeByDisplayId: ScreenId invalid");
         return nullptr;
     }
     return abstractScreenController_->GetRSDisplayNodeByScreenId(dmsScreenId);
@@ -415,7 +413,7 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
 void DisplayManagerService::UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
     bool isAdd)
 {
-    WLOGI("DisplayManagerService::UpdateRSTree");
+    WLOGI("UpdateRSTree");
     ScreenId dmsScreenId = GetScreenIdByDisplayId(displayId);
     if (dmsScreenId == SCREEN_ID_INVALID) {
         return;
