@@ -64,6 +64,8 @@ public:
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
+    void UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node,
+        const sptr<WindowNodeContainer>& container) const;
     bool CheckDisplayInfo(const sptr<AbstractDisplay>& display);
 
     std::recursive_mutex& mutex_;
