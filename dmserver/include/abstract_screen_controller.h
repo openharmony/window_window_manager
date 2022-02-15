@@ -45,7 +45,7 @@ public:
     std::vector<ScreenId> GetAllScreenIds();
     sptr<AbstractScreen> GetAbstractScreen(ScreenId dmsScreenId) const;
     std::vector<ScreenId> GetShotScreenIds(std::vector<ScreenId>) const;
-    std::vector<ScreenId> GetAllMirrorScreenIds(std::vector<ScreenId>) const;
+    std::vector<ScreenId> GetAllExpandOrMirrorScreenIds(std::vector<ScreenId>) const;
     sptr<AbstractScreenGroup> GetAbstractScreenGroup(ScreenId dmsScreenId);
     ScreenId GetDefaultAbstractScreenId();
     ScreenId ConvertToRsScreenId(ScreenId dmsScreenId);
@@ -62,6 +62,7 @@ public:
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
     void UpdateRSTree(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     bool MakeMirror(ScreenId, std::vector<ScreenId> screens);
+    bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
     void DumpScreenInfo() const;
     void DumpScreenGroupInfo() const;
 

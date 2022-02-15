@@ -40,6 +40,7 @@ public:
 
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId);
     sptr<AbstractDisplay> GetAbstractDisplay(DisplayId displayId) const;
+    void AddDisplayForExpandScreen(sptr<AbstractScreen> absScreen);
 
 private:
     void OnAbstractScreenConnect(sptr<AbstractScreen> absScreen);
@@ -48,8 +49,10 @@ private:
     void ProcessDisplayUpdateRotation(sptr<AbstractScreen> absScreen);
     void ProcessDisplaySizeChange(sptr<AbstractScreen> absScreen);
     void BindAloneScreenLocked(sptr<AbstractScreen> absScreen);
-    void AddScreenToMirrorLocked(sptr<AbstractScreenGroup> group, sptr<AbstractScreen> realAbsScreen);
-    void ProcessScreenDisconnected(sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup);
+    void AddScreenToMirrorLocked(sptr<AbstractScreen> absScreen);
+    void AddScreenToExpandLocked(sptr<AbstractScreen> absScreen);
+    void ProcessNormalScreenDisconnected(sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup);
+    void ProcessExpandScreenDisconnected(sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup);
     bool UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info);
 
     std::recursive_mutex& mutex_;

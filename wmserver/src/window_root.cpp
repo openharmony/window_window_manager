@@ -456,5 +456,16 @@ WMError WindowRoot::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mo
     }
     return ret;
 }
+
+void WindowRoot::NotifyDisplayDestory(DisplayId expandDisplayId)
+{
+    WLOGFW("disconnect expand display, get default and expand display container");
+    DisplayId defaultDisplayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    auto expandDisplaycontainer = GetOrCreateWindowNodeContainer(expandDisplayId);
+    auto defaultDisplaycontainer = GetOrCreateWindowNodeContainer(defaultDisplayId);
+
+    defaultDisplaycontainer->MoveWindowNode(expandDisplaycontainer);
+    NotifyDisplayRemoved(expandDisplayId);
+}
 }
 }
