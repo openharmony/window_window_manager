@@ -133,14 +133,15 @@ DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     WM_SCOPED_TRACE("dms:DestroyVirtualScreen(%" PRIu64")", screenId);
-    std::map<ScreenId, std::shared_ptr<RSDisplayNode>>::iterator iter = displayNodeMap_.find(screenId);
+    auto rsScreenId = abstractScreenController_->ConvertToRsScreenId(screenId);
+    std::map<ScreenId, std::shared_ptr<RSDisplayNode>>::iterator iter = displayNodeMap_.find(rsScreenId);
     if (iter == displayNodeMap_.end()) {
         WLOGFE("DisplayManagerService: displayNode is nullptr");
         return abstractScreenController_->DestroyVirtualScreen(screenId);
     }
-    displayNodeMap_[screenId]->RemoveFromTree();
+    displayNodeMap_[rsScreenId]->RemoveFromTree();
     WLOGFE("DisplayManagerService: displayNode remove from tree");
-    displayNodeMap_.erase(screenId);
+    displayNodeMap_.erase(rsScreenId);
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
