@@ -15,6 +15,7 @@
 
 #include "js_screen.h"
 
+#include <cinttypes>
 #include "screen.h"
 #include "window_manager_hilog.h"
 
