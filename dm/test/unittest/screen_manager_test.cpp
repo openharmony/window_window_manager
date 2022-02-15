@@ -88,6 +88,47 @@ HWTEST_F(ScreenManagerTest, CreateAndDestory02, Function | SmallTest | Level1)
     ASSERT_EQ(validId, id);
     ASSERT_EQ(DMError::DM_OK, ret);
 }
+
+/**
+ * @tc.name: MakeExpand_001
+ * @tc.desc: Create a virtual screen as expansion of default screen, return default screen id
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, MakeExpand_001, Function | SmallTest | Level1)
+{
+    ScreenManagerUtils utils;
+    ASSERT_TRUE(utils.CreateSurface());
+    VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
+                                         defaultDensity_, utils.psurface_, defaultFlags_};
+    ScreenId validId = 0; // default srceenId(0)
+    ScreenId virtualScreenId = 1; // VirtualScreen is the second screen(1)
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), CreateVirtualScreen(_)).Times(1).WillOnce(Return(virtualScreenId));
+    EXPECT_CALL(m->Mock(), DestroyVirtualScreen(_)).Times(1).WillOnce(Return(DMError::DM_OK));
+    EXPECT_CALL(m->Mock(), MakeExpand(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    ScreenId vScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    std::vector<ExpandOption> options = {{validId, 0, 0}, {vScreenId, defaultWidth_, 0}};
+    ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
+    ASSERT_EQ(expansionId, validId);
+    DMError ret = ScreenManager::GetInstance().DestroyVirtualScreen(vScreenId);
+    ASSERT_EQ(vScreenId, virtualScreenId);
+    ASSERT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: MakeExpand_002
+ * @tc.desc: Makepand with empty ExpandOption, return SCREEN_ID_INVALID
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, MakeExpand_002, Function | SmallTest | Level1)
+{
+    ScreenId invalidId = SCREEN_ID_INVALID;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), MakeExpand(_, _)).Times(1).WillOnce(Return(DMError::DM_ERROR_INVALID_PARAM));
+    std::vector<ExpandOption> options = {};
+    ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
+    ASSERT_EQ(expansionId, invalidId);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

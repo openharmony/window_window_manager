@@ -16,6 +16,8 @@
 // gtest
 #include <gtest/gtest.h>
 #include "display_test_utils.h"
+#include "window.h"
+#include "window_option.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -27,6 +29,7 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+    sptr<Window> CreateWindowByDisplayId(DisplayId displayId);
     static sptr<Display> defaultDisplay_;
     static DisplayId defaultDisplayId_;
     static std::string defaultName_;
@@ -40,6 +43,7 @@ public:
     const uint32_t maxWaitCount_ = 2000;
     const uint32_t execTimes_ = 10;
     const uint32_t acquireFrames_ = 1;
+    static constexpr uint32_t TEST_SPEEP_S = 1; // test spleep time
 };
 
 sptr<Display> ScreenManagerTest::defaultDisplay_ = nullptr;
@@ -74,6 +78,25 @@ void ScreenManagerTest::SetUp()
 
 void ScreenManagerTest::TearDown()
 {
+}
+
+sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
+{
+    sptr<WindowOption> option = new WindowOption();
+    if (option == nullptr) {
+        return nullptr;
+    }
+    Rect displayRect = {0, 0, 200, 400};
+    option->SetDisplayId(displayId);
+    option->SetWindowRect(displayRect);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    option->SetWindowName("CreateVirtualWindow01");
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
+    option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
+    sptr<Window> window = Window::Create(option->GetWindowName(), option);
+    window->Show();
+    return window;
 }
 
 namespace {
@@ -194,6 +217,64 @@ HWTEST_F(ScreenManagerTest, ScreenManager06, Function | MediumTest | Level1)
         ASSERT_EQ(true, screen->SetScreenActiveMode(modeIdx));
         ASSERT_EQ(modeIdx, screen->GetModeId());
     }
+}
+
+/**
+ * @tc.name: ScreenManager07
+ * @tc.desc: Create a virtual screen as expansion of default screen, and destroy virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, ScreenManager07, Function | MediumTest | Level1)
+{
+    DisplayTestUtils utils;
+    ASSERT_TRUE(utils.CreateSurface());
+    defaultoption_.surface_ = utils.psurface_;
+    defaultoption_.isForShot = false;
+    ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultoption_);
+    ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
+    std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
+    sptr<Screen> DefaultScreen = screens.front();
+    std::vector<ExpandOption> options = {{DefaultScreen->GetId(), 0, 0}, {virtualScreenId, defaultWidth_, 0}};
+    ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
+    ASSERT_NE(SCREEN_ID_INVALID, expansionId);
+    ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId));
+}
+
+/**
+ * @tc.name: ScreenManager08
+ * @tc.desc: Create a virtual screen as expansion of default screen, create windowNode on virtual screen,
+ *           and destroy virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level1)
+{
+    DisplayTestUtils utils;
+    ASSERT_TRUE(utils.CreateSurface());
+    defaultoption_.surface_ = utils.psurface_;
+    defaultoption_.isForShot = false;
+    ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultoption_);
+    ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
+    std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
+    sptr<Screen> DefaultScreen = screens.front();
+    DisplayId virtualDisplayId = DISPLAY_ID_INVALD;
+    std::vector<DisplayId> displayIds = DisplayManager::GetInstance().GetAllDisplayIds();
+    for (auto& id : displayIds) {
+        if (id != defaultDisplayId_) {
+            virtualDisplayId = id; // find the display id of virtual screen
+        }
+    }
+    ASSERT_NE(DISPLAY_ID_INVALD, virtualDisplayId);
+    sptr<Window> window = CreateWindowByDisplayId(virtualDisplayId);
+    ASSERT_NE(nullptr, window);
+    sleep(TEST_SPEEP_S);
+    std::vector<ExpandOption> options = {{DefaultScreen->GetId(), 0, 0}, {virtualScreenId, defaultWidth_, 0}};
+    ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
+    sleep(TEST_SPEEP_S);
+    ASSERT_NE(SCREEN_ID_INVALID, expansionId);
+    ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId));
+    sleep(TEST_SPEEP_S);
+    window->Destroy();
+    // will add NotifyExpandDisconnect check logic.
 }
 }
 } // namespace Rosen
