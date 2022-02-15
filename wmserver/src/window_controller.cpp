@@ -292,6 +292,10 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
             WLOGFI("display w/h: %{public}u %{public}u", abstractDisplay->GetWidth(), abstractDisplay->GetHeight());
             break;
         }
+        case DisplayStateChangeType::DESTROY: {
+            windowRoot_->NotifyDisplayDestory(displayId);
+            break;
+        }
         default: {
             WLOGFE("unknown DisplayStateChangeType:%{public}u", type);
             return;

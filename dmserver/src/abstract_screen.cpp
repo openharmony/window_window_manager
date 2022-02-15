@@ -223,20 +223,8 @@ const sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() cons
     return screenGroupInfo;
 }
 
-bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& startPoint)
+bool AbstractScreenGroup::SetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config)
 {
-    if (dmsScreen == nullptr) {
-        WLOGE("AddChild, dmsScreen is nullptr.");
-        return false;
-    }
-    ScreenId screenId = dmsScreen->dmsId_;
-    auto iter = abstractScreenMap_.find(screenId);
-    if (iter != abstractScreenMap_.end()) {
-        WLOGE("AddChild, abstractScreenMap_ has dmsScreen:%{public}" PRIu64"", screenId);
-        return false;
-    }
-
-    struct RSDisplayNodeConfig config;
     switch (combination_) {
         case ScreenCombination::SCREEN_ALONE:
         case ScreenCombination::SCREEN_EXPAND:
@@ -268,6 +256,25 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
         default:
             WLOGE("fail to add child. invalid group combination:%{public}u", combination_);
             return false;
+    }
+    return true;
+}
+
+bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& startPoint)
+{
+    if (dmsScreen == nullptr) {
+        WLOGE("AddChild, dmsScreen is nullptr.");
+        return false;
+    }
+    ScreenId screenId = dmsScreen->dmsId_;
+    auto iter = abstractScreenMap_.find(screenId);
+    if (iter != abstractScreenMap_.end()) {
+        WLOGE("AddChild, abstractScreenMap_ has dmsScreen:%{public}" PRIu64"", screenId);
+        return false;
+    }
+    struct RSDisplayNodeConfig config;
+    if (!SetRSDisplayNodeConfig(dmsScreen, config)) {
+        return false;
     }
     dmsScreen->InitRSDisplayNode(config);
     dmsScreen->groupDmsId_ = dmsId_;
