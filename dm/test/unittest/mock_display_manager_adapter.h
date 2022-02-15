@@ -41,6 +41,7 @@ public:
     MOCK_METHOD1(SetDisplayState, bool(DisplayState state));
     MOCK_METHOD1(GetDisplayState, DisplayState(uint64_t displayId));
     MOCK_METHOD2(SetScreenActiveMode, bool(ScreenId screenId, uint32_t modeId));
+    MOCK_METHOD2(MakeExpand, DMError(std::vector<ScreenId> screenId, std::vector<Point> startPoint));
 };
 }
 } // namespace OHOS
