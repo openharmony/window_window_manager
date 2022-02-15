@@ -196,10 +196,10 @@ HWTEST_F(WindowFocusTest, FocusChangedTest02, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, subWindow->Show());
     ASSERT_EQ(subWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
-    ASSERT_EQ(WMError::WM_OK, mainWindow->Hide());
+    ASSERT_EQ(WMError::WM_OK, subWindow->Hide());
     // Await 100ms and get callback result in listener.
     usleep(WAIT_ASYNC_US);
-    ASSERT_EQ(subWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
+    ASSERT_EQ(mainWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
 
     mainWindow->Destroy();
     subWindow->Destroy();
@@ -334,6 +334,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest06, Function | MediumTest | Level3)
     subAppInfo_.name = "aboveSubWindow";
     subAppInfo_.rect = { 400, 200, 100, 100 };
     subAppInfo_.parentName = mainWindow->GetWindowName();
+    subAppInfo_.type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
     const sptr<Window>& aboveSubWindow = utils::CreateTestWindow(subAppInfo_);
     ASSERT_EQ(WMError::WM_OK, aboveSubWindow->Show());
     ASSERT_EQ(aboveSubWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);

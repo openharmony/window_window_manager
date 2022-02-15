@@ -112,12 +112,11 @@ void JsWindowStage::AfterUnfocused()
 void JsWindowStage::LifeCycleCallBack(WindowStageEventType type)
 {
     WLOGFI("JsWindowStage::LifeCycleCallBack is called, type: %{public}d", type);
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
         [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(type))};
             for (auto iter = eventCallbackMap_.begin(); iter != eventCallbackMap_.end(); iter++) {
-                std::shared_ptr<NativeReference> callback = iter->first;
-                if (callback == nullptr || callback->Get() == nullptr) {
+                if (iter->first == nullptr || iter->first->Get() == nullptr) {
                     WLOGFE("callback is null");
                     return;
                 }
@@ -228,7 +227,8 @@ NativeValue* JsWindowStage::OnEvent(NativeEngine& engine, NativeCallbackInfo& in
     refence.reset(engine.CreateReference(value, 1));
     eventCallbackMap_[refence] = 1;
     engine_ = &engine;
-    WLOGFI("JsWindowStage::OnEvent eventCallbackMap_ size: %{public}d", eventCallbackMap_.size());
+    WLOGFI("JsWindowStage::OnEvent eventCallbackMap_ size: %{public}d",
+        static_cast<uint32_t>(eventCallbackMap_.size()));
     if (!regLifeCycleListenerFlag_) {
         auto window = windowScene_->GetMainWindow();
         if (window != nullptr) {

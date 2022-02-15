@@ -45,6 +45,7 @@ public:
 
     WMError GoForeground(uint32_t reason = 0);
     WMError GoBackground(uint32_t reason = 0);
+    WMError GoDestroy();
 
     WMError RequestFocus() const;
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration);

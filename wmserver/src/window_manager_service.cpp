@@ -150,7 +150,7 @@ WMError WindowManagerService::RemoveWindow(uint32_t windowId)
     return windowController_->RemoveWindowNode(windowId);
 }
 
-WMError WindowManagerService::DestroyWindow(uint32_t windowId)
+WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     WLOGFI("[WMS] Destroy: %{public}d", windowId);
     WM_SCOPED_TRACE("wms:DestroyWindow(%d)", windowId);
@@ -159,7 +159,7 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId)
     if (node != nullptr && node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
         dragController_->FinishDrag(windowId);
     }
-    return windowController_->DestroyWindow(windowId);
+    return windowController_->DestroyWindow(windowId, onlySelf);
 }
 
 WMError WindowManagerService::ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason)
@@ -266,7 +266,7 @@ void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)
 {
     switch (event) {
         case Event::REMOTE_DIED:
-            DestroyWindow(windowId);
+            DestroyWindow(windowId, true);
             break;
         default:
             break;

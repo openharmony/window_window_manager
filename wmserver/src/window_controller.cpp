@@ -39,14 +39,8 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     }
     windowId = GenWindowId();
     property->SetWindowId(windowId);
-
-    // set default transition effect for window
-    static auto effect = RSTransitionEffect::Create()->Scale({ 0.0f, 0.0f, 0.0f })->Opacity(0.0f);
-    if (surfaceNode != nullptr) {
-        surfaceNode->SetTransitionEffect(effect);
-    }
-
     sptr<WindowNode> node = new WindowNode(property, window, surfaceNode);
+    UpdateWindowAnimation(node);
     return windowRoot_->SaveWindow(node);
 }
 
@@ -105,14 +99,14 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
     return res;
 }
 
-WMError WindowController::DestroyWindow(uint32_t windowId)
+WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     DisplayId displayId = DISPLAY_ID_INVALD;
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node != nullptr) {
         displayId = node->GetDisplayId();
     }
-    WMError res = windowRoot_->DestroyWindow(windowId);
+    WMError res = windowRoot_->DestroyWindow(windowId, onlySelf);
     if (res != WMError::WM_OK) {
         return res;
     }
@@ -258,13 +252,28 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             windowRoot_->NotifyWindowStateChange(WindowState::STATE_UNFROZEN, WindowStateChangeReason::KEYGUARD);
             break;
         }
+        case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION: {
-            const sptr<AbstractDisplay> abstractDisplay
-                = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
-            if (abstractDisplay == nullptr) {
-                WLOGFE("get display failed displayId:%{public}" PRId64 "", displayId);
-                return;
-            }
+            ProcessDisplayChange(displayId, type);
+            break;
+        }
+        default: {
+            WLOGFE("unknown DisplayStateChangeType:%{public}u", type);
+            return;
+        }
+    }
+}
+
+void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type)
+{
+    const sptr<AbstractDisplay> abstractDisplay = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+    if (abstractDisplay == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRId64 "", displayId);
+        return;
+    }
+    
+    switch (type) {
+        case DisplayStateChangeType::UPDATE_ROTATION: {
             windowRoot_->NotifyDisplayChange(abstractDisplay);
 
             // TODO: Remove 'sysBarWinId_' after SystemUI resize 'systembar'
@@ -274,8 +283,13 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
             newRect = { 0, abstractDisplay->GetHeight() - height, width, height };
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
-
-            FlushWindowInfoWithDisplayId(displayId);
+            break;
+        }
+        case DisplayStateChangeType::SIZE_CHANGE: {
+            // Should request different window resolution change but not directly apply resize
+            // show logs of updated display
+            windowRoot_->NotifyDisplayChange(abstractDisplay);
+            WLOGFI("display w/h: %{public}u %{public}u", abstractDisplay->GetWidth(), abstractDisplay->GetHeight());
             break;
         }
         default: {
@@ -283,6 +297,8 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             return;
         }
     }
+    FlushWindowInfoWithDisplayId(displayId);
+    WLOGFI("Finish ProcessDisplayChange");
 }
 
 WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
@@ -294,6 +310,7 @@ WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
     }
     auto property = node->GetWindowProperty();
     property->SetWindowType(type);
+    UpdateWindowAnimation(node);
     WMError res = windowRoot_->UpdateWindowNode(windowId);
     if (res != WMError::WM_OK) {
         return res;
@@ -383,6 +400,25 @@ void WindowController::FlushWindowInfoWithDisplayId(DisplayId displayId)
     WLOGFI("FlushWindowInfoWithDisplayId");
     RSTransaction::FlushImplicitTransaction();
     inputWindowMonitor_->UpdateInputWindowByDisplayId(displayId);
+}
+
+void WindowController::UpdateWindowAnimation(const sptr<WindowNode>& node)
+{
+    if (node == nullptr || node->surfaceNode_ == nullptr) {
+        WLOGFE("windowNode or surfaceNode is nullptr");
+        return;
+    }
+
+    uint32_t animationFlag = node->GetWindowProperty()->GetAnimationFlag();
+    uint32_t windowId = node->GetWindowProperty()->GetWindowId();
+    WLOGFI("windowId: %{public}u, animationFlag: %{public}u", windowId, animationFlag);
+    if (animationFlag == static_cast<uint32_t>(WindowAnimation::DEFAULT)) {
+        // set default transition effect for window: scale from 1.0 to 0.7, fade from 1.0 to 0.0
+        static const auto effect = RSTransitionEffect::Create()->Scale(Vector3f(0.7f, 0.7f, 0.0f))->Opacity(0.0f);
+        node->surfaceNode_->SetTransitionEffect(effect);
+    } else {
+        node->surfaceNode_->SetTransitionEffect(nullptr);
+    }
 }
 
 WMError WindowController::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode)
