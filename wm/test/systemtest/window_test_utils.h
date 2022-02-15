@@ -52,6 +52,9 @@ public:
     static Rect customAppDecoRect_;
     static SplitRects splitRects_;
     static bool isVerticalDisplay_;
+    static Rect singleTileRect_;
+    static std::vector<Rect> doubleTileRects_;
+    static std::vector<Rect> tripleTileRects_;
 
     static void InitByDisplayRect(const Rect& screenRect);
     static sptr<Window> CreateTestWindow(const TestWindowInfo& info);
@@ -65,6 +68,7 @@ public:
     static Rect GetDefaultFoatingRect(const sptr<Window>& window);
     static Rect GetLimitedDecoRect(const Rect& rect);
     static Rect GetFloatingLimitedRect(const Rect& rect);
+    static void InitTileWindowRects(const sptr<Window>& window);
 
 private:
     void UpdateLimitDisplayRect(Rect& avoidRect);
