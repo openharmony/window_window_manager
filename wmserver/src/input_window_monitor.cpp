@@ -19,6 +19,7 @@
 
 #include <ipc_skeleton.h>
 
+#include "display_manager_service_inner.h"
 #include "dm_common.h"
 #include "window_manager_hilog.h"
 
@@ -56,7 +57,7 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
         WLOGFE("can not get window node container.");
         return;
     }
-    UpdateDisplaysInfo(container);
+    UpdateDisplaysInfo(container, displayId);
     std::vector<sptr<WindowNode>> windowNodes;
     container->TraverseContainer(windowNodes);
     auto iter = std::find_if(logicalDisplays_.begin(), logicalDisplays_.end(),
@@ -76,7 +77,7 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(physicalDisplays_, logicalDisplays_);
 }
 
-void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& container)
+void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& container, DisplayId displayId)
 {
     MMI::PhysicalDisplayInfo physicalDisplayInfo = {
         .id = static_cast<int32_t>(container->GetScreenId()),
@@ -91,8 +92,8 @@ void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& con
         .seatName = "default0",
         .logicWidth = static_cast<int32_t>(container->GetDisplayRect().width_),
         .logicHeight = static_cast<int32_t>(container->GetDisplayRect().height_),
-        .direction = MMI::Direction0
     };
+    UpdateDisplayDirection(physicalDisplayInfo, displayId);
     auto physicalDisplayIter = std::find_if(physicalDisplays_.begin(), physicalDisplays_.end(),
                                             [&physicalDisplayInfo](MMI::PhysicalDisplayInfo& physicalDisplay) {
         return physicalDisplay.id == physicalDisplayInfo.id;
@@ -152,6 +153,27 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };
         iter->windowsInfo_.emplace_back(windowInfo);
+    }
+}
+
+void InputWindowMonitor::UpdateDisplayDirection(MMI::PhysicalDisplayInfo& physicalDisplayInfo, DisplayId displayId)
+{
+    Rotation rotation = DisplayManagerServiceInner::GetInstance().GetScreenInfoByDisplayId(displayId)->rotation_;
+    switch (rotation) {
+        case Rotation::ROTATION_0:
+            physicalDisplayInfo.direction = MMI::Direction0;
+            break;
+        case Rotation::ROTATION_90:
+            physicalDisplayInfo.direction = MMI::Direction90;
+            break;
+        case Rotation::ROTATION_180:
+            physicalDisplayInfo.direction = MMI::Direction180;
+            break;
+        case Rotation::ROTATION_270:
+            physicalDisplayInfo.direction = MMI::Direction270;
+            break;
+        default:
+            break;
     }
 }
 }
