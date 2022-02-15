@@ -247,15 +247,47 @@ HWTEST_F(DisplayChangeTest, CheckDisplayStateChange02, Function | SmallTest | Le
     // Check callback again since display sync in another thread
     screen->SetScreenActiveMode(usedModeIdx);
     ResetDisplayChangeListener();
-    ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
+    CheckDisplayChangeEventCallback(true);
 }
 
 /**
  * @tc.name: CheckDisplaySizeChange01
- * @tc.desc: Check display size change as screen mode set if screen sets another mode
+ * @tc.desc: Check screen size change as screen mode set if screen sets another mode
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange01, Function | MediumTest | Level2)
+{
+    WLOGFI("CheckDisplaySizeChange01");
+    sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
+    ScreenId screenId = defaultDisplay->GetScreenId();
+    sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
+    ASSERT_NE(nullptr, screen);
+    auto modes = screen->GetSupportedModes();
+    uint32_t usedModeIdx = screen->GetModeId();
+    WLOGFI("usedModeIdx / SupportMode size: %{public}u %{public}d", usedModeIdx, static_cast<int>(modes.size()));
+
+    for (uint32_t modeIdx = 0; modeIdx < modes.size(); modeIdx++) {
+        if (modeIdx != usedModeIdx) {
+            screen->SetScreenActiveMode(modeIdx);
+            WLOGFI("SetScreenActiveMode: %{public}u -> %{public}u", usedModeIdx, modeIdx);
+            ASSERT_EQ(true, ScreenSizeEqual(screen, modes[modeIdx]));
+            ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
+            break;
+        }
+    }
+    // Set it back as default
+    // Check callback again since display sync in another thread
+    screen->SetScreenActiveMode(usedModeIdx);
+    ResetDisplayChangeListener();
+    CheckDisplayChangeEventCallback(true);
+}
+
+/**
+ * @tc.name: CheckDisplaySizeChange02
+ * @tc.desc: Check display size change as screen mode set if screen sets another mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange02, Function | MediumTest | Level2)
 {
     WLOGFI("CheckDisplaySizeChange01");
     sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
@@ -280,7 +312,7 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange01, Function | MediumTest | Le
     // Check callback again since display sync in another thread
     screen->SetScreenActiveMode(usedModeIdx);
     ResetDisplayChangeListener();
-    ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
+    CheckDisplayChangeEventCallback(true);
 }
 }
 } // namespace Rosen
