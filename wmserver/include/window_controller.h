@@ -56,6 +56,7 @@ private:
     void FlushWindowInfo(uint32_t windowId);
     void FlushWindowInfoWithDisplayId(DisplayId displayId);
     void UpdateWindowAnimation(const sptr<WindowNode>& node);
+    void ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
