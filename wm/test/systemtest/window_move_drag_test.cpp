@@ -50,6 +50,7 @@ private:
     static inline int32_t pointY_ = 0;
     static inline int32_t startPointX_ = 0;
     static inline int32_t startPointY_ = 0;
+    static inline bool hasStartMove_ = false;
     static inline Rect startPointRect_  = {0, 0, 0, 0};
     static inline Rect expectRect_ = {0, 0, 0, 0};
     static inline sptr<Window> window_ = nullptr;
@@ -164,6 +165,12 @@ void WindowMoveDragTest::CalExpectRects()
             oriRect.height_ -= diffY;
         } else if (startPointY_ >= static_cast<int32_t>(startPointRect_.posY_ + startPointRect_.height_)) {
             oriRect.height_ += diffY;
+        }
+    } else {
+        if (hasStartMove_) {
+            oriRect.posX_ += diffX;
+            oriRect.posY_ += diffY;
+            hasStartMove_ = false;
         }
     }
     bool isVertical = (utils::displayRect_.width_ < utils::displayRect_.height_) ? true : false;
@@ -337,6 +344,27 @@ HWTEST_F(WindowMoveDragTest, DragWindow09, Function | MediumTest | Level3)
 
     pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
     pointY_ = startPointRect_.posY_ + startPointRect_.height_ + HOTZONE * DRAG_HOTZONE_RATIO;
+    DoMoveOrDrag();
+    ASSERT_EQ(WMError::WM_OK, window_->Hide());
+}
+
+/**
+ * @tc.name: DragWindow10
+ * @tc.desc: point in decorZone, start move
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTV8
+ */
+HWTEST_F(WindowMoveDragTest, DragWindow10, Function | MediumTest | Level3)
+{
+    ASSERT_EQ(WMError::WM_OK, window_->Show());
+    startPointRect_ = window_->GetRect();
+    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ * POINT_HOTZONE_RATIO;
+    startPointY_ = startPointRect_.posY_ + 1;
+
+    pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
+    pointY_ = startPointRect_.posY_ + HOTZONE * DRAG_HOTZONE_RATIO;
+    window_->StartMove();
+    hasStartMove_ = true;
     DoMoveOrDrag();
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
