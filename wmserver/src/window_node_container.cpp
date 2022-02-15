@@ -457,6 +457,10 @@ void WindowNodeContainer::NotifyIfSystemBarRegionChanged()
 
 bool WindowNodeContainer::IsTopAppWindow(uint32_t windowId) const
 {
+    if (appWindowNode_->children_.empty()) {
+        WLOGFE("app root does not have any node");
+        return false;
+    }
     auto node = *(appWindowNode_->children_.rbegin());
     if (node == nullptr) {
         WLOGFE("window tree does not have any node");
@@ -470,7 +474,6 @@ bool WindowNodeContainer::IsTopAppWindow(uint32_t windowId) const
             break;
         }
     }
-
     return node->GetWindowId() == windowId;
 }
 

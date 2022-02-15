@@ -133,6 +133,21 @@ WMError WindowScene::GoBackground(uint32_t reason)
     }
 }
 
+WMError WindowScene::GoDestroy()
+{
+    if (mainWindow_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    WMError ret = mainWindow_->Destroy();
+    if (ret != WMError::WM_OK) {
+        WLOGFE("WindowScene GoDestroy Failed Name: %{public}s", mainWindow_->GetWindowName().c_str());
+        return ret;
+    }
+    mainWindow_ = nullptr;
+    return WMError::WM_OK;
+}
+
 WMError WindowScene::SetSystemBarProperty(WindowType type, const SystemBarProperty& property) const
 {
     if (mainWindow_ == nullptr) {

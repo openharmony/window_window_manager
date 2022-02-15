@@ -161,7 +161,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
 
     auto parentNode = GetWindowNode(parentId);
     WMError res = container->AddWindowNode(node, parentNode);
-    if (WindowHelper::IsSubWindow(node->GetWindowType())) {
+    if (res == WMError::WM_OK && WindowHelper::IsSubWindow(node->GetWindowType())) {
         if (parentNode == nullptr) {
             WLOGFE("window type is invalid");
             return WMError::WM_ERROR_INVALID_TYPE;
@@ -187,14 +187,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
         WLOGFE("add window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (windowId != container->GetFocusWindow()) {
-        return container->RemoveWindowNode(node);
-    }
-    auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
-    if (nextFocusableWindow != nullptr) {
-        WLOGFI("adjust focus window, pre focus window id: %{public}u", nextFocusableWindow->GetWindowId());
-        container->SetFocusWindow(nextFocusableWindow->GetWindowId());
-    }
+    UpdateFocusWindowWithWindowRemoved(node, container);
     return container->RemoveWindowNode(node);
 }
 
@@ -233,7 +226,7 @@ WMError WindowRoot::ExitSplitWindowMode(sptr<WindowNode>& node)
     return container->ExitSplitWindowMode(node);
 }
 
-WMError WindowRoot::DestroyWindow(uint32_t windowId)
+WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     auto node = GetWindowNode(windowId);
     if (node == nullptr) {
@@ -242,13 +235,27 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId)
     WMError res;
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container != nullptr) {
-        std::vector<uint32_t> windowIds;
-        res = container->DestroyWindowNode(node, windowIds);
-        for (auto id : windowIds) {
-            node = GetWindowNode(id);
-            DestroyWindowInner(node);
+        UpdateFocusWindowWithWindowRemoved(node, container);
+        if (onlySelf) {
+            for (auto& child : node->children_) {
+                child->parent_ = nullptr;
+            }
+            res = container->RemoveWindowNode(node);
+            if (res != WMError::WM_OK) {
+                WLOGFE("RemoveWindowNode failed");
+            }
+            return DestroyWindowInner(node);
+        } else {
+            std::vector<uint32_t> windowIds;
+            res = container->DestroyWindowNode(node, windowIds);
+            for (auto id : windowIds) {
+                node = GetWindowNode(id);
+                if (node != nullptr) {
+                    DestroyWindowInner(node);
+                }
+            }
+            return res;
         }
-        return res;
     }
     res = DestroyWindowInner(node);
     WLOGFI("destroy window failed, window container could not be found");
@@ -277,6 +284,46 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
 
     windowNodeMap_.erase(node->GetWindowId());
     return WMError::WM_OK;
+}
+
+void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node,
+    const sptr<WindowNodeContainer>& container) const
+{
+    if (node == nullptr || container == nullptr) {
+        WLOGFE("window is invalid");
+        return;
+    }
+
+    uint32_t windowId = node->GetWindowId();
+    uint32_t focusedWindowId = container->GetFocusWindow();
+    if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+        if (windowId != focusedWindowId) {
+            auto iter = std::find_if(node->children_.begin(), node->children_.end(),
+                                     [focusedWindowId](sptr<WindowNode> node) {
+                                         return node->GetWindowId() == focusedWindowId;
+                                     });
+            if (iter == node->children_.end()) {
+                return;
+            }
+        }
+        if (!node->children_.empty()) {
+            auto firstChild = node->children_.front();
+            if (firstChild->priority_ < 0) {
+                windowId = firstChild->GetWindowId();
+            }
+        }
+    } else if (WindowHelper::IsSubWindow(node->GetWindowType())) {
+        if (windowId != focusedWindowId) {
+            return;
+        }
+    } else {
+        // do nothing
+    }
+    auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
+    if (nextFocusableWindow != nullptr) {
+        WLOGFI("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
+        container->SetFocusWindow(nextFocusableWindow->GetWindowId());
+    }
 }
 
 bool WindowRoot::isVerticalDisplay(sptr<WindowNode>& node) const

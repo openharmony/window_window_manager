@@ -24,6 +24,7 @@
 #include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
 #include "window_manager_hilog.h"
+#include "wm_trace.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -234,6 +235,7 @@ void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, S
 
 void AbstractScreenController::ProcessScreenModeChanged(ScreenId rsScreenId)
 {
+    WM_SCOPED_TRACE("dms:ProcessScreenModeChanged(%" PRIu64")", rsScreenId);
     auto iter = rs2DmsScreenIdMap_.find(rsScreenId);
     if (iter == rs2DmsScreenIdMap_.end()) {
         WLOGE("ProcessScreenModeChanged: screenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_", rsScreenId);
@@ -246,6 +248,9 @@ void AbstractScreenController::ProcessScreenModeChanged(ScreenId rsScreenId)
         WLOGE("ProcessScreenModeChanged: no dms screen is found, rsscreenId=%{public}" PRIu64"", rsScreenId);
         return;
     }
+    // should be called by OnRsScreenConnectionChange
+    // if not, the recursive_mutex should be added
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     sptr<AbstractScreen> absScreen = dmsScreenMapIter->second;
     int32_t activeModeId = rsInterface_.GetScreenActiveMode(rsScreenId).GetScreenModeId();
     if (activeModeId < 0 || activeModeId >= absScreen->modes_.size()) {

@@ -22,6 +22,7 @@
 #include "display_manager_service.h"
 #include "screen_group.h"
 #include "window_manager_hilog.h"
+#include "wm_trace.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -228,11 +229,13 @@ void AbstractDisplayController::ProcessDisplayUpdateRotation(sptr<AbstractScreen
 
 void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> absScreen)
 {
+    WM_SCOPED_TRACE("dms:ProcessDisplaySizeChange(%" PRIu64")", absScreen->dmsId_);
     sptr<SupportedScreenModes> info = absScreen->GetActiveScreenMode();
     if (info == nullptr) {
         WLOGE("cannot get active screen info.");
         return;
     }
+
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
         sptr<AbstractDisplay> absDisplay = iter->second;

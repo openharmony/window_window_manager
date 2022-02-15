@@ -104,7 +104,7 @@ WMError WindowManagerProxy::RemoveWindow(uint32_t windowId)
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::DestroyWindow(uint32_t windowId)
+WMError WindowManagerProxy::DestroyWindow(uint32_t windowId, bool /* onlySelf */)
 {
     MessageParcel data;
     MessageParcel reply;

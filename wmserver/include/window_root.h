@@ -43,7 +43,7 @@ public:
     WMError SaveWindow(const sptr<WindowNode>& node);
     WMError AddWindowNode(uint32_t parentId, sptr<WindowNode>& node);
     WMError RemoveWindowNode(uint32_t windowId);
-    WMError DestroyWindow(uint32_t windowId);
+    WMError DestroyWindow(uint32_t windowId, bool onlySelf);
     WMError UpdateWindowNode(uint32_t windowId);
     bool isVerticalDisplay(sptr<WindowNode>& node) const;
 
@@ -64,6 +64,8 @@ public:
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
+    void UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node,
+        const sptr<WindowNodeContainer>& container) const;
     bool CheckDisplayInfo(const sptr<AbstractDisplay>& display);
 
     std::recursive_mutex& mutex_;
