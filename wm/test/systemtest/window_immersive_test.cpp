@@ -43,12 +43,6 @@ namespace {
         { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_1, SYS_BAR_REGION_NULL },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_3, SYS_BAR_REGION_NULL },
     };
-    const SystemBarRegionTints TEST_DIFF_PROPS_1_2 = {
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_3, SYS_BAR_REGION_NULL },
-    };
-    const SystemBarRegionTints TEST_DIFF_PROPS_2_1 = {
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_2, SYS_BAR_REGION_NULL },
-    };
 
     const Rect EMPTY_RECT = {0, 0, 0, 0};
     const float RATIO = 0.3;
@@ -59,7 +53,7 @@ const int WAIT_ASYNC_US = 100000;  // 100000us
 
 class TestSystemBarChangedListener : public ISystemBarChangedListener {
 public:
-    SystemBarRegionTints tints_;
+    SystemBarRegionTints tints_ = TEST_PROPS_DEFAULT;
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
 };
 
@@ -149,7 +143,14 @@ bool WindowImmersiveTest::SystemBarPropsEqualsTo(const SystemBarRegionTints& exp
 void TestSystemBarChangedListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     WLOGFI("TestSystemBarChangedListener Display ID: %{public}" PRIu64"", displayId);
-    tints_ = tints;
+    for (auto tint : tints) {
+        auto type = tint.type_;
+        for (uint32_t i = 0; i < tints_.size(); i++) {
+            if (tints_[i].type_ == type) {
+                tints_[i] = tint;
+            }
+        }
+    }
 }
 
 void TestAvoidAreaChangedListener::OnAvoidAreaChanged(std::vector<Rect> avoidAreas)
@@ -248,9 +249,9 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
     ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
     ASSERT_EQ(WMError::WM_OK, window2->Show());
 
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_DIFF_PROPS_1_2));
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_2));
     ASSERT_EQ(WMError::WM_OK, window2->Hide());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_DIFF_PROPS_2_1));
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
     ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
 }
