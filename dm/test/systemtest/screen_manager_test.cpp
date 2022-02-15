@@ -105,7 +105,7 @@ namespace {
  * @tc.desc: Create a virtual screen and destroy it
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager01, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ScreenManager01, Function | MediumTest | Level2)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -120,7 +120,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager01, Function | MediumTest | Level1)
  * @tc.desc: Create a virtual screen as mirror of default screen, and destroy virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager02, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ScreenManager02, Function | MediumTest | Level2)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -138,7 +138,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager02, Function | MediumTest | Level1)
  * @tc.desc: Create a virtual screen and destroy it for 10 times
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager03, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ScreenManager03, Function | MediumTest | Level2)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -155,7 +155,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager03, Function | MediumTest | Level1)
  * @tc.desc: Create a virtual screen as mirror of default screen, and destroy virtual screen for 10 times
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager04, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ScreenManager04, Function | MediumTest | Level2)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -175,7 +175,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager04, Function | MediumTest | Level1)
  * @tc.desc: Compare the length and width for recording screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager05, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ScreenManager05, Function | MediumTest | Level2)
 {
     DisplayTestUtils utils;
     utils.SetDefaultWH(defaultDisplay_);
@@ -207,7 +207,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager05, Function | MediumTest | Level1)
  * @tc.desc: Get and set screenMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager06, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ScreenManager06, Function | MediumTest | Level2)
 {
     ScreenId defaultScreenId = static_cast<ScreenId>(defaultDisplayId_);
     sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId);
@@ -224,12 +224,12 @@ HWTEST_F(ScreenManagerTest, ScreenManager06, Function | MediumTest | Level1)
  * @tc.desc: Create a virtual screen as expansion of default screen, and destroy virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager07, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ScreenManager07, Function | MediumTest | Level2)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
     defaultoption_.surface_ = utils.psurface_;
-    defaultoption_.isForShot = false;
+    defaultoption_.isForShot_ = false;
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultoption_);
     ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
     std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
@@ -246,12 +246,12 @@ HWTEST_F(ScreenManagerTest, ScreenManager07, Function | MediumTest | Level1)
  *           and destroy virtual screen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level1)
+HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
 {
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
     defaultoption_.surface_ = utils.psurface_;
-    defaultoption_.isForShot = false;
+    defaultoption_.isForShot_ = false;
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultoption_);
     ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
     std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
