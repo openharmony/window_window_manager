@@ -725,6 +725,7 @@ void AbstractScreenController::DumpScreenInfo() const
             PRIu64" %{public}10s %{public}20" PRIu64" ", screen->dmsId_, screen->rsId_, screen->groupDmsId_,
             isGroup.c_str(), screenType.c_str(), nodeId, isMirrored.c_str(), screen->rSDisplayNodeConfig_.mirrorNodeId);
     }
+    DumpScreenGroupInfo();
 }
 
 void AbstractScreenController::DumpScreenGroupInfo() const
