@@ -31,6 +31,9 @@ SplitRects WindowTestUtils::splitRects_   = {
     .secondaryRect = {0, 0, 0, 0},
     .dividerRect   = {0, 0, 0, 0},
 };
+Rect WindowTestUtils::singleTileRect_     = {0, 0, 0, 0};
+std::vector<Rect> WindowTestUtils::doubleTileRects_ = std::vector<Rect>(2);
+std::vector<Rect> WindowTestUtils::tripleTileRects_ = std::vector<Rect>(3);
 
 bool WindowTestUtils::isVerticalDisplay_ = false;
 
@@ -154,11 +157,49 @@ void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
 {
     const float barRatio = 0.07;
     const float appRation = 0.4;
+    const float spaceRation = 0.125;
     displayRect_ = displayRect;
     limitDisplayRect_ = displayRect;
+    if (displayRect_.width_ < displayRect_.height_) {
+        isVerticalDisplay_ = true;
+    }
     statusBarRect_ = {0, 0, displayRect_.width_, displayRect_.height_ * barRatio};
     naviBarRect_ = {0, displayRect_.height_ * (1 - barRatio), displayRect_.width_, displayRect_.height_ * barRatio};
-    customAppRect_ = {0, 0, displayRect_.width_ * appRation, displayRect_.height_ * appRation};
+    customAppRect_ = {
+        displayRect_.width_ * spaceRation,
+        displayRect_.height_ * spaceRation,
+        displayRect_.width_ * appRation,
+        displayRect_.height_ * appRation
+    };
+}
+
+void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window)
+{
+    constexpr uint32_t edgeInterval = 48;
+    constexpr uint32_t midInterval = 24;
+    constexpr float ratio = 0.75;  // 0.75: default height/width ratio
+    constexpr float edgeRatio = 0.125;
+    constexpr int half = 2;
+    limitDisplayRect_ = displayRect_;
+    UpdateSplitRects(window);
+    int x = limitDisplayRect_.posX_ + (limitDisplayRect_.width_ * edgeRatio);
+    int y = limitDisplayRect_.posY_ + (limitDisplayRect_.height_ * edgeRatio);
+    uint32_t w = limitDisplayRect_.width_ * ratio;
+    uint32_t h = limitDisplayRect_.height_ * ratio;
+    singleTileRect_ = { x, y, w, h };
+    WLOGFI("singleRect_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
+    x = edgeInterval;
+    w = (limitDisplayRect_.width_ - edgeInterval * half - midInterval) / half;
+    // calc doubleRect
+    doubleTileRects_[0] = {x, y, w, h};
+    doubleTileRects_[1] = {x + w + midInterval, y, w, h};
+    WLOGFI("doubleRects_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
+    // calc tripleRect
+    w = (limitDisplayRect_.width_ - edgeInterval * half - midInterval * half) / 3; // 3 is triple rects num
+    tripleTileRects_[0] = {x, y, w, h};
+    tripleTileRects_[1] = {x + w + midInterval, y, w, h};
+    tripleTileRects_[2] = {x + w * half + midInterval * half, y, w, h}; // 2 is third index
+    WLOGFI("tripleRects_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
 }
 
 bool WindowTestUtils::RectEqualTo(const sptr<Window>& window, const Rect& r)
