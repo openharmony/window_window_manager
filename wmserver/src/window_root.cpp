@@ -240,6 +240,10 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
             for (auto& child : node->children_) {
                 child->parent_ = nullptr;
             }
+            res = container->RemoveWindowNode(node);
+            if (res != WMError::WM_OK) {
+                WLOGFE("RemoveWindowNode failed");
+            }
             return DestroyWindowInner(node);
         } else {
             std::vector<uint32_t> windowIds;
