@@ -27,8 +27,8 @@ NativeValue* CreateJsWindowStage(NativeEngine& engine, std::shared_ptr<Rosen::Wi
 
 class JsWindowStage : Rosen::IWindowLifeCycle {
 public:
-    JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene, NativeValue* object)
-        : windowScene_(windowScene), object_(object) {}
+    explicit JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene)
+        : windowScene_(windowScene) {}
     ~JsWindowStage() = default;
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* SetUIContent(NativeEngine* engine, NativeCallbackInfo* info);
@@ -42,7 +42,7 @@ public:
     virtual void AfterForeground() override;
     virtual void AfterBackground() override;
     virtual void AfterFocused() override;
-    virtual void AfterUnFocused() override;
+    virtual void AfterUnfocused() override;
 
 private:
     NativeValue* CreateJsSubWindowArrayObject(NativeEngine& engine, std::vector<sptr<Window>> subWinVec);
@@ -63,7 +63,6 @@ private:
     void LifeCycleCallBack(WindowStageEventType type);
 
     std::shared_ptr<Rosen::WindowScene> windowScene_;
-    NativeValue* object_ = nullptr;
     NativeEngine* engine_ = nullptr;
     void* contentStorage_ = nullptr;
     sptr<IWindowLifeCycle> lifecycleListener_ = nullptr;
