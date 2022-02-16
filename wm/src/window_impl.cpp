@@ -1076,7 +1076,7 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
 
 void WindowImpl::OnVsync(int64_t timeStamp)
 {
-    uiContent_->ProcessVsyncEvent(timeStamp);
+    uiContent_->ProcessVsyncEvent(static_cast<uint64_t>(timeStamp));
 }
 
 void WindowImpl::RequestFrame()
@@ -1170,8 +1170,8 @@ void WindowImpl::SetDefaultOption()
             property_->GetWindowId());
         return;
     }
-    uint32_t width = display->GetWidth();
-    uint32_t height = display->GetHeight();
+    uint32_t width = static_cast<uint32_t>(display->GetWidth());
+    uint32_t height = static_cast<uint32_t>(display->GetHeight());
     WLOGFI("width:%{public}u, height:%{public}u, displayId:%{public}" PRIu64"",
         width, height, property_->GetDisplayId());
 

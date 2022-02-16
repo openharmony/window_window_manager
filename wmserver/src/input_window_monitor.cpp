@@ -67,7 +67,7 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
     if (iter != logicalDisplays_.end()) {
         TraverseWindowNodes(windowNodes, iter);
         if (!iter->windowsInfo_.empty()) {
-            iter->focusWindowId = container->GetFocusWindow();
+            iter->focusWindowId = static_cast<int32_t>(container->GetFocusWindow());
         }
     } else {
         WLOGFE("There is no display for this window action.");

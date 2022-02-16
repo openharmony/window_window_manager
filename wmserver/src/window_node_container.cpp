@@ -598,7 +598,7 @@ void WindowNodeContainer::DumpScreenWindowTree()
     WLOGFI("WindowName WinId Type Mode Flag ZOrd [   x    y    w    h]");
     std::vector<sptr<WindowNode>> windowNodes;
     TraverseContainer(windowNodes);
-    int zOrder = windowNodes.size();
+    int32_t zOrder = static_cast<int32_t>(windowNodes.size());
     for (auto node : windowNodes) {
         Rect rect = node->GetLayoutRect();
         const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
