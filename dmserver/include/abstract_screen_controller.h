@@ -42,6 +42,7 @@ public:
     ~AbstractScreenController();
 
     void Init();
+    void ScreenConnectionInDisplayInit(sptr<AbstractScreenCallback> abstractScreenCallback);
     std::vector<ScreenId> GetAllScreenIds();
     sptr<AbstractScreen> GetAbstractScreen(ScreenId dmsScreenId) const;
     std::vector<ScreenId> GetShotScreenIds(std::vector<ScreenId>) const;
