@@ -35,13 +35,15 @@ namespace OHOS {
 namespace Rosen {
 class WindowImpl : public Window {
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, uiContentCb) \
-    do { \
-        if (lifecycleListener_ != nullptr) { \
-            lifecycleListener_->windowLifecycleCb(); \
-        } \
-        if (uiContent_ != nullptr) { \
-            uiContent_->uiContentCb(); \
-        } \
+    do {                                                        \
+        for (auto& listener : lifecycleListeners_) {            \
+            if (listener != nullptr) {                          \
+                listener->windowLifecycleCb();                  \
+            }                                                   \
+        }                                                       \
+        if (uiContent_ != nullptr) {                            \
+            uiContent_->uiContentCb();                          \
+        }                                                       \
     } while (0)
 
 public:
@@ -99,6 +101,8 @@ public:
 
     virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) override;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
+    virtual void UnregisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) override;
+    virtual void UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     virtual void UnregisterAvoidAreaChangeListener() override;
     virtual void RegisterDragListener(sptr<IWindowDragListener>& listener) override;
@@ -140,7 +144,7 @@ private:
     {
         CALL_LIFECYCLE_LISTENER(AfterFocused, Focus);
     }
-    inline void NotifyAfterUnFocused() const
+    inline void NotifyAfterUnfocused() const
     {
         CALL_LIFECYCLE_LISTENER(AfterUnfocused, UnFocus);
     }
@@ -171,8 +175,8 @@ private:
     static std::map<uint32_t, std::vector<sptr<Window>>> appFloatingWindowMap_;
     sptr<WindowProperty> property_;
     WindowState state_ { WindowState::STATE_INITIAL };
-    sptr<IWindowLifeCycle> lifecycleListener_;
-    sptr<IWindowChangeListener> windowChangeListener_;
+    std::vector<sptr<IWindowLifeCycle>> lifecycleListeners_;
+    std::vector<sptr<IWindowChangeListener>> windowChangeListeners_;
     sptr<IAvoidAreaChangedListener> avoidAreaChangeListener_;
     std::vector<sptr<IWindowDragListener>> windowDragListeners_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
