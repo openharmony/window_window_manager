@@ -264,9 +264,13 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
     } else if (state_ == WindowState::STATE_SHOWN) {
         property_->SetWindowMode(mode);
         WMError ret = SingletonContainer::Get<WindowAdapter>().SetWindowMode(property_->GetWindowId(), mode);
-        if (ret == WMError::WM_OK && windowChangeListener_ != nullptr) {
-            WLOGFE("notify window mode changed");
-            windowChangeListener_->OnModeChange(mode);
+        if (ret == WMError::WM_OK) {
+            WLOGFD("notify window mode changed");
+            for (auto& listener : windowChangeListeners_) {
+                if (listener != nullptr) {
+                    listener->OnModeChange(mode);
+                }
+            }
         }
         return ret;
     }
@@ -593,8 +597,10 @@ WMError WindowImpl::Show()
     if (state_ == WindowState::STATE_SHOWN && property_->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
         WLOGFI("Minimize all app windows");
         SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
-        if (lifecycleListener_ != nullptr) {
-            lifecycleListener_->AfterForeground();
+        for (auto& listener : lifecycleListeners_) {
+            if (listener != nullptr) {
+                listener->AfterForeground();
+            }
         }
         return WMError::WM_OK;
     }
@@ -766,13 +772,38 @@ void WindowImpl::AddInputEventListener(std::shared_ptr<MMI::IInputEventConsumer>
 
 void WindowImpl::RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener)
 {
-    lifecycleListener_ = listener;
+    if (listener == nullptr) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    lifecycleListeners_.emplace_back(listener);
 }
 
 void WindowImpl::RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener)
 {
-    WLOGFE("RegisterWindowChangeListener, windowId %{public}u", GetWindowId());
-    windowChangeListener_ = listener;
+    if (listener == nullptr) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    windowChangeListeners_.emplace_back(listener);
+}
+
+void WindowImpl::UnregisterLifeCycleListener(sptr<IWindowLifeCycle>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    lifecycleListeners_.erase(std::remove_if(lifecycleListeners_.begin(), lifecycleListeners_.end(),
+        [listener](sptr<IWindowLifeCycle> registeredListener) {
+            return registeredListener == listener;
+        }), lifecycleListeners_.end());
+}
+
+void WindowImpl::UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    windowChangeListeners_.erase(std::remove_if(windowChangeListeners_.begin(), windowChangeListeners_.end(),
+        [listener](sptr<IWindowChangeListener> registeredListener) {
+            return registeredListener == listener;
+        }), windowChangeListeners_.end());
 }
 
 void WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
@@ -806,7 +837,7 @@ void WindowImpl::UnregisterDragListener(sptr<IWindowDragListener>& listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(windowDragListeners_.begin(), windowDragListeners_.end(), listener);
-    if (iter ==windowDragListeners_.end()) {
+    if (iter == windowDragListeners_.end()) {
         WLOGFE("could not find this listener");
         return;
     }
@@ -825,9 +856,12 @@ void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reas
     WLOGFI("winId:%{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], vpr:%{public}f, reason:%{public}u",
         GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, virtualPixelRatio, reason);
     property_->SetWindowRect(rect);
-    if (windowChangeListener_ != nullptr) {
-        windowChangeListener_->OnSizeChange(rect, reason);
+    for (auto& listener : windowChangeListeners_) {
+        if (listener != nullptr) {
+            listener->OnSizeChange(rect, reason);
+        }
     }
+
     if (uiContent_ != nullptr) {
         Ace::ViewportConfig config;
         config.SetSize(rect.width_, rect.height_);
@@ -841,8 +875,10 @@ void WindowImpl::UpdateMode(WindowMode mode)
 {
     WLOGI("UpdateMode %{public}d", mode);
     property_->SetWindowMode(mode);
-    if (windowChangeListener_ != nullptr) {
-        windowChangeListener_->OnModeChange(mode);
+    for (auto& listener : windowChangeListeners_) {
+        if (listener != nullptr) {
+            listener->OnModeChange(mode);
+        }
     }
 }
 
@@ -1054,7 +1090,7 @@ void WindowImpl::UpdateFocusStatus(bool focused)
     if (focused) {
         NotifyAfterFocused();
     } else {
-        NotifyAfterUnFocused();
+        NotifyAfterUnfocused();
     }
 }
 
