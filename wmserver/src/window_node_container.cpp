@@ -985,25 +985,23 @@ void WindowNodeContainer::RaiseInputMethodWindowPriorityIfNeeded(const sptr<Wind
 
 void WindowNodeContainer::MoveWindowNode(sptr<WindowNodeContainer>& container)
 {
-    WLOGFI("MoveWindowNode: disconnect expand display, move window node");
+    WLOGFI("MoveWindowNode: disconnect expand display: %{public}" PRId64 ", move window node to display: "
+        "%{public}" PRId64 "", container->GetDisplayId(), displayId_);
     sptr<WindowNode> belowAppNode = container->GetBelowAppWindowNode();
     sptr<WindowNode> appNode = container->GetAppWindowNode();
     sptr<WindowNode> aboveAppNode = container->GetAboveAppWindowNode();
     for (auto& node : belowAppNode->children_) {
-        WLOGFI("belowAppWindowNode_: move windowNode: {public}%d from displayId: %{public}" PRId64 ""
-            " to displayID %{public}" PRId64 "", node->GetWindowId(), node->GetDisplayId(), displayId_);
+        WLOGFI("belowAppWindowNode_: move windowNode: {public}%d", node->GetWindowId());
         node->SetDisplayId(displayId_);
         belowAppWindowNode_->children_.push_back(node);
     }
     for (auto& node : appNode->children_) {
-        WLOGFI("appWindowNode_: move windowNode: {public}%d from displayId: %{public}" PRId64 ""
-            " to displayID %{public}" PRId64 "", node->GetWindowId(), node->GetDisplayId(), displayId_);
+        WLOGFI("appWindowNode_: move windowNode: {public}%d", node->GetWindowId());
         node->SetDisplayId(displayId_);
         appWindowNode_->children_.push_back(node);
     }
     for (auto& node : aboveAppNode->children_) {
-        WLOGFI("aboveAppWindowNode_: move windowNode: {public}%d from displayId: %{public}" PRId64 ""
-            " to displayID %{public}" PRId64 "", node->GetWindowId(), node->GetDisplayId(), displayId_);
+        WLOGFI("aboveAppWindowNode_: move windowNode: {public}%d", node->GetWindowId());
         node->SetDisplayId(displayId_);
         aboveAppWindowNode_->children_.push_back(node);
     }
