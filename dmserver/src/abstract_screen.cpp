@@ -121,6 +121,17 @@ DMError AbstractScreen::GetScreenColorGamut(ScreenColorGamut& colorGamut)
 
 DMError AbstractScreen::SetScreenColorGamut(int32_t colorGamutIdx)
 {
+    std::vector<ScreenColorGamut> colorGamuts;
+    DMError res = GetScreenSupportedColorGamuts(colorGamuts);
+    if (res != DMError::DM_OK) {
+        WLOGE("SetScreenColorGamut fail! rsId %{public}" PRIu64"", rsId_);
+        return res;
+    }
+    if (colorGamutIdx < 0 || colorGamutIdx >= static_cast<int32_t>(colorGamuts.size())) {
+        WLOGE("SetScreenColorGamut fail! rsId %{public}" PRIu64" colorGamutIdx %{public}d invalid.",
+            rsId_, colorGamutIdx);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
     auto ret = RSInterfaces::GetInstance().SetScreenColorGamut(rsId_, colorGamutIdx);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("SetScreenColorGamut fail! rsId %{public}" PRIu64"", rsId_);
@@ -147,6 +158,9 @@ DMError AbstractScreen::GetScreenGamutMap(ScreenGamutMap& gamutMap)
 
 DMError AbstractScreen::SetScreenGamutMap(ScreenGamutMap gamutMap)
 {
+    if (gamutMap > GAMUT_MAP_HDR_EXTENSION) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
     auto ret = RSInterfaces::GetInstance().SetScreenGamutMap(rsId_, gamutMap);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("SetScreenGamutMap fail! rsId %{public}" PRIu64"", rsId_);
