@@ -138,14 +138,7 @@ struct PointInfo {
 namespace {
     constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
     constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
-    constexpr float DEFAULT_SPLIT_RATIO = 0.5;
-    constexpr uint32_t DIVIDER_WIDTH = 8;
     constexpr uint32_t INVALID_WINDOW_ID = 0;
-    constexpr uint32_t HOTZONE = 40;
-    constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 240;
-    constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 426;
-    constexpr uint32_t MIN_VERTICAL_SPLIT_HEIGHT = 426;
-    constexpr uint32_t MIN_HORIZONTAL_SPLIT_WIDTH = 426;
 }
 
 struct SystemBarProperty {

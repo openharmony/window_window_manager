@@ -140,8 +140,9 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     } else if (reason == WindowSizeChangeReason::DRAG) {
         if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
             // fix rect in case of moving window when dragging
-            newRect = WindowHelper::GetFixedWindowRectByMinRect(rect,
-                property->GetWindowRect(), windowRoot_->isVerticalDisplay(node));
+            float virtualPixelRatio = windowRoot_->GetVirtualPixelRatio(node->GetDisplayId());
+            newRect = WindowHelper::GetFixedWindowRectByMinRect(rect, property->GetWindowRect(),
+                windowRoot_->isVerticalDisplay(node), virtualPixelRatio);
         } else {
             newRect = rect;
         }
@@ -274,7 +275,7 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
         WLOGFE("get display failed displayId:%{public}" PRId64 "", displayId);
         return;
     }
-    
+
     switch (type) {
         case DisplayStateChangeType::UPDATE_ROTATION: {
             windowRoot_->NotifyDisplayChange(abstractDisplay);
