@@ -42,6 +42,7 @@ public:
 
     void SetDisplayId(DisplayId displayId);
     void SetLayoutRect(const Rect& rect);
+    void SetHotZoneRect(const Rect& rect);
     void SetWindowRect(const Rect& rect);
     void SetWindowProperty(const sptr<WindowProperty>& property);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
@@ -81,6 +82,7 @@ private:
     sptr<WindowProperty> property_;
     sptr<IWindow> windowToken_;
     Rect layoutRect_ { 0, 0, 0, 0 };
+    Rect hotZoneRect_ { 0, 0, 0, 0 };
     int32_t callingPid_;
     int32_t callingUid_;
     WindowSizeChangeReason windowSizeChangeReason_ {WindowSizeChangeReason::UNDEFINED};

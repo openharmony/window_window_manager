@@ -62,6 +62,7 @@ public:
     void NotifyDisplayDestory(DisplayId displayId);
     void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
+    float GetVirtualPixelRatio(DisplayId displayId) const;
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
