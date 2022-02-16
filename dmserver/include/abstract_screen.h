@@ -68,7 +68,7 @@ public:
     RSDisplayNodeConfig rSDisplayNodeConfig_;
     ScreenId groupDmsId_ {INVALID_SCREEN_ID};
     ScreenType type_ { ScreenType::REAL };
-    int32_t activeIdx_;
+    int32_t activeIdx_ { 0 };
     float virtualPixelRatio = { 1.0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};
     Rotation rotation_ { Rotation::ROTATION_0 };

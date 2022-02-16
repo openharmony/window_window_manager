@@ -313,7 +313,7 @@ bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScree
     }
     int32_t activeModeId = rsInterface_.GetScreenActiveMode(rsScreenId).GetScreenModeId();
     WLOGD("fill screen activeModeId:%{public}d", activeModeId);
-    if (activeModeId >= allModes.size()) {
+    if (static_cast<std::size_t>(activeModeId) >= allModes.size()) {
         WLOGE("activeModeId exceed, screenId=%{public}" PRIu64", activeModeId:%{public}d/%{public}ud",
             rsScreenId, activeModeId, static_cast<uint32_t>(allModes.size()));
         return false;
