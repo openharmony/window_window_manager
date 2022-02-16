@@ -52,7 +52,7 @@ const int SLEEP_MS = 20;
 
 static void ShowHideWindowSceneCallable(int i)
 {
-    int sleepTimeMs = i * SLEEP_MS;
+    unsigned int sleepTimeMs = i * SLEEP_MS;
     usleep(sleepTimeMs);
     sptr<WindowScene> scene = utils::CreateWindowScene();
     const int loop = 10;
@@ -68,7 +68,7 @@ static void ShowHideWindowSceneCallable(int i)
 
 static void CreateDestroyWindowSceneCallable(int i)
 {
-    int sleepTimeMs = i * SLEEP_MS;
+    unsigned int sleepTimeMs = i * SLEEP_MS;
     const int loop = 10;
     int j = 0;
     for (; j < loop; j++) {

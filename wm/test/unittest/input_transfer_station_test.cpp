@@ -78,7 +78,7 @@ HWTEST_F(InputTransferStationTest, RemoveInputWindow, Function | SmallTest | Lev
  */
 HWTEST_F(InputTransferStationTest, SetInputListener, Function | SmallTest | Level2)
 {
-    int32_t windowId = 1;
+    uint32_t windowId = 1;
     std::shared_ptr<MMI::IInputEventConsumer> listener = std::make_shared<InputEventListener>(InputEventListener());
     InputTransferStation::GetInstance().SetInputListener(windowId, listener);
 }
