@@ -42,6 +42,12 @@ public:
     MOCK_METHOD1(GetDisplayState, DisplayState(uint64_t displayId));
     MOCK_METHOD2(SetScreenActiveMode, bool(ScreenId screenId, uint32_t modeId));
     MOCK_METHOD2(MakeExpand, DMError(std::vector<ScreenId> screenId, std::vector<Point> startPoint));
+    MOCK_METHOD2(GetScreenSupportedColorGamuts, DMError(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts));
+    MOCK_METHOD2(GetScreenColorGamut, DMError(ScreenId screenId, ScreenColorGamut& colorGamut));
+    MOCK_METHOD2(SetScreenColorGamut, DMError(ScreenId screenId, int32_t colorGamutIdx));
+    MOCK_METHOD2(GetScreenGamutMap, DMError(ScreenId screenId, ScreenGamutMap& gamutMap));
+    MOCK_METHOD2(SetScreenGamutMap, DMError(ScreenId screenId, ScreenGamutMap gamutMap));
+    MOCK_METHOD1(SetScreenColorTransform, DMError(ScreenId screenId));
 };
 }
 } // namespace OHOS
