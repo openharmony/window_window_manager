@@ -479,7 +479,7 @@ bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 
 uint32_t DisplayManager::GetScreenBrightness(uint64_t screenId) const
 {
-    uint32_t level = RSInterfaces::GetInstance().GetScreenBacklight(screenId);
+    uint32_t level = static_cast<uint32_t>(RSInterfaces::GetInstance().GetScreenBacklight(screenId));
     WLOGFI("screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     return level;
 }
