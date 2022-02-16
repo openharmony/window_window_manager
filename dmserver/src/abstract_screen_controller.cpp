@@ -282,10 +282,12 @@ void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
             abstractScreenCallback_->onDisconnect_(dmsScreenMapIter->second);
         }
         RemoveFromGroupLocked(dmsScreenMapIter->second);
-        dmsScreenMapIter->second->rsDisplayNode_->RemoveFromTree();
-        auto transactionProxy = RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
+        if (dmsScreenMapIter->second->rsDisplayNode_ != nullptr) {
+            dmsScreenMapIter->second->rsDisplayNode_->RemoveFromTree();
+            auto transactionProxy = RSTransactionProxy::GetInstance();
+            if (transactionProxy != nullptr) {
+                transactionProxy->FlushImplicitTransaction();
+            }
         }
         dmsScreenMap_.erase(dmsScreenMapIter);
     }
@@ -430,6 +432,9 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
     ScreenId result = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
         option.height_, option.surface_, INVALID_SCREEN_ID, option.flags_);
     WLOGFI("AbstractScreenController::CreateVirtualScreen id: %{public}" PRIu64"", result);
+    if (result == SCREEN_ID_INVALID) {
+        return SCREEN_ID_INVALID;
+    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     ScreenId dmsScreenId = SCREEN_ID_INVALID;
     auto iter = rs2DmsScreenIdMap_.find(result);
