@@ -243,7 +243,8 @@ void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rec
     }
     if (WindowHelper::IsMainFloatingWindow(windowType, windowMode)) {
         winRect.posY_ = std::max(limitRect_.posY_, winRect.posY_);
-        winRect.posY_ = std::min(limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_), winRect.posY_);
+        winRect.posY_ = std::min(limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_ - WINDOW_TITLE_BAR_HEIGHT),
+                                 winRect.posY_);
     }
 }
 
