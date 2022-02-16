@@ -52,6 +52,7 @@ void AbstractDisplayController::Init(sptr<AbstractScreenController> abstractScre
     abstractScreenCallback_->onChange_
         = std::bind(&AbstractDisplayController::OnAbstractScreenChange, this, std::placeholders::_1,
         std::placeholders::_2);
+    abstractScreenController_->ScreenConnectionInDisplayInit(abstractScreenCallback_);
     abstractScreenController->RegisterAbstractScreenCallback(abstractScreenCallback_);
 
     // TODO: Active the code after "rsDisplayNode_->SetScreenId(rsScreenId)" is provided.
