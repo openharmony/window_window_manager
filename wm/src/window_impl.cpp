@@ -1074,6 +1074,7 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
 
 void WindowImpl::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
 {
+    WLOGFI("Window Update AvoidArea, id: %{public}d", property_->GetWindowId());
     if (avoidAreaChangeListener_ != nullptr) {
         avoidAreaChangeListener_->OnAvoidAreaChanged(avoidArea);
     }
