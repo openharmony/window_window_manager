@@ -257,6 +257,10 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             ProcessDisplayChange(displayId, type);
             break;
         }
+        case DisplayStateChangeType::DESTROY: {
+            windowRoot_->NotifyDisplayDestory(displayId);
+            break;
+        }
         default: {
             WLOGFE("unknown DisplayStateChangeType:%{public}u", type);
             return;
@@ -290,10 +294,6 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
             // show logs of updated display
             windowRoot_->NotifyDisplayChange(abstractDisplay);
             WLOGFI("display w/h: %{public}u %{public}u", abstractDisplay->GetWidth(), abstractDisplay->GetHeight());
-            break;
-        }
-        case DisplayStateChangeType::DESTROY: {
-            windowRoot_->NotifyDisplayDestory(displayId);
             break;
         }
         default: {
