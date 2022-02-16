@@ -41,7 +41,7 @@ namespace {
 WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height) : displayId_(displayId)
 {
     displayRect_ = {
-        .posX_ = 0, 
+        .posX_ = 0,
         .posY_ = 0,
         .width_ = width,
         .height_ = height
@@ -67,7 +67,7 @@ void WindowNodeContainer::UpdateDisplayRect(uint32_t width, uint32_t height)
 {
     WLOGFI("update display rect, w/h=%{public}u/%{public}u", width, height);
     displayRect_ = {
-        .posX_ = 0, 
+        .posX_ = 0,
         .posY_ = 0,
         .width_ = width,
         .height_ = height
@@ -128,8 +128,9 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     if (avoidController_->IsAvoidAreaNode(node)) {
         avoidController_->AddAvoidAreaNode(node);
         NotifyIfSystemBarRegionChanged();
+    } else {
+        NotifyIfSystemBarTintChanged();
     }
-    NotifyIfSystemBarTintChanged();
     DumpScreenWindowTree();
     UpdateWindowStatus(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     WLOGFI("AddWindowNode windowId: %{public}d end", node->GetWindowId());
@@ -147,8 +148,9 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node)
     if (avoidController_->IsAvoidAreaNode(node)) {
         avoidController_->UpdateAvoidAreaNode(node);
         NotifyIfSystemBarRegionChanged();
+    } else {
+        NotifyIfSystemBarTintChanged();
     }
-    NotifyIfSystemBarTintChanged();
     DumpScreenWindowTree();
     WLOGFI("UpdateWindowNode windowId: %{public}d end", node->GetWindowId());
     return WMError::WM_OK;
@@ -249,8 +251,9 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     if (avoidController_->IsAvoidAreaNode(node)) {
         avoidController_->RemoveAvoidAreaNode(node);
         NotifyIfSystemBarRegionChanged();
+    } else {
+        NotifyIfSystemBarTintChanged();
     }
-    NotifyIfSystemBarTintChanged();
     DumpScreenWindowTree();
     UpdateWindowStatus(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     WLOGFI("RemoveWindowNode windowId: %{public}d end", node->GetWindowId());
@@ -380,58 +383,70 @@ uint32_t WindowNodeContainer::GetFocusWindow() const
     return focusedWindow_;
 }
 
-sptr<WindowNode> WindowNodeContainer::GetTopImmersiveNode() const
+bool WindowNodeContainer::IsFullImmersiveNode(sptr<WindowNode> node) const
 {
+    auto mode = node->GetWindowMode();
+    auto flags = node->GetWindowFlags();
+    return mode == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        !(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+}
+
+bool WindowNodeContainer::IsSplitImmersiveNode(sptr<WindowNode> node) const
+{
+    auto type = node->GetWindowType();
+    return node->IsSplitMode() || type == WindowType::WINDOW_TYPE_DOCK_SLICE;
+}
+
+std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpectImmersiveProperty() const
+{
+    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap {
+        { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
+        { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
+    };
+
+    // default systemBar Type
     if (appWindowNode_->children_.empty()) {
-        return nullptr;
+        WLOGFI("No immersive window on top. Use default systembar Property");
+        return sysBarPropMap;
     }
-    auto iter = appWindowNode_->children_.rbegin();
-    for (; iter < appWindowNode_->children_.rend(); ++iter) {
-        auto mode = (*iter)->GetWindowMode();
-        auto flags = (*iter)->GetWindowFlags();
-        if (mode == WindowMode::WINDOW_MODE_FULLSCREEN &&
-            !(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID))) {
-            return (*iter);
+
+    for (auto iter = appWindowNode_->children_.rbegin(); iter < appWindowNode_->children_.rend(); ++iter) {
+        auto& sysBarPropMapNode = (*iter)->GetSystemBarProperty();
+        if (IsFullImmersiveNode(*iter)) {
+            WLOGFI("Top fullscreen immersive window id: %{public}d. Use full immersice prop", (*iter)->GetWindowId());
+            for (auto it : sysBarPropMap) {
+                sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;
+            }
+            return sysBarPropMap;
+        } else if (IsSplitImmersiveNode(*iter)) {
+            WLOGFI("Top split immersive window id: %{public}d. Use split immersice prop", (*iter)->GetWindowId());
+            for (auto it : sysBarPropMap) {
+                sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;
+                sysBarPropMap[it.first].enable_ = false;
+            }
+            return sysBarPropMap;
         }
     }
-    return nullptr;
+
+    WLOGFI("No immersive window on top. Use default systembar Property");
+    return sysBarPropMap;
 }
 
 void WindowNodeContainer::NotifyIfSystemBarTintChanged()
 {
     WM_FUNCTION_TRACE();
-    auto node = GetTopImmersiveNode();
+    auto expectSystemBarProp = GetExpectImmersiveProperty();
     SystemBarRegionTints tints;
-    if (node == nullptr) { // use default system bar
-        WLOGFI("no immersive window on top");
-        for (auto it : sysBarTintMap_) {
-            if (it.second.prop_ == SystemBarProperty()) {
-                continue;
-            }
-            WLOGFI("system bar prop change to default");
-            sysBarTintMap_[it.first].prop_ = SystemBarProperty();
-            sysBarTintMap_[it.first].type_ = it.first;
-            tints.emplace_back(sysBarTintMap_[it.first]);
+    for (auto it : sysBarTintMap_) {
+        auto expectProp = expectSystemBarProp.find(it.first)->second;
+        if (it.second.prop_ == expectProp) {
+            continue;
         }
-    } else { // use node-defined system bar
-        WLOGFI("top immersive window id: %{public}d", node->GetWindowId());
-        auto& sysBarPropMap = node->GetSystemBarProperty();
-        for (auto it : sysBarTintMap_) {
-            if (sysBarPropMap.find(it.first) == sysBarPropMap.end()) {
-                continue;
-            }
-            auto& prop = sysBarPropMap.find(it.first)->second;
-            if (it.second.prop_ == prop) {
-                continue;
-            }
-            WLOGFI("system bar prop update winId: %{public}d, type: %{public}d" \
-                "visible: %{public}d, Color: %{public}x | %{public}x",
-                node->GetWindowId(), static_cast<int32_t>(it.first),
-                prop.enable_, prop.backgroundColor_, prop.contentColor_);
-            sysBarTintMap_[it.first].prop_ = prop;
-            sysBarTintMap_[it.first].type_ = it.first;
-            tints.emplace_back(sysBarTintMap_[it.first]);
-        }
+        WLOGFI("System bar prop update, Type: %{public}d, Visible: %{public}d, Color: %{public}x | %{public}x",
+            static_cast<int32_t>(it.first), expectProp.enable_, expectProp.backgroundColor_, expectProp.contentColor_);
+        sysBarTintMap_[it.first].prop_ = expectProp;
+        sysBarTintMap_[it.first].type_ = it.first;
+        tints.emplace_back(sysBarTintMap_[it.first]);
     }
     WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId_, tints);
 }
