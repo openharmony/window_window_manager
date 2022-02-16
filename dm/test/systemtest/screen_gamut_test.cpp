@@ -74,6 +74,10 @@ HWTEST_F(ScreenGamutTest, ScreenGamut01, Function | MediumTest | Level1)
 
     ret = defaultScreen_->SetScreenColorGamut(0);
     ASSERT_EQ(ret, DMError::DM_OK);
+
+    const int32_t invalidColorGamutIndex = -1;
+    ret = defaultScreen_->SetScreenColorGamut(invalidColorGamutIndex);
+    ASSERT_NE(ret, DMError::DM_OK);
 }
 
 /**
@@ -92,6 +96,10 @@ HWTEST_F(ScreenGamutTest, ScreenGamut02, Function | MediumTest | Level1)
 
     ret = defaultScreen_->SetScreenGamutMap(gamutMap);
     ASSERT_EQ(ret, DMError::DM_OK);
+
+    gamutMap = static_cast<ScreenGamutMap>(static_cast<uint32_t>(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION) + 1);
+    ret = defaultScreen_->SetScreenGamutMap(gamutMap);
+    ASSERT_NE(ret, DMError::DM_OK);
 }
 
 /**
