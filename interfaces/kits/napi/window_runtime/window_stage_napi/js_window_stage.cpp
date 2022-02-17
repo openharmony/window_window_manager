@@ -311,7 +311,8 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
     if (value2->TypeOf() == NATIVE_FUNCTION) {
         callBack = value2;
     }
-    contentStorage_ = static_cast<void*>(storage);
+    std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
+        std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (errCode != WMError::WM_OK) {
@@ -323,8 +324,8 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
                 return;
             }
-            Rosen::WMError ret = win->SetUIContent(contextUrl, &engine,
-                static_cast<NativeValue*>(contentStorage_), false);
+            NativeValue* nativeStorage = (contentStorage == nullptr) ? nullptr : contentStorage->Get();
+            Rosen::WMError ret = win->SetUIContent(contextUrl, &engine, nativeStorage, false);
             if (ret != Rosen::WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret)));
                 return;
