@@ -33,7 +33,7 @@ public:
     ~WindowNodeContainer();
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);
-    WMError UpdateWindowNode(sptr<WindowNode>& node);
+    WMError UpdateWindowNode(sptr<WindowNode>& node, WindowUpdateReason reason);
     WMError DestroyWindowNode(sptr<WindowNode>& node, std::vector<uint32_t>& windowIds);
     const std::vector<uint32_t>& Destroy();
     void AssignZOrder();

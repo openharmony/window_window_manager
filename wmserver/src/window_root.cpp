@@ -191,7 +191,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
     return container->RemoveWindowNode(node);
 }
 
-WMError WindowRoot::UpdateWindowNode(uint32_t windowId)
+WMError WindowRoot::UpdateWindowNode(uint32_t windowId, WindowUpdateReason reason)
 {
     auto node = GetWindowNode(windowId);
     if (node == nullptr) {
@@ -203,7 +203,7 @@ WMError WindowRoot::UpdateWindowNode(uint32_t windowId)
         WLOGFE("add window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return container->UpdateWindowNode(node);
+    return container->UpdateWindowNode(node, reason);
 }
 
 WMError WindowRoot::EnterSplitWindowMode(sptr<WindowNode>& node)

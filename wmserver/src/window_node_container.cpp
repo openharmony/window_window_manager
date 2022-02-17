@@ -137,13 +137,17 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     return WMError::WM_OK;
 }
 
-WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node)
+WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpdateReason reason)
 {
     if (!node->surfaceNode_) {
         WLOGFE("surface node is nullptr!");
         return WMError::WM_ERROR_NULLPTR;
     }
-    SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
+    if (layoutMode_ == WindowLayoutMode::TILE) {
+        if (WindowHelper::IsMainWindow(node->GetWindowType()) && reason != WindowUpdateReason::UPDATE_OTHER_PROPS) {
+            SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
+        }
+    }
     layoutPolicy_->UpdateWindowNode(node);
     if (avoidController_->IsAvoidAreaNode(node)) {
         avoidController_->UpdateAvoidAreaNode(node);
@@ -906,7 +910,7 @@ WMError WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode,
             WindowMode::WINDOW_MODE_SPLIT_SECONDARY : WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
         pairNode->SetWindowMode(pairDstMode);
         pairNode->GetWindowToken()->UpdateWindowMode(pairDstMode);
-        WMError ret = UpdateWindowNode(pairNode);
+        WMError ret = UpdateWindowNode(pairNode, WindowUpdateReason::UPDATE_MODE);
         if (ret != WMError::WM_OK) {
             WLOGFE("Update window pair info failed");
             return ret;
