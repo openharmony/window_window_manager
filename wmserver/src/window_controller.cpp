@@ -165,12 +165,11 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
 {
     WM_FUNCTION_TRACE();
     auto node = windowRoot_->GetWindowNode(windowId);
-    WindowMode srcMode = node->GetWindowMode();
     if (node == nullptr) {
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-
+    WindowMode srcMode = node->GetWindowMode();
     if (srcMode == dstMode) {
         return WMError::WM_OK;
     }
