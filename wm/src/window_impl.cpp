@@ -738,7 +738,7 @@ WMError WindowImpl::Close()
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         if (abilityContext_ != nullptr) {
-            abilityContext_->TerminateSelf();
+            abilityContext_->CloseAbility();
         } else {
             Destroy();
         }
