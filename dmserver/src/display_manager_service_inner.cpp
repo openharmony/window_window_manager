@@ -92,6 +92,23 @@ const sptr<ScreenInfo> DisplayManagerServiceInner::GetScreenInfoByDisplayId(Disp
         DisplayManagerService::GetInstance().GetScreenIdByDisplayId(displayId));
 }
 
+const sptr<SupportedScreenModes> DisplayManagerServiceInner::GetScreenModesByDisplayId(DisplayId displayId)
+{
+    const sptr<AbstractDisplay> display = GetDisplayById(displayId);
+    if (display == nullptr) {
+        WLOGFE("can not get display.");
+        return nullptr;
+    }
+    ScreenId dmsScreenId = display->GetAbstractScreenId();
+    sptr<AbstractScreen> abstractScreen =
+        DisplayManagerService::GetInstance().abstractScreenController_->GetAbstractScreen(dmsScreenId);
+    if (abstractScreen == nullptr) {
+        WLOGFE("can not get screenMode.");
+        return nullptr;
+    }
+    return abstractScreen->GetActiveScreenMode();
+}
+
 void DisplayManagerServiceInner::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
 {
     DisplayManagerService::GetInstance().RegisterDisplayChangeListener(listener);
