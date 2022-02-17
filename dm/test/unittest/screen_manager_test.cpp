@@ -123,8 +123,6 @@ HWTEST_F(ScreenManagerTest, MakeExpand_001, Function | SmallTest | Level1)
 HWTEST_F(ScreenManagerTest, MakeExpand_002, Function | SmallTest | Level1)
 {
     ScreenId invalidId = SCREEN_ID_INVALID;
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), MakeExpand(_, _)).Times(1).WillOnce(Return(DMError::DM_ERROR_INVALID_PARAM));
     std::vector<ExpandOption> options = {};
     ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
     ASSERT_EQ(expansionId, invalidId);
