@@ -267,13 +267,6 @@ void AbstractScreenController::ProcessScreenModeChanged(ScreenId rsScreenId)
     // if not, the recursive_mutex should be added
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     sptr<AbstractScreen> absScreen = dmsScreenMapIter->second;
-    int32_t activeModeId = rsInterface_.GetScreenActiveMode(rsScreenId).GetScreenModeId();
-    if (activeModeId < 0 || activeModeId >= absScreen->modes_.size()) {
-        WLOGE("activeModeId exceed, screenId=%{public}" PRIu64", activeModeId:%{public}d/%{public}u",
-            rsScreenId, activeModeId, static_cast<uint32_t>(absScreen->modes_.size()));
-        return;
-    }
-    absScreen->activeIdx_ = activeModeId;
     if (abstractScreenCallback_ != nullptr) {
         abstractScreenCallback_->onChange_(absScreen, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     }
