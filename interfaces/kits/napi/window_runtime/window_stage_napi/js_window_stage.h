@@ -64,7 +64,6 @@ private:
 
     std::shared_ptr<Rosen::WindowScene> windowScene_;
     NativeEngine* engine_ = nullptr;
-    void* contentStorage_ = nullptr;
     sptr<IWindowLifeCycle> lifecycleListener_ = nullptr;
     std::map<std::shared_ptr<NativeReference>, int> eventCallbackMap_;
     bool regLifeCycleListenerFlag_ = false;

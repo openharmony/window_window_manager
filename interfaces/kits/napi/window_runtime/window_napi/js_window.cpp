@@ -694,15 +694,16 @@ NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& i
         storage = info.argv[INDEX_ONE];
         callBack = (info.argv[INDEX_TWO]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_TWO] : nullptr);
     }
-    contentStorage_ = static_cast<void*>(storage);
+    std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
+        std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            WMError ret = windowToken_->SetUIContent(contextUrl, &engine,
-                static_cast<NativeValue*>(contentStorage_), false);
+            NativeValue* nativeStorage = (contentStorage == nullptr) ? nullptr : contentStorage->Get();
+            Rosen::WMError ret = windowToken_->SetUIContent(contextUrl, &engine, nativeStorage, false);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
                 WLOGFI("JsWindow::OnLoadContent success");
