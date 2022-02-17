@@ -140,6 +140,8 @@ void WindowLayoutPolicy::RemoveWindowNode(sptr<WindowNode>& node)
     } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
         LayoutWindowTree();
     }
+    Rect winRect = node->GetWindowProperty()->GetWindowRect();
+    node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
 }
 
 void WindowLayoutPolicy::UpdateWindowNode(sptr<WindowNode>& node)

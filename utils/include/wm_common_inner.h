@@ -35,6 +35,15 @@ enum class WindowStateChangeReason : uint32_t {
     NORMAL,
     KEYGUARD,
 };
+
+enum class WindowUpdateReason : uint32_t {
+    UPDATE_ALL,
+    UPDATE_MODE,
+    UPDATE_RECT,
+    UPDATE_FLAGS,
+    UPDATE_TYPE,
+    UPDATE_OTHER_PROPS,
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_INNER_H

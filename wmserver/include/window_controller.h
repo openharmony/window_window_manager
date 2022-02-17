@@ -50,6 +50,7 @@ public:
     WMError ProcessWindowTouchedEvent(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
+    void NotifySystemBarTints();
 
 private:
     uint32_t GenWindowId();
