@@ -234,6 +234,20 @@ void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, S
     }
 }
 
+void AbstractScreenController::ScreenConnectionInDisplayInit(sptr<AbstractScreenCallback> abstractScreenCallback)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (dmsScreenMap_.empty()) {
+        return;
+    }
+    for (auto& iter : dmsScreenMap_) {
+        if (iter.second != nullptr && abstractScreenCallback != nullptr) {
+            WLOGFI("dmsScreenId :%{public}" PRIu64"", iter.first);
+            abstractScreenCallback->onConnect_(iter.second);
+        }
+    }
+}
+
 void AbstractScreenController::ProcessScreenModeChanged(ScreenId rsScreenId)
 {
     WM_SCOPED_TRACE("dms:ProcessScreenModeChanged(%" PRIu64")", rsScreenId);
