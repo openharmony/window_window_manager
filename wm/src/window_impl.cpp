@@ -536,7 +536,7 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
             return ret;
         }
     }
-    windowMap_.insert({ name_, std::pair<uint32_t, sptr<Window>>(windowId, this) });
+    windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, this)));
     if (parentName != "") { // add to subWindowMap_
         subWindowMap_[property_->GetParentId()].push_back(this);
     }
