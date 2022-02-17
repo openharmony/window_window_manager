@@ -66,19 +66,22 @@ NativeValue* JsScreen::RequestRotation(NativeEngine* engine, NativeCallbackInfo*
 NativeValue* JsScreen::OnRequestRotation(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsScreen::OnRequestRotation is called");
+    bool paramValidFlag = true;
+    Rotation rotation = Rotation::ROTATION_0;
+    if (info.argc != ARGC_ONE) {
+        WLOGFE("OnRequestRotation Params not match, info argc: %{public}zu", info.argc);
+        paramValidFlag = false;
+    } else {
+        if (!ConvertFromJsValue(engine, info.argv[0], rotation)) {
+            paramValidFlag = false;
+            WLOGFE("Failed to convert parameter to rotation");
+        }
+    }
 
     AsyncTask::CompleteCallback complete =
-        [this, &info](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (info.argc != ARGC_ONE) {
-                WLOGFE("Params not match");
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM),
-                                                  "JsScreen::OnRequestRotation failed."));
-                return;
-            }
-
-            Rotation rotation;
-            if (!ConvertFromJsValue(engine, info.argv[0], rotation)) {
-                WLOGFE("Failed to convert parameter to rotation");
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!paramValidFlag) {
+                WLOGE("JsScreen::OnRequestRotation paramValidFlag error");
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM),
                                                   "JsScreen::OnRequestRotation failed."));
                 return;
@@ -120,19 +123,26 @@ NativeValue* JsScreen::SetScreenActiveMode(NativeEngine* engine, NativeCallbackI
 NativeValue* JsScreen::OnSetScreenActiveMode(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsScreen::OnSetScreenActiveMode is called");
+    bool paramValidFlag = true;
+    uint32_t modeId = 0;
     if (info.argc != ARGC_ONE) {
-        WLOGFE("Params not match");
-        return engine.CreateUndefined();
-    }
-
-    uint32_t modeId;
-    if (!ConvertFromJsValue(engine, info.argv[0], modeId)) {
-        WLOGFE("Failed to convert parameter to modeId");
-        return engine.CreateUndefined();
+        WLOGFE("OnSetScreenActiveMode Params not match %{public}zu", info.argc);
+        paramValidFlag = false;
+    } else {
+        if (!ConvertFromJsValue(engine, info.argv[0], modeId)) {
+            WLOGFE("Failed to convert parameter to modeId");
+            paramValidFlag = false;
+        }
     }
 
     AsyncTask::CompleteCallback complete =
-        [this, modeId](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!paramValidFlag) {
+                WLOGFE("JsScreen::OnSetScreenActiveMode paramValidFlag error");
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM),
+                                                  "JsScreen::OnSetScreenActiveMode failed."));
+                return;
+            }
             bool res = screen_->SetScreenActiveMode(modeId);
             if (res) {
                 task.Resolve(engine, CreateJsValue(engine, true));
