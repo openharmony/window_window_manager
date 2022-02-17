@@ -79,19 +79,24 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
 
 void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& container, DisplayId displayId)
 {
+    sptr<SupportedScreenModes> screenMode =
+        DisplayManagerServiceInner::GetInstance().GetScreenModesByDisplayId(displayId);
+    if (screenMode == nullptr) {
+        return;
+    }
     MMI::PhysicalDisplayInfo physicalDisplayInfo = {
         .id = static_cast<int32_t>(container->GetScreenId()),
         .leftDisplayId = static_cast<int32_t>(DISPLAY_ID_INVALD),
         .upDisplayId = static_cast<int32_t>(DISPLAY_ID_INVALD),
-        .topLeftX = container->GetDisplayRect().posX_,
-        .topLeftY = container->GetDisplayRect().posY_,
-        .width = static_cast<int32_t>(container->GetDisplayRect().width_),
-        .height = static_cast<int32_t>(container->GetDisplayRect().height_),
+        .topLeftX = 0,
+        .topLeftY = 0,
+        .width = static_cast<int32_t>(screenMode->width_),
+        .height = static_cast<int32_t>(screenMode->height_),
         .name = "physical_display0",
         .seatId = "seat0",
         .seatName = "default0",
-        .logicWidth = static_cast<int32_t>(container->GetDisplayRect().width_),
-        .logicHeight = static_cast<int32_t>(container->GetDisplayRect().height_),
+        .logicWidth = static_cast<int32_t>(screenMode->width_),
+        .logicHeight = static_cast<int32_t>(screenMode->height_),
     };
     UpdateDisplayDirection(physicalDisplayInfo, displayId);
     auto physicalDisplayIter = std::find_if(physicalDisplays_.begin(), physicalDisplays_.end(),
