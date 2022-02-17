@@ -17,7 +17,6 @@
 #include <vector>
 
 #include "display.h"
-#include "display_manager_service_inner.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "window_node.h"
@@ -37,7 +36,11 @@ void DragController::UpdateDragInfo(uint32_t windowId)
     if (!GetHitPoint(windowId, point)) {
         return;
     }
-    sptr<WindowNode> hitWindowNode = GetHitWindow(point);
+    sptr<WindowNode> dragNode = windowRoot_->GetWindowNode(windowId);
+    if (dragNode == nullptr) {
+        return;
+    }
+    sptr<WindowNode> hitWindowNode = GetHitWindow(dragNode->GetDisplayId(), point);
     if (hitWindowNode == nullptr) {
         WLOGFE("Get point failed %{public}d %{public}d", point.x, point.y);
         return;
@@ -61,7 +64,11 @@ void DragController::StartDrag(uint32_t windowId)
         WLOGFE("Get hit point failed");
         return;
     }
-    sptr<WindowNode> hitWindow = GetHitWindow(point);
+    sptr<WindowNode> dragNode = windowRoot_->GetWindowNode(windowId);
+    if (dragNode == nullptr) {
+        return;
+    }
+    sptr<WindowNode> hitWindow = GetHitWindow(dragNode->GetDisplayId(), point);
     if (hitWindow == nullptr) {
         WLOGFE("Get point failed %{public}d %{public}d", point.x, point.y);
         return;
@@ -92,15 +99,13 @@ void DragController::FinishDrag(uint32_t windowId)
     WLOGFI("end drag");
 }
 
-sptr<WindowNode> DragController::GetHitWindow(PointInfo point)
+sptr<WindowNode> DragController::GetHitWindow(DisplayId id, PointInfo point)
 {
     // TODO get display by point
-    DisplayId id = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
     if (id == DISPLAY_ID_INVALD) {
-        WLOGFE("get invalid display");
+        WLOGFE("Get invalid display");
         return nullptr;
     }
-
     sptr<WindowNodeContainer> container = windowRoot_->GetOrCreateWindowNodeContainer(id);
     if (container == nullptr) {
         WLOGFE("get container failed %{public}" PRIu64"", id);
