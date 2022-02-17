@@ -137,13 +137,15 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     return WMError::WM_OK;
 }
 
-WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node)
+WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpdateReason reason)
 {
     if (!node->surfaceNode_) {
         WLOGFE("surface node is nullptr!");
         return WMError::WM_ERROR_NULLPTR;
     }
-    SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
+    if (WindowHelper::IsMainWindow(node->GetWindowType()) && reason != WindowUpdateReason::UPDATE_OTHER_PROPS) {
+        SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
+    }
     layoutPolicy_->UpdateWindowNode(node);
     if (avoidController_->IsAvoidAreaNode(node)) {
         avoidController_->UpdateAvoidAreaNode(node);
@@ -467,6 +469,24 @@ void WindowNodeContainer::NotifyIfSystemBarRegionChanged()
         WLOGFI("system bar region update, type: %{public}d" \
             "region: [%{public}d, %{public}d, %{public}d, %{public}d]",
             static_cast<int32_t>(it.first), newRegion.posX_, newRegion.posY_, newRegion.width_, newRegion.height_);
+    }
+    WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId_, tints);
+}
+
+void WindowNodeContainer::NotifySystemBarTints()
+{
+    WM_FUNCTION_TRACE();
+    SystemBarRegionTints tints;
+    for (auto it : sysBarTintMap_) {
+        WLOGFD("system bar cur notify, type: %{public}d, " \
+            "visible: %{public}d, color: %{public}x | %{public}x, " \
+            "region: [%{public}d, %{public}d, %{public}d, %{public}d]",
+            static_cast<int32_t>(it.first),
+            sysBarTintMap_[it.first].region_.posX_, sysBarTintMap_[it.first].region_.posY_,
+            sysBarTintMap_[it.first].region_.width_, sysBarTintMap_[it.first].region_.height_,
+            sysBarTintMap_[it.first].prop_.enable_,
+            sysBarTintMap_[it.first].prop_.backgroundColor_, sysBarTintMap_[it.first].prop_.contentColor_);
+        tints.push_back(sysBarTintMap_[it.first]);
     }
     WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId_, tints);
 }
@@ -906,7 +926,7 @@ WMError WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode,
             WindowMode::WINDOW_MODE_SPLIT_SECONDARY : WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
         pairNode->SetWindowMode(pairDstMode);
         pairNode->GetWindowToken()->UpdateWindowMode(pairDstMode);
-        WMError ret = UpdateWindowNode(pairNode);
+        WMError ret = UpdateWindowNode(pairNode, WindowUpdateReason::UPDATE_MODE);
         if (ret != WMError::WM_OK) {
             WLOGFE("Update window pair info failed");
             return ret;

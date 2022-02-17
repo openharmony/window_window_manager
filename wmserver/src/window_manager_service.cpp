@@ -249,6 +249,9 @@ void WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType typ
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WindowManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
+    if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR) { // if system bar, notify once
+        windowController_->NotifySystemBarTints();
+    }
 }
 
 void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType type,

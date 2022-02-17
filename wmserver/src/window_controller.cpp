@@ -148,7 +148,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     }
 
     property->SetWindowRect(newRect);
-    WMError res = windowRoot_->UpdateWindowNode(windowId);
+    WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_RECT);
     if (res != WMError::WM_OK) {
         return res;
     }
@@ -201,7 +201,7 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
             return res;
         }
     }
-    res = windowRoot_->UpdateWindowNode(windowId);
+    res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_MODE);
     if (res != WMError::WM_OK) {
         WLOGFE("Set window mode failed, update node failed");
         return res;
@@ -314,7 +314,7 @@ WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
     auto property = node->GetWindowProperty();
     property->SetWindowType(type);
     UpdateWindowAnimation(node);
-    WMError res = windowRoot_->UpdateWindowNode(windowId);
+    WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_TYPE);
     if (res != WMError::WM_OK) {
         return res;
     }
@@ -332,7 +332,7 @@ WMError WindowController::SetWindowFlags(uint32_t windowId, uint32_t flags)
     }
     auto property = node->GetWindowProperty();
     property->SetWindowFlags(flags);
-    WMError res = windowRoot_->UpdateWindowNode(windowId);
+    WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_FLAGS);
     if (res != WMError::WM_OK) {
         return res;
     }
@@ -349,13 +349,18 @@ WMError WindowController::SetSystemBarProperty(uint32_t windowId, WindowType typ
         return WMError::WM_ERROR_NULLPTR;
     }
     node->SetSystemBarProperty(type, property);
-    WMError res = windowRoot_->UpdateWindowNode(windowId);
+    WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_OTHER_PROPS);
     if (res != WMError::WM_OK) {
         return res;
     }
     FlushWindowInfo(windowId);
     WLOGFI("SetSystemBarProperty end");
     return res;
+}
+
+void WindowController::NotifySystemBarTints()
+{
+    windowRoot_->NotifySystemBarTints();
 }
 
 std::vector<Rect> WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
