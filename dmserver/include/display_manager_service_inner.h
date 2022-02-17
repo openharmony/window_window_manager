@@ -37,6 +37,7 @@ public:
     ScreenId GetRSScreenId(DisplayId displayId) const;
     const sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId) const;
     const sptr<AbstractScreen> GetScreenByDisplayId(DisplayId);
+    const sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId);
     void UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
 };
