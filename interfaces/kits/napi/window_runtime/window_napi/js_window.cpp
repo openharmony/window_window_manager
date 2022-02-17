@@ -48,6 +48,10 @@ void JsWindow::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
     WLOGFI("JsWindow::Finalizer is called");
     auto jsWin = std::unique_ptr<JsWindow>(static_cast<JsWindow*>(data));
+    if (jsWin == nullptr) {
+        WLOGFE("JsWindow::Finalizer JsWindow is null");
+        return;
+    }
     std::string windowName = jsWin->GetWindowName();
     WLOGFI("JsWindow::Finalizer windowName : %{public}s", windowName.c_str());
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
