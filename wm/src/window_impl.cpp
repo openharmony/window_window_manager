@@ -594,7 +594,7 @@ WMError WindowImpl::Show()
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (state_ == WindowState::STATE_SHOWN && property_->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
+    if (state_ == WindowState::STATE_SHOWN && property_->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
         WLOGFI("Minimize all app windows");
         SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
         for (auto& listener : lifecycleListeners_) {
