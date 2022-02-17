@@ -91,8 +91,6 @@ void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
     }
     rsDisplayNode_ = rsDisplayNode;
     rSDisplayNodeConfig_ = config;
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    transactionProxy->FlushImplicitTransaction();
 }
 
 DMError AbstractScreen::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts)
