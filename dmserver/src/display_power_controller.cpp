@@ -27,7 +27,8 @@ namespace {
 bool DisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 {
     WLOGFI("reason:%{public}u", reason);
-    DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALD, DisplayStateChangeType::BEFORE_SUSPEND);
+    DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALD,
+        DisplayStateChangeType::BEFORE_SUSPEND);
     return true;
 }
 
