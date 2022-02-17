@@ -88,7 +88,6 @@ private:
     std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallbackMap_;
     std::map<std::string, sptr<JsWindowListener>> jsListenerMap_;
     std::mutex mtx_;
-    void* contentStorage_ = nullptr;
 };
 }  // namespace Rosen
 }  // namespace OHOS
