@@ -174,8 +174,8 @@ static uint32_t GetColorFromJs(NativeEngine& engine, NativeObject* jsObject,
         }
         WLOGFI("origin color: %{public}s", colorStr.c_str());
         std::string color = colorStr.substr(1);
-        if (colorStr.length() == RGB_LENGTH) {
-            colorStr = "FF" + colorStr; // ARGB
+        if (color.length() == RGB_LENGTH) {
+            color = "FF" + color; // ARGB
         }
         std::stringstream ss;
         uint32_t hexColor;
