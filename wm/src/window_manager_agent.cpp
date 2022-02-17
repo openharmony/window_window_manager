@@ -35,5 +35,10 @@ void WindowManagerAgent::UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, 
 {
     SingletonContainer::Get<WindowManager>().UpdateWindowStatus(windowInfo, type);
 }
+
+void WindowManagerAgent::UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos)
+{
+    SingletonContainer::Get<WindowManager>().UpdateWindowVisibilityInfo(visibilityInfos);
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -27,6 +27,7 @@
 
 namespace OHOS {
 namespace Rosen {
+using WindowNodeOperationFunc = std::function<bool(sptr<WindowNode>)>; // return true indicates to stop traverse
 class WindowNodeContainer : public RefBase {
 public:
     WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height);
@@ -50,7 +51,6 @@ public:
     void UpdateDisplayRect(uint32_t width, uint32_t height);
 
     void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas);
-    void LayoutDividerWindow(sptr<WindowNode>& node);
     bool isVerticalDisplay() const;
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     sptr<WindowNode> GetNextFocusableWindow(uint32_t windowId) const;
@@ -63,13 +63,10 @@ public:
     WMError ExitSplitWindowMode(sptr<WindowNode>& node);
     WMError SwitchLayoutPolicy(WindowLayoutMode mode, bool reorder = false);
     void MoveWindowNode(sptr<WindowNodeContainer>& container);
-    sptr<WindowNode> GetBelowAppWindowNode() const;
-    sptr<WindowNode> GetAppWindowNode() const;
-    sptr<WindowNode> GetAboveAppWindowNode() const;
     float GetVirtualPixelRatio() const;
+    void TraverseWindowTree(const WindowNodeOperationFunc& func, bool isFromTopToBottom = true) const;
 
 private:
-    void AssignZOrder(sptr<WindowNode>& node);
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
     sptr<WindowNode> FindWindowNodeById(uint32_t id) const;
@@ -92,6 +89,11 @@ private:
     void ResetLayoutPolicy();
     bool IsFullImmersiveNode(sptr<WindowNode> node) const;
     bool IsSplitImmersiveNode(sptr<WindowNode> node) const;
+    bool TraverseFromTopToBottom(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
+    bool TraverseFromBottomToTop(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
+
+    // cannot determine in case of a window covered by union of several windows or with transparent value
+    void UpdateWindowVisibilityInfos(std::vector<sptr<WindowVisibilityInfo>>& infos);
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
@@ -101,6 +103,7 @@ private:
     std::vector<uint32_t> removedIds_;
     DisplayId displayId_ = 0;
     Rect displayRect_;
+    std::vector<Rect> currentCoveredArea_;
     std::unordered_map<WindowType, sptr<WindowNode>> sysBarNodeMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     nullptr },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, nullptr },

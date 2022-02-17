@@ -259,7 +259,7 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             break;
         }
         case DisplayStateChangeType::DESTROY: {
-            windowRoot_->NotifyDisplayDestory(displayId);
+            windowRoot_->NotifyDisplayDestroy(displayId);
             break;
         }
         default: {

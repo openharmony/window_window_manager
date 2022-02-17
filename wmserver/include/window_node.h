@@ -81,7 +81,8 @@ public:
     int32_t priority_ { 0 };
     bool requestedVisibility_ { false };
     bool currentVisibility_ { false };
-    bool hasDecorated_ = false;
+    bool hasDecorated_ { false };
+    bool isCovered_ { true }; // initial value true to ensure notification when this window is shown
 
 private:
     // colorspace, gamut

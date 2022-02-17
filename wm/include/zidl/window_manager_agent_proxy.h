@@ -31,6 +31,7 @@ public:
         DisplayId displayId, bool focused) override;
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type) override;
+    void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) override;
 
 private:
     static inline BrokerDelegator<WindowManagerAgentProxy> delegator_;
