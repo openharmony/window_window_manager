@@ -42,6 +42,7 @@ public:
     DisplayId GetDefaultDisplayId();
     const sptr<Display> GetDefaultDisplay();
     const sptr<Display> GetDisplayById(DisplayId displayId);
+    const sptr<Display> GetDisplayByScreen(ScreenId screenId);
     std::vector<DisplayId> GetAllDisplayIds();
     bool RegisterDisplayListener(sptr<IDisplayListener> listener);
     bool UnregisterDisplayListener(sptr<IDisplayListener> listener);

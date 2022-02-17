@@ -167,6 +167,11 @@ const sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
     return display;
 }
 
+const sptr<Display> DisplayManager::GetDisplayByScreen(ScreenId screenId)
+{
+    return nullptr;
+}
+
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALD) {
