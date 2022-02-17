@@ -56,6 +56,7 @@ public:
     sptr<WindowNode> GetNextFocusableWindow(uint32_t windowId) const;
     void MinimizeAllAppWindows();
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
+    void NotifySystemBarTints();
     WMError MinimizeAppNodeExceptOptions(const std::vector<uint32_t> &exceptionalIds = {},
                                          const std::vector<WindowMode> &exceptionalModes = {});
     WMError EnterSplitWindowMode(sptr<WindowNode>& node);
