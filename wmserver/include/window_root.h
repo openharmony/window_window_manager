@@ -44,7 +44,7 @@ public:
     WMError AddWindowNode(uint32_t parentId, sptr<WindowNode>& node);
     WMError RemoveWindowNode(uint32_t windowId);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);
-    WMError UpdateWindowNode(uint32_t windowId);
+    WMError UpdateWindowNode(uint32_t windowId, WindowUpdateReason reason);
     bool isVerticalDisplay(sptr<WindowNode>& node) const;
 
     WMError RequestFocus(uint32_t windowId);
