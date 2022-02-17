@@ -542,7 +542,7 @@ void AbstractScreenController::OnScreenRotate(ScreenId dmsId, Rotation before, R
     sptr<AbstractScreen> abstractScreen = iter->second;
     // Notify rotation event to ScreenManager
     DisplayManagerAgentController::GetInstance().OnScreenChange(
-            abstractScreen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+        abstractScreen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
     // Notify rotation event to AbstractDisplayController
     if (abstractScreenCallback_ != nullptr) {
         abstractScreenCallback_->onChange_(abstractScreen, DisplayChangeEvent::UPDATE_ROTATION);
@@ -764,7 +764,8 @@ void AbstractScreenController::DumpScreenGroupInfo() const
             isMirrored.c_str(), screenGroup->rSDisplayNodeConfig_.mirrorNodeId);
         auto childrenScreen = screenGroup->GetChildren();
         for (auto screen : childrenScreen) {
-            std::string isGroup = (dmsScreenGroupMap_.find(screen->dmsId_) != dmsScreenGroupMap_.end()) ? "true" : "false";
+            std::string isGroup =
+                (dmsScreenGroupMap_.find(screen->dmsId_) != dmsScreenGroupMap_.end()) ? "true" : "false";
             if (screen->type_ == ScreenType::UNDEFINE) {
                 screenType = "UNDEFINE";
             } else if (screen->type_ == ScreenType::REAL) {

@@ -167,6 +167,11 @@ const sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
     return display;
 }
 
+const sptr<Display> DisplayManager::GetDisplayByScreen(ScreenId screenId)
+{
+    return nullptr;
+}
+
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALD) {
@@ -372,8 +377,7 @@ void DisplayManager::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 
 void DisplayManager::NotifyDisplayChangedEvent(const sptr<DisplayInfo> info, DisplayChangeEvent event)
 {
-    WLOGI("NotifyDisplayChangedEvent event:%{public}u, size:%{public}zu", event, 
-        pImpl_->displayListeners_.size());
+    WLOGI("NotifyDisplayChangedEvent event:%{public}u, size:%{public}zu", event, pImpl_->displayListeners_.size());
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     for (auto& listener : pImpl_->displayListeners_) {
         listener->OnChange(info->id_, event);
