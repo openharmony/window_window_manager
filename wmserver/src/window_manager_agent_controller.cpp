@@ -65,5 +65,15 @@ void WindowManagerAgentController::UpdateWindowStatus(const sptr<WindowInfo>& wi
         agent->UpdateWindowStatus(windowInfo, type);
     }
 }
+
+void WindowManagerAgentController::UpdateWindowVisibilityInfo(
+    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos)
+{
+    WLOGFD("UpdateWindowVisibilityInfo size:%{public}zu", windowVisibilityInfos.size());
+    for (auto& agent : wmAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY)) {
+        agent->UpdateWindowVisibilityInfo(windowVisibilityInfos);
+    }
+}
 }
 }
