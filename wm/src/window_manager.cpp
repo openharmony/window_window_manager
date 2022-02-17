@@ -111,11 +111,11 @@ void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const Syst
 void WindowManager::Impl::NotifyWindowUpdate(const sptr<WindowInfo>& windowInfo, WindowUpdateType type) const
 {
     WLOGFI("NotifyWindowUpdate: wid[%{public}d],width[%{public}d], \
-            height[%{public}d],positionX[%{public}d],positionY[%{public}d],\
-            isFocused[%{public}d],mode[%{public}d],type[%{public}d]",
-            windowInfo->wid_, windowInfo->windowRect_.width_,windowInfo->windowRect_.height_,
-            windowInfo->windowRect_.posX_,windowInfo->windowRect_.posY_,
-            windowInfo->focused_,windowInfo->mode_,windowInfo->type_);
+        height[%{public}d],positionX[%{public}d],positionY[%{public}d],\
+        isFocused[%{public}d],mode[%{public}d],type[%{public}d]",
+        windowInfo->wid_, windowInfo->windowRect_.width_, windowInfo->windowRect_.height_,
+        windowInfo->windowRect_.posX_, windowInfo->windowRect_.posY_,
+        windowInfo->focused_, windowInfo->mode_, windowInfo->type_);
     for (auto& listener : windowUpdateListeners_) {
         listener->OnWindowUpdate(windowInfo, type);
     }

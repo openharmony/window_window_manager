@@ -32,57 +32,56 @@ constexpr int32_t INDEX_TWO = 2;
 constexpr int32_t INDEX_THREE = 3;
 constexpr int32_t RGB_LENGTH = 6;
 constexpr int32_t RGBA_LENGTH = 8;
-namespace {
-    enum class ApiWindowType : uint32_t {
-        TYPE_BASE,
-        TYPE_APP = TYPE_BASE,
-        TYPE_APP_SUB_WINDOW,
-        TYPE_SYSTEM_ALERT,
-        TYPE_INPUT_METHOD,
-        TYPE_STATUS_BAR,
-        TYPE_PANEL,
-        TYPE_KEYGUARD,
-        TYPE_VOLUME_OVERLAY,
-        TYPE_NAVIGATION_BAR,
-        TYPE_END = TYPE_NAVIGATION_BAR,
-    };
-    const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
-        { WindowType::APP_SUB_WINDOW_BASE,             ApiWindowType::TYPE_APP            },
-        { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, ApiWindowType::TYPE_SYSTEM_ALERT   },
-        { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,  ApiWindowType::TYPE_INPUT_METHOD   },
-        { WindowType::WINDOW_TYPE_STATUS_BAR,          ApiWindowType::TYPE_STATUS_BAR     },
-        { WindowType::WINDOW_TYPE_PANEL,               ApiWindowType::TYPE_PANEL          },
-        { WindowType::WINDOW_TYPE_KEYGUARD,            ApiWindowType::TYPE_KEYGUARD       },
-        { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,      ApiWindowType::TYPE_VOLUME_OVERLAY },
-        { WindowType::WINDOW_TYPE_NAVIGATION_BAR,      ApiWindowType::TYPE_NAVIGATION_BAR },
-        { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      ApiWindowType::TYPE_APP_SUB_WINDOW },
-    };
-    const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
-        { ApiWindowType::TYPE_APP,             WindowType::APP_SUB_WINDOW_BASE            },
-        { ApiWindowType::TYPE_SYSTEM_ALERT,    WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW},
-        { ApiWindowType::TYPE_INPUT_METHOD,    WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT },
-        { ApiWindowType::TYPE_STATUS_BAR,      WindowType::WINDOW_TYPE_STATUS_BAR         },
-        { ApiWindowType::TYPE_PANEL,           WindowType::WINDOW_TYPE_PANEL              },
-        { ApiWindowType::TYPE_KEYGUARD,        WindowType::WINDOW_TYPE_KEYGUARD           },
-        { ApiWindowType::TYPE_VOLUME_OVERLAY,  WindowType::WINDOW_TYPE_VOLUME_OVERLAY     },
-        { ApiWindowType::TYPE_NAVIGATION_BAR,  WindowType::WINDOW_TYPE_NAVIGATION_BAR     },
-        { ApiWindowType::TYPE_APP_SUB_WINDOW,  WindowType::WINDOW_TYPE_APP_SUB_WINDOW     },
-    };
-    enum class ApiWindowMode : uint32_t {
-        UNDEFINED = 1,
-        FULLSCREEN,
-        PRIMARY,
-        SECONDARY,
-        FLOATING
-    };
-    const std::map<WindowMode, ApiWindowMode> NATIVE_TO_JS_WINDOW_MODE_MAP {
-        { WindowMode::WINDOW_MODE_UNDEFINED,       ApiWindowMode::UNDEFINED  },
-        { WindowMode::WINDOW_MODE_FULLSCREEN,      ApiWindowMode::FULLSCREEN },
-        { WindowMode::WINDOW_MODE_SPLIT_PRIMARY,   ApiWindowMode::PRIMARY    },
-        { WindowMode::WINDOW_MODE_SPLIT_SECONDARY, ApiWindowMode::SECONDARY  },
-        { WindowMode::WINDOW_MODE_FLOATING,        ApiWindowMode::FLOATING   },
-    };
-}
+enum class ApiWindowType : uint32_t {
+    TYPE_BASE,
+    TYPE_APP = TYPE_BASE,
+    TYPE_APP_SUB_WINDOW,
+    TYPE_SYSTEM_ALERT,
+    TYPE_INPUT_METHOD,
+    TYPE_STATUS_BAR,
+    TYPE_PANEL,
+    TYPE_KEYGUARD,
+    TYPE_VOLUME_OVERLAY,
+    TYPE_NAVIGATION_BAR,
+    TYPE_END = TYPE_NAVIGATION_BAR,
+};
+const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
+    { WindowType::APP_SUB_WINDOW_BASE,             ApiWindowType::TYPE_APP            },
+    { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, ApiWindowType::TYPE_SYSTEM_ALERT   },
+    { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,  ApiWindowType::TYPE_INPUT_METHOD   },
+    { WindowType::WINDOW_TYPE_STATUS_BAR,          ApiWindowType::TYPE_STATUS_BAR     },
+    { WindowType::WINDOW_TYPE_PANEL,               ApiWindowType::TYPE_PANEL          },
+    { WindowType::WINDOW_TYPE_KEYGUARD,            ApiWindowType::TYPE_KEYGUARD       },
+    { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,      ApiWindowType::TYPE_VOLUME_OVERLAY },
+    { WindowType::WINDOW_TYPE_NAVIGATION_BAR,      ApiWindowType::TYPE_NAVIGATION_BAR },
+    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      ApiWindowType::TYPE_APP_SUB_WINDOW },
+};
+const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
+    { ApiWindowType::TYPE_APP,             WindowType::APP_SUB_WINDOW_BASE            },
+    { ApiWindowType::TYPE_SYSTEM_ALERT,    WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW},
+    { ApiWindowType::TYPE_INPUT_METHOD,    WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT },
+    { ApiWindowType::TYPE_STATUS_BAR,      WindowType::WINDOW_TYPE_STATUS_BAR         },
+    { ApiWindowType::TYPE_PANEL,           WindowType::WINDOW_TYPE_PANEL              },
+    { ApiWindowType::TYPE_KEYGUARD,        WindowType::WINDOW_TYPE_KEYGUARD           },
+    { ApiWindowType::TYPE_VOLUME_OVERLAY,  WindowType::WINDOW_TYPE_VOLUME_OVERLAY     },
+    { ApiWindowType::TYPE_NAVIGATION_BAR,  WindowType::WINDOW_TYPE_NAVIGATION_BAR     },
+    { ApiWindowType::TYPE_APP_SUB_WINDOW,  WindowType::WINDOW_TYPE_APP_SUB_WINDOW     },
+};
+enum class ApiWindowMode : uint32_t {
+    UNDEFINED = 1,
+    FULLSCREEN,
+    PRIMARY,
+    SECONDARY,
+    FLOATING
+};
+const std::map<WindowMode, ApiWindowMode> NATIVE_TO_JS_WINDOW_MODE_MAP {
+    { WindowMode::WINDOW_MODE_UNDEFINED,       ApiWindowMode::UNDEFINED  },
+    { WindowMode::WINDOW_MODE_FULLSCREEN,      ApiWindowMode::FULLSCREEN },
+    { WindowMode::WINDOW_MODE_SPLIT_PRIMARY,   ApiWindowMode::PRIMARY    },
+    { WindowMode::WINDOW_MODE_SPLIT_SECONDARY, ApiWindowMode::SECONDARY  },
+    { WindowMode::WINDOW_MODE_FLOATING,        ApiWindowMode::FLOATING   },
+};
+
     NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect);
     NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window);
     bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,

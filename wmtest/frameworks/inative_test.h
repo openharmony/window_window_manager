@@ -25,9 +25,7 @@ using VisitTestFunc = std::function<void(INativeTest *)>;
 
 class INativeTest {
 public:
-    enum {
-        LAST_TIME_FOREVER = 999999999,
-    };
+    static constexpr uint32_t LAST_TIME_FOREVER = 999999999,
 
     static void VisitTests(VisitTestFunc func);
     INativeTest();

@@ -15,9 +15,6 @@
 
 #include "inative_test.h"
 
-#include <algorithm>
-#include <vector>
-
 namespace OHOS::Rosen {
 void INativeTest::VisitTests(VisitTestFunc func)
 {
