@@ -353,7 +353,7 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
             (*iter)->GetWindowId() != node->GetWindowId()) {
             cascadeRect = (*iter)->GetWindowProperty()->GetWindowRect();
             WLOGFI("get current cascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
-                    cascadeRect.posX_, cascadeRect.posY_, cascadeRect.width_, cascadeRect.height_);
+                cascadeRect.posX_, cascadeRect.posY_, cascadeRect.width_, cascadeRect.height_);
             break;
         }
     }
