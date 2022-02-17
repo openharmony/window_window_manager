@@ -227,11 +227,13 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
 
 void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect)
 {
-    winRect.width_ = std::min(displayRect.width_ - winRect.posX_, winRect.width_);
-    winRect.height_ = std::min(displayRect.height_ - winRect.posY_, winRect.height_);
-    bool isVertical = (displayRect.height_ > displayRect.width_) ? true : false;
     WindowType windowType = node->GetWindowType();
     WindowMode windowMode = node->GetWindowMode();
+    bool isVertical = (displayRect.height_ > displayRect.width_) ? true : false;
+    if (!WindowHelper::IsMainFloatingWindow(windowType, windowMode)) {
+        winRect.width_ = std::min(displayRect.width_ - winRect.posX_, winRect.width_);
+        winRect.height_ = std::min(displayRect.height_ - winRect.posY_, winRect.height_);
+    }
     if ((windowMode == WindowMode::WINDOW_MODE_FLOATING) && !WindowHelper::IsSystemWindow(windowType)) {
         if (isVertical) {
             winRect.width_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, winRect.width_);
