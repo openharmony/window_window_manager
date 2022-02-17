@@ -214,11 +214,13 @@ HWTEST_F(ScreenManagerTest, ScreenManager06, Function | MediumTest | Level2)
 {
     sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
     auto modes = screen->GetSupportedModes();
+    auto defaultModeId = screen->GetModeId();
     ASSERT_GT(modes.size(), 0);
     for (uint32_t modeIdx = 0; modeIdx < modes.size(); modeIdx++) {
         ASSERT_EQ(true, screen->SetScreenActiveMode(modeIdx));
         ASSERT_EQ(modeIdx, screen->GetModeId());
     }
+    ASSERT_EQ(true, screen->SetScreenActiveMode(defaultModeId));
 }
 
 /**
@@ -233,7 +235,6 @@ HWTEST_F(ScreenManagerTest, ScreenManager07, Function | MediumTest | Level2)
     defaultoption_.surface_ = utils.psurface_;
     defaultoption_.isForShot_ = false;
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultoption_);
-    ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
     std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
     sptr<Screen> DefaultScreen = screens.front();
     std::vector<ExpandOption> options = {{DefaultScreen->GetId(), 0, 0}, {virtualScreenId, defaultWidth_, 0}};
@@ -255,7 +256,6 @@ HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
     defaultoption_.surface_ = utils.psurface_;
     defaultoption_.isForShot_ = false;
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultoption_);
-    ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
     std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
     sptr<Screen> DefaultScreen = screens.front();
     DisplayId virtualDisplayId = DISPLAY_ID_INVALD;
@@ -265,7 +265,6 @@ HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
             virtualDisplayId = id; // find the display id of virtual screen
         }
     }
-    ASSERT_NE(DISPLAY_ID_INVALD, virtualDisplayId);
     sptr<Window> window = CreateWindowByDisplayId(virtualDisplayId);
     ASSERT_NE(nullptr, window);
     sleep(TEST_SPEEP_S);
