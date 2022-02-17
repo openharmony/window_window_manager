@@ -372,8 +372,7 @@ void DisplayManager::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 
 void DisplayManager::NotifyDisplayChangedEvent(const sptr<DisplayInfo> info, DisplayChangeEvent event)
 {
-    WLOGI("NotifyDisplayChangedEvent event:%{public}u, size:%{public}zu", event, 
-        pImpl_->displayListeners_.size());
+    WLOGI("NotifyDisplayChangedEvent event:%{public}u, size:%{public}zu", event, pImpl_->displayListeners_.size());
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     for (auto& listener : pImpl_->displayListeners_) {
         listener->OnChange(info->id_, event);
