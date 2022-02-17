@@ -33,7 +33,8 @@ public:
     ScreenGroup(const ScreenGroupInfo* info);
     ~ScreenGroup();
     ScreenCombination GetCombination() const;
-    std::vector<ScreenId> GetChildrenIds() const;
+    std::vector<ScreenId> GetChild() const;
+    std::vector<Point> GetChildPosition() const;
 
 private:
     class Impl;
