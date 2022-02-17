@@ -391,6 +391,16 @@ void WindowRoot::NotifyDisplayChange(sptr<AbstractDisplay> abstractDisplay)
     container->UpdateDisplayRect(abstractDisplay->GetWidth(), abstractDisplay->GetHeight());
 }
 
+void WindowRoot::NotifySystemBarTints()
+{
+    WLOGFD("notify current system bar tints");
+    for (auto& it : windowNodeContainerMap_) {
+        if (it.second != nullptr) {
+            it.second->NotifySystemBarTints();
+        }
+    }
+}
+
 WMError WindowRoot::RaiseZOrderForAppWindow(sptr<WindowNode>& node)
 {
     if (node == nullptr) {

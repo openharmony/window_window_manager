@@ -359,6 +359,11 @@ WMError WindowController::SetSystemBarProperty(uint32_t windowId, WindowType typ
     return res;
 }
 
+void WindowController::NotifySystemBarTints()
+{
+    windowRoot_->NotifySystemBarTints();
+}
+
 std::vector<Rect> WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
 {
     std::vector<Rect> avoidArea = windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
