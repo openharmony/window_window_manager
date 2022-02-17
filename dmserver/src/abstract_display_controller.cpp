@@ -185,9 +185,10 @@ void AbstractDisplayController::ProcessExpandScreenDisconnected(
             ", screenId: %{public}" PRIu64"", displayId, abstractDisplay->GetAbstractScreenId());
         // Notify disconnect event to WMS
         DisplayManagerService::GetInstance().NotifyDisplayStateChange(displayId, DisplayStateChangeType::DESTROY);
-        abstractDisplayMap_.erase(iter);
         // Notify disconnect event to DisplayManager
         DisplayManagerAgentController::GetInstance().OnDisplayDestroy(abstractDisplay->GetId());
+        abstractDisplayMap_.erase(iter);
+        break;
     }
 }
 
