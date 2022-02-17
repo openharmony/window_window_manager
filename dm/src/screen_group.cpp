@@ -54,8 +54,13 @@ ScreenCombination ScreenGroup::GetCombination() const
     return pImpl_->combination_;
 }
 
-std::vector<ScreenId> ScreenGroup::GetChildrenIds() const
+std::vector<ScreenId> ScreenGroup::GetChild() const
 {
     return pImpl_->children_;
+}
+
+std::vector<Point> ScreenGroup::GetChildPosition() const
+{
+    return pImpl_->position_;
 }
 } // namespace OHOS::Rosen
