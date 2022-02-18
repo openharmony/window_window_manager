@@ -52,6 +52,11 @@ public:
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
     void NotifySystemBarTints();
 
+    // colorspace, gamut
+    bool IsSupportWideGamut(uint32_t windowId) const;
+    void SetColorSpace(uint32_t windowId, ColorSpace colorSpace);
+    ColorSpace GetColorSpace(uint32_t windowId) const;
+
 private:
     uint32_t GenWindowId();
     void FlushWindowInfo(uint32_t windowId);
