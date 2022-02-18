@@ -211,34 +211,36 @@ void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absS
 void AbstractDisplayController::ProcessDisplayUpdateRotation(sptr<AbstractScreen> absScreen)
 {
     sptr<AbstractDisplay> abstractDisplay = nullptr;
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = abstractDisplayMap_.begin();
-    for (; iter != abstractDisplayMap_.end(); iter++) {
-        abstractDisplay = iter->second;
-        if (abstractDisplay->GetAbstractScreenId() == absScreen->dmsId_) {
-            WLOGFD("find abstract display of the screen. display %{public}" PRIu64", screen %{public}" PRIu64"",
-                abstractDisplay->GetId(), absScreen->dmsId_);
-            break;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto iter = abstractDisplayMap_.begin();
+        for (; iter != abstractDisplayMap_.end(); iter++) {
+            abstractDisplay = iter->second;
+            if (abstractDisplay->GetAbstractScreenId() == absScreen->dmsId_) {
+                WLOGFD("find abstract display of the screen. display %{public}" PRIu64", screen %{public}" PRIu64"",
+                    abstractDisplay->GetId(), absScreen->dmsId_);
+                break;
+            }
         }
-    }
 
-    sptr<AbstractScreenGroup> group = absScreen->GetGroup();
-    if (group == nullptr) {
-        WLOGFE("cannot get screen group");
-        return;
-    }
-    if (iter == abstractDisplayMap_.end()) {
-        if (group->combination_ == ScreenCombination::SCREEN_ALONE
-            || group->combination_ == ScreenCombination::SCREEN_EXPAND) {
-            WLOGFE("cannot find abstract display of the screen %{public}" PRIu64"", absScreen->dmsId_);
+        sptr<AbstractScreenGroup> group = absScreen->GetGroup();
+        if (group == nullptr) {
+            WLOGFE("cannot get screen group");
             return;
-        } else if (group->combination_ == ScreenCombination::SCREEN_MIRROR) {
-            // If the 'absScreen' cannot be found in 'abstractDisplayMap_', it means that the screen is the secondary.
-            WLOGFI("It's the secondary screen of the mirrored.");
-            return;
-        } else {
-            WLOGFE("Unknow combination");
-            return;
+        }
+        if (iter == abstractDisplayMap_.end()) {
+            if (group->combination_ == ScreenCombination::SCREEN_ALONE
+                || group->combination_ == ScreenCombination::SCREEN_EXPAND) {
+                WLOGFE("cannot find abstract display of the screen %{public}" PRIu64"", absScreen->dmsId_);
+                return;
+            } else if (group->combination_ == ScreenCombination::SCREEN_MIRROR) {
+                // If the screen cannot be found in 'abstractDisplayMap_', it means that the screen is the secondary
+                WLOGFI("It's the secondary screen of the mirrored.");
+                return;
+            } else {
+                WLOGFE("Unknow combination");
+                return;
+            }
         }
     }
     if (abstractDisplay->RequestRotation(absScreen->rotation_)) {
