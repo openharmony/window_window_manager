@@ -85,12 +85,28 @@ void WindowLayoutPolicyTile::AddWindowNode(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
-        UpdateForegroundNodeQueue(node);
+        ForegroundNodeQueuePush(node);
         AssignNodePropertyForTileWindows();
         LayoutForegroundNodeQueue();
     } else {
         UpdateWindowNode(node); // currently, update and add do the same process
     }
+}
+
+void WindowLayoutPolicyTile::RemoveWindowNode(sptr<WindowNode>& node)
+{
+    WM_FUNCTION_TRACE();
+    auto type = node->GetWindowType();
+    // affect other windows, trigger off global layout
+    if (avoidTypes_.find(type) != avoidTypes_.end()) {
+        LayoutWindowTree();
+    } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
+        LayoutWindowTree();
+    } else {
+        ForegroundNodeQueueRemove(node);
+    }
+    Rect winRect = node->GetWindowProperty()->GetWindowRect();
+    node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
 }
 
 void WindowLayoutPolicyTile::LayoutForegroundNodeQueue()
@@ -112,30 +128,38 @@ void WindowLayoutPolicyTile::LayoutForegroundNodeQueue()
 void WindowLayoutPolicyTile::InitForegroundNodeQueue()
 {
     foregroundNodes_.clear();
-    lastForegroundNodeId_ = 0;
     for (auto& node : appWindowNode_->children_) {
         if (WindowHelper::IsMainWindow(node->GetWindowType())) {
-            UpdateForegroundNodeQueue(node);
+            ForegroundNodeQueuePush(node);
         }
     }
 }
 
-void WindowLayoutPolicyTile::UpdateForegroundNodeQueue(sptr<WindowNode>& node)
+void WindowLayoutPolicyTile::ForegroundNodeQueuePush(sptr<WindowNode>& node)
 {
     if (node == nullptr) {
         return;
     }
     WLOGFI("add win in tile for win id: %{public}d", node->GetWindowId());
     uint32_t maxTileWinNum = IsVertical() ? MAX_WIN_NUM_VERTICAL : MAX_WIN_NUM_HORIZONTAL;
-    if (foregroundNodes_.size() < maxTileWinNum) {
-        foregroundNodes_.push_back(node);
-        lastForegroundNodeId_ = ((++lastForegroundNodeId_) % maxTileWinNum);
-    } else {
-        WLOGFI("minimize win %{public}d in tile", foregroundNodes_[lastForegroundNodeId_]->GetWindowId());
-        AAFwk::AbilityManagerClient::GetInstance()->
-            MinimizeAbility(foregroundNodes_[lastForegroundNodeId_]->abilityToken_);
-        foregroundNodes_[lastForegroundNodeId_] = node;
-        lastForegroundNodeId_ = ((++lastForegroundNodeId_) % maxTileWinNum);
+    while (foregroundNodes_.size() >= maxTileWinNum) {
+        auto removeNode = foregroundNodes_.front();
+        foregroundNodes_.pop_front();
+        WLOGFI("minimize win %{public}d in tile", removeNode->GetWindowId());
+        AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(removeNode->abilityToken_);
+    }
+    foregroundNodes_.push_back(node);
+}
+
+void WindowLayoutPolicyTile::ForegroundNodeQueueRemove(sptr<WindowNode>& node)
+{
+    if (node == nullptr) {
+        return;
+    }
+    auto iter = std::find(foregroundNodes_.begin(), foregroundNodes_.end(), node);
+    if (iter != foregroundNodes_.end()) {
+        WLOGFI("remove win in tile for win id: %{public}d", node->GetWindowId());
+        foregroundNodes_.erase(iter);
     }
 }
 
@@ -144,26 +168,28 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows()
     // set rect for foreground windows
     int num = foregroundNodes_.size();
     if (num == 1) {
-        WLOGFI("set rect for win id: %{public}d", foregroundNodes_[0]->GetWindowMode());
-        foregroundNodes_[0]->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-        foregroundNodes_[0]->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-        foregroundNodes_[0]->SetWindowRect(singleRect_);
-        foregroundNodes_[0]->hasDecorated_ = true;
+        WLOGFI("set rect for win id: %{public}d", foregroundNodes_.front()->GetWindowMode());
+        foregroundNodes_.front()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        foregroundNodes_.front()->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        foregroundNodes_.front()->SetWindowRect(singleRect_);
+        foregroundNodes_.front()->hasDecorated_ = true;
         WLOGFI("set rect for win id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
-            foregroundNodes_[0]->GetWindowId(),
+            foregroundNodes_.front()->GetWindowId(),
             singleRect_.posX_, singleRect_.posY_, singleRect_.width_, singleRect_.height_);
-    } else {
-        auto& rects = (num == MAX_WIN_NUM_HORIZONTAL) ? tripleRects_ : doubleRects_;
-        for (uint32_t i = 0; i < foregroundNodes_.size(); i++) {
-            foregroundNodes_[(lastForegroundNodeId_ + i) % num]->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-            foregroundNodes_[(lastForegroundNodeId_ + i) % num]->GetWindowToken()->
-                UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-            foregroundNodes_[(lastForegroundNodeId_ + i) % num]->SetWindowRect(rects[i]);
-            foregroundNodes_[(lastForegroundNodeId_ + i) % num]->hasDecorated_ = true;
+    } else if (num <= 3) {
+        auto rit = (num == MAX_WIN_NUM_HORIZONTAL) ? tripleRects_.begin() : doubleRects_.begin();
+        for (auto it : foregroundNodes_) {
+            auto& rect = (*rit);
+            it->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            it->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            it->SetWindowRect(rect);
+            it->hasDecorated_ = true;
             WLOGFI("set rect for qwin id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
-                foregroundNodes_[(lastForegroundNodeId_ + i) % num]->GetWindowId(),
-                rects[i].posX_, rects[i].posY_, rects[i].width_, rects[i].height_);
+                it->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+            rit++;
         }
+    } else {
+        WLOGE("too many window node in tile queue");
     }
 }
 
