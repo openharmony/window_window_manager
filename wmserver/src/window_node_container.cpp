@@ -15,21 +15,21 @@
 
 #include "window_node_container.h"
 
-#include <algorithm>
 #include <ability_manager_client.h>
+#include <algorithm>
 #include <cinttypes>
 
+#include "common_event_manager.h"
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
 #include "window_helper.h"
+#include "window_inner_manager.h"
 #include "window_layout_policy_cascade.h"
 #include "window_layout_policy_tile.h"
 #include "window_manager_agent_controller.h"
-#include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_trace.h"
-#include "common_event_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -177,19 +177,38 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
 bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, bool isAdd)
 {
     WM_FUNCTION_TRACE();
-    if (isAdd) {
-        DisplayManagerServiceInner::GetInstance().UpdateRSTree(displayId_, node->surfaceNode_, true);
-        for (auto& child : node->children_) {
-            if (child->currentVisibility_) {
-                DisplayManagerServiceInner::GetInstance().UpdateRSTree(displayId_, child->surfaceNode_, true);
+    static const bool IsWindowAnimationEnabled = ReadIsWindowAnimationEnabledProperty();
+
+    auto updateRSTreeFunc = [&]() {
+        auto& dms = DisplayManagerServiceInner::GetInstance();
+        if (isAdd) {
+            dms.UpdateRSTree(displayId_, node->surfaceNode_, true);
+            for (auto& child : node->children_) {
+                if (child->currentVisibility_) {
+                    dms.UpdateRSTree(displayId_, child->surfaceNode_, true);
+                }
+            }
+        } else {
+            dms.UpdateRSTree(displayId_, node->surfaceNode_, false);
+            for (auto& child : node->children_) {
+                dms.UpdateRSTree(displayId_, child->surfaceNode_, false);
             }
         }
+    };
+
+    if (IsWindowAnimationEnabled) {
+        // default transition duration: 350ms
+        static const RSAnimationTimingProtocol timingProtocol(350);
+        // default transition curve: EASE OUT
+        static const Rosen::RSAnimationTimingCurve curve = Rosen::RSAnimationTimingCurve::EASE_OUT;
+
+        // add or remove window with transition animation
+        RSNode::Animate(timingProtocol, curve, updateRSTreeFunc);
     } else {
-        DisplayManagerServiceInner::GetInstance().UpdateRSTree(displayId_, node->surfaceNode_, false);
-        for (auto& child : node->children_) {
-            DisplayManagerServiceInner::GetInstance().UpdateRSTree(displayId_, child->surfaceNode_, false);
-        }
+        // add or remove window without animation
+        updateRSTreeFunc();
     }
+
     return true;
 }
 
@@ -1041,5 +1060,17 @@ sptr<WindowNode> WindowNodeContainer::GetAboveAppWindowNode() const
 {
     return aboveAppWindowNode_;
 }
+
+namespace {
+    const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
 }
+
+bool WindowNodeContainer::ReadIsWindowAnimationEnabledProperty()
+{
+    if (access(DISABLE_WINDOW_ANIMATION_PATH, F_OK) == 0) {
+        return false;
+    }
+    return true;
 }
+} // namespace Rosen
+} // namespace OHOS
