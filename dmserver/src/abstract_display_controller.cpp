@@ -129,67 +129,82 @@ void AbstractDisplayController::OnAbstractScreenConnect(sptr<AbstractScreen> abs
 
 void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> absScreen)
 {
-    WLOGI("disconnect screen. id:%{public}" PRIu64"", absScreen->dmsId_);
     if (absScreen == nullptr) {
         WLOGE("the information of the screen is wrong");
         return;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    sptr<AbstractScreenGroup> screenGroup = absScreen->GetGroup();
-    if (screenGroup == nullptr) {
-        WLOGE("the group information of the screen is wrong");
+    WLOGI("disconnect screen. id:%{public}" PRIu64"", absScreen->dmsId_);
+    sptr<AbstractScreenGroup> screenGroup;
+    DisplayId absDisplayId = DISPLAY_ID_INVALD;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        screenGroup = absScreen->GetGroup();
+        if (screenGroup == nullptr) {
+            WLOGE("the group information of the screen is wrong");
+            return;
+        }
+        if (screenGroup->combination_ == ScreenCombination::SCREEN_ALONE
+            || screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR) {
+            absDisplayId = ProcessNormalScreenDisconnected(absScreen, screenGroup);
+        } else if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
+            absDisplayId = ProcessExpandScreenDisconnected(absScreen, screenGroup);
+        } else {
+            WLOGE("support in future. combination:%{public}u", screenGroup->combination_);
+        }
+    }
+    if (absDisplayId == DISPLAY_ID_INVALD) {
+        WLOGE("the displayId of the disconnected expand screen was not found");
         return;
     }
     if (screenGroup->combination_ == ScreenCombination::SCREEN_ALONE
         || screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR) {
-        ProcessNormalScreenDisconnected(absScreen, screenGroup);
+        if (screenGroup->GetChildCount() == 0) {
+            abstractDisplayMap_.erase(absDisplayId);
+            DisplayManagerAgentController::GetInstance().OnDisplayDestroy(absDisplayId);
+        }
     } else if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
-        ProcessExpandScreenDisconnected(absScreen, screenGroup);
+        DisplayManagerService::GetInstance().NotifyDisplayStateChange(
+            absDisplayId, DisplayStateChangeType::DESTROY);
+        DisplayManagerAgentController::GetInstance().OnDisplayDestroy(absDisplayId);
+        abstractDisplayMap_.erase(absDisplayId);
     } else {
         WLOGE("support in future. combination:%{public}u", screenGroup->combination_);
     }
 }
 
-void AbstractDisplayController::ProcessNormalScreenDisconnected(
+DisplayId AbstractDisplayController::ProcessNormalScreenDisconnected(
     sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup)
 {
     WLOGI("normal screen disconnect");
     ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     sptr<AbstractScreen> defaultScreen = abstractScreenController_->GetAbstractScreen(defaultScreenId);
     for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
+        DisplayId displayId = iter->first;
         sptr<AbstractDisplay> abstractDisplay = iter->second;
-        if (abstractDisplay->GetAbstractScreenId() != absScreen->dmsId_) {
-            continue;
-        }
-        abstractDisplay->BindAbstractScreen(defaultScreen);
-        if (screenGroup->GetChildCount() == 0) {
-            abstractDisplayMap_.erase(iter);
-            DisplayManagerAgentController::GetInstance().OnDisplayDestroy(abstractDisplay->GetId());
+        if (abstractDisplay->GetAbstractScreenId() == absScreen->dmsId_) {
+            WLOGI("normal screen disconnect, displayId: %{public}" PRIu64", screenId: %{public}" PRIu64"",
+                displayId, abstractDisplay->GetAbstractScreenId());
+            abstractDisplay->BindAbstractScreen(defaultScreen);
+            return displayId;
         }
     }
+    return DISPLAY_ID_INVALD;
 }
 
-void AbstractDisplayController::ProcessExpandScreenDisconnected(
+DisplayId AbstractDisplayController::ProcessExpandScreenDisconnected(
     sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup)
 {
     WLOGI("expand screen disconnect");
-    ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
-    sptr<AbstractScreen> defaultScreen = abstractScreenController_->GetAbstractScreen(defaultScreenId);
     for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
         DisplayId displayId = iter->first;
         sptr<AbstractDisplay> abstractDisplay = iter->second;
-        if (abstractDisplay->GetAbstractScreenId() != absScreen->dmsId_) {
-            continue;
+        if (abstractDisplay->GetAbstractScreenId() == absScreen->dmsId_) {
+            WLOGI("expand screen disconnect, displayId: %{public}" PRIu64", screenId: %{public}" PRIu64"",
+                displayId, abstractDisplay->GetAbstractScreenId());
+            return displayId;
         }
-        WLOGI("notify wms and dm which expand screen disconnect, displayId: %{public}" PRIu64""
-            ", screenId: %{public}" PRIu64"", displayId, abstractDisplay->GetAbstractScreenId());
-        // Notify disconnect event to WMS
-        DisplayManagerService::GetInstance().NotifyDisplayStateChange(displayId, DisplayStateChangeType::DESTROY);
-        // Notify disconnect event to DisplayManager
-        DisplayManagerAgentController::GetInstance().OnDisplayDestroy(abstractDisplay->GetId());
-        abstractDisplayMap_.erase(iter);
-        break;
     }
+    return DISPLAY_ID_INVALD;
 }
 
 void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absScreen, DisplayChangeEvent event)
