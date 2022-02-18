@@ -85,7 +85,7 @@ void WindowLayoutPolicyTile::AddWindowNode(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
-        ForegroundNodeQueuePush(node);
+        ForegroundNodeQueuePushBack(node);
         AssignNodePropertyForTileWindows();
         LayoutForegroundNodeQueue();
     } else {
@@ -100,10 +100,10 @@ void WindowLayoutPolicyTile::RemoveWindowNode(sptr<WindowNode>& node)
     // affect other windows, trigger off global layout
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
         LayoutWindowTree();
-    } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
-        LayoutWindowTree();
     } else {
         ForegroundNodeQueueRemove(node);
+        AssignNodePropertyForTileWindows();
+        LayoutForegroundNodeQueue();
     }
     Rect winRect = node->GetWindowProperty()->GetWindowRect();
     node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
@@ -130,12 +130,12 @@ void WindowLayoutPolicyTile::InitForegroundNodeQueue()
     foregroundNodes_.clear();
     for (auto& node : appWindowNode_->children_) {
         if (WindowHelper::IsMainWindow(node->GetWindowType())) {
-            ForegroundNodeQueuePush(node);
+            ForegroundNodeQueuePushBack(node);
         }
     }
 }
 
-void WindowLayoutPolicyTile::ForegroundNodeQueuePush(sptr<WindowNode>& node)
+void WindowLayoutPolicyTile::ForegroundNodeQueuePushBack(sptr<WindowNode>& node)
 {
     if (node == nullptr) {
         return;
@@ -145,8 +145,10 @@ void WindowLayoutPolicyTile::ForegroundNodeQueuePush(sptr<WindowNode>& node)
     while (foregroundNodes_.size() >= maxTileWinNum) {
         auto removeNode = foregroundNodes_.front();
         foregroundNodes_.pop_front();
-        WLOGFI("minimize win %{public}d in tile", removeNode->GetWindowId());
-        AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(removeNode->abilityToken_);
+        if (removeNode->abilityToken_ != nullptr) {
+            WLOGFI("minimize win %{public}d in tile", removeNode->GetWindowId());
+            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(removeNode->abilityToken_);
+        }
     }
     foregroundNodes_.push_back(node);
 }
@@ -176,7 +178,7 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows()
         WLOGFI("set rect for win id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
             foregroundNodes_.front()->GetWindowId(),
             singleRect_.posX_, singleRect_.posY_, singleRect_.width_, singleRect_.height_);
-    } else if (num <= 3) {
+    } else if (num <= MAX_WIN_NUM_HORIZONTAL) {
         auto rit = (num == MAX_WIN_NUM_HORIZONTAL) ? tripleRects_.begin() : doubleRects_.begin();
         for (auto it : foregroundNodes_) {
             auto& rect = (*rit);
