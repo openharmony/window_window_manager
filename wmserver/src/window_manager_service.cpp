@@ -303,19 +303,26 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
 
 bool WindowManagerService::IsSupportWideGamut(uint32_t windowId)
 {
-    bool ret = true;
-    WLOGFI("IsSupportWideGamut %{public}d", ret);
+    WM_SCOPED_TRACE("wms:IsSupportWideGamut");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    bool ret = windowController_->IsSupportWideGamut(windowId);
+    WLOGFI("IsSupportWideGamut windowId %{public}u, ret %{public}d", windowId, ret);
     return ret;
 }
 
 void WindowManagerService::SetColorSpace(uint32_t windowId, ColorSpace colorSpace)
 {
     WLOGFI("SetColorSpace windowId %{public}u, ColorSpace %{public}u", windowId, colorSpace);
+    WM_SCOPED_TRACE("wms:SetColorSpace(%u)", colorSpace);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    windowController_->SetColorSpace(windowId, colorSpace);
 }
 
 ColorSpace WindowManagerService::GetColorSpace(uint32_t windowId)
 {
-    ColorSpace colorSpace = ColorSpace::COLOR_SPACE_DEFAULT;
+    WM_SCOPED_TRACE("wms:GetColorSpace");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    ColorSpace colorSpace = windowController_->GetColorSpace(windowId);
     WLOGFI("GetColorSpace windowId %{public}u, ColorSpace %{public}u", windowId, colorSpace);
     return colorSpace;
 }
