@@ -209,6 +209,10 @@ NativeValue* OnRegisterScreenMangerCallback(NativeEngine& engine, NativeCallback
         return engine.CreateUndefined();
     }
     NativeValue* value = info.argv[INDEX_ONE];
+    if (value == nullptr) {
+        WLOGFI("JsScreenManager::OnRegisterScreenMangerCallback info->argv[1] is nullptr");
+        return engine.CreateUndefined();
+    }
     if (!value->IsCallable()) {
         WLOGFI("JsScreenManager::OnRegisterScreenMangerCallback info->argv[1] is not callable");
         return engine.CreateUndefined();
@@ -235,6 +239,10 @@ NativeValue* OnUnregisterScreenManagerCallback(NativeEngine& engine, NativeCallb
         UnregisterAllScreenListenerWithType(cbType);
     } else {
         NativeValue* value = info.argv[INDEX_ONE];
+        if (value == nullptr) {
+            WLOGFI("JsScreenManager::OnUnregisterScreenManagerCallback info->argv[1] is nullptr");
+            return engine.CreateUndefined();
+        }
         if (!value->IsCallable()) {
             WLOGFI("JsScreenManager::OnUnregisterScreenManagerCallback info->argv[1] is not callable");
             return engine.CreateUndefined();

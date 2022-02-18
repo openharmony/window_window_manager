@@ -150,6 +150,8 @@ declare namespace screen {
     ADD_TO_GROUP = 0,
     REMOVE_FROM_GROUP = 1,
     CHANGE_GROUP = 2,
+    UPDATE_ROTATION = 3,
+    CHANGE_MODE = 4,
   }
 
   /**
