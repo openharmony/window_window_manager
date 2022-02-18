@@ -752,7 +752,7 @@ void AbstractScreenController::DumpScreenGroupInfo() const
         std::string screenType = "UNDEFINE";
         NodeId nodeId = (screenGroup->rsDisplayNode_ == nullptr) ? 0 : screenGroup->rsDisplayNode_->GetId();
         WLOGI("%{public}10s %{public}20" PRIu64" %{public}20" PRIu64" %{public}20" PRIu64" %{public}10s %{public}20"
-            PRIu64" %{public}10s %{public}20" PRIu64" ", isGroup.c_str(), screenGroup->dmsId_,screenGroup->rsId_,
+            PRIu64" %{public}10s %{public}20" PRIu64" ", isGroup.c_str(), screenGroup->dmsId_, screenGroup->rsId_,
             screenGroup->groupDmsId_, screenType.c_str(), nodeId,
             isMirrored.c_str(), screenGroup->rSDisplayNodeConfig_.mirrorNodeId);
         auto childrenScreen = screenGroup->GetChildren();
@@ -769,7 +769,7 @@ void AbstractScreenController::DumpScreenGroupInfo() const
             isMirrored = screen->rSDisplayNodeConfig_.isMirrored ? "true" : "false";
             nodeId = (screen->rsDisplayNode_ == nullptr) ? 0 : screen->rsDisplayNode_->GetId();
             WLOGI("%{public}10s %{public}20" PRIu64" %{public}20" PRIu64" %{public}20" PRIu64" %{public}10s %{public}20"
-                PRIu64" %{public}10s %{public}20" PRIu64" ", isGroup.c_str(), screen->dmsId_,screen->rsId_,
+                PRIu64" %{public}10s %{public}20" PRIu64" ", isGroup.c_str(), screen->dmsId_, screen->rsId_,
                 screen->groupDmsId_, screenType.c_str(), nodeId,
                 isMirrored.c_str(), screen->rSDisplayNodeConfig_.mirrorNodeId);
         }
