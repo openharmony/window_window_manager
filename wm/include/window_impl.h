@@ -185,8 +185,6 @@ private:
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_; // give up when context offer getToken
     std::shared_ptr<AbilityRuntime::Context> context_;
     std::recursive_mutex mutex_;
-    const float STATUS_BAR_RATIO = 0.07;
-    const float NAVIGATION_BAR_RATIO = 0.07;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
 
