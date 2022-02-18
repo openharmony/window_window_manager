@@ -48,7 +48,7 @@ private:
     void AssignNodePropertyForTileWindows();
     void LayoutForegroundNodeQueue();
     void InitForegroundNodeQueue();
-    void ForegroundNodeQueuePush(sptr<WindowNode>& node);
+    void ForegroundNodeQueuePushBack(sptr<WindowNode>& node);
     void ForegroundNodeQueueRemove(sptr<WindowNode>& node);
 };
 }
