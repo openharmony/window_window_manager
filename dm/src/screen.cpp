@@ -29,6 +29,7 @@ friend class Screen;
 public:
     Impl() = default;
     ~Impl() = default;
+    void UpdateScreen(sptr<ScreenInfo> info);
 
     ScreenId id_ { SCREEN_ID_INVALID };
     uint32_t virtualWidth_ { 0 };
@@ -40,6 +41,22 @@ public:
     std::vector<sptr<SupportedScreenModes>> modes_ {};
     Rotation rotation_ { Rotation::ROTATION_0 };
 };
+
+void Screen::Impl::UpdateScreen(sptr<ScreenInfo> info)
+{
+    if (info == nullptr) {
+        WLOGFE("info is nullptr.");
+        return;
+    }
+    virtualWidth_ = info->virtualWidth_;
+    virtualHeight_ = info->virtualHeight_;
+    virtualPixelRatio_ = info->virtualPixelRatio_;
+    parent_ = info->parent_;
+    canHasChild_ = info->canHasChild_;
+    modeId_ = info->modeId_;
+    modes_ = info->modes_;
+    rotation_ = info->rotation_;
+}
 
 Screen::Screen(const ScreenInfo* info)
     : pImpl_(new Impl())
@@ -56,6 +73,7 @@ Screen::Screen(const ScreenInfo* info)
     pImpl_->canHasChild_ = info->canHasChild_;
     pImpl_->modeId_ = info->modeId_;
     pImpl_->modes_ = info->modes_;
+    pImpl_->rotation_ = info->rotation_;
 }
 
 Screen::~Screen()
@@ -64,6 +82,8 @@ Screen::~Screen()
 
 bool Screen::IsGroup() const
 {
+    sptr<ScreenInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetScreenInfo(pImpl_->id_);
+    pImpl_->UpdateScreen(info);
     return pImpl_->canHasChild_;
 }
 
@@ -74,6 +94,8 @@ ScreenId Screen::GetId() const
 
 uint32_t Screen::GetWidth() const
 {
+    sptr<ScreenInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetScreenInfo(pImpl_->id_);
+    pImpl_->UpdateScreen(info);
     auto modeId = pImpl_->modeId_;
     auto modes = pImpl_->modes_;
     if (modeId < 0 || modeId >= modes.size()) {
@@ -84,6 +106,8 @@ uint32_t Screen::GetWidth() const
 
 uint32_t Screen::GetHeight() const
 {
+    sptr<ScreenInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetScreenInfo(pImpl_->id_);
+    pImpl_->UpdateScreen(info);
     auto modeId = pImpl_->modeId_;
     auto modes = pImpl_->modes_;
     if (modeId < 0 || modeId >= modes.size()) {
@@ -94,21 +118,29 @@ uint32_t Screen::GetHeight() const
 
 uint32_t Screen::GetVirtualWidth() const
 {
+    sptr<ScreenInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetScreenInfo(pImpl_->id_);
+    pImpl_->UpdateScreen(info);
     return pImpl_->virtualWidth_;
 }
 
 uint32_t Screen::GetVirtualHeight() const
 {
+    sptr<ScreenInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetScreenInfo(pImpl_->id_);
+    pImpl_->UpdateScreen(info);
     return pImpl_->virtualHeight_;
 }
 
 float Screen::GetVirtualPixelRatio() const
 {
+    sptr<ScreenInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetScreenInfo(pImpl_->id_);
+    pImpl_->UpdateScreen(info);
     return pImpl_->virtualPixelRatio_;
 }
 
 Rotation Screen::GetRotation()
 {
+    sptr<ScreenInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetScreenInfo(pImpl_->id_);
+    pImpl_->UpdateScreen(info);
     return pImpl_->rotation_;
 }
 
