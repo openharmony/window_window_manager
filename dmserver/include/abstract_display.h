@@ -51,6 +51,7 @@ public:
     void SetFreshRate(uint32_t freshRate);
     void SetVirtualPixelRatio(float virtualPixelRatio);
     bool RequestRotation(Rotation rotation);
+    Rotation GetRotation();
 
 private:
     DisplayId id_ { DISPLAY_ID_INVALD };
