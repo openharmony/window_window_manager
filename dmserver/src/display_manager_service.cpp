@@ -102,6 +102,7 @@ DisplayInfo DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
     displayInfo.height_ = display->GetHeight();
     displayInfo.freshRate_ = display->GetFreshRate();
     displayInfo.screenId_ = display->GetAbstractScreenId();
+    displayInfo.rotation_ = display->GetRotation();
     return displayInfo;
 }
 

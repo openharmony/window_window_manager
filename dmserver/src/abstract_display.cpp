@@ -107,6 +107,11 @@ bool AbstractDisplay::RequestRotation(Rotation rotation)
     return true;
 }
 
+Rotation AbstractDisplay::GetRotation()
+{
+    return rotation_;
+}
+
 bool AbstractDisplay::BindAbstractScreen(ScreenId dmsScreenId)
 {
     sptr<AbstractScreenController> screenController
