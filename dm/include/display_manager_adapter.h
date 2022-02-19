@@ -67,6 +67,8 @@ public:
     virtual void NotifyDisplayEvent(DisplayEvent event);
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     virtual void Clear();
+    virtual DisplayInfo GetDisplayInfo(DisplayId displayId);
+    virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
     virtual sptr<Screen> GetScreenById(ScreenId screenId);
     virtual sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
     virtual std::vector<sptr<Screen>> GetAllScreens();
