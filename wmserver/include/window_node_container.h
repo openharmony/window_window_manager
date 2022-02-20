@@ -18,7 +18,7 @@
 
 #include <ui/rs_display_node.h>
 #include "avoid_area_controller.h"
-#include "window_manager_record.h"
+#include "window_manager_recorder.h"
 #include "window_layout_policy.h"
 #include "window_manager.h"
 #include "window_node.h"
@@ -94,6 +94,8 @@ private:
     bool IsFullImmersiveNode(sptr<WindowNode> node) const;
     bool IsSplitImmersiveNode(sptr<WindowNode> node) const;
     void RecordWindowHistory(const sptr<WindowNode>& node, RecordReason reason);
+    static bool ReadIsWindowAnimationEnabledProperty();
+    void RecordCurrentWindowTree();
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
@@ -125,9 +127,8 @@ private:
     std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
     const int32_t WINDOW_TYPE_RAISED_INPUT_METHOD = 115;
-    sptr<WindowActivityRecorder> wmRecorderPtr_;
-
+    sptr<WindowManagerRecorder> wmRecorderPtr_;
 };
-}
-}
+} // namespace Rosen
+} // namespace OHOS
 #endif // OHOS_ROSEN_WINDOW_NODE_CONTAINER_H

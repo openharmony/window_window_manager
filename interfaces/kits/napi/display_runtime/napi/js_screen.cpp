@@ -43,6 +43,10 @@ void JsScreen::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
     WLOGFI("JsScreen::Finalizer is called");
     auto jsScreen = std::unique_ptr<JsScreen>(static_cast<JsScreen*>(data));
+    if (jsScreen == nullptr) {
+        WLOGFE("jsScreen::Finalizer jsScreen is null");
+        return;
+    }
     sptr<Screen> screen = jsScreen->screen_;
     if (screen == nullptr) {
         WLOGFE("JsScreen::Finalizer screen is null");

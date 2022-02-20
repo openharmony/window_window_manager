@@ -27,7 +27,6 @@ config("libwms_config") {
     "//foundation/windowmanager/utils/include",
     "//foundation/windowmanager/dm/include",
     "//foundation/windowmanager/dmserver/include",
-    "//utils/native/base/include",
   ]
 
   if ("${product_name}" == "rk3566" || "${product_name}" == "rk3568" ||
@@ -68,7 +67,7 @@ ohos_shared_library("libwms") {
     "src/window_snapshot/snapshot_proxy.cpp",
     "src/window_snapshot/snapshot_stub.cpp",
     "src/window_zorder_policy.cpp",
-    "src/window_manager_record.cpp"
+    "src/window_manager_recorder.cpp"
   ]
 
   configs = [ ":libwms_config" ]

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,9 +36,9 @@ WindowManagerDebugCommand::WindowManagerDebugCommand(int argc, char *argv[])
 {
     opterr = 0;
     argc_ = argc;
-    argv_ = argv;;
-    cmd_ = argc < MIN_ARG_NUMBER ? "help" : argv[1]; // 1 command of cmd line
-    for (int i = 2; i < argc; i++) {
+    argv_ = argv;
+    cmd_ = argc < MIN_ARG_NUMBER ? "help" : argv[1]; // 1 first arg command of cmd line
+    for (int i = MIN_ARG_NUMBER; i < argc; i++) {
         args_.push_back(argv[i]);
     }
     if (Init() != WMError::WM_OK) {
@@ -143,39 +143,28 @@ WMError WindowManagerDebugCommand::RunDumpCommand()
 void WindowManagerDebugCommand::DumpResults(WindowDumpType dumpType)
 {
     std::vector<std::string> dumpResults;
-    if (SingletonContainer::Get<WindowManager>().DumpWindowTree(dumpResults, dumpType) != WMError::WM_OK) {
-        switch (dumpType) {
-            case WindowDumpType::ALL: {
-                result_ = DUMP_ALL_FAIL_MSG;
-                break;
-            }
-            case WindowDumpType::TREE: {
-                result_ = DUMP_TREE_FAIL_MSG;
-                break;
-            }
-            case WindowDumpType::CLEAR: {
-                result_ = CLEAR_DUMP_INFO_FAIL_MSG;
-                break;
-            }
-        }
-    } else {
+    WMError ret = SingletonContainer::Get<WindowManager>().DumpWindowTree(dumpResults, dumpType);
+    if (ret == WMError::WM_OK) {
         for (auto res : dumpResults) {
             result_ += res + "\n";
         }
-        switch (dumpType) {
+    }
+    switch (dumpType) {
             case WindowDumpType::ALL: {
-                result_ += DUMP_ALL_OK_MSG + "\n";
+                result_ += (ret == WMError::WM_OK) ? DUMP_ALL_OK_MSG : DUMP_ALL_FAIL_MSG;
                 break;
             }
             case WindowDumpType::TREE: {
-                result_ += DUMP_TREE_OK_MSG + "\n";
+                result_ += (ret == WMError::WM_OK) ? DUMP_TREE_OK_MSG : DUMP_TREE_FAIL_MSG;
                 break;
             }
             case WindowDumpType::CLEAR: {
-                result_ += CLEAR_DUMP_INFO_OK_MSG + "\n";
+                result_ += (ret == WMError::WM_OK) ? CLEAR_DUMP_INFO_OK_MSG : CLEAR_DUMP_INFO_FAIL_MSG;
                 break;
             }
-        }
+            default: {
+                result_ = " ";
+            }
     }
 }
 
@@ -198,6 +187,5 @@ std::string WindowManagerDebugCommand::GetUnknownOptionMsg() const
 
     return result;
 }
-
 } // namespace Rosen
 } // namespace OHOS

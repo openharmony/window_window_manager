@@ -53,6 +53,11 @@ public:
     void NotifySystemBarTints();
     WMError DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
 
+    // colorspace, gamut
+    bool IsSupportWideGamut(uint32_t windowId) const;
+    void SetColorSpace(uint32_t windowId, ColorSpace colorSpace);
+    ColorSpace GetColorSpace(uint32_t windowId) const;
+
 private:
     uint32_t GenWindowId();
     void FlushWindowInfo(uint32_t windowId);
