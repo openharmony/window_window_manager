@@ -17,6 +17,7 @@
 #include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
 #include "window_helper.h"
+#include "wm_common.h"
 #include "wm_trace.h"
 
 namespace OHOS {
@@ -442,6 +443,36 @@ WMError WindowController::SetWindowLayoutMode(DisplayId displayId, WindowLayoutM
 WMError WindowController::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
 {
     return windowRoot_->DumpWindowTree(windowTreeInfos, type);
+}
+
+bool WindowController::IsSupportWideGamut(uint32_t windowId) const
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return false;
+    }
+    return node->IsSupportWideGamut();
+}
+
+void WindowController::SetColorSpace(uint32_t windowId, ColorSpace colorSpace)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return;
+    }
+    node->SetColorSpace(colorSpace);
+}
+
+ColorSpace WindowController::GetColorSpace(uint32_t windowId) const
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return ColorSpace::COLOR_SPACE_DEFAULT;
+    }
+    return node->GetColorSpace();
 }
 }
 }

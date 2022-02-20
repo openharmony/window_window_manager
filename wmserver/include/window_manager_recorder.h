@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_MANAGER_RECORD_H
-#define OHOS_ROSEN_WINDOW_MANAGER_RECORD_H
+#ifndef OHOS_ROSEN_WINDOW_MANAGER_RECORDER_H
+#define OHOS_ROSEN_WINDOW_MANAGER_RECORDER_H
 
 #include <refbase.h>
 #include "wm_common.h"
@@ -28,7 +28,7 @@ enum class RecordReason : uint32_t {
     UPDATE_WINDOW,
     REMOVE_WINDOW,
     RAISE_WINDOW,
-    LAYOUT_WINDOW,
+    SWITCH_LAYOUT,
     OTHERS,
 };
 
@@ -43,10 +43,10 @@ struct WindowManagerRecordInfo {
     struct tm recordTime = {0};
 };
 
-class WindowActivityRecorder : public RefBase {
+class WindowManagerRecorder : public RefBase {
 public:
-    WindowActivityRecorder() = default;
-    ~WindowActivityRecorder() = default;
+    WindowManagerRecorder() = default;
+    ~WindowManagerRecorder() = default;
 
     void AddNodeRecord(WindowManagerRecordInfo record);
     void AddTreeRecord(const std::vector<sptr<WindowNode>> &windowNodes);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,12 @@
 #ifndef WINDO_MANAGER_DEBUG_COMMAND_H
 #define WINDO_MANAGER_DEBUG_COMMAND_H
 
-#include "window_manager.h"
 #include <functional>
 #include <map>
 #include <string>
 #include <vector>
+
+#include "window_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -37,18 +38,17 @@ const std::string HELP_MSG_DUMP = "usage: wmdebug dump [<options>]\n"
                                   "  -t, --tree                   dump current window tree\n"
                                   "  -c, --clear                  clear all history info of window manager";
 
-const std::string HELP_MSG_NO_COMMAND = "error: you must specify an command name with 'help' or 'dump'.";
-const std::string HELP_MSG_NO_DUMP_OPTION = "error: you must specify an option with '-a' or '-h' or '-t' or '-c'.";
+const std::string HELP_MSG_NO_COMMAND = "error: you must specify an command name with 'help' or 'dump'.\n";
+const std::string HELP_MSG_NO_DUMP_OPTION = "error: you must specify an option with '-a' or '-h' or '-t' or '-c'.\n";
 
-const std::string CLEAR_DUMP_INFO_OK_MSG = "wmdebug: clear history of window manager successfully.";
-const std::string CLEAR_DUMP_INFO_FAIL_MSG = "error: failed to clear history of window manager.";
+const std::string CLEAR_DUMP_INFO_OK_MSG = "wmdebug: clear history of window manager successfully.\n";
+const std::string CLEAR_DUMP_INFO_FAIL_MSG = "error: failed to clear history of window manager.\n";
 
-const std::string DUMP_ALL_OK_MSG = "wmdebug: dump all history info of window manager successfully.";
-const std::string DUMP_ALL_FAIL_MSG = "error: failed to dump all history info of window manager.";
+const std::string DUMP_ALL_OK_MSG = "wmdebug: dump all history info of window manager successfully.\n";
+const std::string DUMP_ALL_FAIL_MSG = "error: failed to dump all history info of window manager.\n";
 
-const std::string DUMP_TREE_OK_MSG = "wmdebug: dump current window tree successfully.";
-const std::string DUMP_TREE_FAIL_MSG = "error: failed to current window tree.";
-
+const std::string DUMP_TREE_OK_MSG = "wmdebug: dump current window tree successfully.\n";
+const std::string DUMP_TREE_FAIL_MSG = "error: failed to current window tree.\n";
 }  // namespace
 
 class WindowManagerDebugCommand {
@@ -77,4 +77,4 @@ private:
 }  // namespace Rosen
 }  // namespace OHOS
 
-#endif  // BASE_NOTIFICATION_CES_STANDARD_CESFWK_TOOLS_CEM_INCLUDE_COMMON_EVENT_COMMAND_H
+#endif  // WINDO_MANAGER_DEBUG_COMMAND_H

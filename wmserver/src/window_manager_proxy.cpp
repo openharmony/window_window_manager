@@ -519,7 +519,7 @@ void WindowManagerProxy::SetColorSpace(uint32_t windowId, ColorSpace colorSpace)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -626,9 +626,10 @@ WMError WindowManagerProxy::DumpWindowTree(std::vector<std::string> &windowTreeI
         WLOGFE("send request failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
-    if (ret != 0) {
+    WMError ret = static_cast<WMError>(reply.ReadInt32());
+    if (ret != WMError::WM_OK) {
         WLOGFE("dump window failed");
+        return ret;
     }
     int32_t infoNum = reply.ReadInt32();
     for (int i = 0; i < infoNum; ++i) {

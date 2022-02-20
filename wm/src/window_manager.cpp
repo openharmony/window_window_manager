@@ -14,6 +14,7 @@
  */
 
 #include "foundation/windowmanager/interfaces/innerkits/wm/window_manager.h"
+
 #include <algorithm>
 #include <cinttypes>
 

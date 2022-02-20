@@ -378,6 +378,38 @@ DMError DisplayManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<Scr
     return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId);
 }
 
+sptr<ScreenInfo> DisplayManagerAdapter::GetScreenInfo(ScreenId screenId)
+{
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screen id is invalid");
+        return nullptr;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!InitDMSProxyLocked()) {
+        WLOGFE("InitDMSProxyLocked failed!");
+        return nullptr;
+    }
+    sptr<ScreenInfo> screenInfo = displayManagerServiceProxy_->GetScreenInfoById(screenId);
+    if (screenInfo == nullptr) {
+        WLOGFE("screenInfo is null");
+    }
+    return screenInfo;
+}
+
+DisplayInfo DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
+{
+    if (displayId == DISPLAY_ID_INVALD) {
+        WLOGFE("screen id is invalid");
+        return DisplayInfo();
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!InitDMSProxyLocked()) {
+        WLOGFE("InitDMSProxyLocked failed!");
+        return DisplayInfo();
+    }
+    return displayManagerServiceProxy_->GetDisplayInfoById(displayId);
+}
+
 sptr<Screen> DisplayManagerAdapter::GetScreenById(ScreenId screenId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);

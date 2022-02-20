@@ -15,28 +15,29 @@
 
 #include "window_node_container.h"
 
-#include <algorithm>
 #include <ability_manager_client.h>
+#include <algorithm>
 #include <cinttypes>
 
+#include "common_event_manager.h"
 #include "datetime_ex.h"
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
 #include "window_helper.h"
+#include "window_inner_manager.h"
 #include "window_layout_policy_cascade.h"
 #include "window_layout_policy_tile.h"
 #include "window_manager_agent_controller.h"
-#include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_trace.h"
-#include "common_event_manager.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowNodeContainer"};
     constexpr int WINDOW_NAME_MAX_LENGTH = 10;
+    const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
 }
 
 WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height) : displayId_(displayId)
@@ -57,7 +58,7 @@ WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, ui
     layoutPolicy_->Launch();
     UpdateAvoidAreaFunc func = std::bind(&WindowNodeContainer::OnAvoidAreaChange, this, std::placeholders::_1);
     avoidController_ = new AvoidAreaController(func);
-    wmRecorderPtr_ = new WindowActivityRecorder();
+    wmRecorderPtr_ = new WindowManagerRecorder();
 }
 
 WindowNodeContainer::~WindowNodeContainer()
@@ -133,7 +134,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     } else {
         NotifyIfSystemBarTintChanged();
     }
-    // DumpScreenWindowTree();
+    DumpScreenWindowTree();
     RecordWindowHistory(node, RecordReason::ADD_WINDOW);
     UpdateWindowStatus(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     WLOGFI("AddWindowNode windowId: %{public}d end", node->GetWindowId());
@@ -156,7 +157,7 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
     } else {
         NotifyIfSystemBarTintChanged();
     }
-    // DumpScreenWindowTree();
+    DumpScreenWindowTree();
     RecordWindowHistory(node, RecordReason::UPDATE_WINDOW);
     WLOGFI("UpdateWindowNode windowId: %{public}d end", node->GetWindowId());
     return WMError::WM_OK;
@@ -181,19 +182,38 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
 bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, bool isAdd)
 {
     WM_FUNCTION_TRACE();
-    if (isAdd) {
-        DisplayManagerServiceInner::GetInstance().UpdateRSTree(displayId_, node->surfaceNode_, true);
-        for (auto& child : node->children_) {
-            if (child->currentVisibility_) {
-                DisplayManagerServiceInner::GetInstance().UpdateRSTree(displayId_, child->surfaceNode_, true);
+    static const bool IsWindowAnimationEnabled = ReadIsWindowAnimationEnabledProperty();
+
+    auto updateRSTreeFunc = [&]() {
+        auto& dms = DisplayManagerServiceInner::GetInstance();
+        if (isAdd) {
+            dms.UpdateRSTree(displayId_, node->surfaceNode_, true);
+            for (auto& child : node->children_) {
+                if (child->currentVisibility_) {
+                    dms.UpdateRSTree(displayId_, child->surfaceNode_, true);
+                }
+            }
+        } else {
+            dms.UpdateRSTree(displayId_, node->surfaceNode_, false);
+            for (auto& child : node->children_) {
+                dms.UpdateRSTree(displayId_, child->surfaceNode_, false);
             }
         }
+    };
+
+    if (IsWindowAnimationEnabled) {
+        // default transition duration: 350ms
+        static const RSAnimationTimingProtocol timingProtocol(350);
+        // default transition curve: EASE OUT
+        static const Rosen::RSAnimationTimingCurve curve = Rosen::RSAnimationTimingCurve::EASE_OUT;
+
+        // add or remove window with transition animation
+        RSNode::Animate(timingProtocol, curve, updateRSTreeFunc);
     } else {
-        DisplayManagerServiceInner::GetInstance().UpdateRSTree(displayId_, node->surfaceNode_, false);
-        for (auto& child : node->children_) {
-            DisplayManagerServiceInner::GetInstance().UpdateRSTree(displayId_, child->surfaceNode_, false);
-        }
+        // add or remove window without animation
+        updateRSTreeFunc();
     }
+
     return true;
 }
 
@@ -260,7 +280,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     } else {
         NotifyIfSystemBarTintChanged();
     }
-    // DumpScreenWindowTree();
+    DumpScreenWindowTree();
     RecordWindowHistory(node, RecordReason::REMOVE_WINDOW);
     UpdateWindowStatus(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     WLOGFI("RemoveWindowNode windowId: %{public}d end", node->GetWindowId());
@@ -759,7 +779,7 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
     }
     AssignZOrder();
     WLOGFI("RaiseZOrderForAppWindow finished");
-    // DumpScreenWindowTree();
+    DumpScreenWindowTree();
     RecordWindowHistory(node, RecordReason::RAISE_WINDOW);
     return WMError::WM_OK;
 }
@@ -978,8 +998,8 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, bool r
         layoutPolicy_->Clean();
         layoutPolicy_ = layoutPolicys_[dstMode];
         layoutPolicy_->Launch();
-        // DumpScreenWindowTree();
-        // RecordWindowHistory(node, RecordReason::LAYOUT);
+        DumpScreenWindowTree();
+        RecordWindowHistory(nullptr, RecordReason::SWITCH_LAYOUT);
     } else {
         WLOGFI("Curret layout mode is allready: %{public}d", static_cast<uint32_t>(dstMode));
     }
@@ -990,8 +1010,8 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, bool r
             SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, displayId_);
         }
         layoutPolicy_->Reorder();
-        // RecordWindowHistory(node, RecordReason::LAYOUT);
-        // DumpScreenWindowTree();
+        RecordWindowHistory(nullptr, RecordReason::SWITCH_LAYOUT);
+        DumpScreenWindowTree();
     }
     return WMError::WM_OK;
 }
@@ -1050,8 +1070,20 @@ sptr<WindowNode> WindowNodeContainer::GetAboveAppWindowNode() const
     return aboveAppWindowNode_;
 }
 
+bool WindowNodeContainer::ReadIsWindowAnimationEnabledProperty()
+{
+    if (access(DISABLE_WINDOW_ANIMATION_PATH, F_OK) == 0) {
+        return false;
+    }
+    return true;
+}
+
 void WindowNodeContainer::RecordWindowHistory(const sptr<WindowNode>& node, RecordReason reason)
 {
+    if (node == nullptr) {
+        RecordCurrentWindowTree();
+        return;
+    }
     WindowManagerRecordInfo record;
     record.id = node->GetWindowId();
     record.name = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
@@ -1067,10 +1099,15 @@ void WindowNodeContainer::RecordWindowHistory(const sptr<WindowNode>& node, Reco
     }
     wmRecorderPtr_->AddNodeRecord(record);
     if (reason != RecordReason::OTHERS) {
-        std::vector<sptr<WindowNode>> windowNodes;
-        TraverseContainer(windowNodes);
-        wmRecorderPtr_->AddTreeRecord(windowNodes);
+        RecordCurrentWindowTree();
     }
+}
+
+void WindowNodeContainer::RecordCurrentWindowTree()
+{
+    std::vector<sptr<WindowNode>> windowNodes;
+    TraverseContainer(windowNodes);
+    wmRecorderPtr_->AddTreeRecord(windowNodes);
 }
 
 void WindowNodeContainer::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
@@ -1094,5 +1131,5 @@ void WindowNodeContainer::DumpWindowTree(std::vector<std::string> &windowTreeInf
         }
     }
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

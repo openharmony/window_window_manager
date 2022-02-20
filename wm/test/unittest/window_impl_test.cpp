@@ -718,6 +718,63 @@ HWTEST_F(WindowImplTest, Minimize02, Function | SmallTest | Level3)
     window->Minimize();
     ASSERT_TRUE(window->GetShowState());
 }
+
+/**
+ * @tc.name: IsSupportWideGamut01
+ * @tc.desc: IsSupportWideGamut
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, IsSupportWideGamut01, Function | SmallTest | Level3)
+{
+    auto option = new WindowOption();
+    option->SetWindowName("WindowImplTest_IsSupportWideGamut01");
+    auto window = new WindowImpl(option);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    window->Create("");
+    EXPECT_CALL(m->Mock(), IsSupportWideGamut(_)).Times(1).WillOnce(Return(true));
+    window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_TRUE(window->IsSupportWideGamut());
+}
+
+/**
+ * @tc.name: SetColorSpace01
+ * @tc.desc: SetColorSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, SetColorSpace01, Function | SmallTest | Level3)
+{
+    auto option = new WindowOption();
+    option->SetWindowName("WindowImplTest_SetColorSpace01");
+    auto window = new WindowImpl(option);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    window->Create("");
+    EXPECT_CALL(m->Mock(), SetColorSpace(_, _)).Times(1).WillOnce(Return());
+    window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+}
+
+/**
+ * @tc.name: GetColorSpace01
+ * @tc.desc: GetColorSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, GetColorSpace01, Function | SmallTest | Level3)
+{
+    auto option = new WindowOption();
+    option->SetWindowName("WindowImplTest_GetColorSpace01");
+    auto window = new WindowImpl(option);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    window->Create("");
+    EXPECT_CALL(m->Mock(), GetColorSpace(_)).Times(1).WillOnce(Return(ColorSpace::COLOR_SPACE_WIDE_GAMUT));
+    window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(ColorSpace::COLOR_SPACE_WIDE_GAMUT, window->GetColorSpace());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

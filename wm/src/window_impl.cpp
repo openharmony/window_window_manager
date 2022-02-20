@@ -1178,16 +1178,11 @@ void WindowImpl::SetDefaultOption()
     Rect rect;
     switch (property_->GetWindowType()) {
         case WindowType::WINDOW_TYPE_STATUS_BAR: {
-            rect = { 0, 0, width, static_cast<uint32_t>((static_cast<float>(height) * STATUS_BAR_RATIO)) };
-            property_->SetWindowRect(rect);
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetFocusable(false);
             break;
         }
         case WindowType::WINDOW_TYPE_NAVIGATION_BAR: {
-            uint32_t navHeight = static_cast<uint32_t>((static_cast<float>(height) * NAVIGATION_BAR_RATIO));
-            rect = { 0, static_cast<int32_t>(height - navHeight), width, navHeight };
-            property_->SetWindowRect(rect);
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetFocusable(false);
             break;
