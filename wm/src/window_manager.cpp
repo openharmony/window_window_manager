@@ -277,5 +277,10 @@ void WindowManager::UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, Windo
 {
     pImpl_->NotifyWindowUpdate(windowInfo, type);
 }
+
+WMError WindowManager::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
+{
+    return SingletonContainer::Get<WindowAdapter>().DumpWindowTree(windowTreeInfos, type);
+}
 } // namespace Rosen
 } // namespace OHOS

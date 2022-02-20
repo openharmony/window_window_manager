@@ -80,7 +80,7 @@ public:
     void UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
     void MinimizeAllAppWindows(DisplayId displayId);
     void SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId);
-
+    WMError DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
 private:
     WindowManager();
     ~WindowManager();

@@ -65,6 +65,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
 
     virtual void ClearWindowAdapter();
+    virtual WMError DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxyLocked();

@@ -477,5 +477,16 @@ void WindowRoot::NotifyDisplayDestory(DisplayId expandDisplayId)
     defaultDisplaycontainer->MoveWindowNode(expandDisplaycontainer);
     NotifyDisplayRemoved(expandDisplayId);
 }
+
+WMError WindowRoot::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
+{
+    for (auto& elem : windowNodeContainerMap_) {
+        if (elem.second == nullptr) {
+            continue;
+        }
+        elem.second->DumpWindowTree(windowTreeInfos, type);
+    }
+    return WMError::WM_OK;
+}
 }
 }
