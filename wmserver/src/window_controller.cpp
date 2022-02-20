@@ -274,7 +274,7 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
         WLOGFE("get display failed displayId:%{public}" PRId64 "", displayId);
         return;
     }
-    
+
     switch (type) {
         case DisplayStateChangeType::UPDATE_ROTATION: {
             windowRoot_->NotifyDisplayChange(abstractDisplay);
@@ -437,6 +437,11 @@ WMError WindowController::SetWindowLayoutMode(DisplayId displayId, WindowLayoutM
     }
     FlushWindowInfoWithDisplayId(displayId);
     return res;
+}
+
+WMError WindowController::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
+{
+    return windowRoot_->DumpWindowTree(windowTreeInfos, type);
 }
 }
 }

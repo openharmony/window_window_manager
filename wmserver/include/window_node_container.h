@@ -18,6 +18,7 @@
 
 #include <ui/rs_display_node.h>
 #include "avoid_area_controller.h"
+#include "window_manager_record.h"
 #include "window_layout_policy.h"
 #include "window_manager.h"
 #include "window_node.h"
@@ -66,6 +67,7 @@ public:
     sptr<WindowNode> GetBelowAppWindowNode() const;
     sptr<WindowNode> GetAppWindowNode() const;
     sptr<WindowNode> GetAboveAppWindowNode() const;
+    void DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);
@@ -91,6 +93,7 @@ private:
     void ResetLayoutPolicy();
     bool IsFullImmersiveNode(sptr<WindowNode> node) const;
     bool IsSplitImmersiveNode(sptr<WindowNode> node) const;
+    void RecordWindowHistory(const sptr<WindowNode>& node, RecordReason reason);
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
@@ -122,6 +125,8 @@ private:
     std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
     const int32_t WINDOW_TYPE_RAISED_INPUT_METHOD = 115;
+    sptr<WindowActivityRecorder> wmRecorderPtr_;
+
 };
 }
 }

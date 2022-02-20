@@ -301,5 +301,14 @@ WMError WindowAdapter::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode
     }
     return windowManagerServiceProxy_->SetWindowLayoutMode(displayId, mode);
 }
+
+WMError WindowAdapter::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!InitWMSProxyLocked()) {
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return windowManagerServiceProxy_->DumpWindowTree(windowTreeInfos, type);
+}
 } // namespace Rosen
 } // namespace OHOS

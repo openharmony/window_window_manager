@@ -62,6 +62,7 @@ public:
     void NotifyDisplayDestory(DisplayId displayId);
     void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
+    WMError DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
