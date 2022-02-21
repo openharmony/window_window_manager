@@ -99,6 +99,16 @@ sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplayByScreen(Scre
     return nullptr;
 }
 
+std::vector<DisplayId> AbstractDisplayController::GetAllDisplayIds() const
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::vector<DisplayId> res;
+    for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); ++iter) {
+        res.push_back(iter->first);
+    }
+    return res;
+}
+
 std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(DisplayId displayId)
 {
     sptr<AbstractDisplay> abstractDisplay = GetAbstractDisplay(displayId);

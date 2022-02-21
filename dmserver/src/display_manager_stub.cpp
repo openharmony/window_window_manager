@@ -194,6 +194,11 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             }
             break;
         }
+        case TRANS_ID_GET_ALL_DISPLAYIDS: {
+            std::vector<DisplayId> allDisplayIds = GetAllDisplayIds();
+            reply.WriteUInt64Vector(allDisplayIds);
+            break;
+        }
         case TRANS_ID_SCREEN_MAKE_EXPAND: {
             std::vector<ScreenId> screenId;
             if (!data.ReadUInt64Vector(&screenId)) {

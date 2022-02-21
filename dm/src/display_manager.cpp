@@ -315,10 +315,7 @@ sptr<Display> DisplayManager::GetDefaultDisplay()
 
 std::vector<DisplayId> DisplayManager::GetAllDisplayIds()
 {
-    std::vector<DisplayId> res;
-    res.push_back(GetDefaultDisplayId());
-    // 获取所有displayIds
-    return res;
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayIds();
 }
 
 std::vector<const sptr<Display>> DisplayManager::GetAllDisplays()
