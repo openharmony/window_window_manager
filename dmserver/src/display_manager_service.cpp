@@ -89,14 +89,21 @@ DisplayId DisplayManagerService::GetDefaultDisplayId()
     return GetDisplayIdFromScreenId(screenId);
 }
 
-sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
+DisplayInfo DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 {
+    DisplayInfo displayInfo;
     sptr<AbstractDisplay> display = GetDisplayByDisplayId(displayId);
     if (display == nullptr) {
         WLOGFE("GetDisplayById: Get invalid display!");
-        return nullptr;
+        return displayInfo;
     }
-    return display->ConvertToDisplayInfo();
+    displayInfo.id_ = displayId;
+    displayInfo.width_ = display->GetWidth();
+    displayInfo.height_ = display->GetHeight();
+    displayInfo.freshRate_ = display->GetFreshRate();
+    displayInfo.screenId_ = display->GetAbstractScreenId();
+    displayInfo.rotation_ = display->GetRotation();
+    return displayInfo;
 }
 
 sptr<AbstractDisplay> DisplayManagerService::GetAbstractDisplay(DisplayId displayId)

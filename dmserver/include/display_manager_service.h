@@ -51,7 +51,7 @@ public:
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
 
     DisplayId GetDefaultDisplayId() override;
-    sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    DisplayInfo GetDisplayInfoById(DisplayId displayId) override;
     bool RequestRotation(ScreenId screenId, Rotation rotation) override;
     std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
     ScreenId GetRSScreenId(DisplayId displayId) const;
