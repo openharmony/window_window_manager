@@ -89,6 +89,8 @@ public:
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     std::vector<sptr<ScreenInfo>> GetAllScreenInfos() override;
+
+    std::vector<DisplayId> GetAllDisplayIds() override;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
 
 private:

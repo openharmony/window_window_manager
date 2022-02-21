@@ -159,6 +159,7 @@ ScreenId AbstractScreenController::GetDefaultAbstractScreenId()
     auto iter = rs2DmsScreenIdMap_.find(rsDefaultId);
     if (iter != rs2DmsScreenIdMap_.end()) {
         WLOGI("GetDefaultAbstractScreenId, screen:%{public}" PRIu64"", iter->second);
+        defaultScreenId = iter->second;
         return iter->second;
     }
     WLOGFI("GetDefaultAbstractScreenId, default screen is null, try to get.");
@@ -172,7 +173,13 @@ ScreenId AbstractScreenController::GetDefaultAbstractScreenId()
     dms2RsScreenIdMap_.insert(std::make_pair(dmsScreenId, rsDefaultId));
     dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));
     dmsScreenCount_++;
+    defaultScreenId = dmsScreenId;
     return dmsScreenId;
+}
+
+ScreenId AbstractScreenController::GetDefaultScreenId() const
+{
+    return defaultScreenId;
 }
 
 ScreenId AbstractScreenController::ConvertToRsScreenId(ScreenId dmsScreenId)
