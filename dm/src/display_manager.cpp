@@ -54,7 +54,7 @@ public:
 
     void OnDisplayCreate(sptr<DisplayInfo> displayInfo) override
     {
-        if (displayInfo == nullptr || displayInfo->id_ == DISPLAY_ID_INVALD) {
+        if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALD) {
             WLOGFE("OnDisplayCreate, displayInfo is invalid.");
             return;
         }
@@ -63,7 +63,7 @@ public:
             return;
         }
         for (auto listener : pImpl_->displayListeners_) {
-            listener->OnCreate(displayInfo->id_);
+            listener->OnCreate(displayInfo->GetDisplayId());
         }
     };
 
@@ -84,7 +84,7 @@ public:
 
     void OnDisplayChange(const sptr<DisplayInfo> displayInfo, DisplayChangeEvent event) override
     {
-        if (displayInfo == nullptr || displayInfo->id_ == DISPLAY_ID_INVALD) {
+        if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALD) {
             WLOGFE("OnDisplayChange, displayInfo is invalid.");
             return;
         }
@@ -92,9 +92,9 @@ public:
             WLOGFE("OnDisplayChange, impl is nullptr.");
             return;
         }
-        WLOGD("OnDisplayChange. display %{public}" PRIu64", event %{public}u", displayInfo->id_, event);
+        WLOGD("OnDisplayChange. display %{public}" PRIu64", event %{public}u", displayInfo->GetDisplayId(), event);
         for (auto listener : pImpl_->displayListeners_) {
-            listener->OnChange(displayInfo->id_, event);
+            listener->OnChange(displayInfo->GetDisplayId(), event);
         }
     };
 private:
@@ -380,7 +380,7 @@ void DisplayManager::NotifyDisplayChangedEvent(const sptr<DisplayInfo> info, Dis
     WLOGI("NotifyDisplayChangedEvent event:%{public}u, size:%{public}zu", event, pImpl_->displayListeners_.size());
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     for (auto& listener : pImpl_->displayListeners_) {
-        listener->OnChange(info->id_, event);
+        listener->OnChange(info->GetDisplayId(), event);
     }
 }
 

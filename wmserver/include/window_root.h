@@ -63,6 +63,7 @@ public:
     void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
     WMError DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
+    float GetVirtualPixelRatio(DisplayId displayId) const;
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);

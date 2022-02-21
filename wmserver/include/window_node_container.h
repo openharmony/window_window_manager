@@ -68,6 +68,7 @@ public:
     sptr<WindowNode> GetAppWindowNode() const;
     sptr<WindowNode> GetAboveAppWindowNode() const;
     void DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
+    float GetVirtualPixelRatio() const;
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);

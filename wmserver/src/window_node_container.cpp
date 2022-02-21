@@ -30,6 +30,7 @@
 #include "window_manager_agent_controller.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "wm_common_inner.h"
 #include "wm_trace.h"
 
 namespace OHOS {
@@ -1068,6 +1069,11 @@ sptr<WindowNode> WindowNodeContainer::GetAppWindowNode() const
 sptr<WindowNode> WindowNodeContainer::GetAboveAppWindowNode() const
 {
     return aboveAppWindowNode_;
+}
+
+float WindowNodeContainer::GetVirtualPixelRatio() const
+{
+    return layoutPolicy_->GetVirtualPixelRatio();
 }
 
 bool WindowNodeContainer::ReadIsWindowAnimationEnabledProperty()
