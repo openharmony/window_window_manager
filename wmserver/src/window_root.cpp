@@ -467,14 +467,17 @@ WMError WindowRoot::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mo
     return ret;
 }
 
-void WindowRoot::NotifyDisplayDestory(DisplayId expandDisplayId)
+void WindowRoot::NotifyDisplayDestroy(DisplayId expandDisplayId)
 {
-    WLOGFW("disconnect expand display, get default and expand display container");
+    WLOGFD("disconnect expand display, get default and expand display container");
     DisplayId defaultDisplayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
-    auto expandDisplaycontainer = GetOrCreateWindowNodeContainer(expandDisplayId);
-    auto defaultDisplaycontainer = GetOrCreateWindowNodeContainer(defaultDisplayId);
-
-    defaultDisplaycontainer->MoveWindowNode(expandDisplaycontainer);
+    auto expandDisplayContainer = GetOrCreateWindowNodeContainer(expandDisplayId);
+    auto defaultDisplayContainer = GetOrCreateWindowNodeContainer(defaultDisplayId);
+    if (expandDisplayContainer == nullptr || defaultDisplayContainer == nullptr) {
+        WLOGFE("window node container is nullptr!");
+        return;
+    }
+    defaultDisplayContainer->MoveWindowNode(expandDisplayContainer);
     NotifyDisplayRemoved(expandDisplayId);
 }
 

@@ -131,6 +131,32 @@ void WindowManagerAgentProxy::UpdateWindowStatus(const sptr<WindowInfo>& windowI
         WLOGFE("SendRequest failed");
     }
 }
+
+void WindowManagerAgentProxy::UpdateWindowVisibilityInfo(
+    const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(visibilityInfos.size()))) {
+        WLOGFE("write windowVisibilityInfos size failed");
+        return;
+    }
+    for (auto& info : visibilityInfos) {
+        if (!data.WriteParcelable(info)) {
+            WLOGFE("Write windowVisibilityInfo failed");
+            return;
+        }
+    }
+
+    if (Remote()->SendRequest(TRANS_ID_UPDATE_WINDOW_VISIBILITY, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 
