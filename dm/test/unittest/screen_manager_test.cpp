@@ -22,7 +22,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-using Mocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
+using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
 
 sptr<Display> ScreenManagerTest::defaultDisplay_ = nullptr;
 DisplayId ScreenManagerTest::defaultDisplayId_ = DISPLAY_ID_INVALD;

@@ -52,12 +52,12 @@ DisplayId DisplayManagerProxy::GetDefaultDisplayId()
     return displayId;
 }
 
-sptr<DisplayInfo> DisplayManagerProxy::GetDisplayInfoById(DisplayId displayId)
+DisplayInfo DisplayManagerProxy::GetDisplayInfoById(DisplayId displayId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFW("GetDisplayInfoById: remote is nullptr");
-        return nullptr;
+        return DisplayInfo();
     }
 
     MessageParcel data;
@@ -65,23 +65,23 @@ sptr<DisplayInfo> DisplayManagerProxy::GetDisplayInfoById(DisplayId displayId)
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("GetDisplayInfoById: WriteInterfaceToken failed");
-        return nullptr;
+        return DisplayInfo();
     }
     if (!data.WriteUint64(displayId)) {
         WLOGFW("GetDisplayInfoById: WriteUint64 displayId failed");
-        return nullptr;
+        return DisplayInfo();
     }
     if (remote->SendRequest(TRANS_ID_GET_DISPLAY_BY_ID, data, reply, option) != ERR_NONE) {
         WLOGFW("GetDisplayInfoById: SendRequest failed");
-        return nullptr;
+        return DisplayInfo();
     }
 
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
         WLOGFW("DisplayManagerProxy::GetDisplayInfoById SendRequest nullptr.");
-        return nullptr;
+        return DisplayInfo();
     }
-    return info;
+    return *info;
 }
 
 ScreenId DisplayManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOption)
@@ -682,10 +682,9 @@ sptr<ScreenInfo> DisplayManagerProxy::GetScreenInfoById(ScreenId screenId)
         WLOGFW("GetScreenInfoById SendRequest nullptr.");
         return nullptr;
     }
-    auto modes = info->GetModes();
-    for (int i = 0; i < modes.size(); i++) {
+    for (int i = 0; i < info->modes_.size(); i++) {
         WLOGFI("info modes is width: %{public}u, height: %{public}u, freshRate: %{public}u",
-            modes[i]->width_, modes[i]->height_, modes[i]->freshRate_);
+            info->modes_[i]->width_, info->modes_[i]->height_, info->modes_[i]->freshRate_);
     }
     return info;
 }

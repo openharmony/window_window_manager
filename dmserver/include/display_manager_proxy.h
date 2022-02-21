@@ -32,7 +32,7 @@ public:
     ~DisplayManagerProxy() {};
 
     DisplayId GetDefaultDisplayId() override;
-    sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    DisplayInfo GetDisplayInfoById(DisplayId displayId) override;
 
     ScreenId CreateVirtualScreen(VirtualScreenOption option) override;
     DMError DestroyVirtualScreen(ScreenId screenId) override;
