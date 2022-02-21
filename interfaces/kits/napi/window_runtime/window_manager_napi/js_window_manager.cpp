@@ -15,6 +15,7 @@
 #include "js_window_manager.h"
 #include <ability.h>
 #include <cinttypes>
+#include "ability_context.h"
 #include "dm_common.h"
 #include "js_window.h"
 #include "js_window_utils.h"
@@ -172,6 +173,19 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
             "JsWindow::OnCreateWindow newAPI failed."));
         WLOGFE("JsWindowManager::OnCreateWindow in newApi use with empty context!");
         return;
+    }
+    // FixMe: adapt to service and xts
+    if (winType == WindowType::WINDOW_TYPE_FLOAT) {
+        auto abilityContext = Context::ConvertTo<AbilityRuntime::AbilityContext>(context->lock());
+        if (abilityContext != nullptr) {
+            if (!CheckCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WMError::WM_ERROR_INVALID_PERMISSION),
+                    "JsWindow::OnCreateWindow newAPI failed."));
+                WLOGFE("JsWindowManager::OnCreateWindow in newApi TYPE_FLOAT CheckCallingPermission failed!");
+                return;
+            }
+        }
     }
     sptr<WindowOption> windowOption = new WindowOption();
     windowOption->SetWindowType(winType);
@@ -396,8 +410,10 @@ void JsWindowManager::UnregisterWmListenerWithType(std::string type, NativeValue
             type.c_str());
         return;
     }
+    bool findFlag = false;
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         if (value->StrictEquals(it->first->Get())) {
+            findFlag = true;
             it->second->RemoveCallback(value);
             if (type.compare(SYSTEM_BAR_TINT_CHANGE_CB) == 0) {
                 sptr<ISystemBarChangedListener> thisListener(it->second);
@@ -409,6 +425,10 @@ void JsWindowManager::UnregisterWmListenerWithType(std::string type, NativeValue
         } else {
             it++;
         }
+    }
+    if (!findFlag) {
+        WLOGFE("JsWindowManager::UnregisterWmListenerWithType can't find callback!");
+        return;
     }
     // one type with multi jscallback, erase type when there is no callback in one type
     if (jsCbMap_[type].empty()) {
@@ -436,6 +456,7 @@ NativeValue* JsWindowManager::OnRegisterWindowMangerCallback(NativeEngine& engin
     }
     std::lock_guard<std::mutex> lock(mtx_);
     RegisterWmListenerWithType(engine, cbType, value);
+    WLOGFI("JsWindowManager::OnRegisterWindowMangerCallback end!");
     return engine.CreateUndefined();
 }
 
@@ -462,6 +483,7 @@ NativeValue* JsWindowManager::OnUnregisterWindowManagerCallback(NativeEngine& en
         }
         UnregisterWmListenerWithType(cbType, value);
     }
+    WLOGFI("JsWindowManager::OnUnregisterWindowCallback end!");
     return engine.CreateUndefined();
 }
 

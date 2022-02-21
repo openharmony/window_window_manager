@@ -53,7 +53,7 @@ void JsWindowListener::RemoveCallback(NativeValue* jsListenerObject)
             iter++;
         }
     }
-    WLOGFI("JsWindowListener::AddCallbackAndRegister success jsCallBack_ size: %{public}d!",
+    WLOGFI("JsWindowListener::RemoveCallback success jsCallBack_ size: %{public}d!",
         static_cast<uint32_t>(jsCallBack_.size()));
     return;
 }
@@ -118,7 +118,6 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
         WLOGFE("JsWindowListener::OnSystemBarPropertyChange systemBarTintChange not register!");
         return;
     }
-
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [this, displayId, tints] (NativeEngine &engine, AsyncTask &task, int32_t status) {
