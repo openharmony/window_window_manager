@@ -41,7 +41,7 @@ const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDisplayById(DisplayId
 {
     sptr<AbstractDisplay> display = DisplayManagerService::GetInstance().GetAbstractDisplay(displayId);
     if (display == nullptr) {
-        auto displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
+        DisplayInfo displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
         display = new AbstractDisplay(displayInfo);
         WLOGFE("GetDisplayById create new!\n");
     }

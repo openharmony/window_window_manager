@@ -16,6 +16,19 @@
 #include "screen_info.h"
 
 namespace OHOS::Rosen {
+void ScreenInfo::Update(sptr<ScreenInfo> info)
+{
+    id_ = info->id_;
+    virtualWidth_ = info->virtualWidth_;
+    virtualHeight_ = info->virtualHeight_;
+    virtualPixelRatio_ = info->virtualPixelRatio_;
+    parent_ = info->parent_;
+    canHasChild_ = info->canHasChild_;
+    rotation_ = info->rotation_;
+    modeId_ = info->modeId_;
+    modes_ = info->modes_;
+}
+
 bool ScreenInfo::Marshalling(Parcel &parcel) const
 {
     bool res = parcel.WriteUint64(id_) &&
@@ -40,15 +53,10 @@ bool ScreenInfo::Marshalling(Parcel &parcel) const
 ScreenInfo* ScreenInfo::Unmarshalling(Parcel &parcel)
 {
     ScreenInfo* info = new ScreenInfo();
-    bool res = info->InnerUnmarshalling(parcel);
-    if (res) {
-        return info;
-    }
-    delete info;
-    return nullptr;
+    return info->InnerUnmarshalling(parcel);
 }
 
-bool ScreenInfo::InnerUnmarshalling(Parcel& parcel)
+ScreenInfo* ScreenInfo::InnerUnmarshalling(Parcel& parcel)
 {
     uint32_t size = 0;
     uint32_t rotation;
@@ -58,7 +66,7 @@ bool ScreenInfo::InnerUnmarshalling(Parcel& parcel)
         parcel.ReadBool(canHasChild_) && parcel.ReadUint32(rotation) &&
         parcel.ReadUint32(modeId_) && parcel.ReadUint32(size);
     if (!res1) {
-        return false;
+        return nullptr;
     }
     modes_.clear();
     for (uint32_t modeIndex = 0; modeIndex < size; modeIndex++) {
@@ -68,10 +76,10 @@ bool ScreenInfo::InnerUnmarshalling(Parcel& parcel)
             parcel.ReadUint32(mode->freshRate_)) {
             modes_.push_back(mode);
         } else {
-            return false;
+            return nullptr;
         }
     }
     rotation_ = static_cast<Rotation>(rotation);
-    return true;
+    return this;
 }
 } // namespace OHOS::Rosen

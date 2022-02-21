@@ -23,30 +23,26 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "ScreenGroup"};
 }
 class ScreenGroup::Impl : public RefBase {
-public:
-    Impl(sptr<ScreenGroupInfo> info)
-    {
-        if (info == nullptr) {
-            WLOGFE("ScreenGroupInfo is nullptr.");
-        }
-        screenGroupInfo_ = info;
-    }
+friend class ScreenGroup;
+private:
+    Impl() = default;
     ~Impl() = default;
 
-    DEFINE_VAR_FUNC_GET_SET(sptr<ScreenGroupInfo>, ScreenGroupInfo, screenGroupInfo);
+    std::vector<ScreenId> children_;
+    std::vector<Point> position_;
+    ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
 };
 
-ScreenGroup::ScreenGroup(sptr<ScreenGroupInfo> info)
-    : Screen(info), pImpl_(new Impl(info))
-{
-}
-
-void ScreenGroup::UpdateScreenGroupInfo(sptr<ScreenGroupInfo> info)
+ScreenGroup::ScreenGroup(const ScreenGroupInfo* info)
+    : Screen(info), pImpl_(new Impl())
 {
     if (info == nullptr) {
-        WLOGFE("ScreenGroupInfo is nullptr.");
+        WLOGFE("info is nullptr.");
+        return;
     }
-    pImpl_->SetScreenGroupInfo(info);
+    pImpl_->children_ = info->children_;
+    pImpl_->position_ = info->position_;
+    pImpl_->combination_ = info->combination_;
 }
 
 ScreenGroup::~ScreenGroup()
@@ -55,16 +51,16 @@ ScreenGroup::~ScreenGroup()
 
 ScreenCombination ScreenGroup::GetCombination() const
 {
-    return pImpl_->GetScreenGroupInfo()->GetCombination();
+    return pImpl_->combination_;
 }
 
-std::vector<ScreenId> ScreenGroup::GetChildIds() const
+std::vector<ScreenId> ScreenGroup::GetChild() const
 {
-    return pImpl_->GetScreenGroupInfo()->GetChildren();
+    return pImpl_->children_;
 }
 
-std::vector<Point> ScreenGroup::GetChildPositions() const
+std::vector<Point> ScreenGroup::GetChildPosition() const
 {
-    return pImpl_->GetScreenGroupInfo()->GetPosition();
+    return pImpl_->position_;
 }
 } // namespace OHOS::Rosen

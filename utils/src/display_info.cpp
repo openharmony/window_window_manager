@@ -16,6 +16,19 @@
 #include "display_info.h"
 
 namespace OHOS::Rosen {
+void DisplayInfo::Update(DisplayInfo* info)
+{
+    id_ = info->id_;
+    type_ = info->type_;
+    width_ = info->width_;
+    height_ = info->height_;
+    freshRate_ = info->freshRate_;
+    screenId_ = info->screenId_;
+    xDpi_ = info->xDpi_;
+    yDpi_ = info->yDpi_;
+    rotation_ = info->rotation_;
+}
+
 bool DisplayInfo::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteUint64(id_) && parcel.WriteUint32(type_) &&
@@ -28,6 +41,9 @@ bool DisplayInfo::Marshalling(Parcel &parcel) const
 DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
 {
     DisplayInfo *displayInfo = new DisplayInfo();
+    if (displayInfo == nullptr) {
+        return nullptr;
+    }
     uint32_t type = (uint32_t)DisplayType::DEFAULT;
     uint32_t rotation;
     bool res = parcel.ReadUint64(displayInfo->id_) && parcel.ReadUint32(type) &&
@@ -36,11 +52,11 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadFloat(displayInfo->xDpi_) && parcel.ReadFloat(displayInfo->yDpi_) &&
         parcel.ReadUint32(rotation);
     if (!res) {
-        delete displayInfo;
-        return nullptr;
+        displayInfo = nullptr;
+    } else {
+        displayInfo->type_ = (DisplayType)type;
+        displayInfo->rotation_ = static_cast<Rotation>(rotation);
     }
-    displayInfo->type_ = (DisplayType)type;
-    displayInfo->rotation_ = static_cast<Rotation>(rotation);
     return displayInfo;
 }
 } // namespace OHOS::Rosen
