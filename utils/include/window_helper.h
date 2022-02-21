@@ -17,6 +17,7 @@
 #define OHOS_WM_INCLUDE_WM_HELPER_H
 
 #include <wm_common.h>
+#include <wm_common_inner.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -79,15 +80,18 @@ public:
         return (r.posX_ == 0 && r.posY_ == 0 && r.width_ == 0 && r.height_ == 0);
     }
 
-    static Rect GetFixedWindowRectByMinRect(const Rect& oriDstRect, const Rect& lastRect, bool isVertical)
+    static Rect GetFixedWindowRectByMinRect(const Rect& oriDstRect, const Rect& lastRect, bool isVertical,
+        float virtualPixelRatio)
     {
+        uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
+        uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
         Rect dstRect = oriDstRect;
         if (isVertical) {
-            dstRect.width_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, oriDstRect.width_);
-            dstRect.height_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, oriDstRect.height_);
+            dstRect.width_ = std::max(minVerticalFloatingW, oriDstRect.width_);
+            dstRect.height_ = std::max(minVerticalFloatingH, oriDstRect.height_);
         } else {
-            dstRect.width_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, oriDstRect.width_);
-            dstRect.height_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, oriDstRect.height_);
+            dstRect.width_ = std::max(minVerticalFloatingH, oriDstRect.width_);
+            dstRect.height_ = std::max(minVerticalFloatingW, oriDstRect.height_);
         }
 
         // limit position by fixed width or height
