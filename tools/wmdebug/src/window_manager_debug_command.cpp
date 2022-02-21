@@ -150,21 +150,21 @@ void WindowManagerDebugCommand::DumpResults(WindowDumpType dumpType)
         }
     }
     switch (dumpType) {
-            case WindowDumpType::ALL: {
-                result_ += (ret == WMError::WM_OK) ? DUMP_ALL_OK_MSG : DUMP_ALL_FAIL_MSG;
-                break;
-            }
-            case WindowDumpType::TREE: {
-                result_ += (ret == WMError::WM_OK) ? DUMP_TREE_OK_MSG : DUMP_TREE_FAIL_MSG;
-                break;
-            }
-            case WindowDumpType::CLEAR: {
-                result_ += (ret == WMError::WM_OK) ? CLEAR_DUMP_INFO_OK_MSG : CLEAR_DUMP_INFO_FAIL_MSG;
-                break;
-            }
-            default: {
-                result_ = " ";
-            }
+        case WindowDumpType::ALL: {
+            result_ += (ret == WMError::WM_OK) ? DUMP_ALL_OK_MSG : DUMP_ALL_FAIL_MSG;
+            break;
+        }
+        case WindowDumpType::TREE: {
+            result_ += (ret == WMError::WM_OK) ? DUMP_TREE_OK_MSG : DUMP_TREE_FAIL_MSG;
+            break;
+        }
+        case WindowDumpType::CLEAR: {
+            result_ += (ret == WMError::WM_OK) ? CLEAR_DUMP_INFO_OK_MSG : CLEAR_DUMP_INFO_FAIL_MSG;
+            break;
+        }
+        default: {
+            result_ = " ";
+        }
     }
 }
 

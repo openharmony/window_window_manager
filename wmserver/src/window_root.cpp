@@ -488,5 +488,11 @@ WMError WindowRoot::DumpWindowTree(std::vector<std::string> &windowTreeInfos, Wi
     }
     return WMError::WM_OK;
 }
+
+float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
+{
+    auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
+    return container->GetVirtualPixelRatio();
+}
 }
 }

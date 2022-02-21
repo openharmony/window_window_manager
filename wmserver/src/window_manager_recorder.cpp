@@ -42,7 +42,7 @@ void WindowManagerRecorder::AddNodeRecord(WindowManagerRecordInfo record)
 {
     std::string historyRecord;
     int32_t number = records_.size();
-    historyRecord += "\nNo." + std::to_string(number) + "\t[WINDOW-ACTIVITY]\n";
+    historyRecord += "\nNo." + std::to_string(number) + "\t[WINDOW-RECORD]\n";
     char systime[TIME_LENGTH];
     if (strftime(systime, sizeof(char) * TIME_LENGTH, "%Y/%m/%d %H:%M:%S %p", &record.recordTime) != 0) {
         std::string recordTime = "Time: " + std::string(systime) + "\n";

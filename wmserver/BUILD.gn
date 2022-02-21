@@ -76,6 +76,7 @@ ohos_shared_library("libwms") {
     ":window_divider_image",
     "//foundation/ace/ace_engine/build/external_config/flutter/skia:ace_skia_ohos",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/dmserver:libdms",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",

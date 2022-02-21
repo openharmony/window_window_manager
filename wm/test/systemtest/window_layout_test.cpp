@@ -32,6 +32,7 @@ public:
     DisplayId displayId_ = 0;
     std::vector<sptr<Window>> activeWindows_;
     static vector<Rect> fullScreenExpecteds_;
+    static inline float virtualPixelRatio_ = 0.0;
 };
 
 vector<Rect> WindowLayoutTest::fullScreenExpecteds_;
@@ -47,6 +48,9 @@ void WindowLayoutTest::SetUpTestCase()
     }
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
+
+    virtualPixelRatio_ = WindowTestUtils::GetVirtualPixelRatio(0);
+
     // calc expected rects
     Rect expected = { // 0. only statusBar
         0,
@@ -110,7 +114,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
     activeWindows_.push_back(window);
 
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_TRUE(utils::RectEqualTo(window, utils::GetFloatingLimitedRect(utils::customAppRect_)));
+    ASSERT_TRUE(utils::RectEqualTo(window, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 
@@ -140,12 +144,12 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
     activeWindows_.push_back(statBar);
 
     ASSERT_EQ(WMError::WM_OK, appWin->Show());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_)));
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
     ASSERT_EQ(WMError::WM_OK, statBar->Show());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_)));
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
     ASSERT_TRUE(utils::RectEqualTo(statBar, utils::statusBarRect_));
     ASSERT_EQ(WMError::WM_OK, statBar->Hide());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_)));
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
 }
 
 /**
@@ -277,7 +281,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
 
     ASSERT_EQ(WMError::WM_OK, window->Resize(2u, 2u));        // 2: custom min size
     Rect finalExcept = { expect.posX_, expect.posY_, 2u, 2u}; // 2: custom min size
-    finalExcept = utils::GetFloatingLimitedRect(finalExcept);
+    finalExcept = utils::GetFloatingLimitedRect(finalExcept, virtualPixelRatio_);
     ASSERT_TRUE(utils::RectEqualTo(window, finalExcept));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
