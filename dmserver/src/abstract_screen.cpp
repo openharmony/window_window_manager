@@ -53,7 +53,7 @@ sptr<AbstractScreenGroup> AbstractScreen::GetGroup() const
     return DisplayManagerService::GetInstance().GetAbstractScreenController()->GetAbstractScreenGroup(groupDmsId_);
 }
 
-const sptr<ScreenInfo> AbstractScreen::ConvertToScreenInfo() const
+sptr<ScreenInfo> AbstractScreen::ConvertToScreenInfo() const
 {
     sptr<ScreenInfo> info = new ScreenInfo();
     FillScreenInfo(info);
@@ -215,7 +215,7 @@ AbstractScreenGroup::~AbstractScreenGroup()
     abstractScreenMap_.clear();
 }
 
-const sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
+sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
 {
     sptr<ScreenGroupInfo> screenGroupInfo = new ScreenGroupInfo();
     FillScreenInfo(screenGroupInfo);

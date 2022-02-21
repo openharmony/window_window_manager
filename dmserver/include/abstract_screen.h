@@ -46,7 +46,7 @@ public:
     sptr<SupportedScreenModes> GetActiveScreenMode() const;
     std::vector<sptr<SupportedScreenModes>> GetAbstractScreenModes() const;
     sptr<AbstractScreenGroup> GetGroup() const;
-    const sptr<ScreenInfo> ConvertToScreenInfo() const;
+    sptr<ScreenInfo> ConvertToScreenInfo() const;
     void RequestRotation(Rotation rotation);
     Rotation GetRotation() const;
 
@@ -90,7 +90,7 @@ public:
     std::vector<sptr<AbstractScreen>> GetChildren() const;
     std::vector<Point> GetChildrenPosition() const;
     size_t GetChildCount() const;
-    const sptr<ScreenGroupInfo> ConvertToScreenGroupInfo() const;
+    sptr<ScreenGroupInfo> ConvertToScreenGroupInfo() const;
     bool SetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config);
 
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
