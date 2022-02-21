@@ -22,6 +22,9 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using utils = WindowTestUtils;
+constexpr uint32_t MAX_WAIT_COUNT = 100;
+constexpr uint32_t WAIT_DUR = 10 * 1000;
+
 class WindowGamutTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -73,21 +76,73 @@ HWTEST_F(WindowGamutTest, IsSupportWideGamut01, Function | MediumTest | Level3)
 }
 
 /**
- * @tc.name: SetGetColorSpace01
- * @tc.desc: Set and Get ColorSpace
+ * @tc.name: GetColorSpace01
+ * @tc.desc: Get ColorSpace
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(WindowGamutTest, SetGetColorSpace01, Function | MediumTest | Level3)
+HWTEST_F(WindowGamutTest, GetColorSpace01, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
 
-    window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
-    window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+    ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
+
+    window->Destroy();
+}
+
+/**
+ * @tc.name: SetColorSpace01
+ * @tc.desc: Set ColorSpace, valid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WindowGamutTest, SetColorSpace01, Function | MediumTest | Level3)
+{
+    uint32_t i, j;
+    const ColorSpace colorSpacesToTest[] = {
+        ColorSpace::COLOR_SPACE_DEFAULT,
+        ColorSpace::COLOR_SPACE_WIDE_GAMUT
+    };
+    ColorSpace colorSpace;
+    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
+
+    ColorSpace colorSpaceBackup = window->GetColorSpace(); // backup origin
+
+    for (j = 0; j < sizeof(colorSpacesToTest) / sizeof(ColorSpace); j++) {
+        window->SetColorSpace(colorSpacesToTest[j]); // async func
+        for (i = 0; i < MAX_WAIT_COUNT; i++) { // wait some time for async set ok
+            colorSpace = window->GetColorSpace();
+            if (colorSpace != colorSpacesToTest[j]) {
+                usleep(WAIT_DUR);
+            } else {
+                break;
+            }
+        }
+        ASSERT_EQ(colorSpacesToTest[j], window->GetColorSpace());
+    }
+
+    window->SetColorSpace(colorSpaceBackup); // restore
+
+    window->Destroy();
+}
+
+/**
+ * @tc.name: SetColorSpace02
+ * @tc.desc: Set ColorSpace, invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WindowGamutTest, SetColorSpace02, Function | MediumTest | Level3)
+{
+    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
+
+    ColorSpace colorSpaceBackup = window->GetColorSpace();
+
     ColorSpace invalidColorSpace =
         static_cast<ColorSpace>(static_cast<uint32_t>(ColorSpace::COLOR_SPACE_WIDE_GAMUT) + 1);
     window->SetColorSpace(invalidColorSpace);  // invalid param
-    ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
+
+    ASSERT_EQ(colorSpaceBackup, window->GetColorSpace());
 
     window->Destroy();
 }
