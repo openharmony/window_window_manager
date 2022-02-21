@@ -39,7 +39,7 @@ public:
     static inline sptr<DisplayPowerEventListener> listener_ = new DisplayPowerEventListener();
     static inline DisplayId defaultId_ = 0;
     static inline uint32_t brightnessLevel_ = 80;
-    static inline uint32_t invalidBrightnessLevel_ = 10000000;
+    static inline uint32_t invalidBrightnessLevel_ = 1000000000;
     static inline DisplayPowerState initialPowerState_;
     static inline DisplayState initialState_;
 };
