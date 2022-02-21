@@ -66,6 +66,7 @@ public:
     sptr<WindowNode> GetBelowAppWindowNode() const;
     sptr<WindowNode> GetAppWindowNode() const;
     sptr<WindowNode> GetAboveAppWindowNode() const;
+    float GetVirtualPixelRatio() const;
 
 private:
     void AssignZOrder(sptr<WindowNode>& node);

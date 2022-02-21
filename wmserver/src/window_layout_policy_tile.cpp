@@ -99,6 +99,7 @@ void WindowLayoutPolicyTile::LayoutForegroundNodeQueue()
         Rect lastRect = node->GetLayoutRect();
         Rect winRect = node->GetWindowProperty()->GetWindowRect();
         node->SetLayoutRect(winRect);
+        CalcAndSetNodeHotZone(winRect, node);
         if (!(lastRect == winRect)) {
             node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
             node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
@@ -204,6 +205,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
     }
     LimitWindowSize(node, displayRect, winRect);
     node->SetLayoutRect(winRect);
+    CalcAndSetNodeHotZone(winRect, node);
     if (!(lastRect == winRect)) {
         node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);

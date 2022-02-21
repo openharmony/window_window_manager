@@ -18,6 +18,7 @@
 #include "pointer_event.h"
 #include "window_helper.h"
 #include "window_test_utils.h"
+#include "wm_common_inner.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -54,6 +55,8 @@ private:
     static inline Rect startPointRect_  = {0, 0, 0, 0};
     static inline Rect expectRect_ = {0, 0, 0, 0};
     static inline sptr<Window> window_ = nullptr;
+    static inline float virtualPixelRatio_ = 0.0;
+    static inline uint32_t hotZone_ = 0;
 };
 
 void WindowMoveDragTest::SetUpTestCase()
@@ -82,6 +85,9 @@ void WindowMoveDragTest::SetUp()
     }
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
+
+    virtualPixelRatio_ = WindowTestUtils::GetVirtualPixelRatio(0);
+    hotZone_ = static_cast<uint32_t>(HOTZONE * virtualPixelRatio_);
 
     winInfo_ = {
         .name = "Floating",
@@ -174,7 +180,7 @@ void WindowMoveDragTest::CalExpectRects()
         }
     }
     bool isVertical = (utils::displayRect_.width_ < utils::displayRect_.height_) ? true : false;
-    expectRect_ = WindowHelper::GetFixedWindowRectByMinRect(oriRect, startPointRect_, isVertical);
+    expectRect_ = WindowHelper::GetFixedWindowRectByMinRect(oriRect, startPointRect_, isVertical, virtualPixelRatio_);
 }
 
 namespace {
@@ -188,10 +194,10 @@ HWTEST_F(WindowMoveDragTest, DragWindow01, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ - HOTZONE * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ - hotZone_ * POINT_HOTZONE_RATIO;
     startPointY_ = startPointRect_.posY_ + startPointRect_.height_ * POINT_HOTZONE_RATIO;
-    pointX_ = startPointRect_.posX_ + HOTZONE * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + HOTZONE * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    pointY_ = startPointRect_.posY_ + hotZone_ * DRAG_HOTZONE_RATIO;
     DoMoveOrDrag();
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -206,11 +212,11 @@ HWTEST_F(WindowMoveDragTest, DragWindow02, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ - HOTZONE * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ - HOTZONE * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ - hotZone_ * POINT_HOTZONE_RATIO;
+    startPointY_ = startPointRect_.posY_ - hotZone_ * POINT_HOTZONE_RATIO;
 
-    pointX_ = startPointRect_.posX_ + HOTZONE * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + HOTZONE * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    pointY_ = startPointRect_.posY_ + hotZone_ * DRAG_HOTZONE_RATIO;
     DoMoveOrDrag();
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -225,11 +231,11 @@ HWTEST_F(WindowMoveDragTest, DragWindow03, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ - HOTZONE * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ + startPointRect_.height_ + HOTZONE * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ - hotZone_ * POINT_HOTZONE_RATIO;
+    startPointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * POINT_HOTZONE_RATIO;
 
-    pointX_ = startPointRect_.posX_ + HOTZONE * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + HOTZONE * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * DRAG_HOTZONE_RATIO;
     DoMoveOrDrag();
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -244,10 +250,10 @@ HWTEST_F(WindowMoveDragTest, DragWindow04, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ + HOTZONE * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ + hotZone_ * POINT_HOTZONE_RATIO;
     startPointY_ = startPointRect_.posY_ + startPointRect_.height_ * POINT_HOTZONE_RATIO;
 
-    pointX_ = startPointRect_.posX_ + startPointRect_.width_ + HOTZONE * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + startPointRect_.width_ + hotZone_ * DRAG_HOTZONE_RATIO;
     pointY_ = startPointRect_.posY_ + startPointRect_.height_ * DRAG_HOTZONE_RATIO;
     DoMoveOrDrag();
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
@@ -263,11 +269,11 @@ HWTEST_F(WindowMoveDragTest, DragWindow05, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ + HOTZONE * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ - HOTZONE * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ + hotZone_ * POINT_HOTZONE_RATIO;
+    startPointY_ = startPointRect_.posY_ - hotZone_ * POINT_HOTZONE_RATIO;
 
-    pointX_ = startPointRect_.posX_ + startPointRect_.width_ + HOTZONE * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + HOTZONE * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + startPointRect_.width_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    pointY_ = startPointRect_.posY_ + hotZone_ * DRAG_HOTZONE_RATIO;
     DoMoveOrDrag();
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -282,11 +288,11 @@ HWTEST_F(WindowMoveDragTest, DragWindow06, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ + HOTZONE * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ + startPointRect_.height_ + HOTZONE * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ + hotZone_ * POINT_HOTZONE_RATIO;
+    startPointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * POINT_HOTZONE_RATIO;
 
-    pointX_ = startPointRect_.posX_ + startPointRect_.width_ + HOTZONE * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + HOTZONE * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + startPointRect_.width_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * DRAG_HOTZONE_RATIO;
     DoMoveOrDrag();
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -302,10 +308,10 @@ HWTEST_F(WindowMoveDragTest, DragWindow07, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     startPointRect_ = window_->GetRect();
     startPointX_ = startPointRect_.posX_ + startPointRect_.width_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ - HOTZONE * POINT_HOTZONE_RATIO;
+    startPointY_ = startPointRect_.posY_ - hotZone_ * POINT_HOTZONE_RATIO;
 
     pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ - HOTZONE * DRAG_HOTZONE_RATIO;
+    pointY_ = startPointRect_.posY_ - hotZone_ * DRAG_HOTZONE_RATIO;
     DoMoveOrDrag();
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -321,10 +327,10 @@ HWTEST_F(WindowMoveDragTest, DragWindow08, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     startPointRect_ = window_->GetRect();
     startPointX_ = startPointRect_.posX_ + startPointRect_.width_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ + startPointRect_.height_ + HOTZONE * POINT_HOTZONE_RATIO;
+    startPointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * POINT_HOTZONE_RATIO;
 
     pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + HOTZONE * DRAG_HOTZONE_RATIO;
+    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * DRAG_HOTZONE_RATIO;
     DoMoveOrDrag();
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -343,7 +349,7 @@ HWTEST_F(WindowMoveDragTest, DragWindow09, Function | MediumTest | Level3)
     startPointY_ = startPointRect_.posY_ + 1;
 
     pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + HOTZONE * DRAG_HOTZONE_RATIO;
+    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * DRAG_HOTZONE_RATIO;
     DoMoveOrDrag();
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -362,7 +368,7 @@ HWTEST_F(WindowMoveDragTest, DragWindow10, Function | MediumTest | Level3)
     startPointY_ = startPointRect_.posY_ + 1;
 
     pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + HOTZONE * DRAG_HOTZONE_RATIO;
+    pointY_ = startPointRect_.posY_ + hotZone_ * DRAG_HOTZONE_RATIO;
     window_->StartMove();
     hasStartMove_ = true;
     DoMoveOrDrag();

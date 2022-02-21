@@ -141,8 +141,9 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     } else if (reason == WindowSizeChangeReason::DRAG) {
         if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
             // fix rect in case of moving window when dragging
-            newRect = WindowHelper::GetFixedWindowRectByMinRect(rect,
-                property->GetWindowRect(), windowRoot_->isVerticalDisplay(node));
+            float virtualPixelRatio = windowRoot_->GetVirtualPixelRatio(node->GetDisplayId());
+            newRect = WindowHelper::GetFixedWindowRectByMinRect(rect, property->GetWindowRect(),
+                windowRoot_->isVerticalDisplay(node), virtualPixelRatio);
         } else {
             newRect = rect;
         }

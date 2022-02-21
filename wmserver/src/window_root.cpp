@@ -477,5 +477,11 @@ void WindowRoot::NotifyDisplayDestory(DisplayId expandDisplayId)
     defaultDisplaycontainer->MoveWindowNode(expandDisplaycontainer);
     NotifyDisplayRemoved(expandDisplayId);
 }
+
+float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
+{
+    auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
+    return container->GetVirtualPixelRatio();
+}
 }
 }
