@@ -55,7 +55,10 @@ ohos_shared_library("window_native_kit") {
 
   external_deps = [
     "ability_runtime:runtime",
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
     "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
     "napi:ace_napi",
   ]
 
@@ -68,7 +71,6 @@ ohos_shared_library("window_napi") {
     "window_manager_napi/js_window_manager.cpp",
     "window_manager_napi/window_manager_module.cpp",
   ]
-
   configs = [ ":window_manager_napi_config" ]
   deps = [
     ":window_native_kit",
@@ -82,6 +84,7 @@ ohos_shared_library("window_napi") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
     "hiviewdfx_hilog_native:libhilog",

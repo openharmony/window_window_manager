@@ -43,8 +43,10 @@ enum class ApiWindowType : uint32_t {
     TYPE_KEYGUARD,
     TYPE_VOLUME_OVERLAY,
     TYPE_NAVIGATION_BAR,
-    TYPE_END = TYPE_NAVIGATION_BAR,
+    TYPE_FLOAT,
+    TYPE_END = TYPE_FLOAT,
 };
+
 const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::APP_SUB_WINDOW_BASE,             ApiWindowType::TYPE_APP            },
     { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, ApiWindowType::TYPE_SYSTEM_ALERT   },
@@ -55,6 +57,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,      ApiWindowType::TYPE_VOLUME_OVERLAY },
     { WindowType::WINDOW_TYPE_NAVIGATION_BAR,      ApiWindowType::TYPE_NAVIGATION_BAR },
     { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      ApiWindowType::TYPE_APP_SUB_WINDOW },
+    { WindowType::WINDOW_TYPE_FLOAT,               ApiWindowType::TYPE_FLOAT          },
 };
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_APP,             WindowType::APP_SUB_WINDOW_BASE            },
@@ -66,6 +69,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_VOLUME_OVERLAY,  WindowType::WINDOW_TYPE_VOLUME_OVERLAY     },
     { ApiWindowType::TYPE_NAVIGATION_BAR,  WindowType::WINDOW_TYPE_NAVIGATION_BAR     },
     { ApiWindowType::TYPE_APP_SUB_WINDOW,  WindowType::WINDOW_TYPE_APP_SUB_WINDOW     },
+    { ApiWindowType::TYPE_FLOAT,           WindowType::WINDOW_TYPE_FLOAT              }
 };
 enum class ApiWindowMode : uint32_t {
     UNDEFINED = 1,
@@ -91,6 +95,7 @@ const std::map<WindowMode, ApiWindowMode> NATIVE_TO_JS_WINDOW_MODE_MAP {
     NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine,
         const SystemBarRegionTints& tints);
     NativeValue* ChangeAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avoidArea);
+    bool CheckCallingPermission(std::string permission);
 }
 }
 #endif
