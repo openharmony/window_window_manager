@@ -62,6 +62,16 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateWindowStatus(windowInfo, type);
             break;
         }
+        case TRANS_ID_UPDATE_WINDOW_VISIBILITY: {
+            uint32_t size = data.ReadUint32();
+            std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+            for (uint32_t i = 0; i < size; ++i) {
+                sptr<WindowVisibilityInfo> info = data.ReadParcelable<WindowVisibilityInfo>();
+                windowVisibilityInfos.emplace_back(info);
+            }
+            UpdateWindowVisibilityInfo(windowVisibilityInfos);
+            break;
+        }
         default:
             break;
     }

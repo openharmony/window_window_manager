@@ -124,9 +124,16 @@ struct Rect {
     int32_t posY_;
     uint32_t width_;
     uint32_t height_;
-    bool operator == (const Rect& a) const
+
+    bool operator==(const Rect& a) const
     {
         return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
+    }
+
+    bool IsInsideOf(const Rect& a) const
+    {
+        return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
+            posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
     }
 };
 

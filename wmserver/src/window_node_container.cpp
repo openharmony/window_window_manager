@@ -18,6 +18,7 @@
 #include <ability_manager_client.h>
 #include <algorithm>
 #include <cinttypes>
+#include <ctime>
 
 #include "common_event_manager.h"
 #include "display_manager_service_inner.h"
@@ -122,7 +123,6 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
         }
     }
     UpdateWindowTree(node);
-
     UpdateRSTree(node, true);
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
@@ -132,6 +132,8 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     } else {
         NotifyIfSystemBarTintChanged();
     }
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     UpdateWindowStatus(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     WLOGFI("AddWindowNode windowId: %{public}d end", node->GetWindowId());
@@ -256,8 +258,16 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     node->requestedVisibility_ = false;
     node->currentVisibility_ = false;
     node->hasDecorated_ = false;
+    node->isCovered_ = true;
+    std::vector<sptr<WindowVisibilityInfo>> infos = {new WindowVisibilityInfo(node->GetWindowId(),
+        node->GetCallingPid(), node->GetCallingUid(), false)};
     for (auto& child : node->children_) {
-        child->currentVisibility_ = false;
+        if (child->currentVisibility_) {
+            child->currentVisibility_ = false;
+            child->isCovered_ = true;
+            infos.emplace_back(new WindowVisibilityInfo(child->GetWindowId(), child->GetCallingPid(),
+                child->GetCallingUid(), false));
+        }
     }
 
     if (node->IsSplitMode()) {
@@ -276,6 +286,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     } else {
         NotifyIfSystemBarTintChanged();
     }
+    UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     UpdateWindowStatus(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     WLOGFI("RemoveWindowNode windowId: %{public}d end", node->GetWindowId());
@@ -347,43 +358,16 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
 void WindowNodeContainer::AssignZOrder()
 {
     zOrder_ = 0;
-    for (auto& node : belowAppWindowNode_->children_) {
-        AssignZOrder(node);
-    }
-    for (auto& node : appWindowNode_->children_) {
-        AssignZOrder(node);
-    }
-    for (auto& node : aboveAppWindowNode_->children_) {
-        AssignZOrder(node);
-    }
-}
-
-void WindowNodeContainer::AssignZOrder(sptr<WindowNode>& node)
-{
-    if (node == nullptr) {
-        return;
-    }
-    auto iter = node->children_.begin();
-    for (; iter < node->children_.end(); ++iter) {
-        if ((*iter)->priority_ < 0) {
-            if ((*iter)->surfaceNode_) {
-                (*iter)->surfaceNode_->SetPositionZ(zOrder_);
-                ++zOrder_;
-            }
-        } else {
-            break;
+    WindowNodeOperationFunc func = [this](sptr<WindowNode> node) {
+        if (node->surfaceNode_ == nullptr) {
+            WLOGE("AssignZOrder: surfaceNode is nullptr, window Id:%{public}u", node->GetWindowId());
+            return false;
         }
-    }
-    if (node->surfaceNode_) {
         node->surfaceNode_->SetPositionZ(zOrder_);
         ++zOrder_;
-    }
-    for (; iter < node->children_.end(); ++iter) {
-        if ((*iter)->surfaceNode_) {
-            (*iter)->surfaceNode_->SetPositionZ(zOrder_);
-            ++zOrder_;
-        }
-    }
+        return false;
+    };
+    TraverseWindowTree(func, false);
 }
 
 WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
@@ -636,18 +620,18 @@ void WindowNodeContainer::DumpScreenWindowTree()
 {
     WLOGFI("-------- display %{public}" PRIu64" dump window info begin---------", displayId_);
     WLOGFI("WindowName WinId Type Mode Flag ZOrd [   x    y    w    h]");
-    std::vector<sptr<WindowNode>> windowNodes;
-    TraverseContainer(windowNodes);
-    int32_t zOrder = static_cast<int32_t>(windowNodes.size());
-    for (auto node : windowNodes) {
+    uint32_t zOrder = zOrder_;
+    WindowNodeOperationFunc func = [&zOrder](sptr<WindowNode> node) {
         Rect rect = node->GetLayoutRect();
         const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
             node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
-        WLOGFI("%{public}10s %{public}5d %{public}4d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
-            "%{public}4d %{public}4d]", windowName.c_str(), node->GetWindowId(), node->GetWindowType(),
-            node->GetWindowMode(), node->GetWindowFlags(),
-            --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
-    }
+        WLOGI("DumpScreenWindowTree: %{public}10s %{public}5d %{public}4d %{public}4d %{public}4d %{public}4d " \
+            "[%{public}4d %{public}4d %{public}4d %{public}4d]",
+            windowName.c_str(), node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
+            node->GetWindowFlags(), --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
+        return false;
+    };
+    TraverseWindowTree(func, true);
     WLOGFI("-------- display %{public}" PRIu64" dump window info end  ---------", displayId_);
 }
 
@@ -780,22 +764,21 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
 
 sptr<WindowNode> WindowNodeContainer::GetNextFocusableWindow(uint32_t windowId) const
 {
-    std::vector<sptr<WindowNode>> windowNodes;
-    TraverseContainer(windowNodes);
-    auto iter = std::find_if(windowNodes.begin(), windowNodes.end(),
-                             [windowId](sptr<WindowNode>& node) {
-                                 return node->GetWindowId() == windowId;
-                             });
-    if (iter != windowNodes.end()) {
-        int index = std::distance(windowNodes.begin(), iter);
-        for (int i = index + 1; i < windowNodes.size(); i++) {
-            if (windowNodes[i]->GetWindowProperty()->GetFocusable()) {
-                return windowNodes[i];
-            }
+    sptr<WindowNode> nextFocusableWindow;
+    bool previousFocusedWindowFound = false;
+    WindowNodeOperationFunc func = [windowId, &nextFocusableWindow, &previousFocusedWindowFound](
+        sptr<WindowNode> node) {
+        if (previousFocusedWindowFound && node->GetWindowProperty()->GetFocusable()) {
+            nextFocusableWindow = node;
+            return true;
         }
-    }
-    WLOGFI("could not get next focusable window");
-    return nullptr;
+        if (node->GetWindowId() == windowId) {
+            previousFocusedWindowFound = true;
+        }
+        return false;
+    };
+    TraverseWindowTree(func, true);
+    return nextFocusableWindow;
 }
 
 void WindowNodeContainer::MinimizeAllAppWindows()
@@ -1027,39 +1010,136 @@ void WindowNodeContainer::MoveWindowNode(sptr<WindowNodeContainer>& container)
 {
     WLOGFI("MoveWindowNode: disconnect expand display: %{public}" PRId64 ", move window node to display: "
         "%{public}" PRId64 "", container->GetDisplayId(), displayId_);
-    sptr<WindowNode> belowAppNode = container->GetBelowAppWindowNode();
-    sptr<WindowNode> appNode = container->GetAppWindowNode();
-    sptr<WindowNode> aboveAppNode = container->GetAboveAppWindowNode();
-    for (auto& node : belowAppNode->children_) {
+    for (auto& node : container->belowAppWindowNode_->children_) {
         WLOGFI("belowAppWindowNode_: move windowNode: {public}%d", node->GetWindowId());
         node->SetDisplayId(displayId_);
         belowAppWindowNode_->children_.push_back(node);
     }
-    for (auto& node : appNode->children_) {
+    for (auto& node : container->appWindowNode_->children_) {
         WLOGFI("appWindowNode_: move windowNode: {public}%d", node->GetWindowId());
         node->SetDisplayId(displayId_);
         appWindowNode_->children_.push_back(node);
     }
-    for (auto& node : aboveAppNode->children_) {
+    for (auto& node : container->aboveAppWindowNode_->children_) {
         WLOGFI("aboveAppWindowNode_: move windowNode: {public}%d", node->GetWindowId());
         node->SetDisplayId(displayId_);
         aboveAppWindowNode_->children_.push_back(node);
     }
 }
 
-sptr<WindowNode> WindowNodeContainer::GetBelowAppWindowNode() const
+void WindowNodeContainer::TraverseWindowTree(const WindowNodeOperationFunc& func, bool isFromTopToBottom) const
 {
-    return belowAppWindowNode_;
+    std::vector<sptr<WindowNode>> rootNodes = { belowAppWindowNode_, appWindowNode_, aboveAppWindowNode_ };
+    if (isFromTopToBottom) {
+        std::reverse(rootNodes.begin(), rootNodes.end());
+    }
+
+    for (auto& node : rootNodes) {
+        if (isFromTopToBottom) {
+            for (auto iter = node->children_.rbegin(); iter != node->children_.rend(); ++iter) {
+                if (TraverseFromTopToBottom(*iter, func)) {
+                    return;
+                }
+            }
+        } else {
+            for (auto iter = node->children_.begin(); iter != node->children_.end(); ++iter) {
+                if (TraverseFromBottomToTop(*iter, func)) {
+                    return;
+                }
+            }
+        }
+    }
 }
 
-sptr<WindowNode> WindowNodeContainer::GetAppWindowNode() const
+bool WindowNodeContainer::TraverseFromTopToBottom(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const
 {
-    return appWindowNode_;
+    if (node == nullptr) {
+        return false;
+    }
+    auto iterBegin = node->children_.rbegin();
+    for (; iterBegin != node->children_.rend(); ++iterBegin) {
+        if ((*iterBegin)->priority_ <= 0) {
+            break;
+        }
+        if (func(*iterBegin)) {
+            return true;
+        }
+    }
+    if (func(node)) {
+        return true;
+    }
+    for (; iterBegin != node->children_.rend(); ++iterBegin) {
+        if (func(*iterBegin)) {
+            return true;
+        }
+    }
+    return false;
 }
 
-sptr<WindowNode> WindowNodeContainer::GetAboveAppWindowNode() const
+bool WindowNodeContainer::TraverseFromBottomToTop(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const
 {
-    return aboveAppWindowNode_;
+    if (node == nullptr) {
+        return false;
+    }
+    auto iterBegin = node->children_.begin();
+    for (; iterBegin != node->children_.end(); ++iterBegin) {
+        if ((*iterBegin)->priority_ >= 0) {
+            break;
+        }
+        if (func(*iterBegin)) {
+            return true;
+        }
+    }
+    if (func(node)) {
+        return true;
+    }
+    for (; iterBegin != node->children_.end(); ++iterBegin) {
+        if (func(*iterBegin)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void WindowNodeContainer::UpdateWindowVisibilityInfos(std::vector<sptr<WindowVisibilityInfo>>& infos)
+{
+    currentCoveredArea_.clear();
+    WindowNodeOperationFunc func = [this, &infos](sptr<WindowNode> node) {
+        if (node == nullptr) {
+            return false;
+        }
+        Rect layoutRect = node->GetLayoutRect();
+        int32_t nodeX = std::max(0, layoutRect.posX_);
+        int32_t nodeY = std::max(0, layoutRect.posY_);
+        int32_t nodeXEnd = std::min(displayRect_.posX_ + static_cast<int32_t>(displayRect_.width_),
+            layoutRect.posX_ + static_cast<int32_t>(layoutRect.width_));
+        int32_t nodeYEnd = std::min(displayRect_.posY_ + static_cast<int32_t>(displayRect_.height_),
+            layoutRect.posY_ + static_cast<int32_t>(layoutRect.height_));
+
+        Rect rectInDisplay = {nodeX, nodeY,
+                              static_cast<uint32_t>(nodeXEnd - nodeX), static_cast<uint32_t>(nodeYEnd - nodeY)};
+        bool isCovered = false;
+        for (auto& rect : currentCoveredArea_) {
+            if (rectInDisplay.IsInsideOf(rect)) {
+                isCovered = true;
+                WLOGD("UpdateWindowVisibilityInfos: find covered window:%{public}u", node->GetWindowId());
+                break;
+            }
+        }
+        if (!isCovered) {
+            currentCoveredArea_.emplace_back(rectInDisplay);
+        }
+        if (isCovered != node->isCovered_) {
+            node->isCovered_ = isCovered;
+            infos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
+                node->GetCallingUid(), !isCovered));
+            WLOGD("UpdateWindowVisibilityInfos: covered status changed window:%{public}u, covered:%{public}d",
+                node->GetWindowId(), isCovered);
+        }
+        return false;
+    };
+    TraverseWindowTree(func, true);
+    WindowManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(infos);
 }
 
 float WindowNodeContainer::GetVirtualPixelRatio() const

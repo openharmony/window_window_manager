@@ -59,7 +59,7 @@ public:
 
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifyDisplayChange(sptr<AbstractDisplay> abstractDisplay);
-    void NotifyDisplayDestory(DisplayId displayId);
+    void NotifyDisplayDestroy(DisplayId displayId);
     void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
     float GetVirtualPixelRatio(DisplayId displayId) const;
