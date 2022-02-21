@@ -14,6 +14,7 @@
  */
 
 #include <vsync_station.h>
+#include "transaction/rs_interfaces.h"
 
 #include "window_manager_hilog.h"
 
@@ -33,21 +34,24 @@ void VsyncStation::RequestVsync(CallbackType type, std::shared_ptr<VsyncCallback
         return;
     }
     iter->second.insert(vsyncCallback);
+
     if (mainHandler_ == nullptr) {
         auto runner = AppExecFwk::EventRunner::Create(VSYNC_THREAD_ID);
         mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+
+        auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
+        while (receiver_ == nullptr) {
+            receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getpid()), mainHandler_);
+        }
+        receiver_->Init();
     }
-    if (!hasRequestedVsync_) {
-        mainHandler_->PostTask([this]() {
-            callback_.timestamp_ = 0;
-            callback_.userdata_ = this;
-            callback_.callback_ = OnVsync;
-            WLOGFI("request vsync start.");
-            VsyncError ret = VsyncHelper::Current()->RequestFrameCallback(callback_);
-            if (ret != VSYNC_ERROR_OK) {
-                WLOGFE("VsyncStation::RequestNextVsync fail: %{public}s", VsyncErrorStr(ret).c_str());
-            }
-        });
+    
+    if (!hasRequestedVsync_.load()) {
+        OHOS::Rosen::VSyncReceiver::FrameCallback fcb = {
+            .userData_ = this,
+            .callback_ = OnVsync,
+        };
+        receiver_->RequestNextVSync(fcb);
         hasRequestedVsync_.store(true);
     }
 }
