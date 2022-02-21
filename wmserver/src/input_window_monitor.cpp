@@ -163,7 +163,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
 
 void InputWindowMonitor::UpdateDisplayDirection(MMI::PhysicalDisplayInfo& physicalDisplayInfo, DisplayId displayId)
 {
-    Rotation rotation = DisplayManagerServiceInner::GetInstance().GetScreenInfoByDisplayId(displayId)->rotation_;
+    Rotation rotation = DisplayManagerServiceInner::GetInstance().GetScreenInfoByDisplayId(displayId)->GetRotation();
     switch (rotation) {
         case Rotation::ROTATION_0:
             physicalDisplayInfo.direction = MMI::Direction0;

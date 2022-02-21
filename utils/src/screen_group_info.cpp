@@ -16,16 +16,6 @@
 #include "screen_group_info.h"
 
 namespace OHOS::Rosen {
-void ScreenGroupInfo::Update(sptr<ScreenGroupInfo> info)
-{
-    ScreenInfo::Update(info);
-    children_.clear();
-    children_.insert(children_.begin(), info->children_.begin(), info->children_.end());
-    position_.clear();
-    position_.insert(position_.begin(), info->position_.begin(), info->position_.end());
-    combination_ = info->combination_;
-}
-
 bool ScreenGroupInfo::Marshalling(Parcel &parcel) const
 {
     bool res = ScreenInfo::Marshalling(parcel) && parcel.WriteUint32((uint32_t)combination_) &&
@@ -48,29 +38,34 @@ bool ScreenGroupInfo::Marshalling(Parcel &parcel) const
 ScreenGroupInfo* ScreenGroupInfo::Unmarshalling(Parcel &parcel)
 {
     ScreenGroupInfo* screenGroupInfo = new ScreenGroupInfo();
-    return screenGroupInfo->InnerUnmarshalling(parcel);
+    bool res = screenGroupInfo->InnerUnmarshalling(parcel);
+    if (res) {
+        return screenGroupInfo;
+    }
+    delete screenGroupInfo;
+    return nullptr;
 }
 
-ScreenGroupInfo* ScreenGroupInfo::InnerUnmarshalling(Parcel& parcel)
+bool ScreenGroupInfo::InnerUnmarshalling(Parcel& parcel)
 {
     uint32_t combination;
     if (!ScreenInfo::InnerUnmarshalling(parcel) || !parcel.ReadUint32(combination) ||
         !parcel.ReadUInt64Vector(&children_)) {
-        return nullptr;
+        return false;
     }
     combination_ = (ScreenCombination) combination;
     uint32_t size;
     if (!parcel.ReadUint32(size)) {
-        return nullptr;
+        return false;
     }
     for (size_t i = 0; i < size; i++) {
         Point point;
         if (parcel.ReadInt32(point.posX_) && parcel.ReadInt32(point.posY_)) {
             position_.push_back(point);
         } else {
-            return nullptr;
+            return false;
         }
     }
-    return this;
+    return true;
 }
 } // namespace OHOS::Rosen
