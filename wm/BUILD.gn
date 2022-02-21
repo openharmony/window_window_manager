@@ -72,7 +72,7 @@ ohos_shared_library("libwm") {
     "//foundation/windowmanager/utils:libwmutil",
 
     # vsync
-    "//foundation/graphic/standard:libvsync_client",
+    "//foundation/graphic/standard/rosen/modules/composer:libcomposer",
   ]
 
   external_deps = [
