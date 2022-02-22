@@ -172,23 +172,22 @@ ScreenId ScreenManager::MakeExpand(const std::vector<ExpandOption>& options)
         screenIds.emplace_back(option.screenId_);
         startPoints.emplace_back(Point(option.startX_, option.startY_));
     }
-    DMError result = SingletonContainer::Get<ScreenManagerAdapter>().MakeExpand(screenIds, startPoints);
-    if (result != DMError::DM_OK) {
-        return SCREEN_ID_INVALID;
+    ScreenId group = SingletonContainer::Get<ScreenManagerAdapter>().MakeExpand(screenIds, startPoints);
+    if (group == SCREEN_ID_INVALID) {
+        WLOGFI("make expand failed");
     }
-    WLOGFI("make expand success");
-    return screenIds.front(); // default main screenId is the first element of screenIds
+    return group;
 }
 
 ScreenId ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)
 {
     WLOGFI("create mirror for screen: %{public}" PRIu64"", mainScreenId);
     // TODO: "record screen" should use another function, "MakeMirror" should return group id.
-    DMError result = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId);
-    if (result == DMError::DM_OK) {
-        WLOGFI("create mirror success");
+    ScreenId group = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId);
+    if (group == SCREEN_ID_INVALID) {
+        WLOGFI("create mirror failed");
     }
-    return SCREEN_ID_INVALID;
+    return group;
 }
 
 ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option)

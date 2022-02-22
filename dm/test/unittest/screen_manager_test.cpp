@@ -105,7 +105,7 @@ HWTEST_F(ScreenManagerTest, MakeExpand_001, Function | SmallTest | Level1)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateVirtualScreen(_)).Times(1).WillOnce(Return(virtualScreenId));
     EXPECT_CALL(m->Mock(), DestroyVirtualScreen(_)).Times(1).WillOnce(Return(DMError::DM_OK));
-    EXPECT_CALL(m->Mock(), MakeExpand(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    EXPECT_CALL(m->Mock(), MakeExpand(_, _)).Times(1).WillOnce(Return(0));
     ScreenId vScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     std::vector<ExpandOption> options = {{validId, 0, 0}, {vScreenId, defaultWidth_, 0}};
     ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
