@@ -153,7 +153,7 @@ struct SystemBarProperty {
     bool enable_;
     uint32_t backgroundColor_;
     uint32_t contentColor_;
-    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_WHITE), contentColor_(SYSTEM_COLOR_BLACK) {}
+    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_BLACK), contentColor_(SYSTEM_COLOR_WHITE) {}
     SystemBarProperty(bool enable, uint32_t background, uint32_t content)
         : enable_(enable), backgroundColor_(background), contentColor_(content) {}
     bool operator == (const SystemBarProperty& a) const

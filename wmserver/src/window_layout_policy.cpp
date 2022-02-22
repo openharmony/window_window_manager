@@ -144,6 +144,7 @@ void WindowLayoutPolicy::RemoveWindowNode(sptr<WindowNode>& node)
         LayoutWindowTree();
     }
     Rect winRect = node->GetWindowProperty()->GetWindowRect();
+    node->SetLayoutRect(winRect);
     node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
 }
 
