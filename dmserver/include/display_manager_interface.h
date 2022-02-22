@@ -99,8 +99,8 @@ public:
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) = 0;
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) = 0;
     virtual std::vector<sptr<ScreenInfo>> GetAllScreenInfos() = 0;
-    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) = 0;
-    virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) = 0;
+    virtual ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) = 0;
+    virtual ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) = 0;
     virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
 };
 } // namespace OHOS::Rosen
