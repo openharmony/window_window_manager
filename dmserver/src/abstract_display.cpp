@@ -133,8 +133,8 @@ bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
             id_, dmsScreenId);
         return false;
     }
-    width_ = info->width_;
-    height_ = info->height_;
+    width_ = static_cast<int32_t>(info->width_);
+    height_ = static_cast<int32_t>(info->height_);
     freshRate_ = info->freshRate_;
     screenId_ = dmsScreenId;
     WLOGD("display bound to screen. display:%{public}" PRIu64", screen:%{public}" PRIu64"", id_, dmsScreenId);

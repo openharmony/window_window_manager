@@ -30,7 +30,7 @@ class ScreenInfo;
 struct Point {
     int32_t posX_;
     int32_t posY_;
-    Point() {};
+    Point() : posX_(0), posY_(0) {};
     Point(int32_t posX, int32_t posY) : posX_(posX), posY_(posY) {};
 };
 

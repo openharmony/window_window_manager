@@ -937,27 +937,27 @@ void WindowImpl::HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId)
     Rect newRect = startPointRect_;
     if (startPointPosX_ <= startPointRect_.posX_) {
         if (diffX > static_cast<int32_t>(startPointRect_.width_)) {
-            diffX = startPointRect_.width_;
+            diffX = static_cast<int32_t>(startPointRect_.width_);
         }
-        newRect.posX_  += diffX;
-        newRect.width_ -= diffX;
-    } else if (startPointPosX_ >= static_cast<int32_t>(startPointRect_.posX_ + startPointRect_.width_)) {
+        newRect.posX_ += diffX;
+        newRect.width_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.width_) - diffX);
+    } else if (startPointPosX_ >= startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_)) {
         if (diffX < 0 && (-diffX > static_cast<int32_t>(startPointRect_.width_))) {
-            diffX = -startPointRect_.width_;
+            diffX = -(static_cast<int32_t>(startPointRect_.width_));
         }
-        newRect.width_ += diffX;
+        newRect.width_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.width_) + diffX);
     }
     if (startPointPosY_ <= startPointRect_.posY_) {
         if (diffY > static_cast<int32_t>(startPointRect_.height_)) {
-            diffY = startPointRect_.height_;
+            diffY = static_cast<int32_t>(startPointRect_.height_);
         }
-        newRect.posY_   += diffY;
-        newRect.height_ -= diffY;
-    } else if (startPointPosY_ >= static_cast<int32_t>(startPointRect_.posY_ + startPointRect_.height_)) {
+        newRect.posY_ += diffY;
+        newRect.height_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.height_) - diffY);
+    } else if (startPointPosY_ >= startPointRect_.posY_ + static_cast<int32_t>(startPointRect_.height_)) {
         if (diffY < 0 && (-diffY > static_cast<int32_t>(startPointRect_.height_))) {
-            diffY = -startPointRect_.height_;
+            diffY = -(static_cast<int32_t>(startPointRect_.height_));
         }
-        newRect.height_ += diffY;
+        newRect.height_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.height_) + diffY);
     }
     auto res = Drag(newRect);
     if (res != WMError::WM_OK) {

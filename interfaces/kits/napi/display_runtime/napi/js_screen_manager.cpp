@@ -316,7 +316,7 @@ NativeValue* OnMakeExpand(NativeEngine& engine, NativeCallbackInfo& info)
     }
     uint32_t size = array->GetLength();
     std::vector<ExpandOption> options;
-    for (auto i = 0; i < size; ++i) {
+    for (uint32_t i = 0; i < size; ++i) {
         NativeObject* object = ConvertNativeValueTo<NativeObject>(array->GetElement(i));
         ExpandOption expandOption;
         int32_t res = GetExpandOptionFromJs(engine, object, expandOption);
