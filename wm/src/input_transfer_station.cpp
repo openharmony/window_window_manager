@@ -56,7 +56,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
         WLOGE("OnInputEvent receive pointerEvent is nullptr");
         return;
     }
-    uint32_t windowId = pointerEvent->GetAgentWindowId();
+    uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
         WLOGE("OnInputEvent channel is nullptr");

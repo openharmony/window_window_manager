@@ -510,7 +510,7 @@ bool WindowManagerProxy::IsSupportWideGamut(uint32_t windowId)
         return false;
     }
 
-    int32_t ret = reply.ReadUint32();
+    uint32_t ret = reply.ReadUint32();
     return static_cast<bool>(ret);
 }
 
@@ -555,7 +555,7 @@ ColorSpace WindowManagerProxy::GetColorSpace(uint32_t windowId)
         return ColorSpace::COLOR_SPACE_DEFAULT;
     }
 
-    int32_t ret = reply.ReadUint32();
+    uint32_t ret = reply.ReadUint32();
     return static_cast<ColorSpace>(ret);
 }
 
