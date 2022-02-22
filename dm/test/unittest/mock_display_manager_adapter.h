@@ -57,8 +57,8 @@ public:
     MOCK_METHOD1(GetScreenById, sptr<Screen>(ScreenId screenId));
     MOCK_METHOD1(GetScreenGroupById, sptr<ScreenGroup>(ScreenId screenId));
     MOCK_METHOD0(GetAllScreens, std::vector<sptr<Screen>>());
-    MOCK_METHOD2(MakeMirror, DMError(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId));
-    MOCK_METHOD2(MakeExpand, DMError(std::vector<ScreenId> screenId, std::vector<Point> startPoint));
+    MOCK_METHOD2(MakeMirror, ScreenId(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId));
+    MOCK_METHOD2(MakeExpand, ScreenId(std::vector<ScreenId> screenId, std::vector<Point> startPoint));
     MOCK_METHOD2(SetScreenActiveMode, bool(ScreenId screenId, uint32_t modeId));
     MOCK_METHOD1(UpdateScreenInfo, void(ScreenId screenId));
 
