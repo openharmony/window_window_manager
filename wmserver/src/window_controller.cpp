@@ -71,6 +71,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     if (res != WMError::WM_OK) {
         return res;
     }
+    windowRoot_->FocusFaultDetection();
     FlushWindowInfo(property->GetWindowId());
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
@@ -96,6 +97,7 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
     if (res != WMError::WM_OK) {
         return res;
     }
+    windowRoot_->FocusFaultDetection();
     FlushWindowInfo(windowId);
     return res;
 }
@@ -111,6 +113,7 @@ WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
     if (res != WMError::WM_OK) {
         return res;
     }
+    windowRoot_->FocusFaultDetection();
     FlushWindowInfoWithDisplayId(displayId);
     return res;
 }
@@ -385,6 +388,7 @@ WMError WindowController::ProcessWindowTouchedEvent(uint32_t windowId)
         WLOGFI("ProcessWindowTouchedEvent end");
         return WMError::WM_OK;
     }
+    windowRoot_->FocusFaultDetection();
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
