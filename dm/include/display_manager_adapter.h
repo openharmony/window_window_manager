@@ -84,8 +84,8 @@ public:
     virtual sptr<Screen> GetScreenById(ScreenId screenId);
     virtual sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
     virtual std::vector<sptr<Screen>> GetAllScreens();
-    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
-    virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
+    virtual ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
+    virtual ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     virtual void UpdateScreenInfo(ScreenId);
 
