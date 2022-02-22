@@ -29,7 +29,7 @@ typedef enum DisplayType {
 class Display : public RefBase {
 friend class DisplayManagerAdapter;
 public:
-    ~Display() = default;
+    ~Display();
     Display(const Display&) = delete;
     Display(Display&&) = delete;
     Display& operator=(const Display&) = delete;
@@ -40,8 +40,10 @@ public:
     uint32_t GetFreshRate() const;
     ScreenId GetScreenId() const;
     float GetVirtualPixelRatio() const;
-private:
+
+protected:
     Display(const std::string& name, sptr<DisplayInfo> info);
+private:
     void UpdateDisplayInfo(sptr<DisplayInfo>);
     class Impl;
     sptr<Impl> pImpl_;
