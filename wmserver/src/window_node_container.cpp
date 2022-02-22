@@ -896,23 +896,19 @@ WMError WindowNodeContainer::ExitSplitWindowMode(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
     WLOGFI("exit split window mode %{public}d", node->GetWindowId());
-    if (pairedWindowMap_.find(node->GetWindowId()) != pairedWindowMap_.end()) {
-        WindowPairInfo info = pairedWindowMap_.at(node->GetWindowId());
-        auto pairNode = info.pairNode_;
+    node->GetWindowProperty()->ResumeLastWindowMode();
+    node->GetWindowToken()->UpdateWindowMode(node->GetWindowMode());
+    if (pairedWindowMap_.count(node->GetWindowId()) != 0) {
+        auto pairNode = pairedWindowMap_.at(node->GetWindowId()).pairNode_;
         pairNode->GetWindowProperty()->ResumeLastWindowMode();
         pairNode->GetWindowToken()->UpdateWindowMode(pairNode->GetWindowMode());
-        node->GetWindowProperty()->ResumeLastWindowMode();
-        node->GetWindowToken()->UpdateWindowMode(node->GetWindowMode());
         pairedWindowMap_.erase(pairNode->GetWindowId());
         pairedWindowMap_.erase(node->GetWindowId());
-        WLOGFI("Split out, Id[%{public}d, %{public}d], Mode[%{public}d, %{public}d]",
-            node->GetWindowId(), pairNode->GetWindowId(),
-            node->GetWindowMode(), pairNode->GetWindowMode());
-    } else {
-        WLOGFE("Split out, but can not find pair in map  %{public}d", node->GetWindowId());
-        return WMError::WM_OK;
+        WLOGFI("resume pair node mode, Id[%{public}d, %{public}d], Mode[%{public}d, %{public}d]", node->GetWindowId(),
+            pairNode->GetWindowId(), node->GetWindowMode(), pairNode->GetWindowMode());
     }
     if (pairedWindowMap_.empty()) {
+        WLOGFI("send destroy msg to divider, Id: %{public}d", node->GetWindowId());
         SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, displayId_);
     }
     ResetLayoutPolicy();
