@@ -18,30 +18,34 @@
 
 #include <parcel.h>
 
+#include "class_var_definition.h"
 #include "screen.h"
 
 namespace OHOS::Rosen {
 class ScreenInfo : public Parcelable {
+friend class AbstractScreen;
 public:
-    ScreenInfo() = default;
     ~ScreenInfo() = default;
-
-    void Update(sptr<ScreenInfo> info);
+    ScreenInfo(const ScreenInfo&) = delete;
+    ScreenInfo(ScreenInfo&&) = delete;
+    ScreenInfo& operator=(const ScreenInfo&) = delete;
+    ScreenInfo& operator= (ScreenInfo&&) = delete;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static ScreenInfo* Unmarshalling(Parcel& parcel);
 
-    ScreenId id_ { SCREEN_ID_INVALID };
-    uint32_t virtualWidth_ { 0 };
-    uint32_t virtualHeight_ { 0 };
-    float virtualPixelRatio_ { 0.0 };
-    ScreenId parent_ { 0 };
-    bool canHasChild_ { false };
-    Rotation rotation_ { Rotation::ROTATION_0 };
-    uint32_t modeId_ { 0 };
-    std::vector<sptr<SupportedScreenModes>> modes_ {};
+    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, ScreenId, id, SCREEN_ID_INVALID);
+    DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, VirtualWidth, virtualWidth, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, VirtualHeight, virtualHeight, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET(float, VirtualPixelRatio, virtualPixelRatio, 0.0f);
+    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, ParentId, parent, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET(bool, CanHasChild, canHasChild, false);
+    DEFINE_VAR_DEFAULT_FUNC_GET(Rotation, Rotation, rotation, Rotation::ROTATION_0);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, ModeId, modeId, 0);
+    DEFINE_VAR_FUNC_GET(std::vector<sptr<SupportedScreenModes>>, Modes, modes);
 protected:
-    ScreenInfo* InnerUnmarshalling(Parcel& parcel);
+    ScreenInfo() = default;
+    bool InnerUnmarshalling(Parcel& parcel);
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H

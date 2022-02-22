@@ -27,10 +27,13 @@ typedef enum DisplayType {
 } DisplayType;
 
 class Display : public RefBase {
+friend class DisplayManagerAdapter;
 public:
-    Display(const std::string& name, DisplayInfo* info);
-    ~Display() = default;
-
+    ~Display();
+    Display(const Display&) = delete;
+    Display(Display&&) = delete;
+    Display& operator=(const Display&) = delete;
+    Display& operator=(Display&&) = delete;
     DisplayId GetId() const;
     int32_t GetWidth() const;
     int32_t GetHeight() const;
@@ -38,12 +41,10 @@ public:
     ScreenId GetScreenId() const;
     float GetVirtualPixelRatio() const;
 
-    void SetId(DisplayId displayId);
-    void SetWidth(int32_t width);
-    void SetHeight(int32_t height);
-    void SetFreshRate(uint32_t freshRate);
-
+protected:
+    Display(const std::string& name, sptr<DisplayInfo> info);
 private:
+    void UpdateDisplayInfo(sptr<DisplayInfo>);
     class Impl;
     sptr<Impl> pImpl_;
 };

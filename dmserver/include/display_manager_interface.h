@@ -68,7 +68,7 @@ public:
     };
 
     virtual DisplayId GetDefaultDisplayId() = 0;
-    virtual DisplayInfo GetDisplayInfoById(DisplayId displayId) = 0;
+    virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) = 0;
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
