@@ -43,7 +43,7 @@ public:
 
     void OnScreenConnect(sptr<ScreenInfo> screenInfo)
     {
-        if (screenInfo == nullptr || screenInfo->id_ == SCREEN_ID_INVALID) {
+        if (screenInfo == nullptr || screenInfo->GetScreenId() == SCREEN_ID_INVALID) {
             WLOGFE("OnScreenConnect, screenInfo is invalid.");
             return;
         }
@@ -52,7 +52,7 @@ public:
             return;
         }
         for (auto listener : pImpl_->screenListeners_) {
-            listener->OnConnect(screenInfo->id_);
+            listener->OnConnect(screenInfo->GetScreenId());
         }
     };
 
@@ -84,8 +84,8 @@ public:
         WLOGFD("OnScreenChange. event %{public}u", event);
         std::vector<ScreenId> screenIds;
         for (auto screenInfo : screenInfos) {
-            if (screenInfo->id_ != SCREEN_ID_INVALID) {
-                screenIds.push_back(screenInfo->id_);
+            if (screenInfo->GetScreenId() != SCREEN_ID_INVALID) {
+                screenIds.push_back(screenInfo->GetScreenId());
             }
         }
         for (auto listener: pImpl_->screenListeners_) {
@@ -108,17 +108,17 @@ ScreenManager::~ScreenManager()
 
 sptr<Screen> ScreenManager::GetScreenById(ScreenId screenId)
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenById(screenId);
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenById(screenId);
 }
 
 sptr<ScreenGroup> ScreenManager::GetScreenGroupById(ScreenId screenId)
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenGroupById(screenId);
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGroupById(screenId);
 }
 
 std::vector<sptr<Screen>> ScreenManager::GetAllScreens()
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetAllScreens();
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetAllScreens();
 }
 
 bool ScreenManager::RegisterScreenListener(sptr<IScreenListener> listener)
@@ -131,7 +131,7 @@ bool ScreenManager::RegisterScreenListener(sptr<IScreenListener> listener)
     pImpl_->screenListeners_.push_back(listener);
     if (screenManagerListener_ == nullptr) {
         screenManagerListener_ = new ScreenManagerListener(pImpl_);
-        SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+        SingletonContainer::Get<ScreenManagerAdapter>().RegisterDisplayManagerAgent(
             screenManagerListener_,
             DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
     }
@@ -152,7 +152,7 @@ bool ScreenManager::UnregisterScreenListener(sptr<IScreenListener> listener)
     }
     pImpl_->screenListeners_.erase(iter);
     if (pImpl_->screenListeners_.empty() && screenManagerListener_ != nullptr) {
-        SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+        SingletonContainer::Get<ScreenManagerAdapter>().UnregisterDisplayManagerAgent(
             screenManagerListener_,
             DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
         screenManagerListener_ = nullptr;
@@ -172,7 +172,7 @@ ScreenId ScreenManager::MakeExpand(const std::vector<ExpandOption>& options)
         screenIds.emplace_back(option.screenId_);
         startPoints.emplace_back(Point(option.startX_, option.startY_));
     }
-    DMError result = SingletonContainer::Get<DisplayManagerAdapter>().MakeExpand(screenIds, startPoints);
+    DMError result = SingletonContainer::Get<ScreenManagerAdapter>().MakeExpand(screenIds, startPoints);
     if (result != DMError::DM_OK) {
         return SCREEN_ID_INVALID;
     }
@@ -184,7 +184,7 @@ ScreenId ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> 
 {
     WLOGFI("create mirror for screen: %{public}" PRIu64"", mainScreenId);
     // TODO: "record screen" should use another function, "MakeMirror" should return group id.
-    DMError result = SingletonContainer::Get<DisplayManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId);
+    DMError result = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId);
     if (result == DMError::DM_OK) {
         WLOGFI("create mirror success");
     }
@@ -193,16 +193,16 @@ ScreenId ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> 
 
 ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option)
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().CreateVirtualScreen(option);
+    return SingletonContainer::Get<ScreenManagerAdapter>().CreateVirtualScreen(option);
 }
 
 DMError ScreenManager::DestroyVirtualScreen(ScreenId screenId)
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().DestroyVirtualScreen(screenId);
+    return SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(screenId);
 }
 
 DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenSurface(screenId, surface);
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(screenId, surface);
 }
 } // namespace OHOS::Rosen
