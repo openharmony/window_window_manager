@@ -16,6 +16,9 @@
 #include <iomanip>
 #include <regex>
 #include <sstream>
+#include "accesstoken_kit.h"
+#include "bundle_constants.h"
+#include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
 namespace OHOS {
@@ -248,6 +251,19 @@ NativeValue* ChangeAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avo
     object->SetProperty("rightRect", GetRectAndConvertToJsValue(engine, avoidArea.rightRect));
     object->SetProperty("bottomRect", GetRectAndConvertToJsValue(engine, avoidArea.bottomRect));
     return objValue;
+}
+
+bool CheckCallingPermission(std::string permission)
+{
+    WLOGFI("JsWindowUtils::CheckCallingPermission, permission:%{public}s", permission.c_str());
+    if (!permission.empty() &&
+        Security::AccessToken::AccessTokenKit::VerifyAccessToken(IPCSkeleton::GetCallingTokenID(), permission)
+        != AppExecFwk::Constants::PERMISSION_GRANTED) {
+        WLOGFE("%{public}s permission not granted.", permission.c_str());
+        return false;
+    }
+    WLOGFI("JsWindowUtils::CheckCallingPermission end.");
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS
