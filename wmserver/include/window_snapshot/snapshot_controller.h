@@ -46,8 +46,8 @@ private:
         void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelmap) override
         {
             if (flag_ == false) {
-                flag_ = true;
                 pixelMap_ = pixelmap;
+                flag_ = true;
             }
         }
         bool IsPixelMapOk()
