@@ -130,9 +130,9 @@ void DisplayManagerAgentProxy::OnScreenChange(
         return;
     }
 
-    for (int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         if (!data.WriteParcelable(screenInfos[i].GetRefPtr())) {
-            WLOGFE("Write screenInfos[%{public}d] size failed", i);
+            WLOGFE("Write screenInfos[%{public}zu] size failed", i);
             return;
         }
     }

@@ -462,7 +462,7 @@ bool DisplayManager::SetDisplayState(DisplayState state, DisplayStateCallback ca
             DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
     }
 
-    ret &= SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
+    ret = ret && SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
     if (!ret) {
         pImpl_->ClearDisplayStateCallback();
     }

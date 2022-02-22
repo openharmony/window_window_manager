@@ -296,7 +296,7 @@ bool AbstractScreenGroup::AddChildren(std::vector<sptr<AbstractScreen>>& dmsScre
     }
     bool res = true;
     for (size_t i = 0; i < size; i++) {
-        res &= AddChild(dmsScreens[i], startPoints[i]);
+        res = AddChild(dmsScreens[i], startPoints[i]) && res;
     }
     return res;
 }
