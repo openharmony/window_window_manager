@@ -1212,6 +1212,7 @@ void WindowImpl::SetDefaultOption()
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
+        case WindowType::SYSTEM_WINDOW_END: // SYSTEM_WINDOW_END is for boot animation, is unfocusable.
         case WindowType::WINDOW_TYPE_POINTER: {
             property_->SetFocusable(false);
             break;
