@@ -96,10 +96,12 @@ public:
 
         // limit position by fixed width or height
         if (oriDstRect.posX_ != lastRect.posX_) {
-            dstRect.posX_ = oriDstRect.posX_ + oriDstRect.width_ - dstRect.width_;
+            dstRect.posX_ = oriDstRect.posX_ + static_cast<int32_t>(oriDstRect.width_) -
+                static_cast<int32_t>(dstRect.width_);
         }
         if (oriDstRect.posY_ != lastRect.posY_) {
-            dstRect.posY_ = oriDstRect.posY_ + oriDstRect.height_ - dstRect.height_;
+            dstRect.posY_ = oriDstRect.posY_ + static_cast<int32_t>(oriDstRect.height_) -
+                static_cast<int32_t>(dstRect.height_);
         }
         return dstRect;
     }
@@ -107,9 +109,9 @@ public:
     static bool IsPointInWindow(int32_t pointPosX, int32_t pointPosY, Rect pointRect)
     {
         if ((pointPosX > pointRect.posX_) &&
-            (pointPosX < static_cast<int32_t>(pointRect.posX_ + pointRect.width_)) &&
+            (pointPosX < (pointRect.posX_ + static_cast<int32_t>(pointRect.width_))) &&
             (pointPosY > pointRect.posY_) &&
-            (pointPosY < static_cast<int32_t>(pointRect.posY_ + pointRect.height_))) {
+            (pointPosY < (pointRect.posY_ + static_cast<int32_t>(pointRect.height_)))) {
             return true;
         }
         return false;

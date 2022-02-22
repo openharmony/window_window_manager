@@ -312,8 +312,8 @@ bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScree
     }
     for (RSScreenModeInfo rsScreenModeInfo : allModes) {
         sptr<SupportedScreenModes> info = new SupportedScreenModes();
-        info->width_ = rsScreenModeInfo.GetScreenWidth();
-        info->height_ = rsScreenModeInfo.GetScreenHeight();
+        info->width_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenWidth());
+        info->height_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenHeight());
         info->freshRate_ = rsScreenModeInfo.GetScreenFreshRate();
         absScreen->modes_.push_back(info);
         WLOGD("fill screen w/h:%{public}d/%{public}d", info->width_, info->height_);
@@ -613,8 +613,8 @@ bool AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t m
         return false;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    uint32_t usedModeId = screen->activeIdx_;
-    screen->activeIdx_ = modeId;
+    uint32_t usedModeId = static_cast<uint32_t>(screen->activeIdx_);
+    screen->activeIdx_ = static_cast<int32_t>(modeId);
     // add thread to process mode change sync event
     // should be called by OnRsScreenChange if rs implement corresponding event callback
     if (usedModeId != modeId) {

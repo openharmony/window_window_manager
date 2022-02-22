@@ -682,9 +682,9 @@ sptr<ScreenInfo> DisplayManagerProxy::GetScreenInfoById(ScreenId screenId)
         WLOGFW("GetScreenInfoById SendRequest nullptr.");
         return nullptr;
     }
-    for (int i = 0; i < info->modes_.size(); i++) {
+    for (auto& mode : info->modes_) {
         WLOGFI("info modes is width: %{public}u, height: %{public}u, freshRate: %{public}u",
-            info->modes_[i]->width_, info->modes_[i]->height_, info->modes_[i]->freshRate_);
+            mode->width_, mode->height_, mode->freshRate_);
     }
     return info;
 }

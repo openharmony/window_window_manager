@@ -296,7 +296,8 @@ void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> ab
 
 bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info)
 {
-    if (info->height_ == absDisplay->GetHeight() && info->width_ == absDisplay->GetWidth()) {
+    if (info->height_ == static_cast<uint32_t>(absDisplay->GetHeight()) &&
+        info->width_ == static_cast<uint32_t>(absDisplay->GetWidth())) {
         WLOGI("keep display size. display:%{public}" PRIu64"", absDisplay->GetId());
         return false;
     }

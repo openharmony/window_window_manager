@@ -558,7 +558,7 @@ void WindowNodeContainer::UpdateWindowStatus(const sptr<WindowNode>& node, Windo
     }
     if (isNeedNotify) {
         sptr<WindowInfo> windowInfo = new WindowInfo();
-        windowInfo->wid_ = node->GetWindowId();
+        windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
         windowInfo->windowRect_ = node->GetLayoutRect();
         windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
         windowInfo->mode_ = node->GetWindowMode();
