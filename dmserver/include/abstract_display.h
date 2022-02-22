@@ -28,7 +28,7 @@ public:
     constexpr static int32_t DEFAULT_HIGHT = 1280;
     constexpr static float DEFAULT_VIRTUAL_PIXEL_RATIO = 1.0;
     constexpr static uint32_t DEFAULT_FRESH_RATE = 60;
-    AbstractDisplay(const DisplayInfo& info);
+    AbstractDisplay(const DisplayInfo* info);
     AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t freshRate);
     ~AbstractDisplay() = default;
     static inline bool IsVertical(Rotation rotation)
@@ -43,7 +43,7 @@ public:
     ScreenId GetAbstractScreenId() const;
     bool BindAbstractScreen(ScreenId dmsScreenId);
     bool BindAbstractScreen(sptr<AbstractScreen> abstractDisplay);
-    const sptr<DisplayInfo> ConvertToDisplayInfo() const;
+    sptr<DisplayInfo> ConvertToDisplayInfo() const;
 
     void SetId(DisplayId displayId);
     void SetWidth(int32_t width);

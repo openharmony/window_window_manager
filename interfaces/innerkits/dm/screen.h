@@ -57,9 +57,13 @@ struct ExpandOption {
 };
 
 class Screen : public RefBase {
+friend class ScreenManagerAdapter;
 public:
-    Screen(const ScreenInfo* info);
     ~Screen();
+    Screen(const Screen&) = delete;
+    Screen(Screen&&) = delete;
+    Screen& operator=(const Screen&) = delete;
+    Screen& operator=(Screen&&) = delete;
     bool IsGroup() const;
     ScreenId GetId() const;
     uint32_t GetWidth() const;
@@ -81,7 +85,9 @@ public:
     DMError GetScreenGamutMap(ScreenGamutMap& gamutMap) const;
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
-
+protected:
+    Screen(sptr<ScreenInfo> info);
+    void UpdateScreenInfo(sptr<ScreenInfo> screenInfo);
 private:
     class Impl;
     sptr<Impl> pImpl_;

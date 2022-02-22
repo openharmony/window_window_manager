@@ -45,7 +45,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();
             auto info = GetDisplayInfoById(displayId);
-            reply.WriteParcelable(&info);
+            reply.WriteParcelable(info);
             break;
         }
         case TRANS_ID_CREATE_VIRTUAL_SCREEN: {
@@ -166,7 +166,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case TRANS_ID_GET_SCREEN_INFO_BY_ID: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenInfo = GetScreenInfoById(screenId);
-            for (auto& mode : screenInfo->modes_) {
+            for (auto& mode : screenInfo->GetModes()) {
                 WLOGFI("info modes is width: %{public}u, height: %{public}u, freshRate: %{public}u",
                     mode->width_, mode->height_, mode->freshRate_);
             }

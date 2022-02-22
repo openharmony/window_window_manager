@@ -26,6 +26,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAdapter"};
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapter)
+WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapter)
 
 DisplayId DisplayManagerAdapter::GetDefaultDisplayId()
 {
@@ -56,35 +57,34 @@ sptr<Display> DisplayManagerAdapter::GetDisplayById(DisplayId displayId)
     if (iter != displayMap_.end()) {
         // Update display in map
         // should be updated automatically
-        DisplayInfo displayInfo = displayManagerServiceProxy_->GetDisplayInfoById(displayId);
-        if (displayInfo.id_ == DISPLAY_ID_INVALD) {
+        auto displayInfo = displayManagerServiceProxy_->GetDisplayInfoById(displayId);
+        if (displayInfo == nullptr) {
+            WLOGFE("GetDisplayById: displayInfo is nullptr!");
+            displayMap_.erase(iter);
+            return nullptr;
+        }
+        if (displayInfo->GetDisplayId() == DISPLAY_ID_INVALD) {
             WLOGFE("GetDisplayById: Get invalid displayInfo!");
+            displayMap_.erase(iter);
             return nullptr;
         }
         sptr<Display> display = iter->second;
-        if (displayInfo.width_ != display->GetWidth()) {
-            display->SetWidth(displayInfo.width_);
-            WLOGFI("GetDisplayById: set new width %{public}d", display->GetWidth());
-        }
-        if (displayInfo.height_ != display->GetHeight()) {
-            display->SetHeight(displayInfo.height_);
-            WLOGFI("GetDisplayById: set new height %{public}d", display->GetHeight());
-        }
-        if (displayInfo.freshRate_ != display->GetFreshRate()) {
-            display->SetFreshRate(displayInfo.freshRate_);
-            WLOGFI("GetDisplayById: set new freshRate %{public}ud", display->GetFreshRate());
-        }
+        display->UpdateDisplayInfo(displayInfo);
         return iter->second;
     }
-    DisplayInfo displayInfo = displayManagerServiceProxy_->GetDisplayInfoById(displayId);
-    sptr<Display> display = new Display("", &displayInfo);
+    auto displayInfo = displayManagerServiceProxy_->GetDisplayInfoById(displayId);
+    if (displayInfo == nullptr) {
+        WLOGFE("GetDisplayById: displayInfo is nullptr!");
+        return nullptr;
+    }
+    sptr<Display> display = new Display("", displayInfo);
     if (display->GetId() != DISPLAY_ID_INVALD) {
         displayMap_[display->GetId()] = display;
     }
     return display;
 }
 
-bool DisplayManagerAdapter::RequestRotation(ScreenId screenId, Rotation rotation)
+bool ScreenManagerAdapter::RequestRotation(ScreenId screenId, Rotation rotation)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
@@ -109,7 +109,7 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(Displ
     return dispalySnapshot;
 }
 
-DMError DisplayManagerAdapter::GetScreenSupportedColorGamuts(ScreenId screenId,
+DMError ScreenManagerAdapter::GetScreenSupportedColorGamuts(ScreenId screenId,
     std::vector<ScreenColorGamut>& colorGamuts)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -123,7 +123,7 @@ DMError DisplayManagerAdapter::GetScreenSupportedColorGamuts(ScreenId screenId,
     return ret;
 }
 
-DMError DisplayManagerAdapter::GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut)
+DMError ScreenManagerAdapter::GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -136,7 +136,7 @@ DMError DisplayManagerAdapter::GetScreenColorGamut(ScreenId screenId, ScreenColo
     return ret;
 }
 
-DMError DisplayManagerAdapter::SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx)
+DMError ScreenManagerAdapter::SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -149,7 +149,7 @@ DMError DisplayManagerAdapter::SetScreenColorGamut(ScreenId screenId, int32_t co
     return ret;
 }
 
-DMError DisplayManagerAdapter::GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap)
+DMError ScreenManagerAdapter::GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -162,7 +162,7 @@ DMError DisplayManagerAdapter::GetScreenGamutMap(ScreenId screenId, ScreenGamutM
     return ret;
 }
 
-DMError DisplayManagerAdapter::SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap)
+DMError ScreenManagerAdapter::SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -175,7 +175,7 @@ DMError DisplayManagerAdapter::SetScreenGamutMap(ScreenId screenId, ScreenGamutM
     return ret;
 }
 
-DMError DisplayManagerAdapter::SetScreenColorTransform(ScreenId screenId)
+DMError ScreenManagerAdapter::SetScreenColorTransform(ScreenId screenId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -188,7 +188,7 @@ DMError DisplayManagerAdapter::SetScreenColorTransform(ScreenId screenId)
     return ret;
 }
 
-ScreenId DisplayManagerAdapter::CreateVirtualScreen(VirtualScreenOption option)
+ScreenId ScreenManagerAdapter::CreateVirtualScreen(VirtualScreenOption option)
 {
     if (!InitDMSProxyLocked()) {
         return SCREEN_ID_INVALID;
@@ -197,7 +197,7 @@ ScreenId DisplayManagerAdapter::CreateVirtualScreen(VirtualScreenOption option)
     return displayManagerServiceProxy_->CreateVirtualScreen(option);
 }
 
-DMError DisplayManagerAdapter::DestroyVirtualScreen(ScreenId screenId)
+DMError ScreenManagerAdapter::DestroyVirtualScreen(ScreenId screenId)
 {
     if (!InitDMSProxyLocked()) {
         return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
@@ -206,7 +206,7 @@ DMError DisplayManagerAdapter::DestroyVirtualScreen(ScreenId screenId)
     return displayManagerServiceProxy_->DestroyVirtualScreen(screenId);
 }
 
-DMError DisplayManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
+DMError ScreenManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
 {
     if (!InitDMSProxyLocked()) {
         return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
@@ -215,7 +215,7 @@ DMError DisplayManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<S
     return displayManagerServiceProxy_->SetVirtualScreenSurface(screenId, surface);
 }
 
-bool DisplayManagerAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+bool BaseAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -225,7 +225,7 @@ bool DisplayManagerAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManag
     return displayManagerServiceProxy_->RegisterDisplayManagerAgent(displayManagerAgent, type);
 }
 
-bool DisplayManagerAdapter::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+bool BaseAdapter::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -308,7 +308,7 @@ void DisplayManagerAdapter::NotifyDisplayEvent(DisplayEvent event)
     displayManagerServiceProxy_->NotifyDisplayEvent(event);
 }
 
-bool DisplayManagerAdapter::InitDMSProxyLocked()
+bool BaseAdapter::InitDMSProxyLocked()
 {
     if (!displayManagerServiceProxy_) {
         sptr<ISystemAbilityManager> systemAbilityManager =
@@ -331,7 +331,7 @@ bool DisplayManagerAdapter::InitDMSProxyLocked()
             return false;
         }
 
-        dmsDeath_ = new DMSDeathRecipient();
+        dmsDeath_ = new DMSDeathRecipient(*this);
         if (!dmsDeath_) {
             WLOGFE("Failed to create death Recipient ptr DMSDeathRecipient");
             return false;
@@ -342,6 +342,10 @@ bool DisplayManagerAdapter::InitDMSProxyLocked()
         }
     }
     return true;
+}
+
+DMSDeathRecipient::DMSDeathRecipient(BaseAdapter& adapter) : adapter_(adapter)
+{
 }
 
 void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
@@ -356,11 +360,11 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         WLOGFE("object is null");
         return;
     }
-    SingletonContainer::Get<DisplayManagerAdapter>().Clear();
+    adapter_.Clear();
     return;
 }
 
-void DisplayManagerAdapter::Clear()
+void BaseAdapter::Clear()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((displayManagerServiceProxy_ != nullptr) && (displayManagerServiceProxy_->AsObject() != nullptr)) {
@@ -369,7 +373,7 @@ void DisplayManagerAdapter::Clear()
     displayManagerServiceProxy_ = nullptr;
 }
 
-DMError DisplayManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)
+DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
@@ -378,7 +382,7 @@ DMError DisplayManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<Scr
     return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId);
 }
 
-sptr<ScreenInfo> DisplayManagerAdapter::GetScreenInfo(ScreenId screenId)
+sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
 {
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("screen id is invalid");
@@ -396,80 +400,76 @@ sptr<ScreenInfo> DisplayManagerAdapter::GetScreenInfo(ScreenId screenId)
     return screenInfo;
 }
 
-DisplayInfo DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
+sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALD) {
         WLOGFE("screen id is invalid");
-        return DisplayInfo();
+        return nullptr;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         WLOGFE("InitDMSProxyLocked failed!");
-        return DisplayInfo();
+        return nullptr;
     }
     return displayManagerServiceProxy_->GetDisplayInfoById(displayId);
 }
 
-sptr<Screen> DisplayManagerAdapter::GetScreenById(ScreenId screenId)
+sptr<Screen> ScreenManagerAdapter::GetScreenById(ScreenId screenId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (screenId == SCREEN_ID_INVALID) {
-        WLOGFE("screen id is invalid");
+    sptr<ScreenInfo> screenInfo = GetScreenInfo(screenId);
+    if (screenInfo == nullptr) {
+        WLOGFE("screenInfo is null");
+        screenMap_.erase(screenId);
         return nullptr;
     }
     auto iter = screenMap_.find(screenId);
     if (iter != screenMap_.end()) {
         WLOGFI("get screen in screen map");
+        iter->second->UpdateScreenInfo(screenInfo);
         return iter->second;
     }
-
-    if (!InitDMSProxyLocked()) {
-        WLOGFE("InitDMSProxyLocked failed!");
-        return nullptr;
-    }
-    sptr<ScreenInfo> screenInfo = displayManagerServiceProxy_->GetScreenInfoById(screenId);
-    if (screenInfo == nullptr) {
-        WLOGFE("screenInfo is null");
-        return nullptr;
-    }
-    sptr<Screen> screen = new Screen(screenInfo.GetRefPtr());
+    sptr<Screen> screen = new Screen(screenInfo);
     screenMap_.insert(std::make_pair(screenId, screen));
     return screen;
 }
 
-sptr<ScreenGroup> DisplayManagerAdapter::GetScreenGroupById(ScreenId screenId)
+sptr<ScreenGroup> ScreenManagerAdapter::GetScreenGroupById(ScreenId screenId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("screenGroup id is invalid");
         return nullptr;
     }
-    auto iter = screenGroupMap_.find(screenId);
-    if (iter != screenGroupMap_.end()) {
-        WLOGFI("get screenGroup in screenGroup map");
-        return iter->second;
-    }
-
     if (!InitDMSProxyLocked()) {
         WLOGFE("InitDMSProxyLocked failed!");
+        screenGroupMap_.clear();
         return nullptr;
     }
     sptr<ScreenGroupInfo> screenGroupInfo = displayManagerServiceProxy_->GetScreenGroupInfoById(screenId);
     if (screenGroupInfo == nullptr) {
         WLOGFE("screenGroupInfo is null");
+        screenGroupMap_.erase(screenId);
         return nullptr;
     }
-    sptr<ScreenGroup> screenGroup = new ScreenGroup(screenGroupInfo.GetRefPtr());
+    auto iter = screenGroupMap_.find(screenId);
+    if (iter != screenGroupMap_.end()) {
+        WLOGFI("get screenGroup in screenGroup map");
+        iter->second->UpdateScreenGroupInfo(screenGroupInfo);
+        return iter->second;
+    }
+    sptr<ScreenGroup> screenGroup = new ScreenGroup(screenGroupInfo);
     screenGroupMap_.insert(std::make_pair(screenId, screenGroup));
     return screenGroup;
 }
 
-std::vector<sptr<Screen>> DisplayManagerAdapter::GetAllScreens()
+std::vector<sptr<Screen>> ScreenManagerAdapter::GetAllScreens()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::vector<sptr<Screen>> screens;
     if (!InitDMSProxyLocked()) {
         WLOGFE("InitDMSProxyLocked failed!");
+        screenMap_.clear();
         return screens;
     }
     std::vector<sptr<ScreenInfo>> screenInfos = displayManagerServiceProxy_->GetAllScreenInfos();
@@ -478,12 +478,24 @@ std::vector<sptr<Screen>> DisplayManagerAdapter::GetAllScreens()
             WLOGFE("screenInfo is null");
             continue;
         }
-        screens.emplace_back(new Screen(info.GetRefPtr()));
+        auto iter = screenMap_.find(info->GetScreenId());
+        if (iter != screenMap_.end()) {
+            WLOGFI("get screen in screen map");
+            iter->second->UpdateScreenInfo(info);
+            screens.emplace_back(iter->second);
+        } else {
+            sptr<Screen> screen = new Screen(info);
+            screens.emplace_back(screen);
+        }
+    }
+    screenMap_.clear();
+    for (auto screen: screens) {
+        screenMap_.insert(std::make_pair(screen->GetId(), screen));
     }
     return screens;
 }
 
-DMError DisplayManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
+DMError ScreenManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
@@ -492,12 +504,38 @@ DMError DisplayManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::v
     return displayManagerServiceProxy_->MakeExpand(screenId, startPoint);
 }
 
-bool DisplayManagerAdapter::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
+bool ScreenManagerAdapter::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!InitDMSProxyLocked()) {
         return false;
     }
     return displayManagerServiceProxy_->SetScreenActiveMode(screenId, modeId);
+}
+
+void ScreenManagerAdapter::UpdateScreenInfo(ScreenId screenId)
+{
+    auto screenInfo = GetScreenInfo(screenId);
+    if (screenInfo == nullptr) {
+        WLOGFE("screenInfo is invalid");
+        return;
+    }
+    auto iter = screenMap_.find(screenId);
+    if (iter != screenMap_.end()) {
+        iter->second->UpdateScreenInfo(screenInfo);
+    }
+}
+
+void DisplayManagerAdapter::UpdateDisplayInfo(DisplayId displayId)
+{
+    auto displayInfo = GetDisplayInfo(displayId);
+    if (displayInfo == nullptr) {
+        WLOGFE("displayInfo is invalid");
+        return;
+    }
+    auto iter = displayMap_.find(displayId);
+    if (iter != displayMap_.end()) {
+        iter->second->UpdateDisplayInfo(displayInfo);
+    }
 }
 } // namespace OHOS::Rosen
