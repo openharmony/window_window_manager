@@ -39,6 +39,10 @@ Display::Display(const std::string& name, sptr<DisplayInfo> info)
 {
 }
 
+Display::~Display()
+{
+}
+
 DisplayId Display::GetId() const
 {
     return pImpl_->GetDisplayInfo()->GetDisplayId();
