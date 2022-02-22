@@ -24,12 +24,16 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractDisplay"};
 }
 
-AbstractDisplay::AbstractDisplay(const DisplayInfo& info)
-    : id_(info.id_),
-      width_(info.width_),
-      height_(info.height_),
-      freshRate_(info.freshRate_)
+AbstractDisplay::AbstractDisplay(const DisplayInfo* info)
 {
+    if (info == nullptr) {
+        WLOGFE("DisplayInfo is nullptr");
+        return;
+    }
+    id_ = info->GetDisplayId();
+    width_ = info->GetWidth();
+    height_ = info->GetHeight();
+    freshRate_ = info->GetHeight();
 }
 
 AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t freshRate)
@@ -146,7 +150,7 @@ ScreenId AbstractDisplay::GetAbstractScreenId() const
     return screenId_;
 }
 
-const sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
+sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->width_ = width_;

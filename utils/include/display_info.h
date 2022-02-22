@@ -18,29 +18,34 @@
 
 #include <parcel.h>
 
+#include "class_var_definition.h"
 #include "display.h"
 #include "dm_common.h"
 
 namespace OHOS::Rosen {
 class DisplayInfo : public Parcelable {
+friend class AbstractDisplay;
 public:
-    DisplayInfo() = default;
     ~DisplayInfo() = default;
-
-    void Update(DisplayInfo* info);
+    DisplayInfo(const DisplayInfo&) = delete;
+    DisplayInfo(DisplayInfo&&) = delete;
+    DisplayInfo& operator=(const DisplayInfo&) = delete;
+    DisplayInfo& operator=(DisplayInfo&&) = delete;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static DisplayInfo *Unmarshalling(Parcel& parcel);
 
-    DisplayId id_ { DISPLAY_ID_INVALD };
-    DisplayType type_  {DisplayType::DEFAULT };
-    int32_t width_ { 0 };
-    int32_t height_ { 0 };
-    uint32_t freshRate_ { 0 };
-    ScreenId screenId_ { SCREEN_ID_INVALID };
-    float xDpi_ { 0.0 };
-    float yDpi_ { 0.0 };
-    Rotation rotation_ { Rotation::ROTATION_0 };
+    DEFINE_VAR_DEFAULT_FUNC_GET(DisplayId, DisplayId, id, DISPLAY_ID_INVALD);
+    DEFINE_VAR_DEFAULT_FUNC_GET(DisplayType, DisplayType, type, DisplayType::DEFAULT);
+    DEFINE_VAR_DEFAULT_FUNC_GET(int32_t, Width, width, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET(int32_t, Height, height, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, FreshRate, freshRate, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, ScreenId, screenId, SCREEN_ID_INVALID);
+    DEFINE_VAR_DEFAULT_FUNC_GET(float, XDpi, xDpi, 0.0f);
+    DEFINE_VAR_DEFAULT_FUNC_GET(float, YDpi, yDpi, 0.0f);
+    DEFINE_VAR_DEFAULT_FUNC_GET(Rotation, Rotation, rotation, Rotation::ROTATION_0);
+protected:
+    DisplayInfo() = default;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H
