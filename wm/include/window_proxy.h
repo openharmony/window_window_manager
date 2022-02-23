@@ -34,6 +34,7 @@ public:
     void UpdateAvoidArea(const std::vector<Rect>& avoidAreas) override;
     void UpdateWindowState(WindowState state) override;
     void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override;
+    void UpdateDisplayId(DisplayId from, DisplayId to) override;
 private:
     static inline BrokerDelegator<WindowProxy> delegator_;
 };
