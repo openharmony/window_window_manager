@@ -194,7 +194,7 @@ ColorSpace WindowAdapter::GetColorSpace(uint32_t windowId)
 bool WindowAdapter::InitWMSProxy()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (!windowManagerServiceProxy_) {
+    if (!isProxyValid_) {
         sptr<ISystemAbilityManager> systemAbilityManager =
                 SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (!systemAbilityManager) {
@@ -223,17 +223,18 @@ bool WindowAdapter::InitWMSProxy()
             WLOGFE("Failed to add death recipient");
             return false;
         }
+        isProxyValid_ = true;
     }
     return true;
 }
 
 void WindowAdapter::ClearWindowAdapter()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((windowManagerServiceProxy_ != nullptr) && (windowManagerServiceProxy_->AsObject() != nullptr)) {
         windowManagerServiceProxy_->AsObject()->RemoveDeathRecipient(wmsDeath_);
     }
-    windowManagerServiceProxy_ = nullptr;
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    isProxyValid_ = false;
 }
 
 void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)

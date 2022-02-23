@@ -282,7 +282,7 @@ void DisplayManagerAdapter::NotifyDisplayEvent(DisplayEvent event)
 bool BaseAdapter::InitDMSProxy()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (!displayManagerServiceProxy_) {
+    if (!isProxyValid_) {
         sptr<ISystemAbilityManager> systemAbilityManager =
                 SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (!systemAbilityManager) {
@@ -312,6 +312,7 @@ bool BaseAdapter::InitDMSProxy()
             WLOGFE("Failed to add death recipient");
             return false;
         }
+        isProxyValid_ = true;
     }
     return true;
 }
@@ -338,11 +339,11 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 void BaseAdapter::Clear()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((displayManagerServiceProxy_ != nullptr) && (displayManagerServiceProxy_->AsObject() != nullptr)) {
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);
     }
-    displayManagerServiceProxy_ = nullptr;
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    isProxyValid_ = false;
 }
 
 ScreenId ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)

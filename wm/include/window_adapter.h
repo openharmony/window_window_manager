@@ -72,6 +72,7 @@ private:
     std::recursive_mutex mutex_;
     sptr<IWindowManager> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
+    bool isProxyValid_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS
