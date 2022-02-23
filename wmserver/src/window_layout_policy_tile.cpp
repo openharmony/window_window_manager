@@ -23,7 +23,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowLayoutPolicyTile"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicyTile"};
     constexpr uint32_t MAX_WIN_NUM_VERTICAL = 2;
     constexpr uint32_t MAX_WIN_NUM_HORIZONTAL = 3;
 }
@@ -96,6 +96,7 @@ void WindowLayoutPolicyTile::AddWindowNode(sptr<WindowNode>& node)
 void WindowLayoutPolicyTile::RemoveWindowNode(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
+    WLOGFI("RemoveWindowNode %{public}d in tile", node->GetWindowId());
     auto type = node->GetWindowType();
     // affect other windows, trigger off global layout
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
@@ -146,6 +147,7 @@ void WindowLayoutPolicyTile::ForegroundNodeQueuePushBack(sptr<WindowNode>& node)
     while (foregroundNodes_.size() >= maxTileWinNum) {
         auto removeNode = foregroundNodes_.front();
         foregroundNodes_.pop_front();
+        WLOGFI("pop win in queue head id: %{public}d, for add new win", removeNode->GetWindowId());
         if (removeNode->abilityToken_ != nullptr) {
             WLOGFI("minimize win %{public}d in tile", removeNode->GetWindowId());
             AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(removeNode->abilityToken_);

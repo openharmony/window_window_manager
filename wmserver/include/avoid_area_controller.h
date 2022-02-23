@@ -51,10 +51,6 @@ public:
 
 private:
     std::map<uint32_t, sptr<WindowNode>> avoidNodes_;    // key: windowId
-    const std::set<WindowType> avoidType_ {
-        WindowType::WINDOW_TYPE_STATUS_BAR,
-        WindowType::WINDOW_TYPE_NAVIGATION_BAR,
-    };
     UpdateAvoidAreaFunc updateAvoidAreaCallBack_;
     void UseCallbackNotifyAvoidAreaChanged(std::vector<Rect>& avoidArea) const;
     void DumpAvoidArea(const std::vector<Rect>& avoidArea) const;

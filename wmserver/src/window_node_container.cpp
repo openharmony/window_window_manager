@@ -108,8 +108,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
         for (auto& child : node->children_) {
             child->currentVisibility_ = child->requestedVisibility_;
         }
-        if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
-            node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+        if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
             sysBarNodeMap_[node->GetWindowType()] = node;
         }
     }
@@ -129,7 +128,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     UpdateRSTree(node, true);
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
-    if (avoidController_->IsAvoidAreaNode(node)) {
+    if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
         avoidController_->AddAvoidAreaNode(node);
         NotifyIfSystemBarRegionChanged();
     } else {
@@ -153,7 +152,7 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
         SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
     }
     layoutPolicy_->UpdateWindowNode(node);
-    if (avoidController_->IsAvoidAreaNode(node)) {
+    if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
         avoidController_->UpdateAvoidAreaNode(node);
         NotifyIfSystemBarRegionChanged();
     } else {
@@ -283,7 +282,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
 
     UpdateRSTree(node, false);
     layoutPolicy_->RemoveWindowNode(node);
-    if (avoidController_->IsAvoidAreaNode(node)) {
+    if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
         avoidController_->RemoveAvoidAreaNode(node);
         NotifyIfSystemBarRegionChanged();
     } else {
