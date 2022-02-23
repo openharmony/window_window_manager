@@ -169,7 +169,11 @@ const sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
 
 const sptr<Display> DisplayManager::GetDisplayByScreen(ScreenId screenId)
 {
-    return nullptr;
+    sptr<Display> display = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayByScreen(screenId);
+    if (display == nullptr) {
+        WLOGFE("get display by screenId failed. screen %{public}" PRIu64"", screenId);
+    }
+    return display;
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId)

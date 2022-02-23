@@ -84,6 +84,43 @@ sptr<Display> DisplayManagerAdapter::GetDisplayById(DisplayId displayId)
     return display;
 }
 
+sptr<Display> DisplayManagerAdapter::GetDisplayByScreen(ScreenId screenId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_); 
+    if (!InitDMSProxyLocked()) {
+        WLOGFE("get display by screenId: init dms proxy failed!");
+        return nullptr;
+    }
+    
+    auto displayInfo = displayManagerServiceProxy_->GetDisplayInfoByScreen(screenId);
+    if (displayInfo == nullptr) {
+        WLOGFE("get display by screenId: displayInfo is null");
+        return nullptr;
+    }
+    DisplayId displayId = displayInfo->GetDisplayId();
+    if (displayId == DISPLAY_ID_INVALD) {
+        WLOGFE("get display by screenId: invalid displayInfo");
+        return nullptr;
+    }
+
+    auto iter = displayMap_.find(displayId);
+    sptr<Display> display;
+    if (iter != displayMap_.end()) {
+        display = iter->second;
+        if (display == nullptr) {
+            WLOGFE("get display by screenId: display in iterator is null");
+            return nullptr;
+        }
+        display->UpdateDisplayInfo(displayInfo);
+    } else {
+        display = new Display("", displayInfo);
+        if (display->GetId() != DISPLAY_ID_INVALD) {
+            displayMap_[display->GetId()] = display;
+        }
+    }
+    return display;
+}
+
 bool ScreenManagerAdapter::RequestRotation(ScreenId screenId, Rotation rotation)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
