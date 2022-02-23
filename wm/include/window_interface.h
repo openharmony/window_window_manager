@@ -34,6 +34,7 @@ public:
         TRANS_ID_UPDATE_AVOID_AREA,
         TRANS_ID_UPDATE_WINDOW_STATE,
         TRANS_ID_UPDATE_DRAG_EVENT,
+        TRANS_ID_UPDATE_DISPLAY_ID,
     };
 
     virtual void UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason) = 0;
@@ -42,6 +43,7 @@ public:
     virtual void UpdateAvoidArea(const std::vector<Rect>& avoidAreas) = 0;
     virtual void UpdateWindowState(WindowState state) = 0;
     virtual void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) = 0;
+    virtual void UpdateDisplayId(DisplayId from, DisplayId to) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
