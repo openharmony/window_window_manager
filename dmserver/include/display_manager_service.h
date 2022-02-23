@@ -52,6 +52,7 @@ public:
 
     DisplayId GetDefaultDisplayId() override;
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     bool RequestRotation(ScreenId screenId, Rotation rotation) override;
     std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
     ScreenId GetRSScreenId(DisplayId displayId) const;
@@ -82,11 +83,12 @@ public:
     sptr<AbstractDisplay> GetAbstractDisplay(DisplayId displayId);
     sptr<AbstractScreenController> GetAbstractScreenController();
     sptr<AbstractDisplay> GetDisplayByDisplayId(DisplayId displayId) const;
+    sptr<AbstractDisplay> GetDisplayByScreen(ScreenId screenId) const;
     ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
+    ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     std::vector<sptr<ScreenInfo>> GetAllScreenInfos() override;
-    ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
 
 private:

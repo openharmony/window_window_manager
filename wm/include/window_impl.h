@@ -107,6 +107,8 @@ public:
     virtual void UnregisterAvoidAreaChangeListener() override;
     virtual void RegisterDragListener(sptr<IWindowDragListener>& listener) override;
     virtual void UnregisterDragListener(sptr<IWindowDragListener>& listener) override;
+    virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
+    virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
 
     void UpdateRect(const struct Rect& rect, WindowSizeChangeReason reason);
     void UpdateMode(WindowMode mode);
@@ -118,6 +120,7 @@ public:
     void UpdateAvoidArea(const std::vector<Rect>& avoidAreas);
     void UpdateWindowState(WindowState state);
     void UpdateDragEvent(const PointInfo& point, DragEvent event);
+    void UpdateDisplayId(DisplayId from, DisplayId to);
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed) override;
@@ -179,6 +182,7 @@ private:
     std::vector<sptr<IWindowChangeListener>> windowChangeListeners_;
     sptr<IAvoidAreaChangedListener> avoidAreaChangeListener_;
     std::vector<sptr<IWindowDragListener>> windowDragListeners_;
+    std::vector<sptr<IDisplayMoveListener>> displayMoveListeners_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;

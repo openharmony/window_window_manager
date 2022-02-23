@@ -86,6 +86,19 @@ sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplay(DisplayId di
     return iter->second;
 }
 
+sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplayByScreen(ScreenId screenId) const
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    for (auto iter : abstractDisplayMap_) {
+        sptr<AbstractDisplay> display = iter.second;
+        if (display->GetAbstractScreenId() == screenId) {
+            return display;
+        }
+    }
+    WLOGFE("fail to get AbstractDisplay %{public}" PRIu64"", screenId);
+    return nullptr;
+}
+
 std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(DisplayId displayId)
 {
     sptr<AbstractDisplay> abstractDisplay = GetAbstractDisplay(displayId);
