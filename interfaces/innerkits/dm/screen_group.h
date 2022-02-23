@@ -29,7 +29,7 @@ enum class ScreenCombination : uint32_t {
 };
 
 class ScreenGroup : public Screen {
-friend class ScreenManagerAdapter;
+friend class ScreenManager;
 public:
     ~ScreenGroup();
     ScreenGroup(const ScreenGroup&) = delete;

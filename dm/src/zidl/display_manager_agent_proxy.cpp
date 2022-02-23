@@ -114,7 +114,7 @@ void DisplayManagerAgentProxy::OnScreenDisconnect(ScreenId screenId)
 }
 
 void DisplayManagerAgentProxy::OnScreenChange(
-    const std::vector<const sptr<ScreenInfo>>& screenInfos, ScreenChangeEvent event)
+    const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenChangeEvent event)
 {
     MessageParcel data;
     MessageParcel reply;

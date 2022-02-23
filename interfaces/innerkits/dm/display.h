@@ -27,7 +27,7 @@ typedef enum DisplayType {
 } DisplayType;
 
 class Display : public RefBase {
-friend class DisplayManagerAdapter;
+friend class DisplayManager;
 public:
     ~Display();
     Display(const Display&) = delete;
@@ -44,7 +44,8 @@ public:
 protected:
     Display(const std::string& name, sptr<DisplayInfo> info);
 private:
-    void UpdateDisplayInfo(sptr<DisplayInfo>);
+    void UpdateDisplayInfo(sptr<DisplayInfo>) const;
+    void UpdateDisplayInfo() const;
     class Impl;
     sptr<Impl> pImpl_;
 };

@@ -40,7 +40,6 @@ ohos_shared_library("libdm") {
     "src/display.cpp",
     "src/display_manager.cpp",
     "src/display_manager_adapter.cpp",
-    "src/display_manager_agent.cpp",
     "src/screen.cpp",
     "src/screen_group.cpp",
     "src/screen_manager.cpp",

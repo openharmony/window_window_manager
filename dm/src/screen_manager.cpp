@@ -30,12 +30,27 @@ public:
     Impl() = default;
     ~Impl() = default;
     static inline SingletonDelegator<ScreenManager> delegator;
+    bool RegisterScreenListener(sptr<IScreenListener> listener);
+    bool UnregisterScreenListener(sptr<IScreenListener> listener);
+    sptr<Screen> GetScreenById(ScreenId screenId);
+    sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
+    std::vector<sptr<Screen>> GetAllScreens();
 
+private:
+    void NotifyScreenConnect(sptr<ScreenInfo> info);
+    void NotifyScreenDisconnect(ScreenId);
+    void NotifyScreenChange(const std::vector<sptr<ScreenInfo>>& screenInfos);
+    bool UpdateScreenInfoLocked(sptr<ScreenInfo>);
+
+    class ScreenManagerListener;
+    sptr<ScreenManagerListener> screenManagerListener_;
+    std::map<ScreenId, sptr<Screen>> screenMap_;
+    std::map<ScreenId, sptr<ScreenGroup>> screenGroupMap_;
     std::recursive_mutex mutex_;
     std::vector<sptr<IScreenListener>> screenListeners_;
 };
 
-class ScreenManager::ScreenManagerListener : public DisplayManagerAgentDefault {
+class ScreenManager::Impl::ScreenManagerListener : public DisplayManagerAgentDefault {
 public:
     ScreenManagerListener(sptr<Impl> impl) : pImpl_(impl)
     {
@@ -51,6 +66,7 @@ public:
             WLOGFE("OnScreenConnect, impl is nullptr.");
             return;
         }
+        pImpl_->NotifyScreenConnect(screenInfo);
         for (auto listener : pImpl_->screenListeners_) {
             listener->OnConnect(screenInfo->GetScreenId());
         }
@@ -66,12 +82,13 @@ public:
             WLOGFE("OnScreenDisconnect, impl is nullptr.");
             return;
         }
+        pImpl_->NotifyScreenDisconnect(screenId);
         for (auto listener : pImpl_->screenListeners_) {
             listener->OnDisconnect(screenId);
         }
     };
 
-    void OnScreenChange(const std::vector<const sptr<ScreenInfo>>& screenInfos, ScreenChangeEvent event)
+    void OnScreenChange(const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenChangeEvent event)
     {
         if (screenInfos.empty()) {
             WLOGFE("OnScreenChange, screenInfos is empty.");
@@ -82,6 +99,7 @@ public:
             return;
         }
         WLOGFD("OnScreenChange. event %{public}u", event);
+        pImpl_->NotifyScreenChange(screenInfos);
         std::vector<ScreenId> screenIds;
         for (auto screenInfo : screenInfos) {
             if (screenInfo->GetScreenId() != SCREEN_ID_INVALID) {
@@ -106,19 +124,80 @@ ScreenManager::~ScreenManager()
 {
 }
 
+sptr<Screen> ScreenManager::Impl::GetScreenById(ScreenId screenId)
+{
+    auto screenInfo = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenInfo(screenId);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!UpdateScreenInfoLocked(screenInfo)) {
+        screenMap_.erase(screenId);
+        return nullptr;
+    }
+    return screenMap_[screenId];
+}
+
 sptr<Screen> ScreenManager::GetScreenById(ScreenId screenId)
 {
-    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenById(screenId);
+    return pImpl_->GetScreenById(screenId);
+}
+
+sptr<ScreenGroup> ScreenManager::Impl::GetScreenGroupById(ScreenId screenId)
+{
+    auto screenGroupInfo = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGroupInfoById(screenId);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (screenGroupInfo == nullptr) {
+        WLOGFE("screenGroupInfo is null");
+        screenGroupMap_.erase(screenId);
+        return nullptr;
+    }
+    auto iter = screenGroupMap_.find(screenId);
+    if (iter != screenGroupMap_.end() && iter->second != nullptr) {
+        WLOGFI("get screenGroup in screenGroup map");
+        iter->second->UpdateScreenGroupInfo(screenGroupInfo);
+        return iter->second;
+    }
+    sptr<ScreenGroup> screenGroup = new ScreenGroup(screenGroupInfo);
+    screenGroupMap_[screenId] = screenGroup;
+    return screenGroup;
 }
 
 sptr<ScreenGroup> ScreenManager::GetScreenGroupById(ScreenId screenId)
 {
-    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGroupById(screenId);
+    return pImpl_->GetScreenGroupById(screenId);
+}
+
+std::vector<sptr<Screen>> ScreenManager::Impl::GetAllScreens()
+{
+    auto screenInfos = SingletonContainer::Get<ScreenManagerAdapter>().GetAllScreenInfos();
+    std::vector<sptr<Screen>> screens;
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    for (auto info: screenInfos) {
+        if (UpdateScreenInfoLocked(info)) {
+            screens.emplace_back(screenMap_[info->GetScreenId()]);
+        }
+    }
+    screenMap_.clear();
+    for (auto screen: screens) {
+        screenMap_.insert(std::make_pair(screen->GetId(), screen));
+    }
+    return screens;
 }
 
 std::vector<sptr<Screen>> ScreenManager::GetAllScreens()
 {
-    return SingletonContainer::Get<ScreenManagerAdapter>().GetAllScreens();
+    return pImpl_->GetAllScreens();
+}
+
+bool ScreenManager::Impl::RegisterScreenListener(sptr<IScreenListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    screenListeners_.push_back(listener);
+    if (screenManagerListener_ == nullptr) {
+        screenManagerListener_ = new ScreenManagerListener(this);
+        SingletonContainer::Get<ScreenManagerAdapter>().RegisterDisplayManagerAgent(
+            screenManagerListener_,
+            DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
+    }
+    return true;
 }
 
 bool ScreenManager::RegisterScreenListener(sptr<IScreenListener> listener)
@@ -127,13 +206,23 @@ bool ScreenManager::RegisterScreenListener(sptr<IScreenListener> listener)
         WLOGFE("RegisterScreenListener listener is nullptr.");
         return false;
     }
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    pImpl_->screenListeners_.push_back(listener);
-    if (screenManagerListener_ == nullptr) {
-        screenManagerListener_ = new ScreenManagerListener(pImpl_);
-        SingletonContainer::Get<ScreenManagerAdapter>().RegisterDisplayManagerAgent(
+    return pImpl_->RegisterScreenListener(listener);
+}
+
+bool ScreenManager::Impl::UnregisterScreenListener(sptr<IScreenListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(screenListeners_.begin(), screenListeners_.end(), listener);
+    if (iter == screenListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return false;
+    }
+    screenListeners_.erase(iter);
+    if (screenListeners_.empty() && screenManagerListener_ != nullptr) {
+        SingletonContainer::Get<ScreenManagerAdapter>().UnregisterDisplayManagerAgent(
             screenManagerListener_,
             DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
+        screenManagerListener_ = nullptr;
     }
     return true;
 }
@@ -144,20 +233,7 @@ bool ScreenManager::UnregisterScreenListener(sptr<IScreenListener> listener)
         WLOGFE("UnregisterScreenListener listener is nullptr.");
         return false;
     }
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    auto iter = std::find(pImpl_->screenListeners_.begin(), pImpl_->screenListeners_.end(), listener);
-    if (iter == pImpl_->screenListeners_.end()) {
-        WLOGFE("could not find this listener");
-        return false;
-    }
-    pImpl_->screenListeners_.erase(iter);
-    if (pImpl_->screenListeners_.empty() && screenManagerListener_ != nullptr) {
-        SingletonContainer::Get<ScreenManagerAdapter>().UnregisterDisplayManagerAgent(
-            screenManagerListener_,
-            DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
-        screenManagerListener_ = nullptr;
-    }
-    return true;
+    return pImpl_->UnregisterScreenListener(listener);
 }
 
 ScreenId ScreenManager::MakeExpand(const std::vector<ExpandOption>& options)
@@ -203,5 +279,49 @@ DMError ScreenManager::DestroyVirtualScreen(ScreenId screenId)
 DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(screenId, surface);
+}
+
+void ScreenManager::Impl::NotifyScreenConnect(sptr<ScreenInfo> info)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    UpdateScreenInfoLocked(info);
+}
+
+void ScreenManager::Impl::NotifyScreenDisconnect(ScreenId screenId)
+{
+    WLOGFI("screenId:%{public}" PRIu64".", screenId);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    screenMap_.erase(screenId);
+}
+
+void ScreenManager::Impl::NotifyScreenChange(const std::vector<sptr<ScreenInfo>>& screenInfos)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    for (auto screenInfo : screenInfos) {
+        UpdateScreenInfoLocked(screenInfo);
+    }
+}
+
+bool ScreenManager::Impl::UpdateScreenInfoLocked(sptr<ScreenInfo> screenInfo)
+{
+    if (screenInfo == nullptr) {
+        WLOGFE("displayInfo is null");
+        return false;
+    }
+    ScreenId screenId = screenInfo->GetScreenId();
+    WLOGFI("screenId:%{public}" PRIu64".", screenId);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("displayId is invalid.");
+        return false;
+    }
+    auto iter = screenMap_.find(screenId);
+    if (iter != screenMap_.end() && iter->second != nullptr) {
+        WLOGFI("get screen in screen map");
+        iter->second->UpdateScreenInfo(screenInfo);
+        return true;
+    }
+    sptr<Screen> screen = new Screen(screenInfo);
+    screenMap_[screenId] = screen;
+    return true;
 }
 } // namespace OHOS::Rosen

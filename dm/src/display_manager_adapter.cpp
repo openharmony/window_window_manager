@@ -30,99 +30,20 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapter)
 
 DisplayId DisplayManagerAdapter::GetDefaultDisplayId()
 {
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        if (defaultDisplayId_ != DISPLAY_ID_INVALD) {
-            return defaultDisplayId_;
-        }
-    }
-
     if (!InitDMSProxy()) {
         WLOGFE("displayManagerAdapter::GetDefaultDisplayId: InitDMSProxy failed!");
         return DISPLAY_ID_INVALD;
     }
-    DisplayId displayId = displayManagerServiceProxy_->GetDefaultDisplayId();
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        defaultDisplayId_ = displayId;
-    }
-    return displayId;
+    return displayManagerServiceProxy_->GetDefaultDisplayId();
 }
 
-sptr<Display> DisplayManagerAdapter::GetDisplayById(DisplayId displayId)
-{
-    if (!InitDMSProxy()) {
-        WLOGFE("GetDisplayById: InitDMSProxy failed!");
-        return nullptr;
-    }
-
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = displayMap_.find(displayId);
-    if (iter != displayMap_.end()) {
-        // Update display in map
-        // should be updated automatically
-        auto displayInfo = displayManagerServiceProxy_->GetDisplayInfoById(displayId);
-        if (displayInfo == nullptr) {
-            WLOGFE("GetDisplayById: displayInfo is nullptr!");
-            displayMap_.erase(iter);
-            return nullptr;
-        }
-        if (displayInfo->GetDisplayId() == DISPLAY_ID_INVALD) {
-            WLOGFE("GetDisplayById: Get invalid displayInfo!");
-            displayMap_.erase(iter);
-            return nullptr;
-        }
-        sptr<Display> display = iter->second;
-        display->UpdateDisplayInfo(displayInfo);
-        return iter->second;
-    }
-    auto displayInfo = displayManagerServiceProxy_->GetDisplayInfoById(displayId);
-    if (displayInfo == nullptr) {
-        WLOGFE("GetDisplayById: displayInfo is nullptr!");
-        return nullptr;
-    }
-    sptr<Display> display = new Display("", displayInfo);
-    if (display->GetId() != DISPLAY_ID_INVALD) {
-        displayMap_[display->GetId()] = display;
-    }
-    return display;
-}
-
-sptr<Display> DisplayManagerAdapter::GetDisplayByScreen(ScreenId screenId)
+sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfoByScreenId(ScreenId screenId)
 {
     if (!InitDMSProxy()) {
         WLOGFE("get display by screenId: init dms proxy failed!");
         return nullptr;
     }
-    
-    auto displayInfo = displayManagerServiceProxy_->GetDisplayInfoByScreen(screenId);
-    if (displayInfo == nullptr) {
-        WLOGFE("get display by screenId: displayInfo is null");
-        return nullptr;
-    }
-    DisplayId displayId = displayInfo->GetDisplayId();
-    if (displayId == DISPLAY_ID_INVALD) {
-        WLOGFE("get display by screenId: invalid displayInfo");
-        return nullptr;
-    }
-
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = displayMap_.find(displayId);
-    sptr<Display> display;
-    if (iter != displayMap_.end()) {
-        display = iter->second;
-        if (display == nullptr) {
-            WLOGFE("get display by screenId: display in iterator is null");
-            return nullptr;
-        }
-        display->UpdateDisplayInfo(displayInfo);
-    } else {
-        display = new Display("", displayInfo);
-        if (display->GetId() != DISPLAY_ID_INVALD) {
-            displayMap_[display->GetId()] = display;
-        }
-    }
-    return display;
+    return  displayManagerServiceProxy_->GetDisplayInfoByScreen(screenId);
 }
 
 bool ScreenManagerAdapter::RequestRotation(ScreenId screenId, Rotation rotation)
@@ -402,9 +323,6 @@ sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
         return nullptr;
     }
     sptr<ScreenInfo> screenInfo = displayManagerServiceProxy_->GetScreenInfoById(screenId);
-    if (screenInfo == nullptr) {
-        WLOGFE("screenInfo is null");
-    }
     return screenInfo;
 }
 
@@ -421,27 +339,7 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
     return displayManagerServiceProxy_->GetDisplayInfoById(displayId);
 }
 
-sptr<Screen> ScreenManagerAdapter::GetScreenById(ScreenId screenId)
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    sptr<ScreenInfo> screenInfo = GetScreenInfo(screenId);
-    if (screenInfo == nullptr) {
-        WLOGFE("screenInfo is null");
-        screenMap_.erase(screenId);
-        return nullptr;
-    }
-    auto iter = screenMap_.find(screenId);
-    if (iter != screenMap_.end()) {
-        WLOGFI("get screen in screen map");
-        iter->second->UpdateScreenInfo(screenInfo);
-        return iter->second;
-    }
-    sptr<Screen> screen = new Screen(screenInfo);
-    screenMap_.insert(std::make_pair(screenId, screen));
-    return screen;
-}
-
-sptr<ScreenGroup> ScreenManagerAdapter::GetScreenGroupById(ScreenId screenId)
+sptr<ScreenGroupInfo> ScreenManagerAdapter::GetScreenGroupInfoById(ScreenId screenId)
 {
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("screenGroup id is invalid");
@@ -449,59 +347,19 @@ sptr<ScreenGroup> ScreenManagerAdapter::GetScreenGroupById(ScreenId screenId)
     }
     if (!InitDMSProxy()) {
         WLOGFE("InitDMSProxy failed!");
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        screenGroupMap_.clear();
         return nullptr;
     }
-    sptr<ScreenGroupInfo> screenGroupInfo = displayManagerServiceProxy_->GetScreenGroupInfoById(screenId);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (screenGroupInfo == nullptr) {
-        WLOGFE("screenGroupInfo is null");
-        screenGroupMap_.erase(screenId);
-        return nullptr;
-    }
-    auto iter = screenGroupMap_.find(screenId);
-    if (iter != screenGroupMap_.end()) {
-        WLOGFI("get screenGroup in screenGroup map");
-        iter->second->UpdateScreenGroupInfo(screenGroupInfo);
-        return iter->second;
-    }
-    sptr<ScreenGroup> screenGroup = new ScreenGroup(screenGroupInfo);
-    screenGroupMap_.insert(std::make_pair(screenId, screenGroup));
-    return screenGroup;
+    return displayManagerServiceProxy_->GetScreenGroupInfoById(screenId);
 }
 
-std::vector<sptr<Screen>> ScreenManagerAdapter::GetAllScreens()
+std::vector<sptr<ScreenInfo>> ScreenManagerAdapter::GetAllScreenInfos()
 {
-    std::vector<sptr<Screen>> screens;
+    std::vector<sptr<ScreenInfo>> result;
     if (!InitDMSProxy()) {
         WLOGFE("InitDMSProxy failed!");
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        screenMap_.clear();
-        return screens;
+        return result;
     }
-    std::vector<sptr<ScreenInfo>> screenInfos = displayManagerServiceProxy_->GetAllScreenInfos();
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto info: screenInfos) {
-        if (info == nullptr) {
-            WLOGFE("screenInfo is null");
-            continue;
-        }
-        auto iter = screenMap_.find(info->GetScreenId());
-        if (iter != screenMap_.end()) {
-            WLOGFI("get screen in screen map");
-            iter->second->UpdateScreenInfo(info);
-            screens.emplace_back(iter->second);
-        } else {
-            sptr<Screen> screen = new Screen(info);
-            screens.emplace_back(screen);
-        }
-    }
-    screenMap_.clear();
-    for (auto screen: screens) {
-        screenMap_.insert(std::make_pair(screen->GetId(), screen));
-    }
-    return screens;
+    return displayManagerServiceProxy_->GetAllScreenInfos();
 }
 
 ScreenId ScreenManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
@@ -518,31 +376,5 @@ bool ScreenManagerAdapter::SetScreenActiveMode(ScreenId screenId, uint32_t modeI
         return false;
     }
     return displayManagerServiceProxy_->SetScreenActiveMode(screenId, modeId);
-}
-
-void ScreenManagerAdapter::UpdateScreenInfo(ScreenId screenId)
-{
-    auto screenInfo = GetScreenInfo(screenId);
-    if (screenInfo == nullptr) {
-        WLOGFE("screenInfo is invalid");
-        return;
-    }
-    auto iter = screenMap_.find(screenId);
-    if (iter != screenMap_.end()) {
-        iter->second->UpdateScreenInfo(screenInfo);
-    }
-}
-
-void DisplayManagerAdapter::UpdateDisplayInfo(DisplayId displayId)
-{
-    auto displayInfo = GetDisplayInfo(displayId);
-    if (displayInfo == nullptr) {
-        WLOGFE("displayInfo is invalid");
-        return;
-    }
-    auto iter = displayMap_.find(displayId);
-    if (iter != displayMap_.end()) {
-        iter->second->UpdateDisplayInfo(displayInfo);
-    }
 }
 } // namespace OHOS::Rosen
