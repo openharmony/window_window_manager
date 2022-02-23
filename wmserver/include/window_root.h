@@ -62,6 +62,7 @@ public:
     void NotifyDisplayDestroy(DisplayId displayId);
     void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
+    void FocusFaultDetection() const;
     float GetVirtualPixelRatio(DisplayId displayId) const;
 
 private:
@@ -69,12 +70,14 @@ private:
     WMError DestroyWindowInner(sptr<WindowNode>& node);
     void UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node,
         const sptr<WindowNodeContainer>& container) const;
+    std::string GenAllWindowsLogInfo() const;
     bool CheckDisplayInfo(const sptr<AbstractDisplay>& display);
 
     std::recursive_mutex& mutex_;
     std::map<int32_t, sptr<WindowNodeContainer>> windowNodeContainerMap_;
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
+    bool needCheckFocusWindow = false;
 
     std::map<WindowManagerAgentType, std::vector<sptr<IWindowManagerAgent>>> windowManagerAgents_;
 
