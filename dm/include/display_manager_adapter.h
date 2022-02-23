@@ -36,7 +36,7 @@ public:
         DisplayManagerAgentType type);
     virtual void Clear();
 protected:
-    bool InitDMSProxyLocked();
+    bool InitDMSProxy();
     std::recursive_mutex mutex_;
     sptr<IDisplayManager> displayManagerServiceProxy_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;

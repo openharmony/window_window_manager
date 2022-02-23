@@ -28,10 +28,6 @@ WindowAgent::WindowAgent(sptr<WindowImpl>& windowImpl)
     window_ = windowImpl;
 }
 
-void WindowAgent::UpdateWindowProperty(const WindowProperty& windowProperty)
-{
-}
-
 void WindowAgent::UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason)
 {
     if (window_ == nullptr) {

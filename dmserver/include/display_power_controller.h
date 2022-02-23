@@ -18,14 +18,15 @@
 
 #include <map>
 #include <mutex>
+#include <refbase.h>
 #include "display.h"
 #include "dm_common.h"
 
 namespace OHOS {
 namespace Rosen {
-class DisplayPowerController {
+class DisplayPowerController : public RefBase {
 public:
-    DisplayPowerController() = default;
+    DisplayPowerController(std::recursive_mutex& mutex) : mutex_(mutex) {}
     virtual ~DisplayPowerController() = default;
 
     bool SuspendBegin(PowerStateChangeReason reason);
@@ -36,6 +37,7 @@ public:
 private:
     DisplayState displayState_ { DisplayState::UNKNOWN };
     bool isKeyguardDrawn_ { false };
+    std::recursive_mutex& mutex_;
 };
 }
 }
