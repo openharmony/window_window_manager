@@ -54,11 +54,6 @@ public:
     virtual void MinimizeAllAppWindows(DisplayId displayId);
     virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
-    // colorspace, gamut
-    virtual bool IsSupportWideGamut(uint32_t windowId);
-    virtual void SetColorSpace(uint32_t windowId, ColorSpace colorSpace);
-    virtual ColorSpace GetColorSpace(uint32_t windowId);
-
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
