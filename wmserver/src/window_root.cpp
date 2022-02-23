@@ -407,6 +407,16 @@ WMError WindowRoot::RaiseZOrderForAppWindow(sptr<WindowNode>& node)
         WLOGFW("add window failed, node is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+        if (container == nullptr) {
+            WLOGFW("window container could not be found");
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        container->RaiseSplitRelatedWindowToTop(node);
+        return WMError::WM_OK;
+    }
+
     if (!WindowHelper::IsAppWindow(node->GetWindowType())) {
         WLOGFW("window is not app window");
         return WMError::WM_ERROR_INVALID_TYPE;
