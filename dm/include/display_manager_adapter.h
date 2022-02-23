@@ -36,7 +36,7 @@ public:
         DisplayManagerAgentType type);
     virtual void Clear();
 protected:
-    bool InitDMSProxyLocked();
+    bool InitDMSProxy();
     std::recursive_mutex mutex_;
     sptr<IDisplayManager> displayManagerServiceProxy_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
@@ -84,8 +84,8 @@ public:
     virtual sptr<Screen> GetScreenById(ScreenId screenId);
     virtual sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
     virtual std::vector<sptr<Screen>> GetAllScreens();
-    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
-    virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
+    virtual ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
+    virtual ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     virtual void UpdateScreenInfo(ScreenId);
 

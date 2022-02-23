@@ -738,7 +738,7 @@ void WindowNodeContainer::RaiseSplitRelatedWindowToTop(sptr<WindowNode>& node)
         RaiseOrderedWindowToTop(raiseNodeIds, appWindowNode_->children_);
         // raise divider final, keep divider on top
         RaiseWindowToTop(deviderNode->GetWindowId(), appWindowNode_->children_);
-    } else if (!pairedWindowMap_.empty()){
+    } else if (!pairedWindowMap_.empty()) {
         deviderNode = FindDividerNode();
         primaryNode = node;
         secondaryNode = pairedWindowMap_.at(primaryNode->GetWindowId()).pairNode_;
