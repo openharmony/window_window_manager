@@ -163,6 +163,24 @@ void WindowProxy::UpdateWindowDragInfo(const PointInfo& point, DragEvent event)
         WLOGFE("SendRequest TRANS_ID_UPDATE_DRAG_EVENT failed");
     }
 }
+    
+void WindowProxy::UpdateDisplayId(DisplayId from, DisplayId to)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!(data.WriteUint64(from) and data.WriteUint64(to))) {
+        WLOGFE("Write displayid failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_UPDATE_DISPLAY_ID, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest TRANS_ID_UPDATE_DISPLAY_ID failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 

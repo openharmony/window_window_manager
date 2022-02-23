@@ -73,13 +73,22 @@ void WindowAgent::UpdateWindowState(WindowState state)
     window_->UpdateWindowState(state);
 }
 
-void WindowAgent::UpdateWindowDragInfo(const PointInfo& piont, DragEvent event)
+void WindowAgent::UpdateWindowDragInfo(const PointInfo& point, DragEvent event)
 {
     if (window_ == nullptr) {
-        WLOGFE("window is nullptr");
+        WLOGFE("window is null");
         return;
     }
-    window_->UpdateDragEvent(piont, event);
+    window_->UpdateDragEvent(point, event);
+}
+
+void WindowAgent::UpdateDisplayId(DisplayId from, DisplayId to)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window is null");
+        return;
+    }
+    window_->UpdateDisplayId(from, to);
 }
 } // namespace Rosen
 } // namespace OHOS
