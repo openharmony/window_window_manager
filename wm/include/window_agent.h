@@ -27,7 +27,6 @@ class WindowAgent : public WindowStub {
 public:
     WindowAgent(sptr<WindowImpl>& window);
     ~WindowAgent() = default;
-    void UpdateWindowProperty(const WindowProperty& windowProperty) override;
     void UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason) override;
     void UpdateWindowMode(WindowMode mode) override;
     void UpdateFocusStatus(bool focused) override;

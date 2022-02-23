@@ -105,7 +105,7 @@ private:
     static inline SingletonDelegator<DisplayManagerService> delegator_;
     sptr<AbstractDisplayController> abstractDisplayController_;
     sptr<AbstractScreenController> abstractScreenController_;
-    DisplayPowerController displayPowerController_;
+    sptr<DisplayPowerController> displayPowerController_;
     std::map<ScreenId, std::shared_ptr<RSDisplayNode>> displayNodeMap_;
     sptr<IDisplayChangeListener> displayChangeListener_;
 };

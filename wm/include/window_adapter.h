@@ -67,7 +67,7 @@ public:
     virtual void ClearWindowAdapter();
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
-    bool InitWMSProxyLocked();
+    bool InitWMSProxy();
 
     std::recursive_mutex mutex_;
     sptr<IWindowManager> windowManagerServiceProxy_ = nullptr;
