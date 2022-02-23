@@ -59,7 +59,7 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             break;
         }
         case TRANS_ID_ON_SCREEN_CHANGED: {
-            std::vector<const sptr<ScreenInfo>> screenInfos;
+            std::vector<sptr<ScreenInfo>> screenInfos;
             uint32_t size;
             if (!data.ReadUint32(size)) {
                 WLOGFE("Read ScreenChangeEvent failed");

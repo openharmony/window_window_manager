@@ -44,7 +44,7 @@ Screen::~Screen()
 
 bool Screen::IsGroup() const
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().UpdateScreenInfo(GetId());
+    UpdateScreenInfo();
     return pImpl_->GetScreenInfo()->GetCanHasChild();
 }
 
@@ -55,7 +55,7 @@ ScreenId Screen::GetId() const
 
 uint32_t Screen::GetWidth() const
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().UpdateScreenInfo(GetId());
+    UpdateScreenInfo();
     auto modeId = GetModeId();
     auto modes = GetSupportedModes();
     if (modeId < 0 || modeId >= modes.size()) {
@@ -66,7 +66,7 @@ uint32_t Screen::GetWidth() const
 
 uint32_t Screen::GetHeight() const
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().UpdateScreenInfo(GetId());
+    UpdateScreenInfo();
     auto modeId = GetModeId();
     auto modes = GetSupportedModes();
     if (modeId < 0 || modeId >= modes.size()) {
@@ -77,29 +77,29 @@ uint32_t Screen::GetHeight() const
 
 uint32_t Screen::GetVirtualWidth() const
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().UpdateScreenInfo(GetId());
+    UpdateScreenInfo();
     return pImpl_->GetScreenInfo()->GetVirtualWidth();
 }
 
 uint32_t Screen::GetVirtualHeight() const
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().UpdateScreenInfo(GetId());
+    UpdateScreenInfo();
     return pImpl_->GetScreenInfo()->GetVirtualHeight();
 }
 
 float Screen::GetVirtualPixelRatio() const
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().UpdateScreenInfo(GetId());
+    UpdateScreenInfo();
     return pImpl_->GetScreenInfo()->GetVirtualPixelRatio();
 }
 
-Rotation Screen::GetRotation()
+Rotation Screen::GetRotation() const
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().UpdateScreenInfo(GetId());
+    UpdateScreenInfo();
     return pImpl_->GetScreenInfo()->GetRotation();
 }
 
-bool Screen::RequestRotation(Rotation rotation)
+bool Screen::RequestRotation(Rotation rotation) const
 {
     WLOGFD("rotation the screen");
     return SingletonContainer::Get<ScreenManagerAdapter>().RequestRotation(GetId(), rotation);
@@ -163,12 +163,18 @@ bool Screen::SetScreenActiveMode(uint32_t modeId)
     return false;
 }
 
-void Screen::UpdateScreenInfo(sptr<ScreenInfo> screenInfo)
+void Screen::UpdateScreenInfo(sptr<ScreenInfo> info) const
 {
-    if (screenInfo == nullptr) {
+    if (info == nullptr) {
         WLOGFE("ScreenInfo is invalid");
         return;
     }
-    pImpl_->SetScreenInfo(screenInfo);
+    pImpl_->SetScreenInfo(info);
+}
+
+void Screen::UpdateScreenInfo() const
+{
+    auto screenInfo = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenInfo(GetId());
+    UpdateScreenInfo(screenInfo);
 }
 } // namespace OHOS::Rosen

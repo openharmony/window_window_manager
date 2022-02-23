@@ -29,7 +29,7 @@ public:
     MOCK_METHOD2(UnregisterDisplayManagerAgent, bool(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type));
     MOCK_METHOD0(GetDefaultDisplayId, DisplayId());
-    MOCK_METHOD1(GetDisplayById, sptr<Display>(DisplayId displayId));
+    MOCK_METHOD1(GetDisplayInfoByScreenId, sptr<DisplayInfo>(ScreenId screenId));
     MOCK_METHOD1(GetDisplaySnapshot, std::shared_ptr<Media::PixelMap>(DisplayId displayId));
 
     MOCK_METHOD1(WakeUpBegin, bool(PowerStateChangeReason reason));
@@ -40,7 +40,7 @@ public:
     MOCK_METHOD1(SetDisplayState, bool(DisplayState state));
     MOCK_METHOD1(GetDisplayState, DisplayState(DisplayId displayId));
     MOCK_METHOD1(NotifyDisplayEvent, void(DisplayEvent event));
-    MOCK_METHOD1(UpdateDisplayInfo, void(DisplayId displayId));
+    MOCK_METHOD1(GetDisplayInfo, sptr<DisplayInfo>(DisplayId displayId));
 };
 
 class MockScreenManagerAdapter : public ScreenManagerAdapter {
@@ -54,13 +54,12 @@ public:
     MOCK_METHOD1(CreateVirtualScreen, ScreenId(VirtualScreenOption option));
     MOCK_METHOD1(DestroyVirtualScreen, DMError(ScreenId screenId));
     MOCK_METHOD2(SetVirtualScreenSurface, DMError(ScreenId screenId, sptr<Surface> surface));
-    MOCK_METHOD1(GetScreenById, sptr<Screen>(ScreenId screenId));
-    MOCK_METHOD1(GetScreenGroupById, sptr<ScreenGroup>(ScreenId screenId));
-    MOCK_METHOD0(GetAllScreens, std::vector<sptr<Screen>>());
+    MOCK_METHOD1(GetScreenGroupInfoById, sptr<ScreenGroupInfo>(ScreenId screenId));
+    MOCK_METHOD0(GetAllScreenInfos, std::vector<sptr<ScreenInfo>>());
     MOCK_METHOD2(MakeMirror, ScreenId(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId));
     MOCK_METHOD2(MakeExpand, ScreenId(std::vector<ScreenId> screenId, std::vector<Point> startPoint));
     MOCK_METHOD2(SetScreenActiveMode, bool(ScreenId screenId, uint32_t modeId));
-    MOCK_METHOD1(UpdateScreenInfo, void(ScreenId screenId));
+    MOCK_METHOD1(GetScreenInfo, sptr<ScreenInfo>(ScreenId screenId));
 
     MOCK_METHOD2(GetScreenSupportedColorGamuts, DMError(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts));
     MOCK_METHOD2(GetScreenColorGamut, DMError(ScreenId screenId, ScreenColorGamut& colorGamut));

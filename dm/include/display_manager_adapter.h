@@ -55,8 +55,7 @@ class DisplayManagerAdapter : public BaseAdapter {
 WM_DECLARE_SINGLE_INSTANCE(DisplayManagerAdapter);
 public:
     virtual DisplayId GetDefaultDisplayId();
-    virtual sptr<Display> GetDisplayById(DisplayId displayId);
-    virtual sptr<Display> GetDisplayByScreen(ScreenId screenId);
+    virtual sptr<DisplayInfo> GetDisplayInfoByScreenId(ScreenId screenId);
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
     virtual bool WakeUpBegin(PowerStateChangeReason reason);
     virtual bool WakeUpEnd();
@@ -66,14 +65,9 @@ public:
     virtual bool SetDisplayState(DisplayState state);
     virtual DisplayState GetDisplayState(DisplayId displayId);
     virtual void NotifyDisplayEvent(DisplayEvent event);
-    virtual void UpdateDisplayInfo(DisplayId);
+    virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
 private:
-    sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
-
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
-
-    std::map<DisplayId, sptr<Display>> displayMap_;
-    DisplayId defaultDisplayId_;
 };
 
 class ScreenManagerAdapter : public BaseAdapter {
@@ -83,13 +77,12 @@ public:
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option);
     virtual DMError DestroyVirtualScreen(ScreenId screenId);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
-    virtual sptr<Screen> GetScreenById(ScreenId screenId);
-    virtual sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
-    virtual std::vector<sptr<Screen>> GetAllScreens();
+    virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId);
+    virtual std::vector<sptr<ScreenInfo>> GetAllScreenInfos();
     virtual ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     virtual ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
-    virtual void UpdateScreenInfo(ScreenId);
+    virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
 
     // colorspace, gamut
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);
@@ -99,12 +92,7 @@ public:
     virtual DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap);
     virtual DMError SetScreenColorTransform(ScreenId screenId);
 private:
-    sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
-
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
-
-    std::map<ScreenId, sptr<Screen>> screenMap_;
-    std::map<ScreenId, sptr<ScreenGroup>> screenGroupMap_;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DM_DISPLAY_MANAGER_ADAPTER_H
