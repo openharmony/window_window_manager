@@ -93,6 +93,7 @@ ohos_shared_library("libwms") {
     "ces_standard:cesfwk_innerkits",
     "graphic_standard:surface",
     "hilog_native:libhilog",
+    "hisysevent_native:libhisysevent",
     "ipc:ipc_core",
     "multimodalinput_base:libmmi-client",
     "safwk:system_ability_fwk",

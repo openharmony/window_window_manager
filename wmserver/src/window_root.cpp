@@ -16,6 +16,7 @@
 #include "window_root.h"
 
 #include <cinttypes>
+#include <hisysevent.h>
 
 #include "display_manager_service_inner.h"
 #include "window_helper.h"
@@ -171,6 +172,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
     }
     if (res == WMError::WM_OK && node->GetWindowProperty()->GetFocusable()) {
         container->SetFocusWindow(node->GetWindowId());
+        needCheckFocusWindow = true;
     }
     return res;
 }
@@ -465,6 +467,60 @@ WMError WindowRoot::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mo
         WLOGFW("set window layout mode failed displayId: %{public}" PRId64 ", ret: %{public}d", displayId, ret);
     }
     return ret;
+}
+
+std::string WindowRoot::GenAllWindowsLogInfo() const
+{
+    std::ostringstream os;
+    WindowNodeOperationFunc func = [&os](sptr<WindowNode> node) {
+        if (node == nullptr) {
+            WLOGE("WindowNode is nullptr");
+            return false;
+        }
+        os<<"window_name:"<<node->GetWindowName()<<",id:"<<node->GetWindowId()<<
+           ",focusable:"<<node->GetWindowProperty()->GetFocusable()<<";";
+        return false;
+    };
+
+    for (auto& elem : windowNodeContainerMap_) {
+        if (elem.second == nullptr) {
+            continue;
+        }
+        os<<"Display "<<elem.second->GetDisplayId()<<":";
+        elem.second->TraverseWindowTree(func, true);
+    }
+    return os.str();
+}
+
+void WindowRoot::FocusFaultDetection() const
+{
+    if (!needCheckFocusWindow) {
+        return;
+    }
+    bool needReport = true;
+    uint32_t focusWinId = INVALID_WINDOW_ID;
+    for (auto& elem : windowNodeContainerMap_) {
+        if (elem.second == nullptr) {
+            continue;
+        }
+        focusWinId = elem.second->GetFocusWindow();
+        if (focusWinId != INVALID_WINDOW_ID) {
+            needReport = false;
+            sptr<WindowNode> windowNode = GetWindowNode(focusWinId);
+            if (windowNode == nullptr || !windowNode->currentVisibility_) {
+                needReport = true;
+                WLOGFE("The focus windowNode is nullptr or is invisible, focusWinId: %{public}u", focusWinId);
+                break;
+            }
+        }
+    }
+    if (needReport) {
+        std::string windowLog(GenAllWindowsLogInfo());
+        WLOGFE("The focus window is faulty, focusWinId:%{public}u, %{public}s", focusWinId, windowLog.c_str());
+        OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::GRAPHIC, "NO_FOCUS_WINDOW",
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, "PID", getpid(), "UID", getuid(),
+            "FOCUS_WINDOW", focusWinId, "FAULT_INFO", windowLog);
+    }
 }
 
 void WindowRoot::NotifyDisplayDestroy(DisplayId expandDisplayId)
