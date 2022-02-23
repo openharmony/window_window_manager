@@ -73,6 +73,10 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             UpdateWindowDragInfo(point, event);
             break;
         }
+        case TRANS_ID_UPDATE_DISPLAY_ID: {
+            UpdateDisplayId(data.ReadUint64(), data.ReadUint64());
+            break;
+        }
         default:
             break;
     }

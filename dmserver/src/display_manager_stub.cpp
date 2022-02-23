@@ -48,6 +48,12 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteParcelable(info);
             break;
         }
+        case TRANS_ID_GET_DISPLAY_BY_SCREEN: {
+            ScreenId screenId = data.ReadUint64();
+            auto info = GetDisplayInfoByScreen(screenId);
+            reply.WriteParcelable(info);
+            break;
+        }
         case TRANS_ID_CREATE_VIRTUAL_SCREEN: {
             std::string name = data.ReadString();
             uint32_t width = data.ReadUint32();
