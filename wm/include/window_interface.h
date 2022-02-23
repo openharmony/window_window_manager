@@ -28,7 +28,6 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindow");
 
     enum {
-        TRANS_ID_UPDATE_WINDOW_PROPERTY = 1,
         TRANS_ID_UPDATE_WINDOW_RECT,
         TRANS_ID_UPDATE_WINDOW_MODE,
         TRANS_ID_UPDATE_FOCUS_STATUS,
@@ -37,7 +36,6 @@ public:
         TRANS_ID_UPDATE_DRAG_EVENT,
     };
 
-    virtual void UpdateWindowProperty(const WindowProperty& windowProperty) = 0;
     virtual void UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason) = 0;
     virtual void UpdateWindowMode(WindowMode mode) = 0;
     virtual void UpdateFocusStatus(bool focused) = 0;
