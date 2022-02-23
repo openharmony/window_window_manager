@@ -150,6 +150,8 @@ void WindowLayoutPolicyCascade::LimitMoveBounds(Rect& rect)
             rect.posY_ = limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_ - minVerticalSplitH);
         }
     }
+    WLOGFI("limit divider move bounds:[%{public}d, %{public}d, %{public}u, %{public}u]",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 
 void WindowLayoutPolicyCascade::InitCascadeRect()
@@ -212,16 +214,14 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(sptr<WindowNode>& node)
             UpdateFloatingLayoutRect(limitRect, winRect);
         }
     }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        LimitMoveBounds(winRect); // limit divider pos first
+    }
     // Limit window to the maximum window size
     LimitWindowSize(node, displayRect_, winRect);
-
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        LimitMoveBounds(winRect);
-    }
-
     node->SetLayoutRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
-    if (IsLayoutChanged(lastRect, winRect)) {
+    if (IsLayoutChanged(lastRect, winRect) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     }
