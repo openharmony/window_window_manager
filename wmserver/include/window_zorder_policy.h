@@ -59,6 +59,7 @@ private:
         { WindowType::WINDOW_TYPE_KEYGUARD,             114 },
         { WindowType::WINDOW_TYPE_DRAGGING_EFFECT,      115 },
         { WindowType::WINDOW_TYPE_POINTER,              116 },
+        { WindowType::WINDOW_TYPE_BOOT_ANIMATION,       117 },
     };
 };
 }
