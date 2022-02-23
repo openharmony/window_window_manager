@@ -62,6 +62,7 @@ public:
     WMError EnterSplitWindowMode(sptr<WindowNode>& node);
     WMError ExitSplitWindowMode(sptr<WindowNode>& node);
     WMError SwitchLayoutPolicy(WindowLayoutMode mode, bool reorder = false);
+    void RaiseSplitRelatedWindowToTop(sptr<WindowNode>& node);
     void MoveWindowNode(sptr<WindowNodeContainer>& container);
     float GetVirtualPixelRatio() const;
     void TraverseWindowTree(const WindowNodeOperationFunc& func, bool isFromTopToBottom = true) const;
@@ -84,7 +85,6 @@ private:
     bool IsTopAppWindow(uint32_t windowId) const;
     sptr<WindowNode> FindDividerNode() const;
     void RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes);
-    void RaiseZOrderForSplitWindow(sptr<WindowNode>& node);
     void MinimizeWindowFromAbility(const sptr<WindowNode>& node);
     void ResetLayoutPolicy();
     bool IsFullImmersiveNode(sptr<WindowNode> node) const;
@@ -94,6 +94,7 @@ private:
 
     // cannot determine in case of a window covered by union of several windows or with transparent value
     void UpdateWindowVisibilityInfos(std::vector<sptr<WindowVisibilityInfo>>& infos);
+    void RaiseOrderedWindowToTop(std::vector<uint32_t> orderedIds, std::vector<sptr<WindowNode>>& windowNodes);
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
