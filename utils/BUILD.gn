@@ -34,6 +34,8 @@ ohos_shared_library("libwmutil") {
     "src/screen_group_info.cpp",
     "src/screen_info.cpp",
     "src/singleton_container.cpp",
+    "src/surface_reader.cpp",
+    "src/surface_reader_handler_impl.cpp",
     "src/window_property.cpp",
     "src/wm_trace.cpp",
   ]
@@ -49,6 +51,7 @@ ohos_shared_library("libwmutil") {
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "ipc:ipc_core",
+    "multimedia_image_standard:image_native",
     "utils_base:utils",
   ]
 

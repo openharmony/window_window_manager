@@ -159,8 +159,8 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 WLOGE("fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
                 break;
             }
-            DMError result = MakeMirror(mainScreenId, mirrorScreenId);
-            reply.WriteInt32(static_cast<int32_t>(result));
+            ScreenId result = MakeMirror(mainScreenId, mirrorScreenId);
+            reply.WriteUint64(static_cast<uint64_t>(result));
             break;
         }
         case TRANS_ID_GET_SCREEN_INFO_BY_ID: {
@@ -200,8 +200,8 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 Point point { data.ReadInt32(), data.ReadInt32() };
                 startPoint.push_back(point);
             }
-            DMError result = MakeExpand(screenId, startPoint);
-            reply.WriteInt32(static_cast<int32_t>(result));
+            ScreenId result = MakeExpand(screenId, startPoint);
+            reply.WriteUint64(static_cast<uint64_t>(result));
             break;
         }
         case TRANS_ID_SET_SCREEN_ACTIVE_MODE: {

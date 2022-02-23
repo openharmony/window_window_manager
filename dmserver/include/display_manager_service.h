@@ -82,11 +82,11 @@ public:
     sptr<AbstractDisplay> GetAbstractDisplay(DisplayId displayId);
     sptr<AbstractScreenController> GetAbstractScreenController();
     sptr<AbstractDisplay> GetDisplayByDisplayId(DisplayId displayId) const;
-    DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
+    ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     std::vector<sptr<ScreenInfo>> GetAllScreenInfos() override;
-    DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
+    ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
 
 private:
@@ -105,7 +105,7 @@ private:
     static inline SingletonDelegator<DisplayManagerService> delegator_;
     sptr<AbstractDisplayController> abstractDisplayController_;
     sptr<AbstractScreenController> abstractScreenController_;
-    DisplayPowerController displayPowerController_;
+    sptr<DisplayPowerController> displayPowerController_;
     std::map<ScreenId, std::shared_ptr<RSDisplayNode>> displayNodeMap_;
     sptr<IDisplayChangeListener> displayChangeListener_;
 };

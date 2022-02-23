@@ -60,11 +60,11 @@ public:
     bool SetDisplayState(DisplayState state) override;
     DisplayState GetDisplayState(DisplayId displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
-    DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
+    ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     std::vector<sptr<ScreenInfo>> GetAllScreenInfos() override;
-    DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
+    ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
 
 private:
