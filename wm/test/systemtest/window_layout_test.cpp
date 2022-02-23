@@ -354,6 +354,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     if (utils::isVerticalDisplay_) {
         ASSERT_TRUE(utils::RectEqualTo(test1, utils::doubleTileRects_[0]));
         ASSERT_TRUE(utils::RectEqualTo(test2, utils::doubleTileRects_[1]));
+        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
         return;
     } else {
         ASSERT_TRUE(utils::RectEqualTo(window, utils::tripleTileRects_[0]));
@@ -367,6 +368,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     ASSERT_TRUE(utils::RectEqualTo(test1, utils::tripleTileRects_[0]));
     ASSERT_TRUE(utils::RectEqualTo(test2, utils::tripleTileRects_[1]));
     ASSERT_TRUE(utils::RectEqualTo(test3, utils::tripleTileRects_[2])); // 2 is second rect idx
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
 }
 }
 } // namespace Rosen
