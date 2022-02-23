@@ -123,6 +123,9 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
         }
     }
     UpdateWindowTree(node);
+    if (node->IsSplitMode() || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        RaiseSplitRelatedWindowToTop(node);
+    }
     UpdateRSTree(node, true);
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
@@ -517,6 +520,26 @@ bool WindowNodeContainer::IsTopAppWindow(uint32_t windowId) const
     return node->GetWindowId() == windowId;
 }
 
+void WindowNodeContainer::RaiseOrderedWindowToTop(std::vector<uint32_t> orderedIds,
+    std::vector<sptr<WindowNode>>& windowNodes)
+{
+    for (auto iter = appWindowNode_->children_.begin(); iter != appWindowNode_->children_.end();) {
+        uint32_t wid = (*iter)->GetWindowId();
+        auto idIter = std::find_if(orderedIds.begin(), orderedIds.end(),
+            [wid] (uint32_t id) { return id == wid; });
+        if (idIter != orderedIds.end()) {
+            orderedIds.erase(idIter);
+            sptr<WindowNode> node = *iter;
+            iter = windowNodes.erase(iter);
+            UpdateWindowTree(node);
+            WLOGFI("raise group window to top %{public}d", node->GetWindowId());
+        } else {
+            iter++;
+        }
+    }
+    return;
+}
+
 void WindowNodeContainer::RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes)
 {
     auto iter = std::find_if(windowNodes.begin(), windowNodes.end(),
@@ -701,30 +724,36 @@ sptr<WindowNode> WindowNodeContainer::FindDividerNode() const
     return nullptr;
 }
 
-void WindowNodeContainer::RaiseZOrderForSplitWindow(sptr<WindowNode>& node)
+void WindowNodeContainer::RaiseSplitRelatedWindowToTop(sptr<WindowNode>& node)
 {
-    auto divider = FindDividerNode();
-    WLOGFI("start raise split window zorder id: %{public}d", node->GetWindowId());
-    if (pairedWindowMap_.count(node->GetWindowId()) != 0 && (divider != nullptr)) {
-        auto pairNode = pairedWindowMap_.at(node->GetWindowId()).pairNode_;
-        // remove split related node from tree
-        for (auto iter = appWindowNode_->children_.begin(); iter != appWindowNode_->children_.end();) {
-            uint32_t wid = (*iter)->GetWindowId();
-            if (wid == node->GetWindowId() ||
-                wid == pairNode->GetWindowId() ||
-                wid == divider->GetWindowId()) {
-                iter = appWindowNode_->children_.erase(iter);
-            } else {
-                iter++;
-            }
+    sptr<WindowNode> deviderNode = nullptr;
+    sptr<WindowNode> primaryNode = nullptr;
+    sptr<WindowNode> secondaryNode = nullptr;
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE && !pairedWindowMap_.empty()) {
+        deviderNode = node;
+        primaryNode = pairedWindowMap_.begin()->second.pairNode_;
+        secondaryNode = pairedWindowMap_[primaryNode->GetWindowId()].pairNode_;
+        std::vector<uint32_t> raiseNodeIds = {secondaryNode->GetWindowId(), primaryNode->GetWindowId()};
+        // raise primary and secondary window to top, keep raw zorder
+        RaiseOrderedWindowToTop(raiseNodeIds, appWindowNode_->children_);
+        // raise divider final, keep divider on top
+        RaiseWindowToTop(deviderNode->GetWindowId(), appWindowNode_->children_);
+    } else if (!pairedWindowMap_.empty()) {
+        deviderNode = FindDividerNode();
+        primaryNode = node;
+        secondaryNode = pairedWindowMap_.at(primaryNode->GetWindowId()).pairNode_;
+        RaiseWindowToTop(secondaryNode->GetWindowId(), appWindowNode_->children_);
+        RaiseWindowToTop(primaryNode->GetWindowId(), appWindowNode_->children_);
+        if (deviderNode != nullptr) {
+            // raise divider final, keep divider on top
+            RaiseWindowToTop(deviderNode->GetWindowId(), appWindowNode_->children_);
         }
-        UpdateWindowTree(pairNode); // raise pair node
-        UpdateWindowTree(node); // raise self
-        UpdateWindowTree(divider); // devider
     } else {
         // raise self if not paired
         RaiseWindowToTop(node->GetWindowId(), appWindowNode_->children_);
     }
+    AssignZOrder();
+    return;
 }
 
 WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
@@ -743,13 +772,13 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
         }
         RaiseWindowToTop(node->GetWindowId(), parentNode->children_); // raise itself
         if (parentNode->IsSplitMode()) {
-            RaiseZOrderForSplitWindow(parentNode);
+            RaiseSplitRelatedWindowToTop(parentNode);
         } else {
             RaiseWindowToTop(node->GetParentId(), appWindowNode_->children_); // raise parent window
         }
     } else if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         if (node->IsSplitMode()) {
-            RaiseZOrderForSplitWindow(node);
+            RaiseSplitRelatedWindowToTop(node);
         } else {
             RaiseWindowToTop(node->GetWindowId(), appWindowNode_->children_);
         }
