@@ -33,7 +33,8 @@ const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonCon
 
 DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true),
     abstractDisplayController_(new AbstractDisplayController(mutex_)),
-    abstractScreenController_(new AbstractScreenController(mutex_))
+    abstractScreenController_(new AbstractScreenController(mutex_)),
+    displayPowerController_(new DisplayPowerController(mutex_))
 {
 }
 
@@ -290,7 +291,7 @@ bool DisplayManagerService::WakeUpEnd()
 bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 {
     WM_SCOPED_TRACE("dms:SuspendBegin(%u)", reason);
-    displayPowerController_.SuspendBegin(reason);
+    displayPowerController_->SuspendBegin(reason);
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP,
         EventStatus::BEGIN);
 }
@@ -311,8 +312,7 @@ bool DisplayManagerService::SetScreenPowerForAll(DisplayPowerState state, PowerS
 
 bool DisplayManagerService::SetDisplayState(DisplayState state)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return displayPowerController_.SetDisplayState(state);
+    return displayPowerController_->SetDisplayState(state);
 }
 
 ScreenId DisplayManagerService::GetScreenIdByDisplayId(DisplayId displayId) const
@@ -338,13 +338,12 @@ sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenControlle
 DisplayState DisplayManagerService::GetDisplayState(DisplayId displayId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return displayPowerController_.GetDisplayState(displayId);
+    return displayPowerController_->GetDisplayState(displayId);
 }
 
 void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    displayPowerController_.NotifyDisplayEvent(event);
+    displayPowerController_->NotifyDisplayEvent(event);
 }
 
 
