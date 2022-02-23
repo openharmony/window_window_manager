@@ -166,31 +166,6 @@ void WindowAdapter::MinimizeAllAppWindows(DisplayId displayId)
     windowManagerServiceProxy_->MinimizeAllAppWindows(displayId);
 }
 
-bool WindowAdapter::IsSupportWideGamut(uint32_t windowId)
-{
-    if (!InitWMSProxy()) {
-        return false;
-    }
-    return windowManagerServiceProxy_->IsSupportWideGamut(windowId);
-}
-
-void WindowAdapter::SetColorSpace(uint32_t windowId, ColorSpace colorSpace)
-{
-    if (!InitWMSProxy()) {
-        return;
-    }
-    return windowManagerServiceProxy_->SetColorSpace(windowId, colorSpace);
-}
-
-ColorSpace WindowAdapter::GetColorSpace(uint32_t windowId)
-{
-    if (!InitWMSProxy()) {
-        return ColorSpace::COLOR_SPACE_DEFAULT;
-    }
-    return windowManagerServiceProxy_->GetColorSpace(windowId);
-}
-
-
 bool WindowAdapter::InitWMSProxy()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);

@@ -444,35 +444,5 @@ WMError WindowController::SetWindowLayoutMode(DisplayId displayId, WindowLayoutM
     FlushWindowInfoWithDisplayId(displayId);
     return res;
 }
-
-bool WindowController::IsSupportWideGamut(uint32_t windowId) const
-{
-    auto node = windowRoot_->GetWindowNode(windowId);
-    if (node == nullptr) {
-        WLOGFE("could not find window");
-        return false;
-    }
-    return node->IsSupportWideGamut();
-}
-
-void WindowController::SetColorSpace(uint32_t windowId, ColorSpace colorSpace)
-{
-    auto node = windowRoot_->GetWindowNode(windowId);
-    if (node == nullptr) {
-        WLOGFE("could not find window");
-        return;
-    }
-    node->SetColorSpace(colorSpace);
-}
-
-ColorSpace WindowController::GetColorSpace(uint32_t windowId) const
-{
-    auto node = windowRoot_->GetWindowNode(windowId);
-    if (node == nullptr) {
-        WLOGFE("could not find window");
-        return ColorSpace::COLOR_SPACE_DEFAULT;
-    }
-    return node->GetColorSpace();
-}
 }
 }
