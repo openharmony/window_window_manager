@@ -867,7 +867,7 @@ void WindowImpl::UnregisterAvoidAreaChangeListener()
     avoidAreaChangeListener_ = nullptr;
 }
 
-void WindowImpl::RegisterDragListener(sptr<IWindowDragListener>& listener)
+void WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
 {
     if (listener == nullptr) {
         return;
@@ -876,7 +876,7 @@ void WindowImpl::RegisterDragListener(sptr<IWindowDragListener>& listener)
     windowDragListeners_.emplace_back(listener);
 }
 
-void WindowImpl::UnregisterDragListener(sptr<IWindowDragListener>& listener)
+void WindowImpl::UnregisterDragListener(const sptr<IWindowDragListener>& listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(windowDragListeners_.begin(), windowDragListeners_.end(), listener);
@@ -1245,7 +1245,7 @@ void WindowImpl::UpdateDragEvent(const PointInfo& point, DragEvent event)
         windowDragListeners = windowDragListeners_;
     }
     for (auto& iter : windowDragListeners) {
-        iter->OnDrag(point.x, point.y, event);
+        iter->OnDrag(point.x - GetRect().posX_, point.y - GetRect().posY_, event);
     }
 }
 
