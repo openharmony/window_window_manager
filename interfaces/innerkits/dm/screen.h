@@ -86,10 +86,12 @@ public:
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
 protected:
+    // No more methods or variables can be defined here.
     Screen(sptr<ScreenInfo> info);
     void UpdateScreenInfo() const;
     void UpdateScreenInfo(sptr<ScreenInfo> info) const;
 private:
+    // No more methods or variables can be defined here.
     class Impl;
     sptr<Impl> pImpl_;
 };
