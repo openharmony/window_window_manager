@@ -50,8 +50,6 @@ private:
     ScreenManager();
     ~ScreenManager();
 
-    class ScreenManagerListener;
-    sptr<ScreenManagerListener> screenManagerListener_;
     class Impl;
     sptr<Impl> pImpl_;
 };

@@ -48,7 +48,7 @@ public:
     virtual void NotifyDisplayStateChanged(DisplayId id, DisplayState state) = 0;
     virtual void OnScreenConnect(sptr<ScreenInfo>) = 0;
     virtual void OnScreenDisconnect(ScreenId) = 0;
-    virtual void OnScreenChange(const std::vector<const sptr<ScreenInfo>>&, ScreenChangeEvent) = 0;
+    virtual void OnScreenChange(const std::vector<sptr<ScreenInfo>>&, ScreenChangeEvent) = 0;
     virtual void OnDisplayCreate(sptr<DisplayInfo>) = 0;
     virtual void OnDisplayDestroy(DisplayId) = 0;
     virtual void OnDisplayChange(sptr<DisplayInfo>, DisplayChangeEvent) = 0;

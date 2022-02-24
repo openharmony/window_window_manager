@@ -50,35 +50,41 @@ DisplayId Display::GetId() const
 
 int32_t Display::GetWidth() const
 {
-    SingletonContainer::Get<DisplayManagerAdapter>().UpdateDisplayInfo(GetId());
+    UpdateDisplayInfo();
     return pImpl_->GetDisplayInfo()->GetWidth();
 }
 
 int32_t Display::GetHeight() const
 {
-    SingletonContainer::Get<DisplayManagerAdapter>().UpdateDisplayInfo(GetId());
+    UpdateDisplayInfo();
     return pImpl_->GetDisplayInfo()->GetHeight();
 }
 
 uint32_t Display::GetFreshRate() const
 {
-    SingletonContainer::Get<DisplayManagerAdapter>().UpdateDisplayInfo(GetId());
+    UpdateDisplayInfo();
     return pImpl_->GetDisplayInfo()->GetFreshRate();
 }
 
 ScreenId Display::GetScreenId() const
 {
-    SingletonContainer::Get<DisplayManagerAdapter>().UpdateDisplayInfo(GetId());
+    UpdateDisplayInfo();
     return pImpl_->GetDisplayInfo()->GetScreenId();
 }
 
-void Display::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo)
+void Display::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo) const
 {
     if (displayInfo == nullptr) {
         WLOGFE("displayInfo is invalid");
         return;
     }
     pImpl_->SetDisplayInfo(displayInfo);
+}
+
+void Display::UpdateDisplayInfo() const
+{
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(GetId());
+    UpdateDisplayInfo(displayInfo);
 }
 
 float Display::GetVirtualPixelRatio() const
