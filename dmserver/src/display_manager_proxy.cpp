@@ -88,7 +88,7 @@ ScreenId DisplayManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOpt
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("DisplayManagerProxy::CreateVirtualScreen: remote is nullptr");
+        WLOGFW("CreateVirtualScreen: remote is nullptr");
         return SCREEN_ID_INVALID;
     }
 
@@ -96,24 +96,31 @@ ScreenId DisplayManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOpt
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("DisplayManagerProxy::CreateVirtualScreen: WriteInterfaceToken failed");
+        WLOGFE("CreateVirtualScreen: WriteInterfaceToken failed");
         return SCREEN_ID_INVALID;
     }
     bool res = data.WriteString(virtualOption.name_) && data.WriteUint32(virtualOption.width_) &&
         data.WriteUint32(virtualOption.height_) && data.WriteFloat(virtualOption.density_) &&
-        data.WriteRemoteObject(virtualOption.surface_->GetProducer()->AsObject()) &&
         data.WriteInt32(virtualOption.flags_) && data.WriteBool(virtualOption.isForShot_);
+    if (virtualOption.surface_ != nullptr && virtualOption.surface_->GetProducer() != nullptr) {
+        res = res &&
+            data.WriteBool(true) &&
+            data.WriteRemoteObject(virtualOption.surface_->GetProducer()->AsObject());
+    } else {
+        WLOGFW("CreateVirtualScreen: surface is nullptr");
+        res = res && data.WriteBool(false);
+    }
     if (!res) {
-        WLOGFE("DisplayManagerProxy::Write data failed");
+        WLOGFE("Write data failed");
         return SCREEN_ID_INVALID;
     }
     if (remote->SendRequest(TRANS_ID_CREATE_VIRTUAL_SCREEN, data, reply, option) != ERR_NONE) {
-        WLOGFW("DisplayManagerProxy::CreateVirtualScreen: SendRequest failed");
+        WLOGFW("CreateVirtualScreen: SendRequest failed");
         return SCREEN_ID_INVALID;
     }
 
     ScreenId screenId = static_cast<ScreenId>(reply.ReadUint64());
-    WLOGFI("DisplayManagerProxy::CreateVirtualScreen %" PRIu64"", screenId);
+    WLOGFI("CreateVirtualScreen %" PRIu64"", screenId);
     return screenId;
 }
 
@@ -121,7 +128,7 @@ DMError DisplayManagerProxy::DestroyVirtualScreen(ScreenId screenId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("DisplayManagerProxy::DestroyVirtualScreen: remote is nullptr");
+        WLOGFW("DestroyVirtualScreen: remote is nullptr");
         return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
     }
 
@@ -129,15 +136,15 @@ DMError DisplayManagerProxy::DestroyVirtualScreen(ScreenId screenId)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("DisplayManagerProxy::DestroyVirtualScreen: WriteInterfaceToken failed");
+        WLOGFE("DestroyVirtualScreen: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("DisplayManagerProxy::DestroyVirtualScreen: WriteUint64 screenId failed");
+        WLOGFW("DestroyVirtualScreen: WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(TRANS_ID_DESTROY_VIRTUAL_SCREEN, data, reply, option) != ERR_NONE) {
-        WLOGFW("DisplayManagerProxy::DestroyVirtualScreen: SendRequest failed");
+        WLOGFW("DestroyVirtualScreen: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -158,8 +165,16 @@ DMError DisplayManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sptr<Sur
         WLOGFE("SetVirtualScreenSurface: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
-    if (!data.WriteUint64(static_cast<uint64_t>(screenId)) ||
-        !data.WriteRemoteObject(surface->GetProducer()->AsObject())) {
+    bool res = data.WriteUint64(static_cast<uint64_t>(screenId));
+    if (surface != nullptr && surface->GetProducer() != nullptr) {
+        res = res &&
+            data.WriteBool(true) &&
+            data.WriteRemoteObject(surface->GetProducer()->AsObject());
+    } else {
+        WLOGFW("SetVirtualScreenSurface: surface is nullptr");
+        res = res && data.WriteBool(false);
+    }
+    if (!res) {
         WLOGFW("SetVirtualScreenSurface: Write screenId/surface failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
