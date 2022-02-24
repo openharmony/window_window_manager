@@ -39,7 +39,7 @@ declare namespace display {
    * @param type: type of callback
    * #devices tv, phone, tablet, wearable, car
    */
-  function off(type: 'add' | 'remove' | 'change', callback: Callback<number>): void;
+  function off(type: 'add' | 'remove' | 'change', callback?: Callback<number>): void;
 
   /**
   /**
