@@ -69,11 +69,6 @@ public:
     bool IsSplitMode() const;
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
 
-    // colorspace, gamut
-    bool IsSupportWideGamut() const;
-    void SetColorSpace(ColorSpace colorSpace);
-    ColorSpace GetColorSpace() const;
-
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
@@ -85,15 +80,6 @@ public:
     bool isCovered_ { true }; // initial value true to ensure notification when this window is shown
 
 private:
-    // colorspace, gamut
-    using ColorSpaceConvertMap = struct {
-        ColorSpace colorSpace;
-        SurfaceColorGamut sufaceColorGamut;
-    };
-    static const ColorSpaceConvertMap colorSpaceConvertMap[];
-    static ColorSpace GetColorSpaceFromSurfaceGamut(SurfaceColorGamut surfaceColorGamut);
-    static SurfaceColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
-
     sptr<WindowProperty> property_;
     sptr<IWindow> windowToken_;
     Rect layoutRect_ { 0, 0, 0, 0 };

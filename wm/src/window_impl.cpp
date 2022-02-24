@@ -16,7 +16,6 @@
 #include "window_impl.h"
 
 #include <cmath>
-#include <ui/rs_surface_node.h>
 
 #include "display_manager.h"
 #include "singleton_container.h"
@@ -33,6 +32,11 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
 }
+
+const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
+    { ColorSpace::COLOR_SPACE_DEFAULT, COLOR_GAMUT_SRGB },
+    { ColorSpace::COLOR_SPACE_WIDE_GAMUT, COLOR_GAMUT_DCI_P3 },
+};
 
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
 std::map<uint32_t, std::vector<sptr<Window>>> WindowImpl::subWindowMap_;
@@ -367,19 +371,41 @@ std::string WindowImpl::GetContentInfo()
     return uiContent_->GetContentInfo();
 }
 
+ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(SurfaceColorGamut surfaceColorGamut)
+{
+    for (auto item: colorSpaceConvertMap) {
+        if (item.sufaceColorGamut == surfaceColorGamut) {
+            return item.colorSpace;
+        }
+    }
+    return ColorSpace::COLOR_SPACE_DEFAULT;
+}
+
+SurfaceColorGamut WindowImpl::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
+{
+    for (auto item: colorSpaceConvertMap) {
+        if (item.colorSpace == colorSpace) {
+            return item.sufaceColorGamut;
+        }
+    }
+    return SurfaceColorGamut::COLOR_GAMUT_SRGB;
+}
+
 bool WindowImpl::IsSupportWideGamut()
 {
-    return SingletonContainer::Get<WindowAdapter>().IsSupportWideGamut(property_->GetWindowId());
+    return true;
 }
 
 void WindowImpl::SetColorSpace(ColorSpace colorSpace)
 {
-    SingletonContainer::Get<WindowAdapter>().SetColorSpace(property_->GetWindowId(), colorSpace);
+    auto surfaceGamut = GetSurfaceGamutFromColorSpace(colorSpace);
+    surfaceNode_->SetColorSpace(surfaceGamut);
 }
 
 ColorSpace WindowImpl::GetColorSpace()
 {
-    return SingletonContainer::Get<WindowAdapter>().GetColorSpace(property_->GetWindowId());
+    auto surfaceGamut = surfaceNode_->GetColorSpace();
+    return GetColorSpaceFromSurfaceGamut(surfaceGamut);
 }
 
 void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)

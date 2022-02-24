@@ -48,9 +48,6 @@ public:
         TRANS_ID_GET_TOP_WINDOW_ID,
         TRANS_ID_PROCESS_WINDOW_TOUCHED_EVENT,
         TRANS_ID_MINIMIZE_ALL_APP_WINDOWS,
-        TRANS_ID_IS_SUPPORT_WIDE_GAMUT, // wide gamut
-        TRANS_ID_SET_COLOR_SPACE, // set color space
-        TRANS_ID_GET_COLOR_SPACE, // get color space
         TRANS_ID_SET_BACKGROUND_BLUR,
         TRANS_ID_SET_APLPHA,
         TRANS_ID_UPDATE_LAYOUT_MODE,
@@ -76,11 +73,6 @@ public:
     virtual void ProcessWindowTouchedEvent(uint32_t windowId) = 0;
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) = 0;
-
-    // colorspace, gamut
-    virtual bool IsSupportWideGamut(uint32_t windowId) = 0;
-    virtual void SetColorSpace(uint32_t windowId, ColorSpace colorSpace) = 0;
-    virtual ColorSpace GetColorSpace(uint32_t windowId) = 0;
 
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;

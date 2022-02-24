@@ -23,6 +23,7 @@
 #include <key_event.h>
 #include <refbase.h>
 #include <ui_content.h>
+#include <ui/rs_surface_node.h>
 
 #include "input_transfer_station.h"
 #include "vsync_station.h"
@@ -170,6 +171,14 @@ private:
     bool IsPointerEventConsumed();
     void AdjustWindowAnimationFlag();
     void MapFloatingWindowToAppIfNeeded();
+    // colorspace, gamut
+    using ColorSpaceConvertMap = struct {
+        ColorSpace colorSpace;
+        SurfaceColorGamut sufaceColorGamut;
+    };
+    static const ColorSpaceConvertMap colorSpaceConvertMap[];
+    static ColorSpace GetColorSpaceFromSurfaceGamut(SurfaceColorGamut surfaceColorGamut);
+    static SurfaceColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
 
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
         std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
