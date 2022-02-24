@@ -47,6 +47,7 @@ public:
 
     static void PrintUsage(const std::string &cmdLine);
     static bool CheckFileNameValid(const std::string &fileName);
+    static std::string GenerateFileName(int offset = 0);
     static bool CheckWidthAndHeightValid(const CmdArgments& cmdArgments);
     static bool WriteToPng(const std::string &fileName, const WriteToPngParam &param);
     static bool WriteToPngWithPixelMap(const std::string &fileName, Media::PixelMap &pixelMap);
