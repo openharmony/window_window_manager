@@ -57,7 +57,7 @@ struct ExpandOption {
 };
 
 class Screen : public RefBase {
-friend class ScreenManagerAdapter;
+friend class ScreenManager;
 public:
     ~Screen();
     Screen(const Screen&) = delete;
@@ -71,8 +71,8 @@ public:
     uint32_t GetVirtualWidth() const;
     uint32_t GetVirtualHeight() const;
     float GetVirtualPixelRatio() const;
-    bool RequestRotation(Rotation rotation);
-    Rotation GetRotation();
+    bool RequestRotation(Rotation rotation) const;
+    Rotation GetRotation() const;
     ScreenId GetParentId() const;
     uint32_t GetModeId() const;
     std::vector<sptr<SupportedScreenModes>> GetSupportedModes() const;
@@ -87,7 +87,8 @@ public:
     DMError SetScreenColorTransform();
 protected:
     Screen(sptr<ScreenInfo> info);
-    void UpdateScreenInfo(sptr<ScreenInfo> screenInfo);
+    void UpdateScreenInfo() const;
+    void UpdateScreenInfo(sptr<ScreenInfo> info) const;
 private:
     class Impl;
     sptr<Impl> pImpl_;

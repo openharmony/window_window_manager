@@ -93,13 +93,13 @@ void DisplayManagerAgentController::OnScreenChange(sptr<ScreenInfo> screenInfo, 
     if (screenInfo == nullptr) {
         return;
     }
-    std::vector<const sptr<ScreenInfo>> screenInfos;
+    std::vector<sptr<ScreenInfo>> screenInfos;
     screenInfos.push_back(screenInfo);
     OnScreenChange(screenInfos, screenChangeEvent);
 }
 
 void DisplayManagerAgentController::OnScreenChange(
-    const std::vector<const sptr<ScreenInfo>>& screenInfos, ScreenChangeEvent screenChangeEvent)
+    const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenChangeEvent screenChangeEvent)
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
     if (agents.empty() || screenInfos.empty()) {
