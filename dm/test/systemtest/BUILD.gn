@@ -75,7 +75,12 @@ ohos_systemtest("dm_screenshot_test") {
 ohos_systemtest("dm_screenshot_cmd_test") {
   module_out_path = module_out_path
 
-  sources = [ "screenshot_cmd_test.cpp" ]
+  include_dirs = [ "//foundation/windowmanager/snapshot" ]
+
+  sources = [
+    "//foundation/windowmanager/snapshot/snapshot_utils.cpp",
+    "screenshot_cmd_test.cpp",
+  ]
 
   deps = [ ":dm_systemtest_common" ]
 }
