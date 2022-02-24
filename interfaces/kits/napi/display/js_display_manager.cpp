@@ -53,6 +53,12 @@ static NativeValue* GetDefaultDisplay(NativeEngine* engine, NativeCallbackInfo* 
     return (me != nullptr) ? me->OnGetDefaultDisplay(*engine, *info) : nullptr;
 }
 
+static NativeValue* GetAllDisplay(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
+    return (me != nullptr) ? me->OnGetAllDisplay(*engine, *info) : nullptr;
+}
+
 static NativeValue* RegisterDisplayManagerCallback(NativeEngine* engine, NativeCallbackInfo* info)
 {
     JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
@@ -72,8 +78,18 @@ std::mutex mtx_;
 NativeValue* OnGetDefaultDisplay(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsDisplayManager::OnGetDefaultDisplay is called");
+    DMError errCode = DMError::DM_OK;
+    if (info.argc != 0 && info.argc != ARGC_ONE) {
+        WLOGFE("JsDisplayManager::OnGetDefaultDisplay params not match");
+        errCode = DMError::DM_ERROR_INVALID_PARAM;
+    }
+
     AsyncTask::CompleteCallback complete =
-        [](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (errCode != DMError::DM_OK) {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(errCode), "JsDisplayManager::OnGetDefaultDisplay failed."));
+            }
             sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
             if (display != nullptr) {
                 task.Resolve(engine, CreateJsDisplayObject(engine, display));
@@ -84,6 +100,44 @@ NativeValue* OnGetDefaultDisplay(NativeEngine& engine, NativeCallbackInfo& info)
             }
         };
     NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_ONE && info.argv[0]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[0];
+    }
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* OnGetAllDisplay(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsDisplayManager::OnGetAllDisplay is called");
+    DMError errCode = DMError::DM_OK;
+    if (info.argc != 0 && info.argc != ARGC_ONE) {
+        WLOGFE("JsDisplayManager::OnGetAllDisplay params not match");
+        errCode = DMError::DM_ERROR_INVALID_PARAM;
+    }
+
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (errCode != DMError::DM_OK) {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(errCode), "JsDisplayManager::OnGetAllDisplay failed."));
+            }
+            std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
+            if (!displays.empty()) {
+                task.Resolve(engine, CreateJsDisplayArrayObject(engine, displays));
+                WLOGFI("JsDisplayManager::GetAllDisplays success");
+            } else {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsDisplayManager::OnGetAllDisplay failed."));
+            }
+        };
+
+    NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_ONE && info.argv[0]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[0];
+    }
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -227,6 +281,18 @@ NativeValue* OnUnregisterDisplayManagerCallback(NativeEngine& engine, NativeCall
     }
     return engine.CreateUndefined();
 }
+
+NativeValue* CreateJsDisplayArrayObject(NativeEngine& engine, std::vector<sptr<Display>>& displays)
+{
+    WLOGFI("JsDisplayManager::CreateJsDisplayArrayObject is called");
+    NativeValue* arrayValue = engine.CreateArray(displays.size());
+    NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
+    int32_t i = 0;
+    for (auto& display : displays) {
+        array->SetElement(i++, CreateJsDisplayObject(engine, display));
+    }
+    return arrayValue;
+}
 };
 
 NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
@@ -248,6 +314,7 @@ NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetNativePointer(jsDisplayManager.release(), JsDisplayManager::Finalizer, nullptr);
 
     BindNativeFunction(*engine, *object, "getDefaultDisplay", JsDisplayManager::GetDefaultDisplay);
+    BindNativeFunction(*engine, *object, "getAllDisplay", JsDisplayManager::GetAllDisplay);
     BindNativeFunction(*engine, *object, "on", JsDisplayManager::RegisterDisplayManagerCallback);
     BindNativeFunction(*engine, *object, "off", JsDisplayManager::UnregisterDisplayManagerCallback);
     return engine->CreateUndefined();
