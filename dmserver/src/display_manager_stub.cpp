@@ -59,11 +59,15 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             uint32_t width = data.ReadUint32();
             uint32_t height = data.ReadUint32();
             float density = data.ReadFloat();
-            sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
-            sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
-            sptr<Surface> surface = Surface::CreateSurfaceAsProducer(bp);
             int32_t flags = data.ReadInt32();
             bool isForShot = data.ReadBool();
+            bool isSurfaceValid = data.ReadBool();
+            sptr<Surface> surface = nullptr;
+            if (isSurfaceValid) {
+                sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
+                sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
+                surface = Surface::CreateSurfaceAsProducer(bp);
+            }
             VirtualScreenOption option = {
                 .name_ = name,
                 .width_ = width,
@@ -85,9 +89,13 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
         case TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
-            sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
-            sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
-            sptr<Surface> surface = Surface::CreateSurfaceAsProducer(bp);
+            bool isSurfaceValid = data.ReadBool();
+            sptr<Surface> surface = nullptr;
+            if (isSurfaceValid) {
+                sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
+                sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
+                surface = Surface::CreateSurfaceAsProducer(bp);
+            }
             DMError result = SetVirtualScreenSurface(screenId, surface);
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
