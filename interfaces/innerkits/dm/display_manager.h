@@ -33,7 +33,7 @@ public:
     public:
         virtual void OnCreate(DisplayId) = 0;
         virtual void OnDestroy(DisplayId) = 0;
-        virtual void OnChange(DisplayId, DisplayChangeEvent) = 0;
+        virtual void OnChange(DisplayId) = 0;
     };
 
     std::vector<sptr<Display>> GetAllDisplays();

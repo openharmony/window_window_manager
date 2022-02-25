@@ -217,11 +217,11 @@ DMError DisplayManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sptr<Sur
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-bool DisplayManagerProxy::RequestRotation(ScreenId screenId, Rotation rotation)
+bool DisplayManagerProxy::SetOrientation(ScreenId screenId, Orientation orientation)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("fail to request rotation: remote is null");
+        WLOGFW("fail to set orientation: remote is null");
         return false;
     }
 
@@ -229,19 +229,19 @@ bool DisplayManagerProxy::RequestRotation(ScreenId screenId, Rotation rotation)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("fail to request rotation: WriteInterfaceToken failed");
+        WLOGFE("fail to set orientation: WriteInterfaceToken failed");
         return false;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("fail to request rotation: Write screenId failed");
+        WLOGFW("fail to set orientation: Write screenId failed");
         return false;
     }
-    if (!data.WriteUint32(static_cast<uint32_t>(rotation))) {
-        WLOGFW("fail to request rotation: Write rotation failed");
+    if (!data.WriteUint32(static_cast<uint32_t>(orientation))) {
+        WLOGFW("fail to set orientation: Write orientation failed");
         return false;
     }
-    if (remote->SendRequest(TRANS_ID_REQUEST_ROTATION, data, reply, option) != ERR_NONE) {
-        WLOGFW("fail to request rotation: SendRequest failed");
+    if (remote->SendRequest(TRANS_ID_SET_ORIENTATION, data, reply, option) != ERR_NONE) {
+        WLOGFW("fail to set orientation: SendRequest failed");
         return false;
     }
     return reply.ReadBool();

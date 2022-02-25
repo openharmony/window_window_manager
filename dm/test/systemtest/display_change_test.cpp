@@ -44,15 +44,13 @@ public:
         WLOGI("DisplayChangeEventListener::OnDestroy displayId=%{public}" PRIu64"", displayId);
     }
 
-    virtual void OnChange(DisplayId displayId, DisplayChangeEvent event)
+    virtual void OnChange(DisplayId displayId)
     {
         WLOGI("DisplayChangeEventListener::OnChange displayId=%{public}" PRIu64"", displayId);
         isCallbackCalled_ = true;
-        event_ = event;
         displayId_ = displayId;
     }
     bool isCallbackCalled_ { false };
-    DisplayChangeEvent event_ { DisplayChangeEvent::UNKNOWN };
     DisplayId displayId_ { DISPLAY_ID_INVALD };
 };
 
@@ -105,7 +103,6 @@ void DisplayChangeTest::TearDown()
 void DisplayChangeTest::ResetDisplayChangeListener()
 {
     listener_->isCallbackCalled_ = false;
-    listener_->event_ = DisplayChangeEvent::UNKNOWN;
     listener_->displayId_ = DISPLAY_ID_INVALD;
 }
 

@@ -139,7 +139,7 @@ void RegisterScreenListenerWithType(NativeEngine& engine, const std::string& typ
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     sptr<JsScreenListener> screenListener = new JsScreenListener(&engine);
-    if (type == "screenConnectEvent" || type == "screenChangeEvent") {
+    if (type == "connect" || type == "disconnect" || type == "change") {
         SingletonContainer::Get<ScreenManager>().RegisterScreenListener(screenListener);
         WLOGFI("JsScreenManager::RegisterScreenListenerWithType success");
     } else {

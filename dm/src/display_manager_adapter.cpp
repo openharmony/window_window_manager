@@ -46,16 +46,6 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfoByScreenId(ScreenId scree
     return  displayManagerServiceProxy_->GetDisplayInfoByScreen(screenId);
 }
 
-bool ScreenManagerAdapter::RequestRotation(ScreenId screenId, Rotation rotation)
-{
-    if (!InitDMSProxy()) {
-        WLOGFE("fail to request rotation: InitDMSProxy failed!");
-        return false;
-    }
-
-    return displayManagerServiceProxy_->RequestRotation(screenId, rotation);
-}
-
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId)
 {
     if (!InitDMSProxy()) {
@@ -152,6 +142,15 @@ DMError ScreenManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Su
     }
     WLOGFI("DisplayManagerAdapter::SetVirtualScreenSurface");
     return displayManagerServiceProxy_->SetVirtualScreenSurface(screenId, surface);
+}
+
+bool ScreenManagerAdapter::SetOrientation(ScreenId screenId, Orientation orientation)
+{
+    if (!InitDMSProxy()) {
+        WLOGFE("fail to set orientation: InitDMSProxy failed!");
+        return false;
+    }
+    return displayManagerServiceProxy_->SetOrientation(screenId, orientation);
 }
 
 bool BaseAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,

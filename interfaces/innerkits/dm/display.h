@@ -40,6 +40,8 @@ public:
     uint32_t GetFreshRate() const;
     ScreenId GetScreenId() const;
     float GetVirtualPixelRatio() const;
+    Rotation GetRotation() const;
+    Orientation GetOrientation() const;
 
 protected:
     // No more methods or variables can be defined here.

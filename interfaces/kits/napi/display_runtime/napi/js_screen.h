@@ -31,11 +31,11 @@ public:
     ~JsScreen();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* SetScreenActiveMode(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* RequestRotation(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetOrientation(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     sptr<Screen> screen_ = nullptr;
-    NativeValue* OnRequestRotation(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetOrientation(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetScreenActiveMode(NativeEngine& engine, NativeCallbackInfo& info);
 };
 }  // namespace Rosen
