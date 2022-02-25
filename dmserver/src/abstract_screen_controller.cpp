@@ -248,32 +248,6 @@ void AbstractScreenController::ScreenConnectionInDisplayInit(sptr<AbstractScreen
     }
 }
 
-void AbstractScreenController::ProcessScreenModeChanged(ScreenId rsScreenId)
-{
-    WM_SCOPED_TRACE("dms:ProcessScreenModeChanged(%" PRIu64")", rsScreenId);
-    auto iter = rs2DmsScreenIdMap_.find(rsScreenId);
-    if (iter == rs2DmsScreenIdMap_.end()) {
-        WLOGE("ProcessScreenModeChanged: screenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_", rsScreenId);
-        return;
-    }
-    WLOGFD("ProcessScreenModeChanged: process screen info changes");
-    ScreenId dmsScreenId = iter->second;
-    auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
-    if (dmsScreenMapIter == dmsScreenMap_.end()) {
-        WLOGE("ProcessScreenModeChanged: no dms screen is found, rsscreenId=%{public}" PRIu64"", rsScreenId);
-        return;
-    }
-    // should be called by OnRsScreenConnectionChange
-    // if not, the recursive_mutex should be added
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    sptr<AbstractScreen> absScreen = dmsScreenMapIter->second;
-    if (abstractScreenCallback_ != nullptr) {
-        abstractScreenCallback_->onChange_(absScreen, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
-    }
-    DisplayManagerAgentController::GetInstance().OnScreenChange(
-        absScreen->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
-}
-
 void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
 {
     WLOGI("disconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
@@ -504,7 +478,11 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
 DMError AbstractScreenController::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
 {
     WLOGFI("AbstractScreenController::SetVirtualScreenSurface");
-    int32_t res = rsInterface_.SetVirtualScreenSurface(screenId, surface);
+    int32_t res = -1;
+    auto iter = dms2RsScreenIdMap_.find(screenId);
+    if (iter != dms2RsScreenIdMap_.end()) {
+        res = rsInterface_.SetVirtualScreenSurface(iter->second, surface);
+    }
     if (res != 0) {
         WLOGE("SetVirtualScreenSurface failed in RenderService");
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
@@ -614,18 +592,29 @@ bool AbstractScreenController::IsScreenGroup(ScreenId screenId) const
 
 bool AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
-    WLOGI("SetScreenActiveMode: screenId: %{public}" PRIu64", modeId: %{public}u", screenId, modeId);
-    rsInterface_.SetScreenActiveMode(screenId, modeId);
-    auto screen = GetAbstractScreen(screenId);
-    if (screen == nullptr) {
-        WLOGFE("SetScreenActiveMode: Get AbstractScreen failed");
+    WLOGI("SetScreenActiveMode: RsScreenId: %{public}" PRIu64", modeId: %{public}u", screenId, modeId);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("SetScreenActiveMode: invalid screenId");
         return false;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    uint32_t usedModeId = static_cast<uint32_t>(screen->activeIdx_);
-    screen->activeIdx_ = static_cast<int32_t>(modeId);
+    uint32_t usedModeId = 0;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto iter = dms2RsScreenIdMap_.find(screenId);
+        if (iter == dms2RsScreenIdMap_.end()) {
+            WLOGFE("SetScreenActiveMode: No corresponding rsId");
+            return false;
+        }
+        rsInterface_.SetScreenActiveMode(iter->second, modeId);
+        auto screen = GetAbstractScreen(screenId);
+        if (screen == nullptr) {
+            WLOGFE("SetScreenActiveMode: Get AbstractScreen failed");
+            return false;
+        }
+        usedModeId = static_cast<uint32_t>(screen->activeIdx_);
+        screen->activeIdx_ = static_cast<int32_t>(modeId);
+    }
     // add thread to process mode change sync event
-    // should be called by OnRsScreenChange if rs implement corresponding event callback
     if (usedModeId != modeId) {
         WLOGI("SetScreenActiveMode: modeId: %{public}u ->  %{public}u", usedModeId, modeId);
         auto func = [=]() {
@@ -636,6 +625,33 @@ bool AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t m
         thread.detach();
     }
     return true;
+}
+
+void AbstractScreenController::ProcessScreenModeChanged(ScreenId dmsScreenId)
+{
+    WM_SCOPED_TRACE("dms:ProcessScreenModeChanged(%" PRIu64")", dmsScreenId);
+    sptr<AbstractScreen> absScreen = nullptr;
+    sptr<AbstractScreenCallback> absScreenCallback = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
+        if (dmsScreenMapIter == dmsScreenMap_.end()) {
+            WLOGFE("dmsScreenId=%{public}" PRIu64" is not in dmsScreenMap", dmsScreenId);
+            return;
+        }
+        absScreen = GetAbstractScreen(dmsScreenId);
+        if (absScreen == nullptr) {
+            WLOGFE("screen is nullptr. dmsScreenId=%{public}" PRIu64"", dmsScreenId);
+            return;
+        }
+        absScreenCallback = abstractScreenCallback_;
+    }
+
+    if (absScreenCallback != nullptr) {
+        absScreenCallback->onChange_(absScreen, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+    }
+    DisplayManagerAgentController::GetInstance().OnScreenChange(
+        absScreen->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
 }
 
 bool AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenId> screens)
