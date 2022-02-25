@@ -38,6 +38,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowNodeContainer"};
     constexpr int WINDOW_NAME_MAX_LENGTH = 10;
+    const std::string SPLIT_SCREEN_EVENT_NAME = "common.event.SPLIT_SCREEN";
 }
 
 WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height) : displayId_(displayId)
@@ -822,19 +823,18 @@ void WindowNodeContainer::MinimizeAllAppWindows()
 
 void WindowNodeContainer::SendSplitScreenEvent(WindowMode mode)
 {
-    // should define in common_event_support.h and @ohos.commonEvent.d.ts
-    WLOGFI("send split sceen event , trigger mode is %{public}d", mode);
-    const std::string eventName = "common.event.SPLIT_SCREEN";
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
     AAFwk::Want want;
-    want.SetAction(eventName);
+    want.SetAction(SPLIT_SCREEN_EVENT_NAME);
     EventFwk::CommonEventData commonEventData;
     commonEventData.SetWant(want);
-    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-        commonEventData.SetData("Secondary");
-    } else {
-        commonEventData.SetData("Primary");
-    }
+    std::string eventData = (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) ? "Secondary" : "Primary";
+    commonEventData.SetData(eventData);
     EventFwk::CommonEventManager::PublishCommonEvent(commonEventData);
+    // set ipc identity to raw
+    IPCSkeleton::SetCallingIdentity(identity);
+    WLOGFI("send split sceen event finish.");
 }
 
 sptr<WindowNode> WindowNodeContainer::FindSplitPairNode(sptr<WindowNode>& triggerNode) const
