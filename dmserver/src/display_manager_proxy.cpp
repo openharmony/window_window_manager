@@ -653,6 +653,24 @@ DisplayState DisplayManagerProxy::GetDisplayState(DisplayId displayId)
     return static_cast<DisplayState>(reply.ReadUint32());
 }
 
+std::vector<DisplayId> DisplayManagerProxy::GetAllDisplayIds()
+{
+    std::vector<DisplayId> allDisplayIds;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return allDisplayIds;
+    }
+    if (Remote()->SendRequest(TRANS_ID_GET_ALL_DISPLAYIDS, data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return allDisplayIds;
+    }
+    reply.ReadUInt64Vector(&allDisplayIds);
+    return allDisplayIds;
+}
+
 void DisplayManagerProxy::NotifyDisplayEvent(DisplayEvent event)
 {
     MessageParcel data;

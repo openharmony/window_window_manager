@@ -41,6 +41,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId);
     sptr<AbstractDisplay> GetAbstractDisplay(DisplayId displayId) const;
     sptr<AbstractDisplay> GetAbstractDisplayByScreen(ScreenId screenId) const;
+    std::vector<DisplayId> GetAllDisplayIds() const;
     void AddDisplayForExpandScreen(sptr<AbstractScreen> absScreen);
 
 private:

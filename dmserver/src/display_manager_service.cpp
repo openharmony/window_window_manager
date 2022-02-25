@@ -85,9 +85,14 @@ ScreenId DisplayManagerService::GetScreenIdFromDisplayId(DisplayId displayId)
 
 DisplayId DisplayManagerService::GetDefaultDisplayId()
 {
-    ScreenId screenId = abstractDisplayController_->GetDefaultScreenId();
-    WLOGFI("GetDefaultDisplayId %{public}" PRIu64"", screenId);
-    return GetDisplayIdFromScreenId(screenId);
+    ScreenId dmsScreenId = abstractScreenController_->GetDefaultScreenId();
+    WLOGFI("GetDefaultDisplayId %{public}" PRIu64"", dmsScreenId);
+    sptr<AbstractDisplay> display = GetDisplayByScreen(dmsScreenId);
+    if (display == nullptr) {
+        WLOGFE("fail to get displayInfo by id: invalid display");
+        return DISPLAY_ID_INVALD;
+    }
+    return display->GetId();
 }
 
 sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
@@ -456,6 +461,11 @@ sptr<ScreenGroupInfo> DisplayManagerService::GetScreenGroupInfoById(ScreenId scr
         return nullptr;
     }
     return screenGroup->ConvertToScreenGroupInfo();
+}
+
+std::vector<DisplayId> DisplayManagerService::GetAllDisplayIds()
+{
+    return abstractDisplayController_->GetAllDisplayIds();
 }
 
 std::vector<sptr<ScreenInfo>> DisplayManagerService::GetAllScreenInfos()
