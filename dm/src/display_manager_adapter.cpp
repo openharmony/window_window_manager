@@ -326,6 +326,15 @@ sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
     return screenInfo;
 }
 
+std::vector<DisplayId> DisplayManagerAdapter::GetAllDisplayIds()
+{
+    if (!InitDMSProxy()) {
+        WLOGFE("InitDMSProxyLocked failed!");
+        return {};
+    }
+    return displayManagerServiceProxy_->GetAllDisplayIds();
+}
+
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALD) {

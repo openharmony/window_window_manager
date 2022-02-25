@@ -56,6 +56,7 @@ WM_DECLARE_SINGLE_INSTANCE(DisplayManagerAdapter);
 public:
     virtual DisplayId GetDefaultDisplayId();
     virtual sptr<DisplayInfo> GetDisplayInfoByScreenId(ScreenId screenId);
+    virtual std::vector<DisplayId> GetAllDisplayIds();
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
     virtual bool WakeUpBegin(PowerStateChangeReason reason);
     virtual bool WakeUpEnd();
