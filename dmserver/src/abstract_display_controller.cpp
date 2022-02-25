@@ -237,16 +237,16 @@ void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absS
         return;
     }
     WLOGI("screen changes. id:%{public}" PRIu64"", absScreen->dmsId_);
-
-    if (event == DisplayChangeEvent::UPDATE_ROTATION) {
-        ProcessDisplayUpdateRotation(absScreen);
-    }
-    if (event == DisplayChangeEvent::DISPLAY_SIZE_CHANGED) {
+    if (event == DisplayChangeEvent::UPDATE_ORIENTATION) {
+        ProcessDisplayUpdateOrientation(absScreen);
+    } else if (event == DisplayChangeEvent::DISPLAY_SIZE_CHANGED) {
         ProcessDisplaySizeChange(absScreen);
+    } else {
+        WLOGE("unknow screen change event. id:%{public}" PRIu64" event %{public}u", absScreen->dmsId_, event);
     }
 }
 
-void AbstractDisplayController::ProcessDisplayUpdateRotation(sptr<AbstractScreen> absScreen)
+void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScreen> absScreen)
 {
     sptr<AbstractDisplay> abstractDisplay = nullptr;
     {
@@ -281,15 +281,16 @@ void AbstractDisplayController::ProcessDisplayUpdateRotation(sptr<AbstractScreen
             }
         }
     }
+    abstractDisplay->SetOrientation(absScreen->orientation_);
     if (abstractDisplay->RequestRotation(absScreen->rotation_)) {
         // Notify rotation event to WMS
         DisplayManagerService::GetInstance().NotifyDisplayStateChange(abstractDisplay->GetId(),
             DisplayStateChangeType::UPDATE_ROTATION);
-        // Notify rotation event to DisplayManager
-        sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
-        DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo,
-            DisplayChangeEvent::UPDATE_ROTATION);
     }
+    // Notify orientation event to DisplayManager
+    sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
+    DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo,
+        DisplayChangeEvent::UPDATE_ORIENTATION);
 }
 
 void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> absScreen)

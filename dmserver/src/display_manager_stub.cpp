@@ -100,10 +100,10 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
-        case TRANS_ID_REQUEST_ROTATION: {
+        case TRANS_ID_SET_ORIENTATION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
-            Rotation rotation = static_cast<Rotation>(data.ReadUint32());
-            reply.WriteBool(RequestRotation(screenId, rotation));
+            Orientation orientation = static_cast<Orientation>(data.ReadUint32());
+            reply.WriteBool(SetOrientation(screenId, orientation));
             break;
         }
         case TRANS_ID_GET_DISPLAY_SNAPSHOT: {

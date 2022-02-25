@@ -99,10 +99,16 @@ Rotation Screen::GetRotation() const
     return pImpl_->GetScreenInfo()->GetRotation();
 }
 
-bool Screen::RequestRotation(Rotation rotation) const
+Orientation Screen::GetOrientation() const
 {
-    WLOGFD("rotation the screen");
-    return SingletonContainer::Get<ScreenManagerAdapter>().RequestRotation(GetId(), rotation);
+    UpdateScreenInfo();
+    return pImpl_->GetScreenInfo()->GetOrientation();
+}
+
+bool Screen::SetOrientation(Orientation orientation) const
+{
+    WLOGFD("set orientation %{public}u", orientation);
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(GetId(), orientation);
 }
 
 DMError Screen::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const

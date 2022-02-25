@@ -15,7 +15,9 @@
 
 // gtest
 #include <gtest/gtest.h>
+
 #include "display_test_utils.h"
+#include "screen.h"
 #include "window.h"
 #include "window_option.h"
 using namespace testing;
@@ -360,6 +362,28 @@ HWTEST_F(ScreenManagerTest, ScreenManager11, Function | MediumTest | Level2)
         ASSERT_NE(SCREEN_ID_INVALID, screen->GetParentId());
         ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId));
     }
+}
+
+/**
+ * @tc.name: ScreenManager11
+ * @tc.desc: Screen orientatin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, ScreenManager12, Function | MediumTest | Level2)
+{
+    auto screens = ScreenManager::GetInstance().GetAllScreens();
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
+    uint32_t orientation = static_cast<uint32_t>(Orientation::VERTICAL);
+    uint32_t end = static_cast<uint32_t>(Orientation::REVERSE_HORIZONTAL);
+    for (; orientation <= end; ++orientation) {
+        screens[0]->SetOrientation(static_cast<Orientation>(orientation));
+        usleep(1E6);
+        ASSERT_EQ(static_cast<uint32_t>(screens[0]->GetOrientation()), orientation);
+        ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), orientation);
+    }
+    screens[0]->SetOrientation(Orientation::UNSPECIFIED);
+    ASSERT_EQ(static_cast<uint32_t>(screens[0]->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
+    ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
 }
 }
 } // namespace Rosen
