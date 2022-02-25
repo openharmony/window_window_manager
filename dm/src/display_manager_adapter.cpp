@@ -354,9 +354,9 @@ sptr<ScreenGroupInfo> ScreenManagerAdapter::GetScreenGroupInfoById(ScreenId scre
 
 std::vector<sptr<ScreenInfo>> ScreenManagerAdapter::GetAllScreenInfos()
 {
-    std::vector<sptr<ScreenInfo>> result;
     if (!InitDMSProxy()) {
         WLOGFE("InitDMSProxy failed!");
+        std::vector<sptr<ScreenInfo>> result;
         return result;
     }
     return displayManagerServiceProxy_->GetAllScreenInfos();

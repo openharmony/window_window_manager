@@ -450,6 +450,15 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
             WLOGI("CreateVirtualScreen is not shot");
             dmsScreenId = dmsScreenCount_;
             sptr<AbstractScreen> absScreen = new AbstractScreen(dmsScreenId, result);
+            sptr<SupportedScreenModes> info = new SupportedScreenModes();
+            info->width_ = option.width_;
+            info->height_ = option.height_;
+            auto defaultScreen = GetAbstractScreen(GetDefaultAbstractScreenId());
+            if (defaultScreen != nullptr && defaultScreen->GetActiveScreenMode() != nullptr) {
+                info->freshRate_ = defaultScreen->GetActiveScreenMode()->freshRate_;
+            }
+            absScreen->modes_.push_back(info);
+            absScreen->activeIdx_ = 0;
             absScreen->type_ = ScreenType::VIRTUAL;
             dmsScreenCount_++;
             rs2DmsScreenIdMap_.insert(std::make_pair(result, dmsScreenId));
