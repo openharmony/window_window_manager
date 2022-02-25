@@ -33,6 +33,7 @@ public:
     MOCK_METHOD2(SetAlpha, WMError(uint32_t windowId, float alpha));
     MOCK_METHOD2(SaveAbilityToken, WMError(const sptr<IRemoteObject>& abilityToken, uint32_t windowId));
     MOCK_METHOD3(SetSystemBarProperty, WMError(uint32_t windowId, WindowType type, const SystemBarProperty& property));
+    MOCK_METHOD3(ResizeRect, WMError(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason));
 };
 }
 } // namespace OHOS

@@ -636,7 +636,7 @@ HWTEST_F(WindowImplTest, Recover01, Function | SmallTest | Level3)
     option->SetWindowName("WindowImplTest_Recover01");
     auto window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m_->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Create("");
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -774,6 +774,184 @@ HWTEST_F(WindowImplTest, GetColorSpace01, Function | SmallTest | Level3)
     ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
     window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
     ASSERT_EQ(ColorSpace::COLOR_SPACE_WIDE_GAMUT, window->GetColorSpace());
+}
+
+/**
+ * @tc.name: MoveTo01
+ * @tc.desc: create window but not show, move window, test rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, MoveTo01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("WindowImplTest_MoveTo01");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    Rect winRect = {10, 20, 30u, 40u}; // set window rect: 10, 20, 30, 40
+    option->SetWindowRect(winRect);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetMode());
+    ASSERT_FALSE(window->GetShowState());
+    const float moveRatio = 0.5;
+    Rect newRect = {winRect.posX_ * moveRatio, winRect.posY_ * moveRatio, winRect.width_, winRect.height_};
+    window->MoveTo(newRect.posX_, newRect.posY_);
+    ASSERT_EQ(newRect, window->GetRect());
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: MoveTo02
+ * @tc.desc: create and show window, move mvoe window return WM_ERROR_SAMGR, test rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, MoveTo02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("WindowImplTest_MoveTo02");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    Rect winRect = {10, 20, 30u, 40u}; // set window rect: 10, 20, 30, 40
+    option->SetWindowRect(winRect);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    window->Show();
+    ASSERT_TRUE(window->GetShowState());
+    EXPECT_CALL(m->Mock(), ResizeRect(_, _, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
+    const float moveRatio = 0.5;
+    Rect newRect = {winRect.posX_ * moveRatio, winRect.posY_ * moveRatio, winRect.width_, winRect.height_};
+    window->MoveTo(newRect.posX_, newRect.posY_);
+    ASSERT_EQ(winRect, window->GetRect());
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: Resize01
+ * @tc.desc: create window but not show, resize window, test rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, Resize01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("WindowImplTest_Resize01");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    Rect winRect = {10, 20, 30u, 40u}; // set window rect: 10, 20, 30, 40
+    option->SetWindowRect(winRect);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetMode());
+    ASSERT_FALSE(window->GetShowState());
+    const float resizeRatio = 0.5;
+    Rect newRect = {winRect.posX_, winRect.posY_, winRect.width_ * resizeRatio, winRect.height_ * resizeRatio};
+    window->Resize(newRect.width_, newRect.height_);
+    ASSERT_EQ(newRect, window->GetRect());
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: Resize02
+ * @tc.desc: create and show window, mock resize window return WM_ERROR_SAMGR, test rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, Resize02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("WindowImplTest_Resize02");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    Rect winRect = {10, 20, 30u, 40u}; // set window rect: 10, 20, 30, 40
+    option->SetWindowRect(winRect);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    window->Show();
+    ASSERT_TRUE(window->GetShowState());
+    EXPECT_CALL(m->Mock(), ResizeRect(_, _, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
+    const float resizeRatio = 0.5;
+    Rect newRect = {winRect.posX_, winRect.posY_, winRect.width_ * resizeRatio, winRect.height_ * resizeRatio};
+    window->Resize(newRect.width_, newRect.height_);
+    ASSERT_EQ(winRect, window->GetRect());
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: StartMove01
+ * @tc.desc: start move main fullscreen window, test startMoveFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, StartMove01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("WindowImplTest_StartMove01");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    window->Show();
+    window->StartMove();
+    ASSERT_FALSE(window->startMoveFlag_);
+}
+
+/**
+ * @tc.name: StartMove02
+ * @tc.desc: start move main fullscreen window, test startMoveFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, StartMove02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("WindowImplTest_StartMove02");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    window->Show();
+
+    window->StartMove();
+    ASSERT_TRUE(window->startMoveFlag_);
+}
+
+/**
+ * @tc.name: StartMove03
+ * @tc.desc: start move divider, test startMoveFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, StartMove03, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("WindowImplTest_StartMove03");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    window->Show();
+    window->StartMove();
+    ASSERT_FALSE(window->startMoveFlag_);
 }
 }
 } // namespace Rosen

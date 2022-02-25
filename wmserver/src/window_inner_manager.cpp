@@ -215,7 +215,12 @@ void WindowInnerManager::HideAndDestroyDivider(std::unique_ptr<WindowMessage> ms
         WLOGFE("Window is nullptr");
         return;
     }
-    WMError res = window->Destroy();
+    WMError res = window->Hide();
+    if (res != WMError::WM_OK) {
+        WLOGFE("Hide window failed");
+        return;
+    }
+    res = window->Destroy();
     if (res != WMError::WM_OK) {
         WLOGFE("Destroy window failed");
         return;

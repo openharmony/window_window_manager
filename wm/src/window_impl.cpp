@@ -584,6 +584,10 @@ WMError WindowImpl::Destroy()
 
     // FixMe: Remove "NotifyBeforeDestroy()" because of ACE bug, add when fixed
     WMError ret = SingletonContainer::Get<WindowAdapter>().DestroyWindow(property_->GetWindowId());
+    if (ret != WMError::WM_OK) {
+        WLOGFE("destroy window failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        return ret;
+    }
     windowMap_.erase(GetWindowName());
     if (subWindowMap_.count(property_->GetParentId()) > 0) { // remove from subWindowMap_
         std::vector<sptr<Window>>& subWindows = subWindowMap_.at(property_->GetParentId());
