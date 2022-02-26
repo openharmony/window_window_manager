@@ -15,6 +15,7 @@
 
 #include "abstract_screen.h"
 
+#include <cmath>
 #include "abstract_screen_controller.h"
 #include "display_manager_service.h"
 #include "dm_common.h"
@@ -25,9 +26,8 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractScreenGroup"};
 }
 
-AbstractScreen::AbstractScreen(const std::string& name, ScreenId dmsId, ScreenId rsId)
-    : name_(name), dmsId_(dmsId), rsId_(rsId),
-    screenController_(DisplayManagerService::GetInstance().abstractScreenController_)
+AbstractScreen::AbstractScreen(sptr<AbstractScreenController> screenController, const std::string& name, ScreenId dmsId,
+    ScreenId rsId) : name_(name), dmsId_(dmsId), rsId_(rsId), screenController_(screenController)
 {
 }
 
@@ -51,7 +51,7 @@ std::vector<sptr<SupportedScreenModes>> AbstractScreen::GetAbstractScreenModes()
 
 sptr<AbstractScreenGroup> AbstractScreen::GetGroup() const
 {
-    return DisplayManagerService::GetInstance().GetAbstractScreenController()->GetAbstractScreenGroup(groupDmsId_);
+    return screenController_->GetAbstractScreenGroup(groupDmsId_);
 }
 
 sptr<ScreenInfo> AbstractScreen::ConvertToScreenInfo() const
@@ -188,9 +188,14 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
         height = abstractScreenModes->height_;
         width = abstractScreenModes->width_;
     }
+    float virtualPixelRatio = virtualPixelRatio_;
+    // "< 1e-6" means virtualPixelRatio is 0.
+    if (fabsf(virtualPixelRatio) < 1e-6) {
+        virtualPixelRatio = 1.0f;
+    }
     info->virtualPixelRatio_ = virtualPixelRatio;
-    info->virtualHeight_ = virtualPixelRatio * height;
-    info->virtualWidth_ = virtualPixelRatio * width;
+    info->virtualHeight_ = height / virtualPixelRatio;
+    info->virtualWidth_ = width / virtualPixelRatio;
     info->parent_ = groupDmsId_;
     info->canHasChild_ = canHasChild_;
     info->rotation_ = rotation_;
@@ -238,8 +243,8 @@ Rotation AbstractScreen::CalcRotation(Orientation orientation) const
     }
 }
 
-AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId, ScreenCombination combination)
-    : AbstractScreen("", dmsId, rsId), combination_(combination)
+AbstractScreenGroup::AbstractScreenGroup(sptr<AbstractScreenController> screenController, ScreenId dmsId, ScreenId rsId,
+    ScreenCombination combination) : AbstractScreen(screenController, "", dmsId, rsId), combination_(combination)
 {
     type_ = ScreenType::UNDEFINE;
     canHasChild_ = true;
@@ -279,11 +284,9 @@ bool AbstractScreenGroup::SetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen
             }
             if (mirrorScreenId_ == INVALID_SCREEN_ID || !HasChild(mirrorScreenId_)) {
                 WLOGI("AddChild, mirrorScreenId_ is invalid, use default screen");
-                mirrorScreenId_ =
-                    DisplayManagerService::GetInstance().GetAbstractScreenController()->GetDefaultAbstractScreenId();
+                mirrorScreenId_ = screenController_->GetDefaultAbstractScreenId();
             }
-            std::shared_ptr<RSDisplayNode> displayNode = SingletonContainer::Get<DisplayManagerService>().
-                GetAbstractScreenController()->GetRSDisplayNodeByScreenId(mirrorScreenId_);
+            std::shared_ptr<RSDisplayNode> displayNode = screenController_->GetRSDisplayNodeByScreenId(mirrorScreenId_);
             if (displayNode == nullptr) {
                 WLOGFE("AddChild fail, displayNode is nullptr, cannot get DisplayNode");
                 return false;

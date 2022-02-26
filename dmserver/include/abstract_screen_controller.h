@@ -40,6 +40,7 @@ public:
 
     AbstractScreenController(std::recursive_mutex& mutex);
     ~AbstractScreenController();
+    WM_DISALLOW_COPY_AND_MOVE(AbstractScreenController);
 
     void Init();
     void ScreenConnectionInDisplayInit(sptr<AbstractScreenCallback> abstractScreenCallback);
@@ -78,6 +79,8 @@ public:
 
 private:
     void OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent);
+    void ProcessScreenConnected(ScreenId rsScreenId);
+    sptr<AbstractScreen> InitAndGetScreen(ScreenId rsScreenId);
     void ProcessScreenDisconnected(ScreenId rsScreenId);
     bool FillAbstractScreen(sptr<AbstractScreen>& absScreen, ScreenId rsScreenId);
     sptr<AbstractScreenGroup> AddToGroupLocked(sptr<AbstractScreen> newScreen);
@@ -92,12 +95,26 @@ private:
     void AddScreenToGroup(sptr<AbstractScreenGroup>, const std::vector<ScreenId>&,
         const std::vector<Point>&, std::map<ScreenId, bool>&);
 
+    class ScreenIdManager {
+    public:
+        ScreenId CreateAndGetNewScreenId(ScreenId rsScreenId);
+        bool DeleteScreenId(ScreenId dmsScreenId);
+        bool HasDmsScreenId(ScreenId dmsScreenId) const;
+        bool HasRsScreenId(ScreenId dmsScreenId) const;
+        bool ConvertToRsScreenId(ScreenId, ScreenId&) const;
+        ScreenId ConvertToRsScreenId(ScreenId) const;
+        bool ConvertToDmsScreenId(ScreenId, ScreenId&) const;
+        ScreenId ConvertToDmsScreenId(ScreenId) const;
+        void DumpScreenIdInfo() const;
+    private:
+        std::atomic<ScreenId> dmsScreenCount_ {0};
+        std::map<ScreenId, ScreenId> rs2DmsScreenIdMap_;
+        std::map<ScreenId, ScreenId> dms2RsScreenIdMap_;
+    };
+
     std::recursive_mutex& mutex_;
     OHOS::Rosen::RSInterfaces& rsInterface_;
-    std::atomic<ScreenId> dmsScreenCount_;
-    // No AbstractScreenGroup
-    std::map<ScreenId, ScreenId> rs2DmsScreenIdMap_;
-    std::map<ScreenId, ScreenId> dms2RsScreenIdMap_;
+    ScreenIdManager screenIdManager_;
     std::map<ScreenId, sptr<AbstractScreen>> dmsScreenMap_;
     std::map<ScreenId, sptr<AbstractScreenGroup>> dmsScreenGroupMap_;
     sptr<AbstractScreenCallback> abstractScreenCallback_;
