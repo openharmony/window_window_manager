@@ -628,18 +628,19 @@ WMError WindowImpl::Show()
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (state_ == WindowState::STATE_SHOWN && property_->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
-        WLOGFI("Minimize all app windows");
-        SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
-        for (auto& listener : lifecycleListeners_) {
-            if (listener != nullptr) {
-                listener->AfterForeground();
-            }
-        }
-        return WMError::WM_OK;
-    }
     if (state_ == WindowState::STATE_SHOWN) {
-        WLOGFI("window is already shown id: %{public}d", property_->GetWindowId());
+        if (property_->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+            WLOGFI("desktop window [id:%{public}d] is shown, minimize all app windows", property_->GetWindowId());
+            SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
+            for (auto& listener : lifecycleListeners_) {
+                if (listener != nullptr) {
+                    listener->AfterForeground();
+                }
+            }
+        } else {
+            WLOGFI("window is already shown id: %{public}d, raise to top", property_->GetWindowId());
+            SingletonContainer::Get<WindowAdapter>().ProcessWindowTouchedEvent(property_->GetWindowId());
+        }
         return WMError::WM_OK;
     }
     SetDefaultOption();

@@ -179,7 +179,6 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
         return WMError::WM_OK;
     }
     WMError res = WMError::WM_OK;
-    node->SetWindowMode(dstMode);
     if ((srcMode == WindowMode::WINDOW_MODE_FULLSCREEN) && (dstMode == WindowMode::WINDOW_MODE_FLOATING)) {
         node->SetWindowSizeChangeReason(WindowSizeChangeReason::RECOVER);
     } else if (dstMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
@@ -190,9 +189,13 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
     if (WindowHelper::IsSplitWindowMode(srcMode)) {
         // change split mode to other
         res = windowRoot_->ExitSplitWindowMode(node);
+        node->SetWindowMode(dstMode);
     } else if (!WindowHelper::IsSplitWindowMode(srcMode) && WindowHelper::IsSplitWindowMode(dstMode)) {
         // change other mode to split
+        node->SetWindowMode(dstMode);
         res = windowRoot_->EnterSplitWindowMode(node);
+    } else {
+        node->SetWindowMode(dstMode);
     }
     if (res != WMError::WM_OK) {
         node->GetWindowProperty()->ResumeLastWindowMode();
