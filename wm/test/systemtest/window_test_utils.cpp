@@ -145,6 +145,23 @@ Rect WindowTestUtils::GetLimitedDecoRect(const Rect& rect, float virtualPixelRat
     return resRect;
 }
 
+Rect WindowTestUtils::CalcLimitedRect(const Rect& rect, float virtualPixelRatio)
+{
+    uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
+    uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
+
+    bool vertical = displayRect_.width_ < displayRect_.height_;
+    uint32_t minFloatingW = vertical ? minVerticalFloatingW : minVerticalFloatingH;
+    uint32_t minFloatingH = vertical ? minVerticalFloatingH : minVerticalFloatingW;
+    Rect resRect = {
+        rect.posX_,
+        rect.posY_,
+        std::max(minFloatingW, rect.width_),
+        std::max(minFloatingH, rect.height_),
+    };
+    return resRect;
+}
+
 Rect WindowTestUtils::GetFloatingLimitedRect(const Rect& rect, float virtualPixelRatio)
 {
     uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
@@ -213,6 +230,7 @@ void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window)
 
 bool WindowTestUtils::RectEqualTo(const sptr<Window>& window, const Rect& r)
 {
+    usleep(100000); // 100000us
     Rect l = window->GetRect();
     bool res = ((l.posX_ == r.posX_) && (l.posY_ == r.posY_) && (l.width_ == r.width_) && (l.height_ == r.height_));
     if (!res) {
