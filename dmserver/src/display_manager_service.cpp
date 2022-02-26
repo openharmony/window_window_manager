@@ -93,7 +93,17 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 {
     sptr<AbstractDisplay> display = GetDisplayByDisplayId(displayId);
     if (display == nullptr) {
-        WLOGFE("GetDisplayById: Get invalid display!");
+        WLOGFE("fail to get displayInfo by id: invalid display");
+        return nullptr;
+    }
+    return display->ConvertToDisplayInfo();
+}
+
+sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreen(ScreenId screenId)
+{
+    sptr<AbstractDisplay> display = GetDisplayByScreen(screenId);
+    if (display == nullptr) {
+        WLOGFE("fail to get displayInfo by screenId: invalid display");
         return nullptr;
     }
     return display->ConvertToDisplayInfo();
@@ -328,6 +338,11 @@ ScreenId DisplayManagerService::GetScreenIdByDisplayId(DisplayId displayId) cons
 sptr<AbstractDisplay> DisplayManagerService::GetDisplayByDisplayId(DisplayId displayId) const
 {
     return abstractDisplayController_->GetAbstractDisplay(displayId);
+}
+
+sptr<AbstractDisplay> DisplayManagerService::GetDisplayByScreen(ScreenId screenId) const
+{
+    return abstractDisplayController_->GetAbstractDisplayByScreen(screenId);
 }
 
 sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenController()

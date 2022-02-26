@@ -844,6 +844,26 @@ void WindowImpl::UnregisterDragListener(sptr<IWindowDragListener>& listener)
     windowDragListeners_.erase(iter);
 }
 
+void WindowImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+{
+    if (listener == nullptr) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    displayMoveListeners_.emplace_back(listener);
+}
+
+void WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(displayMoveListeners_.begin(), displayMoveListeners_.end(), listener);
+    if (iter == displayMoveListeners_.end()) {
+        WLOGFE("could not find the listener");
+        return;
+    }
+    displayMoveListeners_.erase(iter);
+}
+
 void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reason)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
@@ -1155,6 +1175,16 @@ void WindowImpl::UpdateDragEvent(const PointInfo& point, DragEvent event)
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto& iter : windowDragListeners_) {
         iter->OnDrag(point.x, point.y, event);
+    }
+}
+
+void WindowImpl::UpdateDisplayId(DisplayId from, DisplayId to)
+{
+    WLOGFD("update displayId. win %{public}d", GetWindowId());
+    for (auto& listener : displayMoveListeners_) {
+        if (listener != nullptr) {
+            listener->OnDisplayMove(from, to);
+        }
     }
 }
 

@@ -52,6 +52,7 @@ public:
 
     DisplayId GetDefaultDisplayId() override;
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     bool RequestRotation(ScreenId screenId, Rotation rotation) override;
     std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
     ScreenId GetRSScreenId(DisplayId displayId) const;
@@ -82,6 +83,7 @@ public:
     sptr<AbstractDisplay> GetAbstractDisplay(DisplayId displayId);
     sptr<AbstractScreenController> GetAbstractScreenController();
     sptr<AbstractDisplay> GetDisplayByDisplayId(DisplayId displayId) const;
+    sptr<AbstractDisplay> GetDisplayByScreen(ScreenId screenId) const;
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
