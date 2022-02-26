@@ -58,11 +58,11 @@ private:
     std::map<DisplayId, sptr<Display>> displayMap_;
     DisplayStateCallback displayStateCallback_;
     std::recursive_mutex mutex_;
-    std::vector<sptr<IDisplayPowerEventListener>> powerEventListeners_;
+    std::set<sptr<IDisplayPowerEventListener>> powerEventListeners_;
     class DisplayManagerAgent;
     sptr<DisplayManagerAgent> powerEventListenerAgent_;
     sptr<DisplayManagerAgent> displayStateAgent_;
-    std::vector<sptr<IDisplayListener>> displayListeners_;
+    std::set<sptr<IDisplayListener>> displayListeners_;
 };
 
 class DisplayManager::Impl::DisplayManagerListener : public DisplayManagerAgentDefault {
@@ -338,17 +338,18 @@ std::vector<sptr<Display>> DisplayManager::GetAllDisplays()
 bool DisplayManager::Impl::RegisterDisplayListener(sptr<IDisplayListener> listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    displayListeners_.push_back(listener);
     bool ret = true;
     if (displayManagerListener_ == nullptr) {
         displayManagerListener_ = new DisplayManagerListener(this);
         ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
             displayManagerListener_,
             DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
-        if (!ret) {
-            WLOGFW("RegisterDisplayManagerAgent failed ! remove listener!");
-            displayListeners_.pop_back();
-        }
+    }
+    if (!ret) {
+        WLOGFW("RegisterDisplayManagerAgent failed !");
+        displayManagerListener_ = nullptr;
+    } else {
+        displayListeners_.insert(listener);
     }
     return ret;
 }
@@ -393,17 +394,18 @@ bool DisplayManager::UnregisterDisplayListener(sptr<IDisplayListener> listener)
 bool DisplayManager::Impl::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    powerEventListeners_.push_back(listener);
     bool ret = true;
     if (powerEventListenerAgent_ == nullptr) {
         powerEventListenerAgent_ = new DisplayManagerAgent(this);
         ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
             powerEventListenerAgent_,
             DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
-        if (!ret) {
-            WLOGFW("RegisterDisplayManagerAgent failed ! remove listener!");
-            powerEventListeners_.pop_back();
-        }
+    }
+    if (!ret) {
+        WLOGFW("RegisterDisplayManagerAgent failed !");
+        powerEventListenerAgent_ = nullptr;
+    } else {
+        powerEventListeners_.insert(listener);
     }
     WLOGFI("RegisterDisplayPowerEventListener end");
     return ret;
@@ -451,7 +453,7 @@ void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 {
     WLOGFI("NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu", event, status,
         powerEventListeners_.size());
-    std::vector<sptr<IDisplayPowerEventListener>> powerEventListeners;
+    std::set<sptr<IDisplayPowerEventListener>> powerEventListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         powerEventListeners = powerEventListeners_;
