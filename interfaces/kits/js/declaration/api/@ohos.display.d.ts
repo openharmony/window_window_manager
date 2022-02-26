@@ -21,11 +21,31 @@ import { AsyncCallback, Callback } from './basic';
  * @devices tv, phone, tablet, wearable
  */
 declare namespace display {
+
+  /**
+   * get the default display
+   * @devices tv, phone, tablet, wearable
+   */
+  function getDefaultDisplay(callback: AsyncCallback<Display>): void;
+
   /**
    * get the default display
    * @devices tv, phone, tablet, wearable
    */
   function getDefaultDisplay(): Promise<Display>;
+
+  /**
+   * get all displays
+   * @devices tv, phone, tablet, wearable
+   * @param callback
+   */
+  function getAllDisplay(callback: AsyncCallback<Array<Display>>): void;
+
+  /**
+   * get all displays
+   * @devices tv, phone, tablet, wearable
+   */
+  function getAllDisplay() : Promise<Array<Display>>;
 
   /**
    * register the callback of display change
