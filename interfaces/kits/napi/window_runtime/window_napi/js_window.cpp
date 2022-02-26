@@ -507,16 +507,16 @@ NativeValue* JsWindow::OnGetProperties(NativeEngine& engine, NativeCallbackInfo&
     return result;
 }
 
-bool JsWindow::IfCallbackRegistered(std::string type, NativeValue* jsListenerObject)
+bool JsWindow::IsCallbackRegistered(std::string type, NativeValue* jsListenerObject)
 {
     if (jsCallbackMap_.empty() || jsCallbackMap_.find(type) == jsCallbackMap_.end()) {
-        WLOGFI("JsWindow::IfCallbackRegistered methodName %{public}s not registertd!", type.c_str());
+        WLOGFI("JsWindow::IsCallbackRegistered methodName %{public}s not registertd!", type.c_str());
         return false;
     }
 
     for (auto iter = jsCallbackMap_[type].begin(); iter != jsCallbackMap_[type].end(); iter++) {
         if (jsListenerObject->StrictEquals((*iter)->Get())) {
-            WLOGFE("JsWindow::IfCallbackRegistered callback already registered!");
+            WLOGFE("JsWindow::IsCallbackRegistered callback already registered!");
             return true;
         }
     }
@@ -525,7 +525,7 @@ bool JsWindow::IfCallbackRegistered(std::string type, NativeValue* jsListenerObj
 
 void JsWindow::RegisterWindowListenerWithType(NativeEngine& engine, std::string type, NativeValue* value)
 {
-    if (IfCallbackRegistered(type, value)) {
+    if (IsCallbackRegistered(type, value)) {
         WLOGFE("JsWindow::RegisterWindowListenerWithType callback already registered!");
         return;
     }
@@ -564,8 +564,8 @@ void JsWindow::UnregisterAllWindowListenerWithType(std::string type)
     }
     jsListenerMap_[type]->RemoveAllCallback();
     if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
-        sptr<IWindowChangeListener> thisListener(nullptr);
-        windowToken_->RegisterWindowChangeListener(thisListener);
+        sptr<IWindowChangeListener> thisListener(jsListenerMap_[type]);
+        windowToken_->UnregisterWindowChangeListener(thisListener);
         WLOGFI("JsWindow::UnregisterAllWindowListenerWithType windowSizeChange success");
     }
     if (type.compare(SYSTEM_AVOID_AREA_CHANGE_CB) == 0) {
@@ -596,8 +596,8 @@ void JsWindow::UnregisterWindowListenerWithType(std::string type, NativeValue* v
     // one type with multi jscallback, erase type when there is no callback in one type
     if (jsCallbackMap_[type].empty()) {
         if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
-            sptr<IWindowChangeListener> thisListener(nullptr);
-            windowToken_->RegisterWindowChangeListener(thisListener);
+            sptr<IWindowChangeListener> thisListener(jsListenerMap_[type]);
+            windowToken_->UnregisterWindowChangeListener (thisListener);
             WLOGFI("JsWindow::UnregisterWindowListenerWithType windowSizeChange success");
         }
         if (type.compare(SYSTEM_AVOID_AREA_CHANGE_CB) == 0) {

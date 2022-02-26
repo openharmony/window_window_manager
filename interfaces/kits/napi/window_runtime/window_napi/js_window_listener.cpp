@@ -46,11 +46,10 @@ void JsWindowListener::RemoveAllCallback()
 void JsWindowListener::RemoveCallback(NativeValue* jsListenerObject)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    for (auto iter = jsCallBack_.begin(); iter != jsCallBack_.end();) {
+    for (auto iter = jsCallBack_.begin(); iter != jsCallBack_.end(); ++iter) {
         if (jsListenerObject->StrictEquals((*iter)->Get())) {
-            jsCallBack_.erase(iter);
-        } else {
-            iter++;
+            iter = jsCallBack_.erase(iter);
+            break;
         }
     }
     WLOGFI("JsWindowListener::RemoveCallback success jsCallBack_ size: %{public}d!",
@@ -61,13 +60,12 @@ void JsWindowListener::RemoveCallback(NativeValue* jsListenerObject)
 void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
 {
     WLOGFI("CallJsMethod methodName = %{public}s", methodName);
-    std::lock_guard<std::mutex> lock(mtx_);
     if (engine_ == nullptr || jsCallBack_.empty()) {
         WLOGFE("engine_ nullptr or jsCallBack_ is empty");
         return;
     }
-    for (auto iter = jsCallBack_.begin(); iter != jsCallBack_.end(); iter++) {
-        NativeValue* method = (*iter)->Get();
+    for (auto &item : jsCallBack_) {
+        NativeValue* method = item->Get();
         if (method == nullptr) {
             WLOGFE("Failed to get method callback from object");
             continue;
