@@ -537,6 +537,16 @@ void WindowRoot::NotifyDisplayDestroy(DisplayId expandDisplayId)
 {
     WLOGFD("disconnect expand display, get default and expand display container");
     DisplayId defaultDisplayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    // get all windowNode below expand display, and reset its displayId
+    for (auto iter = windowNodeMap_.begin(); iter != windowNodeMap_.end(); iter++) {
+        auto node = iter->second;
+        if (node->GetDisplayId() != expandDisplayId) {
+            continue;
+        }
+        node->SetDisplayId(defaultDisplayId);
+        node->GetWindowToken()->UpdateDisplayId(expandDisplayId, defaultDisplayId);
+    }
+    // move windowNode from expand display container to default display container
     auto expandDisplayContainer = GetOrCreateWindowNodeContainer(expandDisplayId);
     auto defaultDisplayContainer = GetOrCreateWindowNodeContainer(defaultDisplayId);
     if (expandDisplayContainer == nullptr || defaultDisplayContainer == nullptr) {
@@ -544,7 +554,7 @@ void WindowRoot::NotifyDisplayDestroy(DisplayId expandDisplayId)
         return;
     }
     defaultDisplayContainer->MoveWindowNode(expandDisplayContainer);
-    NotifyDisplayRemoved(expandDisplayId);
+    windowNodeContainerMap_.erase(expandDisplayId);
 }
 
 float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
