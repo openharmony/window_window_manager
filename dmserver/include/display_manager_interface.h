@@ -35,6 +35,7 @@ public:
     enum {
         TRANS_ID_GET_DEFAULT_DISPLAY_ID = 0,
         TRANS_ID_GET_DISPLAY_BY_ID,
+        TRANS_ID_GET_DISPLAY_BY_SCREEN,
         TRANS_ID_GET_DISPLAY_SNAPSHOT,
         TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT,
         TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT,
@@ -69,6 +70,7 @@ public:
 
     virtual DisplayId GetDefaultDisplayId() = 0;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) = 0;
+    virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) = 0;
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
