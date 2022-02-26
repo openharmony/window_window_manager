@@ -527,9 +527,18 @@ void WindowRoot::FocusFaultDetection() const
     if (needReport) {
         std::string windowLog(GenAllWindowsLogInfo());
         WLOGFE("The focus window is faulty, focusWinId:%{public}u, %{public}s", focusWinId, windowLog.c_str());
-        OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::GRAPHIC, "NO_FOCUS_WINDOW",
-            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, "PID", getpid(), "UID", getuid(),
-            "FOCUS_WINDOW", focusWinId, "FAULT_INFO", windowLog);
+        int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "NO_FOCUS_WINDOW",
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+            "PID", getpid(),
+            "UID", getuid(),
+            "PACKAGE_NAME", "foundation",
+            "PROCESS_NAME", "foundation",
+            "MSG", windowLog);
+        if (ret != 0) {
+            WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+        }
     }
 }
 
