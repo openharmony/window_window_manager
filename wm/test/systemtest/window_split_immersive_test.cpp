@@ -39,7 +39,7 @@ public:
     utils::TestWindowInfo splitInfo_;
 
 private:
-    static constexpr uint32_t SPLIT_TEST_SPEEP_S = 1; // split test spleep time
+    static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1; // split test sleep time
 };
 
 void WindowSplitImmersiveTest::SetUpTestCase()
@@ -96,14 +96,14 @@ HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Lev
     const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 
     // enter split mode
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
     const sptr<Window>& priWindow = utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(priWindow);
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 
     // check is enter split Immersive
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetMode());
@@ -111,11 +111,11 @@ HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Lev
     Rect immersivePriRect = priWindow->GetRect();
     ASSERT_EQ(0, immersivePriRect.posX_);
     ASSERT_EQ(0, immersivePriRect.posY_);
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 
     // Exit split Mode.
     ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 
     // check is out split Immersive
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
@@ -125,9 +125,9 @@ HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Lev
     ASSERT_EQ(avoidArea.topRect.height_, curFullScreenRect.posY_);
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
     ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 }
 }
 } // namespace Rosen
