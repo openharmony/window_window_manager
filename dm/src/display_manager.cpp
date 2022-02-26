@@ -318,9 +318,9 @@ std::vector<DisplayId> DisplayManager::GetAllDisplayIds()
     return SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayIds();
 }
 
-std::vector<const sptr<Display>> DisplayManager::GetAllDisplays()
+std::vector<sptr<Display>> DisplayManager::GetAllDisplays()
 {
-    std::vector<const sptr<Display>> res;
+    std::vector<sptr<Display>> res;
     auto displayIds = GetAllDisplayIds();
     for (auto displayId: displayIds) {
         const sptr<Display> display = GetDisplayById(displayId);
