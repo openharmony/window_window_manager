@@ -275,6 +275,10 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
                     listener->OnModeChange(mode);
                 }
             }
+            if (uiContent_ != nullptr) {
+                uiContent_->UpdateWindowMode(mode);
+                WLOGFI("notify uiContent window mode change end");
+            }
         }
         return ret;
     }
@@ -929,6 +933,11 @@ void WindowImpl::UpdateMode(WindowMode mode)
         if (listener != nullptr) {
             listener->OnModeChange(mode);
         }
+    }
+
+    if (uiContent_ != nullptr) {
+        uiContent_->UpdateWindowMode(mode);
+        WLOGFI("notify uiContent window mode change end");
     }
 }
 
