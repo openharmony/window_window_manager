@@ -36,7 +36,7 @@ public:
         virtual void OnChange(DisplayId, DisplayChangeEvent) = 0;
     };
 
-    std::vector<const sptr<Display>> GetAllDisplays();
+    std::vector<sptr<Display>> GetAllDisplays();
     DisplayId GetDefaultDisplayId();
     sptr<Display> GetDefaultDisplay();
     sptr<Display> GetDisplayById(DisplayId displayId);
