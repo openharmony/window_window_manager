@@ -391,10 +391,16 @@ float WindowTestUtils::GetVirtualPixelRatio(DisplayId displayId)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
-        WLOGFE("GetVirtualPixel fail. Get display fail. displayId:%{public}" PRIu64", vpr:%{public}f", displayId, 0.0);
-        return 0.0;
+        WLOGFE("GetVirtualPixel fail. Get display fail. displayId:%{public}" PRIu64", use Default vpr:1.0", displayId);
+        return 1.0;  // Use DefaultVPR 1.0
     }
+
     float virtualPixelRatio = display->GetVirtualPixelRatio();
+    if (virtualPixelRatio == 0.0) {
+        WLOGFE("GetVirtualPixel fail. vpr is 0.0. displayId:%{public}" PRIu64", use Default vpr:1.0", displayId);
+        return 1.0;  // Use DefaultVPR 1.0
+    }
+
     WLOGFI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", displayId, virtualPixelRatio);
     return virtualPixelRatio;
 }
