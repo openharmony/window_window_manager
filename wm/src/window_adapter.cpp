@@ -166,6 +166,14 @@ void WindowAdapter::MinimizeAllAppWindows(DisplayId displayId)
     windowManagerServiceProxy_->MinimizeAllAppWindows(displayId);
 }
 
+WMError WindowAdapter::MaxmizeWindow(uint32_t windowId)
+{
+    if (!InitWMSProxy()) {
+        return WMError::WM_ERROR_SAMGR;
+    }
+    return windowManagerServiceProxy_->MaxmizeWindow(windowId);
+}
+
 bool WindowAdapter::InitWMSProxy()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);

@@ -147,6 +147,22 @@ void WindowRoot::MinimizeAllAppWindows(DisplayId displayId)
     return container->MinimizeAllAppWindows();
 }
 
+WMError WindowRoot::MaxmizeWindow(uint32_t windowId)
+{
+    auto node = GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("add window failed, window container could not be found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    container->NotifySystemBarDismiss(node);
+    return WMError::WM_OK;
+}
+
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
 {
     if (node == nullptr) {
