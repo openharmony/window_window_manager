@@ -360,7 +360,13 @@ float WindowLayoutPolicy::GetVirtualPixelRatio() const
         WLOGFE("GetVirtualPixel fail. Get display fail. displayId:%{public}" PRIu64", use Default vpr:1.0", screenId_);
         return 1.0;  // Use DefaultVPR 1.0
     }
+
     float virtualPixelRatio = display->GetVirtualPixelRatio();
+    if (virtualPixelRatio == 0.0) {
+        WLOGFE("GetVirtualPixel fail. vpr is 0.0. displayId:%{public}" PRIu64", use Default vpr:1.0", screenId_);
+        return 1.0;  // Use DefaultVPR 1.0
+    }
+
     WLOGFI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", screenId_, virtualPixelRatio);
     return virtualPixelRatio;
 }

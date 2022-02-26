@@ -58,6 +58,11 @@ public:
         return ((IsMainWindow(type)) && (mode == WindowMode::WINDOW_MODE_FLOATING));
     }
 
+    static inline bool IsAvoidAreaWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    }
+
     static inline bool IsSplitWindowMode(WindowMode mode)
     {
         return mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
