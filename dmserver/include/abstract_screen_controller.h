@@ -85,6 +85,10 @@ private:
     sptr<AbstractScreenGroup> AddAsFirstScreenLocked(sptr<AbstractScreen> newScreen);
     sptr<AbstractScreenGroup> AddAsSuccedentScreenLocked(sptr<AbstractScreen> newScreen);
     void ProcessScreenModeChanged(ScreenId dmsScreenId);
+    void ChangeScreenGroup(sptr<AbstractScreenGroup> group, const std::vector<ScreenId>& screens,
+        const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination);
+    void AddScreenToGroup(sptr<AbstractScreenGroup>, const std::vector<ScreenId>&,
+        const std::vector<Point>&, std::map<ScreenId, bool>&);
 
     std::recursive_mutex& mutex_;
     OHOS::Rosen::RSInterfaces& rsInterface_;
