@@ -46,11 +46,10 @@ void JsWindowListener::RemoveAllCallback()
 void JsWindowListener::RemoveCallback(NativeValue* jsListenerObject)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    for (auto iter = jsCallBack_.begin(); iter != jsCallBack_.end();) {
+    for (auto iter = jsCallBack_.begin(); iter != jsCallBack_.end(); ++iter) {
         if (jsListenerObject->StrictEquals((*iter)->Get())) {
-            jsCallBack_.erase(iter);
-        } else {
-            iter++;
+            iter = jsCallBack_.erase(iter);
+            break;
         }
     }
     WLOGFI("JsWindowListener::RemoveCallback success jsCallBack_ size: %{public}d!",
@@ -61,12 +60,12 @@ void JsWindowListener::RemoveCallback(NativeValue* jsListenerObject)
 void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
 {
     WLOGFI("CallJsMethod methodName = %{public}s", methodName);
-    if (engine_ == nullptr) {
-        WLOGFE("engine_ nullptr");
+    if (engine_ == nullptr || jsCallBack_.empty()) {
+        WLOGFE("engine_ nullptr or jsCallBack_ is empty");
         return;
     }
-    for (auto iter = jsCallBack_.begin(); iter != jsCallBack_.end(); iter++) {
-        NativeValue* method = (*iter)->Get();
+    for (auto &item : jsCallBack_) {
+        NativeValue* method = item->Get();
         if (method == nullptr) {
             WLOGFE("Failed to get method callback from object");
             continue;
@@ -78,12 +77,6 @@ void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* 
 void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason)
 {
     WLOGFI("JsWindowListener::OnSizeChange is called");
-    std::lock_guard<std::mutex> lock(mtx_);
-    if (jsCallBack_.empty()) {
-        WLOGFE("JsWindowListener::OnSizeChange windowSizeChanged not register!");
-        return;
-    }
-
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [this, rect] (NativeEngine &engine, AsyncTask &task, int32_t status) {
@@ -112,12 +105,7 @@ void JsWindowListener::OnModeChange(WindowMode mode)
 
 void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
 {
-    std::lock_guard<std::mutex> lock(mtx_);
     WLOGFI("JsWindowListener::OnSystemBarPropertyChange is called");
-    if (jsCallBack_.empty()) {
-        WLOGFE("JsWindowListener::OnSystemBarPropertyChange systemBarTintChange not register!");
-        return;
-    }
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [this, displayId, tints] (NativeEngine &engine, AsyncTask &task, int32_t status) {
@@ -141,13 +129,7 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
 
 void JsWindowListener::OnAvoidAreaChanged(const std::vector<Rect> avoidAreas)
 {
-    std::lock_guard<std::mutex> lock(mtx_);
     WLOGFI("JsWindowListener::OnAvoidAreaChanged is called");
-    if (jsCallBack_.empty()) {
-        WLOGFE("JsWindowListener::OnAvoidAreaChanged systemAvoidAreaChange not register!");
-        return;
-    }
-
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [this, avoidAreas] (NativeEngine &engine, AsyncTask &task, int32_t status) {

@@ -115,12 +115,13 @@ void JsWindowStage::LifeCycleCallBack(WindowStageEventType type)
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
         [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(type))};
-            for (auto iter = eventCallbackMap_.begin(); iter != eventCallbackMap_.end(); iter++) {
-                if (iter->first == nullptr || iter->first->Get() == nullptr) {
+            for (auto &iter : eventCallbackMap_) {
+                NativeValue* method = (iter.first)->Get();
+                if (method == nullptr) {
                     WLOGFE("callback is null");
                     return;
                 }
-                engine_->CallFunction(engine_->CreateUndefined(), iter->first->Get(), argv, ArraySize(argv));
+                engine_->CallFunction(engine_->CreateUndefined(), method, argv, ArraySize(argv));
             }
         }
     );

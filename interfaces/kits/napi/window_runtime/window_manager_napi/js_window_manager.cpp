@@ -232,7 +232,7 @@ NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbac
         callback = (info.argc == ARGC_TWO) ? nullptr :
             (info.argv[INDEX_TWO]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_TWO] : nullptr);
     } else if (info.argc >= ARGC_THREE) {
-        nativeContext = info.argv[0];
+        nativeContext = info.argv[0]->TypeOf() == NATIVE_OBJECT ? info.argv[0] : nullptr;
         nativeString = info.argv[ARGC_ONE];
         nativeType = info.argv[ARGC_TWO];
         callback = (info.argc == ARGC_THREE) ? nullptr :
@@ -342,16 +342,16 @@ NativeValue* JsWindowManager::OnMinimizeAll(NativeEngine& engine, NativeCallback
     return result;
 }
 
-bool JsWindowManager::IfCallbackRegistered(std::string type, NativeValue* jsListenerObject)
+bool JsWindowManager::IsCallbackRegistered(std::string type, NativeValue* jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFI("JsWindowManager::IfCallbackRegistered methodName %{public}s not registertd!", type.c_str());
+        WLOGFI("JsWindowManager::IsCallbackRegistered methodName %{public}s not registertd!", type.c_str());
         return false;
     }
 
     for (auto iter = jsCbMap_[type].begin(); iter != jsCbMap_[type].end(); iter++) {
         if (jsListenerObject->StrictEquals(iter->first->Get())) {
-            WLOGFE("JsWindowManager::IfCallbackRegistered callback already registered!");
+            WLOGFE("JsWindowManager::IsCallbackRegistered callback already registered!");
             return true;
         }
     }
@@ -361,7 +361,7 @@ bool JsWindowManager::IfCallbackRegistered(std::string type, NativeValue* jsList
 void JsWindowManager::RegisterWmListenerWithType(NativeEngine& engine, std::string type, NativeValue* value)
 {
     // should do type check
-    if (IfCallbackRegistered(type, value)) {
+    if (IsCallbackRegistered(type, value)) {
         WLOGFE("JsWindowManager::RegisterWmListenerWithType callback already registered!");
         return;
     }

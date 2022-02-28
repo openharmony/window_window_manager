@@ -56,7 +56,7 @@ public:
     static NativeValue* GetColorSpace(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
-    bool IfCallbackRegistered(std::string type, NativeValue* jsListenerObject);
+    bool IsCallbackRegistered(std::string type, NativeValue* jsListenerObject);
     void RegisterWindowListenerWithType(NativeEngine& engine, std::string type, NativeValue* value);
     void UnregisterWindowListenerWithType(std::string type, NativeValue* value);
     void UnregisterAllWindowListenerWithType(std::string type);
