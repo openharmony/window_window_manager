@@ -127,6 +127,53 @@ HWTEST_F(ScreenManagerTest, MakeExpand_002, Function | SmallTest | Level1)
     ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
     ASSERT_EQ(expansionId, invalidId);
 }
+
+/**
+ * @tc.name: SetSurface01
+ * @tc.desc: SetVirtualScreenSurface with valid option and return success
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, SetSurface01, Function | SmallTest | Level1)
+{
+    ScreenManagerUtils utils;
+    ASSERT_TRUE(utils.CreateSurface());
+    VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
+                                         defaultDensity_, nullptr, defaultFlags_};
+    ScreenId validId = 0;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), CreateVirtualScreen(_)).Times(1).WillOnce(Return(validId));
+    EXPECT_CALL(m->Mock(), SetVirtualScreenSurface(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    EXPECT_CALL(m->Mock(), DestroyVirtualScreen(_)).Times(1).WillOnce(Return(DMError::DM_OK));
+    ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError surfaceRes = ScreenManager::GetInstance().SetVirtualScreenSurface(id, utils.psurface_);
+    DMError destroyRes = ScreenManager::GetInstance().DestroyVirtualScreen(id);
+    ASSERT_EQ(validId, id);
+    ASSERT_EQ(DMError::DM_OK, surfaceRes);
+    ASSERT_EQ(DMError::DM_OK, destroyRes);
+}
+
+/**
+ * @tc.name: SetSurface02
+ * @tc.desc: SetVirtualScreenSurface with invalid option and return failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, SetSurface02, Function | SmallTest | Level1)
+{
+    ScreenManagerUtils utils;
+    ASSERT_TRUE(utils.CreateSurface());
+    VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
+                                         defaultDensity_, nullptr, defaultFlags_};
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), CreateVirtualScreen(_)).Times(1).WillOnce(Return(SCREEN_ID_INVALID));
+    EXPECT_CALL(m->Mock(), SetVirtualScreenSurface(_, _)).Times(1).WillOnce(Return(DMError::DM_ERROR_INVALID_PARAM));
+    EXPECT_CALL(m->Mock(), DestroyVirtualScreen(_)).Times(1).WillOnce(Return(DMError::DM_ERROR_INVALID_PARAM));
+    ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
+    DMError surfaceRes = ScreenManager::GetInstance().SetVirtualScreenSurface(id, utils.psurface_);
+    DMError destroyRes = ScreenManager::GetInstance().DestroyVirtualScreen(id);
+    ASSERT_EQ(SCREEN_ID_INVALID, id);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, surfaceRes);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, destroyRes);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
