@@ -50,6 +50,7 @@ public:
     void SetHeight(int32_t height);
     void SetFreshRate(uint32_t freshRate);
     void SetVirtualPixelRatio(float virtualPixelRatio);
+    void SetOrientation(Orientation orientation);
     bool RequestRotation(Rotation rotation);
     Rotation GetRotation();
 
@@ -61,6 +62,7 @@ private:
     uint32_t freshRate_ { 0 };
     float virtualPixelRatio_ { 1.0 };
     Rotation rotation_ { Rotation::ROTATION_0 };
+    Orientation orientation_ { Orientation::UNSPECIFIED };
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_H

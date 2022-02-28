@@ -56,9 +56,8 @@ public:
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
-    bool RequestRotation(ScreenId screenId, Rotation rotation);
+    bool SetOrientation(ScreenId screenId, Orientation orientation);
 
-    void OnScreenRotate(ScreenId dmsScreenId, Rotation before, Rotation after);
     bool IsScreenGroup(ScreenId screenId) const;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;

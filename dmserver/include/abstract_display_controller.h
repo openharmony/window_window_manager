@@ -48,7 +48,7 @@ private:
     void OnAbstractScreenConnect(sptr<AbstractScreen> absScreen);
     void OnAbstractScreenDisconnect(sptr<AbstractScreen> absScreen);
     void OnAbstractScreenChange(sptr<AbstractScreen> absScreen, DisplayChangeEvent event);
-    void ProcessDisplayUpdateRotation(sptr<AbstractScreen> absScreen);
+    void ProcessDisplayUpdateOrientation(sptr<AbstractScreen> absScreen);
     void ProcessDisplaySizeChange(sptr<AbstractScreen> absScreen);
     void BindAloneScreenLocked(sptr<AbstractScreen> absScreen);
     void AddScreenToMirrorLocked(sptr<AbstractScreen> absScreen);

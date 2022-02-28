@@ -37,7 +37,7 @@ public:
 
     virtual void OnDestroy(DisplayId displayId) {}
 
-    virtual void OnChange(DisplayId displayId, DisplayChangeEvent event) {}
+    virtual void OnChange(DisplayId displayId) {}
 };
 
 class DisplayChangeUnitTest : public testing::Test {

@@ -107,7 +107,7 @@ std::shared_ptr<RSDisplayNode> AbstractScreenController::GetRSDisplayNodeByScree
     if (screen == nullptr) {
         return nullptr;
     }
-    WLOGI("GetAbstractScreen: screen: %{public}" PRIu64", nodeId: %{public}" PRIu64" ",
+    WLOGI("GetRSDisplayNodeByScreenId: screen: %{public}" PRIu64", nodeId: %{public}" PRIu64" ",
         screen->dmsId_, screen->rsDisplayNode_->GetId());
     return screen->rsDisplayNode_;
 }
@@ -320,8 +320,8 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddToGroupLocked(sptr<Abstra
         res = AddAsSuccedentScreenLocked(newScreen);
     }
     if (res != nullptr) {
-        DisplayManagerAgentController::GetInstance().OnScreenChange(
-            newScreen->ConvertToScreenInfo(), ScreenChangeEvent::ADD_TO_GROUP);
+        DisplayManagerAgentController::GetInstance().OnScreenGroupChange(
+            newScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
     }
     return res;
 }
@@ -351,8 +351,8 @@ sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<A
         dmsScreenGroupMap_.erase(screenGroup->dmsId_);
         dmsScreenMap_.erase(screenGroup->dmsId_);
     }
-    DisplayManagerAgentController::GetInstance().OnScreenChange(
-        screen->ConvertToScreenInfo(), ScreenChangeEvent::REMOVE_FROM_GROUP);
+    DisplayManagerAgentController::GetInstance().OnScreenGroupChange(
+        screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
     return screenGroup;
 }
 
@@ -497,43 +497,47 @@ DMError AbstractScreenController::SetVirtualScreenSurface(ScreenId screenId, spt
     return DMError::DM_OK;
 }
 
-bool AbstractScreenController::RequestRotation(ScreenId screenId, Rotation rotation)
+bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation newOrientation)
 {
-    WLOGD("request rotation: screen %{public}" PRIu64"", screenId);
+    WLOGD("set orientation. screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);
     auto screen = GetAbstractScreen(screenId);
     if (screen == nullptr) {
-        WLOGFE("fail to request rotation, cannot find screen %{public}" PRIu64"", screenId);
+        WLOGFE("fail to set orientation, cannot find screen %{public}" PRIu64"", screenId);
         return false;
     }
     if (screen->canHasChild_) {
-        WLOGE("cannot rotate the combination screen: %{public}" PRIu64"", screenId);
+        WLOGE("cannot set orientation to the combination. screen: %{public}" PRIu64"", screenId);
         return false;
     }
-    if (!rsInterface_.RequestRotation(screenId, static_cast<ScreenRotation>(rotation))) {
-        WLOGE("rotate screen fail: %{public}" PRIu64"", screenId);
-        return false;
+    if (screen->orientation_ == newOrientation) {
+        WLOGI("skip setting orientation. screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);
+        return true;
     }
-    Rotation before = screen->rotation_;
-    screen->RequestRotation(rotation);
-    OnScreenRotate(screenId, before, rotation);
-    return true;
-}
 
-void AbstractScreenController::OnScreenRotate(ScreenId dmsId, Rotation before, Rotation after)
-{
-    auto iter = dmsScreenMap_.find(dmsId);
-    if (iter == dmsScreenMap_.end()) {
-        WLOGE("rotate screen fail, not found abstract screen %{public}" PRIu64"", dmsId);
-        return;
+    Rotation rotationAfter = screen->CalcRotation(newOrientation);
+    if (rotationAfter != screen->rotation_) {
+        WLOGI("set orientation. roatiton %{public}u", rotationAfter);
+        if (!rsInterface_.RequestRotation(screenId, static_cast<ScreenRotation>(rotationAfter))) {
+            WLOGE("rotate screen fail. %{public}" PRIu64"", screenId);
+            return false;
+        }
+    } else {
+        WLOGI("rotation not changed. screen %{public}" PRIu64" rotation %{public}u", screenId, rotationAfter);
     }
-    sptr<AbstractScreen> abstractScreen = iter->second;
+    if (!screen->SetOrientation(newOrientation)) {
+        WLOGE("fail to set orientation, screen %{public}" PRIu64"", screenId);
+        return false;
+    }
+    screen->rotation_ = rotationAfter;
+
     // Notify rotation event to ScreenManager
     DisplayManagerAgentController::GetInstance().OnScreenChange(
-        abstractScreen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+        screen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ORIENTATION);
     // Notify rotation event to AbstractDisplayController
     if (abstractScreenCallback_ != nullptr) {
-        abstractScreenCallback_->onChange_(abstractScreen, DisplayChangeEvent::UPDATE_ROTATION);
+        abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::UPDATE_ORIENTATION);
     }
+    return true;
 }
 
 DMError AbstractScreenController::GetScreenSupportedColorGamuts(ScreenId screenId,
@@ -663,7 +667,7 @@ void AbstractScreenController::ProcessScreenModeChanged(ScreenId dmsScreenId)
 
 bool AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenId> screens)
 {
-    WLOGI("AbstractScreenController::MakeMirror, screenId:%{public}" PRIu64"", screenId);
+    WLOGI("MakeMirror, screenId:%{public}" PRIu64"", screenId);
     sptr<AbstractScreen> screen = GetAbstractScreen(screenId);
     if (screen == nullptr || screen->type_ != ScreenType::REAL) {
         WLOGFE("screen is nullptr, or screenType is not real.");

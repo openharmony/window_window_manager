@@ -44,6 +44,7 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET(float, XDpi, xDpi, 0.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET(float, YDpi, yDpi, 0.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET(Rotation, Rotation, rotation, Rotation::ROTATION_0);
+    DEFINE_VAR_DEFAULT_FUNC_GET(Orientation, Orientation, orientation, Orientation::UNSPECIFIED);
 protected:
     DisplayInfo() = default;
 };

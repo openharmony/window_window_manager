@@ -29,7 +29,8 @@ public:
     void NotifyDisplayStateChanged(DisplayId id, DisplayState state) override {};
     void OnScreenConnect(sptr<ScreenInfo>) override {};
     void OnScreenDisconnect(ScreenId) override {};
-    void OnScreenChange(const std::vector<sptr<ScreenInfo>>&, ScreenChangeEvent) override {};
+    void OnScreenChange(const sptr<ScreenInfo>&, ScreenChangeEvent) override {};
+    void OnScreenGroupChange(const std::vector<sptr<ScreenInfo>>&, ScreenGroupChangeEvent) override {};
     void OnDisplayCreate(sptr<DisplayInfo>) override {};
     void OnDisplayDestroy(DisplayId) override {};
     void OnDisplayChange(const sptr<DisplayInfo>, DisplayChangeEvent) override {};

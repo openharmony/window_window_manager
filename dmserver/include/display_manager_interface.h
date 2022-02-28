@@ -56,7 +56,7 @@ public:
         TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID,
         TRANS_ID_SET_SCREEN_ACTIVE_MODE,
         TRANS_ID_GET_ALL_SCREEN_INFOS,
-        TRANS_ID_REQUEST_ROTATION,
+        TRANS_ID_SET_ORIENTATION,
         TRANS_ID_SCREENGROUP_BASE = 1100,
         TRANS_ID_SCREEN_MAKE_MIRROR = TRANS_ID_SCREENGROUP_BASE,
         TRANS_ID_SCREEN_MAKE_EXPAND,
@@ -76,7 +76,7 @@ public:
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) = 0;
-    virtual bool RequestRotation(ScreenId screenId, Rotation rotation) = 0;
+    virtual bool SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
 
     // colorspace, gamut

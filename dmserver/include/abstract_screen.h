@@ -47,8 +47,8 @@ public:
     std::vector<sptr<SupportedScreenModes>> GetAbstractScreenModes() const;
     sptr<AbstractScreenGroup> GetGroup() const;
     sptr<ScreenInfo> ConvertToScreenInfo() const;
-    void RequestRotation(Rotation rotation);
-    Rotation GetRotation() const;
+    bool SetOrientation(Orientation orientation);
+    Rotation CalcRotation(Orientation orientation) const;
 
     void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     void InitRSDisplayNode(RSDisplayNodeConfig& config);
@@ -66,11 +66,12 @@ public:
     bool canHasChild_ { false };
     std::shared_ptr<RSDisplayNode> rsDisplayNode_;
     RSDisplayNodeConfig rSDisplayNodeConfig_;
-    ScreenId groupDmsId_ {INVALID_SCREEN_ID};
+    ScreenId groupDmsId_ { SCREEN_ID_INVALID };
     ScreenType type_ { ScreenType::REAL };
     int32_t activeIdx_ { 0 };
     float virtualPixelRatio = { 1.0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};
+    Orientation orientation_ { Orientation::UNSPECIFIED };
     Rotation rotation_ { Rotation::ROTATION_0 };
 protected:
     void FillScreenInfo(sptr<ScreenInfo>) const;
@@ -94,7 +95,7 @@ public:
     bool SetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config);
 
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
-    ScreenId mirrorScreenId_ {INVALID_SCREEN_ID};
+    ScreenId mirrorScreenId_ { SCREEN_ID_INVALID };
 
 private:
     std::map<ScreenId, std::pair<sptr<AbstractScreen>, Point>> abstractScreenMap_;

@@ -115,7 +115,7 @@ public:
         WLOGD("OnDisplayChange. display %{public}" PRIu64", event %{public}u", displayInfo->GetDisplayId(), event);
         pImpl_->NotifyDisplayChange(displayInfo);
         for (auto listener : pImpl_->displayListeners_) {
-            listener->OnChange(displayInfo->GetDisplayId(), event);
+            listener->OnChange(displayInfo->GetDisplayId());
         }
     };
 private:
@@ -465,15 +465,6 @@ void DisplayManager::Impl::NotifyDisplayStateChanged(DisplayId id, DisplayState 
         return;
     }
     WLOGFW("callback_ target is not set!");
-}
-
-void DisplayManager::Impl::NotifyDisplayChangedEvent(sptr<DisplayInfo> info, DisplayChangeEvent event)
-{
-    WLOGI("NotifyDisplayChangedEvent event:%{public}u, size:%{public}zu", event, displayListeners_.size());
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto& listener : displayListeners_) {
-        listener->OnChange(info->GetDisplayId(), event);
-    }
 }
 
 void DisplayManager::Impl::NotifyDisplayCreate(sptr<DisplayInfo> info)
