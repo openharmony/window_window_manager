@@ -35,7 +35,6 @@ public:
     static inline SingletonDelegator<DisplayManager> delegator;
     bool CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const;
     bool CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const;
-    void ClearDisplayStateCallback();
     sptr<Display> GetDisplayById(DisplayId displayId);
     bool RegisterDisplayListener(sptr<IDisplayListener> listener);
     bool UnregisterDisplayListener(sptr<IDisplayListener> listener);
@@ -44,6 +43,7 @@ public:
     bool UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
 private:
+    void ClearDisplayStateCallback();
     void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
     void NotifyDisplayStateChanged(DisplayId id, DisplayState state);
     void NotifyDisplayChangedEvent(sptr<DisplayInfo> info, DisplayChangeEvent event);
@@ -177,6 +177,7 @@ bool DisplayManager::Impl::CheckSizeValid(const Media::Size& size, int32_t oriHe
 
 void DisplayManager::Impl::ClearDisplayStateCallback()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayStateCallback_ = nullptr;
     if (displayStateAgent_ != nullptr) {
         SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(displayStateAgent_,
@@ -573,20 +574,22 @@ DisplayPowerState DisplayManager::GetScreenPower(uint64_t screenId)
 bool DisplayManager::Impl::SetDisplayState(DisplayState state, DisplayStateCallback callback)
 {
     WLOGFI("state:%{public}u", state);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (displayStateCallback_ != nullptr || callback == nullptr) {
-        WLOGFI("previous callback not called or callback invalid");
-        return false;
-    }
-    displayStateCallback_ = callback;
     bool ret = true;
-    if (displayStateAgent_ == nullptr) {
-        displayStateAgent_ = new DisplayManagerAgent(this);
-        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
-            displayStateAgent_,
-            DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
-    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        if (displayStateCallback_ != nullptr || callback == nullptr) {
+            WLOGFI("previous callback not called or callback invalid");
+            return false;
+        }
+        displayStateCallback_ = callback;
 
+        if (displayStateAgent_ == nullptr) {
+            displayStateAgent_ = new DisplayManagerAgent(this);
+            ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+                displayStateAgent_,
+                DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
+        }
+    }
     ret = ret && SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
     if (!ret) {
         ClearDisplayStateCallback();
