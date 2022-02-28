@@ -67,6 +67,7 @@ public:
     static bool RectEqualToRect(const Rect& l, const Rect& r);
     static Rect GetDefaultFoatingRect(const sptr<Window>& window);
     static Rect GetLimitedDecoRect(const Rect& rect, float virtualPixelRatio);
+    static Rect CalcLimitedRect(const Rect& rect, float virtualPixelRatio);
     static Rect GetFloatingLimitedRect(const Rect& rect, float virtualPixelRatio);
     static void InitTileWindowRects(const sptr<Window>& window);
     static float GetVirtualPixelRatio(DisplayId displayId);
