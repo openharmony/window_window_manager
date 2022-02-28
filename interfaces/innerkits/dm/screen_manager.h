@@ -31,7 +31,12 @@ public:
     public:
         virtual void OnConnect(ScreenId) = 0;
         virtual void OnDisconnect(ScreenId) = 0;
-        virtual void OnChange(const std::vector<ScreenId>&, ScreenChangeEvent) = 0;
+        virtual void OnChange(ScreenId) = 0;
+    };
+
+    class IScreenGroupListener : public virtual RefBase {
+    public:
+        virtual void OnChange(const std::vector<ScreenId>&, ScreenGroupChangeEvent) = 0;
     };
 
     sptr<Screen> GetScreenById(ScreenId screenId);
@@ -40,6 +45,8 @@ public:
 
     bool RegisterScreenListener(sptr<IScreenListener> listener);
     bool UnregisterScreenListener(sptr<IScreenListener> listener);
+    bool RegisterScreenGroupListener(sptr<IScreenGroupListener> listener);
+    bool UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener);
     ScreenId MakeExpand(const std::vector<ExpandOption>& options);
     ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);

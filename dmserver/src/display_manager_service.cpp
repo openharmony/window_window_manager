@@ -170,10 +170,10 @@ DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<S
     return abstractScreenController_->SetVirtualScreenSurface(screenId, surface);
 }
 
-bool DisplayManagerService::RequestRotation(ScreenId screenId, Rotation rotation)
+bool DisplayManagerService::SetOrientation(ScreenId screenId, Orientation orientation)
 {
-    WM_SCOPED_TRACE("dms:RequestRotation(%" PRIu64")", screenId);
-    return abstractScreenController_->RequestRotation(screenId, rotation);
+    WM_SCOPED_TRACE("dms:SetOrientation(%" PRIu64")", screenId);
+    return abstractScreenController_->SetOrientation(screenId, orientation);
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)

@@ -38,7 +38,7 @@ public:
     ScreenId CreateVirtualScreen(VirtualScreenOption option) override;
     DMError DestroyVirtualScreen(ScreenId screenId) override;
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
-    bool RequestRotation(ScreenId screenId, Rotation rotation) override;
+    bool SetOrientation(ScreenId screenId, Orientation orientation) override;
     std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
 
     // colorspace, gamut

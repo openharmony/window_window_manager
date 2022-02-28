@@ -118,7 +118,7 @@ void JsDisplayListener::OnDestroy(DisplayId id)
             callback, std::move(execute), std::move(complete)));
 }
 
-void JsDisplayListener::OnChange(DisplayId id, DisplayChangeEvent event)
+void JsDisplayListener::OnChange(DisplayId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     WLOGFI("JsDisplayListener::OnChange is called, displayId: %{public}d", static_cast<uint32_t>(id));

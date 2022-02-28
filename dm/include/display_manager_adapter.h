@@ -74,10 +74,10 @@ private:
 class ScreenManagerAdapter : public BaseAdapter {
 WM_DECLARE_SINGLE_INSTANCE(ScreenManagerAdapter);
 public:
-    virtual bool RequestRotation(ScreenId screenId, Rotation rotation);
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option);
     virtual DMError DestroyVirtualScreen(ScreenId screenId);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    virtual bool SetOrientation(ScreenId screenId, Orientation orientation);
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId);
     virtual std::vector<sptr<ScreenInfo>> GetAllScreenInfos();
     virtual ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);

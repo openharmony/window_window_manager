@@ -95,6 +95,11 @@ void AbstractDisplay::SetId(DisplayId id)
     id_ = id;
 }
 
+void AbstractDisplay::SetOrientation(Orientation orientation)
+{
+    orientation_ = orientation;
+}
+
 bool AbstractDisplay::RequestRotation(Rotation rotation)
 {
     WLOGD("request rotation from %{public}u to %{public}u, display %{public}" PRIu64"", rotation_, rotation, id_);
@@ -158,6 +163,8 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->id_ = id_;
     displayInfo->freshRate_ = freshRate_;
     displayInfo->screenId_ = screenId_;
+    displayInfo->rotation_ = rotation_;
+    displayInfo->orientation_ = orientation_;
     return displayInfo;
 }
 } // namespace OHOS::Rosen

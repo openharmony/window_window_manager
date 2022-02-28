@@ -33,7 +33,7 @@ public:
     void RemoveCallback(NativeValue* jsListenerObject);
     void OnCreate(DisplayId id) override;
     void OnDestroy(DisplayId id) override;
-    void OnChange(DisplayId id, DisplayChangeEvent event) override;
+    void OnChange(DisplayId id) override;
 
 private:
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);

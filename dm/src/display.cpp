@@ -72,6 +72,18 @@ ScreenId Display::GetScreenId() const
     return pImpl_->GetDisplayInfo()->GetScreenId();
 }
 
+Rotation Display::GetRotation() const
+{
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetRotation();
+}
+
+Orientation Display::GetOrientation() const
+{
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetOrientation();
+}
+
 void Display::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo) const
 {
     if (displayInfo == nullptr) {
