@@ -54,7 +54,7 @@ public:
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     bool SetOrientation(ScreenId screenId, Orientation orientation) override;
-    std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
     ScreenId GetRSScreenId(DisplayId displayId) const;
 
     // colorspace, gamut

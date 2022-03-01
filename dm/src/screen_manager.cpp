@@ -34,8 +34,8 @@ public:
     bool UnregisterScreenListener(sptr<IScreenListener> listener);
     bool RegisterScreenGroupListener(sptr<IScreenGroupListener> listener);
     bool UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener);
-    sptr<Screen> GetScreenById(ScreenId screenId);
-    sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
+    sptr<Screen> GetScreen(ScreenId screenId);
+    sptr<ScreenGroup> GetScreenGroup(ScreenId screenId);
     std::vector<sptr<Screen>> GetAllScreens();
 
 private:
@@ -145,7 +145,7 @@ ScreenManager::~ScreenManager()
 {
 }
 
-sptr<Screen> ScreenManager::Impl::GetScreenById(ScreenId screenId)
+sptr<Screen> ScreenManager::Impl::GetScreen(ScreenId screenId)
 {
     auto screenInfo = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenInfo(screenId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -158,10 +158,10 @@ sptr<Screen> ScreenManager::Impl::GetScreenById(ScreenId screenId)
 
 sptr<Screen> ScreenManager::GetScreenById(ScreenId screenId)
 {
-    return pImpl_->GetScreenById(screenId);
+    return pImpl_->GetScreen(screenId);
 }
 
-sptr<ScreenGroup> ScreenManager::Impl::GetScreenGroupById(ScreenId screenId)
+sptr<ScreenGroup> ScreenManager::Impl::GetScreenGroup(ScreenId screenId)
 {
     auto screenGroupInfo = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGroupInfoById(screenId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -181,9 +181,9 @@ sptr<ScreenGroup> ScreenManager::Impl::GetScreenGroupById(ScreenId screenId)
     return screenGroup;
 }
 
-sptr<ScreenGroup> ScreenManager::GetScreenGroupById(ScreenId screenId)
+sptr<ScreenGroup> ScreenManager::GetScreenGroup(ScreenId screenId)
 {
-    return pImpl_->GetScreenGroupById(screenId);
+    return pImpl_->GetScreenGroup(screenId);
 }
 
 std::vector<sptr<Screen>> ScreenManager::Impl::GetAllScreens()
