@@ -49,6 +49,7 @@ public:
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
     WMError ProcessWindowTouchedEvent(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
+    WMError MaxmizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
     void NotifySystemBarTints();
 

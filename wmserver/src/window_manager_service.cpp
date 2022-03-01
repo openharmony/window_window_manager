@@ -300,6 +300,13 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
     windowController_->MinimizeAllAppWindows(displayId);
 }
 
+WMError WindowManagerService::MaxmizeWindow(uint32_t windowId)
+{
+    WM_SCOPED_TRACE("wms:MaxmizeWindow");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->MaxmizeWindow(windowId);
+}
+
 WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
     WM_SCOPED_TRACE("wms:GetTopWindowId(%d)", mainWinId);
