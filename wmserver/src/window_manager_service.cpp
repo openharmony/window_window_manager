@@ -135,7 +135,6 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
     WM_SCOPED_TRACE("wms:AddWindow(%d)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WMError res = windowController_->AddWindowNode(property);
-    system::SetParameter("persist.window.boot.inited", "1");
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
         dragController_->StartDrag(windowId);
     }
