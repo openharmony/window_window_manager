@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_screen_manager.h"
 
 #include <vector>
-
+#include <new>
 #include <ability.h>
 #include "js_runtime_utils.h"
 #include "js_screen_listener.h"
@@ -138,7 +139,11 @@ void RegisterScreenListenerWithType(NativeEngine& engine, const std::string& typ
     }
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
-    sptr<JsScreenListener> screenListener = new JsScreenListener(&engine);
+    sptr<JsScreenListener> screenListener = new(std::nothrow) JsScreenListener(&engine);
+    if (screenListener == nullptr) {
+        WLOGFE("screenListener is nullptr");
+        return;
+    }
     if (type == "connect" || type == "disconnect" || type == "change") {
         SingletonContainer::Get<ScreenManager>().RegisterScreenListener(screenListener);
         WLOGFI("JsScreenManager::RegisterScreenListenerWithType success");
