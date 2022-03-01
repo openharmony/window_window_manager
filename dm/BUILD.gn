@@ -18,12 +18,6 @@ config("libdm_private_config") {
     "include",
     "../dmserver/include",
   ]
-
-  if (defined(product_name) &&
-      (product_name == "rk3566" || product_name == "rk3568" ||
-       product_name == "Hi3516DV300" || product_name == "watchos")) {
-    defines = [ "PRODUCT_RK" ]
-  }
 }
 
 config("libdm_public_config") {
