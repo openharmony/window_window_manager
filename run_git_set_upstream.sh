@@ -1,0 +1,1 @@
+../../script/run_git_set_upstream.sh
