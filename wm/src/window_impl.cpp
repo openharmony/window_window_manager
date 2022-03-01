@@ -365,6 +365,11 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     return WMError::WM_OK;
 }
 
+Ace::UIContent* WindowImpl::GetUIContent() const
+{
+    return uiContent_.get();
+}
+
 std::string WindowImpl::GetContentInfo()
 {
     WLOGFI("GetContentInfo");
@@ -586,7 +591,13 @@ WMError WindowImpl::Destroy()
 
     WLOGFI("[Client] Window %{public}d Destroy", property_->GetWindowId());
 
-    // FixMe: Remove "NotifyBeforeDestroy()" because of ACE bug, add when fixed
+    NotifyBeforeDestroy();
+    if (subWindowMap_.count(GetWindowId()) > 0) {
+        for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+            NotifyBeforeSubWindowDestroy(subWindow);
+        }
+    }
+
     WMError ret = SingletonContainer::Get<WindowAdapter>().DestroyWindow(property_->GetWindowId());
     if (ret != WMError::WM_OK) {
         WLOGFE("destroy window failed with errCode:%{public}d", static_cast<int32_t>(ret));
@@ -607,6 +618,7 @@ WMError WindowImpl::Destroy()
     // Destroy app floating window if exist
     if (appFloatingWindowMap_.count(GetWindowId()) > 0) {
         for (auto& floatingWindow : appFloatingWindowMap_.at(GetWindowId())) {
+            NotifyBeforeSubWindowDestroy(floatingWindow);
             WMError fltRet = SingletonContainer::Get<WindowAdapter>().DestroyWindow(floatingWindow->GetWindowId());
             if (fltRet == WMError::WM_OK) {
                 WLOGFI("Destroy App %{public}d FltWindow %{public}d", GetWindowId(), floatingWindow->GetWindowId());

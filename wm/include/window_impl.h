@@ -127,6 +127,7 @@ public:
         NativeValue* storage, bool isdistributed) override;
     virtual std::string GetContentInfo() override;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
+    virtual Ace::UIContent* GetUIContent() const override;
 
     // colorspace, gamut
     virtual bool IsSupportWideGamut() override;
@@ -156,6 +157,13 @@ private:
     {
         if (uiContent_ != nullptr) {
             uiContent_->Destroy();
+        }
+    }
+    inline void NotifyBeforeSubWindowDestroy(sptr<Window>& window) const
+    {
+        auto uiContent = window->GetUIContent();
+        if (uiContent != nullptr) {
+            uiContent->Destroy();
         }
     }
     void SetDefaultOption(); // for api7
