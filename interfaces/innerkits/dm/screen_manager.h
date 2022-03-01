@@ -49,6 +49,7 @@ public:
     bool UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener);
     ScreenId MakeExpand(const std::vector<ExpandOption>& options);
     ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
+    void CancelMakeMirrorOrExpand(std::vector<ScreenId> screens);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);

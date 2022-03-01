@@ -64,6 +64,7 @@ public:
     void UpdateRSTree(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     bool MakeMirror(ScreenId, std::vector<ScreenId> screens);
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
+    void CancelMakeMirrorOrExpand(std::vector<ScreenId> screens);
     void DumpScreenInfo() const;
     void DumpScreenGroupInfo() const;
 
@@ -81,6 +82,7 @@ private:
     bool FillAbstractScreen(sptr<AbstractScreen>& absScreen, ScreenId rsScreenId);
     sptr<AbstractScreenGroup> AddToGroupLocked(sptr<AbstractScreen> newScreen);
     sptr<AbstractScreenGroup> RemoveFromGroupLocked(sptr<AbstractScreen> newScreen);
+    bool RemoveChildFromGroup(sptr<AbstractScreen>, sptr<AbstractScreenGroup>);
     bool CheckScreenInScreenGroup(sptr<AbstractScreen> newScreen) const;
     sptr<AbstractScreenGroup> AddAsFirstScreenLocked(sptr<AbstractScreen> newScreen);
     sptr<AbstractScreenGroup> AddAsSuccedentScreenLocked(sptr<AbstractScreen> newScreen);

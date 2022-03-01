@@ -82,6 +82,7 @@ public:
     virtual std::vector<sptr<ScreenInfo>> GetAllScreenInfos();
     virtual ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     virtual ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
+    virtual void CancelMakeMirrorOrExpand(std::vector<ScreenId>);
     virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
 
