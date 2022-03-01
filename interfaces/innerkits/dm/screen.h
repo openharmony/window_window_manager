@@ -65,6 +65,7 @@ public:
     Screen& operator=(const Screen&) = delete;
     Screen& operator=(Screen&&) = delete;
     bool IsGroup() const;
+    const std::string& GetName() const;
     ScreenId GetId() const;
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;
@@ -73,6 +74,7 @@ public:
     float GetVirtualPixelRatio() const;
     Rotation GetRotation() const;
     Orientation GetOrientation() const;
+    bool IsReal() const;
     ScreenId GetParentId() const;
     uint32_t GetModeId() const;
     std::vector<sptr<SupportedScreenModes>> GetSupportedModes() const;

@@ -77,7 +77,7 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) = 0;
     virtual bool SetOrientation(ScreenId screenId, Orientation orientation) = 0;
-    virtual std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
+    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) = 0;
 
     // colorspace, gamut
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) = 0;
