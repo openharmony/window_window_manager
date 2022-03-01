@@ -380,6 +380,10 @@ std::shared_ptr<RSDisplayNode> DisplayManagerService::GetRSDisplayNodeByDisplayI
 void DisplayManagerService::SetShotScreen(ScreenId mainScreenId, std::vector<ScreenId> shotScreenIds)
 {
     WLOGFI("SetShotScreen. mainScreenId: %{public}" PRIu64"", mainScreenId);
+    if (shotScreenIds.empty()) {
+        WLOGFI("shotScreenIds is empty");
+        return;
+    }
     std::shared_ptr<RSDisplayNode> displayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(mainScreenId);
     if (displayNode == nullptr) {
         WLOGFE("SetShotScreen error, cannot get DisplayNode");
