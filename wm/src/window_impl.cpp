@@ -995,25 +995,25 @@ void WindowImpl::HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId)
     int32_t diffX = posX - startPointPosX_;
     int32_t diffY = posY - startPointPosY_;
     Rect newRect = startPointRect_;
-    if (startPointPosX_ <= startPointRect_.posX_) {
+    if (startPointPosX_ <= startRectExceptFrame_.posX_) {
         if (diffX > static_cast<int32_t>(startPointRect_.width_)) {
             diffX = static_cast<int32_t>(startPointRect_.width_);
         }
         newRect.posX_ += diffX;
         newRect.width_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.width_) - diffX);
-    } else if (startPointPosX_ >= startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_)) {
+    } else if (startPointPosX_ >= startRectExceptFrame_.posX_ + static_cast<int32_t>(startRectExceptFrame_.width_)) {
         if (diffX < 0 && (-diffX > static_cast<int32_t>(startPointRect_.width_))) {
             diffX = -(static_cast<int32_t>(startPointRect_.width_));
         }
         newRect.width_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.width_) + diffX);
     }
-    if (startPointPosY_ <= startPointRect_.posY_) {
+    if (startPointPosY_ <= startRectExceptFrame_.posY_) {
         if (diffY > static_cast<int32_t>(startPointRect_.height_)) {
             diffY = static_cast<int32_t>(startPointRect_.height_);
         }
         newRect.posY_ += diffY;
         newRect.height_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.height_) - diffY);
-    } else if (startPointPosY_ >= startPointRect_.posY_ + static_cast<int32_t>(startPointRect_.height_)) {
+    } else if (startPointPosY_ >= startRectExceptFrame_.posY_ + static_cast<int32_t>(startRectExceptFrame_.height_)) {
         if (diffY < 0 && (-diffY > static_cast<int32_t>(startPointRect_.height_))) {
             diffY = -(static_cast<int32_t>(startPointRect_.height_));
         }
@@ -1046,9 +1046,28 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
     startPointPosY_ = globalY;
     startPointerId_ = pointId;
     pointEventStarted_ = true;
+
+    // calculate window inner rect except frame
+    auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
+            property_->GetWindowId());
+        return;
+    }
+    float virtualPixelRatio = display->GetVirtualPixelRatio();
+    
+    startRectExceptFrame_.posX_ = startPointRect_.posX_ +
+        static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
+    startRectExceptFrame_.posY_ = startPointRect_.posY_ +
+        static_cast<int32_t>(WINDOW_FRAME_TOP_WIDTH * virtualPixelRatio);
+    startRectExceptFrame_.width_ = startPointRect_.width_ -
+        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio);
+    startRectExceptFrame_.height_ = startPointRect_.height_ -
+        static_cast<uint32_t>((WINDOW_FRAME_TOP_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio);
+
     if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         startMoveFlag_ = true;
-    } else if (!WindowHelper::IsPointInWindow(startPointPosX_, startPointPosY_, startPointRect_)) {
+    } else if (!WindowHelper::IsPointInTargetRect(startPointPosX_, startPointPosY_, startRectExceptFrame_)) {
         startDragFlag_ = true;
     }
     return;
