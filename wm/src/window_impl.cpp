@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -920,6 +920,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reas
     if (uiContent_ != nullptr) {
         Ace::ViewportConfig config;
         config.SetSize(rect.width_, rect.height_);
+        config.SetPosition(rect.posX_, rect.posY_);
         config.SetDensity(virtualPixelRatio);
         uiContent_->UpdateViewportConfig(config, reason);
         WLOGFI("notify uiContent window size change end");
