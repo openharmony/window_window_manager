@@ -108,7 +108,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
         case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
             DisplayId displayId = data.ReadUint64();
-            std::shared_ptr<Media::PixelMap> dispalySnapshot = GetDispalySnapshot(displayId);
+            std::shared_ptr<Media::PixelMap> dispalySnapshot = GetDisplaySnapshot(displayId);
             if (dispalySnapshot == nullptr) {
                 reply.WriteParcelable(nullptr);
                 break;

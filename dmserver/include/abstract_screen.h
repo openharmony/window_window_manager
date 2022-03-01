@@ -30,17 +30,11 @@
 #include "screen_info.h"
 
 namespace OHOS::Rosen {
-enum class ScreenType : uint32_t {
-    UNDEFINE,
-    REAL,
-    VIRTUAL
-};
-
 class AbstractScreenGroup;
 class AbstractScreenController;
 class AbstractScreen : public RefBase {
 public:
-    AbstractScreen(ScreenId dmsId, ScreenId rsId);
+    AbstractScreen(const std::string& name, ScreenId dmsId, ScreenId rsId);
     AbstractScreen() = delete;
     ~AbstractScreen();
     sptr<SupportedScreenModes> GetActiveScreenMode() const;
@@ -61,6 +55,7 @@ public:
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
 
+    const std::string name_;
     ScreenId dmsId_;
     ScreenId rsId_;
     bool canHasChild_ { false };
@@ -69,8 +64,8 @@ public:
     ScreenId groupDmsId_ { SCREEN_ID_INVALID };
     ScreenType type_ { ScreenType::REAL };
     int32_t activeIdx_ { 0 };
-    float virtualPixelRatio = { 1.0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};
+    float virtualPixelRatio = { 1.0 };
     Orientation orientation_ { Orientation::UNSPECIFIED };
     Rotation rotation_ { Rotation::ROTATION_0 };
 protected:

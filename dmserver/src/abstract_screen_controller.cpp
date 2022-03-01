@@ -164,7 +164,7 @@ ScreenId AbstractScreenController::GetDefaultAbstractScreenId()
     }
     WLOGFI("GetDefaultAbstractScreenId, default screen is null, try to get.");
     ScreenId dmsScreenId = dmsScreenCount_;
-    sptr<AbstractScreen> absScreen = new AbstractScreen(dmsScreenId, rsDefaultId);
+    sptr<AbstractScreen> absScreen = new AbstractScreen(DEFAULT_SCREEN_NAME, dmsScreenId, rsDefaultId);
     if (!FillAbstractScreen(absScreen, rsDefaultId)) {
         WLOGFW("GetDefaultAbstractScreenId, FillAbstractScreen failed.");
         return INVALID_SCREEN_ID;
@@ -218,7 +218,7 @@ void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, S
         if (iter == rs2DmsScreenIdMap_.end()) {
             WLOGFD("connect new screen");
             dmsScreenId = dmsScreenCount_;
-            sptr<AbstractScreen> absScreen = new AbstractScreen(dmsScreenId, rsScreenId);
+            sptr<AbstractScreen> absScreen = new AbstractScreen(DEFAULT_SCREEN_NAME, dmsScreenId, rsScreenId);
             if (!FillAbstractScreen(absScreen, rsScreenId)) {
                 return;
             }
@@ -417,20 +417,20 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsSuccedentScreenLocked(s
 
 ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption option)
 {
-    ScreenId result = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
+    ScreenId rsId = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
         option.height_, option.surface_, INVALID_SCREEN_ID, option.flags_);
-    WLOGFI("AbstractScreenController::CreateVirtualScreen id: %{public}" PRIu64"", result);
-    if (result == SCREEN_ID_INVALID) {
+    WLOGFI("CreateVirtualScreen id: %{public}" PRIu64"", rsId);
+    if (rsId == SCREEN_ID_INVALID) {
         return SCREEN_ID_INVALID;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     ScreenId dmsScreenId = SCREEN_ID_INVALID;
-    auto iter = rs2DmsScreenIdMap_.find(result);
+    auto iter = rs2DmsScreenIdMap_.find(rsId);
     if (iter == rs2DmsScreenIdMap_.end()) {
         if (!option.isForShot_) {
             WLOGI("CreateVirtualScreen is not shot");
             dmsScreenId = dmsScreenCount_;
-            sptr<AbstractScreen> absScreen = new AbstractScreen(dmsScreenId, result);
+            sptr<AbstractScreen> absScreen = new AbstractScreen(option.name_, dmsScreenId, rsId);
             sptr<SupportedScreenModes> info = new SupportedScreenModes();
             info->width_ = option.width_;
             info->height_ = option.height_;
@@ -442,15 +442,15 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
             absScreen->activeIdx_ = 0;
             absScreen->type_ = ScreenType::VIRTUAL;
             dmsScreenCount_++;
-            rs2DmsScreenIdMap_.insert(std::make_pair(result, dmsScreenId));
-            dms2RsScreenIdMap_.insert(std::make_pair(dmsScreenId, result));
+            rs2DmsScreenIdMap_.insert(std::make_pair(rsId, dmsScreenId));
+            dms2RsScreenIdMap_.insert(std::make_pair(dmsScreenId, rsId));
             dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));
             DisplayManagerAgentController::GetInstance().OnScreenConnect(absScreen->ConvertToScreenInfo());
         } else {
             WLOGI("CreateVirtualScreen is shot");
             dmsScreenId = dmsScreenCount_++;
-            rs2DmsScreenIdMap_.insert(std::make_pair(result, dmsScreenId));
-            dms2RsScreenIdMap_.insert(std::make_pair(dmsScreenId, result));
+            rs2DmsScreenIdMap_.insert(std::make_pair(rsId, dmsScreenId));
+            dms2RsScreenIdMap_.insert(std::make_pair(dmsScreenId, rsId));
         }
     } else {
         return iter->second;

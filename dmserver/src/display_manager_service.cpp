@@ -176,9 +176,9 @@ bool DisplayManagerService::SetOrientation(ScreenId screenId, Orientation orient
     return abstractScreenController_->SetOrientation(screenId, orientation);
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId)
 {
-    WM_SCOPED_TRACE("dms:GetDispalySnapshot(%" PRIu64")", displayId);
+    WM_SCOPED_TRACE("dms:GetDisplaySnapshot(%" PRIu64")", displayId);
     std::shared_ptr<Media::PixelMap> screenSnapshot
         = abstractDisplayController_->GetScreenSnapshot(displayId);
     return screenSnapshot;
