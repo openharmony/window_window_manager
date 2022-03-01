@@ -21,7 +21,6 @@
 
 #include <input_window_monitor.h>
 #include <nocopyable.h>
-#include <parameters.h>
 #include <system_ability.h>
 #include "display_change_listener.h"
 #include "drag_controller.h"

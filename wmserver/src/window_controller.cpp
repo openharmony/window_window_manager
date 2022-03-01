@@ -14,6 +14,7 @@
  */
 
 #include "window_controller.h"
+#include <parameters.h>
 #include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
 #include "window_helper.h"
@@ -86,9 +87,11 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         WM_SCOPED_TRACE_END();
         if (res != WMError::WM_OK) {
             WLOGFE("Minimize other structured window failed");
+            return res;
         }
     }
-    return res;
+    StopBootAnimationIfNeed(node->GetWindowType());
+    return WMError::WM_OK;
 }
 
 WMError WindowController::RemoveWindowNode(uint32_t windowId)
@@ -310,6 +313,14 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
     }
     FlushWindowInfoWithDisplayId(displayId);
     WLOGFI("Finish ProcessDisplayChange");
+}
+
+void WindowController::StopBootAnimationIfNeed(WindowType type) const
+{
+    if (WindowType::WINDOW_TYPE_DESKTOP == type) {
+        WLOGFD("stop boot animation");
+        system::SetParameter("persist.window.boot.inited", "1");
+    }
 }
 
 WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)

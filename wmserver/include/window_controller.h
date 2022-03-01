@@ -58,6 +58,7 @@ private:
     void FlushWindowInfoWithDisplayId(DisplayId displayId);
     void UpdateWindowAnimation(const sptr<WindowNode>& node);
     void ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type);
+    void StopBootAnimationIfNeed(WindowType type) const;
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
