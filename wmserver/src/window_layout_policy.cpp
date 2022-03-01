@@ -241,15 +241,14 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(Rect layoutOutRect, sptr<WindowNo
     Rect rect = layoutOutRect;
     float virtualPixelRatio = GetVirtualPixelRatio();
     uint32_t hotZone = static_cast<uint32_t>(HOTZONE * virtualPixelRatio);
-    uint32_t divHotZone = static_cast<uint32_t>(DIV_HOTZONE * virtualPixelRatio);
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         if (rect.width_ < rect.height_) {
-            rect.posX_ -= divHotZone;
-            rect.width_ += (divHotZone + divHotZone);
+            rect.posX_ -= hotZone;
+            rect.width_ += (hotZone + hotZone);
         } else {
-            rect.posY_ -= divHotZone;
-            rect.height_ += (divHotZone + divHotZone);
+            rect.posY_ -= hotZone;
+            rect.height_ += (hotZone + hotZone);
         }
     } else if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
         rect.posX_ -= hotZone;
