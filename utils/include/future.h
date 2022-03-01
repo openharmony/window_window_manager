@@ -50,5 +50,37 @@ private:
     std::condition_variable conditionVariable_;
     std::mutex mutex_;
 };
+
+template<class T>
+class RunnableFuture : public Future<T> {
+public:
+    void SetValue(T res)
+    {
+        Future<T>::FutureCall(res);
+    }
+    void Reset()
+    {
+        flag_ = false;
+    }
+protected:
+    void Call(T res) override
+    {
+        if (!flag_) {
+            flag_ = true;
+            result_ = res;
+        }
+    }
+    bool IsReady() override
+    {
+        return flag_;
+    }
+    T FetchResult() override
+    {
+        return result_;
+    }
+private:
+    bool flag_ {false};
+    T result_;
+};
 } // namespace OHOS::Rosen
 #endif // OHOS_WM_INCLUDE_FUTURE_H

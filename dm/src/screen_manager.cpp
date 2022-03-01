@@ -336,6 +336,11 @@ ScreenId ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> 
     return group;
 }
 
+void ScreenManager::CancelMakeMirrorOrExpand(std::vector<ScreenId> screens)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().CancelMakeMirrorOrExpand(screens);
+}
+
 ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().CreateVirtualScreen(option);

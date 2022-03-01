@@ -223,6 +223,15 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteUint64(static_cast<uint64_t>(result));
             break;
         }
+        case TRANS_ID_SCREEN_MAKE_MIRROR_OR_EXPAND_CANCELED: {
+            std::vector<ScreenId> screenId;
+            if (!data.ReadUInt64Vector(&screenId)) {
+                WLOGE("fail to receive screens in stub.");
+                break;
+            }
+            CancelMakeMirrorOrExpand(screenId);
+            break;
+        }
         case TRANS_ID_SET_SCREEN_ACTIVE_MODE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             uint32_t modeId = data.ReadUint32();
