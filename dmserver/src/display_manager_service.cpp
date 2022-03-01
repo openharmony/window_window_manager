@@ -433,6 +433,11 @@ ScreenId DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Sc
     return screen->groupDmsId_;
 }
 
+void DisplayManagerService::CancelMakeMirrorOrExpand(std::vector<ScreenId> screens)
+{
+    abstractScreenController_->CancelMakeMirrorOrExpand(screens);
+}
+
 void DisplayManagerService::UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
     bool isAdd)
 {

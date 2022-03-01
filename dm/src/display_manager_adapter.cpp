@@ -378,6 +378,14 @@ ScreenId ScreenManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::v
     return displayManagerServiceProxy_->MakeExpand(screenId, startPoint);
 }
 
+void ScreenManagerAdapter::CancelMakeMirrorOrExpand(std::vector<ScreenId> screens)
+{
+    if (!InitDMSProxy()) {
+        return;
+    }
+    displayManagerServiceProxy_->CancelMakeMirrorOrExpand(screens);
+}
+
 bool ScreenManagerAdapter::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
     if (!InitDMSProxy()) {
