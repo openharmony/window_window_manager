@@ -1210,6 +1210,7 @@ void WindowImpl::SetDefaultOption()
         }
         case WindowType::WINDOW_TYPE_VOLUME_OVERLAY: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetFocusable(false);
             break;
         }
         case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT: {
