@@ -22,6 +22,11 @@
 #include "screen.h"
 
 namespace OHOS::Rosen {
+enum class ScreenType : uint32_t {
+    UNDEFINE,
+    REAL,
+    VIRTUAL
+};
 class ScreenInfo : public Parcelable {
 friend class AbstractScreen;
 public:
@@ -34,6 +39,7 @@ public:
     virtual bool Marshalling(Parcel& parcel) const override;
     static ScreenInfo* Unmarshalling(Parcel& parcel);
 
+    DEFINE_VAR_FUNC_GET(std::string, Name, name);
     DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, ScreenId, id, SCREEN_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, VirtualWidth, virtualWidth, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, VirtualHeight, virtualHeight, 0);
@@ -42,6 +48,7 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET(bool, CanHasChild, canHasChild, false);
     DEFINE_VAR_DEFAULT_FUNC_GET(Rotation, Rotation, rotation, Rotation::ROTATION_0);
     DEFINE_VAR_DEFAULT_FUNC_GET(Orientation, Orientation, orientation, Orientation::UNSPECIFIED);
+    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenType, Type, type, ScreenType::REAL);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, ModeId, modeId, 0);
     DEFINE_VAR_FUNC_GET(std::vector<sptr<SupportedScreenModes>>, Modes, modes);
 protected:

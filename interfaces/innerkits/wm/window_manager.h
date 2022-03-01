@@ -102,7 +102,7 @@ public:
     void RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     void UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     void MinimizeAllAppWindows(DisplayId displayId);
-    void SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId);
+    WMError SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId);
 
 private:
     WindowManager();

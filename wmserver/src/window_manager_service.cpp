@@ -135,7 +135,6 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
     WM_SCOPED_TRACE("wms:AddWindow(%d)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WMError res = windowController_->AddWindowNode(property);
-    system::SetParameter("persist.window.boot.inited", "1");
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
         dragController_->StartDrag(windowId);
     }
@@ -299,6 +298,13 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
     WLOGFI("displayId %{public}" PRIu64"", displayId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     windowController_->MinimizeAllAppWindows(displayId);
+}
+
+WMError WindowManagerService::MaxmizeWindow(uint32_t windowId)
+{
+    WM_SCOPED_TRACE("wms:MaxmizeWindow");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->MaxmizeWindow(windowId);
 }
 
 WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)

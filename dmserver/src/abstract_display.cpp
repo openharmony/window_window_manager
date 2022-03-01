@@ -33,7 +33,7 @@ AbstractDisplay::AbstractDisplay(const DisplayInfo* info)
     id_ = info->GetDisplayId();
     width_ = info->GetWidth();
     height_ = info->GetHeight();
-    freshRate_ = info->GetHeight();
+    freshRate_ = info->GetFreshRate();
 }
 
 AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t freshRate)

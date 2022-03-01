@@ -14,6 +14,7 @@
  */
 
 #include <vector>
+#include <new>
 
 #include "js_runtime_utils.h"
 #include "native_engine/native_reference.h"
@@ -152,7 +153,11 @@ void RegisterDisplayListenerWithType(NativeEngine& engine, const std::string& ty
     }
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
-    sptr<JsDisplayListener> displayListener = new JsDisplayListener(&engine);
+    sptr<JsDisplayListener> displayListener = new(std::nothrow) JsDisplayListener(&engine);
+    if (displayListener == nullptr) {
+        WLOGFE("displayListener is nullptr");
+        return;
+    }
     if (type == "add" || type == "remove" || type == "change") {
         SingletonContainer::Get<DisplayManager>().RegisterDisplayListener(displayListener);
         WLOGFI("JsDisplayManager::RegisterDisplayListenerWithType success");

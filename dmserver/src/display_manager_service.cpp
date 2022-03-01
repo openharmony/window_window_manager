@@ -123,8 +123,6 @@ sptr<AbstractDisplay> DisplayManagerService::GetAbstractDisplay(DisplayId displa
 ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option)
 {
     WM_SCOPED_TRACE("dms:CreateVirtualScreen(%s)", option.name_.c_str());
-    WLOGFI("DumpScreenInfo before Create VirtualScreen");
-    abstractScreenController_->DumpScreenInfo();
     ScreenId screenId = abstractScreenController_->CreateVirtualScreen(option);
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("DisplayManagerService::CreateVirtualScreen: Get virtualScreenId failed");
@@ -176,9 +174,9 @@ bool DisplayManagerService::SetOrientation(ScreenId screenId, Orientation orient
     return abstractScreenController_->SetOrientation(screenId, orientation);
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId)
 {
-    WM_SCOPED_TRACE("dms:GetDispalySnapshot(%" PRIu64")", displayId);
+    WM_SCOPED_TRACE("dms:GetDisplaySnapshot(%" PRIu64")", displayId);
     std::shared_ptr<Media::PixelMap> screenSnapshot
         = abstractDisplayController_->GetScreenSnapshot(displayId);
     return screenSnapshot;
@@ -406,7 +404,6 @@ void DisplayManagerService::SetShotScreen(ScreenId mainScreenId, std::vector<Scr
 ScreenId DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds)
 {
     WLOGFI("MakeMirror. mainScreenId :%{public}" PRIu64"", mainScreenId);
-    abstractScreenController_->DumpScreenInfo();
     auto shotScreenIds = abstractScreenController_->GetShotScreenIds(mirrorScreenIds);
     auto iter = std::find(shotScreenIds.begin(), shotScreenIds.end(), mainScreenId);
     if (iter != shotScreenIds.end()) {
@@ -496,7 +493,6 @@ ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds
             static_cast<uint32_t>(expandScreenIds.size()), static_cast<uint32_t>(startPoints.size()));
         return SCREEN_ID_INVALID;
     }
-    abstractScreenController_->DumpScreenInfo();
     ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     WLOGI("MakeExpand, defaultScreenId:%{public}" PRIu64"", defaultScreenId);
     auto shotScreenIds = abstractScreenController_->GetShotScreenIds(expandScreenIds);
