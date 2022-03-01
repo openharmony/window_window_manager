@@ -173,6 +173,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             MinimizeAllAppWindows(data.ReadUint64());
             break;
         }
+        case TRANS_ID_MAXMIZE_WINDOW: {
+            MaxmizeWindow(data.ReadUint32());
+            break;
+        }
         case TRANS_ID_UPDATE_LAYOUT_MODE: {
             DisplayId displayId = data.ReadUint64();
             WindowLayoutMode mode = static_cast<WindowLayoutMode>(data.ReadUint32());

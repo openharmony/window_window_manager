@@ -51,6 +51,7 @@ public:
         TRANS_ID_SET_BACKGROUND_BLUR,
         TRANS_ID_SET_APLPHA,
         TRANS_ID_UPDATE_LAYOUT_MODE,
+        TRANS_ID_MAXMIZE_WINDOW,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId)  = 0;
@@ -72,6 +73,7 @@ public:
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
     virtual void ProcessWindowTouchedEvent(uint32_t windowId) = 0;
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
+    virtual WMError MaxmizeWindow(uint32_t windowId) = 0;
     virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) = 0;
 
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,

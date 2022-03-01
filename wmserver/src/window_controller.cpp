@@ -14,6 +14,7 @@
  */
 
 #include "window_controller.h"
+#include <parameters.h>
 #include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
 #include "window_helper.h"
@@ -86,9 +87,11 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         WM_SCOPED_TRACE_END();
         if (res != WMError::WM_OK) {
             WLOGFE("Minimize other structured window failed");
+            return res;
         }
     }
-    return res;
+    StopBootAnimationIfNeed(node->GetWindowType());
+    return WMError::WM_OK;
 }
 
 WMError WindowController::RemoveWindowNode(uint32_t windowId)
@@ -313,6 +316,14 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
     WLOGFI("Finish ProcessDisplayChange");
 }
 
+void WindowController::StopBootAnimationIfNeed(WindowType type) const
+{
+    if (WindowType::WINDOW_TYPE_DESKTOP == type) {
+        WLOGFD("stop boot animation");
+        system::SetParameter("persist.window.boot.inited", "1");
+    }
+}
+
 WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
@@ -399,6 +410,17 @@ WMError WindowController::ProcessWindowTouchedEvent(uint32_t windowId)
 void WindowController::MinimizeAllAppWindows(DisplayId displayId)
 {
     windowRoot_->MinimizeAllAppWindows(displayId);
+}
+
+WMError WindowController::MaxmizeWindow(uint32_t windowId)
+{
+    WMError ret = SetWindowMode(windowId, WindowMode::WINDOW_MODE_FULLSCREEN);
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+    ret = windowRoot_->MaxmizeWindow(windowId);
+    FlushWindowInfo(windowId);
+    return ret;
 }
 
 WMError WindowController::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)

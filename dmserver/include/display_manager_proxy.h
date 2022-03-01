@@ -39,7 +39,7 @@ public:
     DMError DestroyVirtualScreen(ScreenId screenId) override;
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
     bool SetOrientation(ScreenId screenId, Orientation orientation) override;
-    std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) override;

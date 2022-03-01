@@ -38,6 +38,10 @@ namespace OHOS::AbilityRuntime {
     class Context;
 }
 
+namespace OHOS::Ace {
+    class UIContent;
+}
+
 namespace OHOS {
 namespace Rosen {
 class RSSurfaceNode;
@@ -125,6 +129,7 @@ public:
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed = false) = 0;
     virtual std::string GetContentInfo() = 0;
+    virtual Ace::UIContent* GetUIContent() const = 0;
 
     virtual bool IsDecorEnable() const = 0;
     virtual WMError Maximize() = 0;
