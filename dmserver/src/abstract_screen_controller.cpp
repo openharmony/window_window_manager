@@ -789,13 +789,13 @@ bool AbstractScreenController::MakeExpand(std::vector<ScreenId> screenIds, std::
     if (group == nullptr) {
         return false;
     }
-    bool filterMirroredScreen = group->combination_ == ScreenCombination::SCREEN_EXPAND;
-    ChangeScreenGroup(group, screenIds, startPoints, filterMirroredScreen, ScreenCombination::SCREEN_MIRROR);
+    bool filterExpandScreen = group->combination_ == ScreenCombination::SCREEN_EXPAND;
+    ChangeScreenGroup(group, screenIds, startPoints, filterExpandScreen, ScreenCombination::SCREEN_EXPAND);
     WLOGFI("MakeExpand success");
     return true;
 }
 
-void AbstractScreenController::CancelMakeMirrorOrExpand(std::vector<ScreenId> screens)
+void AbstractScreenController::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 {
     if (screens.empty()) {
         return;

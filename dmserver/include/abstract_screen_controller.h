@@ -64,7 +64,7 @@ public:
     void UpdateRSTree(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     bool MakeMirror(ScreenId, std::vector<ScreenId> screens);
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
-    void CancelMakeMirrorOrExpand(std::vector<ScreenId> screens);
+    void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
     void DumpScreenInfo() const;
     void DumpScreenGroupInfo() const;
 

@@ -229,7 +229,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 WLOGE("fail to receive screens in stub.");
                 break;
             }
-            CancelMakeMirrorOrExpand(screenId);
+            RemoveVirtualScreenFromGroup(screenId);
             break;
         }
         case TRANS_ID_SET_SCREEN_ACTIVE_MODE: {

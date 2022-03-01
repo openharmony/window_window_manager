@@ -852,7 +852,7 @@ ScreenId DisplayManagerProxy::MakeExpand(std::vector<ScreenId> screenId, std::ve
     return static_cast<ScreenId>(reply.ReadUint64());
 }
 
-void DisplayManagerProxy::CancelMakeMirrorOrExpand(std::vector<ScreenId> screens)
+void DisplayManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
