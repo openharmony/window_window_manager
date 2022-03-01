@@ -264,23 +264,14 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
-        property_->SetWindowMode(mode);
+        UpdateMode(mode);
     } else if (state_ == WindowState::STATE_SHOWN) {
-        property_->SetWindowMode(mode);
         WMError ret = SingletonContainer::Get<WindowAdapter>().SetWindowMode(property_->GetWindowId(), mode);
-        if (ret == WMError::WM_OK) {
-            WLOGFD("notify window mode changed");
-            for (auto& listener : windowChangeListeners_) {
-                if (listener != nullptr) {
-                    listener->OnModeChange(mode);
-                }
-            }
-            if (uiContent_ != nullptr) {
-                uiContent_->UpdateWindowMode(mode);
-                WLOGFI("notify uiContent window mode change end");
-            }
+        if (ret != WMError::WM_OK) {
+            return ret;
         }
-        return ret;
+        // set client window mode if success.
+        UpdateMode(mode);
     }
     if (property_->GetWindowMode() != mode) {
         WLOGFE("set window mode filed! id: %{public}d", property_->GetWindowId());
