@@ -40,7 +40,7 @@ public:
     };
 
     sptr<Screen> GetScreenById(ScreenId screenId);
-    sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
+    sptr<ScreenGroup> GetScreenGroup(ScreenId groupId);
     std::vector<sptr<Screen>> GetAllScreens();
 
     bool RegisterScreenListener(sptr<IScreenListener> listener);

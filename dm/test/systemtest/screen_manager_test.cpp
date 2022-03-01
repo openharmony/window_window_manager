@@ -365,7 +365,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager11, Function | MediumTest | Level2)
 }
 
 /**
- * @tc.name: ScreenManager11
+ * @tc.name: ScreenManager12
  * @tc.desc: Screen orientatin.
  * @tc.type: FUNC
  */

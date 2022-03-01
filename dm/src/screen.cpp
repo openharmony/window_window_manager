@@ -48,6 +48,11 @@ bool Screen::IsGroup() const
     return pImpl_->GetScreenInfo()->GetCanHasChild();
 }
 
+const std::string& Screen::GetName() const
+{
+    return pImpl_->GetScreenInfo()->GetName();
+}
+
 ScreenId Screen::GetId() const
 {
     return pImpl_->GetScreenInfo()->GetScreenId();
@@ -103,6 +108,12 @@ Orientation Screen::GetOrientation() const
 {
     UpdateScreenInfo();
     return pImpl_->GetScreenInfo()->GetOrientation();
+}
+
+bool Screen::IsReal() const
+{
+    UpdateScreenInfo();
+    return pImpl_->GetScreenInfo()->GetType() == ScreenType::REAL;
 }
 
 bool Screen::SetOrientation(Orientation orientation) const

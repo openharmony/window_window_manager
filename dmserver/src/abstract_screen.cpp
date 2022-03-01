@@ -25,8 +25,9 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractScreenGroup"};
 }
 
-AbstractScreen::AbstractScreen(ScreenId dmsId, ScreenId rsId)
-    : dmsId_(dmsId), rsId_(rsId), screenController_(DisplayManagerService::GetInstance().abstractScreenController_)
+AbstractScreen::AbstractScreen(const std::string& name, ScreenId dmsId, ScreenId rsId)
+    : name_(name), dmsId_(dmsId), rsId_(rsId),
+    screenController_(DisplayManagerService::GetInstance().abstractScreenController_)
 {
 }
 
@@ -189,6 +190,7 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
     info->canHasChild_ = canHasChild_;
     info->rotation_ = rotation_;
     info->orientation_ = orientation_;
+    info->type_ = type_;
     info->modeId_ = activeIdx_;
     info->modes_ = modes_;
 }
@@ -201,7 +203,11 @@ bool AbstractScreen::SetOrientation(Orientation orientation)
 
 Rotation AbstractScreen::CalcRotation(Orientation orientation) const
 {
-    sptr<SupportedScreenModes> info = AbstractScreen::GetActiveScreenMode();
+    if (activeIdx_ < 0 || activeIdx_ >= modes_.size()) {
+        WLOGE("active mode index is wrong: %{public}d", activeIdx_);
+        return Rotation::ROTATION_0;
+    }
+    sptr<SupportedScreenModes> info = modes_[activeIdx_];
     // virtical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = info->width_ < info->height_;
     switch (orientation) {
@@ -228,7 +234,7 @@ Rotation AbstractScreen::CalcRotation(Orientation orientation) const
 }
 
 AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId, ScreenCombination combination)
-    : AbstractScreen(dmsId, rsId), combination_(combination)
+    : AbstractScreen("", dmsId, rsId), combination_(combination)
 {
     type_ = ScreenType::UNDEFINE;
     canHasChild_ = true;

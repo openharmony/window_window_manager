@@ -22,8 +22,11 @@ namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
 using ScreenId = uint64_t;
-static constexpr DisplayId DISPLAY_ID_INVALD = -1ULL;
-static constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+namespace {
+    constexpr DisplayId DISPLAY_ID_INVALD = -1ULL;
+    constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+    const static std::string DEFAULT_SCREEN_NAME = "buildIn";
+}
 
 enum class PowerStateChangeReason : uint32_t {
     POWER_BUTTON,

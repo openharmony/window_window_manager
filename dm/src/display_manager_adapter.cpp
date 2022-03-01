@@ -49,11 +49,11 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfoByScreenId(ScreenId scree
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId)
 {
     if (!InitDMSProxy()) {
-        WLOGFE("displayManagerAdapter::GetDisplaySnapshot: InitDMSProxy failed!");
+        WLOGFE("GetDisplaySnapshot: init dms proxy failed!");
         return nullptr;
     }
 
-    return displayManagerServiceProxy_->GetDispalySnapshot(displayId);
+    return displayManagerServiceProxy_->GetDisplaySnapshot(displayId);
 }
 
 DMError ScreenManagerAdapter::GetScreenSupportedColorGamuts(ScreenId screenId,
