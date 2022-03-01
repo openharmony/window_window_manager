@@ -492,6 +492,27 @@ void WindowManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
     }
 }
 
+WMError WindowManagerProxy::MaxmizeWindow(uint32_t windowId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(TRANS_ID_MAXMIZE_WINDOW, data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
+
 WMError WindowManagerProxy::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode)
 {
     MessageParcel data;
