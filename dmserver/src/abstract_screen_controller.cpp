@@ -336,11 +336,21 @@ sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<A
         return nullptr;
     }
     sptr<AbstractScreenGroup> screenGroup = iter->second;
+    if (!RemoveChildFromGroup(screen, screenGroup)) {
+        return nullptr;
+    }
+    DisplayManagerAgentController::GetInstance().OnScreenGroupChange(
+        screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
+    return screenGroup;
+}
+
+bool AbstractScreenController::RemoveChildFromGroup(sptr<AbstractScreen> screen, sptr<AbstractScreenGroup> screenGroup)
+{
     bool res = screenGroup->RemoveChild(screen);
     if (!res) {
         WLOGE("RemoveFromGroupLocked. remove screen:%{public}" PRIu64" failed from screenGroup:%{public}" PRIu64".",
-            screen->dmsId_, groupDmsId);
-        return nullptr;
+              screen->dmsId_, screen->groupDmsId_);
+        return false;
     }
     if (screen->dmsId_ == screenGroup->mirrorScreenId_) {
         // Todo: if mirror screen removed and it is SCREEN_MIRROR type, then should make mirror in this group.
@@ -351,9 +361,7 @@ sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<A
         dmsScreenGroupMap_.erase(screenGroup->dmsId_);
         dmsScreenMap_.erase(screenGroup->dmsId_);
     }
-    DisplayManagerAgentController::GetInstance().OnScreenGroupChange(
-        screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
-    return screenGroup;
+    return true;
 }
 
 bool AbstractScreenController::CheckScreenInScreenGroup(sptr<AbstractScreen> screen) const
@@ -719,7 +727,7 @@ void AbstractScreenController::ChangeScreenGroup(sptr<AbstractScreenGroup> group
         auto originGroup = GetAbstractScreenGroup(screen->groupDmsId_);
         bool removeChildRes = false;
         if (originGroup != nullptr) {
-            removeChildRes = originGroup->RemoveChild(screen);
+            removeChildRes = RemoveChildFromGroup(screen, originGroup);
             abstractScreenCallback_->onDisconnect_(screen);
         }
         addChildPos.emplace_back(startPoints[i]);
@@ -785,6 +793,32 @@ bool AbstractScreenController::MakeExpand(std::vector<ScreenId> screenIds, std::
     ChangeScreenGroup(group, screenIds, startPoints, filterMirroredScreen, ScreenCombination::SCREEN_MIRROR);
     WLOGFI("MakeExpand success");
     return true;
+}
+
+void AbstractScreenController::CancelMakeMirrorOrExpand(std::vector<ScreenId> screens)
+{
+    if (screens.empty()) {
+        return;
+    }
+    std::vector<sptr<ScreenInfo>> removeFromGroup;
+    for (ScreenId screenId : screens) {
+        auto screen = GetAbstractScreen(screenId);
+        if (screen->type_ != ScreenType::VIRTUAL) {
+            continue;
+        }
+        auto originGroup = GetAbstractScreenGroup(screen->groupDmsId_);
+        if (originGroup == nullptr) {
+            continue;
+        }
+        if (!originGroup->HasChild(screenId)) {
+            continue;
+        }
+        removeFromGroup.emplace_back(screen->ConvertToScreenInfo());
+        RemoveChildFromGroup(screen, originGroup);
+        abstractScreenCallback_->onDisconnect_(screen);
+    }
+    DisplayManagerAgentController::GetInstance().
+        OnScreenGroupChange(removeFromGroup, ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
 }
 
 void AbstractScreenController::DumpScreenInfo() const

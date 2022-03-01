@@ -852,6 +852,31 @@ ScreenId DisplayManagerProxy::MakeExpand(std::vector<ScreenId> screenId, std::ve
     return static_cast<ScreenId>(reply.ReadUint64());
 }
 
+void DisplayManagerProxy::CancelMakeMirrorOrExpand(std::vector<ScreenId> screens)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("cancel make mirror or expand fail: remote is null");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("cancel make mirror or expand fail: WriteInterfaceToken failed");
+        return;
+    }
+    bool res = data.WriteUInt64Vector(screens);
+    if (!res) {
+        WLOGFE("cancel make mirror or expand fail: write screens failed.");
+        return;
+    }
+    if (remote->SendRequest(TRANS_ID_SCREEN_MAKE_MIRROR_OR_EXPAND_CANCELED, data, reply, option) != ERR_NONE) {
+        WLOGFW("cancel make mirror or expand fail: SendRequest failed");
+    }
+}
+
 bool DisplayManagerProxy::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
     sptr<IRemoteObject> remote = Remote();
