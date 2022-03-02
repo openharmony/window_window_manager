@@ -1304,9 +1304,14 @@ void WindowImpl::SetDefaultOption()
             break;
         }
         case WindowType::WINDOW_TYPE_TOAST:
-        case WindowType::WINDOW_TYPE_SEARCHING_BAR:
+        case WindowType::WINDOW_TYPE_FLOAT:
+        case WindowType::WINDOW_TYPE_SEARCHING_BAR: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            break;
+        }
         case WindowType::WINDOW_TYPE_VOLUME_OVERLAY: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetFocusable(false);
             break;
         }
         case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT: {
