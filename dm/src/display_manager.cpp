@@ -21,6 +21,7 @@
 #include "display_manager_adapter.h"
 #include "display_manager_agent_default.h"
 #include "dm_common.h"
+#include "screen_manager.h"
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
 
@@ -537,11 +538,10 @@ bool DisplayManager::SuspendEnd()
 
 bool DisplayManager::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
 {
-    // TODO: should get all screen ids
     WLOGFI("state:%{public}u, reason:%{public}u", state, reason);
-    ScreenId defaultId = GetDefaultDisplayId();
-    if (defaultId == DISPLAY_ID_INVALD) {
-        WLOGFI("defaultId invalid!");
+    auto screens = ScreenManager::GetInstance().GetAllScreens();
+    if (screens.empty()) {
+        WLOGFW("No screen found !");
         return false;
     }
     ScreenPowerStatus status;
@@ -559,7 +559,11 @@ bool DisplayManager::SetScreenPowerForAll(DisplayPowerState state, PowerStateCha
             return false;
         }
     }
-    RSInterfaces::GetInstance().SetScreenPowerStatus(defaultId, status);
+    for (auto& screen : screens) {
+        if (screen != nullptr && screen->IsReal()) {
+            RSInterfaces::GetInstance().SetScreenPowerStatus(screen->GetId(), status);
+        }
+    }
     WLOGFI("SetScreenPowerStatus end");
     return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenPowerForAll(state, reason);
 }
