@@ -484,20 +484,17 @@ void WindowNodeContainer::NotifySystemBarDismiss(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
     SystemBarRegionTints tints;
-    bool isChanged = false;
     auto& sysBarPropMapNode = node->GetSystemBarProperty();
     for (auto it : sysBarPropMapNode) {
-        it.second.enable_ = false;
         if (sysBarTintMap_[it.first].prop_.enable_) {
             sysBarTintMap_[it.first].prop_.enable_ = false;
-            isChanged = true;
+            it.second.enable_ = false;
+            node->SetSystemBarProperty(it.first, it.second);
             tints.emplace_back(sysBarTintMap_[it.first]);
             WLOGFI("system bar dismiss, type: %{public}d", static_cast<int32_t>(it.first));
         }
     }
-    if (isChanged) {
-        WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId_, tints);
-    }
+    WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId_, tints);
 }
 
 void WindowNodeContainer::NotifySystemBarTints()
