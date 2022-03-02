@@ -648,8 +648,8 @@ void WindowNodeContainer::DumpScreenWindowTree()
         Rect rect = node->GetLayoutRect();
         const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
             node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
-        WLOGI("DumpScreenWindowTree: %{public}10s %{public}5d %{public}4d %{public}4d %{public}4d %{public}4d " \
-            "[%{public}4d %{public}4d %{public}4d %{public}4d]",
+        WLOGI("DumpScreenWindowTree: %{public}10s %{public}5u %{public}4u %{public}4u %{public}4u %{public}4u " \
+            "[%{public}4d %{public}4d %{public}4u %{public}4u]",
             windowName.c_str(), node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
             node->GetWindowFlags(), --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
         return false;
@@ -862,8 +862,7 @@ void WindowNodeContainer::MinimizeWindowFromAbility(const sptr<WindowNode>& node
         WLOGFW("Target abilityToken is nullptr, windowId:%{public}u", node->GetWindowId());
         return;
     }
-    AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(node->abilityToken_,
-        static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
+    AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(node->abilityToken_, true);
 }
 
 WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(const std::vector<uint32_t> &exceptionalIds,
