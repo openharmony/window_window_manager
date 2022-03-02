@@ -34,7 +34,6 @@ void JsWindowListener::AddCallback(NativeValue* jsListenerObject)
     jsCallBack_.push_back(std::move(callbackRef));
     WLOGFI("JsWindowListener::AddCallback success jsCallBack_ size: %{public}d!",
         static_cast<uint32_t>(jsCallBack_.size()));
-    return;
 }
 
 void JsWindowListener::RemoveAllCallback()
@@ -54,7 +53,6 @@ void JsWindowListener::RemoveCallback(NativeValue* jsListenerObject)
     }
     WLOGFI("JsWindowListener::RemoveCallback success jsCallBack_ size: %{public}d!",
         static_cast<uint32_t>(jsCallBack_.size()));
-    return;
 }
 
 void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
