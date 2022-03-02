@@ -23,6 +23,8 @@
 #include <napi/native_api.h>
 #include <napi/native_common.h>
 #include <napi/native_node_api.h>
+#include "js_native_api.h"
+#include "js_native_api_types.h"
 #include "wm_common.h"
 #include "window_manager_hilog.h"
 
@@ -54,11 +56,15 @@ napi_status SetMemberInt32(napi_env env, napi_value result, const char *key, int
 napi_status SetMemberUint32(napi_env env, napi_value result, const char *key, uint32_t value);
 napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key);
 
+void ProcessPromise(napi_env env, Rosen::WMError wret, napi_deferred deferred, napi_value result[]);
+void ProcessCallback(napi_env env, napi_ref ref, napi_value result[]);
+
 template<typename ParamT>
 napi_value CreatePromise(napi_env env,
                          std::string funcname,
                          void(*async)(napi_env env, std::unique_ptr<ParamT>& param),
                          napi_value(*resolve)(napi_env env, std::unique_ptr<ParamT>& param),
+                         napi_ref& callbackRef,
                          std::unique_ptr<ParamT>& param)
 {
     struct AsyncCallbackInfo {
@@ -67,20 +73,27 @@ napi_value CreatePromise(napi_env env,
         void (*async)(napi_env env, std::unique_ptr<ParamT>& param);
         napi_value (*resolve)(napi_env env, std::unique_ptr<ParamT>& param);
         std::unique_ptr<ParamT> param;
+        napi_ref ref;
     };
 
     AsyncCallbackInfo *info = new AsyncCallbackInfo {
         .async = async,
         .resolve = resolve,
         .param = std::move(param),
+        .ref = callbackRef,
     };
 
-    napi_value resourceName;
+    napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_create_string_latin1(env,
         funcname.c_str(), NAPI_AUTO_LENGTH, &resourceName));
 
-    napi_value promise;
-    NAPI_CALL(env, napi_create_promise(env, &info->deferred, &promise));
+    // decide use promise or callback
+    napi_value result = nullptr;
+    if (info->ref == nullptr) {
+        NAPI_CALL(env, napi_create_promise(env, &info->deferred, &result));
+    } else {
+        NAPI_CALL(env, napi_get_undefined(env, &result));
+    }
 
     auto asyncFunc = [](napi_env env, void *data) {
         AsyncCallbackInfo *info = reinterpret_cast<AsyncCallbackInfo *>(data);
@@ -91,21 +104,16 @@ napi_value CreatePromise(napi_env env,
 
     auto completeFunc = [](napi_env env, napi_status status, void *data) {
         AsyncCallbackInfo *info = reinterpret_cast<AsyncCallbackInfo *>(data);
-        napi_value resolveValue;
+        napi_value result[2] = {0}; // 2: callback func input number, also reused by Promise
+        napi_get_undefined(env, &result[0]);
+        napi_get_undefined(env, &result[1]);
         if (info->resolve) {
-            resolveValue = info->resolve(env, info->param);
-        } else {
-            napi_get_undefined(env, &resolveValue);
+            result[1] = info->resolve(env, info->param);
         }
-
         if (info->deferred) {
-            if (info->param->wret == OHOS::Rosen::WMError::WM_OK) {
-                GNAPI_LOG("CreatePromise, resolve");
-                napi_resolve_deferred(env, info->deferred, resolveValue);
-            } else {
-                GNAPI_LOG("CreatePromise, reject");
-                napi_reject_deferred(env, info->deferred, resolveValue);
-            }
+            ProcessPromise(env, info->param->wret, info->deferred, result);
+        } else {
+            ProcessCallback(env, info->ref, result);
         }
         napi_delete_async_work(env, info->asyncWork);
         delete info;
@@ -115,7 +123,7 @@ napi_value CreatePromise(napi_env env,
         reinterpret_cast<void *>(info), &info->asyncWork));
 
     NAPI_CALL(env, napi_queue_async_work(env, info->asyncWork));
-    return promise;
+    return result;
 };
 } // namespace OHOS
 
