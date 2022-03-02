@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,6 @@ namespace {
  * @tc.name: IsSupportWideGamut01
  * @tc.desc: IsSupportWideGamut
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(WindowGamutTest, IsSupportWideGamut01, Function | MediumTest | Level3)
 {
@@ -79,7 +78,6 @@ HWTEST_F(WindowGamutTest, IsSupportWideGamut01, Function | MediumTest | Level3)
  * @tc.name: GetColorSpace01
  * @tc.desc: Get ColorSpace
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(WindowGamutTest, GetColorSpace01, Function | MediumTest | Level3)
 {
@@ -94,7 +92,6 @@ HWTEST_F(WindowGamutTest, GetColorSpace01, Function | MediumTest | Level3)
  * @tc.name: SetColorSpace01
  * @tc.desc: Set ColorSpace, valid param
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(WindowGamutTest, SetColorSpace01, Function | MediumTest | Level3)
 {
@@ -130,7 +127,6 @@ HWTEST_F(WindowGamutTest, SetColorSpace01, Function | MediumTest | Level3)
  * @tc.name: SetColorSpace02
  * @tc.desc: Set ColorSpace, invalid param
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(WindowGamutTest, SetColorSpace02, Function | MediumTest | Level3)
 {

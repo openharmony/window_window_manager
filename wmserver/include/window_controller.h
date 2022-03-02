@@ -64,7 +64,7 @@ private:
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
     std::atomic<uint32_t> windowId_ { INVALID_WINDOW_ID };
-    // TODO: Remove 'sysBarWinId_' after SystemUI resize 'systembar'
+    // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
     std::unordered_map<WindowType, uint32_t> sysBarWinId_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     INVALID_WINDOW_ID },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, INVALID_WINDOW_ID },

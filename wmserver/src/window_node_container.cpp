@@ -1021,7 +1021,7 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, bool r
         layoutPolicy_->Launch();
         DumpScreenWindowTree();
     } else {
-        WLOGFI("Curret layout mode is allready: %{public}d", static_cast<uint32_t>(dstMode));
+        WLOGFI("Current layout mode is already: %{public}d", static_cast<uint32_t>(dstMode));
     }
     if (reorder) {
         if (!pairedWindowMap_.empty()) {

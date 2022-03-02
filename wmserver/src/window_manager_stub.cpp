@@ -129,7 +129,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             AvoidAreaType avoidAreaType = static_cast<AvoidAreaType>(data.ReadUint32());
             std::vector<Rect> avoidArea = GetAvoidAreaByType(windowId, avoidAreaType);
 
-            // prepare relpy data
+            // prepare reply data
             uint32_t avoidAreaNum = static_cast<uint32_t>(avoidArea.size());
             reply.WriteUint32(avoidAreaNum);
             for (uint32_t i = 0; i < avoidAreaNum; ++i) {

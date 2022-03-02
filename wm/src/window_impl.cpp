@@ -988,7 +988,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             return;
         }
         if (!uiContent_->ProcessKeyEvent(keyEvent)) {
-            WLOGI("ConsumeKeyEvent no comsumer window exit");
+            WLOGI("ConsumeKeyEvent no consumer window exit");
         }
     }
 }
@@ -1108,7 +1108,7 @@ void WindowImpl::ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& poin
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
         case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
             EndMoveOrDragWindow(pointId);
-            WLOGFI("[Point Up/Cancle]: windowId: %{public}u, action: %{public}d, startMove: %{public}d, "
+            WLOGFI("[Point Up/Cancel]: windowId: %{public}u, action: %{public}d, startMove: %{public}d, "
                    "startDrag: %{public}d", GetWindowId(), action, startMoveFlag_, startDragFlag_);
             break;
         }
@@ -1149,7 +1149,7 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
         WLOGE("ConsumePointerEvent uiContent is nullptr, windowId: %{public}u", GetWindowId());
         return;
     }
-    WLOGFI("Transer pointer event to ACE");
+    WLOGFI("Transfer pointer event to ACE");
     uiContent_->ProcessPointerEvent(pointerEvent);
 }
 

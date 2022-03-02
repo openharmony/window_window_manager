@@ -51,7 +51,6 @@ namespace {
  * @tc.name: CreateWindow01
  * @tc.desc: Create window with no parentName
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, CreateWindow01, Function | SmallTest | Level2)
 {
@@ -70,7 +69,6 @@ HWTEST_F(WindowImplTest, CreateWindow01, Function | SmallTest | Level2)
  * @tc.name: CreateWindow02
  * @tc.desc: Create window with no parentName and no abilityContext
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, CreateWindow02, Function | SmallTest | Level2)
 {
@@ -86,7 +84,6 @@ HWTEST_F(WindowImplTest, CreateWindow02, Function | SmallTest | Level2)
  * @tc.name: CreateWindow03
  * @tc.desc: Create window with illegal parentName
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, CreateWindow03, Function | SmallTest | Level2)
 {
@@ -100,7 +97,6 @@ HWTEST_F(WindowImplTest, CreateWindow03, Function | SmallTest | Level2)
  * @tc.name: CreateWindow04
  * @tc.desc: Create window with repeated windowName
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, CreateWindow04, Function | SmallTest | Level2)
 {
@@ -115,7 +111,6 @@ HWTEST_F(WindowImplTest, CreateWindow04, Function | SmallTest | Level2)
  * @tc.name: CreateWindow05
  * @tc.desc: Create window with exist parentName
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, CreateWindow05, Function | SmallTest | Level2)
 {
@@ -134,7 +129,6 @@ HWTEST_F(WindowImplTest, CreateWindow05, Function | SmallTest | Level2)
  * @tc.name: CreateWindow06
  * @tc.desc: Create window with no default option, get and check Property
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, CreateWindow06, Function | SmallTest | Level2)
 {
@@ -165,7 +159,6 @@ HWTEST_F(WindowImplTest, CreateWindow06, Function | SmallTest | Level2)
  * @tc.name: CreateWindow07
  * @tc.desc: Create window with no parentName and abilityContext
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, CreateWindow07, Function | SmallTest | Level2)
 {
@@ -182,7 +175,6 @@ HWTEST_F(WindowImplTest, CreateWindow07, Function | SmallTest | Level2)
  * @tc.name: CreateWindow08
  * @tc.desc: Mock SaveAbilityToken return WM_ERROR_NULLPTR, create window with no parentName and abilityContext
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, CreateWindow08, Function | SmallTest | Level2)
 {
@@ -199,7 +191,6 @@ HWTEST_F(WindowImplTest, CreateWindow08, Function | SmallTest | Level2)
  * @tc.name: FindWindow01
  * @tc.desc: Find one exit window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, FindWindow01, Function | SmallTest | Level2)
 {
@@ -210,7 +201,6 @@ HWTEST_F(WindowImplTest, FindWindow01, Function | SmallTest | Level2)
  * @tc.name: FindWindow02
  * @tc.desc: Add another window, find both two windows
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, FindWindow02, Function | SmallTest | Level2)
 {
@@ -233,7 +223,6 @@ HWTEST_F(WindowImplTest, FindWindow02, Function | SmallTest | Level2)
  * @tc.name: FindWindow03
  * @tc.desc: Find one no exit window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, FindWindow03, Function | SmallTest | Level2)
 {
@@ -244,7 +233,6 @@ HWTEST_F(WindowImplTest, FindWindow03, Function | SmallTest | Level2)
  * @tc.name: FindWindow04
  * @tc.desc: Find window with empty name
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, FindWindow04, Function | SmallTest | Level2)
 {
@@ -255,7 +243,6 @@ HWTEST_F(WindowImplTest, FindWindow04, Function | SmallTest | Level2)
  * @tc.name: FindWindow05
  * @tc.desc: Find one destroyed window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, FindWindow05, Function | SmallTest | Level2)
 {
@@ -266,7 +253,6 @@ HWTEST_F(WindowImplTest, FindWindow05, Function | SmallTest | Level2)
  * @tc.name: SetWindowType01
  * @tc.desc: SetWindowType
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, SetWindowType01, Function | SmallTest | Level2)
 {
@@ -277,7 +263,6 @@ HWTEST_F(WindowImplTest, SetWindowType01, Function | SmallTest | Level2)
  * @tc.name: SetWindowMode01
  * @tc.desc: SetWindowMode
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, SetWindowMode01, Function | SmallTest | Level2)
 {
@@ -288,7 +273,6 @@ HWTEST_F(WindowImplTest, SetWindowMode01, Function | SmallTest | Level2)
  * @tc.name: SetWindowMode02
  * @tc.desc: Set window mode to split primary
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowImplTest, SetWindowMode02, Function | SmallTest | Level3)
 {
@@ -311,7 +295,6 @@ HWTEST_F(WindowImplTest, SetWindowMode02, Function | SmallTest | Level3)
  * @tc.name: SetWindowMode03
  * @tc.desc: Set window mode to split secondary
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowImplTest, SetWindowMode03, Function | SmallTest | Level3)
 {
@@ -334,7 +317,6 @@ HWTEST_F(WindowImplTest, SetWindowMode03, Function | SmallTest | Level3)
  * @tc.name: SetWindowMode04
  * @tc.desc: Set window mode to floating
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowImplTest, SetWindowMode04, Function | SmallTest | Level3)
 {
@@ -357,7 +339,6 @@ HWTEST_F(WindowImplTest, SetWindowMode04, Function | SmallTest | Level3)
  * @tc.name: SetWindowMode05
  * @tc.desc: Set window mode to pip
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowImplTest, SetWindowMode05, Function | SmallTest | Level3)
 {
@@ -379,7 +360,6 @@ HWTEST_F(WindowImplTest, SetWindowMode05, Function | SmallTest | Level3)
  * @tc.name: ShowHideWindow01
  * @tc.desc: Show and hide window with add and remove window ok
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, ShowHideWindow01, Function | SmallTest | Level2)
 {
@@ -394,7 +374,6 @@ HWTEST_F(WindowImplTest, ShowHideWindow01, Function | SmallTest | Level2)
  * @tc.name: ShowHideWindow02
  * @tc.desc: Show window with add window WM_ERROR_SAMGR
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, ShowHideWindow02, Function | SmallTest | Level2)
 {
@@ -407,7 +386,6 @@ HWTEST_F(WindowImplTest, ShowHideWindow02, Function | SmallTest | Level2)
  * @tc.name: ShowHideWindow03
  * @tc.desc: Show window with add window WM_ERROR_IPC_FAILED
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, ShowHideWindow03, Function | SmallTest | Level3)
 {
@@ -420,7 +398,6 @@ HWTEST_F(WindowImplTest, ShowHideWindow03, Function | SmallTest | Level3)
  * @tc.name: ShowHideWindow04
  * @tc.desc: Show window with add window OK & Hide window with remove window WM_ERROR_SAMGR
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, ShowHideWindow04, Function | SmallTest | Level3)
 {
@@ -435,7 +412,6 @@ HWTEST_F(WindowImplTest, ShowHideWindow04, Function | SmallTest | Level3)
  * @tc.name: ShowHideWindow05
  * @tc.desc: Hide window with remove window WM_ERROR_IPC_FAILED
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, ShowHideWindow05, Function | SmallTest | Level3)
 {
@@ -448,7 +424,6 @@ HWTEST_F(WindowImplTest, ShowHideWindow05, Function | SmallTest | Level3)
  * @tc.name: ShowHideWindow06
  * @tc.desc: Hide window with remove window OK
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowImplTest, ShowHideWindow06, Function | SmallTest | Level3)
 {
@@ -461,7 +436,6 @@ HWTEST_F(WindowImplTest, ShowHideWindow06, Function | SmallTest | Level3)
  * @tc.name: SetSystemBarProperty01
  * @tc.desc: SetSystemBarProperty with default param
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImplTest, SetSystemBarProperty01, Function | SmallTest | Level3)
 {
@@ -474,7 +448,6 @@ HWTEST_F(WindowImplTest, SetSystemBarProperty01, Function | SmallTest | Level3)
  * @tc.name: SetSystemBarProperty02
  * @tc.desc: SetSystemBarProperty with adapter return WM_ERROR_SAMGR
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImplTest, SetSystemBarProperty02, Function | SmallTest | Level3)
 {
@@ -493,7 +466,6 @@ HWTEST_F(WindowImplTest, SetSystemBarProperty02, Function | SmallTest | Level3)
  * @tc.name: SetSystemBarProperty03
  * @tc.desc: SetSystemBarProperty to invalid window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImplTest, SetSystemBarProperty03, Function | SmallTest | Level3)
 {
@@ -509,7 +481,6 @@ HWTEST_F(WindowImplTest, SetSystemBarProperty03, Function | SmallTest | Level3)
  * @tc.name: GetSystemBarPropertyByType01
  * @tc.desc: GetSystemBarPropertyByType with exist key
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImplTest, GetSystemBarPropertyByType01, Function | SmallTest | Level3)
 {
@@ -529,7 +500,6 @@ HWTEST_F(WindowImplTest, GetSystemBarPropertyByType01, Function | SmallTest | Le
  * @tc.name: GetSystemBarPropertyByType02
  * @tc.desc: GetSystemBarPropertyByType with nonexist key
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImplTest, GetSystemBarPropertyByType02, Function | SmallTest | Level3)
 {
@@ -549,7 +519,6 @@ HWTEST_F(WindowImplTest, GetSystemBarPropertyByType02, Function | SmallTest | Le
  * @tc.name: GetSystemBarPropertyByType03
  * @tc.desc: GetSystemBarPropertyByType with not systemBar type
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImplTest, GetSystemBarPropertyByType03, Function | SmallTest | Level3)
 {
@@ -569,7 +538,6 @@ HWTEST_F(WindowImplTest, GetSystemBarPropertyByType03, Function | SmallTest | Le
  * @tc.name: IsDecorEnable01
  * @tc.desc: IsDecorEnable default value is false
  * @tc.type: FUNC
- * @tc.require: AR000GGTVB
  */
 HWTEST_F(WindowImplTest, IsDecorEnable01, Function | SmallTest | Level3)
 {
@@ -580,7 +548,6 @@ HWTEST_F(WindowImplTest, IsDecorEnable01, Function | SmallTest | Level3)
  * @tc.name: Maximize01
  * @tc.desc: Maximize the main window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVB
  */
 HWTEST_F(WindowImplTest, Maximize01, Function | SmallTest | Level3)
 {
@@ -604,7 +571,6 @@ HWTEST_F(WindowImplTest, Maximize01, Function | SmallTest | Level3)
  * @tc.name: Maximize02
  * @tc.desc: Maximize the sub window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVB
  */
 HWTEST_F(WindowImplTest, Maximize02, Function | SmallTest | Level3)
 {
@@ -628,7 +594,6 @@ HWTEST_F(WindowImplTest, Maximize02, Function | SmallTest | Level3)
  * @tc.name: Recover01
  * @tc.desc: Recover the main window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVB
  */
 HWTEST_F(WindowImplTest, Recover01, Function | SmallTest | Level3)
 {
@@ -652,7 +617,6 @@ HWTEST_F(WindowImplTest, Recover01, Function | SmallTest | Level3)
  * @tc.name: Recover02
  * @tc.desc: Recover the sub window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVB
  */
 HWTEST_F(WindowImplTest, Recover02, Function | SmallTest | Level3)
 {
@@ -676,7 +640,6 @@ HWTEST_F(WindowImplTest, Recover02, Function | SmallTest | Level3)
  * @tc.name: Minimize01
  * @tc.desc: Minimize the main window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVB
  */
 HWTEST_F(WindowImplTest, Minimize01, Function | SmallTest | Level3)
 {
@@ -700,7 +663,6 @@ HWTEST_F(WindowImplTest, Minimize01, Function | SmallTest | Level3)
  * @tc.name: Minimize02
  * @tc.desc: Minimize the sub window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVB
  */
 HWTEST_F(WindowImplTest, Minimize02, Function | SmallTest | Level3)
 {
