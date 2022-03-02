@@ -111,12 +111,12 @@ public:
         return dstRect;
     }
 
-    static bool IsPointInWindow(int32_t pointPosX, int32_t pointPosY, Rect pointRect)
+    static bool IsPointInTargetRect(int32_t pointPosX, int32_t pointPosY, const Rect& targetRect)
     {
-        if ((pointPosX > pointRect.posX_) &&
-            (pointPosX < (pointRect.posX_ + static_cast<int32_t>(pointRect.width_))) &&
-            (pointPosY > pointRect.posY_) &&
-            (pointPosY < (pointRect.posY_ + static_cast<int32_t>(pointRect.height_)))) {
+        if ((pointPosX > targetRect.posX_) &&
+            (pointPosX < (targetRect.posX_ + static_cast<int32_t>(targetRect.width_))) &&
+            (pointPosY > targetRect.posY_) &&
+            (pointPosY < (targetRect.posY_ + static_cast<int32_t>(targetRect.height_)))) {
             return true;
         }
         return false;
