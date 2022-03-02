@@ -55,7 +55,6 @@ namespace {
  * @tc.name: WindowRect01
  * @tc.desc: SetWindowRect/GetWindowRect
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowOptionTest, WindowRect01, Function | SmallTest | Level2)
 {
@@ -73,7 +72,6 @@ HWTEST_F(WindowOptionTest, WindowRect01, Function | SmallTest | Level2)
  * @tc.name: WindowType01
  * @tc.desc: SetWindowType/GetWindowType
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowOptionTest, WindowType01, Function | SmallTest | Level2)
 {
@@ -86,7 +84,6 @@ HWTEST_F(WindowOptionTest, WindowType01, Function | SmallTest | Level2)
  * @tc.name: WindowMode01
  * @tc.desc: SetWindowMode/GetWindowMode
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowOptionTest, WindowMode01, Function | SmallTest | Level2)
 {
@@ -99,7 +96,6 @@ HWTEST_F(WindowOptionTest, WindowMode01, Function | SmallTest | Level2)
  * @tc.name: WindowMode02
  * @tc.desc: SetWindowMode/GetWindowMode
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowOptionTest, WindowMode02, Function | SmallTest | Level2)
 {
@@ -113,7 +109,6 @@ HWTEST_F(WindowOptionTest, WindowMode02, Function | SmallTest | Level2)
  * @tc.name: WindowMode03
  * @tc.desc: SetWindowMode/GetWindowMode
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowOptionTest, WindowMode03, Function | SmallTest | Level2)
 {
@@ -126,7 +121,6 @@ HWTEST_F(WindowOptionTest, WindowMode03, Function | SmallTest | Level2)
  * @tc.name: WindowMode04
  * @tc.desc: SetWindowMode/GetWindowMode
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowOptionTest, WindowMode04, Function | SmallTest | Level2)
 {
@@ -139,7 +133,6 @@ HWTEST_F(WindowOptionTest, WindowMode04, Function | SmallTest | Level2)
  * @tc.name: WindowMode05
  * @tc.desc: SetWindowMode/GetWindowMode
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowOptionTest, WindowMode05, Function | SmallTest | Level2)
 {
@@ -152,7 +145,6 @@ HWTEST_F(WindowOptionTest, WindowMode05, Function | SmallTest | Level2)
  * @tc.name: WindowMode06
  * @tc.desc: SetWindowMode/GetWindowMode
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowOptionTest, WindowMode06, Function | SmallTest | Level2)
 {
@@ -164,7 +156,6 @@ HWTEST_F(WindowOptionTest, WindowMode06, Function | SmallTest | Level2)
  * @tc.name: Focusable01
  * @tc.desc: SetFocusable/GetFocusable
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowOptionTest, Focusable01, Function | SmallTest | Level2)
 {
@@ -177,7 +168,6 @@ HWTEST_F(WindowOptionTest, Focusable01, Function | SmallTest | Level2)
  * @tc.name: Touchable01
  * @tc.desc: SetTouchable/GetTouchable
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowOptionTest, Touchable01, Function | SmallTest | Level2)
 {
@@ -190,7 +180,6 @@ HWTEST_F(WindowOptionTest, Touchable01, Function | SmallTest | Level2)
  * @tc.name: DisplayId01
  * @tc.desc: SetDisplayId/GetDisplayId
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowOptionTest, DisplayId01, Function | SmallTest | Level2)
 {
@@ -203,7 +192,6 @@ HWTEST_F(WindowOptionTest, DisplayId01, Function | SmallTest | Level2)
  * @tc.name: ParentName01
  * @tc.desc: SetParentName/GetParentName
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowOptionTest, ParentName01, Function | SmallTest | Level2)
 {
@@ -216,7 +204,6 @@ HWTEST_F(WindowOptionTest, ParentName01, Function | SmallTest | Level2)
  * @tc.name: WindowName01
  * @tc.desc: SetWindowName/GetWindowName
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowOptionTest, WindowName01, Function | SmallTest | Level2)
 {
@@ -229,7 +216,6 @@ HWTEST_F(WindowOptionTest, WindowName01, Function | SmallTest | Level2)
  * @tc.name: WindowFlag01
  * @tc.desc: SetWindowFlags/GetWindowFlags
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowOptionTest, WindowFlag01, Function | SmallTest | Level2)
 {
@@ -242,7 +228,6 @@ HWTEST_F(WindowOptionTest, WindowFlag01, Function | SmallTest | Level2)
  * @tc.name: WindowFlag02
  * @tc.desc: AddWindowFlag/GetWindowFlags
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowOptionTest, WindowFlag02, Function | SmallTest | Level2)
 {
@@ -255,7 +240,6 @@ HWTEST_F(WindowOptionTest, WindowFlag02, Function | SmallTest | Level2)
  * @tc.name: WindowFlag03
  * @tc.desc: AddWindowFlag/RemoveWindowFlag/GetWindowFlags
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowOptionTest, WindowFlag03, Function | SmallTest | Level2)
 {
@@ -270,7 +254,6 @@ HWTEST_F(WindowOptionTest, WindowFlag03, Function | SmallTest | Level2)
  * @tc.name: SetGetSystemBarProperty01
  * @tc.desc: SetSystemBarProperty with test param and get
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowOptionTest, SetGetSystemBarProperty01, Function | SmallTest | Level3)
 {
@@ -284,7 +267,6 @@ HWTEST_F(WindowOptionTest, SetGetSystemBarProperty01, Function | SmallTest | Lev
  * @tc.name: SetGetSystemBarProperty02
  * @tc.desc: SetSystemBarProperty with invalid type and get
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowOptionTest, SetGetSystemBarProperty02, Function | SmallTest | Level3)
 {
@@ -298,7 +280,6 @@ HWTEST_F(WindowOptionTest, SetGetSystemBarProperty02, Function | SmallTest | Lev
  * @tc.name: SetGetSystemBarProperty03
  * @tc.desc: GetSystemBarProperty with no set
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowOptionTest, SetGetSystemBarProperty03, Function | SmallTest | Level3)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,6 +130,10 @@ std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(Di
 
 void AbstractDisplayController::OnAbstractScreenConnect(sptr<AbstractScreen> absScreen)
 {
+    if (absScreen == nullptr) {
+        WLOGFE("absScreen is null");
+        return;
+    }
     WLOGI("connect new screen. id:%{public}" PRIu64"", absScreen->dmsId_);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     sptr<AbstractScreenGroup> group = absScreen->GetGroup();

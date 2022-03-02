@@ -210,10 +210,10 @@ napi_value MainFunc(napi_env env, napi_callback_info info)
         GNAPI_LOG("argv[0]'s type is not napi_object");
         return nullptr;
     } else {
-        GNAPI_LOG("argc number missmatch");
+        GNAPI_LOG("argc number mismatch");
         return nullptr;
     }
-    GNAPI_LOG("argc number missmatch");
+    GNAPI_LOG("argc number mismatch");
     return nullptr;
 }
 } // namespace save

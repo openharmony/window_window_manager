@@ -176,7 +176,7 @@ ohos_static_library("wm_unittest_common") {
   public_deps = [
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
 
-    # todo need delete it for abilitycontext
+    # need delete it for abilitycontext
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/ace/napi:ace_napi",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",

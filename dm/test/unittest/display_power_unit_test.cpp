@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,7 +70,6 @@ namespace {
  * @tc.name: register_display_power_event_listener_001
  * @tc.desc: call Register/UnregisterDisplayPowerEventListener with a valid listener and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_001, Function | SmallTest | Level2)
 {
@@ -91,7 +90,6 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_001, Functi
  * @tc.name: register_display_power_event_listener_002
  * @tc.desc: call Register/UnregisterDisplayPowerEventListener with nullptr and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_002, Function | SmallTest | Level2)
 {
@@ -111,7 +109,6 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_002, Functi
  * @tc.name: register_display_power_event_listener_003
  * @tc.desc: call Register/UnregisterDisplayPowerEventListener with ipc failed and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_003, Function | SmallTest | Level2)
 {
@@ -131,7 +128,6 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_003, Functi
  * @tc.name: unregister_display_power_event_listener_001
  * @tc.desc: call UnregisterDisplayPowerEventListener with a listener never registered and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_001, Function | SmallTest | Level2)
 {
@@ -146,7 +142,6 @@ HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_001, Func
  * @tc.name: unregister_display_power_event_listener_002
  * @tc.desc: call UnregisterDisplayPowerEventListener with nullptr and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_002, Function | SmallTest | Level2)
 {
@@ -161,7 +156,6 @@ HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_002, Func
  * @tc.name: wake_up_begin_001
  * @tc.desc: call WakeUpBegin and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, wake_up_begin_001, Function | SmallTest | Level2)
 {
@@ -179,7 +173,6 @@ HWTEST_F(DisplayPowerUnitTest, wake_up_begin_001, Function | SmallTest | Level2)
  * @tc.name: wake_up_end_001
  * @tc.desc: call WakeUpEnd and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, wake_up_end_001, Function | SmallTest | Level2)
 {
@@ -197,7 +190,6 @@ HWTEST_F(DisplayPowerUnitTest, wake_up_end_001, Function | SmallTest | Level2)
  * @tc.name: suspend_begin_001
  * @tc.desc: call SuspendBegin and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, suspend_begin_001, Function | SmallTest | Level2)
 {
@@ -215,7 +207,6 @@ HWTEST_F(DisplayPowerUnitTest, suspend_begin_001, Function | SmallTest | Level2)
 * @tc.name: suspend_end_001
 * @tc.desc: call SuspendEnd and check return value
 * @tc.type: FUNC
-* @tc.require:
 */
 HWTEST_F(DisplayPowerUnitTest, suspend_end_001, Function | SmallTest | Level2)
 {

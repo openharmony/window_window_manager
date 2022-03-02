@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -185,7 +185,6 @@ namespace {
  * @tc.name: DragWindow01
  * @tc.desc: drag left
  * @tc.type: FUNC
- * @tc.require: AR000GGTV8
  */
 HWTEST_F(WindowMoveDragTest, DragWindow01, Function | MediumTest | Level3)
 {
@@ -203,7 +202,6 @@ HWTEST_F(WindowMoveDragTest, DragWindow01, Function | MediumTest | Level3)
  * @tc.name: DragWindow02
  * @tc.desc: drag left top
  * @tc.type: FUNC
- * @tc.require: AR000GGTV8
  */
 HWTEST_F(WindowMoveDragTest, DragWindow02, Function | MediumTest | Level3)
 {
@@ -222,7 +220,6 @@ HWTEST_F(WindowMoveDragTest, DragWindow02, Function | MediumTest | Level3)
  * @tc.name: DragWindow03
  * @tc.desc: drag left bottom
  * @tc.type: FUNC
- * @tc.require: AR000GGTV8
  */
 HWTEST_F(WindowMoveDragTest, DragWindow03, Function | MediumTest | Level3)
 {
@@ -241,7 +238,6 @@ HWTEST_F(WindowMoveDragTest, DragWindow03, Function | MediumTest | Level3)
  * @tc.name: DragWindow04
  * @tc.desc: drag right
  * @tc.type: FUNC
- * @tc.require: AR000GGTV8
  */
 HWTEST_F(WindowMoveDragTest, DragWindow04, Function | MediumTest | Level3)
 {
@@ -260,7 +256,6 @@ HWTEST_F(WindowMoveDragTest, DragWindow04, Function | MediumTest | Level3)
  * @tc.name: DragWindow05
  * @tc.desc: drag right top
  * @tc.type: FUNC
- * @tc.require: AR000GGTV8
  */
 HWTEST_F(WindowMoveDragTest, DragWindow05, Function | MediumTest | Level3)
 {
@@ -279,7 +274,6 @@ HWTEST_F(WindowMoveDragTest, DragWindow05, Function | MediumTest | Level3)
  * @tc.name: DragWindow06
  * @tc.desc: drag right bottom
  * @tc.type: FUNC
- * @tc.require: AR000GGTV8
  */
 HWTEST_F(WindowMoveDragTest, DragWindow06, Function | MediumTest | Level3)
 {
@@ -298,7 +292,6 @@ HWTEST_F(WindowMoveDragTest, DragWindow06, Function | MediumTest | Level3)
  * @tc.name: DragWindow07
  * @tc.desc: drag top
  * @tc.type: FUNC
- * @tc.require: AR000GGTV8
  */
 HWTEST_F(WindowMoveDragTest, DragWindow07, Function | MediumTest | Level3)
 {
@@ -317,7 +310,6 @@ HWTEST_F(WindowMoveDragTest, DragWindow07, Function | MediumTest | Level3)
  * @tc.name: DragWindow08
  * @tc.desc: drag bottom
  * @tc.type: FUNC
- * @tc.require: AR000GGTV8
  */
 HWTEST_F(WindowMoveDragTest, DragWindow08, Function | MediumTest | Level3)
 {
@@ -336,7 +328,6 @@ HWTEST_F(WindowMoveDragTest, DragWindow08, Function | MediumTest | Level3)
  * @tc.name: DragWindow09
  * @tc.desc: point in decorZone, uiContent is nullptr
  * @tc.type: FUNC
- * @tc.require: AR000GGTV8
  */
 HWTEST_F(WindowMoveDragTest, DragWindow09, Function | MediumTest | Level3)
 {
@@ -355,7 +346,6 @@ HWTEST_F(WindowMoveDragTest, DragWindow09, Function | MediumTest | Level3)
  * @tc.name: DragWindow10
  * @tc.desc: point in decorZone, start move
  * @tc.type: FUNC
- * @tc.require: AR000GGTV8
  */
 HWTEST_F(WindowMoveDragTest, DragWindow10, Function | MediumTest | Level3)
 {
@@ -376,7 +366,6 @@ HWTEST_F(WindowMoveDragTest, DragWindow10, Function | MediumTest | Level3)
  * @tc.name: DragWindow11
  * @tc.desc: drag inner
  * @tc.type: FUNC
- * @tc.require: AR000GGTV8
  */
 HWTEST_F(WindowMoveDragTest, DragWindow11, Function | MediumTest | Level3)
 {

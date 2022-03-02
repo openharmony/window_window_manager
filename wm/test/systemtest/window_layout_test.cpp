@@ -97,7 +97,6 @@ namespace {
  * @tc.name: LayoutWindow02
  * @tc.desc: One FLOATING APP Window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
 {
@@ -122,7 +121,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow04
  * @tc.desc: One FLOATING APP Window & One StatusBar Window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
 {
@@ -156,7 +154,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow06
  * @tc.desc: StatusBar Window and NaviBar & Sys Window FULLSCRENN,NOT NEEDVOID,PARENTLIMIT
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
 {
@@ -195,7 +192,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow07
  * @tc.desc: StatusBar Window and NaviBar & One Floating Sys Window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
 {
@@ -234,7 +230,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow08
  * @tc.desc: One FLOATING APP Window with on custom rect
  * @tc.type: FUNC
- * @tc.require: AR000GGTV9
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
 {
@@ -259,7 +254,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow09
  * @tc.desc: Add a floating and resize(2, 2)
  * @tc.type: FUNC
- * @tc.require: AR000GGTV9
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
 {
@@ -290,7 +284,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow10
  * @tc.desc: One FLOATING APP Window do max and recovery
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
 {
@@ -320,7 +313,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
  * @tc.name: LayoutTile01
  * @tc.desc: One FLOATING APP Window into tile mode, show 4 new window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
 {
@@ -375,7 +367,6 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
  * @tc.name: LayoutTileNegative01
  * @tc.desc: negative test for tile window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
 {
@@ -428,7 +419,6 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
  * @tc.name: LayoutTileNegative01
  * @tc.desc: move window out of the display
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
 {
@@ -458,7 +448,6 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
  * @tc.name: LayoutNegative02
  * @tc.desc: resize window to negative size
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
 {

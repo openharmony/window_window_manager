@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,6 +124,10 @@ bool DisplayChangeTest::CheckDisplayChangeEventCallback(bool valueExpected)
 
 bool DisplayChangeTest::ScreenSizeEqual(const sptr<Screen> screen, const sptr<SupportedScreenModes> curInfo)
 {
+    if (screen == nullptr || curInfo == nullptr) {
+        WLOGFI("param is nullptr");
+        return false;
+    }
     uint32_t sWidth = screen->GetWidth();
     uint32_t sHeight = screen->GetHeight();
     WLOGI("ScreenSizeEqual: ScreenSize: %{public}u %{public}u, ActiveModeInfoSize: %{public}u %{public}u",
