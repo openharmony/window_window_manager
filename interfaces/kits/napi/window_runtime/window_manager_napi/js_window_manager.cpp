@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -190,6 +190,8 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
     }
     sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
     if (windowOption == nullptr) {
+        task.Reject(engine, CreateJsError(engine,
+            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnCreateWindow failed."));
         WLOGFE("JsWindowManager::OnCreateWindow windowOption malloc failed");
         return;
     }
@@ -211,6 +213,8 @@ static void CreateSubWindowTask(std::string parentWinName, std::string windowNam
     WLOGFI("JsWindowManager::CreateSubWindowTask is called");
     sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
     if (windowOption == nullptr) {
+        task.Reject(engine, CreateJsError(engine,
+            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnCreateWindow failed."));
         WLOGFE("JsWindowManager::OnCreateWindow windowOption malloc failed");
         return;
     }
