@@ -52,7 +52,7 @@ namespace {
     constexpr uint32_t HOTZONE = 40;
     constexpr uint32_t DIV_HOTZONE = 20;
     constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 240;
-    constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 426;
+    constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 320;
     constexpr uint32_t MIN_VERTICAL_SPLIT_HEIGHT = 426;
     constexpr uint32_t MIN_HORIZONTAL_SPLIT_WIDTH = 426;
 }
