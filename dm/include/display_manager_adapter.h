@@ -62,7 +62,6 @@ public:
     virtual bool WakeUpEnd();
     virtual bool SuspendBegin(PowerStateChangeReason reason);
     virtual bool SuspendEnd();
-    virtual bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason);
     virtual bool SetDisplayState(DisplayState state);
     virtual DisplayState GetDisplayState(DisplayId displayId);
     virtual void NotifyDisplayEvent(DisplayEvent event);
@@ -77,6 +76,7 @@ public:
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option);
     virtual DMError DestroyVirtualScreen(ScreenId screenId);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     virtual bool SetOrientation(ScreenId screenId, Orientation orientation);
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId);
     virtual std::vector<sptr<ScreenInfo>> GetAllScreenInfos();

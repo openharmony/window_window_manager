@@ -101,8 +101,8 @@ void DragController::FinishDrag(uint32_t windowId)
 
 sptr<WindowNode> DragController::GetHitWindow(DisplayId id, PointInfo point)
 {
-    // get display by point
-    if (id == DISPLAY_ID_INVALD) {
+    // Need get display by point
+    if (id == DISPLAY_ID_INVALID) {
         WLOGFE("Get invalid display");
         return nullptr;
     }

@@ -96,7 +96,7 @@ public:
     virtual bool WakeUpEnd() = 0;
     virtual bool SuspendBegin(PowerStateChangeReason reason) = 0;
     virtual bool SuspendEnd() = 0;
-    virtual bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason) = 0;
+    virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual bool SetDisplayState(DisplayState state) = 0;
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
     virtual std::vector<DisplayId> GetAllDisplayIds() = 0;

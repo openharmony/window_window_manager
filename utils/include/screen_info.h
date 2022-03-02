@@ -41,6 +41,7 @@ public:
 
     DEFINE_VAR_FUNC_GET(std::string, Name, name);
     DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, ScreenId, id, SCREEN_ID_INVALID);
+    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, RsScreenId, rsId, SCREEN_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, VirtualWidth, virtualWidth, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, VirtualHeight, virtualHeight, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET(float, VirtualPixelRatio, virtualPixelRatio, 0.0f);

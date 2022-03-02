@@ -51,7 +51,7 @@ public:
         displayId_ = displayId;
     }
     bool isCallbackCalled_ { false };
-    DisplayId displayId_ { DISPLAY_ID_INVALD };
+    DisplayId displayId_ { DISPLAY_ID_INVALID };
 };
 
 class DisplayChangeTest : public testing::Test {
@@ -71,13 +71,13 @@ public:
     static sptr<DisplayChangeEventListener> listener_;
     static inline uint32_t times_ = 0;
 };
-DisplayId DisplayChangeTest::defaultDisplayId_ = DISPLAY_ID_INVALD;
+DisplayId DisplayChangeTest::defaultDisplayId_ = DISPLAY_ID_INVALID;
 sptr<DisplayChangeEventListener> DisplayChangeTest::listener_ = new DisplayChangeEventListener();
 
 void DisplayChangeTest::SetUpTestCase()
 {
     defaultDisplayId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
-    if (defaultDisplayId_ == DISPLAY_ID_INVALD) {
+    if (defaultDisplayId_ == DISPLAY_ID_INVALID) {
         WLOGE("DisplayId is invalid!");
     }
     if (!DisplayManager::GetInstance().RegisterDisplayListener(listener_)) {
@@ -103,7 +103,7 @@ void DisplayChangeTest::TearDown()
 void DisplayChangeTest::ResetDisplayChangeListener()
 {
     listener_->isCallbackCalled_ = false;
-    listener_->displayId_ = DISPLAY_ID_INVALD;
+    listener_->displayId_ = DISPLAY_ID_INVALID;
 }
 
 bool DisplayChangeTest::CheckDisplayChangeEventCallback(bool valueExpected)

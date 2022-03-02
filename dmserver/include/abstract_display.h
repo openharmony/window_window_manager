@@ -55,7 +55,7 @@ public:
     Rotation GetRotation();
 
 private:
-    DisplayId id_ { DISPLAY_ID_INVALD };
+    DisplayId id_ { DISPLAY_ID_INVALID };
     ScreenId screenId_ { SCREEN_ID_INVALID };
     int32_t width_ { 0 };
     int32_t height_ { 0 };

@@ -25,7 +25,7 @@ namespace Rosen {
 using Mocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
 
 sptr<Display> ScreenManagerTest::defaultDisplay_ = nullptr;
-DisplayId ScreenManagerTest::defaultDisplayId_ = DISPLAY_ID_INVALD;
+DisplayId ScreenManagerTest::defaultDisplayId_ = DISPLAY_ID_INVALID;
 uint32_t ScreenManagerTest::defaultWidth_ = 480;
 uint32_t ScreenManagerTest::defaultHeight_ = 320;
 
