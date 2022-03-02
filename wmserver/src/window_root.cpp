@@ -159,6 +159,9 @@ WMError WindowRoot::MaxmizeWindow(uint32_t windowId)
         WLOGFE("add window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
+    auto property = node->GetWindowProperty();
+    uint32_t flags = property->GetWindowFlags() & (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    property->SetWindowFlags(flags);
     container->NotifySystemBarDismiss(node);
     return WMError::WM_OK;
 }
