@@ -27,12 +27,6 @@ config("libwm_private_config") {
     "//third_party/jsoncpp/include",
     "//third_party/json/include",
   ]
-
-  if (defined(product_name) &&
-      (product_name == "rk3566" || product_name == "rk3568" ||
-       product_name == "Hi3516DV300" || product_name == "watchos")) {
-    defines = [ "PRODUCT_RK" ]
-  }
 }
 
 config("libwm_public_config") {
