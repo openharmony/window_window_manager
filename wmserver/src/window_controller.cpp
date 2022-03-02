@@ -66,6 +66,8 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     }
     node->SetWindowProperty(property);
 
+    // Need 'check permission'
+    // Need 'adjust property'
     WMError res = windowRoot_->AddWindowNode(property->GetParentId(), node);
     if (res != WMError::WM_OK) {
         return res;

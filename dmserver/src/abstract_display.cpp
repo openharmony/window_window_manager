@@ -108,9 +108,7 @@ bool AbstractDisplay::RequestRotation(Rotation rotation)
         return false;
     }
     if (IsVertical(rotation) != IsVertical(rotation_)) {
-        int32_t tmp = width_;
-        width_ = height_;
-        height_ = tmp;
+        std::swap(width_, height_);
     }
     rotation_ = rotation;
     return true;
@@ -135,7 +133,6 @@ bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
         return false;
     }
     ScreenId dmsScreenId = abstractScreen->dmsId_;
-    // TODO: screen->rsDisplayNode_->SetScreenId(rsScreenId);
     sptr<SupportedScreenModes> info = abstractScreen->GetActiveScreenMode();
     if (info == nullptr) {
         WLOGE("display bind screen error, cannot get info. display:%{public}" PRIu64", screen:%{public}" PRIu64"",
