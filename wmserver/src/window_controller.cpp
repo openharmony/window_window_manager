@@ -65,9 +65,9 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         return WMError::WM_ERROR_NULLPTR;
     }
     node->SetWindowProperty(property);
-    // TODO: check permission
-    // TODO: adjust property
 
+    // Need 'check permission'
+    // Need 'adjust property'
     WMError res = windowRoot_->AddWindowNode(property->GetParentId(), node);
     if (res != WMError::WM_OK) {
         return res;
@@ -291,7 +291,7 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
         case DisplayStateChangeType::UPDATE_ROTATION: {
             windowRoot_->NotifyDisplayChange(abstractDisplay);
 
-            // TODO: Remove 'sysBarWinId_' after SystemUI resize 'systembar'
+            // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
             uint32_t width = static_cast<uint32_t>(abstractDisplay->GetWidth());
             uint32_t height = abstractDisplay->GetHeight() * SYSTEM_BAR_HEIGHT_RATIO;
             Rect newRect = { 0, 0, width, height };
