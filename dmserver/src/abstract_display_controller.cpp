@@ -118,7 +118,7 @@ std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(Di
     }
     ScreenId dmsScreenId = abstractDisplay->GetAbstractScreenId();
     std::shared_ptr<RSDisplayNode> displayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(dmsScreenId);
-
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::shared_ptr<ScreenshotCallback> callback = std::make_shared<ScreenshotCallback>();
     rsInterface_.TakeSurfaceCapture(displayNode, callback);
     std::shared_ptr<Media::PixelMap> screenshot = callback->GetResult(2000); // wait for 2000ms

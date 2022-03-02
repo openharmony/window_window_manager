@@ -18,7 +18,7 @@ import image from './@ohos.multimedia.image';
 
 /**
  * interface for screenshot
- * @devices tv, phone, tablet, wearable, car
+ * @syscap SystemCapability.WindowManager.WindowManager.Core.
  * @systemapi Hide this for inner system use.
  * @since 7
  */
@@ -26,7 +26,14 @@ declare namespace screenshot {
     /**
      * Takes a screenshot and saves it as a PixelMap object
      * @param options Screenshot options, which consist of screenRect, imageSize, and rotation. You need to set these parameters
-     * @devices tv, phone, tablet, wearable, car
+     * @permission ohos.permission.CAPTURE_SCREEN
+     * @since 7
+     */
+    function save(options?: ScreenshotOptions, callback: AsyncCallback<image.PixelMap>): void;
+
+    /**
+     * Takes a screenshot and saves it as a PixelMap object
+     * @param options Screenshot options, which consist of screenRect, imageSize, and rotation. You need to set these parameters
      * @permission ohos.permission.CAPTURE_SCREEN
      * @since 7
      */
@@ -34,7 +41,6 @@ declare namespace screenshot {
 
     /**
      * Describes the region of the screen to capture
-     * @devices tv, phone, tablet, wearable, car
      * @since 7
      */
     interface Rect {
@@ -46,7 +52,6 @@ declare namespace screenshot {
 
     /**
      * Describes the size of the screen region to capture
-     * @devices tv, phone, tablet, wearable, car
      * @since 7
      */
     interface Size {
@@ -56,7 +61,6 @@ declare namespace screenshot {
 
     /**
      * Describes screenshot options
-     * @devices tv, phone, tablet, wearable, car
      * @since 7
      */
     interface ScreenshotOptions {

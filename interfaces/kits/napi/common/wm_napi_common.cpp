@@ -41,4 +41,26 @@ napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key)
     GNAPI_INNER(napi_set_named_property(env, result, key, undefined));
     return napi_ok;
 }
+
+void ProcessPromise(napi_env env, Rosen::WMError wret, napi_deferred deferred, napi_value result[])
+{
+    GNAPI_LOG("Process Promise");
+    if (wret != Rosen::WMError::WM_OK) {
+        GNAPI_LOG("ProcessPromise, reject");
+        napi_reject_deferred(env, deferred, result[0]);
+        return;
+    }
+    GNAPI_LOG("ProcessPromise, resolve");
+    napi_resolve_deferred(env, deferred, result[1]);
+}
+
+void ProcessCallback(napi_env env, napi_ref ref, napi_value result[])
+{
+    GNAPI_LOG("Process Callback");
+    napi_value callback = nullptr;
+    napi_value returnVal = nullptr;
+    napi_get_reference_value(env, ref, &callback);
+    napi_call_function(env, nullptr, callback, 2, result, &returnVal); // 2: callback func input number
+    napi_delete_reference(env, ref);
+}
 } // namespace OHOS
