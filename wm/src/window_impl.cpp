@@ -1241,8 +1241,12 @@ void WindowImpl::UpdateWindowState(WindowState state)
 
 void WindowImpl::UpdateDragEvent(const PointInfo& point, DragEvent event)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto& iter : windowDragListeners_) {
+    std::vector<sptr<IWindowDragListener>> windowDragListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        windowDragListeners = windowDragListeners_;
+    }
+    for (auto& iter : windowDragListeners) {
         iter->OnDrag(point.x, point.y, event);
     }
 }
