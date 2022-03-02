@@ -1017,7 +1017,13 @@ NativeValue* JsWindow::OnSetColorSpace(NativeEngine& engine, NativeCallbackInfo&
             WLOGFE("JsWindow::OnSetColorSpace Failed to convert parameter to ColorSpace");
         } else {
             colorSpace = static_cast<ColorSpace>(static_cast<uint32_t>(*nativeType));
-            WLOGFI("JsWindow::OnSetColorSpace %{public}u", static_cast<uint32_t>(colorSpace));
+            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT) {
+                WLOGFE("JsWindow::OnSetColorSpace Failed, colorSpace %{public}u invalid!",
+                    static_cast<uint32_t>(colorSpace));
+                errCode = WMError::WM_ERROR_INVALID_PARAM;
+            } else {
+                WLOGFI("JsWindow::OnSetColorSpace %{public}u", static_cast<uint32_t>(colorSpace));
+            }
         }
     }
 
