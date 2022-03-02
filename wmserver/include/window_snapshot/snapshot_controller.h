@@ -34,6 +34,8 @@ public:
     int32_t GetSnapshot(const sptr<IRemoteObject> &token, AAFwk::Snapshot& snapshot) override;
 
 private:
+    float scaleW = 0.5f; // width scaling ratio(0.5)
+    float scaleH = 0.5f; // height scaling ratio(0.5)
     sptr<WindowRoot> windowRoot_;
     RSInterfaces& rsInterface_;
 
