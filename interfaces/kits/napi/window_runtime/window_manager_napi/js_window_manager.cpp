@@ -15,6 +15,7 @@
 #include "js_window_manager.h"
 #include <ability.h>
 #include <cinttypes>
+#include <new>
 #include "ability_context.h"
 #include "dm_common.h"
 #include "js_window.h"
@@ -187,7 +188,13 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
             }
         }
     }
-    sptr<WindowOption> windowOption = new WindowOption();
+    sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
+    if (windowOption == nullptr) {
+        task.Reject(engine, CreateJsError(engine,
+            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnCreateWindow failed."));
+        WLOGFE("JsWindowManager::OnCreateWindow windowOption malloc failed");
+        return;
+    }
     windowOption->SetWindowType(winType);
     sptr<Window> window = Window::Create(windowName, windowOption, context->lock());
     if (window != nullptr) {
@@ -204,7 +211,13 @@ static void CreateSubWindowTask(std::string parentWinName, std::string windowNam
     NativeEngine& engine, AsyncTask& task)
 {
     WLOGFI("JsWindowManager::CreateSubWindowTask is called");
-    sptr<WindowOption> windowOption = new WindowOption();
+    sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
+    if (windowOption == nullptr) {
+        task.Reject(engine, CreateJsError(engine,
+            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnCreateWindow failed."));
+        WLOGFE("JsWindowManager::OnCreateWindow windowOption malloc failed");
+        return;
+    }
     windowOption->SetWindowType(winType);
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     windowOption->SetParentName(parentWinName);
@@ -368,7 +381,11 @@ void JsWindowManager::RegisterWmListenerWithType(NativeEngine& engine, std::stri
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
 
-    sptr<JsWindowListener> windowManagerListener = new JsWindowListener(&engine);
+    sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(&engine);
+    if (windowManagerListener == nullptr) {
+        WLOGFE("JsWindowManager::RegisterWmListenerWithType windowManagerListener malloc failed");
+        return;
+    }
     if (type.compare(SYSTEM_BAR_TINT_CHANGE_CB) == 0) {
         sptr<ISystemBarChangedListener> thisListener(windowManagerListener);
         SingletonContainer::Get<WindowManager>().RegisterSystemBarChangedListener(thisListener);
