@@ -217,6 +217,7 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
         WLOGFE("Set window mode failed, update node failed");
         return res;
     }
+    node->GetWindowToken()->UpdateWindowMode(node->GetWindowMode());
     FlushWindowInfo(windowId);
     return WMError::WM_OK;
 }
