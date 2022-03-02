@@ -49,8 +49,8 @@ namespace {
     constexpr uint32_t DIVIDER_WIDTH = 8;
     constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 48;
     constexpr uint32_t WINDOW_FRAME_WIDTH = 4;
-    constexpr uint32_t HOTZONE = 40;
-    constexpr uint32_t DIV_HOTZONE = 20;
+    constexpr uint32_t WINDOW_FRAME_TOP_WIDTH = 1; // the frame width of top position
+    constexpr uint32_t HOTZONE = 20;
     constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 240;
     constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 426;
     constexpr uint32_t MIN_VERTICAL_SPLIT_HEIGHT = 426;
