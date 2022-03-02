@@ -14,6 +14,7 @@
  */
 
 #include "js_window.h"
+#include <new>
 #include "window.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
@@ -397,10 +398,8 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
         if (nativeType == nullptr) {
             WLOGFE("Failed to convert parameter to windowType");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
-        }
-        // adapt to the old version
-        if (static_cast<uint32_t>(*nativeType) >= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_BASE)) {
-            winType = static_cast<WindowType>(static_cast<uint32_t>(*nativeType));
+        } else if (static_cast<uint32_t>(*nativeType) >= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_BASE)) {
+            winType = static_cast<WindowType>(static_cast<uint32_t>(*nativeType)); // adapt to the old version
         } else {
             if (JS_TO_NATIVE_WINDOW_TYPE_MAP.count(
                 static_cast<ApiWindowType>(static_cast<uint32_t>(*nativeType))) != 0) {
@@ -412,6 +411,7 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
             }
         }
     }
+
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (errCode != WMError::WM_OK) {
@@ -450,8 +450,9 @@ NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo&
         if (nativeMode == nullptr) {
             WLOGFE("Failed to convert parameter to windowMode");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            winMode = static_cast<WindowMode>(static_cast<uint32_t>(*nativeMode));
         }
-        winMode = static_cast<WindowMode>(static_cast<uint32_t>(*nativeMode));
     }
 
     AsyncTask::CompleteCallback complete =
@@ -536,7 +537,11 @@ void JsWindow::RegisterWindowListenerWithType(NativeEngine& engine, std::string 
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     if (jsListenerMap_.find(type) == jsListenerMap_.end()) {
-        sptr<JsWindowListener> windowListener = new JsWindowListener(&engine);
+        sptr<JsWindowListener> windowListener = new(std::nothrow) JsWindowListener(&engine);
+        if (windowListener == nullptr) {
+            WLOGFE("JsWindow::RegisterWindowListenerWithType windowListener malloc failed");
+            return;
+        }
         if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
             sptr<IWindowChangeListener> thisListener(windowListener);
             windowToken_->RegisterWindowChangeListener(thisListener);
@@ -736,8 +741,9 @@ NativeValue* JsWindow::OnSetFullScreen(NativeEngine& engine, NativeCallbackInfo&
         if (nativeVal == nullptr) {
             WLOGFE("Failed to convert parameter to isFullScreen");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            isFullScreen = static_cast<bool>(*nativeVal);
         }
-        isFullScreen = static_cast<bool>(*nativeVal);
     }
 
     AsyncTask::CompleteCallback complete =
@@ -778,8 +784,9 @@ NativeValue* JsWindow::OnSetLayoutFullScreen(NativeEngine& engine, NativeCallbac
         if (nativeVal == nullptr) {
             WLOGFE("Failed to convert parameter to isLayoutFullScreen");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            isLayoutFullScreen = static_cast<bool>(*nativeVal);
         }
-        isLayoutFullScreen = static_cast<bool>(*nativeVal);
     }
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
@@ -857,11 +864,11 @@ NativeValue* JsWindow::OnSetSystemBarProperties(NativeEngine& engine, NativeCall
         if (nativeObj == nullptr) {
             WLOGFE("Failed to convert object to SystemBarProperties");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
-        }
-
-        if (!SetSystemBarPropertiesFromJs(engine, nativeObj, systemBarProperties, windowToken_)) {
-            WLOGFE("Failed to GetSystemBarProperties From Js Object");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            if (!SetSystemBarPropertiesFromJs(engine, nativeObj, systemBarProperties, windowToken_)) {
+                WLOGFE("Failed to GetSystemBarProperties From Js Object");
+                errCode = WMError::WM_ERROR_INVALID_PARAM;
+            }
         }
     }
     AsyncTask::CompleteCallback complete =
@@ -906,9 +913,9 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
         if (nativeMode == nullptr) {
             WLOGFE("Failed to convert parameter to AvoidAreaType");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            avoidAreaType = static_cast<AvoidAreaType>(static_cast<uint32_t>(*nativeMode));
         }
-        avoidAreaType = static_cast<AvoidAreaType>(static_cast<uint32_t>(*nativeMode));
-        WLOGFI("JsWindow::OnGetAvoidArea get avoidAreaType success %{public}u", avoidAreaType);
     }
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
