@@ -23,20 +23,23 @@
 
 namespace OHOS::Rosen {
 class ScreenGroupInfo : public ScreenInfo {
+friend class AbstractScreenGroup;
 public:
-    ScreenGroupInfo() = default;
     ~ScreenGroupInfo() = default;
-
-    void Update(sptr<ScreenGroupInfo> info);
+    ScreenGroupInfo(const ScreenGroupInfo&) = delete;
+    ScreenGroupInfo(ScreenGroupInfo&&) = delete;
+    ScreenGroupInfo& operator=(const ScreenGroupInfo&) = delete;
+    ScreenGroupInfo& operator=(ScreenGroupInfo&&) = delete;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static ScreenGroupInfo* Unmarshalling(Parcel& parcel);
 
-    std::vector<ScreenId> children_;
-    std::vector<Point> position_;
-    ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
-protected:
-    ScreenGroupInfo* InnerUnmarshalling(Parcel& parcel);
+    DEFINE_VAR_FUNC_GET(std::vector<ScreenId>, Children, children);
+    DEFINE_VAR_FUNC_GET(std::vector<Point>, Position, position);
+    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenCombination, Combination, combination, ScreenCombination::SCREEN_ALONE);
+private:
+    ScreenGroupInfo() = default;
+    bool InnerUnmarshalling(Parcel& parcel);
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_SCREEN_GROUP_INFO_H

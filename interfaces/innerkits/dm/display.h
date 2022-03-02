@@ -27,23 +27,29 @@ typedef enum DisplayType {
 } DisplayType;
 
 class Display : public RefBase {
+friend class DisplayManager;
 public:
-    Display(const std::string& name, DisplayInfo* info);
-    ~Display() = default;
-
+    ~Display();
+    Display(const Display&) = delete;
+    Display(Display&&) = delete;
+    Display& operator=(const Display&) = delete;
+    Display& operator=(Display&&) = delete;
     DisplayId GetId() const;
     int32_t GetWidth() const;
     int32_t GetHeight() const;
     uint32_t GetFreshRate() const;
     ScreenId GetScreenId() const;
     float GetVirtualPixelRatio() const;
+    Rotation GetRotation() const;
+    Orientation GetOrientation() const;
 
-    void SetId(DisplayId displayId);
-    void SetWidth(int32_t width);
-    void SetHeight(int32_t height);
-    void SetFreshRate(uint32_t freshRate);
-
+protected:
+    // No more methods or variables can be defined here.
+    Display(const std::string& name, sptr<DisplayInfo> info);
 private:
+    // No more methods or variables can be defined here.
+    void UpdateDisplayInfo(sptr<DisplayInfo>) const;
+    void UpdateDisplayInfo() const;
     class Impl;
     sptr<Impl> pImpl_;
 };

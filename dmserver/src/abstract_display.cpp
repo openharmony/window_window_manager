@@ -24,12 +24,16 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractDisplay"};
 }
 
-AbstractDisplay::AbstractDisplay(const DisplayInfo& info)
-    : id_(info.id_),
-      width_(info.width_),
-      height_(info.height_),
-      freshRate_(info.freshRate_)
+AbstractDisplay::AbstractDisplay(const DisplayInfo* info)
 {
+    if (info == nullptr) {
+        WLOGFE("DisplayInfo is nullptr");
+        return;
+    }
+    id_ = info->GetDisplayId();
+    width_ = info->GetWidth();
+    height_ = info->GetHeight();
+    freshRate_ = info->GetFreshRate();
 }
 
 AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t freshRate)
@@ -91,6 +95,11 @@ void AbstractDisplay::SetId(DisplayId id)
     id_ = id;
 }
 
+void AbstractDisplay::SetOrientation(Orientation orientation)
+{
+    orientation_ = orientation;
+}
+
 bool AbstractDisplay::RequestRotation(Rotation rotation)
 {
     WLOGD("request rotation from %{public}u to %{public}u, display %{public}" PRIu64"", rotation_, rotation, id_);
@@ -105,6 +114,11 @@ bool AbstractDisplay::RequestRotation(Rotation rotation)
     }
     rotation_ = rotation;
     return true;
+}
+
+Rotation AbstractDisplay::GetRotation()
+{
+    return rotation_;
 }
 
 bool AbstractDisplay::BindAbstractScreen(ScreenId dmsScreenId)
@@ -128,8 +142,8 @@ bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
             id_, dmsScreenId);
         return false;
     }
-    width_ = info->width_;
-    height_ = info->height_;
+    width_ = static_cast<int32_t>(info->width_);
+    height_ = static_cast<int32_t>(info->height_);
     freshRate_ = info->freshRate_;
     screenId_ = dmsScreenId;
     WLOGD("display bound to screen. display:%{public}" PRIu64", screen:%{public}" PRIu64"", id_, dmsScreenId);
@@ -141,7 +155,7 @@ ScreenId AbstractDisplay::GetAbstractScreenId() const
     return screenId_;
 }
 
-const sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
+sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
 {
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
     displayInfo->width_ = width_;
@@ -149,6 +163,8 @@ const sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->id_ = id_;
     displayInfo->freshRate_ = freshRate_;
     displayInfo->screenId_ = screenId_;
+    displayInfo->rotation_ = rotation_;
+    displayInfo->orientation_ = orientation_;
     return displayInfo;
 }
 } // namespace OHOS::Rosen

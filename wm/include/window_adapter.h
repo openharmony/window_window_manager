@@ -52,12 +52,8 @@ public:
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     virtual void ProcessWindowTouchedEvent(uint32_t windowId);
     virtual void MinimizeAllAppWindows(DisplayId displayId);
+    virtual WMError MaxmizeWindow(uint32_t windowId);
     virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
-
-    // colorspace, gamut
-    virtual bool IsSupportWideGamut(uint32_t windowId);
-    virtual void SetColorSpace(uint32_t windowId, ColorSpace colorSpace);
-    virtual ColorSpace GetColorSpace(uint32_t windowId);
 
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
@@ -67,11 +63,12 @@ public:
     virtual void ClearWindowAdapter();
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
-    bool InitWMSProxyLocked();
+    bool InitWMSProxy();
 
     std::recursive_mutex mutex_;
     sptr<IWindowManager> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
+    bool isProxyValid_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS

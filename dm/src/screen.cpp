@@ -16,7 +16,6 @@
 #include "screen.h"
 
 #include "display_manager_adapter.h"
-#include "screen_group.h"
 #include "screen_info.h"
 #include "window_manager_hilog.h"
 
@@ -25,37 +24,18 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "Screen"};
 }
 class Screen::Impl : public RefBase {
-friend class Screen;
 public:
-    Impl() = default;
+    Impl(sptr<ScreenInfo> info)
+    {
+        screenInfo_ = info;
+    }
     ~Impl() = default;
-
-    ScreenId id_ { SCREEN_ID_INVALID };
-    uint32_t virtualWidth_ { 0 };
-    uint32_t virtualHeight_ { 0 };
-    float virtualPixelRatio_ { 0.0 };
-    ScreenId parent_ { SCREEN_ID_INVALID };
-    bool canHasChild_ { false };
-    uint32_t modeId_ { 0 };
-    std::vector<sptr<SupportedScreenModes>> modes_ {};
-    Rotation rotation_ { Rotation::ROTATION_0 };
+    DEFINE_VAR_FUNC_GET_SET(sptr<ScreenInfo>, ScreenInfo, screenInfo);
 };
 
-Screen::Screen(const ScreenInfo* info)
-    : pImpl_(new Impl())
+Screen::Screen(sptr<ScreenInfo> info)
+    : pImpl_(new Impl(info))
 {
-    if (info == nullptr) {
-        WLOGFE("info is nullptr.");
-        return;
-    }
-    pImpl_->id_ = info->id_;
-    pImpl_->virtualWidth_ = info->virtualWidth_;
-    pImpl_->virtualHeight_ = info->virtualHeight_;
-    pImpl_->virtualPixelRatio_ = info->virtualPixelRatio_;
-    pImpl_->parent_ = info->parent_;
-    pImpl_->canHasChild_ = info->canHasChild_;
-    pImpl_->modeId_ = info->modeId_;
-    pImpl_->modes_ = info->modes_;
 }
 
 Screen::~Screen()
@@ -64,18 +44,25 @@ Screen::~Screen()
 
 bool Screen::IsGroup() const
 {
-    return pImpl_->canHasChild_;
+    UpdateScreenInfo();
+    return pImpl_->GetScreenInfo()->GetCanHasChild();
+}
+
+const std::string& Screen::GetName() const
+{
+    return pImpl_->GetScreenInfo()->GetName();
 }
 
 ScreenId Screen::GetId() const
 {
-    return pImpl_->id_;
+    return pImpl_->GetScreenInfo()->GetScreenId();
 }
 
 uint32_t Screen::GetWidth() const
 {
-    auto modeId = pImpl_->modeId_;
-    auto modes = pImpl_->modes_;
+    UpdateScreenInfo();
+    auto modeId = GetModeId();
+    auto modes = GetSupportedModes();
     if (modeId < 0 || modeId >= modes.size()) {
         return 0;
     }
@@ -84,8 +71,9 @@ uint32_t Screen::GetWidth() const
 
 uint32_t Screen::GetHeight() const
 {
-    auto modeId = pImpl_->modeId_;
-    auto modes = pImpl_->modes_;
+    UpdateScreenInfo();
+    auto modeId = GetModeId();
+    auto modes = GetSupportedModes();
     if (modeId < 0 || modeId >= modes.size()) {
         return 0;
     }
@@ -94,85 +82,116 @@ uint32_t Screen::GetHeight() const
 
 uint32_t Screen::GetVirtualWidth() const
 {
-    return pImpl_->virtualWidth_;
+    UpdateScreenInfo();
+    return pImpl_->GetScreenInfo()->GetVirtualWidth();
 }
 
 uint32_t Screen::GetVirtualHeight() const
 {
-    return pImpl_->virtualHeight_;
+    UpdateScreenInfo();
+    return pImpl_->GetScreenInfo()->GetVirtualHeight();
 }
 
 float Screen::GetVirtualPixelRatio() const
 {
-    return pImpl_->virtualPixelRatio_;
+    UpdateScreenInfo();
+    return pImpl_->GetScreenInfo()->GetVirtualPixelRatio();
 }
 
-Rotation Screen::GetRotation()
+Rotation Screen::GetRotation() const
 {
-    return pImpl_->rotation_;
+    UpdateScreenInfo();
+    return pImpl_->GetScreenInfo()->GetRotation();
 }
 
-bool Screen::RequestRotation(Rotation rotation)
+Orientation Screen::GetOrientation() const
 {
-    WLOGFD("rotation the screen");
-    return SingletonContainer::Get<DisplayManagerAdapter>().RequestRotation(pImpl_->id_, rotation);
+    UpdateScreenInfo();
+    return pImpl_->GetScreenInfo()->GetOrientation();
+}
+
+bool Screen::IsReal() const
+{
+    UpdateScreenInfo();
+    return pImpl_->GetScreenInfo()->GetType() == ScreenType::REAL;
+}
+
+bool Screen::SetOrientation(Orientation orientation) const
+{
+    WLOGFD("set orientation %{public}u", orientation);
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(GetId(), orientation);
 }
 
 DMError Screen::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenSupportedColorGamuts(pImpl_->id_, colorGamuts);
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenSupportedColorGamuts(GetId(), colorGamuts);
 }
 
 DMError Screen::GetScreenColorGamut(ScreenColorGamut& colorGamut) const
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenColorGamut(pImpl_->id_, colorGamut);
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenColorGamut(GetId(), colorGamut);
 }
 
 DMError Screen::SetScreenColorGamut(int32_t colorGamutIdx)
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenColorGamut(pImpl_->id_, colorGamutIdx);
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorGamut(GetId(), colorGamutIdx);
 }
 
 DMError Screen::GetScreenGamutMap(ScreenGamutMap& gamutMap) const
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenGamutMap(pImpl_->id_, gamutMap);
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGamutMap(GetId(), gamutMap);
 }
 
 DMError Screen::SetScreenGamutMap(ScreenGamutMap gamutMap)
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenGamutMap(pImpl_->id_, gamutMap);
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenGamutMap(GetId(), gamutMap);
 }
 
 DMError Screen::SetScreenColorTransform()
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenColorTransform(pImpl_->id_);
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorTransform(GetId());
 }
 
 ScreenId Screen::GetParentId() const
 {
-    return pImpl_->parent_;
+    return pImpl_->GetScreenInfo()->GetParentId();
 }
 
 uint32_t Screen::GetModeId() const
 {
-    return pImpl_->modeId_;
+    return pImpl_->GetScreenInfo()->GetModeId();
 }
 
 std::vector<sptr<SupportedScreenModes>> Screen::GetSupportedModes() const
 {
-    return pImpl_->modes_;
+    return pImpl_->GetScreenInfo()->GetModes();
 }
 
 bool Screen::SetScreenActiveMode(uint32_t modeId)
 {
-    ScreenId screenId = pImpl_->id_;
-    if (modeId < 0 || modeId >= pImpl_->modes_.size()) {
+    ScreenId screenId = GetId();
+    if (modeId >= GetSupportedModes().size()) {
         return false;
     }
-    if (SingletonContainer::Get<DisplayManagerAdapter>().SetScreenActiveMode(screenId, modeId)) {
-        pImpl_->modeId_ = modeId;
+    if (SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(screenId, modeId)) {
+        pImpl_->GetScreenInfo()->SetModeId(modeId);
         return true;
     }
     return false;
+}
+
+void Screen::UpdateScreenInfo(sptr<ScreenInfo> info) const
+{
+    if (info == nullptr) {
+        WLOGFE("ScreenInfo is invalid");
+        return;
+    }
+    pImpl_->SetScreenInfo(info);
+}
+
+void Screen::UpdateScreenInfo() const
+{
+    auto screenInfo = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenInfo(GetId());
+    UpdateScreenInfo(screenInfo);
 }
 } // namespace OHOS::Rosen

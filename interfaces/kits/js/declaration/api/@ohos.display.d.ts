@@ -13,11 +13,21 @@
 * limitations under the License.
 */
 
+import { AsyncCallback, Callback } from './basic';
+
 /**
  * interface of display manager
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
  * @devices tv, phone, tablet, wearable
  */
 declare namespace display {
+
+  /**
+   * get the default display
+   * @devices tv, phone, tablet, wearable
+   */
+  function getDefaultDisplay(callback: AsyncCallback<Display>): void;
+
   /**
    * get the default display
    * @devices tv, phone, tablet, wearable
@@ -25,8 +35,36 @@ declare namespace display {
   function getDefaultDisplay(): Promise<Display>;
 
   /**
+   * get all displays
+   * @devices tv, phone, tablet, wearable
+   * @param callback
+   */
+  function getAllDisplay(callback: AsyncCallback<Array<Display>>): void;
+
+  /**
+   * get all displays
+   * @devices tv, phone, tablet, wearable
+   */
+  function getAllDisplay() : Promise<Array<Display>>;
+
+  /**
+   * register the callback of display change
+   * @param type: type of callback
+   * @devices tv, phone, tablet, wearable, car
+   */
+  function on(type: 'add' | 'remove' | 'change', callback: Callback<number>): void;
+
+  /**
+   * unregister the callback of display change
+   * @param type: type of callback
+   * #devices tv, phone, tablet, wearable, car
+   */
+  function off(type: 'add' | 'remove' | 'change', callback?: Callback<number>): void;
+
+  /**
   /**
    * the state of display
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @devices tv, phone, tablet, wearable
    */
   enum DisplayState {
@@ -62,6 +100,7 @@ declare namespace display {
 
   /**
    * Properties of display, it couldn't update automatically
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @devices tv, phone, tablet, wearable
    */
   interface Display {

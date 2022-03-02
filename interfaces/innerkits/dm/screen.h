@@ -30,7 +30,7 @@ class ScreenInfo;
 struct Point {
     int32_t posX_;
     int32_t posY_;
-    Point() {};
+    Point() : posX_(0), posY_(0) {};
     Point(int32_t posX, int32_t posY) : posX_(posX), posY_(posY) {};
 };
 
@@ -57,22 +57,29 @@ struct ExpandOption {
 };
 
 class Screen : public RefBase {
+friend class ScreenManager;
 public:
-    Screen(const ScreenInfo* info);
     ~Screen();
+    Screen(const Screen&) = delete;
+    Screen(Screen&&) = delete;
+    Screen& operator=(const Screen&) = delete;
+    Screen& operator=(Screen&&) = delete;
     bool IsGroup() const;
+    const std::string& GetName() const;
     ScreenId GetId() const;
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;
     uint32_t GetVirtualWidth() const;
     uint32_t GetVirtualHeight() const;
     float GetVirtualPixelRatio() const;
-    bool RequestRotation(Rotation rotation);
-    Rotation GetRotation();
+    Rotation GetRotation() const;
+    Orientation GetOrientation() const;
+    bool IsReal() const;
     ScreenId GetParentId() const;
     uint32_t GetModeId() const;
     std::vector<sptr<SupportedScreenModes>> GetSupportedModes() const;
     bool SetScreenActiveMode(uint32_t modeId);
+    bool SetOrientation(Orientation orientation) const;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const;
@@ -81,8 +88,13 @@ public:
     DMError GetScreenGamutMap(ScreenGamutMap& gamutMap) const;
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
-
+protected:
+    // No more methods or variables can be defined here.
+    Screen(sptr<ScreenInfo> info);
+    void UpdateScreenInfo() const;
+    void UpdateScreenInfo(sptr<ScreenInfo> info) const;
 private:
+    // No more methods or variables can be defined here.
     class Impl;
     sptr<Impl> pImpl_;
 };

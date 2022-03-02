@@ -28,22 +28,22 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindow");
 
     enum {
-        TRANS_ID_UPDATE_WINDOW_PROPERTY = 1,
         TRANS_ID_UPDATE_WINDOW_RECT,
         TRANS_ID_UPDATE_WINDOW_MODE,
         TRANS_ID_UPDATE_FOCUS_STATUS,
         TRANS_ID_UPDATE_AVOID_AREA,
         TRANS_ID_UPDATE_WINDOW_STATE,
         TRANS_ID_UPDATE_DRAG_EVENT,
+        TRANS_ID_UPDATE_DISPLAY_ID,
     };
 
-    virtual void UpdateWindowProperty(const WindowProperty& windowProperty) = 0;
     virtual void UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason) = 0;
     virtual void UpdateWindowMode(WindowMode mode) = 0;
     virtual void UpdateFocusStatus(bool focused) = 0;
     virtual void UpdateAvoidArea(const std::vector<Rect>& avoidAreas) = 0;
     virtual void UpdateWindowState(WindowState state) = 0;
     virtual void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) = 0;
+    virtual void UpdateDisplayId(DisplayId from, DisplayId to) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

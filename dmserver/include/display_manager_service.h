@@ -51,9 +51,10 @@ public:
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
 
     DisplayId GetDefaultDisplayId() override;
-    DisplayInfo GetDisplayInfoById(DisplayId displayId) override;
-    bool RequestRotation(ScreenId screenId, Rotation rotation) override;
-    std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
+    sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
+    bool SetOrientation(ScreenId screenId, Orientation orientation) override;
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
     ScreenId GetRSScreenId(DisplayId displayId) const;
 
     // colorspace, gamut
@@ -82,11 +83,15 @@ public:
     sptr<AbstractDisplay> GetAbstractDisplay(DisplayId displayId);
     sptr<AbstractScreenController> GetAbstractScreenController();
     sptr<AbstractDisplay> GetDisplayByDisplayId(DisplayId displayId) const;
-    DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
+    sptr<AbstractDisplay> GetDisplayByScreen(ScreenId screenId) const;
+    ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
+    ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
+    void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     std::vector<sptr<ScreenInfo>> GetAllScreenInfos() override;
-    DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
+
+    std::vector<DisplayId> GetAllDisplayIds() override;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
 
 private:
@@ -105,7 +110,7 @@ private:
     static inline SingletonDelegator<DisplayManagerService> delegator_;
     sptr<AbstractDisplayController> abstractDisplayController_;
     sptr<AbstractScreenController> abstractScreenController_;
-    DisplayPowerController displayPowerController_;
+    sptr<DisplayPowerController> displayPowerController_;
     std::map<ScreenId, std::shared_ptr<RSDisplayNode>> displayNodeMap_;
     sptr<IDisplayChangeListener> displayChangeListener_;
 };

@@ -43,6 +43,10 @@ void JsScreen::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
     WLOGFI("JsScreen::Finalizer is called");
     auto jsScreen = std::unique_ptr<JsScreen>(static_cast<JsScreen*>(data));
+    if (jsScreen == nullptr) {
+        WLOGFE("jsScreen::Finalizer jsScreen is null");
+        return;
+    }
     sptr<Screen> screen = jsScreen->screen_;
     if (screen == nullptr) {
         WLOGFE("JsScreen::Finalizer screen is null");
@@ -57,52 +61,49 @@ void JsScreen::Finalizer(NativeEngine* engine, void* data, void* hint)
     }
 }
 
-NativeValue* JsScreen::RequestRotation(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue* JsScreen::SetOrientation(NativeEngine* engine, NativeCallbackInfo* info)
 {
     JsScreen* me = CheckParamsAndGetThis<JsScreen>(engine, info);
-    return (me != nullptr) ? me->OnRequestRotation(*engine, *info) : nullptr;
+    return (me != nullptr) ? me->OnSetOrientation(*engine, *info) : nullptr;
 }
 
-NativeValue* JsScreen::OnRequestRotation(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsScreen::OnSetOrientation(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsScreen::OnRequestRotation is called");
+    WLOGFI("JsScreen::OnSetOrientation is called");
     bool paramValidFlag = true;
-    Rotation rotation = Rotation::ROTATION_0;
+    Orientation orientation = Orientation::UNSPECIFIED;
     if (info.argc != ARGC_ONE) {
-        WLOGFE("OnRequestRotation Params not match, info argc: %{public}zu", info.argc);
+        WLOGFE("OnSetOrientation Params not match, info argc: %{public}zu", info.argc);
         paramValidFlag = false;
     } else {
-        if (!ConvertFromJsValue(engine, info.argv[0], rotation)) {
+        if (!ConvertFromJsValue(engine, info.argv[0], orientation)) {
             paramValidFlag = false;
-            WLOGFE("Failed to convert parameter to rotation");
+            WLOGFE("Failed to convert parameter to orientation");
         }
     }
 
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (!paramValidFlag) {
-                WLOGE("JsScreen::OnRequestRotation paramValidFlag error");
+                WLOGE("JsScreen::OnSetOrientation paramValidFlag error");
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM),
-                                                  "JsScreen::OnRequestRotation failed."));
+                                                  "JsScreen::OnSetOrientation failed."));
                 return;
             }
-            if (rotation != Rotation::ROTATION_0 &&
-                rotation != Rotation::ROTATION_90 &&
-                rotation != Rotation::ROTATION_180 &&
-                rotation != Rotation::ROTATION_270) {
-                WLOGE("Rotation param error! rotation value must from enum Rotation");
+            if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
+                WLOGE("Orientation param error! orientation value must from enum Orientation");
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM),
-                                                  "JsScreen::OnRequestRotation failed."));
+                                                  "JsScreen::OnSetOrientation failed."));
                 return;
             }
 
-            bool res = screen_->RequestRotation(rotation);
+            bool res = screen_->SetOrientation(orientation);
             if (res) {
                 task.Resolve(engine, CreateJsValue(engine, true));
-                WLOGFI("JsScreen::OnRequestRotation success");
+                WLOGFI("JsScreen::OnSetOrientation success");
             } else {
-                task.Resolve(engine, CreateJsError(engine, false, "JsScreen::OnRequestRotation failed."));
-                WLOGFE("JsScreen::OnRequestRotation failed");
+                task.Resolve(engine, CreateJsError(engine, false, "JsScreen::OnSetOrientation failed."));
+                WLOGFE("JsScreen::OnSetOrientation failed");
             }
         };
     NativeValue* lastParam = nullptr;
@@ -174,7 +175,7 @@ NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
 
     object->SetProperty("id", CreateJsValue(engine, static_cast<uint32_t>(screen->GetId())));
     object->SetProperty("parent", CreateJsValue(engine, static_cast<uint32_t>(screen->GetParentId())));
-    object->SetProperty("rotation", CreateJsValue(engine, screen->GetRotation()));
+    object->SetProperty("orientation", CreateJsValue(engine, screen->GetOrientation()));
     object->SetProperty("activeModeIndex", CreateJsValue(engine, screen->GetModeId()));
     object->SetProperty("supportedModeInfo", CreateJsScreenModeArrayObject(engine, screen->GetSupportedModes()));
 
@@ -184,7 +185,7 @@ NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     g_JsScreenMap[screenId] = JsScreenRef;
     BindNativeFunction(engine, *object, "setScreenActiveMode", JsScreen::SetScreenActiveMode);
-    BindNativeFunction(engine, *object, "requestRotation", JsScreen::RequestRotation);
+    BindNativeFunction(engine, *object, "setOrientation", JsScreen::SetOrientation);
     return objValue;
 }
 

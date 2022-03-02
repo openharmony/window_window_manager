@@ -124,6 +124,37 @@ HWTEST_F(AvoidAreaControllerTest, IsAvoidAreaNode02, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: IsAvoidAreaNode03
+ * @tc.desc: Create a Dock_Slice Window. Test IsAvoidAreaNode
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVD
+ */
+HWTEST_F(AvoidAreaControllerTest, IsAvoidAreaNode03, Function | SmallTest | Level2)
+{
+    auto avoidAreaController = new AvoidAreaController(nullptr);
+
+    sptr<WindowNode> node = new WindowNode();
+    sptr<WindowProperty> property = new WindowProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
+    node->SetWindowProperty(property);
+
+    ASSERT_EQ(false, avoidAreaController->IsAvoidAreaNode(node));
+}
+
+/**
+ * @tc.name: IsAvoidAreaNode04
+ * @tc.desc: Create a Dock_Slice Window. Test IsAvoidAreaNode
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVD
+ */
+HWTEST_F(AvoidAreaControllerTest, IsAvoidAreaNode04, Function | SmallTest | Level2)
+{
+    auto avoidAreaController = new AvoidAreaController(nullptr);
+
+    ASSERT_EQ(false, avoidAreaController->IsAvoidAreaNode(nullptr));
+}
+
+/**
  * @tc.name: AddAvoidAreaNode01
  * @tc.desc: Add a new avoid area Node
  * @tc.type: FUNC
@@ -199,6 +230,18 @@ HWTEST_F(AvoidAreaControllerTest, AddAvoidAreaNode03, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: AddAvoidAreaNode04
+ * @tc.desc: Add nullptr
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVD
+ */
+HWTEST_F(AvoidAreaControllerTest, AddAvoidAreaNode04, Function | SmallTest | Level2)
+{
+    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, avoidAreaController->AddAvoidAreaNode(nullptr));
+}
+
+/**
  * @tc.name: RemoveAvoidAreaNode01
  * @tc.desc: Add a new avoid area. And Remove this.
  * @tc.type: FUNC
@@ -236,6 +279,18 @@ HWTEST_F(AvoidAreaControllerTest, RemoveAvoidAreaNode02, Function | SmallTest | 
     node->SetLayoutRect(topAvoidRect_);
     node->SetWindowProperty(property);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, avoidAreaController->RemoveAvoidAreaNode(node));
+}
+
+/**
+ * @tc.name: RemoveAvoidAreaNode03
+ * @tc.desc: Remove nullptr
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVD
+ */
+HWTEST_F(AvoidAreaControllerTest, RemoveAvoidAreaNode03, Function | SmallTest | Level2)
+{
+    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, avoidAreaController->RemoveAvoidAreaNode(nullptr));
 }
 
 /**
@@ -278,6 +333,18 @@ HWTEST_F(AvoidAreaControllerTest, UpdateAvoidAreaNode02, Function | SmallTest | 
     node->SetLayoutRect(topAvoidRect_);
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, avoidAreaController->UpdateAvoidAreaNode(node));
+}
+
+/**
+ * @tc.name: UpdateAvoidAreaNode03
+ * @tc.desc: Update nullptr
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVD
+ */
+HWTEST_F(AvoidAreaControllerTest, UpdateAvoidAreaNode03, Function | SmallTest | Level2)
+{
+    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, avoidAreaController->UpdateAvoidAreaNode(nullptr));
 }
 
 /**
@@ -362,7 +429,6 @@ HWTEST_F(AvoidAreaControllerTest, GetAvoidArea03, Function | SmallTest | Level2)
 HWTEST_F(AvoidAreaControllerTest, GetAvoidAreaByType01, Function | SmallTest | Level2)
 {
     sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(nullptr);
-
     std::vector<Rect> avoidArea = avoidAreaController->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT);
 
     ASSERT_EQ(4u, static_cast<uint32_t>(avoidArea.size()));
@@ -374,7 +440,7 @@ HWTEST_F(AvoidAreaControllerTest, GetAvoidAreaByType01, Function | SmallTest | L
 
 /**
  * @tc.name: GetAvoidAreaByType02
- * @tc.desc: Search a unexist AvoidAreaType. And GetAvoidAreaByType
+ * @tc.desc: Add a new node. And GetAvoidAreaByType
  * @tc.type: FUNC
  * @tc.require: AR000GGTVD
  */

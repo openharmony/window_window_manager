@@ -32,13 +32,14 @@ public:
     ~DisplayManagerProxy() {};
 
     DisplayId GetDefaultDisplayId() override;
-    DisplayInfo GetDisplayInfoById(DisplayId displayId) override;
+    sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
 
     ScreenId CreateVirtualScreen(VirtualScreenOption option) override;
     DMError DestroyVirtualScreen(ScreenId screenId) override;
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
-    bool RequestRotation(ScreenId screenId, Rotation rotation) override;
-    std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) override;
+    bool SetOrientation(ScreenId screenId, Orientation orientation) override;
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) override;
@@ -58,13 +59,15 @@ public:
     bool SuspendEnd() override;
     bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason) override;
     bool SetDisplayState(DisplayState state) override;
+    std::vector<DisplayId> GetAllDisplayIds() override;
     DisplayState GetDisplayState(DisplayId displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
-    DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
+    ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     std::vector<sptr<ScreenInfo>> GetAllScreenInfos() override;
-    DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
+    ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
+    void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
 
 private:

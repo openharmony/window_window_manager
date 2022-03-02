@@ -16,7 +16,9 @@
 #include "snapshot_utils.h"
 
 #include <cstdio>
+#include <sys/time.h>
 #include <getopt.h>
+#include <securec.h>
 #include <png.h>
 #include "wm_trace.h"
 
@@ -26,13 +28,38 @@ using namespace OHOS::Rosen;
 namespace OHOS {
 constexpr int BITMAP_DEPTH = 8;
 constexpr int BPP = 4;
+constexpr int MAX_TIME_STR_LEN = 40;
+constexpr int YEAR_SINCE = 1900;
 
 const char *VALID_SNAPSHOT_PATH = "/data";
+const char *DEFAULT_SNAPSHOT_PREFIX = "/snapshot";
 const char *VALID_SNAPSHOT_SUFFIX = ".png";
 
 void SnapShotUtils::PrintUsage(const std::string &cmdLine)
 {
     printf("usage: %s [-i displayId] [-f output_file] [-w width] [-h height] [-m]\n", cmdLine.c_str());
+}
+
+std::string SnapShotUtils::GenerateFileName(int offset)
+{
+    timeval tv;
+    std::string fileName = VALID_SNAPSHOT_PATH;
+    char timeStr[MAX_TIME_STR_LEN] = { 0 };
+
+    fileName += DEFAULT_SNAPSHOT_PREFIX;
+    if (gettimeofday(&tv, nullptr) == 0) {
+        tv.tv_sec += offset; // add offset second
+        struct tm *tmVal = localtime(&tv.tv_sec);
+        if (tmVal != nullptr) {
+            snprintf_s(timeStr, sizeof(timeStr), sizeof(timeStr) - 1,
+                "_%04d-%02d-%02d_%02d-%02d-%02d",
+                tmVal->tm_year + YEAR_SINCE, tmVal->tm_mon + 1, tmVal->tm_mday,
+                tmVal->tm_hour, tmVal->tm_min, tmVal->tm_sec);
+            fileName += timeStr;
+        }
+    }
+    fileName += VALID_SNAPSHOT_SUFFIX;
+    return fileName;
 }
 
 bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
@@ -235,6 +262,11 @@ bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArgments &cmdA
 
     if (!ProcessDisplayId(cmdArgments.displayId)) {
         return false;
+    }
+
+    if (cmdArgments.fileName == "") {
+        cmdArgments.fileName = GenerateFileName();
+        printf("process: set filename to %s\n", cmdArgments.fileName.c_str());
     }
 
     // check fileName

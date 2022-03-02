@@ -21,7 +21,6 @@
 
 #include <input_window_monitor.h>
 #include <nocopyable.h>
-#include <parameters.h>
 #include <system_ability.h>
 #include "display_change_listener.h"
 #include "drag_controller.h"
@@ -67,12 +66,8 @@ public:
     void ProcessWindowTouchedEvent(uint32_t windowId) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
+    WMError MaxmizeWindow(uint32_t windowId) override;
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) override;
-
-    // colorspace, gamut
-    virtual bool IsSupportWideGamut(uint32_t windowId) override;
-    virtual void SetColorSpace(uint32_t windowId, ColorSpace colorSpace) override;
-    virtual ColorSpace GetColorSpace(uint32_t windowId) override;
 
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;

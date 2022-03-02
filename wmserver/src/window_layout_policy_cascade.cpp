@@ -17,6 +17,7 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "wm_common_inner.h"
 #include "wm_trace.h"
 
 namespace OHOS {
@@ -130,21 +131,27 @@ static bool IsLayoutChanged(const Rect& l, const Rect& r)
 
 void WindowLayoutPolicyCascade::LimitMoveBounds(Rect& rect)
 {
+    float virtualPixelRatio = GetVirtualPixelRatio();
+    uint32_t minHorizontalSplitW = static_cast<uint32_t>(MIN_HORIZONTAL_SPLIT_WIDTH * virtualPixelRatio);
+    uint32_t minVerticalSplitH = static_cast<uint32_t>(MIN_VERTICAL_SPLIT_HEIGHT * virtualPixelRatio);
+
     if (rect.width_ < rect.height_) {
-        if (rect.posX_ < (limitRect_.posX_ + static_cast<int32_t>(MIN_HORIZONTAL_SPLIT_WIDTH))) {
-            rect.posX_ = limitRect_.posX_ + static_cast<int32_t>(MIN_HORIZONTAL_SPLIT_WIDTH);
+        if (rect.posX_ < (limitRect_.posX_ + static_cast<int32_t>(minHorizontalSplitW))) {
+            rect.posX_ = limitRect_.posX_ + static_cast<int32_t>(minHorizontalSplitW);
         } else if (rect.posX_ >
-            (limitRect_.posX_ + limitRect_.width_ - static_cast<int32_t>(MIN_HORIZONTAL_SPLIT_WIDTH))) {
-            rect.posX_ = limitRect_.posX_ + static_cast<int32_t>(limitRect_.width_ - MIN_HORIZONTAL_SPLIT_WIDTH);
+            (limitRect_.posX_ + limitRect_.width_ - static_cast<int32_t>(minHorizontalSplitW))) {
+            rect.posX_ = limitRect_.posX_ + static_cast<int32_t>(limitRect_.width_ - minHorizontalSplitW);
         }
     } else {
-        if (rect.posY_ < (limitRect_.posY_ + static_cast<int32_t>(MIN_VERTICAL_SPLIT_HEIGHT))) {
-            rect.posY_ = limitRect_.posY_ + static_cast<int32_t>(MIN_VERTICAL_SPLIT_HEIGHT);
+        if (rect.posY_ < (limitRect_.posY_ + static_cast<int32_t>(minVerticalSplitH))) {
+            rect.posY_ = limitRect_.posY_ + static_cast<int32_t>(minVerticalSplitH);
         } else if (rect.posY_ >
-            (limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_ - MIN_VERTICAL_SPLIT_HEIGHT))) {
-            rect.posY_ = limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_ - MIN_VERTICAL_SPLIT_HEIGHT);
+            (limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_ - minVerticalSplitH))) {
+            rect.posY_ = limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_ - minVerticalSplitH);
         }
     }
+    WLOGFI("limit divider move bounds:[%{public}d, %{public}d, %{public}u, %{public}u]",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 
 void WindowLayoutPolicyCascade::InitCascadeRect()
@@ -207,15 +214,14 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(sptr<WindowNode>& node)
             UpdateFloatingLayoutRect(limitRect, winRect);
         }
     }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        LimitMoveBounds(winRect); // limit divider pos first
+    }
     // Limit window to the maximum window size
     LimitWindowSize(node, displayRect_, winRect);
-
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        LimitMoveBounds(winRect);
-    }
-
     node->SetLayoutRect(winRect);
-    if (IsLayoutChanged(lastRect, winRect)) {
+    CalcAndSetNodeHotZone(winRect, node);
+    if (IsLayoutChanged(lastRect, winRect) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     }
@@ -265,12 +271,15 @@ void WindowLayoutPolicyCascade::UpdateSplitLimitRect(const Rect& limitRect, Rect
 
 void WindowLayoutPolicyCascade::InitSplitRects()
 {
+    float virtualPixelRatio = GetVirtualPixelRatio();
+    uint32_t dividerWidth = static_cast<uint32_t>(DIVIDER_WIDTH * virtualPixelRatio);
+
     if (!IsVertical()) {
-        dividerRect_ = { static_cast<uint32_t>((displayRect_.width_ - DIVIDER_WIDTH) * DEFAULT_SPLIT_RATIO), 0,
-                DIVIDER_WIDTH, displayRect_.height_ };
+        dividerRect_ = { static_cast<uint32_t>((displayRect_.width_ - dividerWidth) * DEFAULT_SPLIT_RATIO), 0,
+                dividerWidth, displayRect_.height_ };
     } else {
-        dividerRect_ = { 0, static_cast<uint32_t>((displayRect_.height_ - DIVIDER_WIDTH) * DEFAULT_SPLIT_RATIO),
-               displayRect_.width_, DIVIDER_WIDTH };
+        dividerRect_ = { 0, static_cast<uint32_t>((displayRect_.height_ - dividerWidth) * DEFAULT_SPLIT_RATIO),
+               displayRect_.width_, dividerWidth };
     }
     WLOGFI("init dividerRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
         dividerRect_.posX_, dividerRect_.posY_, dividerRect_.width_, dividerRect_.height_);

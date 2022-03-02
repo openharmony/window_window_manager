@@ -14,16 +14,16 @@
  */
 
 #include "window_layout_policy.h"
+#include "display_manager.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "wm_common_inner.h"
 #include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicy"};
-    constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 48;
-    constexpr uint32_t WINDOW_FRAME_WIDTH = 4;
 }
 WindowLayoutPolicy::WindowLayoutPolicy(const Rect& displayRect, const uint64_t& screenId,
     sptr<WindowNode>& belowAppNode, sptr<WindowNode>& appNode, sptr<WindowNode>& aboveAppNode)
@@ -115,11 +115,14 @@ void WindowLayoutPolicy::UpdateDefaultFoatingRect()
 
 void WindowLayoutPolicy::SetRectForFloating(const sptr<WindowNode>& node)
 {
+    float virtualPixelRatio = GetVirtualPixelRatio();
+    uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
+    uint32_t winTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
     // deduct decor size
     Rect rect = defaultFloatingRect_;
     if (node->GetWindowProperty()->GetDecorEnable()) {
-        rect.width_ -= (WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH);
-        rect.height_ -= (WINDOW_TITLE_BAR_HEIGHT + WINDOW_FRAME_WIDTH);
+        rect.width_ -= (winFrameW + winFrameW);
+        rect.height_ -= (winTitleBarH + winFrameW);
     }
 
     node->SetWindowRect(rect);
@@ -140,6 +143,9 @@ void WindowLayoutPolicy::RemoveWindowNode(sptr<WindowNode>& node)
     } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
         LayoutWindowTree();
     }
+    Rect winRect = node->GetWindowProperty()->GetWindowRect();
+    node->SetLayoutRect(winRect);
+    node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
 }
 
 void WindowLayoutPolicy::UpdateWindowNode(sptr<WindowNode>& node)
@@ -172,11 +178,15 @@ void WindowLayoutPolicy::UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect
 
 Rect WindowLayoutPolicy::ComputeDecoratedWindowRect(const Rect& winRect)
 {
+    float virtualPixelRatio = GetVirtualPixelRatio();
+    uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
+    uint32_t winTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
+
     Rect rect;
     rect.posX_ = winRect.posX_;
     rect.posY_ = winRect.posY_;
-    rect.width_ = winRect.width_ + WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH;
-    rect.height_ = winRect.height_ + WINDOW_TITLE_BAR_HEIGHT + WINDOW_FRAME_WIDTH;
+    rect.width_ = winRect.width_ + winFrameW + winFrameW;
+    rect.height_ = winRect.height_ + winTitleBarH + winFrameW;
     return rect;
 }
 
@@ -219,14 +229,44 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
     LimitWindowSize(node, displayRect, winRect);
 
     node->SetLayoutRect(winRect);
+    CalcAndSetNodeHotZone(winRect, node);
     if (!(lastRect == winRect)) {
         node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     }
 }
 
+void WindowLayoutPolicy::CalcAndSetNodeHotZone(Rect layoutOutRect, sptr<WindowNode>& node)
+{
+    Rect rect = layoutOutRect;
+    float virtualPixelRatio = GetVirtualPixelRatio();
+    uint32_t hotZone = static_cast<uint32_t>(HOTZONE * virtualPixelRatio);
+    uint32_t divHotZone = static_cast<uint32_t>(DIV_HOTZONE * virtualPixelRatio);
+
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        if (rect.width_ < rect.height_) {
+            rect.posX_ -= divHotZone;
+            rect.width_ += (divHotZone + divHotZone);
+        } else {
+            rect.posY_ -= divHotZone;
+            rect.height_ += (divHotZone + divHotZone);
+        }
+    } else if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+        rect.posX_ -= hotZone;
+        rect.posY_ -= hotZone;
+        rect.width_ += (hotZone + hotZone);
+        rect.height_ += (hotZone + hotZone);
+    }
+    node->SetHotZoneRect(rect);
+}
+
 void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect)
 {
+    float virtualPixelRatio = GetVirtualPixelRatio();
+    uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
+    uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
+    uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
+
     WindowType windowType = node->GetWindowType();
     WindowMode windowMode = node->GetWindowMode();
     bool isVertical = (displayRect.height_ > displayRect.width_) ? true : false;
@@ -236,16 +276,16 @@ void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rec
     }
     if ((windowMode == WindowMode::WINDOW_MODE_FLOATING) && !WindowHelper::IsSystemWindow(windowType)) {
         if (isVertical) {
-            winRect.width_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, winRect.width_);
-            winRect.height_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, winRect.height_);
+            winRect.width_ = std::max(minVerticalFloatingW, winRect.width_);
+            winRect.height_ = std::max(minVerticalFloatingH, winRect.height_);
         } else {
-            winRect.width_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, winRect.width_);
-            winRect.height_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, winRect.height_);
+            winRect.width_ = std::max(minVerticalFloatingH, winRect.width_);
+            winRect.height_ = std::max(minVerticalFloatingW, winRect.height_);
         }
     }
     if (WindowHelper::IsMainFloatingWindow(windowType, windowMode)) {
         winRect.posY_ = std::max(limitRect_.posY_, winRect.posY_);
-        winRect.posY_ = std::min(limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_ - WINDOW_TITLE_BAR_HEIGHT),
+        winRect.posY_ = std::min(limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_ - windowTitleBarH),
                                  winRect.posY_);
     }
 }
@@ -311,6 +351,24 @@ void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& lim
 
 void WindowLayoutPolicy::Reset()
 {
+}
+
+float WindowLayoutPolicy::GetVirtualPixelRatio() const
+{
+    auto display = DisplayManager::GetInstance().GetDisplayById(screenId_);
+    if (display == nullptr) {
+        WLOGFE("GetVirtualPixel fail. Get display fail. displayId:%{public}" PRIu64", use Default vpr:1.0", screenId_);
+        return 1.0;  // Use DefaultVPR 1.0
+    }
+
+    float virtualPixelRatio = display->GetVirtualPixelRatio();
+    if (virtualPixelRatio == 0.0) {
+        WLOGFE("GetVirtualPixel fail. vpr is 0.0. displayId:%{public}" PRIu64", use Default vpr:1.0", screenId_);
+        return 1.0;  // Use DefaultVPR 1.0
+    }
+
+    WLOGFI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", screenId_, virtualPixelRatio);
+    return virtualPixelRatio;
 }
 }
 }

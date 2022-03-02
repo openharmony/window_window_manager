@@ -28,35 +28,36 @@
 #include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
-class DMSDeathRecipient : public IRemoteObject::DeathRecipient {
+class BaseAdapter {
 public:
-    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
-};
-
-class DisplayManagerAdapter {
-WM_DECLARE_SINGLE_INSTANCE(DisplayManagerAdapter);
-public:
-    virtual DisplayId GetDefaultDisplayId();
-    virtual sptr<Display> GetDisplayById(DisplayId displayId);
-
-    virtual ScreenId CreateVirtualScreen(VirtualScreenOption option);
-    virtual DMError DestroyVirtualScreen(ScreenId screenId);
-    virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
-    virtual bool RequestRotation(ScreenId screenId, Rotation rotation);
-    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
-
-    // colorspace, gamut
-    virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);
-    virtual DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut);
-    virtual DMError SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx);
-    virtual DMError GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap);
-    virtual DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap);
-    virtual DMError SetScreenColorTransform(ScreenId screenId);
-
     virtual bool RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
     virtual bool UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
+    virtual void Clear();
+protected:
+    bool InitDMSProxy();
+    std::recursive_mutex mutex_;
+    sptr<IDisplayManager> displayManagerServiceProxy_ = nullptr;
+    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
+    bool isProxyValid_ { false };
+};
+
+class DMSDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    DMSDeathRecipient(BaseAdapter& adapter);
+    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+private:
+    BaseAdapter& adapter_;
+};
+
+class DisplayManagerAdapter : public BaseAdapter {
+WM_DECLARE_SINGLE_INSTANCE(DisplayManagerAdapter);
+public:
+    virtual DisplayId GetDefaultDisplayId();
+    virtual sptr<DisplayInfo> GetDisplayInfoByScreenId(ScreenId screenId);
+    virtual std::vector<DisplayId> GetAllDisplayIds();
+    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId);
     virtual bool WakeUpBegin(PowerStateChangeReason reason);
     virtual bool WakeUpEnd();
     virtual bool SuspendBegin(PowerStateChangeReason reason);
@@ -65,26 +66,35 @@ public:
     virtual bool SetDisplayState(DisplayState state);
     virtual DisplayState GetDisplayState(DisplayId displayId);
     virtual void NotifyDisplayEvent(DisplayEvent event);
-    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
-    virtual void Clear();
-    virtual sptr<Screen> GetScreenById(ScreenId screenId);
-    virtual sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
-    virtual std::vector<sptr<Screen>> GetAllScreens();
-    virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
-    virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
-
+    virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
 private:
-    bool InitDMSProxyLocked();
-
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
+};
 
-    std::recursive_mutex mutex_;
-    sptr<IDisplayManager> displayManagerServiceProxy_ = nullptr;
-    sptr<DMSDeathRecipient> dmsDeath_ = nullptr;
-    std::map<DisplayId, sptr<Display>> displayMap_;
-    std::map<ScreenId, sptr<Screen>> screenMap_;
-    std::map<ScreenId, sptr<ScreenGroup>> screenGroupMap_;
-    DisplayId defaultDisplayId_;
+class ScreenManagerAdapter : public BaseAdapter {
+WM_DECLARE_SINGLE_INSTANCE(ScreenManagerAdapter);
+public:
+    virtual ScreenId CreateVirtualScreen(VirtualScreenOption option);
+    virtual DMError DestroyVirtualScreen(ScreenId screenId);
+    virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    virtual bool SetOrientation(ScreenId screenId, Orientation orientation);
+    virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId);
+    virtual std::vector<sptr<ScreenInfo>> GetAllScreenInfos();
+    virtual ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
+    virtual ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
+    virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId>);
+    virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
+    virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
+
+    // colorspace, gamut
+    virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);
+    virtual DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut);
+    virtual DMError SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx);
+    virtual DMError GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap);
+    virtual DMError SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap);
+    virtual DMError SetScreenColorTransform(ScreenId screenId);
+private:
+    static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DM_DISPLAY_MANAGER_ADAPTER_H

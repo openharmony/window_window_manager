@@ -30,6 +30,7 @@ group("systemtest") {
     ":wm_window_split_immersive_test",
     ":wm_window_split_test",
     ":wm_window_subwindow_test",
+    ":wm_window_visibility_info_test",
   ]
 }
 
@@ -153,6 +154,17 @@ ohos_systemtest("wm_window_gamut_test") {
 }
 
 ## SystemTest window_gamut_test }}}
+
+## SystemTest wm_window_visibility_info_test {{{
+ohos_systemtest("wm_window_visibility_info_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_visibility_info_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+}
+
+## SystemTest wm_window_visibility_info_test }}}
 
 ## Build wm_systemtest_common.a {{{
 config("wm_systemtest_common_public_config") {

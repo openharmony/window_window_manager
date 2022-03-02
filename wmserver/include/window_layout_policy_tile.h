@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_LAYOUT_POLICY_TILE_H
 
 #include <map>
+#include <queue>
 #include <refbase.h>
 #include <set>
 
@@ -34,20 +35,21 @@ public:
     ~WindowLayoutPolicyTile() = default;
     void Launch() override;
     void AddWindowNode(sptr<WindowNode>& node) override;
+    void RemoveWindowNode(sptr<WindowNode>& node) override;
     void UpdateLayoutRect(sptr<WindowNode>& node) override;
 
 private:
     Rect singleRect_ = { 0, 0, 0, 0 };
     std::vector<Rect> doubleRects_ = std::vector<Rect>(2);
     std::vector<Rect> tripleRects_ = std::vector<Rect>(3);
-    std::vector<sptr<WindowNode>> foregroundNodes_;
-    uint32_t lastForegroundNodeId_ = 0;
+    std::deque<sptr<WindowNode>> foregroundNodes_;
     void UpdateDisplayInfo() override;
     void InitTileWindowRects();
     void AssignNodePropertyForTileWindows();
     void LayoutForegroundNodeQueue();
     void InitForegroundNodeQueue();
-    void UpdateForegroundNodeQueue(sptr<WindowNode>& node);
+    void ForegroundNodeQueuePushBack(sptr<WindowNode>& node);
+    void ForegroundNodeQueueRemove(sptr<WindowNode>& node);
 };
 }
 }

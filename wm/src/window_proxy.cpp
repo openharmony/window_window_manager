@@ -25,20 +25,11 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowProxy"};
 }
 
-void WindowProxy::UpdateWindowProperty(const WindowProperty& windowProperty)
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFW("remote is nullptr");
-        return;
-    }
-}
-
 void WindowProxy::UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -64,7 +55,7 @@ void WindowProxy::UpdateWindowMode(WindowMode mode)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -84,7 +75,7 @@ void WindowProxy::UpdateFocusStatus(bool focused)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -105,7 +96,7 @@ void WindowProxy::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -135,7 +126,7 @@ void WindowProxy::UpdateWindowState(WindowState state)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -170,6 +161,24 @@ void WindowProxy::UpdateWindowDragInfo(const PointInfo& point, DragEvent event)
 
     if (Remote()->SendRequest(TRANS_ID_UPDATE_DRAG_EVENT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest TRANS_ID_UPDATE_DRAG_EVENT failed");
+    }
+}
+    
+void WindowProxy::UpdateDisplayId(DisplayId from, DisplayId to)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!(data.WriteUint64(from) and data.WriteUint64(to))) {
+        WLOGFE("Write displayid failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_UPDATE_DISPLAY_ID, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest TRANS_ID_UPDATE_DISPLAY_ID failed");
     }
 }
 } // namespace Rosen

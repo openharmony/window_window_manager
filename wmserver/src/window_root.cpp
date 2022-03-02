@@ -16,6 +16,7 @@
 #include "window_root.h"
 
 #include <cinttypes>
+#include <hisysevent.h>
 
 #include "display_manager_service_inner.h"
 #include "window_helper.h"
@@ -146,6 +147,22 @@ void WindowRoot::MinimizeAllAppWindows(DisplayId displayId)
     return container->MinimizeAllAppWindows();
 }
 
+WMError WindowRoot::MaxmizeWindow(uint32_t windowId)
+{
+    auto node = GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("add window failed, window container could not be found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    container->NotifySystemBarDismiss(node);
+    return WMError::WM_OK;
+}
+
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
 {
     if (node == nullptr) {
@@ -171,6 +188,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
     }
     if (res == WMError::WM_OK && node->GetWindowProperty()->GetFocusable()) {
         container->SetFocusWindow(node->GetWindowId());
+        needCheckFocusWindow = true;
     }
     return res;
 }
@@ -191,7 +209,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
     return container->RemoveWindowNode(node);
 }
 
-WMError WindowRoot::UpdateWindowNode(uint32_t windowId)
+WMError WindowRoot::UpdateWindowNode(uint32_t windowId, WindowUpdateReason reason)
 {
     auto node = GetWindowNode(windowId);
     if (node == nullptr) {
@@ -203,7 +221,7 @@ WMError WindowRoot::UpdateWindowNode(uint32_t windowId)
         WLOGFE("add window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return container->UpdateWindowNode(node);
+    return container->UpdateWindowNode(node, reason);
 }
 
 WMError WindowRoot::EnterSplitWindowMode(sptr<WindowNode>& node)
@@ -391,12 +409,32 @@ void WindowRoot::NotifyDisplayChange(sptr<AbstractDisplay> abstractDisplay)
     container->UpdateDisplayRect(abstractDisplay->GetWidth(), abstractDisplay->GetHeight());
 }
 
+void WindowRoot::NotifySystemBarTints()
+{
+    WLOGFD("notify current system bar tints");
+    for (auto& it : windowNodeContainerMap_) {
+        if (it.second != nullptr) {
+            it.second->NotifySystemBarTints();
+        }
+    }
+}
+
 WMError WindowRoot::RaiseZOrderForAppWindow(sptr<WindowNode>& node)
 {
     if (node == nullptr) {
         WLOGFW("add window failed, node is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+        if (container == nullptr) {
+            WLOGFW("window container could not be found");
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        container->RaiseSplitRelatedWindowToTop(node);
+        return WMError::WM_OK;
+    }
+
     if (!WindowHelper::IsAppWindow(node->GetWindowType())) {
         WLOGFW("window is not app window");
         return WMError::WM_ERROR_INVALID_TYPE;
@@ -457,15 +495,97 @@ WMError WindowRoot::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mo
     return ret;
 }
 
-void WindowRoot::NotifyDisplayDestory(DisplayId expandDisplayId)
+std::string WindowRoot::GenAllWindowsLogInfo() const
 {
-    WLOGFW("disconnect expand display, get default and expand display container");
-    DisplayId defaultDisplayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
-    auto expandDisplaycontainer = GetOrCreateWindowNodeContainer(expandDisplayId);
-    auto defaultDisplaycontainer = GetOrCreateWindowNodeContainer(defaultDisplayId);
+    std::ostringstream os;
+    WindowNodeOperationFunc func = [&os](sptr<WindowNode> node) {
+        if (node == nullptr) {
+            WLOGE("WindowNode is nullptr");
+            return false;
+        }
+        os<<"window_name:"<<node->GetWindowName()<<",id:"<<node->GetWindowId()<<
+           ",focusable:"<<node->GetWindowProperty()->GetFocusable()<<";";
+        return false;
+    };
 
-    defaultDisplaycontainer->MoveWindowNode(expandDisplaycontainer);
-    NotifyDisplayRemoved(expandDisplayId);
+    for (auto& elem : windowNodeContainerMap_) {
+        if (elem.second == nullptr) {
+            continue;
+        }
+        os<<"Display "<<elem.second->GetDisplayId()<<":";
+        elem.second->TraverseWindowTree(func, true);
+    }
+    return os.str();
+}
+
+void WindowRoot::FocusFaultDetection() const
+{
+    if (!needCheckFocusWindow) {
+        return;
+    }
+    bool needReport = true;
+    uint32_t focusWinId = INVALID_WINDOW_ID;
+    for (auto& elem : windowNodeContainerMap_) {
+        if (elem.second == nullptr) {
+            continue;
+        }
+        focusWinId = elem.second->GetFocusWindow();
+        if (focusWinId != INVALID_WINDOW_ID) {
+            needReport = false;
+            sptr<WindowNode> windowNode = GetWindowNode(focusWinId);
+            if (windowNode == nullptr || !windowNode->currentVisibility_) {
+                needReport = true;
+                WLOGFE("The focus windowNode is nullptr or is invisible, focusWinId: %{public}u", focusWinId);
+                break;
+            }
+        }
+    }
+    if (needReport) {
+        std::string windowLog(GenAllWindowsLogInfo());
+        WLOGFE("The focus window is faulty, focusWinId:%{public}u, %{public}s", focusWinId, windowLog.c_str());
+        int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "NO_FOCUS_WINDOW",
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+            "PID", getpid(),
+            "UID", getuid(),
+            "PACKAGE_NAME", "foundation",
+            "PROCESS_NAME", "foundation",
+            "MSG", windowLog);
+        if (ret != 0) {
+            WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+        }
+    }
+}
+
+void WindowRoot::NotifyDisplayDestroy(DisplayId expandDisplayId)
+{
+    WLOGFD("disconnect expand display, get default and expand display container");
+    DisplayId defaultDisplayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    // get all windowNode below expand display, and reset its displayId
+    for (auto iter = windowNodeMap_.begin(); iter != windowNodeMap_.end(); iter++) {
+        auto node = iter->second;
+        if (node->GetDisplayId() != expandDisplayId) {
+            continue;
+        }
+        node->SetDisplayId(defaultDisplayId);
+        node->GetWindowToken()->UpdateDisplayId(expandDisplayId, defaultDisplayId);
+    }
+    // move windowNode from expand display container to default display container
+    auto expandDisplayContainer = GetOrCreateWindowNodeContainer(expandDisplayId);
+    auto defaultDisplayContainer = GetOrCreateWindowNodeContainer(defaultDisplayId);
+    if (expandDisplayContainer == nullptr || defaultDisplayContainer == nullptr) {
+        WLOGFE("window node container is nullptr!");
+        return;
+    }
+    defaultDisplayContainer->MoveWindowNode(expandDisplayContainer);
+    windowNodeContainerMap_.erase(expandDisplayId);
+}
+
+float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
+{
+    auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
+    return container->GetVirtualPixelRatio();
 }
 }
 }

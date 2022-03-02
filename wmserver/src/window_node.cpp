@@ -22,6 +22,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowNode"};
 }
+
 void WindowNode::SetDisplayId(DisplayId displayId)
 {
     property_->SetDisplayId(displayId);
@@ -30,6 +31,11 @@ void WindowNode::SetDisplayId(DisplayId displayId)
 void WindowNode::SetLayoutRect(const Rect& rect)
 {
     layoutRect_ = rect;
+}
+
+void WindowNode::SetHotZoneRect(const Rect& rect)
+{
+    hotZoneRect_ = rect;
 }
 
 void WindowNode::SetWindowRect(const Rect& rect)
@@ -128,23 +134,7 @@ const Rect& WindowNode::GetLayoutRect() const
 
 Rect WindowNode::GetHotZoneRect() const
 {
-    Rect rect = layoutRect_;
-    if (GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        const int32_t divHotZone = 20;
-        if (rect.width_ < rect.height_) {
-            rect.posX_ -= divHotZone;
-            rect.width_ += (divHotZone + divHotZone);
-        } else {
-            rect.posY_ -= divHotZone;
-            rect.height_ += (divHotZone + divHotZone);
-        }
-    } else if (WindowHelper::IsMainFloatingWindow(GetWindowType(), GetWindowMode())) {
-        rect.posX_ -= HOTZONE;
-        rect.posY_ -= HOTZONE;
-        rect.width_ += (HOTZONE + HOTZONE);
-        rect.height_ += (HOTZONE + HOTZONE);
-    }
-    return rect;
+    return hotZoneRect_;
 }
 
 WindowType WindowNode::GetWindowType() const

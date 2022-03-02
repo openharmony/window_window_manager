@@ -23,6 +23,7 @@
 #include <key_event.h>
 #include <refbase.h>
 #include <ui_content.h>
+#include <ui/rs_surface_node.h>
 
 #include "input_transfer_station.h"
 #include "vsync_station.h"
@@ -107,6 +108,8 @@ public:
     virtual void UnregisterAvoidAreaChangeListener() override;
     virtual void RegisterDragListener(sptr<IWindowDragListener>& listener) override;
     virtual void UnregisterDragListener(sptr<IWindowDragListener>& listener) override;
+    virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
+    virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
 
     void UpdateRect(const struct Rect& rect, WindowSizeChangeReason reason);
     void UpdateMode(WindowMode mode);
@@ -118,11 +121,13 @@ public:
     void UpdateAvoidArea(const std::vector<Rect>& avoidAreas);
     void UpdateWindowState(WindowState state);
     void UpdateDragEvent(const PointInfo& point, DragEvent event);
+    void UpdateDisplayId(DisplayId from, DisplayId to);
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed) override;
     virtual std::string GetContentInfo() override;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
+    virtual Ace::UIContent* GetUIContent() const override;
 
     // colorspace, gamut
     virtual bool IsSupportWideGamut() override;
@@ -154,6 +159,13 @@ private:
             uiContent_->Destroy();
         }
     }
+    inline void NotifyBeforeSubWindowDestroy(sptr<Window>& window) const
+    {
+        auto uiContent = window->GetUIContent();
+        if (uiContent != nullptr) {
+            uiContent->Destroy();
+        }
+    }
     void SetDefaultOption(); // for api7
     bool IsWindowValid() const;
     void OnVsync(int64_t timeStamp);
@@ -167,6 +179,14 @@ private:
     bool IsPointerEventConsumed();
     void AdjustWindowAnimationFlag();
     void MapFloatingWindowToAppIfNeeded();
+    // colorspace, gamut
+    using ColorSpaceConvertMap = struct {
+        ColorSpace colorSpace;
+        SurfaceColorGamut sufaceColorGamut;
+    };
+    static const ColorSpaceConvertMap colorSpaceConvertMap[];
+    static ColorSpace GetColorSpaceFromSurfaceGamut(SurfaceColorGamut surfaceColorGamut);
+    static SurfaceColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
 
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
         std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
@@ -179,6 +199,7 @@ private:
     std::vector<sptr<IWindowChangeListener>> windowChangeListeners_;
     sptr<IAvoidAreaChangedListener> avoidAreaChangeListener_;
     std::vector<sptr<IWindowDragListener>> windowDragListeners_;
+    std::vector<sptr<IDisplayMoveListener>> displayMoveListeners_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;

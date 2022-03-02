@@ -45,7 +45,13 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();
             auto info = GetDisplayInfoById(displayId);
-            reply.WriteParcelable(&info);
+            reply.WriteParcelable(info);
+            break;
+        }
+        case TRANS_ID_GET_DISPLAY_BY_SCREEN: {
+            ScreenId screenId = data.ReadUint64();
+            auto info = GetDisplayInfoByScreen(screenId);
+            reply.WriteParcelable(info);
             break;
         }
         case TRANS_ID_CREATE_VIRTUAL_SCREEN: {
@@ -53,11 +59,15 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             uint32_t width = data.ReadUint32();
             uint32_t height = data.ReadUint32();
             float density = data.ReadFloat();
-            sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
-            sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
-            sptr<Surface> surface = Surface::CreateSurfaceAsProducer(bp);
             int32_t flags = data.ReadInt32();
             bool isForShot = data.ReadBool();
+            bool isSurfaceValid = data.ReadBool();
+            sptr<Surface> surface = nullptr;
+            if (isSurfaceValid) {
+                sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
+                sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
+                surface = Surface::CreateSurfaceAsProducer(bp);
+            }
             VirtualScreenOption option = {
                 .name_ = name,
                 .width_ = width,
@@ -79,22 +89,26 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
         case TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
-            sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
-            sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
-            sptr<Surface> surface = Surface::CreateSurfaceAsProducer(bp);
+            bool isSurfaceValid = data.ReadBool();
+            sptr<Surface> surface = nullptr;
+            if (isSurfaceValid) {
+                sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
+                sptr<IBufferProducer> bp = iface_cast<IBufferProducer>(surfaceObject);
+                surface = Surface::CreateSurfaceAsProducer(bp);
+            }
             DMError result = SetVirtualScreenSurface(screenId, surface);
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
-        case TRANS_ID_REQUEST_ROTATION: {
+        case TRANS_ID_SET_ORIENTATION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
-            Rotation rotation = static_cast<Rotation>(data.ReadUint32());
-            reply.WriteBool(RequestRotation(screenId, rotation));
+            Orientation orientation = static_cast<Orientation>(data.ReadUint32());
+            reply.WriteBool(SetOrientation(screenId, orientation));
             break;
         }
         case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
             DisplayId displayId = data.ReadUint64();
-            std::shared_ptr<Media::PixelMap> dispalySnapshot = GetDispalySnapshot(displayId);
+            std::shared_ptr<Media::PixelMap> dispalySnapshot = GetDisplaySnapshot(displayId);
             if (dispalySnapshot == nullptr) {
                 reply.WriteParcelable(nullptr);
                 break;
@@ -159,16 +173,16 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 WLOGE("fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
                 break;
             }
-            DMError result = MakeMirror(mainScreenId, mirrorScreenId);
-            reply.WriteInt32(static_cast<int32_t>(result));
+            ScreenId result = MakeMirror(mainScreenId, mirrorScreenId);
+            reply.WriteUint64(static_cast<uint64_t>(result));
             break;
         }
         case TRANS_ID_GET_SCREEN_INFO_BY_ID: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenInfo = GetScreenInfoById(screenId);
-            for (int i = 0; i < screenInfo->modes_.size(); i++) {
+            for (auto& mode : screenInfo->GetModes()) {
                 WLOGFI("info modes is width: %{public}u, height: %{public}u, freshRate: %{public}u",
-                    screenInfo->modes_[i]->width_, screenInfo->modes_[i]->height_, screenInfo->modes_[i]->freshRate_);
+                    mode->width_, mode->height_, mode->freshRate_);
             }
             reply.WriteStrongParcelable(screenInfo);
             break;
@@ -188,6 +202,11 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             }
             break;
         }
+        case TRANS_ID_GET_ALL_DISPLAYIDS: {
+            std::vector<DisplayId> allDisplayIds = GetAllDisplayIds();
+            reply.WriteUInt64Vector(allDisplayIds);
+            break;
+        }
         case TRANS_ID_SCREEN_MAKE_EXPAND: {
             std::vector<ScreenId> screenId;
             if (!data.ReadUInt64Vector(&screenId)) {
@@ -200,8 +219,17 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 Point point { data.ReadInt32(), data.ReadInt32() };
                 startPoint.push_back(point);
             }
-            DMError result = MakeExpand(screenId, startPoint);
-            reply.WriteInt32(static_cast<int32_t>(result));
+            ScreenId result = MakeExpand(screenId, startPoint);
+            reply.WriteUint64(static_cast<uint64_t>(result));
+            break;
+        }
+        case TRANS_ID_SCREEN_MAKE_MIRROR_OR_EXPAND_CANCELED: {
+            std::vector<ScreenId> screenId;
+            if (!data.ReadUInt64Vector(&screenId)) {
+                WLOGE("fail to receive screens in stub.");
+                break;
+            }
+            RemoveVirtualScreenFromGroup(screenId);
             break;
         }
         case TRANS_ID_SET_SCREEN_ACTIVE_MODE: {

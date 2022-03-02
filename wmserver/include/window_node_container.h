@@ -27,13 +27,14 @@
 
 namespace OHOS {
 namespace Rosen {
+using WindowNodeOperationFunc = std::function<bool(sptr<WindowNode>)>; // return true indicates to stop traverse
 class WindowNodeContainer : public RefBase {
 public:
     WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height);
     ~WindowNodeContainer();
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);
-    WMError UpdateWindowNode(sptr<WindowNode>& node);
+    WMError UpdateWindowNode(sptr<WindowNode>& node, WindowUpdateReason reason);
     WMError DestroyWindowNode(sptr<WindowNode>& node, std::vector<uint32_t>& windowIds);
     const std::vector<uint32_t>& Destroy();
     void AssignZOrder();
@@ -50,24 +51,24 @@ public:
     void UpdateDisplayRect(uint32_t width, uint32_t height);
 
     void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas);
-    void LayoutDividerWindow(sptr<WindowNode>& node);
     bool isVerticalDisplay() const;
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     sptr<WindowNode> GetNextFocusableWindow(uint32_t windowId) const;
     void MinimizeAllAppWindows();
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
+    void NotifySystemBarTints();
+    void NotifySystemBarDismiss(sptr<WindowNode>& node);
     WMError MinimizeAppNodeExceptOptions(const std::vector<uint32_t> &exceptionalIds = {},
                                          const std::vector<WindowMode> &exceptionalModes = {});
     WMError EnterSplitWindowMode(sptr<WindowNode>& node);
     WMError ExitSplitWindowMode(sptr<WindowNode>& node);
     WMError SwitchLayoutPolicy(WindowLayoutMode mode, bool reorder = false);
+    void RaiseSplitRelatedWindowToTop(sptr<WindowNode>& node);
     void MoveWindowNode(sptr<WindowNodeContainer>& container);
-    sptr<WindowNode> GetBelowAppWindowNode() const;
-    sptr<WindowNode> GetAppWindowNode() const;
-    sptr<WindowNode> GetAboveAppWindowNode() const;
+    float GetVirtualPixelRatio() const;
+    void TraverseWindowTree(const WindowNodeOperationFunc& func, bool isFromTopToBottom = true) const;
 
 private:
-    void AssignZOrder(sptr<WindowNode>& node);
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
     sptr<WindowNode> FindWindowNodeById(uint32_t id) const;
@@ -85,11 +86,16 @@ private:
     bool IsTopAppWindow(uint32_t windowId) const;
     sptr<WindowNode> FindDividerNode() const;
     void RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes);
-    void RaiseZOrderForSplitWindow(sptr<WindowNode>& node);
     void MinimizeWindowFromAbility(const sptr<WindowNode>& node);
     void ResetLayoutPolicy();
     bool IsFullImmersiveNode(sptr<WindowNode> node) const;
     bool IsSplitImmersiveNode(sptr<WindowNode> node) const;
+    bool TraverseFromTopToBottom(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
+    bool TraverseFromBottomToTop(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
+
+    // cannot determine in case of a window covered by union of several windows or with transparent value
+    void UpdateWindowVisibilityInfos(std::vector<sptr<WindowVisibilityInfo>>& infos);
+    void RaiseOrderedWindowToTop(std::vector<uint32_t> orderedIds, std::vector<sptr<WindowNode>>& windowNodes);
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
@@ -99,6 +105,7 @@ private:
     std::vector<uint32_t> removedIds_;
     DisplayId displayId_ = 0;
     Rect displayRect_;
+    std::vector<Rect> currentCoveredArea_;
     std::unordered_map<WindowType, sptr<WindowNode>> sysBarNodeMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     nullptr },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, nullptr },
@@ -121,7 +128,9 @@ private:
     std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
     const int32_t WINDOW_TYPE_RAISED_INPUT_METHOD = 115;
+
+    static bool ReadIsWindowAnimationEnabledProperty();
 };
-}
-}
+} // namespace Rosen
+} // namespace OHOS
 #endif // OHOS_ROSEN_WINDOW_NODE_CONTAINER_H

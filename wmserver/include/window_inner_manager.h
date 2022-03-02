@@ -27,7 +27,7 @@
 #endif
 #include "transaction/rs_transaction.h"
 #include "ui/rs_surface_extractor.h"
-#include "single_instance.h"
+#include "wm_single_instance.h"
 #include "singleton_delegator.h"
 #include "window.h"
 #include "wm_common.h"
@@ -51,10 +51,10 @@ WM_DECLARE_SINGLE_INSTANCE(WindowInnerManager);
 public:
     void Init();
     void SendMessage(InnerWMCmd cmdType, DisplayId displayId = 0);
-    void HandleMessage();
 private:
     static inline SingletonDelegator<WindowInnerManager> delegator;
 
+    void HandleMessage();
     sptr<Window> CreateWindow(DisplayId displayId, const WindowType& type, const Rect& rect);
     void CreateAndShowDivider(std::unique_ptr<WindowMessage> msg);
     void HideAndDestroyDivider(std::unique_ptr<WindowMessage> msg);

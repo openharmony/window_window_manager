@@ -23,25 +23,44 @@ namespace OHOS {
 namespace Rosen {
 class MockDisplayManagerAdapter : public DisplayManagerAdapter {
 public:
-    MOCK_METHOD0(GetDefaultDisplayId, DisplayId());
-    MOCK_METHOD1(GetDisplayById, sptr<Display>(DisplayId displayId));
-    MOCK_METHOD1(CreateVirtualScreen, ScreenId(VirtualScreenOption option));
-    MOCK_METHOD1(DestroyVirtualScreen, DMError(ScreenId screenId));
-    MOCK_METHOD1(GetDisplaySnapshot, std::shared_ptr<Media::PixelMap>(DisplayId displayId));
     MOCK_METHOD0(Clear, void());
     MOCK_METHOD2(RegisterDisplayManagerAgent, bool(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type));
     MOCK_METHOD2(UnregisterDisplayManagerAgent, bool(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type));
+    MOCK_METHOD0(GetDefaultDisplayId, DisplayId());
+    MOCK_METHOD1(GetDisplayInfoByScreenId, sptr<DisplayInfo>(ScreenId screenId));
+    MOCK_METHOD1(GetDisplaySnapshot, std::shared_ptr<Media::PixelMap>(DisplayId displayId));
+
     MOCK_METHOD1(WakeUpBegin, bool(PowerStateChangeReason reason));
     MOCK_METHOD0(WakeUpEnd, bool());
     MOCK_METHOD1(SuspendBegin, bool(PowerStateChangeReason reason));
     MOCK_METHOD0(SuspendEnd, bool());
     MOCK_METHOD2(SetScreenPowerForAll, bool(DisplayPowerState state, PowerStateChangeReason reason));
     MOCK_METHOD1(SetDisplayState, bool(DisplayState state));
-    MOCK_METHOD1(GetDisplayState, DisplayState(uint64_t displayId));
+    MOCK_METHOD1(GetDisplayState, DisplayState(DisplayId displayId));
+    MOCK_METHOD1(NotifyDisplayEvent, void(DisplayEvent event));
+    MOCK_METHOD1(GetDisplayInfo, sptr<DisplayInfo>(DisplayId displayId));
+};
+
+class MockScreenManagerAdapter : public ScreenManagerAdapter {
+public:
+    MOCK_METHOD0(Clear, void());
+    MOCK_METHOD2(RegisterDisplayManagerAgent, bool(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+        DisplayManagerAgentType type));
+    MOCK_METHOD2(UnregisterDisplayManagerAgent, bool(const sptr<IDisplayManagerAgent>& displayManagerAgent,
+        DisplayManagerAgentType type));
+    MOCK_METHOD2(RequestRotation, bool(ScreenId screenId, Rotation rotation));
+    MOCK_METHOD1(CreateVirtualScreen, ScreenId(VirtualScreenOption option));
+    MOCK_METHOD1(DestroyVirtualScreen, DMError(ScreenId screenId));
+    MOCK_METHOD2(SetVirtualScreenSurface, DMError(ScreenId screenId, sptr<Surface> surface));
+    MOCK_METHOD1(GetScreenGroupInfoById, sptr<ScreenGroupInfo>(ScreenId screenId));
+    MOCK_METHOD0(GetAllScreenInfos, std::vector<sptr<ScreenInfo>>());
+    MOCK_METHOD2(MakeMirror, ScreenId(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId));
+    MOCK_METHOD2(MakeExpand, ScreenId(std::vector<ScreenId> screenId, std::vector<Point> startPoint));
     MOCK_METHOD2(SetScreenActiveMode, bool(ScreenId screenId, uint32_t modeId));
-    MOCK_METHOD2(MakeExpand, DMError(std::vector<ScreenId> screenId, std::vector<Point> startPoint));
+    MOCK_METHOD1(GetScreenInfo, sptr<ScreenInfo>(ScreenId screenId));
+
     MOCK_METHOD2(GetScreenSupportedColorGamuts, DMError(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts));
     MOCK_METHOD2(GetScreenColorGamut, DMError(ScreenId screenId, ScreenColorGamut& colorGamut));
     MOCK_METHOD2(SetScreenColorGamut, DMError(ScreenId screenId, int32_t colorGamutIdx));

@@ -78,7 +78,7 @@ static std::string GetHexColor(uint32_t color)
     std::string temp;
     ioss << std::setiosflags(std::ios::uppercase) << std::hex << color;
     ioss >> temp;
-    int count = RGBA_LENGTH - temp.length();
+    int count = RGBA_LENGTH - static_cast<int>(temp.length());
     std::string tmpColor(count, '0');
     tmpColor += temp;
     std::string finalColor("#");

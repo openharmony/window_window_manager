@@ -25,8 +25,9 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractScreenGroup"};
 }
 
-AbstractScreen::AbstractScreen(ScreenId dmsId, ScreenId rsId)
-    : dmsId_(dmsId), rsId_(rsId), screenController_(DisplayManagerService::GetInstance().abstractScreenController_)
+AbstractScreen::AbstractScreen(const std::string& name, ScreenId dmsId, ScreenId rsId)
+    : name_(name), dmsId_(dmsId), rsId_(rsId),
+    screenController_(DisplayManagerService::GetInstance().abstractScreenController_)
 {
 }
 
@@ -53,7 +54,7 @@ sptr<AbstractScreenGroup> AbstractScreen::GetGroup() const
     return DisplayManagerService::GetInstance().GetAbstractScreenController()->GetAbstractScreenGroup(groupDmsId_);
 }
 
-const sptr<ScreenInfo> AbstractScreen::ConvertToScreenInfo() const
+sptr<ScreenInfo> AbstractScreen::ConvertToScreenInfo() const
 {
     sptr<ScreenInfo> info = new ScreenInfo();
     FillScreenInfo(info);
@@ -68,18 +69,11 @@ void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, b
     }
     WLOGFI("AbstractScreen::UpdateRSTree");
 
-    // default duration 350ms
-    static const RSAnimationTimingProtocol timingProtocol(350);
-    // default curve EASE OUT
-    static const Rosen::RSAnimationTimingCurve curve = Rosen::RSAnimationTimingCurve::EASE_OUT;
-    // add or remove window with transition animation
-    RSNode::Animate(timingProtocol, curve, [=]() {
-        if (isAdd) {
-            rsDisplayNode_->AddChild(surfaceNode, -1);
-        } else {
-            rsDisplayNode_->RemoveChild(surfaceNode);
-        }
-    });
+    if (isAdd) {
+        rsDisplayNode_->AddChild(surfaceNode, -1);
+    } else {
+        rsDisplayNode_->RemoveChild(surfaceNode);
+    }
 }
 
 void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
@@ -91,6 +85,10 @@ void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
     }
     rsDisplayNode_ = rsDisplayNode;
     rSDisplayNodeConfig_ = config;
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
 }
 
 DMError AbstractScreen::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts)
@@ -195,22 +193,52 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
     info->parent_ = groupDmsId_;
     info->canHasChild_ = canHasChild_;
     info->rotation_ = rotation_;
+    info->orientation_ = orientation_;
+    info->type_ = type_;
     info->modeId_ = activeIdx_;
     info->modes_ = modes_;
 }
 
-Rotation AbstractScreen::GetRotation() const
+bool AbstractScreen::SetOrientation(Orientation orientation)
 {
-    return rotation_;
+    orientation_ = orientation;
+    return true;
 }
 
-void AbstractScreen::RequestRotation(Rotation rotation)
+Rotation AbstractScreen::CalcRotation(Orientation orientation) const
 {
-    rotation_ = rotation;
+    if (activeIdx_ < 0 || activeIdx_ >= modes_.size()) {
+        WLOGE("active mode index is wrong: %{public}d", activeIdx_);
+        return Rotation::ROTATION_0;
+    }
+    sptr<SupportedScreenModes> info = modes_[activeIdx_];
+    // virtical: phone(Plugin screen); horizontal: pad & external screen
+    bool isVerticalScreen = info->width_ < info->height_;
+    switch (orientation) {
+        case Orientation::UNSPECIFIED: {
+            return Rotation::ROTATION_0;
+        }
+        case Orientation::VERTICAL: {
+            return isVerticalScreen ? Rotation::ROTATION_0 : Rotation::ROTATION_90;
+        }
+        case Orientation::HORIZONTAL: {
+            return isVerticalScreen ? Rotation::ROTATION_90 : Rotation::ROTATION_0;
+        }
+        case Orientation::REVERSE_VERTICAL: {
+            return isVerticalScreen ? Rotation::ROTATION_180 : Rotation::ROTATION_270;
+        }
+        case Orientation::REVERSE_HORIZONTAL: {
+            return isVerticalScreen ? Rotation::ROTATION_270 : Rotation::ROTATION_180;
+        }
+        default: {
+            WLOGE("unknown orientation %{public}u", orientation);
+            return Rotation::ROTATION_0;
+        }
+    }
 }
 
 AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId, ScreenCombination combination)
-    : AbstractScreen(dmsId, rsId), combination_(combination)
+    : AbstractScreen("", dmsId, rsId), combination_(combination)
 {
     type_ = ScreenType::UNDEFINE;
     canHasChild_ = true;
@@ -222,7 +250,7 @@ AbstractScreenGroup::~AbstractScreenGroup()
     abstractScreenMap_.clear();
 }
 
-const sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
+sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
 {
     sptr<ScreenGroupInfo> screenGroupInfo = new ScreenGroupInfo();
     FillScreenInfo(screenGroupInfo);
@@ -303,7 +331,7 @@ bool AbstractScreenGroup::AddChildren(std::vector<sptr<AbstractScreen>>& dmsScre
     }
     bool res = true;
     for (size_t i = 0; i < size; i++) {
-        res &= AddChild(dmsScreens[i], startPoints[i]);
+        res = AddChild(dmsScreens[i], startPoints[i]) && res;
     }
     return res;
 }

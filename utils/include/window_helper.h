@@ -17,6 +17,7 @@
 #define OHOS_WM_INCLUDE_WM_HELPER_H
 
 #include <wm_common.h>
+#include <wm_common_inner.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -24,12 +25,12 @@ class WindowHelper {
 public:
     static inline bool IsMainWindow(WindowType type)
     {
-        return (type >= WindowType::APP_MAIN_WINDOW_BASE && type <= WindowType::APP_MAIN_WINDOW_END);
+        return (type >= WindowType::APP_MAIN_WINDOW_BASE && type < WindowType::APP_MAIN_WINDOW_END);
     }
 
     static inline bool IsSubWindow(WindowType type)
     {
-        return (type >= WindowType::APP_SUB_WINDOW_BASE && type <= WindowType::APP_SUB_WINDOW_END);
+        return (type >= WindowType::APP_SUB_WINDOW_BASE && type < WindowType::APP_SUB_WINDOW_END);
     }
 
     static inline bool IsAppWindow(WindowType type)
@@ -39,12 +40,12 @@ public:
 
     static inline bool IsBelowSystemWindow(WindowType type)
     {
-        return (type >= WindowType::BELOW_APP_SYSTEM_WINDOW_BASE && type <= WindowType::BELOW_APP_SYSTEM_WINDOW_END);
+        return (type >= WindowType::BELOW_APP_SYSTEM_WINDOW_BASE && type < WindowType::BELOW_APP_SYSTEM_WINDOW_END);
     }
 
     static inline bool IsAboveSystemWindow(WindowType type)
     {
-        return (type >= WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE && type <= WindowType::ABOVE_APP_SYSTEM_WINDOW_END);
+        return (type >= WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE && type < WindowType::ABOVE_APP_SYSTEM_WINDOW_END);
     }
 
     static inline bool IsSystemWindow(WindowType type)
@@ -55,6 +56,11 @@ public:
     static inline bool IsMainFloatingWindow(WindowType type, WindowMode mode)
     {
         return ((IsMainWindow(type)) && (mode == WindowMode::WINDOW_MODE_FLOATING));
+    }
+
+    static inline bool IsAvoidAreaWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR);
     }
 
     static inline bool IsSplitWindowMode(WindowMode mode)
@@ -79,23 +85,28 @@ public:
         return (r.posX_ == 0 && r.posY_ == 0 && r.width_ == 0 && r.height_ == 0);
     }
 
-    static Rect GetFixedWindowRectByMinRect(const Rect& oriDstRect, const Rect& lastRect, bool isVertical)
+    static Rect GetFixedWindowRectByMinRect(const Rect& oriDstRect, const Rect& lastRect, bool isVertical,
+        float virtualPixelRatio)
     {
+        uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
+        uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
         Rect dstRect = oriDstRect;
         if (isVertical) {
-            dstRect.width_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, oriDstRect.width_);
-            dstRect.height_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, oriDstRect.height_);
+            dstRect.width_ = std::max(minVerticalFloatingW, oriDstRect.width_);
+            dstRect.height_ = std::max(minVerticalFloatingH, oriDstRect.height_);
         } else {
-            dstRect.width_ = std::max(MIN_VERTICAL_FLOATING_HEIGHT, oriDstRect.width_);
-            dstRect.height_ = std::max(MIN_VERTICAL_FLOATING_WIDTH, oriDstRect.height_);
+            dstRect.width_ = std::max(minVerticalFloatingH, oriDstRect.width_);
+            dstRect.height_ = std::max(minVerticalFloatingW, oriDstRect.height_);
         }
 
         // limit position by fixed width or height
         if (oriDstRect.posX_ != lastRect.posX_) {
-            dstRect.posX_ = oriDstRect.posX_ + oriDstRect.width_ - dstRect.width_;
+            dstRect.posX_ = oriDstRect.posX_ + static_cast<int32_t>(oriDstRect.width_) -
+                static_cast<int32_t>(dstRect.width_);
         }
         if (oriDstRect.posY_ != lastRect.posY_) {
-            dstRect.posY_ = oriDstRect.posY_ + oriDstRect.height_ - dstRect.height_;
+            dstRect.posY_ = oriDstRect.posY_ + static_cast<int32_t>(oriDstRect.height_) -
+                static_cast<int32_t>(dstRect.height_);
         }
         return dstRect;
     }
@@ -103,9 +114,9 @@ public:
     static bool IsPointInWindow(int32_t pointPosX, int32_t pointPosY, Rect pointRect)
     {
         if ((pointPosX > pointRect.posX_) &&
-            (pointPosX < static_cast<int32_t>(pointRect.posX_ + pointRect.width_)) &&
+            (pointPosX < (pointRect.posX_ + static_cast<int32_t>(pointRect.width_))) &&
             (pointPosY > pointRect.posY_) &&
-            (pointPosY < static_cast<int32_t>(pointRect.posY_ + pointRect.height_))) {
+            (pointPosY < (pointRect.posY_ + static_cast<int32_t>(pointRect.height_)))) {
             return true;
         }
         return false;
