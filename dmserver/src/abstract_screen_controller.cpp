@@ -243,11 +243,16 @@ void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, S
 
 void AbstractScreenController::ScreenConnectionInDisplayInit(sptr<AbstractScreenCallback> abstractScreenCallback)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (dmsScreenMap_.empty()) {
-        return;
+    std::map<ScreenId, sptr<AbstractScreen>> dmsScreenMap;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        dmsScreenMap = dmsScreenMap_;
+        if (dmsScreenMap_.empty()) {
+            return;
+        }
     }
-    for (auto& iter : dmsScreenMap_) {
+
+    for (auto& iter : dmsScreenMap) {
         if (iter.second != nullptr && abstractScreenCallback != nullptr) {
             WLOGFI("dmsScreenId :%{public}" PRIu64"", iter.first);
             abstractScreenCallback->onConnect_(iter.second);
