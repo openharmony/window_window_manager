@@ -113,8 +113,33 @@ void DisplayManagerAgentProxy::OnScreenDisconnect(ScreenId screenId)
     }
 }
 
-void DisplayManagerAgentProxy::OnScreenChange(
-    const std::vector<const sptr<ScreenInfo>>& screenInfos, ScreenChangeEvent event)
+void DisplayManagerAgentProxy::OnScreenChange(const sptr<ScreenInfo>& screenInfo, ScreenChangeEvent event)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteParcelable(screenInfo.GetRefPtr())) {
+        WLOGFE("Write screenInfo failed");
+        return;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(event))) {
+        WLOGFE("Write ScreenChangeEvent failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(TRANS_ID_ON_SCREEN_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void DisplayManagerAgentProxy::OnScreenGroupChange(
+    const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenGroupChangeEvent event)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -130,19 +155,19 @@ void DisplayManagerAgentProxy::OnScreenChange(
         return;
     }
 
-    for (int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         if (!data.WriteParcelable(screenInfos[i].GetRefPtr())) {
-            WLOGFE("Write screenInfos[%{public}d] size failed", i);
+            WLOGFE("Write screenInfos[%{public}zu] size failed", i);
             return;
         }
     }
 
     if (!data.WriteUint32(static_cast<uint32_t>(event))) {
-        WLOGFE("Write ScreenChangeEvent failed");
+        WLOGFE("Write ScreenGroupChangeEvent failed");
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_ON_SCREEN_CHANGED, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(TRANS_ID_ON_SCREENGROUP_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }

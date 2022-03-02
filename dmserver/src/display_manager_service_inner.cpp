@@ -41,23 +41,24 @@ const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDisplayById(DisplayId
 {
     sptr<AbstractDisplay> display = DisplayManagerService::GetInstance().GetAbstractDisplay(displayId);
     if (display == nullptr) {
-        DisplayInfo displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
-        display = new AbstractDisplay(displayInfo);
-        WLOGFE("GetDisplayById create new!\n");
+        WLOGFE("GetDisplayById can not find corresponding display!\n");
     }
     return display;
 }
 
 const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDefaultDisplay()
 {
+    DisplayId defaultDisplayId = GetDefaultDisplayId();
+    if (defaultDisplayId == DISPLAY_ID_INVALD) {
+        WLOGFE("Fail to get default displayId");
+        return nullptr;
+    }
     return GetDisplayById(GetDefaultDisplayId());
 }
 
 std::vector<DisplayId> DisplayManagerServiceInner::GetAllDisplayIds()
 {
-    std::vector<DisplayId> res;
-    res.push_back(GetDefaultDisplayId());
-    return res;
+    return DisplayManagerService::GetInstance().GetAllDisplayIds();
 }
 
 std::vector<const sptr<AbstractDisplay>> DisplayManagerServiceInner::GetAllDisplays()
@@ -90,6 +91,23 @@ const sptr<ScreenInfo> DisplayManagerServiceInner::GetScreenInfoByDisplayId(Disp
 {
     return DisplayManagerService::GetInstance().GetScreenInfoById(
         DisplayManagerService::GetInstance().GetScreenIdByDisplayId(displayId));
+}
+
+const sptr<SupportedScreenModes> DisplayManagerServiceInner::GetScreenModesByDisplayId(DisplayId displayId)
+{
+    const sptr<AbstractDisplay> display = GetDisplayById(displayId);
+    if (display == nullptr) {
+        WLOGFE("can not get display.");
+        return nullptr;
+    }
+    ScreenId dmsScreenId = display->GetAbstractScreenId();
+    sptr<AbstractScreen> abstractScreen =
+        DisplayManagerService::GetInstance().abstractScreenController_->GetAbstractScreen(dmsScreenId);
+    if (abstractScreen == nullptr) {
+        WLOGFE("can not get screenMode.");
+        return nullptr;
+    }
+    return abstractScreen->GetActiveScreenMode();
 }
 
 void DisplayManagerServiceInner::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)

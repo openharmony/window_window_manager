@@ -24,7 +24,7 @@ using namespace OHOS::Rosen;
 int main(int argc, char *argv[])
 {
     CmdArgments cmdArgments;
-    cmdArgments.fileName = "/data/snapshot_display_1.png";
+    cmdArgments.fileName = "";
 
     if (!SnapShotUtils::ProcessArgs(argc, argv, cmdArgments)) {
         return 0;

@@ -14,6 +14,7 @@
  */
 
 #include "avoid_area_controller.h"
+#include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
 
@@ -27,10 +28,17 @@ const int32_t AVOID_NUM = 4;
 
 bool AvoidAreaController::IsAvoidAreaNode(const sptr<WindowNode>& node) const
 {
-    if (avoidType_.find(node->GetWindowType()) != avoidType_.end()) {
-        return true;
+    if (node == nullptr) {
+        WLOGFE("IsAvoidAreaNode Failed, node is nullprt");
+        return false;
     }
-    return false;
+
+    if (!WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
+        WLOGFE("IsAvoidAreaNode Failed, node type is not avoid type");
+        return false;
+    }
+
+    return true;
 }
 
 static AvoidPos GetAvoidPosType(const Rect& rect)
@@ -54,6 +62,11 @@ static AvoidPos GetAvoidPosType(const Rect& rect)
 WMError AvoidAreaController::AddAvoidAreaNode(const sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
+    if (!IsAvoidAreaNode(node)) {
+        WLOGFE("AddAvoidAreaNode check param Failed.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
     uint32_t windowId = node->GetWindowId();
     auto iter = avoidNodes_.find(windowId);
     if (iter != avoidNodes_.end()) {
@@ -75,6 +88,11 @@ WMError AvoidAreaController::AddAvoidAreaNode(const sptr<WindowNode>& node)
 WMError AvoidAreaController::RemoveAvoidAreaNode(const sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
+    if (!IsAvoidAreaNode(node)) {
+        WLOGFE("RemoveAvoidAreaNode check param Failed.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
     uint32_t windowId = node->GetWindowId();
     auto iter = avoidNodes_.find(windowId);
     if (iter == avoidNodes_.end()) {
@@ -96,6 +114,11 @@ WMError AvoidAreaController::RemoveAvoidAreaNode(const sptr<WindowNode>& node)
 WMError AvoidAreaController::UpdateAvoidAreaNode(const sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
+    if (!IsAvoidAreaNode(node)) {
+        WLOGFE("UpdateAvoidAreaNode check param Failed.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
     uint32_t windowId = node->GetWindowId();
     auto iter = avoidNodes_.find(windowId);
     if (iter == avoidNodes_.end()) {

@@ -30,25 +30,19 @@
 #include "screen_info.h"
 
 namespace OHOS::Rosen {
-enum class ScreenType : uint32_t {
-    UNDEFINE,
-    REAL,
-    VIRTUAL
-};
-
 class AbstractScreenGroup;
 class AbstractScreenController;
 class AbstractScreen : public RefBase {
 public:
-    AbstractScreen(ScreenId dmsId, ScreenId rsId);
+    AbstractScreen(const std::string& name, ScreenId dmsId, ScreenId rsId);
     AbstractScreen() = delete;
     ~AbstractScreen();
     sptr<SupportedScreenModes> GetActiveScreenMode() const;
     std::vector<sptr<SupportedScreenModes>> GetAbstractScreenModes() const;
     sptr<AbstractScreenGroup> GetGroup() const;
-    const sptr<ScreenInfo> ConvertToScreenInfo() const;
-    void RequestRotation(Rotation rotation);
-    Rotation GetRotation() const;
+    sptr<ScreenInfo> ConvertToScreenInfo() const;
+    bool SetOrientation(Orientation orientation);
+    Rotation CalcRotation(Orientation orientation) const;
 
     void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     void InitRSDisplayNode(RSDisplayNodeConfig& config);
@@ -61,16 +55,18 @@ public:
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
 
+    const std::string name_;
     ScreenId dmsId_;
     ScreenId rsId_;
     bool canHasChild_ { false };
     std::shared_ptr<RSDisplayNode> rsDisplayNode_;
     RSDisplayNodeConfig rSDisplayNodeConfig_;
-    ScreenId groupDmsId_ {INVALID_SCREEN_ID};
+    ScreenId groupDmsId_ { SCREEN_ID_INVALID };
     ScreenType type_ { ScreenType::REAL };
     int32_t activeIdx_ { 0 };
-    float virtualPixelRatio = { 1.0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};
+    float virtualPixelRatio = { 1.0 };
+    Orientation orientation_ { Orientation::UNSPECIFIED };
     Rotation rotation_ { Rotation::ROTATION_0 };
 protected:
     void FillScreenInfo(sptr<ScreenInfo>) const;
@@ -90,11 +86,11 @@ public:
     std::vector<sptr<AbstractScreen>> GetChildren() const;
     std::vector<Point> GetChildrenPosition() const;
     size_t GetChildCount() const;
-    const sptr<ScreenGroupInfo> ConvertToScreenGroupInfo() const;
+    sptr<ScreenGroupInfo> ConvertToScreenGroupInfo() const;
     bool SetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config);
 
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
-    ScreenId mirrorScreenId_ {INVALID_SCREEN_ID};
+    ScreenId mirrorScreenId_ { SCREEN_ID_INVALID };
 
 private:
     std::map<ScreenId, std::pair<sptr<AbstractScreen>, Point>> abstractScreenMap_;

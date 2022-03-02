@@ -605,10 +605,14 @@ NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, Native
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(winLayoutMode,
+            WMError ret = SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(winLayoutMode,
                 static_cast<uint64_t>(displayId));
-            task.Resolve(engine, engine.CreateUndefined());
-            WLOGFI("JsWindowManager::OnSetWindowLayoutMode success");
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+                WLOGFI("JsWindowManager::OnSetWindowLayoutMode success");
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "do failed"));
+            }
         };
     NativeValue* lastParam = (info.argc < ARGC_THREE) ? nullptr :
         (info.argv[INDEX_TWO]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_TWO] : nullptr);

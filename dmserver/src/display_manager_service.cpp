@@ -33,7 +33,8 @@ const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonCon
 
 DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true),
     abstractDisplayController_(new AbstractDisplayController(mutex_)),
-    abstractScreenController_(new AbstractScreenController(mutex_))
+    abstractScreenController_(new AbstractScreenController(mutex_)),
+    displayPowerController_(new DisplayPowerController(mutex_))
 {
 }
 
@@ -84,25 +85,34 @@ ScreenId DisplayManagerService::GetScreenIdFromDisplayId(DisplayId displayId)
 
 DisplayId DisplayManagerService::GetDefaultDisplayId()
 {
-    ScreenId screenId = abstractDisplayController_->GetDefaultScreenId();
-    WLOGFI("GetDefaultDisplayId %{public}" PRIu64"", screenId);
-    return GetDisplayIdFromScreenId(screenId);
+    ScreenId dmsScreenId = abstractScreenController_->GetDefaultScreenId();
+    WLOGFI("GetDefaultDisplayId %{public}" PRIu64"", dmsScreenId);
+    sptr<AbstractDisplay> display = GetDisplayByScreen(dmsScreenId);
+    if (display == nullptr) {
+        WLOGFE("fail to get displayInfo by id: invalid display");
+        return DISPLAY_ID_INVALD;
+    }
+    return display->GetId();
 }
 
-DisplayInfo DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
+sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 {
-    DisplayInfo displayInfo;
     sptr<AbstractDisplay> display = GetDisplayByDisplayId(displayId);
     if (display == nullptr) {
-        WLOGFE("GetDisplayById: Get invalid display!");
-        return displayInfo;
+        WLOGFE("fail to get displayInfo by id: invalid display");
+        return nullptr;
     }
-    displayInfo.id_ = displayId;
-    displayInfo.width_ = display->GetWidth();
-    displayInfo.height_ = display->GetHeight();
-    displayInfo.freshRate_ = display->GetFreshRate();
-    displayInfo.screenId_ = display->GetAbstractScreenId();
-    return displayInfo;
+    return display->ConvertToDisplayInfo();
+}
+
+sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreen(ScreenId screenId)
+{
+    sptr<AbstractDisplay> display = GetDisplayByScreen(screenId);
+    if (display == nullptr) {
+        WLOGFE("fail to get displayInfo by screenId: invalid display");
+        return nullptr;
+    }
+    return display->ConvertToDisplayInfo();
 }
 
 sptr<AbstractDisplay> DisplayManagerService::GetAbstractDisplay(DisplayId displayId)
@@ -113,8 +123,6 @@ sptr<AbstractDisplay> DisplayManagerService::GetAbstractDisplay(DisplayId displa
 ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option)
 {
     WM_SCOPED_TRACE("dms:CreateVirtualScreen(%s)", option.name_.c_str());
-    WLOGFI("DumpScreenInfo before Create VirtualScreen");
-    abstractScreenController_->DumpScreenInfo();
     ScreenId screenId = abstractScreenController_->CreateVirtualScreen(option);
     if (screenId == SCREEN_ID_INVALID) {
         WLOGFE("DisplayManagerService::CreateVirtualScreen: Get virtualScreenId failed");
@@ -160,15 +168,15 @@ DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<S
     return abstractScreenController_->SetVirtualScreenSurface(screenId, surface);
 }
 
-bool DisplayManagerService::RequestRotation(ScreenId screenId, Rotation rotation)
+bool DisplayManagerService::SetOrientation(ScreenId screenId, Orientation orientation)
 {
-    WM_SCOPED_TRACE("dms:RequestRotation(%" PRIu64")", screenId);
-    return abstractScreenController_->RequestRotation(screenId, rotation);
+    WM_SCOPED_TRACE("dms:SetOrientation(%" PRIu64")", screenId);
+    return abstractScreenController_->SetOrientation(screenId, orientation);
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDispalySnapshot(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId)
 {
-    WM_SCOPED_TRACE("dms:GetDispalySnapshot(%" PRIu64")", displayId);
+    WM_SCOPED_TRACE("dms:GetDisplaySnapshot(%" PRIu64")", displayId);
     std::shared_ptr<Media::PixelMap> screenSnapshot
         = abstractDisplayController_->GetScreenSnapshot(displayId);
     return screenSnapshot;
@@ -296,7 +304,7 @@ bool DisplayManagerService::WakeUpEnd()
 bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 {
     WM_SCOPED_TRACE("dms:SuspendBegin(%u)", reason);
-    displayPowerController_.SuspendBegin(reason);
+    displayPowerController_->SuspendBegin(reason);
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP,
         EventStatus::BEGIN);
 }
@@ -317,8 +325,7 @@ bool DisplayManagerService::SetScreenPowerForAll(DisplayPowerState state, PowerS
 
 bool DisplayManagerService::SetDisplayState(DisplayState state)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return displayPowerController_.SetDisplayState(state);
+    return displayPowerController_->SetDisplayState(state);
 }
 
 ScreenId DisplayManagerService::GetScreenIdByDisplayId(DisplayId displayId) const
@@ -336,6 +343,11 @@ sptr<AbstractDisplay> DisplayManagerService::GetDisplayByDisplayId(DisplayId dis
     return abstractDisplayController_->GetAbstractDisplay(displayId);
 }
 
+sptr<AbstractDisplay> DisplayManagerService::GetDisplayByScreen(ScreenId screenId) const
+{
+    return abstractDisplayController_->GetAbstractDisplayByScreen(screenId);
+}
+
 sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenController()
 {
     return abstractScreenController_;
@@ -344,13 +356,12 @@ sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenControlle
 DisplayState DisplayManagerService::GetDisplayState(DisplayId displayId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return displayPowerController_.GetDisplayState(displayId);
+    return displayPowerController_->GetDisplayState(displayId);
 }
 
 void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    displayPowerController_.NotifyDisplayEvent(event);
+    displayPowerController_->NotifyDisplayEvent(event);
 }
 
 
@@ -367,6 +378,10 @@ std::shared_ptr<RSDisplayNode> DisplayManagerService::GetRSDisplayNodeByDisplayI
 void DisplayManagerService::SetShotScreen(ScreenId mainScreenId, std::vector<ScreenId> shotScreenIds)
 {
     WLOGFI("SetShotScreen. mainScreenId: %{public}" PRIu64"", mainScreenId);
+    if (shotScreenIds.empty()) {
+        WLOGFI("shotScreenIds is empty");
+        return;
+    }
     std::shared_ptr<RSDisplayNode> displayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(mainScreenId);
     if (displayNode == nullptr) {
         WLOGFE("SetShotScreen error, cannot get DisplayNode");
@@ -386,10 +401,9 @@ void DisplayManagerService::SetShotScreen(ScreenId mainScreenId, std::vector<Scr
     transactionProxy->FlushImplicitTransaction();
 }
 
-DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds)
+ScreenId DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds)
 {
     WLOGFI("MakeMirror. mainScreenId :%{public}" PRIu64"", mainScreenId);
-    abstractScreenController_->DumpScreenInfo();
     auto shotScreenIds = abstractScreenController_->GetShotScreenIds(mirrorScreenIds);
     auto iter = std::find(shotScreenIds.begin(), shotScreenIds.end(), mainScreenId);
     if (iter != shotScreenIds.end()) {
@@ -402,16 +416,26 @@ DMError DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Scr
     }
     if (mainScreenId == SCREEN_ID_INVALID || (shotScreenIds.empty() && allMirrorScreenIds.empty())) {
         WLOGFI("create mirror fail, screen is invalid. Screen :%{public}" PRIu64"", mainScreenId);
-        return DMError::DM_ERROR_INVALID_PARAM;
+        return SCREEN_ID_INVALID;
     }
     SetShotScreen(mainScreenId, shotScreenIds);
     WM_SCOPED_TRACE("dms:MakeMirror");
     if (!allMirrorScreenIds.empty() && !abstractScreenController_->MakeMirror(mainScreenId, allMirrorScreenIds)) {
         WLOGFE("make mirror failed.");
-        return DMError::DM_ERROR_NULLPTR;
+        return SCREEN_ID_INVALID;
     }
     abstractScreenController_->DumpScreenInfo();
-    return DMError::DM_OK;
+    auto screen = abstractScreenController_->GetAbstractScreen(mainScreenId);
+    if (screen == nullptr || abstractScreenController_->GetAbstractScreenGroup(screen->groupDmsId_) == nullptr) {
+        WLOGFE("get screen group failed.");
+        return SCREEN_ID_INVALID;
+    }
+    return screen->groupDmsId_;
+}
+
+void DisplayManagerService::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
+{
+    abstractScreenController_->RemoveVirtualScreenFromGroup(screens);
 }
 
 void DisplayManagerService::UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -445,6 +469,11 @@ sptr<ScreenGroupInfo> DisplayManagerService::GetScreenGroupInfoById(ScreenId scr
     return screenGroup->ConvertToScreenGroupInfo();
 }
 
+std::vector<DisplayId> DisplayManagerService::GetAllDisplayIds()
+{
+    return abstractDisplayController_->GetAllDisplayIds();
+}
+
 std::vector<sptr<ScreenInfo>> DisplayManagerService::GetAllScreenInfos()
 {
     std::vector<ScreenId> screenIds = abstractScreenController_->GetAllScreenIds();
@@ -460,16 +489,15 @@ std::vector<sptr<ScreenInfo>> DisplayManagerService::GetAllScreenInfos()
     return screenInfos;
 }
 
-DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds, std::vector<Point> startPoints)
+ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds, std::vector<Point> startPoints)
 {
     WLOGI("MakeExpand");
     if (expandScreenIds.empty() || startPoints.empty() || expandScreenIds.size() != startPoints.size()) {
         WLOGFI("create expand fail, input params is invalid. "
             "screenId vector size :%{public}ud, startPoint vector size :%{public}ud",
             static_cast<uint32_t>(expandScreenIds.size()), static_cast<uint32_t>(startPoints.size()));
-        return DMError::DM_ERROR_INVALID_PARAM;
+        return SCREEN_ID_INVALID;
     }
-    abstractScreenController_->DumpScreenInfo();
     ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     WLOGI("MakeExpand, defaultScreenId:%{public}" PRIu64"", defaultScreenId);
     auto shotScreenIds = abstractScreenController_->GetShotScreenIds(expandScreenIds);
@@ -490,10 +518,15 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds,
     WM_SCOPED_TRACE("dms:MakeExpand");
     if (!allExpandScreenIds.empty() && !abstractScreenController_->MakeExpand(allExpandScreenIds, startPoints)) {
         WLOGFE("make expand failed.");
-        return DMError::DM_ERROR_NULLPTR;
+        return SCREEN_ID_INVALID;
     }
     abstractScreenController_->DumpScreenInfo();
-    return DMError::DM_OK;
+    auto screen = abstractScreenController_->GetAbstractScreen(allExpandScreenIds[0]);
+    if (screen == nullptr || abstractScreenController_->GetAbstractScreenGroup(screen->groupDmsId_) == nullptr) {
+        WLOGFE("get screen group failed.");
+        return SCREEN_ID_INVALID;
+    }
+    return screen->groupDmsId_;
 }
 
 bool DisplayManagerService::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)

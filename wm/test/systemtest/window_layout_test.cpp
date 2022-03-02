@@ -32,6 +32,7 @@ public:
     DisplayId displayId_ = 0;
     std::vector<sptr<Window>> activeWindows_;
     static vector<Rect> fullScreenExpecteds_;
+    static inline float virtualPixelRatio_ = 0.0;
 };
 
 vector<Rect> WindowLayoutTest::fullScreenExpecteds_;
@@ -47,6 +48,9 @@ void WindowLayoutTest::SetUpTestCase()
     }
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
+
+    virtualPixelRatio_ = WindowTestUtils::GetVirtualPixelRatio(0);
+
     // calc expected rects
     Rect expected = { // 0. only statusBar
         0,
@@ -110,7 +114,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
     activeWindows_.push_back(window);
 
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_TRUE(utils::RectEqualTo(window, utils::GetFloatingLimitedRect(utils::customAppRect_)));
+    ASSERT_TRUE(utils::RectEqualTo(window, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 
@@ -140,12 +144,12 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
     activeWindows_.push_back(statBar);
 
     ASSERT_EQ(WMError::WM_OK, appWin->Show());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_)));
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
     ASSERT_EQ(WMError::WM_OK, statBar->Show());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_)));
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
     ASSERT_TRUE(utils::RectEqualTo(statBar, utils::statusBarRect_));
     ASSERT_EQ(WMError::WM_OK, statBar->Hide());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_)));
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
 }
 
 /**
@@ -277,7 +281,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
 
     ASSERT_EQ(WMError::WM_OK, window->Resize(2u, 2u));        // 2: custom min size
     Rect finalExcept = { expect.posX_, expect.posY_, 2u, 2u}; // 2: custom min size
-    finalExcept = utils::GetFloatingLimitedRect(finalExcept);
+    finalExcept = utils::GetFloatingLimitedRect(finalExcept, virtualPixelRatio_);
     ASSERT_TRUE(utils::RectEqualTo(window, finalExcept));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
@@ -350,6 +354,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     if (utils::isVerticalDisplay_) {
         ASSERT_TRUE(utils::RectEqualTo(test1, utils::doubleTileRects_[0]));
         ASSERT_TRUE(utils::RectEqualTo(test2, utils::doubleTileRects_[1]));
+        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
         return;
     } else {
         ASSERT_TRUE(utils::RectEqualTo(window, utils::tripleTileRects_[0]));
@@ -363,6 +368,120 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     ASSERT_TRUE(utils::RectEqualTo(test1, utils::tripleTileRects_[0]));
     ASSERT_TRUE(utils::RectEqualTo(test2, utils::tripleTileRects_[1]));
     ASSERT_TRUE(utils::RectEqualTo(test3, utils::tripleTileRects_[2])); // 2 is second rect idx
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
+}
+
+/**
+ * @tc.name: LayoutTileNegative01
+ * @tc.desc: negative test for tile window
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVJ
+ */
+HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
+{
+    utils::TestWindowInfo info = {
+        .name = "main",
+        .rect = {-1, -100, -1, -100}, // -1, -100, -1, -100 is typical negative case nums
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentName = "",
+    };
+    const sptr<Window>& window = utils::CreateTestWindow(info);
+    activeWindows_.push_back(window);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    utils::InitTileWindowRects(window);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE, displayId_);
+    ASSERT_TRUE(utils::RectEqualTo(window, utils::singleTileRect_));
+    info.name = "test1";
+    const sptr<Window>& test1 = utils::CreateTestWindow(info);
+    activeWindows_.push_back(test1);
+    ASSERT_EQ(WMError::WM_OK, test1->Show());
+    ASSERT_TRUE(utils::RectEqualTo(window, utils::doubleTileRects_[0]));
+    ASSERT_TRUE(utils::RectEqualTo(test1, utils::doubleTileRects_[1]));
+    info.name = "test2";
+    const sptr<Window>& test2 = utils::CreateTestWindow(info);
+    activeWindows_.push_back(test2);
+    ASSERT_EQ(WMError::WM_OK, test2->Show());
+    if (utils::isVerticalDisplay_) {
+        ASSERT_TRUE(utils::RectEqualTo(test1, utils::doubleTileRects_[0]));
+        ASSERT_TRUE(utils::RectEqualTo(test2, utils::doubleTileRects_[1]));
+        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
+        return;
+    } else {
+        ASSERT_TRUE(utils::RectEqualTo(window, utils::tripleTileRects_[0]));
+        ASSERT_TRUE(utils::RectEqualTo(test1, utils::tripleTileRects_[1]));
+        ASSERT_TRUE(utils::RectEqualTo(test2, utils::tripleTileRects_[2])); // 2 is second rect idx
+    }
+    info.name = "test3";
+    const sptr<Window>& test3 = utils::CreateTestWindow(info);
+    activeWindows_.push_back(test3);
+    ASSERT_EQ(WMError::WM_OK, test3->Show());
+    ASSERT_TRUE(utils::RectEqualTo(test1, utils::tripleTileRects_[0]));
+    ASSERT_TRUE(utils::RectEqualTo(test2, utils::tripleTileRects_[1]));
+    ASSERT_TRUE(utils::RectEqualTo(test3, utils::tripleTileRects_[2])); // 2 is second rect idx
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
+}
+
+/**
+ * @tc.name: LayoutTileNegative01
+ * @tc.desc: move window out of the display
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVJ
+ */
+HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
+{
+    utils::TestWindowInfo info = {
+        .name = "main",
+        .rect = {0, 0, 0, 0},
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentName = "",
+    };
+    const sptr<Window>& window = utils::CreateTestWindow(info);
+    activeWindows_.push_back(window);
+    Rect expect = utils::GetDefaultFoatingRect(window);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_TRUE(utils::RectEqualTo(window, expect));
+    window->MoveTo(INT_MIN, INT_MIN);
+    AvoidArea avoidArea;
+    auto res = window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidArea);
+    ASSERT_EQ(WMError::WM_OK, res);
+    Rect expect2 = {INT_MIN, avoidArea.topRect.height_, expect.width_, expect.height_};
+    ASSERT_TRUE(utils::RectEqualTo(window, expect2));
+}
+
+/**
+ * @tc.name: LayoutNegative02
+ * @tc.desc: resize window to negative size
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVJ
+ */
+HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
+{
+    const uint32_t negativeW = UINT32_MAX;
+    const uint32_t negativeH = 0;
+    utils::TestWindowInfo info = {
+        .name = "main",
+        .rect = {0, 0, 0, 0},
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentName = "",
+    };
+    const sptr<Window>& window = utils::CreateTestWindow(info);
+    activeWindows_.push_back(window);
+    Rect expect = utils::GetDefaultFoatingRect(window);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_TRUE(utils::RectEqualTo(window, expect));
+    window->Resize(negativeW, negativeH);
+    Rect expect2 = {expect.posX_, expect.posY_, negativeW, negativeH};
+    expect2 = utils::CalcLimitedRect(expect2, virtualPixelRatio_);
+    ASSERT_TRUE(utils::RectEqualTo(window, expect2));
 }
 }
 } // namespace Rosen

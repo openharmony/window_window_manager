@@ -27,12 +27,6 @@ config("libwm_private_config") {
     "//third_party/jsoncpp/include",
     "//third_party/json/include",
   ]
-
-  if (defined(product_name) &&
-      (product_name == "rk3566" || product_name == "rk3568" ||
-       product_name == "Hi3516DV300" || product_name == "watchos")) {
-    defines = [ "PRODUCT_RK" ]
-  }
 }
 
 config("libwm_public_config") {
@@ -72,7 +66,7 @@ ohos_shared_library("libwm") {
     "//foundation/windowmanager/utils:libwmutil",
 
     # vsync
-    "//foundation/graphic/standard:libvsync_client",
+    "//foundation/graphic/standard/rosen/modules/composer:libcomposer",
   ]
 
   external_deps = [

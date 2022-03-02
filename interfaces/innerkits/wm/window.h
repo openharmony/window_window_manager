@@ -38,6 +38,10 @@ namespace OHOS::AbilityRuntime {
     class Context;
 }
 
+namespace OHOS::Ace {
+    class UIContent;
+}
+
 namespace OHOS {
 namespace Rosen {
 class RSSurfaceNode;
@@ -56,6 +60,12 @@ class IWindowDragListener : virtual public RefBase {
 public:
     virtual void OnDrag(int32_t x, int32_t y, DragEvent event) = 0;
 };
+
+class IDisplayMoveListener : virtual public RefBase {
+public:
+    virtual void OnDisplayMove(DisplayId from, DisplayId to) = 0;
+};
+
 
 class Window : public RefBase {
 public:
@@ -114,9 +124,12 @@ public:
     virtual void UnregisterAvoidAreaChangeListener() = 0;
     virtual void RegisterDragListener(sptr<IWindowDragListener>& listener) = 0;
     virtual void UnregisterDragListener(sptr<IWindowDragListener>& listener) = 0;
+    virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
+    virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed = false) = 0;
     virtual std::string GetContentInfo() = 0;
+    virtual Ace::UIContent* GetUIContent() const = 0;
 
     virtual bool IsDecorEnable() const = 0;
     virtual WMError Maximize() = 0;

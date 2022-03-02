@@ -14,6 +14,7 @@
  */
 
 #include "foundation/windowmanager/interfaces/innerkits/wm/window_manager.h"
+
 #include <algorithm>
 #include <cinttypes>
 
@@ -28,6 +29,24 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManager"};
 }
 
+bool WindowVisibilityInfo::Marshalling(Parcel &parcel) const
+{
+    return parcel.WriteUint32(windowId_) && parcel.WriteInt32(pid_) &&
+           parcel.WriteInt32(uid_) && parcel.WriteBool(isVisible_);
+}
+
+WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
+{
+    WindowVisibilityInfo* windowVisibilityInfo = new WindowVisibilityInfo();
+    bool res = parcel.ReadUint32(windowVisibilityInfo->windowId_) && parcel.ReadInt32(windowVisibilityInfo->pid_) &&
+    parcel.ReadInt32(windowVisibilityInfo->uid_) && parcel.ReadBool(windowVisibilityInfo->isVisible_);
+    if (!res) {
+        delete windowVisibilityInfo;
+        return nullptr;
+    }
+    return windowVisibilityInfo;
+}
+
 bool WindowInfo::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteInt32(wid_) && parcel.WriteUint32(windowRect_.width_) &&
@@ -39,13 +58,11 @@ bool WindowInfo::Marshalling(Parcel &parcel) const
 WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
 {
     WindowInfo* windowInfo = new WindowInfo();
-    if (windowInfo == nullptr) {
-        return nullptr;
-    }
     bool res = parcel.ReadInt32(windowInfo->wid_) && parcel.ReadUint32(windowInfo->windowRect_.width_) &&
         parcel.ReadUint32(windowInfo->windowRect_.height_) && parcel.ReadInt32(windowInfo->windowRect_.posX_) &&
         parcel.ReadInt32(windowInfo->windowRect_.posY_) && parcel.ReadBool(windowInfo->focused_);
     if (!res) {
+        delete windowInfo;
         return nullptr;
     }
     windowInfo->mode_ = static_cast<WindowMode>(parcel.ReadUint32());
@@ -63,6 +80,7 @@ public:
         WindowType windowType, DisplayId displayId) const;
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints) const;
     void NotifyWindowUpdate(const sptr<WindowInfo>& windowInfo, WindowUpdateType type) const;
+    void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
     static inline SingletonDelegator<WindowManager> delegator_;
 
     std::recursive_mutex mutex_;
@@ -72,6 +90,8 @@ public:
     sptr<WindowManagerAgent> systemBarChangedListenerAgent_;
     std::vector<sptr<IWindowUpdateListener>> windowUpdateListeners_;
     sptr<WindowManagerAgent> windowUpdateListenerAgent_;
+    std::vector<sptr<IVisibilityChangedListener>> windowVisibilityListeners_;
+    sptr<WindowManagerAgent> windowVisibilityListenerAgent_;
 };
 
 void WindowManager::Impl::NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
@@ -118,6 +138,14 @@ void WindowManager::Impl::NotifyWindowUpdate(const sptr<WindowInfo>& windowInfo,
         windowInfo->focused_, windowInfo->mode_, windowInfo->type_);
     for (auto& listener : windowUpdateListeners_) {
         listener->OnWindowUpdate(windowInfo, type);
+    }
+}
+
+void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
+    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const
+{
+    for (auto& listener : windowVisibilityListeners_) {
+        listener->OnWindowVisibilityChanged(windowVisibilityInfos);
     }
 }
 
@@ -210,14 +238,14 @@ void WindowManager::MinimizeAllAppWindows(DisplayId displayId)
     SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(displayId);
 }
 
-void WindowManager::SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId)
+WMError WindowManager::SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId)
 {
     WLOGFI("set window layout mode: %{public}d, displayId %{public}" PRIu64"", mode, displayId);
     WMError ret  = SingletonContainer::Get<WindowAdapter>().SetWindowLayoutMode(displayId, mode);
     if (ret != WMError::WM_OK) {
         WLOGFE("set layout mode failed");
     }
-    return;
+    return ret;
 }
 
 void WindowManager::RegisterWindowUpdateListener(const sptr<IWindowUpdateListener> &listener)
@@ -256,6 +284,41 @@ void WindowManager::UnregisterWindowUpdateListener(const sptr<IWindowUpdateListe
     }
 }
 
+void WindowManager::RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    pImpl_->windowVisibilityListeners_.emplace_back(listener);
+    if (pImpl_->windowVisibilityListenerAgent_ == nullptr) {
+        pImpl_->windowVisibilityListenerAgent_ = new WindowManagerAgent();
+        SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+            pImpl_->windowVisibilityListenerAgent_);
+    }
+}
+
+void WindowManager::UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    pImpl_->windowVisibilityListeners_.erase(std::remove_if(pImpl_->windowVisibilityListeners_.begin(),
+        pImpl_->windowVisibilityListeners_.end(), [listener](sptr<IVisibilityChangedListener> registeredListener) {
+            return registeredListener == listener;
+        }), pImpl_->windowVisibilityListeners_.end());
+
+    if (pImpl_->windowVisibilityListeners_.empty() && pImpl_->windowVisibilityListenerAgent_ != nullptr) {
+        SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+            pImpl_->windowVisibilityListenerAgent_);
+        pImpl_->windowVisibilityListenerAgent_ = nullptr;
+    }
+}
+
 void WindowManager::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
     DisplayId displayId, bool focused) const
 {
@@ -276,6 +339,12 @@ void WindowManager::UpdateSystemBarRegionTints(DisplayId displayId,
 void WindowManager::UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type)
 {
     pImpl_->NotifyWindowUpdate(windowInfo, type);
+}
+
+void WindowManager::UpdateWindowVisibilityInfo(
+    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const
+{
+    pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -19,6 +19,8 @@
 #include "display_test_utils.h"
 #include "pixel_map.h"
 
+#include "snapshot_utils.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -37,7 +39,7 @@ public:
     static DisplayId defaultId_;
     DisplayId invalidId_ = DISPLAY_ID_INVALD;
     const std::string defaultCmd_ = "/system/bin/snapshot_display";
-    const std::string defaultImg_ = "/data/snapshot_display_1.png";
+    const int testTimeCount_ = 2;
 };
 
 DisplayId ScreenshotCmdTest::defaultId_ = DISPLAY_ID_INVALD;
@@ -87,15 +89,26 @@ namespace {
  */
 HWTEST_F(ScreenshotCmdTest, ScreenShotCmdValid01, Function | MediumTest | Level2)
 {
-    if (CheckFileExist(defaultImg_)) {
-        remove(defaultImg_.c_str());
+    std::string imgPath[testTimeCount_];
+    int i;
+
+    for (i = 0; i < testTimeCount_; i++) {
+        imgPath[i] = SnapShotUtils::GenerateFileName(i);
+        if (CheckFileExist(imgPath[i])) {
+            remove(imgPath[i].c_str());
+        }
     }
+
     (void)system(defaultCmd_.c_str());
-    bool isExist = CheckFileExist(defaultImg_);
-    if (isExist) {
-        remove(defaultImg_.c_str());
+
+    for (i = 0; i < testTimeCount_; i++) {
+        if (CheckFileExist(imgPath[i])) {  // ok
+            remove(imgPath[i].c_str());
+            ASSERT_TRUE(true);
+            return;
+        }
     }
-    ASSERT_EQ(true, isExist);
+    ADD_FAILURE(); // fail, can't find snapshot file
 }
 
 /**
@@ -105,16 +118,27 @@ HWTEST_F(ScreenshotCmdTest, ScreenShotCmdValid01, Function | MediumTest | Level2
  */
 HWTEST_F(ScreenshotCmdTest, ScreenShotCmdValid02, Function | MediumTest | Level2)
 {
-    if (CheckFileExist(defaultImg_)) {
-        remove(defaultImg_.c_str());
+    std::string imgPath[testTimeCount_];
+    int i;
+
+    for (i = 0; i < testTimeCount_; i++) {
+        imgPath[i] = SnapShotUtils::GenerateFileName(i);
+        if (CheckFileExist(imgPath[i])) {
+            remove(imgPath[i].c_str());
+        }
     }
+
     const std::string cmd = defaultCmd_ + " -i " + std::to_string(defaultId_);
     (void)system(cmd.c_str());
-    bool isExist = CheckFileExist(defaultImg_);
-    if (isExist) {
-        remove(defaultImg_.c_str());
+
+    for (i = 0; i < testTimeCount_; i++) {
+        if (CheckFileExist(imgPath[i])) {  // ok
+            remove(imgPath[i].c_str());
+            ASSERT_TRUE(true);
+            return;
+        }
     }
-    ASSERT_EQ(true, isExist);
+    ADD_FAILURE(); // fail, can't find snapshot file
 }
 
 /**

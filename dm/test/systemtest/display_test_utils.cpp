@@ -31,6 +31,9 @@ DisplayTestUtils::~DisplayTestUtils()
         }
         WLOGFI("prevBuffer_ release success");
     }
+    if (csurface_ != nullptr) {
+        csurface_->UnregisterConsumerListener();
+    }
     csurface_ = nullptr;
     psurface_ = nullptr;
     listener_ = nullptr;
@@ -86,7 +89,7 @@ bool DisplayTestUtils::CreateSurface()
 void DisplayTestUtils::OnVsync()
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    WLOGFI("DisplayTestUtils::OnVsyn");
+    WLOGFI("DisplayTestUtils::OnVsync");
     sptr<SurfaceBuffer> cbuffer = nullptr;
     int32_t fence = -1;
     int64_t timestamp = 0;

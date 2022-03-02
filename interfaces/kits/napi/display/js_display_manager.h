@@ -13,20 +13,16 @@
  * limitations under the License.
  */
 
-#include "display_manager_agent.h"
-#include "display_manager.h"
-#include "singleton_container.h"
+#ifndef OHOS_JS_DISPLAY_MANAGER_H
+#define OHOS_JS_DISPLAY_MANAGER_H
+
+#include "native_engine/native_engine.h"
+#include "native_engine/native_value.h"
 
 namespace OHOS {
 namespace Rosen {
-void DisplayManagerAgent::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
-{
-    SingletonContainer::Get<DisplayManager>().NotifyDisplayPowerEvent(event, status);
-}
+NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj);
+}  // namespace Rosen
+}  // namespace OHOS
 
-void DisplayManagerAgent::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
-{
-    SingletonContainer::Get<DisplayManager>().NotifyDisplayStateChanged(id, state);
-}
-} // namespace Rosen
-} // namespace OHOS
+#endif

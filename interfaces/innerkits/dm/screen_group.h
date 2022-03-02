@@ -29,13 +29,21 @@ enum class ScreenCombination : uint32_t {
 };
 
 class ScreenGroup : public Screen {
+friend class ScreenManager;
 public:
-    ScreenGroup(const ScreenGroupInfo* info);
     ~ScreenGroup();
+    ScreenGroup(const ScreenGroup&) = delete;
+    ScreenGroup(ScreenGroup&&) = delete;
+    ScreenGroup& operator=(const ScreenGroup&) = delete;
+    ScreenGroup& operator=(ScreenGroup&&) = delete;
     ScreenCombination GetCombination() const;
-    std::vector<ScreenId> GetChildrenIds() const;
+    std::vector<ScreenId> GetChildIds() const;
+    std::vector<Point> GetChildPositions() const;
 
 private:
+    // No more methods or variables can be defined here.
+    ScreenGroup(sptr<ScreenGroupInfo> info);
+    void UpdateScreenGroupInfo(sptr<ScreenGroupInfo> info);
     class Impl;
     sptr<Impl> pImpl_;
 };

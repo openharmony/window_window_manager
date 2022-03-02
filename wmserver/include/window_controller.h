@@ -49,7 +49,9 @@ public:
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
     WMError ProcessWindowTouchedEvent(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
+    WMError MaxmizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
+    void NotifySystemBarTints();
 
 private:
     uint32_t GenWindowId();
@@ -57,6 +59,7 @@ private:
     void FlushWindowInfoWithDisplayId(DisplayId displayId);
     void UpdateWindowAnimation(const sptr<WindowNode>& node);
     void ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type);
+    void StopBootAnimationIfNeed(WindowType type) const;
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;

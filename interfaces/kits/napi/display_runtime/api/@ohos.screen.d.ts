@@ -30,8 +30,8 @@ declare namespace screen {
   function getAllScreen(): Promise<Array<Screen>>;
 
   // Screen plug-in event; Screen resolution ratio and other parameters, combination relationship changes
-  function on(eventType: 'screenConnectEvent' | 'screenChangeEvent', callback: Callback<ScreenEvent>): void;
-  function off(eventType: 'screenConnectEvent' | 'screenChangeEvent', callback?: Callback<ScreenEvent>): void;
+  function on(eventType: 'connect' | 'disconnect' | 'change', callback: Callback<number>): void;
+  function off(eventType: 'connect' | 'disconnect' | 'change', callback?: Callback<number>): void;
 
   /**
    * make screens as expand-screen
@@ -89,14 +89,14 @@ declare namespace screen {
 
     readonly activeModeIndex: number;
 
+    readonly orientation: Orientation;
+
     /**
-     * get the rotation of the screen
+     * set the orientation of the screen
      * @devices tv, phone, tablet, wearable
      * @since 8
      */
-    readonly rotation: Rotation;
-
-    requestRotation(rotation: Rotation): Promise<boolean>;
+    setOrientation(orientation: Orientation): Promise<boolean>;
 
     setScreenActiveMode(modeIndex: number): Promise<boolean>;
   }
@@ -128,52 +128,15 @@ declare namespace screen {
     mirrorScreenId: Array<number>;
   }
 
-  /**
-   * screen connect or disconnect event
-   * @devices tv, phone, tablet, wearable
-   * @since 8
-   */
-  type ScreenEvent = {
-    screenId: number;
-    type: ScreenConnectEventType;
-  } | {
-    screenId: Array<number>;
-    type: ScreenChangeEventType;
-  }
-
-  enum ScreenConnectEventType {
-    DISCONNECT = 0,
-    CONNECT = 1,
-  }
-
-  enum ScreenChangeEventType {
-    ADD_TO_GROUP = 0,
-    REMOVE_FROM_GROUP = 1,
-    CHANGE_GROUP = 2,
-  }
-
-  /**
-   * rotation degree of screen
-   * @devices tv, phone, tablet, wearable
-   * @since 8
-   */
-   enum Rotation {
-    /**
-     * 0 degree
-     */
-    ROTATION_0 = 0,
-    /**
-     * 90 degree
-     */
-    ROTATION_90 = 1,
-    /**
-     * 180 degree
-     */
-    ROTATION_180 = 2,
-    /**
-     * 270 degree
-     */
-    ROTATION_270 = 3,
+  enum Orientation {
+    UNSPECIFIED = 0,
+    VERTICAL = 1,
+    HORIZONTAL = 2,
+    REVERSE_VERTICAL = 3,
+    REVERSE_HORIZONTAL = 4,
+    SENSOR = 5,
+    SENSOR_VERTICAL = 6,
+    SENSOR_HORIZONTAL = 7,
   }
 
   interface ScreenModeInfo {

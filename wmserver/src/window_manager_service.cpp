@@ -135,7 +135,6 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
     WM_SCOPED_TRACE("wms:AddWindow(%d)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WMError res = windowController_->AddWindowNode(property);
-    system::SetParameter("persist.window.boot.inited", "1");
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
         dragController_->StartDrag(windowId);
     }
@@ -249,6 +248,9 @@ void WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType typ
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WindowManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
+    if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR) { // if system bar, notify once
+        windowController_->NotifySystemBarTints();
+    }
 }
 
 void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -298,23 +300,11 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
     windowController_->MinimizeAllAppWindows(displayId);
 }
 
-bool WindowManagerService::IsSupportWideGamut(uint32_t windowId)
+WMError WindowManagerService::MaxmizeWindow(uint32_t windowId)
 {
-    bool ret = true;
-    WLOGFI("IsSupportWideGamut %{public}d", ret);
-    return ret;
-}
-
-void WindowManagerService::SetColorSpace(uint32_t windowId, ColorSpace colorSpace)
-{
-    WLOGFI("SetColorSpace windowId %{public}u, ColorSpace %{public}u", windowId, colorSpace);
-}
-
-ColorSpace WindowManagerService::GetColorSpace(uint32_t windowId)
-{
-    ColorSpace colorSpace = ColorSpace::COLOR_SPACE_DEFAULT;
-    WLOGFI("GetColorSpace windowId %{public}u, ColorSpace %{public}u", windowId, colorSpace);
-    return colorSpace;
+    WM_SCOPED_TRACE("wms:MaxmizeWindow");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->MaxmizeWindow(windowId);
 }
 
 WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)

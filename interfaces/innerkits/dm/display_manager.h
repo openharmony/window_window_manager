@@ -26,22 +26,21 @@
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
-class DisplayManagerAgent;
 class DisplayManager {
-friend class DisplayManagerAgent;
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManager);
 public:
     class IDisplayListener : public virtual RefBase {
     public:
         virtual void OnCreate(DisplayId) = 0;
         virtual void OnDestroy(DisplayId) = 0;
-        virtual void OnChange(DisplayId, DisplayChangeEvent) = 0;
+        virtual void OnChange(DisplayId) = 0;
     };
 
-    std::vector<const sptr<Display>> GetAllDisplays();
+    std::vector<sptr<Display>> GetAllDisplays();
     DisplayId GetDefaultDisplayId();
-    const sptr<Display> GetDefaultDisplay();
-    const sptr<Display> GetDisplayById(DisplayId displayId);
+    sptr<Display> GetDefaultDisplay();
+    sptr<Display> GetDisplayById(DisplayId displayId);
+    sptr<Display> GetDisplayByScreen(ScreenId screenId);
     std::vector<DisplayId> GetAllDisplayIds();
     bool RegisterDisplayListener(sptr<IDisplayListener> listener);
     bool UnregisterDisplayListener(sptr<IDisplayListener> listener);
@@ -69,14 +68,8 @@ private:
     DisplayManager();
     ~DisplayManager();
 
-    class DisplayManagerListener;
-    sptr<DisplayManagerListener> displayManagerListener_;
     class Impl;
     sptr<Impl> pImpl_;
-
-    void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
-    void NotifyDisplayStateChanged(DisplayId id, DisplayState state);
-    void NotifyDisplayChangedEvent(const sptr<DisplayInfo> info, DisplayChangeEvent event);
 };
 } // namespace OHOS::Rosen
 

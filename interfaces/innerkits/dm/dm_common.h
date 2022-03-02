@@ -22,8 +22,11 @@ namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
 using ScreenId = uint64_t;
-static constexpr DisplayId DISPLAY_ID_INVALD = -1ULL;
-static constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+namespace {
+    constexpr DisplayId DISPLAY_ID_INVALD = -1ULL;
+    constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+    const static std::string DEFAULT_SCREEN_NAME = "buildIn";
+}
 
 enum class PowerStateChangeReason : uint32_t {
     POWER_BUTTON,
@@ -84,11 +87,14 @@ public:
 };
 
 enum class ScreenChangeEvent : uint32_t {
+    UPDATE_ORIENTATION,
+    CHANGE_MODE,
+};
+
+enum class ScreenGroupChangeEvent : uint32_t {
     ADD_TO_GROUP,
     REMOVE_FROM_GROUP,
     CHANGE_GROUP,
-    UPDATE_ROTATION,
-    CHANGE_MODE,
 };
 
 enum class Rotation : uint32_t {
@@ -98,8 +104,21 @@ enum class Rotation : uint32_t {
     ROTATION_270,
 };
 
+enum class Orientation : uint32_t {
+    BEGIN = 0,
+    UNSPECIFIED = BEGIN,
+    VERTICAL = 1,
+    HORIZONTAL = 2,
+    REVERSE_VERTICAL = 3,
+    REVERSE_HORIZONTAL = 4,
+    SENSOR = 5,
+    SENSOR_VERTICAL = 6,
+    SENSOR_HORIZONTAL = 7,
+    END = SENSOR_HORIZONTAL,
+};
+
 enum class DisplayChangeEvent : uint32_t {
-    UPDATE_ROTATION,
+    UPDATE_ORIENTATION,
     DISPLAY_SIZE_CHANGED,
     UNKNOWN,
 };

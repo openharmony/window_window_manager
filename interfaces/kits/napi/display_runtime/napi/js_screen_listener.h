@@ -33,7 +33,7 @@ public:
     void RemoveCallback(NativeValue* jsListenerObject);
     void OnConnect(ScreenId id) override;
     void OnDisconnect(ScreenId id) override;
-    void OnChange(const std::vector<ScreenId> &vector, ScreenChangeEvent event) override;
+    void OnChange(ScreenId id) override;
 
 private:
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);

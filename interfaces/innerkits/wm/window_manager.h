@@ -49,6 +49,27 @@ public:
     virtual void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) = 0;
 };
 
+class WindowVisibilityInfo : public Parcelable {
+public:
+    WindowVisibilityInfo() = default;
+    WindowVisibilityInfo(uint32_t winId, int32_t pid, int32_t uid, bool visibility)
+        : windowId_(winId), pid_(pid), uid_(uid), isVisible_(visibility) {};
+    ~WindowVisibilityInfo() = default;
+
+    virtual bool Marshalling(Parcel& parcel) const override;
+    static WindowVisibilityInfo* Unmarshalling(Parcel& parcel);
+
+    uint32_t windowId_ { INVALID_WINDOW_ID };
+    int32_t pid_ { 0 };
+    int32_t uid_ { 0 };
+    bool isVisible_ { false };
+};
+
+class IVisibilityChangedListener : public RefBase {
+public:
+    virtual void OnWindowVisibilityChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo) = 0;
+};
+
 class WindowInfo : public Parcelable {
 public:
     WindowInfo() = default;
@@ -78,8 +99,10 @@ public:
     void UnregisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
     void RegisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
     void UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
+    void RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
+    void UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     void MinimizeAllAppWindows(DisplayId displayId);
-    void SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId);
+    WMError SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId);
 
 private:
     WindowManager();
@@ -91,6 +114,8 @@ private:
         DisplayId displayId, bool focused) const;
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) const;
     void UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type);
+    void UpdateWindowVisibilityInfo(
+        const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
 };
 } // namespace Rosen
 } // namespace OHOS

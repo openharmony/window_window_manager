@@ -32,9 +32,6 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         return -1;
     }
     switch (code) {
-        case TRANS_ID_UPDATE_WINDOW_PROPERTY: {
-            break;
-        }
         case TRANS_ID_UPDATE_WINDOW_RECT: {
             struct Rect rect { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
             WindowSizeChangeReason reason = static_cast<WindowSizeChangeReason>(data.ReadUint32());
@@ -71,6 +68,10 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             point.y = data.ReadInt32();
             DragEvent event = static_cast<DragEvent> (data.ReadUint32());
             UpdateWindowDragInfo(point, event);
+            break;
+        }
+        case TRANS_ID_UPDATE_DISPLAY_ID: {
+            UpdateDisplayId(data.ReadUint64(), data.ReadUint64());
             break;
         }
         default:

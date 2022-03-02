@@ -35,6 +35,7 @@ public:
         DisplayId displayId, bool focused);
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints);
     void UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type);
+    void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
 
 private:
     WindowManagerAgentController() {}

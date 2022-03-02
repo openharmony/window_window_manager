@@ -35,6 +35,27 @@ enum class WindowStateChangeReason : uint32_t {
     NORMAL,
     KEYGUARD,
 };
+
+enum class WindowUpdateReason : uint32_t {
+    UPDATE_ALL,
+    UPDATE_MODE,
+    UPDATE_RECT,
+    UPDATE_FLAGS,
+    UPDATE_TYPE,
+    UPDATE_OTHER_PROPS,
+};
+namespace {
+    constexpr float DEFAULT_SPLIT_RATIO = 0.5;
+    constexpr uint32_t DIVIDER_WIDTH = 8;
+    constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 48;
+    constexpr uint32_t WINDOW_FRAME_WIDTH = 4;
+    constexpr uint32_t HOTZONE = 40;
+    constexpr uint32_t DIV_HOTZONE = 20;
+    constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 240;
+    constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 426;
+    constexpr uint32_t MIN_VERTICAL_SPLIT_HEIGHT = 426;
+    constexpr uint32_t MIN_HORIZONTAL_SPLIT_WIDTH = 426;
+}
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_INNER_H

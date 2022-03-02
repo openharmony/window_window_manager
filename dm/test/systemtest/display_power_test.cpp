@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "display_manager.h"
+#include "window.h"
 #include "window_manager_hilog.h"
 
 using namespace testing;
@@ -53,7 +54,7 @@ public:
 
     static inline DisplayId defaultId_;
     static inline uint32_t brightnessLevel_ = 80;
-    static inline uint32_t invalidBrightnessLevel_ = 10000000;
+    static inline uint32_t invalidBrightnessLevel_ = 1000000000;
     static inline uint32_t times_ = 0;
     static inline bool isDisplayStateCallbackCalled_ = false;
     static sptr<DisplayPowerEventListener> listener_;
@@ -432,6 +433,28 @@ HWTEST_F(DisplayPowerTest, set_screen_brightness_002, Function | MediumTest | Le
     ASSERT_EQ(false, ret);
     uint32_t level = DisplayManager::GetInstance().GetScreenBrightness(defaultId_);
     ASSERT_NE(level, invalidBrightnessLevel_);
+}
+
+/**
+* @tc.name: window_life_cycle_001
+* @tc.desc: Add a window and then call SuspendEnd and check window state; Notify unlock and check window state
+* @tc.type: FUNC
+*/
+HWTEST_F(DisplayPowerTest, window_life_cycle_001, Function | MediumTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    sptr<Window> window = Window::Create("window1", option, nullptr);
+    EXPECT_EQ(WMError::WM_OK, window->Show());
+
+    DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
+    usleep(SLEEP_TIME_IN_US);
+    ASSERT_EQ(false, window->GetShowState());
+
+    DisplayManager::GetInstance().NotifyDisplayEvent(DisplayEvent::UNLOCK);
+    usleep(SLEEP_TIME_IN_US);
+    ASSERT_EQ(true, window->GetShowState());
+
+    window->Destroy();
 }
 } // namespace
 } // namespace Rosen

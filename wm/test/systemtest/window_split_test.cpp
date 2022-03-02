@@ -33,7 +33,7 @@ public:
     utils::TestWindowInfo splitInfo_;
 
 private:
-    static constexpr uint32_t SPLIT_TEST_SPEEP_S = 1; // split test spleep time
+    static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1; // split test sleep time
 };
 
 void WindowSplitTest::SetUpTestCase()
@@ -93,21 +93,21 @@ HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
     const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 
     const sptr<Window>& priWindow = utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(priWindow);
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetMode());
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetMode());
 
     ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 }
 
 /**
@@ -125,20 +125,20 @@ HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
     const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
     const sptr<Window>& secWindow = utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(secWindow);
     ASSERT_EQ(WMError::WM_OK, secWindow->Show());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, secWindow->GetMode());
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, fullWindow->GetMode());
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, secWindow->GetMode());
     ASSERT_EQ(WMError::WM_OK, secWindow->Hide());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 }
 
 /**
@@ -158,11 +158,11 @@ HWTEST_F(WindowSplitTest, SplitCreen03, Function | MediumTest | Level3)
     const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
     const sptr<Window>& priWindow = utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(priWindow);
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 
     utils::UpdateSplitRects(fullWindow);
 
@@ -170,9 +170,9 @@ HWTEST_F(WindowSplitTest, SplitCreen03, Function | MediumTest | Level3)
     ASSERT_TRUE(utils::RectEqualTo(priWindow, utils::splitRects_.primaryRect));
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
     ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 }
 
 /**
@@ -192,11 +192,11 @@ HWTEST_F(WindowSplitTest, SplitCreen04, Function | MediumTest | Level3)
     const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
     const sptr<Window>& secWindow = utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(secWindow);
     ASSERT_EQ(WMError::WM_OK, secWindow->Show());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 
     utils::UpdateSplitRects(fullWindow);
 
@@ -204,9 +204,9 @@ HWTEST_F(WindowSplitTest, SplitCreen04, Function | MediumTest | Level3)
     ASSERT_TRUE(utils::RectEqualTo(secWindow, utils::splitRects_.secondaryRect));
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
     ASSERT_EQ(WMError::WM_OK, secWindow->Hide());
-    sleep(SPLIT_TEST_SPEEP_S);
+    sleep(SPLIT_TEST_SLEEP_S);
 }
 }
 } // namespace Rosen

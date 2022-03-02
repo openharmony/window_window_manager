@@ -23,19 +23,19 @@ enum class WindowType : uint32_t {
     APP_WINDOW_BASE = 1,
     APP_MAIN_WINDOW_BASE = APP_WINDOW_BASE,
     WINDOW_TYPE_APP_MAIN_WINDOW = APP_MAIN_WINDOW_BASE,
-    APP_MAIN_WINDOW_END = WINDOW_TYPE_APP_MAIN_WINDOW, // equals last window type
+    APP_MAIN_WINDOW_END,
 
     APP_SUB_WINDOW_BASE = 1000,
     WINDOW_TYPE_MEDIA = APP_SUB_WINDOW_BASE,
     WINDOW_TYPE_APP_SUB_WINDOW,
-    APP_SUB_WINDOW_END = WINDOW_TYPE_APP_SUB_WINDOW, // equals last window type
+    APP_SUB_WINDOW_END,
     APP_WINDOW_END = APP_SUB_WINDOW_END,
 
     SYSTEM_WINDOW_BASE = 2000,
     BELOW_APP_SYSTEM_WINDOW_BASE = SYSTEM_WINDOW_BASE,
     WINDOW_TYPE_WALLPAPER = SYSTEM_WINDOW_BASE,
     WINDOW_TYPE_DESKTOP,
-    BELOW_APP_SYSTEM_WINDOW_END = WINDOW_TYPE_DESKTOP, // equals last window type
+    BELOW_APP_SYSTEM_WINDOW_END,
 
     ABOVE_APP_SYSTEM_WINDOW_BASE = 2100,
     WINDOW_TYPE_APP_LAUNCHING = ABOVE_APP_SYSTEM_WINDOW_BASE,
@@ -55,7 +55,9 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_POINTER,
     WINDOW_TYPE_LAUNCHER_RECENT,
     WINDOW_TYPE_LAUNCHER_DOCK,
-    ABOVE_APP_SYSTEM_WINDOW_END = WINDOW_TYPE_LAUNCHER_DOCK, // equals last window type
+    WINDOW_TYPE_BOOT_ANIMATION,
+    ABOVE_APP_SYSTEM_WINDOW_END,
+
     SYSTEM_WINDOW_END = ABOVE_APP_SYSTEM_WINDOW_END,
 };
 
@@ -125,9 +127,16 @@ struct Rect {
     int32_t posY_;
     uint32_t width_;
     uint32_t height_;
-    bool operator == (const Rect& a) const
+
+    bool operator==(const Rect& a) const
     {
         return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
+    }
+
+    bool IsInsideOf(const Rect& a) const
+    {
+        return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
+            posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
     }
 };
 
@@ -139,21 +148,14 @@ struct PointInfo {
 namespace {
     constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
     constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
-    constexpr float DEFAULT_SPLIT_RATIO = 0.5;
-    constexpr uint32_t DIVIDER_WIDTH = 8;
     constexpr uint32_t INVALID_WINDOW_ID = 0;
-    constexpr uint32_t HOTZONE = 40;
-    constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 240;
-    constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 426;
-    constexpr uint32_t MIN_VERTICAL_SPLIT_HEIGHT = 426;
-    constexpr uint32_t MIN_HORIZONTAL_SPLIT_WIDTH = 426;
 }
 
 struct SystemBarProperty {
     bool enable_;
     uint32_t backgroundColor_;
     uint32_t contentColor_;
-    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_WHITE), contentColor_(SYSTEM_COLOR_BLACK) {}
+    SystemBarProperty() : enable_(true), backgroundColor_(SYSTEM_COLOR_BLACK), contentColor_(SYSTEM_COLOR_WHITE) {}
     SystemBarProperty(bool enable, uint32_t background, uint32_t content)
         : enable_(enable), backgroundColor_(background), contentColor_(content) {}
     bool operator == (const SystemBarProperty& a) const

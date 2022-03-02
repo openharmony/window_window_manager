@@ -44,7 +44,7 @@ public:
     WMError AddWindowNode(uint32_t parentId, sptr<WindowNode>& node);
     WMError RemoveWindowNode(uint32_t windowId);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);
-    WMError UpdateWindowNode(uint32_t windowId);
+    WMError UpdateWindowNode(uint32_t windowId, WindowUpdateReason reason);
     bool isVerticalDisplay(sptr<WindowNode>& node) const;
 
     WMError RequestFocus(uint32_t windowId);
@@ -55,24 +55,30 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void MinimizeAllAppWindows(DisplayId displayId);
+    WMError MaxmizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifyDisplayChange(sptr<AbstractDisplay> abstractDisplay);
-    void NotifyDisplayDestory(DisplayId displayId);
+    void NotifyDisplayDestroy(DisplayId displayId);
+    void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
+    void FocusFaultDetection() const;
+    float GetVirtualPixelRatio(DisplayId displayId) const;
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
     void UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node,
         const sptr<WindowNodeContainer>& container) const;
+    std::string GenAllWindowsLogInfo() const;
     bool CheckDisplayInfo(const sptr<AbstractDisplay>& display);
 
     std::recursive_mutex& mutex_;
     std::map<int32_t, sptr<WindowNodeContainer>> windowNodeContainerMap_;
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
+    bool needCheckFocusWindow = false;
 
     std::map<WindowManagerAgentType, std::vector<sptr<IWindowManagerAgent>>> windowManagerAgents_;
 

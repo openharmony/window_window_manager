@@ -15,6 +15,7 @@
 
 #include "window_test_utils.h"
 #include <ability_context.h>
+#include "wm_common_inner.h"
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -123,13 +124,18 @@ Rect WindowTestUtils::GetDefaultFoatingRect(const sptr<Window>& window)
     return resRect;
 }
 
-Rect WindowTestUtils::GetLimitedDecoRect(const Rect& rect)
+Rect WindowTestUtils::GetLimitedDecoRect(const Rect& rect, float virtualPixelRatio)
 {
-    constexpr uint32_t winFrameH = 52u;
-    constexpr uint32_t winFrameW = 8u;
+    constexpr uint32_t windowTitleBarHeight = 48;
+    constexpr uint32_t windowFrameWidth = 4;
+    uint32_t winFrameH = static_cast<uint32_t>((windowTitleBarHeight + windowFrameWidth) * virtualPixelRatio);
+    uint32_t winFrameW = static_cast<uint32_t>((windowFrameWidth + windowFrameWidth) * virtualPixelRatio);
+    uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
+    uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
+
     bool vertical = displayRect_.width_ < displayRect_.height_;
-    uint32_t minFloatingW = vertical ? MIN_VERTICAL_FLOATING_WIDTH : MIN_VERTICAL_FLOATING_HEIGHT;
-    uint32_t minFloatingH = vertical ? MIN_VERTICAL_FLOATING_HEIGHT : MIN_VERTICAL_FLOATING_WIDTH;
+    uint32_t minFloatingW = vertical ? minVerticalFloatingW : minVerticalFloatingH;
+    uint32_t minFloatingH = vertical ? minVerticalFloatingH : minVerticalFloatingW;
     Rect resRect = {
         rect.posX_,
         rect.posY_,
@@ -139,11 +145,31 @@ Rect WindowTestUtils::GetLimitedDecoRect(const Rect& rect)
     return resRect;
 }
 
-Rect WindowTestUtils::GetFloatingLimitedRect(const Rect& rect)
+Rect WindowTestUtils::CalcLimitedRect(const Rect& rect, float virtualPixelRatio)
 {
+    uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
+    uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
+
     bool vertical = displayRect_.width_ < displayRect_.height_;
-    uint32_t minFloatingW = vertical ? MIN_VERTICAL_FLOATING_WIDTH : MIN_VERTICAL_FLOATING_HEIGHT;
-    uint32_t minFloatingH = vertical ? MIN_VERTICAL_FLOATING_HEIGHT : MIN_VERTICAL_FLOATING_WIDTH;
+    uint32_t minFloatingW = vertical ? minVerticalFloatingW : minVerticalFloatingH;
+    uint32_t minFloatingH = vertical ? minVerticalFloatingH : minVerticalFloatingW;
+    Rect resRect = {
+        rect.posX_,
+        rect.posY_,
+        std::max(minFloatingW, rect.width_),
+        std::max(minFloatingH, rect.height_),
+    };
+    return resRect;
+}
+
+Rect WindowTestUtils::GetFloatingLimitedRect(const Rect& rect, float virtualPixelRatio)
+{
+    uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
+    uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
+    bool vertical = displayRect_.width_ < displayRect_.height_;
+
+    uint32_t minFloatingW = vertical ? minVerticalFloatingW : minVerticalFloatingH;
+    uint32_t minFloatingH = vertical ? minVerticalFloatingH : minVerticalFloatingW;
     Rect resRect = {
         rect.posX_,
         rect.posY_,
@@ -204,6 +230,7 @@ void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window)
 
 bool WindowTestUtils::RectEqualTo(const sptr<Window>& window, const Rect& r)
 {
+    usleep(100000); // 100000us
     Rect l = window->GetRect();
     bool res = ((l.posX_ == r.posX_) && (l.posY_ == r.posY_) && (l.width_ == r.width_) && (l.height_ == r.height_));
     if (!res) {
@@ -257,18 +284,21 @@ void WindowTestUtils::InitSplitRects()
     displayRect_ = displayRect;
     limitDisplayRect_ = displayRect;
 
+    float virtualPixelRatio = WindowTestUtils::GetVirtualPixelRatio(0);
+    uint32_t dividerWidth = static_cast<uint32_t>(DIVIDER_WIDTH * virtualPixelRatio);
+
     if (displayRect_.width_ < displayRect_.height_) {
         isVerticalDisplay_ = true;
     }
     if (isVerticalDisplay_) {
         splitRects_.dividerRect = { 0,
-                                    static_cast<uint32_t>((displayRect_.height_ - DIVIDER_WIDTH) * DEFAULT_SPLIT_RATIO),
+                                    static_cast<uint32_t>((displayRect_.height_ - dividerWidth) * DEFAULT_SPLIT_RATIO),
                                     displayRect_.width_,
-                                    DIVIDER_WIDTH, };
+                                    dividerWidth, };
     } else {
-        splitRects_.dividerRect = { static_cast<uint32_t>((displayRect_.width_ - DIVIDER_WIDTH) * DEFAULT_SPLIT_RATIO),
+        splitRects_.dividerRect = { static_cast<uint32_t>((displayRect_.width_ - dividerWidth) * DEFAULT_SPLIT_RATIO),
                                     0,
-                                    DIVIDER_WIDTH,
+                                    dividerWidth,
                                     displayRect_.height_ };
     }
 }
@@ -373,6 +403,24 @@ void WindowTestUtils::UpdateLimitSplitRect(Rect& limitSplitRect)
     limitSplitRect.height_ = std::min(limitDisplayRect_.posY_ + limitDisplayRect_.height_,
                                       curLimitRect.posY_ + curLimitRect.height_) -
                                       limitSplitRect.posY_;
+}
+
+float WindowTestUtils::GetVirtualPixelRatio(DisplayId displayId)
+{
+    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (display == nullptr) {
+        WLOGFE("GetVirtualPixel fail. Get display fail. displayId:%{public}" PRIu64", use Default vpr:1.0", displayId);
+        return 1.0;  // Use DefaultVPR 1.0
+    }
+
+    float virtualPixelRatio = display->GetVirtualPixelRatio();
+    if (virtualPixelRatio == 0.0) {
+        WLOGFE("GetVirtualPixel fail. vpr is 0.0. displayId:%{public}" PRIu64", use Default vpr:1.0", displayId);
+        return 1.0;  // Use DefaultVPR 1.0
+    }
+
+    WLOGFI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", displayId, virtualPixelRatio);
+    return virtualPixelRatio;
 }
 } // namespace ROSEN
 } // namespace OHOS

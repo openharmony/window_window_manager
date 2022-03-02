@@ -59,7 +59,17 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             break;
         }
         case TRANS_ID_ON_SCREEN_CHANGED: {
-            std::vector<const sptr<ScreenInfo>> screenInfos;
+            sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
+            uint32_t event;
+            if (!data.ReadUint32(event)) {
+                WLOGFE("Read ScreenChangeEvent failed");
+                return -1;
+            }
+            OnScreenChange(screenInfo, static_cast<ScreenChangeEvent>(event));
+            break;
+        }
+        case TRANS_ID_ON_SCREENGROUP_CHANGED: {
+            std::vector<sptr<ScreenInfo>> screenInfos;
             uint32_t size;
             if (!data.ReadUint32(size)) {
                 WLOGFE("Read ScreenChangeEvent failed");
@@ -75,7 +85,7 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
                 WLOGFE("Read ScreenChangeEvent failed");
                 return -1;
             }
-            OnScreenChange(screenInfos, static_cast<ScreenChangeEvent>(event));
+            OnScreenGroupChange(screenInfos, static_cast<ScreenGroupChangeEvent>(event));
             break;
         }
         case TRANS_ID_ON_DISPLAY_CONNECT: {

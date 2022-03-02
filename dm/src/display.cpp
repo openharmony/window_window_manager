@@ -15,82 +15,99 @@
 
 #include "display.h"
 #include "display_info.h"
+#include "display_manager_adapter.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "Display"};
+    constexpr int32_t LARGE_SCREEN_WIDTH = 2560;
+}
 class Display::Impl : public RefBase {
-friend class Display;
-private:
-    std::string name_;
-    DisplayId id_ { DISPLAY_ID_INVALD };
-    int32_t width_ { 0 };
-    int32_t height_ { 0 };
-    uint32_t freshRate_ { 0 };
-    ScreenId screenId_ {SCREEN_ID_INVALID};
+public:
+    Impl(const std::string& name, sptr<DisplayInfo> info)
+    {
+        name_= name;
+        displayInfo_ = info;
+    }
+    ~Impl() = default;
+    DEFINE_VAR_FUNC_GET_SET(std::string, Name, name);
+    DEFINE_VAR_FUNC_GET_SET(sptr<DisplayInfo>, DisplayInfo, displayInfo);
 };
 
-Display::Display(const std::string& name, DisplayInfo* info)
-    : pImpl_(new Impl())
+Display::Display(const std::string& name, sptr<DisplayInfo> info)
+    : pImpl_(new Impl(name, info))
 {
-    pImpl_->name_ = name;
-    pImpl_->id_ = info->id_;
-    pImpl_->width_ = info->width_;
-    pImpl_->height_ = info->height_;
-    pImpl_->freshRate_ = info->freshRate_;
-    pImpl_->screenId_ = info->screenId_;
+}
+
+Display::~Display()
+{
 }
 
 DisplayId Display::GetId() const
 {
-    return pImpl_->id_;
+    return pImpl_->GetDisplayInfo()->GetDisplayId();
 }
 
 int32_t Display::GetWidth() const
 {
-    return pImpl_->width_;
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetWidth();
 }
 
 int32_t Display::GetHeight() const
 {
-    return pImpl_->height_;
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetHeight();
 }
 
 uint32_t Display::GetFreshRate() const
 {
-    return pImpl_->freshRate_;
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetFreshRate();
 }
 
 ScreenId Display::GetScreenId() const
 {
-    return pImpl_->screenId_;
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetScreenId();
 }
 
-void Display::SetWidth(int32_t width)
+Rotation Display::GetRotation() const
 {
-    pImpl_->width_ = width;
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetRotation();
 }
 
-void Display::SetHeight(int32_t height)
+Orientation Display::GetOrientation() const
 {
-    pImpl_->height_ = height;
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetOrientation();
 }
 
-void Display::SetFreshRate(uint32_t freshRate)
+void Display::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo) const
 {
-    pImpl_->freshRate_ = freshRate;
+    if (displayInfo == nullptr) {
+        WLOGFE("displayInfo is invalid");
+        return;
+    }
+    pImpl_->SetDisplayInfo(displayInfo);
+}
+
+void Display::UpdateDisplayInfo() const
+{
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(GetId());
+    UpdateDisplayInfo(displayInfo);
 }
 
 float Display::GetVirtualPixelRatio() const
 {
     // TODO: Should get from DMS
-#ifdef PRODUCT_RK
-    return 1.0f;
-#else
-    return 2.0f;
-#endif
-}
-
-void Display::SetId(DisplayId id)
-{
-    pImpl_->id_ = id;
+    if ((pImpl_->GetDisplayInfo()->GetWidth() == LARGE_SCREEN_WIDTH)
+        || (pImpl_->GetDisplayInfo()->GetHeight() == LARGE_SCREEN_WIDTH)) {
+        return 2.0f;
+    } else {
+        return 1.0f;
+    }
 }
 } // namespace OHOS::Rosen

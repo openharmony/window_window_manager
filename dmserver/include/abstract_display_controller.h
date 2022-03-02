@@ -40,19 +40,21 @@ public:
 
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(DisplayId displayId);
     sptr<AbstractDisplay> GetAbstractDisplay(DisplayId displayId) const;
+    sptr<AbstractDisplay> GetAbstractDisplayByScreen(ScreenId screenId) const;
+    std::vector<DisplayId> GetAllDisplayIds() const;
     void AddDisplayForExpandScreen(sptr<AbstractScreen> absScreen);
 
 private:
     void OnAbstractScreenConnect(sptr<AbstractScreen> absScreen);
     void OnAbstractScreenDisconnect(sptr<AbstractScreen> absScreen);
     void OnAbstractScreenChange(sptr<AbstractScreen> absScreen, DisplayChangeEvent event);
-    void ProcessDisplayUpdateRotation(sptr<AbstractScreen> absScreen);
+    void ProcessDisplayUpdateOrientation(sptr<AbstractScreen> absScreen);
     void ProcessDisplaySizeChange(sptr<AbstractScreen> absScreen);
     void BindAloneScreenLocked(sptr<AbstractScreen> absScreen);
     void AddScreenToMirrorLocked(sptr<AbstractScreen> absScreen);
     void AddScreenToExpandLocked(sptr<AbstractScreen> absScreen);
-    void ProcessNormalScreenDisconnected(sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup);
-    void ProcessExpandScreenDisconnected(sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup);
+    DisplayId ProcessNormalScreenDisconnected(sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup);
+    DisplayId ProcessExpandScreenDisconnected(sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup);
     bool UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info);
 
     std::recursive_mutex& mutex_;

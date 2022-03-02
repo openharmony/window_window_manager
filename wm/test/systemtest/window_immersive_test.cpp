@@ -333,6 +333,27 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest05, Function | MediumTest | Level3)
 }
 
 /**
+ * @tc.name: ImmersiveNegativeTest01
+ * @tc.desc: set systembar props with wrong window type
+ * @tc.type: FUNC
+ * @tc.require: AR000GGTVD
+ */
+HWTEST_F(WindowImmersiveTest, ImmersiveNegativeTest01, Function | MediumTest | Level3)
+{
+    const SystemBarRegionTints TEST_PROPS_NEGATIVE = {
+        { WindowType::WINDOW_TYPE_KEYGUARD, SYS_BAR_PROP_1, SYS_BAR_REGION_NULL },
+        { WindowType::WINDOW_TYPE_POINTER, SYS_BAR_PROP_2, SYS_BAR_REGION_NULL },
+    };
+    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppinfo_);
+    activeWindows_.push_back(window);
+    SetWindowSystemProps(window, TEST_PROPS_NEGATIVE);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+}
+
+/**
  * @tc.name: GetAvoidAreaByTypeTest01
  * @tc.desc: Test GetAvoidArea use unsupport Type(TYPE_CUTOUT).
  * @tc.type: FUNC

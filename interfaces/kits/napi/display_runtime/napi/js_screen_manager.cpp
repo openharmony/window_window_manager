@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_screen_manager.h"
 
 #include <vector>
-
+#include <new>
 #include <ability.h>
 #include "js_runtime_utils.h"
 #include "js_screen_listener.h"
@@ -138,8 +139,12 @@ void RegisterScreenListenerWithType(NativeEngine& engine, const std::string& typ
     }
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
-    sptr<JsScreenListener> screenListener = new JsScreenListener(&engine);
-    if (type == "screenConnectEvent" || type == "screenChangeEvent") {
+    sptr<JsScreenListener> screenListener = new(std::nothrow) JsScreenListener(&engine);
+    if (screenListener == nullptr) {
+        WLOGFE("screenListener is nullptr");
+        return;
+    }
+    if (type == "connect" || type == "disconnect" || type == "change") {
         SingletonContainer::Get<ScreenManager>().RegisterScreenListener(screenListener);
         WLOGFI("JsScreenManager::RegisterScreenListenerWithType success");
     } else {
@@ -209,6 +214,10 @@ NativeValue* OnRegisterScreenMangerCallback(NativeEngine& engine, NativeCallback
         return engine.CreateUndefined();
     }
     NativeValue* value = info.argv[INDEX_ONE];
+    if (value == nullptr) {
+        WLOGFI("JsScreenManager::OnRegisterScreenMangerCallback info->argv[1] is nullptr");
+        return engine.CreateUndefined();
+    }
     if (!value->IsCallable()) {
         WLOGFI("JsScreenManager::OnRegisterScreenMangerCallback info->argv[1] is not callable");
         return engine.CreateUndefined();
@@ -235,6 +244,10 @@ NativeValue* OnUnregisterScreenManagerCallback(NativeEngine& engine, NativeCallb
         UnregisterAllScreenListenerWithType(cbType);
     } else {
         NativeValue* value = info.argv[INDEX_ONE];
+        if (value == nullptr) {
+            WLOGFI("JsScreenManager::OnUnregisterScreenManagerCallback info->argv[1] is nullptr");
+            return engine.CreateUndefined();
+        }
         if (!value->IsCallable()) {
             WLOGFI("JsScreenManager::OnUnregisterScreenManagerCallback info->argv[1] is not callable");
             return engine.CreateUndefined();
@@ -308,7 +321,7 @@ NativeValue* OnMakeExpand(NativeEngine& engine, NativeCallbackInfo& info)
     }
     uint32_t size = array->GetLength();
     std::vector<ExpandOption> options;
-    for (auto i = 0; i < size; ++i) {
+    for (uint32_t i = 0; i < size; ++i) {
         NativeObject* object = ConvertNativeValueTo<NativeObject>(array->GetElement(i));
         ExpandOption expandOption;
         int32_t res = GetExpandOptionFromJs(engine, object, expandOption);

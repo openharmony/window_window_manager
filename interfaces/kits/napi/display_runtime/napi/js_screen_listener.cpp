@@ -80,16 +80,18 @@ void JsScreenListener::OnConnect(ScreenId id)
         WLOGFE("JsScreenListener::OnConnect not register!");
         return;
     }
-    NativeValue* propertyValue = engine_->CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(propertyValue);
-    if (object == nullptr) {
-        WLOGFE("Failed to convert prop to jsObject");
-        return;
-    }
-    object->SetProperty("screenId", CreateJsValue(*engine_, static_cast<uint32_t>(id)));
-    object->SetProperty("type", CreateJsValue(*engine_, SCREEN_CONNECT_TYPE));
-    NativeValue* argv[] = {propertyValue};
-    CallJsMethod("screenConnectEvent", argv, ArraySize(argv));
+
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
+            CallJsMethod("connect", argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(
+            callback, std::move(execute), std::move(complete)));
 }
 
 void JsScreenListener::OnDisconnect(ScreenId id)
@@ -100,19 +102,21 @@ void JsScreenListener::OnDisconnect(ScreenId id)
         WLOGFE("JsScreenListener::OnDisconnect not register!");
         return;
     }
-    NativeValue* propertyValue = engine_->CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(propertyValue);
-    if (object == nullptr) {
-        WLOGFE("Failed to convert prop to jsObject");
-        return;
-    }
-    object->SetProperty("screenId", CreateJsValue(*engine_, static_cast<uint32_t>(id)));
-    object->SetProperty("type", CreateJsValue(*engine_, SCREEN_DISCONNECT_TYPE));
-    NativeValue* argv[] = {propertyValue};
-    CallJsMethod("screenConnectEvent", argv, ArraySize(argv));
+
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
+            CallJsMethod("disconnect", argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(
+            callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenListener::OnChange(const std::vector<ScreenId> &vector, ScreenChangeEvent event)
+void JsScreenListener::OnChange(ScreenId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     WLOGFI("JsScreenListener::OnChange is called");
@@ -120,16 +124,18 @@ void JsScreenListener::OnChange(const std::vector<ScreenId> &vector, ScreenChang
         WLOGFE("JsScreenListener::OnChange not register!");
         return;
     }
-    NativeValue* propertyValue = engine_->CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(propertyValue);
-    if (object == nullptr) {
-        WLOGFE("Failed to convert prop to jsObject");
-        return;
-    }
-    object->SetProperty("screenId", CreateScreenIdArray(*engine_, vector));
-    object->SetProperty("type", CreateJsValue(*engine_, event));
-    NativeValue* argv[] = {propertyValue};
-    CallJsMethod("screenChangeEvent", argv, ArraySize(argv));
+
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
+            CallJsMethod("change", argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(
+            callback, std::move(execute), std::move(complete)));
 }
 
 NativeValue* JsScreenListener::CreateScreenIdArray(NativeEngine& engine, const std::vector<ScreenId>& data)
