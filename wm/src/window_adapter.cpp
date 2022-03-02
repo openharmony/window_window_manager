@@ -26,151 +26,141 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapter)
 
+#define INIT_PROXY_CHECK_RETURN(ret) \
+    do { \
+        if (!InitWMSProxy()) { \
+            WLOGFE("InitWMSProxy failed!"); \
+            return ret; \
+        } \
+    } while (false)
+
 WMError WindowAdapter::SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->SaveAbilityToken(abilityToken, windowId);
 }
 
 WMError WindowAdapter::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
     std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->CreateWindow(window, windowProperty, surfaceNode, windowId);
 }
 
 WMError WindowAdapter::AddWindow(sptr<WindowProperty>& windowProperty)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->AddWindow(windowProperty);
 }
 
 WMError WindowAdapter::RemoveWindow(uint32_t windowId)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->RemoveWindow(windowId);
 }
 
 WMError WindowAdapter::DestroyWindow(uint32_t windowId)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->DestroyWindow(windowId);
 }
 
 WMError WindowAdapter::ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->ResizeRect(windowId, rect, reason);
 }
 
 WMError WindowAdapter::RequestFocus(uint32_t windowId)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->RequestFocus(windowId);
 }
 
 WMError WindowAdapter::SetWindowFlags(uint32_t windowId, uint32_t flags)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->SetWindowFlags(windowId, flags);
 }
 
 WMError WindowAdapter::SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->SetSystemBarProperty(windowId, type, property);
 }
 
 void WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    if (!InitWMSProxy()) {
-        return;
-    }
+    INIT_PROXY_CHECK_RETURN();
+
     return windowManagerServiceProxy_->RegisterWindowManagerAgent(type, windowManagerAgent);
 }
 
 void WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    if (!InitWMSProxy()) {
-        return;
-    }
+    INIT_PROXY_CHECK_RETURN();
+
     return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 }
 
 WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, std::vector<Rect>& avoidRect)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     avoidRect = windowManagerServiceProxy_->GetAvoidAreaByType(windowId, type);
     return WMError::WM_OK;
 }
 
 WMError WindowAdapter::SetWindowMode(uint32_t windowId, WindowMode mode)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->SetWindowMode(windowId, mode);
 }
 
 WMError WindowAdapter::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->SetWindowBackgroundBlur(windowId, level);
 }
 
 WMError WindowAdapter::SetAlpha(uint32_t windowId, float alpha)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->SetAlpha(windowId, alpha);
 }
 
 void WindowAdapter::ProcessWindowTouchedEvent(uint32_t windowId)
 {
-    if (!InitWMSProxy()) {
-        return;
-    }
+    INIT_PROXY_CHECK_RETURN();
+
     return windowManagerServiceProxy_->ProcessWindowTouchedEvent(windowId);
 }
 
 void WindowAdapter::MinimizeAllAppWindows(DisplayId displayId)
 {
-    if (!InitWMSProxy()) {
-        return;
-    }
+    INIT_PROXY_CHECK_RETURN();
+
     windowManagerServiceProxy_->MinimizeAllAppWindows(displayId);
 }
 
 WMError WindowAdapter::MaxmizeWindow(uint32_t windowId)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->MaxmizeWindow(windowId);
 }
 
@@ -238,17 +228,15 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 WMError WindowAdapter::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->GetTopWindowId(mainWinId, topWinId);
 }
 
 WMError WindowAdapter::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode)
 {
-    if (!InitWMSProxy()) {
-        return WMError::WM_ERROR_SAMGR;
-    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
     return windowManagerServiceProxy_->SetWindowLayoutMode(displayId, mode);
 }
 } // namespace Rosen
