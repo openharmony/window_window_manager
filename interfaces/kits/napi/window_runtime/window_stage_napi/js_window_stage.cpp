@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -224,9 +224,9 @@ NativeValue* JsWindowStage::OnEvent(NativeEngine& engine, NativeCallbackInfo& in
         return engine.CreateUndefined();
     }
 
-    std::shared_ptr<NativeReference> refence = nullptr;
-    refence.reset(engine.CreateReference(value, 1));
-    eventCallbackMap_[refence] = 1;
+    std::shared_ptr<NativeReference> reference = nullptr;
+    reference.reset(engine.CreateReference(value, 1));
+    eventCallbackMap_[reference] = 1;
     engine_ = &engine;
     WLOGFI("JsWindowStage::OnEvent eventCallbackMap_ size: %{public}d",
         static_cast<uint32_t>(eventCallbackMap_.size()));

@@ -64,7 +64,7 @@ std::string WindowScene::GenerateMainWindowName(const std::shared_ptr<AbilityRun
     } else {
         std::string windowName = context->GetBundleName() + std::to_string(count++);
         std::size_t pos = windowName.find_last_of('.');
-        return (pos < 0) ? windowName : windowName.substr(pos + 1); // skip '.'
+        return (pos == std::string::npos) ? windowName : windowName.substr(pos + 1); // skip '.'
     }
 }
 

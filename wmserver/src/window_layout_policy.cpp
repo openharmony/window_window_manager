@@ -339,7 +339,7 @@ void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& lim
                 limitW -= offsetW;
                 break;
             default:
-                WLOGFE("invaild avoidPosType: %{public}d", avoidPosType);
+                WLOGFE("invalid avoidPosType: %{public}d", avoidPosType);
         }
     }
     limitRect.height_ = static_cast<uint32_t>(limitH < 0 ? 0 : limitH);

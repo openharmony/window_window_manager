@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,7 @@ void WindowInputMethodTest::SetUpTestCase()
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     if (display == nullptr) {
         printf("GetDefaultDisplay: failed!\n");
+        return;
     } else {
         printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
             display->GetHeight(), display->GetFreshRate());
@@ -80,7 +81,6 @@ namespace {
  * @tc.name: InputMethodWindow01
  * @tc.desc: One InputMethod Floating Window
  * @tc.type: FUNC
- * @tc.require: AR000GGTUT
  */
 HWTEST_F(WindowInputMethodTest, InputMethodWindow01, Function | MediumTest | Level3)
 {
@@ -95,7 +95,6 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow01, Function | MediumTest | Lev
  * @tc.name: InputMethodWindow02
  * @tc.desc: One KeyGuard Window
  * @tc.type: FUNC
- * @tc.require: AR000GGTUT
  */
 HWTEST_F(WindowInputMethodTest, InputMethodWindow02, Function | MediumTest | Level3)
 {
@@ -110,7 +109,6 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow02, Function | MediumTest | Lev
  * @tc.name: InputMethodWindow03
  * @tc.desc: One InputMethod Floating Window & One KeyGuard Window
  * @tc.type: FUNC
- * @tc.require: AR000GGTUU
  */
 HWTEST_F(WindowInputMethodTest, InputMethodWindow03, Function | MediumTest | Level3)
 {

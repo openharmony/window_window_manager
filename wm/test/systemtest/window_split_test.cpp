@@ -82,7 +82,6 @@ namespace {
  * @tc.name: SplitWindow01
  * @tc.desc: one primary window and one fullscreen window, test mode change
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
 {
@@ -114,7 +113,6 @@ HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
  * @tc.name: SplitWindow02
  * @tc.desc: one secondary window and one fullscreen window, test mode change
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
 {
@@ -145,7 +143,6 @@ HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
  * @tc.name: SplitCreen03
  * @tc.desc: one primary window and one fullscreen window, test rects
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowSplitTest, SplitCreen03, Function | MediumTest | Level3)
 {
@@ -179,7 +176,6 @@ HWTEST_F(WindowSplitTest, SplitCreen03, Function | MediumTest | Level3)
  * @tc.name: SplitCreen04
  * @tc.desc: one secondary window and one fullscreen window, test rects
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowSplitTest, SplitCreen04, Function | MediumTest | Level3)
 {

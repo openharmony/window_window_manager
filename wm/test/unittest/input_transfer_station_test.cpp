@@ -50,7 +50,6 @@ namespace {
  * @tc.name: AddInputWindow
  * @tc.desc: add input window in station.
  * @tc.type: FUNC
- * @tc.require: AR000GGTUV
  */
 HWTEST_F(InputTransferStationTest, AddInputWindow, Function | SmallTest | Level2)
 {
@@ -63,7 +62,6 @@ HWTEST_F(InputTransferStationTest, AddInputWindow, Function | SmallTest | Level2
  * @tc.name: RemoveInputWindow
  * @tc.desc: remove input window in station.
  * @tc.type: FUNC
- * @tc.require: AR000GGTUV
  */
 HWTEST_F(InputTransferStationTest, RemoveInputWindow, Function | SmallTest | Level2)
 {
@@ -74,7 +72,6 @@ HWTEST_F(InputTransferStationTest, RemoveInputWindow, Function | SmallTest | Lev
  * @tc.name: SetInputListener
  * @tc.desc: set input listener for inner window
  * @tc.type: FUNC
- * @tc.require: AR000GGTUV
  */
 HWTEST_F(InputTransferStationTest, SetInputListener, Function | SmallTest | Level2)
 {
