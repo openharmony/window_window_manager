@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,7 +82,6 @@ static std::shared_ptr<Media::PixelMap> CreatePixelMap()
  * @tc.name: GetScreenshot_default
  * @tc.desc: SetWindowRect/GetWindowRect
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(ScreenshotTest, GetScreenshot_default, Function | SmallTest | Level2)
 {

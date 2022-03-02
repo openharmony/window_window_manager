@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +48,8 @@ void ScreenshotCmdTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
-        WLOGFI("GetDefaultDisplay: failed!\n");
+        WLOGFE("GetDefaultDisplay: failed!\n");
+        return;
     } else {
         WLOGFI("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
             display->GetHeight(), display->GetFreshRate());
@@ -69,7 +70,7 @@ void ScreenshotCmdTest::TearDown()
 {
 }
 
-bool CheckFileExist(const std::string fPath)
+bool CheckFileExist(const std::string& fPath)
 {
     if (!fPath.empty()) {
         FILE* fp = fopen(fPath.c_str(), "r");

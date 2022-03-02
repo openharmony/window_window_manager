@@ -53,7 +53,6 @@ namespace {
  * @tc.name: Init01
  * @tc.desc: Init Scene with null abilityContext, null listener
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, Init01, Function | SmallTest | Level2)
 {
@@ -71,7 +70,6 @@ HWTEST_F(WindowSceneTest, Init01, Function | SmallTest | Level2)
  * @tc.name: Init02
  * @tc.desc: Mock window Create Static Method return nullptr, init Scene with null abilityContext, null listener
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, Init02, Function | SmallTest | Level2)
 {
@@ -89,7 +87,6 @@ HWTEST_F(WindowSceneTest, Init02, Function | SmallTest | Level2)
  * @tc.name: Init03
  * @tc.desc: Init Scene with abilityContext, null listener
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, Init03, Function | SmallTest | Level2)
 {
@@ -106,7 +103,6 @@ HWTEST_F(WindowSceneTest, Init03, Function | SmallTest | Level2)
  * @tc.name: Create01
  * @tc.desc: CreateWindow without windowName
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, Create01, Function | SmallTest | Level2)
 {
@@ -119,7 +115,6 @@ HWTEST_F(WindowSceneTest, Create01, Function | SmallTest | Level2)
  * @tc.name: Create02
  * @tc.desc: CreateWindow with windowName and without mainWindow
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, Create02, Function | SmallTest | Level2)
 {
@@ -132,7 +127,6 @@ HWTEST_F(WindowSceneTest, Create02, Function | SmallTest | Level2)
  * @tc.name: Create03
  * @tc.desc: CreateWindow with windowName and mainWindow
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, Create03, Function | SmallTest | Level2)
 {
@@ -146,7 +140,6 @@ HWTEST_F(WindowSceneTest, Create03, Function | SmallTest | Level2)
  * @tc.name: Create04
  * @tc.desc: Mock window Create Static Method return nullptr, createWindow with windowName and mainWindow
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, Create04, Function | SmallTest | Level2)
 {
@@ -160,7 +153,6 @@ HWTEST_F(WindowSceneTest, Create04, Function | SmallTest | Level2)
  * @tc.name: Create05
  * @tc.desc: createWindow with windowName and null option
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, Create05, Function | SmallTest | Level2)
 {
@@ -172,7 +164,6 @@ HWTEST_F(WindowSceneTest, Create05, Function | SmallTest | Level2)
  * @tc.name: GetMainWindow01
  * @tc.desc: GetMainWindow without scene init
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, GetMainWindow01, Function | SmallTest | Level2)
 {
@@ -184,7 +175,6 @@ HWTEST_F(WindowSceneTest, GetMainWindow01, Function | SmallTest | Level2)
  * @tc.name: GetMainWindow02
  * @tc.desc: GetMainWindow01 with scene init success
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, GetMainWindow02, Function | SmallTest | Level2)
 {
@@ -195,7 +185,6 @@ HWTEST_F(WindowSceneTest, GetMainWindow02, Function | SmallTest | Level2)
  * @tc.name: GoForeground01
  * @tc.desc: GoForeground01 without mainWindow
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, GoForeground01, Function | SmallTest | Level2)
 {
@@ -207,7 +196,6 @@ HWTEST_F(WindowSceneTest, GoForeground01, Function | SmallTest | Level2)
  * @tc.name: GoBackground01
  * @tc.desc: GoBackground01 without mainWindow
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, GoBackground01, Function | SmallTest | Level2)
 {
@@ -219,7 +207,6 @@ HWTEST_F(WindowSceneTest, GoBackground01, Function | SmallTest | Level2)
  * @tc.name: RequestFocus01
  * @tc.desc: RequestFocus01 without mainWindow
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowSceneTest, RequestFocus01, Function | SmallTest | Level2)
 {

@@ -355,7 +355,7 @@ void WindowTestUtils::UpdateLimitDisplayRect(Rect& avoidRect)
             limitDisplayRect_.width_ -= offsetW;
             break;
         default:
-            WLOGFE("invaild avoidPosType: %{public}d", avoidPosType);
+            WLOGFE("invalid avoidPosType: %{public}d", avoidPosType);
     }
 }
 

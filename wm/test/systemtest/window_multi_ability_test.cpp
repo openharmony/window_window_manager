@@ -88,7 +88,6 @@ static void CreateDestroyWindowSceneCallable(int i)
  * @tc.name: MultiAbilityWindow01
  * @tc.desc: Five scene process in one thread
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | Level2)
 {
@@ -114,7 +113,6 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | L
  * @tc.name: MultiAbilityWindow02
  * @tc.desc: Five scene process show/hide in five threads
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | Level2)
 {
@@ -134,7 +132,6 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | L
  * @tc.name: MultiAbilityWindow03
  * @tc.desc: Five scene process create/destroy in five threads
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | Level2)
 {
