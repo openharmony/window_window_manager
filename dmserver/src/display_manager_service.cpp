@@ -98,7 +98,7 @@ DisplayId DisplayManagerService::GetDefaultDisplayId()
     sptr<AbstractDisplay> display = GetDisplayByScreen(dmsScreenId);
     if (display == nullptr) {
         WLOGFE("fail to get displayInfo by id: invalid display");
-        return DISPLAY_ID_INVALD;
+        return DISPLAY_ID_INVALID;
     }
     return display->GetId();
 }
@@ -305,11 +305,11 @@ bool DisplayManagerService::SuspendEnd()
         EventStatus::END);
 }
 
-bool DisplayManagerService::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
+bool DisplayManagerService::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     WLOGFI("SetScreenPowerForAll");
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(
-        state == DisplayPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
+        state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END);
 }
 

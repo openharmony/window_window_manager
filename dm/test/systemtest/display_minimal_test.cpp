@@ -53,7 +53,7 @@ namespace {
  */
 HWTEST_F(DisplayMinimalTest, BasicDisplay01, Function | MediumTest | Level1)
 {
-    ASSERT_NE(DISPLAY_ID_INVALD, DisplayManager::GetInstance().GetDefaultDisplayId());
+    ASSERT_NE(DISPLAY_ID_INVALID, DisplayManager::GetInstance().GetDefaultDisplayId());
 }
 
 /**

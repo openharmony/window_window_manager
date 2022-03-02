@@ -32,7 +32,7 @@ using  WriteToPngParam = struct {
 };
 
 using CmdArgments = struct {
-    Rosen::DisplayId displayId = Rosen::DISPLAY_ID_INVALD;
+    Rosen::DisplayId displayId = Rosen::DISPLAY_ID_INVALID;
     std::string fileName;
     bool isWidthSet = false;
     int32_t width = -1;

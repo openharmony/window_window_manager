@@ -90,7 +90,7 @@ public:
 };
 
 sptr<Display> ScreenManagerTest::defaultDisplay_ = nullptr;
-DisplayId ScreenManagerTest::defaultDisplayId_ = DISPLAY_ID_INVALD;
+DisplayId ScreenManagerTest::defaultDisplayId_ = DISPLAY_ID_INVALID;
 ScreenId ScreenManagerTest::defaultScreenId_ = INVALID_SCREEN_ID;
 std::string ScreenManagerTest::defaultName_ = "virtualScreen01";
 uint32_t ScreenManagerTest::defaultWidth_ = 480;
@@ -366,7 +366,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
     ASSERT_EQ(virtualScreenId, screenId);
     std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
     sptr<Screen> DefaultScreen = screens.front();
-    DisplayId virtualDisplayId = DISPLAY_ID_INVALD;
+    DisplayId virtualDisplayId = DISPLAY_ID_INVALID;
     std::vector<DisplayId> displayIds = DisplayManager::GetInstance().GetAllDisplayIds();
     for (auto& id : displayIds) {
         if (id != defaultDisplayId_) {

@@ -165,7 +165,7 @@ void UnregisterAllScreenListenerWithType(const std::string& type)
     }
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         it->second->RemoveAllCallback();
-        if (type == "screenConnectEvent" || type == "screenChangeEvent") {
+        if (type == "connect" || type == "disconnect" || type == "change") {
             sptr<ScreenManager::IScreenListener> thisListener(it->second);
             SingletonContainer::Get<ScreenManager>().UnregisterScreenListener(thisListener);
             WLOGFI("JsScreenManager::UnregisterAllScreenListenerWithType success");
@@ -185,7 +185,7 @@ void UnRegisterScreenListenerWithType(const std::string& type, NativeValue* valu
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         if (value->StrictEquals(it->first->Get())) {
             it->second->RemoveCallback(value);
-            if (type == "screenConnectEvent" || type == "screenChangeEvent") {
+            if (type == "connect" || type == "disconnect" || type == "change") {
                 sptr<ScreenManager::IScreenListener> thisListener(it->second);
                 SingletonContainer::Get<ScreenManager>().UnregisterScreenListener(thisListener);
                 WLOGFI("JsScreenManager::UnRegisterScreenListenerWithType success");

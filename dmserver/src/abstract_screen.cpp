@@ -180,6 +180,7 @@ DMError AbstractScreen::SetScreenColorTransform()
 void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
 {
     info->id_ = dmsId_;
+    info->rsId_ = rsId_;
     uint32_t width = 0;
     uint32_t height = 0;
     if (activeIdx_ >= 0 && activeIdx_ < modes_.size()) {

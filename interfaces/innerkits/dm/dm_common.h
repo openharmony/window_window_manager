@@ -24,7 +24,7 @@ namespace Rosen {
 using DisplayId = uint64_t;
 using ScreenId = uint64_t;
 namespace {
-    constexpr DisplayId DISPLAY_ID_INVALD = -1ULL;
+    constexpr DisplayId DISPLAY_ID_INVALID = -1ULL;
     constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
     const static std::string DEFAULT_SCREEN_NAME = "buildIn";
 }
@@ -33,7 +33,7 @@ enum class PowerStateChangeReason : uint32_t {
     POWER_BUTTON,
 };
 
-enum class DisplayPowerState : uint32_t {
+enum class ScreenPowerState : uint32_t {
     POWER_ON,
     POWER_STAND_BY,
     POWER_SUSPEND,

@@ -146,7 +146,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             break;
         }
         case TRANS_ID_SET_SCREEN_POWER_FOR_ALL: {
-            DisplayPowerState state = static_cast<DisplayPowerState>(data.ReadUint32());
+            ScreenPowerState state = static_cast<ScreenPowerState>(data.ReadUint32());
             PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
             reply.WriteBool(SetScreenPowerForAll(state, reason));
             break;

@@ -52,7 +52,7 @@ public:
     static ScreenId defaultScreenId_;
     sptr<DisplayChangeEventListener> listener_ = new DisplayChangeEventListener();
 };
-DisplayId DisplayChangeUnitTest::defaultDisplayId_ = DISPLAY_ID_INVALD;
+DisplayId DisplayChangeUnitTest::defaultDisplayId_ = DISPLAY_ID_INVALID;
 ScreenId DisplayChangeUnitTest::defaultScreenId_ = SCREEN_ID_INVALID;
 
 void DisplayChangeUnitTest::SetUpTestCase()

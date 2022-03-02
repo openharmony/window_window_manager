@@ -49,7 +49,7 @@ const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDisplayById(DisplayId
 const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDefaultDisplay()
 {
     DisplayId defaultDisplayId = GetDefaultDisplayId();
-    if (defaultDisplayId == DISPLAY_ID_INVALD) {
+    if (defaultDisplayId == DISPLAY_ID_INVALID) {
         WLOGFE("Fail to get default displayId");
         return nullptr;
     }
