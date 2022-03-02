@@ -48,7 +48,7 @@ bool Screen::IsGroup() const
     return pImpl_->GetScreenInfo()->GetCanHasChild();
 }
 
-const std::string& Screen::GetName() const
+const std::string Screen::GetName() const
 {
     return pImpl_->GetScreenInfo()->GetName();
 }

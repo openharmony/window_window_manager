@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_DM_COMMON_H
 
 #include <refbase.h>
+#include <string>
 
 namespace OHOS {
 namespace Rosen {
