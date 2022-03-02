@@ -450,8 +450,12 @@ void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 {
     WLOGFI("NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu", event, status,
         powerEventListeners_.size());
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto& listener : powerEventListeners_) {
+    std::vector<sptr<IDisplayPowerEventListener>> powerEventListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        powerEventListeners = powerEventListeners_;
+    }
+    for (auto& listener : powerEventListeners) {
         listener->OnDisplayPowerEvent(event, status);
     }
 }
@@ -459,9 +463,13 @@ void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 void DisplayManager::Impl::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 {
     WLOGFI("state:%{public}u", state);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (displayStateCallback_) {
-        displayStateCallback_(state);
+    DisplayStateCallback displayStateCallback;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        displayStateCallback = displayStateCallback_;
+    }
+    if (displayStateCallback) {
+        displayStateCallback(state);
         ClearDisplayStateCallback();
         return;
     }
