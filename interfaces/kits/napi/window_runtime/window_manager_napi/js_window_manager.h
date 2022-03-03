@@ -52,7 +52,7 @@ private:
     NativeValue* OnGetTopWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetWindowLayoutMode(NativeEngine& engine, NativeCallbackInfo& info);
     std::weak_ptr<AbilityRuntime::Context> context_;
-    std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
+    std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
 };
 }  // namespace Rosen
