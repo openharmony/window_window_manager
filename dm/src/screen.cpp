@@ -45,7 +45,7 @@ Screen::~Screen()
 bool Screen::IsGroup() const
 {
     UpdateScreenInfo();
-    return pImpl_->GetScreenInfo()->GetCanHasChild();
+    return pImpl_->GetScreenInfo()->GetIsScreenGroup();
 }
 
 const std::string Screen::GetName() const
@@ -60,7 +60,6 @@ ScreenId Screen::GetId() const
 
 uint32_t Screen::GetWidth() const
 {
-    UpdateScreenInfo();
     auto modeId = GetModeId();
     auto modes = GetSupportedModes();
     if (modeId < 0 || modeId >= modes.size()) {
@@ -112,7 +111,6 @@ Orientation Screen::GetOrientation() const
 
 bool Screen::IsReal() const
 {
-    UpdateScreenInfo();
     return pImpl_->GetScreenInfo()->GetType() == ScreenType::REAL;
 }
 
@@ -154,11 +152,13 @@ DMError Screen::SetScreenColorTransform()
 
 ScreenId Screen::GetParentId() const
 {
+    UpdateScreenInfo();
     return pImpl_->GetScreenInfo()->GetParentId();
 }
 
 uint32_t Screen::GetModeId() const
 {
+    UpdateScreenInfo();
     return pImpl_->GetScreenInfo()->GetModeId();
 }
 
@@ -173,11 +173,7 @@ bool Screen::SetScreenActiveMode(uint32_t modeId)
     if (modeId >= GetSupportedModes().size()) {
         return false;
     }
-    if (SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(screenId, modeId)) {
-        pImpl_->GetScreenInfo()->SetModeId(modeId);
-        return true;
-    }
-    return false;
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(screenId, modeId);
 }
 
 void Screen::UpdateScreenInfo(sptr<ScreenInfo> info) const

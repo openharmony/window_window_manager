@@ -19,6 +19,7 @@
 #include <map>
 #include <vector>
 
+#include <event_handler.h>
 #include <refbase.h>
 #include <surface.h>
 #include <transaction/rs_interfaces.h>
@@ -58,7 +59,6 @@ public:
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     bool SetOrientation(ScreenId screenId, Orientation orientation);
 
-    bool IsScreenGroup(ScreenId screenId) const;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
     void UpdateRSTree(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
@@ -66,7 +66,6 @@ public:
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
     void DumpScreenInfo() const;
-    void DumpScreenGroupInfo() const;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);
@@ -93,6 +92,12 @@ private:
         const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination);
     void AddScreenToGroup(sptr<AbstractScreenGroup>, const std::vector<ScreenId>&,
         const std::vector<Point>&, std::map<ScreenId, bool>&);
+    void NotifyScreenConnected(sptr<ScreenInfo>) const;
+    void NotifyScreenDisconnected(ScreenId screenId) const;
+    void NotifyScreenChanged(sptr<ScreenInfo> screenInfo, ScreenChangeEvent event) const;
+    void NotifyScreenGroupChanged(const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent event) const;
+    void NotifyScreenGroupChanged(const std::vector<sptr<ScreenInfo>>& screenInfo, ScreenGroupChangeEvent event) const;
+    void DumpScreenGroupInfo() const;
 
     class ScreenIdManager {
     public:
@@ -114,12 +119,15 @@ private:
         std::map<ScreenId, ScreenId> dms2RsScreenIdMap_;
     };
 
+    const std::string CONTROLLER_THREAD_ID = "abstract_screen_controller_thread";
+
     std::recursive_mutex& mutex_;
     OHOS::Rosen::RSInterfaces& rsInterface_;
     ScreenIdManager screenIdManager_;
     std::map<ScreenId, sptr<AbstractScreen>> dmsScreenMap_;
     std::map<ScreenId, sptr<AbstractScreenGroup>> dmsScreenGroupMap_;
     sptr<AbstractScreenCallback> abstractScreenCallback_;
+    std::shared_ptr<AppExecFwk::EventHandler> controllerHandler_;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_SCREEN_CONTROLLER_H

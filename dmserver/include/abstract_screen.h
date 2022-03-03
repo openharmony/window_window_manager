@@ -60,7 +60,7 @@ public:
     const std::string name_;
     const ScreenId dmsId_;
     const ScreenId rsId_;
-    bool canHasChild_ { false };
+    bool isScreenGroup_ { false };
     std::shared_ptr<RSDisplayNode> rsDisplayNode_;
     RSDisplayNodeConfig rSDisplayNodeConfig_;
     ScreenId groupDmsId_ { SCREEN_ID_INVALID };

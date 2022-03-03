@@ -88,8 +88,7 @@ void DisplayManagerAgentController::OnScreenDisconnect(ScreenId screenId)
     }
 }
 
-void DisplayManagerAgentController::OnScreenChange(const sptr<ScreenInfo> screenInfo,
-    ScreenChangeEvent screenChangeEvent)
+void DisplayManagerAgentController::OnScreenChange(sptr<ScreenInfo> screenInfo, ScreenChangeEvent screenChangeEvent)
 {
     if (screenInfo == nullptr) {
         return;
