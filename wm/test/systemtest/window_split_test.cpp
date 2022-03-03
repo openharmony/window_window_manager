@@ -150,7 +150,7 @@ HWTEST_F(WindowSplitTest, SplitCreen03, Function | MediumTest | Level3)
     splitInfo_.name = "primary.3";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
 
-    utils::InitSplitRects();
+    ASSERT_TRUE(utils::InitSplitRects());
 
     const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
@@ -183,7 +183,7 @@ HWTEST_F(WindowSplitTest, SplitCreen04, Function | MediumTest | Level3)
     splitInfo_.name = "secondary.4";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 
-    utils::InitSplitRects();
+    ASSERT_TRUE(utils::InitSplitRects());
 
     const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
