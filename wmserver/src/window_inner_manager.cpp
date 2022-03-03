@@ -254,7 +254,7 @@ void WindowInnerManager::HandleMessage()
         }
         // loop to handle massages
         for (auto& msg : handleMsgs) {
-            if (msg == nullptr) {
+            if (!msg) {
                 continue;
             }
             auto cmdType = msg->cmdType;
@@ -280,7 +280,7 @@ void WindowInnerManager::SendMessage(InnerWMCmd cmdType, DisplayId displayId)
         return;
     }
     std::unique_ptr<WindowMessage> winMsg = std::make_unique<WindowMessage>();
-    if (winMsg == nullptr) {
+    if (!winMsg) {
         WLOGFI("alloc winMsg failed");
         return;
     }

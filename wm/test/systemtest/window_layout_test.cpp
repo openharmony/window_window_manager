@@ -40,12 +40,9 @@ vector<Rect> WindowLayoutTest::fullScreenExpecteds_;
 void WindowLayoutTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
-    if (display == nullptr) {
-        printf("GetDefaultDisplay: failed!\n");
-        return;
-    }
+    ASSERT_TRUE((display != nullptr));
     printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
-        display->GetHeight(), display->GetFreshRate());
+        display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
 
