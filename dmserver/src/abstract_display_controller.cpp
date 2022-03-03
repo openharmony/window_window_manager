@@ -162,7 +162,7 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
     }
     WLOGI("disconnect screen. id:%{public}" PRIu64"", absScreen->dmsId_);
     sptr<AbstractScreenGroup> screenGroup;
-    DisplayId absDisplayId = DISPLAY_ID_INVALD;
+    DisplayId absDisplayId = DISPLAY_ID_INVALID;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         screenGroup = absScreen->GetGroup();
@@ -179,7 +179,7 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
             WLOGE("support in future. combination:%{public}u", screenGroup->combination_);
         }
     }
-    if (absDisplayId == DISPLAY_ID_INVALD) {
+    if (absDisplayId == DISPLAY_ID_INVALID) {
         WLOGE("the displayId of the disconnected expand screen was not found");
         return;
     }
@@ -215,7 +215,7 @@ DisplayId AbstractDisplayController::ProcessNormalScreenDisconnected(
             return displayId;
         }
     }
-    return DISPLAY_ID_INVALD;
+    return DISPLAY_ID_INVALID;
 }
 
 DisplayId AbstractDisplayController::ProcessExpandScreenDisconnected(
@@ -231,7 +231,7 @@ DisplayId AbstractDisplayController::ProcessExpandScreenDisconnected(
             return displayId;
         }
     }
-    return DISPLAY_ID_INVALD;
+    return DISPLAY_ID_INVALID;
 }
 
 void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absScreen, DisplayChangeEvent event)

@@ -36,12 +36,12 @@ public:
     static DisplayId defaultId_;
     static Media::Rect defaultScreen_;
     static Media::Size defaultImage_;
-    DisplayId invalidId_ = DISPLAY_ID_INVALD;
+    DisplayId invalidId_ = DISPLAY_ID_INVALID;
     Media::Rect invalidRect_ = {-1, -1, -1, -1};
     uint32_t defaultRot_ = 0;
 };
 
-DisplayId ScreenshotTest::defaultId_ = DISPLAY_ID_INVALD;
+DisplayId ScreenshotTest::defaultId_ = DISPLAY_ID_INVALID;
 Media::Rect ScreenshotTest::defaultScreen_ = {0, 0, 0, 0};
 Media::Size ScreenshotTest::defaultImage_ = {0, 0};
 
