@@ -42,10 +42,10 @@ void WindowLayoutTest::SetUpTestCase()
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     if (display == nullptr) {
         printf("GetDefaultDisplay: failed!\n");
-    } else {
-        printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
-            display->GetHeight(), display->GetFreshRate());
+        return;
     }
+    printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
+        display->GetHeight(), display->GetFreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
 

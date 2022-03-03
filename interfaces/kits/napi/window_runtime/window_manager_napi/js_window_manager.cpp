@@ -330,7 +330,6 @@ NativeValue* JsWindowManager::OnMinimizeAll(NativeEngine& engine, NativeCallback
         WLOGFE("param is too small!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    // TODO: use DisplayId instead of int64_t when engine supported
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALD);
     if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[0], displayId)) {
         WLOGFE("Failed to convert parameter to displayId");
