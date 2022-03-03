@@ -180,10 +180,6 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case TRANS_ID_GET_SCREEN_INFO_BY_ID: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenInfo = GetScreenInfoById(screenId);
-            for (auto& mode : screenInfo->GetModes()) {
-                WLOGFI("info modes is width: %{public}u, height: %{public}u, refreshRate: %{public}u",
-                    mode->width_, mode->height_, mode->refreshRate_);
-            }
             reply.WriteStrongParcelable(screenInfo);
             break;
         }

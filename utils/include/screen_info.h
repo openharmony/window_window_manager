@@ -41,13 +41,13 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, RsScreenId, rsId, SCREEN_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, VirtualWidth, virtualWidth, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, VirtualHeight, virtualHeight, 0);
-    DEFINE_VAR_DEFAULT_FUNC_GET(float, VirtualPixelRatio, virtualPixelRatio, 0.0f);
-    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, ParentId, parent, 0);
-    DEFINE_VAR_DEFAULT_FUNC_GET(bool, CanHasChild, canHasChild, false);
+    DEFINE_VAR_DEFAULT_FUNC_GET(float, VirtualPixelRatio, virtualPixelRatio, 1.0f);
+    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, ParentId, parent, SCREEN_ID_INVALID);
+    DEFINE_VAR_DEFAULT_FUNC_GET(bool, IsScreenGroup, isScreenGroup, false);
     DEFINE_VAR_DEFAULT_FUNC_GET(Rotation, Rotation, rotation, Rotation::ROTATION_0);
     DEFINE_VAR_DEFAULT_FUNC_GET(Orientation, Orientation, orientation, Orientation::UNSPECIFIED);
-    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenType, Type, type, ScreenType::REAL);
-    DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, ModeId, modeId, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenType, Type, type, ScreenType::UNDEFINE);
+    DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, ModeId, modeId, 0);
     DEFINE_VAR_FUNC_GET(std::vector<sptr<SupportedScreenModes>>, Modes, modes);
 protected:
     ScreenInfo() = default;

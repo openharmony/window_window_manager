@@ -52,7 +52,7 @@ struct VirtualScreenOption {
 };
 
 struct ExpandOption {
-    uint32_t screenId_;
+    ScreenId screenId_;
     uint32_t startX_;
     uint32_t startY_;
 };
