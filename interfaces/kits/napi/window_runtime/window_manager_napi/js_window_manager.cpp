@@ -102,7 +102,7 @@ static bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability)
     if (ability == nullptr) {
         return false;
     } else {
-        WLOGE("JsWindowManager::GetAPI7Ability ability is %{public}p!", ability);
+        WLOGE("JsWindowManager::GetAPI7Ability ability is success!");
     }
     return true;
 }
@@ -327,8 +327,7 @@ NativeValue* JsWindowManager::OnMinimizeAll(NativeEngine& engine, NativeCallback
         WLOGFE("param is too small!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    // TODO: use DisplayId instead of int64_t when engine supported
-    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALD);
+    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[0], displayId)) {
         WLOGFE("Failed to convert parameter to displayId");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
@@ -403,7 +402,6 @@ void JsWindowManager::UnregisterAllWmListenerWithType(std::string type)
     }
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         if (type.compare(SYSTEM_BAR_TINT_CHANGE_CB) == 0) {
-            // it->second.jsCallBack_ = nullptr
             sptr<ISystemBarChangedListener> thisListener(it->second);
             SingletonContainer::Get<WindowManager>().UnregisterSystemBarChangedListener(thisListener);
             WLOGFI("JsWindowManager::UnregisterAllWmListenerWithType systemBarTintChange success");

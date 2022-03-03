@@ -201,7 +201,7 @@ bool SnapShotUtils::WriteToPngWithPixelMap(const std::string &fileName, PixelMap
 static bool ProcessDisplayId(DisplayId &displayId)
 {
     WM_SCOPED_TRACE("snapshot:ProcessDisplayId(%" PRIu64")", displayId);
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     } else {
         bool validFlag = false;

@@ -38,7 +38,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapter)
 
 DisplayId DisplayManagerAdapter::GetDefaultDisplayId()
 {
-    INIT_PROXY_CHECK_RETURN(DISPLAY_ID_INVALD);
+    INIT_PROXY_CHECK_RETURN(DISPLAY_ID_INVALID);
 
     return displayManagerServiceProxy_->GetDefaultDisplayId();
 }
@@ -124,6 +124,12 @@ DMError ScreenManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Su
     return displayManagerServiceProxy_->SetVirtualScreenSurface(screenId, surface);
 }
 
+bool ScreenManagerAdapter::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    return displayManagerServiceProxy_->SetScreenPowerForAll(state, reason);
+}
+
 bool ScreenManagerAdapter::SetOrientation(ScreenId screenId, Orientation orientation)
 {
     INIT_PROXY_CHECK_RETURN(false);
@@ -174,14 +180,6 @@ bool DisplayManagerAdapter::SuspendEnd()
 
     return displayManagerServiceProxy_->SuspendEnd();
 }
-
-bool DisplayManagerAdapter::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
-{
-    INIT_PROXY_CHECK_RETURN(false);
-
-    return displayManagerServiceProxy_->SetScreenPowerForAll(state, reason);
-}
-
 
 bool DisplayManagerAdapter::SetDisplayState(DisplayState state)
 {
@@ -299,7 +297,7 @@ std::vector<DisplayId> DisplayManagerAdapter::GetAllDisplayIds()
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("screen id is invalid");
         return nullptr;
     }

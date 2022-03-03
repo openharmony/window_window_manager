@@ -52,14 +52,16 @@ public:
     static ScreenId defaultScreenId_;
     sptr<DisplayChangeEventListener> listener_ = new DisplayChangeEventListener();
 };
-DisplayId DisplayChangeUnitTest::defaultDisplayId_ = DISPLAY_ID_INVALD;
+DisplayId DisplayChangeUnitTest::defaultDisplayId_ = DISPLAY_ID_INVALID;
 ScreenId DisplayChangeUnitTest::defaultScreenId_ = SCREEN_ID_INVALID;
 
 void DisplayChangeUnitTest::SetUpTestCase()
 {
     defaultDisplayId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
     sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
-    defaultScreenId_ = defaultDisplay->GetScreenId();
+    if (defaultDisplay != nullptr) {
+        defaultScreenId_ = defaultDisplay->GetScreenId();
+    }
 }
 
 void DisplayChangeUnitTest::TearDownTestCase()

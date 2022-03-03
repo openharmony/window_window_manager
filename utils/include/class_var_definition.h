@@ -15,9 +15,17 @@
 
 #ifndef OHOS_ROSEN_CLASS_VAR_DEFINITION_H
 #define OHOS_ROSEN_CLASS_VAR_DEFINITION_H
+
+#include <mutex>
+
 namespace OHOS::Rosen {
 #define DEFINE_VAR(type, memberName)                                               \
 private:                                                                           \
+    type memberName##_;
+
+#define DEFINE_VAR_WITH_LOCK(type, memberName)                                     \
+private:                                                                           \
+    std::recursive_mutex memberName##Mutex_;                                       \
     type memberName##_;
 
 #define DEFINE_VAR_DEFAULT(type, memberName, defaultValue)                         \
@@ -31,10 +39,26 @@ public:                                                                         
         return memberName##_;                                                      \
     }
 
+#define DEFINE_FUNC_GET_WITH_LOCK(type, funcName, memberName)                      \
+public:                                                                            \
+    type Get##funcName()                                                           \
+    {                                                                              \
+        std::lock_guard<std::recursive_mutex> lock(memberName##Mutex_);            \
+        return memberName##_;                                                      \
+    }
+
 #define DEFINE_FUNC_SET(type, funcName, memberName)                                \
 public:                                                                            \
     void Set##funcName(type value)                                                 \
     {                                                                              \
+        memberName##_ = value;                                                     \
+    }
+
+#define DEFINE_FUNC_SET_WITH_LOCK(type, funcName, memberName)                      \
+public:                                                                            \
+    void Set##funcName(type value)                                                 \
+    {                                                                              \
+        std::lock_guard<std::recursive_mutex> lock(memberName##Mutex_);            \
         memberName##_ = value;                                                     \
     }
 
@@ -50,6 +74,11 @@ public:                                                                         
     DEFINE_VAR(type, memberName)                                                   \
     DEFINE_FUNC_GET(type, funcName, memberName)                                    \
     DEFINE_FUNC_SET(type, funcName, memberName)
+
+#define DEFINE_VAR_FUNC_GET_SET_WITH_LOCK(type, funcName, memberName)              \
+    DEFINE_VAR_WITH_LOCK(type, memberName)                                         \
+    DEFINE_FUNC_GET_WITH_LOCK(type, funcName, memberName)                          \
+    DEFINE_FUNC_SET_WITH_LOCK(type, funcName, memberName)
 
 #define DEFINE_VAR_DEFAULT_FUNC_GET_SET(type, funcName, memberName, defaultValue)  \
     DEFINE_VAR_DEFAULT(type, memberName, defaultValue)                             \

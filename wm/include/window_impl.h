@@ -106,8 +106,8 @@ public:
     virtual void UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     virtual void UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
-    virtual void RegisterDragListener(sptr<IWindowDragListener>& listener) override;
-    virtual void UnregisterDragListener(sptr<IWindowDragListener>& listener) override;
+    virtual void RegisterDragListener(const sptr<IWindowDragListener>& listener) override;
+    virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
 

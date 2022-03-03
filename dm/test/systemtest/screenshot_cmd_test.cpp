@@ -37,12 +37,12 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     static DisplayId defaultId_;
-    DisplayId invalidId_ = DISPLAY_ID_INVALD;
+    DisplayId invalidId_ = DISPLAY_ID_INVALID;
     const std::string defaultCmd_ = "/system/bin/snapshot_display";
     const int testTimeCount_ = 2;
 };
 
-DisplayId ScreenshotCmdTest::defaultId_ = DISPLAY_ID_INVALD;
+DisplayId ScreenshotCmdTest::defaultId_ = DISPLAY_ID_INVALID;
 
 void ScreenshotCmdTest::SetUpTestCase()
 {
@@ -50,10 +50,9 @@ void ScreenshotCmdTest::SetUpTestCase()
     if (display == nullptr) {
         WLOGFE("GetDefaultDisplay: failed!\n");
         return;
-    } else {
-        WLOGFI("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
-            display->GetHeight(), display->GetFreshRate());
     }
+    WLOGFI("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
+        display->GetHeight(), display->GetRefreshRate());
 
     defaultId_ = display->GetId();
 }
