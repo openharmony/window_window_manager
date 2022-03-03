@@ -32,7 +32,7 @@ public:
     }
     ~Impl() = default;
     DEFINE_VAR_FUNC_GET_SET(std::string, Name, name);
-    DEFINE_VAR_FUNC_GET_SET(sptr<DisplayInfo>, DisplayInfo, displayInfo);
+    DEFINE_VAR_FUNC_GET_SET_WITH_LOCK(sptr<DisplayInfo>, DisplayInfo, displayInfo);
 };
 
 Display::Display(const std::string& name, sptr<DisplayInfo> info)
