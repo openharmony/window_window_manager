@@ -48,7 +48,7 @@ declare namespace screen {
   function makeMirror(mainScreen:number, mirrorScreen:Array<number>): Promise<number>;
 
   /**
-   * the paramter of making expand screen
+   * the parameter of making expand screen
    * @devices tv, phone, tablet, wearable
    * @since 8
    */
