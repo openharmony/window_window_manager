@@ -33,6 +33,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
 class DisplayManager::Impl : public RefBase {
 public:
+    ~Impl();
     static inline SingletonDelegator<DisplayManager> delegator;
     bool CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const;
     bool CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const;
@@ -185,6 +186,30 @@ void DisplayManager::Impl::ClearDisplayStateCallback()
             DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
         displayStateAgent_ = nullptr;
     }
+}
+
+DisplayManager::Impl::~Impl()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    bool res = true;
+    if (displayManagerListener_ != nullptr) {
+        res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            displayManagerListener_, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+    }
+    displayManagerListener_ = nullptr;
+    if (!res) {
+        WLOGFW("UnregisterDisplayManagerAgent DISPLAY_EVENT_LISTENER failed !");
+    }
+    res = true;
+    if (powerEventListenerAgent_ != nullptr) {
+        res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            powerEventListenerAgent_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
+    }
+    powerEventListenerAgent_ = nullptr;
+    if (!res) {
+        WLOGFW("UnregisterDisplayManagerAgent DISPLAY_POWER_EVENT_LISTENER failed !");
+    }
+    ClearDisplayStateCallback();
 }
 
 DisplayManager::DisplayManager() : pImpl_(new Impl())

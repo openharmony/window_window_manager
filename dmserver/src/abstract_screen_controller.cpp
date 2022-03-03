@@ -157,7 +157,6 @@ ScreenId AbstractScreenController::GetDefaultAbstractScreenId()
     ScreenId defaultDmsScreenId;
     if (screenIdManager_.ConvertToDmsScreenId(rsDefaultId, defaultDmsScreenId)) {
         WLOGI("GetDefaultAbstractScreenId, screen:%{public}" PRIu64"", defaultDmsScreenId);
-        defaultScreenId = defaultDmsScreenId;
         return defaultDmsScreenId;
     }
     WLOGFI("GetDefaultAbstractScreenId, default screen is null, try to get.");
@@ -165,13 +164,7 @@ ScreenId AbstractScreenController::GetDefaultAbstractScreenId()
     if (defaultScreen == nullptr) {
         return SCREEN_ID_INVALID;
     }
-    defaultScreenId = defaultScreen->dmsId_;
-    return defaultScreenId;
-}
-
-ScreenId AbstractScreenController::GetDefaultScreenId() const
-{
-    return defaultScreenId;
+    return defaultScreen->dmsId_;
 }
 
 ScreenId AbstractScreenController::ConvertToRsScreenId(ScreenId dmsScreenId)
@@ -244,10 +237,15 @@ void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
 sptr<AbstractScreen> AbstractScreenController::InitAndGetScreen(ScreenId rsScreenId)
 {
     ScreenId dmsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsScreenId);
-    sptr<AbstractScreen> absScreen = new AbstractScreen(this, DEFAULT_SCREEN_NAME, dmsScreenId, rsScreenId);
+    sptr<AbstractScreen> absScreen =
+        new(std::nothrow) AbstractScreen(this, DEFAULT_SCREEN_NAME, dmsScreenId, rsScreenId);
+    if (absScreen == nullptr) {
+        WLOGFE("new AbstractScreen failed.");
+        return nullptr;
+    }
     if (!FillAbstractScreen(absScreen, rsScreenId)) {
         screenIdManager_.DeleteScreenId(dmsScreenId);
-        WLOGI("InitAndGetScreen failed.");
+        WLOGFE("InitAndGetScreen failed.");
         return nullptr;
     }
     dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));
@@ -258,10 +256,10 @@ sptr<AbstractScreen> AbstractScreenController::InitAndGetScreen(ScreenId rsScree
 
 void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
 {
-    WLOGI("disconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
+    WLOGFI("disconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
     ScreenId dmsScreenId;
     if (!screenIdManager_.ConvertToDmsScreenId(rsScreenId, dmsScreenId)) {
-        WLOGE("disconnect screen, screenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_", rsScreenId);
+        WLOGFE("disconnect screen, screenId=%{public}" PRIu64" is not in rs2DmsScreenIdMap_", rsScreenId);
         return;
     }
     auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
@@ -379,8 +377,12 @@ bool AbstractScreenController::CheckScreenInScreenGroup(sptr<AbstractScreen> scr
 sptr<AbstractScreenGroup> AbstractScreenController::AddAsFirstScreenLocked(sptr<AbstractScreen> newScreen)
 {
     ScreenId dmsGroupScreenId = screenIdManager_.CreateAndGetNewScreenId(SCREEN_ID_INVALID);
-    sptr<AbstractScreenGroup> screenGroup =
-        new AbstractScreenGroup(this, dmsGroupScreenId, SCREEN_ID_INVALID, ScreenCombination::SCREEN_MIRROR);
+    sptr<AbstractScreenGroup> screenGroup = new(std::nothrow) AbstractScreenGroup(this, dmsGroupScreenId,
+        SCREEN_ID_INVALID, ScreenCombination::SCREEN_MIRROR);
+    if (screenGroup == nullptr) {
+        WLOGE("new AbstractScreenGroup failed");
+        return nullptr;
+    }
     Point point;
     if (!screenGroup->AddChild(newScreen, point)) {
         WLOGE("fail to add screen to group. screen=%{public}" PRIu64"", newScreen->dmsId_);
@@ -426,7 +428,7 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
 {
     ScreenId rsId = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
         option.height_, option.surface_, SCREEN_ID_INVALID, option.flags_);
-    WLOGFI("CreateVirtualScreen id: %{public}" PRIu64"", rsId);
+    WLOGFI("id: %{public}" PRIu64"", rsId);
     if (rsId == SCREEN_ID_INVALID) {
         return SCREEN_ID_INVALID;
     }
@@ -436,8 +438,12 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
         dmsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsId);
         if (!option.isForShot_) {
             WLOGI("CreateVirtualScreen is not shot");
-            sptr<AbstractScreen> absScreen = new AbstractScreen(this, option.name_, dmsScreenId, rsId);
-            sptr<SupportedScreenModes> info = new SupportedScreenModes();
+            sptr<AbstractScreen> absScreen = new(std::nothrow) AbstractScreen(this, option.name_, dmsScreenId, rsId);
+            sptr<SupportedScreenModes> info = new(std::nothrow) SupportedScreenModes();
+            if (absScreen == nullptr || info == nullptr) {
+                WLOGFI("new AbstractScreen or SupportedScreenModes failed");
+                return SCREEN_ID_INVALID;
+            }
             info->width_ = option.width_;
             info->height_ = option.height_;
             auto defaultScreen = GetAbstractScreen(GetDefaultAbstractScreenId());
@@ -453,7 +459,7 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
             WLOGI("CreateVirtualScreen is shot");
         }
     } else {
-        WLOGFI("id: %{public}" PRIu64" exit", rsId);
+        WLOGFI("id: %{public}" PRIu64" appears in screenIdManager_. ", rsId);
     }
     return dmsScreenId;
 }
@@ -876,8 +882,8 @@ void AbstractScreenController::DumpScreenGroupInfo() const
 
 void AbstractScreenController::ScreenIdManager::DumpScreenIdInfo() const
 {
-    for (auto iter = dms2RsScreenIdMap_.begin(); iter != dms2RsScreenIdMap_.end(); iter++) {
-        WLOGI("%{public}20" PRIu64" %{public}20" PRIu64"", iter->first, iter->second);
+    for (auto& pair : dms2RsScreenIdMap_) {
+        WLOGI("%{public}20" PRIu64" %{public}20" PRIu64"", pair.first, pair.second);
     }
 };
 

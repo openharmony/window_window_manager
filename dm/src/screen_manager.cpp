@@ -32,7 +32,7 @@ namespace {
 class ScreenManager::Impl : public RefBase {
 public:
     Impl() = default;
-    ~Impl() = default;
+    ~Impl();
     static inline SingletonDelegator<ScreenManager> delegator;
     bool RegisterScreenListener(sptr<IScreenListener> listener);
     bool UnregisterScreenListener(sptr<IScreenListener> listener);
@@ -149,6 +149,21 @@ ScreenManager::~ScreenManager()
 {
 }
 
+ScreenManager::Impl::~Impl()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    bool res = true;
+    if (screenManagerListener_ != nullptr) {
+        res = SingletonContainer::Get<ScreenManagerAdapter>().UnregisterDisplayManagerAgent(
+            screenManagerListener_,
+            DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
+    }
+    screenManagerListener_ = nullptr;
+    if (!res) {
+        WLOGFW("UnregisterDisplayManagerAgent SCREEN_EVENT_LISTENER failed !");
+    }
+}
+
 sptr<Screen> ScreenManager::Impl::GetScreen(ScreenId screenId)
 {
     auto screenInfo = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenInfo(screenId);
@@ -228,7 +243,7 @@ bool ScreenManager::Impl::RegisterScreenListener(sptr<IScreenListener> listener)
     } else {
         screenListeners_.insert(listener);
     }
-    return true;
+    return ret;
 }
 
 bool ScreenManager::RegisterScreenListener(sptr<IScreenListener> listener)
@@ -248,14 +263,15 @@ bool ScreenManager::Impl::UnregisterScreenListener(sptr<IScreenListener> listene
         WLOGFE("could not find this listener");
         return false;
     }
+    bool ret = true;
     screenListeners_.erase(iter);
-    if (screenListeners_.empty() && screenGroupMap_.empty() && screenManagerListener_ != nullptr) {
-        SingletonContainer::Get<ScreenManagerAdapter>().UnregisterDisplayManagerAgent(
+    if (screenListeners_.empty() && screenGroupListeners_.empty() && screenManagerListener_ != nullptr) {
+        ret = SingletonContainer::Get<ScreenManagerAdapter>().UnregisterDisplayManagerAgent(
             screenManagerListener_,
             DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
         screenManagerListener_ = nullptr;
     }
-    return true;
+    return ret;
 }
 
 bool ScreenManager::UnregisterScreenListener(sptr<IScreenListener> listener)
@@ -303,14 +319,15 @@ bool ScreenManager::Impl::UnregisterScreenGroupListener(sptr<IScreenGroupListene
         WLOGFE("could not find this listener");
         return false;
     }
+    bool ret = true;
     screenGroupListeners_.erase(iter);
-    if (screenGroupListeners_.empty() && screenGroupMap_.empty() && screenManagerListener_ != nullptr) {
-        SingletonContainer::Get<ScreenManagerAdapter>().UnregisterDisplayManagerAgent(
+    if (screenGroupListeners_.empty() && screenGroupListeners_.empty() && screenManagerListener_ != nullptr) {
+        ret = SingletonContainer::Get<ScreenManagerAdapter>().UnregisterDisplayManagerAgent(
             screenManagerListener_,
             DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
         screenManagerListener_ = nullptr;
     }
-    return true;
+    return ret;
 }
 
 bool ScreenManager::UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener)

@@ -108,7 +108,7 @@ void Display::UpdateDisplayInfo() const
 
 float Display::GetVirtualPixelRatio() const
 {
-    // TODO: Should get from DMS
+    // Should get from DMS
     if ((pImpl_->GetDisplayInfo()->GetWidth() == LARGE_SCREEN_WIDTH)
         || (pImpl_->GetDisplayInfo()->GetHeight() == LARGE_SCREEN_WIDTH)) {
         return 2.0f;
