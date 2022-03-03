@@ -131,7 +131,7 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
             break;
         }
     }
-    WLOGFI("GetTopWindowfinal MainWinId:%{public}d!", mainWinId);
+    WLOGFI("GetTopWindowfinal MainWinId:%{public}u!", mainWinId);
     if (!mainWinId) {
         WLOGFE("Cannot find topWindow!");
         return nullptr;
@@ -238,7 +238,7 @@ WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 
 WMError WindowImpl::SetWindowType(WindowType type)
 {
-    WLOGFI("window id: %{public}d, type:%{public}d", property_->GetWindowId(), static_cast<uint32_t>(type));
+    WLOGFI("window id: %{public}u, type:%{public}u", property_->GetWindowId(), static_cast<uint32_t>(type));
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -259,7 +259,7 @@ WMError WindowImpl::SetWindowType(WindowType type)
 
 WMError WindowImpl::SetWindowMode(WindowMode mode)
 {
-    WLOGFI("[Client] Window %{public}d mode %{public}d", property_->GetWindowId(), static_cast<uint32_t>(mode));
+    WLOGFI("[Client] Window %{public}u mode %{public}u", property_->GetWindowId(), static_cast<uint32_t>(mode));
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -798,7 +798,6 @@ void WindowImpl::StartMove()
     }
     startMoveFlag_ = true;
     WLOGFI("[StartMove] windowId %{public}u", GetWindowId());
-    return;
 }
 
 WMError WindowImpl::RequestFocus() const
@@ -1043,7 +1042,6 @@ void WindowImpl::EndMoveOrDragWindow(int32_t pointId)
     startDragFlag_ = false;
     startMoveFlag_ = false;
     pointEventStarted_ = false;
-    return;
 }
 
 void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId, const Rect& rect)
@@ -1345,20 +1343,14 @@ bool WindowImpl::IsLayoutFullScreen() const
     uint32_t flags = GetWindowFlags();
     auto mode = GetMode();
     bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !needAvoid) {
-        return true;
-    }
-    return false;
+    return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !needAvoid);
 }
 
 bool WindowImpl::IsFullScreen() const
 {
     auto statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto naviProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-    if (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_) {
-        return true;
-    }
-    return false;
+    return (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_);
 }
 }
 }
