@@ -15,6 +15,7 @@
 
 #include "window_test_utils.h"
 #include <ability_context.h>
+#include "window_helper.h"
 #include "wm_common_inner.h"
 namespace OHOS {
 namespace Rosen {
@@ -254,20 +255,15 @@ bool WindowTestUtils::RectEqualToRect(const Rect& l, const Rect& r)
 
 AvoidPosType WindowTestUtils::GetAvoidPosType(const Rect& rect)
 {
-    if (rect.width_ >=  rect.height_) {
-        if (rect.posY_ == 0) {
-            return AvoidPosType::AVOID_POS_TOP;
-        } else {
-            return AvoidPosType::AVOID_POS_BOTTOM;
-        }
-    } else {
-        if (rect.posX_ == 0) {
-            return AvoidPosType::AVOID_POS_LEFT;
-        } else {
-            return AvoidPosType::AVOID_POS_RIGHT;
-        }
+    auto display = DisplayManager::GetInstance().GetDisplayById(0);
+    if (display == nullptr) {
+        WLOGFE("GetAvoidPosType fail. Get display fail. displayId: 0");
+        return AvoidPosType::AVOID_POS_UNKNOWN;
     }
-    return AvoidPosType::AVOID_POS_UNKNOWN;
+    uint32_t displayWidth = display->GetWidth();
+    uint32_t displayHeight = display->GetHeight();
+
+    return WindowHelper::GetAvoidPosType(rect, displayWidth, displayHeight);
 }
 
 bool WindowTestUtils::InitSplitRects()

@@ -91,6 +91,35 @@ void WindowLayoutTest::TearDown()
 
 namespace {
 /**
+ * @tc.name: LayoutWindow01
+ * @tc.desc: One FLOATING APP Window with on custom rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE, displayId_);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE, displayId_);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
+
+    utils::TestWindowInfo info = {
+        .name = "main",
+        .rect = {0, 0, 0, 0},
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentName = "",
+    };
+    const sptr<Window>& window = utils::CreateTestWindow(info);
+    activeWindows_.push_back(window);
+    Rect expect = utils::GetDefaultFoatingRect(window);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_TRUE(utils::RectEqualTo(window, expect));
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
+}
+
+/**
  * @tc.name: LayoutWindow02
  * @tc.desc: One FLOATING APP Window
  * @tc.type: FUNC
