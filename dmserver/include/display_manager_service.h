@@ -98,8 +98,6 @@ private:
     DisplayManagerService();
     ~DisplayManagerService() = default;
     bool Init();
-    DisplayId GetDisplayIdFromScreenId(ScreenId screenId);
-    ScreenId GetScreenIdFromDisplayId(DisplayId displayId);
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
     void SetShotScreen(ScreenId mainScreenId, std::vector<ScreenId> shotScreenIds);
