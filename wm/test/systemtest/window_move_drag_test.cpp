@@ -26,9 +26,10 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowMoveDrag"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowMoveDragTest"};
     constexpr float POINT_HOTZONE_RATIO = 0.5;
     constexpr float DRAG_HOTZONE_RATIO = 0.6;
+    constexpr int WAIT_SYANC_MS = 100000;
 }
 using utils = WindowTestUtils;
 class WindowMoveDragTest : public testing::Test {
@@ -67,6 +68,7 @@ void WindowMoveDragTest::SetUpTestCase()
     pointY_ = 0;
     startPointRect_ = {0, 0, 0, 0};
     expectRect_     = {0, 0, 0, 0};
+    usleep(WAIT_SYANC_MS);
 }
 
 void WindowMoveDragTest::TearDownTestCase()
@@ -76,12 +78,9 @@ void WindowMoveDragTest::TearDownTestCase()
 void WindowMoveDragTest::SetUp()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
-    if (display == nullptr) {
-        WLOGFE("GetDefaultDisplay: failed!\n");
-        return;
-    }
+    ASSERT_TRUE((display != nullptr));
     WLOGFI("GetDefaultDisplay: id %{public}llu, w %{public}d, h %{public}d, fps %{public}u\n",
-        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetFreshRate());
+        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
 
@@ -131,6 +130,7 @@ void WindowMoveDragTest::DoMoveOrDrag(bool isMove, bool isDrag)
     pointerEvent = CreatePointerEvent(pointX_, pointY_, pointerId_, MMI::PointerEvent::POINTER_ACTION_MOVE);
     window_->ConsumePointerEvent(pointerEvent);
     CalExpectRects();
+    usleep(WAIT_SYANC_MS);
     ASSERT_TRUE(utils::RectEqualToRect(window_->GetRect(), expectRect_));
     ASSERT_EQ(isMove, window_->startMoveFlag_);
     ASSERT_EQ(isDrag, window_->startDragFlag_);
@@ -142,31 +142,33 @@ void WindowMoveDragTest::DoMoveOrDrag(bool isMove, bool isDrag)
 
 void WindowMoveDragTest::CalExpectRects()
 {
-    bool isPointInWindow;
-    if ((startPointX_ > startPointRect_.posX_) &&
-        (startPointX_ < static_cast<int32_t>(startPointRect_.posX_ + startPointRect_.width_)) &&
-        (startPointY_ > startPointRect_.posY_) &&
-        (startPointY_ < static_cast<int32_t>(startPointRect_.posY_ + startPointRect_.height_))) {
-        isPointInWindow = true;
-    } else {
-        isPointInWindow = false;
-    }
+    Rect startRectExceptFrame;
+    // calculate window inner rect except frame
+    startRectExceptFrame.posX_ = startPointRect_.posX_ +
+        static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio_);
+    startRectExceptFrame.posY_ = startPointRect_.posY_ +
+        static_cast<int32_t>(WINDOW_FRAME_TOP_WIDTH * virtualPixelRatio_);
+    startRectExceptFrame.width_ = startPointRect_.width_ -
+        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio_);
+    startRectExceptFrame.height_ = startPointRect_.height_ -
+        static_cast<uint32_t>((WINDOW_FRAME_TOP_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio_);
 
+    bool isPointInWindow = WindowHelper::IsPointInTargetRect(startPointX_, startPointY_, startRectExceptFrame);
     int32_t diffX = pointX_ - startPointX_;
     int32_t diffY = pointY_ - startPointY_;
     Rect oriRect = startPointRect_;
     if (!isPointInWindow) {
-        if (startPointX_ <= startPointRect_.posX_) {
+        if (startPointX_ <= startRectExceptFrame.posX_) {
             oriRect.posX_ += diffX;
             oriRect.width_ -= diffX;
-        } else if (startPointX_ >= static_cast<int32_t>(startPointRect_.posX_ + startPointRect_.width_)) {
+        } else if (startPointX_ >= startRectExceptFrame.posX_ + static_cast<int32_t>(startRectExceptFrame.width_)) {
             oriRect.width_ += diffX;
         }
 
-        if (startPointY_ <= startPointRect_.posY_) {
+        if (startPointY_ <= startRectExceptFrame.posY_) {
             oriRect.posY_   += diffY;
             oriRect.height_ -= diffY;
-        } else if (startPointY_ >= static_cast<int32_t>(startPointRect_.posY_ + startPointRect_.height_)) {
+        } else if (startPointY_ >= startRectExceptFrame.posY_ + static_cast<int32_t>(startRectExceptFrame.height_)) {
             oriRect.height_ += diffY;
         }
     } else {
@@ -189,11 +191,12 @@ namespace {
 HWTEST_F(WindowMoveDragTest, DragWindow01, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
+    usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ - hotZone_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ + startPointRect_.height_ * POINT_HOTZONE_RATIO;
-    pointX_ = startPointRect_.posX_ + hotZone_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ - static_cast<int32_t>(hotZone_ * POINT_HOTZONE_RATIO);
+    startPointY_ = startPointRect_.posY_ + static_cast<int32_t>(startPointRect_.height_ * POINT_HOTZONE_RATIO);
+    pointX_ = startPointRect_.posX_ + static_cast<int32_t>(hotZone_ * DRAG_HOTZONE_RATIO);
+    pointY_ = startPointRect_.posY_ + static_cast<int32_t>(hotZone_ * DRAG_HOTZONE_RATIO);
     DoMoveOrDrag(false, true);
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -206,12 +209,13 @@ HWTEST_F(WindowMoveDragTest, DragWindow01, Function | MediumTest | Level3)
 HWTEST_F(WindowMoveDragTest, DragWindow02, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
+    usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ - hotZone_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ - hotZone_ * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ - static_cast<int32_t>(hotZone_ * POINT_HOTZONE_RATIO);
+    startPointY_ = startPointRect_.posY_ - static_cast<int32_t>(hotZone_ * POINT_HOTZONE_RATIO);
 
-    pointX_ = startPointRect_.posX_ + hotZone_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + static_cast<int32_t>(hotZone_ * DRAG_HOTZONE_RATIO);
+    pointY_ = startPointRect_.posY_ + static_cast<int32_t>(hotZone_ * DRAG_HOTZONE_RATIO);
     DoMoveOrDrag(false, true);
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -224,12 +228,15 @@ HWTEST_F(WindowMoveDragTest, DragWindow02, Function | MediumTest | Level3)
 HWTEST_F(WindowMoveDragTest, DragWindow03, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
+    usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ - hotZone_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ - static_cast<int32_t>(hotZone_ * POINT_HOTZONE_RATIO);
+    startPointY_ = startPointRect_.posY_ +
+                   static_cast<int32_t>(startPointRect_.height_ + hotZone_ * POINT_HOTZONE_RATIO);
 
-    pointX_ = startPointRect_.posX_ + hotZone_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + static_cast<int32_t>(hotZone_ * DRAG_HOTZONE_RATIO);
+    pointY_ = startPointRect_.posY_ +
+              static_cast<int32_t>(startPointRect_.height_ + hotZone_ * DRAG_HOTZONE_RATIO);
     DoMoveOrDrag(false, true);
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -242,12 +249,14 @@ HWTEST_F(WindowMoveDragTest, DragWindow03, Function | MediumTest | Level3)
 HWTEST_F(WindowMoveDragTest, DragWindow04, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
+    usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ + hotZone_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ + startPointRect_.height_ * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ +
+                   static_cast<int32_t>(startPointRect_.width_ + hotZone_ * POINT_HOTZONE_RATIO);
+    startPointY_ = startPointRect_.posY_ + static_cast<int32_t>(startPointRect_.height_ * POINT_HOTZONE_RATIO);
 
-    pointX_ = startPointRect_.posX_ + startPointRect_.width_ + hotZone_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + startPointRect_.height_ * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_ + hotZone_ * DRAG_HOTZONE_RATIO);
+    pointY_ = startPointRect_.posY_ + static_cast<int32_t>(startPointRect_.height_ * DRAG_HOTZONE_RATIO);
     DoMoveOrDrag(false, true);
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -260,12 +269,14 @@ HWTEST_F(WindowMoveDragTest, DragWindow04, Function | MediumTest | Level3)
 HWTEST_F(WindowMoveDragTest, DragWindow05, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
+    usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ + hotZone_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ - hotZone_ * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ +
+                   static_cast<int32_t>(startPointRect_.width_ + hotZone_ * POINT_HOTZONE_RATIO);
+    startPointY_ = startPointRect_.posY_ - static_cast<int32_t>(hotZone_ * POINT_HOTZONE_RATIO);
 
-    pointX_ = startPointRect_.posX_ + startPointRect_.width_ + hotZone_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_ + hotZone_ * DRAG_HOTZONE_RATIO);
+    pointY_ = startPointRect_.posY_ + static_cast<int32_t>(hotZone_ * DRAG_HOTZONE_RATIO);
     DoMoveOrDrag(false, true);
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -278,12 +289,17 @@ HWTEST_F(WindowMoveDragTest, DragWindow05, Function | MediumTest | Level3)
 HWTEST_F(WindowMoveDragTest, DragWindow06, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
+    usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ + hotZone_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ +
+                   static_cast<int32_t>(startPointRect_.width_ + hotZone_ * POINT_HOTZONE_RATIO);
+    startPointY_ = startPointRect_.posY_ +
+                   static_cast<int32_t>(startPointRect_.height_ + hotZone_ * POINT_HOTZONE_RATIO);
 
-    pointX_ = startPointRect_.posX_ + startPointRect_.width_ + hotZone_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ +
+              static_cast<int32_t>(startPointRect_.width_ + hotZone_ * DRAG_HOTZONE_RATIO);
+    pointY_ = startPointRect_.posY_ +
+              static_cast<int32_t>(startPointRect_.height_ + hotZone_ * DRAG_HOTZONE_RATIO);
     DoMoveOrDrag(false, true);
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -296,12 +312,13 @@ HWTEST_F(WindowMoveDragTest, DragWindow06, Function | MediumTest | Level3)
 HWTEST_F(WindowMoveDragTest, DragWindow07, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
+    usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ - hotZone_ * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_ * POINT_HOTZONE_RATIO);
+    startPointY_ = startPointRect_.posY_ - static_cast<int32_t>(hotZone_ * POINT_HOTZONE_RATIO);
 
-    pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ - hotZone_ * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_ * DRAG_HOTZONE_RATIO);
+    pointY_ = startPointRect_.posY_ - static_cast<int32_t>(hotZone_ * DRAG_HOTZONE_RATIO);
     DoMoveOrDrag(false, true);
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -314,12 +331,14 @@ HWTEST_F(WindowMoveDragTest, DragWindow07, Function | MediumTest | Level3)
 HWTEST_F(WindowMoveDragTest, DragWindow08, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
+    usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_ * POINT_HOTZONE_RATIO);
+    startPointY_ = startPointRect_.posY_ +
+                   static_cast<int32_t>(startPointRect_.height_ + hotZone_ * POINT_HOTZONE_RATIO);
 
-    pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_ * DRAG_HOTZONE_RATIO);
+    pointY_ = startPointRect_.posY_ + static_cast<int32_t>(startPointRect_.height_ + hotZone_ * DRAG_HOTZONE_RATIO);
     DoMoveOrDrag(false, true);
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -332,12 +351,13 @@ HWTEST_F(WindowMoveDragTest, DragWindow08, Function | MediumTest | Level3)
 HWTEST_F(WindowMoveDragTest, DragWindow09, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
+    usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ + 1;
+    startPointX_ = startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_ * POINT_HOTZONE_RATIO);
+    startPointY_ = startPointRect_.posY_ + static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio_);
 
-    pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + startPointRect_.height_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_ * DRAG_HOTZONE_RATIO);
+    pointY_ = startPointRect_.posY_ + static_cast<int32_t>(startPointRect_.height_ + hotZone_ * DRAG_HOTZONE_RATIO);
     DoMoveOrDrag(false, false);
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }
@@ -350,12 +370,13 @@ HWTEST_F(WindowMoveDragTest, DragWindow09, Function | MediumTest | Level3)
 HWTEST_F(WindowMoveDragTest, DragWindow10, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
+    usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ + 1;
+    startPointX_ = startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_ * POINT_HOTZONE_RATIO);
+    startPointY_ = startPointRect_.posY_ + static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio_);
 
-    pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + hotZone_ * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_ * DRAG_HOTZONE_RATIO);
+    pointY_ = startPointRect_.posY_ + static_cast<int32_t>(hotZone_ * DRAG_HOTZONE_RATIO);
     window_->StartMove();
     hasStartMove_ = true;
     DoMoveOrDrag(true, false);
@@ -370,12 +391,13 @@ HWTEST_F(WindowMoveDragTest, DragWindow10, Function | MediumTest | Level3)
 HWTEST_F(WindowMoveDragTest, DragWindow11, Function | MediumTest | Level3)
 {
     ASSERT_EQ(WMError::WM_OK, window_->Show());
+    usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
-    startPointX_ = startPointRect_.posX_ + startPointRect_.width_ * POINT_HOTZONE_RATIO;
-    startPointY_ = startPointRect_.posY_ + startPointRect_.height_ * POINT_HOTZONE_RATIO;
+    startPointX_ = startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_ * POINT_HOTZONE_RATIO);
+    startPointY_ = startPointRect_.posY_ + static_cast<int32_t>(startPointRect_.height_ * POINT_HOTZONE_RATIO);
 
-    pointX_ = startPointRect_.posX_ + startPointRect_.width_ * DRAG_HOTZONE_RATIO;
-    pointY_ = startPointRect_.posY_ + startPointRect_.height_ * DRAG_HOTZONE_RATIO;
+    pointX_ = startPointRect_.posX_ + static_cast<int32_t>(startPointRect_.width_ * DRAG_HOTZONE_RATIO);
+    pointY_ = startPointRect_.posY_ + static_cast<int32_t>(startPointRect_.height_ * DRAG_HOTZONE_RATIO);
     DoMoveOrDrag(false, false);
     ASSERT_EQ(WMError::WM_OK, window_->Hide());
 }

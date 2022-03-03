@@ -1063,7 +1063,7 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
         return;
     }
     float virtualPixelRatio = display->GetVirtualPixelRatio();
-    
+
     startRectExceptFrame_.posX_ = startPointRect_.posX_ +
         static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
     startRectExceptFrame_.posY_ = startPointRect_.posY_ +

@@ -73,12 +73,9 @@ void TestFocusChangedListener::OnUnfocused(uint32_t windowId, sptr<IRemoteObject
 void WindowFocusTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
-    if (display == nullptr) {
-        WLOGFE("GetDefaultDisplay: failed!");
-        return;
-    }
+    ASSERT_TRUE((display != nullptr));
     WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
-        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetFreshRate());
+        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
 }
@@ -391,7 +388,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest07, Function | MediumTest | Level3)
     subAppInfo_.parentName = mainWindow2->GetWindowName();
     subAppInfo_.type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
     const sptr<Window>& aboveSubWindow = utils::CreateTestWindow(subAppInfo_);
-    
+
     subAppInfo_.name = "belowSubWindow2";
     subAppInfo_.rect = { 310, 410, 100, 100 };
     subAppInfo_.parentName = mainWindow3->GetWindowName();
@@ -418,7 +415,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest07, Function | MediumTest | Level3)
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(aboveSubWindow->GetWindowId(), testFocusChangedListener_->unfocusedWindow_);
     ASSERT_EQ(mainWindow2->GetWindowId(), testFocusChangedListener_->focusedWindow_);
-    
+
     mainWindow2->Destroy();
 }
 
@@ -451,7 +448,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
     // Await 100ms and get callback result in listener.
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(belowSubWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
-    
+
     mainWindow1->Destroy();
 }
 }
