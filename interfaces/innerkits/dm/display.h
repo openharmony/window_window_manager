@@ -18,6 +18,7 @@
 
 #include <string>
 #include "dm_common.h"
+#include "noncopyable.h"
 
 namespace OHOS::Rosen {
 class DisplayInfo;
@@ -30,10 +31,7 @@ class Display : public RefBase {
 friend class DisplayManager;
 public:
     ~Display();
-    Display(const Display&) = delete;
-    Display(Display&&) = delete;
-    Display& operator=(const Display&) = delete;
-    Display& operator=(Display&&) = delete;
+    WM_DISALLOW_COPY_AND_MOVE(Display);
     DisplayId GetId() const;
     int32_t GetWidth() const;
     int32_t GetHeight() const;

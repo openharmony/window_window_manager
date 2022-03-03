@@ -40,6 +40,7 @@ public:
 
     AbstractScreenController(std::recursive_mutex& mutex);
     ~AbstractScreenController();
+    WM_DISALLOW_COPY_AND_MOVE(AbstractScreenController);
 
     void Init();
     void ScreenConnectionInDisplayInit(sptr<AbstractScreenCallback> abstractScreenCallback);
@@ -49,7 +50,6 @@ public:
     std::vector<ScreenId> GetAllExpandOrMirrorScreenIds(std::vector<ScreenId>) const;
     sptr<AbstractScreenGroup> GetAbstractScreenGroup(ScreenId dmsScreenId);
     ScreenId GetDefaultAbstractScreenId();
-    ScreenId GetDefaultScreenId() const; // save default screenID got by GetDefaultAbstractScreenId as cache
     ScreenId ConvertToRsScreenId(ScreenId dmsScreenId);
     ScreenId ConvertToDmsScreenId(ScreenId rsScreenId);
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
@@ -78,6 +78,8 @@ public:
 
 private:
     void OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent);
+    void ProcessScreenConnected(ScreenId rsScreenId);
+    sptr<AbstractScreen> InitAndGetScreen(ScreenId rsScreenId);
     void ProcessScreenDisconnected(ScreenId rsScreenId);
     bool FillAbstractScreen(sptr<AbstractScreen>& absScreen, ScreenId rsScreenId);
     sptr<AbstractScreenGroup> AddToGroupLocked(sptr<AbstractScreen> newScreen);
@@ -92,16 +94,32 @@ private:
     void AddScreenToGroup(sptr<AbstractScreenGroup>, const std::vector<ScreenId>&,
         const std::vector<Point>&, std::map<ScreenId, bool>&);
 
+    class ScreenIdManager {
+    public:
+        ScreenIdManager() = default;
+        ~ScreenIdManager() = default;
+        WM_DISALLOW_COPY_AND_MOVE(ScreenIdManager);
+        ScreenId CreateAndGetNewScreenId(ScreenId rsScreenId);
+        bool DeleteScreenId(ScreenId dmsScreenId);
+        bool HasDmsScreenId(ScreenId dmsScreenId) const;
+        bool HasRsScreenId(ScreenId dmsScreenId) const;
+        bool ConvertToRsScreenId(ScreenId, ScreenId&) const;
+        ScreenId ConvertToRsScreenId(ScreenId) const;
+        bool ConvertToDmsScreenId(ScreenId, ScreenId&) const;
+        ScreenId ConvertToDmsScreenId(ScreenId) const;
+        void DumpScreenIdInfo() const;
+    private:
+        std::atomic<ScreenId> dmsScreenCount_ {0};
+        std::map<ScreenId, ScreenId> rs2DmsScreenIdMap_;
+        std::map<ScreenId, ScreenId> dms2RsScreenIdMap_;
+    };
+
     std::recursive_mutex& mutex_;
     OHOS::Rosen::RSInterfaces& rsInterface_;
-    std::atomic<ScreenId> dmsScreenCount_;
-    // No AbstractScreenGroup
-    std::map<ScreenId, ScreenId> rs2DmsScreenIdMap_;
-    std::map<ScreenId, ScreenId> dms2RsScreenIdMap_;
+    ScreenIdManager screenIdManager_;
     std::map<ScreenId, sptr<AbstractScreen>> dmsScreenMap_;
     std::map<ScreenId, sptr<AbstractScreenGroup>> dmsScreenGroupMap_;
     sptr<AbstractScreenCallback> abstractScreenCallback_;
-    ScreenId defaultScreenId = INVALID_SCREEN_ID;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_SCREEN_CONTROLLER_H

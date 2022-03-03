@@ -27,10 +27,7 @@ class DisplayInfo : public Parcelable {
 friend class AbstractDisplay;
 public:
     ~DisplayInfo() = default;
-    DisplayInfo(const DisplayInfo&) = delete;
-    DisplayInfo(DisplayInfo&&) = delete;
-    DisplayInfo& operator=(const DisplayInfo&) = delete;
-    DisplayInfo& operator=(DisplayInfo&&) = delete;
+    WM_DISALLOW_COPY_AND_MOVE(DisplayInfo);
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static DisplayInfo *Unmarshalling(Parcel& parcel);

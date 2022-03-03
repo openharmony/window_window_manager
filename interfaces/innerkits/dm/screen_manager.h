@@ -50,7 +50,6 @@ public:
     ScreenId MakeExpand(const std::vector<ExpandOption>& options);
     ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
-    void CancelMakeMirrorOrExpand(std::vector<ScreenId> screens);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);

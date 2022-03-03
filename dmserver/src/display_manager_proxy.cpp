@@ -872,7 +872,7 @@ void DisplayManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenId> scr
         WLOGFE("cancel make mirror or expand fail: write screens failed.");
         return;
     }
-    if (remote->SendRequest(TRANS_ID_SCREEN_MAKE_MIRROR_OR_EXPAND_CANCELED, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP, data, reply, option) != ERR_NONE) {
         WLOGFW("cancel make mirror or expand fail: SendRequest failed");
     }
 }

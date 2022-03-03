@@ -30,7 +30,7 @@ public:
         screenInfo_ = info;
     }
     ~Impl() = default;
-    DEFINE_VAR_FUNC_GET_SET(sptr<ScreenInfo>, ScreenInfo, screenInfo);
+    DEFINE_VAR_FUNC_GET_SET_WITH_LOCK(sptr<ScreenInfo>, ScreenInfo, screenInfo);
 };
 
 Screen::Screen(sptr<ScreenInfo> info)
