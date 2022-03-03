@@ -291,6 +291,7 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
     }
 
     switch (type) {
+        case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION: {
             windowRoot_->NotifyDisplayChange(abstractDisplay);
 
@@ -301,13 +302,6 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
             newRect = { 0, abstractDisplay->GetHeight() - height, width, height };
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
-            break;
-        }
-        case DisplayStateChangeType::SIZE_CHANGE: {
-            // Should request different window resolution change but not directly apply resize
-            // show logs of updated display
-            windowRoot_->NotifyDisplayChange(abstractDisplay);
-            WLOGFI("display w/h: %{public}u %{public}u", abstractDisplay->GetWidth(), abstractDisplay->GetHeight());
             break;
         }
         default: {
