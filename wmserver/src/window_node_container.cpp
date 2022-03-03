@@ -242,7 +242,7 @@ WMError WindowNodeContainer::DestroyWindowNode(sptr<WindowNode>& node, std::vect
 
 WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
 {
-    if (node == nullptr || !node->surfaceNode_) {
+    if (node == nullptr) {
         WLOGFE("window node or surface node is nullptr, invalid");
         return WMError::WM_ERROR_DESTROYED_OBJECT;
     }

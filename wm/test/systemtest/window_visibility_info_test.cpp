@@ -69,10 +69,10 @@ void WindowVisibilityInfoTest::SetUpTestCase()
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     if (display == nullptr) {
         WLOGFE("GetDefaultDisplay: failed!");
-    } else {
-        WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
-            display->GetId(), display->GetWidth(), display->GetHeight(), display->GetFreshRate());
+        return;
     }
+    WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
+        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetFreshRate());
     Rect displayRect = {0, 0,
                         static_cast<uint32_t>(display->GetWidth()), static_cast<uint32_t>(display->GetHeight())};
     utils::InitByDisplayRect(displayRect);

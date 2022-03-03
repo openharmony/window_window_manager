@@ -78,10 +78,10 @@ void WindowMoveDragTest::SetUp()
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     if (display == nullptr) {
         WLOGFE("GetDefaultDisplay: failed!\n");
-    } else {
-        WLOGFI("GetDefaultDisplay: id %{public}llu, w %{public}d, h %{public}d, fps %{public}u\n",
-               display->GetId(), display->GetWidth(), display->GetHeight(), display->GetFreshRate());
+        return;
     }
+    WLOGFI("GetDefaultDisplay: id %{public}llu, w %{public}d, h %{public}d, fps %{public}u\n",
+        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetFreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
 
