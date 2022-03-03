@@ -32,7 +32,7 @@ DisplayId DisplayManagerProxy::GetDefaultDisplayId()
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFW("GetDefaultDisplayId: remote is nullptr");
-        return DISPLAY_ID_INVALD;
+        return DISPLAY_ID_INVALID;
     }
 
     MessageParcel data;
@@ -40,11 +40,11 @@ DisplayId DisplayManagerProxy::GetDefaultDisplayId()
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("GetDefaultDisplayId: WriteInterfaceToken failed");
-        return DISPLAY_ID_INVALD;
+        return DISPLAY_ID_INVALID;
     }
     if (remote->SendRequest(TRANS_ID_GET_DEFAULT_DISPLAY_ID, data, reply, option) != ERR_NONE) {
         WLOGFW("GetDefaultDisplayId: SendRequest failed");
-        return DISPLAY_ID_INVALD;
+        return DISPLAY_ID_INVALID;
     }
 
     DisplayId displayId = reply.ReadUint64();
@@ -589,7 +589,7 @@ bool DisplayManagerProxy::SuspendEnd()
     return reply.ReadBool();
 }
 
-bool DisplayManagerProxy::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
+bool DisplayManagerProxy::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -599,7 +599,7 @@ bool DisplayManagerProxy::SetScreenPowerForAll(DisplayPowerState state, PowerSta
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(state))) {
-        WLOGFE("Write DisplayPowerState failed");
+        WLOGFE("Write ScreenPowerState failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
@@ -748,8 +748,8 @@ sptr<ScreenInfo> DisplayManagerProxy::GetScreenInfoById(ScreenId screenId)
         return nullptr;
     }
     for (auto& mode : info->GetModes()) {
-        WLOGFI("info modes is width: %{public}u, height: %{public}u, freshRate: %{public}u",
-            mode->width_, mode->height_, mode->freshRate_);
+        WLOGFI("info modes is width: %{public}u, height: %{public}u, refreshRate: %{public}u",
+            mode->width_, mode->height_, mode->refreshRate_);
     }
     return info;
 }

@@ -31,6 +31,7 @@ const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
 const std::string SYSTEM_BAR_TINT_CHANGE_CB = "systemBarTintChange";
 const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
 const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
+
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
                          public IAvoidAreaChangedListener,

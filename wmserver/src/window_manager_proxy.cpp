@@ -560,5 +560,5 @@ WMError WindowManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinI
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

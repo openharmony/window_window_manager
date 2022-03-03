@@ -243,11 +243,16 @@ void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, S
 
 void AbstractScreenController::ScreenConnectionInDisplayInit(sptr<AbstractScreenCallback> abstractScreenCallback)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (dmsScreenMap_.empty()) {
-        return;
+    std::map<ScreenId, sptr<AbstractScreen>> dmsScreenMap;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        dmsScreenMap = dmsScreenMap_;
+        if (dmsScreenMap_.empty()) {
+            return;
+        }
     }
-    for (auto& iter : dmsScreenMap_) {
+
+    for (auto& iter : dmsScreenMap) {
         if (iter.second != nullptr && abstractScreenCallback != nullptr) {
             WLOGFI("dmsScreenId :%{public}" PRIu64"", iter.first);
             abstractScreenCallback->onConnect_(iter.second);
@@ -295,7 +300,7 @@ bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScree
         sptr<SupportedScreenModes> info = new SupportedScreenModes();
         info->width_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenWidth());
         info->height_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenHeight());
-        info->freshRate_ = rsScreenModeInfo.GetScreenFreshRate();
+        info->refreshRate_ = rsScreenModeInfo.GetScreenFreshRate();
         absScreen->modes_.push_back(info);
         WLOGD("fill screen w/h:%{public}d/%{public}d", info->width_, info->height_);
     }
@@ -444,7 +449,7 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
             info->height_ = option.height_;
             auto defaultScreen = GetAbstractScreen(GetDefaultAbstractScreenId());
             if (defaultScreen != nullptr && defaultScreen->GetActiveScreenMode() != nullptr) {
-                info->freshRate_ = defaultScreen->GetActiveScreenMode()->freshRate_;
+                info->refreshRate_ = defaultScreen->GetActiveScreenMode()->refreshRate_;
             }
             absScreen->modes_.push_back(info);
             absScreen->activeIdx_ = 0;

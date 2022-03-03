@@ -35,11 +35,12 @@ public:
     virtual bool Marshalling(Parcel& parcel) const override;
     static DisplayInfo *Unmarshalling(Parcel& parcel);
 
-    DEFINE_VAR_DEFAULT_FUNC_GET(DisplayId, DisplayId, id, DISPLAY_ID_INVALD);
+    DEFINE_VAR_DEFAULT_FUNC_GET(DisplayId, DisplayId, id, DISPLAY_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET(DisplayType, DisplayType, type, DisplayType::DEFAULT);
     DEFINE_VAR_DEFAULT_FUNC_GET(int32_t, Width, width, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET(int32_t, Height, height, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, FreshRate, freshRate, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, RefreshRate, refreshRate, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, ScreenId, screenId, SCREEN_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET(float, XDpi, xDpi, 0.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET(float, YDpi, yDpi, 0.0f);

@@ -57,6 +57,7 @@ public:
 
 private:
     bool IsCallbackRegistered(std::string type, NativeValue* jsListenerObject);
+    void ListenerProcess(uint32_t type, sptr<JsWindowListener> listener, bool isRegister);
     void RegisterWindowListenerWithType(NativeEngine& engine, std::string type, NativeValue* value);
     void UnregisterWindowListenerWithType(std::string type, NativeValue* value);
     void UnregisterAllWindowListenerWithType(std::string type);

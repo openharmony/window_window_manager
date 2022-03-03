@@ -111,7 +111,7 @@ void WindowManagerService::OnStop()
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId)
 {
-    WM_SCOPED_TRACE("wms:CreateWindow(%d)", windowId);
+    WM_SCOPED_TRACE("wms:CreateWindow(%u)", windowId);
     if (window == nullptr || property == nullptr || surfaceNode == nullptr) {
         WLOGFE("window is invalid");
         return WMError::WM_ERROR_NULLPTR;
@@ -143,16 +143,16 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 
 WMError WindowManagerService::RemoveWindow(uint32_t windowId)
 {
-    WLOGFI("[WMS] Remove: %{public}d", windowId);
-    WM_SCOPED_TRACE("wms:RemoveWindow(%d)", windowId);
+    WLOGFI("[WMS] Remove: %{public}u", windowId);
+    WM_SCOPED_TRACE("wms:RemoveWindow(%u)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->RemoveWindowNode(windowId);
 }
 
 WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
-    WLOGFI("[WMS] Destroy: %{public}d", windowId);
-    WM_SCOPED_TRACE("wms:DestroyWindow(%d)", windowId);
+    WLOGFI("[WMS] Destroy: %{public}u", windowId);
+    WM_SCOPED_TRACE("wms:DestroyWindow(%u)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node != nullptr && node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
@@ -177,7 +177,7 @@ WMError WindowManagerService::ResizeRect(uint32_t windowId, const Rect& rect, Wi
 
 WMError WindowManagerService::RequestFocus(uint32_t windowId)
 {
-    WLOGFI("[WMS] RequestFocus: %{public}d", windowId);
+    WLOGFI("[WMS] RequestFocus: %{public}u", windowId);
     WM_SCOPED_TRACE("wms:RequestFocus");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->RequestFocus(windowId);
@@ -227,7 +227,7 @@ WMError WindowManagerService::SetSystemBarProperty(uint32_t windowId, WindowType
 
 WMError WindowManagerService::SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId)
 {
-    WLOGFI("[WMS] SaveAbilityToken: %{public}d", windowId);
+    WLOGFI("[WMS] SaveAbilityToken: %{public}u", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->SaveAbilityToken(abilityToken, windowId);
 }
@@ -266,12 +266,8 @@ void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType t
 
 void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)
 {
-    switch (event) {
-        case Event::REMOTE_DIED:
-            DestroyWindow(windowId, true);
-            break;
-        default:
-            break;
+    if (event == Event::REMOTE_DIED) {
+        DestroyWindow(windowId, true);
     }
 }
 
@@ -309,7 +305,7 @@ WMError WindowManagerService::MaxmizeWindow(uint32_t windowId)
 
 WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
-    WM_SCOPED_TRACE("wms:GetTopWindowId(%d)", mainWinId);
+    WM_SCOPED_TRACE("wms:GetTopWindowId(%u)", mainWinId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->GetTopWindowId(mainWinId, topWinId);
 }

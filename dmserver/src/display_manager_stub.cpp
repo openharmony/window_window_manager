@@ -146,7 +146,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             break;
         }
         case TRANS_ID_SET_SCREEN_POWER_FOR_ALL: {
-            DisplayPowerState state = static_cast<DisplayPowerState>(data.ReadUint32());
+            ScreenPowerState state = static_cast<ScreenPowerState>(data.ReadUint32());
             PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
             reply.WriteBool(SetScreenPowerForAll(state, reason));
             break;
@@ -181,8 +181,8 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenInfo = GetScreenInfoById(screenId);
             for (auto& mode : screenInfo->GetModes()) {
-                WLOGFI("info modes is width: %{public}u, height: %{public}u, freshRate: %{public}u",
-                    mode->width_, mode->height_, mode->freshRate_);
+                WLOGFI("info modes is width: %{public}u, height: %{public}u, refreshRate: %{public}u",
+                    mode->width_, mode->height_, mode->refreshRate_);
             }
             reply.WriteStrongParcelable(screenInfo);
             break;
