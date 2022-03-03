@@ -85,8 +85,7 @@ private:
     NativeValue* OnGetColorSpace(NativeEngine& engine, NativeCallbackInfo& info);
 
     sptr<Window> windowToken_ = nullptr;
-    std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallbackMap_;
-    std::map<std::string, sptr<JsWindowListener>> jsListenerMap_;
+    std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
 };
 }  // namespace Rosen

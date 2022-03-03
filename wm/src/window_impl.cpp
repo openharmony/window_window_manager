@@ -852,20 +852,21 @@ void WindowImpl::UnregisterWindowChangeListener(sptr<IWindowChangeListener>& lis
 
 void WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    if (avoidAreaChangeListener_ != nullptr) {
-        WLOGFE("RegisterAvoidAreaChangeListener failed. AvoidAreaChangeListene is not nullptr");
+    if (listener == nullptr) {
+        WLOGFE("RegisterAvoidAreaChangeListener failed. AvoidAreaChangeListener is nullptr");
         return;
     }
-    avoidAreaChangeListener_ = listener;
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    avoidAreaChangeListeners_.emplace_back(listener);
 }
 
-void WindowImpl::UnregisterAvoidAreaChangeListener()
+void WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    if (avoidAreaChangeListener_ == nullptr) {
-        WLOGFE("UnregisterAvoidAreaChangeListener failed. AvoidAreaChangeListene is nullptr");
-        return;
-    }
-    avoidAreaChangeListener_ = nullptr;
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    avoidAreaChangeListeners_.erase(std::remove_if(avoidAreaChangeListeners_.begin(), avoidAreaChangeListeners_.end(),
+        [listener](sptr<IAvoidAreaChangedListener> registeredListener) {
+            return registeredListener == listener;
+        }), avoidAreaChangeListeners_.end());
 }
 
 void WindowImpl::RegisterDragListener(sptr<IWindowDragListener>& listener)
@@ -920,6 +921,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reas
     WLOGFI("winId:%{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], vpr:%{public}f, reason:%{public}u",
         GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, virtualPixelRatio, reason);
     property_->SetWindowRect(rect);
+    WLOGFI("sizeChange callback size: %{public}u", windowChangeListeners_.size());
     for (auto& listener : windowChangeListeners_) {
         if (listener != nullptr) {
             listener->OnSizeChange(rect, reason);
@@ -1065,7 +1067,7 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
         return;
     }
     float virtualPixelRatio = display->GetVirtualPixelRatio();
-    
+
     startRectExceptFrame_.posX_ = startPointRect_.posX_ +
         static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
     startRectExceptFrame_.posY_ = startPointRect_.posY_ +
@@ -1200,8 +1202,10 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
 void WindowImpl::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
 {
     WLOGFI("Window Update AvoidArea, id: %{public}d", property_->GetWindowId());
-    if (avoidAreaChangeListener_ != nullptr) {
-        avoidAreaChangeListener_->OnAvoidAreaChanged(avoidArea);
+    for (auto& listener : avoidAreaChangeListeners_) {
+        if (listener != nullptr) {
+            listener->OnAvoidAreaChanged(avoidArea);
+        }
     }
 }
 

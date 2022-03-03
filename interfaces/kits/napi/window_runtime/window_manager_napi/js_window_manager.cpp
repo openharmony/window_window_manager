@@ -118,7 +118,6 @@ static void GetNativeContext(NativeValue* nativeContext, void*& contextPtr, WMEr
         }
         contextPtr = objContext->GetNativePointer();
     }
-    return;
 }
 
 static bool GetWindowTypeAndParentName(NativeEngine& engine, std::string& parentName, WindowType& winType,
@@ -204,7 +203,6 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
         task.Reject(engine, CreateJsError(engine,
             static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnCreateWindow failed."));
     }
-    return;
 }
 
 static void CreateSubWindowTask(std::string parentWinName, std::string windowName, WindowType winType,
@@ -229,7 +227,6 @@ static void CreateSubWindowTask(std::string parentWinName, std::string windowNam
         task.Reject(engine, CreateJsError(engine,
             static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnCreateWindow failed."));
     }
-    return;
 }
 
 NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info)
@@ -378,10 +375,9 @@ void JsWindowManager::RegisterWmListenerWithType(NativeEngine& engine, std::stri
         WLOGFE("JsWindowManager::RegisterWmListenerWithType callback already registered!");
         return;
     }
-    std::unique_ptr<NativeReference> callbackRef;
+    std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
-
-    sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(&engine);
+    sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(&engine, callbackRef);
     if (windowManagerListener == nullptr) {
         WLOGFE("JsWindowManager::RegisterWmListenerWithType windowManagerListener malloc failed");
         return;
@@ -395,9 +391,7 @@ void JsWindowManager::RegisterWmListenerWithType(NativeEngine& engine, std::stri
             type.c_str());
         return;
     }
-    windowManagerListener->AddCallback(value);
-    jsCbMap_[type][std::move(callbackRef)] = windowManagerListener;
-    return;
+    jsCbMap_[type][callbackRef] = windowManagerListener;
 }
 
 void JsWindowManager::UnregisterAllWmListenerWithType(std::string type)
@@ -408,16 +402,16 @@ void JsWindowManager::UnregisterAllWmListenerWithType(std::string type)
         return;
     }
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-        it->second->RemoveAllCallback();
         if (type.compare(SYSTEM_BAR_TINT_CHANGE_CB) == 0) {
+            // it->second.jsCallBack_ = nullptr
             sptr<ISystemBarChangedListener> thisListener(it->second);
             SingletonContainer::Get<WindowManager>().UnregisterSystemBarChangedListener(thisListener);
             WLOGFI("JsWindowManager::UnregisterAllWmListenerWithType systemBarTintChange success");
         }
         jsCbMap_[type].erase(it++);
     }
+    WLOGFI("JsWindow::UnregisterWindowListenerWithType callback map size: %{public}u success", jsCbMap_[type].size());
     jsCbMap_.erase(type);
-    return;
 }
 
 void JsWindowManager::UnregisterWmListenerWithType(std::string type, NativeValue* value)
@@ -427,11 +421,8 @@ void JsWindowManager::UnregisterWmListenerWithType(std::string type, NativeValue
             type.c_str());
         return;
     }
-    bool findFlag = false;
-    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();it++) {
         if (value->StrictEquals(it->first->Get())) {
-            findFlag = true;
-            it->second->RemoveCallback(value);
             if (type.compare(SYSTEM_BAR_TINT_CHANGE_CB) == 0) {
                 sptr<ISystemBarChangedListener> thisListener(it->second);
                 SingletonContainer::Get<WindowManager>().UnregisterSystemBarChangedListener(thisListener);
@@ -439,25 +430,19 @@ void JsWindowManager::UnregisterWmListenerWithType(std::string type, NativeValue
             }
             jsCbMap_[type].erase(it++);
             break;
-        } else {
-            it++;
         }
     }
-    if (!findFlag) {
-        WLOGFE("JsWindowManager::UnregisterWmListenerWithType can't find callback!");
-        return;
-    }
+    WLOGFI("JsWindow::UnregisterWindowListenerWithType callback map size: %{public}u success", jsCbMap_[type].size());
     // one type with multi jscallback, erase type when there is no callback in one type
     if (jsCbMap_[type].empty()) {
         jsCbMap_.erase(type);
     }
-    return;
 }
 
 NativeValue* JsWindowManager::OnRegisterWindowMangerCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsWindowManager::OnRegisterWindowMangerCallback is called");
-    if (info.argc != ARGC_TWO) {
+    if (info.argc != 2) { // 2 is num of argc
         WLOGFE("Params not match");
         return engine.CreateUndefined();
     }

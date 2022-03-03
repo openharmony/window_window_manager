@@ -28,6 +28,14 @@ namespace {
 
 static std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
 std::recursive_mutex g_mutex;
+// std::map<string, function<void(sptr<JsWindowListener>, sptr<Window>)>> JsWindow::g_registerMap =
+// {
+//     {WINDOW_SIZE_CHANGE_CB, add},
+//     {SYSTEM_BAR_TINT_CHANGE_CB, std::minus<int>()},//标准库的函数，参数为两个整数，可以参考前一篇博客
+//     {SYSTEM_AVOID_AREA_CHANGE_CB, divide()},//类成员函数
+//     {LIFECYCLE_EVENT_CB, [](sptr<JsWindowListener> listener, sptr<Window> window){sptr<IAvoidAreaChangedListener> thisListener(listener);
+                // window->UnregisterAvoidAreaChangeListener(thisListener);}},//lambda表达式
+// };
 JsWindow::JsWindow(const sptr<Window>& window) : windowToken_(window)
 {
 }
@@ -162,7 +170,7 @@ NativeValue* JsWindow::SetSystemBarEnable(NativeEngine* engine, NativeCallbackIn
 
 NativeValue* JsWindow::SetSystemBarProperties(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("JsWindow::SetBarProperties is called");
+    WLOGFI("JsWindow::SetSystemBarProperties is called");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnSetSystemBarProperties(*engine, *info) : nullptr;
 }
@@ -514,13 +522,13 @@ NativeValue* JsWindow::OnGetProperties(NativeEngine& engine, NativeCallbackInfo&
 
 bool JsWindow::IsCallbackRegistered(std::string type, NativeValue* jsListenerObject)
 {
-    if (jsCallbackMap_.empty() || jsCallbackMap_.find(type) == jsCallbackMap_.end()) {
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFI("JsWindow::IsCallbackRegistered methodName %{public}s not registertd!", type.c_str());
         return false;
     }
 
-    for (auto iter = jsCallbackMap_[type].begin(); iter != jsCallbackMap_[type].end(); iter++) {
-        if (jsListenerObject->StrictEquals((*iter)->Get())) {
+    for (auto iter = jsCbMap_[type].begin(); iter != jsCbMap_[type].end(); iter++) {
+        if (jsListenerObject->StrictEquals(iter->first->Get())) {
             WLOGFE("JsWindow::IsCallbackRegistered callback already registered!");
             return true;
         }
@@ -528,95 +536,142 @@ bool JsWindow::IsCallbackRegistered(std::string type, NativeValue* jsListenerObj
     return false;
 }
 
+// void JsWindow::ListenerProcess(std::string type, sptr<JsWindowListener> listener, bool isRegister)
+// {
+//     switch (type)
+//     {
+//         case WINDOW_SIZE_CHANGE_CB: {
+//             sptr<IWindowChangeListener> thisListener(listener);
+//             if (isRegister) {
+//                 windowToken_->RegisterWindowChangeListener(thisListener);
+//             } else {
+//                 windowToken_->UnregisterWindowChangeListener(thisListener);
+//             }
+//             break;
+//         }
+//         case SYSTEM_AVOID_AREA_CHANGE_CB: {
+//             sptr<IAvoidAreaChangedListener> thisListener(listener);
+//             if (isRegister) {
+//                 windowToken_->RegisterAvoidAreaChangeListener(thisListener);
+//             } else {
+//                 windowToken_->UnregisterAvoidAreaChangeListener(thisListener);
+//             }
+//             break;
+//         }
+//         case LIFECYCLE_EVENT_CB: {
+//             sptr<IAvoidAreaChangedListener> thisListener(listener);
+//             if (isRegister) {
+//                 windowToken_->RegisterAvoidAreaChangeListener(thisListener);
+//             } else {
+//                 windowToken_->RegisterLifeCycleListener(thisListener);
+//             }
+//             break;
+//         }
+//         default: {
+//             WLOGFE("JsWindow::RegisterWindowListenerWithType failed method: %{public}s not support!",
+//                 type.c_str());
+//             break;
+//         }
+//     }
+// }
+
 void JsWindow::RegisterWindowListenerWithType(NativeEngine& engine, std::string type, NativeValue* value)
 {
     if (IsCallbackRegistered(type, value)) {
         WLOGFE("JsWindow::RegisterWindowListenerWithType callback already registered!");
         return;
     }
-    std::unique_ptr<NativeReference> callbackRef;
+
+    std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
-    if (jsListenerMap_.find(type) == jsListenerMap_.end()) {
-        sptr<JsWindowListener> windowListener = new(std::nothrow) JsWindowListener(&engine);
-        if (windowListener == nullptr) {
-            WLOGFE("JsWindow::RegisterWindowListenerWithType windowListener malloc failed");
-            return;
-        }
-        if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
-            sptr<IWindowChangeListener> thisListener(windowListener);
-            windowToken_->RegisterWindowChangeListener(thisListener);
-            WLOGFI("JsWindow::RegisterWindowListenerWithType windowSizeChange success");
-        } else if (type.compare(SYSTEM_AVOID_AREA_CHANGE_CB) == 0) {
-            sptr<IAvoidAreaChangedListener> thisListener(windowListener);
-            windowToken_->RegisterAvoidAreaChangeListener(thisListener);
-            WLOGFI("JsWindow::RegisterWindowListenerWithType systemAvoidAreaChange success");
-        } else {
-            WLOGFE("JsWindow::RegisterWindowListenerWithType failed method: %{public}s not support!",
-                type.c_str());
-            return;
-        }
-        windowListener->AddCallback(value);
-        jsListenerMap_[type] = windowListener;
-    } else {
-        jsListenerMap_[type]->AddCallback(value);
+    sptr<JsWindowListener> windowListener = new(std::nothrow) JsWindowListener(&engine, callbackRef);
+    if (windowListener == nullptr) {
+        WLOGFE("JsWindow::RegisterWindowListenerWithType windowListener malloc failed");
+        return;
     }
-    jsCallbackMap_[type].push_back(std::move(callbackRef));
-    return;
+    if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
+        sptr<IWindowChangeListener> thisListener(windowListener);
+        windowToken_->RegisterWindowChangeListener(thisListener);
+    } else if (type.compare(SYSTEM_AVOID_AREA_CHANGE_CB) == 0) {
+        sptr<IAvoidAreaChangedListener> thisListener(windowListener);
+        windowToken_->RegisterAvoidAreaChangeListener(thisListener);
+    } else if (type.compare(LIFECYCLE_EVENT_CB) == 0) {
+        sptr<IWindowLifeCycle> thisListener(windowListener);
+        windowToken_->RegisterLifeCycleListener(thisListener);
+    } else {
+        WLOGFE("JsWindow::RegisterWindowListenerWithType failed method: %{public}s not support!",
+            type.c_str());
+        return;
+    }
+    jsCbMap_[type][callbackRef] = windowListener;
+    WLOGFI("JsWindow::RegisterWindowListenerWithType %{public}s success! callback map size: %{public}u ",
+        type.c_str(), jsCbMap_[type].size());
 }
 
 void JsWindow::UnregisterAllWindowListenerWithType(std::string type)
 {
-    if (jsListenerMap_.empty() || jsListenerMap_.find(type) == jsListenerMap_.end()) {
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFI("JsWindow::UnregisterAllWindowListenerWithType methodName %{public}s not registerted!",
             type.c_str());
         return;
     }
-    jsListenerMap_[type]->RemoveAllCallback();
-    if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
-        sptr<IWindowChangeListener> thisListener(jsListenerMap_[type]);
-        windowToken_->UnregisterWindowChangeListener(thisListener);
-        WLOGFI("JsWindow::UnregisterAllWindowListenerWithType windowSizeChange success");
+    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+        if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
+            sptr<IWindowChangeListener> thisListener(it->second);
+            windowToken_->UnregisterWindowChangeListener(thisListener);
+        } else if (type.compare(SYSTEM_AVOID_AREA_CHANGE_CB) == 0) {
+            sptr<IAvoidAreaChangedListener> thisListener(it->second);
+            windowToken_->UnregisterAvoidAreaChangeListener(thisListener);
+        } else if (type.compare(LIFECYCLE_EVENT_CB) == 0) {
+            sptr<IWindowLifeCycle> thisListener(it->second);
+            windowToken_->UnregisterLifeCycleListener(thisListener);
+        } else {
+            WLOGFE("JsWindow::UnregisterWindowListenerWithType failed method: %{public}s not support!",
+                type.c_str());
+            return;
+        }
+        jsCbMap_[type].erase(it++);
     }
-    if (type.compare(SYSTEM_AVOID_AREA_CHANGE_CB) == 0) {
-        windowToken_->UnregisterAvoidAreaChangeListener();
-        WLOGFI("JsWindow::UnregisterAllWindowListenerWithType systemAvoidAreaChange success");
-    }
-    jsListenerMap_.erase(type);
-    jsCallbackMap_.erase(type);
-    return;
+    WLOGFI("JsWindow::UnregisterWindowListenerWithType %{public}s success! callback map size: %{public}u",
+        type.c_str(), jsCbMap_[type].size());
+
+    jsCbMap_.erase(type);
 }
 
 void JsWindow::UnregisterWindowListenerWithType(std::string type, NativeValue* value)
 {
-    if (jsListenerMap_.empty() || jsListenerMap_.find(type) == jsListenerMap_.end()) {
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         WLOGFI("JsWindow::UnregisterWindowListenerWithType methodName %{public}s not registerted!",
             type.c_str());
         return;
     }
-    for (auto it = jsCallbackMap_[type].begin(); it != jsCallbackMap_[type].end();) {
-        if (value->StrictEquals((*it)->Get())) {
-            jsListenerMap_[type]->RemoveCallback(value);
-            jsCallbackMap_[type].erase(it++);
+    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();it++) {
+        if (value->StrictEquals(it->first->Get())) {
+            if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
+                sptr<IWindowChangeListener> thisListener(it->second);
+                windowToken_->UnregisterWindowChangeListener (thisListener);
+                WLOGFI("JsWindow::UnregisterWindowListenerWithType windowSizeChange success");
+            } else if (type.compare(SYSTEM_AVOID_AREA_CHANGE_CB) == 0) {
+                sptr<IAvoidAreaChangedListener> thisListener(it->second);
+                windowToken_->UnregisterAvoidAreaChangeListener(thisListener);
+                WLOGFI("JsWindow::UnregisterWindowListenerWithType systemAvoidAreaChange success");
+            } else if (type.compare(LIFECYCLE_EVENT_CB) == 0) {
+                sptr<IWindowLifeCycle> thisListener(it->second);
+                windowToken_->UnregisterLifeCycleListener(thisListener);
+            } else {
+                WLOGFE("JsWindow::UnregisterWindowListenerWithType failed method: %{public}s not support!",
+                    type.c_str());
+                return;
+            }
+            jsCbMap_[type].erase(it++);
             break;
-        } else {
-            it++;
         }
     }
     // one type with multi jscallback, erase type when there is no callback in one type
-    if (jsCallbackMap_[type].empty()) {
-        if (type.compare(WINDOW_SIZE_CHANGE_CB) == 0) {
-            sptr<IWindowChangeListener> thisListener(jsListenerMap_[type]);
-            windowToken_->UnregisterWindowChangeListener (thisListener);
-            WLOGFI("JsWindow::UnregisterWindowListenerWithType windowSizeChange success");
-        }
-        if (type.compare(SYSTEM_AVOID_AREA_CHANGE_CB) == 0) {
-            windowToken_->UnregisterAvoidAreaChangeListener();
-            WLOGFI("JsWindow::UnregisterWindowListenerWithType systemAvoidAreaChange success");
-        }
-        jsCallbackMap_.erase(type);
-        jsListenerMap_.erase(type);
+    WLOGFI("JsWindow::UnregisterWindowListenerWithType callback map size: %{public}u success", jsCbMap_[type].size());
+    if (jsCbMap_[type].empty()) {
+        jsCbMap_.erase(type);
     }
-    return;
 }
 
 NativeValue* JsWindow::OnRegisterWindowCallback(NativeEngine& engine, NativeCallbackInfo& info)
@@ -649,12 +704,8 @@ NativeValue* JsWindow::OnRegisterWindowCallback(NativeEngine& engine, NativeCall
 NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsWindow::OnUnregisterWindowCallback is called");
-    if (windowToken_ == nullptr) {
-        WLOGFE("JsWindow windowToken_ is nullptr");
-        return engine.CreateUndefined();
-    }
-    if (info.argc == 0) {
-        WLOGFE("Params not match");
+    if (windowToken_ == nullptr || info.argc < 1 || info.argc > 2)  {
+        WLOGFE("JsWindow windowToken_ is nullptr or params not match");
         return engine.CreateUndefined();
     }
     std::string cbType;
@@ -900,9 +951,9 @@ NativeValue* JsWindow::OnSetSystemBarProperties(NativeEngine& engine, NativeCall
 
 NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsWindow::OnGetAvoidArea is called");
+    WLOGFI("JsWindow::OnGetAvoidArea is called info.argc: %{public}d", info.argc);
     WMError errCode = WMError::WM_OK;
-    if (windowToken_ == nullptr || info.argc < ARGC_ONE) {
+    if (windowToken_ == nullptr || info.argc < 1 || info.argc > 2) { // 2 is max num of argv
         WLOGFE("JsWindow windowToken_ is nullptr or param is too small!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }

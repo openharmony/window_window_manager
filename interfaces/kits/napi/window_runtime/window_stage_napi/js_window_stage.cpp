@@ -17,6 +17,7 @@
 #include <string>
 #include "js_runtime_utils.h"
 #include "js_window.h"
+#include "js_window_listener.h"
 #include "js_window_utils.h"
 #include "window_manager_hilog.h"
 namespace OHOS {
@@ -27,6 +28,7 @@ const int CONTENT_STORAGE_ARG = 2;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowStage"};
 } // namespace
 
+static std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>> g_jsCbMap;
 void JsWindowStage::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
     WLOGFI("JsWindowStage::Finalizer is called");
@@ -87,47 +89,6 @@ NativeValue* JsWindowStage::GetSubWindow(NativeEngine* engine, NativeCallbackInf
     WLOGFI("JsWindowStage::GetSubWindow is called");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnGetSubWindow(*engine, *info) : nullptr;
-}
-
-void JsWindowStage::AfterForeground()
-{
-    LifeCycleCallBack(WindowStageEventType::FOREGROUND);
-}
-
-void JsWindowStage::AfterBackground()
-{
-    LifeCycleCallBack(WindowStageEventType::BACKGROUND);
-}
-
-void JsWindowStage::AfterFocused()
-{
-    LifeCycleCallBack(WindowStageEventType::ACTIVE);
-}
-
-void JsWindowStage::AfterUnfocused()
-{
-    LifeCycleCallBack(WindowStageEventType::INACTIVE);
-}
-
-void JsWindowStage::LifeCycleCallBack(WindowStageEventType type)
-{
-    WLOGFI("JsWindowStage::LifeCycleCallBack is called, type: %{public}d", type);
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
-            NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(type))};
-            for (auto &iter : eventCallbackMap_) {
-                NativeValue* method = (iter.first)->Get();
-                if (method == nullptr) {
-                    WLOGFE("callback is null");
-                    return;
-                }
-                engine_->CallFunction(engine_->CreateUndefined(), method, argv, ArraySize(argv));
-            }
-        }
-    );
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackInfo& info)
@@ -194,19 +155,29 @@ NativeValue* JsWindowStage::OnGetMainWindow(NativeEngine& engine, NativeCallback
     return result;
 }
 
+bool JsWindowStage::IsCallbackRegistered(std::string type, NativeValue* jsListenerObject)
+{
+    if (g_jsCbMap.empty()) {
+        WLOGFI("JsWindowStage::JsWindowStage methodName %{public}s not registerted!", type.c_str());
+        return false;
+    }
+
+    for (auto iter = g_jsCbMap.begin(); iter != g_jsCbMap.end(); iter++) {
+        if (jsListenerObject->StrictEquals(iter->first->Get())) {
+            WLOGFE("JsWindowStage::IsCallbackRegistered callback already registered!");
+            return true;
+        }
+    }
+    return false;
+}
+
 NativeValue* JsWindowStage::OnEvent(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsWindowStage::OnEvent is called");
-    if (windowScene_ == nullptr) {
-        WLOGFE("JsWindowStage::OnEvent windowScene_ is nullptr");
+    if (windowScene_ == nullptr || info.argc < 2) { // 2: minimum param nums
+        WLOGFE("JsWindowStage::OnEvent windowScene_ is nullptr or params not match");
         return engine.CreateUndefined();
     }
-
-    if (info.argc < 2) { // 2: minimum param nums
-        WLOGFE("JsWindowStage::OnEvent wrong input params");
-        return engine.CreateUndefined();
-    }
-
     // Parse info->argv[0] as string
     std::string eventString;
     if (!ConvertFromJsValue(engine, info.argv[0], eventString)) {
@@ -218,31 +189,76 @@ NativeValue* JsWindowStage::OnEvent(NativeEngine& engine, NativeCallbackInfo& in
             eventString.c_str());
         return engine.CreateUndefined();
     }
-
     NativeValue* value = info.argv[1];
     if (!value->IsCallable()) {
         WLOGFE("JsWindowStage::OnEvent info->argv[1] is not callable");
         return engine.CreateUndefined();
     }
-
+    std::lock_guard<std::mutex> lock(mtx_);
+    if (IsCallbackRegistered(eventString, value)) {
+        WLOGFE("JsWindowStage::OnEvent callback already registered!");
+        return engine.CreateUndefined();
+    }
     std::shared_ptr<NativeReference> reference = nullptr;
     reference.reset(engine.CreateReference(value, 1));
-    eventCallbackMap_[reference] = 1;
-    engine_ = &engine;
-    WLOGFI("JsWindowStage::OnEvent eventCallbackMap_ size: %{public}d",
-        static_cast<uint32_t>(eventCallbackMap_.size()));
-    if (!regLifeCycleListenerFlag_) {
-        auto window = windowScene_->GetMainWindow();
-        if (window != nullptr) {
-            sptr<IWindowLifeCycle> listener = this;
-            window->RegisterLifeCycleListener(listener);
-            regLifeCycleListenerFlag_ = true;
-            WLOGFI("JsWindowStage::OnEvent regist lifecycle success");
-        }
-    } else {
-        WLOGFI("JsWindowStage::OnEvent already regist lifecycle");
+    sptr<JsWindowListener> windowListener = new(std::nothrow) JsWindowListener(&engine, reference);
+    if (windowListener == nullptr) {
+        WLOGFE("JsWindowStage::OnEvent windowListener malloc failed");
+        return engine.CreateUndefined();
     }
+    auto window = windowScene_->GetMainWindow();
+    if (window != nullptr) {
+        sptr<IWindowLifeCycle> thisListener(windowListener);
+        window->RegisterLifeCycleListener(thisListener);
+    }
+    g_jsCbMap[reference] = windowListener;
+    WLOGFI("JsWindowStage::OnEvent callback map size: %{public}u success", g_jsCbMap.size());
     return engine.CreateUndefined();
+}
+
+void JsWindowStage::UnregisterAllWindowListenerWithType(std::string type)
+{
+    if (g_jsCbMap.empty()) {
+        WLOGFE("JsWindowStage::UnregisterAllWindowListenerWithType methodName %{public}s not registerted!",
+            type.c_str());
+        return;
+    }
+    auto window = windowScene_->GetMainWindow();
+    if (window == nullptr) {
+        WLOGFE("JsWindowStage::UnregisterAllWindowListenerWithType mainWindow is null!");
+        return;
+    }
+    for (auto it = g_jsCbMap.begin(); it != g_jsCbMap.end();) {
+        sptr<IWindowLifeCycle> thisListener(it->second);
+        window->UnregisterLifeCycleListener(thisListener);
+        g_jsCbMap.erase(it++);
+    }
+    WLOGFI("JsWindowStage::UnregisterWindowListenerWithType callback map size: %{public}u success",
+        g_jsCbMap.size());
+}
+
+void JsWindowStage::UnregisterWindowListenerWithType(std::string type, NativeValue* value)
+{
+    if (g_jsCbMap.empty()) {
+        WLOGFE("JsWindowStage::UnregisterWindowListenerWithType methodName %{public}s not registerted!",
+            type.c_str());
+        return;
+    }
+
+    for (auto it = g_jsCbMap.begin(); it != g_jsCbMap.end();it++) {
+        if (value->StrictEquals(it->first->Get())) {
+            auto window = windowScene_->GetMainWindow();
+            if (window != nullptr) {
+                sptr<IWindowLifeCycle> thisListener(it->second);
+                window->UnregisterLifeCycleListener(thisListener);
+            }
+            g_jsCbMap.erase(it++);
+            break;
+        }
+    }
+    // one type with multi jscallback, erase type when there is no callback in one type
+    WLOGFI("JsWindowStage::UnregisterWindowListenerWithType callback map size: %{public}u success",
+        g_jsCbMap.size());
 }
 
 NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& info)
@@ -269,19 +285,13 @@ NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& i
     }
 
     NativeValue* value = info.argv[1];
-    if (value->IsCallable()) {
+    std::lock_guard<std::mutex> lock(mtx_);
+    if (value->TypeOf() == NATIVE_FUNCTION) {
         WLOGFI("JsWindowStage::OffEvent info->argv[1] is callable type");
-        for (auto iter = eventCallbackMap_.begin(); iter != eventCallbackMap_.end(); iter++) {
-            std::shared_ptr<NativeReference> callback = iter->first;
-            if (value->StrictEquals(callback->Get())) {
-                eventCallbackMap_.erase(iter);
-                break;
-            }
-        }
-        return engine.CreateUndefined();
+        UnregisterWindowListenerWithType(eventString, value);
     } else if (value->TypeOf() == NativeValueType::NATIVE_UNDEFINED) {
         WLOGFI("JsWindowStage::OffEvent info->argv[1] is native undefined type");
-        eventCallbackMap_.clear();
+        UnregisterAllWindowListenerWithType(eventString);
     } else {
         WLOGFE("JsWindowStage::OffEvent info->argv[1] is InValid param");
     }

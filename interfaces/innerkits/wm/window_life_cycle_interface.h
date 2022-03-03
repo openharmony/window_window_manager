@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Rosen {
-class IWindowLifeCycle : public RefBase {
+class IWindowLifeCycle : virtual public RefBase {
 public:
     virtual void AfterForeground() = 0;
     virtual void AfterBackground() = 0;
