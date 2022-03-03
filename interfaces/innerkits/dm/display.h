@@ -38,6 +38,7 @@ public:
     int32_t GetWidth() const;
     int32_t GetHeight() const;
     uint32_t GetFreshRate() const;
+    uint32_t GetRefreshRate() const;
     ScreenId GetScreenId() const;
     float GetVirtualPixelRatio() const;
     Rotation GetRotation() const;

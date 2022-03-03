@@ -50,10 +50,9 @@ void ScreenshotCmdTest::SetUpTestCase()
     if (display == nullptr) {
         WLOGFE("GetDefaultDisplay: failed!\n");
         return;
-    } else {
-        WLOGFI("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
-            display->GetHeight(), display->GetFreshRate());
     }
+    WLOGFI("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
+        display->GetHeight(), display->GetRefreshRate());
 
     defaultId_ = display->GetId();
 }

@@ -352,7 +352,7 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
                 return;
             }
             sptr<AbstractDisplay> display = new AbstractDisplay(displayCount_.fetch_add(1),
-                realAbsScreen->dmsId_, info->width_, info->height_, info->freshRate_);
+                realAbsScreen->dmsId_, info->width_, info->height_, info->refreshRate_);
             abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
             WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, display->GetId());
@@ -395,7 +395,7 @@ void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> abs
         return;
     }
     sptr<AbstractDisplay> display = new AbstractDisplay(displayCount_.fetch_add(1),
-        absScreen->dmsId_, info->width_, info->height_, info->freshRate_);
+        absScreen->dmsId_, info->width_, info->height_, info->refreshRate_);
     abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
     WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
         absScreen->dmsId_, display->GetId());
