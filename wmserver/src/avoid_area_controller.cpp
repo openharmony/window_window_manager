@@ -48,7 +48,7 @@ static AvoidPos GetAvoidPosType(const Rect& rect)
             return AvoidPos::AVOID_POS_TOP;
         } else {
             return AvoidPos::AVOID_POS_BOTTOM;
-            }
+        }
     } else {
         if (rect.posX_ == 0) {
             return AvoidPos::AVOID_POS_LEFT;

@@ -75,7 +75,6 @@ void WindowInnerManager::DrawSurface(const sptr<Window>& window)
     } else {
         DrawColor(rsSurface, width, height);
     }
-    return;
 }
 
 void WindowInnerManager::DrawBitmap(std::shared_ptr<RSSurface>& rsSurface, uint32_t width, uint32_t height)
@@ -95,14 +94,16 @@ void WindowInnerManager::DrawBitmap(std::shared_ptr<RSSurface>& rsSurface, uint3
     SkMatrix matrix;
     SkRect rect;
     rect.set(0, 0, static_cast<int>(width), static_cast<int>(height));
-    if (width < height) {
-        // rotate when devider is hozizon
-        matrix.setScale(static_cast<float>(height) / dividerBitmap_.width(),
-            static_cast<float>(width) / dividerBitmap_.height());
-        matrix.postRotate(-90.0f); // devider shader rotate -90.0
-    } else {
-        matrix.setScale(static_cast<float>(width) / dividerBitmap_.width(),
-            static_cast<float>(height) / dividerBitmap_.height());
+    if (dividerBitmap_.width() != 0 && dividerBitmap_.height() != 0) {
+        if (width < height) {
+            // rotate when divider is horizontal
+            matrix.setScale(static_cast<float>(height) / dividerBitmap_.width(),
+                static_cast<float>(width) / dividerBitmap_.height());
+            matrix.postRotate(-90.0f); // divider shader rotate -90.0
+        } else {
+            matrix.setScale(static_cast<float>(width) / dividerBitmap_.width(),
+                static_cast<float>(height) / dividerBitmap_.height());
+        }
     }
     paint.setShader(dividerBitmap_.makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat));
     if (paint.getShader() == nullptr) {
@@ -113,7 +114,6 @@ void WindowInnerManager::DrawBitmap(std::shared_ptr<RSSurface>& rsSurface, uint3
     canvas->drawRect(rect, paint);
     frame->SetDamageRegion(0, 0, width, height);
     rsSurface->FlushFrame(frame);
-    return;
 }
 
 void WindowInnerManager::DrawColor(std::shared_ptr<RSSurface>& rsSurface, uint32_t width, uint32_t height)
@@ -254,6 +254,9 @@ void WindowInnerManager::HandleMessage()
         }
         // loop to handle massages
         for (auto& msg : handleMsgs) {
+            if (msg == nullptr) {
+                continue;
+            }
             auto cmdType = msg->cmdType;
             using Func_t = void(WindowInnerManager::*)(std::unique_ptr<WindowMessage> winMsg);
             static const std::map<InnerWMCmd, Func_t> funcMap = {
@@ -277,6 +280,10 @@ void WindowInnerManager::SendMessage(InnerWMCmd cmdType, DisplayId displayId)
         return;
     }
     std::unique_ptr<WindowMessage> winMsg = std::make_unique<WindowMessage>();
+    if (winMsg == nullptr) {
+        WLOGFI("alloc winMsg failed");
+        return;
+    }
     winMsg->cmdType = cmdType;
     winMsg->displayId = displayId;
     WLOGFI("SendMessage : displayId = %{public}" PRIu64",  type = %{public}d",

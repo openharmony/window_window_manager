@@ -75,5 +75,5 @@ void WindowManagerAgentController::UpdateWindowVisibilityInfo(
         agent->UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS
