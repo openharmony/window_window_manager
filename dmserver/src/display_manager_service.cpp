@@ -50,6 +50,7 @@ void DisplayManagerService::OnStart()
 {
     WLOGFI("DisplayManagerService::OnStart start");
     if (!Init()) {
+        WLOGFW("Init failed");
         return;
     }
 }
@@ -79,16 +80,6 @@ void DisplayManagerService::NotifyDisplayStateChange(DisplayId id, DisplayStateC
     if (displayChangeListener_ != nullptr) {
         displayChangeListener_->OnDisplayStateChange(id, type);
     }
-}
-
-DisplayId DisplayManagerService::GetDisplayIdFromScreenId(ScreenId screenId)
-{
-    return (DisplayId)screenId;
-}
-
-ScreenId DisplayManagerService::GetScreenIdFromDisplayId(DisplayId displayId)
-{
-    return (ScreenId)displayId;
 }
 
 DisplayId DisplayManagerService::GetDefaultDisplayId()
@@ -386,7 +377,9 @@ void DisplayManagerService::SetShotScreen(ScreenId mainScreenId, std::vector<Scr
         displayNodeMap_[shotScreenId] = RSDisplayNode::Create(config);
     }
     auto transactionProxy = RSTransactionProxy::GetInstance();
-    transactionProxy->FlushImplicitTransaction();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
 }
 
 ScreenId DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds)
