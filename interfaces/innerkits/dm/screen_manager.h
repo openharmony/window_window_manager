@@ -54,6 +54,8 @@ public:
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
+    ScreenPowerState GetScreenPower(ScreenId screenId);
 
 private:
     ScreenManager();

@@ -73,7 +73,7 @@ public:
 
     void OnDisplayCreate(sptr<DisplayInfo> displayInfo) override
     {
-        if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALD) {
+        if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALID) {
             WLOGFE("OnDisplayCreate, displayInfo is invalid.");
             return;
         }
@@ -89,7 +89,7 @@ public:
 
     void OnDisplayDestroy(DisplayId displayId) override
     {
-        if (displayId == DISPLAY_ID_INVALD) {
+        if (displayId == DISPLAY_ID_INVALID) {
             WLOGFE("OnDisplayDestroy, displayId is invalid.");
             return;
         }
@@ -105,7 +105,7 @@ public:
 
     void OnDisplayChange(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event) override
     {
-        if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALD) {
+        if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALID) {
             WLOGFE("OnDisplayChange, displayInfo is invalid.");
             return;
         }
@@ -237,7 +237,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayByScreenId(ScreenId screenId)
         return nullptr;
     }
     DisplayId displayId = displayInfo->GetDisplayId();
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("get display by screenId: invalid displayInfo");
         return nullptr;
     }
@@ -252,7 +252,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayByScreenId(ScreenId screenId)
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId)
 {
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("displayId invalid!");
         return nullptr;
     }
@@ -269,7 +269,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
                                                                const Media::Size &size, int rotation)
 {
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("displayId invalid!");
         return nullptr;
     }
@@ -504,7 +504,7 @@ bool DisplayManager::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo
     }
     DisplayId displayId = displayInfo->GetDisplayId();
     WLOGFI("displayId:%{public}" PRIu64".", displayId);
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("displayId is invalid.");
         return false;
     }
@@ -542,45 +542,6 @@ bool DisplayManager::SuspendEnd()
 {
     WLOGFI("SuspendEnd start");
     return SingletonContainer::Get<DisplayManagerAdapter>().SuspendEnd();
-}
-
-bool DisplayManager::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
-{
-    WLOGFI("state:%{public}u, reason:%{public}u", state, reason);
-    auto screens = ScreenManager::GetInstance().GetAllScreens();
-    if (screens.empty()) {
-        WLOGFW("No screen found !");
-        return false;
-    }
-    ScreenPowerStatus status;
-    switch (state) {
-        case DisplayPowerState::POWER_ON: {
-            status = ScreenPowerStatus::POWER_STATUS_ON;
-            break;
-        }
-        case DisplayPowerState::POWER_OFF: {
-            status = ScreenPowerStatus::POWER_STATUS_OFF;
-            break;
-        }
-        default: {
-            WLOGFW("SetScreenPowerStatus state not support");
-            return false;
-        }
-    }
-    for (auto& screen : screens) {
-        if (screen != nullptr && screen->IsReal()) {
-            RSInterfaces::GetInstance().SetScreenPowerStatus(screen->GetId(), status);
-        }
-    }
-    WLOGFI("SetScreenPowerStatus end");
-    return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenPowerForAll(state, reason);
-}
-
-DisplayPowerState DisplayManager::GetScreenPower(uint64_t screenId)
-{
-    DisplayPowerState res = static_cast<DisplayPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screenId));
-    WLOGFI("GetScreenPower:%{public}u, defaultId:%{public}" PRIu64".", res, screenId);
-    return res;
 }
 
 bool DisplayManager::Impl::SetDisplayState(DisplayState state, DisplayStateCallback callback)

@@ -107,7 +107,7 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
 
 WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
-    DisplayId displayId = DISPLAY_ID_INVALD;
+    DisplayId displayId = DISPLAY_ID_INVALID;
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node != nullptr) {
         displayId = node->GetDisplayId();
