@@ -388,15 +388,19 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
 
 Rect WindowLayoutPolicyCascade::StepCascadeRect(Rect rect) const
 {
+    float virtualPixelRatio = GetVirtualPixelRatio();
+    uint32_t cascadeWidth = static_cast<uint32_t>(WINDOW_CASCADE_WIDTH * virtualPixelRatio);
+    uint32_t cascadeHeight = static_cast<uint32_t>(WINDOW_CASCADE_HEIGHT * virtualPixelRatio);
+
     Rect cascadeRect = {0, 0, 0, 0};
     cascadeRect.width_ = rect.width_;
     cascadeRect.height_ = rect.height_;
-    cascadeRect.posX_ = (rect.posX_ + WINDOW_CASCADE_WIDTH >= limitRect_.posX_) &&
-                    (rect.posX_ + rect.width_ + WINDOW_CASCADE_WIDTH <= (limitRect_.width_ + limitRect_.posX_)) ?
-                    (rect.posX_ + WINDOW_CASCADE_WIDTH) : limitRect_.posX_;
-    cascadeRect.posY_ = (rect.posY_ + WINDOW_CASCADE_HEIGHT >= limitRect_.posY_) &&
-                    (rect.posY_ + rect.height_ + WINDOW_CASCADE_HEIGHT <= (limitRect_.height_ + limitRect_.posY_)) ?
-                    (rect.posY_ + WINDOW_CASCADE_HEIGHT) : limitRect_.posY_;
+    cascadeRect.posX_ = (rect.posX_ + cascadeWidth >= limitRect_.posX_) &&
+                    (rect.posX_ + rect.width_ + cascadeWidth <= (limitRect_.width_ + limitRect_.posX_)) ?
+                    (rect.posX_ + cascadeWidth) : limitRect_.posX_;
+    cascadeRect.posY_ = (rect.posY_ + cascadeHeight >= limitRect_.posY_) &&
+                    (rect.posY_ + rect.height_ + cascadeHeight <= (limitRect_.height_ + limitRect_.posY_)) ?
+                    (rect.posY_ + cascadeHeight) : limitRect_.posY_;
     WLOGFI("step cascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
         cascadeRect.posX_, cascadeRect.posY_, cascadeRect.width_, cascadeRect.height_);
     return cascadeRect;
