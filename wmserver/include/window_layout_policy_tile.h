@@ -39,9 +39,8 @@ public:
     void UpdateLayoutRect(sptr<WindowNode>& node) override;
 
 private:
-    Rect singleRect_ = { 0, 0, 0, 0 };
-    std::vector<Rect> doubleRects_ = std::vector<Rect>(2);
-    std::vector<Rect> tripleRects_ = std::vector<Rect>(3);
+    uint32_t maxTileWinNum_ = 1;
+    std::vector<std::vector<Rect>> presetRects_;
     std::deque<sptr<WindowNode>> foregroundNodes_;
     void UpdateDisplayInfo() override;
     void InitTileWindowRects();

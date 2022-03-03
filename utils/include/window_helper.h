@@ -122,6 +122,12 @@ public:
         return false;
     }
 
+    static inline bool IsSwitchCascadeReason(WindowUpdateReason reason)
+    {
+        return (reason >= WindowUpdateReason::NEED_SWITCH_CASCADE_BASE) &&
+            (reason < WindowUpdateReason::NEED_SWITCH_CASCADE_END);
+    }
+
     WindowHelper() = default;
     ~WindowHelper() = default;
 };
