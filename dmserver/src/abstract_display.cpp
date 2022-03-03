@@ -33,15 +33,15 @@ AbstractDisplay::AbstractDisplay(const DisplayInfo* info)
     id_ = info->GetDisplayId();
     width_ = info->GetWidth();
     height_ = info->GetHeight();
-    freshRate_ = info->GetFreshRate();
+    refreshRate_ = info->GetRefreshRate();
 }
 
-AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t freshRate)
+AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t refreshRate)
     : id_(id),
       screenId_(screenId),
       width_(width),
       height_(height),
-      freshRate_(freshRate)
+      refreshRate_(refreshRate)
 {
 }
 
@@ -60,9 +60,9 @@ int32_t AbstractDisplay::GetHeight() const
     return height_;
 }
 
-uint32_t AbstractDisplay::GetFreshRate() const
+uint32_t AbstractDisplay::GetRefreshRate() const
 {
-    return freshRate_;
+    return refreshRate_;
 }
 
 float AbstractDisplay::GetVirtualPixelRatio() const
@@ -80,9 +80,9 @@ void AbstractDisplay::SetHeight(int32_t height)
     height_ = height;
 }
 
-void AbstractDisplay::SetFreshRate(uint32_t freshRate)
+void AbstractDisplay::SetRefreshRate(uint32_t refreshRate)
 {
-    freshRate_ = freshRate;
+    refreshRate_ = refreshRate;
 }
 
 void AbstractDisplay::SetVirtualPixelRatio(float virtualPixelRatio)
@@ -141,7 +141,7 @@ bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
     }
     width_ = static_cast<int32_t>(info->width_);
     height_ = static_cast<int32_t>(info->height_);
-    freshRate_ = info->freshRate_;
+    refreshRate_ = info->refreshRate_;
     screenId_ = dmsScreenId;
     WLOGD("display bound to screen. display:%{public}" PRIu64", screen:%{public}" PRIu64"", id_, dmsScreenId);
     return true;
@@ -158,7 +158,7 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->width_ = width_;
     displayInfo->height_ = height_;
     displayInfo->id_ = id_;
-    displayInfo->freshRate_ = freshRate_;
+    displayInfo->refreshRate_ = refreshRate_;
     displayInfo->screenId_ = screenId_;
     displayInfo->rotation_ = rotation_;
     displayInfo->orientation_ = orientation_;
