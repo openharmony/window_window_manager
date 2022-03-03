@@ -137,6 +137,10 @@ bool DisplayChangeTest::ScreenSizeEqual(const sptr<Screen> screen, const sptr<Su
 
 bool DisplayChangeTest::DisplaySizeEqual(const sptr<Display> display, const sptr<SupportedScreenModes> curInfo)
 {
+    if (display == nullptr || curInfo == nullptr) {
+        WLOGFI("param is nullptr");
+        return false;
+    }
     uint32_t dWidth = static_cast<uint32_t>(display->GetWidth());
     uint32_t dHeight = static_cast<uint32_t>(display->GetHeight());
     WLOGI("DisplaySizeEqual:: DisplaySize: %{public}u %{public}u, ActiveModeInfoSize: %{public}u %{public}u",
