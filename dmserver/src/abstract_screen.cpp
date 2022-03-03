@@ -57,6 +57,9 @@ sptr<AbstractScreenGroup> AbstractScreen::GetGroup() const
 sptr<ScreenInfo> AbstractScreen::ConvertToScreenInfo() const
 {
     sptr<ScreenInfo> info = new ScreenInfo();
+    if (info == nullptr) {
+        return nullptr;
+    }
     FillScreenInfo(info);
     return info;
 }
@@ -259,6 +262,9 @@ AbstractScreenGroup::~AbstractScreenGroup()
 sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
 {
     sptr<ScreenGroupInfo> screenGroupInfo = new ScreenGroupInfo();
+    if (screenGroupInfo == nullptr) {
+        return nullptr;
+    }
     FillScreenInfo(screenGroupInfo);
     screenGroupInfo->combination_ = combination_;
     for (auto iter = abstractScreenMap_.begin(); iter != abstractScreenMap_.end(); iter++) {
@@ -271,6 +277,10 @@ sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
 
 bool AbstractScreenGroup::SetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config)
 {
+    if (dmsScreen == nullptr) {
+        WLOGE("dmsScreen is nullptr.");
+        return false;
+    }
     switch (combination_) {
         case ScreenCombination::SCREEN_ALONE:
         case ScreenCombination::SCREEN_EXPAND:
@@ -353,8 +363,7 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
 
 bool AbstractScreenGroup::HasChild(ScreenId childScreen) const
 {
-    auto iter = abstractScreenMap_.find(childScreen);
-    return iter != abstractScreenMap_.end();
+    return abstractScreenMap_.find(childScreen) != abstractScreenMap_.end();
 }
 
 std::vector<sptr<AbstractScreen>> AbstractScreenGroup::GetChildren() const

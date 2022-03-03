@@ -37,11 +37,13 @@ enum class WindowStateChangeReason : uint32_t {
 };
 
 enum class WindowUpdateReason : uint32_t {
-    UPDATE_ALL,
+    NEED_SWITCH_CASCADE_BASE,
+    UPDATE_ALL = NEED_SWITCH_CASCADE_BASE,
     UPDATE_MODE,
     UPDATE_RECT,
     UPDATE_FLAGS,
     UPDATE_TYPE,
+    NEED_SWITCH_CASCADE_END,
     UPDATE_OTHER_PROPS,
 };
 namespace {

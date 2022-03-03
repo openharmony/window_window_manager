@@ -146,14 +146,14 @@ private:
 
 bool DisplayManager::Impl::CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const
 {
-    if (!((rect.left >= 0) and (rect.left < oriWidth) and (rect.top >= 0) and (rect.top < oriHeight))) {
+    if (!((rect.left >= 0) && (rect.left < oriWidth) && (rect.top >= 0) && (rect.top < oriHeight))) {
         WLOGFE("rect left or top invalid!");
         return false;
     }
 
-    if (!((rect.width > 0) and (rect.width <= (oriWidth - rect.left)) and
-        (rect.height > 0) and (rect.height <= (oriHeight - rect.top)))) {
-        if (!((rect.width == 0) and (rect.height == 0))) {
+    if (!((rect.width > 0) && (rect.width <= (oriWidth - rect.left)) &&
+        (rect.height > 0) && (rect.height <= (oriHeight - rect.top)))) {
+        if (!((rect.width == 0) && (rect.height == 0))) {
             WLOGFE("rect height or width invalid!");
             return false;
         }
@@ -163,8 +163,8 @@ bool DisplayManager::Impl::CheckRectValid(const Media::Rect& rect, int32_t oriHe
 
 bool DisplayManager::Impl::CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const
 {
-    if (!((size.width > 0) and (size.height > 0))) {
-        if (!((size.width == 0) and (size.height == 0))) {
+    if (!((size.width > 0) && (size.height > 0))) {
+        if (!((size.width == 0) && (size.height == 0))) {
             WLOGFE("width or height invalid!");
             return false;
         }
