@@ -96,5 +96,7 @@ ohos_static_library("wms_unittest_common") {
   ]
 
   external_deps = [ "ability_runtime:ability_context_native" ]
+  subsystem_name = "window"
+  part_name = "window_manager"
 }
 ## Build wms_unittest_common.a }}}

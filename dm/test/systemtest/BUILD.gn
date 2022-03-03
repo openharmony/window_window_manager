@@ -148,5 +148,7 @@ ohos_static_library("dm_systemtest_common") {
     "hilog_native:libhilog",
     "ipc:ipc_core",
   ]
+  subsystem_name = "window"
+  part_name = "window_manager"
 }
 ## Build dm_systemtest_common.a }}}
