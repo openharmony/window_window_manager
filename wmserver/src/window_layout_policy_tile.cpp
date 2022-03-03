@@ -36,9 +36,7 @@ WindowLayoutPolicyTile::WindowLayoutPolicyTile(const Rect& displayRect, const ui
 void WindowLayoutPolicyTile::Launch()
 {
     // compute limit rect
-    limitRect_ = displayRect_;
-    LayoutWindowNode(aboveAppWindowNode_);
-    InitTileWindowRects();
+    UpdateDisplayInfo();
     // select app min win in queue, and minimize others
     InitForegroundNodeQueue();
     AssignNodePropertyForTileWindows();
@@ -61,24 +59,26 @@ void WindowLayoutPolicyTile::InitTileWindowRects()
     constexpr float ratio = 0.75;  // 0.75: default height/width ratio
     constexpr float edgeRatio = 0.125;
     constexpr int half = 2;
+    maxTileWinNum_ = IsVertical() ? MAX_WIN_NUM_VERTICAL : MAX_WIN_NUM_HORIZONTAL;
+    presetRects_.clear();
     int x = limitRect_.posX_ + (limitRect_.width_ * edgeRatio);
     int y = limitRect_.posY_ + (limitRect_.height_ * edgeRatio);
     uint32_t w = limitRect_.width_ * ratio;
     uint32_t h = limitRect_.height_ * ratio;
-    singleRect_ = { x, y, w, h };
-    WLOGFI("singleRect_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
-    x = edgeInterval;
-    w = (limitRect_.width_ - edgeInterval * half - midInterval) / half;
-    // calc doubleRect
-    doubleRects_[0] = {x, y, w, h};
-    doubleRects_[1] = {x + w + midInterval, y, w, h};
-    WLOGFI("doubleRects_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
-    // calc tripleRect
-    w = (limitRect_.width_ - edgeInterval * half - midInterval * half) / MAX_WIN_NUM_HORIZONTAL;
-    tripleRects_[0] = {x, y, w, h};
-    tripleRects_[1] = {x + w + midInterval, y, w, h};
-    tripleRects_[2] = {x + w * half + midInterval * half, y, w, h}; // 2 is third index
-    WLOGFI("tripleRects_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
+    std::vector<Rect> single = {{ x, y, w, h }};
+    presetRects_.emplace_back(single);
+    for (uint32_t num = 2; num <= maxTileWinNum_; num++) { // start calc preset with 2 windows
+        w = (limitRect_.width_ - edgeInterval * half - midInterval * (num - 1)) / num;
+        std::vector<Rect> curLevel;
+        for (uint32_t i = 0; i < num; i++) {
+            int curX = limitRect_.posX_ + edgeInterval + i * (w + midInterval);
+            Rect curRect = { curX, y, w, h };
+            WLOGFI("presetRects: level %{public}d, id %{public}d, [%{public}d %{public}d %{public}d %{public}d]",
+                num, i, curX, y, w, h);
+            curLevel.emplace_back(curRect);
+        }
+        presetRects_.emplace_back(curLevel);
+    }
 }
 
 void WindowLayoutPolicyTile::AddWindowNode(sptr<WindowNode>& node)
@@ -143,8 +143,7 @@ void WindowLayoutPolicyTile::ForegroundNodeQueuePushBack(sptr<WindowNode>& node)
         return;
     }
     WLOGFI("add win in tile for win id: %{public}d", node->GetWindowId());
-    uint32_t maxTileWinNum = IsVertical() ? MAX_WIN_NUM_VERTICAL : MAX_WIN_NUM_HORIZONTAL;
-    while (foregroundNodes_.size() >= maxTileWinNum) {
+    while (foregroundNodes_.size() >= maxTileWinNum_) {
         auto removeNode = foregroundNodes_.front();
         foregroundNodes_.pop_front();
         WLOGFI("pop win in queue head id: %{public}d, for add new win", removeNode->GetWindowId());
@@ -171,30 +170,26 @@ void WindowLayoutPolicyTile::ForegroundNodeQueueRemove(sptr<WindowNode>& node)
 void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows()
 {
     // set rect for foreground windows
-    int num = foregroundNodes_.size();
-    if (num == 1) {
-        WLOGFI("set rect for win id: %{public}d", foregroundNodes_.front()->GetWindowMode());
-        foregroundNodes_.front()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-        foregroundNodes_.front()->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-        foregroundNodes_.front()->SetWindowRect(singleRect_);
-        foregroundNodes_.front()->hasDecorated_ = true;
-        WLOGFI("set rect for win id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
-            foregroundNodes_.front()->GetWindowId(),
-            singleRect_.posX_, singleRect_.posY_, singleRect_.width_, singleRect_.height_);
-    } else if (num <= MAX_WIN_NUM_HORIZONTAL) {
-        auto rit = (num == MAX_WIN_NUM_HORIZONTAL) ? tripleRects_.begin() : doubleRects_.begin();
-        for (auto it : foregroundNodes_) {
-            auto& rect = (*rit);
-            it->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-            it->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-            it->SetWindowRect(rect);
-            it->hasDecorated_ = true;
-            WLOGFI("set rect for qwin id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
-                it->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
-            rit++;
-        }
-    } else {
-        WLOGE("too many window node in tile queue");
+    uint32_t num = foregroundNodes_.size();
+    if (num > maxTileWinNum_ || num > presetRects_.size() || num == 0) {
+        WLOGE("invalid tile queue");
+        return;
+    }
+    std::vector<Rect>& presetRect = presetRects_[num - 1];
+    if (presetRect.size() != num) {
+        WLOGE("invalid preset rects");
+        return;
+    }
+    auto rectIt = presetRect.begin();
+    for (auto node : foregroundNodes_) {
+        auto& rect = (*rectIt);
+        node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        node->SetWindowRect(rect);
+        node->hasDecorated_ = true;
+        WLOGFI("set rect for qwin id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
+            node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+        rectIt++;
     }
 }
 

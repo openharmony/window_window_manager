@@ -149,7 +149,7 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
         WLOGFE("surface node is nullptr!");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (WindowHelper::IsMainWindow(node->GetWindowType()) && reason != WindowUpdateReason::UPDATE_OTHER_PROPS) {
+    if (WindowHelper::IsMainWindow(node->GetWindowType()) && WindowHelper::IsSwitchCascadeReason(reason)) {
         SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
     }
     layoutPolicy_->UpdateWindowNode(node);
