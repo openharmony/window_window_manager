@@ -59,7 +59,9 @@ void DisplayChangeUnitTest::SetUpTestCase()
 {
     defaultDisplayId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
     sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
-    defaultScreenId_ = defaultDisplay->GetScreenId();
+    if (defaultDisplay != nullptr) {
+        defaultScreenId_ = defaultDisplay->GetScreenId();
+    }
 }
 
 void DisplayChangeUnitTest::TearDownTestCase()

@@ -38,10 +38,9 @@ void WindowInputMethodTest::SetUpTestCase()
     if (display == nullptr) {
         printf("GetDefaultDisplay: failed!\n");
         return;
-    } else {
-        printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
-            display->GetHeight(), display->GetFreshRate());
     }
+    printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
+        display->GetHeight(), display->GetFreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
 }
