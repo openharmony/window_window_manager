@@ -37,7 +37,7 @@ public:
 
 private:
     sptr<WindowInputChannel> GetInputChannel(uint32_t windowId);
-    bool initInputListener_ = false;
+    std::mutex mtx_;
     std::unordered_map<uint32_t, sptr<WindowInputChannel>> windowInputChannels_;
     std::shared_ptr<MMI::IInputEventConsumer> inputListener_ = nullptr;
 };
