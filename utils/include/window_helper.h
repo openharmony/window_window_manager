@@ -124,7 +124,8 @@ public:
 
     static inline bool IsSwitchCascadeReason(WindowUpdateReason reason)
     {
-        return (reason >= NEED_SWITCH_CASCADE_BASE) && (reason < NEED_SWITCH_CASCADE_END);
+        return (reason >= WindowUpdateReason::NEED_SWITCH_CASCADE_BASE) &&
+            (reason < WindowUpdateReason::NEED_SWITCH_CASCADE_END);
     }
 
     WindowHelper() = default;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,7 +97,7 @@ public:
 void WindowManager::Impl::NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
     WindowType windowType, DisplayId displayId) const
 {
-    WLOGFI("NotifyFocused [%{public}d; %{public}p; %{public}d; %{public}" PRIu64"]", windowId, abilityToken.GetRefPtr(),
+    WLOGFI("NotifyFocused [%{public}u; %{public}p; %{public}d; %{public}" PRIu64"]", windowId, abilityToken.GetRefPtr(),
         static_cast<uint32_t>(windowType), displayId);
     for (auto& listener : focusChangedListeners_) {
         listener->OnFocused(windowId, abilityToken, windowType, displayId);
@@ -107,7 +107,7 @@ void WindowManager::Impl::NotifyFocused(uint32_t windowId, const sptr<IRemoteObj
 void WindowManager::Impl::NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
     WindowType windowType, DisplayId displayId) const
 {
-    WLOGFI("NotifyUnfocused [%{public}d; %{public}p; %{public}d; %{public}" PRIu64"]", windowId,
+    WLOGFI("NotifyUnfocused [%{public}u; %{public}p; %{public}d; %{public}" PRIu64"]", windowId,
         abilityToken.GetRefPtr(), static_cast<uint32_t>(windowType), displayId);
     for (auto& listener : focusChangedListeners_) {
         listener->OnUnfocused(windowId, abilityToken, windowType, displayId);
@@ -240,7 +240,7 @@ void WindowManager::MinimizeAllAppWindows(DisplayId displayId)
 
 WMError WindowManager::SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId)
 {
-    WLOGFI("set window layout mode: %{public}d, displayId %{public}" PRIu64"", mode, displayId);
+    WLOGFI("set window layout mode: %{public}u, displayId %{public}" PRIu64"", mode, displayId);
     WMError ret  = SingletonContainer::Get<WindowAdapter>().SetWindowLayoutMode(displayId, mode);
     if (ret != WMError::WM_OK) {
         WLOGFE("set layout mode failed");
@@ -322,7 +322,7 @@ void WindowManager::UnregisterVisibilityChangedListener(const sptr<IVisibilityCh
 void WindowManager::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
     DisplayId displayId, bool focused) const
 {
-    WLOGFI("window focus status: %{public}d, id: %{public}d", focused, windowId);
+    WLOGFI("window focus status: %{public}d, id: %{public}u", focused, windowId);
     if (focused) {
         pImpl_->NotifyFocused(windowId, abilityToken, windowType, displayId);
     } else {
