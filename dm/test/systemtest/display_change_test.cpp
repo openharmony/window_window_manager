@@ -220,6 +220,7 @@ HWTEST_F(DisplayChangeTest, CheckDisplayStateChange01, Function | SmallTest | Le
 {
     WLOGFI("CheckDisplayStateChange01");
     sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
+    ASSERT_NE(nullptr, defaultDisplay);
     ScreenId screenId = defaultDisplay->GetScreenId();
     sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
     ASSERT_NE(nullptr, screen);
@@ -238,6 +239,7 @@ HWTEST_F(DisplayChangeTest, CheckDisplayStateChange02, Function | SmallTest | Le
 {
     WLOGFI("CheckDisplayStateChange02");
     sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
+    ASSERT_NE(nullptr, defaultDisplay);
     ScreenId screenId = defaultDisplay->GetScreenId();
     sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
     ASSERT_NE(nullptr, screen);
@@ -270,6 +272,7 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange01, Function | MediumTest | Le
 {
     WLOGFI("CheckDisplaySizeChange01");
     sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
+    ASSERT_NE(nullptr, defaultDisplay);
     ScreenId screenId = defaultDisplay->GetScreenId();
     sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
     ASSERT_NE(nullptr, screen);
@@ -302,6 +305,7 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange02, Function | MediumTest | Le
 {
     WLOGFI("CheckDisplaySizeChange02");
     sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
+    ASSERT_NE(nullptr, defaultDisplay);
     ScreenId screenId = defaultDisplay->GetScreenId();
     sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
     ASSERT_NE(nullptr, screen);
@@ -315,6 +319,7 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange02, Function | MediumTest | Le
             WLOGFI("SetScreenActiveMode: %{public}u -> %{public}u", usedModeIdx, modeIdx);
             ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
             defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
+            ASSERT_NE(nullptr, defaultDisplay);
             ASSERT_EQ(true, DisplaySizeEqual(defaultDisplay, modes[modeIdx]));
             break;
         }
