@@ -93,7 +93,7 @@ ScreenId DisplayManagerService::GetScreenIdFromDisplayId(DisplayId displayId)
 
 DisplayId DisplayManagerService::GetDefaultDisplayId()
 {
-    ScreenId dmsScreenId = abstractScreenController_->GetDefaultScreenId();
+    ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     WLOGFI("GetDefaultDisplayId %{public}" PRIu64"", dmsScreenId);
     sptr<AbstractDisplay> display = GetDisplayByScreen(dmsScreenId);
     if (display == nullptr) {

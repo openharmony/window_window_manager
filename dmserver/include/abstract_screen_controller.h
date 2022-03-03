@@ -50,7 +50,6 @@ public:
     std::vector<ScreenId> GetAllExpandOrMirrorScreenIds(std::vector<ScreenId>) const;
     sptr<AbstractScreenGroup> GetAbstractScreenGroup(ScreenId dmsScreenId);
     ScreenId GetDefaultAbstractScreenId();
-    ScreenId GetDefaultScreenId() const; // save default screenID got by GetDefaultAbstractScreenId as cache
     ScreenId ConvertToRsScreenId(ScreenId dmsScreenId);
     ScreenId ConvertToDmsScreenId(ScreenId rsScreenId);
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
@@ -97,6 +96,9 @@ private:
 
     class ScreenIdManager {
     public:
+        ScreenIdManager() = default;
+        ~ScreenIdManager() = default;
+        WM_DISALLOW_COPY_AND_MOVE(ScreenIdManager);
         ScreenId CreateAndGetNewScreenId(ScreenId rsScreenId);
         bool DeleteScreenId(ScreenId dmsScreenId);
         bool HasDmsScreenId(ScreenId dmsScreenId) const;
@@ -118,7 +120,6 @@ private:
     std::map<ScreenId, sptr<AbstractScreen>> dmsScreenMap_;
     std::map<ScreenId, sptr<AbstractScreenGroup>> dmsScreenGroupMap_;
     sptr<AbstractScreenCallback> abstractScreenCallback_;
-    ScreenId defaultScreenId = INVALID_SCREEN_ID;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_SCREEN_CONTROLLER_H

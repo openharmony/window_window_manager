@@ -30,7 +30,7 @@ public:
     }
     ~Impl() = default;
 
-    DEFINE_VAR_FUNC_GET_SET(sptr<ScreenGroupInfo>, ScreenGroupInfo, screenGroupInfo);
+    DEFINE_VAR_FUNC_GET_SET_WITH_LOCK(sptr<ScreenGroupInfo>, ScreenGroupInfo, screenGroupInfo);
 };
 
 ScreenGroup::ScreenGroup(sptr<ScreenGroupInfo> info)
