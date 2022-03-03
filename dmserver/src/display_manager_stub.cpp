@@ -223,7 +223,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteUint64(static_cast<uint64_t>(result));
             break;
         }
-        case TRANS_ID_SCREEN_MAKE_MIRROR_OR_EXPAND_CANCELED: {
+        case TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP: {
             std::vector<ScreenId> screenId;
             if (!data.ReadUInt64Vector(&screenId)) {
                 WLOGE("fail to receive screens in stub.");

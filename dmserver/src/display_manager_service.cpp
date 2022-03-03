@@ -84,7 +84,7 @@ void DisplayManagerService::NotifyDisplayStateChange(DisplayId id, DisplayStateC
 
 DisplayId DisplayManagerService::GetDefaultDisplayId()
 {
-    ScreenId dmsScreenId = abstractScreenController_->GetDefaultScreenId();
+    ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     WLOGFI("GetDefaultDisplayId %{public}" PRIu64"", dmsScreenId);
     sptr<AbstractDisplay> display = GetDisplayByScreen(dmsScreenId);
     if (display == nullptr) {

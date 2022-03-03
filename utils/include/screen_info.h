@@ -31,10 +31,7 @@ class ScreenInfo : public Parcelable {
 friend class AbstractScreen;
 public:
     ~ScreenInfo() = default;
-    ScreenInfo(const ScreenInfo&) = delete;
-    ScreenInfo(ScreenInfo&&) = delete;
-    ScreenInfo& operator=(const ScreenInfo&) = delete;
-    ScreenInfo& operator= (ScreenInfo&&) = delete;
+    WM_DISALLOW_COPY_AND_MOVE(ScreenInfo);
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static ScreenInfo* Unmarshalling(Parcel& parcel);

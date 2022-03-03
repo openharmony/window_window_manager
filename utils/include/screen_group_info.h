@@ -26,10 +26,7 @@ class ScreenGroupInfo : public ScreenInfo {
 friend class AbstractScreenGroup;
 public:
     ~ScreenGroupInfo() = default;
-    ScreenGroupInfo(const ScreenGroupInfo&) = delete;
-    ScreenGroupInfo(ScreenGroupInfo&&) = delete;
-    ScreenGroupInfo& operator=(const ScreenGroupInfo&) = delete;
-    ScreenGroupInfo& operator=(ScreenGroupInfo&&) = delete;
+    WM_DISALLOW_COPY_AND_MOVE(ScreenGroupInfo);
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static ScreenGroupInfo* Unmarshalling(Parcel& parcel);

@@ -30,6 +30,7 @@ public:
     constexpr static uint32_t DEFAULT_FRESH_RATE = 60;
     AbstractDisplay(const DisplayInfo* info);
     AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t refreshRate);
+    WM_DISALLOW_COPY_AND_MOVE(AbstractDisplay);
     ~AbstractDisplay() = default;
     static inline bool IsVertical(Rotation rotation)
     {

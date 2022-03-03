@@ -33,6 +33,7 @@ class AbstractDisplayController : public RefBase {
 public:
     AbstractDisplayController(std::recursive_mutex& mutex);
     ~AbstractDisplayController();
+    WM_DISALLOW_COPY_AND_MOVE(AbstractDisplayController);
 
     void Init(sptr<AbstractScreenController> abstractScreenController);
     ScreenId GetDefaultScreenId();

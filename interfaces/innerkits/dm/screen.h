@@ -23,6 +23,7 @@
 #include <screen_manager/screen_types.h>
 
 #include "dm_common.h"
+#include "noncopyable.h"
 
 namespace OHOS::Rosen {
 class ScreenInfo;
@@ -60,10 +61,7 @@ class Screen : public RefBase {
 friend class ScreenManager;
 public:
     ~Screen();
-    Screen(const Screen&) = delete;
-    Screen(Screen&&) = delete;
-    Screen& operator=(const Screen&) = delete;
-    Screen& operator=(Screen&&) = delete;
+    WM_DISALLOW_COPY_AND_MOVE(Screen);
     bool IsGroup() const;
     const std::string GetName() const;
     ScreenId GetId() const;
