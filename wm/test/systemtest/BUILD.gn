@@ -19,6 +19,7 @@ group("systemtest") {
   testonly = true
 
   deps = [
+    ":wm_window_drag_test",
     ":wm_window_effect_test",
     ":wm_window_focus_test",
     ":wm_window_gamut_test",
@@ -165,6 +166,17 @@ ohos_systemtest("wm_window_visibility_info_test") {
 }
 
 ## SystemTest wm_window_visibility_info_test }}}
+
+## SystemTest wm_window_drag_test {{{
+ohos_systemtest("wm_window_drag_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_drag_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+}
+
+## SystemTest drag_window_test }}}
 
 ## Build wm_systemtest_common.a {{{
 config("wm_systemtest_common_public_config") {
