@@ -61,7 +61,10 @@ class Screen : public RefBase {
 friend class ScreenManager;
 public:
     ~Screen();
-    WM_DISALLOW_COPY_AND_MOVE(Screen);
+    Screen(const Screen&) = delete;
+    Screen(Screen&&) = delete;
+    Screen& operator=(const Screen&) = delete;
+    Screen& operator=(Screen&&) = delete;
     bool IsGroup() const;
     const std::string GetName() const;
     ScreenId GetId() const;
