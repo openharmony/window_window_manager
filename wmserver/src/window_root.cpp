@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -337,8 +337,6 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
         if (windowId != focusedWindowId) {
             return;
         }
-    } else {
-        // do nothing
     }
     auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
     if (nextFocusableWindow != nullptr) {
@@ -590,5 +588,5 @@ float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
     auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
     return container->GetVirtualPixelRatio();
 }
-}
-}
+} // namespace OHOS::Rosen
+} // namespace OHOS
