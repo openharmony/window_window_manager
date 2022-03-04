@@ -236,5 +236,5 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     }
 }
-}
-}
+} // Rosen
+} // OHOS
