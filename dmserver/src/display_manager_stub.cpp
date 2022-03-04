@@ -108,12 +108,12 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
         case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
             DisplayId displayId = data.ReadUint64();
-            std::shared_ptr<Media::PixelMap> dispalySnapshot = GetDisplaySnapshot(displayId);
-            if (dispalySnapshot == nullptr) {
+            std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId);
+            if (displaySnapshot == nullptr) {
                 reply.WriteParcelable(nullptr);
                 break;
             }
-            reply.WriteParcelable(dispalySnapshot.get());
+            reply.WriteParcelable(displaySnapshot.get());
         }
         case TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
