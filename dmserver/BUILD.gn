@@ -15,15 +15,7 @@ import("//build/ohos.gni")
 
 ## Build libdms.so
 config("libdms_private_config") {
-  include_dirs = [
-    "../dm/include",
-
-    # todo need delete it
-    "../wmserver/include",
-    "../wm/include",
-    "../interfaces/innerkits/wm",
-    "../wmserver/include/window_snapshot",
-  ]
+  include_dirs = [ "../dm/include" ]
 }
 
 config("libdms_public_config") {
