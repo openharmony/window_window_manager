@@ -105,7 +105,7 @@ public:
     virtual void UnregisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) override;
     virtual void UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
-    virtual void UnregisterAvoidAreaChangeListener() override;
+    virtual void UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     virtual void RegisterDragListener(const sptr<IWindowDragListener>& listener) override;
     virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
@@ -197,7 +197,7 @@ private:
     WindowState state_ { WindowState::STATE_INITIAL };
     std::vector<sptr<IWindowLifeCycle>> lifecycleListeners_;
     std::vector<sptr<IWindowChangeListener>> windowChangeListeners_;
-    sptr<IAvoidAreaChangedListener> avoidAreaChangeListener_;
+    std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
     std::vector<sptr<IWindowDragListener>> windowDragListeners_;
     std::vector<sptr<IDisplayMoveListener>> displayMoveListeners_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;

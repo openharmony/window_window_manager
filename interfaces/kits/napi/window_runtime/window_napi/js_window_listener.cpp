@@ -25,51 +25,19 @@ namespace {
 
 constexpr uint32_t AVOID_AREA_NUM = 4;
 
-void JsWindowListener::AddCallback(NativeValue* jsListenerObject)
-{
-    WLOGFI("JsWindowListener::AddCallback is called");
-    std::lock_guard<std::mutex> lock(mtx_);
-    std::unique_ptr<NativeReference> callbackRef;
-    callbackRef.reset(engine_->CreateReference(jsListenerObject, 1));
-    jsCallBack_.push_back(std::move(callbackRef));
-    WLOGFI("JsWindowListener::AddCallback success jsCallBack_ size: %{public}d!",
-        static_cast<uint32_t>(jsCallBack_.size()));
-}
-
-void JsWindowListener::RemoveAllCallback()
-{
-    std::lock_guard<std::mutex> lock(mtx_);
-    jsCallBack_.clear();
-}
-
-void JsWindowListener::RemoveCallback(NativeValue* jsListenerObject)
-{
-    std::lock_guard<std::mutex> lock(mtx_);
-    for (auto iter = jsCallBack_.begin(); iter != jsCallBack_.end(); ++iter) {
-        if (jsListenerObject->StrictEquals((*iter)->Get())) {
-            iter = jsCallBack_.erase(iter);
-            break;
-        }
-    }
-    WLOGFI("JsWindowListener::RemoveCallback success jsCallBack_ size: %{public}d!",
-        static_cast<uint32_t>(jsCallBack_.size()));
-}
-
 void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
 {
     WLOGFI("CallJsMethod methodName = %{public}s", methodName);
-    if (engine_ == nullptr || jsCallBack_.empty()) {
-        WLOGFE("engine_ nullptr or jsCallBack_ is empty");
+    if (engine_ == nullptr || jsCallBack_ == nullptr) {
+        WLOGFE("engine_ nullptr or jsCallBack_ is nullptr");
         return;
     }
-    for (auto &item : jsCallBack_) {
-        NativeValue* method = item->Get();
-        if (method == nullptr) {
-            WLOGFE("Failed to get method callback from object");
-            continue;
-        }
-        engine_->CallFunction(engine_->CreateUndefined(), method, argv, argc);
+    NativeValue* method = jsCallBack_->Get();
+    if (method == nullptr) {
+        WLOGFE("Failed to get method callback from object");
+        return;
     }
+    engine_->CallFunction(engine_->CreateUndefined(), method, argv, argc);
 }
 
 void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason)
@@ -156,6 +124,40 @@ void JsWindowListener::OnAvoidAreaChanged(const std::vector<Rect> avoidAreas)
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
+{
+    WLOGFI("JsWindowListener::LifeCycleCallBack is called, type: %{public}d", eventType);
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(eventType))};
+            CallJsMethod(LIFECYCLE_EVENT_CB.c_str(), argv, ArraySize(argv));
+        }
+    );
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsWindowListener::AfterForeground()
+{
+    LifeCycleCallBack(LifeCycleEventType::FOREGROUND);
+}
+
+void JsWindowListener::AfterBackground()
+{
+    LifeCycleCallBack(LifeCycleEventType::BACKGROUND);
+}
+
+void JsWindowListener::AfterFocused()
+{
+    LifeCycleCallBack(LifeCycleEventType::ACTIVE);
+}
+
+void JsWindowListener::AfterUnfocused()
+{
+    LifeCycleCallBack(LifeCycleEventType::INACTIVE);
 }
 } // namespace Rosen
 } // namespace OHOS
