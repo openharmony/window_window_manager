@@ -88,6 +88,6 @@ private:
     int32_t callingUid_;
     WindowSizeChangeReason windowSizeChangeReason_ {WindowSizeChangeReason::UNDEFINED};
 };
-}
-}
+} // Rosen
+} // OHOS
 #endif // OHOS_ROSEN_WINDOW_NODE_H
