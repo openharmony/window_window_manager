@@ -82,7 +82,7 @@ WMError WindowNodeContainer::MinimizeStructuredAppWindowsExceptSelf(const sptr<W
 {
     std::vector<uint32_t> exceptionalIds = { node->GetWindowId() };
     std::vector<WindowMode> exceptionalModes = { WindowMode::WINDOW_MODE_FLOATING, WindowMode::WINDOW_MODE_PIP };
-    return MinimizeAppNodeExceptOptions(exceptionalIds, exceptionalModes);
+    return MinimizeAppNodeExceptOptions(false, exceptionalIds, exceptionalModes);
 }
 
 WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
@@ -829,7 +829,7 @@ sptr<WindowNode> WindowNodeContainer::GetNextFocusableWindow(uint32_t windowId) 
 
 void WindowNodeContainer::MinimizeAllAppWindows()
 {
-    WMError ret =  MinimizeAppNodeExceptOptions();
+    WMError ret =  MinimizeAppNodeExceptOptions(true);
     SwitchLayoutPolicy(WindowLayoutMode::CASCADE);
     if (ret != WMError::WM_OK) {
         WLOGFE("Minimize all app window failed");
@@ -873,16 +873,16 @@ sptr<WindowNode> WindowNodeContainer::FindSplitPairNode(sptr<WindowNode>& trigge
     return nullptr;
 }
 
-void WindowNodeContainer::MinimizeWindowFromAbility(const sptr<WindowNode>& node)
+void WindowNodeContainer::MinimizeWindowFromAbility(const sptr<WindowNode>& node, bool fromUser)
 {
     if (node->abilityToken_ == nullptr) {
         WLOGFW("Target abilityToken is nullptr, windowId:%{public}u", node->GetWindowId());
         return;
     }
-    AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(node->abilityToken_, true);
+    AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(node->abilityToken_, fromUser);
 }
 
-WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(const std::vector<uint32_t> &exceptionalIds,
+WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(bool fromUser, const std::vector<uint32_t> &exceptionalIds,
                                                           const std::vector<WindowMode> &exceptionalModes)
 {
     if (appWindowNode_->children_.empty()) {
@@ -898,7 +898,7 @@ WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(const std::vector<uint
         }
         // minimize window
         WLOGFI("minimize window, windowId:%{public}u", appNode->GetWindowId());
-        MinimizeWindowFromAbility(appNode);
+        MinimizeWindowFromAbility(appNode, fromUser);
     }
     return WMError::WM_OK;
 }
@@ -921,7 +921,7 @@ WMError WindowNodeContainer::EnterSplitWindowMode(sptr<WindowNode>& node)
             exceptionalIds.emplace_back(iter->first);
         }
         std::vector<WindowMode> exceptionalModes = { WindowMode::WINDOW_MODE_FLOATING, WindowMode::WINDOW_MODE_PIP };
-        ret = MinimizeAppNodeExceptOptions(exceptionalIds, exceptionalModes);
+        ret = MinimizeAppNodeExceptOptions(false, exceptionalIds, exceptionalModes);
         if (ret != WMError::WM_OK) {
             return ret;
         }
