@@ -28,8 +28,8 @@
 #include "dm_common.h"
 #include "window_manager_hilog.h"
 #include "unique_fd.h"
-#include "core/ui/rs_surface_node.h"
-#include "core/ui/rs_display_node.h"
+#include "ui/rs_surface_node.h"
+#include "ui/rs_display_node.h"
 
 namespace OHOS {
 namespace Rosen {
