@@ -306,19 +306,27 @@ void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> ab
         return;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
-        sptr<AbstractDisplay> absDisplay = iter->second;
-        if (absDisplay->GetAbstractScreenId() != absScreen->dmsId_) {
-            continue;
+    std::map<DisplayId, sptr<AbstractDisplay>> matchedDisplays;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); ++iter) {
+            sptr<AbstractDisplay> absDisplay = iter->second;
+            if (absDisplay == nullptr || absDisplay->GetAbstractScreenId() != absScreen->dmsId_) {
+                continue;
+            }
+            if (UpdateDisplaySize(absDisplay, info)) {
+                matchedDisplays.insert(std::make_pair(iter->first, iter->second));
+            }
         }
-        if (UpdateDisplaySize(absDisplay, info)) {
-            WLOGFI("Notify display size change");
-            DisplayManagerService::GetInstance().NotifyDisplayStateChange(
-                iter->first, DisplayStateChangeType::SIZE_CHANGE);
-            DisplayManagerAgentController::GetInstance().OnDisplayChange(
-                absDisplay->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
-        }
+    }
+
+    WLOGFI("Size of matchedDisplays %{public}zu", matchedDisplays.size());
+    for (auto iter = matchedDisplays.begin(); iter != matchedDisplays.end(); ++iter) {
+        WLOGFI("Notify display size change. Id %{public}" PRIu64"", iter->first);
+        DisplayManagerService::GetInstance().NotifyDisplayStateChange(
+            iter->first, DisplayStateChangeType::SIZE_CHANGE);
+        DisplayManagerAgentController::GetInstance().OnDisplayChange(
+            iter->second->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     }
 }
 
@@ -329,7 +337,6 @@ bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDispl
         WLOGI("keep display size. display:%{public}" PRIu64"", absDisplay->GetId());
         return false;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     absDisplay->SetHeight(info->height_);
     absDisplay->SetWidth(info->width_);
     WLOGI("update display size. id %{public}" PRIu64", size: %{public}d %{public}d",
