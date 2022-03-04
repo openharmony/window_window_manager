@@ -58,7 +58,7 @@ public:
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifySystemBarTints();
     void NotifySystemBarDismiss(sptr<WindowNode>& node);
-    WMError MinimizeAppNodeExceptOptions(const std::vector<uint32_t> &exceptionalIds = {},
+    WMError MinimizeAppNodeExceptOptions(bool fromUser, const std::vector<uint32_t> &exceptionalIds = {},
                                          const std::vector<WindowMode> &exceptionalModes = {});
     WMError EnterSplitWindowMode(sptr<WindowNode>& node);
     WMError ExitSplitWindowMode(sptr<WindowNode>& node);
@@ -86,7 +86,7 @@ private:
     bool IsTopAppWindow(uint32_t windowId) const;
     sptr<WindowNode> FindDividerNode() const;
     void RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes);
-    void MinimizeWindowFromAbility(const sptr<WindowNode>& node);
+    void MinimizeWindowFromAbility(const sptr<WindowNode>& node, bool fromUser);
     void ResetLayoutPolicy();
     bool IsFullImmersiveNode(sptr<WindowNode> node) const;
     bool IsSplitImmersiveNode(sptr<WindowNode> node) const;
