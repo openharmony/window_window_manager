@@ -32,7 +32,10 @@ class ScreenGroup : public Screen {
 friend class ScreenManager;
 public:
     ~ScreenGroup();
-    WM_DISALLOW_COPY_AND_MOVE(ScreenGroup);
+    ScreenGroup(const ScreenGroup&) = delete;
+    ScreenGroup(ScreenGroup&&) = delete;
+    ScreenGroup& operator=(const ScreenGroup&) = delete;
+    ScreenGroup& operator=(ScreenGroup&&) = delete;
     ScreenCombination GetCombination() const;
     std::vector<ScreenId> GetChildIds() const;
     std::vector<Point> GetChildPositions() const;
