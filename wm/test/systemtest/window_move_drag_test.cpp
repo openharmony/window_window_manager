@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-// gtest
 #include <gtest/gtest.h>
 #include "pointer_event.h"
 #include "window_helper.h"
