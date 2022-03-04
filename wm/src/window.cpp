@@ -31,7 +31,11 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
         return nullptr;
     }
     if (option == nullptr) {
-        option = new WindowOption();
+        option = new(std::nothrow) WindowOption();
+        if (option == nullptr) {
+            WLOGFE("malloc option failed");
+            return nullptr;
+        }
     }
     WindowType type = option->GetWindowType();
     if (!(WindowHelper::IsAppWindow(type) || WindowHelper::IsSystemWindow(type))) {
@@ -39,7 +43,11 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
         return nullptr;
     }
     option->SetWindowName(windowName);
-    sptr<WindowImpl> windowImpl = new WindowImpl(option);
+    sptr<WindowImpl> windowImpl = new(std::nothrow) WindowImpl(option);
+    if (windowImpl == nullptr) {
+        WLOGFE("malloc windowImpl failed");
+        return nullptr;
+    }
     WMError error = windowImpl->Create(option->GetParentName(), context);
     if (error != WMError::WM_OK) {
         return nullptr;
@@ -66,5 +74,5 @@ std::vector<sptr<Window>> Window::GetSubWindow(uint32_t parentId)
 {
     return WindowImpl::GetSubWindow(parentId);
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

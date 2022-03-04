@@ -455,7 +455,7 @@ HWTEST_F(WindowImmersiveTest, OnAvoidAreaChangedTest01, Function | MediumTest | 
     std::vector<Rect> avoidArea2 = testAvoidAreaChangedListener_->avoidAreas_;
     ASSERT_TRUE(utils::RectEqualToRect(bigTopRect, avoidArea2[1]));
 
-    window->UnregisterAvoidAreaChangeListener();
+    window->UnregisterAvoidAreaChangeListener(thisListener);
 }
 
 /**
@@ -493,7 +493,7 @@ HWTEST_F(WindowImmersiveTest, OnAvoidAreaChangedTest02, Function | MediumTest | 
     std::vector<Rect> avoidArea2 = testAvoidAreaChangedListener_->avoidAreas_;
     ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidArea2[0])); // 0: left Rect
 
-    window->UnregisterAvoidAreaChangeListener();
+    window->UnregisterAvoidAreaChangeListener(thisListener);
 }
 }
 } // namespace Rosen
