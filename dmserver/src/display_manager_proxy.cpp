@@ -17,10 +17,9 @@
 
 #include <cinttypes>
 #include <ipc_types.h>
+#include <parcel.h>
 
 #include "window_manager_hilog.h"
-
-#include <parcel.h>
 
 namespace OHOS::Rosen {
 namespace {
@@ -313,7 +312,7 @@ DMError DisplayManagerProxy::GetScreenSupportedColorGamuts(ScreenId screenId,
     colorGamuts.clear();
     for (uint32_t i = 0; i < size; i++) {
         ScreenColorGamut colorGamut = static_cast<ScreenColorGamut>(reply.ReadUint32());
-        colorGamuts.push_back(colorGamut);
+        colorGamuts.emplace_back(colorGamut);
     }
     return ret;
 }
@@ -372,8 +371,7 @@ DMError DisplayManagerProxy::SetScreenColorGamut(ScreenId screenId, int32_t colo
         WLOGFW("DisplayManagerProxy::SetScreenColorGamut: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    DMError ret = static_cast<DMError>(reply.ReadInt32());
-    return ret;
+    return static_cast<DMError>(reply.ReadInt32());
 }
 
 DMError DisplayManagerProxy::GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap)
@@ -430,8 +428,7 @@ DMError DisplayManagerProxy::SetScreenGamutMap(ScreenId screenId, ScreenGamutMap
         WLOGFW("DisplayManagerProxy::SetScreenGamutMap: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    DMError ret = static_cast<DMError>(reply.ReadInt32());
-    return ret;
+    return static_cast<DMError>(reply.ReadInt32());
 }
 
 DMError DisplayManagerProxy::SetScreenColorTransform(ScreenId screenId)
@@ -457,8 +454,7 @@ DMError DisplayManagerProxy::SetScreenColorTransform(ScreenId screenId)
         WLOGFW("DisplayManagerProxy::SetScreenColorTransform: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    DMError ret = static_cast<DMError>(reply.ReadInt32());
-    return ret;
+    return static_cast<DMError>(reply.ReadInt32());
 }
 
 bool DisplayManagerProxy::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
