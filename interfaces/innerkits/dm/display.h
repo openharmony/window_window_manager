@@ -31,7 +31,10 @@ class Display : public RefBase {
 friend class DisplayManager;
 public:
     ~Display();
-    WM_DISALLOW_COPY_AND_MOVE(Display);
+    Display(const Display&) = delete;
+    Display(Display&&) = delete;
+    Display& operator=(const Display&) = delete;
+    Display& operator=(Display&&) = delete;
     DisplayId GetId() const;
     int32_t GetWidth() const;
     int32_t GetHeight() const;
