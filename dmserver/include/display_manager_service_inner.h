@@ -17,6 +17,8 @@
 #define FOUNDATION_DMSERVER_DISPLAY_MANAGER_SERVICE_INNER_H
 
 #include <vector>
+
+#include <pixel_map.h>
 #include <system_ability.h>
 
 #include "abstract_display.h"
@@ -37,6 +39,7 @@ public:
     ScreenId GetRSScreenId(DisplayId displayId) const;
     const sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId) const;
     const sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId);
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId);
     void UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
 };

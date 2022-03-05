@@ -202,6 +202,12 @@ void DisplayManagerAdapter::NotifyDisplayEvent(DisplayEvent event)
     displayManagerServiceProxy_->NotifyDisplayEvent(event);
 }
 
+bool DisplayManagerAdapter::SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    return displayManagerServiceProxy_->SetFreeze(displayIds, isFreeze);
+}
+
 bool BaseAdapter::InitDMSProxy()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);

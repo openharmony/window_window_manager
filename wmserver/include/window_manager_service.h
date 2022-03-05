@@ -24,6 +24,7 @@
 #include <system_ability.h>
 #include "display_change_listener.h"
 #include "drag_controller.h"
+#include "freeze_controller.h"
 #include "singleton_delegator.h"
 #include "wm_single_instance.h"
 #include "window_controller.h"
@@ -91,6 +92,7 @@ private:
     sptr<InputWindowMonitor> inputWindowMonitor_;
     sptr<SnapshotController> snapshotController_;
     sptr<DragController> dragController_;
+    sptr<FreezeController> freezeDisplayController_;
 };
 }
 }

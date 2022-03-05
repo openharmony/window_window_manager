@@ -48,6 +48,7 @@ public:
         TRANS_ID_GET_DISPLAY_STATE,
         TRANS_ID_GET_ALL_DISPLAYIDS,
         TRANS_ID_NOTIFY_DISPLAY_EVENT,
+        TRANS_ID_SET_FREEZE_EVENT,
         TRANS_ID_SCREEN_BASE = 1000,
         TRANS_ID_CREATE_VIRTUAL_SCREEN = TRANS_ID_SCREEN_BASE,
         TRANS_ID_DESTROY_VIRTUAL_SCREEN,
@@ -101,6 +102,7 @@ public:
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
     virtual std::vector<DisplayId> GetAllDisplayIds() = 0;
     virtual void NotifyDisplayEvent(DisplayEvent event) = 0;
+    virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) = 0;
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) = 0;
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) = 0;
     virtual std::vector<sptr<ScreenInfo>> GetAllScreenInfos() = 0;

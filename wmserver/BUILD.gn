@@ -48,6 +48,7 @@ ohos_shared_library("libwms") {
     "../wm/src/zidl/window_manager_agent_proxy.cpp",
     "src/avoid_area_controller.cpp",
     "src/drag_controller.cpp",
+    "src/freeze_controller.cpp",
     "src/input_window_monitor.cpp",
     "src/window_controller.cpp",
     "src/window_inner_manager.cpp",

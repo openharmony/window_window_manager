@@ -110,6 +110,11 @@ const sptr<SupportedScreenModes> DisplayManagerServiceInner::GetScreenModesByDis
     return abstractScreen->GetActiveScreenMode();
 }
 
+std::shared_ptr<Media::PixelMap> DisplayManagerServiceInner::GetDisplaySnapshot(DisplayId displayId)
+{
+    return DisplayManagerService::GetInstance().abstractDisplayController_->GetScreenSnapshot(displayId);
+}
+
 void DisplayManagerServiceInner::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
 {
     DisplayManagerService::GetInstance().RegisterDisplayChangeListener(listener);

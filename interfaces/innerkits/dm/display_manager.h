@@ -60,6 +60,8 @@ public:
     bool SetScreenBrightness(uint64_t screenId, uint32_t level);
     uint32_t GetScreenBrightness(uint64_t screenId) const;
     void NotifyDisplayEvent(DisplayEvent event);
+    bool Freeze(std::vector<DisplayId> displayIds);
+    bool Unfreeze(std::vector<DisplayId> displayIds);
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 
 private:

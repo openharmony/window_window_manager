@@ -48,6 +48,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     windowController_ = new WindowController(windowRoot_, inputWindowMonitor_);
     snapshotController_ = new SnapshotController(windowRoot_);
     dragController_ = new DragController(windowRoot_);
+    freezeDisplayController_ = new FreezeController();
 }
 
 void WindowManagerService::OnStart()
@@ -274,8 +275,14 @@ void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)
 void WindowManagerService::NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type)
 {
     WM_SCOPED_TRACE("wms:NotifyDisplayStateChange(%u)", type);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->NotifyDisplayStateChange(id, type);
+    if (type == DisplayStateChangeType::FREEZE) {
+        freezeDisplayController_->FreezeDisplay(id);
+    } else if (type == DisplayStateChangeType::UNFREEZE) {
+        freezeDisplayController_->UnfreezeDisplay(id);
+    } else {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        return windowController_->NotifyDisplayStateChange(id, type);
+    }
 }
 
 void DisplayChangeListener::OnDisplayStateChange(DisplayId id, DisplayStateChangeType type)
