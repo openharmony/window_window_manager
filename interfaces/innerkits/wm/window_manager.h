@@ -35,6 +35,25 @@ struct SystemBarRegionTint {
 };
 using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
 
+class FocusChangeInfo : public Parcelable {
+public:
+    FocusChangeInfo() = default;
+    FocusChangeInfo(uint32_t winId, DisplayId displayId, int32_t pid, int32_t uid, WindowType type,
+        const sptr<IRemoteObject>& abilityToken): windowId_(winId), displayId_(displayId), pid_(pid), uid_(uid),
+        windowType_(type),  abilityToken_(abilityToken) {};
+    ~FocusChangeInfo() = default;
+
+    virtual bool Marshalling(Parcel& parcel) const override;
+    static FocusChangeInfo* Unmarshalling(Parcel& parcel);
+
+    uint32_t windowId_ = INVALID_WINDOW_ID;
+    DisplayId displayId_ = 0;
+    int32_t pid_ = 0;
+    int32_t uid_ = 0;
+    WindowType windowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    sptr<IRemoteObject> abilityToken_;
+};
+
 class IFocusChangedListener : public RefBase {
 public:
     virtual void OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
@@ -42,6 +61,10 @@ public:
 
     virtual void OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
         WindowType windowType, DisplayId displayId) = 0;
+
+    virtual void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo);
+
+    virtual void OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
 };
 
 class ISystemBarChangedListener : virtual public RefBase {
@@ -112,6 +135,7 @@ private:
 
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         DisplayId displayId, bool focused) const;
+    void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const;
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) const;
     void UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type);
     void UpdateWindowVisibilityInfo(
