@@ -44,6 +44,7 @@ public:
     sptr<AbstractDisplay> GetAbstractDisplayByScreen(ScreenId screenId) const;
     std::vector<DisplayId> GetAllDisplayIds() const;
     void AddDisplayForExpandScreen(sptr<AbstractScreen> absScreen);
+    void SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze);
 
 private:
     void OnAbstractScreenConnect(sptr<AbstractScreen> absScreen);

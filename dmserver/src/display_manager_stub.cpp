@@ -166,6 +166,12 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             NotifyDisplayEvent(event);
             break;
         }
+        case TRANS_ID_SET_FREEZE_EVENT: {
+            std::vector<DisplayId> ids;
+            data.ReadUInt64Vector(&ids);
+            SetFreeze(ids, data.ReadBool());
+            break;
+        }
         case TRANS_ID_SCREEN_MAKE_MIRROR: {
             ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
             std::vector<ScreenId> mirrorScreenId;

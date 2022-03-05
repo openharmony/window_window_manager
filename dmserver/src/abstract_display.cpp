@@ -114,9 +114,19 @@ bool AbstractDisplay::RequestRotation(Rotation rotation)
     return true;
 }
 
-Rotation AbstractDisplay::GetRotation()
+Rotation AbstractDisplay::GetRotation() const
 {
     return rotation_;
+}
+
+void AbstractDisplay::SetFreezeFlag(FreezeFlag freezeFlag)
+{
+    freezeFlag_ = freezeFlag;
+}
+
+FreezeFlag AbstractDisplay::GetFreezeFlag() const
+{
+    return freezeFlag_;
 }
 
 bool AbstractDisplay::BindAbstractScreen(ScreenId dmsScreenId)

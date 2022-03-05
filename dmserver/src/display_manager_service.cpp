@@ -345,6 +345,11 @@ void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
     displayPowerController_->NotifyDisplayEvent(event);
 }
 
+bool DisplayManagerService::SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze)
+{
+    abstractDisplayController_->SetFreeze(displayIds, isFreeze);
+    return true;
+}
 
 std::shared_ptr<RSDisplayNode> DisplayManagerService::GetRSDisplayNodeByDisplayId(DisplayId displayId) const
 {
