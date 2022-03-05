@@ -15,6 +15,7 @@
 
 #include "native_screenshot_module.h"
 #include <memory>
+#include <string>
 #include "display_manager.h"
 #include "display_property.h"
 #include "pixel_map.h"
@@ -34,6 +35,9 @@ struct Option {
 struct Param {
     WMError wret;
     Option option;
+    std::string errMessage;
+    bool useInputOption;
+    bool validInputParam;
     std::shared_ptr<Media::PixelMap> image;
 };
 
@@ -146,26 +150,46 @@ static void GetImageSize(napi_env env, std::unique_ptr<Param> &param, napi_value
     }
 }
 
-static void AsyncGetScreenshotByDefaultOption(napi_env env, std::unique_ptr<Param> &param)
+static void GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
 {
-    GNAPI_LOG("Get Screenshot by default option");
-    param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId);
-    if (param->image == nullptr) {
-        GNAPI_LOG("Get Screenshot failed!");
-        param->wret = WMError::WM_ERROR_NULLPTR;
+    if (param == nullptr) {
+        GNAPI_LOG("param == nullptr, use default param");
         return;
     }
-    param->wret = WMError::WM_OK;
+    GetDisplayId(env, param, argv);
+    GetRotation(env, param, argv);
+    GetScreenRect(env, param, argv);
+    GetImageSize(env, param, argv);
 }
 
-static void AsyncGetScreenshotByInputOption(napi_env env, std::unique_ptr<Param> &param)
+static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
 {
-    GNAPI_LOG("Get Screenshot by input option");
-    param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId,
-        param->option.rect, param->option.size, param->option.rotation);
+    if (!CheckCallingPermission("ohos.permission.CAPTURE_SCREEN")) {
+        WLOGFE("Get Screenshot failed. Do not have permission!");
+        param->image = nullptr;
+        param->wret = WMError::WM_ERROR_INVALID_PERMISSION;
+        param->errMessage = "Get Screenshot Failed: Do not have ohos.permission.CAPTURE_SCREEN";
+        return;
+    }
+    if (!param->validInputParam) {
+        WLOGFE("Invalid Input Param!");
+        param->image = nullptr;
+        param->wret = WMError::WM_ERROR_INVALID_PARAM;
+        param->errMessage = "Get Screenshot Failed: Invalid input param";
+        return;
+    }
+    if (param->useInputOption) {
+        GNAPI_LOG("Get Screenshot by input option");
+        param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId,
+            param->option.rect, param->option.size, param->option.rotation);
+    } else {
+        GNAPI_LOG("Get Screenshot by default option");
+        param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId);
+    }
     if (param->image == nullptr) {
         GNAPI_LOG("Get Screenshot failed!");
         param->wret = WMError::WM_ERROR_NULLPTR;
+        param->errMessage = "Get Screenshot failed: Screenshot image is nullptr";
         return;
     }
     param->wret = WMError::WM_OK;
@@ -191,50 +215,31 @@ napi_value MainFunc(napi_env env, napi_callback_info info)
     napi_value argv[2] = {0}; // the max number of input parameters is 2
     size_t argc = 2; // the max number of input parameters is 2
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+
     auto param = std::make_unique<Param>();
     param->option.displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     napi_ref ref = nullptr;
     if (argc == 0) {
         GNAPI_LOG("argc == 0");
-        return CreatePromise<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshotByDefaultOption,
-            Resolve, ref, param);
-    } else if (argc == 1) {
-        GNAPI_LOG("argc == 1");
-        if (GetType(env, argv[0]) == napi_object) {
-            GNAPI_LOG("argv[0]'s type is napi_object");
-            GetDisplayId(env, param, argv[0]);
-            GetRotation(env, param, argv[0]);
-            GetScreenRect(env, param, argv[0]);
-            GetImageSize(env, param, argv[0]);
-            return CreatePromise<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshotByInputOption,
-                Resolve, ref, param);
-        }
-        if (GetType(env, argv[0]) == napi_function) {
-            GNAPI_LOG("argv[0]'s type is napi_function");
-            NAPI_CALL(env, napi_create_reference(env, argv[0], 1, &ref));
-            return CreatePromise<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshotByDefaultOption,
-                Resolve, ref, param);
-        }
-        GNAPI_LOG("argv[0]'s type is not napi_object or napi_function");
-        return nullptr;
-    } else if (argc == 2) { // the number of input parameters is 2
-        GNAPI_LOG("argc == 2");
-        if (GetType(env, argv[0]) == napi_object && GetType(env, argv[1]) == napi_function) {
-            GNAPI_LOG("argv[0]'s type is napi_object, argv[0]'s type is napi_function");
-            GetDisplayId(env, param, argv[0]);
-            GetRotation(env, param, argv[0]);
-            GetScreenRect(env, param, argv[0]);
-            GetImageSize(env, param, argv[0]);
-            NAPI_CALL(env, napi_create_reference(env, argv[1], 1, &ref));
-            return CreatePromise<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshotByInputOption,
-                Resolve, ref, param);
-        }
-    } else {
-        GNAPI_LOG("argc number mismatch");
-        return nullptr;
+        param->validInputParam = true;
+    } else if (argc == 1 && GetType(env, argv[0]) == napi_object) {
+        GNAPI_LOG("argc == 1, argv[0]'s type is napi_object");
+        param->validInputParam = true;
+        param->useInputOption = true;
+        GetScreenshotParam(env, param, argv[0]);
+    } else if (argc == 1 && GetType(env, argv[0]) == napi_function) {
+        GNAPI_LOG("argc == 1, argv[0]'s type is napi_function");
+        param->validInputParam = true;
+        NAPI_CALL(env, napi_create_reference(env, argv[0], 1, &ref));
+    } else if (argc == 2 &&  // the number of input parameters is 2
+        GetType(env, argv[0]) == napi_object && GetType(env, argv[1]) == napi_function) {
+        GNAPI_LOG("argc == 2, argv[0]'s type is napi_object, argv[1]'s type is napi_function");
+        param->validInputParam = true;
+        param->useInputOption = true;
+        GetScreenshotParam(env, param, argv[0]);
+        NAPI_CALL(env, napi_create_reference(env, argv[1], 1, &ref));
     }
-    GNAPI_LOG("argc number mismatch");
-    return nullptr;
+    return AsyncProcess<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshot, Resolve, ref, param);
 }
 } // namespace save
 
