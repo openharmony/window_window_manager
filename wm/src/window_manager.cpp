@@ -70,6 +70,26 @@ WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
     return windowInfo;
 }
 
+bool FocusChangeInfo::Marshalling(Parcel &parcel) const
+{
+    return parcel.WriteUint32(windowId_) && parcel.WriteUint64(displayId_) &&
+        parcel.WriteInt32(pid_) && parcel.WriteInt32(uid_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(windowType_));
+}
+
+FocusChangeInfo* FocusChangeInfo::Unmarshalling(Parcel &parcel)
+{
+    FocusChangeInfo* focusChangeInfo = new FocusChangeInfo();
+    bool res = parcel.ReadUint32(focusChangeInfo->windowId_) && parcel.ReadUint64(focusChangeInfo->displayId_) &&
+        parcel.ReadInt32(focusChangeInfo->pid_) && parcel.ReadInt32(focusChangeInfo->uid_);
+    if (!res) {
+        delete focusChangeInfo;
+        return nullptr;
+    }
+    focusChangeInfo->windowType_ = static_cast<WindowType>(parcel.ReadUint32());
+    return focusChangeInfo;
+}
+
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManager)
 
 class WindowManager::Impl {
@@ -78,6 +98,8 @@ public:
         WindowType windowType, DisplayId displayId) const;
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
         WindowType windowType, DisplayId displayId) const;
+    void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo) const;
+    void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo) const;
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints) const;
     void NotifyWindowUpdate(const sptr<WindowInfo>& windowInfo, WindowUpdateType type) const;
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
@@ -111,6 +133,26 @@ void WindowManager::Impl::NotifyUnfocused(uint32_t windowId, const sptr<IRemoteO
         abilityToken.GetRefPtr(), static_cast<uint32_t>(windowType), displayId);
     for (auto& listener : focusChangedListeners_) {
         listener->OnUnfocused(windowId, abilityToken, windowType, displayId);
+    }
+}
+
+void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo) const
+{
+    WLOGFI("NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
+        focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
+        static_cast<uint32_t>(focusChangeInfo->windowType_), focusChangeInfo->abilityToken_.GetRefPtr());
+    for (auto& listener : focusChangedListeners_) {
+        listener->OnFocused(focusChangeInfo);
+    }
+}
+
+void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo) const
+{
+    WLOGFI("NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
+        focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
+        static_cast<uint32_t>(focusChangeInfo->windowType_), focusChangeInfo->abilityToken_.GetRefPtr());
+    for (auto& listener : focusChangedListeners_) {
+        listener->OnUnfocused(focusChangeInfo);
     }
 }
 
@@ -154,6 +196,14 @@ WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>())
 }
 
 WindowManager::~WindowManager()
+{
+}
+
+void IFocusChangedListener::OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
+{
+}
+
+void IFocusChangedListener::OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
 }
 
@@ -327,6 +377,16 @@ void WindowManager::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObjec
         pImpl_->NotifyFocused(windowId, abilityToken, windowType, displayId);
     } else {
         pImpl_->NotifyUnfocused(windowId, abilityToken, windowType, displayId);
+    }
+}
+
+void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const
+{
+    WLOGFI("window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
+    if (focused) {
+        pImpl_->NotifyFocused(focusChangeInfo);
+    } else {
+        pImpl_->NotifyUnfocused(focusChangeInfo);
     }
 }
 
