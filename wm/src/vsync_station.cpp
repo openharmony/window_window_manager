@@ -15,67 +15,85 @@
 
 #include "vsync_station.h"
 #include "transaction/rs_interfaces.h"
-
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "VsyncStation"};
+    const std::string VSYNC_TIME_OUT_TASK = "vsync_time_out_task";
+    constexpr int64_t VSYNC_TIME_OUT_MILLISECONDS = 600;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(VsyncStation)
 
 void VsyncStation::RequestVsync(CallbackType type, std::shared_ptr<VsyncCallback> vsyncCallback)
 {
-    std::lock_guard<std::mutex> lock_l(lock_);
-    auto iter = vsyncCallbacks_.find(type);
-    if (iter == vsyncCallbacks_.end()) {
-        WLOGFE("wrong callback type.");
-        return;
-    }
-    iter->second.insert(vsyncCallback);
-
-    if (mainHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create(VSYNC_THREAD_ID);
-        mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-
-        auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
-        while (receiver_ == nullptr) {
-            receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getpid()), mainHandler_);
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        auto iter = vsyncCallbacks_.find(type);
+        if (iter == vsyncCallbacks_.end()) {
+            WLOGFE("wrong callback type.");
+            return;
         }
-        receiver_->Init();
+        iter->second.insert(vsyncCallback);
+
+        if (mainHandler_ == nullptr) {
+            mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+            auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
+            while (receiver_ == nullptr) {
+                receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getpid()), mainHandler_);
+            }
+            receiver_->Init();
+        }
+        if (hasRequestedVsync_) {
+            return;
+        }
+        hasRequestedVsync_ = true;
+        vsyncCount_++;
+        if (vsyncCount_ & 0x01) { // write log every 2 vsync
+            WLOGFI("Request next vsync.");
+        }
+        mainHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
+        mainHandler_->PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_TASK, VSYNC_TIME_OUT_MILLISECONDS);
     }
-    
-    if (!hasRequestedVsync_.load()) {
-        OHOS::Rosen::VSyncReceiver::FrameCallback fcb = {
-            .userData_ = this,
-            .callback_ = OnVsync,
-        };
-        receiver_->RequestNextVSync(fcb);
-        hasRequestedVsync_.store(true);
-    }
+    receiver_->RequestNextVSync(frameCallback_);
 }
 
 void VsyncStation::VsyncCallbackInner(int64_t timestamp)
 {
-    for (auto& vsyncCallbacksSet: vsyncCallbacks_) {
+    std::map<CallbackType, std::unordered_set<std::shared_ptr<VsyncCallback>>> vsyncCallbacks;
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        hasRequestedVsync_ = false;
+        vsyncCallbacks = vsyncCallbacks_;
+        mainHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
+        if (vsyncCount_ & 0x01) { // write log every 2 vsync
+            WLOGFI("On vsync callback.");
+        }
+    }
+    for (auto& vsyncCallbacksSet: vsyncCallbacks) {
         for (const auto& callback: vsyncCallbacksSet.second) {
             callback->onCallback(timestamp);
         }
         vsyncCallbacksSet.second.clear();
     }
-    hasRequestedVsync_.store(false);
 }
 
 void VsyncStation::OnVsync(int64_t timestamp, void* client)
 {
-    WLOGFI("on vsync callback.");
     auto vsyncClient = static_cast<VsyncStation*>(client);
     if (vsyncClient) {
         vsyncClient->VsyncCallbackInner(timestamp);
     } else {
-        WLOGFE("VsyncStation::OnVsync vsyncClient is null");
+        WLOGFE("VsyncClient is null");
     }
+}
+
+void VsyncStation::OnVsyncTimeOut()
+{
+    WLOGFE("Vsync time out");
+    std::lock_guard<std::mutex> lock(mtx_);
+    hasRequestedVsync_ = false;
 }
 }
 }
