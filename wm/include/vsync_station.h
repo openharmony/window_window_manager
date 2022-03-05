@@ -48,13 +48,20 @@ private:
     VsyncStation() = default;
     static void OnVsync(int64_t nanoTimestamp, void* client);
     void VsyncCallbackInner(int64_t nanoTimestamp);
+    void OnVsyncTimeOut();
+    AppExecFwk::EventHandler::Callback vsyncTimeoutCallback_ = std::bind(&VsyncStation::OnVsyncTimeOut, this);
     const std::string VSYNC_THREAD_ID = "vsync_thread";
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_ = nullptr;
-    std::mutex lock_;
-    std::atomic_bool hasRequestedVsync_ {false};
+    std::mutex mtx_;
+    bool hasRequestedVsync_ = false;
+    uint32_t vsyncCount_ = 0;
     std::map<CallbackType, std::unordered_set<std::shared_ptr<VsyncCallback>>> vsyncCallbacks_ = {
         {CallbackType::CALLBACK_INPUT, {}},
         {CallbackType::CALLBACK_FRAME, {}},
+    };
+    VSyncReceiver::FrameCallback frameCallback_ = {
+        .userData_ = this,
+        .callback_ = OnVsync,
     };
     std::shared_ptr<OHOS::Rosen::VSyncReceiver> receiver_ = nullptr;
 };
