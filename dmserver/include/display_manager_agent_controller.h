@@ -36,7 +36,7 @@ public:
 
     void OnScreenConnect(sptr<ScreenInfo> screenInfo);
     void OnScreenDisconnect(ScreenId);
-    void OnScreenChange(const sptr<ScreenInfo>, ScreenChangeEvent);
+    void OnScreenChange(sptr<ScreenInfo>, ScreenChangeEvent);
     void OnScreenGroupChange(const sptr<ScreenInfo>&, ScreenGroupChangeEvent);
     void OnScreenGroupChange(const std::vector<sptr<ScreenInfo>>&, ScreenGroupChangeEvent);
     void OnDisplayCreate(sptr<DisplayInfo>);
