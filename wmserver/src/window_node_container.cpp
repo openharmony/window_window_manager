@@ -355,6 +355,10 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
         }
         WindowManagerAgentController::GetInstance().UpdateFocusStatus(
             node->GetWindowId(), node->abilityToken_, node->GetWindowType(), node->GetDisplayId(), focused);
+        sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(node->GetWindowId(), node->GetDisplayId(),
+            node->GetCallingPid(), node->GetCallingUid(), node->GetWindowType(), node->abilityToken_);
+        WindowManagerAgentController::GetInstance().UpdateFocusChangeInfo(
+            focusChangeInfo, focused);
     }
 }
 

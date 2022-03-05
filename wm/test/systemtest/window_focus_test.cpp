@@ -39,6 +39,8 @@ public:
 
     void OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
                      DisplayId displayId) override;
+    void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo) override;
+    void OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo) override;
 };
 
 class WindowFocusTest : public testing::Test {
@@ -59,15 +61,23 @@ sptr<TestFocusChangedListener> WindowFocusTest::testFocusChangedListener_ =
 void TestFocusChangedListener::OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
                                          DisplayId displayId)
 {
-    WLOGFI("TestFocusChangedListener Focused ID: %{public}u", windowId);
-    focusedWindow_ = windowId;
 }
 
 void TestFocusChangedListener::OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
                                            DisplayId displayId)
 {
-    WLOGFI("TestFocusChangedListener Unfocused ID: %{public}u", windowId);
-    unfocusedWindow_ = windowId;
+}
+
+void TestFocusChangedListener::OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
+{
+    WLOGFI("TestFocusChangedListener Focused ID: %{public}u", focusChangeInfo->windowId_);
+    focusedWindow_ = focusChangeInfo->windowId_;
+}
+
+void TestFocusChangedListener::OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
+{
+    WLOGFI("TestFocusChangedListener Unfocused ID: %{public}u", focusChangeInfo->windowId_);
+    unfocusedWindow_ = focusChangeInfo->windowId_;
 }
 
 void WindowFocusTest::SetUpTestCase()
