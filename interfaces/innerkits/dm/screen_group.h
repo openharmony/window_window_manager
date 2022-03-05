@@ -43,7 +43,8 @@ public:
 private:
     // No more methods or variables can be defined here.
     ScreenGroup(sptr<ScreenGroupInfo> info);
-    void UpdateScreenGroupInfo(sptr<ScreenGroupInfo> info);
+    void UpdateScreenGroupInfo(sptr<ScreenGroupInfo> info) const;
+    void UpdateScreenGroupInfo() const;
     class Impl;
     sptr<Impl> pImpl_;
 };

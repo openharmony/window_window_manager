@@ -200,7 +200,7 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
     info->virtualHeight_ = height / virtualPixelRatio;
     info->virtualWidth_ = width / virtualPixelRatio;
     info->parent_ = groupDmsId_;
-    info->canHasChild_ = canHasChild_;
+    info->isScreenGroup_ = isScreenGroup_;
     info->rotation_ = rotation_;
     info->orientation_ = orientation_;
     info->type_ = type_;
@@ -250,7 +250,7 @@ AbstractScreenGroup::AbstractScreenGroup(sptr<AbstractScreenController> screenCo
     ScreenCombination combination) : AbstractScreen(screenController, "", dmsId, rsId), combination_(combination)
 {
     type_ = ScreenType::UNDEFINE;
-    canHasChild_ = true;
+    isScreenGroup_ = true;
 }
 
 AbstractScreenGroup::~AbstractScreenGroup()
@@ -358,6 +358,13 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
     }
     ScreenId screenId = dmsScreen->dmsId_;
     dmsScreen->groupDmsId_ = SCREEN_ID_INVALID;
+    if (rsDisplayNode_ != nullptr) {
+        rsDisplayNode_->RemoveFromTree();
+        auto transactionProxy = RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->FlushImplicitTransaction();
+        }
+    }
     return abstractScreenMap_.erase(screenId);
 }
 
