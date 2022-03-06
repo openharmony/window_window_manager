@@ -20,6 +20,7 @@
 #include "avoid_area_controller.h"
 #include "window_layout_policy.h"
 #include "window_manager.h"
+#include "window_manager_recorder.h"
 #include "window_node.h"
 #include "window_zorder_policy.h"
 #include "wm_common.h"
@@ -65,6 +66,7 @@ public:
     WMError SwitchLayoutPolicy(WindowLayoutMode mode, bool reorder = false);
     void RaiseSplitRelatedWindowToTop(sptr<WindowNode>& node);
     void MoveWindowNode(sptr<WindowNodeContainer>& container);
+    void DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
     float GetVirtualPixelRatio() const;
     void TraverseWindowTree(const WindowNodeOperationFunc& func, bool isFromTopToBottom = true) const;
 
@@ -96,6 +98,9 @@ private:
     // cannot determine in case of a window covered by union of several windows or with transparent value
     void UpdateWindowVisibilityInfos(std::vector<sptr<WindowVisibilityInfo>>& infos);
     void RaiseOrderedWindowToTop(std::vector<uint32_t> orderedIds, std::vector<sptr<WindowNode>>& windowNodes);
+    void RecordCurrentWindowTree();
+    void RecordWindowHistory(const sptr<WindowNode>& node, RecordType reason);
+    static bool ReadIsWindowAnimationEnabledProperty();
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
@@ -128,8 +133,7 @@ private:
     std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
     const int32_t WINDOW_TYPE_RAISED_INPUT_METHOD = 115;
-
-    static bool ReadIsWindowAnimationEnabledProperty();
+    sptr<WindowManagerRecorder> wmRecorderPtr_;
 };
 } // namespace Rosen
 } // namespace OHOS
