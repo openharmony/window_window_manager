@@ -52,6 +52,7 @@ public:
     WMError MaxmizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
     void NotifySystemBarTints();
+    WMError DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
 
 private:
     uint32_t GenWindowId();

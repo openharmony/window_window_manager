@@ -467,5 +467,10 @@ WMError WindowController::SetWindowLayoutMode(DisplayId displayId, WindowLayoutM
     FlushWindowInfoWithDisplayId(displayId);
     return res;
 }
+
+WMError WindowController::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
+{
+    return windowRoot_->DumpWindowTree(windowTreeInfos, type);
 }
-}
+} // namespace OHOS
+} // namespace Rosen
