@@ -20,7 +20,6 @@
 #include "js_window.h"
 #include "js_window_utils.h"
 #include "window_helper.h"
-#include "window_manager.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
 #include "singleton_container.h"
@@ -31,6 +30,13 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowManager"};
 }
 
+JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
+{
+}
+
+JsWindowManager::~JsWindowManager()
+{
+}
 void JsWindowManager::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
     WLOGFI("JsWindowManager::Finalizer is called");
@@ -101,7 +107,7 @@ static bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability)
     if (ability == nullptr) {
         return false;
     } else {
-        WLOGE("JsWindowManager::GetAPI7Ability ability is %{public}p!", ability);
+        WLOGI("JsWindowManager::GetAPI7Ability ability is success!");
     }
     return true;
 }
@@ -117,7 +123,6 @@ static void GetNativeContext(NativeValue* nativeContext, void*& contextPtr, WMEr
         }
         contextPtr = objContext->GetNativePointer();
     }
-    return;
 }
 
 static bool GetWindowTypeAndParentName(NativeEngine& engine, std::string& parentName, WindowType& winType,
@@ -174,7 +179,6 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
         WLOGFE("JsWindowManager::OnCreateWindow in newApi use with empty context!");
         return;
     }
-    // FixMe: adapt to service and xts
     if (winType == WindowType::WINDOW_TYPE_FLOAT) {
         auto abilityContext = Context::ConvertTo<AbilityRuntime::AbilityContext>(context->lock());
         if (abilityContext != nullptr) {
@@ -197,7 +201,6 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
         task.Reject(engine, CreateJsError(engine,
             static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnCreateWindow failed."));
     }
-    return;
 }
 
 static void CreateSubWindowTask(std::string parentWinName, std::string windowName, WindowType winType,
@@ -216,7 +219,6 @@ static void CreateSubWindowTask(std::string parentWinName, std::string windowNam
         task.Reject(engine, CreateJsError(engine,
             static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnCreateWindow failed."));
     }
-    return;
 }
 
 NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info)
@@ -342,101 +344,6 @@ NativeValue* JsWindowManager::OnMinimizeAll(NativeEngine& engine, NativeCallback
     return result;
 }
 
-bool JsWindowManager::IsCallbackRegistered(std::string type, NativeValue* jsListenerObject)
-{
-    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFI("JsWindowManager::IsCallbackRegistered methodName %{public}s not registertd!", type.c_str());
-        return false;
-    }
-
-    for (auto iter = jsCbMap_[type].begin(); iter != jsCbMap_[type].end(); iter++) {
-        if (jsListenerObject->StrictEquals(iter->first->Get())) {
-            WLOGFE("JsWindowManager::IsCallbackRegistered callback already registered!");
-            return true;
-        }
-    }
-    return false;
-}
-
-void JsWindowManager::RegisterWmListenerWithType(NativeEngine& engine, std::string type, NativeValue* value)
-{
-    // should do type check
-    if (IsCallbackRegistered(type, value)) {
-        WLOGFE("JsWindowManager::RegisterWmListenerWithType callback already registered!");
-        return;
-    }
-    std::unique_ptr<NativeReference> callbackRef;
-    callbackRef.reset(engine.CreateReference(value, 1));
-
-    sptr<JsWindowListener> windowManagerListener = new JsWindowListener(&engine);
-    if (type.compare(SYSTEM_BAR_TINT_CHANGE_CB) == 0) {
-        sptr<ISystemBarChangedListener> thisListener(windowManagerListener);
-        SingletonContainer::Get<WindowManager>().RegisterSystemBarChangedListener(thisListener);
-        WLOGFI("JsWindowManager::RegisterWmListenerWithType systemBarTintChange success");
-    } else {
-        WLOGFE("JsWindowManager::RegisterWmListenerWithType failed method: %{public}s not support!",
-            type.c_str());
-        return;
-    }
-    windowManagerListener->AddCallback(value);
-    jsCbMap_[type][std::move(callbackRef)] = windowManagerListener;
-    return;
-}
-
-void JsWindowManager::UnregisterAllWmListenerWithType(std::string type)
-{
-    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFI("JsWindowManager::UnregisterAllWmListenerWithType methodName %{public}s not registerted!",
-            type.c_str());
-        return;
-    }
-    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-        it->second->RemoveAllCallback();
-        if (type.compare(SYSTEM_BAR_TINT_CHANGE_CB) == 0) {
-            sptr<ISystemBarChangedListener> thisListener(it->second);
-            SingletonContainer::Get<WindowManager>().UnregisterSystemBarChangedListener(thisListener);
-            WLOGFI("JsWindowManager::UnregisterAllWmListenerWithType systemBarTintChange success");
-        }
-        jsCbMap_[type].erase(it++);
-    }
-    jsCbMap_.erase(type);
-    return;
-}
-
-void JsWindowManager::UnregisterWmListenerWithType(std::string type, NativeValue* value)
-{
-    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFI("JsWindowManager::UnregisterWmListenerWithType methodName %{public}s not registerted!",
-            type.c_str());
-        return;
-    }
-    bool findFlag = false;
-    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-        if (value->StrictEquals(it->first->Get())) {
-            findFlag = true;
-            it->second->RemoveCallback(value);
-            if (type.compare(SYSTEM_BAR_TINT_CHANGE_CB) == 0) {
-                sptr<ISystemBarChangedListener> thisListener(it->second);
-                SingletonContainer::Get<WindowManager>().UnregisterSystemBarChangedListener(thisListener);
-                WLOGFI("JsWindowManager::UnregisterWmListenerWithType systemBarTintChange success");
-            }
-            jsCbMap_[type].erase(it++);
-            break;
-        } else {
-            it++;
-        }
-    }
-    if (!findFlag) {
-        WLOGFE("JsWindowManager::UnregisterWmListenerWithType can't find callback!");
-        return;
-    }
-    // one type with multi jscallback, erase type when there is no callback in one type
-    if (jsCbMap_[type].empty()) {
-        jsCbMap_.erase(type);
-    }
-    return;
-}
-
 NativeValue* JsWindowManager::OnRegisterWindowMangerCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsWindowManager::OnRegisterWindowMangerCallback is called");
@@ -454,8 +361,8 @@ NativeValue* JsWindowManager::OnRegisterWindowMangerCallback(NativeEngine& engin
         WLOGFI("JsWindowManager::OnRegisterWindowMangerCallback info->argv[1] is not callable");
         return engine.CreateUndefined();
     }
-    std::lock_guard<std::mutex> lock(mtx_);
-    RegisterWmListenerWithType(engine, cbType, value);
+
+    registerManager_->RegisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER, engine, value);
     WLOGFI("JsWindowManager::OnRegisterWindowMangerCallback end!");
     return engine.CreateUndefined();
 }
@@ -472,16 +379,15 @@ NativeValue* JsWindowManager::OnUnregisterWindowManagerCallback(NativeEngine& en
         WLOGFE("Failed to convert parameter to callbackType");
         return engine.CreateUndefined();
     }
-    std::lock_guard<std::mutex> lock(mtx_);
     if (info.argc == 1) {
-        UnregisterAllWmListenerWithType(cbType);
+        registerManager_->UnregisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER, nullptr);
     } else {
         NativeValue* value = info.argv[1];
         if (!value->IsCallable()) {
             WLOGFI("JsWindowManager::OnUnregisterWindowManagerCallback info->argv[1] is not callable");
             return engine.CreateUndefined();
         }
-        UnregisterWmListenerWithType(cbType, value);
+        registerManager_->UnregisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER, value);
     }
     WLOGFI("JsWindowManager::OnUnregisterWindowCallback end!");
     return engine.CreateUndefined();
