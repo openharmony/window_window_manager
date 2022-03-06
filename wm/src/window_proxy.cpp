@@ -140,7 +140,7 @@ void WindowProxy::UpdateWindowState(WindowState state)
         WLOGFE("SendRequest failed");
     }
 }
-    
+
 void WindowProxy::UpdateWindowDragInfo(const PointInfo& point, DragEvent event)
 {
     MessageParcel data;
@@ -163,7 +163,7 @@ void WindowProxy::UpdateWindowDragInfo(const PointInfo& point, DragEvent event)
         WLOGFE("SendRequest TRANS_ID_UPDATE_DRAG_EVENT failed");
     }
 }
-    
+
 void WindowProxy::UpdateDisplayId(DisplayId from, DisplayId to)
 {
     MessageParcel data;

@@ -583,6 +583,17 @@ void WindowRoot::NotifyDisplayDestroy(DisplayId expandDisplayId)
     windowNodeContainerMap_.erase(expandDisplayId);
 }
 
+WMError WindowRoot::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
+{
+    for (auto& elem : windowNodeContainerMap_) {
+        if (elem.second == nullptr) {
+            continue;
+        }
+        elem.second->DumpWindowTree(windowTreeInfos, type);
+    }
+    return WMError::WM_OK;
+}
+
 float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
 {
     auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
