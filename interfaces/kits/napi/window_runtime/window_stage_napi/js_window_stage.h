@@ -24,12 +24,10 @@
 namespace OHOS {
 namespace Rosen {
 NativeValue* CreateJsWindowStage(NativeEngine& engine, std::shared_ptr<Rosen::WindowScene> windowScene);
-
-class JsWindowStage : Rosen::IWindowLifeCycle {
+class JsWindowStage {
 public:
-    explicit JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene)
-        : windowScene_(windowScene) {}
-    ~JsWindowStage() = default;
+    explicit JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene);
+    ~JsWindowStage();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* SetUIContent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetMainWindow(NativeEngine* engine, NativeCallbackInfo* info);
@@ -39,10 +37,6 @@ public:
     static NativeValue* GetWindowMode(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* CreateSubWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetSubWindow(NativeEngine* engine, NativeCallbackInfo* info);
-    virtual void AfterForeground() override;
-    virtual void AfterBackground() override;
-    virtual void AfterFocused() override;
-    virtual void AfterUnfocused() override;
 
 private:
     NativeValue* CreateJsSubWindowArrayObject(NativeEngine& engine, std::vector<sptr<Window>> subWinVec);
@@ -54,19 +48,8 @@ private:
     NativeValue* OnGetWindowMode(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnCreateSubWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetSubWindow(NativeEngine& engine, NativeCallbackInfo& info);
-    enum class WindowStageEventType : uint32_t {
-        FOREGROUND = 1,
-        ACTIVE,
-        INACTIVE,
-        BACKGROUND,
-    };
-    void LifeCycleCallBack(WindowStageEventType type);
 
     std::shared_ptr<Rosen::WindowScene> windowScene_;
-    NativeEngine* engine_ = nullptr;
-    sptr<IWindowLifeCycle> lifecycleListener_ = nullptr;
-    std::map<std::shared_ptr<NativeReference>, int> eventCallbackMap_;
-    bool regLifeCycleListenerFlag_ = false;
 };
 }  // namespace Rosen
 }  // namespace OHOS

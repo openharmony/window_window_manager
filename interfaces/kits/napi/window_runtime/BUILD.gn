@@ -43,6 +43,7 @@ ohos_shared_library("window_native_kit") {
   sources = [
     "window_napi/js_window.cpp",
     "window_napi/js_window_listener.cpp",
+    "window_napi/js_window_register_manager.cpp",
     "window_napi/js_window_utils.cpp",
   ]
 
