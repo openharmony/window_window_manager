@@ -16,6 +16,7 @@
 #include "window_manager_proxy.h"
 #include <ipc_types.h>
 #include "window_manager_hilog.h"
+#include "string_ex.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -559,6 +560,37 @@ WMError WindowManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinI
     topWinId = reply.ReadUint32();
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
+}
+
+WMError WindowManagerProxy::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    std::vector<std::string> infos;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+        WLOGFE("Write type failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(TRANS_ID_DUMP_WINDOW_TREE, data, reply, option) != ERR_NONE) {
+        WLOGFE("send request failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    WMError ret = static_cast<WMError>(reply.ReadInt32());
+    if (ret != WMError::WM_OK) {
+        WLOGFE("dump window failed");
+        return ret;
+    }
+    int32_t infoNum = reply.ReadInt32();
+    for (int i = 0; i < infoNum; ++i) {
+        std::string info = Str16ToStr8(reply.ReadString16());
+        windowTreeInfos.emplace_back(info);
+    }
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

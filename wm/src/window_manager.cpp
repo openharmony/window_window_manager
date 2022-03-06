@@ -406,5 +406,10 @@ void WindowManager::UpdateWindowVisibilityInfo(
 {
     pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
 }
+
+WMError WindowManager::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
+{
+    return SingletonContainer::Get<WindowAdapter>().DumpWindowTree(windowTreeInfos, type);
+}
 } // namespace Rosen
 } // namespace OHOS
