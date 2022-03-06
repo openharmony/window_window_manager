@@ -14,7 +14,7 @@
  */
 
 #include "js_runtime_utils.h"
-#include "js_window_listener.h"
+#include "js_window_register_manager.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
@@ -27,8 +27,8 @@ namespace Rosen {
 NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj);
 class JsWindowManager {
 public:
-    JsWindowManager() {}
-    ~JsWindowManager() = default;
+    JsWindowManager();
+    ~JsWindowManager();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* CreateWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* FindWindow(NativeEngine* engine, NativeCallbackInfo* info);
@@ -39,11 +39,6 @@ public:
     static NativeValue* SetWindowLayoutMode(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
-    bool IsCallbackRegistered(std::string type, NativeValue* jsListenerObject);
-    void RegisterWmListenerWithType(NativeEngine& engine, std::string type, NativeValue* value);
-    void UnregisterAllWmListenerWithType(std::string type);
-    void UnregisterWmListenerWithType(std::string type, NativeValue* value);
-
     NativeValue* OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnFindWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnMinimizeAll(NativeEngine& engine, NativeCallbackInfo& info);
@@ -51,9 +46,7 @@ private:
     NativeValue* OnUnregisterWindowManagerCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetTopWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetWindowLayoutMode(NativeEngine& engine, NativeCallbackInfo& info);
-    std::weak_ptr<AbilityRuntime::Context> context_;
-    std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
-    std::mutex mtx_;
+    std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
 };
 }  // namespace Rosen
 }  // namespace OHOS
