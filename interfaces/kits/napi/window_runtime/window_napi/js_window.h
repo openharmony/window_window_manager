@@ -17,7 +17,7 @@
 #define OHOS_JS_WINDOW_H
 
 #include "js_runtime_utils.h"
-#include "js_window_listener.h"
+#include "js_window_register_manager.h"
 #include "js_window_utils.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
@@ -56,10 +56,6 @@ public:
     static NativeValue* GetColorSpace(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
-    bool IsCallbackRegistered(std::string type, NativeValue* jsListenerObject);
-    void RegisterWindowListenerWithType(NativeEngine& engine, std::string type, NativeValue* value);
-    void UnregisterWindowListenerWithType(std::string type, NativeValue* value);
-    void UnregisterAllWindowListenerWithType(std::string type);
     std::string GetWindowName();
     NativeValue* OnShow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnDestroy(NativeEngine& engine, NativeCallbackInfo& info);
@@ -85,9 +81,7 @@ private:
     NativeValue* OnGetColorSpace(NativeEngine& engine, NativeCallbackInfo& info);
 
     sptr<Window> windowToken_ = nullptr;
-    std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallbackMap_;
-    std::map<std::string, sptr<JsWindowListener>> jsListenerMap_;
-    std::mutex mtx_;
+    std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
 };
 }  // namespace Rosen
 }  // namespace OHOS
