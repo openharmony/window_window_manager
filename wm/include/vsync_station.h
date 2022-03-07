@@ -43,6 +43,10 @@ public:
     };
     ~VsyncStation() = default;
     void RequestVsync(CallbackType type, std::shared_ptr<VsyncCallback> vsyncCallback);
+    void SetIsMainHandlerAvailable(bool available)
+    {
+        isMainHandlerAvailable_ = available;
+    }
 
 private:
     VsyncStation() = default;
@@ -51,9 +55,10 @@ private:
     void OnVsyncTimeOut();
     AppExecFwk::EventHandler::Callback vsyncTimeoutCallback_ = std::bind(&VsyncStation::OnVsyncTimeOut, this);
     const std::string VSYNC_THREAD_ID = "vsync_thread";
-    std::shared_ptr<AppExecFwk::EventHandler> mainHandler_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> vsyncHandler_ = nullptr;
     std::mutex mtx_;
     bool hasRequestedVsync_ = false;
+    bool isMainHandlerAvailable_ = true;
     uint32_t vsyncCount_ = 0;
     std::map<CallbackType, std::unordered_set<std::shared_ptr<VsyncCallback>>> vsyncCallbacks_ = {
         {CallbackType::CALLBACK_INPUT, {}},
