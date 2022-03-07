@@ -79,6 +79,7 @@ public:
 
     DisplayState GetDisplayState(DisplayId displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
+    bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) override;
 
     sptr<AbstractDisplay> GetAbstractDisplay(DisplayId displayId);
     sptr<AbstractScreenController> GetAbstractScreenController();

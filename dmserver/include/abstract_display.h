@@ -22,6 +22,11 @@
 #include "display_info.h"
 
 namespace OHOS::Rosen {
+enum class FreezeFlag : uint32_t {
+    FREEZING,
+    UNFREEZING,
+};
+
 class AbstractDisplay : public RefBase {
 public:
     constexpr static int32_t DEFAULT_WIDTH = 720;
@@ -45,6 +50,8 @@ public:
     bool BindAbstractScreen(ScreenId dmsScreenId);
     bool BindAbstractScreen(sptr<AbstractScreen> abstractDisplay);
     sptr<DisplayInfo> ConvertToDisplayInfo() const;
+    Rotation GetRotation() const;
+    FreezeFlag GetFreezeFlag() const;
 
     void SetId(DisplayId displayId);
     void SetWidth(int32_t width);
@@ -53,7 +60,7 @@ public:
     void SetVirtualPixelRatio(float virtualPixelRatio);
     void SetOrientation(Orientation orientation);
     bool RequestRotation(Rotation rotation);
-    Rotation GetRotation();
+    void SetFreezeFlag(FreezeFlag);
 
 private:
     DisplayId id_ { DISPLAY_ID_INVALID };
@@ -64,6 +71,7 @@ private:
     float virtualPixelRatio_ { 1.0 };
     Rotation rotation_ { Rotation::ROTATION_0 };
     Orientation orientation_ { Orientation::UNSPECIFIED };
+    FreezeFlag freezeFlag_ { FreezeFlag::UNFREEZING };
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_H
