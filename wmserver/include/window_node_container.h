@@ -101,6 +101,7 @@ private:
     void RecordCurrentWindowTree();
     void RecordWindowHistory(const sptr<WindowNode>& node, RecordType reason);
     static bool ReadIsWindowAnimationEnabledProperty();
+    void GetWindowList(std::vector<sptr<WindowInfo>>& windowList) const;
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();

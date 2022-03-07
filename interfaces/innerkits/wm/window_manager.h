@@ -106,6 +106,10 @@ public:
     bool focused_;
     WindowMode mode_;
     WindowType type_;
+    std::vector<sptr<WindowInfo>> relatedWindows_;
+private:
+    bool VectorMarshalling(Parcel& parcel) const;
+    static void VectorUnmarshalling(Parcel& parcel, WindowInfo* windowInfo);
 };
 class IWindowUpdateListener : public RefBase {
 public:
