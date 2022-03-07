@@ -363,6 +363,7 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, Function | MediumTest | 
     ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.rightRect));
     ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.topRect));
     ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.bottomRect));
+    ASSERT_EQ(WMError::WM_OK, win->Hide());
 }
 
 /**
@@ -388,6 +389,8 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest02, Function | MediumTest | 
     WMError ret = win->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidarea);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_TRUE(utils::RectEqualTo(left, avoidarea.leftRect));
+    ASSERT_EQ(WMError::WM_OK, left->Hide());
+    ASSERT_EQ(WMError::WM_OK, win->Hide());
 }
 
 /**
@@ -414,6 +417,8 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest03, Function | MediumTest | 
     WMError ret = win->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidarea);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_TRUE(utils::RectEqualTo(top, avoidarea.topRect));
+    ASSERT_EQ(WMError::WM_OK, top->Hide());
+    ASSERT_EQ(WMError::WM_OK, win->Hide());
 }
 
 /**
@@ -456,6 +461,8 @@ HWTEST_F(WindowImmersiveTest, OnAvoidAreaChangedTest01, Function | MediumTest | 
     ASSERT_TRUE(utils::RectEqualToRect(bigTopRect, avoidArea2[1]));
 
     window->UnregisterAvoidAreaChangeListener(thisListener);
+    ASSERT_EQ(WMError::WM_OK, top->Hide());
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 
 /**
@@ -494,6 +501,7 @@ HWTEST_F(WindowImmersiveTest, OnAvoidAreaChangedTest02, Function | MediumTest | 
     ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidArea2[0])); // 0: left Rect
 
     window->UnregisterAvoidAreaChangeListener(thisListener);
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 }
 } // namespace Rosen

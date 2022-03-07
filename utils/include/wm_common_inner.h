@@ -46,6 +46,15 @@ enum class WindowUpdateReason : uint32_t {
     NEED_SWITCH_CASCADE_END,
     UPDATE_OTHER_PROPS,
 };
+
+enum class AvoidPosType : uint32_t {
+    AVOID_POS_LEFT,
+    AVOID_POS_TOP,
+    AVOID_POS_RIGHT,
+    AVOID_POS_BOTTOM,
+    AVOID_POS_UNKNOWN
+};
+
 namespace {
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
     constexpr uint32_t DIVIDER_WIDTH = 8;

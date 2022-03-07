@@ -14,7 +14,7 @@
  */
 
 #include "window_layout_policy.h"
-#include "display_manager.h"
+#include "display_manager_service_inner.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
@@ -287,20 +287,15 @@ void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rec
 
 AvoidPosType WindowLayoutPolicy::GetAvoidPosType(const Rect& rect)
 {
-    if (rect.width_ >=  rect.height_) {
-        if (rect.posY_ == 0) {
-            return AvoidPosType::AVOID_POS_TOP;
-        } else {
-            return AvoidPosType::AVOID_POS_BOTTOM;
-        }
-    } else {
-        if (rect.posX_ == 0) {
-            return AvoidPosType::AVOID_POS_LEFT;
-        } else {
-            return AvoidPosType::AVOID_POS_RIGHT;
-        }
+    auto display = DisplayManagerServiceInner::GetInstance().GetDisplayById(screenId_);
+    if (display == nullptr) {
+        WLOGFE("GetAvoidPosType fail. Get display fail. displayId:%{public}" PRIu64"", screenId_);
+        return AvoidPosType::AVOID_POS_UNKNOWN;
     }
-    return AvoidPosType::AVOID_POS_UNKNOWN;
+    uint32_t displayWidth = display->GetWidth();
+    uint32_t displayHeight = display->GetHeight();
+
+    return WindowHelper::GetAvoidPosType(rect, displayWidth, displayHeight);
 }
 
 void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect)
@@ -350,7 +345,7 @@ void WindowLayoutPolicy::Reset()
 
 float WindowLayoutPolicy::GetVirtualPixelRatio() const
 {
-    auto display = DisplayManager::GetInstance().GetDisplayById(screenId_);
+    auto display = DisplayManagerServiceInner::GetInstance().GetDisplayById(screenId_);
     if (display == nullptr) {
         WLOGFE("GetVirtualPixel fail. Get display fail. displayId:%{public}" PRIu64", use Default vpr:1.0", screenId_);
         return 1.0;  // Use DefaultVPR 1.0

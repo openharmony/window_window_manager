@@ -25,14 +25,6 @@
 
 namespace OHOS {
 namespace Rosen {
-enum class AvoidPosType : uint32_t {
-    AVOID_POS_TOP,
-    AVOID_POS_BOTTOM,
-    AVOID_POS_LEFT,
-    AVOID_POS_RIGHT,
-    AVOID_POS_UNKNOWN
-};
-
 class WindowLayoutPolicy : public RefBase {
 public:
     WindowLayoutPolicy() = delete;
