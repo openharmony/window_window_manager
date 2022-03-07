@@ -419,7 +419,7 @@ void AbstractDisplayController::AddDisplayForExpandScreen(sptr<AbstractScreen> a
             return;
         }
     }
-    WLOGI("screenId: %{public}" PRIu64" has no corresponding display, create new dispaly.",
+    WLOGI("screenId: %{public}" PRIu64" has no corresponding display, create new display.",
         absScreen->dmsId_);
     AddScreenToExpandLocked(absScreen);
 }
