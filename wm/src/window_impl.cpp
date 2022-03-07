@@ -1261,6 +1261,7 @@ void WindowImpl::UpdateDisplayId(DisplayId from, DisplayId to)
             listener->OnDisplayMove(from, to);
         }
     }
+    property_->SetDisplayId(to);
 }
 
 void WindowImpl::SetDefaultOption()
