@@ -111,8 +111,10 @@ enum class WindowSizeChangeReason : uint32_t {
 };
 
 enum class WindowLayoutMode : uint32_t {
-    CASCADE = 0,
+    BASE = 0,
+    CASCADE = BASE,
     TILE = 1,
+    END,
 };
 
 enum class DragEvent : uint32_t {
