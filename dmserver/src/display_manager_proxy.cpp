@@ -263,7 +263,7 @@ std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDisplaySnapshot(Display
     }
 
     if (!data.WriteUint64(displayId)) {
-        WLOGFE("Write dispalyId failed");
+        WLOGFE("Write displayId failed");
         return nullptr;
     }
 
