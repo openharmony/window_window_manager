@@ -164,11 +164,8 @@ ScreenId AbstractScreenController::GetDefaultAbstractScreenId()
         return defaultDmsScreenId;
     }
     WLOGFI("GetDefaultAbstractScreenId, default screen is null, try to get.");
-    auto defaultScreen = InitAndGetScreen(rsDefaultId);
-    if (defaultScreen == nullptr) {
-        return SCREEN_ID_INVALID;
-    }
-    return defaultScreen->dmsId_;
+    ProcessScreenConnected(rsDefaultId);
+    return screenIdManager_.ConvertToDmsScreenId(rsDefaultId);
 }
 
 ScreenId AbstractScreenController::ConvertToRsScreenId(ScreenId dmsScreenId)
@@ -237,6 +234,9 @@ void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
             return;
         }
         sptr<AbstractScreenGroup> screenGroup = AddToGroupLocked(absScreen);
+        if (screenGroup != nullptr) {
+            NotifyScreenGroupChanged(absScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
+        }
         if (screenGroup != nullptr && abstractScreenCallback_ != nullptr) {
             abstractScreenCallback_->onConnect_(absScreen);
         }
@@ -275,15 +275,31 @@ void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
         return;
     }
     auto dmsScreenMapIter = dmsScreenMap_.find(dmsScreenId);
+    sptr<AbstractScreenGroup> screenGroup;
     if (dmsScreenMapIter != dmsScreenMap_.end()) {
-        if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(dmsScreenMapIter->second)) {
-            abstractScreenCallback_->onDisconnect_(dmsScreenMapIter->second);
+        auto screen = dmsScreenMapIter->second;
+        if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(screen)) {
+            abstractScreenCallback_->onDisconnect_(screen);
         }
-        RemoveFromGroupLocked(dmsScreenMapIter->second);
+        screenGroup = RemoveFromGroupLocked(screen);
+        if (screenGroup != nullptr) {
+            NotifyScreenGroupChanged(screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
+        }
         dmsScreenMap_.erase(dmsScreenMapIter);
+        NotifyScreenDisconnected(dmsScreenId);
+        if (screenGroup != nullptr && screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR &&
+            screen->dmsId_ == screenGroup->mirrorScreenId_ && screenGroup->GetChildCount() != 0) {
+            auto defaultScreenId = GetDefaultAbstractScreenId();
+            std::vector<ScreenId> screens;
+            for (auto screen : screenGroup->GetChildren()) {
+                if (screen->dmsId_ != defaultScreenId) {
+                    screens.emplace_back(screen->dmsId_);
+                }
+            }
+            MakeMirror(defaultScreenId, screens);
+        }
     }
     screenIdManager_.DeleteScreenId(dmsScreenId);
-    NotifyScreenDisconnected(dmsScreenId);
 }
 
 bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScreen, ScreenId rsScreenId)
@@ -321,9 +337,6 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddToGroupLocked(sptr<Abstra
     } else {
         res = AddAsSuccedentScreenLocked(newScreen);
     }
-    if (res != nullptr) {
-        NotifyScreenGroupChanged(newScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
-    }
     return res;
 }
 
@@ -340,7 +353,6 @@ sptr<AbstractScreenGroup> AbstractScreenController::RemoveFromGroupLocked(sptr<A
     if (!RemoveChildFromGroup(screen, screenGroup)) {
         return nullptr;
     }
-    NotifyScreenGroupChanged(screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
     return screenGroup;
 }
 
@@ -351,10 +363,6 @@ bool AbstractScreenController::RemoveChildFromGroup(sptr<AbstractScreen> screen,
         WLOGE("RemoveFromGroupLocked. remove screen:%{public}" PRIu64" failed from screenGroup:%{public}" PRIu64".",
               screen->dmsId_, screen->groupDmsId_);
         return false;
-    }
-    if (screen->dmsId_ == screenGroup->mirrorScreenId_) {
-        // Todo: if mirror screen removed and it is SCREEN_MIRROR type, then should make mirror in this group.
-        screenGroup->mirrorScreenId_ = GetDefaultAbstractScreenId();
     }
     if (screenGroup->GetChildCount() == 0) {
         // Group removed, need to do something.
@@ -678,6 +686,7 @@ bool AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenI
             WLOGFE("group is nullptr");
             return false;
         }
+        NotifyScreenGroupChanged(screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
         if (group != nullptr && abstractScreenCallback_ != nullptr) {
             abstractScreenCallback_->onConnect_(screen);
         }
@@ -688,6 +697,7 @@ bool AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenI
     startPoints.insert(startPoints.begin(), screens.size(), point);
     bool filterMirroredScreen =
         group->combination_ == ScreenCombination::SCREEN_MIRROR && group->mirrorScreenId_ == screen->dmsId_;
+    group->mirrorScreenId_ = screen->dmsId_;
     ChangeScreenGroup(group, screens, startPoints, filterMirroredScreen, ScreenCombination::SCREEN_MIRROR);
     WLOGFI("MakeMirror success");
     return true;
@@ -712,14 +722,12 @@ void AbstractScreenController::ChangeScreenGroup(sptr<AbstractScreenGroup> group
         if (filterScreen && screen->groupDmsId_ == group->dmsId_ && group->HasChild(screen->dmsId_)) {
             continue;
         }
-        auto originGroup = GetAbstractScreenGroup(screen->groupDmsId_);
-        bool removeChildRes = false;
-        if (originGroup != nullptr) {
-            removeChildRes = RemoveChildFromGroup(screen, originGroup);
+        if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(screen)) {
             abstractScreenCallback_->onDisconnect_(screen);
         }
+        auto originGroup = RemoveFromGroupLocked(screen);
         addChildPos.emplace_back(startPoints[i]);
-        removeChildResMap[screenId] = removeChildRes;
+        removeChildResMap[screenId] = originGroup != nullptr;
         addScreens.emplace_back(screenId);
     }
     group->combination_ = combination;
@@ -801,8 +809,10 @@ void AbstractScreenController::RemoveVirtualScreenFromGroup(std::vector<ScreenId
             continue;
         }
         removeFromGroup.emplace_back(screen->ConvertToScreenInfo());
-        RemoveChildFromGroup(screen, originGroup);
-        abstractScreenCallback_->onDisconnect_(screen);
+        if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(screen)) {
+            abstractScreenCallback_->onDisconnect_(screen);
+        }
+        RemoveFromGroupLocked(screen);
     }
     NotifyScreenGroupChanged(removeFromGroup, ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
 }

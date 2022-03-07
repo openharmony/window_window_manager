@@ -172,7 +172,7 @@ sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
     ASSERT_NE(nullptr, virtualScreen); \
     ASSERT_EQ(virtualScreenId, virtualScreen->GetId()); \
     ScreenId screenId = screenListener->connectFuture_.GetResult(TIME_OUT); \
-    screenListener->connectFuture_.Reset(); \
+    screenListener->connectFuture_.Reset(SCREEN_ID_INVALID); \
     ASSERT_EQ(virtualScreenId, screenId); \
 
 void ScreenManagerTest::CheckScreenStateInGroup(
@@ -197,7 +197,8 @@ void ScreenManagerTest::CheckScreenGroupState(ScreenCombination combination, Scr
     ScreenId virtualScreenId, sptr<ScreenGroup> group, sptr<ScreenGroupChangeListener> screenGroupChangeListener)
 {
     auto pair = screenGroupChangeListener->changeFuture_.GetResult(TIME_OUT);
-    screenGroupChangeListener->changeFuture_.Reset();
+    screenGroupChangeListener->changeFuture_.Reset(
+        std::make_pair(SCREEN_ID_INVALID, ScreenGroupChangeEvent::REMOVE_FROM_GROUP));
     ASSERT_EQ(virtualScreenId, pair.first);
     ASSERT_EQ(event, pair.second);
     ASSERT_EQ(combination, group->GetCombination());
@@ -206,7 +207,7 @@ void ScreenManagerTest::CheckScreenGroupState(ScreenCombination combination, Scr
 #define CHECK_SCREEN_STATE_AFTER_DESTROY_VIRTUAL_SCREEN \
     { \
         auto screenId = screenListener->disconnectFuture_.GetResult(TIME_OUT); \
-        screenListener->disconnectFuture_.Reset(); \
+        screenListener->disconnectFuture_.Reset(SCREEN_ID_INVALID); \
         ASSERT_EQ(virtualScreenId, screenId); \
     }
 
