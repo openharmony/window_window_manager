@@ -352,12 +352,12 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
             WLOGE("The first real screen should be default for Phone. %{public}" PRIu64"", realAbsScreen->dmsId_);
             return;
         }
+        sptr<SupportedScreenModes> info = realAbsScreen->GetActiveScreenMode();
+        if (info == nullptr) {
+            WLOGE("bind alone screen error, cannot get info.");
+            return;
+        }
         if (dummyDisplay_ == nullptr) {
-            sptr<SupportedScreenModes> info = realAbsScreen->GetActiveScreenMode();
-            if (info == nullptr) {
-                WLOGE("bind alone screen error, cannot get info.");
-                return;
-            }
             sptr<AbstractDisplay> display = new AbstractDisplay(displayCount_.fetch_add(1),
                 realAbsScreen->dmsId_, info->width_, info->height_, info->refreshRate_);
             abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
@@ -367,7 +367,11 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
         } else {
             WLOGI("bind display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, dummyDisplay_->GetId());
+            bool updateFlag = dummyDisplay_->GetHeight() == info->height_ && dummyDisplay_->GetWidth() == info->width_;
             dummyDisplay_->BindAbstractScreen(realAbsScreen->dmsId_);
+            if (updateFlag) {
+                DisplayManagerAgentController::GetInstance().OnDisplayCreate(dummyDisplay_->ConvertToDisplayInfo());
+            }
             dummyDisplay_ = nullptr;
         }
     } else {
