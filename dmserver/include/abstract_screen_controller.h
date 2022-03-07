@@ -76,6 +76,7 @@ public:
     DMError SetScreenColorTransform(ScreenId screenId);
 
 private:
+    void RegisterRsScreenConnectionChangeListener();
     void OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent);
     void ProcessScreenConnected(ScreenId rsScreenId);
     sptr<AbstractScreen> InitAndGetScreen(ScreenId rsScreenId);
