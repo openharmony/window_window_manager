@@ -47,9 +47,22 @@ AbstractScreenController::~AbstractScreenController()
 void AbstractScreenController::Init()
 {
     WLOGFD("screen controller init");
-    rsInterface_.SetScreenChangeCallback(
+    RegisterRsScreenConnectionChangeListener();
+}
+
+void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
+{
+    WLOGFD("RegisterRsScreenConnectionChangeListener");
+    auto res = rsInterface_.SetScreenChangeCallback(
         std::bind(&AbstractScreenController::OnRsScreenConnectionChange,
         this, std::placeholders::_1, std::placeholders::_2));
+    if (res != StatusCode::SUCCESS) {
+        auto task = [this] {
+            RegisterRsScreenConnectionChangeListener();
+        };
+        // posk task after 50 ms.
+        controllerHandler_->PostTask(task, 50, AppExecFwk::EventQueue::Priority::HIGH);
+    }
 }
 
 std::vector<ScreenId> AbstractScreenController::GetAllScreenIds()
