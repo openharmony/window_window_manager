@@ -121,6 +121,8 @@ enum class Orientation : uint32_t {
 enum class DisplayChangeEvent : uint32_t {
     UPDATE_ORIENTATION,
     DISPLAY_SIZE_CHANGED,
+    DISPLAY_FREEZED,
+    DISPLAY_UNFREEZED,
     UNKNOWN,
 };
 }

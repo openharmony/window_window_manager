@@ -627,4 +627,24 @@ void DisplayManager::NotifyDisplayEvent(DisplayEvent event)
     WLOGFI("DisplayEvent:%{public}u", event);
     SingletonContainer::Get<DisplayManagerAdapter>().NotifyDisplayEvent(event);
 }
+
+bool DisplayManager::Freeze(std::vector<DisplayId> displayIds)
+{
+    WLOGFD("freeze display");
+    if (displayIds.size() == 0) {
+        WLOGFE("freeze display fail, num of display is 0");
+        return false;
+    }
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, true);
+}
+
+bool DisplayManager::Unfreeze(std::vector<DisplayId> displayIds)
+{
+    WLOGFD("unfreeze display");
+    if (displayIds.size() == 0) {
+        WLOGFE("unfreeze display fail, num of display is 0");
+        return false;
+    }
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, false);
+}
 } // namespace OHOS::Rosen
