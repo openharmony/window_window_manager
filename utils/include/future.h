@@ -58,9 +58,10 @@ public:
     {
         Future<T>::FutureCall(res);
     }
-    void Reset()
+    void Reset(T defaultValue)
     {
         flag_ = false;
+        result_ = defaultValue;
     }
 protected:
     void Call(T res) override

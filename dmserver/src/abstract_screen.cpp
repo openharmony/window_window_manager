@@ -275,7 +275,7 @@ sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
     return screenGroupInfo;
 }
 
-bool AbstractScreenGroup::SetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config)
+bool AbstractScreenGroup::GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config)
 {
     if (dmsScreen == nullptr) {
         WLOGE("dmsScreen is nullptr.");
@@ -327,7 +327,7 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
         return false;
     }
     struct RSDisplayNodeConfig config;
-    if (!SetRSDisplayNodeConfig(dmsScreen, config)) {
+    if (!GetRSDisplayNodeConfig(dmsScreen, config)) {
         return false;
     }
     dmsScreen->InitRSDisplayNode(config);
