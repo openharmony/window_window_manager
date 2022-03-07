@@ -15,13 +15,16 @@
 
 // gtest
 #include <gtest/gtest.h>
-
 #include "display_test_utils.h"
 #include "future.h"
 #include "screen.h"
+#include "transaction/rs_transaction.h"
+#include "ui/rs_root_node.h"
+#include "ui/rs_ui_director.h"
 #include "window.h"
 #include "window_option.h"
 #include "window_manager_hilog.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -55,7 +58,8 @@ public:
     const uint32_t maxWaitCount_ = 2000;
     const uint32_t execTimes_ = 10;
     const uint32_t acquireFrames_ = 1;
-    static constexpr uint32_t TEST_SPEEP_S = 1; // test spleep time
+    static constexpr uint32_t TEST_SPEEP_S = 1; // test sleep time
+    static constexpr uint32_t TEST_SPEEP_S_LONG = 10; // test sleep for 10 seconds
     static constexpr long TIME_OUT = 1000;
 };
 
@@ -105,6 +109,7 @@ VirtualScreenOption ScreenManagerTest::defaultOption_ = {
     defaultName_, defaultWidth_, defaultHeight_, defaultDensity_, nullptr, defaultFlags_
 };
 uint32_t ScreenManagerTest::waitCount_ = 0;
+std::shared_ptr<RSNode> rootNode;
 
 void ScreenManagerTest::SetUpTestCase()
 {
@@ -129,6 +134,16 @@ void ScreenManagerTest::TearDown()
 {
 }
 
+void RootNodeInit(std::shared_ptr<RSUIDirector> rsUiDirector, int width, int height)
+{
+    std::cout << "rs app demo Init Rosen Backend!" << std::endl;
+    rootNode = RSRootNode::Create();
+    rootNode->SetBounds(0, 0, width, height);
+    rootNode->SetFrame(0, 0, width, height);
+    rootNode->SetBackgroundColor(SK_ColorRED);
+    rsUiDirector->SetRoot(rootNode->GetId());
+}
+
 sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
 {
     sptr<WindowOption> option = new WindowOption();
@@ -139,12 +154,9 @@ sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
     option->SetDisplayId(displayId);
     option->SetWindowRect(displayRect);
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    option->SetWindowName("CreateVirtualWindow01");
-    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
-    option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetWindowName("VirtualWindow01");
     sptr<Window> window = Window::Create(option->GetWindowName(), option);
-    window->Show();
     return window;
 }
 
@@ -419,24 +431,27 @@ HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
     CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
     CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
-    std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
-    sptr<Screen> DefaultScreen = screens.front();
-    DisplayId virtualDisplayId = DISPLAY_ID_INVALID;
-    std::vector<DisplayId> displayIds = DisplayManager::GetInstance().GetAllDisplayIds();
-    for (auto& id : displayIds) {
-        if (id != defaultDisplayId_) {
-            virtualDisplayId = id; // find the display id of virtual screen
-        }
-    }
-    sptr<Window> window = CreateWindowByDisplayId(virtualDisplayId);
-    ASSERT_NE(nullptr, window);
     sleep(TEST_SPEEP_S);
-    std::vector<ExpandOption> options = {{DefaultScreen->GetId(), 0, 0}, {virtualScreenId, defaultWidth_, 0}};
-    ScreenId expansionGroup = ScreenManager::GetInstance().MakeExpand(options);
-    ASSERT_NE(SCREEN_ID_INVALID, expansionGroup);
+    std::vector<ExpandOption> options = {{defaultScreenId_, 0, 0}, {virtualScreenId, defaultWidth_, 0}};
+    ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
     CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::ADD_TO_GROUP,
         virtualScreenId, group, screenGroupChangeListener);
     CheckScreenStateInGroup(true, group, groupId, virtualScreen, virtualScreenId);
+    sleep(TEST_SPEEP_S);
+    ASSERT_NE(SCREEN_ID_INVALID, expansionId);
+    DisplayId virtualDisplayId = DisplayManager::GetInstance().GetDisplayByScreen(virtualScreenId)->GetId();
+    ASSERT_NE(DISPLAY_ID_INVALID, virtualDisplayId);
+    sptr<Window> window = CreateWindowByDisplayId(virtualDisplayId);
+    ASSERT_NE(nullptr, window);
+    sleep(TEST_SPEEP_S);
+    auto surfaceNode = window->GetSurfaceNode();
+    auto rsUiDirector = RSUIDirector::Create();
+    rsUiDirector->Init();
+    RSTransaction::FlushImplicitTransaction();
+    sleep(TEST_SPEEP_S);
+    rsUiDirector->SetRSSurfaceNode(surfaceNode);
+    RootNodeInit(rsUiDirector, 200, 400);
+    rsUiDirector->SendMessages();
     sleep(TEST_SPEEP_S);
     ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId));
     CHECK_SCREEN_STATE_AFTER_DESTROY_VIRTUAL_SCREEN
@@ -446,8 +461,9 @@ HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
     sleep(TEST_SPEEP_S);
+    window->Show();
+    sleep(TEST_SPEEP_S_LONG);
     window->Destroy();
-    // will add NotifyExpandDisconnect check logic.
 }
 
 /**
