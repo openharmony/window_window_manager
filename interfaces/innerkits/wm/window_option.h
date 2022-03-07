@@ -75,6 +75,6 @@ private:
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
 };
-}
-}
+} // namespace Rosen
+} // namespace OHOS
 #endif // OHOS_ROSEN_WINDOW_OPTION_H
