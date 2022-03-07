@@ -16,6 +16,7 @@
 #ifndef INTERFACES_KITS_NAPI_GRAPHIC_COMMON_COMMON_H
 #define INTERFACES_KITS_NAPI_GRAPHIC_COMMON_COMMON_H
 
+#include <cstring>
 #include <memory>
 #include <string>
 
@@ -23,6 +24,7 @@
 #include <napi/native_api.h>
 #include <napi/native_common.h>
 #include <napi/native_node_api.h>
+
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 #include "wm_common.h"
@@ -56,16 +58,18 @@ napi_status SetMemberInt32(napi_env env, napi_value result, const char *key, int
 napi_status SetMemberUint32(napi_env env, napi_value result, const char *key, uint32_t value);
 napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key);
 
+bool CheckCallingPermission(const std::string &permission);
+void SetErrorInfo(napi_env env, Rosen::WMError wret, std::string errMessage, napi_value result[]);
 void ProcessPromise(napi_env env, Rosen::WMError wret, napi_deferred deferred, napi_value result[]);
 void ProcessCallback(napi_env env, napi_ref ref, napi_value result[]);
 
 template<typename ParamT>
-napi_value CreatePromise(napi_env env,
-                         std::string funcname,
-                         void(*async)(napi_env env, std::unique_ptr<ParamT>& param),
-                         napi_value(*resolve)(napi_env env, std::unique_ptr<ParamT>& param),
-                         napi_ref& callbackRef,
-                         std::unique_ptr<ParamT>& param)
+napi_value AsyncProcess(napi_env env,
+                        std::string funcname,
+                        void(*async)(napi_env env, std::unique_ptr<ParamT>& param),
+                        napi_value(*resolve)(napi_env env, std::unique_ptr<ParamT>& param),
+                        napi_ref& callbackRef,
+                        std::unique_ptr<ParamT>& param)
 {
     struct AsyncCallbackInfo {
         napi_async_work asyncWork;
@@ -105,10 +109,11 @@ napi_value CreatePromise(napi_env env,
     auto completeFunc = [](napi_env env, napi_status status, void *data) {
         AsyncCallbackInfo *info = reinterpret_cast<AsyncCallbackInfo *>(data);
         napi_value result[2] = {0}; // 2: callback func input number, also reused by Promise
-        napi_get_undefined(env, &result[0]);
-        napi_get_undefined(env, &result[1]);
-        if (info->resolve) {
+        if (info->param->wret == Rosen::WMError::WM_OK) {
+            napi_get_undefined(env, &result[0]);
             result[1] = info->resolve(env, info->param);
+        } else {
+            SetErrorInfo(env, info->param->wret, info->param->errMessage, result);
         }
         if (info->deferred) {
             ProcessPromise(env, info->param->wret, info->deferred, result);

@@ -43,6 +43,13 @@ ohos_static_library("wm_napi_common") {
     "//foundation/ace/napi:ace_napi",
     "//foundation/windowmanager/wm:libwm",
   ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "ipc:ipc_core",
+  ]
+
   subsystem_name = "window"
   part_name = "window_manager"
 }
