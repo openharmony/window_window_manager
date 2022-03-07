@@ -54,7 +54,6 @@ bool CheckCallingPermission(const std::string &permission)
     if (!permission.empty() &&
         Security::AccessToken::AccessTokenKit::VerifyAccessToken(IPCSkeleton::GetCallingTokenID(), permission)
         != AppExecFwk::Constants::PERMISSION_GRANTED) {
-        WLOGFE("PERMISSION_GRANTED: %{public}d", AppExecFwk::Constants::PERMISSION_GRANTED);
         WLOGFE("%{public}s permission not granted.", permission.c_str());
         return false;
     }
@@ -62,8 +61,12 @@ bool CheckCallingPermission(const std::string &permission)
     return true;
 }
 
-void SetErrorInfo(napi_env env, Rosen::WMError wret, std::string errMessage, napi_value result[])
+void SetErrorInfo(napi_env env, Rosen::WMError wret, std::string errMessage, napi_value result[], int count)
 {
+    if (count != 2 || result == nullptr) { // input param number is 2
+        GNAPI_LOG("Error, input param number must be 2");
+        return;
+    }
     napi_value code = nullptr;
     napi_value message = nullptr;
     auto errorCode = static_cast<int32_t>(wret);
@@ -73,8 +76,12 @@ void SetErrorInfo(napi_env env, Rosen::WMError wret, std::string errMessage, nap
     napi_get_undefined(env, &result[1]);
 }
 
-void ProcessPromise(napi_env env, Rosen::WMError wret, napi_deferred deferred, napi_value result[])
+void ProcessPromise(napi_env env, Rosen::WMError wret, napi_deferred deferred, napi_value result[], int count)
 {
+    if (count != 2 || result == nullptr) { // input param number is 2
+        GNAPI_LOG("Error, input param number must be 2");
+        return;
+    }
     GNAPI_LOG("AsyncProcess: Promise");
     if (wret == Rosen::WMError::WM_OK) {
         GNAPI_LOG("AsyncProcess: Promise resolve");
@@ -85,8 +92,12 @@ void ProcessPromise(napi_env env, Rosen::WMError wret, napi_deferred deferred, n
     }
 }
 
-void ProcessCallback(napi_env env, napi_ref ref, napi_value result[])
+void ProcessCallback(napi_env env, napi_ref ref, napi_value result[], int count)
 {
+    if (count != 2 || result == nullptr) { // input param number is 2
+        GNAPI_LOG("Error, input param number must be 2");
+        return;
+    }
     GNAPI_LOG("AsyncProcess Callback");
     napi_value callback = nullptr;
     napi_value returnVal = nullptr;
