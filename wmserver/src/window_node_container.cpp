@@ -60,7 +60,7 @@ WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, ui
     layoutPolicy_ = layoutPolicys_[WindowLayoutMode::CASCADE];
     layoutPolicy_->Launch();
     UpdateAvoidAreaFunc func = std::bind(&WindowNodeContainer::OnAvoidAreaChange, this, std::placeholders::_1);
-    avoidController_ = new AvoidAreaController(func);
+    avoidController_ = new AvoidAreaController(displayId, func);
     wmRecorderPtr_ = new WindowManagerRecorder();
 }
 
@@ -133,7 +133,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
     if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
-        avoidController_->AddAvoidAreaNode(node);
+        avoidController_->AvoidControl(node, AvoidControlType::AVOID_NODE_ADD);
         NotifyIfSystemBarRegionChanged();
     } else {
         NotifyIfSystemBarTintChanged();
@@ -158,7 +158,7 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
     }
     layoutPolicy_->UpdateWindowNode(node);
     if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
-        avoidController_->UpdateAvoidAreaNode(node);
+        avoidController_->AvoidControl(node, AvoidControlType::AVOID_NODE_UPDATE);
         NotifyIfSystemBarRegionChanged();
     } else {
         NotifyIfSystemBarTintChanged();
@@ -289,7 +289,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     UpdateRSTree(node, false);
     layoutPolicy_->RemoveWindowNode(node);
     if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
-        avoidController_->RemoveAvoidAreaNode(node);
+        avoidController_->AvoidControl(node, AvoidControlType::AVOID_NODE_REMOVE);
         NotifyIfSystemBarRegionChanged();
     } else {
         NotifyIfSystemBarTintChanged();

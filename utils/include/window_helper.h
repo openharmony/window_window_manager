@@ -128,6 +128,25 @@ public:
             (reason < WindowUpdateReason::NEED_SWITCH_CASCADE_END);
     }
 
+    static AvoidPosType GetAvoidPosType(const Rect& rect, uint32_t displayWidth, uint32_t displayHeight)
+    {
+        if (rect.width_ ==  displayWidth) {
+            if (rect.posY_ == 0) {
+                return AvoidPosType::AVOID_POS_TOP;
+            } else {
+                return AvoidPosType::AVOID_POS_BOTTOM;
+            }
+        } else if (rect.height_ ==  displayHeight) {
+            if (rect.posX_ == 0) {
+                return AvoidPosType::AVOID_POS_LEFT;
+            } else {
+                return AvoidPosType::AVOID_POS_RIGHT;
+            }
+        }
+
+        return AvoidPosType::AVOID_POS_UNKNOWN;
+    }
+
     WindowHelper() = default;
     ~WindowHelper() = default;
 };

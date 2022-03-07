@@ -56,6 +56,10 @@ void WindowLayoutPolicyTile::InitTileWindowRects()
 {
     constexpr uint32_t edgeInterval = 48;
     constexpr uint32_t midInterval = 24;
+    float virtualPixelRatio = GetVirtualPixelRatio();
+    uint32_t edgeIntervalVp = static_cast<uint32_t>(edgeInterval * virtualPixelRatio);
+    uint32_t midIntervalVp = static_cast<uint32_t>(midInterval * virtualPixelRatio);
+
     constexpr float ratio = 0.75;  // 0.75: default height/width ratio
     constexpr float edgeRatio = 0.125;
     constexpr int half = 2;
@@ -68,10 +72,10 @@ void WindowLayoutPolicyTile::InitTileWindowRects()
     std::vector<Rect> single = {{ x, y, w, h }};
     presetRects_.emplace_back(single);
     for (uint32_t num = 2; num <= maxTileWinNum_; num++) { // start calc preset with 2 windows
-        w = (limitRect_.width_ - edgeInterval * half - midInterval * (num - 1)) / num;
+        w = (limitRect_.width_ - edgeIntervalVp * half - midIntervalVp * (num - 1)) / num;
         std::vector<Rect> curLevel;
         for (uint32_t i = 0; i < num; i++) {
-            int curX = limitRect_.posX_ + edgeInterval + i * (w + midInterval);
+            int curX = limitRect_.posX_ + edgeIntervalVp + i * (w + midIntervalVp);
             Rect curRect = { curX, y, w, h };
             WLOGFI("presetRects: level %{public}d, id %{public}d, [%{public}d %{public}d %{public}d %{public}d]",
                 num, i, curX, y, w, h);
