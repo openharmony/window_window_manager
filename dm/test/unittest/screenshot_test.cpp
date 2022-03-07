@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+#include "screenshot_test.h"
+
 #include <securec.h>
 
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
-#include "screenshot_test.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,10 +68,14 @@ static std::shared_ptr<Media::PixelMap> CreatePixelMap()
     }
 
     uint8_t *pic = (uint8_t *)data;
-    memset_s(pic, voulumeSize, pixelValue, voulumeSize);
+    if (memset_s(pic, voulumeSize, pixelValue, voulumeSize) != EOK) {
+        free(data);
+        return nullptr;
+    }
 
     uint32_t colorLen = voulumeSize * bitmapDepth;
     auto pixelMap = Media::PixelMap::Create(data, colorLen, opt);
+    free(data);
     if (pixelMap == nullptr) {
         return nullptr;
     }
