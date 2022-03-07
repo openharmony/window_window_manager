@@ -199,6 +199,16 @@ WindowManager::~WindowManager()
 {
 }
 
+void IFocusChangedListener::OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
+    WindowType windowType, DisplayId displayId)
+{
+}
+
+void IFocusChangedListener::OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
+    WindowType windowType, DisplayId displayId)
+{
+}
+
 void IFocusChangedListener::OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
 }
