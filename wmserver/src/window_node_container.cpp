@@ -604,13 +604,31 @@ void WindowNodeContainer::UpdateWindowStatus(const sptr<WindowNode>& node, Windo
             break;
     }
     if (isNeedNotify) {
+        std::vector<sptr<WindowInfo>> windowList;
+        GetWindowList(windowList);
         sptr<WindowInfo> windowInfo = new WindowInfo();
         windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
         windowInfo->windowRect_ = node->GetLayoutRect();
         windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
         windowInfo->mode_ = node->GetWindowMode();
         windowInfo->type_ = node->GetWindowType();
+        windowInfo->relatedWindows_ = windowList;
         WindowManagerAgentController::GetInstance().UpdateWindowStatus(windowInfo, type);
+    }
+}
+
+void WindowNodeContainer::GetWindowList(std::vector<sptr<WindowInfo>>& windowList) const
+{
+    std::vector<sptr<WindowNode>> windowNodes;
+    TraverseContainer(windowNodes);
+    for (auto node : windowNodes) {
+        sptr<WindowInfo> windowInfo = new WindowInfo();
+        windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
+        windowInfo->windowRect_ = node->GetLayoutRect();
+        windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
+        windowInfo->mode_ = node->GetWindowMode();
+        windowInfo->type_ = node->GetWindowType();
+        windowList.emplace_back(windowInfo);
     }
 }
 

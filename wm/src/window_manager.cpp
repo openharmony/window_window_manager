@@ -49,10 +49,15 @@ WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
 
 bool WindowInfo::Marshalling(Parcel &parcel) const
 {
-    return parcel.WriteInt32(wid_) && parcel.WriteUint32(windowRect_.width_) &&
+    bool res = parcel.WriteInt32(wid_) && parcel.WriteUint32(windowRect_.width_) &&
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(windowRect_.posX_) &&
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteBool(focused_) &&
         parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(type_));
+    if (!res) {
+        return res;
+    }
+    VectorMarshalling(parcel);
+    return res;
 }
 
 WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
@@ -67,7 +72,36 @@ WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
     }
     windowInfo->mode_ = static_cast<WindowMode>(parcel.ReadUint32());
     windowInfo->type_ = static_cast<WindowType>(parcel.ReadUint32());
+    VectorUnmarshalling(parcel, windowInfo);
     return windowInfo;
+}
+
+bool WindowInfo::VectorMarshalling(Parcel& parcel) const
+{
+    auto size = relatedWindows_.size();
+    if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
+        return false;
+    }
+    for (auto window : relatedWindows_) {
+        if (!parcel.WriteParcelable(window)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void WindowInfo::VectorUnmarshalling(Parcel& parcel, WindowInfo* windowInfo)
+{
+    std::vector<sptr<WindowInfo>> windows;
+    uint32_t size = parcel.ReadUint32();
+    for (uint32_t i = 0; i < size; i++) {
+        WindowInfo* window = parcel.ReadParcelable<WindowInfo>();
+        if (!window) {
+            WLOGE("ReadParcelable Failed!");
+            return;
+        }
+        windowInfo->relatedWindows_.emplace_back(window);
+    }
 }
 
 bool FocusChangeInfo::Marshalling(Parcel &parcel) const
