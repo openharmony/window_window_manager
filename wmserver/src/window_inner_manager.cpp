@@ -22,6 +22,7 @@
 #include "include/core/SkData.h"
 #include "include/core/SkImage.h"
 
+#include "vsync_station.h"
 #include "window_life_cycle_interface.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
@@ -301,6 +302,7 @@ void WindowInnerManager::Init()
     std::thread innerWMThread(&WindowInnerManager::HandleMessage, this);
     innerWMThread.detach();
     hasInitThread_ = true;
+    VsyncStation::GetInstance().SetIsMainHandlerAvailable(false);
     WLOGFI("Inner window manager thread create success");
 }
 }
