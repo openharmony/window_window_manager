@@ -635,14 +635,14 @@ WMError WindowImpl::Show()
         if (property_->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
             WLOGFI("desktop window [id:%{public}d] is shown, minimize all app windows", property_->GetWindowId());
             SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
-            for (auto& listener : lifecycleListeners_) {
-                if (listener != nullptr) {
-                    listener->AfterForeground();
-                }
-            }
         } else {
             WLOGFI("window is already shown id: %{public}d, raise to top", property_->GetWindowId());
             SingletonContainer::Get<WindowAdapter>().ProcessWindowTouchedEvent(property_->GetWindowId());
+        }
+        for (auto& listener : lifecycleListeners_) {
+            if (listener != nullptr) {
+                listener->AfterForeground();
+            }
         }
         return WMError::WM_OK;
     }
