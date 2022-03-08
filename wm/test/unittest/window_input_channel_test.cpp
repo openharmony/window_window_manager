@@ -50,7 +50,6 @@ namespace {
  * @tc.name: HandlePointerEvent
  * @tc.desc: consume pointer event when receive callback from input
  * @tc.type: FUNC
- * @tc.require: AR000GGTUV
  */
 HWTEST_F(WindowInputChannelTest, HandlePointerEvent, Function | SmallTest | Level2)
 {
@@ -64,7 +63,6 @@ HWTEST_F(WindowInputChannelTest, HandlePointerEvent, Function | SmallTest | Leve
  * @tc.name: HandleKeyEvent
  * @tc.desc: consume key event when receive callback from input
  * @tc.type: FUNC
- * @tc.require: AR000GGTUV
  */
 HWTEST_F(WindowInputChannelTest, HandleKeyEvent, Function | SmallTest | Level2)
 {
@@ -78,7 +76,6 @@ HWTEST_F(WindowInputChannelTest, HandleKeyEvent, Function | SmallTest | Level2)
  * @tc.name: SetInputListener
  * @tc.desc: set input listener when create window
  * @tc.type: FUNC
- * @tc.require: AR000GGTUV
  */
 HWTEST_F(WindowInputChannelTest, SetInputListener, Function | SmallTest | Level2)
 {

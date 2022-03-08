@@ -60,6 +60,7 @@ private:
         { WindowType::WINDOW_TYPE_DRAGGING_EFFECT,      115 },
         { WindowType::WINDOW_TYPE_POINTER,              116 },
         { WindowType::WINDOW_TYPE_BOOT_ANIMATION,       117 },
+        { WindowType::WINDOW_TYPE_FREEZE_DISPLAY,       118 },
     };
 };
 }

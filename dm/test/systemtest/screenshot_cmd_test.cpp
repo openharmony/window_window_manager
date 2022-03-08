@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,22 +37,22 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     static DisplayId defaultId_;
-    DisplayId invalidId_ = DISPLAY_ID_INVALD;
+    DisplayId invalidId_ = DISPLAY_ID_INVALID;
     const std::string defaultCmd_ = "/system/bin/snapshot_display";
     const int testTimeCount_ = 2;
 };
 
-DisplayId ScreenshotCmdTest::defaultId_ = DISPLAY_ID_INVALD;
+DisplayId ScreenshotCmdTest::defaultId_ = DISPLAY_ID_INVALID;
 
 void ScreenshotCmdTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
-        WLOGFI("GetDefaultDisplay: failed!\n");
-    } else {
-        WLOGFI("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
-            display->GetHeight(), display->GetFreshRate());
+        WLOGFE("GetDefaultDisplay: failed!\n");
+        return;
     }
+    WLOGFI("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
+        display->GetHeight(), display->GetRefreshRate());
 
     defaultId_ = display->GetId();
 }
@@ -69,7 +69,7 @@ void ScreenshotCmdTest::TearDown()
 {
 }
 
-bool CheckFileExist(const std::string fPath)
+bool CheckFileExist(const std::string& fPath)
 {
     if (!fPath.empty()) {
         FILE* fp = fopen(fPath.c_str(), "r");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -201,7 +201,7 @@ bool SnapShotUtils::WriteToPngWithPixelMap(const std::string &fileName, PixelMap
 static bool ProcessDisplayId(DisplayId &displayId)
 {
     WM_SCOPED_TRACE("snapshot:ProcessDisplayId(%" PRIu64")", displayId);
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     } else {
         bool validFlag = false;

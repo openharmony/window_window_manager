@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #include "window_manager_stub.h"
 #include <ipc_skeleton.h>
+#include "string_ex.h"
 #include "window_manager_hilog.h"
+
 
 namespace OHOS {
 namespace Rosen {
@@ -129,7 +131,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             AvoidAreaType avoidAreaType = static_cast<AvoidAreaType>(data.ReadUint32());
             std::vector<Rect> avoidArea = GetAvoidAreaByType(windowId, avoidAreaType);
 
-            // prepare relpy data
+            // prepare reply data
             uint32_t avoidAreaNum = static_cast<uint32_t>(avoidArea.size());
             reply.WriteUint32(avoidAreaNum);
             for (uint32_t i = 0; i < avoidAreaNum; ++i) {
@@ -173,11 +175,27 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             MinimizeAllAppWindows(data.ReadUint64());
             break;
         }
+        case TRANS_ID_MAXMIZE_WINDOW: {
+            MaxmizeWindow(data.ReadUint32());
+            break;
+        }
         case TRANS_ID_UPDATE_LAYOUT_MODE: {
             DisplayId displayId = data.ReadUint64();
             WindowLayoutMode mode = static_cast<WindowLayoutMode>(data.ReadUint32());
             WMError errCode = SetWindowLayoutMode(displayId, mode);
             reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case TRANS_ID_DUMP_WINDOW_TREE: {
+            std::vector<std::string> windowTreeInfos;
+            WindowDumpType type = static_cast<WindowDumpType>(data.ReadUint32());
+            WMError errCode = DumpWindowTree(windowTreeInfos, type);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            int32_t infoSize = windowTreeInfos.size();
+            reply.WriteInt32(infoSize);
+            for (int i = 0; i < infoSize; i++) {
+                reply.WriteString16(Str8ToStr16(windowTreeInfos[i]));
+            }
             break;
         }
         default:
@@ -186,5 +204,5 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
     }
     return 0;
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

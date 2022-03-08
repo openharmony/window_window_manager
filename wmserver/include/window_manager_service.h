@@ -21,10 +21,10 @@
 
 #include <input_window_monitor.h>
 #include <nocopyable.h>
-#include <parameters.h>
 #include <system_ability.h>
 #include "display_change_listener.h"
 #include "drag_controller.h"
+#include "freeze_controller.h"
 #include "singleton_delegator.h"
 #include "wm_single_instance.h"
 #include "window_controller.h"
@@ -67,13 +67,14 @@ public:
     void ProcessWindowTouchedEvent(uint32_t windowId) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
+    WMError MaxmizeWindow(uint32_t windowId) override;
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) override;
 
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
-
+    WMError DumpWindowTree(std::vector<std::string> &windowTreeInfo, WindowDumpType type) override;
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;
@@ -91,6 +92,7 @@ private:
     sptr<InputWindowMonitor> inputWindowMonitor_;
     sptr<SnapshotController> snapshotController_;
     sptr<DragController> dragController_;
+    sptr<FreezeController> freezeDisplayController_;
 };
 }
 }

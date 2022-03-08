@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,7 @@ public:
         TRANS_ID_GET_DISPLAY_STATE,
         TRANS_ID_GET_ALL_DISPLAYIDS,
         TRANS_ID_NOTIFY_DISPLAY_EVENT,
+        TRANS_ID_SET_FREEZE_EVENT,
         TRANS_ID_SCREEN_BASE = 1000,
         TRANS_ID_CREATE_VIRTUAL_SCREEN = TRANS_ID_SCREEN_BASE,
         TRANS_ID_DESTROY_VIRTUAL_SCREEN,
@@ -60,6 +61,7 @@ public:
         TRANS_ID_SCREENGROUP_BASE = 1100,
         TRANS_ID_SCREEN_MAKE_MIRROR = TRANS_ID_SCREENGROUP_BASE,
         TRANS_ID_SCREEN_MAKE_EXPAND,
+        TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP,
         TRANS_ID_SCREEN_GAMUT_BASE = 1200,
         TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS = TRANS_ID_SCREEN_GAMUT_BASE,
         TRANS_ID_SCREEN_GET_COLOR_GAMUT,
@@ -77,7 +79,7 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) = 0;
     virtual bool SetOrientation(ScreenId screenId, Orientation orientation) = 0;
-    virtual std::shared_ptr<Media::PixelMap> GetDispalySnapshot(DisplayId displayId) = 0;
+    virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) = 0;
 
     // colorspace, gamut
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) = 0;
@@ -95,16 +97,18 @@ public:
     virtual bool WakeUpEnd() = 0;
     virtual bool SuspendBegin(PowerStateChangeReason reason) = 0;
     virtual bool SuspendEnd() = 0;
-    virtual bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason) = 0;
+    virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual bool SetDisplayState(DisplayState state) = 0;
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
     virtual std::vector<DisplayId> GetAllDisplayIds() = 0;
     virtual void NotifyDisplayEvent(DisplayEvent event) = 0;
+    virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) = 0;
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) = 0;
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) = 0;
     virtual std::vector<sptr<ScreenInfo>> GetAllScreenInfos() = 0;
     virtual ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) = 0;
     virtual ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) = 0;
+    virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) = 0;
     virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
 };
 } // namespace OHOS::Rosen

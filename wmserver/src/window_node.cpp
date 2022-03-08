@@ -192,5 +192,5 @@ WindowSizeChangeReason WindowNode::GetWindowSizeChangeReason() const
 {
     return windowSizeChangeReason_;
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

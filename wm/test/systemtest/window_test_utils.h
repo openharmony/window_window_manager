@@ -62,7 +62,7 @@ public:
     static sptr<Window> CreateNavigationBarWindow();
     static sptr<WindowScene> CreateWindowScene();
     static bool RectEqualTo(const sptr<Window>& window, const Rect& r);
-    static void InitSplitRects();
+    static bool InitSplitRects();
     static void UpdateSplitRects(const sptr<Window>& window);
     static bool RectEqualToRect(const Rect& l, const Rect& r);
     static Rect GetDefaultFoatingRect(const sptr<Window>& window);

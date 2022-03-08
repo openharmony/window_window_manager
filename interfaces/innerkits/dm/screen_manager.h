@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ public:
     };
 
     sptr<Screen> GetScreenById(ScreenId screenId);
-    sptr<ScreenGroup> GetScreenGroupById(ScreenId screenId);
+    sptr<ScreenGroup> GetScreenGroup(ScreenId groupId);
     std::vector<sptr<Screen>> GetAllScreens();
 
     bool RegisterScreenListener(sptr<IScreenListener> listener);
@@ -49,9 +49,12 @@ public:
     bool UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener);
     ScreenId MakeExpand(const std::vector<ExpandOption>& options);
     ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
+    void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
+    ScreenPowerState GetScreenPower(ScreenId screenId);
 
 private:
     ScreenManager();

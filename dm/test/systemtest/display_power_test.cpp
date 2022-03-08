@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "display_manager.h"
+#include "screen_manager.h"
 #include "window.h"
 #include "window_manager_hilog.h"
 
@@ -71,7 +72,7 @@ sptr<DisplayPowerEventListener> DisplayPowerTest::listener_ = new DisplayPowerEv
 void DisplayPowerTest::SetUpTestCase()
 {
     defaultId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
-    if (defaultId_ == DISPLAY_ID_INVALD) {
+    if (defaultId_ == DISPLAY_ID_INVALID) {
         WLOGFE("GetDefaultDisplayId failed!");
     }
     DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener_);
@@ -323,7 +324,7 @@ HWTEST_F(DisplayPowerTest, suspend_end_callback_001, Function | MediumTest | Lev
 */
 HWTEST_F(DisplayPowerTest, set_screen_power_for_all_001, Function | MediumTest | Level2)
 {
-    bool ret = DisplayManager::GetInstance().SetScreenPowerForAll(DisplayPowerState::POWER_OFF,
+    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_OFF,
         PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
     CheckDisplayPowerEventCallback(true);
@@ -339,7 +340,7 @@ HWTEST_F(DisplayPowerTest, set_screen_power_for_all_001, Function | MediumTest |
 */
 HWTEST_F(DisplayPowerTest, set_screen_power_for_all_002, Function | MediumTest | Level2)
 {
-    bool ret = DisplayManager::GetInstance().SetScreenPowerForAll(DisplayPowerState::POWER_ON,
+    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_ON,
         PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
     CheckDisplayPowerEventCallback(true);
@@ -355,7 +356,7 @@ HWTEST_F(DisplayPowerTest, set_screen_power_for_all_002, Function | MediumTest |
 */
 HWTEST_F(DisplayPowerTest, set_screen_power_for_all_003, Function | MediumTest | Level2)
 {
-    bool ret = DisplayManager::GetInstance().SetScreenPowerForAll(DisplayPowerState::INVALID_STATE,
+    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(ScreenPowerState::INVALID_STATE,
         PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(false, ret);
     CheckDisplayPowerEventCallback(true);
@@ -388,10 +389,10 @@ HWTEST_F(DisplayPowerTest, set_display_state_power_event_callback_001, Function 
 */
 HWTEST_F(DisplayPowerTest, get_display_power_001, Function | MediumTest | Level2)
 {
-    DisplayPowerState stateToSet = DisplayPowerState::POWER_OFF;
-    bool ret = DisplayManager::GetInstance().SetScreenPowerForAll(stateToSet, PowerStateChangeReason::POWER_BUTTON);
+    ScreenPowerState stateToSet = ScreenPowerState::POWER_OFF;
+    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(stateToSet, PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
-    DisplayPowerState stateGet = DisplayManager::GetInstance().GetScreenPower(defaultId_);
+    ScreenPowerState stateGet = ScreenManager::GetInstance().GetScreenPower(defaultId_);
     ASSERT_EQ(stateGet, stateToSet);
 }
 
@@ -402,10 +403,10 @@ HWTEST_F(DisplayPowerTest, get_display_power_001, Function | MediumTest | Level2
 */
 HWTEST_F(DisplayPowerTest, get_display_power_002, Function | MediumTest | Level2)
 {
-    DisplayPowerState stateToSet = DisplayPowerState::POWER_ON;
-    bool ret = DisplayManager::GetInstance().SetScreenPowerForAll(stateToSet, PowerStateChangeReason::POWER_BUTTON);
+    ScreenPowerState stateToSet = ScreenPowerState::POWER_ON;
+    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(stateToSet, PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
-    DisplayPowerState stateGet = DisplayManager::GetInstance().GetScreenPower(defaultId_);
+    ScreenPowerState stateGet = ScreenManager::GetInstance().GetScreenPower(defaultId_);
     ASSERT_EQ(stateGet, stateToSet);
 }
 

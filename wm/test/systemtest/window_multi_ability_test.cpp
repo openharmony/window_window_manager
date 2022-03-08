@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,7 @@ static void ShowHideWindowSceneCallable(int i)
         ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
         usleep(sleepTimeMs);
     }
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
 }
 
 static void CreateDestroyWindowSceneCallable(int i)
@@ -79,6 +80,8 @@ static void CreateDestroyWindowSceneCallable(int i)
         usleep(sleepTimeMs);
         ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
         usleep(sleepTimeMs);
+        ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
+        usleep(sleepTimeMs);
         scene.clear();
         usleep(sleepTimeMs);
     }
@@ -88,7 +91,6 @@ static void CreateDestroyWindowSceneCallable(int i)
  * @tc.name: MultiAbilityWindow01
  * @tc.desc: Five scene process in one thread
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | Level2)
 {
@@ -108,13 +110,17 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | L
     ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
     ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
     ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
+    ASSERT_EQ(WMError::WM_OK, scene1->GoDestroy());
+    ASSERT_EQ(WMError::WM_OK, scene2->GoDestroy());
+    ASSERT_EQ(WMError::WM_OK, scene3->GoDestroy());
+    ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
+    ASSERT_EQ(WMError::WM_OK, scene5->GoDestroy());
 }
 
 /**
  * @tc.name: MultiAbilityWindow02
  * @tc.desc: Five scene process show/hide in five threads
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | Level2)
 {
@@ -134,7 +140,6 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow02, Function | MediumTest | L
  * @tc.name: MultiAbilityWindow03
  * @tc.desc: Five scene process create/destroy in five threads
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | Level2)
 {
@@ -148,6 +153,68 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | L
     th3.join();
     th4.join();
     th5.join();
+}
+
+/**
+ * @tc.name: MultiAbilityWindow04
+ * @tc.desc: Five scene process in one thread, create/show/hide/destroy in order
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow04, Function | MediumTest | Level3)
+{
+    sptr<WindowScene> scene1 = utils::CreateWindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
+    ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
+    ASSERT_EQ(WMError::WM_OK, scene1->GoDestroy());
+
+    sptr<WindowScene> scene2 = utils::CreateWindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene2->GoForeground());
+    ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
+    ASSERT_EQ(WMError::WM_OK, scene2->GoDestroy());
+
+    sptr<WindowScene> scene3 = utils::CreateWindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
+    ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
+    ASSERT_EQ(WMError::WM_OK, scene3->GoDestroy());
+
+    sptr<WindowScene> scene4 = utils::CreateWindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene4->GoForeground());
+    ASSERT_EQ(WMError::WM_OK, scene4->GoBackground());
+    ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
+
+    sptr<WindowScene> scene5 = utils::CreateWindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
+    ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
+    ASSERT_EQ(WMError::WM_OK, scene5->GoDestroy());
+}
+
+/**
+ * @tc.name: MultiAbilityWindow05
+ * @tc.desc: Five scene process in one thread, create/show/hide/destroy out of order
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow05, Function | MediumTest | Level3)
+{
+    sptr<WindowScene> scene1 = utils::CreateWindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
+    sptr<WindowScene> scene2 = utils::CreateWindowScene();
+    sptr<WindowScene> scene3 = utils::CreateWindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
+    ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
+    ASSERT_EQ(WMError::WM_OK, scene1->GoDestroy());
+    sptr<WindowScene> scene4 = utils::CreateWindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
+    ASSERT_EQ(WMError::WM_OK, scene2->GoForeground());
+    ASSERT_EQ(WMError::WM_OK, scene4->GoForeground());
+    ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
+    sptr<WindowScene> scene5 = utils::CreateWindowScene();
+    ASSERT_EQ(WMError::WM_OK, scene3->GoDestroy());
+    ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
+    ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
+    ASSERT_EQ(WMError::WM_OK, scene4->GoBackground());
+    ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
+    ASSERT_EQ(WMError::WM_OK, scene5->GoDestroy());
+    ASSERT_EQ(WMError::WM_OK, scene2->GoDestroy());
 }
 } // namespace Rosen
 } // namespace OHOS

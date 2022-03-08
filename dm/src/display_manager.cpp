@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "display_manager_adapter.h"
 #include "display_manager_agent_default.h"
 #include "dm_common.h"
+#include "screen_manager.h"
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
 
@@ -32,6 +33,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
 class DisplayManager::Impl : public RefBase {
 public:
+    ~Impl();
     static inline SingletonDelegator<DisplayManager> delegator;
     bool CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const;
     bool CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const;
@@ -57,11 +59,11 @@ private:
     std::map<DisplayId, sptr<Display>> displayMap_;
     DisplayStateCallback displayStateCallback_;
     std::recursive_mutex mutex_;
-    std::vector<sptr<IDisplayPowerEventListener>> powerEventListeners_;
+    std::set<sptr<IDisplayPowerEventListener>> powerEventListeners_;
     class DisplayManagerAgent;
     sptr<DisplayManagerAgent> powerEventListenerAgent_;
     sptr<DisplayManagerAgent> displayStateAgent_;
-    std::vector<sptr<IDisplayListener>> displayListeners_;
+    std::set<sptr<IDisplayListener>> displayListeners_;
 };
 
 class DisplayManager::Impl::DisplayManagerListener : public DisplayManagerAgentDefault {
@@ -72,7 +74,7 @@ public:
 
     void OnDisplayCreate(sptr<DisplayInfo> displayInfo) override
     {
-        if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALD) {
+        if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALID) {
             WLOGFE("OnDisplayCreate, displayInfo is invalid.");
             return;
         }
@@ -88,7 +90,7 @@ public:
 
     void OnDisplayDestroy(DisplayId displayId) override
     {
-        if (displayId == DISPLAY_ID_INVALD) {
+        if (displayId == DISPLAY_ID_INVALID) {
             WLOGFE("OnDisplayDestroy, displayId is invalid.");
             return;
         }
@@ -104,7 +106,7 @@ public:
 
     void OnDisplayChange(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event) override
     {
-        if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALD) {
+        if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALID) {
             WLOGFE("OnDisplayChange, displayInfo is invalid.");
             return;
         }
@@ -144,14 +146,14 @@ private:
 
 bool DisplayManager::Impl::CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const
 {
-    if (!((rect.left >= 0) and (rect.left < oriWidth) and (rect.top >= 0) and (rect.top < oriHeight))) {
+    if (!((rect.left >= 0) && (rect.left < oriWidth) && (rect.top >= 0) && (rect.top < oriHeight))) {
         WLOGFE("rect left or top invalid!");
         return false;
     }
 
-    if (!((rect.width > 0) and (rect.width <= (oriWidth - rect.left)) and
-        (rect.height > 0) and (rect.height <= (oriHeight - rect.top)))) {
-        if (!((rect.width == 0) and (rect.height == 0))) {
+    if (!((rect.width > 0) && (rect.width <= (oriWidth - rect.left)) &&
+        (rect.height > 0) && (rect.height <= (oriHeight - rect.top)))) {
+        if (!((rect.width == 0) && (rect.height == 0))) {
             WLOGFE("rect height or width invalid!");
             return false;
         }
@@ -161,8 +163,8 @@ bool DisplayManager::Impl::CheckRectValid(const Media::Rect& rect, int32_t oriHe
 
 bool DisplayManager::Impl::CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const
 {
-    if (!((size.width > 0) and (size.height > 0))) {
-        if (!((size.width == 0) and (size.height == 0))) {
+    if (!((size.width > 0) && (size.height > 0))) {
+        if (!((size.width == 0) && (size.height == 0))) {
             WLOGFE("width or height invalid!");
             return false;
         }
@@ -184,6 +186,30 @@ void DisplayManager::Impl::ClearDisplayStateCallback()
             DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
         displayStateAgent_ = nullptr;
     }
+}
+
+DisplayManager::Impl::~Impl()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    bool res = true;
+    if (displayManagerListener_ != nullptr) {
+        res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            displayManagerListener_, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+    }
+    displayManagerListener_ = nullptr;
+    if (!res) {
+        WLOGFW("UnregisterDisplayManagerAgent DISPLAY_EVENT_LISTENER failed !");
+    }
+    res = true;
+    if (powerEventListenerAgent_ != nullptr) {
+        res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            powerEventListenerAgent_, DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
+    }
+    powerEventListenerAgent_ = nullptr;
+    if (!res) {
+        WLOGFW("UnregisterDisplayManagerAgent DISPLAY_POWER_EVENT_LISTENER failed !");
+    }
+    ClearDisplayStateCallback();
 }
 
 DisplayManager::DisplayManager() : pImpl_(new Impl())
@@ -236,7 +262,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayByScreenId(ScreenId screenId)
         return nullptr;
     }
     DisplayId displayId = displayInfo->GetDisplayId();
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("get display by screenId: invalid displayInfo");
         return nullptr;
     }
@@ -251,7 +277,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayByScreenId(ScreenId screenId)
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId)
 {
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("displayId invalid!");
         return nullptr;
     }
@@ -268,7 +294,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
                                                                const Media::Size &size, int rotation)
 {
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("displayId invalid!");
         return nullptr;
     }
@@ -337,17 +363,18 @@ std::vector<sptr<Display>> DisplayManager::GetAllDisplays()
 bool DisplayManager::Impl::RegisterDisplayListener(sptr<IDisplayListener> listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    displayListeners_.push_back(listener);
     bool ret = true;
     if (displayManagerListener_ == nullptr) {
         displayManagerListener_ = new DisplayManagerListener(this);
         ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
             displayManagerListener_,
             DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
-        if (!ret) {
-            WLOGFW("RegisterDisplayManagerAgent failed ! remove listener!");
-            displayListeners_.pop_back();
-        }
+    }
+    if (!ret) {
+        WLOGFW("RegisterDisplayManagerAgent failed !");
+        displayManagerListener_ = nullptr;
+    } else {
+        displayListeners_.insert(listener);
     }
     return ret;
 }
@@ -392,17 +419,18 @@ bool DisplayManager::UnregisterDisplayListener(sptr<IDisplayListener> listener)
 bool DisplayManager::Impl::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    powerEventListeners_.push_back(listener);
     bool ret = true;
     if (powerEventListenerAgent_ == nullptr) {
         powerEventListenerAgent_ = new DisplayManagerAgent(this);
         ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
             powerEventListenerAgent_,
             DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
-        if (!ret) {
-            WLOGFW("RegisterDisplayManagerAgent failed ! remove listener!");
-            powerEventListeners_.pop_back();
-        }
+    }
+    if (!ret) {
+        WLOGFW("RegisterDisplayManagerAgent failed !");
+        powerEventListenerAgent_ = nullptr;
+    } else {
+        powerEventListeners_.insert(listener);
     }
     WLOGFI("RegisterDisplayPowerEventListener end");
     return ret;
@@ -450,8 +478,12 @@ void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 {
     WLOGFI("NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu", event, status,
         powerEventListeners_.size());
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto& listener : powerEventListeners_) {
+    std::set<sptr<IDisplayPowerEventListener>> powerEventListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        powerEventListeners = powerEventListeners_;
+    }
+    for (auto& listener : powerEventListeners) {
         listener->OnDisplayPowerEvent(event, status);
     }
 }
@@ -459,9 +491,13 @@ void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 void DisplayManager::Impl::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 {
     WLOGFI("state:%{public}u", state);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (displayStateCallback_) {
-        displayStateCallback_(state);
+    DisplayStateCallback displayStateCallback;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        displayStateCallback = displayStateCallback_;
+    }
+    if (displayStateCallback) {
+        displayStateCallback(state);
         ClearDisplayStateCallback();
         return;
     }
@@ -495,7 +531,7 @@ bool DisplayManager::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo
     }
     DisplayId displayId = displayInfo->GetDisplayId();
     WLOGFI("displayId:%{public}" PRIu64".", displayId);
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("displayId is invalid.");
         return false;
     }
@@ -533,42 +569,6 @@ bool DisplayManager::SuspendEnd()
 {
     WLOGFI("SuspendEnd start");
     return SingletonContainer::Get<DisplayManagerAdapter>().SuspendEnd();
-}
-
-bool DisplayManager::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
-{
-    // TODO: should get all screen ids
-    WLOGFI("state:%{public}u, reason:%{public}u", state, reason);
-    ScreenId defaultId = GetDefaultDisplayId();
-    if (defaultId == DISPLAY_ID_INVALD) {
-        WLOGFI("defaultId invalid!");
-        return false;
-    }
-    ScreenPowerStatus status;
-    switch (state) {
-        case DisplayPowerState::POWER_ON: {
-            status = ScreenPowerStatus::POWER_STATUS_ON;
-            break;
-        }
-        case DisplayPowerState::POWER_OFF: {
-            status = ScreenPowerStatus::POWER_STATUS_OFF;
-            break;
-        }
-        default: {
-            WLOGFW("SetScreenPowerStatus state not support");
-            return false;
-        }
-    }
-    RSInterfaces::GetInstance().SetScreenPowerStatus(defaultId, status);
-    WLOGFI("SetScreenPowerStatus end");
-    return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenPowerForAll(state, reason);
-}
-
-DisplayPowerState DisplayManager::GetScreenPower(uint64_t screenId)
-{
-    DisplayPowerState res = static_cast<DisplayPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screenId));
-    WLOGFI("GetScreenPower:%{public}u, defaultId:%{public}" PRIu64".", res, screenId);
-    return res;
 }
 
 bool DisplayManager::Impl::SetDisplayState(DisplayState state, DisplayStateCallback callback)
@@ -626,5 +626,25 @@ void DisplayManager::NotifyDisplayEvent(DisplayEvent event)
     // Unlock event dms->wms restore other hidden windows
     WLOGFI("DisplayEvent:%{public}u", event);
     SingletonContainer::Get<DisplayManagerAdapter>().NotifyDisplayEvent(event);
+}
+
+bool DisplayManager::Freeze(std::vector<DisplayId> displayIds)
+{
+    WLOGFD("freeze display");
+    if (displayIds.size() == 0) {
+        WLOGFE("freeze display fail, num of display is 0");
+        return false;
+    }
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, true);
+}
+
+bool DisplayManager::Unfreeze(std::vector<DisplayId> displayIds)
+{
+    WLOGFD("unfreeze display");
+    if (displayIds.size() == 0) {
+        WLOGFE("unfreeze display fail, num of display is 0");
+        return false;
+    }
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, false);
 }
 } // namespace OHOS::Rosen

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <map>
 #include <vector>
 
+#include <event_handler.h>
 #include <refbase.h>
 #include <surface.h>
 #include <transaction/rs_interfaces.h>
@@ -40,6 +41,7 @@ public:
 
     AbstractScreenController(std::recursive_mutex& mutex);
     ~AbstractScreenController();
+    WM_DISALLOW_COPY_AND_MOVE(AbstractScreenController);
 
     void Init();
     void ScreenConnectionInDisplayInit(sptr<AbstractScreenCallback> abstractScreenCallback);
@@ -49,7 +51,6 @@ public:
     std::vector<ScreenId> GetAllExpandOrMirrorScreenIds(std::vector<ScreenId>) const;
     sptr<AbstractScreenGroup> GetAbstractScreenGroup(ScreenId dmsScreenId);
     ScreenId GetDefaultAbstractScreenId();
-    ScreenId GetDefaultScreenId() const; // save default screenID got by GetDefaultAbstractScreenId as cache
     ScreenId ConvertToRsScreenId(ScreenId dmsScreenId);
     ScreenId ConvertToDmsScreenId(ScreenId rsScreenId);
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
@@ -58,14 +59,13 @@ public:
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     bool SetOrientation(ScreenId screenId, Orientation orientation);
 
-    bool IsScreenGroup(ScreenId screenId) const;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
     void UpdateRSTree(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     bool MakeMirror(ScreenId, std::vector<ScreenId> screens);
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
+    void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
     void DumpScreenInfo() const;
-    void DumpScreenGroupInfo() const;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);
@@ -77,25 +77,57 @@ public:
 
 private:
     void OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent);
+    void ProcessScreenConnected(ScreenId rsScreenId);
+    sptr<AbstractScreen> InitAndGetScreen(ScreenId rsScreenId);
     void ProcessScreenDisconnected(ScreenId rsScreenId);
     bool FillAbstractScreen(sptr<AbstractScreen>& absScreen, ScreenId rsScreenId);
     sptr<AbstractScreenGroup> AddToGroupLocked(sptr<AbstractScreen> newScreen);
     sptr<AbstractScreenGroup> RemoveFromGroupLocked(sptr<AbstractScreen> newScreen);
+    bool RemoveChildFromGroup(sptr<AbstractScreen>, sptr<AbstractScreenGroup>);
     bool CheckScreenInScreenGroup(sptr<AbstractScreen> newScreen) const;
     sptr<AbstractScreenGroup> AddAsFirstScreenLocked(sptr<AbstractScreen> newScreen);
     sptr<AbstractScreenGroup> AddAsSuccedentScreenLocked(sptr<AbstractScreen> newScreen);
     void ProcessScreenModeChanged(ScreenId dmsScreenId);
+    void ChangeScreenGroup(sptr<AbstractScreenGroup> group, const std::vector<ScreenId>& screens,
+        const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination);
+    void AddScreenToGroup(sptr<AbstractScreenGroup>, const std::vector<ScreenId>&,
+        const std::vector<Point>&, std::map<ScreenId, bool>&);
+    void NotifyScreenConnected(sptr<ScreenInfo>) const;
+    void NotifyScreenDisconnected(ScreenId screenId) const;
+    void NotifyScreenChanged(sptr<ScreenInfo> screenInfo, ScreenChangeEvent event) const;
+    void NotifyScreenGroupChanged(const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent event) const;
+    void NotifyScreenGroupChanged(const std::vector<sptr<ScreenInfo>>& screenInfo, ScreenGroupChangeEvent event) const;
+    void DumpScreenGroupInfo() const;
+
+    class ScreenIdManager {
+    public:
+        ScreenIdManager() = default;
+        ~ScreenIdManager() = default;
+        WM_DISALLOW_COPY_AND_MOVE(ScreenIdManager);
+        ScreenId CreateAndGetNewScreenId(ScreenId rsScreenId);
+        bool DeleteScreenId(ScreenId dmsScreenId);
+        bool HasDmsScreenId(ScreenId dmsScreenId) const;
+        bool HasRsScreenId(ScreenId dmsScreenId) const;
+        bool ConvertToRsScreenId(ScreenId, ScreenId&) const;
+        ScreenId ConvertToRsScreenId(ScreenId) const;
+        bool ConvertToDmsScreenId(ScreenId, ScreenId&) const;
+        ScreenId ConvertToDmsScreenId(ScreenId) const;
+        void DumpScreenIdInfo() const;
+    private:
+        std::atomic<ScreenId> dmsScreenCount_ {0};
+        std::map<ScreenId, ScreenId> rs2DmsScreenIdMap_;
+        std::map<ScreenId, ScreenId> dms2RsScreenIdMap_;
+    };
+
+    const std::string CONTROLLER_THREAD_ID = "abstract_screen_controller_thread";
 
     std::recursive_mutex& mutex_;
     OHOS::Rosen::RSInterfaces& rsInterface_;
-    std::atomic<ScreenId> dmsScreenCount_;
-    // No AbstractScreenGroup
-    std::map<ScreenId, ScreenId> rs2DmsScreenIdMap_;
-    std::map<ScreenId, ScreenId> dms2RsScreenIdMap_;
+    ScreenIdManager screenIdManager_;
     std::map<ScreenId, sptr<AbstractScreen>> dmsScreenMap_;
     std::map<ScreenId, sptr<AbstractScreenGroup>> dmsScreenGroupMap_;
     sptr<AbstractScreenCallback> abstractScreenCallback_;
-    ScreenId defaultScreenId = INVALID_SCREEN_ID;
+    std::shared_ptr<AppExecFwk::EventHandler> controllerHandler_;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_SCREEN_CONTROLLER_H

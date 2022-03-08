@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "screen_group.h"
+
+#include "display_manager_adapter.h"
 #include "screen.h"
 #include "screen_group_info.h"
 #include "window_manager_hilog.h"
@@ -30,7 +32,7 @@ public:
     }
     ~Impl() = default;
 
-    DEFINE_VAR_FUNC_GET_SET(sptr<ScreenGroupInfo>, ScreenGroupInfo, screenGroupInfo);
+    DEFINE_VAR_FUNC_GET_SET_WITH_LOCK(sptr<ScreenGroupInfo>, ScreenGroupInfo, screenGroupInfo);
 };
 
 ScreenGroup::ScreenGroup(sptr<ScreenGroupInfo> info)
@@ -38,13 +40,20 @@ ScreenGroup::ScreenGroup(sptr<ScreenGroupInfo> info)
 {
 }
 
-void ScreenGroup::UpdateScreenGroupInfo(sptr<ScreenGroupInfo> info)
+void ScreenGroup::UpdateScreenGroupInfo(sptr<ScreenGroupInfo> info) const
 {
     if (info == nullptr) {
         WLOGFE("ScreenGroupInfo is nullptr.");
         return;
     }
+    Screen::UpdateScreenInfo(info);
     pImpl_->SetScreenGroupInfo(info);
+}
+
+void ScreenGroup::UpdateScreenGroupInfo() const
+{
+    auto screenInfo = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGroupInfoById(GetId());
+    UpdateScreenGroupInfo(screenInfo);
 }
 
 ScreenGroup::~ScreenGroup()
@@ -53,16 +62,19 @@ ScreenGroup::~ScreenGroup()
 
 ScreenCombination ScreenGroup::GetCombination() const
 {
+    UpdateScreenGroupInfo();
     return pImpl_->GetScreenGroupInfo()->GetCombination();
 }
 
 std::vector<ScreenId> ScreenGroup::GetChildIds() const
 {
+    UpdateScreenGroupInfo();
     return pImpl_->GetScreenGroupInfo()->GetChildren();
 }
 
 std::vector<Point> ScreenGroup::GetChildPositions() const
 {
+    UpdateScreenGroupInfo();
     return pImpl_->GetScreenGroupInfo()->GetPosition();
 }
 } // namespace OHOS::Rosen
