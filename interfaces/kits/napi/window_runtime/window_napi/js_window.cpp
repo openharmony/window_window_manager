@@ -189,6 +189,62 @@ NativeValue* JsWindow::IsSupportWideGamut(NativeEngine* engine, NativeCallbackIn
     return (me != nullptr) ? me->OnIsSupportWideGamut(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::SetBackgroundColor(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::SetBackgroundColor is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetBackgroundColor(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::SetBrightness(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::SetBrightness is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetBrightness(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::SetDimBehind(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::SetDimBehind is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetDimBehind(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::SetFocusable(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::SetFocusable is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetFocusable(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::SetKeepScreenOn(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::SetkeepScreenOn is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetKeepScreenOn(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::SetOutsideTouchable(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::SetOutsideTouchable is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetOutsideTouchable(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::SetPrivacyMode(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::SetPrivacyMode is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetPrivacyMode(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::SetTouchable(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsWindow::SetTouchable is called");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetTouchable(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::SetColorSpace(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGFI("JsWindow::SetColorSpace is called");
@@ -884,6 +940,134 @@ NativeValue* JsWindow::OnIsSupportWideGamut(NativeEngine& engine, NativeCallback
     return result;
 }
 
+NativeValue* JsWindow::OnSetBackgroundColor(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnSetBackgroundColor is called");
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+    };
+
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnSetBrightness(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnSetBrightness is called");
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+        };
+
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnSetDimBehind(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnSetDimBehind is called");
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+        };
+
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnSetFocusable(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnSetFocusable is called");
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+        };
+
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnSetKeepScreenOn(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnSetKeepScreenOn is called");
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+        };
+
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnSetOutsideTouchable(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnSetOutsideTouchable is called");
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+        };
+
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnSetPrivacyMode(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnSetPrivacyMode is called");
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+        };
+
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnSetTouchable(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsWindow::OnSetTouchable is called");
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+        };
+
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        (info.argv[INDEX_ONE]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_ONE] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 NativeValue* JsWindow::OnSetColorSpace(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsWindow::OnSetColorSpace is called");
@@ -1003,6 +1187,14 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     BindNativeFunction(engine, *object, "isSupportWideGamut", JsWindow::IsSupportWideGamut);
     BindNativeFunction(engine, *object, "setColorSpace", JsWindow::SetColorSpace);
     BindNativeFunction(engine, *object, "getColorSpace", JsWindow::GetColorSpace);
+    BindNativeFunction(engine, *object, "setBackgroundColor", JsWindow::SetBackgroundColor);
+    BindNativeFunction(engine, *object, "setBrightness", JsWindow::SetBrightness);
+    BindNativeFunction(engine, *object, "setDimBehind", JsWindow::SetDimBehind);
+    BindNativeFunction(engine, *object, "setFocusable", JsWindow::SetFocusable);
+    BindNativeFunction(engine, *object, "setKeepScreenOn", JsWindow::SetKeepScreenOn);
+    BindNativeFunction(engine, *object, "setOutsideTouchable", JsWindow::SetOutsideTouchable);
+    BindNativeFunction(engine, *object, "setPrivacyMode", JsWindow::SetPrivacyMode);
+    BindNativeFunction(engine, *object, "setTouchable", JsWindow::SetTouchable);
     std::shared_ptr<NativeReference> jsWindowRef;
     jsWindowRef.reset(engine.CreateReference(objValue, 1));
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
