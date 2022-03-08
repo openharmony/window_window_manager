@@ -14,6 +14,7 @@
  */
 
 #include "window_controller.h"
+#include <parameters.h>
 #include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
 #include "window_helper.h"
@@ -64,9 +65,9 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         return WMError::WM_ERROR_NULLPTR;
     }
     node->SetWindowProperty(property);
-    // TODO: check permission
-    // TODO: adjust property
 
+    // Need 'check permission'
+    // Need 'adjust property'
     WMError res = windowRoot_->AddWindowNode(property->GetParentId(), node);
     if (res != WMError::WM_OK) {
         return res;
@@ -86,9 +87,11 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         WM_SCOPED_TRACE_END();
         if (res != WMError::WM_OK) {
             WLOGFE("Minimize other structured window failed");
+            return res;
         }
     }
-    return res;
+    StopBootAnimationIfNeed(node->GetWindowType());
+    return WMError::WM_OK;
 }
 
 WMError WindowController::RemoveWindowNode(uint32_t windowId)
@@ -104,7 +107,7 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
 
 WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
-    DisplayId displayId = DISPLAY_ID_INVALD;
+    DisplayId displayId = DISPLAY_ID_INVALID;
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node != nullptr) {
         displayId = node->GetDisplayId();
@@ -163,6 +166,9 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
 
 WMError WindowController::RequestFocus(uint32_t windowId)
 {
+    if (windowRoot_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     return windowRoot_->RequestFocus(windowId);
 }
 
@@ -285,23 +291,17 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
     }
 
     switch (type) {
+        case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION: {
             windowRoot_->NotifyDisplayChange(abstractDisplay);
 
-            // TODO: Remove 'sysBarWinId_' after SystemUI resize 'systembar'
+            // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
             uint32_t width = static_cast<uint32_t>(abstractDisplay->GetWidth());
             uint32_t height = abstractDisplay->GetHeight() * SYSTEM_BAR_HEIGHT_RATIO;
             Rect newRect = { 0, 0, width, height };
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
             newRect = { 0, abstractDisplay->GetHeight() - height, width, height };
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
-            break;
-        }
-        case DisplayStateChangeType::SIZE_CHANGE: {
-            // Should request different window resolution change but not directly apply resize
-            // show logs of updated display
-            windowRoot_->NotifyDisplayChange(abstractDisplay);
-            WLOGFI("display w/h: %{public}u %{public}u", abstractDisplay->GetWidth(), abstractDisplay->GetHeight());
             break;
         }
         default: {
@@ -311,6 +311,14 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
     }
     FlushWindowInfoWithDisplayId(displayId);
     WLOGFI("Finish ProcessDisplayChange");
+}
+
+void WindowController::StopBootAnimationIfNeed(WindowType type) const
+{
+    if (WindowType::WINDOW_TYPE_DESKTOP == type) {
+        WLOGFD("stop boot animation");
+        system::SetParameter("persist.window.boot.inited", "1");
+    }
 }
 
 WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
@@ -401,6 +409,17 @@ void WindowController::MinimizeAllAppWindows(DisplayId displayId)
     windowRoot_->MinimizeAllAppWindows(displayId);
 }
 
+WMError WindowController::MaxmizeWindow(uint32_t windowId)
+{
+    WMError ret = SetWindowMode(windowId, WindowMode::WINDOW_MODE_FULLSCREEN);
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+    ret = windowRoot_->MaxmizeWindow(windowId);
+    FlushWindowInfo(windowId);
+    return ret;
+}
+
 WMError WindowController::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
     return windowRoot_->GetTopWindowId(mainWinId, topWinId);
@@ -448,5 +467,10 @@ WMError WindowController::SetWindowLayoutMode(DisplayId displayId, WindowLayoutM
     FlushWindowInfoWithDisplayId(displayId);
     return res;
 }
+
+WMError WindowController::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
+{
+    return windowRoot_->DumpWindowTree(windowTreeInfos, type);
 }
-}
+} // namespace OHOS
+} // namespace Rosen

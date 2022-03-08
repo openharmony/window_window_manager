@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -79,7 +79,7 @@ ohos_static_library("wms_unittest_common") {
   public_deps = [
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
 
-    # todo need delete it for abilitycontext
+    # need delete it for abilitycontext
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/ace/ace_engine/build/external_config/flutter/skia:ace_skia_ohos",
     "//foundation/ace/napi:ace_napi",
@@ -96,5 +96,7 @@ ohos_static_library("wms_unittest_common") {
   ]
 
   external_deps = [ "ability_runtime:ability_context_native" ]
+  subsystem_name = "window"
+  part_name = "window_manager"
 }
 ## Build wms_unittest_common.a }}}

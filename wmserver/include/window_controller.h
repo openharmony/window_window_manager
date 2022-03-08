@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,8 +49,10 @@ public:
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
     WMError ProcessWindowTouchedEvent(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
+    WMError MaxmizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
     void NotifySystemBarTints();
+    WMError DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
 
 private:
     uint32_t GenWindowId();
@@ -58,11 +60,12 @@ private:
     void FlushWindowInfoWithDisplayId(DisplayId displayId);
     void UpdateWindowAnimation(const sptr<WindowNode>& node);
     void ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type);
+    void StopBootAnimationIfNeed(WindowType type) const;
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
     std::atomic<uint32_t> windowId_ { INVALID_WINDOW_ID };
-    // TODO: Remove 'sysBarWinId_' after SystemUI resize 'systembar'
+    // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
     std::unordered_map<WindowType, uint32_t> sysBarWinId_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     INVALID_WINDOW_ID },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, INVALID_WINDOW_ID },

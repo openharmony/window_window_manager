@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "abstract_screen.h"
 
+#include <cmath>
 #include "abstract_screen_controller.h"
 #include "display_manager_service.h"
 #include "dm_common.h"
@@ -25,8 +26,8 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractScreenGroup"};
 }
 
-AbstractScreen::AbstractScreen(ScreenId dmsId, ScreenId rsId)
-    : dmsId_(dmsId), rsId_(rsId), screenController_(DisplayManagerService::GetInstance().abstractScreenController_)
+AbstractScreen::AbstractScreen(sptr<AbstractScreenController> screenController, const std::string& name, ScreenId dmsId,
+    ScreenId rsId) : name_(name), dmsId_(dmsId), rsId_(rsId), screenController_(screenController)
 {
 }
 
@@ -50,12 +51,15 @@ std::vector<sptr<SupportedScreenModes>> AbstractScreen::GetAbstractScreenModes()
 
 sptr<AbstractScreenGroup> AbstractScreen::GetGroup() const
 {
-    return DisplayManagerService::GetInstance().GetAbstractScreenController()->GetAbstractScreenGroup(groupDmsId_);
+    return screenController_->GetAbstractScreenGroup(groupDmsId_);
 }
 
 sptr<ScreenInfo> AbstractScreen::ConvertToScreenInfo() const
 {
     sptr<ScreenInfo> info = new ScreenInfo();
+    if (info == nullptr) {
+        return nullptr;
+    }
     FillScreenInfo(info);
     return info;
 }
@@ -179,6 +183,7 @@ DMError AbstractScreen::SetScreenColorTransform()
 void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
 {
     info->id_ = dmsId_;
+    info->rsId_ = rsId_;
     uint32_t width = 0;
     uint32_t height = 0;
     if (activeIdx_ >= 0 && activeIdx_ < modes_.size()) {
@@ -186,13 +191,19 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
         height = abstractScreenModes->height_;
         width = abstractScreenModes->width_;
     }
+    float virtualPixelRatio = virtualPixelRatio_;
+    // "< 1e-6" means virtualPixelRatio is 0.
+    if (fabsf(virtualPixelRatio) < 1e-6) {
+        virtualPixelRatio = 1.0f;
+    }
     info->virtualPixelRatio_ = virtualPixelRatio;
-    info->virtualHeight_ = virtualPixelRatio * height;
-    info->virtualWidth_ = virtualPixelRatio * width;
+    info->virtualHeight_ = height / virtualPixelRatio;
+    info->virtualWidth_ = width / virtualPixelRatio;
     info->parent_ = groupDmsId_;
-    info->canHasChild_ = canHasChild_;
+    info->isScreenGroup_ = isScreenGroup_;
     info->rotation_ = rotation_;
     info->orientation_ = orientation_;
+    info->type_ = type_;
     info->modeId_ = activeIdx_;
     info->modes_ = modes_;
 }
@@ -205,7 +216,11 @@ bool AbstractScreen::SetOrientation(Orientation orientation)
 
 Rotation AbstractScreen::CalcRotation(Orientation orientation) const
 {
-    sptr<SupportedScreenModes> info = AbstractScreen::GetActiveScreenMode();
+    if (activeIdx_ < 0 || activeIdx_ >= modes_.size()) {
+        WLOGE("active mode index is wrong: %{public}d", activeIdx_);
+        return Rotation::ROTATION_0;
+    }
+    sptr<SupportedScreenModes> info = modes_[activeIdx_];
     // virtical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = info->width_ < info->height_;
     switch (orientation) {
@@ -231,11 +246,11 @@ Rotation AbstractScreen::CalcRotation(Orientation orientation) const
     }
 }
 
-AbstractScreenGroup::AbstractScreenGroup(ScreenId dmsId, ScreenId rsId, ScreenCombination combination)
-    : AbstractScreen(dmsId, rsId), combination_(combination)
+AbstractScreenGroup::AbstractScreenGroup(sptr<AbstractScreenController> screenController, ScreenId dmsId, ScreenId rsId,
+    ScreenCombination combination) : AbstractScreen(screenController, "", dmsId, rsId), combination_(combination)
 {
     type_ = ScreenType::UNDEFINE;
-    canHasChild_ = true;
+    isScreenGroup_ = true;
 }
 
 AbstractScreenGroup::~AbstractScreenGroup()
@@ -247,6 +262,9 @@ AbstractScreenGroup::~AbstractScreenGroup()
 sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
 {
     sptr<ScreenGroupInfo> screenGroupInfo = new ScreenGroupInfo();
+    if (screenGroupInfo == nullptr) {
+        return nullptr;
+    }
     FillScreenInfo(screenGroupInfo);
     screenGroupInfo->combination_ = combination_;
     for (auto iter = abstractScreenMap_.begin(); iter != abstractScreenMap_.end(); iter++) {
@@ -257,8 +275,12 @@ sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
     return screenGroupInfo;
 }
 
-bool AbstractScreenGroup::SetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config)
+bool AbstractScreenGroup::GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config)
 {
+    if (dmsScreen == nullptr) {
+        WLOGE("dmsScreen is nullptr.");
+        return false;
+    }
     switch (combination_) {
         case ScreenCombination::SCREEN_ALONE:
         case ScreenCombination::SCREEN_EXPAND:
@@ -272,11 +294,9 @@ bool AbstractScreenGroup::SetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen
             }
             if (mirrorScreenId_ == INVALID_SCREEN_ID || !HasChild(mirrorScreenId_)) {
                 WLOGI("AddChild, mirrorScreenId_ is invalid, use default screen");
-                mirrorScreenId_ =
-                    DisplayManagerService::GetInstance().GetAbstractScreenController()->GetDefaultAbstractScreenId();
+                mirrorScreenId_ = screenController_->GetDefaultAbstractScreenId();
             }
-            std::shared_ptr<RSDisplayNode> displayNode = SingletonContainer::Get<DisplayManagerService>().
-                GetAbstractScreenController()->GetRSDisplayNodeByScreenId(mirrorScreenId_);
+            std::shared_ptr<RSDisplayNode> displayNode = screenController_->GetRSDisplayNodeByScreenId(mirrorScreenId_);
             if (displayNode == nullptr) {
                 WLOGFE("AddChild fail, displayNode is nullptr, cannot get DisplayNode");
                 return false;
@@ -307,7 +327,7 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
         return false;
     }
     struct RSDisplayNodeConfig config;
-    if (!SetRSDisplayNodeConfig(dmsScreen, config)) {
+    if (!GetRSDisplayNodeConfig(dmsScreen, config)) {
         return false;
     }
     dmsScreen->InitRSDisplayNode(config);
@@ -338,13 +358,19 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
     }
     ScreenId screenId = dmsScreen->dmsId_;
     dmsScreen->groupDmsId_ = SCREEN_ID_INVALID;
+    if (rsDisplayNode_ != nullptr) {
+        rsDisplayNode_->RemoveFromTree();
+        auto transactionProxy = RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->FlushImplicitTransaction();
+        }
+    }
     return abstractScreenMap_.erase(screenId);
 }
 
 bool AbstractScreenGroup::HasChild(ScreenId childScreen) const
 {
-    auto iter = abstractScreenMap_.find(childScreen);
-    return iter != abstractScreenMap_.end();
+    return abstractScreenMap_.find(childScreen) != abstractScreenMap_.end();
 }
 
 std::vector<sptr<AbstractScreen>> AbstractScreenGroup::GetChildren() const

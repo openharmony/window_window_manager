@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,14 @@ void WindowManagerAgentController::UpdateFocusStatus(uint32_t windowId, const sp
     }
 }
 
+void WindowManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused)
+{
+    WLOGFI("UpdateFocusChangeInfo");
+    for (auto& agent : wmAgentContainer_.GetAgentsByType(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS)) {
+        agent->UpdateFocusChangeInfo(focusChangeInfo, focused);
+    }
+}
+
 void WindowManagerAgentController::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     WLOGFI("UpdateSystemBarRegionTints, tints size: %{public}u", static_cast<uint32_t>(tints.size()));
@@ -75,5 +83,5 @@ void WindowManagerAgentController::UpdateWindowVisibilityInfo(
         agent->UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

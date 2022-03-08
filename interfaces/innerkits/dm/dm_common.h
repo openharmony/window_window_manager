@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,19 +17,23 @@
 #define OHOS_ROSEN_DM_COMMON_H
 
 #include <refbase.h>
+#include <string>
 
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
 using ScreenId = uint64_t;
-static constexpr DisplayId DISPLAY_ID_INVALD = -1ULL;
-static constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+namespace {
+    constexpr DisplayId DISPLAY_ID_INVALID = -1ULL;
+    constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+    const static std::string DEFAULT_SCREEN_NAME = "buildIn";
+}
 
 enum class PowerStateChangeReason : uint32_t {
     POWER_BUTTON,
 };
 
-enum class DisplayPowerState : uint32_t {
+enum class ScreenPowerState : uint32_t {
     POWER_ON,
     POWER_STAND_BY,
     POWER_SUSPEND,
@@ -117,6 +121,8 @@ enum class Orientation : uint32_t {
 enum class DisplayChangeEvent : uint32_t {
     UPDATE_ORIENTATION,
     DISPLAY_SIZE_CHANGED,
+    DISPLAY_FREEZED,
+    DISPLAY_UNFREEZED,
     UNKNOWN,
 };
 }

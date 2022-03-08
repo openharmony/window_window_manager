@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,8 +50,8 @@ public:
         isCallbackCalled_ = true;
         displayId_ = displayId;
     }
-    bool isCallbackCalled_ { false };
-    DisplayId displayId_ { DISPLAY_ID_INVALD };
+    bool isCallbackCalled_ = false;
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
 };
 
 class DisplayChangeTest : public testing::Test {
@@ -62,27 +62,32 @@ public:
     virtual void TearDown() override;
     void ResetDisplayChangeListener();
     bool CheckDisplayChangeEventCallback(bool valueExpected);
-    bool ScreenSizeEqual(const sptr<Screen> screen, const sptr<SupportedScreenModes> curInfo);
-    bool DisplaySizeEqual(const sptr<Display> display, const sptr<SupportedScreenModes> curInfo);
+    bool ScreenSizeEqual(const sptr<Screen> screen, const sptr<SupportedScreenModes> curInfo) const;
+    bool DisplaySizeEqual(const sptr<Display> display, const sptr<SupportedScreenModes> curInfo) const;
     inline bool CheckModeSizeChange(const sptr<SupportedScreenModes> usedInfo,
         const sptr<SupportedScreenModes> curInfo) const;
 
     static DisplayId defaultDisplayId_;
+    static sptr<Screen> defaultScreen_;
     static sptr<DisplayChangeEventListener> listener_;
     static inline uint32_t times_ = 0;
 };
-DisplayId DisplayChangeTest::defaultDisplayId_ = DISPLAY_ID_INVALD;
+DisplayId DisplayChangeTest::defaultDisplayId_ = DISPLAY_ID_INVALID;
+sptr<Screen> DisplayChangeTest::defaultScreen_ = nullptr;
 sptr<DisplayChangeEventListener> DisplayChangeTest::listener_ = new DisplayChangeEventListener();
 
 void DisplayChangeTest::SetUpTestCase()
 {
     defaultDisplayId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
-    if (defaultDisplayId_ == DISPLAY_ID_INVALD) {
-        WLOGE("DisplayId is invalid!");
-    }
-    if (!DisplayManager::GetInstance().RegisterDisplayListener(listener_)) {
-        WLOGE("Fail to register display listener");
-    }
+    ASSERT_NE(DISPLAY_ID_INVALID, defaultDisplayId_);
+    sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
+    ASSERT_NE(nullptr, defaultDisplay);
+    ScreenId screenId = defaultDisplay->GetScreenId();
+    ASSERT_NE(INVALID_SCREEN_ID, screenId);
+    defaultScreen_ = ScreenManager::GetInstance().GetScreenById(screenId);
+    ASSERT_NE(nullptr, defaultScreen_);
+
+    ASSERT_EQ(true, DisplayManager::GetInstance().RegisterDisplayListener(listener_));
 }
 
 void DisplayChangeTest::TearDownTestCase()
@@ -102,8 +107,9 @@ void DisplayChangeTest::TearDown()
 
 void DisplayChangeTest::ResetDisplayChangeListener()
 {
+    ASSERT_NE(nullptr, listener_);
     listener_->isCallbackCalled_ = false;
-    listener_->displayId_ = DISPLAY_ID_INVALD;
+    listener_->displayId_ = DISPLAY_ID_INVALID;
 }
 
 bool DisplayChangeTest::CheckDisplayChangeEventCallback(bool valueExpected)
@@ -119,11 +125,16 @@ bool DisplayChangeTest::CheckDisplayChangeEventCallback(bool valueExpected)
         usleep(SLEEP_TIME_IN_US);
         ++times_;
     } while (times_ <= MAX_TIME_WAITING_FOR_CALLBACK);
+    WLOGI("CheckDisplayChangeEventCallback: cannot get valueExpected");
     return false;
 }
 
-bool DisplayChangeTest::ScreenSizeEqual(const sptr<Screen> screen, const sptr<SupportedScreenModes> curInfo)
+bool DisplayChangeTest::ScreenSizeEqual(const sptr<Screen> screen, const sptr<SupportedScreenModes> curInfo) const
 {
+    if (screen == nullptr || curInfo == nullptr) {
+        WLOGFI("param is nullptr");
+        return false;
+    }
     uint32_t sWidth = screen->GetWidth();
     uint32_t sHeight = screen->GetHeight();
     WLOGI("ScreenSizeEqual: ScreenSize: %{public}u %{public}u, ActiveModeInfoSize: %{public}u %{public}u",
@@ -131,8 +142,12 @@ bool DisplayChangeTest::ScreenSizeEqual(const sptr<Screen> screen, const sptr<Su
     return ((curInfo->width_ == sWidth) && (curInfo->height_ == sHeight));
 }
 
-bool DisplayChangeTest::DisplaySizeEqual(const sptr<Display> display, const sptr<SupportedScreenModes> curInfo)
+bool DisplayChangeTest::DisplaySizeEqual(const sptr<Display> display, const sptr<SupportedScreenModes> curInfo) const
 {
+    if (display == nullptr || curInfo == nullptr) {
+        WLOGFI("param is nullptr");
+        return false;
+    }
     uint32_t dWidth = static_cast<uint32_t>(display->GetWidth());
     uint32_t dHeight = static_cast<uint32_t>(display->GetHeight());
     WLOGI("DisplaySizeEqual:: DisplaySize: %{public}u %{public}u, ActiveModeInfoSize: %{public}u %{public}u",
@@ -215,12 +230,8 @@ HWTEST_F(DisplayChangeTest, UnregisterDisplayChangeListener03, Function | SmallT
 HWTEST_F(DisplayChangeTest, CheckDisplayStateChange01, Function | SmallTest | Level2)
 {
     WLOGFI("CheckDisplayStateChange01");
-    sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
-    ScreenId screenId = defaultDisplay->GetScreenId();
-    sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
-    ASSERT_NE(nullptr, screen);
-    uint32_t usedModeIdx = screen->GetModeId();
-    screen->SetScreenActiveMode(usedModeIdx);
+    uint32_t usedModeIdx = defaultScreen_->GetModeId();
+    defaultScreen_->SetScreenActiveMode(usedModeIdx);
     WLOGFI("SetScreenActiveMode: %{public}u", usedModeIdx);
     ASSERT_EQ(false, CheckDisplayChangeEventCallback(true));
 }
@@ -233,28 +244,22 @@ HWTEST_F(DisplayChangeTest, CheckDisplayStateChange01, Function | SmallTest | Le
 HWTEST_F(DisplayChangeTest, CheckDisplayStateChange02, Function | SmallTest | Level2)
 {
     WLOGFI("CheckDisplayStateChange02");
-    sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
-    ScreenId screenId = defaultDisplay->GetScreenId();
-    sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
-    ASSERT_NE(nullptr, screen);
-    auto modes = screen->GetSupportedModes();
-    uint32_t usedModeIdx = screen->GetModeId();
+    auto modes = defaultScreen_->GetSupportedModes();
+    uint32_t usedModeIdx = defaultScreen_->GetModeId();
     WLOGFI("usedModeIdx / SupportMode size: %{public}u %{public}zu", usedModeIdx, modes.size());
 
     for (uint32_t modeIdx = 0; modeIdx < modes.size(); modeIdx++) {
         if (modeIdx != usedModeIdx && CheckModeSizeChange(modes[usedModeIdx], modes[modeIdx])) {
-            screen->SetScreenActiveMode(modeIdx);
-            WLOGFI("SetScreenActiveMode: %{public}u", modeIdx);
+            defaultScreen_->SetScreenActiveMode(modeIdx);
+            WLOGFI("SetScreenActiveMode: %{public}u -> %{public}u", usedModeIdx, modeIdx);
             ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
-            ASSERT_EQ(defaultDisplayId_, listener_->displayId_);
+            // reset usedMode
+            ResetDisplayChangeListener();
+            defaultScreen_->SetScreenActiveMode(usedModeIdx);
+            CheckDisplayChangeEventCallback(true);
             break;
         }
     }
-    // Set it back as default
-    // Check callback again since display sync in another thread
-    screen->SetScreenActiveMode(usedModeIdx);
-    ResetDisplayChangeListener();
-    CheckDisplayChangeEventCallback(true);
 }
 
 /**
@@ -265,28 +270,23 @@ HWTEST_F(DisplayChangeTest, CheckDisplayStateChange02, Function | SmallTest | Le
 HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange01, Function | MediumTest | Level2)
 {
     WLOGFI("CheckDisplaySizeChange01");
-    sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
-    ScreenId screenId = defaultDisplay->GetScreenId();
-    sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
-    ASSERT_NE(nullptr, screen);
-    auto modes = screen->GetSupportedModes();
-    uint32_t usedModeIdx = screen->GetModeId();
+    auto modes = defaultScreen_->GetSupportedModes();
+    uint32_t usedModeIdx = defaultScreen_->GetModeId();
     WLOGFI("usedModeIdx / SupportMode size: %{public}u %{public}zu", usedModeIdx, modes.size());
 
     for (uint32_t modeIdx = 0; modeIdx < modes.size(); modeIdx++) {
         if (modeIdx != usedModeIdx && CheckModeSizeChange(modes[usedModeIdx], modes[modeIdx])) {
-            screen->SetScreenActiveMode(modeIdx);
+            defaultScreen_->SetScreenActiveMode(modeIdx);
             WLOGFI("SetScreenActiveMode: %{public}u -> %{public}u", usedModeIdx, modeIdx);
-            ASSERT_EQ(true, ScreenSizeEqual(screen, modes[modeIdx]));
+            ASSERT_EQ(true, ScreenSizeEqual(defaultScreen_, modes[modeIdx]));
             ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
+            // reset usedMode
+            ResetDisplayChangeListener();
+            defaultScreen_->SetScreenActiveMode(usedModeIdx);
+            CheckDisplayChangeEventCallback(true);
             break;
         }
     }
-    // Set it back as default
-    // Check callback again since display sync in another thread
-    screen->SetScreenActiveMode(usedModeIdx);
-    ResetDisplayChangeListener();
-    CheckDisplayChangeEventCallback(true);
 }
 
 /**
@@ -297,29 +297,26 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange01, Function | MediumTest | Le
 HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange02, Function | MediumTest | Level2)
 {
     WLOGFI("CheckDisplaySizeChange02");
-    sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
-    ScreenId screenId = defaultDisplay->GetScreenId();
-    sptr<Screen> screen = ScreenManager::GetInstance().GetScreenById(screenId);
-    ASSERT_NE(nullptr, screen);
-    auto modes = screen->GetSupportedModes();
-    uint32_t usedModeIdx = screen->GetModeId();
+    auto modes = defaultScreen_->GetSupportedModes();
+    uint32_t usedModeIdx = defaultScreen_->GetModeId();
     WLOGFI("usedModeIdx / SupportMode size: %{public}u %{public}zu", usedModeIdx, modes.size());
 
     for (uint32_t modeIdx = 0; modeIdx < modes.size(); modeIdx++) {
         if (modeIdx != usedModeIdx && CheckModeSizeChange(modes[usedModeIdx], modes[modeIdx])) {
-            screen->SetScreenActiveMode(modeIdx);
+            defaultScreen_->SetScreenActiveMode(modeIdx);
             WLOGFI("SetScreenActiveMode: %{public}u -> %{public}u", usedModeIdx, modeIdx);
+            ASSERT_EQ(true, ScreenSizeEqual(defaultScreen_, modes[modeIdx]));
             ASSERT_EQ(true, CheckDisplayChangeEventCallback(true));
-            defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
+            sptr<Display> defaultDisplay = DisplayManager::GetInstance().GetDisplayById(defaultDisplayId_);
+            ASSERT_NE(nullptr, defaultDisplay);
             ASSERT_EQ(true, DisplaySizeEqual(defaultDisplay, modes[modeIdx]));
+            // reset usedMode
+            ResetDisplayChangeListener();
+            defaultScreen_->SetScreenActiveMode(usedModeIdx);
+            CheckDisplayChangeEventCallback(true);
             break;
         }
     }
-    // Set it back as default
-    // Check callback again since display sync in another thread
-    screen->SetScreenActiveMode(usedModeIdx);
-    ResetDisplayChangeListener();
-    CheckDisplayChangeEventCallback(true);
 }
 }
 } // namespace Rosen

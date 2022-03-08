@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 #include "js_window_manager.h"
 #include <ability.h>
 #include <cinttypes>
+#include <new>
 #include "ability_context.h"
 #include "dm_common.h"
 #include "js_window.h"
@@ -191,7 +192,13 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
             }
         }
     }
-    sptr<WindowOption> windowOption = new WindowOption();
+    sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
+    if (windowOption == nullptr) {
+        task.Reject(engine, CreateJsError(engine,
+            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnCreateWindow failed."));
+        WLOGFE("JsWindowManager::OnCreateWindow windowOption malloc failed");
+        return;
+    }
     windowOption->SetWindowType(winType);
     sptr<Window> window = Window::Create(windowName, windowOption, context->lock());
     if (window != nullptr) {
@@ -207,7 +214,13 @@ static void CreateSubWindowTask(std::string parentWinName, std::string windowNam
     NativeEngine& engine, AsyncTask& task)
 {
     WLOGFI("JsWindowManager::CreateSubWindowTask is called");
-    sptr<WindowOption> windowOption = new WindowOption();
+    sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
+    if (windowOption == nullptr) {
+        task.Reject(engine, CreateJsError(engine,
+            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnCreateWindow failed."));
+        WLOGFE("JsWindowManager::OnCreateWindow windowOption malloc failed");
+        return;
+    }
     windowOption->SetWindowType(winType);
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     windowOption->SetParentName(parentWinName);
@@ -319,8 +332,7 @@ NativeValue* JsWindowManager::OnMinimizeAll(NativeEngine& engine, NativeCallback
         WLOGFE("param is too small!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    // TODO: use DisplayId instead of int64_t when engine supported
-    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALD);
+    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[0], displayId)) {
         WLOGFE("Failed to convert parameter to displayId");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
@@ -347,7 +359,7 @@ NativeValue* JsWindowManager::OnMinimizeAll(NativeEngine& engine, NativeCallback
 NativeValue* JsWindowManager::OnRegisterWindowMangerCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsWindowManager::OnRegisterWindowMangerCallback is called");
-    if (info.argc != ARGC_TWO) {
+    if (info.argc != 2) { // 2 is num of argc
         WLOGFE("Params not match");
         return engine.CreateUndefined();
     }
@@ -498,10 +510,14 @@ NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, Native
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(winLayoutMode,
+            WMError ret = SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(winLayoutMode,
                 static_cast<uint64_t>(displayId));
-            task.Resolve(engine, engine.CreateUndefined());
-            WLOGFI("JsWindowManager::OnSetWindowLayoutMode success");
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+                WLOGFI("JsWindowManager::OnSetWindowLayoutMode success");
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "do failed"));
+            }
         };
     NativeValue* lastParam = (info.argc < ARGC_THREE) ? nullptr :
         (info.argv[INDEX_TWO]->TypeOf() == NATIVE_FUNCTION ? info.argv[INDEX_TWO] : nullptr);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "Display"};
+    constexpr int32_t LARGE_SCREEN_WIDTH = 2160;
 }
 class Display::Impl : public RefBase {
 public:
@@ -31,7 +32,7 @@ public:
     }
     ~Impl() = default;
     DEFINE_VAR_FUNC_GET_SET(std::string, Name, name);
-    DEFINE_VAR_FUNC_GET_SET(sptr<DisplayInfo>, DisplayInfo, displayInfo);
+    DEFINE_VAR_FUNC_GET_SET_WITH_LOCK(sptr<DisplayInfo>, DisplayInfo, displayInfo);
 };
 
 Display::Display(const std::string& name, sptr<DisplayInfo> info)
@@ -63,7 +64,13 @@ int32_t Display::GetHeight() const
 uint32_t Display::GetFreshRate() const
 {
     UpdateDisplayInfo();
-    return pImpl_->GetDisplayInfo()->GetFreshRate();
+    return pImpl_->GetDisplayInfo()->GetRefreshRate();
+}
+
+uint32_t Display::GetRefreshRate() const
+{
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetRefreshRate();
 }
 
 ScreenId Display::GetScreenId() const
@@ -101,11 +108,12 @@ void Display::UpdateDisplayInfo() const
 
 float Display::GetVirtualPixelRatio() const
 {
-    // TODO: Should get from DMS
-#ifdef PRODUCT_RK
-    return 1.0f;
-#else
-    return 2.0f;
-#endif
+    // Should get from DMS
+    if ((pImpl_->GetDisplayInfo()->GetWidth() >= LARGE_SCREEN_WIDTH)
+        || (pImpl_->GetDisplayInfo()->GetHeight() >= LARGE_SCREEN_WIDTH)) {
+        return 2.0f;
+    } else {
+        return 1.0f;
+    }
 }
 } // namespace OHOS::Rosen

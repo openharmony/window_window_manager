@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ namespace Rosen {
 using Mocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
 
 sptr<Display> ScreenManagerTest::defaultDisplay_ = nullptr;
-DisplayId ScreenManagerTest::defaultDisplayId_ = DISPLAY_ID_INVALD;
+DisplayId ScreenManagerTest::defaultDisplayId_ = DISPLAY_ID_INVALID;
 uint32_t ScreenManagerTest::defaultWidth_ = 480;
 uint32_t ScreenManagerTest::defaultHeight_ = 320;
 

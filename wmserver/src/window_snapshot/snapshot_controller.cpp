@@ -32,7 +32,7 @@ void SnapshotController::Init(sptr<WindowRoot>& root)
 WMError SnapshotController::TakeSnapshot(const std::shared_ptr<RSSurfaceNode>& surfaceNode, Snapshot& snapshot)
 {
     std::shared_ptr<GetSurfaceCapture> callback = std::make_shared<GetSurfaceCapture>();
-    rsInterface_.TakeSurfaceCapture(surfaceNode, callback);
+    rsInterface_.TakeSurfaceCapture(surfaceNode, callback, scaleW, scaleH);
 
     int counter = 0;
     while (!callback->IsPixelMapOk()) {

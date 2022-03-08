@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_screen_manager.h"
 
 #include <vector>
-
+#include <new>
 #include <ability.h>
 #include "js_runtime_utils.h"
 #include "js_screen_listener.h"
@@ -138,7 +139,11 @@ void RegisterScreenListenerWithType(NativeEngine& engine, const std::string& typ
     }
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
-    sptr<JsScreenListener> screenListener = new JsScreenListener(&engine);
+    sptr<JsScreenListener> screenListener = new(std::nothrow) JsScreenListener(&engine);
+    if (screenListener == nullptr) {
+        WLOGFE("screenListener is nullptr");
+        return;
+    }
     if (type == "connect" || type == "disconnect" || type == "change") {
         SingletonContainer::Get<ScreenManager>().RegisterScreenListener(screenListener);
         WLOGFI("JsScreenManager::RegisterScreenListenerWithType success");
@@ -160,7 +165,7 @@ void UnregisterAllScreenListenerWithType(const std::string& type)
     }
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         it->second->RemoveAllCallback();
-        if (type == "screenConnectEvent" || type == "screenChangeEvent") {
+        if (type == "connect" || type == "disconnect" || type == "change") {
             sptr<ScreenManager::IScreenListener> thisListener(it->second);
             SingletonContainer::Get<ScreenManager>().UnregisterScreenListener(thisListener);
             WLOGFI("JsScreenManager::UnregisterAllScreenListenerWithType success");
@@ -180,7 +185,7 @@ void UnRegisterScreenListenerWithType(const std::string& type, NativeValue* valu
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         if (value->StrictEquals(it->first->Get())) {
             it->second->RemoveCallback(value);
-            if (type == "screenConnectEvent" || type == "screenChangeEvent") {
+            if (type == "connect" || type == "disconnect" || type == "change") {
                 sptr<ScreenManager::IScreenListener> thisListener(it->second);
                 SingletonContainer::Get<ScreenManager>().UnregisterScreenListener(thisListener);
                 WLOGFI("JsScreenManager::UnRegisterScreenListenerWithType success");

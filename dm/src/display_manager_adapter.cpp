@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,212 +28,184 @@ namespace {
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerAdapter)
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapter)
 
+#define INIT_PROXY_CHECK_RETURN(ret) \
+    do { \
+        if (!InitDMSProxy()) { \
+            WLOGFE("InitDMSProxy failed!"); \
+            return ret; \
+        } \
+    } while (false)
+
 DisplayId DisplayManagerAdapter::GetDefaultDisplayId()
 {
-    if (!InitDMSProxy()) {
-        WLOGFE("displayManagerAdapter::GetDefaultDisplayId: InitDMSProxy failed!");
-        return DISPLAY_ID_INVALD;
-    }
+    INIT_PROXY_CHECK_RETURN(DISPLAY_ID_INVALID);
+
     return displayManagerServiceProxy_->GetDefaultDisplayId();
 }
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfoByScreenId(ScreenId screenId)
 {
-    if (!InitDMSProxy()) {
-        WLOGFE("get display by screenId: init dms proxy failed!");
-        return nullptr;
-    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+
     return  displayManagerServiceProxy_->GetDisplayInfoByScreen(screenId);
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId)
 {
-    if (!InitDMSProxy()) {
-        WLOGFE("displayManagerAdapter::GetDisplaySnapshot: InitDMSProxy failed!");
-        return nullptr;
-    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
 
-    return displayManagerServiceProxy_->GetDispalySnapshot(displayId);
+    return displayManagerServiceProxy_->GetDisplaySnapshot(displayId);
 }
 
 DMError ScreenManagerAdapter::GetScreenSupportedColorGamuts(ScreenId screenId,
     std::vector<ScreenColorGamut>& colorGamuts)
 {
-    if (!InitDMSProxy()) {
-        WLOGFE("displayManagerAdapter::GetScreenSupportedColorGamuts: InitDMSProxy failed!");
-        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
-    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->GetScreenSupportedColorGamuts(screenId, colorGamuts);
 }
 
 DMError ScreenManagerAdapter::GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut)
 {
-    if (!InitDMSProxy()) {
-        WLOGFE("displayManagerAdapter::GetScreenColorGamut: InitDMSProxy failed!");
-        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
-    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->GetScreenColorGamut(screenId, colorGamut);
 }
 
 DMError ScreenManagerAdapter::SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx)
 {
-    if (!InitDMSProxy()) {
-        WLOGFE("displayManagerAdapter::SetScreenColorGamut: InitDMSProxy failed!");
-        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
-    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->SetScreenColorGamut(screenId, colorGamutIdx);
 }
 
 DMError ScreenManagerAdapter::GetScreenGamutMap(ScreenId screenId, ScreenGamutMap& gamutMap)
 {
-    if (!InitDMSProxy()) {
-        WLOGFE("displayManagerAdapter::GetScreenGamutMap: InitDMSProxy failed!");
-        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
-    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->GetScreenGamutMap(screenId, gamutMap);
 }
 
 DMError ScreenManagerAdapter::SetScreenGamutMap(ScreenId screenId, ScreenGamutMap gamutMap)
 {
-    if (!InitDMSProxy()) {
-        WLOGFE("displayManagerAdapter::SetScreenGamutMap: InitDMSProxy failed!");
-        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
-    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->SetScreenGamutMap(screenId, gamutMap);
 }
 
 DMError ScreenManagerAdapter::SetScreenColorTransform(ScreenId screenId)
 {
-    if (!InitDMSProxy()) {
-        WLOGFE("displayManagerAdapter::SetScreenColorTransform: InitDMSProxy failed!");
-        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
-    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->SetScreenColorTransform(screenId);
 }
 
 ScreenId ScreenManagerAdapter::CreateVirtualScreen(VirtualScreenOption option)
 {
-    if (!InitDMSProxy()) {
-        return SCREEN_ID_INVALID;
-    }
+    INIT_PROXY_CHECK_RETURN(SCREEN_ID_INVALID);
+
     WLOGFI("DisplayManagerAdapter::CreateVirtualScreen");
     return displayManagerServiceProxy_->CreateVirtualScreen(option);
 }
 
 DMError ScreenManagerAdapter::DestroyVirtualScreen(ScreenId screenId)
 {
-    if (!InitDMSProxy()) {
-        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
-    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
     WLOGFI("DisplayManagerAdapter::DestroyVirtualScreen");
     return displayManagerServiceProxy_->DestroyVirtualScreen(screenId);
 }
 
 DMError ScreenManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface)
 {
-    if (!InitDMSProxy()) {
-        return DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED;
-    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
     WLOGFI("DisplayManagerAdapter::SetVirtualScreenSurface");
     return displayManagerServiceProxy_->SetVirtualScreenSurface(screenId, surface);
 }
 
+bool ScreenManagerAdapter::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    return displayManagerServiceProxy_->SetScreenPowerForAll(state, reason);
+}
+
 bool ScreenManagerAdapter::SetOrientation(ScreenId screenId, Orientation orientation)
 {
-    if (!InitDMSProxy()) {
-        WLOGFE("fail to set orientation: InitDMSProxy failed!");
-        return false;
-    }
+    INIT_PROXY_CHECK_RETURN(false);
+
     return displayManagerServiceProxy_->SetOrientation(screenId, orientation);
 }
 
 bool BaseAdapter::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    if (!InitDMSProxy()) {
-        return false;
-    }
+    INIT_PROXY_CHECK_RETURN(false);
+
     return displayManagerServiceProxy_->RegisterDisplayManagerAgent(displayManagerAgent, type);
 }
 
 bool BaseAdapter::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    if (!InitDMSProxy()) {
-        return false;
-    }
+    INIT_PROXY_CHECK_RETURN(false);
+
     return displayManagerServiceProxy_->UnregisterDisplayManagerAgent(displayManagerAgent, type);
 }
 
 bool DisplayManagerAdapter::WakeUpBegin(PowerStateChangeReason reason)
 {
-    if (!InitDMSProxy()) {
-        return false;
-    }
+    INIT_PROXY_CHECK_RETURN(false);
+
     return displayManagerServiceProxy_->WakeUpBegin(reason);
 }
 
 bool DisplayManagerAdapter::WakeUpEnd()
 {
-    if (!InitDMSProxy()) {
-        return false;
-    }
+    INIT_PROXY_CHECK_RETURN(false);
+
     return displayManagerServiceProxy_->WakeUpEnd();
 }
 
 bool DisplayManagerAdapter::SuspendBegin(PowerStateChangeReason reason)
 {
-    if (!InitDMSProxy()) {
-        return false;
-    }
+    INIT_PROXY_CHECK_RETURN(false);
+
     return displayManagerServiceProxy_->SuspendBegin(reason);
 }
 
 bool DisplayManagerAdapter::SuspendEnd()
 {
-    if (!InitDMSProxy()) {
-        return false;
-    }
+    INIT_PROXY_CHECK_RETURN(false);
+
     return displayManagerServiceProxy_->SuspendEnd();
 }
 
-bool DisplayManagerAdapter::SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason)
-{
-    if (!InitDMSProxy()) {
-        return false;
-    }
-    return displayManagerServiceProxy_->SetScreenPowerForAll(state, reason);
-}
-
-
 bool DisplayManagerAdapter::SetDisplayState(DisplayState state)
 {
-    if (!InitDMSProxy()) {
-        return false;
-    }
+    INIT_PROXY_CHECK_RETURN(false);
+
     return displayManagerServiceProxy_->SetDisplayState(state);
 }
 
 DisplayState DisplayManagerAdapter::GetDisplayState(DisplayId displayId)
 {
-    if (!InitDMSProxy()) {
-        return DisplayState::UNKNOWN;
-    }
+    INIT_PROXY_CHECK_RETURN(DisplayState::UNKNOWN);
+
     return displayManagerServiceProxy_->GetDisplayState(displayId);
 }
 
 void DisplayManagerAdapter::NotifyDisplayEvent(DisplayEvent event)
 {
-    if (!InitDMSProxy()) {
-        return;
-    }
+    INIT_PROXY_CHECK_RETURN();
+
     displayManagerServiceProxy_->NotifyDisplayEvent(event);
+}
+
+bool DisplayManagerAdapter::SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    return displayManagerServiceProxy_->SetFreeze(displayIds, isFreeze);
 }
 
 bool BaseAdapter::InitDMSProxy()
@@ -305,9 +277,8 @@ void BaseAdapter::Clear()
 
 ScreenId ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)
 {
-    if (!InitDMSProxy()) {
-        return SCREEN_ID_INVALID;
-    }
+    INIT_PROXY_CHECK_RETURN(SCREEN_ID_INVALID);
+
     return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId);
 }
 
@@ -317,33 +288,27 @@ sptr<ScreenInfo> ScreenManagerAdapter::GetScreenInfo(ScreenId screenId)
         WLOGFE("screen id is invalid");
         return nullptr;
     }
-    if (!InitDMSProxy()) {
-        WLOGFE("InitDMSProxy failed!");
-        return nullptr;
-    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+
     sptr<ScreenInfo> screenInfo = displayManagerServiceProxy_->GetScreenInfoById(screenId);
     return screenInfo;
 }
 
 std::vector<DisplayId> DisplayManagerAdapter::GetAllDisplayIds()
 {
-    if (!InitDMSProxy()) {
-        WLOGFE("InitDMSProxyLocked failed!");
-        return {};
-    }
+    INIT_PROXY_CHECK_RETURN(std::vector<DisplayId>());
+
     return displayManagerServiceProxy_->GetAllDisplayIds();
 }
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("screen id is invalid");
         return nullptr;
     }
-    if (!InitDMSProxy()) {
-        WLOGFE("InitDMSProxy failed!");
-        return nullptr;
-    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+
     return displayManagerServiceProxy_->GetDisplayInfoById(displayId);
 }
 
@@ -353,36 +318,36 @@ sptr<ScreenGroupInfo> ScreenManagerAdapter::GetScreenGroupInfoById(ScreenId scre
         WLOGFE("screenGroup id is invalid");
         return nullptr;
     }
-    if (!InitDMSProxy()) {
-        WLOGFE("InitDMSProxy failed!");
-        return nullptr;
-    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+
     return displayManagerServiceProxy_->GetScreenGroupInfoById(screenId);
 }
 
 std::vector<sptr<ScreenInfo>> ScreenManagerAdapter::GetAllScreenInfos()
 {
-    if (!InitDMSProxy()) {
-        WLOGFE("InitDMSProxy failed!");
-        std::vector<sptr<ScreenInfo>> result;
-        return result;
-    }
+    INIT_PROXY_CHECK_RETURN(std::vector<sptr<ScreenInfo>>());
+
     return displayManagerServiceProxy_->GetAllScreenInfos();
 }
 
 ScreenId ScreenManagerAdapter::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint)
 {
-    if (!InitDMSProxy()) {
-        return SCREEN_ID_INVALID;
-    }
+    INIT_PROXY_CHECK_RETURN(SCREEN_ID_INVALID);
+
     return displayManagerServiceProxy_->MakeExpand(screenId, startPoint);
+}
+
+void ScreenManagerAdapter::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    displayManagerServiceProxy_->RemoveVirtualScreenFromGroup(screens);
 }
 
 bool ScreenManagerAdapter::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
-    if (!InitDMSProxy()) {
-        return false;
-    }
+    INIT_PROXY_CHECK_RETURN(false);
+
     return displayManagerServiceProxy_->SetScreenActiveMode(screenId, modeId);
 }
 } // namespace OHOS::Rosen

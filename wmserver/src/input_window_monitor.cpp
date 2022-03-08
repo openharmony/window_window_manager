@@ -49,7 +49,7 @@ void InputWindowMonitor::UpdateInputWindow(uint32_t windowId)
 
 void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
 {
-    if (displayId == DISPLAY_ID_INVALD) {
+    if (displayId == DISPLAY_ID_INVALID) {
         return;
     }
     auto container = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
@@ -86,8 +86,8 @@ void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& con
     }
     MMI::PhysicalDisplayInfo physicalDisplayInfo = {
         .id = static_cast<int32_t>(container->GetScreenId()),
-        .leftDisplayId = static_cast<int32_t>(DISPLAY_ID_INVALD),
-        .upDisplayId = static_cast<int32_t>(DISPLAY_ID_INVALD),
+        .leftDisplayId = static_cast<int32_t>(DISPLAY_ID_INVALID),
+        .upDisplayId = static_cast<int32_t>(DISPLAY_ID_INVALID),
         .topLeftX = 0,
         .topLeftY = 0,
         .width = static_cast<int32_t>(screenMode->width_),

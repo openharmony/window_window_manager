@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -43,5 +43,14 @@ ohos_static_library("wm_napi_common") {
     "//foundation/ace/napi:ace_napi",
     "//foundation/windowmanager/wm:libwm",
   ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "ipc:ipc_core",
+  ]
+
+  subsystem_name = "window"
+  part_name = "window_manager"
 }
 ## Build wm_napi_common.a }}}

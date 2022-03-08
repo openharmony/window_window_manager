@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -9,7 +9,7 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing p ermissions and
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
@@ -49,6 +49,39 @@ protected:
 private:
     std::condition_variable conditionVariable_;
     std::mutex mutex_;
+};
+
+template<class T>
+class RunnableFuture : public Future<T> {
+public:
+    void SetValue(T res)
+    {
+        Future<T>::FutureCall(res);
+    }
+    void Reset(T defaultValue)
+    {
+        flag_ = false;
+        result_ = defaultValue;
+    }
+protected:
+    void Call(T res) override
+    {
+        if (!flag_) {
+            flag_ = true;
+            result_ = res;
+        }
+    }
+    bool IsReady() override
+    {
+        return flag_;
+    }
+    T FetchResult() override
+    {
+        return result_;
+    }
+private:
+    bool flag_ {false};
+    T result_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WM_INCLUDE_FUTURE_H

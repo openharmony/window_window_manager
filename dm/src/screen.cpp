@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ public:
         screenInfo_ = info;
     }
     ~Impl() = default;
-    DEFINE_VAR_FUNC_GET_SET(sptr<ScreenInfo>, ScreenInfo, screenInfo);
+    DEFINE_VAR_FUNC_GET_SET_WITH_LOCK(sptr<ScreenInfo>, ScreenInfo, screenInfo);
 };
 
 Screen::Screen(sptr<ScreenInfo> info)
@@ -45,7 +45,12 @@ Screen::~Screen()
 bool Screen::IsGroup() const
 {
     UpdateScreenInfo();
-    return pImpl_->GetScreenInfo()->GetCanHasChild();
+    return pImpl_->GetScreenInfo()->GetIsScreenGroup();
+}
+
+const std::string Screen::GetName() const
+{
+    return pImpl_->GetScreenInfo()->GetName();
 }
 
 ScreenId Screen::GetId() const
@@ -55,7 +60,6 @@ ScreenId Screen::GetId() const
 
 uint32_t Screen::GetWidth() const
 {
-    UpdateScreenInfo();
     auto modeId = GetModeId();
     auto modes = GetSupportedModes();
     if (modeId < 0 || modeId >= modes.size()) {
@@ -105,6 +109,11 @@ Orientation Screen::GetOrientation() const
     return pImpl_->GetScreenInfo()->GetOrientation();
 }
 
+bool Screen::IsReal() const
+{
+    return pImpl_->GetScreenInfo()->GetType() == ScreenType::REAL;
+}
+
 bool Screen::SetOrientation(Orientation orientation) const
 {
     WLOGFD("set orientation %{public}u", orientation);
@@ -143,11 +152,13 @@ DMError Screen::SetScreenColorTransform()
 
 ScreenId Screen::GetParentId() const
 {
+    UpdateScreenInfo();
     return pImpl_->GetScreenInfo()->GetParentId();
 }
 
 uint32_t Screen::GetModeId() const
 {
+    UpdateScreenInfo();
     return pImpl_->GetScreenInfo()->GetModeId();
 }
 
@@ -162,11 +173,7 @@ bool Screen::SetScreenActiveMode(uint32_t modeId)
     if (modeId >= GetSupportedModes().size()) {
         return false;
     }
-    if (SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(screenId, modeId)) {
-        pImpl_->GetScreenInfo()->SetModeId(modeId);
-        return true;
-    }
-    return false;
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenActiveMode(screenId, modeId);
 }
 
 void Screen::UpdateScreenInfo(sptr<ScreenInfo> info) const

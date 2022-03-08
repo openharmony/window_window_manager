@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,8 +101,8 @@ void DragController::FinishDrag(uint32_t windowId)
 
 sptr<WindowNode> DragController::GetHitWindow(DisplayId id, PointInfo point)
 {
-    // TODO get display by point
-    if (id == DISPLAY_ID_INVALD) {
+    // Need get display by point
+    if (id == DISPLAY_ID_INVALID) {
         WLOGFE("Get invalid display");
         return nullptr;
     }

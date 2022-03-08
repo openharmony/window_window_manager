@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 #include "window_scene.h"
-
+#include <new>
 #include <configuration.h>
 
 #include "static_call.h"
@@ -43,7 +43,11 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
 {
     displayId_ = displayId;
     if (option == nullptr) {
-        option = new WindowOption();
+        option = new(std::nothrow) WindowOption();
+        if (option == nullptr) {
+            WLOGFW("alloc WindowOption failed");
+            return WMError::WM_ERROR_NULLPTR;
+        }
     }
     option->SetDisplayId(displayId);
 
@@ -64,7 +68,7 @@ std::string WindowScene::GenerateMainWindowName(const std::shared_ptr<AbilityRun
     } else {
         std::string windowName = context->GetBundleName() + std::to_string(count++);
         std::size_t pos = windowName.find_last_of('.');
-        return (pos < 0) ? windowName : windowName.substr(pos + 1); // skip '.'
+        return (pos == std::string::npos) ? windowName : windowName.substr(pos + 1); // skip '.'
     }
 }
 
@@ -166,6 +170,10 @@ WMError WindowScene::RequestFocus() const
 
 void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
+    if (mainWindow_ == nullptr) {
+        WLOGFE("mainWindow_ is null");
+        return;
+    }
     WLOGFI("notify mainWindow winId:%{public}d", mainWindow_->GetWindowId());
     mainWindow_->UpdateConfiguration(configuration);
 }

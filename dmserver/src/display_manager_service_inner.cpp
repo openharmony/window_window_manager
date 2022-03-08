@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDisplayById(DisplayId
 const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDefaultDisplay()
 {
     DisplayId defaultDisplayId = GetDefaultDisplayId();
-    if (defaultDisplayId == DISPLAY_ID_INVALD) {
+    if (defaultDisplayId == DISPLAY_ID_INVALID) {
         WLOGFE("Fail to get default displayId");
         return nullptr;
     }
@@ -108,6 +108,11 @@ const sptr<SupportedScreenModes> DisplayManagerServiceInner::GetScreenModesByDis
         return nullptr;
     }
     return abstractScreen->GetActiveScreenMode();
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManagerServiceInner::GetDisplaySnapshot(DisplayId displayId)
+{
+    return DisplayManagerService::GetInstance().abstractDisplayController_->GetScreenSnapshot(displayId);
 }
 
 void DisplayManagerServiceInner::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
