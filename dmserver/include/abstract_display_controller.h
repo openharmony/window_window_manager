@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ class AbstractDisplayController : public RefBase {
 public:
     AbstractDisplayController(std::recursive_mutex& mutex);
     ~AbstractDisplayController();
+    WM_DISALLOW_COPY_AND_MOVE(AbstractDisplayController);
 
     void Init(sptr<AbstractScreenController> abstractScreenController);
     ScreenId GetDefaultScreenId();
@@ -43,6 +44,7 @@ public:
     sptr<AbstractDisplay> GetAbstractDisplayByScreen(ScreenId screenId) const;
     std::vector<DisplayId> GetAllDisplayIds() const;
     void AddDisplayForExpandScreen(sptr<AbstractScreen> absScreen);
+    void SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze);
 
 private:
     void OnAbstractScreenConnect(sptr<AbstractScreen> absScreen);

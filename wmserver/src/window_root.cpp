@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,6 +145,25 @@ void WindowRoot::MinimizeAllAppWindows(DisplayId displayId)
         return;
     }
     return container->MinimizeAllAppWindows();
+}
+
+WMError WindowRoot::MaxmizeWindow(uint32_t windowId)
+{
+    auto node = GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("add window failed, window container could not be found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto property = node->GetWindowProperty();
+    uint32_t flags = property->GetWindowFlags() & (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
+    property->SetWindowFlags(flags);
+    container->NotifySystemBarDismiss(node);
+    return WMError::WM_OK;
 }
 
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
@@ -318,8 +337,6 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
         if (windowId != focusedWindowId) {
             return;
         }
-    } else {
-        // do nothing
     }
     auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
     if (nextFocusableWindow != nullptr) {
@@ -566,10 +583,21 @@ void WindowRoot::NotifyDisplayDestroy(DisplayId expandDisplayId)
     windowNodeContainerMap_.erase(expandDisplayId);
 }
 
+WMError WindowRoot::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
+{
+    for (auto& elem : windowNodeContainerMap_) {
+        if (elem.second == nullptr) {
+            continue;
+        }
+        elem.second->DumpWindowTree(windowTreeInfos, type);
+    }
+    return WMError::WM_OK;
+}
+
 float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
 {
     auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
     return container->GetVirtualPixelRatio();
 }
-}
-}
+} // namespace OHOS::Rosen
+} // namespace OHOS

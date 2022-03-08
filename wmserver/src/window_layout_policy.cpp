@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 #include "window_layout_policy.h"
-#include "display_manager.h"
+#include "display_manager_service_inner.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
@@ -269,10 +269,6 @@ void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rec
     WindowType windowType = node->GetWindowType();
     WindowMode windowMode = node->GetWindowMode();
     bool isVertical = (displayRect.height_ > displayRect.width_) ? true : false;
-    if (!WindowHelper::IsMainFloatingWindow(windowType, windowMode)) {
-        winRect.width_ = std::min(displayRect.width_ - winRect.posX_, winRect.width_);
-        winRect.height_ = std::min(displayRect.height_ - winRect.posY_, winRect.height_);
-    }
     if ((windowMode == WindowMode::WINDOW_MODE_FLOATING) && !WindowHelper::IsSystemWindow(windowType)) {
         if (isVertical) {
             winRect.width_ = std::max(minVerticalFloatingW, winRect.width_);
@@ -291,20 +287,15 @@ void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rec
 
 AvoidPosType WindowLayoutPolicy::GetAvoidPosType(const Rect& rect)
 {
-    if (rect.width_ >=  rect.height_) {
-        if (rect.posY_ == 0) {
-            return AvoidPosType::AVOID_POS_TOP;
-        } else {
-            return AvoidPosType::AVOID_POS_BOTTOM;
-        }
-    } else {
-        if (rect.posX_ == 0) {
-            return AvoidPosType::AVOID_POS_LEFT;
-        } else {
-            return AvoidPosType::AVOID_POS_RIGHT;
-        }
+    auto display = DisplayManagerServiceInner::GetInstance().GetDisplayById(screenId_);
+    if (display == nullptr) {
+        WLOGFE("GetAvoidPosType fail. Get display fail. displayId:%{public}" PRIu64"", screenId_);
+        return AvoidPosType::AVOID_POS_UNKNOWN;
     }
-    return AvoidPosType::AVOID_POS_UNKNOWN;
+    uint32_t displayWidth = display->GetWidth();
+    uint32_t displayHeight = display->GetHeight();
+
+    return WindowHelper::GetAvoidPosType(rect, displayWidth, displayHeight);
 }
 
 void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect)
@@ -339,7 +330,7 @@ void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& lim
                 limitW -= offsetW;
                 break;
             default:
-                WLOGFE("invaild avoidPosType: %{public}d", avoidPosType);
+                WLOGFE("invalid avoidPosType: %{public}d", avoidPosType);
         }
     }
     limitRect.height_ = static_cast<uint32_t>(limitH < 0 ? 0 : limitH);
@@ -354,7 +345,7 @@ void WindowLayoutPolicy::Reset()
 
 float WindowLayoutPolicy::GetVirtualPixelRatio() const
 {
-    auto display = DisplayManager::GetInstance().GetDisplayById(screenId_);
+    auto display = DisplayManagerServiceInner::GetInstance().GetDisplayById(screenId_);
     if (display == nullptr) {
         WLOGFE("GetVirtualPixel fail. Get display fail. displayId:%{public}" PRIu64", use Default vpr:1.0", screenId_);
         return 1.0;  // Use DefaultVPR 1.0

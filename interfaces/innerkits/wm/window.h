@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,8 +122,8 @@ public:
     virtual void UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
     virtual void UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
-    virtual void RegisterDragListener(sptr<IWindowDragListener>& listener) = 0;
-    virtual void UnregisterDragListener(sptr<IWindowDragListener>& listener) = 0;
+    virtual void RegisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
+    virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,

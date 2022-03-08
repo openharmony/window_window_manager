@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,6 +120,31 @@ public:
             return true;
         }
         return false;
+    }
+
+    static inline bool IsSwitchCascadeReason(WindowUpdateReason reason)
+    {
+        return (reason >= WindowUpdateReason::NEED_SWITCH_CASCADE_BASE) &&
+            (reason < WindowUpdateReason::NEED_SWITCH_CASCADE_END);
+    }
+
+    static AvoidPosType GetAvoidPosType(const Rect& rect, uint32_t displayWidth, uint32_t displayHeight)
+    {
+        if (rect.width_ ==  displayWidth) {
+            if (rect.posY_ == 0) {
+                return AvoidPosType::AVOID_POS_TOP;
+            } else {
+                return AvoidPosType::AVOID_POS_BOTTOM;
+            }
+        } else if (rect.height_ ==  displayHeight) {
+            if (rect.posX_ == 0) {
+                return AvoidPosType::AVOID_POS_LEFT;
+            } else {
+                return AvoidPosType::AVOID_POS_RIGHT;
+            }
+        }
+
+        return AvoidPosType::AVOID_POS_UNKNOWN;
     }
 
     WindowHelper() = default;

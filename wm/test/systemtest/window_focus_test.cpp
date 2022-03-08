@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,8 @@ public:
 
     void OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
                      DisplayId displayId) override;
+    void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo) override;
+    void OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo) override;
 };
 
 class WindowFocusTest : public testing::Test {
@@ -59,26 +61,31 @@ sptr<TestFocusChangedListener> WindowFocusTest::testFocusChangedListener_ =
 void TestFocusChangedListener::OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
                                          DisplayId displayId)
 {
-    WLOGFI("TestFocusChangedListener Focused ID: %{public}u", windowId);
-    focusedWindow_ = windowId;
 }
 
 void TestFocusChangedListener::OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
                                            DisplayId displayId)
 {
-    WLOGFI("TestFocusChangedListener Unfocused ID: %{public}u", windowId);
-    unfocusedWindow_ = windowId;
+}
+
+void TestFocusChangedListener::OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
+{
+    WLOGFI("TestFocusChangedListener Focused ID: %{public}u", focusChangeInfo->windowId_);
+    focusedWindow_ = focusChangeInfo->windowId_;
+}
+
+void TestFocusChangedListener::OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
+{
+    WLOGFI("TestFocusChangedListener Unfocused ID: %{public}u", focusChangeInfo->windowId_);
+    unfocusedWindow_ = focusChangeInfo->windowId_;
 }
 
 void WindowFocusTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
-    if (display == nullptr) {
-        WLOGFE("GetDefaultDisplay: failed!");
-    } else {
-        WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
-            display->GetId(), display->GetWidth(), display->GetHeight(), display->GetFreshRate());
-    }
+    ASSERT_TRUE((display != nullptr));
+    WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
+        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
 }
@@ -391,7 +398,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest07, Function | MediumTest | Level3)
     subAppInfo_.parentName = mainWindow2->GetWindowName();
     subAppInfo_.type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
     const sptr<Window>& aboveSubWindow = utils::CreateTestWindow(subAppInfo_);
-    
+
     subAppInfo_.name = "belowSubWindow2";
     subAppInfo_.rect = { 310, 410, 100, 100 };
     subAppInfo_.parentName = mainWindow3->GetWindowName();
@@ -418,7 +425,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest07, Function | MediumTest | Level3)
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(aboveSubWindow->GetWindowId(), testFocusChangedListener_->unfocusedWindow_);
     ASSERT_EQ(mainWindow2->GetWindowId(), testFocusChangedListener_->focusedWindow_);
-    
+
     mainWindow2->Destroy();
 }
 
@@ -451,7 +458,7 @@ HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
     // Await 100ms and get callback result in listener.
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(belowSubWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
-    
+
     mainWindow1->Destroy();
 }
 }

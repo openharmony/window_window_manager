@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+#include "screenshot_test.h"
+
 #include <securec.h>
 
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
-#include "screenshot_test.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,10 +68,14 @@ static std::shared_ptr<Media::PixelMap> CreatePixelMap()
     }
 
     uint8_t *pic = (uint8_t *)data;
-    memset_s(pic, voulumeSize, pixelValue, voulumeSize);
+    if (memset_s(pic, voulumeSize, pixelValue, voulumeSize) != EOK) {
+        free(data);
+        return nullptr;
+    }
 
     uint32_t colorLen = voulumeSize * bitmapDepth;
     auto pixelMap = Media::PixelMap::Create(data, colorLen, opt);
+    free(data);
     if (pixelMap == nullptr) {
         return nullptr;
     }
@@ -82,7 +87,6 @@ static std::shared_ptr<Media::PixelMap> CreatePixelMap()
  * @tc.name: GetScreenshot_default
  * @tc.desc: SetWindowRect/GetWindowRect
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(ScreenshotTest, GetScreenshot_default, Function | SmallTest | Level2)
 {

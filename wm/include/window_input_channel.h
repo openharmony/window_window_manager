@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,8 @@ public:
 private:
     void OnVsync(int64_t timeStamp);
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
-    std::vector<std::shared_ptr<MMI::PointerEvent>> pointerEventPool_;
+    std::shared_ptr<MMI::PointerEvent> moveEvent_ = nullptr;
+    std::mutex mtx_;
     sptr<Window> window_;
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
         std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());

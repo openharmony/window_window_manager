@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,6 @@ namespace {
  * @tc.name: Create01
  * @tc.desc: Create window with no WindowName and no abilityToken
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowTest, Create01, Function | SmallTest | Level2)
 {
@@ -57,7 +56,6 @@ HWTEST_F(WindowTest, Create01, Function | SmallTest | Level2)
  * @tc.name: Create02
  * @tc.desc: Create window with WindowName and no abilityToken
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowTest, Create02, Function | SmallTest | Level2)
 {
@@ -71,7 +69,6 @@ HWTEST_F(WindowTest, Create02, Function | SmallTest | Level2)
  * @tc.name: Create03
  * @tc.desc: Mock CreateWindow return WM_ERROR_SAMGR, create window with WindowName and no abilityToken
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowTest, Create03, Function | SmallTest | Level2)
 {
@@ -85,7 +82,6 @@ HWTEST_F(WindowTest, Create03, Function | SmallTest | Level2)
  * @tc.name: Create04
  * @tc.desc: Create window with WindowName and abilityContext
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowTest, Create04, Function | SmallTest | Level2)
 {
@@ -100,7 +96,6 @@ HWTEST_F(WindowTest, Create04, Function | SmallTest | Level2)
  * @tc.name: Create06
  * @tc.desc: Create window with WindowName and no option
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowTest, Create06, Function | SmallTest | Level2)
 {
@@ -112,7 +107,6 @@ HWTEST_F(WindowTest, Create06, Function | SmallTest | Level2)
  * @tc.name: Find01
  * @tc.desc: Find with no name
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowTest, Find01, Function | SmallTest | Level2)
 {
@@ -123,7 +117,6 @@ HWTEST_F(WindowTest, Find01, Function | SmallTest | Level2)
  * @tc.name: Find02
  * @tc.desc: Find with name
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowTest, Find02, Function | SmallTest | Level2)
 {

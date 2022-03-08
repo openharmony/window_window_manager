@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -161,12 +161,9 @@ void TestAvoidAreaChangedListener::OnAvoidAreaChanged(std::vector<Rect> avoidAre
 void WindowImmersiveTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
-    if (display == nullptr) {
-        WLOGFE("GetDefaultDisplay: failed!");
-    } else {
-        WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
-            display->GetId(), display->GetWidth(), display->GetHeight(), display->GetFreshRate());
-    }
+    ASSERT_TRUE((display != nullptr));
+    WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
+        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
 }
@@ -217,7 +214,6 @@ namespace {
  * @tc.name: ImmersiveTest01
  * @tc.desc: Add one immersive window and hide
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImmersiveTest, ImmersiveTest01, Function | MediumTest | Level3)
 {
@@ -234,7 +230,6 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest01, Function | MediumTest | Level3)
  * @tc.name: ImmersiveTest02
  * @tc.desc: Add two immersive window and switch
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
 {
@@ -260,7 +255,6 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
  * @tc.name: ImmersiveTest03
  * @tc.desc: Add one no immersive window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImmersiveTest, ImmersiveTest03, Function | MediumTest | Level3)
 {
@@ -284,7 +278,6 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest03, Function | MediumTest | Level3)
  * @tc.name: ImmersiveTest04
  * @tc.desc: SetLayoutFullScreen
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImmersiveTest, ImmersiveTest04, Function | MediumTest | Level3)
 {
@@ -314,7 +307,6 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest04, Function | MediumTest | Level3)
  * @tc.name: ImmersiveTest05
  * @tc.desc: SetFullScreen
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImmersiveTest, ImmersiveTest05, Function | MediumTest | Level3)
 {
@@ -336,7 +328,6 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest05, Function | MediumTest | Level3)
  * @tc.name: ImmersiveNegativeTest01
  * @tc.desc: set systembar props with wrong window type
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImmersiveTest, ImmersiveNegativeTest01, Function | MediumTest | Level3)
 {
@@ -355,9 +346,8 @@ HWTEST_F(WindowImmersiveTest, ImmersiveNegativeTest01, Function | MediumTest | L
 
 /**
  * @tc.name: GetAvoidAreaByTypeTest01
- * @tc.desc: Test GetAvoidArea use unsupport Type(TYPE_CUTOUT).
+ * @tc.desc: Test GetAvoidArea use unsupported Type(TYPE_CUTOUT).
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, Function | MediumTest | Level3)
 {
@@ -373,13 +363,13 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, Function | MediumTest | 
     ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.rightRect));
     ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.topRect));
     ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.bottomRect));
+    ASSERT_EQ(WMError::WM_OK, win->Hide());
 }
 
 /**
  * @tc.name: GetAvoidAreaByTypeTest02
  * @tc.desc: Add SystemBar left avoid. And Test GetAvoidArea.
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest02, Function | MediumTest | Level3)
 {
@@ -399,13 +389,14 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest02, Function | MediumTest | 
     WMError ret = win->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidarea);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_TRUE(utils::RectEqualTo(left, avoidarea.leftRect));
+    ASSERT_EQ(WMError::WM_OK, left->Hide());
+    ASSERT_EQ(WMError::WM_OK, win->Hide());
 }
 
 /**
  * @tc.name: GetAvoidAreaByTypeTest03
  * @tc.desc: Add SystemBar top avoid. And Test GetAvoidArea.
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest03, Function | MediumTest | Level3)
 {
@@ -426,13 +417,14 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest03, Function | MediumTest | 
     WMError ret = win->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidarea);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_TRUE(utils::RectEqualTo(top, avoidarea.topRect));
+    ASSERT_EQ(WMError::WM_OK, top->Hide());
+    ASSERT_EQ(WMError::WM_OK, win->Hide());
 }
 
 /**
  * @tc.name: OnAvoidAreaChangedTest01
  * @tc.desc: Add unexistavoid and Update this avoid. Test OnAvoidAreaChanged listener
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImmersiveTest, OnAvoidAreaChangedTest01, Function | MediumTest | Level3)
 {
@@ -469,13 +461,14 @@ HWTEST_F(WindowImmersiveTest, OnAvoidAreaChangedTest01, Function | MediumTest | 
     ASSERT_TRUE(utils::RectEqualToRect(bigTopRect, avoidArea2[1]));
 
     window->UnregisterAvoidAreaChangeListener(thisListener);
+    ASSERT_EQ(WMError::WM_OK, top->Hide());
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 
 /**
  * @tc.name: OnAvoidAreaChangedTest02
  * @tc.desc: Add unexistavoid and remove this avoid. Test OnAvoidAreaChanged listener
  * @tc.type: FUNC
- * @tc.require: AR000GGTVD
  */
 HWTEST_F(WindowImmersiveTest, OnAvoidAreaChangedTest02, Function | MediumTest | Level3)
 {
@@ -508,6 +501,7 @@ HWTEST_F(WindowImmersiveTest, OnAvoidAreaChangedTest02, Function | MediumTest | 
     ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidArea2[0])); // 0: left Rect
 
     window->UnregisterAvoidAreaChangeListener(thisListener);
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 }
 } // namespace Rosen

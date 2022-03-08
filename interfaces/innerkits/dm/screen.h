@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include <screen_manager/screen_types.h>
 
 #include "dm_common.h"
+#include "noncopyable.h"
 
 namespace OHOS::Rosen {
 class ScreenInfo;
@@ -37,7 +38,7 @@ struct Point {
 struct SupportedScreenModes : public RefBase {
     uint32_t width_;
     uint32_t height_;
-    uint32_t freshRate_;
+    uint32_t refreshRate_;
 };
 
 struct VirtualScreenOption {
@@ -51,7 +52,7 @@ struct VirtualScreenOption {
 };
 
 struct ExpandOption {
-    uint32_t screenId_;
+    ScreenId screenId_;
     uint32_t startX_;
     uint32_t startY_;
 };
@@ -65,6 +66,7 @@ public:
     Screen& operator=(const Screen&) = delete;
     Screen& operator=(Screen&&) = delete;
     bool IsGroup() const;
+    const std::string GetName() const;
     ScreenId GetId() const;
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;
@@ -73,6 +75,7 @@ public:
     float GetVirtualPixelRatio() const;
     Rotation GetRotation() const;
     Orientation GetOrientation() const;
+    bool IsReal() const;
     ScreenId GetParentId() const;
     uint32_t GetModeId() const;
     std::vector<sptr<SupportedScreenModes>> GetSupportedModes() const;

@@ -131,7 +131,7 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
             break;
         }
     }
-    WLOGFI("GetTopWindowfinal MainWinId:%{public}d!", mainWinId);
+    WLOGFI("GetTopWindowfinal MainWinId:%{public}u!", mainWinId);
     if (!mainWinId) {
         WLOGFE("Cannot find topWindow!");
         return nullptr;
@@ -238,7 +238,7 @@ WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 
 WMError WindowImpl::SetWindowType(WindowType type)
 {
-    WLOGFI("window id: %{public}d, type:%{public}d", property_->GetWindowId(), static_cast<uint32_t>(type));
+    WLOGFI("window id: %{public}u, type:%{public}u", property_->GetWindowId(), static_cast<uint32_t>(type));
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -259,7 +259,7 @@ WMError WindowImpl::SetWindowType(WindowType type)
 
 WMError WindowImpl::SetWindowMode(WindowMode mode)
 {
-    WLOGFI("[Client] Window %{public}d mode %{public}d", property_->GetWindowId(), static_cast<uint32_t>(mode));
+    WLOGFI("[Client] Window %{public}u mode %{public}u", property_->GetWindowId(), static_cast<uint32_t>(mode));
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -735,9 +735,15 @@ WMError WindowImpl::Maximize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        SetFullScreen(true);
+        WMError ret = SingletonContainer::Get<WindowAdapter>().MaxmizeWindow(property_->GetWindowId());
+        if (ret == WMError::WM_OK) {
+            UpdateMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+        }
+        return ret;
+    } else {
+        WLOGFI("Maximize Window failed. The window is not main window");
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
-    return WMError::WM_OK;
 }
 
 WMError WindowImpl::Minimize()
@@ -792,7 +798,6 @@ void WindowImpl::StartMove()
     }
     startMoveFlag_ = true;
     WLOGFI("[StartMove] windowId %{public}u", GetWindowId());
-    return;
 }
 
 WMError WindowImpl::RequestFocus() const
@@ -863,7 +868,7 @@ void WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListene
         }), avoidAreaChangeListeners_.end());
 }
 
-void WindowImpl::RegisterDragListener(sptr<IWindowDragListener>& listener)
+void WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
 {
     if (listener == nullptr) {
         return;
@@ -872,7 +877,7 @@ void WindowImpl::RegisterDragListener(sptr<IWindowDragListener>& listener)
     windowDragListeners_.emplace_back(listener);
 }
 
-void WindowImpl::UnregisterDragListener(sptr<IWindowDragListener>& listener)
+void WindowImpl::UnregisterDragListener(const sptr<IWindowDragListener>& listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(windowDragListeners_.begin(), windowDragListeners_.end(), listener);
@@ -975,7 +980,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             return;
         }
         if (!uiContent_->ProcessKeyEvent(keyEvent)) {
-            WLOGI("ConsumeKeyEvent no comsumer window exit");
+            WLOGI("ConsumeKeyEvent no consumer window exit");
         }
     }
 }
@@ -1039,7 +1044,6 @@ void WindowImpl::EndMoveOrDragWindow(int32_t pointId)
     startDragFlag_ = false;
     startMoveFlag_ = false;
     pointEventStarted_ = false;
-    return;
 }
 
 void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId, const Rect& rect)
@@ -1114,7 +1118,7 @@ void WindowImpl::ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& poin
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
         case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
             EndMoveOrDragWindow(pointId);
-            WLOGFI("[Point Up/Cancle]: windowId: %{public}u, action: %{public}d, startMove: %{public}d, "
+            WLOGFI("[Point Up/Cancel]: windowId: %{public}u, action: %{public}d, startMove: %{public}d, "
                    "startDrag: %{public}d", GetWindowId(), action, startMoveFlag_, startDragFlag_);
             break;
         }
@@ -1155,7 +1159,7 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
         WLOGE("ConsumePointerEvent uiContent is nullptr, windowId: %{public}u", GetWindowId());
         return;
     }
-    WLOGFI("Transer pointer event to ACE");
+    WLOGFI("Transfer pointer event to ACE");
     uiContent_->ProcessPointerEvent(pointerEvent);
 }
 
@@ -1239,9 +1243,13 @@ void WindowImpl::UpdateWindowState(WindowState state)
 
 void WindowImpl::UpdateDragEvent(const PointInfo& point, DragEvent event)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto& iter : windowDragListeners_) {
-        iter->OnDrag(point.x, point.y, event);
+    std::vector<sptr<IWindowDragListener>> windowDragListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        windowDragListeners = windowDragListeners_;
+    }
+    for (auto& iter : windowDragListeners) {
+        iter->OnDrag(point.x - GetRect().posX_, point.y - GetRect().posY_, event);
     }
 }
 
@@ -1301,8 +1309,15 @@ void WindowImpl::SetDefaultOption()
             property_->SetWindowFlags(0);
             break;
         }
+        case WindowType::WINDOW_TYPE_TOAST:
+        case WindowType::WINDOW_TYPE_FLOAT:
+        case WindowType::WINDOW_TYPE_SEARCHING_BAR: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            break;
+        }
         case WindowType::WINDOW_TYPE_VOLUME_OVERLAY: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetFocusable(false);
             break;
         }
         case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT: {
@@ -1332,20 +1347,14 @@ bool WindowImpl::IsLayoutFullScreen() const
     uint32_t flags = GetWindowFlags();
     auto mode = GetMode();
     bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !needAvoid) {
-        return true;
-    }
-    return false;
+    return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !needAvoid);
 }
 
 bool WindowImpl::IsFullScreen() const
 {
     auto statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto naviProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-    if (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_) {
-        return true;
-    }
-    return false;
+    return (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_);
 }
 }
 }

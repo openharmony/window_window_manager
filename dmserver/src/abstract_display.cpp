@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,15 +33,15 @@ AbstractDisplay::AbstractDisplay(const DisplayInfo* info)
     id_ = info->GetDisplayId();
     width_ = info->GetWidth();
     height_ = info->GetHeight();
-    freshRate_ = info->GetHeight();
+    refreshRate_ = info->GetRefreshRate();
 }
 
-AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t freshRate)
+AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t refreshRate)
     : id_(id),
       screenId_(screenId),
       width_(width),
       height_(height),
-      freshRate_(freshRate)
+      refreshRate_(refreshRate)
 {
 }
 
@@ -60,9 +60,9 @@ int32_t AbstractDisplay::GetHeight() const
     return height_;
 }
 
-uint32_t AbstractDisplay::GetFreshRate() const
+uint32_t AbstractDisplay::GetRefreshRate() const
 {
-    return freshRate_;
+    return refreshRate_;
 }
 
 float AbstractDisplay::GetVirtualPixelRatio() const
@@ -80,9 +80,9 @@ void AbstractDisplay::SetHeight(int32_t height)
     height_ = height;
 }
 
-void AbstractDisplay::SetFreshRate(uint32_t freshRate)
+void AbstractDisplay::SetRefreshRate(uint32_t refreshRate)
 {
-    freshRate_ = freshRate;
+    refreshRate_ = refreshRate;
 }
 
 void AbstractDisplay::SetVirtualPixelRatio(float virtualPixelRatio)
@@ -108,17 +108,25 @@ bool AbstractDisplay::RequestRotation(Rotation rotation)
         return false;
     }
     if (IsVertical(rotation) != IsVertical(rotation_)) {
-        int32_t tmp = width_;
-        width_ = height_;
-        height_ = tmp;
+        std::swap(width_, height_);
     }
     rotation_ = rotation;
     return true;
 }
 
-Rotation AbstractDisplay::GetRotation()
+Rotation AbstractDisplay::GetRotation() const
 {
     return rotation_;
+}
+
+void AbstractDisplay::SetFreezeFlag(FreezeFlag freezeFlag)
+{
+    freezeFlag_ = freezeFlag;
+}
+
+FreezeFlag AbstractDisplay::GetFreezeFlag() const
+{
+    return freezeFlag_;
 }
 
 bool AbstractDisplay::BindAbstractScreen(ScreenId dmsScreenId)
@@ -135,7 +143,6 @@ bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
         return false;
     }
     ScreenId dmsScreenId = abstractScreen->dmsId_;
-    // TODO: screen->rsDisplayNode_->SetScreenId(rsScreenId);
     sptr<SupportedScreenModes> info = abstractScreen->GetActiveScreenMode();
     if (info == nullptr) {
         WLOGE("display bind screen error, cannot get info. display:%{public}" PRIu64", screen:%{public}" PRIu64"",
@@ -144,7 +151,7 @@ bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
     }
     width_ = static_cast<int32_t>(info->width_);
     height_ = static_cast<int32_t>(info->height_);
-    freshRate_ = info->freshRate_;
+    refreshRate_ = info->refreshRate_;
     screenId_ = dmsScreenId;
     WLOGD("display bound to screen. display:%{public}" PRIu64", screen:%{public}" PRIu64"", id_, dmsScreenId);
     return true;
@@ -161,7 +168,7 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->width_ = width_;
     displayInfo->height_ = height_;
     displayInfo->id_ = id_;
-    displayInfo->freshRate_ = freshRate_;
+    displayInfo->refreshRate_ = refreshRate_;
     displayInfo->screenId_ = screenId_;
     displayInfo->rotation_ = rotation_;
     displayInfo->orientation_ = orientation_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -117,9 +117,9 @@ bool SurfaceReader::ProcessBuffer(const sptr<SurfaceBuffer> &buf)
         return false;
     }
 
-    uint32_t width = bufferHandle->width;
-    uint32_t height = bufferHandle->height;
-    uint32_t stride = bufferHandle->stride;
+    uint32_t width = static_cast<uint32_t>(bufferHandle->width);
+    uint32_t height = static_cast<uint32_t>(bufferHandle->height);
+    uint32_t stride = static_cast<uint32_t>(bufferHandle->stride);
     uint8_t *addr = (uint8_t *)buf->GetVirAddr();
 
     auto data = (uint8_t *)malloc(width * height * BPP);
@@ -137,8 +137,8 @@ bool SurfaceReader::ProcessBuffer(const sptr<SurfaceBuffer> &buf)
 
     sptr<PixelMap> pixelMap = new PixelMap();
     ImageInfo info;
-    info.size.width = width;
-    info.size.height = height;
+    info.size.width = static_cast<int32_t>(width);
+    info.size.height = static_cast<int32_t>(height);
     info.pixelFormat = PixelFormat::RGBA_8888;
     info.colorSpace = ColorSpace::SRGB;
     pixelMap->SetImageInfo(info);

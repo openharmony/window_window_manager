@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ public:
     MOCK_METHOD0(WakeUpEnd, bool());
     MOCK_METHOD1(SuspendBegin, bool(PowerStateChangeReason reason));
     MOCK_METHOD0(SuspendEnd, bool());
-    MOCK_METHOD2(SetScreenPowerForAll, bool(DisplayPowerState state, PowerStateChangeReason reason));
+    MOCK_METHOD2(SetScreenPowerForAll, bool(ScreenPowerState state, PowerStateChangeReason reason));
     MOCK_METHOD1(SetDisplayState, bool(DisplayState state));
     MOCK_METHOD1(GetDisplayState, DisplayState(DisplayId displayId));
     MOCK_METHOD1(NotifyDisplayEvent, void(DisplayEvent event));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,7 +88,6 @@ namespace {
  * @tc.name: SplitImmersive01
  * @tc.desc: one primary window and one fullscreen window, test enter and out split immersive
  * @tc.type: FUNC
- * @tc.require: AR000GGTV7
  */
 HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Level3)
 {
