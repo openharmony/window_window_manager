@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ namespace {
 bool DisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 {
     WLOGFI("reason:%{public}u", reason);
-    DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALD,
+    DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALID,
         DisplayStateChangeType::BEFORE_SUSPEND);
     return true;
 }
@@ -51,7 +51,7 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
                 isKeyguardDrawn = isKeyguardDrawn_;
             }
             if (!isKeyguardDrawn) {
-                DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALD,
+                DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALID,
                     DisplayStateChangeType::BEFORE_UNLOCK);
             }
             DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
@@ -72,7 +72,7 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
             return false;
         }
     }
-    DisplayManagerAgentController::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALD, state);
+    DisplayManagerAgentController::GetInstance().NotifyDisplayStateChanged(DISPLAY_ID_INVALID, state);
     return true;
 }
 
@@ -85,7 +85,7 @@ void DisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
 {
     WLOGFI("DisplayEvent:%{public}u", event);
     if (event == DisplayEvent::UNLOCK) {
-        DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALD,
+        DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALID,
             DisplayStateChangeType::BEFORE_UNLOCK);
         DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DESKTOP_READY,
             EventStatus::BEGIN);

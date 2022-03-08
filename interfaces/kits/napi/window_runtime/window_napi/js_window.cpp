@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "js_window.h"
+#include <new>
 #include "window.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
@@ -398,7 +399,7 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
             WLOGFE("Failed to convert parameter to windowType");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         } else if (static_cast<uint32_t>(*nativeType) >= static_cast<uint32_t>(WindowType::SYSTEM_WINDOW_BASE)) {
-            winType = static_cast<WindowType>(static_cast<uint32_t>(*nativeType));
+            winType = static_cast<WindowType>(static_cast<uint32_t>(*nativeType)); // adapt to the old version
         } else {
             if (JS_TO_NATIVE_WINDOW_TYPE_MAP.count(
                 static_cast<ApiWindowType>(static_cast<uint32_t>(*nativeType))) != 0) {
@@ -410,6 +411,7 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
             }
         }
     }
+
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (errCode != WMError::WM_OK) {
@@ -749,11 +751,11 @@ NativeValue* JsWindow::OnSetSystemBarProperties(NativeEngine& engine, NativeCall
         if (nativeObj == nullptr) {
             WLOGFE("Failed to convert object to SystemBarProperties");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
-        }
-
-        if (!SetSystemBarPropertiesFromJs(engine, nativeObj, systemBarProperties, windowToken_)) {
-            WLOGFE("Failed to GetSystemBarProperties From Js Object");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            if (!SetSystemBarPropertiesFromJs(engine, nativeObj, systemBarProperties, windowToken_)) {
+                WLOGFE("Failed to GetSystemBarProperties From Js Object");
+                errCode = WMError::WM_ERROR_INVALID_PARAM;
+            }
         }
     }
     AsyncTask::CompleteCallback complete =
@@ -902,7 +904,13 @@ NativeValue* JsWindow::OnSetColorSpace(NativeEngine& engine, NativeCallbackInfo&
             WLOGFE("JsWindow::OnSetColorSpace Failed to convert parameter to ColorSpace");
         } else {
             colorSpace = static_cast<ColorSpace>(static_cast<uint32_t>(*nativeType));
-            WLOGFI("JsWindow::OnSetColorSpace %{public}u", static_cast<uint32_t>(colorSpace));
+            if (colorSpace > ColorSpace::COLOR_SPACE_WIDE_GAMUT) {
+                WLOGFE("JsWindow::OnSetColorSpace Failed, colorSpace %{public}u invalid!",
+                    static_cast<uint32_t>(colorSpace));
+                errCode = WMError::WM_ERROR_INVALID_PARAM;
+            } else {
+                WLOGFI("JsWindow::OnSetColorSpace %{public}u", static_cast<uint32_t>(colorSpace));
+            }
         }
     }
 
@@ -963,7 +971,7 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
 {
     WLOGFI("JsWindow::CreateJsWindow is called");
     std::string windowName = window->GetWindowName();
-    // avoid repeatly creat js window when getWindow
+    // avoid repeatedly create js window when getWindow
     std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
     if (jsWindowObj != nullptr && jsWindowObj->Get() != nullptr) {
         WLOGFI("JsWindow::CreateJsWindow FindJsWindowObject %{public}s", windowName.c_str());

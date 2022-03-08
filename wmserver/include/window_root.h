@@ -55,6 +55,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void MinimizeAllAppWindows(DisplayId displayId);
+    WMError MaxmizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
@@ -63,6 +64,7 @@ public:
     void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
     void FocusFaultDetection() const;
+    WMError DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
     float GetVirtualPixelRatio(DisplayId displayId) const;
 
 private:

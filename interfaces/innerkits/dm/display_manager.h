@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,13 +55,13 @@ public:
     bool WakeUpEnd();
     bool SuspendBegin(PowerStateChangeReason reason);
     bool SuspendEnd();
-    bool SetScreenPowerForAll(DisplayPowerState state, PowerStateChangeReason reason);
-    DisplayPowerState GetScreenPower(uint64_t screenId);
     bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
     DisplayState GetDisplayState(DisplayId displayId);
     bool SetScreenBrightness(uint64_t screenId, uint32_t level);
     uint32_t GetScreenBrightness(uint64_t screenId) const;
     void NotifyDisplayEvent(DisplayEvent event);
+    bool Freeze(std::vector<DisplayId> displayIds);
+    bool Unfreeze(std::vector<DisplayId> displayIds);
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 
 private:

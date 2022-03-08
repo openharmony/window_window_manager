@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,7 @@ void AbstractDisplayController::Init(sptr<AbstractScreenController> abstractScre
     abstractScreenController_->ScreenConnectionInDisplayInit(abstractScreenCallback_);
     abstractScreenController->RegisterAbstractScreenCallback(abstractScreenCallback_);
 
-    // TODO: Active the code after "rsDisplayNode_->SetScreenId(rsScreenId)" is provided.
+    // Active the code after "rsDisplayNode_->SetScreenId(rsScreenId)" is provided.
     /*std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (dummyDisplay_ == nullptr) {
         sptr<AbstractDisplay> display = new AbstractDisplay(this, displayCount_.fetch_add(1), SCREEN_ID_INVALID,
@@ -118,7 +118,7 @@ std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(Di
     }
     ScreenId dmsScreenId = abstractDisplay->GetAbstractScreenId();
     std::shared_ptr<RSDisplayNode> displayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(dmsScreenId);
-
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::shared_ptr<ScreenshotCallback> callback = std::make_shared<ScreenshotCallback>();
     rsInterface_.TakeSurfaceCapture(displayNode, callback);
     std::shared_ptr<Media::PixelMap> screenshot = callback->GetResult(2000); // wait for 2000ms
@@ -130,6 +130,10 @@ std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(Di
 
 void AbstractDisplayController::OnAbstractScreenConnect(sptr<AbstractScreen> absScreen)
 {
+    if (absScreen == nullptr) {
+        WLOGFE("absScreen is null");
+        return;
+    }
     WLOGI("connect new screen. id:%{public}" PRIu64"", absScreen->dmsId_);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     sptr<AbstractScreenGroup> group = absScreen->GetGroup();
@@ -158,7 +162,7 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
     }
     WLOGI("disconnect screen. id:%{public}" PRIu64"", absScreen->dmsId_);
     sptr<AbstractScreenGroup> screenGroup;
-    DisplayId absDisplayId = DISPLAY_ID_INVALD;
+    DisplayId absDisplayId = DISPLAY_ID_INVALID;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         screenGroup = absScreen->GetGroup();
@@ -175,7 +179,7 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
             WLOGE("support in future. combination:%{public}u", screenGroup->combination_);
         }
     }
-    if (absDisplayId == DISPLAY_ID_INVALD) {
+    if (absDisplayId == DISPLAY_ID_INVALID) {
         WLOGE("the displayId of the disconnected expand screen was not found");
         return;
     }
@@ -211,7 +215,7 @@ DisplayId AbstractDisplayController::ProcessNormalScreenDisconnected(
             return displayId;
         }
     }
-    return DISPLAY_ID_INVALD;
+    return DISPLAY_ID_INVALID;
 }
 
 DisplayId AbstractDisplayController::ProcessExpandScreenDisconnected(
@@ -227,7 +231,7 @@ DisplayId AbstractDisplayController::ProcessExpandScreenDisconnected(
             return displayId;
         }
     }
-    return DISPLAY_ID_INVALD;
+    return DISPLAY_ID_INVALID;
 }
 
 void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absScreen, DisplayChangeEvent event)
@@ -302,19 +306,27 @@ void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> ab
         return;
     }
 
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
-        sptr<AbstractDisplay> absDisplay = iter->second;
-        if (absDisplay->GetAbstractScreenId() != absScreen->dmsId_) {
-            continue;
+    std::map<DisplayId, sptr<AbstractDisplay>> matchedDisplays;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); ++iter) {
+            sptr<AbstractDisplay> absDisplay = iter->second;
+            if (absDisplay == nullptr || absDisplay->GetAbstractScreenId() != absScreen->dmsId_) {
+                continue;
+            }
+            if (UpdateDisplaySize(absDisplay, info)) {
+                matchedDisplays.insert(std::make_pair(iter->first, iter->second));
+            }
         }
-        if (UpdateDisplaySize(absDisplay, info)) {
-            WLOGFI("Notify display size change");
-            DisplayManagerService::GetInstance().NotifyDisplayStateChange(
-                iter->first, DisplayStateChangeType::SIZE_CHANGE);
-            DisplayManagerAgentController::GetInstance().OnDisplayChange(
-                absDisplay->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
-        }
+    }
+
+    WLOGFI("Size of matchedDisplays %{public}zu", matchedDisplays.size());
+    for (auto iter = matchedDisplays.begin(); iter != matchedDisplays.end(); ++iter) {
+        WLOGFI("Notify display size change. Id %{public}" PRIu64"", iter->first);
+        DisplayManagerService::GetInstance().NotifyDisplayStateChange(
+            iter->first, DisplayStateChangeType::SIZE_CHANGE);
+        DisplayManagerAgentController::GetInstance().OnDisplayChange(
+            iter->second->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     }
 }
 
@@ -325,7 +337,6 @@ bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDispl
         WLOGI("keep display size. display:%{public}" PRIu64"", absDisplay->GetId());
         return false;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     absDisplay->SetHeight(info->height_);
     absDisplay->SetWidth(info->width_);
     WLOGI("update display size. id %{public}" PRIu64", size: %{public}d %{public}d",
@@ -341,14 +352,14 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
             WLOGE("The first real screen should be default for Phone. %{public}" PRIu64"", realAbsScreen->dmsId_);
             return;
         }
+        sptr<SupportedScreenModes> info = realAbsScreen->GetActiveScreenMode();
+        if (info == nullptr) {
+            WLOGE("bind alone screen error, cannot get info.");
+            return;
+        }
         if (dummyDisplay_ == nullptr) {
-            sptr<SupportedScreenModes> info = realAbsScreen->GetActiveScreenMode();
-            if (info == nullptr) {
-                WLOGE("bind alone screen error, cannot get info.");
-                return;
-            }
             sptr<AbstractDisplay> display = new AbstractDisplay(displayCount_.fetch_add(1),
-                realAbsScreen->dmsId_, info->width_, info->height_, info->freshRate_);
+                realAbsScreen->dmsId_, info->width_, info->height_, info->refreshRate_);
             abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
             WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, display->GetId());
@@ -356,7 +367,11 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
         } else {
             WLOGI("bind display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, dummyDisplay_->GetId());
+            bool updateFlag = dummyDisplay_->GetHeight() == info->height_ && dummyDisplay_->GetWidth() == info->width_;
             dummyDisplay_->BindAbstractScreen(realAbsScreen->dmsId_);
+            if (updateFlag) {
+                DisplayManagerAgentController::GetInstance().OnDisplayCreate(dummyDisplay_->ConvertToDisplayInfo());
+            }
             dummyDisplay_ = nullptr;
         }
     } else {
@@ -391,7 +406,7 @@ void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> abs
         return;
     }
     sptr<AbstractDisplay> display = new AbstractDisplay(displayCount_.fetch_add(1),
-        absScreen->dmsId_, info->width_, info->height_, info->freshRate_);
+        absScreen->dmsId_, info->width_, info->height_, info->refreshRate_);
     abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
     WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
         absScreen->dmsId_, display->GetId());
@@ -408,8 +423,46 @@ void AbstractDisplayController::AddDisplayForExpandScreen(sptr<AbstractScreen> a
             return;
         }
     }
-    WLOGI("screenId: %{public}" PRIu64" has no corresponding display, create new dispaly.",
+    WLOGI("screenId: %{public}" PRIu64" has no corresponding display, create new display.",
         absScreen->dmsId_);
     AddScreenToExpandLocked(absScreen);
+}
+
+
+void AbstractDisplayController::SetFreeze(std::vector<DisplayId> displayIds, bool toFreeze)
+{
+    WM_SCOPED_TRACE("dms:SetAllFreeze");
+    DisplayStateChangeType type = toFreeze ? DisplayStateChangeType::FREEZE : DisplayStateChangeType::UNFREEZE;
+    DisplayChangeEvent event
+        = toFreeze ? DisplayChangeEvent::DISPLAY_FREEZED : DisplayChangeEvent::DISPLAY_UNFREEZED;
+    for (DisplayId displayId : displayIds) {
+        sptr<AbstractDisplay> abstractDisplay;
+        WM_SCOPED_TRACE("dms:SetFreeze(%" PRIu64")", displayId);
+        {
+            WLOGI("setfreeze display %{public}" PRIu64"", displayId);
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            auto iter = abstractDisplayMap_.find(displayId);
+            if (iter == abstractDisplayMap_.end()) {
+                WLOGI("setfreeze fail, cannot get display %{public}" PRIu64"", displayId);
+                continue;
+            }
+            abstractDisplay = iter->second;
+            FreezeFlag curFlag = abstractDisplay->GetFreezeFlag();
+            if ((toFreeze && (curFlag == FreezeFlag::FREEZING))
+                || (!toFreeze && (curFlag == FreezeFlag::UNFREEZING))) {
+                WLOGI("setfreeze fail, display %{public}" PRIu64" freezeflag is %{public}u",
+                    displayId, curFlag);
+                continue;
+            }
+            FreezeFlag flag = toFreeze ? FreezeFlag::FREEZING : FreezeFlag::UNFREEZING;
+            abstractDisplay->SetFreezeFlag(flag);
+        }
+
+        // Notify freeze event to WMS
+        DisplayManagerService::GetInstance().NotifyDisplayStateChange(displayId, type);
+        // Notify freeze event to DisplayManager
+        sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
+        DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo, event);
+    }
 }
 } // namespace OHOS::Rosen

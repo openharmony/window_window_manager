@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,24 +24,20 @@
 #include <ui/rs_display_node.h>
 #include <ui/rs_surface_node.h>
 
+#include "noncopyable.h"
 #include "screen.h"
 #include "screen_group.h"
 #include "screen_group_info.h"
 #include "screen_info.h"
 
 namespace OHOS::Rosen {
-enum class ScreenType : uint32_t {
-    UNDEFINE,
-    REAL,
-    VIRTUAL
-};
-
 class AbstractScreenGroup;
 class AbstractScreenController;
 class AbstractScreen : public RefBase {
 public:
-    AbstractScreen(ScreenId dmsId, ScreenId rsId);
+    AbstractScreen(sptr<AbstractScreenController>, const std::string& name, ScreenId dmsId, ScreenId rsId);
     AbstractScreen() = delete;
+    WM_DISALLOW_COPY_AND_MOVE(AbstractScreen);
     ~AbstractScreen();
     sptr<SupportedScreenModes> GetActiveScreenMode() const;
     std::vector<sptr<SupportedScreenModes>> GetAbstractScreenModes() const;
@@ -61,27 +57,29 @@ public:
     DMError SetScreenGamutMap(ScreenGamutMap gamutMap);
     DMError SetScreenColorTransform();
 
-    ScreenId dmsId_;
-    ScreenId rsId_;
-    bool canHasChild_ { false };
+    const std::string name_;
+    const ScreenId dmsId_;
+    const ScreenId rsId_;
+    bool isScreenGroup_ { false };
     std::shared_ptr<RSDisplayNode> rsDisplayNode_;
     RSDisplayNodeConfig rSDisplayNodeConfig_;
     ScreenId groupDmsId_ { SCREEN_ID_INVALID };
     ScreenType type_ { ScreenType::REAL };
     int32_t activeIdx_ { 0 };
-    float virtualPixelRatio = { 1.0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};
+    float virtualPixelRatio_ = { 1.0 };
     Orientation orientation_ { Orientation::UNSPECIFIED };
     Rotation rotation_ { Rotation::ROTATION_0 };
 protected:
     void FillScreenInfo(sptr<ScreenInfo>) const;
-    sptr<AbstractScreenController>& screenController_;
+    const sptr<AbstractScreenController> screenController_;
 };
 
 class AbstractScreenGroup : public AbstractScreen {
 public:
-    AbstractScreenGroup(ScreenId dmsId, ScreenId rsId, ScreenCombination combination);
+    AbstractScreenGroup(sptr<AbstractScreenController>, ScreenId dmsId, ScreenId rsId, ScreenCombination combination);
     AbstractScreenGroup() = delete;
+    WM_DISALLOW_COPY_AND_MOVE(AbstractScreenGroup);
     ~AbstractScreenGroup();
 
     bool AddChild(sptr<AbstractScreen>& dmsScreen, Point& startPoint);
@@ -92,12 +90,13 @@ public:
     std::vector<Point> GetChildrenPosition() const;
     size_t GetChildCount() const;
     sptr<ScreenGroupInfo> ConvertToScreenGroupInfo() const;
-    bool SetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config);
 
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     ScreenId mirrorScreenId_ { SCREEN_ID_INVALID };
 
 private:
+    bool GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config);
+
     std::map<ScreenId, std::pair<sptr<AbstractScreen>, Point>> abstractScreenMap_;
 };
 } // namespace OHOS::Rosen

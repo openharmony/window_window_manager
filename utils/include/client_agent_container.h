@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 
 #include <map>
 #include <mutex>
-#include <vector>
+#include <set>
 #include "agent_death_recipient.h"
 #include "window_manager_hilog.h"
 
@@ -32,11 +32,11 @@ public:
 
     bool RegisterAgent(const sptr<T1>& agent, T2 type);
     bool UnregisterAgent(const sptr<T1>& agent, T2 type);
-    std::vector<sptr<T1>> GetAgentsByType(T2 type);
+    std::set<sptr<T1>> GetAgentsByType(T2 type);
 
 private:
     void RemoveAgent(const sptr<IRemoteObject>& remoteObject);
-    bool UnregisterAgentLocked(std::vector<sptr<T1>>& agents, const sptr<IRemoteObject>& agent);
+    bool UnregisterAgentLocked(std::set<sptr<T1>>& agents, const sptr<IRemoteObject>& agent);
 
     static constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ClientAgentContainer"};
 
@@ -52,7 +52,7 @@ private:
     };
 
     std::recursive_mutex mutex_;
-    std::map<T2, std::vector<sptr<T1>>> agentMap_;
+    std::map<T2, std::set<sptr<T1>>> agentMap_;
     sptr<AgentDeathRecipient> deathRecipient_;
 };
 
@@ -64,7 +64,7 @@ template<typename T1, typename T2>
 bool ClientAgentContainer<T1, T2>::RegisterAgent(const sptr<T1>& agent, T2 type)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    agentMap_[type].push_back(agent);
+    agentMap_[type].insert(agent);
     WLOGFI("agent registered type:%{public}u", type);
     if (deathRecipient_ == nullptr || !agent->AsObject()->AddDeathRecipient(deathRecipient_)) {
         WLOGFI("failed to add death recipient");
@@ -87,18 +87,18 @@ bool ClientAgentContainer<T1, T2>::UnregisterAgent(const sptr<T1>& agent, T2 typ
 }
 
 template<typename T1, typename T2>
-std::vector<sptr<T1>> ClientAgentContainer<T1, T2>::GetAgentsByType(T2 type)
+std::set<sptr<T1>> ClientAgentContainer<T1, T2>::GetAgentsByType(T2 type)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (agentMap_.count(type) == 0) {
         WLOGFI("no such type of agent registered! type:%{public}u", type);
-        return std::vector<sptr<T1>>();
+        return std::set<sptr<T1>>();
     }
     return agentMap_.at(type);
 }
 
 template<typename T1, typename T2>
-bool ClientAgentContainer<T1, T2>::UnregisterAgentLocked(std::vector<sptr<T1>>& agents,
+bool ClientAgentContainer<T1, T2>::UnregisterAgentLocked(std::set<sptr<T1>>& agents,
     const sptr<IRemoteObject>& agent)
 {
     auto iter = std::find_if(agents.begin(), agents.end(), finder_t(agent));

@@ -64,6 +64,40 @@ void WindowManagerAgentProxy::UpdateFocusStatus(uint32_t windowId, const sptr<IR
     }
 }
 
+void WindowManagerAgentProxy::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (focusChangeInfo == nullptr) {
+        WLOGFE("Invalid focus change info");
+        return;
+    }
+    
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteParcelable(focusChangeInfo)) {
+        WLOGFE("Write displayId failed");
+        return;
+    }
+
+    if (!data.WriteRemoteObject(focusChangeInfo->abilityToken_)) {
+        WLOGFI("Write abilityToken failed");
+    }
+
+    if (!data.WriteBool(focused)) {
+        WLOGFE("Write Focus failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(TRANS_ID_UPDATE_FOCUS, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 void WindowManagerAgentProxy::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     MessageParcel data;

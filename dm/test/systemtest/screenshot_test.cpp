@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,12 +36,12 @@ public:
     static DisplayId defaultId_;
     static Media::Rect defaultScreen_;
     static Media::Size defaultImage_;
-    DisplayId invalidId_ = DISPLAY_ID_INVALD;
+    DisplayId invalidId_ = DISPLAY_ID_INVALID;
     Media::Rect invalidRect_ = {-1, -1, -1, -1};
     uint32_t defaultRot_ = 0;
 };
 
-DisplayId ScreenshotTest::defaultId_ = DISPLAY_ID_INVALD;
+DisplayId ScreenshotTest::defaultId_ = DISPLAY_ID_INVALID;
 Media::Rect ScreenshotTest::defaultScreen_ = {0, 0, 0, 0};
 Media::Size ScreenshotTest::defaultImage_ = {0, 0};
 
@@ -49,11 +49,11 @@ void ScreenshotTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
-        WLOGFI("GetDefaultDisplay: failed!\n");
-    } else {
-        WLOGFI("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
-            display->GetHeight(), display->GetFreshRate());
+        WLOGFE("GetDefaultDisplay: failed!\n");
+        return;
     }
+    WLOGFI("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
+        display->GetHeight(), display->GetRefreshRate());
 
     defaultId_ = display->GetId();
     defaultScreen_ = {0, 0, display->GetWidth(), display->GetHeight()};

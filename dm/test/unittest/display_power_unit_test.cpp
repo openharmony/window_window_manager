@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "display_manager.h"
+#include "screen_manager.h"
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 
@@ -40,7 +41,7 @@ public:
     static inline DisplayId defaultId_ = 0;
     static inline uint32_t brightnessLevel_ = 80;
     static inline uint32_t invalidBrightnessLevel_ = 1000000000;
-    static inline DisplayPowerState initialPowerState_;
+    static inline ScreenPowerState initialPowerState_;
     static inline DisplayState initialState_;
 };
 
@@ -54,13 +55,13 @@ void DisplayPowerUnitTest::TearDownTestCase()
 
 void DisplayPowerUnitTest::SetUp()
 {
-    initialPowerState_ = DisplayManager::GetInstance().GetScreenPower(defaultId_);
+    initialPowerState_ = ScreenManager::GetInstance().GetScreenPower(defaultId_);
     initialState_ = DisplayManager::GetInstance().GetDisplayState(defaultId_);
 }
 
 void DisplayPowerUnitTest::TearDown()
 {
-    DisplayManager::GetInstance().SetScreenPowerForAll(initialPowerState_, PowerStateChangeReason::POWER_BUTTON);
+    ScreenManager::GetInstance().SetScreenPowerForAll(initialPowerState_, PowerStateChangeReason::POWER_BUTTON);
     DisplayStateCallback callback;
     DisplayManager::GetInstance().SetDisplayState(initialState_, callback);
 }
@@ -70,7 +71,6 @@ namespace {
  * @tc.name: register_display_power_event_listener_001
  * @tc.desc: call Register/UnregisterDisplayPowerEventListener with a valid listener and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_001, Function | SmallTest | Level2)
 {
@@ -91,7 +91,6 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_001, Functi
  * @tc.name: register_display_power_event_listener_002
  * @tc.desc: call Register/UnregisterDisplayPowerEventListener with nullptr and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_002, Function | SmallTest | Level2)
 {
@@ -111,7 +110,6 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_002, Functi
  * @tc.name: register_display_power_event_listener_003
  * @tc.desc: call Register/UnregisterDisplayPowerEventListener with ipc failed and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_003, Function | SmallTest | Level2)
 {
@@ -131,7 +129,6 @@ HWTEST_F(DisplayPowerUnitTest, register_display_power_event_listener_003, Functi
  * @tc.name: unregister_display_power_event_listener_001
  * @tc.desc: call UnregisterDisplayPowerEventListener with a listener never registered and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_001, Function | SmallTest | Level2)
 {
@@ -146,7 +143,6 @@ HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_001, Func
  * @tc.name: unregister_display_power_event_listener_002
  * @tc.desc: call UnregisterDisplayPowerEventListener with nullptr and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_002, Function | SmallTest | Level2)
 {
@@ -161,7 +157,6 @@ HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_002, Func
  * @tc.name: wake_up_begin_001
  * @tc.desc: call WakeUpBegin and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, wake_up_begin_001, Function | SmallTest | Level2)
 {
@@ -179,7 +174,6 @@ HWTEST_F(DisplayPowerUnitTest, wake_up_begin_001, Function | SmallTest | Level2)
  * @tc.name: wake_up_end_001
  * @tc.desc: call WakeUpEnd and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, wake_up_end_001, Function | SmallTest | Level2)
 {
@@ -197,7 +191,6 @@ HWTEST_F(DisplayPowerUnitTest, wake_up_end_001, Function | SmallTest | Level2)
  * @tc.name: suspend_begin_001
  * @tc.desc: call SuspendBegin and check return value
  * @tc.type: FUNC
- * @tc.require:
  */
 HWTEST_F(DisplayPowerUnitTest, suspend_begin_001, Function | SmallTest | Level2)
 {
@@ -215,7 +208,6 @@ HWTEST_F(DisplayPowerUnitTest, suspend_begin_001, Function | SmallTest | Level2)
 * @tc.name: suspend_end_001
 * @tc.desc: call SuspendEnd and check return value
 * @tc.type: FUNC
-* @tc.require:
 */
 HWTEST_F(DisplayPowerUnitTest, suspend_end_001, Function | SmallTest | Level2)
 {
@@ -267,12 +259,12 @@ HWTEST_F(DisplayPowerUnitTest, set_screen_power_for_all_001, Function | MediumTe
     EXPECT_CALL(m.Mock(), SetScreenPowerForAll(_, PowerStateChangeReason::POWER_BUTTON))
         .Times(1).WillOnce(Return(true));
 
-    bool ret = DisplayManager::GetInstance().SetScreenPowerForAll(DisplayPowerState::POWER_OFF,
+    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(ScreenPowerState::POWER_OFF,
         PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
 
-    DisplayPowerState state = DisplayManager::GetInstance().GetScreenPower(defaultId_);
-    ASSERT_EQ(state, DisplayPowerState::POWER_OFF);
+    ScreenPowerState state = ScreenManager::GetInstance().GetScreenPower(defaultId_);
+    ASSERT_EQ(state, ScreenPowerState::POWER_OFF);
 }
 
 /**
@@ -286,11 +278,11 @@ HWTEST_F(DisplayPowerUnitTest, set_screen_power_for_all_002, Function | MediumTe
     EXPECT_CALL(m.Mock(), GetDefaultDisplayId()).Times(1).WillOnce(Return(defaultId_));
     EXPECT_CALL(m.Mock(), SetScreenPowerForAll(_, PowerStateChangeReason::POWER_BUTTON)).Times(0);
 
-    bool ret = DisplayManager::GetInstance().SetScreenPowerForAll(DisplayPowerState::INVALID_STATE,
+    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(ScreenPowerState::INVALID_STATE,
         PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(false, ret);
 
-    DisplayPowerState state = DisplayManager::GetInstance().GetScreenPower(defaultId_);
+    ScreenPowerState state = ScreenManager::GetInstance().GetScreenPower(defaultId_);
     ASSERT_EQ(state, initialPowerState_);
 }
 

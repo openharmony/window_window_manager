@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_LAUNCHER_RECENT,
     WINDOW_TYPE_LAUNCHER_DOCK,
     WINDOW_TYPE_BOOT_ANIMATION,
+    WINDOW_TYPE_FREEZE_DISPLAY,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_WINDOW_END = ABOVE_APP_SYSTEM_WINDOW_END,
@@ -195,6 +196,12 @@ enum class WindowUpdateType : int32_t {
     WINDOW_UPDATE_FOCUSED,
     WINDOW_UPDATE_BOUNDS,
     WINDOW_UPDATE_ACTIVE,
+};
+
+enum class WindowDumpType : uint32_t {
+    ALL,
+    TREE,
+    CLEAR
 };
 }
 }

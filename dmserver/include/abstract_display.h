@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,11 @@
 #include "display_info.h"
 
 namespace OHOS::Rosen {
+enum class FreezeFlag : uint32_t {
+    FREEZING,
+    UNFREEZING,
+};
+
 class AbstractDisplay : public RefBase {
 public:
     constexpr static int32_t DEFAULT_WIDTH = 720;
@@ -29,7 +34,8 @@ public:
     constexpr static float DEFAULT_VIRTUAL_PIXEL_RATIO = 1.0;
     constexpr static uint32_t DEFAULT_FRESH_RATE = 60;
     AbstractDisplay(const DisplayInfo* info);
-    AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t freshRate);
+    AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t refreshRate);
+    WM_DISALLOW_COPY_AND_MOVE(AbstractDisplay);
     ~AbstractDisplay() = default;
     static inline bool IsVertical(Rotation rotation)
     {
@@ -38,31 +44,34 @@ public:
     DisplayId GetId() const;
     int32_t GetWidth() const;
     int32_t GetHeight() const;
-    uint32_t GetFreshRate() const;
+    uint32_t GetRefreshRate() const;
     float GetVirtualPixelRatio() const;
     ScreenId GetAbstractScreenId() const;
     bool BindAbstractScreen(ScreenId dmsScreenId);
     bool BindAbstractScreen(sptr<AbstractScreen> abstractDisplay);
     sptr<DisplayInfo> ConvertToDisplayInfo() const;
+    Rotation GetRotation() const;
+    FreezeFlag GetFreezeFlag() const;
 
     void SetId(DisplayId displayId);
     void SetWidth(int32_t width);
     void SetHeight(int32_t height);
-    void SetFreshRate(uint32_t freshRate);
+    void SetRefreshRate(uint32_t refreshRate);
     void SetVirtualPixelRatio(float virtualPixelRatio);
     void SetOrientation(Orientation orientation);
     bool RequestRotation(Rotation rotation);
-    Rotation GetRotation();
+    void SetFreezeFlag(FreezeFlag);
 
 private:
-    DisplayId id_ { DISPLAY_ID_INVALD };
+    DisplayId id_ { DISPLAY_ID_INVALID };
     ScreenId screenId_ { SCREEN_ID_INVALID };
     int32_t width_ { 0 };
     int32_t height_ { 0 };
-    uint32_t freshRate_ { 0 };
+    uint32_t refreshRate_ { 0 };
     float virtualPixelRatio_ { 1.0 };
     Rotation rotation_ { Rotation::ROTATION_0 };
     Orientation orientation_ { Orientation::UNSPECIFIED };
+    FreezeFlag freezeFlag_ { FreezeFlag::UNFREEZING };
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_H

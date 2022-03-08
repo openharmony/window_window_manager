@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,12 +40,9 @@ vector<Rect> WindowLayoutTest::fullScreenExpecteds_;
 void WindowLayoutTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
-    if (display == nullptr) {
-        printf("GetDefaultDisplay: failed!\n");
-    } else {
-        printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
-            display->GetHeight(), display->GetFreshRate());
-    }
+    ASSERT_TRUE((display != nullptr));
+    printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
+        display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
 
@@ -94,10 +91,38 @@ void WindowLayoutTest::TearDown()
 
 namespace {
 /**
+ * @tc.name: LayoutWindow01
+ * @tc.desc: One FLOATING APP Window with on custom rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
+{
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE, displayId_);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE, displayId_);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
+
+    utils::TestWindowInfo info = {
+        .name = "main",
+        .rect = {0, 0, 0, 0},
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentName = "",
+    };
+    const sptr<Window>& window = utils::CreateTestWindow(info);
+    activeWindows_.push_back(window);
+    Rect expect = utils::GetDefaultFoatingRect(window);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_TRUE(utils::RectEqualTo(window, expect));
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
+}
+
+/**
  * @tc.name: LayoutWindow02
  * @tc.desc: One FLOATING APP Window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
 {
@@ -122,7 +147,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow04
  * @tc.desc: One FLOATING APP Window & One StatusBar Window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
 {
@@ -156,7 +180,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow06
  * @tc.desc: StatusBar Window and NaviBar & Sys Window FULLSCRENN,NOT NEEDVOID,PARENTLIMIT
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
 {
@@ -195,7 +218,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow07
  * @tc.desc: StatusBar Window and NaviBar & One Floating Sys Window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
 {
@@ -234,7 +256,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow08
  * @tc.desc: One FLOATING APP Window with on custom rect
  * @tc.type: FUNC
- * @tc.require: AR000GGTV9
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
 {
@@ -259,7 +280,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow09
  * @tc.desc: Add a floating and resize(2, 2)
  * @tc.type: FUNC
- * @tc.require: AR000GGTV9
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
 {
@@ -290,7 +310,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
  * @tc.name: LayoutWindow10
  * @tc.desc: One FLOATING APP Window do max and recovery
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
 {
@@ -320,7 +339,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
  * @tc.name: LayoutTile01
  * @tc.desc: One FLOATING APP Window into tile mode, show 4 new window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
 {
@@ -375,7 +393,6 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
  * @tc.name: LayoutTileNegative01
  * @tc.desc: negative test for tile window
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
 {
@@ -428,7 +445,6 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
  * @tc.name: LayoutTileNegative01
  * @tc.desc: move window out of the display
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
 {
@@ -458,7 +474,6 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
  * @tc.name: LayoutNegative02
  * @tc.desc: resize window to negative size
  * @tc.type: FUNC
- * @tc.require: AR000GGTVJ
  */
 HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ namespace {
  */
 HWTEST_F(DisplayMinimalTest, BasicDisplay01, Function | MediumTest | Level1)
 {
-    ASSERT_NE(DISPLAY_ID_INVALD, DisplayManager::GetInstance().GetDefaultDisplayId());
+    ASSERT_NE(DISPLAY_ID_INVALID, DisplayManager::GetInstance().GetDefaultDisplayId());
 }
 
 /**
