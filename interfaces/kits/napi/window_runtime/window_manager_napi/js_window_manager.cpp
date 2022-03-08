@@ -17,6 +17,7 @@
 #include <cinttypes>
 #include <new>
 #include "ability_context.h"
+#include "display_manager.h"
 #include "dm_common.h"
 #include "js_window.h"
 #include "js_window_utils.h"
@@ -337,7 +338,13 @@ NativeValue* JsWindowManager::OnMinimizeAll(NativeEngine& engine, NativeCallback
         WLOGFE("Failed to convert parameter to displayId");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    WLOGFI("displayId %{public}" PRIu64"", static_cast<uint64_t>(displayId));
+    if (displayId < 0 ||
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
+        WLOGFE("displayId is invalid");
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    } else {
+        WLOGFI("displayId %{public}" PRIu64"", static_cast<uint64_t>(displayId));
+    }
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (errCode != WMError::WM_OK) {
