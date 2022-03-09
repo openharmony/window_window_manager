@@ -602,5 +602,11 @@ float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
     auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
     return container->GetVirtualPixelRatio();
 }
+
+Rect WindowRoot::GetDisplayLimitRect(DisplayId displayId) const
+{
+    auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
+    return container->GetDisplayLimitRect();
+}
 } // namespace OHOS::Rosen
 } // namespace OHOS
