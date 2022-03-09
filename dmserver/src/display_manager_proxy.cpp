@@ -115,7 +115,8 @@ sptr<DisplayInfo> DisplayManagerProxy::GetDisplayInfoByScreen(ScreenId screenId)
     return info;
 }
 
-ScreenId DisplayManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOption)
+ScreenId DisplayManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOption,
+    const sptr<IRemoteObject>& displayManagerAgent)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -140,6 +141,10 @@ ScreenId DisplayManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOpt
     } else {
         WLOGFW("CreateVirtualScreen: surface is nullptr");
         res = res && data.WriteBool(false);
+    }
+    if (displayManagerAgent != nullptr) {
+        res = res &&
+            data.WriteRemoteObject(displayManagerAgent);
     }
     if (!res) {
         WLOGFE("Write data failed");

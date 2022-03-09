@@ -63,6 +63,12 @@ void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
         // posk task after 50 ms.
         controllerHandler_->PostTask(task, 50, AppExecFwk::EventQueue::Priority::HIGH);
     }
+    bool callbackRegister = DisplayManagerAgentController::GetInstance().SetRemoveAgentCallback(
+        std::bind(&AbstractScreenController::OnRemoteDied, this, std::placeholders::_1),
+        DisplayManagerAgentType::VIRTUAL_SCREEN_DIED_LISTENER);
+    if (!callbackRegister) {
+        WLOGFE("virtualScreen callback registered failed");
+    }
 }
 
 std::vector<ScreenId> AbstractScreenController::GetAllScreenIds() const
@@ -460,7 +466,15 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsSuccedentScreenLocked(s
     return screenGroup;
 }
 
-ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption option)
+bool AbstractScreenController::RegisterVirtualScreenAgent(const sptr<IRemoteObject>& displayManagerAgent)
+{
+    return DisplayManagerAgentController::GetInstance().RegisterDisplayManagerAgent(
+        iface_cast<IDisplayManagerAgent>(displayManagerAgent),
+        DisplayManagerAgentType::VIRTUAL_SCREEN_DIED_LISTENER);
+}
+
+ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption option,
+    const sptr<IRemoteObject>& displayManagerAgent)
 {
     ScreenId rsId = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
         option.height_, option.surface_, SCREEN_ID_INVALID, option.flags_);
@@ -468,7 +482,16 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
     if (rsId == SCREEN_ID_INVALID) {
         return SCREEN_ID_INVALID;
     }
+    std::vector<ScreenId> virtualScreenIds;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::map<sptr<IRemoteObject>, std::vector<ScreenId>>::iterator agIter = screenAgentMap_.find(displayManagerAgent);
+    if (agIter == screenAgentMap_.end()) {
+        if (!RegisterVirtualScreenAgent(displayManagerAgent)) {
+            return SCREEN_ID_INVALID;
+        }
+    } else {
+        virtualScreenIds = screenAgentMap_[displayManagerAgent];
+    }
     ScreenId dmsScreenId = SCREEN_ID_INVALID;
     if (!screenIdManager_.ConvertToDmsScreenId(rsId, dmsScreenId)) {
         dmsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsId);
@@ -498,6 +521,8 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
     } else {
         WLOGFI("id: %{public}" PRIu64" appears in screenIdManager_. ", rsId);
     }
+    virtualScreenIds.emplace_back(dmsScreenId);
+    screenAgentMap_[displayManagerAgent] = virtualScreenIds;
     return dmsScreenId;
 }
 
@@ -507,13 +532,45 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent = nullptr;
+    bool agentFound = false;
+    for (auto &agentIter : screenAgentMap_) {
+        for (auto iter = agentIter.second.begin(); iter != agentIter.second.end(); iter++) {
+            if (*iter == screenId) {
+                iter = agentIter.second.erase(iter);
+                agentFound = true;
+                break;
+            }
+        }
+        if (agentFound) {
+            break;
+        }
+    }
+
+    std::map<ScreenId, std::shared_ptr<RSDisplayNode>>::iterator iter = displayNodeMap_.find(rsScreenId);
+    if (iter == displayNodeMap_.end()) {
+        WLOGFI("displayNode is nullptr");
+    } else {
+        displayNodeMap_[rsScreenId]->RemoveFromTree();
+        WLOGFI("displayNode remove from tree rsScreenId: %{public}" PRIu64"", rsScreenId);
+        displayNodeMap_.erase(rsScreenId);
+        auto transactionProxy = RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->FlushImplicitTransaction();
+        }
+    }
+    
     if (rsScreenId != SCREEN_ID_INVALID && GetAbstractScreen(screenId) != nullptr) {
         ProcessScreenDisconnected(rsScreenId);
     }
     screenIdManager_.DeleteScreenId(screenId);
-    if (rsScreenId != SCREEN_ID_INVALID) {
-        rsInterface_.RemoveVirtualScreen(rsScreenId);
+
+    if (rsScreenId == SCREEN_ID_INVALID) {
+        WLOGFE("DestroyVirtualScreen: No corresponding rsScreenId");
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
+    rsInterface_.RemoveVirtualScreen(rsScreenId);
     WLOGFI("DumpScreenInfo after Destroy VirtualScreen");
     DumpScreenInfo();
     return DMError::DM_OK;
@@ -814,6 +871,34 @@ bool AbstractScreenController::MakeExpand(std::vector<ScreenId> screenIds, std::
     return true;
 }
 
+void AbstractScreenController::SetShotScreen(ScreenId mainScreenId, std::vector<ScreenId> shotScreenIds)
+{
+    WLOGFI("SetShotScreen. mainScreenId: %{public}" PRIu64"", mainScreenId);
+    if (shotScreenIds.empty()) {
+        WLOGFI("shotScreenIds is empty");
+        return;
+    }
+    std::shared_ptr<RSDisplayNode> displayNode = GetRSDisplayNodeByScreenId(mainScreenId);
+    if (displayNode == nullptr) {
+        WLOGFE("SetShotScreen error, cannot get DisplayNode");
+        return;
+    }
+    NodeId nodeId = displayNode->GetId();
+    WLOGI("SetShotScreen, mainScreen nodeId:%{public}" PRIu64"", nodeId);
+    for (ScreenId shotScreenId : shotScreenIds) {
+        shotScreenId = ConvertToRsScreenId(shotScreenId);
+        if (shotScreenId == SCREEN_ID_INVALID) {
+            continue;
+        }
+        struct RSDisplayNodeConfig config = {shotScreenId, true, nodeId};
+        displayNodeMap_[shotScreenId] = RSDisplayNode::Create(config);
+    }
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+}
+
 void AbstractScreenController::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 {
     if (screens.empty()) {
@@ -839,6 +924,26 @@ void AbstractScreenController::RemoveVirtualScreenFromGroup(std::vector<ScreenId
         RemoveFromGroupLocked(screen);
     }
     NotifyScreenGroupChanged(removeFromGroup, ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
+}
+
+bool AbstractScreenController::OnRemoteDied(const sptr<IRemoteObject>& agent)
+{
+    if (agent == nullptr) {
+        return false;
+    }
+    std::map<sptr<IRemoteObject>, std::vector<ScreenId>>::iterator agentIter = screenAgentMap_.find(agent);
+    if (agentIter != screenAgentMap_.end()) {
+        while (screenAgentMap_[agent].size() > 0) {
+            auto diedId = screenAgentMap_[agent][0];
+            WLOGI("destroy screenId in OnRemoteDied: %{public}" PRIu64"", diedId);
+            DMError res = DestroyVirtualScreen(diedId);
+            if (res != DMError::DM_OK) {
+                WLOGE("destroy failed in OnRemoteDied: %{public}" PRIu64"", diedId);
+            }
+        }
+        screenAgentMap_.erase(agent);
+    }
+    return true;
 }
 
 void AbstractScreenController::DumpScreenInfo() const
