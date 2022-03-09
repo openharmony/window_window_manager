@@ -103,7 +103,6 @@ namespace {
  * @tc.name: DragIn
  * @tc.desc: Drag a window to another window
  * @tc.type: FUNC
- * @tc.require: AR000GKB4M
  */
 HWTEST_F(WindowDragTest, DragIn, Function | MediumTest | Level3) {
     const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
@@ -127,7 +126,6 @@ HWTEST_F(WindowDragTest, DragIn, Function | MediumTest | Level3) {
  * @tc.name: DragMove
  * @tc.desc: Window Move
  * @tc.type: FUNC
- * @tc.require: AR000GKB4M
  */
 HWTEST_F(WindowDragTest, DragMove, Function | MediumTest | Level3) {
     const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
@@ -157,7 +155,6 @@ HWTEST_F(WindowDragTest, DragMove, Function | MediumTest | Level3) {
  * @tc.name: DragOut
  * @tc.desc: Drag the drag window out of the current window
  * @tc.type: FUNC
- * @tc.require: AR000GKB4M
  */
 HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
     const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
@@ -201,7 +198,6 @@ HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
  * @tc.name: DragEnd
  * @tc.desc: End window drag
  * @tc.type: FUNC
- * @tc.require: AR000GKB4M
  */
 HWTEST_F(WindowDragTest, DragEnd, Function | MediumTest | Level3) {
     const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
