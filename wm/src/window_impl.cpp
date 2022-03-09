@@ -39,8 +39,8 @@ const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
 };
 
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
-std::map<uint32_t, std::vector<sptr<Window>>> WindowImpl::subWindowMap_;
-std::map<uint32_t, std::vector<sptr<Window>>> WindowImpl::appFloatingWindowMap_;
+std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
+std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appFloatingWindowMap_;
 
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
@@ -132,7 +132,7 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
         }
     }
     WLOGFI("GetTopWindowfinal MainWinId:%{public}u!", mainWinId);
-    if (!mainWinId) {
+    if (mainWinId == INVALID_WINDOW_ID) {
         WLOGFE("Cannot find topWindow!");
         return nullptr;
     }
@@ -151,7 +151,7 @@ std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
         WLOGFE("Cannot parentWindow with id: %{public}d!", parentId);
         return std::vector<sptr<Window>>();
     }
-    return subWindowMap_[parentId];
+    return std::vector<sptr<Window>>(subWindowMap_[parentId].begin(), subWindowMap_[parentId].end());
 }
 
 std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
@@ -336,8 +336,7 @@ WMError WindowImpl::SetWindowFlags(uint32_t flags)
 WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed)
 {
-    WLOGFI("SetUIContent");
-    WLOGFI("contentInfo: %{public}s, context_:%{public}p", contentInfo.c_str(), context_.get());
+    WLOGFI("SetUIContent contentInfo: %{public}s", contentInfo.c_str());
     uiContent_ = Ace::UIContent::Create(context_.get(), engine);
     if (uiContent_ == nullptr) {
         WLOGFE("fail to SetUIContent id: %{public}d", property_->GetWindowId());
@@ -553,7 +552,6 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
         return ret;
     }
     context_ = context;
-    // FIX ME: use context_
     abilityContext_ = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
     if (abilityContext_ != nullptr) {
         ret = SingletonContainer::Get<WindowAdapter>().SaveAbilityToken(abilityContext_->GetToken(), windowId);
@@ -574,6 +572,58 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     return ret;
 }
 
+void WindowImpl::DestroyFloatingWindow()
+{
+    // remove from appFloatingWindowMap_
+    for (auto& floatingWindows: appFloatingWindowMap_) {
+        for (auto iter = floatingWindows.second.begin(); iter != floatingWindows.second.end(); ++iter) {
+            if ((*iter)->GetWindowId() == GetWindowId()) {
+                floatingWindows.second.erase(iter);
+                break;
+            }
+        }
+    }
+
+    // Destroy app floating window if exist
+    if (appFloatingWindowMap_.count(GetWindowId()) > 0) {
+        for (auto& floatingWindow : appFloatingWindowMap_.at(GetWindowId())) {
+            NotifyBeforeSubWindowDestroy(floatingWindow);
+            WMError fltRet = SingletonContainer::Get<WindowAdapter>().DestroyWindow(floatingWindow->GetWindowId());
+            if (fltRet == WMError::WM_OK) {
+                WLOGFI("Destroy App %{public}d FltWindow %{}d", GetWindowId(), floatingWindow->GetWindowId());
+            } else {
+                WLOGFE("Floating Window %{public}d Destroy Failed", floatingWindow->GetWindowId());
+            }
+            floatingWindow->SetWindowState(WindowState::STATE_DESTROYED);
+            windowMap_.erase(floatingWindow->GetWindowName());
+        }
+        appFloatingWindowMap_.erase(GetWindowId());
+    }
+}
+
+void WindowImpl::DestroySubWindow()
+{
+    if (subWindowMap_.count(property_->GetParentId()) > 0) { // remove from subWindowMap_
+        std::vector<sptr<WindowImpl>>& subWindows = subWindowMap_.at(property_->GetParentId());
+        for (auto iter = subWindows.begin(); iter < subWindows.end(); ++iter) {
+            if ((*iter)->GetWindowId() == GetWindowId()) {
+                subWindows.erase(iter);
+                break;
+            }
+        }
+    }
+
+    if (subWindowMap_.count(GetWindowId()) > 0) { // remove from subWindowMap_ and windowMap_
+        std::vector<sptr<WindowImpl>>& subWindows = subWindowMap_.at(GetWindowId());
+        for (auto& subWindow : subWindows) {
+            subWindow->SetWindowState(WindowState::STATE_DESTROYED);
+            windowMap_.erase(subWindow->GetWindowName());
+        }
+        subWindowMap_[GetWindowId()].clear();
+        subWindowMap_.erase(GetWindowId());
+    }
+}
+
 WMError WindowImpl::Destroy()
 {
     if (!IsWindowValid()) {
@@ -582,7 +632,7 @@ WMError WindowImpl::Destroy()
 
     WLOGFI("[Client] Window %{public}d Destroy", property_->GetWindowId());
 
-    NotifyBeforeDestroy();
+    NotifyBeforeDestroy(GetWindowName());
     if (subWindowMap_.count(GetWindowId()) > 0) {
         for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
             NotifyBeforeSubWindowDestroy(subWindow);
@@ -595,30 +645,8 @@ WMError WindowImpl::Destroy()
         return ret;
     }
     windowMap_.erase(GetWindowName());
-    if (subWindowMap_.count(property_->GetParentId()) > 0) { // remove from subWindowMap_
-        std::vector<sptr<Window>>& subWindows = subWindowMap_.at(property_->GetParentId());
-        for (auto iter = subWindows.begin(); iter < subWindows.end(); ++iter) {
-            if ((*iter)->GetWindowId() == GetWindowId()) {
-                subWindows.erase(iter);
-                break;
-            }
-        }
-    }
-    subWindowMap_.erase(GetWindowId());
-
-    // Destroy app floating window if exist
-    if (appFloatingWindowMap_.count(GetWindowId()) > 0) {
-        for (auto& floatingWindow : appFloatingWindowMap_.at(GetWindowId())) {
-            NotifyBeforeSubWindowDestroy(floatingWindow);
-            WMError fltRet = SingletonContainer::Get<WindowAdapter>().DestroyWindow(floatingWindow->GetWindowId());
-            if (fltRet == WMError::WM_OK) {
-                WLOGFI("Destroy App %{public}d FltWindow %{public}d", GetWindowId(), floatingWindow->GetWindowId());
-            } else {
-                WLOGFE("Floating Window %{public}d Destroy Failed", floatingWindow->GetWindowId());
-            }
-        }
-        appFloatingWindowMap_.erase(GetWindowId());
-    }
+    DestroySubWindow();
+    DestroyFloatingWindow();
 
     state_ = WindowState::STATE_DESTROYED;
     InputTransferStation::GetInstance().RemoveInputWindow(this);
@@ -908,6 +936,12 @@ void WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& liste
     displayMoveListeners_.erase(iter);
 }
 
+void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
+{
+    WLOGFE("JS RegisterWindowDestroyedListener the listener");
+    notifyNativefunc_ = std::move(func);
+}
+
 void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reason)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
@@ -966,7 +1000,6 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             WLOGI("ConsumeKeyEvent keyEvent is consumed");
             return;
         }
-        // FIX ME: use context_
         if (abilityContext_ != nullptr) {
             WLOGI("ConsumeKeyEvent ability TerminateSelf");
             abilityContext_->TerminateSelf();
