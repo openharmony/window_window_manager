@@ -57,6 +57,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetDisplayId(option->GetDisplayId());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetHitOffset(option->GetHitOffset());
+    windowTag_ = option->GetWindowTag();
     AdjustWindowAnimationFlag();
     auto& sysBarPropMap = option->GetSystemBarProperty();
     for (auto it : sysBarPropMap) {
@@ -625,11 +626,17 @@ WMError WindowImpl::Destroy()
     return ret;
 }
 
-WMError WindowImpl::Show()
+WMError WindowImpl::Show(uint32_t reason)
 {
     WLOGFI("[Client] Window [name:%{public}s, id:%{public}d] Show", name_.c_str(), property_->GetWindowId());
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
+    if (stateChangeReason == WindowStateChangeReason::KEYGUARD) {
+        state_ = WindowState::STATE_SHOWN;
+        NotifyAfterForeground();
+        return WMError::WM_OK;
     }
     if (state_ == WindowState::STATE_SHOWN) {
         if (property_->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
@@ -657,11 +664,17 @@ WMError WindowImpl::Show()
     return ret;
 }
 
-WMError WindowImpl::Hide()
+WMError WindowImpl::Hide(uint32_t reason)
 {
     WLOGFI("[Client] Window [name:%{public}s, id:%{public}d] Hide", name_.c_str(), property_->GetWindowId());
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
+    if (stateChangeReason == WindowStateChangeReason::KEYGUARD) {
+        state_ = WindowState::STATE_HIDDEN;
+        NotifyAfterBackground();
+        return WMError::WM_OK;
     }
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         WLOGFI("window is already hidden id: %{public}d", property_->GetWindowId());
@@ -1215,23 +1228,25 @@ void WindowImpl::UpdateWindowState(WindowState state)
     }
     switch (state) {
         case WindowState::STATE_FROZEN: {
-            state_ = WindowState::STATE_HIDDEN;
-            if (abilityContext_ != nullptr) {
+            if (abilityContext_ != nullptr && windowTag_ == WindowTag::MAIN_WINDOW) {
                 WLOGFD("DoAbilityBackground KEYGUARD, id: %{public}d", GetWindowId());
                 AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(abilityContext_->GetToken(),
                     static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
+            } else {
+                state_ = WindowState::STATE_HIDDEN;
+                NotifyAfterBackground();
             }
-            NotifyAfterBackground();
             break;
         }
         case WindowState::STATE_UNFROZEN: {
-            state_ = WindowState::STATE_SHOWN;
-            if (abilityContext_ != nullptr) {
+            if (abilityContext_ != nullptr && windowTag_ == WindowTag::MAIN_WINDOW) {
                 WLOGFD("DoAbilityForeground KEYGUARD, id: %{public}d", GetWindowId());
                 AAFwk::AbilityManagerClient::GetInstance()->DoAbilityForeground(abilityContext_->GetToken(),
                     static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
+            } else {
+                state_ = WindowState::STATE_SHOWN;
+                NotifyAfterForeground();
             }
-            NotifyAfterForeground();
             break;
         }
         default: {
