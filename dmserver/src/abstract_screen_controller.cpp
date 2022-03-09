@@ -68,6 +68,10 @@ std::vector<ScreenId> AbstractScreenController::GetShotScreenIds(std::vector<Scr
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::vector<ScreenId> screenIds;
     for (ScreenId screenId : mirrorScreenIds) {
+        auto iter = std::find(screenIds.begin(), screenIds.end(), screenId);
+        if (iter != screenIds.end()) {
+            continue;
+        }
         auto dmsScreenIter = dmsScreenMap_.find(screenId);
         if (screenIdManager_.HasDmsScreenId(screenId) && dmsScreenIter == dmsScreenMap_.end()) {
             screenIds.emplace_back(screenId);
@@ -83,6 +87,10 @@ std::vector<ScreenId> AbstractScreenController::GetAllExpandOrMirrorScreenIds(
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::vector<ScreenId> screenIds;
     for (ScreenId screenId : mirrorScreenIds) {
+        auto screenIdIter = std::find(screenIds.begin(), screenIds.end(), screenId);
+        if (screenIdIter != screenIds.end()) {
+            continue;
+        }
         auto iter = dmsScreenMap_.find(screenId);
         if (iter != dmsScreenMap_.end()) {
             screenIds.emplace_back(screenId);
