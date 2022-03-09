@@ -66,6 +66,7 @@ namespace {
     constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 320;
     constexpr uint32_t MIN_VERTICAL_SPLIT_HEIGHT = 426;
     constexpr uint32_t MIN_HORIZONTAL_SPLIT_WIDTH = 426;
+    constexpr uint32_t MAX_FLOATING_SIZE = 2560;
 }
 }
 }

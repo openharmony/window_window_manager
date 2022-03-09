@@ -85,12 +85,13 @@ public:
         return (r.posX_ == 0 && r.posY_ == 0 && r.width_ == 0 && r.height_ == 0);
     }
 
-    static Rect GetFixedWindowRectByMinRect(const Rect& oriDstRect, const Rect& lastRect, bool isVertical,
+    static Rect GetFixedWindowRectByLimitSize(const Rect& oriDstRect, const Rect& lastRect, bool isVertical,
         float virtualPixelRatio)
     {
         uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
         uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
         Rect dstRect = oriDstRect;
+        // fix minimum size
         if (isVertical) {
             dstRect.width_ = std::max(minVerticalFloatingW, oriDstRect.width_);
             dstRect.height_ = std::max(minVerticalFloatingH, oriDstRect.height_);
@@ -98,6 +99,10 @@ public:
             dstRect.width_ = std::max(minVerticalFloatingH, oriDstRect.width_);
             dstRect.height_ = std::max(minVerticalFloatingW, oriDstRect.height_);
         }
+
+        // fix maximum size
+        dstRect.width_ = std::min(static_cast<uint32_t>(MAX_FLOATING_SIZE * virtualPixelRatio), dstRect.width_);
+        dstRect.height_ = std::min(static_cast<uint32_t>(MAX_FLOATING_SIZE * virtualPixelRatio), dstRect.height_);
 
         // limit position by fixed width or height
         if (oriDstRect.posX_ != lastRect.posX_) {
@@ -107,6 +112,38 @@ public:
         if (oriDstRect.posY_ != lastRect.posY_) {
             dstRect.posY_ = oriDstRect.posY_ + static_cast<int32_t>(oriDstRect.height_) -
                 static_cast<int32_t>(dstRect.height_);
+        }
+        return dstRect;
+    }
+
+    static Rect GetFixedWindowRectByLimitPosition(const Rect& oriDstRect, const Rect& lastRect,
+        float virtualPixelRatio, const Rect& displayLimitRect)
+    {
+        Rect dstRect = oriDstRect;
+        uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
+        // minimum (x + width)
+        if (dstRect.posX_ < (displayLimitRect.posX_ + static_cast<int32_t>(windowTitleBarH - oriDstRect.width_))) {
+            if (oriDstRect.width_ != lastRect.width_) {
+                dstRect.width_ = static_cast<uint32_t>(displayLimitRect.posX_  - oriDstRect.posX_) + windowTitleBarH;
+            }
+        }
+        // maximum position x
+        if (dstRect.posX_ > (displayLimitRect.posX_ +
+                             static_cast<int32_t>(displayLimitRect.width_ - windowTitleBarH))) {
+            dstRect.posX_ = displayLimitRect.posX_ + static_cast<int32_t>(displayLimitRect.width_ - windowTitleBarH);
+            if (oriDstRect.width_ != lastRect.width_) {
+                dstRect.width_ = lastRect.width_;
+            }
+        }
+        // minimum position y
+        dstRect.posY_ = std::max(displayLimitRect.posY_, oriDstRect.posY_);
+        // maximum position y
+        if (dstRect.posY_ > (displayLimitRect.posY_ +
+                             static_cast<int32_t>(displayLimitRect.height_ - windowTitleBarH))) {
+            dstRect.posY_ = displayLimitRect.posY_ + static_cast<int32_t>(displayLimitRect.height_ - windowTitleBarH);
+            if (oriDstRect.height_ != lastRect.height_) {
+                dstRect.height_ = lastRect.height_;
+            }
         }
         return dstRect;
     }

@@ -66,6 +66,7 @@ public:
     void FocusFaultDetection() const;
     WMError DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
     float GetVirtualPixelRatio(DisplayId displayId) const;
+    Rect GetDisplayLimitRect(DisplayId displayId) const;
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
