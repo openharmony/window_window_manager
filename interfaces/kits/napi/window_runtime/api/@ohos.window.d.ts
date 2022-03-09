@@ -57,6 +57,11 @@ declare namespace window {
      * Navigation bar.
      */
     TYPE_NAVIGATION_BAR,
+
+    /**
+     * System gesture.
+     */
+    TYPE_SYSTEM_GESTURE,
   }
 
   /**
@@ -220,12 +225,29 @@ declare namespace window {
   function on(type: 'systemBarTintChange', callback: Callback<SystemBarTintState>): void;
 
   /**
+   * register the callback of keyboardHeightChange
+   * @param type: 'keyboardHeightChange'
+   * @systemapi Hide this for inner system use.
+   * @since 7
+   */
+  function on(type: 'keyboardHeightChange', callback: AsyncCallback<number>): void;
+
+  /**
   * unregister the callback of systemBarTintChange
   * @param type: 'systemBarTintChange'
   * @systemapi Hide this for inner system use.
   * @since 8
   */
   function off(type: 'systemBarTintChange', callback?: Callback<SystemBarTintState>): void;
+
+
+  /**
+   * unregister the callback of keyboardHeightChange
+   * @param type: 'keyboardHeightChange'
+   * @systemapi Hide this for inner system use.
+   * @since 7
+   */
+  function off(type: 'keyboardHeightChange', callback: AsyncCallback<number>): void;
 
   /**
    * Properties of status bar and navigation bar, it couldn't update automatically
@@ -426,6 +448,43 @@ declare namespace window {
      * @since 6
      */
     touchable: boolean
+
+
+    /**
+     * Brightness value of window.
+     * @since 7
+     */
+    brightness: number
+
+    /**
+     * The dimbehind value of window.
+     * @since 7
+     */
+    dimBehindValue: number
+
+    /**
+     * Whether keep screen on.
+     * @since 7
+     */
+    isKeepScreenOn: boolean
+
+    /**
+     * Whether make window in privacy mode or not.
+     * @since 7
+     */
+    isPrivacyMode: boolean
+
+    /**
+     * Whether is round corner or not.
+     * @since 7
+     */
+    isRoundCorner: boolean
+
+    /**
+     * Whether is transparent or not.
+     * @since 7
+     */
+    isTransparent: boolean
   }
 
   /**
@@ -720,6 +779,125 @@ declare namespace window {
      * @since 8
      */
     getColorSpace(callback: AsyncCallback<ColorSpace>): void;
+
+    /**
+     * Sets the background color of window.
+     * @param color the specified color.
+     * @since 7
+     */
+    setBackgroundColor(color: string): Promise<void>;
+
+    /**
+     * Sets the background color of window.
+     * @param color the specified color.
+     * @since 7
+     */
+    setBackgroundColor(color: string, callback: AsyncCallback<void>): void;
+
+    /**
+     * Sets the brightness of window.
+     * @param brightness the specified brightness value.
+     * @since 7
+     */
+    setBrightness(brightness: number): Promise<void>;
+
+    /**
+     * Sets the brightness of window.
+     * @param brightness the specified brightness value.
+     * @since 7
+     */
+    setBrightness(brightness: number, callback: AsyncCallback<void>): void;
+
+    /**
+     * Sets the dimBehind of window.
+     * @param dimBehindValue the specified dimBehind.
+     * @since 7
+     */
+    setDimBehind(dimBehindValue: number, callback: AsyncCallback<void>): void;
+
+    /**
+     * Sets the dimBehind of window.
+     * @param dimBehind the specified dimBehind.
+     * @since 7
+     */
+    setDimBehind(dimBehindValue: number): Promise<void>;
+
+    /**
+     * Sets whether focusable or not.
+     * @param isFocusable can be focus if true, or can not be focus if false.
+     * @since 7
+     */
+    setFocusable(isFocusable: boolean): Promise<void>;
+
+
+    /**
+     * Sets whether focusable or not.
+     * @param isFocusable can be focus if true, or can not be focus if false.
+     * @since 7
+     */
+    setFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void;
+
+    /**
+     * Sets whether keep screen on or not.
+     * @param isKeepScreenOn keep screen on if true, or not if false.
+     * @since 7
+     */
+    setKeepScreenOn(isKeepScreenOn: boolean): Promise<void>;
+
+
+    /**
+     * Sets whether keep screen on or not.
+     * @param isKeepScreenOn keep screen on if true, or not if false.
+     * @since 7
+     */
+    setKeepScreenOn(isKeepScreenOn: boolean, callback: AsyncCallback<void>): void;
+
+
+    /**
+     * Sets whether outside can be touch or not.
+     * @param touchable outside can be touch if true, or not if false.
+     * @since 7
+     */
+    setOutsideTouchable(touchable: boolean): Promise<void>;
+
+
+    /**
+     * Sets whether outside can be touch or not.
+     * @param touchable outside can be touch if true, or not if false.
+     * @since 7
+     */
+    setOutsideTouchable(touchable: boolean, callback: AsyncCallback<void>): void;
+
+
+    /**
+     * Sets whether is private mode or not.
+     * @param isPrivacyMode in private mode if true, or not if false.
+     * @since 7
+     */
+    setPrivacyMode(isPrivacyMode: boolean): Promise<void>;
+
+
+    /**
+     * Sets whether is private mode or not.
+     * @param isPrivacyMode in private mode if true, or not if false.
+     * @since 7
+     */
+    setPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback<void>): void;
+
+
+    /**
+     * Sets whether is touchable or not.
+     * @param isTouchable is touchable if true, or not if false.
+     * @since 7
+     */
+    setTouchable(isTouchable: boolean): Promise<void>;
+
+    /**
+     * Sets whether is touchable or not.
+     * @param isTouchable is touchable if true, or not if false.
+     * @since 7
+     */
+    setTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void;
   }
 
   enum WindowStageEventType {
