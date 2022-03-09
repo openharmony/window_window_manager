@@ -1041,7 +1041,11 @@ void WindowImpl::EndMoveOrDragWindow(int32_t pointId)
     if (pointId != startPointerId_) {
         return;
     }
-    startDragFlag_ = false;
+
+    if (startDragFlag_) {
+        UpdateRect(GetRect(), WindowSizeChangeReason::DRAG_END);
+        startDragFlag_ = false;
+    }
     startMoveFlag_ = false;
     pointEventStarted_ = false;
 }
