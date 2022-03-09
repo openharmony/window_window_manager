@@ -39,6 +39,7 @@ public:
     bool UnregisterScreenListener(sptr<IScreenListener> listener);
     bool RegisterScreenGroupListener(sptr<IScreenGroupListener> listener);
     bool UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener);
+    ScreenId CreateVirtualScreen(VirtualScreenOption option);
     sptr<Screen> GetScreen(ScreenId screenId);
     sptr<ScreenGroup> GetScreenGroup(ScreenId screenId);
     std::vector<sptr<Screen>> GetAllScreens();
@@ -57,6 +58,7 @@ private:
     std::recursive_mutex mutex_;
     std::set<sptr<IScreenListener>> screenListeners_;
     std::set<sptr<IScreenGroupListener>> screenGroupListeners_;
+    sptr<IDisplayManagerAgent> virtualScreenAgent_ = nullptr;
 };
 
 class ScreenManager::Impl::ScreenManagerListener : public DisplayManagerAgentDefault {
@@ -139,6 +141,7 @@ public:
 private:
     sptr<Impl> pImpl_;
 };
+
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManager)
 
 ScreenManager::ScreenManager()
@@ -395,7 +398,16 @@ void ScreenManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 
 ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option)
 {
-    return SingletonContainer::Get<ScreenManagerAdapter>().CreateVirtualScreen(option);
+    return pImpl_->CreateVirtualScreen(option);
+}
+
+ScreenId ScreenManager::Impl::CreateVirtualScreen(VirtualScreenOption option)
+{
+    //  After the process creating the virtual screen is killed, DMS needs to delete the virtual screen
+    if (virtualScreenAgent_ == nullptr) {
+        virtualScreenAgent_ = new DisplayManagerAgentDefault();
+    }
+    return SingletonContainer::Get<ScreenManagerAdapter>().CreateVirtualScreen(option, virtualScreenAgent_);
 }
 
 DMError ScreenManager::DestroyVirtualScreen(ScreenId screenId)
