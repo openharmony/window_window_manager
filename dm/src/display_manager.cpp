@@ -28,6 +28,7 @@
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
+    const static uint32_t MAX_DISPLAY_SIZE = 32;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -635,6 +636,10 @@ bool DisplayManager::Freeze(std::vector<DisplayId> displayIds)
         WLOGFE("freeze display fail, num of display is 0");
         return false;
     }
+    if (displayIds.size() > MAX_DISPLAY_SIZE) {
+        WLOGFE("freeze display fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
+        return false;
+    }
     return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, true);
 }
 
@@ -643,6 +648,10 @@ bool DisplayManager::Unfreeze(std::vector<DisplayId> displayIds)
     WLOGFD("unfreeze display");
     if (displayIds.size() == 0) {
         WLOGFE("unfreeze display fail, num of display is 0");
+        return false;
+    }
+    if (displayIds.size() > MAX_DISPLAY_SIZE) {
+        WLOGFE("unfreeze display fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
         return false;
     }
     return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, false);
