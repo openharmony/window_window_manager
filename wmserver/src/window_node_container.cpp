@@ -700,6 +700,11 @@ Rect WindowNodeContainer::GetDisplayRect() const
     return displayRect_;
 }
 
+Rect WindowNodeContainer::GetDisplayLimitRect() const
+{
+    return layoutPolicy_->GetDisplayLimitRect();
+}
+
 bool WindowNodeContainer::isVerticalDisplay() const
 {
     return displayRect_.width_ < displayRect_.height_;

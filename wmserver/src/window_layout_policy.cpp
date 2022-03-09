@@ -269,19 +269,33 @@ void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rec
     WindowType windowType = node->GetWindowType();
     WindowMode windowMode = node->GetWindowMode();
     bool isVertical = (displayRect.height_ > displayRect.width_) ? true : false;
-    if ((windowMode == WindowMode::WINDOW_MODE_FLOATING) && !WindowHelper::IsSystemWindow(windowType)) {
-        if (isVertical) {
-            winRect.width_ = std::max(minVerticalFloatingW, winRect.width_);
-            winRect.height_ = std::max(minVerticalFloatingH, winRect.height_);
-        } else {
-            winRect.width_ = std::max(minVerticalFloatingH, winRect.width_);
-            winRect.height_ = std::max(minVerticalFloatingW, winRect.height_);
+
+    if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
+        // limit minimum size of floating (not system type) window
+        if (!WindowHelper::IsSystemWindow(windowType)) {
+            if (isVertical) {
+                winRect.width_ = std::max(minVerticalFloatingW, winRect.width_);
+                winRect.height_ = std::max(minVerticalFloatingH, winRect.height_);
+            } else {
+                winRect.width_ = std::max(minVerticalFloatingH, winRect.width_);
+                winRect.height_ = std::max(minVerticalFloatingW, winRect.height_);
+            }
         }
+        // limit maximum size of all floating window
+        winRect.width_ = std::min(static_cast<uint32_t>(MAX_FLOATING_SIZE * virtualPixelRatio), winRect.width_);
+        winRect.height_ = std::min(static_cast<uint32_t>(MAX_FLOATING_SIZE * virtualPixelRatio), winRect.height_);
     }
+
+    // limit position of the main floating window(window which support dragging)
     if (WindowHelper::IsMainFloatingWindow(windowType, windowMode)) {
         winRect.posY_ = std::max(limitRect_.posY_, winRect.posY_);
         winRect.posY_ = std::min(limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_ - windowTitleBarH),
                                  winRect.posY_);
+
+        winRect.posX_ = std::max(limitRect_.posX_ + static_cast<int32_t>(windowTitleBarH - winRect.width_),
+                                 winRect.posX_);
+        winRect.posX_ = std::min(limitRect_.posX_ + static_cast<int32_t>(limitRect_.width_ - windowTitleBarH),
+                                 winRect.posX_);
     }
 }
 
@@ -359,6 +373,11 @@ float WindowLayoutPolicy::GetVirtualPixelRatio() const
 
     WLOGFI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", screenId_, virtualPixelRatio);
     return virtualPixelRatio;
+}
+
+Rect WindowLayoutPolicy::GetDisplayLimitRect() const
+{
+    return limitRect_;
 }
 }
 }

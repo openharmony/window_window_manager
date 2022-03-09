@@ -43,6 +43,7 @@ public:
     virtual void UpdateLayoutRect(sptr<WindowNode>& node) = 0;
     void UpdateDefaultFoatingRect();
     float GetVirtualPixelRatio() const;
+    Rect GetDisplayLimitRect() const;
 
 protected:
     const Rect& displayRect_;
