@@ -198,8 +198,8 @@ config("wm_systemtest_common_public_config") {
     "//third_party/node/deps/icu-small/source/common",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
     "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
-    "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr/include",
     "//foundation/aafwk/standard/interfaces/innerkits/base/include",
+    "//foundation/aafwk/standard/interfaces/innerkits/uri/include",
     "//third_party/jsoncpp/include",
     "//third_party/json/include",
 
