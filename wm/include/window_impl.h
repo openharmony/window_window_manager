@@ -67,6 +67,10 @@ public:
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() const override;
     virtual uint32_t GetWindowFlags() const override;
+    inline NotifyNativeWinDestroyFunc GetNativeDestroyCallback()
+    {
+        return notifyNativefunc_;
+    }
     virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     virtual bool IsFullScreen() const override;
     virtual bool IsLayoutFullScreen() const override;
@@ -80,6 +84,10 @@ public:
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     virtual WMError SetLayoutFullScreen(bool status) override;
     virtual WMError SetFullScreen(bool status) override;
+    inline void SetWindowState(WindowState state)
+    {
+        state_ = state;
+    }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
 
     WMError Create(const std::string& parentName,
@@ -110,7 +118,7 @@ public:
     virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
-
+    virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     void UpdateRect(const struct Rect& rect, WindowSizeChangeReason reason);
     void UpdateMode(WindowMode mode);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
@@ -135,7 +143,6 @@ public:
     virtual ColorSpace GetColorSpace() override;
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
-
 private:
     inline void NotifyAfterForeground() const
     {
@@ -153,19 +160,27 @@ private:
     {
         CALL_LIFECYCLE_LISTENER(AfterUnfocused, UnFocus);
     }
-    inline void NotifyBeforeDestroy() const
+    inline void NotifyBeforeDestroy(std::string windowName) const
     {
         if (uiContent_ != nullptr) {
             uiContent_->Destroy();
         }
+        if (notifyNativefunc_) {
+            notifyNativefunc_(windowName);
+        }
     }
-    inline void NotifyBeforeSubWindowDestroy(sptr<Window>& window) const
+    inline void NotifyBeforeSubWindowDestroy(sptr<WindowImpl> window) const
     {
         auto uiContent = window->GetUIContent();
         if (uiContent != nullptr) {
             uiContent->Destroy();
         }
+        if (window->GetNativeDestroyCallback()) {
+            window->GetNativeDestroyCallback()(window->GetWindowName());
+        }
     }
+    void DestroyFloatingWindow();
+    void DestroySubWindow();
     void SetDefaultOption(); // for api7
     bool IsWindowValid() const;
     void OnVsync(int64_t timeStamp);
@@ -191,8 +206,8 @@ private:
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
         std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
-    static std::map<uint32_t, std::vector<sptr<Window>>> subWindowMap_;
-    static std::map<uint32_t, std::vector<sptr<Window>>> appFloatingWindowMap_;
+    static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
+    static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appFloatingWindowMap_;
     sptr<WindowProperty> property_;
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowTag windowTag_;
@@ -201,6 +216,7 @@ private:
     std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
     std::vector<sptr<IWindowDragListener>> windowDragListeners_;
     std::vector<sptr<IDisplayMoveListener>> displayMoveListeners_;
+    NotifyNativeWinDestroyFunc notifyNativefunc_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;

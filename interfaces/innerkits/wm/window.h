@@ -44,6 +44,7 @@ namespace OHOS::Ace {
 
 namespace OHOS {
 namespace Rosen {
+using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 class RSSurfaceNode;
 class IWindowChangeListener : virtual public RefBase {
 public:
@@ -126,6 +127,7 @@ public:
     virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
+    virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed = false) = 0;
     virtual std::string GetContentInfo() = 0;
