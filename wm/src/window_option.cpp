@@ -19,7 +19,7 @@
 
 namespace OHOS {
 namespace Rosen {
-WindowOption::WindowOption()
+WindowOption::WindowOption(): windowTag_(WindowTag::SYSTEM_WINDOW)
 {
     AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
 }
@@ -161,6 +161,16 @@ void WindowOption::SetHitOffset(int32_t x, int32_t y)
 {
     hitOffset_.x = x;
     hitOffset_.y = y;
+}
+
+void WindowOption::SetWindowTag(WindowTag windowTag)
+{
+    windowTag_ = windowTag;
+}
+
+WindowTag WindowOption::GetWindowTag() const
+{
+    return windowTag_;
 }
 
 const PointInfo& WindowOption::GetHitOffset() const

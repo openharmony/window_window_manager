@@ -125,6 +125,12 @@ enum class DragEvent : uint32_t {
     DRAG_EVENT_END,
 };
 
+enum class WindowTag : uint32_t {
+    MAIN_WINDOW = 0,
+    SUB_WINDOW = 1,
+    SYSTEM_WINDOW = 2,
+};
+
 struct Rect {
     int32_t posX_;
     int32_t posY_;
