@@ -37,11 +37,18 @@ void VsyncStation::RequestVsync(CallbackType type, std::shared_ptr<VsyncCallback
         }
         iter->second.insert(vsyncCallback);
 
-        if (mainHandler_ == nullptr) {
-            mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+        if (vsyncHandler_ == nullptr) {
+            auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+            if (mainEventRunner != nullptr && isMainHandlerAvailable_) {
+                vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
+            } else {
+                WLOGFE("MainEventRunner is not available, create a new EventRunner for vsyncHandler_.");
+                vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(
+                    AppExecFwk::EventRunner::Create(VSYNC_THREAD_ID));
+            }
             auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
             while (receiver_ == nullptr) {
-                receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getpid()), mainHandler_);
+                receiver_ = rsClient.CreateVSyncReceiver("WM_" + std::to_string(::getpid()), vsyncHandler_);
             }
             receiver_->Init();
         }
@@ -53,8 +60,8 @@ void VsyncStation::RequestVsync(CallbackType type, std::shared_ptr<VsyncCallback
         if (vsyncCount_ & 0x01) { // write log every 2 vsync
             WLOGFI("Request next vsync.");
         }
-        mainHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
-        mainHandler_->PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_TASK, VSYNC_TIME_OUT_MILLISECONDS);
+        vsyncHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
+        vsyncHandler_->PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_TASK, VSYNC_TIME_OUT_MILLISECONDS);
     }
     receiver_->RequestNextVSync(frameCallback_);
 }
@@ -66,7 +73,10 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp)
         std::lock_guard<std::mutex> lock(mtx_);
         hasRequestedVsync_ = false;
         vsyncCallbacks = vsyncCallbacks_;
-        mainHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
+        for (auto& vsyncCallbacksSet: vsyncCallbacks_) {
+            vsyncCallbacksSet.second.clear();
+        }
+        vsyncHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
         if (vsyncCount_ & 0x01) { // write log every 2 vsync
             WLOGFI("On vsync callback.");
         }
@@ -75,7 +85,6 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp)
         for (const auto& callback: vsyncCallbacksSet.second) {
             callback->onCallback(timestamp);
         }
-        vsyncCallbacksSet.second.clear();
     }
 }
 
