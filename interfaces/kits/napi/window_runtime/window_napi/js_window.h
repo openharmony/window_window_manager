@@ -49,6 +49,14 @@ public:
     static NativeValue* SetSystemBarProperties(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetAvoidArea(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* IsShowing(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetBackgroundColor(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetBrightness(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetDimBehind(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetFocusable(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetKeepScreenOn(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetOutsideTouchable(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetPrivacyMode(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetTouchable(NativeEngine* engine, NativeCallbackInfo* info);
 
     // colorspace, gamut
     static NativeValue* IsSupportWideGamut(NativeEngine* engine, NativeCallbackInfo* info);
@@ -79,6 +87,14 @@ private:
     NativeValue* OnIsSupportWideGamut(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetColorSpace(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetColorSpace(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetBackgroundColor(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetBrightness(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetDimBehind(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetFocusable(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetKeepScreenOn(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetOutsideTouchable(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetPrivacyMode(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetTouchable(NativeEngine& engine, NativeCallbackInfo& info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
