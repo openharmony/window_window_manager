@@ -423,27 +423,24 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
 
-    // default systemBar Type
-    if (appWindowNode_->children_.empty()) {
-        WLOGFI("No immersive window on top. Use default systembar Property");
-        return sysBarPropMap;
-    }
-
-    for (auto iter = appWindowNode_->children_.rbegin(); iter < appWindowNode_->children_.rend(); ++iter) {
-        auto& sysBarPropMapNode = (*iter)->GetSystemBarProperty();
-        if (IsFullImmersiveNode(*iter)) {
-            WLOGFI("Top fullscreen immersive window id: %{public}d. Use full immersice prop", (*iter)->GetWindowId());
-            for (auto it : sysBarPropMap) {
-                sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;
+    std::vector<sptr<WindowNode>> rootNodes = { aboveAppWindowNode_, appWindowNode_, belowAppWindowNode_ };
+    for (auto& node : rootNodes) {
+        for (auto iter = node->children_.rbegin(); iter < node->children_.rend(); ++iter) {
+            auto& sysBarPropMapNode = (*iter)->GetSystemBarProperty();
+            if (IsFullImmersiveNode(*iter)) {
+                WLOGFI("Top immersive window id: %{public}d. Use full immersive prop", (*iter)->GetWindowId());
+                for (auto it : sysBarPropMap) {
+                    sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;
+                }
+                return sysBarPropMap;
+            } else if (IsSplitImmersiveNode(*iter)) {
+                WLOGFI("Top split window id: %{public}d. Use split immersive prop", (*iter)->GetWindowId());
+                for (auto it : sysBarPropMap) {
+                    sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;
+                    sysBarPropMap[it.first].enable_ = false;
+                }
+                return sysBarPropMap;
             }
-            return sysBarPropMap;
-        } else if (IsSplitImmersiveNode(*iter)) {
-            WLOGFI("Top split immersive window id: %{public}d. Use split immersice prop", (*iter)->GetWindowId());
-            for (auto it : sysBarPropMap) {
-                sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;
-                sysBarPropMap[it.first].enable_ = false;
-            }
-            return sysBarPropMap;
         }
     }
 
