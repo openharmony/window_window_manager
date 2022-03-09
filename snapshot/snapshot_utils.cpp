@@ -252,8 +252,6 @@ bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArgments &cmdA
                 cmdArgments.fileName = optarg;
                 break;
             case 'm': // help
-                SnapShotUtils::PrintUsage(argv[0]);
-                return false;
             default:
                 SnapShotUtils::PrintUsage(argv[0]);
                 return false;
