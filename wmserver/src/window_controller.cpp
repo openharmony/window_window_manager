@@ -148,8 +148,11 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
         if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
             // fix rect in case of moving window when dragging
             float virtualPixelRatio = windowRoot_->GetVirtualPixelRatio(node->GetDisplayId());
-            newRect = WindowHelper::GetFixedWindowRectByMinRect(rect, property->GetWindowRect(),
+            Rect displayLimitRect = windowRoot_->GetDisplayLimitRect(node->GetDisplayId());
+            newRect = WindowHelper::GetFixedWindowRectByLimitSize(rect, lastRect,
                 windowRoot_->isVerticalDisplay(node), virtualPixelRatio);
+            newRect = WindowHelper::GetFixedWindowRectByLimitPosition(newRect, lastRect,
+                virtualPixelRatio, displayLimitRect);
         } else {
             newRect = rect;
         }
