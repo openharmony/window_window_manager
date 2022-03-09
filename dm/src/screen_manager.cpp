@@ -28,6 +28,7 @@
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManager"};
+    const static uint32_t MAX_SCREEN_SIZE = 32;
 }
 class ScreenManager::Impl : public RefBase {
 public:
@@ -341,19 +342,26 @@ bool ScreenManager::UnregisterScreenGroupListener(sptr<IScreenGroupListener> lis
 
 ScreenId ScreenManager::MakeExpand(const std::vector<ExpandOption>& options)
 {
-    WLOGFI("make expand");
+    WLOGFI("Make expand");
     if (options.empty()) {
+        return SCREEN_ID_INVALID;
+    }
+    if (options.size() > MAX_SCREEN_SIZE) {
+        WLOGFW("Make expand failed. The options size is bigger than %{public}u.", MAX_SCREEN_SIZE);
         return SCREEN_ID_INVALID;
     }
     std::vector<ScreenId> screenIds;
     std::vector<Point> startPoints;
     for (auto& option: options) {
+        if (std::find(screenIds.begin(), screenIds.end(), option.screenId_) != screenIds.end()) {
+            continue;
+        }
         screenIds.emplace_back(option.screenId_);
         startPoints.emplace_back(Point(option.startX_, option.startY_));
     }
     ScreenId group = SingletonContainer::Get<ScreenManagerAdapter>().MakeExpand(screenIds, startPoints);
     if (group == SCREEN_ID_INVALID) {
-        WLOGFI("make expand failed");
+        WLOGFI("Make expand failed");
     }
     return group;
 }
@@ -361,6 +369,10 @@ ScreenId ScreenManager::MakeExpand(const std::vector<ExpandOption>& options)
 ScreenId ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId)
 {
     WLOGFI("create mirror for screen: %{public}" PRIu64"", mainScreenId);
+    if (mirrorScreenId.size() > MAX_SCREEN_SIZE) {
+        WLOGFW("Make Mirror failed. The mirrorScreenId size is bigger than %{public}u.", MAX_SCREEN_SIZE);
+        return SCREEN_ID_INVALID;
+    }
     ScreenId group = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId);
     if (group == SCREEN_ID_INVALID) {
         WLOGFI("create mirror failed");
@@ -370,6 +382,14 @@ ScreenId ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> 
 
 void ScreenManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 {
+    if (screens.empty()) {
+        WLOGFW("RemoveVirtualScreenFromGroup failed. screens is empty.");
+        return;
+    }
+    if (screens.size() > MAX_SCREEN_SIZE) {
+        WLOGFW("RemoveVirtualScreenFromGroup failed. The screens size is bigger than %{public}u.", MAX_SCREEN_SIZE);
+        return;
+    }
     SingletonContainer::Get<ScreenManagerAdapter>().RemoveVirtualScreenFromGroup(screens);
 }
 
