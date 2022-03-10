@@ -70,7 +70,7 @@ std::vector<ScreenId> AbstractScreenController::GetAllScreenIds()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::vector<ScreenId> res;
     for (auto iter = dmsScreenMap_.begin(); iter != dmsScreenMap_.end(); iter++) {
-        res.push_back(iter->first);
+        res.emplace_back(iter->first);
     }
     return res;
 }
@@ -130,6 +130,9 @@ std::shared_ptr<RSDisplayNode> AbstractScreenController::GetRSDisplayNodeByScree
 {
     sptr<AbstractScreen> screen = GetAbstractScreen(dmsScreenId);
     if (screen == nullptr) {
+        return nullptr;
+    }
+    if (screen->rsDisplayNode_ == nullptr) {
         return nullptr;
     }
     WLOGI("GetRSDisplayNodeByScreenId: screen: %{public}" PRIu64", nodeId: %{public}" PRIu64" ",
@@ -335,7 +338,7 @@ bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScree
         info->width_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenWidth());
         info->height_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenHeight());
         info->refreshRate_ = rsScreenModeInfo.GetScreenFreshRate();
-        absScreen->modes_.push_back(info);
+        absScreen->modes_.emplace_back(info);
         WLOGD("fill screen w/h:%{public}d/%{public}d", info->width_, info->height_);
     }
     int32_t activeModeId = rsInterface_.GetScreenActiveMode(rsScreenId).GetScreenModeId();
@@ -484,7 +487,7 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
             if (defaultScreen != nullptr && defaultScreen->GetActiveScreenMode() != nullptr) {
                 info->refreshRate_ = defaultScreen->GetActiveScreenMode()->refreshRate_;
             }
-            absScreen->modes_.push_back(info);
+            absScreen->modes_.emplace_back(info);
             absScreen->activeIdx_ = 0;
             absScreen->type_ = ScreenType::VIRTUAL;
             dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));

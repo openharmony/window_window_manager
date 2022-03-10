@@ -222,6 +222,9 @@ DisplayId AbstractDisplayController::ProcessExpandScreenDisconnected(
     sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup)
 {
     WLOGI("expand screen disconnect");
+    if (absScreen == nullptr) {
+        return DISPLAY_ID_INVALID;
+    }
     for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
         DisplayId displayId = iter->first;
         sptr<AbstractDisplay> abstractDisplay = iter->second;
