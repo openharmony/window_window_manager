@@ -182,6 +182,10 @@ void UnRegisterScreenListenerWithType(const std::string& type, NativeValue* valu
             type.c_str());
         return;
     }
+    if (value == nullptr) {
+        WLOGFE("JsScreenManager::UnRegisterScreenListenerWithType value is nullptr");
+        return;
+    }
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         if (value->StrictEquals(it->first->Get())) {
             it->second->RemoveCallback(value);
