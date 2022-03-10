@@ -850,16 +850,20 @@ void WindowNodeContainer::MinimizeAllAppWindows()
     return;
 }
 
-void WindowNodeContainer::SendSplitScreenEvent(WindowMode mode)
+void WindowNodeContainer::SendSplitScreenEvent(sptr<WindowNode>& node)
 {
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     AAFwk::Want want;
     want.SetAction(SPLIT_SCREEN_EVENT_NAME);
+    std::string modeData = (node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) ? "Secondary" : "Primary";
+    int32_t missionId = -1;
+    AAFwk::AbilityManagerClient::GetInstance()->GetMissionIdByToken(node->abilityToken_, missionId);
+    WLOGFI("split window missionId is: %{public}d", missionId);
+    want.SetParam("windowMode", modeData);
+    want.SetParam("missionId", missionId);
     EventFwk::CommonEventData commonEventData;
     commonEventData.SetWant(want);
-    std::string eventData = (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) ? "Secondary" : "Primary";
-    commonEventData.SetData(eventData);
     EventFwk::CommonEventManager::PublishCommonEvent(commonEventData);
     // set ipc identity to raw
     IPCSkeleton::SetCallingIdentity(identity);
@@ -939,7 +943,7 @@ WMError WindowNodeContainer::EnterSplitWindowMode(sptr<WindowNode>& node)
             return ret;
         }
     } else {
-        SendSplitScreenEvent(node->GetWindowMode());
+        SendSplitScreenEvent(node);
     }
     return WMError::WM_OK;
 }
