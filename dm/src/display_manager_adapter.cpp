@@ -232,8 +232,8 @@ bool BaseAdapter::InitDMSProxy()
             return false;
         }
 
-        dmsDeath_ = new DMSDeathRecipient(*this);
-        if (!dmsDeath_) {
+        dmsDeath_ = new(std::nothrow) DMSDeathRecipient(*this);
+        if (dmsDeath_ == nullptr) {
             WLOGFE("Failed to create death Recipient ptr DMSDeathRecipient");
             return false;
         }

@@ -65,7 +65,7 @@ void WindowManagerService::OnStart()
 
 void WindowManagerService::RegisterSnapshotHandler()
 {
-    if (!snapshotController_) {
+    if (snapshotController_ == nullptr) {
         snapshotController_ = new SnapshotController(windowRoot_);
     }
     if (AAFwk::AbilityManagerClient::GetInstance()->RegisterSnapshotHandler(snapshotController_) != ERR_OK) {
