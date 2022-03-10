@@ -47,7 +47,6 @@ public:
     uint32_t GetRefreshRate() const;
     float GetVirtualPixelRatio() const;
     ScreenId GetAbstractScreenId() const;
-    bool BindAbstractScreen(ScreenId dmsScreenId);
     bool BindAbstractScreen(sptr<AbstractScreen> abstractDisplay);
     sptr<DisplayInfo> ConvertToDisplayInfo() const;
     Rotation GetRotation() const;

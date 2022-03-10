@@ -129,13 +129,6 @@ FreezeFlag AbstractDisplay::GetFreezeFlag() const
     return freezeFlag_;
 }
 
-bool AbstractDisplay::BindAbstractScreen(ScreenId dmsScreenId)
-{
-    sptr<AbstractScreenController> screenController
-        = DisplayManagerService::GetInstance().GetAbstractScreenController();
-    return BindAbstractScreen(screenController->GetAbstractScreen(dmsScreenId));
-}
-
 bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
 {
     if (abstractScreen == nullptr) {

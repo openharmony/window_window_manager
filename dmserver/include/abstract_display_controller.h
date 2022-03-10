@@ -25,13 +25,15 @@
 
 #include "screen.h"
 #include "abstract_display.h"
+#include "display_change_listener.h"
 #include "transaction/rs_interfaces.h"
 #include "future.h"
 
 namespace OHOS::Rosen {
 class AbstractDisplayController : public RefBase {
+using DisplayStateChangeListener = std::function<void(DisplayId, DisplayStateChangeType)>;
 public:
-    AbstractDisplayController(std::recursive_mutex& mutex);
+    AbstractDisplayController(std::recursive_mutex& mutex, DisplayStateChangeListener);
     ~AbstractDisplayController();
     WM_DISALLOW_COPY_AND_MOVE(AbstractDisplayController);
 
@@ -66,6 +68,7 @@ private:
     sptr<AbstractScreenController> abstractScreenController_;
     sptr<AbstractScreenController::AbstractScreenCallback> abstractScreenCallback_;
     OHOS::Rosen::RSInterfaces& rsInterface_;
+    DisplayStateChangeListener displayStateChangeListener_;
 
     class ScreenshotCallback : public SurfaceCaptureCallback, public Future<std::shared_ptr<Media::PixelMap>> {
     public:
