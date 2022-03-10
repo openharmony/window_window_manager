@@ -214,7 +214,7 @@ NativeValue* CreateJsScreenModeObject(NativeEngine& engine, sptr<SupportedScreen
     uint32_t refreshRate = mode->refreshRate_;
     optionObject->SetProperty("width", CreateJsValue(engine, width));
     optionObject->SetProperty("height", CreateJsValue(engine, height));
-    optionObject->SetProperty("freshRate", CreateJsValue(engine, refreshRate));
+    optionObject->SetProperty("refreshRate", CreateJsValue(engine, refreshRate));
     return objValue;
 }
 }  // namespace Rosen
