@@ -60,12 +60,6 @@ int32_t Display::GetHeight() const
     return pImpl_->GetDisplayInfo()->GetHeight();
 }
 
-uint32_t Display::GetFreshRate() const
-{
-    UpdateDisplayInfo();
-    return pImpl_->GetDisplayInfo()->GetRefreshRate();
-}
-
 uint32_t Display::GetRefreshRate() const
 {
     UpdateDisplayInfo();
