@@ -82,7 +82,7 @@ ohos_shared_library("libwm") {
     "inputmethod_native:inputmethod_client",
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
-    "multimodalinput_base:libmmi-client",
+    "input:libmmi-client",
     "napi:ace_napi",
 
     # because appexecfwk_core depends on global_resmgr
