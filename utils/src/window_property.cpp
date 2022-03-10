@@ -19,6 +19,11 @@
 
 namespace OHOS {
 namespace Rosen {
+WindowProperty::WindowProperty(const sptr<WindowProperty>& property)
+{
+    CopyFrom(property);
+}
+
 void WindowProperty::SetWindowName(const std::string& name)
 {
     windowName_ = name;
@@ -118,6 +123,16 @@ void WindowProperty::SetHitOffset(const PointInfo& offset)
 void WindowProperty::SetAnimationFlag(uint32_t animationFlag)
 {
     animationFlag_ = animationFlag;
+}
+
+void WindowProperty::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
+{
+    windowSizeChangeReason_ = reason;
+}
+
+WindowSizeChangeReason WindowProperty::GetWindowSizeChangeReason() const
+{
+    return windowSizeChangeReason_;
 }
 
 void WindowProperty::ResumeLastWindowMode()
@@ -368,6 +383,11 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
     if (!parcel.WriteUint32(animationFlag_)) {
         return false;
     }
+
+    // write windowSizeChangeReason_
+    if (!parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_))) {
+        return false;
+    }
     return true;
 }
 
@@ -396,7 +416,34 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     PointInfo offset = {parcel.ReadInt32(), parcel.ReadInt32()};
     property->SetHitOffset(offset);
     property->SetAnimationFlag(parcel.ReadUint32());
+    property->SetWindowSizeChangeReason(static_cast<WindowSizeChangeReason>(parcel.ReadUint32()));
     return property;
+}
+
+void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
+{
+    windowName_ = property->windowName_;
+    windowRect_ = property->windowRect_;
+    type_ = property->type_;
+    mode_ = property->mode_;
+    level_ = property->level_;
+    lastMode_ = property->lastMode_;
+    flags_ = property->flags_;
+    isFullScreen_ = property->isFullScreen_;
+    focusable_ = property->focusable_;
+    touchable_ = property->touchable_;
+    isPrivacyMode_ = property->isPrivacyMode_;
+    isTransparent_ = property->isTransparent_;
+    alpha_ = property->alpha_;
+    displayId_ = property->displayId_;
+    windowId_ = property->windowId_;
+    parentId_ = property->parentId_;
+    hitOffset_ = property->hitOffset_;
+    animationFlag_ = property->animationFlag_;
+    windowSizeChangeReason_ = property->windowSizeChangeReason_;
+    sysBarPropMap_ = property->sysBarPropMap_;
+    isDecorEnable_ = property->isDecorEnable_;
+    isDecorEnable_ = property->isDecorEnable_;
 }
 }
 }

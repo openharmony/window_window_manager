@@ -191,9 +191,21 @@ bool WindowImpl::GetShowState() const
     return state_ == WindowState::STATE_SHOWN;
 }
 
+void WindowImpl::SetFocusable(bool isFocusable)
+{
+    property_->SetFocusable(isFocusable);
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+}
+
 bool WindowImpl::GetFocusable() const
 {
     return property_->GetFocusable();
+}
+
+void WindowImpl::SetTouchable(bool isTouchable)
+{
+    property_->SetTouchable(isTouchable);
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
 }
 
 bool WindowImpl::GetTouchable() const
@@ -268,7 +280,8 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
         UpdateMode(mode);
     } else if (state_ == WindowState::STATE_SHOWN) {
-        WMError ret = SingletonContainer::Get<WindowAdapter>().SetWindowMode(property_->GetWindowId(), mode);
+        property_->SetWindowMode(mode);
+        WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_MODE);
         if (ret != WMError::WM_OK) {
             return ret;
         }
@@ -327,7 +340,7 @@ WMError WindowImpl::SetWindowFlags(uint32_t flags)
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
         return WMError::WM_OK;
     }
-    WMError ret = SingletonContainer::Get<WindowAdapter>().SetWindowFlags(property_->GetWindowId(), flags);
+    WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_FLAGS);
     if (ret != WMError::WM_OK) {
         WLOGFE("SetWindowFlags errCode:%{public}d winId:%{public}d",
             static_cast<int32_t>(ret), property_->GetWindowId());
@@ -433,8 +446,7 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
         return WMError::WM_OK;
     }
-    WMError ret = SingletonContainer::Get<WindowAdapter>().SetSystemBarProperty(property_->GetWindowId(),
-        type, property);
+    WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS);
     if (ret != WMError::WM_OK) {
         WLOGFE("SetSystemBarProperty errCode:%{public}d winId:%{public}d",
             static_cast<int32_t>(ret), property_->GetWindowId());
@@ -521,6 +533,11 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
             return;
         }
     }
+}
+
+WMError WindowImpl::UpdateProperty(PropertyChangeAction action)
+{
+    return SingletonContainer::Get<WindowAdapter>().UpdateProperty(property_, action);
 }
 
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
@@ -736,8 +753,9 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
         property_->SetWindowRect(moveRect);
         return WMError::WM_OK;
     }
-    return SingletonContainer::Get<WindowAdapter>().ResizeRect(property_->GetWindowId(),
-        moveRect, WindowSizeChangeReason::MOVE);
+    property_->SetWindowRect(moveRect);
+    property_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
+    return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
 
 WMError WindowImpl::Resize(uint32_t width, uint32_t height)
@@ -755,8 +773,9 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
         property_->SetWindowRect(resizeRect);
         return WMError::WM_OK;
     }
-    return SingletonContainer::Get<WindowAdapter>().ResizeRect(property_->GetWindowId(),
-        resizeRect, WindowSizeChangeReason::RESIZE);
+    property_->SetWindowRect(resizeRect);
+    property_->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
+    return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
 
 WMError WindowImpl::Drag(const Rect& rect)
@@ -764,8 +783,9 @@ WMError WindowImpl::Drag(const Rect& rect)
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    return SingletonContainer::Get<WindowAdapter>().ResizeRect(property_->GetWindowId(),
-        rect, WindowSizeChangeReason::DRAG);
+    property_->SetWindowRect(rect);
+    property_->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
+    return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
 
 bool WindowImpl::IsDecorEnable() const

@@ -35,15 +35,10 @@ public:
     WMError AddWindowNode(sptr<WindowProperty>& property);
     WMError RemoveWindowNode(uint32_t windowId);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);
-    WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
     WMError RequestFocus(uint32_t windowId);
     WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId);
-    WMError SetWindowMode(uint32_t windowId, WindowMode dstMode);
     WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level);
     WMError SetAlpha(uint32_t windowId, float alpha);
-    WMError SetWindowType(uint32_t windowId, WindowType type);
-    WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
-    WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
@@ -52,6 +47,7 @@ public:
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError MaxmizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
+    WMError UpdateProperty(sptr<WindowProperty>& property, PropertyChangeAction action);
     void NotifySystemBarTints();
 
 private:
@@ -61,6 +57,11 @@ private:
     void UpdateWindowAnimation(const sptr<WindowNode>& node);
     void ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type);
     void StopBootAnimationIfNeed(WindowType type) const;
+    WMError SetWindowType(uint32_t windowId, WindowType type);
+    WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
+    WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
+    WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
+    WMError SetWindowMode(uint32_t windowId, WindowMode dstMode);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
