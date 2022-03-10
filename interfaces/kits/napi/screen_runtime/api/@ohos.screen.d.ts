@@ -143,7 +143,7 @@ declare namespace screen {
     id: number;
     width: number;
     height: number;
-    freshRate: number;
+    refreshRate: number;
   }
 }
 
