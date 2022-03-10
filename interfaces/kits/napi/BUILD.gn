@@ -16,8 +16,8 @@ import("//build/ohos.gni")
 
 group("napi_packages") {
   deps = [
-    "display:display_napi",
-    "display_runtime:screen_napi",
+    "display_runtime:display_napi",
+    "screen_runtime:screen_napi",
     "screenshot:screenshot",
     "window_runtime:window_napi",
     "window_runtime:window_native_kit",
