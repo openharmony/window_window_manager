@@ -39,6 +39,7 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, FreshRate, freshRate, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, RefreshRate, refreshRate, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, ScreenId, screenId, SCREEN_ID_INVALID);
+    DEFINE_VAR_DEFAULT_FUNC_GET(float, VirtualPixelRatio, virtualPixelRatio, 1.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET(float, XDpi, xDpi, 0.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET(float, YDpi, yDpi, 0.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET(Rotation, Rotation, rotation, Rotation::ROTATION_0);
