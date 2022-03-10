@@ -96,7 +96,7 @@ void WindowInnerManager::DrawBitmap(std::shared_ptr<RSSurface>& rsSurface, uint3
     SkRect rect;
     rect.set(0, 0, static_cast<int>(width), static_cast<int>(height));
     if (dividerBitmap_.width() != 0 && dividerBitmap_.height() != 0) {
-        if (width < height) {
+        if (width > height) {
             // rotate when divider is horizontal
             matrix.setScale(static_cast<float>(height) / dividerBitmap_.width(),
                 static_cast<float>(width) / dividerBitmap_.height());
