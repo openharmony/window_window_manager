@@ -65,7 +65,7 @@ void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
     }
 }
 
-std::vector<ScreenId> AbstractScreenController::GetAllScreenIds()
+std::vector<ScreenId> AbstractScreenController::GetAllScreenIds() const
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::vector<ScreenId> res;
@@ -192,13 +192,13 @@ ScreenId AbstractScreenController::GetDefaultAbstractScreenId()
     return screenIdManager_.ConvertToDmsScreenId(rsDefaultId);
 }
 
-ScreenId AbstractScreenController::ConvertToRsScreenId(ScreenId dmsScreenId)
+ScreenId AbstractScreenController::ConvertToRsScreenId(ScreenId dmsScreenId) const
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return screenIdManager_.ConvertToRsScreenId(dmsScreenId);
 }
 
-ScreenId AbstractScreenController::ConvertToDmsScreenId(ScreenId rsScreenId)
+ScreenId AbstractScreenController::ConvertToDmsScreenId(ScreenId rsScreenId) const
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return screenIdManager_.ConvertToDmsScreenId(rsScreenId);
@@ -1047,5 +1047,74 @@ void AbstractScreenController::NotifyScreenGroupChanged(
         DisplayManagerAgentController::GetInstance().OnScreenGroupChange(screenInfo, event);
     };
     controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
+}
+
+bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) const
+{
+    WLOGFI("state:%{public}u, reason:%{public}u", state, reason);
+    auto screenIds = GetAllScreenIds();
+    if (screenIds.empty()) {
+        WLOGFI("no screen info");
+        return false;
+    }
+
+    ScreenPowerStatus status;
+    switch (state) {
+        case ScreenPowerState::POWER_ON: {
+            status = ScreenPowerStatus::POWER_STATUS_ON;
+            break;
+        }
+        case ScreenPowerState::POWER_OFF: {
+            status = ScreenPowerStatus::POWER_STATUS_OFF;
+            break;
+        }
+        default: {
+            WLOGFW("SetScreenPowerStatus state not support");
+            return false;
+        }
+    }
+
+    bool hasSetScreenPower = false;
+    for (auto screenId : screenIds) {
+        auto screen = GetAbstractScreen(screenId);
+        if (screen->type_ != ScreenType::REAL) {
+            WLOGD("skip virtual screen %{public}" PRIu64"", screen->dmsId_);
+            continue;
+        }
+        RSInterfaces::GetInstance().SetScreenPowerStatus(screen->rsId_, status);
+        WLOGI("set screen power status. rsscreen %{public}" PRIu64", status %{public}u", screen->rsId_, status);
+        hasSetScreenPower = true;
+    }
+    WLOGFI("SetScreenPowerStatus end");
+    if (!hasSetScreenPower) {
+        WLOGFI("no real screen");
+        return false;
+    }
+    return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(
+        state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
+        DisplayPowerEvent::DISPLAY_OFF, EventStatus::END);
+}
+
+ScreenPowerState AbstractScreenController::GetScreenPower(ScreenId dmsScreenId) const
+{
+    auto screenIds = GetAllScreenIds();
+    if (screenIds.empty()) {
+        WLOGFE("no screen info");
+        return ScreenPowerState::INVALID_STATE;
+    }
+    ScreenId rsId = SCREEN_ID_INVALID;
+    for (ScreenId screenId : screenIds) {
+        if (screenId == dmsScreenId) {
+            rsId = ConvertToRsScreenId(screenId);
+            break;
+        }
+    }
+    if (rsId == SCREEN_ID_INVALID) {
+        WLOGFE("cannot find screen %{public}" PRIu64"", dmsScreenId);
+        return ScreenPowerState::INVALID_STATE;
+    }
+    ScreenPowerState state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(rsId));
+    WLOGFI("GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, rsId);
+    return state;
 }
 } // namespace OHOS::Rosen

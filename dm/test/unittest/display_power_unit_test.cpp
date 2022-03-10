@@ -254,8 +254,8 @@ HWTEST_F(DisplayPowerUnitTest, set_screen_brightness_002, Function | MediumTest 
 */
 HWTEST_F(DisplayPowerUnitTest, set_screen_power_for_all_001, Function | MediumTest | Level2)
 {
-    Mocker m;
-    EXPECT_CALL(m.Mock(), GetDefaultDisplayId()).Times(1).WillOnce(Return(defaultId_));
+    SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter> m;
+    EXPECT_CALL(m.Mock(), GetScreenPower(_)).Times(1).WillOnce(Return(ScreenPowerState::POWER_OFF));
     EXPECT_CALL(m.Mock(), SetScreenPowerForAll(_, PowerStateChangeReason::POWER_BUTTON))
         .Times(1).WillOnce(Return(true));
 
@@ -265,25 +265,6 @@ HWTEST_F(DisplayPowerUnitTest, set_screen_power_for_all_001, Function | MediumTe
 
     ScreenPowerState state = ScreenManager::GetInstance().GetScreenPower(defaultId_);
     ASSERT_EQ(state, ScreenPowerState::POWER_OFF);
-}
-
-/**
-* @tc.name: set_screen_power_for_all_002
-* @tc.desc: Call SetScreenPowerForAll with invalid value and check the GetScreenPower return value
-* @tc.type: FUNC
-*/
-HWTEST_F(DisplayPowerUnitTest, set_screen_power_for_all_002, Function | MediumTest | Level2)
-{
-    Mocker m;
-    EXPECT_CALL(m.Mock(), GetDefaultDisplayId()).Times(1).WillOnce(Return(defaultId_));
-    EXPECT_CALL(m.Mock(), SetScreenPowerForAll(_, PowerStateChangeReason::POWER_BUTTON)).Times(0);
-
-    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(ScreenPowerState::INVALID_STATE,
-        PowerStateChangeReason::POWER_BUTTON);
-    ASSERT_EQ(false, ret);
-
-    ScreenPowerState state = ScreenManager::GetInstance().GetScreenPower(defaultId_);
-    ASSERT_EQ(state, initialPowerState_);
 }
 
 /**
