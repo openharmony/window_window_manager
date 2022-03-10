@@ -178,7 +178,7 @@ void WindowMoveDragTest::CalExpectRects()
         }
     }
     bool isVertical = (utils::displayRect_.width_ < utils::displayRect_.height_) ? true : false;
-    expectRect_ = WindowHelper::GetFixedWindowRectByMinRect(oriRect, startPointRect_, isVertical, virtualPixelRatio_);
+    expectRect_ = WindowHelper::GetFixedWindowRectByLimitSize(oriRect, startPointRect_, isVertical, virtualPixelRatio_);
 }
 
 namespace {
