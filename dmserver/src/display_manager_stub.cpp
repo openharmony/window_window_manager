@@ -109,11 +109,8 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
             DisplayId displayId = data.ReadUint64();
             std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId);
-            if (displaySnapshot == nullptr) {
-                reply.WriteParcelable(nullptr);
-                break;
-            }
-            reply.WriteParcelable(displaySnapshot.get());
+            reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
+            break;
         }
         case TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
@@ -217,9 +214,25 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             }
             std::vector<Point> startPoint;
             uint32_t nums = data.ReadUint32();
+            if (nums > data.GetReadableBytes() || nums > startPoint.max_size()) {
+                WLOGE("fail to receive startPoint size.");
+                break;
+            }
+            startPoint.resize(nums);
+            if (startPoint.size() < nums) {
+                WLOGE("fail to resize startPoint.");
+                break;
+            }
+            bool readVectorRes = true;
             for (uint32_t i = 0; i < nums; ++i) {
-                Point point { data.ReadInt32(), data.ReadInt32() };
-                startPoint.push_back(point);
+                readVectorRes = data.ReadInt32(startPoint[i].posX_) && data.ReadInt32(startPoint[i].posY_);
+                if (!readVectorRes) {
+                    WLOGE("fail to ReadInt32. index:%{public}u, nums:%{public}u", i, nums);
+                    break;
+                }
+            }
+            if (!readVectorRes) {
+                break;
             }
             ScreenId result = MakeExpand(screenId, startPoint);
             reply.WriteUint64(static_cast<uint64_t>(result));
