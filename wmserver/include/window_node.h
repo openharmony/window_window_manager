@@ -49,6 +49,8 @@ public:
     void SetWindowMode(WindowMode mode);
     void SetWindowBackgroundBlur(WindowBlurLevel level);
     void SetAlpha(float alpha);
+    void SetFocusable(bool focusable);
+    void SetTouchable(bool touchable);
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
