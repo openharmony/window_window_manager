@@ -66,7 +66,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
         case TRANS_ID_UPDATE_WINDOW_STATUS: {
             sptr<AccessibilityWindowInfo> windowInfo = data.ReadParcelable<AccessibilityWindowInfo>();
             WindowUpdateType type = static_cast<WindowUpdateType>(data.ReadUint32());
-            UpdateWindowStatus(windowInfo, type);
+            NotifyAccessibilityWindowInfo(windowInfo, type);
             break;
         }
         case TRANS_ID_UPDATE_WINDOW_VISIBILITY: {

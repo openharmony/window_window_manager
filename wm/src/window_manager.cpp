@@ -49,14 +49,10 @@ WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
 
 bool WindowInfo::Marshalling(Parcel &parcel) const
 {
-    bool res = parcel.WriteInt32(wid_) && parcel.WriteUint32(windowRect_.width_) &&
+    return parcel.WriteInt32(wid_) && parcel.WriteUint32(windowRect_.width_) &&
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(windowRect_.posX_) &&
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteBool(focused_) &&
         parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(type_));
-    if (!res) {
-        return res;
-    }
-    return res;
 }
 
 WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
@@ -146,7 +142,7 @@ public:
     void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo) const;
     void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo) const;
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints) const;
-    void NotifyWindowUpdate(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) const;
+    void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) const;
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -215,9 +211,10 @@ void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const Syst
     }
 }
 
-void WindowManager::Impl::NotifyWindowUpdate(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) const
+void WindowManager::Impl::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
+    WindowUpdateType type) const
 {
-    WLOGFI("NotifyWindowUpdate: wid[%{public}d],width[%{public}d], \
+    WLOGFI("NotifyAccessibilityWindowInfo: wid[%{public}d],width[%{public}d], \
         height[%{public}d],positionX[%{public}d],positionY[%{public}d],\
         isFocused[%{public}d],mode[%{public}d],type[%{public}d]",
         windowInfo->currentWindowInfo_->wid_, windowInfo->currentWindowInfo_->windowRect_.width_,
@@ -453,9 +450,10 @@ void WindowManager::UpdateSystemBarRegionTints(DisplayId displayId,
     pImpl_->NotifySystemBarChanged(displayId, tints);
 }
 
-void WindowManager::UpdateWindowStatus(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type)
+void WindowManager::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
+    WindowUpdateType type)
 {
-    pImpl_->NotifyWindowUpdate(windowInfo, type);
+    pImpl_->NotifyAccessibilityWindowInfo(windowInfo, type);
 }
 
 void WindowManager::UpdateWindowVisibilityInfo(
