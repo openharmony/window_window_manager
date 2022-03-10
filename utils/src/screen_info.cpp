@@ -18,7 +18,7 @@
 namespace OHOS::Rosen {
 bool ScreenInfo::Marshalling(Parcel &parcel) const
 {
-    bool res = parcel.WriteString(name_) && parcel.WriteUint64(id_) && parcel.WriteUint64(rsId_) &&
+    bool res = parcel.WriteString(name_) && parcel.WriteUint64(id_) &&
         parcel.WriteUint32(virtualWidth_) && parcel.WriteUint32(virtualHeight_) &&
         parcel.WriteFloat(virtualPixelRatio_) && parcel.WriteUint64(parent_) &&
         parcel.WriteBool(isScreenGroup_) && parcel.WriteUint32(static_cast<uint32_t>(rotation_)) &&
@@ -41,7 +41,10 @@ bool ScreenInfo::Marshalling(Parcel &parcel) const
 
 ScreenInfo* ScreenInfo::Unmarshalling(Parcel &parcel)
 {
-    ScreenInfo* info = new ScreenInfo();
+    ScreenInfo* info = new(std::nothrow) ScreenInfo();
+    if (info == nullptr) {
+        return info;
+    }
     bool res = info->InnerUnmarshalling(parcel);
     if (res) {
         return info;
@@ -57,7 +60,7 @@ bool ScreenInfo::InnerUnmarshalling(Parcel& parcel)
     uint32_t orientation;
     uint32_t type;
     name_ = parcel.ReadString();
-    bool res1 = parcel.ReadUint64(id_) && parcel.ReadUint64(rsId_) &&
+    bool res1 = parcel.ReadUint64(id_) &&
         parcel.ReadUint32(virtualWidth_) && parcel.ReadUint32(virtualHeight_) &&
         parcel.ReadFloat(virtualPixelRatio_) && parcel.ReadUint64(parent_) &&
         parcel.ReadBool(isScreenGroup_) && parcel.ReadUint32(rotation) &&
