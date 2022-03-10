@@ -79,7 +79,7 @@ private:
     void UpdateWindowTree(sptr<WindowNode>& node);
     bool UpdateRSTree(sptr<WindowNode>& node, bool isAdd);
 
-    void SendSplitScreenEvent(WindowMode mode);
+    void SendSplitScreenEvent(sptr<WindowNode>& node);
     sptr<WindowNode> FindSplitPairNode(sptr<WindowNode>& node) const;
     WMError UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode);
     void NotifyIfSystemBarTintChanged();
