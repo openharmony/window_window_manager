@@ -33,7 +33,7 @@
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, OHOS::Rosen::HILOG_DOMAIN_WINDOW,
                                                 "NapiWindowManagerCommonLayer" };
 
-const int PARAMNUMBER = 2; // 2: callback func input number, also reused by Promise
+const int PARAM_NUMBER = 2; // 2: callback func input number, also reused by Promise
 
 #define GNAPI_LOG(fmt, ...) OHOS::HiviewDFX::HiLog::Info(LABEL, \
     "%{public}s:%{public}d " fmt, __func__, __LINE__, ##__VA_ARGS__)
@@ -111,17 +111,17 @@ napi_value AsyncProcess(napi_env env,
 
     auto completeFunc = [](napi_env env, napi_status status, void *data) {
         AsyncCallbackInfo *info = reinterpret_cast<AsyncCallbackInfo *>(data);
-        napi_value result[PARAMNUMBER] = {0};
+        napi_value result[PARAM_NUMBER] = {0};
         if (info->param->wret == Rosen::WMError::WM_OK) {
             napi_get_undefined(env, &result[0]);
             result[1] = info->resolve(env, info->param);
         } else {
-            SetErrorInfo(env, info->param->wret, info->param->errMessage, result, PARAMNUMBER);
+            SetErrorInfo(env, info->param->wret, info->param->errMessage, result, PARAM_NUMBER);
         }
         if (info->deferred) {
-            ProcessPromise(env, info->param->wret, info->deferred, result, PARAMNUMBER);
+            ProcessPromise(env, info->param->wret, info->deferred, result, PARAM_NUMBER);
         } else {
-            ProcessCallback(env, info->ref, result, PARAMNUMBER);
+            ProcessCallback(env, info->ref, result, PARAM_NUMBER);
         }
         napi_delete_async_work(env, info->asyncWork);
         delete info;
