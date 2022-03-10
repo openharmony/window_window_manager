@@ -106,7 +106,9 @@ public:
     virtual uint32_t GetWindowId() const = 0;
     virtual uint32_t GetWindowFlags() const = 0;
     virtual bool GetShowState() const = 0;
+    virtual void SetFocusable(bool isFocusable) = 0;
     virtual bool GetFocusable() const = 0;
+    virtual void SetTouchable(bool isTouchable) = 0;
     virtual bool GetTouchable() const = 0;
     virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) const = 0;
     virtual bool IsFullScreen() const = 0;

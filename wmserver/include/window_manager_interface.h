@@ -33,12 +33,7 @@ public:
         TRANS_ID_ADD_WINDOW,
         TRANS_ID_REMOVE_WINDOW,
         TRANS_ID_DESTROY_WINDOW,
-        TRANS_ID_RESIZE_RECT,
         TRANS_ID_REQUEST_FOCUS,
-        TRANS_ID_UPDATE_TYPE,
-        TRANS_ID_UPDATE_MODE,
-        TRANS_ID_UPDATE_FLAGS,
-        TRANS_ID_UPDATE_SYSTEM_BAR_PROPERTY,
         TRANS_ID_SEND_ABILITY_TOKEN,
         TRANS_ID_REGISTER_FOCUS_CHANGED_LISTENER,
         TRANS_ID_UNREGISTER_FOCUS_CHANGED_LISTENER,
@@ -60,16 +55,9 @@ public:
     virtual WMError AddWindow(sptr<WindowProperty>& property) = 0;
     virtual WMError RemoveWindow(uint32_t windowId) = 0;
     virtual WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) = 0;
-    virtual WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason) = 0;
     virtual WMError RequestFocus(uint32_t windowId) = 0;
-    virtual WMError SetWindowMode(uint32_t windowId, WindowMode mode) = 0;
-
     virtual WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) = 0;
     virtual WMError SetAlpha(uint32_t windowId, float alpha) = 0;
-
-    virtual WMError SetWindowType(uint32_t windowId, WindowType type) = 0;
-    virtual WMError SetWindowFlags(uint32_t windowId, uint32_t flags) = 0;
-    virtual WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) = 0;
     virtual WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId) = 0;
     virtual std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
@@ -78,7 +66,7 @@ public:
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError MaxmizeWindow(uint32_t windowId) = 0;
     virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) = 0;
-
+    virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) = 0;
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
