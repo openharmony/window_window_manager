@@ -103,8 +103,8 @@ public:
     virtual WMError SetLayoutFullScreen(bool status) = 0;
     virtual WMError SetFullScreen(bool status) = 0;
     virtual WMError Destroy() = 0;
-    virtual WMError Show() = 0;
-    virtual WMError Hide() = 0;
+    virtual WMError Show(uint32_t reason = 0) = 0;
+    virtual WMError Hide(uint32_t reason = 0) = 0;
 
     virtual WMError MoveTo(int32_t x, int32_t y) = 0;
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
