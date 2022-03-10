@@ -164,6 +164,7 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->id_ = id_;
     displayInfo->refreshRate_ = refreshRate_;
     displayInfo->screenId_ = screenId_;
+    displayInfo->virtualPixelRatio_ = virtualPixelRatio_;
     displayInfo->rotation_ = rotation_;
     displayInfo->orientation_ = orientation_;
     return displayInfo;

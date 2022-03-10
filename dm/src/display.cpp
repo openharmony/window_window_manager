@@ -21,7 +21,6 @@
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "Display"};
-    constexpr int32_t LARGE_SCREEN_WIDTH = 2160;
 }
 class Display::Impl : public RefBase {
 public:
@@ -108,12 +107,7 @@ void Display::UpdateDisplayInfo() const
 
 float Display::GetVirtualPixelRatio() const
 {
-    // Should get from DMS
-    if ((pImpl_->GetDisplayInfo()->GetWidth() >= LARGE_SCREEN_WIDTH)
-        || (pImpl_->GetDisplayInfo()->GetHeight() >= LARGE_SCREEN_WIDTH)) {
-        return 2.0f;
-    } else {
-        return 1.0f;
-    }
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetVirtualPixelRatio();
 }
 } // namespace OHOS::Rosen
