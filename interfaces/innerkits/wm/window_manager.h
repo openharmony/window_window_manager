@@ -107,9 +107,25 @@ public:
     WindowMode mode_;
     WindowType type_;
 };
+
+class AccessibilityWindowInfo : public Parcelable {
+public:
+    AccessibilityWindowInfo() = default;
+    ~AccessibilityWindowInfo() = default;
+
+    virtual bool Marshalling(Parcel& parcel) const override;
+    static AccessibilityWindowInfo* Unmarshalling(Parcel& parcel);
+
+    sptr<WindowInfo> currentWindowInfo_;
+    std::vector<sptr<WindowInfo>> windowList_;
+        
+private:
+    bool VectorMarshalling(Parcel& parcel) const;
+    static void VectorUnmarshalling(Parcel& parcel, AccessibilityWindowInfo* windowInfo);
+};
 class IWindowUpdateListener : public RefBase {
 public:
-    virtual void OnWindowUpdate(const sptr<WindowInfo>& windowInfo, WindowUpdateType type) = 0;
+    virtual void OnWindowUpdate(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) = 0;
 };
 
 class WindowManager {
@@ -138,7 +154,7 @@ private:
         DisplayId displayId, bool focused) const;
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const;
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) const;
-    void UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type);
+    void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type);
     void UpdateWindowVisibilityInfo(
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
 };

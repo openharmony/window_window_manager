@@ -48,7 +48,7 @@ public:
     DisplayId GetDisplayId() const;
     Rect GetDisplayRect() const;
     std::unordered_map<WindowType, SystemBarProperty> GetExpectImmersiveProperty() const;
-    void UpdateWindowStatus(const sptr<WindowNode>& windowId, WindowUpdateType type) const;
+    void NotifyAccessibilityWindowInfo(const sptr<WindowNode>& windowId, WindowUpdateType type) const;
     void UpdateDisplayRect(uint32_t width, uint32_t height);
 
     void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas);
@@ -101,6 +101,7 @@ private:
     void RecordCurrentWindowTree();
     void RecordWindowHistory(const sptr<WindowNode>& node, RecordType reason);
     static bool ReadIsWindowAnimationEnabledProperty();
+    void GetWindowList(std::vector<sptr<WindowInfo>>& windowList) const;
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();

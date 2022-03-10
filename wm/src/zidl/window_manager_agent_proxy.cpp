@@ -142,7 +142,8 @@ void WindowManagerAgentProxy::UpdateSystemBarRegionTints(DisplayId displayId, co
     }
 }
 
-void WindowManagerAgentProxy::UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type)
+void WindowManagerAgentProxy::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
+    WindowUpdateType type)
 {
     MessageParcel data;
     MessageParcel reply;
