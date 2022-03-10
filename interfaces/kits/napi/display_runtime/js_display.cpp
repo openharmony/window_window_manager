@@ -76,7 +76,7 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
     object->SetProperty("id", CreateJsValue(engine, static_cast<uint32_t>(display->GetId())));
     object->SetProperty("width", CreateJsValue(engine, display->GetWidth()));
     object->SetProperty("height", CreateJsValue(engine, display->GetHeight()));
-    object->SetProperty("refreshRate", CreateJsValue(engine, display->GetFreshRate()));
+    object->SetProperty("refreshRate", CreateJsValue(engine, display->GetRefreshRate()));
     object->SetProperty("name", engine.CreateUndefined());
     object->SetProperty("alive", engine.CreateUndefined());
     object->SetProperty("state", engine.CreateUndefined());

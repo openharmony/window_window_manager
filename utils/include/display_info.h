@@ -36,7 +36,6 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET(DisplayType, DisplayType, type, DisplayType::DEFAULT);
     DEFINE_VAR_DEFAULT_FUNC_GET(int32_t, Width, width, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET(int32_t, Height, height, 0);
-    DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, FreshRate, freshRate, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, RefreshRate, refreshRate, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, ScreenId, screenId, SCREEN_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET(float, VirtualPixelRatio, virtualPixelRatio, 1.0f);

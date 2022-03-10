@@ -198,6 +198,10 @@ DisplayId AbstractDisplayController::ProcessNormalScreenDisconnected(
     sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup)
 {
     WLOGI("normal screen disconnect");
+    if (absScreen == nullptr || screenGroup == nullptr) {
+        WLOGFE("Invalid params as nullptr.");
+        return DISPLAY_ID_INVALID;
+    }
     ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     sptr<AbstractScreen> defaultScreen = abstractScreenController_->GetAbstractScreen(defaultScreenId);
     for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
@@ -217,7 +221,8 @@ DisplayId AbstractDisplayController::ProcessExpandScreenDisconnected(
     sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup)
 {
     WLOGI("expand screen disconnect");
-    if (absScreen == nullptr) {
+    if (absScreen == nullptr || screenGroup == nullptr) {
+        WLOGFE("Invalid params as nullptr.");
         return DISPLAY_ID_INVALID;
     }
     for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
@@ -244,7 +249,7 @@ void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absS
     } else if (event == DisplayChangeEvent::DISPLAY_SIZE_CHANGED) {
         ProcessDisplaySizeChange(absScreen);
     } else {
-        WLOGE("unknow screen change event. id:%{public}" PRIu64" event %{public}u", absScreen->dmsId_, event);
+        WLOGE("unknown screen change event. id:%{public}" PRIu64" event %{public}u", absScreen->dmsId_, event);
     }
 }
 
@@ -278,7 +283,7 @@ void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScr
                 WLOGFI("It's the secondary screen of the mirrored.");
                 return;
             } else {
-                WLOGFE("Unknow combination");
+                WLOGFE("Unknown combination");
                 return;
             }
         }
@@ -330,14 +335,18 @@ void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> ab
 
 bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info)
 {
+    if (absDisplay == nullptr || info == nullptr) {
+        WLOGFE("invalid params.");
+        return false;
+    }
     if (info->height_ == static_cast<uint32_t>(absDisplay->GetHeight()) &&
         info->width_ == static_cast<uint32_t>(absDisplay->GetWidth())) {
-        WLOGI("keep display size. display:%{public}" PRIu64"", absDisplay->GetId());
+        WLOGFI("keep display size. display:%{public}" PRIu64"", absDisplay->GetId());
         return false;
     }
     absDisplay->SetHeight(info->height_);
     absDisplay->SetWidth(info->width_);
-    WLOGI("update display size. id %{public}" PRIu64", size: %{public}d %{public}d",
+    WLOGFI("Reset H&W. id %{public}" PRIu64", size: %{public}d %{public}d",
           absDisplay->GetId(), absDisplay->GetWidth(), absDisplay->GetHeight());
     return true;
 }
