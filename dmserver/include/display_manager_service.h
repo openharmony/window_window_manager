@@ -35,11 +35,6 @@
 
 namespace OHOS::Rosen {
 class DisplayManagerService : public SystemAbility, public DisplayManagerStub {
-friend class DisplayManagerServiceInner;
-friend class DisplayPowerController;
-friend class AbstractDisplay;
-friend class AbstractDisplayController;
-friend class AbstractScreen;
 DECLARE_SYSTEM_ABILITY(DisplayManagerService);
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
 
@@ -82,10 +77,6 @@ public:
     void NotifyDisplayEvent(DisplayEvent event) override;
     bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) override;
 
-    sptr<AbstractDisplay> GetAbstractDisplay(DisplayId displayId);
-    sptr<AbstractScreenController> GetAbstractScreenController();
-    sptr<AbstractDisplay> GetDisplayByDisplayId(DisplayId displayId) const;
-    sptr<AbstractDisplay> GetDisplayByScreen(ScreenId screenId) const;
     ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;
     ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
@@ -96,11 +87,11 @@ public:
     std::vector<DisplayId> GetAllDisplayIds() override;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
 
+    void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
 private:
     DisplayManagerService();
     ~DisplayManagerService() = default;
     bool Init();
-    void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
     void SetShotScreen(ScreenId mainScreenId, std::vector<ScreenId> shotScreenIds);
     ScreenId GetScreenIdByDisplayId(DisplayId displayId) const;

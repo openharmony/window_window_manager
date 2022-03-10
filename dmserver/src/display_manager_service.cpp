@@ -40,9 +40,11 @@ const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonCon
     } while (false)
 
 DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true),
-    abstractDisplayController_(new AbstractDisplayController(mutex_)),
+    abstractDisplayController_(new AbstractDisplayController(mutex_,
+    std::bind(&DisplayManagerService::NotifyDisplayStateChange, this, std::placeholders::_1, std::placeholders::_2))),
     abstractScreenController_(new AbstractScreenController(mutex_)),
-    displayPowerController_(new DisplayPowerController(mutex_))
+    displayPowerController_(new DisplayPowerController(mutex_,
+    std::bind(&DisplayManagerService::NotifyDisplayStateChange, this, std::placeholders::_1, std::placeholders::_2)))
 {
 }
 
@@ -77,6 +79,7 @@ void DisplayManagerService::RegisterDisplayChangeListener(sptr<IDisplayChangeLis
 
 void DisplayManagerService::NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type)
 {
+    WLOGFI("DisplayId %{public}" PRIu64"", id);
     if (displayChangeListener_ != nullptr) {
         displayChangeListener_->OnDisplayStateChange(id, type);
     }
@@ -86,7 +89,7 @@ DisplayId DisplayManagerService::GetDefaultDisplayId()
 {
     ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     WLOGFI("GetDefaultDisplayId %{public}" PRIu64"", dmsScreenId);
-    sptr<AbstractDisplay> display = GetDisplayByScreen(dmsScreenId);
+    sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplayByScreen(dmsScreenId);
     if (display == nullptr) {
         WLOGFE("fail to get displayInfo by id: invalid display");
         return DISPLAY_ID_INVALID;
@@ -96,7 +99,7 @@ DisplayId DisplayManagerService::GetDefaultDisplayId()
 
 sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 {
-    sptr<AbstractDisplay> display = GetDisplayByDisplayId(displayId);
+    sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplay(displayId);
     if (display == nullptr) {
         WLOGFE("fail to get displayInfo by id: invalid display");
         return nullptr;
@@ -106,17 +109,12 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 
 sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreen(ScreenId screenId)
 {
-    sptr<AbstractDisplay> display = GetDisplayByScreen(screenId);
+    sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplayByScreen(screenId);
     if (display == nullptr) {
         WLOGFE("fail to get displayInfo by screenId: invalid display");
         return nullptr;
     }
     return display->ConvertToDisplayInfo();
-}
-
-sptr<AbstractDisplay> DisplayManagerService::GetAbstractDisplay(DisplayId displayId)
-{
-    return abstractDisplayController_->GetAbstractDisplay(displayId);
 }
 
 ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option)
@@ -320,21 +318,6 @@ ScreenId DisplayManagerService::GetScreenIdByDisplayId(DisplayId displayId) cons
         return SCREEN_ID_INVALID;
     }
     return abstractDisplay->GetAbstractScreenId();
-}
-
-sptr<AbstractDisplay> DisplayManagerService::GetDisplayByDisplayId(DisplayId displayId) const
-{
-    return abstractDisplayController_->GetAbstractDisplay(displayId);
-}
-
-sptr<AbstractDisplay> DisplayManagerService::GetDisplayByScreen(ScreenId screenId) const
-{
-    return abstractDisplayController_->GetAbstractDisplayByScreen(screenId);
-}
-
-sptr<AbstractScreenController> DisplayManagerService::GetAbstractScreenController()
-{
-    return abstractScreenController_;
 }
 
 DisplayState DisplayManagerService::GetDisplayState(DisplayId displayId)

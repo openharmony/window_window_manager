@@ -33,26 +33,26 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId d
     if (iter != windowNodeContainerMap_.end()) {
         return iter->second;
     }
-    const sptr<AbstractDisplay> abstractDisplay = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
-    if (abstractDisplay == nullptr) {
+    const sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+    if (displayInfo == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRId64 "", displayId);
         return nullptr;
     }
 
-    if (!CheckDisplayInfo(abstractDisplay)) {
+    if (!CheckDisplayInfo(displayInfo)) {
         WLOGFE("get display invailed infp:%{public}" PRId64 "", displayId);
         return nullptr;
     }
 
     WLOGFI("create new window node container display width:%{public}d, height:%{public}d, screenId:%{public}" PRIu64"",
-        abstractDisplay->GetWidth(), abstractDisplay->GetHeight(), abstractDisplay->GetId());
-    sptr<WindowNodeContainer> container = new WindowNodeContainer(abstractDisplay->GetId(),
-        static_cast<uint32_t>(abstractDisplay->GetWidth()), static_cast<uint32_t>(abstractDisplay->GetHeight()));
+        displayInfo->GetWidth(), displayInfo->GetHeight(), displayInfo->GetDisplayId());
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(displayInfo->GetDisplayId(),
+        static_cast<uint32_t>(displayInfo->GetWidth()), static_cast<uint32_t>(displayInfo->GetHeight()));
     windowNodeContainerMap_.insert(std::make_pair(displayId, container));
     return container;
 }
 
-bool WindowRoot::CheckDisplayInfo(const sptr<AbstractDisplay>& display)
+bool WindowRoot::CheckDisplayInfo(const sptr<DisplayInfo>& display)
 {
     const int32_t minWidth = 50;
     const int32_t minHeight = 50;
@@ -402,15 +402,15 @@ void WindowRoot::NotifyWindowStateChange(WindowState state, WindowStateChangeRea
     }
 }
 
-void WindowRoot::NotifyDisplayChange(sptr<AbstractDisplay> abstractDisplay)
+void WindowRoot::NotifyDisplayChange(sptr<DisplayInfo> displayInfo)
 {
     WLOGFD("window should be updated for display changed");
-    auto container = GetOrCreateWindowNodeContainer(abstractDisplay->GetId());
+    auto container = GetOrCreateWindowNodeContainer(displayInfo->GetDisplayId());
     if (container == nullptr) {
         WLOGFE("can't find window node container, failed!");
         return;
     }
-    container->UpdateDisplayRect(abstractDisplay->GetWidth(), abstractDisplay->GetHeight());
+    container->UpdateDisplayRect(displayInfo->GetWidth(), displayInfo->GetHeight());
 }
 
 void WindowRoot::NotifySystemBarTints()
