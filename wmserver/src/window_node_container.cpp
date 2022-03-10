@@ -612,8 +612,10 @@ void WindowNodeContainer::UpdateWindowStatus(const sptr<WindowNode>& node, Windo
         windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
         windowInfo->mode_ = node->GetWindowMode();
         windowInfo->type_ = node->GetWindowType();
-        windowInfo->relatedWindows_ = windowList;
-        WindowManagerAgentController::GetInstance().UpdateWindowStatus(windowInfo, type);
+        sptr<AccessibilityWindowInfo> accessibilityWindowInfo = new AccessibilityWindowInfo();
+        accessibilityWindowInfo->currentWindowInfo_ = windowInfo;
+        accessibilityWindowInfo->windowList_ = windowList;
+        WindowManagerAgentController::GetInstance().UpdateWindowStatus(accessibilityWindowInfo, type);
     }
 }
 
