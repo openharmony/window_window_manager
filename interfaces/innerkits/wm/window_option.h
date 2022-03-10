@@ -43,6 +43,7 @@ public:
     void SetWindowFlags(uint32_t flags);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
     void SetHitOffset(int32_t x, int32_t y);
+    void SetWindowTag(WindowTag windowTag);
 
     Rect GetWindowRect() const;
     WindowType GetWindowType() const;
@@ -57,6 +58,7 @@ public:
     uint32_t GetWindowFlags() const;
     const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
     const PointInfo& GetHitOffset() const;
+    WindowTag GetWindowTag() const;
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -70,6 +72,7 @@ private:
     std::string windowName_ { "" };
     uint32_t flags_ { 0 };
     PointInfo hitOffset_ { 0, 0 };
+    WindowTag windowTag_;
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },

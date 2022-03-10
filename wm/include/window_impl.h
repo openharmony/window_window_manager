@@ -93,8 +93,8 @@ public:
     WMError Create(const std::string& parentName,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy() override;
-    virtual WMError Show() override;
-    virtual WMError Hide() override;
+    virtual WMError Show(uint32_t reason = 0) override;
+    virtual WMError Hide(uint32_t reason = 0) override;
     virtual WMError MoveTo(int32_t x, int32_t y) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
 
@@ -210,6 +210,7 @@ private:
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appFloatingWindowMap_;
     sptr<WindowProperty> property_;
     WindowState state_ { WindowState::STATE_INITIAL };
+    WindowTag windowTag_;
     std::vector<sptr<IWindowLifeCycle>> lifecycleListeners_;
     std::vector<sptr<IWindowChangeListener>> windowChangeListeners_;
     std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;

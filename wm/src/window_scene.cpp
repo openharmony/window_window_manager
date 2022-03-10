@@ -50,6 +50,7 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
         }
     }
     option->SetDisplayId(displayId);
+    option->SetWindowTag(WindowTag::MAIN_WINDOW);
 
     mainWindow_ = SingletonContainer::Get<StaticCall>().CreateWindow(
         GenerateMainWindowName(context), option, context);
@@ -79,6 +80,7 @@ sptr<Window> WindowScene::CreateWindow(const std::string& windowName, sptr<Windo
         return nullptr;
     }
     option->SetParentName(mainWindow_->GetWindowName());
+    option->SetWindowTag(WindowTag::SUB_WINDOW);
     return SingletonContainer::Get<StaticCall>().CreateWindow(windowName, option, mainWindow_->GetContext());
 }
 
@@ -103,18 +105,7 @@ WMError WindowScene::GoForeground(uint32_t reason)
     if (mainWindow_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto changeReason = static_cast<WindowStateChangeReason>(reason);
-    switch (changeReason) {
-        case WindowStateChangeReason::NORMAL: {
-            return mainWindow_->Show();
-        }
-        case WindowStateChangeReason::KEYGUARD: {
-            return WMError::WM_OK;
-        }
-        default: {
-            return WMError::WM_ERROR_INVALID_PARAM;
-        }
-    }
+    return mainWindow_->Show(reason);
 }
 
 WMError WindowScene::GoBackground(uint32_t reason)
@@ -123,18 +114,7 @@ WMError WindowScene::GoBackground(uint32_t reason)
     if (mainWindow_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto changeReason = static_cast<WindowStateChangeReason>(reason);
-    switch (changeReason) {
-        case WindowStateChangeReason::NORMAL: {
-            return mainWindow_->Hide();
-        }
-        case WindowStateChangeReason::KEYGUARD: {
-            return WMError::WM_OK;
-        }
-        default: {
-            return WMError::WM_ERROR_INVALID_PARAM;
-        }
-    }
+    return mainWindow_->Hide(reason);
 }
 
 WMError WindowScene::GoDestroy()
