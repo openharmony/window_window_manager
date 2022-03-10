@@ -299,9 +299,12 @@ bool DisplayManagerService::SuspendEnd()
 bool DisplayManagerService::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     WLOGFI("SetScreenPowerForAll");
-    return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(
-        state == ScreenPowerState::POWER_ON ? DisplayPowerEvent::DISPLAY_ON :
-        DisplayPowerEvent::DISPLAY_OFF, EventStatus::END);
+    return abstractScreenController_->SetScreenPowerForAll(state, reason);
+}
+
+ScreenPowerState DisplayManagerService::GetScreenPower(ScreenId dmsScreenId)
+{
+    return abstractScreenController_->GetScreenPower(dmsScreenId);
 }
 
 bool DisplayManagerService::SetDisplayState(DisplayState state)

@@ -37,7 +37,10 @@ bool ScreenGroupInfo::Marshalling(Parcel &parcel) const
 
 ScreenGroupInfo* ScreenGroupInfo::Unmarshalling(Parcel &parcel)
 {
-    ScreenGroupInfo* screenGroupInfo = new ScreenGroupInfo();
+    ScreenGroupInfo* screenGroupInfo = new(std::nothrow) ScreenGroupInfo();
+    if (screenGroupInfo == nullptr) {
+        return screenGroupInfo;
+    }
     bool res = screenGroupInfo->InnerUnmarshalling(parcel);
     if (res) {
         return screenGroupInfo;
