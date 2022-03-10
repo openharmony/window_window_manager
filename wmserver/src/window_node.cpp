@@ -97,6 +97,16 @@ void WindowNode::SetAlpha(float alpha)
     surfaceNode_->SetAlpha(alpha);
 }
 
+void WindowNode::SetFocusable(bool focusable)
+{
+    property_->SetFocusable(focusable);
+}
+
+void WindowNode::SetTouchable(bool touchable)
+{
+    property_->SetTouchable(touchable);
+}
+
 void WindowNode::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
 {
     windowSizeChangeReason_ = reason;
