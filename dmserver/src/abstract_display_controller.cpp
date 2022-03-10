@@ -44,7 +44,11 @@ void AbstractDisplayController::Init(sptr<AbstractScreenController> abstractScre
     WLOGFD("display controller init");
     displayCount_ = 0;
     abstractScreenController_ = abstractScreenController;
-    abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback();
+    abstractScreenCallback_ = new(std::nothrow) AbstractScreenController::AbstractScreenCallback();
+    if (abstractScreenCallback_ == nullptr) {
+        WLOGFE("abstractScreenCallback init failed");
+        return;
+    }
     abstractScreenCallback_->onConnect_
         = std::bind(&AbstractDisplayController::OnAbstractScreenConnect, this, std::placeholders::_1);
     abstractScreenCallback_->onDisconnect_

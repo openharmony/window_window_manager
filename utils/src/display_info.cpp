@@ -28,7 +28,10 @@ bool DisplayInfo::Marshalling(Parcel &parcel) const
 
 DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
 {
-    DisplayInfo *displayInfo = new DisplayInfo();
+    DisplayInfo *displayInfo = new(std::nothrow) DisplayInfo();
+    if (displayInfo == nullptr) {
+        return nullptr;
+    }
     uint32_t type = (uint32_t)DisplayType::DEFAULT;
     uint32_t rotation;
     uint32_t orientation;
