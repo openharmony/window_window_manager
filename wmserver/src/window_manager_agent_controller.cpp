@@ -65,7 +65,7 @@ void WindowManagerAgentController::UpdateSystemBarRegionTints(DisplayId displayI
     }
 }
 
-void WindowManagerAgentController::UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type)
+void WindowManagerAgentController::UpdateWindowStatus(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type)
 {
     WLOGFI("UpdateWindowStatus");
     for (auto& agent : wmAgentContainer_.GetAgentsByType(

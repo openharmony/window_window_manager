@@ -36,7 +36,7 @@ void WindowManagerAgent::UpdateSystemBarRegionTints(DisplayId displayId, const S
     SingletonContainer::Get<WindowManager>().UpdateSystemBarRegionTints(displayId, tints);
 }
 
-void WindowManagerAgent::UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type)
+void WindowManagerAgent::UpdateWindowStatus(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type)
 {
     SingletonContainer::Get<WindowManager>().UpdateWindowStatus(windowInfo, type);
 }
