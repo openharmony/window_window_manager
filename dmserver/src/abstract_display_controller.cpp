@@ -54,15 +54,6 @@ void AbstractDisplayController::Init(sptr<AbstractScreenController> abstractScre
         std::placeholders::_2);
     abstractScreenController_->ScreenConnectionInDisplayInit(abstractScreenCallback_);
     abstractScreenController->RegisterAbstractScreenCallback(abstractScreenCallback_);
-
-    // Active the code after "rsDisplayNode_->SetScreenId(rsScreenId)" is provided.
-    /*std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (dummyDisplay_ == nullptr) {
-        sptr<AbstractDisplay> display = new AbstractDisplay(this, displayCount_.fetch_add(1), SCREEN_ID_INVALID,
-            AbstractDisplay::DEFAULT_WIDTH, AbstractDisplay::DEFAULT_HIGHT, AbstractDisplay::DEFAULT_FRESH_RATE);
-        abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
-        dummyDisplay_ = display;
-    }*/
 }
 
 ScreenId AbstractDisplayController::GetDefaultScreenId()
