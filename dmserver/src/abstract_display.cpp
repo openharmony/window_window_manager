@@ -158,7 +158,10 @@ ScreenId AbstractDisplay::GetAbstractScreenId() const
 
 sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
 {
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
+    if (displayInfo == nullptr) {
+        return displayInfo;
+    }
     displayInfo->width_ = width_;
     displayInfo->height_ = height_;
     displayInfo->id_ = id_;

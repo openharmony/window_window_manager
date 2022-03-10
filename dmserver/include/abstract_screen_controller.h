@@ -45,14 +45,14 @@ public:
 
     void Init();
     void ScreenConnectionInDisplayInit(sptr<AbstractScreenCallback> abstractScreenCallback);
-    std::vector<ScreenId> GetAllScreenIds();
+    std::vector<ScreenId> GetAllScreenIds() const;
     sptr<AbstractScreen> GetAbstractScreen(ScreenId dmsScreenId) const;
     std::vector<ScreenId> GetShotScreenIds(std::vector<ScreenId>) const;
     std::vector<ScreenId> GetAllExpandOrMirrorScreenIds(std::vector<ScreenId>) const;
     sptr<AbstractScreenGroup> GetAbstractScreenGroup(ScreenId dmsScreenId);
     ScreenId GetDefaultAbstractScreenId();
-    ScreenId ConvertToRsScreenId(ScreenId dmsScreenId);
-    ScreenId ConvertToDmsScreenId(ScreenId rsScreenId);
+    ScreenId ConvertToRsScreenId(ScreenId dmsScreenId) const;
+    ScreenId ConvertToDmsScreenId(ScreenId rsScreenId) const;
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
     ScreenId CreateVirtualScreen(VirtualScreenOption option);
     DMError DestroyVirtualScreen(ScreenId screenId);
@@ -66,6 +66,8 @@ public:
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
     void DumpScreenInfo() const;
+    bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) const;
+    ScreenPowerState GetScreenPower(ScreenId dmsScreenId) const;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);
