@@ -58,6 +58,7 @@ public:
     bool SuspendBegin(PowerStateChangeReason reason) override;
     bool SuspendEnd() override;
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
+    ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
     bool SetDisplayState(DisplayState state) override;
     std::vector<DisplayId> GetAllDisplayIds() override;
     DisplayState GetDisplayState(DisplayId displayId) override;

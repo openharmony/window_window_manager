@@ -74,6 +74,7 @@ public:
     bool SuspendBegin(PowerStateChangeReason reason) override;
     bool SuspendEnd() override;
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
+    ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
     bool SetDisplayState(DisplayState state) override;
     void UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
 

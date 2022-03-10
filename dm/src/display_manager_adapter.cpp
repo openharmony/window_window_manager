@@ -130,6 +130,12 @@ bool ScreenManagerAdapter::SetScreenPowerForAll(ScreenPowerState state, PowerSta
     return displayManagerServiceProxy_->SetScreenPowerForAll(state, reason);
 }
 
+ScreenPowerState ScreenManagerAdapter::GetScreenPower(ScreenId dmsScreenId)
+{
+    INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
+    return displayManagerServiceProxy_->GetScreenPower(dmsScreenId);
+}
+
 bool ScreenManagerAdapter::SetOrientation(ScreenId screenId, Orientation orientation)
 {
     INIT_PROXY_CHECK_RETURN(false);
