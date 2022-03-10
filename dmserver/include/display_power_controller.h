@@ -20,13 +20,18 @@
 #include <mutex>
 #include <refbase.h>
 #include "display.h"
+#include "display_change_listener.h"
 #include "dm_common.h"
 
 namespace OHOS {
 namespace Rosen {
 class DisplayPowerController : public RefBase {
+using DisplayStateChangeListener = std::function<void(DisplayId, DisplayStateChangeType)>;
 public:
-    DisplayPowerController(std::recursive_mutex& mutex) : mutex_(mutex) {}
+    DisplayPowerController(std::recursive_mutex& mutex, DisplayStateChangeListener listener)
+        : mutex_(mutex), displayStateChangeListener_(listener)
+    {
+    }
     virtual ~DisplayPowerController() = default;
 
     bool SuspendBegin(PowerStateChangeReason reason);
@@ -38,6 +43,7 @@ private:
     DisplayState displayState_ { DisplayState::UNKNOWN };
     bool isKeyguardDrawn_ { false };
     std::recursive_mutex& mutex_;
+    DisplayStateChangeListener displayStateChangeListener_;
 };
 }
 }
