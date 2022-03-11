@@ -37,7 +37,7 @@ private:
     std::vector<MMI::PhysicalDisplayInfo> physicalDisplays_;
     std::vector<MMI::LogicalDisplayInfo> logicalDisplays_;
     std::unordered_set<WindowType> windowTypeSkipped_ { WindowType::WINDOW_TYPE_POINTER,
-        WindowType::WINDOW_TYPE_DRAGGING_EFFECT };
+        WindowType::WINDOW_TYPE_DRAGGING_EFFECT, WindowType::WINDOW_TYPE_FREEZE_DISPLAY};
     const int INVALID_WINDOW_ID = -1;
     void TraverseWindowNodes(const std::vector<sptr<WindowNode>>& windowNodes,
                               std::vector<MMI::LogicalDisplayInfo>::iterator& iter);
