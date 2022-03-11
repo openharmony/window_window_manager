@@ -23,6 +23,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowStub"};
+    const uint32_t MAX_AVOID_NUM = 4;
 }
 
 int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -51,9 +52,24 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         case TRANS_ID_UPDATE_AVOID_AREA: {
             std::vector<Rect> avoidArea;
             uint32_t len = data.ReadUint32();
+            if (len != MAX_AVOID_NUM) {
+                WLOGFE("Read len fail. AvoidArea size != 4");
+                return -1;
+            }
+            avoidArea.resize(len);
+            if (avoidArea.size() < len) {
+                WLOGE("Fail to resize avoidArea.");
+                return -1;
+            }
+
+            bool readVectorRes = true;
             for (uint32_t i = 0; i < len; ++i) {
-                Rect rect { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
-                avoidArea.push_back(rect);
+                readVectorRes = data.ReadInt32(avoidArea[i].posX_) && data.ReadInt32(avoidArea[i].posY_) &&
+                    data.ReadUint32(avoidArea[i].width_) && data.ReadUint32(avoidArea[i].height_);
+                if (!readVectorRes) {
+                    WLOGE("Fail to ReadInt32. index:%{public}u, nums:%{public}u", i, len);
+                    return -1;
+                }
             }
             UpdateAvoidArea(avoidArea);
             break;
