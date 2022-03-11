@@ -191,9 +191,9 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             WindowDumpType type = static_cast<WindowDumpType>(data.ReadUint32());
             WMError errCode = DumpWindowTree(windowTreeInfos, type);
             reply.WriteInt32(static_cast<int32_t>(errCode));
-            int32_t infoSize = windowTreeInfos.size();
+            int32_t infoSize = static_cast<int32_t>(windowTreeInfos.size());
             reply.WriteInt32(infoSize);
-            for (int i = 0; i < infoSize; i++) {
+            for (int32_t i = 0; i < infoSize; i++) {
                 reply.WriteString16(Str8ToStr16(windowTreeInfos[i]));
             }
             break;

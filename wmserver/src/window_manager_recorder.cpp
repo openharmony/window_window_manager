@@ -41,7 +41,7 @@ void WindowManagerRecorder::Clear()
 void WindowManagerRecorder::AddNodeRecord(WindowManagerRecordInfo record)
 {
     std::string historyRecord;
-    int32_t number = records_.size();
+    size_t number = records_.size();
     historyRecord += "\nNo." + std::to_string(number) + "\t[WINDOW-RECORD]\n";
     char systime[TIME_LENGTH];
     if (strftime(systime, sizeof(char) * TIME_LENGTH, "%Y/%m/%d %H:%M:%S %p", &record.recordTime) != 0) {
@@ -105,7 +105,7 @@ void WindowManagerRecorder::AddTreeRecord(const std::vector<sptr<WindowNode>> &w
     std::ostringstream item;
     std::string horizontalLines(RECORD_NAMES.size() * DATA_LENGTH + 2, '-'); // 2 is left and right edge
 
-    int32_t number = records_.size();
+    size_t number = records_.size();
     treeInfo += "\nNo." + std::to_string(number) + "\t[TREE]\n";
 
     treeInfo += (horizontalLines + "\n");
