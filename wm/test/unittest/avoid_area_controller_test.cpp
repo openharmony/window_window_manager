@@ -337,76 +337,6 @@ HWTEST_F(AvoidAreaControllerTest, UpdateAvoidAreaNode03, Function | SmallTest | 
 }
 
 /**
- * @tc.name: GetAvoidArea01
- * @tc.desc: GetAvoidArea
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, GetAvoidArea01, Function | SmallTest | Level2)
-{
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    std::vector<Rect> avoidArea = avoidAreaController->GetAvoidArea();
-    ASSERT_EQ(4u, static_cast<uint32_t>(avoidArea.size()));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[LEFT]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[TOP]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[RIGHT]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[BOTTOM]));
-}
-
-/**
- * @tc.name: GetAvoidArea02
- * @tc.desc: Add a new node. And GetAvoidArea
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, GetAvoidArea02, Function | SmallTest | Level2)
-{
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    sptr<WindowNode> node = new WindowNode();
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(100u);
-    property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node->SetWindowProperty(property);
-    node->SetLayoutRect(topAvoidRect_);
-    ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_ADD));
-
-    std::vector<Rect> avoidArea = avoidAreaController->GetAvoidArea();
-    ASSERT_EQ(4u, static_cast<uint32_t>(avoidArea.size()));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[LEFT]));
-    ASSERT_TRUE(RectEqualToRect(topAvoidRect_, avoidArea[TOP]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[RIGHT]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[BOTTOM]));
-}
-
-/**
- * @tc.name: GetAvoidArea03
- * @tc.desc: Add a new node. Update this node. And GetAvoidArea
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, GetAvoidArea03, Function | SmallTest | Level2)
-{
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    sptr<WindowNode> node = new WindowNode();
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(100u);
-    property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node->SetWindowProperty(property);
-    node->SetLayoutRect(topAvoidRect_);
-    ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_ADD));
-
-    node->SetLayoutRect(leftAvoidRect_);
-    ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_UPDATE));
-
-    std::vector<Rect> avoidArea = avoidAreaController->GetAvoidArea();
-    ASSERT_EQ(4u, static_cast<uint32_t>(avoidArea.size()));
-    ASSERT_TRUE(RectEqualToRect(leftAvoidRect_, avoidArea[LEFT]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[TOP]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[RIGHT]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[BOTTOM]));
-}
-
-/**
  * @tc.name: GetAvoidAreaByType01
  * @tc.desc: Search a unexist AvoidAreaType. And GetAvoidAreaByType
  * @tc.type: FUNC
@@ -419,32 +349,6 @@ HWTEST_F(AvoidAreaControllerTest, GetAvoidAreaByType01, Function | SmallTest | L
     ASSERT_EQ(4u, static_cast<uint32_t>(avoidArea.size()));
     ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[LEFT]));
     ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[TOP]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[RIGHT]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[BOTTOM]));
-}
-
-/**
- * @tc.name: GetAvoidAreaByType02
- * @tc.desc: Add a new node. And GetAvoidAreaByType
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, GetAvoidAreaByType02, Function | SmallTest | Level2)
-{
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    sptr<WindowNode> node = new WindowNode();
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(100u);
-    property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node->SetWindowProperty(property);
-    node->SetLayoutRect(topAvoidRect_);
-    ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_ADD));
-
-    std::vector<Rect> avoidArea = avoidAreaController->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM);
-
-    ASSERT_EQ(4u, static_cast<uint32_t>(avoidArea.size()));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[LEFT]));
-    ASSERT_TRUE(RectEqualToRect(topAvoidRect_, avoidArea[TOP]));
     ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[RIGHT]));
     ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[BOTTOM]));
 }
