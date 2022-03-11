@@ -59,7 +59,7 @@ public:
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
-    void NotifyDisplayChange(sptr<AbstractDisplay> abstractDisplay);
+    void NotifyDisplayChange(sptr<DisplayInfo> abstractDisplay);
     void NotifyDisplayDestroy(DisplayId displayId);
     void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
@@ -74,7 +74,7 @@ private:
     void UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node,
         const sptr<WindowNodeContainer>& container) const;
     std::string GenAllWindowsLogInfo() const;
-    bool CheckDisplayInfo(const sptr<AbstractDisplay>& display);
+    bool CheckDisplayInfo(const sptr<DisplayInfo>& display);
 
     std::recursive_mutex& mutex_;
     std::map<int32_t, sptr<WindowNodeContainer>> windowNodeContainerMap_;
