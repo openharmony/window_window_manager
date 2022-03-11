@@ -561,6 +561,7 @@ HWTEST_F(WindowImplTest, Maximize01, Function | SmallTest | Level3)
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     window->Show();
+    EXPECT_CALL(m->Mock(), MaxmizeWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Maximize();
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
     EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -607,6 +608,7 @@ HWTEST_F(WindowImplTest, Recover01, Function | SmallTest | Level3)
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->Show();
+    EXPECT_CALL(m->Mock(), SetWindowMode(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Recover();
     ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetMode());
     EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
