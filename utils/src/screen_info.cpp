@@ -71,7 +71,10 @@ bool ScreenInfo::InnerUnmarshalling(Parcel& parcel)
     }
     modes_.clear();
     for (uint32_t modeIndex = 0; modeIndex < size; modeIndex++) {
-        sptr<SupportedScreenModes> mode = new SupportedScreenModes();
+        sptr<SupportedScreenModes> mode = new(std::nothrow) SupportedScreenModes();
+        if (mode == nullptr) {
+            return false;
+        }
         if (parcel.ReadUint32(mode->height_) &&
             parcel.ReadUint32(mode->width_) &&
             parcel.ReadUint32(mode->refreshRate_)) {
