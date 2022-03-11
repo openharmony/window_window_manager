@@ -49,8 +49,8 @@ AvoidPosType AvoidAreaController::GetAvoidPosType(const Rect& rect) const
         WLOGFE("GetAvoidPosType fail. Get display fail. displayId:%{public}" PRIu64"", displayId_);
         return AvoidPosType::AVOID_POS_UNKNOWN;
     }
-    uint32_t displayWidth = display->GetWidth();
-    uint32_t displayHeight = display->GetHeight();
+    uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(display->GetHeight());
 
     return WindowHelper::GetAvoidPosType(rect, displayWidth, displayHeight);
 }
