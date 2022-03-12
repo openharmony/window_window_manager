@@ -22,7 +22,8 @@
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractDisplay"};
-    constexpr int32_t LARGE_SCREEN_WIDTH = 2160;
+    constexpr int32_t PAD_SCREEN_WIDTH = 2560;
+    constexpr int32_t PHONE_SCREEN_WIDTH = 2160;
 }
 
 AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t refreshRate)
@@ -32,10 +33,14 @@ AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width,
       height_(height),
       refreshRate_(refreshRate)
 {
-    if ((width_ >= LARGE_SCREEN_WIDTH) || (height_ >= LARGE_SCREEN_WIDTH)) {
-        virtualPixelRatio_ = 2.0f;
+    if ((width_ >= PHONE_SCREEN_WIDTH) || (height_ >= PHONE_SCREEN_WIDTH)) {
+        if ((width_ == PAD_SCREEN_WIDTH) || (height_ == PAD_SCREEN_WIDTH)) {
+            virtualPixelRatio_ = 2.0f; // Pad is 2.0
+        } else {
+            virtualPixelRatio_ = 3.0f; // Phone is 3.0
+        }
     } else {
-        virtualPixelRatio_ = 1.0f;
+        virtualPixelRatio_ = 1.0f; // Other is 1.0
     }
 }
 
