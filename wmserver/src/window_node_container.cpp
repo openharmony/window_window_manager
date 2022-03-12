@@ -490,15 +490,21 @@ void WindowNodeContainer::NotifyIfSystemBarRegionChanged()
 void WindowNodeContainer::NotifySystemBarDismiss(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
+    if (node == nullptr) {
+        WLOGE("could not find window");
+        return;
+    }
     SystemBarRegionTints tints;
     auto& sysBarPropMapNode = node->GetSystemBarProperty();
     for (auto it : sysBarPropMapNode) {
+        it.second.enable_ = false;
+        node->SetSystemBarProperty(it.first, it.second);
+        WLOGFI("set system bar enable to false, id: %{public}u, type: %{public}d",
+            node->GetWindowId(), static_cast<int32_t>(it.first));
         if (sysBarTintMap_[it.first].prop_.enable_) {
             sysBarTintMap_[it.first].prop_.enable_ = false;
-            it.second.enable_ = false;
-            node->SetSystemBarProperty(it.first, it.second);
             tints.emplace_back(sysBarTintMap_[it.first]);
-            WLOGFI("system bar dismiss, type: %{public}d", static_cast<int32_t>(it.first));
+            WLOGFI("notify system bar dismiss, type: %{public}d", static_cast<int32_t>(it.first));
         }
     }
     WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId_, tints);
