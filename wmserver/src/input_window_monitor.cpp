@@ -66,7 +66,7 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
     });
     if (iter != logicalDisplays_.end()) {
         TraverseWindowNodes(windowNodes, iter);
-        if (!iter->windowsInfo_.empty()) {
+        if (!iter->windowsInfo.empty()) {
             iter->focusWindowId = static_cast<int32_t>(container->GetFocusWindow());
         }
     } else {
@@ -119,7 +119,7 @@ void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& con
         .seatId = "seat0",
         .seatName = "default0",
         .focusWindowId = INVALID_WINDOW_ID,
-        .windowsInfo_ = {},
+        .windowsInfo = {},
     };
     auto logicalDisplayIter = std::find_if(logicalDisplays_.begin(), logicalDisplays_.end(),
                                            [&logicalDisplayInfo](MMI::LogicalDisplayInfo& logicalDisplay) {
@@ -135,7 +135,7 @@ void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& con
 void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>> &windowNodes,
                                              std::vector<MMI::LogicalDisplayInfo>::iterator& iter)
 {
-    iter->windowsInfo_.clear();
+    iter->windowsInfo.clear();
     for (auto& windowNode: windowNodes) {
         if (windowTypeSkipped_.find(windowNode->GetWindowProperty()->GetWindowType()) != windowTypeSkipped_.end()) {
             WLOGFI("window has been skipped. [id: %{public}d, type: %{public}d]", windowNode->GetWindowId(),
@@ -157,7 +157,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
             .displayId = static_cast<int32_t>(windowNode->GetDisplayId()),
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };
-        iter->windowsInfo_.emplace_back(windowInfo);
+        iter->windowsInfo.emplace_back(windowInfo);
     }
 }
 
