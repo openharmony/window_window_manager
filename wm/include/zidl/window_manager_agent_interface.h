@@ -45,7 +45,8 @@ public:
         DisplayId displayId, bool focused) = 0;
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
     virtual void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) = 0;
-    virtual void UpdateWindowStatus(const sptr<WindowInfo>& windowInfo, WindowUpdateType type) = 0;
+    virtual void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
+        WindowUpdateType type) = 0;
     virtual void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) = 0;
 };
 } // namespace Rosen

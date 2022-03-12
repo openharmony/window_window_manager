@@ -142,7 +142,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     RecordWindowHistory(node, RecordType::ADD_WINDOW);
-    UpdateWindowStatus(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
+    NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     WLOGFI("AddWindowNode windowId: %{public}d end", node->GetWindowId());
     return WMError::WM_OK;
 }
@@ -297,7 +297,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     RecordWindowHistory(node, RecordType::REMOVE_WINDOW);
-    UpdateWindowStatus(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+    NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     WLOGFI("RemoveWindowNode windowId: %{public}d end", node->GetWindowId());
     return WMError::WM_OK;
 }
@@ -392,7 +392,7 @@ WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
     UpdateFocusStatus(focusedWindow_, false);
     focusedWindow_ = windowId;
     sptr<WindowNode> node = FindWindowNodeById(windowId);
-    UpdateWindowStatus(node, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
+    NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
     UpdateFocusStatus(focusedWindow_, true);
     return WMError::WM_OK;
 }
@@ -579,7 +579,7 @@ void WindowNodeContainer::RaiseWindowToTop(uint32_t windowId, std::vector<sptr<W
     }
 }
 
-void WindowNodeContainer::UpdateWindowStatus(const sptr<WindowNode>& node, WindowUpdateType type) const
+void WindowNodeContainer::NotifyAccessibilityWindowInfo(const sptr<WindowNode>& node, WindowUpdateType type) const
 {
     if (node == nullptr) {
         WLOGFE("window node is null");
@@ -604,13 +604,33 @@ void WindowNodeContainer::UpdateWindowStatus(const sptr<WindowNode>& node, Windo
             break;
     }
     if (isNeedNotify) {
+        std::vector<sptr<WindowInfo>> windowList;
+        GetWindowList(windowList);
         sptr<WindowInfo> windowInfo = new WindowInfo();
         windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
         windowInfo->windowRect_ = node->GetLayoutRect();
         windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
         windowInfo->mode_ = node->GetWindowMode();
         windowInfo->type_ = node->GetWindowType();
-        WindowManagerAgentController::GetInstance().UpdateWindowStatus(windowInfo, type);
+        sptr<AccessibilityWindowInfo> accessibilityWindowInfo = new AccessibilityWindowInfo();
+        accessibilityWindowInfo->currentWindowInfo_ = windowInfo;
+        accessibilityWindowInfo->windowList_ = windowList;
+        WindowManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(accessibilityWindowInfo, type);
+    }
+}
+
+void WindowNodeContainer::GetWindowList(std::vector<sptr<WindowInfo>>& windowList) const
+{
+    std::vector<sptr<WindowNode>> windowNodes;
+    TraverseContainer(windowNodes);
+    for (auto node : windowNodes) {
+        sptr<WindowInfo> windowInfo = new WindowInfo();
+        windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
+        windowInfo->windowRect_ = node->GetLayoutRect();
+        windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
+        windowInfo->mode_ = node->GetWindowMode();
+        windowInfo->type_ = node->GetWindowType();
+        windowList.emplace_back(windowInfo);
     }
 }
 
