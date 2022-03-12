@@ -62,7 +62,9 @@ public:
     virtual WindowBlurLevel GetWindowBackgroundBlur() const override;
     virtual float GetAlpha() const override;
     virtual bool GetShowState() const override;
+    virtual void SetFocusable(bool isFocusable) override;
     virtual bool GetFocusable() const override;
+    virtual void SetTouchable(bool isTouchable) override;
     virtual bool GetTouchable() const override;
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() const override;
@@ -194,6 +196,7 @@ private:
     bool IsPointerEventConsumed();
     void AdjustWindowAnimationFlag();
     void MapFloatingWindowToAppIfNeeded();
+    WMError UpdateProperty(PropertyChangeAction action);
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;

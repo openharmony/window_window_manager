@@ -70,32 +70,11 @@ WMError WindowAdapter::DestroyWindow(uint32_t windowId)
     return windowManagerServiceProxy_->DestroyWindow(windowId);
 }
 
-WMError WindowAdapter::ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
-    return windowManagerServiceProxy_->ResizeRect(windowId, rect, reason);
-}
-
 WMError WindowAdapter::RequestFocus(uint32_t windowId)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
     return windowManagerServiceProxy_->RequestFocus(windowId);
-}
-
-WMError WindowAdapter::SetWindowFlags(uint32_t windowId, uint32_t flags)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
-    return windowManagerServiceProxy_->SetWindowFlags(windowId, flags);
-}
-
-WMError WindowAdapter::SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
-    return windowManagerServiceProxy_->SetSystemBarProperty(windowId, type, property);
 }
 
 void WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -120,13 +99,6 @@ WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type,
 
     avoidRect = windowManagerServiceProxy_->GetAvoidAreaByType(windowId, type);
     return WMError::WM_OK;
-}
-
-WMError WindowAdapter::SetWindowMode(uint32_t windowId, WindowMode mode)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
-    return windowManagerServiceProxy_->SetWindowMode(windowId, mode);
 }
 
 WMError WindowAdapter::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level)
@@ -237,6 +209,12 @@ WMError WindowAdapter::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
     return windowManagerServiceProxy_->SetWindowLayoutMode(displayId, mode);
+}
+
+WMError WindowAdapter::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->UpdateProperty(windowProperty, action);
 }
 
 WMError WindowAdapter::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)

@@ -32,23 +32,17 @@ public:
     WMError AddWindow(sptr<WindowProperty>& property) override;
     WMError RemoveWindow(uint32_t windowId) override;
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override;
-    WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason) override;
     WMError RequestFocus(uint32_t windowId) override;
     WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId) override;
-    WMError SetWindowMode(uint32_t windowId, WindowMode mode) override;
-
     WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) override;
     WMError SetAlpha(uint32_t windowId, float alpha) override;
-
-    WMError SetWindowType(uint32_t windowId, WindowType type) override;
-    WMError SetWindowFlags(uint32_t windowId, uint32_t flags) override;
-    WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) override;
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void ProcessWindowTouchedEvent(uint32_t windowId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
     WMError MaxmizeWindow(uint32_t windowId) override;
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) override;
+    WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) override;
 
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
