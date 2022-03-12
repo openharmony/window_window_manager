@@ -60,6 +60,11 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         return;
     }
     if (inputListener_ != nullptr) {
+        int32_t action = pointerEvent->GetPointerAction();
+        if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+            window_->ConsumePointerEvent(pointerEvent);
+        }
         inputListener_->OnInputEvent(pointerEvent);
         return;
     }
