@@ -162,33 +162,12 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
     return windowController_->DestroyWindow(windowId, onlySelf);
 }
 
-WMError WindowManagerService::ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason)
-{
-    WLOGFI("[WMS] ResizeRect windowId: %{public}u, reason: %{public}u, resizeRect: "
-           "[%{public}d, %{public}d, %{public}u, %{public}u]",
-           windowId, reason, rect.posX_, rect.posY_, rect.width_, rect.height_);
-    WM_SCOPED_TRACE("wms:ResizeRect");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WMError res = windowController_->ResizeRect(windowId, rect, reason);
-    if (res == WMError::WM_OK && reason == WindowSizeChangeReason::MOVE) {
-        dragController_->UpdateDragInfo(windowId);
-    }
-    return res;
-}
-
 WMError WindowManagerService::RequestFocus(uint32_t windowId)
 {
     WLOGFI("[WMS] RequestFocus: %{public}u", windowId);
     WM_SCOPED_TRACE("wms:RequestFocus");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->RequestFocus(windowId);
-}
-
-WMError WindowManagerService::SetWindowMode(uint32_t windowId, WindowMode mode)
-{
-    WM_SCOPED_TRACE("wms:SetWindowMode");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->SetWindowMode(windowId, mode);
 }
 
 WMError WindowManagerService::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level)
@@ -203,27 +182,6 @@ WMError WindowManagerService::SetAlpha(uint32_t windowId, float alpha)
     WM_SCOPED_TRACE("wms:SetAlpha");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->SetAlpha(windowId, alpha);
-}
-
-WMError WindowManagerService::SetWindowType(uint32_t windowId, WindowType type)
-{
-    WM_SCOPED_TRACE("wms:SetWindowType");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->SetWindowType(windowId, type);
-}
-
-WMError WindowManagerService::SetWindowFlags(uint32_t windowId, uint32_t flags)
-{
-    WM_SCOPED_TRACE("wms:SetWindowFlags");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->SetWindowFlags(windowId, flags);
-}
-
-WMError WindowManagerService::SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop)
-{
-    WM_SCOPED_TRACE("wms:SetSystemBarProperty");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->SetSystemBarProperty(windowId, type, prop);
 }
 
 WMError WindowManagerService::SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId)
@@ -322,6 +280,22 @@ WMError WindowManagerService::SetWindowLayoutMode(DisplayId displayId, WindowLay
     WM_SCOPED_TRACE("wms:SetWindowLayoutMode");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->SetWindowLayoutMode(displayId, mode);
+}
+
+WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action)
+{
+    if (windowProperty == nullptr) {
+        WLOGFE("property is invalid");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WM_SCOPED_TRACE("wms:UpdateProperty");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    WMError res = windowController_->UpdateProperty(windowProperty, action);
+    if (action == PropertyChangeAction::ACTION_UPDATE_RECT && res == WMError::WM_OK &&
+        windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
+        dragController_->UpdateDragInfo(windowProperty->GetWindowId());
+    }
+    return res;
 }
 
 WMError WindowManagerService::DumpWindowTree(std::vector<std::string> &windowTreeInfo, WindowDumpType type)

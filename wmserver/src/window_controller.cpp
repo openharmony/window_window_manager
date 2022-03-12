@@ -40,8 +40,9 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     windowId = GenWindowId();
-    property->SetWindowId(windowId);
-    sptr<WindowNode> node = new WindowNode(property, window, surfaceNode);
+    sptr<WindowProperty> windowProperty = new WindowProperty(property);
+    windowProperty->SetWindowId(windowId);
+    sptr<WindowNode> node = new WindowNode(windowProperty, window, surfaceNode);
     UpdateWindowAnimation(node);
     return windowRoot_->SaveWindow(node);
 }
@@ -64,7 +65,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    node->SetWindowProperty(property);
+    node->GetWindowProperty()->CopyFrom(property);
 
     // Need 'check permission'
     // Need 'adjust property'
@@ -469,6 +470,52 @@ WMError WindowController::SetWindowLayoutMode(DisplayId displayId, WindowLayoutM
     }
     FlushWindowInfoWithDisplayId(displayId);
     return res;
+}
+
+WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, PropertyChangeAction action)
+{
+    if (property == nullptr) {
+        WLOGFE("property is invalid");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uint32_t windowId = property->GetWindowId();
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("window is invalid");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    switch (action) {
+        case PropertyChangeAction::ACTION_UPDATE_RECT: {
+            ResizeRect(windowId, property->GetWindowRect(), property->GetWindowSizeChangeReason());
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_MODE: {
+            SetWindowMode(windowId, property->GetWindowMode());
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_FLAGS: {
+            SetWindowFlags(windowId, property->GetWindowFlags());
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
+            auto& props = property->GetSystemBarProperty();
+            for (auto& iter : props) {
+                SetSystemBarProperty(windowId, iter.first, iter.second);
+            }
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
+            node->SetFocusable(property->GetFocusable());
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
+            node->SetTouchable(property->GetTouchable());
+            break;
+        }
+        default:
+            break;
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowController::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)

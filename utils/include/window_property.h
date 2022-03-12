@@ -27,7 +27,10 @@ namespace Rosen {
 class WindowProperty : public Parcelable {
 public:
     WindowProperty() = default;
+    WindowProperty(const sptr<WindowProperty>& property);
     ~WindowProperty() = default;
+
+    void CopyFrom(const sptr<WindowProperty>& property);
 
     void SetWindowName(const std::string& name);
     void SetWindowRect(const struct Rect& rect);
@@ -50,6 +53,8 @@ public:
     void SetDecorEnable(bool decorEnable);
     void SetHitOffset(const PointInfo& offset);
     void SetAnimationFlag(uint32_t animationFlag);
+    void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
+    WindowSizeChangeReason GetWindowSizeChangeReason() const;
 
     const std::string& GetWindowName() const;
     Rect GetWindowRect() const;
@@ -75,6 +80,9 @@ public:
     virtual bool Marshalling(Parcel& parcel) const override;
     static sptr<WindowProperty> Unmarshalling(Parcel& parcel);
 private:
+    bool MapMarshalling(Parcel& parcel) const;
+    static void MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& property);
+
     std::string windowName_;
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -93,14 +101,12 @@ private:
     uint32_t parentId_ { 0 };
     PointInfo hitOffset_ { 0, 0 };
     uint32_t animationFlag_ { static_cast<uint32_t>(WindowAnimation::DEFAULT) };
-
+    WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
     bool isDecorEnable_ { false };
-    bool MapMarshalling(Parcel& parcel) const;
-    static void MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& property);
 };
 }
 }
