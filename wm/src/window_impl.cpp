@@ -384,24 +384,24 @@ std::string WindowImpl::GetContentInfo()
     return uiContent_->GetContentInfo();
 }
 
-ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(SurfaceColorGamut surfaceColorGamut)
+ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(ColorGamut ColorGamut)
 {
     for (auto item: colorSpaceConvertMap) {
-        if (item.sufaceColorGamut == surfaceColorGamut) {
+        if (item.sufaceColorGamut == ColorGamut) {
             return item.colorSpace;
         }
     }
     return ColorSpace::COLOR_SPACE_DEFAULT;
 }
 
-SurfaceColorGamut WindowImpl::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
+ColorGamut WindowImpl::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
 {
     for (auto item: colorSpaceConvertMap) {
         if (item.colorSpace == colorSpace) {
             return item.sufaceColorGamut;
         }
     }
-    return SurfaceColorGamut::COLOR_GAMUT_SRGB;
+    return ColorGamut::COLOR_GAMUT_SRGB;
 }
 
 bool WindowImpl::IsSupportWideGamut()
