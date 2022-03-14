@@ -22,6 +22,7 @@
 #include <i_input_event_consumer.h>
 #include <key_event.h>
 #include <refbase.h>
+#include <running_lock.h>
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
 
@@ -99,6 +100,8 @@ public:
     virtual WMError Hide(uint32_t reason = 0) override;
     virtual WMError MoveTo(int32_t x, int32_t y) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
+    virtual void SetKeepScreenOn(bool keepScreenOn) override;
+    virtual bool GetKeepScreenOn() const override;
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;
@@ -197,6 +200,8 @@ private:
     void AdjustWindowAnimationFlag();
     void MapFloatingWindowToAppIfNeeded();
     WMError UpdateProperty(PropertyChangeAction action);
+    void HandleKeepScreenOn(bool keepScreenOn);
+
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;
@@ -237,6 +242,8 @@ private:
     bool pointEventStarted_ = false;
     Rect startPointRect_ = { 0, 0, 0, 0 };
     Rect startRectExceptFrame_ = { 0, 0, 0, 0 };
+    bool keepScreenOn_ = false;
+    std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 };
 }
 }
