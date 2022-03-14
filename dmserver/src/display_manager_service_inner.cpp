@@ -16,13 +16,8 @@
 #include "display_manager_service_inner.h"
 
 #include <cinttypes>
-#include <unistd.h>
-
-#include <ipc_skeleton.h>
 #include <iservice_registry.h>
-#include <system_ability_definition.h>
 
-#include "abstract_display_controller.h"
 #include "display_manager_service.h"
 #include "window_manager_hilog.h"
 
@@ -32,43 +27,43 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerServiceInner)
 
-DisplayId DisplayManagerServiceInner::GetDefaultDisplayId()
+DisplayId DisplayManagerServiceInner::GetDefaultDisplayId() const
 {
     return DisplayManagerService::GetInstance().GetDefaultDisplayId();
 }
 
-const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDisplayById(DisplayId displayId)
+sptr<DisplayInfo> DisplayManagerServiceInner::GetDisplayById(DisplayId displayId) const
 {
-    sptr<AbstractDisplay> display = DisplayManagerService::GetInstance().GetAbstractDisplay(displayId);
+    sptr<DisplayInfo> display = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
     if (display == nullptr) {
         WLOGFE("GetDisplayById can not find corresponding display!\n");
     }
     return display;
 }
 
-const sptr<AbstractDisplay> DisplayManagerServiceInner::GetDefaultDisplay()
+sptr<DisplayInfo> DisplayManagerServiceInner::GetDefaultDisplay() const
 {
     DisplayId defaultDisplayId = GetDefaultDisplayId();
     if (defaultDisplayId == DISPLAY_ID_INVALID) {
         WLOGFE("Fail to get default displayId");
         return nullptr;
     }
-    return GetDisplayById(GetDefaultDisplayId());
+    return DisplayManagerService::GetInstance().GetDisplayInfoById(defaultDisplayId);
 }
 
-std::vector<DisplayId> DisplayManagerServiceInner::GetAllDisplayIds()
+std::vector<DisplayId> DisplayManagerServiceInner::GetAllDisplayIds() const
 {
     return DisplayManagerService::GetInstance().GetAllDisplayIds();
 }
 
-std::vector<const sptr<AbstractDisplay>> DisplayManagerServiceInner::GetAllDisplays()
+std::vector<sptr<DisplayInfo>> DisplayManagerServiceInner::GetAllDisplays() const
 {
-    std::vector<const sptr<AbstractDisplay>> res;
+    std::vector<sptr<DisplayInfo>> res;
     auto displayIds = GetAllDisplayIds();
     for (auto displayId: displayIds) {
-        const sptr<AbstractDisplay> display = GetDisplayById(displayId);
+        sptr<DisplayInfo> display = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
         if (display != nullptr) {
-            res.push_back(display);
+            res.emplace_back(display);
         } else {
             WLOGFE("GetAllDisplays display %" PRIu64" nullptr!", displayId);
         }
@@ -87,32 +82,35 @@ ScreenId DisplayManagerServiceInner::GetRSScreenId(DisplayId displayId) const
     return DisplayManagerService::GetInstance().GetRSScreenId(displayId);
 }
 
-const sptr<ScreenInfo> DisplayManagerServiceInner::GetScreenInfoByDisplayId(DisplayId displayId) const
+sptr<ScreenInfo> DisplayManagerServiceInner::GetScreenInfoByDisplayId(DisplayId displayId) const
 {
-    return DisplayManagerService::GetInstance().GetScreenInfoById(
-        DisplayManagerService::GetInstance().GetScreenIdByDisplayId(displayId));
-}
-
-const sptr<SupportedScreenModes> DisplayManagerServiceInner::GetScreenModesByDisplayId(DisplayId displayId)
-{
-    const sptr<AbstractDisplay> display = GetDisplayById(displayId);
-    if (display == nullptr) {
+    auto displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
+    if (displayInfo == nullptr) {
         WLOGFE("can not get display.");
         return nullptr;
     }
-    ScreenId dmsScreenId = display->GetAbstractScreenId();
-    sptr<AbstractScreen> abstractScreen =
-        DisplayManagerService::GetInstance().abstractScreenController_->GetAbstractScreen(dmsScreenId);
-    if (abstractScreen == nullptr) {
+    return DisplayManagerService::GetInstance().GetScreenInfoById(displayInfo->GetScreenId());
+}
+
+sptr<SupportedScreenModes> DisplayManagerServiceInner::GetScreenModesByDisplayId(DisplayId displayId) const
+{
+    const sptr<ScreenInfo> screenInfo = GetScreenInfoByDisplayId(displayId);
+    if (screenInfo == nullptr) {
+        WLOGFE("can not get display.");
+        return nullptr;
+    }
+    auto modes = screenInfo->GetModes();
+    auto id = screenInfo->GetModeId();
+    if (id >= modes.size()) {
         WLOGFE("can not get screenMode.");
         return nullptr;
     }
-    return abstractScreen->GetActiveScreenMode();
+    return modes[id];
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManagerServiceInner::GetDisplaySnapshot(DisplayId displayId)
+std::shared_ptr<Media::PixelMap> DisplayManagerServiceInner::GetDisplaySnapshot(DisplayId displayId) const
 {
-    return DisplayManagerService::GetInstance().abstractDisplayController_->GetScreenSnapshot(displayId);
+    return DisplayManagerService::GetInstance().GetDisplaySnapshot(displayId);
 }
 
 void DisplayManagerServiceInner::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)

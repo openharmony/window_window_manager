@@ -22,18 +22,7 @@
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractDisplay"};
-}
-
-AbstractDisplay::AbstractDisplay(const DisplayInfo* info)
-{
-    if (info == nullptr) {
-        WLOGFE("DisplayInfo is nullptr");
-        return;
-    }
-    id_ = info->GetDisplayId();
-    width_ = info->GetWidth();
-    height_ = info->GetHeight();
-    refreshRate_ = info->GetRefreshRate();
+    constexpr int32_t LARGE_SCREEN_WIDTH = 2160;
 }
 
 AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t refreshRate)
@@ -43,6 +32,11 @@ AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width,
       height_(height),
       refreshRate_(refreshRate)
 {
+    if ((width_ >= LARGE_SCREEN_WIDTH) || (height_ >= LARGE_SCREEN_WIDTH)) {
+        virtualPixelRatio_ = 2.0f;
+    } else {
+        virtualPixelRatio_ = 1.0f;
+    }
 }
 
 DisplayId AbstractDisplay::GetId() const
@@ -129,13 +123,6 @@ FreezeFlag AbstractDisplay::GetFreezeFlag() const
     return freezeFlag_;
 }
 
-bool AbstractDisplay::BindAbstractScreen(ScreenId dmsScreenId)
-{
-    sptr<AbstractScreenController> screenController
-        = DisplayManagerService::GetInstance().GetAbstractScreenController();
-    return BindAbstractScreen(screenController->GetAbstractScreen(dmsScreenId));
-}
-
 bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
 {
     if (abstractScreen == nullptr) {
@@ -164,12 +151,16 @@ ScreenId AbstractDisplay::GetAbstractScreenId() const
 
 sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
 {
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
+    if (displayInfo == nullptr) {
+        return displayInfo;
+    }
     displayInfo->width_ = width_;
     displayInfo->height_ = height_;
     displayInfo->id_ = id_;
     displayInfo->refreshRate_ = refreshRate_;
     displayInfo->screenId_ = screenId_;
+    displayInfo->virtualPixelRatio_ = virtualPixelRatio_;
     displayInfo->rotation_ = rotation_;
     displayInfo->orientation_ = orientation_;
     return displayInfo;

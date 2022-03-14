@@ -21,7 +21,7 @@ bool DisplayInfo::Marshalling(Parcel &parcel) const
     return parcel.WriteUint64(id_) && parcel.WriteUint32(type_) &&
         parcel.WriteInt32(width_) && parcel.WriteInt32(height_) &&
         parcel.WriteUint32(freshRate_) && parcel.WriteUint32(refreshRate_) && parcel.WriteUint64(screenId_) &&
-        parcel.WriteFloat(xDpi_) && parcel.WriteFloat(yDpi_) &&
+        parcel.WriteFloat(virtualPixelRatio_) && parcel.WriteFloat(xDpi_) && parcel.WriteFloat(yDpi_) &&
         parcel.WriteUint32(static_cast<uint32_t>(rotation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(orientation_));
 }
@@ -36,6 +36,7 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadInt32(displayInfo->width_) && parcel.ReadInt32(displayInfo->height_) &&
         parcel.ReadUint32(displayInfo->freshRate_) &&
         parcel.ReadUint32(displayInfo->refreshRate_) && parcel.ReadUint64(displayInfo->screenId_) &&
+        parcel.ReadFloat(displayInfo->virtualPixelRatio_) &&
         parcel.ReadFloat(displayInfo->xDpi_) && parcel.ReadFloat(displayInfo->yDpi_) &&
         parcel.ReadUint32(rotation) && parcel.ReadUint32(orientation);
     if (!res) {

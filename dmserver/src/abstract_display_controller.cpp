@@ -29,8 +29,8 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractDisplayController"};
 }
 
-AbstractDisplayController::AbstractDisplayController(std::recursive_mutex& mutex)
-    : mutex_(mutex), rsInterface_(RSInterfaces::GetInstance())
+AbstractDisplayController::AbstractDisplayController(std::recursive_mutex& mutex, DisplayStateChangeListener listener)
+    : mutex_(mutex), rsInterface_(RSInterfaces::GetInstance()), displayStateChangeListener_(listener)
 {
 }
 
@@ -54,15 +54,6 @@ void AbstractDisplayController::Init(sptr<AbstractScreenController> abstractScre
         std::placeholders::_2);
     abstractScreenController_->ScreenConnectionInDisplayInit(abstractScreenCallback_);
     abstractScreenController->RegisterAbstractScreenCallback(abstractScreenCallback_);
-
-    // Active the code after "rsDisplayNode_->SetScreenId(rsScreenId)" is provided.
-    /*std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (dummyDisplay_ == nullptr) {
-        sptr<AbstractDisplay> display = new AbstractDisplay(this, displayCount_.fetch_add(1), SCREEN_ID_INVALID,
-            AbstractDisplay::DEFAULT_WIDTH, AbstractDisplay::DEFAULT_HIGHT, AbstractDisplay::DEFAULT_FRESH_RATE);
-        abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
-        dummyDisplay_ = display;
-    }*/
 }
 
 ScreenId AbstractDisplayController::GetDefaultScreenId()
@@ -190,8 +181,7 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
             DisplayManagerAgentController::GetInstance().OnDisplayDestroy(absDisplayId);
         }
     } else if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
-        DisplayManagerService::GetInstance().NotifyDisplayStateChange(
-            absDisplayId, DisplayStateChangeType::DESTROY);
+        displayStateChangeListener_(absDisplayId, DisplayStateChangeType::DESTROY);
         DisplayManagerAgentController::GetInstance().OnDisplayDestroy(absDisplayId);
         abstractDisplayMap_.erase(absDisplayId);
     } else {
@@ -288,8 +278,7 @@ void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScr
     abstractDisplay->SetOrientation(absScreen->orientation_);
     if (abstractDisplay->RequestRotation(absScreen->rotation_)) {
         // Notify rotation event to WMS
-        DisplayManagerService::GetInstance().NotifyDisplayStateChange(abstractDisplay->GetId(),
-            DisplayStateChangeType::UPDATE_ROTATION);
+        displayStateChangeListener_(abstractDisplay->GetId(), DisplayStateChangeType::UPDATE_ROTATION);
     }
     // Notify orientation event to DisplayManager
     sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
@@ -323,8 +312,7 @@ void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> ab
     WLOGFI("Size of matchedDisplays %{public}zu", matchedDisplays.size());
     for (auto iter = matchedDisplays.begin(); iter != matchedDisplays.end(); ++iter) {
         WLOGFI("Notify display size change. Id %{public}" PRIu64"", iter->first);
-        DisplayManagerService::GetInstance().NotifyDisplayStateChange(
-            iter->first, DisplayStateChangeType::SIZE_CHANGE);
+        displayStateChangeListener_(iter->first, DisplayStateChangeType::SIZE_CHANGE);
         DisplayManagerAgentController::GetInstance().OnDisplayChange(
             iter->second->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     }
@@ -368,7 +356,7 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
             WLOGI("bind display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, dummyDisplay_->GetId());
             bool updateFlag = dummyDisplay_->GetHeight() == info->height_ && dummyDisplay_->GetWidth() == info->width_;
-            dummyDisplay_->BindAbstractScreen(realAbsScreen->dmsId_);
+            dummyDisplay_->BindAbstractScreen(abstractScreenController_->GetAbstractScreen(realAbsScreen->dmsId_));
             if (updateFlag) {
                 DisplayManagerAgentController::GetInstance().OnDisplayCreate(dummyDisplay_->ConvertToDisplayInfo());
             }
@@ -459,7 +447,7 @@ void AbstractDisplayController::SetFreeze(std::vector<DisplayId> displayIds, boo
         }
 
         // Notify freeze event to WMS
-        DisplayManagerService::GetInstance().NotifyDisplayStateChange(displayId, type);
+        displayStateChangeListener_(displayId, type);
         // Notify freeze event to DisplayManager
         sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
         DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo, event);
