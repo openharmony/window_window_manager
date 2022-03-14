@@ -148,6 +148,8 @@ Rect WindowTestUtils::GetLimitedDecoRect(const Rect& rect, float virtualPixelRat
 
 Rect WindowTestUtils::CalcLimitedRect(const Rect& rect, float virtualPixelRatio)
 {
+    uint32_t maxLimitLen = 2560;
+    int maxPosRemain = 48;
     uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
     uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
 
@@ -155,10 +157,11 @@ Rect WindowTestUtils::CalcLimitedRect(const Rect& rect, float virtualPixelRatio)
     uint32_t minFloatingW = vertical ? minVerticalFloatingW : minVerticalFloatingH;
     uint32_t minFloatingH = vertical ? minVerticalFloatingH : minVerticalFloatingW;
     Rect resRect = {
-        rect.posX_,
-        rect.posY_,
-        std::max(minFloatingW, rect.width_),
-        std::max(minFloatingH, rect.height_),
+        std::min(std::max(rect.posX_, maxPosRemain - static_cast<int>(rect.width_)),
+            static_cast<int>(displayRect_.width_) - maxPosRemain),
+        std::min(std::max(rect.posY_, maxPosRemain), static_cast<int>(displayRect_.height_) - maxPosRemain),
+        std::min(std::max(minFloatingW, rect.width_), maxLimitLen),
+        std::min(std::max(minFloatingH, rect.height_), maxLimitLen),
     };
     return resRect;
 }
