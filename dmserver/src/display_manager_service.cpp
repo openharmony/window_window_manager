@@ -481,10 +481,6 @@ ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds
     if (iter != allExpandScreenIds.end()) {
         allExpandScreenIds.erase(iter);
     }
-    for (ScreenId expandScreenId : allExpandScreenIds) {
-        auto expandScreen = abstractScreenController_->GetAbstractScreen(expandScreenId);
-        abstractDisplayController_->AddDisplayForExpandScreen(expandScreen);
-    }
     SetShotScreen(defaultScreenId, shotScreenIds);
     WM_SCOPED_TRACE("dms:MakeExpand");
     if (!allExpandScreenIds.empty() && !abstractScreenController_->MakeExpand(allExpandScreenIds, startPoints)) {
