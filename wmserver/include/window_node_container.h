@@ -91,6 +91,7 @@ private:
     void RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes);
     void MinimizeWindowFromAbility(const sptr<WindowNode>& node, bool fromUser);
     void ResetLayoutPolicy();
+    bool IsAboveSystemBarNode(sptr<WindowNode> node) const;
     bool IsFullImmersiveNode(sptr<WindowNode> node) const;
     bool IsSplitImmersiveNode(sptr<WindowNode> node) const;
     bool TraverseFromTopToBottom(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
