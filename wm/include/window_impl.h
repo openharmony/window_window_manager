@@ -160,6 +160,14 @@ private:
     {
         CALL_LIFECYCLE_LISTENER(AfterUnfocused, UnFocus);
     }
+    inline void NotifyListenerAfterUnfocused() const
+    {
+        for (auto& listener : lifecycleListeners_) {
+            if (listener != nullptr) {
+                listener->AfterUnfocused();
+            }
+        }
+    }
     inline void NotifyBeforeDestroy(std::string windowName) const
     {
         if (uiContent_ != nullptr) {

@@ -1191,6 +1191,17 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
     int32_t action = pointerEvent->GetPointerAction();
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         WLOGI("WMS process point down, windowId: %{public}u, action: %{public}d", GetWindowId(), action);
+        if (GetType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
+            MMI::PointerEvent::PointerItem pointerItem;
+            if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+                WLOGFW("Point item is invalid");
+                return;
+            }
+            if (!WindowHelper::IsPointInTargetRect(pointerItem.GetGlobalX(), pointerItem.GetGlobalY(), GetRect())) {
+                NotifyListenerAfterUnfocused();
+                return;
+            }
+        }
         SingletonContainer::Get<WindowAdapter>().ProcessWindowTouchedEvent(property_->GetWindowId());
     }
     if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ||
@@ -1371,6 +1382,7 @@ void WindowImpl::SetDefaultOption()
         }
         case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetFocusable(false);
             break;
         }
         case WindowType::WINDOW_TYPE_BOOT_ANIMATION:
