@@ -419,11 +419,11 @@ NativeValue* JsWindowManager::OnUnregisterWindowManagerCallback(NativeEngine& en
     return engine.CreateUndefined();
 }
 
-static void GetTopWindowTask(void* contextPtr, bool isNewApi, NativeEngine& engine, AsyncTask& task)
+static void GetTopWindowTask(void* contextPtr, bool isOldApi, NativeEngine& engine, AsyncTask& task)
 {
     std::string windowName;
     sptr<Window> window = nullptr;
-    if (!isNewApi) {
+    if (isOldApi) {
         AppExecFwk::Ability* ability = nullptr;
         if (!GetAPI7Ability(engine, ability)) {
             task.Reject(engine, CreateJsError(engine,
@@ -454,7 +454,7 @@ static void GetTopWindowTask(void* contextPtr, bool isNewApi, NativeEngine& engi
     if (jsWindowObj != nullptr && jsWindowObj->Get() != nullptr) {
         task.Resolve(engine, jsWindowObj->Get());
     } else {
-        task.Resolve(engine, CreateJsWindowObject(engine, window, isNewApi));
+        task.Resolve(engine, CreateJsWindowObject(engine, window, isOldApi));
     }
     WLOGFI("JsWindowManager::OnGetTopWindow success");
     return;
@@ -467,18 +467,18 @@ NativeValue* JsWindowManager::OnGetTopWindow(NativeEngine& engine, NativeCallbac
     NativeValue* nativeContext = nullptr;
     NativeValue* nativeCallback = nullptr;
     void* contextPtr = nullptr;
-    bool isNewApi = true;
+    bool isOldApi = false;
     if (info.argc > 2) { // 2: maximum params num
         WLOGFE("param not match!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     } else {
         if (info.argc > 0 && info.argv[0]->TypeOf() == NATIVE_OBJECT) { // (context, callback?)
-            isNewApi = true;
+            isOldApi = false;
             nativeContext = info.argv[0];
             nativeCallback = (info.argc == 1) ? nullptr :
                 (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
         } else { // (callback?)
-            isNewApi = false;
+            isOldApi = true;
             nativeCallback = (info.argc == 0) ? nullptr :
                 (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
         }
@@ -491,7 +491,7 @@ NativeValue* JsWindowManager::OnGetTopWindow(NativeEngine& engine, NativeCallbac
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            return GetTopWindowTask(contextPtr, isNewApi, engine, task);
+            return GetTopWindowTask(contextPtr, isOldApi, engine, task);
         };
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
