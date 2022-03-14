@@ -19,7 +19,6 @@
 #include <vector>
 #include <mutex>
 #include <pixel_map.h>
-#include <surface.h>
 
 #include "display.h"
 #include "dm_common.h"

@@ -200,11 +200,11 @@ private:
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;
-        SurfaceColorGamut sufaceColorGamut;
+        ColorGamut sufaceColorGamut;
     };
     static const ColorSpaceConvertMap colorSpaceConvertMap[];
-    static ColorSpace GetColorSpaceFromSurfaceGamut(SurfaceColorGamut surfaceColorGamut);
-    static SurfaceColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
+    static ColorSpace GetColorSpaceFromSurfaceGamut(ColorGamut ColorGamut);
+    static ColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
 
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
         std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
