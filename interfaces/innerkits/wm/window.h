@@ -130,6 +130,8 @@ public:
 
     virtual WMError MoveTo(int32_t x, int32_t y) = 0;
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
+    virtual void SetKeepScreenOn(bool keepScreenOn) = 0;
+    virtual bool GetKeepScreenOn() const = 0;
 
     virtual WMError RequestFocus() const = 0;
     // AddInputEventListener is for api 7
