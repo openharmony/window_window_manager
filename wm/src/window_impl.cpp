@@ -17,6 +17,9 @@
 
 #include <cmath>
 
+#include <ability_manager_client.h>
+#include <power_mgr_client.h>
+
 #include "display_manager.h"
 #include "singleton_container.h"
 #include "window_adapter.h"
@@ -25,8 +28,6 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
-
-#include <ability_manager_client.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -59,6 +60,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetHitOffset(option->GetHitOffset());
     windowTag_ = option->GetWindowTag();
+    keepScreenOn_ = option->GetKeepScreenOn();
     AdjustWindowAnimationFlag();
     auto& sysBarPropMap = option->GetSystemBarProperty();
     for (auto it : sysBarPropMap) {
@@ -540,6 +542,27 @@ WMError WindowImpl::UpdateProperty(PropertyChangeAction action)
     return SingletonContainer::Get<WindowAdapter>().UpdateProperty(property_, action);
 }
 
+void WindowImpl::HandleKeepScreenOn(bool keepScreenOn)
+{
+    if (keepScreenOn && keepScreenLock_ == nullptr) {
+        keepScreenLock_ = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(name_,
+            PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);
+    }
+    if (keepScreenLock_ == nullptr) {
+        return;
+    }
+    WLOGFI("handle keep screen on: operation: %{public}d", keepScreenOn);
+    ErrCode res;
+    if (keepScreenOn) {
+        res = keepScreenLock_->Lock();
+    } else {
+        res = keepScreenLock_->UnLock();
+    }
+    if (res != ERR_OK) {
+        WLOGFE("handle keep screen running lock failed: [operation: %{public}d, err: %{public}d]", keepScreenOn, res);
+    }
+}
+
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGFI("[Client] Window Create");
@@ -667,6 +690,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
     windowMap_.erase(GetWindowName());
     DestroySubWindow();
     DestroyFloatingWindow();
+    HandleKeepScreenOn(false);
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
@@ -707,6 +731,7 @@ WMError WindowImpl::Show(uint32_t reason)
     if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
+        HandleKeepScreenOn(keepScreenOn_);
     } else {
         WLOGFE("show errCode:%{public}d for winId:%{public}d", static_cast<int32_t>(ret), property_->GetWindowId());
     }
@@ -736,6 +761,7 @@ WMError WindowImpl::Hide(uint32_t reason)
     }
     state_ = WindowState::STATE_HIDDEN;
     NotifyAfterBackground();
+    HandleKeepScreenOn(false);
     return ret;
 }
 
@@ -776,6 +802,19 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
     property_->SetWindowRect(resizeRect);
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
+}
+
+void WindowImpl::SetKeepScreenOn(bool keepScreenOn)
+{
+    keepScreenOn_ = keepScreenOn;
+    if (state_ == WindowState::STATE_SHOWN) {
+        HandleKeepScreenOn(keepScreenOn);
+    }
+}
+
+bool WindowImpl::GetKeepScreenOn() const
+{
+    return keepScreenOn_;
 }
 
 WMError WindowImpl::Drag(const Rect& rect)
@@ -1363,6 +1402,7 @@ void WindowImpl::UpdateWindowState(WindowState state)
                 state_ = WindowState::STATE_FROZEN;
                 NotifyAfterBackground();
             }
+            HandleKeepScreenOn(false);
             break;
         }
         case WindowState::STATE_UNFROZEN: {
@@ -1374,6 +1414,7 @@ void WindowImpl::UpdateWindowState(WindowState state)
                 state_ = WindowState::STATE_SHOWN;
                 NotifyAfterForeground();
             }
+            HandleKeepScreenOn(keepScreenOn_);
             break;
         }
         default: {

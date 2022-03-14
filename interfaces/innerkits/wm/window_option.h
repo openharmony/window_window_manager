@@ -44,6 +44,8 @@ public:
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
     void SetHitOffset(int32_t x, int32_t y);
     void SetWindowTag(WindowTag windowTag);
+    void SetKeepScreenOn(bool keepScreenOn);
+    bool GetKeepScreenOn() const;
 
     Rect GetWindowRect() const;
     WindowType GetWindowType() const;
@@ -73,6 +75,7 @@ private:
     uint32_t flags_ { 0 };
     PointInfo hitOffset_ { 0, 0 };
     WindowTag windowTag_;
+    bool keepScreenOn_ = false;
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
