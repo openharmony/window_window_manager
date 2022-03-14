@@ -44,6 +44,7 @@ public:
         TRANS_ID_SUSPEND_BEGIN,
         TRANS_ID_SUSPEND_END,
         TRANS_ID_SET_SCREEN_POWER_FOR_ALL,
+        TRANS_ID_GET_SCREEN_POWER,
         TRANS_ID_SET_DISPLAY_STATE,
         TRANS_ID_GET_DISPLAY_STATE,
         TRANS_ID_GET_ALL_DISPLAYIDS,
@@ -98,6 +99,7 @@ public:
     virtual bool SuspendBegin(PowerStateChangeReason reason) = 0;
     virtual bool SuspendEnd() = 0;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) = 0;
+    virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) = 0;
     virtual bool SetDisplayState(DisplayState state) = 0;
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
     virtual std::vector<DisplayId> GetAllDisplayIds() = 0;

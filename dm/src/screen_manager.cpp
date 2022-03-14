@@ -411,68 +411,12 @@ DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> 
 bool ScreenManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     WLOGFI("state:%{public}u, reason:%{public}u", state, reason);
-    auto screenInfos = SingletonContainer::Get<ScreenManagerAdapter>().GetAllScreenInfos();
-    if (screenInfos.empty()) {
-        WLOGFI("no screen info");
-        return false;
-    }
-
-    ScreenPowerStatus status;
-    switch (state) {
-        case ScreenPowerState::POWER_ON: {
-            status = ScreenPowerStatus::POWER_STATUS_ON;
-            break;
-        }
-        case ScreenPowerState::POWER_OFF: {
-            status = ScreenPowerStatus::POWER_STATUS_OFF;
-            break;
-        }
-        default: {
-            WLOGFW("SetScreenPowerStatus state not support");
-            return false;
-        }
-    }
-
-    bool hasSetScreenPower = false;
-    for (sptr<ScreenInfo> screenInfo : screenInfos) {
-        if (screenInfo->GetType() != ScreenType::REAL) {
-            WLOGD("skip virtual screen %{public}" PRIu64"", screenInfo->GetScreenId());
-            continue;
-        }
-        RSInterfaces::GetInstance().SetScreenPowerStatus(screenInfo->GetRsScreenId(), status);
-        WLOGI("set screen power status. rsscreen %{public}" PRIu64", status %{public}u",
-            screenInfo->GetRsScreenId(), status);
-        hasSetScreenPower = true;
-    }
-    WLOGFI("SetScreenPowerStatus end");
-    if (!hasSetScreenPower) {
-        WLOGFI("no real screen");
-        return false;
-    }
     return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenPowerForAll(state, reason);
 }
 
 ScreenPowerState ScreenManager::GetScreenPower(ScreenId dmsScreenId)
 {
-    auto screenInfos = SingletonContainer::Get<ScreenManagerAdapter>().GetAllScreenInfos();
-    if (screenInfos.empty()) {
-        WLOGFE("no screen info");
-        return ScreenPowerState::INVALID_STATE;
-    }
-    ScreenId rsId = SCREEN_ID_INVALID;
-    for (sptr<ScreenInfo> screenInfo : screenInfos) {
-        if (screenInfo->GetScreenId() == dmsScreenId) {
-            rsId = screenInfo->GetRsScreenId();
-            break;
-        }
-    }
-    if (rsId == SCREEN_ID_INVALID) {
-        WLOGFE("cannot find screen %{public}" PRIu64"", dmsScreenId);
-        return ScreenPowerState::INVALID_STATE;
-    }
-    ScreenPowerState state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(rsId));
-    WLOGFI("GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, rsId);
-    return state;
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenPower(dmsScreenId);
 }
 
 void ScreenManager::Impl::NotifyScreenConnect(sptr<ScreenInfo> info)

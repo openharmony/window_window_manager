@@ -287,8 +287,8 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
 
 void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type)
 {
-    const sptr<AbstractDisplay> abstractDisplay = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
-    if (abstractDisplay == nullptr) {
+    const sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+    if (displayInfo == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRId64 "", displayId);
         return;
     }
@@ -296,14 +296,14 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
     switch (type) {
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION: {
-            windowRoot_->NotifyDisplayChange(abstractDisplay);
+            windowRoot_->NotifyDisplayChange(displayInfo);
 
             // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
-            uint32_t width = static_cast<uint32_t>(abstractDisplay->GetWidth());
-            uint32_t height = static_cast<uint32_t>(abstractDisplay->GetHeight() * SYSTEM_BAR_HEIGHT_RATIO);
+            uint32_t width = static_cast<uint32_t>(displayInfo->GetWidth());
+            uint32_t height = static_cast<uint32_t>(displayInfo->GetHeight() * SYSTEM_BAR_HEIGHT_RATIO);
             Rect newRect = { 0, 0, width, height };
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
-            newRect = { 0, abstractDisplay->GetHeight() - height, width, height };
+            newRect = { 0, displayInfo->GetHeight() - height, width, height };
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
             break;
         }

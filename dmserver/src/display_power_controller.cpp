@@ -27,8 +27,7 @@ namespace {
 bool DisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 {
     WLOGFI("reason:%{public}u", reason);
-    DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALID,
-        DisplayStateChangeType::BEFORE_SUSPEND);
+    displayStateChangeListener_(DISPLAY_ID_INVALID, DisplayStateChangeType::BEFORE_SUSPEND);
     return true;
 }
 
@@ -51,8 +50,7 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
                 isKeyguardDrawn = isKeyguardDrawn_;
             }
             if (!isKeyguardDrawn) {
-                DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALID,
-                    DisplayStateChangeType::BEFORE_UNLOCK);
+                displayStateChangeListener_(DISPLAY_ID_INVALID, DisplayStateChangeType::BEFORE_UNLOCK);
             }
             DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_ON,
                 EventStatus::BEGIN);
@@ -85,8 +83,7 @@ void DisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
 {
     WLOGFI("DisplayEvent:%{public}u", event);
     if (event == DisplayEvent::UNLOCK) {
-        DisplayManagerService::GetInstance().NotifyDisplayStateChange(DISPLAY_ID_INVALID,
-            DisplayStateChangeType::BEFORE_UNLOCK);
+        displayStateChangeListener_(DISPLAY_ID_INVALID, DisplayStateChangeType::BEFORE_UNLOCK);
         DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::DESKTOP_READY,
             EventStatus::BEGIN);
         std::lock_guard<std::recursive_mutex> lock(mutex_);
