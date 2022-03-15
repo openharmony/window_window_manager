@@ -142,7 +142,6 @@ public:
     void UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId);
-    WMError DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type);
 
 private:
     WindowManager();
