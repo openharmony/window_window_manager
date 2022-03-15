@@ -47,7 +47,6 @@ public:
         TRANS_ID_SET_APLPHA,
         TRANS_ID_UPDATE_LAYOUT_MODE,
         TRANS_ID_MAXMIZE_WINDOW,
-        TRANS_ID_DUMP_WINDOW_TREE,
         TRANS_ID_UPDATE_PROPERTY,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
@@ -70,7 +69,6 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
-    virtual WMError DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type) = 0;
 };
 }
 }

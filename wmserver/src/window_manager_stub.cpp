@@ -15,7 +15,6 @@
 
 #include "window_manager_stub.h"
 #include <ipc_skeleton.h>
-#include "string_ex.h"
 #include "window_manager_hilog.h"
 
 
@@ -154,18 +153,6 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             PropertyChangeAction action = static_cast<PropertyChangeAction>(data.ReadUint32());
             WMError errCode = UpdateProperty(windowProperty, action);
             reply.WriteInt32(static_cast<int32_t>(errCode));
-            break;
-        }
-        case TRANS_ID_DUMP_WINDOW_TREE: {
-            std::vector<std::string> windowTreeInfos;
-            WindowDumpType type = static_cast<WindowDumpType>(data.ReadUint32());
-            WMError errCode = DumpWindowTree(windowTreeInfos, type);
-            reply.WriteInt32(static_cast<int32_t>(errCode));
-            int32_t infoSize = static_cast<int32_t>(windowTreeInfos.size());
-            reply.WriteInt32(infoSize);
-            for (int32_t i = 0; i < infoSize; i++) {
-                reply.WriteString16(Str8ToStr16(windowTreeInfos[i]));
-            }
             break;
         }
         default:
