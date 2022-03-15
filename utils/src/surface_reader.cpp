@@ -139,7 +139,7 @@ bool SurfaceReader::ProcessBuffer(const sptr<SurfaceBuffer> &buf)
     ImageInfo info;
     info.size.width = static_cast<int32_t>(width);
     info.size.height = static_cast<int32_t>(height);
-    info.pixelFormat = PixelFormat::RGBA_8888;
+    info.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     info.colorSpace = ColorSpace::SRGB;
     pixelMap->SetImageInfo(info);
 
