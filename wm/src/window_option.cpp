@@ -182,6 +182,16 @@ const std::unordered_map<WindowType, SystemBarProperty>& WindowOption::GetSystem
 {
     return sysBarPropMap_;
 }
+
+void WindowOption::SetKeepScreenOn(bool keepScreenOn)
+{
+    keepScreenOn_ = keepScreenOn;
+}
+
+bool WindowOption::GetKeepScreenOn() const
+{
+    return keepScreenOn_;
+}
 } // namespace Rosen
 } // namespace OHOS
 
