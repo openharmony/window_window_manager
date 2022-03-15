@@ -34,7 +34,6 @@ public:
         TRANS_ID_REMOVE_WINDOW,
         TRANS_ID_DESTROY_WINDOW,
         TRANS_ID_REQUEST_FOCUS,
-        TRANS_ID_SEND_ABILITY_TOKEN,
         TRANS_ID_REGISTER_FOCUS_CHANGED_LISTENER,
         TRANS_ID_UNREGISTER_FOCUS_CHANGED_LISTENER,
         TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT,
@@ -50,14 +49,14 @@ public:
         TRANS_ID_UPDATE_PROPERTY,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId)  = 0;
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        uint32_t& windowId, sptr<IRemoteObject> token) = 0;
     virtual WMError AddWindow(sptr<WindowProperty>& property) = 0;
     virtual WMError RemoveWindow(uint32_t windowId) = 0;
     virtual WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) = 0;
     virtual WMError RequestFocus(uint32_t windowId) = 0;
     virtual WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) = 0;
     virtual WMError SetAlpha(uint32_t windowId, float alpha) = 0;
-    virtual WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId) = 0;
     virtual std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
     virtual void ProcessWindowTouchedEvent(uint32_t windowId) = 0;

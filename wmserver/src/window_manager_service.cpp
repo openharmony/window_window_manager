@@ -110,7 +110,7 @@ void WindowManagerService::OnStop()
 }
 
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token)
 {
     WM_SCOPED_TRACE("wms:CreateWindow(%u)", windowId);
     if (window == nullptr || property == nullptr || surfaceNode == nullptr) {
@@ -122,7 +122,7 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
         return WMError::WM_ERROR_NULLPTR;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->CreateWindow(window, property, surfaceNode, windowId);
+    return windowController_->CreateWindow(window, property, surfaceNode, windowId, token);
 }
 
 WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
@@ -182,13 +182,6 @@ WMError WindowManagerService::SetAlpha(uint32_t windowId, float alpha)
     WM_SCOPED_TRACE("wms:SetAlpha");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->SetAlpha(windowId, alpha);
-}
-
-WMError WindowManagerService::SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId)
-{
-    WLOGFI("[WMS] SaveAbilityToken: %{public}u", windowId);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->SaveAbilityToken(abilityToken, windowId);
 }
 
 std::vector<Rect> WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
