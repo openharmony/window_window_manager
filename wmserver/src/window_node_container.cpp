@@ -21,7 +21,6 @@
 #include <ctime>
 
 #include "common_event_manager.h"
-#include "datetime_ex.h"
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
 #include "window_helper.h"
@@ -61,7 +60,6 @@ WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, ui
     layoutPolicy_->Launch();
     UpdateAvoidAreaFunc func = std::bind(&WindowNodeContainer::OnAvoidAreaChange, this, std::placeholders::_1);
     avoidController_ = new AvoidAreaController(displayId, func);
-    wmRecorderPtr_ = new WindowManagerRecorder();
 }
 
 WindowNodeContainer::~WindowNodeContainer()
@@ -141,7 +139,6 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     std::vector<sptr<WindowVisibilityInfo>> infos;
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
-    RecordWindowHistory(node, RecordType::ADD_WINDOW);
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     WLOGFI("AddWindowNode windowId: %{public}d end", node->GetWindowId());
     return WMError::WM_OK;
@@ -164,7 +161,6 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
         NotifyIfSystemBarTintChanged();
     }
     DumpScreenWindowTree();
-    RecordWindowHistory(node, RecordType::UPDATE_WINDOW);
     WLOGFI("UpdateWindowNode windowId: %{public}d end", node->GetWindowId());
     return WMError::WM_OK;
 }
@@ -296,7 +292,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     }
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
-    RecordWindowHistory(node, RecordType::REMOVE_WINDOW);
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     WLOGFI("RemoveWindowNode windowId: %{public}d end", node->GetWindowId());
     return WMError::WM_OK;
@@ -856,7 +851,6 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
     AssignZOrder();
     WLOGFI("RaiseZOrderForAppWindow finished");
     DumpScreenWindowTree();
-    RecordWindowHistory(node, RecordType::RAISE_WINDOW);
     return WMError::WM_OK;
 }
 
@@ -1076,7 +1070,6 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, bool r
         layoutPolicy_ = layoutPolicys_[dstMode];
         layoutPolicy_->Launch();
         DumpScreenWindowTree();
-        RecordWindowHistory(nullptr, RecordType::SWITCH_LAYOUT);
     } else {
         WLOGFI("Current layout mode is already: %{public}d", static_cast<uint32_t>(dstMode));
     }
@@ -1087,7 +1080,6 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, bool r
             SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, displayId_);
         }
         layoutPolicy_->Reorder();
-        RecordWindowHistory(nullptr, RecordType::SWITCH_LAYOUT);
         DumpScreenWindowTree();
     }
     return WMError::WM_OK;
@@ -1256,61 +1248,6 @@ bool WindowNodeContainer::ReadIsWindowAnimationEnabledProperty()
         return false;
     }
     return true;
-}
-
-void WindowNodeContainer::RecordWindowHistory(const sptr<WindowNode>& node, RecordType reason)
-{
-    if (node == nullptr) {
-        RecordCurrentWindowTree();
-        return;
-    }
-    WindowManagerRecordInfo record;
-    record.id = node->GetWindowId();
-    record.name = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
-        node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
-    record.flag = node->GetWindowFlags();
-    record.type = node->GetWindowType();
-    record.mode = node->GetWindowMode();
-    record.reason = reason;
-    record.rect = node->GetLayoutRect();
-    struct tm recordTime = {0};
-    if (GetSystemCurrentTime(&recordTime)) {
-        record.recordTime = recordTime;
-    }
-    wmRecorderPtr_->AddNodeRecord(record);
-    if (reason != RecordType::OTHERS) {
-        // record window tree
-        RecordCurrentWindowTree();
-    }
-}
-
-void WindowNodeContainer::RecordCurrentWindowTree()
-{
-    std::vector<sptr<WindowNode>> windowNodes;
-    TraverseContainer(windowNodes);
-    wmRecorderPtr_->AddTreeRecord(windowNodes);
-}
-
-void WindowNodeContainer::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
-{
-    WLOGFI("DumpWindowTree");
-    switch (type) {
-        case WindowDumpType::ALL : {
-            wmRecorderPtr_->DumpWindowRecord(windowTreeInfos);
-            break;
-        }
-        case WindowDumpType::TREE : {
-            windowTreeInfos = {wmRecorderPtr_->GetCurrentWindowTree()};
-            break;
-        }
-        case WindowDumpType::CLEAR : {
-            wmRecorderPtr_->Clear();
-            break;
-        }
-        default : {
-            break;
-        }
-    }
 }
 } // namespace Rosen
 } // namespace OHOS
