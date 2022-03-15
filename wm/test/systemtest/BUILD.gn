@@ -224,6 +224,7 @@ ohos_static_library("wm_systemtest_common") {
   public_configs = [ ":wm_systemtest_common_public_config" ]
 
   public_deps = [
+    "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
     "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
 
     # need delete it for abilitycontext
