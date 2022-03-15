@@ -56,7 +56,6 @@ ohos_shared_library("libwms") {
     "src/window_layout_policy_cascade.cpp",
     "src/window_layout_policy_tile.cpp",
     "src/window_manager_agent_controller.cpp",
-    "src/window_manager_recorder.cpp",
     "src/window_manager_service.cpp",
     "src/window_manager_stub.cpp",
     "src/window_node.cpp",

@@ -517,10 +517,5 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
     }
     return WMError::WM_OK;
 }
-
-WMError WindowController::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
-{
-    return windowRoot_->DumpWindowTree(windowTreeInfos, type);
-}
 } // namespace OHOS
 } // namespace Rosen
