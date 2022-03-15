@@ -390,6 +390,14 @@ void AbstractDisplayController::AddScreenToMirrorLocked(sptr<AbstractScreen> abs
 
 void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> absScreen)
 {
+    for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
+        sptr<AbstractDisplay> abstractDisplay = iter->second;
+        if (abstractDisplay->GetAbstractScreenId() == absScreen->dmsId_) {
+            WLOGE("error, screenId: %{public}" PRIu64" already has corresponding display",
+                absScreen->dmsId_);
+            return;
+        }
+    }
     WLOGI("bind display to expand. screen:%{public}" PRIu64"", absScreen->dmsId_);
     sptr<SupportedScreenModes> info;
     if (absScreen->type_ == ScreenType::VIRTUAL) {
@@ -416,22 +424,6 @@ void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> abs
         absScreen->dmsId_, display->GetId());
     DisplayManagerAgentController::GetInstance().OnDisplayCreate(display->ConvertToDisplayInfo());
 }
-
-void AbstractDisplayController::AddDisplayForExpandScreen(sptr<AbstractScreen> absScreen)
-{
-    for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
-        sptr<AbstractDisplay> abstractDisplay = iter->second;
-        if (abstractDisplay->GetAbstractScreenId() == absScreen->dmsId_) {
-            WLOGE("error, screenId: %{public}" PRIu64" already has corresponding display",
-                absScreen->dmsId_);
-            return;
-        }
-    }
-    WLOGI("screenId: %{public}" PRIu64" has no corresponding display, create new display.",
-        absScreen->dmsId_);
-    AddScreenToExpandLocked(absScreen);
-}
-
 
 void AbstractDisplayController::SetFreeze(std::vector<DisplayId> displayIds, bool toFreeze)
 {
