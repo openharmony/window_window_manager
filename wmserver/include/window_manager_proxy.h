@@ -54,7 +54,6 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
-    virtual WMError DumpWindowTree(std::vector<std::string>& windowTreeInfos, WindowDumpType type) override;
 
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
