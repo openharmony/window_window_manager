@@ -203,12 +203,6 @@ enum class WindowUpdateType : int32_t {
     WINDOW_UPDATE_BOUNDS,
     WINDOW_UPDATE_ACTIVE,
 };
-
-enum class WindowDumpType : uint32_t {
-    ALL,
-    TREE,
-    CLEAR
-};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

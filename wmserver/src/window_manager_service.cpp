@@ -323,13 +323,5 @@ WMError WindowManagerService::SetWindowLayoutMode(DisplayId displayId, WindowLay
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->SetWindowLayoutMode(displayId, mode);
 }
-
-WMError WindowManagerService::DumpWindowTree(std::vector<std::string> &windowTreeInfo, WindowDumpType type)
-{
-    WM_SCOPED_TRACE("wms:DumpWindowTree");
-    WLOGFI("dump window tree");
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return windowController_->DumpWindowTree(windowTreeInfo, type);
-}
-}
-}
+} // namespace Rosen
+} // namespace OHOS

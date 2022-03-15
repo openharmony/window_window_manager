@@ -74,7 +74,6 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
-    WMError DumpWindowTree(std::vector<std::string> &windowTreeInfo, WindowDumpType type) override;
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;

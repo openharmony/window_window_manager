@@ -238,11 +238,5 @@ WMError WindowAdapter::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode
 
     return windowManagerServiceProxy_->SetWindowLayoutMode(displayId, mode);
 }
-
-WMError WindowAdapter::DumpWindowTree(std::vector<std::string> &windowTreeInfos, WindowDumpType type)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    return windowManagerServiceProxy_->DumpWindowTree(windowTreeInfos, type);
-}
 } // namespace Rosen
 } // namespace OHOS
