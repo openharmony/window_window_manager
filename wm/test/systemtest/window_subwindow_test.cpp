@@ -317,7 +317,7 @@ HWTEST_F(WindowSubWindowTest, SubWindow10, Function | MediumTest | Level2)
 
     sptr<Window> mainWindow = scene->GetMainWindow();
     ASSERT_EQ(WMError::WM_OK, mainWindow->Destroy());
-    ASSERT_EQ(WMError::WM_ERROR_DESTROYED_OBJECT, subWindow->Destroy());
+    ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
 
     scene->GoDestroy();
 }

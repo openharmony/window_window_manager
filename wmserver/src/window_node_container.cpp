@@ -402,6 +402,16 @@ uint32_t WindowNodeContainer::GetFocusWindow() const
     return focusedWindow_;
 }
 
+bool WindowNodeContainer::IsAboveSystemBarNode(sptr<WindowNode> node) const
+{
+    int32_t curPriority = zorderPolicy_->GetWindowPriority(node->GetWindowType());
+    if ((curPriority > zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_STATUS_BAR)) &&
+        (curPriority > zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_NAVIGATION_BAR))) {
+        return true;
+    }
+    return false;
+}
+
 bool WindowNodeContainer::IsFullImmersiveNode(sptr<WindowNode> node) const
 {
     auto mode = node->GetWindowMode();
@@ -427,6 +437,9 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
     for (auto& node : rootNodes) {
         for (auto iter = node->children_.rbegin(); iter < node->children_.rend(); ++iter) {
             auto& sysBarPropMapNode = (*iter)->GetSystemBarProperty();
+            if (IsAboveSystemBarNode(*iter)) {
+                continue;
+            }
             if (IsFullImmersiveNode(*iter)) {
                 WLOGFI("Top immersive window id: %{public}d. Use full immersive prop", (*iter)->GetWindowId());
                 for (auto it : sysBarPropMap) {
