@@ -220,6 +220,11 @@ void WindowProperty::SetParentId(uint32_t parentId)
     parentId_ = parentId;
 }
 
+void WindowProperty::SetTokenState(bool hasToken)
+{
+    tokenState_ = hasToken;
+}
+
 uint32_t WindowProperty::GetWindowId() const
 {
     return windowId_;
@@ -238,6 +243,11 @@ const PointInfo& WindowProperty::GetHitOffset() const
 uint32_t WindowProperty::GetAnimationFlag() const
 {
     return animationFlag_;
+}
+
+bool WindowProperty::GetTokenState() const
+{
+    return tokenState_;
 }
 
 bool WindowProperty::MapMarshalling(Parcel& parcel) const
@@ -373,6 +383,11 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
     if (!parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_))) {
         return false;
     }
+
+    // write tokenState
+    if (!parcel.WriteBool(tokenState_)) {
+        return false;
+    }
     return true;
 }
 
@@ -401,6 +416,7 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetHitOffset(offset);
     property->SetAnimationFlag(parcel.ReadUint32());
     property->SetWindowSizeChangeReason(static_cast<WindowSizeChangeReason>(parcel.ReadUint32()));
+    property->SetTokenState(parcel.ReadBool());
     return property;
 }
 
@@ -428,6 +444,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     sysBarPropMap_ = property->sysBarPropMap_;
     isDecorEnable_ = property->isDecorEnable_;
     isDecorEnable_ = property->isDecorEnable_;
+    tokenState_ = property->tokenState_;
 }
 }
 }

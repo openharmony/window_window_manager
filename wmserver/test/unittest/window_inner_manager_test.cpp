@@ -68,7 +68,7 @@ HWTEST_F(WindowInnerManagerTest, InitThread01, Function | SmallTest | Level3)
 HWTEST_F(WindowInnerManagerTest, SendMessage01, Function | SmallTest | Level3)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
     innerManager_.SendMessage(INNER_WM_CREATE_DIVIDER, displayId_);
     sleep(SEND_MSG_SLEEP_S);
     ASSERT_TRUE(innerManager_.GetDividerWindow(displayId_) == nullptr);
@@ -82,7 +82,7 @@ HWTEST_F(WindowInnerManagerTest, SendMessage01, Function | SmallTest | Level3)
 HWTEST_F(WindowInnerManagerTest, SendMessage02, Function | SmallTest | Level3)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     innerManager_.SendMessage(INNER_WM_CREATE_DIVIDER, displayId_);
     sleep(SEND_MSG_SLEEP_S);
@@ -103,7 +103,7 @@ HWTEST_F(WindowInnerManagerTest, SendMessage02, Function | SmallTest | Level3)
 HWTEST_F(WindowInnerManagerTest, SendMessage03, Function | SmallTest | Level3)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     innerManager_.SendMessage(INNER_WM_CREATE_DIVIDER, displayId_);
     sleep(SEND_MSG_SLEEP_S);
@@ -128,7 +128,7 @@ HWTEST_F(WindowInnerManagerTest, SendMessage03, Function | SmallTest | Level3)
 HWTEST_F(WindowInnerManagerTest, SendMessage04, Function | SmallTest | Level3)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     innerManager_.SendMessage(INNER_WM_CREATE_DIVIDER, displayId_);
     sleep(SEND_MSG_SLEEP_S);

@@ -580,26 +580,24 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
             property_->SetParentId(parentId);
         }
     }
-
+    context_ = context;
     sptr<WindowImpl> window(this);
     sptr<IWindow> windowAgent(new WindowAgent(window));
     uint32_t windowId = 0;
+    sptr<IRemoteObject> token = nullptr;
+    if (context_ != nullptr) {
+        token = context_->GetToken();
+        if (token != nullptr) {
+            property_->SetTokenState(true);
+        }
+    }
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
-        windowId);
+        windowId, token);
     property_->SetWindowId(windowId);
 
     if (ret != WMError::WM_OK) {
         WLOGFE("create window failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return ret;
-    }
-    context_ = context;
-    abilityContext_ = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
-    if (abilityContext_ != nullptr) {
-        ret = SingletonContainer::Get<WindowAdapter>().SaveAbilityToken(abilityContext_->GetToken(), windowId);
-        if (ret != WMError::WM_OK) {
-            WLOGFE("SaveAbilityToken failed with errCode:%{public}d", static_cast<int32_t>(ret));
-            return ret;
-        }
     }
     windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, this)));
     if (parentName != "") { // add to subWindowMap_
@@ -853,8 +851,8 @@ WMError WindowImpl::Minimize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        if (abilityContext_ != nullptr) {
-            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(abilityContext_->GetToken(), true);
+        if (context_ != nullptr) {
+            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(context_->GetToken(), true);
         } else {
             Hide();
         }
@@ -881,8 +879,9 @@ WMError WindowImpl::Close()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        if (abilityContext_ != nullptr) {
-            abilityContext_->CloseAbility();
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (abilityContext != nullptr) {
+            abilityContext->CloseAbility();
         } else {
             Destroy();
         }
@@ -1072,9 +1071,10 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             WLOGI("ConsumeKeyEvent keyEvent is consumed");
             return;
         }
-        if (abilityContext_ != nullptr) {
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (abilityContext != nullptr) {
             WLOGI("ConsumeKeyEvent ability TerminateSelf");
-            abilityContext_->TerminateSelf();
+            abilityContext->TerminateSelf();
         } else {
             WLOGI("ConsumeKeyEvent destroy window");
             Destroy();
@@ -1333,11 +1333,12 @@ void WindowImpl::UpdateWindowState(WindowState state)
     if (!IsWindowValid()) {
         return;
     }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
     switch (state) {
         case WindowState::STATE_FROZEN: {
-            if (abilityContext_ != nullptr && windowTag_ == WindowTag::MAIN_WINDOW) {
+            if (abilityContext != nullptr && windowTag_ == WindowTag::MAIN_WINDOW) {
                 WLOGFD("DoAbilityBackground KEYGUARD, id: %{public}d", GetWindowId());
-                AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(abilityContext_->GetToken(),
+                AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(abilityContext->GetToken(),
                     static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
             } else {
                 state_ = WindowState::STATE_HIDDEN;
@@ -1347,9 +1348,9 @@ void WindowImpl::UpdateWindowState(WindowState state)
             break;
         }
         case WindowState::STATE_UNFROZEN: {
-            if (abilityContext_ != nullptr && windowTag_ == WindowTag::MAIN_WINDOW) {
+            if (abilityContext != nullptr && windowTag_ == WindowTag::MAIN_WINDOW) {
                 WLOGFD("DoAbilityForeground KEYGUARD, id: %{public}d", GetWindowId());
-                AAFwk::AbilityManagerClient::GetInstance()->DoAbilityForeground(abilityContext_->GetToken(),
+                AAFwk::AbilityManagerClient::GetInstance()->DoAbilityForeground(abilityContext->GetToken(),
                     static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
             } else {
                 state_ = WindowState::STATE_SHOWN;

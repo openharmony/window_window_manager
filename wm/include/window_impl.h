@@ -236,7 +236,6 @@ private:
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;
-    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_; // give up when context offer getToken
     std::shared_ptr<AbilityRuntime::Context> context_;
     std::recursive_mutex mutex_;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;

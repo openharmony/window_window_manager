@@ -34,19 +34,12 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapter)
         } \
     } while (false)
 
-WMError WindowAdapter::SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
-    return windowManagerServiceProxy_->SaveAbilityToken(abilityToken, windowId);
-}
-
 WMError WindowAdapter::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
-    std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId)
+    std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject> &token)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
-    return windowManagerServiceProxy_->CreateWindow(window, windowProperty, surfaceNode, windowId);
+    return windowManagerServiceProxy_->CreateWindow(window, windowProperty, surfaceNode, windowId, token);
 }
 
 WMError WindowAdapter::AddWindow(sptr<WindowProperty>& windowProperty)

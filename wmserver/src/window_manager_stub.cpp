@@ -38,7 +38,13 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             sptr<WindowProperty> windowProperty = data.ReadStrongParcelable<WindowProperty>();
             std::shared_ptr<RSSurfaceNode> surfaceNode(data.ReadParcelable<RSSurfaceNode>());
             uint32_t windowId;
-            WMError errCode = CreateWindow(windowProxy, windowProperty, surfaceNode, windowId);
+            sptr<IRemoteObject> token = nullptr;
+            if (windowProperty && windowProperty->GetTokenState()) {
+                token = data.ReadRemoteObject();
+            } else {
+                WLOGFI("accept token is nullptr");
+            }
+            WMError errCode = CreateWindow(windowProxy, windowProperty, surfaceNode, windowId, token);
             reply.WriteUint32(windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -78,13 +84,6 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             uint32_t windowId = data.ReadUint32();
             float alpha = data.ReadFloat();
             WMError errCode = SetAlpha(windowId, alpha);
-            reply.WriteInt32(static_cast<int32_t>(errCode));
-            break;
-        }
-        case TRANS_ID_SEND_ABILITY_TOKEN: {
-            sptr<IRemoteObject> abilityToken = data.ReadRemoteObject();
-            uint32_t windowId = data.ReadUint32();
-            WMError errCode = SaveAbilityToken(abilityToken, windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
