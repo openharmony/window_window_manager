@@ -467,6 +467,7 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
     auto res = window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidArea);
     ASSERT_EQ(WMError::WM_OK, res);
     Rect expect2 = {INT_MIN, avoidArea.topRect.height_, expect.width_, expect.height_};
+    expect2 = utils::CalcLimitedRect(expect2, virtualPixelRatio_);
     ASSERT_TRUE(utils::RectEqualTo(window, expect2));
 }
 
