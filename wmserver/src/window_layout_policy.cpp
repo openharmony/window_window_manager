@@ -250,6 +250,8 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(Rect layoutOutRect, sptr<WindowNo
             rect.posY_ -= hotZone;
             rect.height_ += (hotZone + hotZone);
         }
+    } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
+        rect = displayRect_;
     } else if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
         rect.posX_ -= hotZone;
         rect.posY_ -= hotZone;
