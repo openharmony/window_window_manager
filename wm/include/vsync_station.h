@@ -42,7 +42,8 @@ public:
         OnCallback onCallback;
     };
     ~VsyncStation() = default;
-    void RequestVsync(CallbackType type, std::shared_ptr<VsyncCallback> vsyncCallback);
+    void RequestVsync(CallbackType type, const std::shared_ptr<VsyncCallback>& vsyncCallback);
+    void RemoveCallback(CallbackType type, const std::shared_ptr<VsyncCallback>& vsyncCallback);
     void SetIsMainHandlerAvailable(bool available)
     {
         isMainHandlerAvailable_ = available;
