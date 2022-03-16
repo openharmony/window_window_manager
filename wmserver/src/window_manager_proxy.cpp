@@ -456,7 +456,7 @@ void WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType typ
     }
 }
 
-void WindowManagerProxy::ProcessWindowTouchedEvent(uint32_t windowId)
+void WindowManagerProxy::ProcessPointDown(uint32_t windowId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -469,7 +469,25 @@ void WindowManagerProxy::ProcessWindowTouchedEvent(uint32_t windowId)
         WLOGFE("Write windowId failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_PROCESS_WINDOW_TOUCHED_EVENT, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(TRANS_ID_PROCESS_POINT_DOWN, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void WindowManagerProxy::ProcessPointUp(uint32_t windowId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_PROCESS_POINT_UP, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
