@@ -97,6 +97,17 @@ void WindowLayoutPolicyTile::AddWindowNode(sptr<WindowNode>& node)
     }
 }
 
+void WindowLayoutPolicyTile::UpdateWindowNode(sptr<WindowNode>& node)
+{
+    WM_FUNCTION_TRACE();
+    WindowLayoutPolicy::UpdateWindowNode(node);
+    if (avoidTypes_.find(node->GetWindowType()) != avoidTypes_.end()) {
+        InitTileWindowRects();
+        AssignNodePropertyForTileWindows();
+        LayoutForegroundNodeQueue();
+    }
+}
+
 void WindowLayoutPolicyTile::RemoveWindowNode(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
@@ -111,7 +122,7 @@ void WindowLayoutPolicyTile::RemoveWindowNode(sptr<WindowNode>& node)
         LayoutForegroundNodeQueue();
     }
     Rect winRect = node->GetWindowProperty()->GetWindowRect();
-    node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
+    node->GetWindowToken()->UpdateWindowRect(winRect, WindowSizeChangeReason::HIDE);
 }
 
 void WindowLayoutPolicyTile::LayoutForegroundNodeQueue()
