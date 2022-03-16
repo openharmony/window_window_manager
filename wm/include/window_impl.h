@@ -106,7 +106,7 @@ public:
     virtual void StartMove() override;
 
     virtual WMError RequestFocus() const override;
-    virtual void AddInputEventListener(std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) override;
+    virtual void AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) override;
 
     virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) override;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
@@ -202,6 +202,7 @@ private:
     bool IsPointerEventConsumed();
     void AdjustWindowAnimationFlag();
     void MapFloatingWindowToAppIfNeeded();
+    WMError Destroy(bool needNotifyServer);
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;
