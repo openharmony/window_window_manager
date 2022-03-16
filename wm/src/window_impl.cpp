@@ -672,7 +672,7 @@ WMError WindowImpl::Show(uint32_t reason)
             SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
         } else {
             WLOGFI("window is already shown id: %{public}d, raise to top", property_->GetWindowId());
-            SingletonContainer::Get<WindowAdapter>().ProcessWindowTouchedEvent(property_->GetWindowId());
+            SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
         }
         for (auto& listener : lifecycleListeners_) {
             if (listener != nullptr) {
@@ -1090,8 +1090,18 @@ void WindowImpl::EndMoveOrDragWindow(int32_t pointId)
     if (pointId != startPointerId_) {
         return;
     }
-    startDragFlag_ = false;
-    startMoveFlag_ = false;
+
+    if (startDragFlag_) {
+        SingletonContainer::Get<WindowAdapter>().ProcessPointUp(GetWindowId());
+        startDragFlag_ = false;
+    }
+
+    if (startMoveFlag_) {
+        if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+            SingletonContainer::Get<WindowAdapter>().ProcessPointUp(GetWindowId());
+        }
+        startMoveFlag_ = false;
+    }
     pointEventStarted_ = false;
 }
 
@@ -1205,8 +1215,9 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
                 return;
             }
         }
-        SingletonContainer::Get<WindowAdapter>().ProcessWindowTouchedEvent(property_->GetWindowId());
+        SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
     }
+
     if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) ||
         GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         ConsumeMoveOrDragEvent(pointerEvent);

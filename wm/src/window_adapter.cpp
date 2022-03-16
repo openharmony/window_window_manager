@@ -143,11 +143,18 @@ WMError WindowAdapter::SetAlpha(uint32_t windowId, float alpha)
     return windowManagerServiceProxy_->SetAlpha(windowId, alpha);
 }
 
-void WindowAdapter::ProcessWindowTouchedEvent(uint32_t windowId)
+void WindowAdapter::ProcessPointDown(uint32_t windowId)
 {
     INIT_PROXY_CHECK_RETURN();
 
-    return windowManagerServiceProxy_->ProcessWindowTouchedEvent(windowId);
+    return windowManagerServiceProxy_->ProcessPointDown(windowId);
+}
+
+void WindowAdapter::ProcessPointUp(uint32_t windowId)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    return windowManagerServiceProxy_->ProcessPointUp(windowId);
 }
 
 void WindowAdapter::MinimizeAllAppWindows(DisplayId displayId)

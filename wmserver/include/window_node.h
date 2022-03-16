@@ -68,6 +68,7 @@ public:
     const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
     bool IsSplitMode() const;
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
+    void ResetWindowSizeChangeReason();
 
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;
