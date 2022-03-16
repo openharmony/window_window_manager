@@ -90,5 +90,14 @@ void WindowAgent::UpdateDisplayId(DisplayId from, DisplayId to)
     }
     window_->UpdateDisplayId(from, to);
 }
+
+void WindowAgent::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window is null");
+        return;
+    }
+    window_->UpdateOccupiedAreaChangeInfo(info);
+}
 } // namespace Rosen
 } // namespace OHOS

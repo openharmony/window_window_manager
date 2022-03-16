@@ -119,6 +119,8 @@ public:
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
+    virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     void UpdateRect(const struct Rect& rect, WindowSizeChangeReason reason);
     void UpdateMode(WindowMode mode);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
@@ -130,6 +132,7 @@ public:
     void UpdateWindowState(WindowState state);
     void UpdateDragEvent(const PointInfo& point, DragEvent event);
     void UpdateDisplayId(DisplayId from, DisplayId to);
+    void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info);
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed) override;
@@ -225,6 +228,7 @@ private:
     std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
     std::vector<sptr<IWindowDragListener>> windowDragListeners_;
     std::vector<sptr<IDisplayMoveListener>> displayMoveListeners_;
+    std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
