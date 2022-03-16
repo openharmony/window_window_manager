@@ -34,6 +34,7 @@ public:
     void UpdateWindowState(WindowState state) override;
     void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override;
     void UpdateDisplayId(DisplayId from, DisplayId to) override;
+    void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override;
 private:
     sptr<WindowImpl> window_;
 };

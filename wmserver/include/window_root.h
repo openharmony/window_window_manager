@@ -75,6 +75,8 @@ private:
         const sptr<WindowNodeContainer>& container) const;
     std::string GenAllWindowsLogInfo() const;
     bool CheckDisplayInfo(const sptr<DisplayInfo>& display);
+    void NotifyKeyboardSizeChangeInfo(const sptr<WindowNode>& node,
+        const sptr<WindowNodeContainer>& container, Rect rect);
 
     std::recursive_mutex& mutex_;
     std::map<int32_t, sptr<WindowNodeContainer>> windowNodeContainerMap_;
