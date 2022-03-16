@@ -35,6 +35,7 @@ public:
     ~WindowLayoutPolicyTile() = default;
     void Launch() override;
     void AddWindowNode(sptr<WindowNode>& node) override;
+    void UpdateWindowNode(sptr<WindowNode>& node) override;
     void RemoveWindowNode(sptr<WindowNode>& node) override;
     void UpdateLayoutRect(sptr<WindowNode>& node) override;
 
