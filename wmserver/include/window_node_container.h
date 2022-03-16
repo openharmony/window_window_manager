@@ -68,6 +68,7 @@ public:
     void MoveWindowNode(sptr<WindowNodeContainer>& container);
     float GetVirtualPixelRatio() const;
     void TraverseWindowTree(const WindowNodeOperationFunc& func, bool isFromTopToBottom = true) const;
+    void UpdateSizeChangeReasonForPointUp(sptr<WindowNode>& node);
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;

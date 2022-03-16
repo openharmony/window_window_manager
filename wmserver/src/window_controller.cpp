@@ -390,7 +390,7 @@ std::vector<Rect> WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidA
     return avoidArea;
 }
 
-WMError WindowController::ProcessWindowTouchedEvent(uint32_t windowId)
+WMError WindowController::ProcessPointDown(uint32_t windowId)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
@@ -401,11 +401,25 @@ WMError WindowController::ProcessWindowTouchedEvent(uint32_t windowId)
     WMError focusRes = windowRoot_->RequestFocus(windowId);
     if (zOrderRes == WMError::WM_OK || focusRes == WMError::WM_OK) {
         FlushWindowInfo(windowId);
-        WLOGFI("ProcessWindowTouchedEvent end");
+        WLOGFI("ProcessPointDown end");
         return WMError::WM_OK;
     }
     windowRoot_->FocusFaultDetection();
     return WMError::WM_ERROR_INVALID_OPERATION;
+}
+
+WMError WindowController::ProcessPointUp(uint32_t windowId)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFW("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WMError res = windowRoot_->UpdateSizeChangeReasonForPointUp(windowId);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
+    return WMError::WM_OK;
 }
 
 void WindowController::MinimizeAllAppWindows(DisplayId displayId)

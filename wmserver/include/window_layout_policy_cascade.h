@@ -38,7 +38,7 @@ public:
     void Reorder() override;
     void UpdateDisplayInfo() override;
     void AddWindowNode(sptr<WindowNode>& node) override;
-    void UpdateWindowNode(sptr<WindowNode>& node) override;
+    void UpdateWindowNode(sptr<WindowNode>& node, bool isAddWindow = false) override;
     void UpdateLayoutRect(sptr<WindowNode>& node) override;
 
 private:

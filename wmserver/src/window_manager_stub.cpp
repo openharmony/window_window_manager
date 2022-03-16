@@ -120,9 +120,14 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
             break;
         }
-        case TRANS_ID_PROCESS_WINDOW_TOUCHED_EVENT: {
+        case TRANS_ID_PROCESS_POINT_DOWN: {
             uint32_t windowId = data.ReadUint32();
-            ProcessWindowTouchedEvent(windowId);
+            ProcessPointDown(windowId);
+            break;
+        }
+        case TRANS_ID_PROCESS_POINT_UP: {
+            uint32_t windowId = data.ReadUint32();
+            ProcessPointUp(windowId);
             break;
         }
         case TRANS_ID_GET_TOP_WINDOW_ID: {
