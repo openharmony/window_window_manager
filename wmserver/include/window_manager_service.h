@@ -57,7 +57,8 @@ public:
     WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) override;
     WMError SetAlpha(uint32_t windowId, float alpha) override;
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) override;
-    void ProcessWindowTouchedEvent(uint32_t windowId) override;
+    void ProcessPointDown(uint32_t windowId) override;
+    void ProcessPointUp(uint32_t windowId) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
     WMError MaxmizeWindow(uint32_t windowId) override;
