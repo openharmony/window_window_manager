@@ -17,6 +17,7 @@
 #include "window_helper.h"
 #include "window_impl.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -73,6 +74,28 @@ sptr<Window> Window::GetTopWindowWithId(uint32_t mainWinId)
 std::vector<sptr<Window>> Window::GetSubWindow(uint32_t parentId)
 {
     return WindowImpl::GetSubWindow(parentId);
+}
+
+bool OccupiedAreaChangeInfo::Marshalling(Parcel& parcel) const
+{
+    return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&
+        parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(type_));
+}
+
+OccupiedAreaChangeInfo* OccupiedAreaChangeInfo::Unmarshalling(Parcel& parcel)
+{
+    OccupiedAreaChangeInfo* occupiedAreaChangeInfo = new OccupiedAreaChangeInfo();
+    bool res = parcel.ReadInt32(occupiedAreaChangeInfo->rect_.posX_) &&
+        parcel.ReadInt32(occupiedAreaChangeInfo->rect_.posY_) &&
+        parcel.ReadUint32(occupiedAreaChangeInfo->rect_.width_) &&
+        parcel.ReadUint32(occupiedAreaChangeInfo->rect_.height_);
+    if (!res) {
+        delete occupiedAreaChangeInfo;
+        return nullptr;
+    }
+    occupiedAreaChangeInfo->type_ = static_cast<OccupiedAreaType>(parcel.ReadUint32());
+    return occupiedAreaChangeInfo;
 }
 } // namespace Rosen
 } // namespace OHOS

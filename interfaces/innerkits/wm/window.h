@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_H
 
 #include <refbase.h>
+#include <parcel.h>
 
 #include "wm_common.h"
 #include "window_option.h"
@@ -65,6 +66,24 @@ public:
 class IDisplayMoveListener : virtual public RefBase {
 public:
     virtual void OnDisplayMove(DisplayId from, DisplayId to) = 0;
+};
+
+class OccupiedAreaChangeInfo : public Parcelable {
+public:
+    OccupiedAreaChangeInfo() = default;
+    OccupiedAreaChangeInfo(OccupiedAreaType type, Rect rect) : type_(type), rect_(rect) {};
+    ~OccupiedAreaChangeInfo() = default;
+
+    virtual bool Marshalling(Parcel& parcel) const override;
+    static OccupiedAreaChangeInfo* Unmarshalling(Parcel& parcel);
+
+    OccupiedAreaType type_ = OccupiedAreaType::TYPE_INPUT;
+    Rect rect_ = { 0, 0, 0, 0 };
+};
+
+class IOccupiedAreaChangeListener : virtual public RefBase {
+public:
+    virtual void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) = 0;
 };
 
 
@@ -129,6 +148,8 @@ public:
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
+    virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
+    virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed = false) = 0;
     virtual std::string GetContentInfo() = 0;

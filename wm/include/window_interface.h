@@ -17,6 +17,7 @@
 #define OHOS_WINDOW_INTERFACE_H
 
 #include "iremote_broker.h"
+#include "window.h"
 #include "window_property.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
@@ -35,6 +36,7 @@ public:
         TRANS_ID_UPDATE_WINDOW_STATE,
         TRANS_ID_UPDATE_DRAG_EVENT,
         TRANS_ID_UPDATE_DISPLAY_ID,
+        TRANS_ID_UPDATE_OCCUPIED_AREA,
     };
 
     virtual void UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason) = 0;
@@ -44,6 +46,7 @@ public:
     virtual void UpdateWindowState(WindowState state) = 0;
     virtual void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) = 0;
     virtual void UpdateDisplayId(DisplayId from, DisplayId to) = 0;
+    virtual void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
