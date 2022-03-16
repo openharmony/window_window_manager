@@ -53,6 +53,15 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             DisplayId displayId = data.ReadUint64();
             SystemBarRegionTints tints;
             uint32_t size = data.ReadUint32();
+            if (size > data.GetReadableBytes() || size > tints.max_size()) {
+                WLOGFE("fail to get SystemBarRegionTints size");
+                break;
+            }
+            tints.resize(size);
+            if (tints.size() < size) {
+                WLOGFE("fail to resize SystemBarRegionTints");
+                break;
+            }
             for (uint32_t i = 0; i < size; i++) {
                 WindowType type = static_cast<WindowType>(data.ReadUint32());
                 SystemBarProperty prop = { data.ReadBool(), data.ReadUint32(), data.ReadUint32() };
@@ -72,6 +81,15 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
         case TRANS_ID_UPDATE_WINDOW_VISIBILITY: {
             uint32_t size = data.ReadUint32();
             std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+            if (size > data.GetReadableBytes() || size > windowVisibilityInfos.max_size()) {
+                WLOGFE("fail to get windowVisibilityInfos size.");
+                break;
+            }
+            windowVisibilityInfos.resize(size);
+            if (windowVisibilityInfos.size() < size) {
+                WLOGFE("fail to resize windowVisibilityInfos.");
+                break;
+            }
             for (uint32_t i = 0; i < size; ++i) {
                 sptr<WindowVisibilityInfo> info = data.ReadParcelable<WindowVisibilityInfo>();
                 windowVisibilityInfos.emplace_back(info);
