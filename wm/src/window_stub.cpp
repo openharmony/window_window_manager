@@ -90,6 +90,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             UpdateDisplayId(data.ReadUint64(), data.ReadUint64());
             break;
         }
+        case TRANS_ID_UPDATE_OCCUPIED_AREA: {
+            sptr<OccupiedAreaChangeInfo> info = data.ReadParcelable<OccupiedAreaChangeInfo>();
+            UpdateOccupiedAreaChangeInfo(info);
+            break;
+        }
         default:
             break;
     }

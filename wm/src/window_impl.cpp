@@ -1017,6 +1017,25 @@ void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFun
     notifyNativefunc_ = std::move(func);
 }
 
+void WindowImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE(" listener is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    occupiedAreaChangeListeners_.emplace_back(listener);
+}
+
+void WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    occupiedAreaChangeListeners_.erase(std::remove_if(occupiedAreaChangeListeners_.begin(),
+        occupiedAreaChangeListeners_.end(), [listener](sptr<IOccupiedAreaChangeListener> registeredListener) {
+            return registeredListener == listener;
+        }), occupiedAreaChangeListeners_.end());
+}
+
 void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reason)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
@@ -1406,6 +1425,16 @@ void WindowImpl::UpdateDisplayId(DisplayId from, DisplayId to)
         }
     }
     property_->SetDisplayId(to);
+}
+
+void WindowImpl::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info)
+{
+    WLOGFI("Window Update OccupiedArea, id: %{public}d", property_->GetWindowId());
+    for (auto& listener : occupiedAreaChangeListeners_) {
+        if (listener != nullptr) {
+            listener->OnSizeChange(info);
+        }
+    }
 }
 
 Rect WindowImpl::GetSystemAlarmWindowDefaultSize(Rect defaultRect)
