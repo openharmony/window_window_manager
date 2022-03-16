@@ -122,7 +122,7 @@ void WindowLayoutPolicyTile::RemoveWindowNode(sptr<WindowNode>& node)
         LayoutForegroundNodeQueue();
     }
     Rect winRect = node->GetWindowProperty()->GetWindowRect();
-    node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
+    node->GetWindowToken()->UpdateWindowRect(winRect, WindowSizeChangeReason::HIDE);
 }
 
 void WindowLayoutPolicyTile::LayoutForegroundNodeQueue()

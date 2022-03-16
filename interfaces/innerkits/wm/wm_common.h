@@ -110,6 +110,7 @@ enum class WindowSizeChangeReason : uint32_t {
     DRAG_END,
     RESIZE,
     MOVE,
+    HIDE,
 };
 
 enum class WindowLayoutMode : uint32_t {
