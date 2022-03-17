@@ -45,7 +45,8 @@ public:
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& prop) override;
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
-    void ProcessWindowTouchedEvent(uint32_t windowId) override;
+    void ProcessPointDown(uint32_t windowId) override;
+    void ProcessPointUp(uint32_t windowId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
     WMError MaxmizeWindow(uint32_t windowId) override;
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) override;
