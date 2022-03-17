@@ -111,7 +111,8 @@ public:
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
 
     virtual WMError RequestFocus() const = 0;
-    virtual void AddInputEventListener(std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) = 0; // for api 7
+    // AddInputEventListener is for api 7
+    virtual void AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) = 0;
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) = 0;
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
     virtual void RequestFrame() = 0;

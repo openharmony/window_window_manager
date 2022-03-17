@@ -22,9 +22,8 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowInputChannel"};
 }
-WindowInputChannel::WindowInputChannel(const sptr<Window>& window)
+WindowInputChannel::WindowInputChannel(const sptr<Window>& window): window_(window), isAvailable_(true)
 {
-    window_ = window;
     callback_->onCallback = std::bind(&WindowInputChannel::OnVsync, this, std::placeholders::_1);
 }
 
@@ -74,8 +73,13 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
             std::lock_guard<std::mutex> lock(mtx_);
             pointerEventTemp = moveEvent_;
             moveEvent_ = pointerEvent;
+            if (isAvailable_) {
+                VsyncStation::GetInstance().RequestVsync(VsyncStation::CallbackType::CALLBACK_INPUT, callback_);
+            } else {
+                WLOGFE("WindowInputChannel is not available");
+                pointerEvent->MarkProcessed();
+            }
         }
-        VsyncStation::GetInstance().RequestVsync(VsyncStation::CallbackType::CALLBACK_INPUT, callback_);
         WLOGFI("Receive move event, windowId: %{public}d, action: %{public}d",
             window_->GetWindowId(), pointerEvent->GetPointerAction());
         if (pointerEventTemp != nullptr) {
@@ -107,9 +111,21 @@ void WindowInputChannel::OnVsync(int64_t timeStamp)
     pointerEvent->MarkProcessed();
 }
 
-void WindowInputChannel::SetInputListener(std::shared_ptr<MMI::IInputEventConsumer>& listener)
+void WindowInputChannel::SetInputListener(const std::shared_ptr<MMI::IInputEventConsumer>& listener)
 {
     inputListener_ = listener;
+}
+
+void WindowInputChannel::Destroy()
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    WLOGFI("Destroy WindowInputChannel, windowId:%{public}d", window_->GetWindowId());
+    isAvailable_ = false;
+    VsyncStation::GetInstance().RemoveCallback(VsyncStation::CallbackType::CALLBACK_INPUT, callback_);
+    if (moveEvent_ != nullptr) {
+        moveEvent_->MarkProcessed();
+        moveEvent_ = nullptr;
+    }
 }
 
 bool WindowInputChannel::IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const

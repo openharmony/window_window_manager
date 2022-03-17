@@ -33,7 +33,7 @@ friend class InputEventListener;
 public:
     void AddInputWindow(const sptr<Window>& window);
     void RemoveInputWindow(const sptr<Window>& window);
-    void SetInputListener(uint32_t windowId, std::shared_ptr<MMI::IInputEventConsumer>& listener);
+    void SetInputListener(uint32_t windowId, const std::shared_ptr<MMI::IInputEventConsumer>& listener);
 
 private:
     sptr<WindowInputChannel> GetInputChannel(uint32_t windowId);
@@ -42,7 +42,7 @@ private:
     std::shared_ptr<MMI::IInputEventConsumer> inputListener_ = nullptr;
 };
 
-class InputEventListener : public RefBase, public MMI::IInputEventConsumer {
+class InputEventListener : public MMI::IInputEventConsumer {
 public:
     InputEventListener() = default;
     void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
