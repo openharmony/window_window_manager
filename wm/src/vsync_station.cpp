@@ -26,7 +26,7 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(VsyncStation)
 
-void VsyncStation::RequestVsync(CallbackType type, std::shared_ptr<VsyncCallback> vsyncCallback)
+void VsyncStation::RequestVsync(CallbackType type, const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
     {
         std::lock_guard<std::mutex> lock(mtx_);
@@ -64,6 +64,18 @@ void VsyncStation::RequestVsync(CallbackType type, std::shared_ptr<VsyncCallback
         vsyncHandler_->PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_TASK, VSYNC_TIME_OUT_MILLISECONDS);
     }
     receiver_->RequestNextVSync(frameCallback_);
+}
+
+void VsyncStation::RemoveCallback(CallbackType type, const std::shared_ptr<VsyncCallback>& vsyncCallback)
+{
+    WLOGFE("Remove callback, type: %{public}u", type);
+    std::lock_guard<std::mutex> lock(mtx_);
+    auto iter = vsyncCallbacks_.find(type);
+    if (iter == vsyncCallbacks_.end()) {
+        WLOGFE("wrong callback type.");
+        return;
+    }
+    iter->second.erase(vsyncCallback);
 }
 
 void VsyncStation::VsyncCallbackInner(int64_t timestamp)
