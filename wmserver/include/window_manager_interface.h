@@ -40,7 +40,8 @@ public:
         TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT,
         TRANS_ID_GET_AVOID_AREA,
         TRANS_ID_GET_TOP_WINDOW_ID,
-        TRANS_ID_PROCESS_WINDOW_TOUCHED_EVENT,
+        TRANS_ID_PROCESS_POINT_DOWN,
+        TRANS_ID_PROCESS_POINT_UP,
         TRANS_ID_MINIMIZE_ALL_APP_WINDOWS,
         TRANS_ID_SET_BACKGROUND_BLUR,
         TRANS_ID_SET_APLPHA,
@@ -59,7 +60,8 @@ public:
     virtual WMError SetAlpha(uint32_t windowId, float alpha) = 0;
     virtual std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
-    virtual void ProcessWindowTouchedEvent(uint32_t windowId) = 0;
+    virtual void ProcessPointDown(uint32_t windowId) = 0;
+    virtual void ProcessPointUp(uint32_t windowId) = 0;
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError MaxmizeWindow(uint32_t windowId) = 0;
     virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) = 0;

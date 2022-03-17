@@ -227,6 +227,22 @@ WMError WindowRoot::UpdateWindowNode(uint32_t windowId, WindowUpdateReason reaso
     return container->UpdateWindowNode(node, reason);
 }
 
+WMError WindowRoot::UpdateSizeChangeReasonForPointUp(uint32_t windowId)
+{
+    auto node = GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("update window size change reason failed, window container could not be found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    container->UpdateSizeChangeReasonForPointUp(node);
+    return WMError::WM_OK;
+}
+
 WMError WindowRoot::EnterSplitWindowMode(sptr<WindowNode>& node)
 {
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
