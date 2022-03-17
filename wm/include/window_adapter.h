@@ -36,11 +36,10 @@ class WindowAdapter {
 WM_DECLARE_SINGLE_INSTANCE(WindowAdapter);
 public:
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
-        std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId);
+        std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject> &token);
     virtual WMError AddWindow(sptr<WindowProperty>& windowProperty);
     virtual WMError RemoveWindow(uint32_t windowId);
     virtual WMError DestroyWindow(uint32_t windowId);
-    virtual WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId);
     virtual WMError RequestFocus(uint32_t windowId);
     virtual WMError GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, std::vector<Rect>& avoidRect);
     virtual WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level);

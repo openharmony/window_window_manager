@@ -32,7 +32,7 @@ uint32_t WindowController::GenWindowId()
 }
 
 WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token)
 {
     uint32_t parentId = property->GetParentId();
     if ((parentId != INVALID_WINDOW_ID) && !WindowHelper::IsSubWindow(property->GetWindowType())) {
@@ -43,19 +43,9 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     sptr<WindowProperty> windowProperty = new WindowProperty(property);
     windowProperty->SetWindowId(windowId);
     sptr<WindowNode> node = new WindowNode(windowProperty, window, surfaceNode);
+    node->abilityToken_ = token;
     UpdateWindowAnimation(node);
     return windowRoot_->SaveWindow(node);
-}
-
-WMError WindowController::SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId)
-{
-    auto node = windowRoot_->GetWindowNode(windowId);
-    if (node == nullptr) {
-        WLOGFE("could not find window");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    node->abilityToken_ = abilityToken;
-    return WMError::WM_OK;
 }
 
 WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)

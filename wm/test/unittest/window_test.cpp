@@ -61,7 +61,7 @@ HWTEST_F(WindowTest, Create02, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_NE(nullptr, Window::Create("WindowTest02", option));
 }
 
@@ -74,22 +74,8 @@ HWTEST_F(WindowTest, Create03, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
     ASSERT_EQ(nullptr, Window::Create("WindowTest03", option));
-}
-
-/**
- * @tc.name: Create04
- * @tc.desc: Create window with WindowName and abilityContext
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, Create04, Function | SmallTest | Level2)
-{
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    sptr<WindowOption> option = new WindowOption();
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_CALL(m->Mock(), SaveAbilityToken(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_NE(nullptr, Window::Create("WindowTest04", option, abilityContext_));
 }
 
 /**
@@ -122,7 +108,7 @@ HWTEST_F(WindowTest, Find02, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_NE(nullptr, Window::Create("WindowTest03", option));
     ASSERT_NE(nullptr, Window::Find("WindowTest03"));
 }

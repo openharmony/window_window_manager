@@ -25,7 +25,7 @@ namespace {
 
 
 WMError WindowManagerProxy::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -48,6 +48,12 @@ WMError WindowManagerProxy::CreateWindow(sptr<IWindow>& window, sptr<WindowPrope
     if (!data.WriteParcelable(surfaceNode.get())) {
         WLOGFE("Write windowProperty failed");
         return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (token != nullptr) {
+        if (!data.WriteRemoteObject(token)) {
+            WLOGFE("Write abilityToken failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
     }
 
     if (Remote()->SendRequest(TRANS_ID_CREATE_WINDOW, data, reply, option) != ERR_NONE) {
@@ -192,34 +198,6 @@ WMError WindowManagerProxy::SetAlpha(uint32_t windowId, float alpha)
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(TRANS_ID_SET_APLPHA, data, reply, option) != ERR_NONE) {
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WMError>(ret);
-}
-
-WMError WindowManagerProxy::SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteRemoteObject(abilityToken)) {
-        WLOGFE("Write abilityToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    if (!data.WriteUint32(windowId)) {
-        WLOGFE("Write windowId failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    if (Remote()->SendRequest(TRANS_ID_SEND_ABILITY_TOKEN, data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
 

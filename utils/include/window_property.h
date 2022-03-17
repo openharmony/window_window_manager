@@ -54,6 +54,7 @@ public:
     void SetHitOffset(const PointInfo& offset);
     void SetAnimationFlag(uint32_t animationFlag);
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
+    void SetTokenState(bool hasToken);
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
 
     const std::string& GetWindowName() const;
@@ -67,6 +68,7 @@ public:
     bool GetTouchable() const;
     bool GetPrivacyMode() const;
     bool GetTransparent() const;
+    bool GetTokenState() const;
     float GetAlpha() const;
     DisplayId GetDisplayId() const;
     uint32_t GetWindowId() const;
@@ -95,6 +97,7 @@ private:
     bool touchable_ { true };
     bool isPrivacyMode_ { false };
     bool isTransparent_ { false };
+    bool tokenState_ { false };
     float alpha_ { 1.0f };
     DisplayId displayId_ { 0 };
     uint32_t windowId_ { 0 };

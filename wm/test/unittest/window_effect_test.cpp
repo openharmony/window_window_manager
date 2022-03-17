@@ -82,7 +82,7 @@ HWTEST_F(WindowEffectTest, WindowEffect03, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowBackgroundBlur(WindowBlurLevel::WINDOW_BLUR_LOW);
     sptr<WindowImpl> window = new WindowImpl(option);
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
 
     ASSERT_EQ(WindowBlurLevel::WINDOW_BLUR_LOW, window->GetWindowBackgroundBlur());
@@ -103,7 +103,7 @@ HWTEST_F(WindowEffectTest, WindowEffect04, Function | SmallTest | Level2)
     option->SetAlpha(0.1f);
 
     sptr<WindowImpl> window = new WindowImpl(option);
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
 
     ASSERT_EQ(0.1f, window->GetAlpha());
@@ -123,7 +123,7 @@ HWTEST_F(WindowEffectTest, WindowEffect05, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowImpl> window = new WindowImpl(option);
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
 
     EXPECT_CALL(m->Mock(), SetWindowBackgroundBlur(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -145,7 +145,7 @@ HWTEST_F(WindowEffectTest, WindowEffect06, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowImpl> window = new WindowImpl(option);
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     EXPECT_CALL(m->Mock(), SetAlpha(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetAlpha(0.1f));
@@ -165,7 +165,7 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | SmallTest | Level2)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowImpl> window = new WindowImpl(option);
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
 
     ASSERT_EQ(WindowBlurLevel::WINDOW_BLUR_OFF, window->GetWindowBackgroundBlur());

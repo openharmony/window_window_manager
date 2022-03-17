@@ -31,12 +31,12 @@ public:
     ~WindowController() = default;
 
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId);
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        uint32_t& windowId, sptr<IRemoteObject> token);
     WMError AddWindowNode(sptr<WindowProperty>& property);
     WMError RemoveWindowNode(uint32_t windowId);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);
     WMError RequestFocus(uint32_t windowId);
-    WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId);
     WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level);
     WMError SetAlpha(uint32_t windowId, float alpha);
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);

@@ -29,7 +29,7 @@ void WindowInputChannelTest::SetUpTestCase()
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("window");
     window_ = new WindowImpl(option);
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window_->Create("");
 }
 
