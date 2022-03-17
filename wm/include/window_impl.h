@@ -111,7 +111,7 @@ public:
     virtual void StartMove() override;
 
     virtual WMError RequestFocus() const override;
-    virtual void AddInputEventListener(std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) override;
+    virtual void AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) override;
 
     virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) override;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
@@ -208,6 +208,7 @@ private:
     void AdjustWindowAnimationFlag();
     void MapFloatingWindowToAppIfNeeded();
     WMError UpdateProperty(PropertyChangeAction action);
+    WMError Destroy(bool needNotifyServer);
     void HandleKeepScreenOn(bool keepScreenOn);
 
     // colorspace, gamut

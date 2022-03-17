@@ -27,6 +27,7 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "wm_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -628,15 +629,7 @@ void WindowImpl::DestroyFloatingWindow()
     // Destroy app floating window if exist
     if (appFloatingWindowMap_.count(GetWindowId()) > 0) {
         for (auto& floatingWindow : appFloatingWindowMap_.at(GetWindowId())) {
-            NotifyBeforeSubWindowDestroy(floatingWindow);
-            WMError fltRet = SingletonContainer::Get<WindowAdapter>().DestroyWindow(floatingWindow->GetWindowId());
-            if (fltRet == WMError::WM_OK) {
-                WLOGFI("Destroy App %{public}d FltWindow %{}d", GetWindowId(), floatingWindow->GetWindowId());
-            } else {
-                WLOGFE("Floating Window %{public}d Destroy Failed", floatingWindow->GetWindowId());
-            }
-            floatingWindow->SetWindowState(WindowState::STATE_DESTROYED);
-            windowMap_.erase(floatingWindow->GetWindowName());
+            floatingWindow->Destroy();
         }
         appFloatingWindowMap_.erase(GetWindowId());
     }
@@ -657,8 +650,7 @@ void WindowImpl::DestroySubWindow()
     if (subWindowMap_.count(GetWindowId()) > 0) { // remove from subWindowMap_ and windowMap_
         std::vector<sptr<WindowImpl>>& subWindows = subWindowMap_.at(GetWindowId());
         for (auto& subWindow : subWindows) {
-            subWindow->SetWindowState(WindowState::STATE_DESTROYED);
-            windowMap_.erase(subWindow->GetWindowName());
+            subWindow->Destroy(false);
         }
         subWindowMap_[GetWindowId()].clear();
         subWindowMap_.erase(GetWindowId());
@@ -667,31 +659,43 @@ void WindowImpl::DestroySubWindow()
 
 WMError WindowImpl::Destroy()
 {
+    return Destroy(true);
+}
+
+WMError WindowImpl::Destroy(bool needNotifyServer)
+{
     if (!IsWindowValid()) {
         return WMError::WM_OK;
     }
 
     WLOGFI("[Client] Window %{public}d Destroy", property_->GetWindowId());
-
-    NotifyBeforeDestroy(GetWindowName());
-    if (subWindowMap_.count(GetWindowId()) > 0) {
-        for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
-            NotifyBeforeSubWindowDestroy(subWindow);
+    InputTransferStation::GetInstance().RemoveInputWindow(this);
+    WMError ret = WMError::WM_OK;
+    if (needNotifyServer) {
+        NotifyBeforeDestroy(GetWindowName());
+        if (subWindowMap_.count(GetWindowId()) > 0) {
+            for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+                NotifyBeforeSubWindowDestroy(subWindow);
+            }
         }
+        ret = SingletonContainer::Get<WindowAdapter>().DestroyWindow(property_->GetWindowId());
+        if (ret != WMError::WM_OK) {
+            WLOGFE("destroy window failed with errCode:%{public}d", static_cast<int32_t>(ret));
+            return ret;
+        }
+    } else {
+        WLOGFI("Do not need to notify server to destroy window");
     }
 
-    WMError ret = SingletonContainer::Get<WindowAdapter>().DestroyWindow(property_->GetWindowId());
-    if (ret != WMError::WM_OK) {
-        WLOGFE("destroy window failed with errCode:%{public}d", static_cast<int32_t>(ret));
-        return ret;
-    }
     windowMap_.erase(GetWindowName());
     DestroySubWindow();
     DestroyFloatingWindow();
     HandleKeepScreenOn(false);
-
-    state_ = WindowState::STATE_DESTROYED;
-    InputTransferStation::GetInstance().RemoveInputWindow(this);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        state_ = WindowState::STATE_DESTROYED;
+        VsyncStation::GetInstance().RemoveCallback(VsyncStation::CallbackType::CALLBACK_FRAME, callback_);
+    }
     return ret;
 }
 
@@ -908,7 +912,7 @@ WMError WindowImpl::RequestFocus() const
     return SingletonContainer::Get<WindowAdapter>().RequestFocus(property_->GetWindowId());
 }
 
-void WindowImpl::AddInputEventListener(std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener)
+void WindowImpl::AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener)
 {
     InputTransferStation::GetInstance().SetInputListener(GetWindowId(), inputEventListener);
 }
@@ -1293,6 +1297,11 @@ void WindowImpl::OnVsync(int64_t timeStamp)
 
 void WindowImpl::RequestFrame()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (state_ == WindowState::STATE_DESTROYED) {
+        WLOGFE("RequestFrame failed, window is destroyed");
+        return;
+    }
     VsyncStation::GetInstance().RequestVsync(VsyncStation::CallbackType::CALLBACK_FRAME, callback_);
 }
 
