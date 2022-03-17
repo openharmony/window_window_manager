@@ -92,7 +92,7 @@ void WindowLayoutPolicyCascade::LayoutWindowTree()
     }
 }
 
-void WindowLayoutPolicyCascade::UpdateWindowNode(sptr<WindowNode>& node)
+void WindowLayoutPolicyCascade::UpdateWindowNode(sptr<WindowNode>& node, bool isAddWindow)
 {
     WM_FUNCTION_TRACE();
     auto type = node->GetWindowType();
@@ -106,6 +106,13 @@ void WindowLayoutPolicyCascade::UpdateWindowNode(sptr<WindowNode>& node)
         WLOGFI("UpdateDividerRects WinId: %{public}u, Rect: %{public}d %{public}d %{public}u %{public}u",
             node->GetWindowId(), splitDockerRect.posX_, splitDockerRect.posY_,
             splitDockerRect.width_, splitDockerRect.height_);
+        if (!isAddWindow) {
+            for (auto& childNode : appWindowNode_->children_) { // update split node size change reason
+                if (childNode->IsSplitMode()) {
+                    childNode->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
+                }
+            }
+        }
         LayoutWindowTree();
     } else { // layout single window
         LayoutWindowNode(node);
@@ -126,7 +133,7 @@ void WindowLayoutPolicyCascade::AddWindowNode(sptr<WindowNode>& node)
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         node->SetWindowRect(dividerRect_); // init divider bar
     }
-    UpdateWindowNode(node); // currently, update and add do the same process
+    UpdateWindowNode(node, true); // currently, update and add do the same process
 }
 
 static bool IsLayoutChanged(const Rect& l, const Rect& r)
@@ -186,26 +193,24 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(sptr<WindowNode>& node)
 {
     auto type = node->GetWindowType();
     auto mode = node->GetWindowMode();
-    auto flags = node->GetWindowFlags();
     auto property = node->GetWindowProperty();
     if (property == nullptr) {
         WLOGFE("window property is nullptr.");
         return;
     }
-    auto decorEnbale = property->GetDecorEnable();
-    bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-    bool parentLimit = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
+
+    bool needAvoid = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+    bool parentLimit = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
     bool subWindow = WindowHelper::IsSubWindow(type);
     bool floatingWindow = (mode == WindowMode::WINDOW_MODE_FLOATING);
-    const Rect& layoutRect = node->GetLayoutRect();
-    Rect lastRect = layoutRect;
+    const Rect lastLayoutRect = node->GetLayoutRect();
     Rect displayRect = GetDisplayRect(mode);
     Rect limitRect = displayRect;
     Rect winRect = property->GetWindowRect();
 
     WLOGFI("Id:%{public}u, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
         "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-        node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnbale,
+        node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, property->GetDecorEnable(),
         static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     if (needAvoid) {
         limitRect = GetLimitRect(mode);
@@ -232,8 +237,12 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(sptr<WindowNode>& node)
     node->SetLayoutRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
 
-    if (IsLayoutChanged(lastRect, winRect) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
+    if (IsLayoutChanged(lastLayoutRect, winRect) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        auto reason = node->GetWindowSizeChangeReason();
+        node->GetWindowToken()->UpdateWindowRect(node->GetLayoutRect(), reason);
+        if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
+            node->ResetWindowSizeChangeReason();
+        }
     }
     // update node bounds
     if (node->surfaceNode_ != nullptr) {

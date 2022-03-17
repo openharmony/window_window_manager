@@ -39,7 +39,7 @@ public:
     virtual void AddWindowNode(sptr<WindowNode>& node);
     virtual void LayoutWindowTree();
     virtual void RemoveWindowNode(sptr<WindowNode>& node);
-    virtual void UpdateWindowNode(sptr<WindowNode>& node);
+    virtual void UpdateWindowNode(sptr<WindowNode>& node, bool isAddWindow = false);
     virtual void UpdateLayoutRect(sptr<WindowNode>& node) = 0;
     void UpdateDefaultFoatingRect();
     float GetVirtualPixelRatio() const;

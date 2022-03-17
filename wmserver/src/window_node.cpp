@@ -102,6 +102,11 @@ void WindowNode::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
     windowSizeChangeReason_ = reason;
 }
 
+void WindowNode::ResetWindowSizeChangeReason()
+{
+    windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+}
+
 const sptr<IWindow>& WindowNode::GetWindowToken() const
 {
     return windowToken_;
