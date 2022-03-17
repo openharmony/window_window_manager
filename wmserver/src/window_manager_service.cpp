@@ -241,10 +241,16 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId id, DisplayStateChang
     WindowManagerService::GetInstance().NotifyDisplayStateChange(id, type);
 }
 
-void WindowManagerService::ProcessWindowTouchedEvent(uint32_t windowId)
+void WindowManagerService::ProcessPointDown(uint32_t windowId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    windowController_->ProcessWindowTouchedEvent(windowId);
+    windowController_->ProcessPointDown(windowId);
+}
+
+void WindowManagerService::ProcessPointUp(uint32_t windowId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    windowController_->ProcessPointUp(windowId);
 }
 
 void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)

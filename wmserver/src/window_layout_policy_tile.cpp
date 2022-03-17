@@ -97,7 +97,7 @@ void WindowLayoutPolicyTile::AddWindowNode(sptr<WindowNode>& node)
     }
 }
 
-void WindowLayoutPolicyTile::UpdateWindowNode(sptr<WindowNode>& node)
+void WindowLayoutPolicyTile::UpdateWindowNode(sptr<WindowNode>& node, bool isAddWindow)
 {
     WM_FUNCTION_TRACE();
     WindowLayoutPolicy::UpdateWindowNode(node);
@@ -247,7 +247,11 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
     node->SetLayoutRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
     if (!(lastRect == winRect)) {
-        node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
+        auto reason = node->GetWindowSizeChangeReason();
+        node->GetWindowToken()->UpdateWindowRect(winRect, reason);
+        if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
+            node->ResetWindowSizeChangeReason();
+        }
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     }
 }
