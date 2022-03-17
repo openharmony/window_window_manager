@@ -23,15 +23,14 @@ namespace OHOS {
 namespace Rosen {
 class MockWindowAdapter : public WindowAdapter {
 public:
-    MOCK_METHOD4(CreateWindow, WMError(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
-        std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId));
+    MOCK_METHOD5(CreateWindow, WMError(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
+        std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject> &token));
     MOCK_METHOD1(AddWindow, WMError(sptr<WindowProperty>& windowProperty));
     MOCK_METHOD1(RemoveWindow, WMError(uint32_t windowId));
     MOCK_METHOD0(ClearWindowAdapter, void());
     MOCK_METHOD1(DestroyWindow, WMError(uint32_t windowId));
     MOCK_METHOD2(SetWindowBackgroundBlur, WMError(uint32_t windowId, WindowBlurLevel level));
     MOCK_METHOD2(SetAlpha, WMError(uint32_t windowId, float alpha));
-    MOCK_METHOD2(SaveAbilityToken, WMError(const sptr<IRemoteObject>& abilityToken, uint32_t windowId));
     MOCK_METHOD2(UpdateProperty, WMError(sptr<WindowProperty>& windowProperty, PropertyChangeAction action));
     MOCK_METHOD1(MaxmizeWindow, WMError(uint32_t windowId));
 };
