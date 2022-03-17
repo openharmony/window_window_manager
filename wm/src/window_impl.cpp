@@ -1408,40 +1408,40 @@ void WindowImpl::UpdateDisplayId(DisplayId from, DisplayId to)
     property_->SetDisplayId(to);
 }
 
-void WindowImpl::SetDefaultOption()
+Rect WindowImpl::GetSystemAlarmWindowDefaultSize(Rect defaultRect)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
-        return;
+        return defaultRect;
     }
     uint32_t width = static_cast<uint32_t>(display->GetWidth());
     uint32_t height = static_cast<uint32_t>(display->GetHeight());
     WLOGFI("width:%{public}u, height:%{public}u, displayId:%{public}" PRIu64"",
         width, height, property_->GetDisplayId());
-
     Rect rect;
+    uint32_t alarmWidth = static_cast<uint32_t>((static_cast<float>(width) *
+        SYSTEM_ALARM_WINDOW_WIDTH_RATIO));
+    uint32_t alarmHeight = static_cast<uint32_t>((static_cast<float>(height) *
+        SYSTEM_ALARM_WINDOW_HEIGHT_RATIO));
+
+    rect = { static_cast<int32_t>((width - alarmWidth) / 2), static_cast<int32_t>((height - alarmHeight) / 2),
+                alarmWidth, alarmHeight }; // devided by 2 to middle the window
+    return rect;
+}
+
+void WindowImpl::SetDefaultOption()
+{
     switch (property_->GetWindowType()) {
-        case WindowType::WINDOW_TYPE_STATUS_BAR: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-            property_->SetFocusable(false);
-            break;
-        }
+        case WindowType::WINDOW_TYPE_STATUS_BAR:
         case WindowType::WINDOW_TYPE_NAVIGATION_BAR: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetFocusable(false);
             break;
         }
         case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW: {
-            uint32_t alarmWidth = static_cast<uint32_t>((static_cast<float>(width) *
-                SYSTEM_ALARM_WINDOW_WIDTH_RATIO));
-            uint32_t alarmHeight = static_cast<uint32_t>((static_cast<float>(height) *
-                SYSTEM_ALARM_WINDOW_HEIGHT_RATIO));
-
-            rect = { static_cast<int32_t>((width - alarmWidth) / 2), static_cast<int32_t>((height - alarmHeight) / 2),
-                     alarmWidth, alarmHeight };
-            property_->SetWindowRect(rect);
+            property_->SetWindowRect(GetSystemAlarmWindowDefaultSize(property_->GetWindowRect()));
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }

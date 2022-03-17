@@ -95,11 +95,11 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             // prepare reply data
             uint32_t avoidAreaNum = static_cast<uint32_t>(avoidArea.size());
             reply.WriteUint32(avoidAreaNum);
-            for (uint32_t i = 0; i < avoidAreaNum; ++i) {
-                reply.WriteInt32(avoidArea[i].posX_);
-                reply.WriteInt32(avoidArea[i].posY_);
-                reply.WriteUint32(avoidArea[i].width_);
-                reply.WriteUint32(avoidArea[i].height_);
+            for (auto avoid : avoidArea) {
+                reply.WriteInt32(avoid.posX_);
+                reply.WriteInt32(avoid.posY_);
+                reply.WriteUint32(avoid.width_);
+                reply.WriteUint32(avoid.height_);
             }
             break;
         }
