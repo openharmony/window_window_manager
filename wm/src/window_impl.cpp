@@ -971,9 +971,6 @@ void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reas
     WLOGFI("winId:%{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], vpr:%{public}f, reason:%{public}u",
         GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, virtualPixelRatio, reason);
     property_->SetWindowRect(rect);
-    if (reason == WindowSizeChangeReason::HIDE) { // if hide, no follow-up notification required
-        return;
-    }
     WLOGFI("sizeChange callback size: %{public}u", windowChangeListeners_.size());
     for (auto& listener : windowChangeListeners_) {
         if (listener != nullptr) {
