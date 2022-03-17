@@ -1082,6 +1082,7 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, bool r
         layoutPolicy_->Reorder();
         DumpScreenWindowTree();
     }
+    NotifyIfSystemBarTintChanged();
     return WMError::WM_OK;
 }
 
