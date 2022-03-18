@@ -210,6 +210,7 @@ std::vector<Rect> WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, Avoi
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    const uint32_t maxAvoidNum = 4;
 
     std::vector<Rect> avoidArea;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
@@ -232,13 +233,23 @@ std::vector<Rect> WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, Avoi
     }
 
     uint32_t avoidNum = reply.ReadUint32();
+    if (avoidNum != maxAvoidNum) {
+        WLOGFE("Read len fail. AvoidArea size != 4");
+        return avoidArea;
+    }
+    avoidArea.resize(avoidNum);
+    if (avoidArea.size() < avoidNum) {
+        WLOGFE("Fail to resize avoidArea.");
+        return avoidArea;
+    }
+    bool readVectorRes = true;
     for (uint32_t i = 0; i < avoidNum; ++i) {
-        int32_t x = reply.ReadInt32();
-        int32_t y = reply.ReadInt32();
-        uint32_t w = reply.ReadUint32();
-        uint32_t h = reply.ReadUint32();
-        Rect rect = {x, y, w, h};
-        avoidArea.push_back(rect);
+        readVectorRes = reply.ReadInt32(avoidArea[i].posX_) && reply.ReadInt32(avoidArea[i].posY_) &&
+            reply.ReadUint32(avoidArea[i].width_) && reply.ReadUint32(avoidArea[i].height_);
+        if (!readVectorRes) {
+            WLOGFE("Fail to ReadInt32. index:%{public}u, nums:%{public}u", i, avoidNum);
+            return avoidArea;
+        }
     }
     return avoidArea;
 }

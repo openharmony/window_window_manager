@@ -210,6 +210,7 @@ private:
     WMError UpdateProperty(PropertyChangeAction action);
     WMError Destroy(bool needNotifyServer);
     void HandleKeepScreenOn(bool keepScreenOn);
+    Rect GetSystemAlarmWindowDefaultSize(Rect defaultRect);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
