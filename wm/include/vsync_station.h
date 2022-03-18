@@ -59,7 +59,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> vsyncHandler_ = nullptr;
     std::mutex mtx_;
     bool hasRequestedVsync_ = false;
-    bool isMainHandlerAvailable_ = true;
+    bool isMainHandlerAvailable_ = false;
     uint32_t vsyncCount_ = 0;
     std::map<CallbackType, std::unordered_set<std::shared_ptr<VsyncCallback>>> vsyncCallbacks_ = {
         {CallbackType::CALLBACK_INPUT, {}},
