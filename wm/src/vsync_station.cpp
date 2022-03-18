@@ -68,7 +68,7 @@ void VsyncStation::RequestVsync(CallbackType type, const std::shared_ptr<VsyncCa
 
 void VsyncStation::RemoveCallback(CallbackType type, const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
-    WLOGFE("Remove callback, type: %{public}u", type);
+    WLOGFI("Remove callback, type: %{public}u", type);
     std::lock_guard<std::mutex> lock(mtx_);
     auto iter = vsyncCallbacks_.find(type);
     if (iter == vsyncCallbacks_.end()) {
