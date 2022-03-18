@@ -443,7 +443,6 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     windowSizeChangeReason_ = property->windowSizeChangeReason_;
     sysBarPropMap_ = property->sysBarPropMap_;
     isDecorEnable_ = property->isDecorEnable_;
-    isDecorEnable_ = property->isDecorEnable_;
     tokenState_ = property->tokenState_;
 }
 }

@@ -124,7 +124,7 @@ NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackI
         WLOGFE("JsWindowStage::OnSetUIContent failed to convert parameter to url");
         return engine.CreateUndefined();
     }
-    WLOGFI("JsWindowStage::OnSetUIContent Get url: %{public}s", contextUrl.c_str());
+    WLOGFI("JsWindowStage::OnSetUIContent Get url");
 
     windowScene_->GetMainWindow()->SetUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
 
