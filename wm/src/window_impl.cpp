@@ -704,7 +704,7 @@ WMError WindowImpl::Hide(uint32_t reason)
     }
     WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
     if (stateChangeReason == WindowStateChangeReason::KEYGUARD) {
-        state_ = WindowState::STATE_HIDDEN;
+        state_ = WindowState::STATE_FROZEN;
         NotifyAfterBackground();
         return WMError::WM_OK;
     }
@@ -1297,7 +1297,7 @@ void WindowImpl::UpdateWindowState(WindowState state)
                 AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(abilityContext_->GetToken(),
                     static_cast<uint32_t>(WindowStateChangeReason::KEYGUARD));
             } else {
-                state_ = WindowState::STATE_HIDDEN;
+                state_ = WindowState::STATE_FROZEN;
                 NotifyAfterBackground();
             }
             break;
