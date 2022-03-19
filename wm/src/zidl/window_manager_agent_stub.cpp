@@ -44,6 +44,10 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
         }
         case TRANS_ID_UPDATE_FOCUS: {
             sptr<FocusChangeInfo> info = data.ReadParcelable<FocusChangeInfo>();
+            if (!info) {
+                WLOGFE("info is null.");
+                break;
+            }
             info->abilityToken_ = data.ReadRemoteObject();
             bool focused = data.ReadBool();
             UpdateFocusChangeInfo(info, focused);
@@ -74,6 +78,10 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
         }
         case TRANS_ID_UPDATE_WINDOW_STATUS: {
             sptr<AccessibilityWindowInfo> windowInfo = data.ReadParcelable<AccessibilityWindowInfo>();
+            if (!windowInfo) {
+                WLOGFE("windowInfo is null.");
+                break;
+            }
             WindowUpdateType type = static_cast<WindowUpdateType>(data.ReadUint32());
             NotifyAccessibilityWindowInfo(windowInfo, type);
             break;
@@ -92,6 +100,10 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             }
             for (uint32_t i = 0; i < size; ++i) {
                 sptr<WindowVisibilityInfo> info = data.ReadParcelable<WindowVisibilityInfo>();
+                if (!info) {
+                    WLOGFE("info is null.");
+                    break;
+                }
                 windowVisibilityInfos.emplace_back(info);
             }
             UpdateWindowVisibilityInfo(windowVisibilityInfos);
