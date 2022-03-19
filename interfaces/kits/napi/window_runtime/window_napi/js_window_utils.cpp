@@ -28,6 +28,150 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowUtils"};
 }
 
+NativeValue* WindowTypeInit(NativeEngine* engine)
+{
+    WLOGFI("WindowTypeInit");
+
+    if (engine == nullptr) {
+        WLOGFE("Invalid input parameters");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("TYPE_APP", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_APP)));
+    object->SetProperty("TYPE_SYSTEM_ALERT", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_SYSTEM_ALERT)));
+    object->SetProperty("TYPE_INPUT_METHOD", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_INPUT_METHOD)));
+    object->SetProperty("TYPE_STATUS_BAR", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_STATUS_BAR)));
+    object->SetProperty("TYPE_PANEL", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_PANEL)));
+    object->SetProperty("TYPE_KEYGUARD", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_KEYGUARD)));
+    object->SetProperty("TYPE_VOLUME_OVERLAY", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_VOLUME_OVERLAY)));
+    object->SetProperty("TYPE_NAVIGATION_BAR", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_NAVIGATION_BAR)));
+    object->SetProperty("TYPE_FLOAT", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_FLOAT)));
+    return objValue;
+}
+
+NativeValue* AvoidAreaTypeInit(NativeEngine* engine)
+{
+    WLOGFI("AvoidAreaTypeInit");
+
+    if (engine == nullptr) {
+        WLOGFE("Invalid input parameters");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("TYPE_SYSTEM", CreateJsValue(*engine,
+        static_cast<int32_t>(AvoidAreaType::TYPE_SYSTEM)));
+    object->SetProperty("TYPE_CUTOUT", CreateJsValue(*engine,
+        static_cast<int32_t>(AvoidAreaType::TYPE_CUTOUT)));
+    return objValue;
+}
+
+NativeValue* WindowModeInit(NativeEngine* engine)
+{
+    WLOGFI("WindowModeInit");
+
+    if (engine == nullptr) {
+        WLOGFE("Invalid input parameters");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("UNDEFINED", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowMode::UNDEFINED)));
+    object->SetProperty("FULLSCREEN", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowMode::FULLSCREEN)));
+    object->SetProperty("PRIMARY", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowMode::PRIMARY)));
+    object->SetProperty("SECONDARY", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowMode::SECONDARY)));
+    object->SetProperty("FLOATING", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowMode::FLOATING)));
+    return objValue;
+}
+
+NativeValue* ColorSpaceInit(NativeEngine* engine)
+{
+    WLOGFI("ColorSpaceInit");
+
+    if (engine == nullptr) {
+        WLOGFE("Invalid input parameters");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("DEFAULT", CreateJsValue(*engine,
+        static_cast<int32_t>(ColorSpace::COLOR_SPACE_DEFAULT)));
+    object->SetProperty("WIDE_GAMUT", CreateJsValue(*engine,
+        static_cast<int32_t>(ColorSpace::COLOR_SPACE_WIDE_GAMUT)));
+    return objValue;
+}
+
+NativeValue* WindowStageEventTypeInit(NativeEngine* engine)
+{
+    WLOGFI("WindowStageEventTypeInit");
+
+    if (engine == nullptr) {
+        WLOGFE("Invalid input parameters");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("FOREGROUND", CreateJsValue(*engine,
+        static_cast<int32_t>(LifeCycleEventType::FOREGROUND)));
+    object->SetProperty("ACTIVE", CreateJsValue(*engine,
+        static_cast<int32_t>(LifeCycleEventType::ACTIVE)));
+    object->SetProperty("INACTIVE", CreateJsValue(*engine,
+        static_cast<int32_t>(LifeCycleEventType::INACTIVE)));
+    object->SetProperty("BACKGROUND", CreateJsValue(*engine,
+        static_cast<int32_t>(LifeCycleEventType::BACKGROUND)));
+    return objValue;
+}
+
 NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect)
 {
     NativeValue* objValue = engine.CreateObject();

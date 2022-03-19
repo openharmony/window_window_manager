@@ -24,7 +24,7 @@ namespace Rosen {
 class MockWindowAdapter : public WindowAdapter {
 public:
     MOCK_METHOD5(CreateWindow, WMError(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
-        std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject> &token));
+        std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject>& token));
     MOCK_METHOD1(AddWindow, WMError(sptr<WindowProperty>& windowProperty));
     MOCK_METHOD1(RemoveWindow, WMError(uint32_t windowId));
     MOCK_METHOD0(ClearWindowAdapter, void());
