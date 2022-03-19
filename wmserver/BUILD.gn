@@ -109,7 +109,3 @@ ohos_shared_library("libwms") {
   subsystem_name = "window"
 }
 
-group("test") {
-  testonly = true
-  deps = [ "test:test" ]
-}
