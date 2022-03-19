@@ -15,6 +15,7 @@
 
 #include "zidl/display_manager_agent_proxy.h"
 #include <ipc_types.h>
+#include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -149,17 +150,9 @@ void DisplayManagerAgentProxy::OnScreenGroupChange(
         return;
     }
 
-    size_t size = screenInfos.size();
-    if (!data.WriteUint32(size)) {
-        WLOGFE("Write creenInfos' size failed");
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
+        WLOGFE("Write screenInfos failed");
         return;
-    }
-
-    for (size_t i = 0; i < size; i++) {
-        if (!data.WriteParcelable(screenInfos[i].GetRefPtr())) {
-            WLOGFE("Write screenInfos[%{public}zu] size failed", i);
-            return;
-        }
     }
 
     if (!data.WriteUint32(static_cast<uint32_t>(event))) {
