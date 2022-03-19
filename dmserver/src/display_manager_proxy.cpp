@@ -19,6 +19,7 @@
 #include <ipc_types.h>
 #include <parcel.h>
 
+#include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -308,12 +309,14 @@ DMError DisplayManagerProxy::GetScreenSupportedColorGamuts(ScreenId screenId,
     if (ret != DMError::DM_OK) {
         return ret;
     }
-    uint32_t size = reply.ReadUint32();
-    colorGamuts.clear();
-    for (uint32_t i = 0; i < size; i++) {
-        ScreenColorGamut colorGamut = static_cast<ScreenColorGamut>(reply.ReadUint32());
-        colorGamuts.emplace_back(colorGamut);
-    }
+    MarshallingHelper::UnmarshallingVectorObj<ScreenColorGamut>(reply, colorGamuts,
+        [](Parcel& parcel, ScreenColorGamut& color) {
+            uint32_t value;
+            bool res = parcel.ReadUint32(value);
+            color = static_cast<ScreenColorGamut>(value);
+            return res;
+        }
+    );
     return ret;
 }
 
@@ -848,11 +851,7 @@ std::vector<sptr<ScreenInfo>> DisplayManagerProxy::GetAllScreenInfos()
         return screenInfos;
     }
 
-    uint32_t nums = reply.ReadUint32();
-    for (uint32_t i = 0; i < nums; ++i) {
-        sptr<ScreenInfo> info = reply.ReadStrongParcelable<ScreenInfo>();
-        screenInfos.emplace_back(info);
-    }
+    MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos);
     return screenInfos;
 }
 
@@ -875,16 +874,11 @@ ScreenId DisplayManagerProxy::MakeExpand(std::vector<ScreenId> screenId, std::ve
         WLOGFE("MakeExpand: write screenId failed");
         return SCREEN_ID_INVALID;
     }
-    uint32_t num = startPoint.size();
-    if (!data.WriteUint32(num)) {
-        WLOGFE("MakeExpand: write startPoint size failed");
+    if (!MarshallingHelper::MarshallingVectorObj<Point>(data, startPoint, [](Parcel& parcel, const Point& point) {
+            return parcel.WriteInt32(point.posX_) && parcel.WriteInt32(point.posY_);
+        })) {
+        WLOGFE("MakeExpand: write startPoint failed");
         return SCREEN_ID_INVALID;
-    }
-    for (auto point: startPoint) {
-        if (!(data.WriteInt32(point.posX_) && data.WriteInt32(point.posY_))) {
-            WLOGFE("MakeExpand: write startPoint failed");
-            return SCREEN_ID_INVALID;
-        }
     }
     if (remote->SendRequest(TRANS_ID_SCREEN_MAKE_EXPAND, data, reply, option) != ERR_NONE) {
         WLOGFE("MakeExpand: SendRequest failed");

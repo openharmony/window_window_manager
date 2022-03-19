@@ -15,6 +15,7 @@
 
 #include "zidl/display_manager_agent_stub.h"
 #include "ipc_skeleton.h"
+#include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -70,26 +71,9 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
         }
         case TRANS_ID_ON_SCREENGROUP_CHANGED: {
             std::vector<sptr<ScreenInfo>> screenInfos;
-            uint32_t size;
-            if (!data.ReadUint32(size)) {
-                WLOGFE("Read ScreenChangeEvent failed");
+            if (!MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
+                WLOGFE("Read ScreenInfo failed");
                 return -1;
-            }
-            if (size > data.GetReadableBytes() || size > screenInfos.max_size()) {
-                WLOGE("fail to receive screenInfos size.");
-                break;
-            }
-            bool readVectorRes = true;
-            for (uint32_t i = 0; i < size; i++) {
-                sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
-                if (screenInfo == nullptr) {
-                    readVectorRes = false;
-                    break;
-                }
-                screenInfos.push_back(screenInfo);
-            }
-            if (!readVectorRes) {
-                break;
             }
             uint32_t event;
             if (!data.ReadUint32(event)) {

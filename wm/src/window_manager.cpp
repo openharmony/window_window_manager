@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include "foundation/windowmanager/interfaces/innerkits/wm/window_manager.h"
+#include "window_manager.h"
 
 #include <algorithm>
 #include <cinttypes>
 
+#include "marshalling_helper.h"
 #include "window_adapter.h"
 #include "window_manager_agent.h"
 #include "window_manager_hilog.h"
@@ -72,43 +73,20 @@ WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
 
 bool AccessibilityWindowInfo::Marshalling(Parcel &parcel) const
 {
-    return parcel.WriteParcelable(currentWindowInfo_) && VectorMarshalling(parcel);
+    return parcel.WriteParcelable(currentWindowInfo_) &&
+        MarshallingHelper::MarshallingVectorParcelableObj<WindowInfo>(parcel, windowList_);
 }
 
 AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel &parcel)
 {
     AccessibilityWindowInfo* accessibilityWindowInfo = new AccessibilityWindowInfo();
     accessibilityWindowInfo->currentWindowInfo_ = parcel.ReadParcelable<WindowInfo>();
-    VectorUnmarshalling(parcel, accessibilityWindowInfo);
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowInfo>(parcel,
+        accessibilityWindowInfo->windowList_)) {
+        delete accessibilityWindowInfo;
+        return nullptr;
+    }
     return accessibilityWindowInfo;
-}
-
-bool AccessibilityWindowInfo::VectorMarshalling(Parcel& parcel) const
-{
-    auto size = windowList_.size();
-    if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
-        return false;
-    }
-    for (auto window : windowList_) {
-        if (!parcel.WriteParcelable(window)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void AccessibilityWindowInfo::VectorUnmarshalling(Parcel& parcel, AccessibilityWindowInfo* windowInfo)
-{
-    std::vector<sptr<WindowInfo>> windows;
-    uint32_t size = parcel.ReadUint32();
-    for (uint32_t i = 0; i < size; i++) {
-        WindowInfo* window = parcel.ReadParcelable<WindowInfo>();
-        if (!window) {
-            WLOGE("ReadParcelable Failed!");
-            return;
-        }
-        windowInfo->windowList_.emplace_back(window);
-    }
 }
 
 bool FocusChangeInfo::Marshalling(Parcel &parcel) const
@@ -214,6 +192,10 @@ void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const Syst
 void WindowManager::Impl::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
     WindowUpdateType type) const
 {
+    if (windowInfo == nullptr) {
+        WLOGFE("windowInfo is nullptr");
+        return;
+    }
     WLOGFI("NotifyAccessibilityWindowInfo: wid[%{public}d],width[%{public}d], \
         height[%{public}d],positionX[%{public}d],positionY[%{public}d],\
         isFocused[%{public}d],mode[%{public}d],type[%{public}d]",
@@ -269,6 +251,11 @@ void WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListene
     }
 
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(), listener);
+    if (iter != pImpl_->focusChangedListeners_.end()) {
+        WLOGFI("Listener is already registered.");
+        return;
+    }
     pImpl_->focusChangedListeners_.push_back(listener);
     if (pImpl_->focusChangedListenerAgent_ == nullptr) {
         pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
@@ -306,6 +293,12 @@ void WindowManager::RegisterSystemBarChangedListener(const sptr<ISystemBarChange
     }
 
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->systemBarChangedListeners_.begin(), pImpl_->systemBarChangedListeners_.end(),
+        listener);
+    if (iter != pImpl_->systemBarChangedListeners_.end()) {
+        WLOGFI("Listener is already registered.");
+        return;
+    }
     pImpl_->systemBarChangedListeners_.push_back(listener);
     if (pImpl_->systemBarChangedListenerAgent_ == nullptr) {
         pImpl_->systemBarChangedListenerAgent_ = new WindowManagerAgent();
@@ -359,6 +352,11 @@ void WindowManager::RegisterWindowUpdateListener(const sptr<IWindowUpdateListene
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->windowUpdateListeners_.begin(), pImpl_->windowUpdateListeners_.end(), listener);
+    if (iter != pImpl_->windowUpdateListeners_.end()) {
+        WLOGFI("Listener is already registered.");
+        return;
+    }
     pImpl_->windowUpdateListeners_.emplace_back(listener);
     if (pImpl_->windowUpdateListenerAgent_ == nullptr) {
         pImpl_->windowUpdateListenerAgent_ = new WindowManagerAgent();
@@ -374,8 +372,7 @@ void WindowManager::UnregisterWindowUpdateListener(const sptr<IWindowUpdateListe
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
-    auto iter = std::find(pImpl_->windowUpdateListeners_.begin(), pImpl_->windowUpdateListeners_.end(),
-        listener);
+    auto iter = std::find(pImpl_->windowUpdateListeners_.begin(), pImpl_->windowUpdateListeners_.end(), listener);
     if (iter == pImpl_->windowUpdateListeners_.end()) {
         WLOGFE("could not find this listener");
         return;
@@ -395,6 +392,12 @@ void WindowManager::RegisterVisibilityChangedListener(const sptr<IVisibilityChan
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->windowVisibilityListeners_.begin(), pImpl_->windowVisibilityListeners_.end(),
+        listener);
+    if (iter != pImpl_->windowVisibilityListeners_.end()) {
+        WLOGFI("Listener is already registered.");
+        return;
+    }
     pImpl_->windowVisibilityListeners_.emplace_back(listener);
     if (pImpl_->windowVisibilityListenerAgent_ == nullptr) {
         pImpl_->windowVisibilityListenerAgent_ = new WindowManagerAgent();
@@ -436,6 +439,10 @@ void WindowManager::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObjec
 
 void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const
 {
+    if (focusChangeInfo == nullptr) {
+        WLOGFE("focusChangeInfo is nullptr.");
+        return;
+    }
     WLOGFI("window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
     if (focused) {
         pImpl_->NotifyFocused(focusChangeInfo);
