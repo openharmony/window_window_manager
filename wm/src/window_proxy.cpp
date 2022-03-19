@@ -181,6 +181,24 @@ void WindowProxy::UpdateDisplayId(DisplayId from, DisplayId to)
         WLOGFE("SendRequest TRANS_ID_UPDATE_DISPLAY_ID failed");
     }
 }
+
+void WindowProxy::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteParcelable(info)) {
+        WLOGFE("Write OccupiedAreaChangeInfo failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_UPDATE_OCCUPIED_AREA, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 
