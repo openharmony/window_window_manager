@@ -65,6 +65,30 @@ bool WindowRoot::CheckDisplayInfo(const sptr<DisplayInfo>& display)
     return true;
 }
 
+void WindowRoot::NotifyKeyboardSizeChangeInfo(const sptr<WindowNode>& node,
+    const sptr<WindowNodeContainer>& container, Rect rect)
+{
+    if (node == nullptr || container == nullptr) {
+        WLOGFE("invalid parameter");
+        return;
+    }
+
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return;
+    }
+    auto focusWindow = GetWindowNode(container->GetFocusWindow());
+    if (focusWindow != nullptr && (focusWindow->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN ||
+        focusWindow->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        focusWindow->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+        focusWindow->GetWindowToken() != nullptr) {
+        WLOGFI("keyboard size change callWindow: %{public}u, " \
+            "input rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+            focusWindow->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+        sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, rect);
+        focusWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
+    }
+}
+
 void WindowRoot::NotifyDisplayRemoved(DisplayId displayId)
 {
     auto container = GetOrCreateWindowNodeContainer(displayId);
@@ -193,6 +217,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
         container->SetFocusWindow(node->GetWindowId());
         needCheckFocusWindow = true;
     }
+    NotifyKeyboardSizeChangeInfo(node, container, node->GetLayoutRect());
     return res;
 }
 
@@ -209,7 +234,13 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
         return WMError::WM_ERROR_NULLPTR;
     }
     UpdateFocusWindowWithWindowRemoved(node, container);
-    return container->RemoveWindowNode(node);
+
+    WMError res = container->RemoveWindowNode(node);
+    if (res == WMError::WM_OK) {
+        Rect rect = { 0, 0, 0, 0 };
+        NotifyKeyboardSizeChangeInfo(node, container, rect);
+    }
+    return res;
 }
 
 WMError WindowRoot::UpdateWindowNode(uint32_t windowId, WindowUpdateReason reason)
@@ -290,6 +321,10 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
                 if (node != nullptr) {
                     DestroyWindowInner(node);
                 }
+            }
+            if (res == WMError::WM_OK) {
+                Rect rect = { 0, 0, 0, 0 };
+                NotifyKeyboardSizeChangeInfo(node, container, rect);
             }
             return res;
         }
