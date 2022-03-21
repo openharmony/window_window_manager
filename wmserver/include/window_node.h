@@ -81,6 +81,7 @@ public:
     bool currentVisibility_ { false };
     bool hasDecorated_ { false };
     bool isCovered_ { true }; // initial value true to ensure notification when this window is shown
+    bool forceUpdateRect_ { false }; // if true, force to notify client when layout update
 
 private:
     sptr<WindowProperty> property_;
