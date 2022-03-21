@@ -42,7 +42,7 @@ public:
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
-    WMError ProcessPointDown(uint32_t windowId);
+    WMError ProcessPointDown(uint32_t windowId, bool isStartDrag);
     WMError ProcessPointUp(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError MaxmizeWindow(uint32_t windowId);
