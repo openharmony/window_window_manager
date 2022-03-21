@@ -15,6 +15,7 @@
 
 #include "zidl/window_manager_agent_stub.h"
 #include "ipc_skeleton.h"
+#include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 
@@ -44,11 +45,9 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
         }
         case TRANS_ID_UPDATE_FOCUS: {
             sptr<FocusChangeInfo> info = data.ReadParcelable<FocusChangeInfo>();
-            if (!info) {
-                WLOGFE("info is null.");
-                break;
+            if (info != nullptr) {
+                info->abilityToken_ = data.ReadRemoteObject();
             }
-            info->abilityToken_ = data.ReadRemoteObject();
             bool focused = data.ReadBool();
             UpdateFocusChangeInfo(info, focused);
             break;
@@ -56,57 +55,41 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
         case TRANS_ID_UPDATE_SYSTEM_BAR_PROPS: {
             DisplayId displayId = data.ReadUint64();
             SystemBarRegionTints tints;
-            uint32_t size = data.ReadUint32();
-            if (size > data.GetReadableBytes() || size > tints.max_size()) {
-                WLOGFE("fail to get SystemBarRegionTints size");
+            bool res = MarshallingHelper::UnmarshallingVectorObj<SystemBarRegionTint>(data, tints,
+                [](Parcel& parcel, SystemBarRegionTint& tint) {
+                    uint32_t type;
+                    SystemBarProperty prop;
+                    Rect region;
+                    bool res = parcel.ReadUint32(type) && parcel.ReadBool(prop.enable_) &&
+                        parcel.ReadUint32(prop.backgroundColor_) && parcel.ReadUint32(prop.contentColor_) &&
+                        parcel.ReadInt32(region.posX_) && parcel.ReadInt32(region.posY_) &&
+                        parcel.ReadUint32(region.width_) && parcel.ReadUint32(region.height_);
+                    tint.type_ = static_cast<WindowType>(type);
+                    tint.prop_ = prop;
+                    tint.region_ = region;
+                    return res;
+                }
+            );
+            if (!res) {
+                WLOGFE("fail to read SystemBarRegionTints.");
                 break;
-            }
-            tints.resize(size);
-            if (tints.size() < size) {
-                WLOGFE("fail to resize SystemBarRegionTints");
-                break;
-            }
-            for (uint32_t i = 0; i < size; i++) {
-                WindowType type = static_cast<WindowType>(data.ReadUint32());
-                SystemBarProperty prop = { data.ReadBool(), data.ReadUint32(), data.ReadUint32() };
-                Rect region = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
-                SystemBarRegionTint tint(type, prop, region);
-                tints.emplace_back(tint);
             }
             UpdateSystemBarRegionTints(displayId, tints);
             break;
         }
         case TRANS_ID_UPDATE_WINDOW_STATUS: {
             sptr<AccessibilityWindowInfo> windowInfo = data.ReadParcelable<AccessibilityWindowInfo>();
-            if (!windowInfo) {
-                WLOGFE("windowInfo is null.");
-                break;
-            }
             WindowUpdateType type = static_cast<WindowUpdateType>(data.ReadUint32());
             NotifyAccessibilityWindowInfo(windowInfo, type);
             break;
         }
         case TRANS_ID_UPDATE_WINDOW_VISIBILITY: {
-            uint32_t size = data.ReadUint32();
-            std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
-            if (size > data.GetReadableBytes() || size > windowVisibilityInfos.max_size()) {
-                WLOGFE("fail to get windowVisibilityInfos size.");
+            std::vector<sptr<WindowVisibilityInfo>> infos;
+            if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowVisibilityInfo>(data, infos)) {
+                WLOGFE("fail to read WindowVisibilityInfo.");
                 break;
             }
-            windowVisibilityInfos.resize(size);
-            if (windowVisibilityInfos.size() < size) {
-                WLOGFE("fail to resize windowVisibilityInfos.");
-                break;
-            }
-            for (uint32_t i = 0; i < size; ++i) {
-                sptr<WindowVisibilityInfo> info = data.ReadParcelable<WindowVisibilityInfo>();
-                if (!info) {
-                    WLOGFE("info is null.");
-                    break;
-                }
-                windowVisibilityInfos.emplace_back(info);
-            }
-            UpdateWindowVisibilityInfo(windowVisibilityInfos);
+            UpdateWindowVisibilityInfo(infos);
             break;
         }
         default:

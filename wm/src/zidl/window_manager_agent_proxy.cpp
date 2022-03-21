@@ -15,6 +15,7 @@
 
 #include "zidl/window_manager_agent_proxy.h"
 #include <ipc_types.h>
+#include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 
@@ -112,30 +113,17 @@ void WindowManagerAgentProxy::UpdateSystemBarRegionTints(DisplayId displayId, co
         WLOGFE("Write displayId failed");
         return;
     }
-
-    auto size = tints.size();
-    if (!data.WriteUint32(static_cast<uint32_t>(size))) {
-        WLOGFE("Write vector size failed");
+    bool res = MarshallingHelper::MarshallingVectorObj<SystemBarRegionTint>(data, tints,
+        [](Parcel& parcel, const SystemBarRegionTint& tint) {
+            return parcel.WriteUint32(static_cast<uint32_t>(tint.type_)) && parcel.WriteBool(tint.prop_.enable_) &&
+                parcel.WriteUint32(tint.prop_.backgroundColor_) && parcel.WriteUint32(tint.prop_.contentColor_) &&
+                parcel.WriteInt32(tint.region_.posX_) && parcel.WriteInt32(tint.region_.posY_) &&
+                parcel.WriteInt32(tint.region_.width_) && parcel.WriteInt32(tint.region_.height_);
+        }
+    );
+    if (!res) {
+        WLOGFE("Write SystemBarRegionTint failed");
         return;
-    }
-    for (auto it : tints) {
-        // write key(type)
-        if (!data.WriteUint32(static_cast<uint32_t>(it.type_))) {
-            WLOGFE("Write type failed");
-            return;
-        }
-        // write val(prop)
-        if (!(data.WriteBool(it.prop_.enable_) && data.WriteUint32(it.prop_.backgroundColor_) &&
-            data.WriteUint32(it.prop_.contentColor_))) {
-            WLOGFE("Write prop failed");
-            return;
-        }
-        // write val(region)
-        if (!(data.WriteInt32(it.region_.posX_) && data.WriteInt32(it.region_.posY_) &&
-            data.WriteInt32(it.region_.width_) && data.WriteInt32(it.region_.height_))) {
-            WLOGFE("Write region failed");
-            return;
-        }
     }
     if (Remote()->SendRequest(TRANS_ID_UPDATE_SYSTEM_BAR_PROPS, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");

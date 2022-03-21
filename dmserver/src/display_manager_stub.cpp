@@ -19,6 +19,7 @@
 
 #include <ipc_skeleton.h>
 
+#include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 
 #include "transaction/rs_interfaces.h"
@@ -203,10 +204,8 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
         case TRANS_ID_GET_ALL_SCREEN_INFOS: {
             std::vector<sptr<ScreenInfo>> screenInfos = GetAllScreenInfos();
-            uint32_t nums = static_cast<uint32_t>(screenInfos.size());
-            reply.WriteUint32(nums);
-            for (uint32_t i = 0; i < nums; ++i) {
-                reply.WriteStrongParcelable(screenInfos[i]);
+            if (!MarshallingHelper::MarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos)) {
+                WLOGE("fail to marshalling screenInfos in stub.");
             }
             break;
         }
@@ -222,25 +221,10 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 break;
             }
             std::vector<Point> startPoint;
-            uint32_t nums = data.ReadUint32();
-            if (nums > data.GetReadableBytes() || nums > startPoint.max_size()) {
-                WLOGE("fail to receive startPoint size.");
-                break;
-            }
-            startPoint.resize(nums);
-            if (startPoint.size() < nums) {
-                WLOGE("fail to resize startPoint.");
-                break;
-            }
-            bool readVectorRes = true;
-            for (uint32_t i = 0; i < nums; ++i) {
-                readVectorRes = data.ReadInt32(startPoint[i].posX_) && data.ReadInt32(startPoint[i].posY_);
-                if (!readVectorRes) {
-                    WLOGE("fail to ReadInt32. index:%{public}u, nums:%{public}u", i, nums);
-                    break;
-                }
-            }
-            if (!readVectorRes) {
+            if (!MarshallingHelper::UnmarshallingVectorObj<Point>(data, startPoint, [](Parcel& parcel, Point& point) {
+                    return parcel.ReadInt32(point.posX_) && parcel.ReadInt32(point.posY_);
+                })) {
+                WLOGE("fail to receive startPoint in stub.");
                 break;
             }
             ScreenId result = MakeExpand(screenId, startPoint);
@@ -271,11 +255,11 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             if (ret != DMError::DM_OK) {
                 break;
             }
-            uint32_t size = colorGamuts.size();
-            reply.WriteUint32(size);
-            for (uint32_t i = 0; i < size; i++) {
-                reply.WriteUint32(static_cast<uint32_t>(colorGamuts[i]));
-            }
+            MarshallingHelper::MarshallingVectorObj<ScreenColorGamut>(reply, colorGamuts,
+                [](Parcel& parcel, const ScreenColorGamut& color) {
+                    return parcel.WriteUint32(static_cast<uint32_t>(color));
+                }
+            );
             break;
         }
         case TRANS_ID_SCREEN_GET_COLOR_GAMUT: {
