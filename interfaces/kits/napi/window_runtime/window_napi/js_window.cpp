@@ -521,7 +521,16 @@ NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo&
             WLOGFE("Failed to convert parameter to windowMode");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         } else {
-            winMode = static_cast<WindowMode>(static_cast<uint32_t>(*nativeMode));
+            if (static_cast<uint32_t>(*nativeMode) >= static_cast<uint32_t>(WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
+                winMode = static_cast<WindowMode>(static_cast<uint32_t>(*nativeMode));
+            } else if (static_cast<uint32_t>(*nativeMode) >= static_cast<uint32_t>(ApiWindowMode::UNDEFINED) &&
+                static_cast<uint32_t>(*nativeMode) <= static_cast<uint32_t>(ApiWindowMode::MODE_END)) {
+                winMode = JS_TO_NATIVE_WINDOW_MODE_MAP.at(
+                    static_cast<ApiWindowMode>(static_cast<uint32_t>(*nativeMode)));
+            } else {
+                WLOGFE("Do not surppot this type");
+                errCode = WMError::WM_ERROR_INVALID_PARAM;
+            }
         }
     }
 

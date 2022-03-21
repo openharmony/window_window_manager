@@ -40,6 +40,13 @@ enum class ApiWindowType : uint32_t {
     TYPE_END = TYPE_FLOAT,
 };
 
+enum class LifeCycleEventType : uint32_t {
+    FOREGROUND = 1,
+    ACTIVE,
+    INACTIVE,
+    BACKGROUND,
+};
+
 const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      ApiWindowType::TYPE_APP            },
     { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, ApiWindowType::TYPE_SYSTEM_ALERT   },
@@ -67,14 +74,24 @@ enum class ApiWindowMode : uint32_t {
     FULLSCREEN,
     PRIMARY,
     SECONDARY,
-    FLOATING
+    FLOATING,
+    MODE_END = FLOATING
 };
+
 const std::map<WindowMode, ApiWindowMode> NATIVE_TO_JS_WINDOW_MODE_MAP {
     { WindowMode::WINDOW_MODE_UNDEFINED,       ApiWindowMode::UNDEFINED  },
     { WindowMode::WINDOW_MODE_FULLSCREEN,      ApiWindowMode::FULLSCREEN },
     { WindowMode::WINDOW_MODE_SPLIT_PRIMARY,   ApiWindowMode::PRIMARY    },
     { WindowMode::WINDOW_MODE_SPLIT_SECONDARY, ApiWindowMode::SECONDARY  },
     { WindowMode::WINDOW_MODE_FLOATING,        ApiWindowMode::FLOATING   },
+};
+
+const std::map<ApiWindowMode, WindowMode> JS_TO_NATIVE_WINDOW_MODE_MAP {
+    {ApiWindowMode::UNDEFINED,  WindowMode::WINDOW_MODE_UNDEFINED       },
+    {ApiWindowMode::FULLSCREEN, WindowMode::WINDOW_MODE_FULLSCREEN      },
+    {ApiWindowMode::PRIMARY,    WindowMode::WINDOW_MODE_SPLIT_PRIMARY   },
+    {ApiWindowMode::SECONDARY,  WindowMode::WINDOW_MODE_SPLIT_SECONDARY },
+    {ApiWindowMode::FLOATING,   WindowMode::WINDOW_MODE_FLOATING        },
 };
 
     NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect);
@@ -87,6 +104,11 @@ const std::map<WindowMode, ApiWindowMode> NATIVE_TO_JS_WINDOW_MODE_MAP {
         const SystemBarRegionTints& tints);
     NativeValue* ChangeAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avoidArea);
     bool CheckCallingPermission(std::string permission);
+    NativeValue* WindowTypeInit(NativeEngine* engine);
+    NativeValue* AvoidAreaTypeInit(NativeEngine* engine);
+    NativeValue* WindowModeInit(NativeEngine* engine);
+    NativeValue* ColorSpaceInit(NativeEngine* engine);
+    NativeValue* WindowStageEventTypeInit(NativeEngine* engine);
 }
 }
 #endif
