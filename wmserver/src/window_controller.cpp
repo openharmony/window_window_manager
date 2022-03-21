@@ -294,7 +294,7 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
             uint32_t height = static_cast<uint32_t>(displayInfo->GetHeight() * SYSTEM_BAR_HEIGHT_RATIO);
             Rect newRect = { 0, 0, width, height };
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
-            newRect = { 0, displayInfo->GetHeight() - height, width, height };
+            newRect = { 0, displayInfo->GetHeight() - static_cast<int32_t>(height), width, height };
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
             break;
         }

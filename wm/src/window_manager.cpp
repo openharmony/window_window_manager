@@ -57,7 +57,10 @@ bool WindowInfo::Marshalling(Parcel &parcel) const
 
 WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
 {
-    WindowInfo* windowInfo = new WindowInfo();
+    WindowInfo* windowInfo = new (std::nothrow) WindowInfo();
+    if (windowInfo == nullptr) {
+        return nullptr;
+    }
     bool res = parcel.ReadInt32(windowInfo->wid_) && parcel.ReadUint32(windowInfo->windowRect_.width_) &&
         parcel.ReadUint32(windowInfo->windowRect_.height_) && parcel.ReadInt32(windowInfo->windowRect_.posX_) &&
         parcel.ReadInt32(windowInfo->windowRect_.posY_) && parcel.ReadBool(windowInfo->focused_);
