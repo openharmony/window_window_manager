@@ -45,6 +45,11 @@ void WindowProperty::SetWindowMode(WindowMode mode)
     mode_ = mode;
 }
 
+void WindowProperty::SetLastWindowMode(WindowMode mode)
+{
+    lastMode_ = mode;
+}
+
 void WindowProperty::SetWindowBackgroundBlur(WindowBlurLevel level)
 {
     if (!WindowHelper::IsValidWindowBlurLevel(level)) {
@@ -138,6 +143,11 @@ WindowType WindowProperty::GetWindowType() const
 WindowMode WindowProperty::GetWindowMode() const
 {
     return mode_;
+}
+
+WindowMode WindowProperty::GetLastWindowMode() const
+{
+    return lastMode_;
 }
 
 WindowBlurLevel WindowProperty::GetWindowBackgroundBlur() const
@@ -279,6 +289,11 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         return false;
     }
 
+    // write last mode_
+    if (!parcel.WriteUint32(static_cast<uint32_t>(lastMode_))) {
+        return false;
+    }
+
     // write blur level_
     if (!parcel.WriteUint32(static_cast<uint32_t>(level_))) {
         return false;
@@ -364,6 +379,7 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowRect(rect);
     property->SetWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
+    property->SetLastWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetWindowBackgroundBlur(static_cast<WindowBlurLevel>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetFullScreen(parcel.ReadBool());
