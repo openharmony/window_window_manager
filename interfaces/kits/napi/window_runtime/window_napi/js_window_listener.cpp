@@ -14,7 +14,6 @@
  */
 #include "js_window_listener.h"
 #include "js_runtime_utils.h"
-#include "js_window_utils.h"
 #include "window_manager_hilog.h"
 namespace OHOS {
 namespace Rosen {
