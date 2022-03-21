@@ -136,11 +136,6 @@ void WindowLayoutPolicyCascade::AddWindowNode(sptr<WindowNode>& node)
     UpdateWindowNode(node, true); // currently, update and add do the same process
 }
 
-static bool IsLayoutChanged(const Rect& l, const Rect& r)
-{
-    return !((l.posX_ == r.posX_) && (l.posY_ == r.posY_) && (l.width_ == r.width_) && (l.height_ == r.height_));
-}
-
 void WindowLayoutPolicyCascade::LimitMoveBounds(Rect& rect)
 {
     float virtualPixelRatio = GetVirtualPixelRatio();
@@ -237,9 +232,11 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(sptr<WindowNode>& node)
     node->SetLayoutRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
 
-    if (IsLayoutChanged(lastLayoutRect, winRect) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+    if (!(lastRect == winRect) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE ||
+        node->forceUpdateRect_) {
         auto reason = node->GetWindowSizeChangeReason();
         node->GetWindowToken()->UpdateWindowRect(node->GetLayoutRect(), reason);
+        node->forceUpdateRect_ = false;
         if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
             node->ResetWindowSizeChangeReason();
         }

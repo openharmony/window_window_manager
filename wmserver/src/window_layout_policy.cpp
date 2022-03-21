@@ -146,6 +146,7 @@ void WindowLayoutPolicy::RemoveWindowNode(sptr<WindowNode>& node)
     Rect winRect = node->GetWindowProperty()->GetWindowRect();
     node->SetLayoutRect(winRect);
     node->GetWindowToken()->UpdateWindowRect(winRect, WindowSizeChangeReason::HIDE);
+    node->forceUpdateRect_ = true;
 }
 
 void WindowLayoutPolicy::UpdateWindowNode(sptr<WindowNode>& node, bool isAddWindow)
@@ -230,9 +231,10 @@ void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
 
     node->SetLayoutRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
-    if (!(lastRect == winRect)) {
+    if (!(lastRect == winRect) || node->forceUpdateRect_) {
         auto reason = node->GetWindowSizeChangeReason();
         node->GetWindowToken()->UpdateWindowRect(winRect, reason);
+        node->forceUpdateRect_ = false;
         if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
             node->ResetWindowSizeChangeReason();
         }
