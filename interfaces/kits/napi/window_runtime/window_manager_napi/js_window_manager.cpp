@@ -39,6 +39,7 @@ JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowR
 JsWindowManager::~JsWindowManager()
 {
 }
+
 void JsWindowManager::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
     WLOGFI("JsWindowManager::Finalizer is called");
@@ -565,7 +566,11 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
 
     std::unique_ptr<JsWindowManager> jsWinManager = std::make_unique<JsWindowManager>();
     object->SetNativePointer(jsWinManager.release(), JsWindowManager::Finalizer, nullptr);
-
+    object->SetProperty("WindowType", WindowTypeInit(engine));
+    object->SetProperty("AvoidAreaType", WindowTypeInit(engine));
+    object->SetProperty("WindowMode", WindowModeInit(engine));
+    object->SetProperty("ColorSpace", ColorSpaceInit(engine));
+    object->SetProperty("WindowStageEventType", WindowStageEventTypeInit(engine));
     BindNativeFunction(*engine, *object, "create", JsWindowManager::CreateWindow);
     BindNativeFunction(*engine, *object, "find", JsWindowManager::FindWindow);
     BindNativeFunction(*engine, *object, "on", JsWindowManager::RegisterWindowManagerCallback);

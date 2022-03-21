@@ -18,6 +18,7 @@
 
 #include <map>
 #include <mutex>
+#include "js_window_utils.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "refbase.h"
@@ -50,12 +51,6 @@ public:
     void AfterFocused() override;
     void AfterUnfocused() override;
 private:
-    enum class LifeCycleEventType : uint32_t {
-        FOREGROUND = 1,
-        ACTIVE,
-        INACTIVE,
-        BACKGROUND,
-    };
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
     void LifeCycleCallBack(LifeCycleEventType eventType);
     NativeEngine* engine_ = nullptr;
