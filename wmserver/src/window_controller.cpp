@@ -389,13 +389,19 @@ std::vector<Rect> WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidA
     return avoidArea;
 }
 
-WMError WindowController::ProcessPointDown(uint32_t windowId)
+WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
         WLOGFW("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
+
+    if (isStartDrag) {
+        WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
+        return res;
+    }
+
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     WMError focusRes = windowRoot_->RequestFocus(windowId);
     if (zOrderRes == WMError::WM_OK || focusRes == WMError::WM_OK) {
@@ -414,7 +420,7 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
         WLOGFW("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WMError res = windowRoot_->UpdateSizeChangeReasonForPointUp(windowId);
+    WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_END);
     if (res != WMError::WM_OK) {
         return res;
     }

@@ -73,7 +73,7 @@ public:
     virtual WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId) = 0;
     virtual std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
-    virtual void ProcessPointDown(uint32_t windowId) = 0;
+    virtual void ProcessPointDown(uint32_t windowId, bool isStartDrag) = 0;
     virtual void ProcessPointUp(uint32_t windowId) = 0;
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError MaxmizeWindow(uint32_t windowId) = 0;
