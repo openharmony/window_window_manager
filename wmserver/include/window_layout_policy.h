@@ -65,6 +65,7 @@ protected:
     void SetRectForFloating(const sptr<WindowNode>& node);
     Rect ComputeDecoratedWindowRect(const Rect& winRect);
     bool IsVertical() const;
+    bool IsFullScreenRecentWindowExist() const;
     Rect defaultFloatingRect_ = { 0, 0, 0, 0 };
 };
 }

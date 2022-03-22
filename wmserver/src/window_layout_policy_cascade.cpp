@@ -86,10 +86,7 @@ void WindowLayoutPolicyCascade::LayoutWindowNode(sptr<WindowNode>& node)
 void WindowLayoutPolicyCascade::LayoutWindowTree()
 {
     InitLimitRects();
-    std::vector<sptr<WindowNode>> rootNodes = { aboveAppWindowNode_, appWindowNode_, belowAppWindowNode_ };
-    for (auto& node : rootNodes) { // ensure that the avoid area windows are traversed first
-        LayoutWindowNode(node);
-    }
+    WindowLayoutPolicy::LayoutWindowTree();
 }
 
 void WindowLayoutPolicyCascade::UpdateWindowNode(sptr<WindowNode>& node, bool isAddWindow)
