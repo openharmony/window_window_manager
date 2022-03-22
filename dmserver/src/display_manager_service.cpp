@@ -438,8 +438,14 @@ ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds
     }
     auto allExpandScreenIds = abstractScreenController_->GetAllExpandOrMirrorScreenIds(expandScreenIds);
     iter = std::find(allExpandScreenIds.begin(), allExpandScreenIds.end(), defaultScreenId);
+    auto startPointIter = iter - allExpandScreenIds.begin() + startPoints.begin();
     if (iter != allExpandScreenIds.end()) {
         allExpandScreenIds.erase(iter);
+    }
+    if (startPointIter != startPoints.end()) {
+        auto defaultRsDisplayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(defaultScreenId);
+        defaultRsDisplayNode->SetDisplayOffset((*startPointIter).posX_, (*startPointIter).posY_);
+        startPoints.erase(startPointIter);
     }
     abstractScreenController_->SetShotScreen(defaultScreenId, shotScreenIds);
     WM_SCOPED_TRACE("dms:MakeExpand");
