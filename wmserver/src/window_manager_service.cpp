@@ -241,10 +241,10 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId id, DisplayStateChang
     WindowManagerService::GetInstance().NotifyDisplayStateChange(id, type);
 }
 
-void WindowManagerService::ProcessPointDown(uint32_t windowId)
+void WindowManagerService::ProcessPointDown(uint32_t windowId, bool isStartDrag)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    windowController_->ProcessPointDown(windowId);
+    windowController_->ProcessPointDown(windowId, isStartDrag);
 }
 
 void WindowManagerService::ProcessPointUp(uint32_t windowId)
