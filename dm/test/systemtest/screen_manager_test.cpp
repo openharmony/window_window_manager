@@ -234,6 +234,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager01, Function | MediumTest | Level2)
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
     defaultOption_.surface_ = utils.psurface_;
+    defaultOption_.isForShot_ = false;
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
     ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
     ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId));
@@ -249,6 +250,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager02, Function | MediumTest | Level2)
     DisplayTestUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
     defaultOption_.surface_ = utils.psurface_;
+    defaultOption_.isForShot_ = false;
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
     std::vector<ScreenId> mirrorIds;
     mirrorIds.push_back(virtualScreenId);
@@ -265,9 +267,10 @@ HWTEST_F(ScreenManagerTest, ScreenManager02, Function | MediumTest | Level2)
 HWTEST_F(ScreenManagerTest, ScreenManager03, Function | MediumTest | Level2)
 {
     DisplayTestUtils utils;
-    ASSERT_TRUE(utils.CreateSurface());
-    defaultOption_.surface_ = utils.psurface_;
+    defaultOption_.isForShot_ = false;
     for (uint32_t i = 0; i < execTimes_; i++) {
+        ASSERT_TRUE(utils.CreateSurface());
+        defaultOption_.surface_ = utils.psurface_;
         ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
         ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
         ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId));
@@ -282,9 +285,10 @@ HWTEST_F(ScreenManagerTest, ScreenManager03, Function | MediumTest | Level2)
 HWTEST_F(ScreenManagerTest, ScreenManager04, Function | MediumTest | Level2)
 {
     DisplayTestUtils utils;
-    ASSERT_TRUE(utils.CreateSurface());
-    defaultOption_.surface_ = utils.psurface_;
+    defaultOption_.isForShot_ = false;
     for (uint32_t i = 0; i < execTimes_; i++) {
+        ASSERT_TRUE(utils.CreateSurface());
+        defaultOption_.surface_ = utils.psurface_;
         ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
         std::vector<ScreenId> mirrorIds;
         mirrorIds.push_back(virtualScreenId);
@@ -305,6 +309,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager05, Function | MediumTest | Level2)
     utils.SetDefaultWH(defaultDisplay_);
     ASSERT_TRUE(utils.CreateSurface());
     defaultOption_.surface_ = utils.psurface_;
+    defaultOption_.isForShot_ = true;
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
 
     ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
@@ -337,6 +342,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager06, Function | MediumTest | Level2)
     DisplayTestUtils utils;
     utils.SetDefaultWH(defaultDisplay_);
     defaultOption_.surface_ = nullptr;
+    defaultOption_.isForShot_ = true;
     ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
     ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
 
@@ -714,6 +720,23 @@ HWTEST_F(ScreenManagerTest, ScreenManager16, Function | MediumTest | Level2)
     ASSERT_EQ(static_cast<uint32_t>(screens[0]->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
     ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
+}
+
+/**
+ * @tc.name: ScreenManager17
+ * @tc.desc: Create VirtualScreen for 10 times but do not destroy it
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, ScreenManager17, Function | MediumTest | Level2)
+{
+    DisplayTestUtils utils;
+    defaultOption_.isForShot_ = false;
+    for (uint32_t i = 0; i < execTimes_; i++) {
+        ASSERT_TRUE(utils.CreateSurface());
+        defaultOption_.surface_ = utils.psurface_;
+        ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
+        ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
+    }
 }
 }
 } // namespace Rosen

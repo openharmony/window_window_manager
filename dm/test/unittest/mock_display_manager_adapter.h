@@ -50,7 +50,8 @@ public:
     MOCK_METHOD2(UnregisterDisplayManagerAgent, bool(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type));
     MOCK_METHOD2(RequestRotation, bool(ScreenId screenId, Rotation rotation));
-    MOCK_METHOD1(CreateVirtualScreen, ScreenId(VirtualScreenOption option));
+    MOCK_METHOD2(CreateVirtualScreen, ScreenId(VirtualScreenOption option,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent));
     MOCK_METHOD1(DestroyVirtualScreen, DMError(ScreenId screenId));
     MOCK_METHOD2(SetVirtualScreenSurface, DMError(ScreenId screenId, sptr<Surface> surface));
     MOCK_METHOD1(GetScreenGroupInfoById, sptr<ScreenGroupInfo>(ScreenId screenId));

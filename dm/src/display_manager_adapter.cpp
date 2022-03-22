@@ -100,12 +100,13 @@ DMError ScreenManagerAdapter::SetScreenColorTransform(ScreenId screenId)
     return displayManagerServiceProxy_->SetScreenColorTransform(screenId);
 }
 
-ScreenId ScreenManagerAdapter::CreateVirtualScreen(VirtualScreenOption option)
+ScreenId ScreenManagerAdapter::CreateVirtualScreen(VirtualScreenOption option,
+    const sptr<IDisplayManagerAgent>& displayManagerAgent)
 {
     INIT_PROXY_CHECK_RETURN(SCREEN_ID_INVALID);
 
     WLOGFI("DisplayManagerAdapter::CreateVirtualScreen");
-    return displayManagerServiceProxy_->CreateVirtualScreen(option);
+    return displayManagerServiceProxy_->CreateVirtualScreen(option, displayManagerAgent->AsObject());
 }
 
 DMError ScreenManagerAdapter::DestroyVirtualScreen(ScreenId screenId)

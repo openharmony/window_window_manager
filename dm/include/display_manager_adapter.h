@@ -74,7 +74,8 @@ private:
 class ScreenManagerAdapter : public BaseAdapter {
 WM_DECLARE_SINGLE_INSTANCE(ScreenManagerAdapter);
 public:
-    virtual ScreenId CreateVirtualScreen(VirtualScreenOption option);
+    virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent);
     virtual DMError DestroyVirtualScreen(ScreenId screenId);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
