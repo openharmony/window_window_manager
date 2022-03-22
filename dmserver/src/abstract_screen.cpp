@@ -182,6 +182,10 @@ DMError AbstractScreen::SetScreenColorTransform()
 
 void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
 {
+    if (info == nullptr) {
+        WLOGE("FillScreenInfo failed! info is nullptr");
+        return;
+    }
     info->id_ = dmsId_;
     uint32_t width = 0;
     uint32_t height = 0;
