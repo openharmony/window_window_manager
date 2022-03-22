@@ -431,5 +431,15 @@ void WindowManager::UpdateWindowVisibilityInfo(
 {
     pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
 }
+
+WMError WindowManager::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
+{
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAccessibilityWindowInfo(windowInfo);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("get window info failed");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -58,6 +58,8 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
 
     virtual void ClearWindowAdapter();
+
+    virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();

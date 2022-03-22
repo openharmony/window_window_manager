@@ -68,6 +68,7 @@ public:
     float GetVirtualPixelRatio(DisplayId displayId) const;
     Rect GetDisplayLimitRect(DisplayId displayId) const;
     WMError UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeReason reason);
+    WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
