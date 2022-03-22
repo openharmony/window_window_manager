@@ -567,7 +567,7 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
     std::unique_ptr<JsWindowManager> jsWinManager = std::make_unique<JsWindowManager>();
     object->SetNativePointer(jsWinManager.release(), JsWindowManager::Finalizer, nullptr);
     object->SetProperty("WindowType", WindowTypeInit(engine));
-    object->SetProperty("AvoidAreaType", WindowTypeInit(engine));
+    object->SetProperty("AvoidAreaType", AvoidAreaTypeInit(engine));
     object->SetProperty("WindowMode", WindowModeInit(engine));
     object->SetProperty("ColorSpace", ColorSpaceInit(engine));
     object->SetProperty("WindowStageEventType", WindowStageEventTypeInit(engine));
