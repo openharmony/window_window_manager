@@ -389,9 +389,8 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
     }
 
     if (isStartDrag) {
-        node->GetWindowToken()->UpdateWindowRect(node->GetLayoutRect(), WindowSizeChangeReason::DRAG_START);
-        WLOGFI("Notify window that the drag action is start: %{public}d", node->GetWindowId());
-        return WMError::WM_OK;
+        WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
+        return res;
     }
 
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
@@ -412,7 +411,7 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
         WLOGFW("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WMError res = windowRoot_->UpdateSizeChangeReasonForPointUp(windowId);
+    WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_END);
     if (res != WMError::WM_OK) {
         return res;
     }

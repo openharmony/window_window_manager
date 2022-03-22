@@ -66,7 +66,7 @@ public:
     void FocusFaultDetection() const;
     float GetVirtualPixelRatio(DisplayId displayId) const;
     Rect GetDisplayLimitRect(DisplayId displayId) const;
-    WMError UpdateSizeChangeReasonForPointUp(uint32_t windowId);
+    WMError UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeReason reason);
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
