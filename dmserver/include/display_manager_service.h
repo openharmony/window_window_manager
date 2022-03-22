@@ -41,7 +41,8 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
 public:
     void OnStart() override;
     void OnStop() override;
-    ScreenId CreateVirtualScreen(VirtualScreenOption option) override;
+    ScreenId CreateVirtualScreen(VirtualScreenOption option,
+        const sptr<IRemoteObject>& displayManagerAgent) override;
     DMError DestroyVirtualScreen(ScreenId screenId) override;
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
 
@@ -93,7 +94,6 @@ private:
     ~DisplayManagerService() = default;
     bool Init();
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
-    void SetShotScreen(ScreenId mainScreenId, std::vector<ScreenId> shotScreenIds);
     ScreenId GetScreenIdByDisplayId(DisplayId displayId) const;
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByDisplayId(DisplayId displayId) const;
 
@@ -102,7 +102,6 @@ private:
     sptr<AbstractDisplayController> abstractDisplayController_;
     sptr<AbstractScreenController> abstractScreenController_;
     sptr<DisplayPowerController> displayPowerController_;
-    std::map<ScreenId, std::shared_ptr<RSDisplayNode>> displayNodeMap_;
     sptr<IDisplayChangeListener> displayChangeListener_;
 };
 } // namespace OHOS::Rosen
