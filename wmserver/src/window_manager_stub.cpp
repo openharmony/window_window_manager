@@ -161,6 +161,13 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID: {
+            sptr<AccessibilityWindowInfo> windowInfo = data.ReadParcelable<AccessibilityWindowInfo>();
+            WMError errCode = GetAccessibilityWindowInfo(windowInfo);
+            reply.WriteParcelable(windowInfo);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
