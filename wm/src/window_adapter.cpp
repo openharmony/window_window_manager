@@ -108,11 +108,11 @@ WMError WindowAdapter::SetAlpha(uint32_t windowId, float alpha)
     return windowManagerServiceProxy_->SetAlpha(windowId, alpha);
 }
 
-void WindowAdapter::ProcessPointDown(uint32_t windowId)
+void WindowAdapter::ProcessPointDown(uint32_t windowId, bool isStartDrag)
 {
     INIT_PROXY_CHECK_RETURN();
 
-    return windowManagerServiceProxy_->ProcessPointDown(windowId);
+    return windowManagerServiceProxy_->ProcessPointDown(windowId, isStartDrag);
 }
 
 void WindowAdapter::ProcessPointUp(uint32_t windowId)

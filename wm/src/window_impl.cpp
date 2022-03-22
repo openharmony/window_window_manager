@@ -1220,6 +1220,7 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
         startMoveFlag_ = true;
     } else if (!WindowHelper::IsPointInTargetRect(startPointPosX_, startPointPosY_, startRectExceptFrame_)) {
         startDragFlag_ = true;
+        SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(), true);
     }
     return;
 }

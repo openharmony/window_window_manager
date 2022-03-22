@@ -306,7 +306,7 @@ void WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType typ
     }
 }
 
-void WindowManagerProxy::ProcessPointDown(uint32_t windowId)
+void WindowManagerProxy::ProcessPointDown(uint32_t windowId, bool isStartDrag)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -317,6 +317,10 @@ void WindowManagerProxy::ProcessPointDown(uint32_t windowId)
     }
     if (!data.WriteUint32(windowId)) {
         WLOGFE("Write windowId failed");
+        return;
+    }
+    if (!data.WriteBool(isStartDrag)) {
+        WLOGFE("Write bool isStartDrag failed");
         return;
     }
     if (Remote()->SendRequest(TRANS_ID_PROCESS_POINT_DOWN, data, reply, option) != ERR_NONE) {
