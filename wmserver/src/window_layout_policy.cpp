@@ -57,10 +57,13 @@ void WindowLayoutPolicy::Reorder()
 void WindowLayoutPolicy::LayoutWindowTree()
 {
     limitRect_ = displayRect_;
-    std::vector<sptr<WindowNode>> rootNodes = { aboveAppWindowNode_, appWindowNode_, belowAppWindowNode_ };
-    for (auto& node : rootNodes) { // ensure that the avoid area windows are traversed first
-        LayoutWindowNode(node);
+    LayoutWindowNode(aboveAppWindowNode_); // ensure that the avoid area windows are traversed first
+    if (IsFullScreenRecentWindowExist()) {
+        WLOGFI("recent window on top, early exit layout tree");
+        return;
     }
+    LayoutWindowNode(appWindowNode_);
+    LayoutWindowNode(belowAppWindowNode_);
 }
 
 void WindowLayoutPolicy::LayoutWindowNode(sptr<WindowNode>& node)
@@ -379,6 +382,17 @@ float WindowLayoutPolicy::GetVirtualPixelRatio() const
 
     WLOGFI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", screenId_, virtualPixelRatio);
     return virtualPixelRatio;
+}
+
+bool WindowLayoutPolicy::IsFullScreenRecentWindowExist() const
+{
+    for (auto& childNode : aboveAppWindowNode_->children_) {
+        if (childNode->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT &&
+            childNode->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            return true;
+        }
+    }
+    return false;
 }
 
 Rect WindowLayoutPolicy::GetDisplayLimitRect() const
