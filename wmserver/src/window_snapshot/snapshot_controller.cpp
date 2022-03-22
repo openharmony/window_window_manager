@@ -34,16 +34,7 @@ WMError SnapshotController::TakeSnapshot(const std::shared_ptr<RSSurfaceNode>& s
     std::shared_ptr<GetSurfaceCapture> callback = std::make_shared<GetSurfaceCapture>();
     rsInterface_.TakeSurfaceCapture(surfaceNode, callback, scaleW, scaleH);
 
-    int counter = 0;
-    while (!callback->IsPixelMapOk()) {
-        usleep(10000); // 10000us equals to 10ms
-        counter++;
-        if (counter >= 200) { // wait for 200 * 10ms = 2s
-            WLOGFE("Failed to get pixelmap, timeout");
-            return WMError::WM_ERROR_NULLPTR;
-        }
-    }
-    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetPixelMap();
+    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(2000); // wait for 2000ms
 
     if (pixelMap == nullptr) {
         WLOGFE("Failed to get pixelmap, return nullptr!");
