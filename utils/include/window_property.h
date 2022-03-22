@@ -34,6 +34,7 @@ public:
     void SetWindowHotZoneRect(const struct Rect& rect);
     void SetWindowType(WindowType type);
     void SetWindowMode(WindowMode mode);
+    void SetLastWindowMode(WindowMode mode);
     void SetWindowBackgroundBlur(WindowBlurLevel level);
     void ResumeLastWindowMode();
     void SetFullScreen(bool isFullScreen);
@@ -56,6 +57,7 @@ public:
     Rect GetWindowHotZoneRect() const;
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;
+    WindowMode GetLastWindowMode() const;
     WindowBlurLevel GetWindowBackgroundBlur() const;
     bool GetFullScreen() const;
     bool GetFocusable() const;
