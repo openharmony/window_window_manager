@@ -146,11 +146,11 @@ void WindowMoveDragTest::CalExpectRects()
     startRectExceptFrame.posX_ = startPointRect_.posX_ +
         static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio_);
     startRectExceptFrame.posY_ = startPointRect_.posY_ +
-        static_cast<int32_t>(WINDOW_FRAME_TOP_WIDTH * virtualPixelRatio_);
+        static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio_);
     startRectExceptFrame.width_ = startPointRect_.width_ -
         static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio_);
     startRectExceptFrame.height_ = startPointRect_.height_ -
-        static_cast<uint32_t>((WINDOW_FRAME_TOP_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio_);
+        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio_);
 
     bool isPointInWindow = WindowHelper::IsPointInTargetRect(startPointX_, startPointY_, startRectExceptFrame);
     int32_t diffX = pointX_ - startPointX_;
