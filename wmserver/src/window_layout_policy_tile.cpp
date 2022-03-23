@@ -252,6 +252,9 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
         if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
             node->ResetWindowSizeChangeReason();
         }
+    }
+    // update node bounds
+    if (node->surfaceNode_ != nullptr) {
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     }
 }
