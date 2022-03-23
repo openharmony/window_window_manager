@@ -95,6 +95,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             UpdateOccupiedAreaChangeInfo(info);
             break;
         }
+        case TRANS_ID_UPDATE_ACTIVE_STATUS: {
+            bool isActive = data.ReadBool();
+            UpdateActiveStatus(isActive);
+            break;
+        }
         default:
             break;
     }

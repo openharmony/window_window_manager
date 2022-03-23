@@ -21,7 +21,6 @@
 
 #include "wm_common.h"
 #include "window_option.h"
-#include "window_life_cycle_interface.h"
 
 class NativeValue;
 class NativeEngine;
@@ -47,6 +46,17 @@ namespace OHOS {
 namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 class RSSurfaceNode;
+
+class IWindowLifeCycle : virtual public RefBase {
+public:
+    virtual void AfterForeground() = 0;
+    virtual void AfterBackground() = 0;
+    virtual void AfterFocused() = 0;
+    virtual void AfterUnfocused() = 0;
+    virtual void AfterActive() {}
+    virtual void AfterInactive() {}
+};
+
 class IWindowChangeListener : virtual public RefBase {
 public:
     virtual void OnSizeChange(Rect rect, WindowSizeChangeReason reason) = 0;
