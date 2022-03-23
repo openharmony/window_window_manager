@@ -1137,25 +1137,36 @@ void WindowImpl::HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId)
     int32_t diffX = posX - startPointPosX_;
     int32_t diffY = posY - startPointPosY_;
     Rect newRect = startPointRect_;
-    if (startPointPosX_ <= startRectExceptFrame_.posX_) {
+
+    Rect hotZoneRect;
+    if ((startPointPosX_ > startRectExceptCorner_.posX_ &&
+        (startPointPosX_ < startRectExceptCorner_.posX_ + static_cast<int32_t>(startRectExceptCorner_.width_))) &&
+        (startPointPosY_ > startRectExceptCorner_.posY_ &&
+        (startPointPosY_ < startRectExceptCorner_.posY_ + static_cast<int32_t>(startRectExceptCorner_.height_)))) {
+        hotZoneRect = startRectExceptFrame_; // drag type: left/right/top/bottom
+    } else {
+        hotZoneRect = startRectExceptCorner_; // drag type: left_top/right_top/left_bottom/right_bottom
+    }
+
+    if (startPointPosX_ <= hotZoneRect.posX_) {
         if (diffX > static_cast<int32_t>(startPointRect_.width_)) {
             diffX = static_cast<int32_t>(startPointRect_.width_);
         }
         newRect.posX_ += diffX;
         newRect.width_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.width_) - diffX);
-    } else if (startPointPosX_ >= startRectExceptFrame_.posX_ + static_cast<int32_t>(startRectExceptFrame_.width_)) {
+    } else if (startPointPosX_ >= hotZoneRect.posX_ + static_cast<int32_t>(hotZoneRect.width_)) {
         if (diffX < 0 && (-diffX > static_cast<int32_t>(startPointRect_.width_))) {
             diffX = -(static_cast<int32_t>(startPointRect_.width_));
         }
         newRect.width_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.width_) + diffX);
     }
-    if (startPointPosY_ <= startRectExceptFrame_.posY_) {
+    if (startPointPosY_ <= hotZoneRect.posY_) {
         if (diffY > static_cast<int32_t>(startPointRect_.height_)) {
             diffY = static_cast<int32_t>(startPointRect_.height_);
         }
         newRect.posY_ += diffY;
         newRect.height_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.height_) - diffY);
-    } else if (startPointPosY_ >= startRectExceptFrame_.posY_ + static_cast<int32_t>(startRectExceptFrame_.height_)) {
+    } else if (startPointPosY_ >= hotZoneRect.posY_ + static_cast<int32_t>(hotZoneRect.height_)) {
         if (diffY < 0 && (-diffY > static_cast<int32_t>(startPointRect_.height_))) {
             diffY = -(static_cast<int32_t>(startPointRect_.height_));
         }
@@ -1210,16 +1221,27 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
     startRectExceptFrame_.posX_ = startPointRect_.posX_ +
         static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
     startRectExceptFrame_.posY_ = startPointRect_.posY_ +
-        static_cast<int32_t>(WINDOW_FRAME_TOP_WIDTH * virtualPixelRatio);
+        static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
     startRectExceptFrame_.width_ = startPointRect_.width_ -
         static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio);
     startRectExceptFrame_.height_ = startPointRect_.height_ -
-        static_cast<uint32_t>((WINDOW_FRAME_TOP_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio);
+        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio);
+
+    startRectExceptCorner_.posX_ = startPointRect_.posX_ +
+        static_cast<int32_t>(WINDOW_FRAME_CORNER_WIDTH * virtualPixelRatio);
+    startRectExceptCorner_.posY_ = startPointRect_.posY_ +
+        static_cast<int32_t>(WINDOW_FRAME_CORNER_WIDTH * virtualPixelRatio);
+    startRectExceptCorner_.width_ = startPointRect_.width_ -
+        static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) * virtualPixelRatio);
+    startRectExceptCorner_.height_ = startPointRect_.height_ -
+        static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) * virtualPixelRatio);
 
     if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         startMoveFlag_ = true;
         SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(), true);
-    } else if (!WindowHelper::IsPointInTargetRect(startPointPosX_, startPointPosY_, startRectExceptFrame_)) {
+    } else if (!WindowHelper::IsPointInTargetRect(startPointPosX_, startPointPosY_, startRectExceptFrame_) ||
+        (WindowHelper::IsPointInTargetRect(startPointPosX_, startPointPosY_, startRectExceptFrame_) &&
+        (!WindowHelper::IsPointInWindowExceptCorner(startPointPosX_, startPointPosY_, startRectExceptCorner_)))) {
         startDragFlag_ = true;
         SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(), true);
     }
