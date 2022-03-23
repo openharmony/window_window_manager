@@ -785,8 +785,8 @@ NativeValue* JsWindow::OnSetSystemBarEnable(NativeEngine& engine, NativeCallback
 {
     WLOGFI("JsWindow::OnSetSystemBarEnable is called");
     WMError errCode = WMError::WM_OK;
-    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
-        WLOGFE("JsWindow params not match!");
+    if (info.argc < 1 || info.argc > 2 || windowToken_ == nullptr) { // 2: maximum params num
+        WLOGFE("JsWindow params not match or window token is nullptr!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     std::map<WindowType, SystemBarProperty> systemBarProperties;
