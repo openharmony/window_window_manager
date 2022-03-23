@@ -188,7 +188,7 @@ enum class OccupiedAreaType : uint32_t {
 
 enum class ColorSpace : uint32_t {
     COLOR_SPACE_DEFAULT = 0, // Default color space.
-    COLOR_SPACE_WIDE_GAMUT,  // Wide gamut color space. The specific wide color gamut depends on thr screen.
+    COLOR_SPACE_WIDE_GAMUT,  // Wide gamut color space. The specific wide color gamut depends on the screen.
 };
 
 enum class WindowAnimation : uint32_t {
