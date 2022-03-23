@@ -382,6 +382,16 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
     }
 }
 
+void WindowNodeContainer::UpdateActiveStatus(uint32_t id, bool isActive) const
+{
+    auto node = FindWindowNodeById(id);
+    if (node == nullptr) {
+        WLOGFE("cannot find active window id: %{public}d", id);
+        return;
+    }
+    node->GetWindowToken()->UpdateActiveStatus(isActive);
+}
+
 void WindowNodeContainer::AssignZOrder()
 {
     zOrder_ = 0;
@@ -400,7 +410,7 @@ void WindowNodeContainer::AssignZOrder()
 WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
 {
     if (focusedWindow_ == windowId) {
-        WLOGFI("focused window do not change");
+        WLOGFI("focused window do not change, id: %{public}u", windowId);
         return WMError::WM_DO_NOTHING;
     }
     UpdateFocusStatus(focusedWindow_, false);
@@ -414,6 +424,23 @@ WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
 uint32_t WindowNodeContainer::GetFocusWindow() const
 {
     return focusedWindow_;
+}
+
+WMError WindowNodeContainer::SetActiveWindow(uint32_t windowId)
+{
+    if (activeWindow_ == windowId) {
+        WLOGFI("active window do not change, id: %{public}u", windowId);
+        return WMError::WM_DO_NOTHING;
+    }
+    UpdateActiveStatus(activeWindow_, false);
+    activeWindow_ = windowId;
+    UpdateActiveStatus(activeWindow_, true);
+    return WMError::WM_OK;
+}
+
+uint32_t WindowNodeContainer::GetActiveWindow() const
+{
+    return activeWindow_;
 }
 
 bool WindowNodeContainer::IsAboveSystemBarNode(sptr<WindowNode> node) const
@@ -890,6 +917,50 @@ sptr<WindowNode> WindowNodeContainer::GetNextFocusableWindow(uint32_t windowId) 
     };
     TraverseWindowTree(func, true);
     return nextFocusableWindow;
+}
+
+sptr<WindowNode> WindowNodeContainer::GetNextActiveWindow(uint32_t windowId) const
+{
+    auto node = FindWindowNodeById(windowId);
+    if (node == nullptr) {
+        WLOGFE("cannot find window id: %{public}u by tree", windowId);
+        return nullptr;
+    }
+    WLOGFI("current window: [%{public}u, %{public}u]", windowId, static_cast<uint32_t>(node->GetWindowType()));
+    if (WindowHelper::IsSystemWindow(node->GetWindowType())) {
+        for (auto& node : appWindowNode_->children_) {
+            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+                continue;
+            }
+            return node;
+        }
+        for (auto& node : belowAppWindowNode_->children_) {
+            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+                return node;
+            }
+        }
+    } else if (WindowHelper::IsAppWindow(node->GetWindowType())) {
+        std::vector<sptr<WindowNode>> windowNodes;
+        TraverseContainer(windowNodes);
+        auto iter = std::find_if(windowNodes.begin(), windowNodes.end(), [windowId](sptr<WindowNode>& node) {
+            return node->GetWindowId() == windowId;
+            });
+        if (iter == windowNodes.end()) {
+            WLOGFE("could not find this window");
+            return nullptr;
+        }
+        int index = std::distance(windowNodes.begin(), iter);
+        for (size_t i = index + 1; i < windowNodes.size(); i++) {
+            if (windowNodes[i]->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+                continue;
+            }
+            return windowNodes[i];
+        }
+    } else {
+        // do nothing
+    }
+    WLOGFE("could not get next active window");
+    return nullptr;
 }
 
 void WindowNodeContainer::MinimizeAllAppWindows()
