@@ -23,7 +23,6 @@
 #include "include/core/SkImage.h"
 
 #include "vsync_station.h"
-#include "window_life_cycle_interface.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
 

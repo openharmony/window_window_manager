@@ -403,8 +403,10 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
         return res;
     }
 
+    WLOGFI("process point down, windowId: %{public}u", windowId);
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     WMError focusRes = windowRoot_->RequestFocus(windowId);
+    windowRoot_->RequestActiveWindow(windowId);
     if (zOrderRes == WMError::WM_OK || focusRes == WMError::WM_OK) {
         FlushWindowInfo(windowId);
         WLOGFI("ProcessPointDown end");
