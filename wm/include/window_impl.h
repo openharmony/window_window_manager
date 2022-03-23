@@ -247,6 +247,7 @@ private:
     bool pointEventStarted_ = false;
     Rect startPointRect_ = { 0, 0, 0, 0 };
     Rect startRectExceptFrame_ = { 0, 0, 0, 0 };
+    Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
 };
 }
 }
