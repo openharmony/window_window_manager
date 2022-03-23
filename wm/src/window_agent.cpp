@@ -99,5 +99,14 @@ void WindowAgent::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo
     }
     window_->UpdateOccupiedAreaChangeInfo(info);
 }
+
+void WindowAgent::UpdateActiveStatus(bool isActive)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window is null");
+        return;
+    }
+    window_->UpdateActiveStatus(isActive);
+}
 } // namespace Rosen
 } // namespace OHOS
