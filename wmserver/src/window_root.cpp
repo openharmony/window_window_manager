@@ -258,7 +258,7 @@ WMError WindowRoot::UpdateWindowNode(uint32_t windowId, WindowUpdateReason reaso
     return container->UpdateWindowNode(node, reason);
 }
 
-WMError WindowRoot::UpdateSizeChangeReasonForPointUp(uint32_t windowId)
+WMError WindowRoot::UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeReason reason)
 {
     auto node = GetWindowNode(windowId);
     if (node == nullptr) {
@@ -270,7 +270,7 @@ WMError WindowRoot::UpdateSizeChangeReasonForPointUp(uint32_t windowId)
         WLOGFE("update window size change reason failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    container->UpdateSizeChangeReasonForPointUp(node);
+    container->UpdateSizeChangeReason(node, reason);
     return WMError::WM_OK;
 }
 
