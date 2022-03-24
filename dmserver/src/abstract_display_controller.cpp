@@ -350,6 +350,10 @@ bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDispl
 
 void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realAbsScreen)
 {
+    if (realAbsScreen == nullptr) {
+        WLOGE("BindAloneScreenLocked failed, realAbsScreen is nullptr");
+        return;
+    }
     ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     if (defaultScreenId != SCREEN_ID_INVALID) {
         if (defaultScreenId != realAbsScreen->dmsId_) {
@@ -390,6 +394,10 @@ void AbstractDisplayController::AddScreenToMirrorLocked(sptr<AbstractScreen> abs
 
 void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> absScreen)
 {
+    if (absScreen == nullptr) {
+        WLOGE("AddScreenToExpandLocked failed, absScreen is nullptr");
+        return;
+    }
     for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
         sptr<AbstractDisplay> abstractDisplay = iter->second;
         if (abstractDisplay->GetAbstractScreenId() == absScreen->dmsId_) {
