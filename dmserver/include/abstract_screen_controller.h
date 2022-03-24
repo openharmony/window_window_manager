@@ -127,8 +127,6 @@ private:
         std::map<ScreenId, ScreenId> dms2RsScreenIdMap_;
     };
 
-    const std::string CONTROLLER_THREAD_ID = "abstract_screen_controller_thread";
-
     std::recursive_mutex& mutex_;
     OHOS::Rosen::RSInterfaces& rsInterface_;
     ScreenIdManager screenIdManager_;

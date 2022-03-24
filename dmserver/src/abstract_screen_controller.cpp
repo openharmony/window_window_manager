@@ -264,10 +264,11 @@ void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
             return;
         }
         sptr<AbstractScreenGroup> screenGroup = AddToGroupLocked(absScreen);
-        if (screenGroup != nullptr) {
-            NotifyScreenGroupChanged(absScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
+        if (screenGroup == nullptr) {
+            return;
         }
-        if (screenGroup != nullptr && abstractScreenCallback_ != nullptr) {
+        NotifyScreenGroupChanged(absScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
+        if (abstractScreenCallback_ != nullptr) {
             abstractScreenCallback_->onConnect_(absScreen);
         }
     } else {
@@ -698,17 +699,17 @@ bool AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t m
     uint32_t usedModeId = 0;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto screen = GetAbstractScreen(screenId);
+        if (screen == nullptr) {
+            WLOGFE("SetScreenActiveMode: Get AbstractScreen failed");
+            return false;
+        }
         ScreenId rsScreenId = SCREEN_ID_INVALID;
         if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
             WLOGFE("SetScreenActiveMode: No corresponding rsId");
             return false;
         }
         rsInterface_.SetScreenActiveMode(rsScreenId, modeId);
-        auto screen = GetAbstractScreen(screenId);
-        if (screen == nullptr) {
-            WLOGFE("SetScreenActiveMode: Get AbstractScreen failed");
-            return false;
-        }
         usedModeId = static_cast<uint32_t>(screen->activeIdx_);
         screen->activeIdx_ = static_cast<int32_t>(modeId);
     }
@@ -1202,18 +1203,17 @@ bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state, Powe
 
 ScreenPowerState AbstractScreenController::GetScreenPower(ScreenId dmsScreenId) const
 {
-    auto screenIds = GetAllScreenIds();
-    if (screenIds.empty()) {
+    if (dmsScreenMap_.empty()) {
         WLOGFE("no screen info");
         return ScreenPowerState::INVALID_STATE;
     }
+
     ScreenId rsId = SCREEN_ID_INVALID;
-    for (ScreenId screenId : screenIds) {
-        if (screenId == dmsScreenId) {
-            rsId = ConvertToRsScreenId(screenId);
-            break;
-        }
+    auto iter = dmsScreenMap_.find(dmsScreenId);
+    if (iter != dmsScreenMap_.end()) {
+        rsId = ConvertToRsScreenId(dmsScreenId);
     }
+
     if (rsId == SCREEN_ID_INVALID) {
         WLOGFE("cannot find screen %{public}" PRIu64"", dmsScreenId);
         return ScreenPowerState::INVALID_STATE;
