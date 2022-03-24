@@ -37,11 +37,13 @@ AbstractScreen::~AbstractScreen()
 
 sptr<SupportedScreenModes> AbstractScreen::GetActiveScreenMode() const
 {
-    if (activeIdx_ < 0 || activeIdx_ >= modes_.size()) {
-        WLOGE("active mode index is wrong: %{public}d", activeIdx_);
-        return nullptr;
+    for (sptr<SupportedScreenModes> mode : modes_) {
+        if (mode->modeId_ == activeIdx_) {
+            return mode;
+        }
     }
-    return modes_[activeIdx_];
+    WLOGE("active mode index is wrong: %{public}d", activeIdx_);
+    return nullptr;
 }
 
 std::vector<sptr<SupportedScreenModes>> AbstractScreen::GetAbstractScreenModes() const
@@ -189,8 +191,8 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
     info->id_ = dmsId_;
     uint32_t width = 0;
     uint32_t height = 0;
-    if (activeIdx_ >= 0 && activeIdx_ < modes_.size()) {
-        sptr<SupportedScreenModes> abstractScreenModes = modes_[activeIdx_];
+    sptr<SupportedScreenModes> abstractScreenModes = GetActiveScreenMode();
+    if (abstractScreenModes != nullptr) {
         height = abstractScreenModes->height_;
         width = abstractScreenModes->width_;
     }
@@ -219,11 +221,10 @@ bool AbstractScreen::SetOrientation(Orientation orientation)
 
 Rotation AbstractScreen::CalcRotation(Orientation orientation) const
 {
-    if (activeIdx_ < 0 || activeIdx_ >= modes_.size()) {
-        WLOGE("active mode index is wrong: %{public}d", activeIdx_);
+    sptr<SupportedScreenModes> info = GetActiveScreenMode();
+    if (info == nullptr) {
         return Rotation::ROTATION_0;
     }
-    sptr<SupportedScreenModes> info = modes_[activeIdx_];
     // virtical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = info->width_ < info->height_;
     switch (orientation) {
