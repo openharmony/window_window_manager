@@ -673,6 +673,7 @@ void WindowNodeContainer::NotifyAccessibilityWindowInfo(const sptr<WindowNode>& 
             windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
             windowInfo->windowRect_ = node->GetLayoutRect();
             windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
+            windowInfo->displayId_ = node->GetDisplayId();
             windowInfo->mode_ = node->GetWindowMode();
             windowInfo->type_ = node->GetWindowType();
             accessibilityWindowInfo->currentWindowInfo_ = windowInfo;
@@ -691,6 +692,7 @@ void WindowNodeContainer::GetWindowList(std::vector<sptr<WindowInfo>>& windowLis
         windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
         windowInfo->windowRect_ = node->GetLayoutRect();
         windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
+        windowInfo->displayId_ = node->GetDisplayId();
         windowInfo->mode_ = node->GetWindowMode();
         windowInfo->type_ = node->GetWindowType();
         windowList.emplace_back(windowInfo);
