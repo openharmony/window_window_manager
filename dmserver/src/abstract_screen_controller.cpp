@@ -339,13 +339,14 @@ bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScree
         WLOGE("supported screen mode is 0, screenId=%{public}" PRIu64"", rsScreenId);
         return false;
     }
-    for (RSScreenModeInfo rsScreenModeInfo : allModes) {
+    for (const RSScreenModeInfo& rsScreenModeInfo : allModes) {
         sptr<SupportedScreenModes> info = new SupportedScreenModes();
         info->width_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenWidth());
         info->height_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenHeight());
         info->refreshRate_ = rsScreenModeInfo.GetScreenRefreshRate();
+        info->modeId_ = rsScreenModeInfo.GetScreenModeId();
         absScreen->modes_.push_back(info);
-        WLOGD("fill screen w/h:%{public}d/%{public}d", info->width_, info->height_);
+        WLOGD("fill screen mode%{public}d w/h:%{public}d/%{public}d", info->modeId_, info->width_, info->height_);
     }
     int32_t activeModeId = rsInterface_.GetScreenActiveMode(rsScreenId).GetScreenModeId();
     WLOGD("fill screen activeModeId:%{public}d", activeModeId);
