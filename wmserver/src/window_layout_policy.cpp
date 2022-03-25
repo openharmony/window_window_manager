@@ -193,56 +193,6 @@ Rect WindowLayoutPolicy::ComputeDecoratedWindowRect(const Rect& winRect)
     return rect;
 }
 
-void WindowLayoutPolicy::UpdateLayoutRect(sptr<WindowNode>& node)
-{
-    auto type = node->GetWindowType();
-    auto mode = node->GetWindowMode();
-    auto flags = node->GetWindowFlags();
-    auto decorEnbale = node->GetWindowProperty()->GetDecorEnable();
-    bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-    bool parentLimit = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
-    bool subWindow = WindowHelper::IsSubWindow(type);
-    bool floatingWindow = (mode == WindowMode::WINDOW_MODE_FLOATING);
-    const Rect& layoutRect = node->GetLayoutRect();
-    Rect lastRect = layoutRect;
-    Rect displayRect = displayRect_;
-    Rect limitRect = displayRect;
-    Rect winRect = node->GetWindowProperty()->GetWindowRect();
-
-    WLOGFI("Id:%{public}u, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
-        "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-        node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnbale,
-        static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-    if (needAvoid) {
-        limitRect = limitRect_;
-    }
-
-    if (!floatingWindow) { // fullscreen window
-        winRect = limitRect;
-    } else { // floating window
-        if (node->GetWindowProperty()->GetDecorEnable()) { // is decorable
-            winRect = ComputeDecoratedWindowRect(winRect);
-        }
-        if (subWindow && parentLimit) { // subwidow and limited by parent
-            limitRect = node->parent_->GetLayoutRect();
-            UpdateFloatingLayoutRect(limitRect, winRect);
-        }
-    }
-    // Limit window to the maximum window size
-    LimitWindowSize(node, displayRect, winRect);
-
-    node->SetLayoutRect(winRect);
-    CalcAndSetNodeHotZone(winRect, node);
-    if (!(lastRect == winRect)) {
-        auto reason = node->GetWindowSizeChangeReason();
-        node->GetWindowToken()->UpdateWindowRect(winRect, reason);
-        if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
-            node->ResetWindowSizeChangeReason();
-        }
-        node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-    }
-}
-
 void WindowLayoutPolicy::CalcAndSetNodeHotZone(Rect layoutOutRect, sptr<WindowNode>& node)
 {
     Rect rect = layoutOutRect;

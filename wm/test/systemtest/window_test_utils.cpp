@@ -202,8 +202,9 @@ void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
 
 void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window)
 {
-    constexpr uint32_t edgeInterval = 48;
-    constexpr uint32_t midInterval = 24;
+    float virtualPixelRatio = GetVirtualPixelRatio(0);
+    uint32_t edgeInterval = 48 * virtualPixelRatio; // 48 is edge interval
+    uint32_t midInterval = 24 * virtualPixelRatio; // 24 is mid interval
     constexpr float ratio = 0.75;  // 0.75: default height/width ratio
     constexpr float edgeRatio = 0.125;
     constexpr int half = 2;
