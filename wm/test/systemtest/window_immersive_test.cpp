@@ -83,6 +83,7 @@ public:
     uint32_t leftAvoidH_;
     uint32_t topAvoidW_;
     uint32_t topAvoidH_;
+    sptr<Window> backgroundWindow_;
 };
 
 vector<Rect> WindowImmersiveTest::fullScreenExpecteds_;
@@ -198,6 +199,18 @@ void WindowImmersiveTest::SetUp()
 
     WindowManager::GetInstance().RegisterSystemBarChangedListener(testSystemBarChangedListener_);
     activeWindows_.clear();
+    utils::TestWindowInfo backgroundAppinfo = {
+        .name = "background",
+        .rect = utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN, // immersive setting
+        .needAvoid = false, // immersive setting
+        .parentLimit = false,
+        .parentName = "",
+    };
+    backgroundWindow_ = utils::CreateTestWindow(backgroundAppinfo);
+    SetWindowSystemProps(backgroundWindow_, TEST_PROPS_DEFAULT);
+    backgroundWindow_->Show();
 }
 
 void WindowImmersiveTest::TearDown()
@@ -207,6 +220,7 @@ void WindowImmersiveTest::TearDown()
         activeWindows_.pop_back();
     }
     WindowManager::GetInstance().UnregisterSystemBarChangedListener(testSystemBarChangedListener_);
+    backgroundWindow_->Destroy();
 }
 
 namespace {
