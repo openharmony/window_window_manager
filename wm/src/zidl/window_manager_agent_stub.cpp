@@ -34,15 +34,6 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
         return -1;
     }
     switch (code) {
-        case TRANS_ID_UPDATE_FOCUS_STATUS: {
-            uint32_t windowId = data.ReadUint32();
-            sptr<IRemoteObject> abilityToken = data.ReadRemoteObject();
-            WindowType windowType = static_cast<WindowType>(data.ReadUint32());
-            DisplayId displayId = data.ReadUint64();
-            bool focused = data.ReadBool();
-            UpdateFocusStatus(windowId, abilityToken, windowType, displayId, focused);
-            break;
-        }
         case TRANS_ID_UPDATE_FOCUS: {
             sptr<FocusChangeInfo> info = data.ReadParcelable<FocusChangeInfo>();
             if (info != nullptr) {

@@ -34,15 +34,12 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowManagerAgent");
 
     enum {
-        TRANS_ID_UPDATE_FOCUS_STATUS = 1,
-        TRANS_ID_UPDATE_FOCUS,
+        TRANS_ID_UPDATE_FOCUS  = 1,
         TRANS_ID_UPDATE_SYSTEM_BAR_PROPS,
         TRANS_ID_UPDATE_WINDOW_STATUS,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY,
     };
 
-    virtual void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
-        DisplayId displayId, bool focused) = 0;
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
     virtual void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) = 0;
     virtual void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
