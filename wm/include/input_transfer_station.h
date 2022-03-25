@@ -49,8 +49,8 @@ public:
     void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override;
     void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
 };
-}
-}
+} // namespace Rosen
+} // namespace OHOS
 
 
 #endif // OHOS_INPUT_TRANSFER_STATION
