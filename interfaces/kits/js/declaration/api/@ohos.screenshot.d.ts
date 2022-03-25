@@ -18,7 +18,7 @@ import image from './@ohos.multimedia.image';
 
 /**
  * interface for screenshot
- * @syscap SystemCapability.WindowManager.WindowManager.Core.
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
  * @systemapi Hide this for inner system use.
  * @since 7
  */

@@ -373,6 +373,10 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
         if (node->abilityToken_ == nullptr) {
             WLOGFI("abilityToken is null, window : %{public}d", id);
         }
+        if (focused) {
+            WLOGFW("current focus window: windowId: %{public}d, windowName: %{public}s",
+                id, node->GetWindowProperty()->GetWindowName().c_str());
+        }
         WindowManagerAgentController::GetInstance().UpdateFocusStatus(
             node->GetWindowId(), node->abilityToken_, node->GetWindowType(), node->GetDisplayId(), focused);
         sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(node->GetWindowId(), node->GetDisplayId(),
