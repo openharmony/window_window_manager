@@ -697,7 +697,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
 
 WMError WindowImpl::Show(uint32_t reason)
 {
-    WLOGFI("[Client] Window [name:%{public}s, id:%{public}d] Show", name_.c_str(), property_->GetWindowId());
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Show", name_.c_str(), property_->GetWindowId());
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1303,7 +1303,8 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
 {
     int32_t action = pointerEvent->GetPointerAction();
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        WLOGI("WMS process point down, windowId: %{public}u, action: %{public}d", GetWindowId(), action);
+        WLOGI("WMS process point down, window: [name:%{public}s, id:%{public}u], action: %{public}d",
+            name_.c_str(), GetWindowId(), action);
         if (GetType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
             MMI::PointerEvent::PointerItem pointerItem;
             if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
@@ -1452,6 +1453,16 @@ void WindowImpl::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>
         if (listener != nullptr) {
             listener->OnSizeChange(info);
         }
+    }
+}
+
+void WindowImpl::UpdateActiveStatus(bool isActive)
+{
+    WLOGFI("window active status: %{public}d, id: %{public}u", isActive, property_->GetWindowId());
+    if (isActive) {
+        NotifyAfterActive();
+    } else {
+        NotifyAfterInactive();
     }
 }
 

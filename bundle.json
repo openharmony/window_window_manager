@@ -65,7 +65,6 @@
             "header": {
               "header_files": [
                 "window.h",
-                "window_life_cycle_interface.h",
                 "window_manager.h",
                 "window_option.h",
                 "window_scene.h",
