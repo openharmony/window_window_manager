@@ -31,8 +31,6 @@ public:
     void UnregisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
         WindowManagerAgentType type);
 
-    void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
-        DisplayId displayId, bool focused);
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints);
     void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type);

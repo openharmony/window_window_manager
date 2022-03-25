@@ -36,14 +36,6 @@ void WindowManagerAgentController::UnregisterWindowManagerAgent(const sptr<IWind
     wmAgentContainer_.UnregisterAgent(windowManagerAgent, type);
 }
 
-void WindowManagerAgentController::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-    WindowType windowType, DisplayId displayId, bool focused)
-{
-    for (auto& agent : wmAgentContainer_.GetAgentsByType(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS)) {
-        agent->UpdateFocusStatus(windowId, abilityToken, windowType, displayId, focused);
-    }
-}
-
 void WindowManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused)
 {
     for (auto& agent : wmAgentContainer_.GetAgentsByType(WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS)) {
