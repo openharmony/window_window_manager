@@ -20,12 +20,6 @@
 
 namespace OHOS {
 namespace Rosen {
-void WindowManagerAgent::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-    WindowType windowType, DisplayId displayId, bool focused)
-{
-    SingletonContainer::Get<WindowManager>().UpdateFocusStatus(windowId, abilityToken, windowType, displayId, focused);
-}
-
 void WindowManagerAgent::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused)
 {
     SingletonContainer::Get<WindowManager>().UpdateFocusChangeInfo(focusChangeInfo, focused);
