@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicyTile"};
-    constexpr uint32_t MAX_WIN_NUM_VERTICAL = 2;
-    constexpr uint32_t MAX_WIN_NUM_HORIZONTAL = 3;
+    constexpr uint32_t EDGE_INTERVAL = 48;
+    constexpr uint32_t MID_INTERVAL = 24;
 }
 WindowLayoutPolicyTile::WindowLayoutPolicyTile(const Rect& displayRect, const uint64_t& screenId,
     sptr<WindowNode>& belowAppNode, sptr<WindowNode>& appNode, sptr<WindowNode>& aboveAppNode)
@@ -52,18 +52,29 @@ void WindowLayoutPolicyTile::UpdateDisplayInfo()
     InitTileWindowRects();
 }
 
+uint32_t WindowLayoutPolicyTile::GetMaxTileWinNum() const
+{
+    float virtualPixelRatio = GetVirtualPixelRatio();
+    constexpr uint32_t half = 2;
+    uint32_t edgeIntervalVp = static_cast<uint32_t>(EDGE_INTERVAL * half * virtualPixelRatio);
+    uint32_t midIntervalVp = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio);
+    uint32_t minFloatingW = IsVertical() ? MIN_VERTICAL_FLOATING_WIDTH : MIN_VERTICAL_FLOATING_HEIGHT;
+    minFloatingW = static_cast<uint32_t>(minFloatingW * virtualPixelRatio);
+    uint32_t drawableW = limitRect_.width_ - edgeIntervalVp + midIntervalVp;
+    return static_cast<uint32_t>(drawableW / (minFloatingW + midIntervalVp));
+}
+
 void WindowLayoutPolicyTile::InitTileWindowRects()
 {
-    constexpr uint32_t edgeInterval = 48;
-    constexpr uint32_t midInterval = 24;
     float virtualPixelRatio = GetVirtualPixelRatio();
-    uint32_t edgeIntervalVp = static_cast<uint32_t>(edgeInterval * virtualPixelRatio);
-    uint32_t midIntervalVp = static_cast<uint32_t>(midInterval * virtualPixelRatio);
+    uint32_t edgeIntervalVp = static_cast<uint32_t>(EDGE_INTERVAL * virtualPixelRatio);
+    uint32_t midIntervalVp = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio);
 
     constexpr float ratio = 0.75;  // 0.75: default height/width ratio
     constexpr float edgeRatio = 0.125;
     constexpr int half = 2;
-    maxTileWinNum_ = IsVertical() ? MAX_WIN_NUM_VERTICAL : MAX_WIN_NUM_HORIZONTAL;
+    maxTileWinNum_ = GetMaxTileWinNum();
+    WLOGFI("set max tile window num %{public}u", maxTileWinNum_);
     presetRects_.clear();
     int x = limitRect_.posX_ + (limitRect_.width_ * edgeRatio);
     int y = limitRect_.posY_ + (limitRect_.height_ * edgeRatio);
