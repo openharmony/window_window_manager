@@ -377,8 +377,6 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
             WLOGFW("current focus window: windowId: %{public}d, windowName: %{public}s",
                 id, node->GetWindowProperty()->GetWindowName().c_str());
         }
-        WindowManagerAgentController::GetInstance().UpdateFocusStatus(
-            node->GetWindowId(), node->abilityToken_, node->GetWindowType(), node->GetDisplayId(), focused);
         sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(node->GetWindowId(), node->GetDisplayId(),
             node->GetCallingPid(), node->GetCallingUid(), node->GetWindowType(), node->abilityToken_);
         WindowManagerAgentController::GetInstance().UpdateFocusChangeInfo(
@@ -925,13 +923,13 @@ sptr<WindowNode> WindowNodeContainer::GetNextFocusableWindow(uint32_t windowId) 
 
 sptr<WindowNode> WindowNodeContainer::GetNextActiveWindow(uint32_t windowId) const
 {
-    auto node = FindWindowNodeById(windowId);
-    if (node == nullptr) {
+    auto currentNode = FindWindowNodeById(windowId);
+    if (currentNode == nullptr) {
         WLOGFE("cannot find window id: %{public}u by tree", windowId);
         return nullptr;
     }
-    WLOGFI("current window: [%{public}u, %{public}u]", windowId, static_cast<uint32_t>(node->GetWindowType()));
-    if (WindowHelper::IsSystemWindow(node->GetWindowType())) {
+    WLOGFI("current window: [%{public}u, %{public}u]", windowId, static_cast<uint32_t>(currentNode->GetWindowType()));
+    if (WindowHelper::IsSystemWindow(currentNode->GetWindowType())) {
         for (auto& node : appWindowNode_->children_) {
             if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
                 continue;
@@ -943,7 +941,7 @@ sptr<WindowNode> WindowNodeContainer::GetNextActiveWindow(uint32_t windowId) con
                 return node;
             }
         }
-    } else if (WindowHelper::IsAppWindow(node->GetWindowType())) {
+    } else if (WindowHelper::IsAppWindow(currentNode->GetWindowType())) {
         std::vector<sptr<WindowNode>> windowNodes;
         TraverseContainer(windowNodes);
         auto iter = std::find_if(windowNodes.begin(), windowNodes.end(), [windowId](sptr<WindowNode>& node) {

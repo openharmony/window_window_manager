@@ -138,26 +138,6 @@ public:
     sptr<WindowManagerAgent> windowVisibilityListenerAgent_;
 };
 
-void WindowManager::Impl::NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-    WindowType windowType, DisplayId displayId) const
-{
-    WLOGFI("NotifyFocused [%{public}u; %{public}p; %{public}d; %{public}" PRIu64"]", windowId, abilityToken.GetRefPtr(),
-        static_cast<uint32_t>(windowType), displayId);
-    for (auto& listener : focusChangedListeners_) {
-        listener->OnFocused(windowId, abilityToken, windowType, displayId);
-    }
-}
-
-void WindowManager::Impl::NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-    WindowType windowType, DisplayId displayId) const
-{
-    WLOGFI("NotifyUnfocused [%{public}u; %{public}p; %{public}d; %{public}" PRIu64"]", windowId,
-        abilityToken.GetRefPtr(), static_cast<uint32_t>(windowType), displayId);
-    for (auto& listener : focusChangedListeners_) {
-        listener->OnUnfocused(windowId, abilityToken, windowType, displayId);
-    }
-}
-
 void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo) const
 {
     WLOGFI("NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
@@ -225,24 +205,6 @@ WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>())
 }
 
 WindowManager::~WindowManager()
-{
-}
-
-void IFocusChangedListener::OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
-    WindowType windowType, DisplayId displayId)
-{
-}
-
-void IFocusChangedListener::OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
-    WindowType windowType, DisplayId displayId)
-{
-}
-
-void IFocusChangedListener::OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
-{
-}
-
-void IFocusChangedListener::OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
 }
 
@@ -426,17 +388,6 @@ void WindowManager::UnregisterVisibilityChangedListener(const sptr<IVisibilityCh
             WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
             pImpl_->windowVisibilityListenerAgent_);
         pImpl_->windowVisibilityListenerAgent_ = nullptr;
-    }
-}
-
-void WindowManager::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
-    DisplayId displayId, bool focused) const
-{
-    WLOGFI("window focus status: %{public}d, id: %{public}u", focused, windowId);
-    if (focused) {
-        pImpl_->NotifyFocused(windowId, abilityToken, windowType, displayId);
-    } else {
-        pImpl_->NotifyUnfocused(windowId, abilityToken, windowType, displayId);
     }
 }
 

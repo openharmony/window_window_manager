@@ -34,11 +34,6 @@ class TestFocusChangedListener : public IFocusChangedListener {
 public:
     uint32_t focusedWindow_ = INVALID_WINDOW_ID;
     uint32_t unfocusedWindow_ = INVALID_WINDOW_ID;
-    void OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
-                   DisplayId displayId) override;
-
-    void OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
-                     DisplayId displayId) override;
     void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo) override;
     void OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo) override;
 };
@@ -57,16 +52,6 @@ public:
 
 sptr<TestFocusChangedListener> WindowFocusTest::testFocusChangedListener_ =
     new TestFocusChangedListener();
-
-void TestFocusChangedListener::OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
-                                         DisplayId displayId)
-{
-}
-
-void TestFocusChangedListener::OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
-                                           DisplayId displayId)
-{
-}
 
 void TestFocusChangedListener::OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
