@@ -19,8 +19,6 @@ config("libwm_private_config") {
   include_dirs = [
     "include",
     "../wmserver/include",
-
-    # todo for abilitycontext need delete it
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
     "//foundation/aafwk/standard/interfaces/innerkits/app_manager/include/appmgr",

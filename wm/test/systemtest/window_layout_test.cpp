@@ -462,12 +462,6 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
     Rect expect = utils::GetDefaultFoatingRect(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(utils::RectEqualTo(window, expect));
-    window->MoveTo(INT_MIN, INT_MIN);
-    AvoidArea avoidArea;
-    auto res = window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidArea);
-    ASSERT_EQ(WMError::WM_OK, res);
-    Rect expect2 = {INT_MIN, avoidArea.topRect.height_, expect.width_, expect.height_};
-    ASSERT_TRUE(utils::RectEqualTo(window, expect2));
 }
 
 /**
@@ -477,7 +471,7 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
 {
-    const uint32_t negativeW = UINT32_MAX;
+    const uint32_t negativeW = 0;
     const uint32_t negativeH = 0;
     utils::TestWindowInfo info = {
         .name = "main",
