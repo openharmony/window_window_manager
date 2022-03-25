@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@ private:
     std::vector<std::vector<Rect>> presetRects_;
     std::deque<sptr<WindowNode>> foregroundNodes_;
     void UpdateDisplayInfo() override;
+    uint32_t GetMaxTileWinNum() const;
     void InitTileWindowRects();
     void AssignNodePropertyForTileWindows();
     void LayoutForegroundNodeQueue();

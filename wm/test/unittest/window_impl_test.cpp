@@ -513,30 +513,6 @@ HWTEST_F(WindowImplTest, IsDecorEnable01, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: Maximize01
- * @tc.desc: Maximize the main window
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImplTest, Maximize01, Function | SmallTest | Level3)
-{
-    auto option = new WindowOption();
-    option->SetWindowName("WindowImplTest_Maximize01");
-    auto window = new WindowImpl(option);
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Create("");
-    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->Show();
-    EXPECT_CALL(m->Mock(), MaxmizeWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Maximize();
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
-    EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Hide();
-}
-
-/**
  * @tc.name: Maximize02
  * @tc.desc: Maximize the sub window
  * @tc.type: FUNC
