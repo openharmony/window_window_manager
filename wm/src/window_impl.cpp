@@ -46,7 +46,7 @@ std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appFloatingWindowM
 
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
-    property_ = new WindowProperty();
+    property_ = new (std::nothrow) WindowProperty();
     property_->SetWindowName(option->GetWindowName());
     property_->SetWindowRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
@@ -101,7 +101,7 @@ sptr<Window> WindowImpl::FindTopWindow(uint32_t topWinId)
     }
     for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
         if (topWinId == iter->second.first) {
-            WLOGFI("FindTopWindow id: %{public}d", topWinId);
+            WLOGFI("FindTopWindow id: %{public}u", topWinId);
             return iter->second.second;
         }
     }
@@ -152,7 +152,7 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
 std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
 {
     if (subWindowMap_.find(parentId) == subWindowMap_.end()) {
-        WLOGFE("Cannot parentWindow with id: %{public}d!", parentId);
+        WLOGFE("Cannot parentWindow with id: %{public}u!", parentId);
         return std::vector<sptr<Window>>();
     }
     return std::vector<sptr<Window>>(subWindowMap_[parentId].begin(), subWindowMap_[parentId].end());
@@ -1537,6 +1537,7 @@ void WindowImpl::SetDefaultOption()
             break;
     }
 }
+
 bool WindowImpl::IsWindowValid() const
 {
     bool res = ((state_ > WindowState::STATE_INITIAL) && (state_ < WindowState::STATE_BOTTOM));
@@ -1560,5 +1561,5 @@ bool WindowImpl::IsFullScreen() const
     auto naviProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
     return (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_);
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

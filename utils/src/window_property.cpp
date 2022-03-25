@@ -293,113 +293,91 @@ void WindowProperty::MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& prop
 
 bool WindowProperty::Marshalling(Parcel& parcel) const
 {
-    // write windowName_
     if (!parcel.WriteString(windowName_)) {
         return false;
     }
 
-    // write windowRect_
     if (!(parcel.WriteInt32(windowRect_.posX_) && parcel.WriteInt32(windowRect_.posY_) &&
         parcel.WriteUint32(windowRect_.width_) && parcel.WriteUint32(windowRect_.height_))) {
         return false;
     }
 
-    // write type_
     if (!parcel.WriteUint32(static_cast<uint32_t>(type_))) {
         return false;
     }
 
-    // write mode_
     if (!parcel.WriteUint32(static_cast<uint32_t>(mode_))) {
         return false;
     }
 
-    // write last mode_
     if (!parcel.WriteUint32(static_cast<uint32_t>(lastMode_))) {
         return false;
     }
 
-    // write blur level_
     if (!parcel.WriteUint32(static_cast<uint32_t>(level_))) {
         return false;
     }
 
-    // write flags_
     if (!parcel.WriteUint32(flags_)) {
         return false;
     }
 
-    // write isFullScreen_
     if (!parcel.WriteBool(isFullScreen_)) {
         return false;
     }
 
-    // write focusable_
     if (!parcel.WriteBool(focusable_)) {
         return false;
     }
 
-    // write touchable_
     if (!parcel.WriteBool(touchable_)) {
         return false;
     }
 
-    // write isPrivacyMode_
     if (!parcel.WriteBool(isPrivacyMode_)) {
         return false;
     }
 
-    // write isTransparent_
     if (!parcel.WriteBool(isTransparent_)) {
         return false;
     }
 
-    // write alpha_
     if (!parcel.WriteFloat(alpha_)) {
         return false;
     }
 
-    // write displayId_
     if (!parcel.WriteUint64(displayId_)) {
         return false;
     }
 
-    // write windowId_
     if (!parcel.WriteUint32(windowId_)) {
         return false;
     }
 
-    // write parentId_
     if (!parcel.WriteUint32(parentId_)) {
         return false;
     }
 
-    // write sysUIStateMap_
     if (!MapMarshalling(parcel)) {
         return false;
     }
 
-    // write isDecorEnable_
     if (!parcel.WriteBool(isDecorEnable_)) {
         return false;
     }
 
-    // write hitOffset_
     if (!(parcel.WriteInt32(hitOffset_.x) and parcel.WriteInt32(hitOffset_.y))) {
         return false;
     }
 
-    // write parentId_
     if (!parcel.WriteUint32(animationFlag_)) {
         return false;
     }
 
-    // write windowSizeChangeReason_
     if (!parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_))) {
         return false;
     }
 
-    // write tokenState
     if (!parcel.WriteBool(tokenState_)) {
         return false;
     }
