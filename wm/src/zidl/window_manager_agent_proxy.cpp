@@ -74,7 +74,7 @@ void WindowManagerAgentProxy::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>&
         WLOGFE("Invalid focus change info");
         return;
     }
-    
+
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;

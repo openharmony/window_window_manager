@@ -39,5 +39,5 @@ void AgentDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         callback_(object);
     }
 }
-}
-}
+} // namespace Rosen
+} // namepsace OHOS
