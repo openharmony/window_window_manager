@@ -16,12 +16,12 @@
     <process>foundation</process>
     <systemability> <!--Declare a system ability and its profile-->
         <name>4607</name> <!--Declare the name of system ability-->
-        <libpath>libwms.z.so</libpath> <!--Declare the path of .so file which includes the system ability; Note: 1 .so file have 1 to N system abilities. -->
-        <!--<depend></depend>--> <!--Declare the name of system abilities which the system ability depends on,using the system ability would start on demand. -->
+        <libpath>libwms.z.so</libpath> <!--Declare the path of .so file which includes the system ability; Note: 1 .so file has 1 to N system abilities. -->
+        <!--<depend></depend>--> <!--Declare the system abilities on which a system ability depends. These abilities would start on demand. -->
         <!--<depend-time-out></depend-time-out> --> <!-- Check all dependencies are available before the timeout period ended. The MAX_DEPENDENCY_TIMEOUT is 60s. -->
-        <run-on-create>true</run-on-create> <!-- "true" means the system ability would start immediately, "false" means the system ability would start on demand. -->
-        <distributed>false</distributed> <!-- "true" means the system ability supports distributed scheduling while "false" is not.-->
-        <dump-level>1</dump-level> <!-- Declare the dump level. 1-high; 2-media; 3-low -->
+        <run-on-create>true</run-on-create> <!-- "true" means the system ability starts immediately, and "false" means the system ability starts on demand. -->
+        <distributed>false</distributed> <!-- "true" means the system ability supports distributed scheduling, and "false" means the opposite.-->
+        <dump-level>1</dump-level> <!-- Declare the dump level. 1-high; 2-medium; 3-low -->
         <bootphase>CoreStartPhase</bootphase>
     </systemability>
 </info>
