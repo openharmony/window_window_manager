@@ -280,7 +280,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     }
     node->requestedVisibility_ = false;
     node->currentVisibility_ = false;
-    node->hasDecorated_ = false;
+    node->hasDecorated_ = node->isDefultLayoutRect_ ? true : false;
     node->isCovered_ = true;
     std::vector<sptr<WindowVisibilityInfo>> infos = {new WindowVisibilityInfo(node->GetWindowId(),
         node->GetCallingPid(), node->GetCallingUid(), false)};
