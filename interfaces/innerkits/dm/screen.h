@@ -39,7 +39,6 @@ struct SupportedScreenModes : public RefBase {
     uint32_t width_;
     uint32_t height_;
     uint32_t refreshRate_;
-    int32_t modeId_;
 };
 
 struct VirtualScreenOption {
