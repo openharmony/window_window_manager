@@ -871,7 +871,7 @@ NativeValue* JsWindow::OnSetSystemBarProperties(NativeEngine& engine, NativeCall
 
 NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsWindow::OnGetAvoidArea is called info.argc: %{public}d", info.argc);
+    WLOGFI("JsWindow::OnGetAvoidArea is called info.argc: %{public}ld", (long)info.argc);
     WMError errCode = WMError::WM_OK;
     if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
         WLOGFE("JsWindow params not match!");
