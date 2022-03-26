@@ -143,6 +143,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
         }
     } else if (reason == WindowSizeChangeReason::RESIZE) {
         node->hasDecorated_ = false;
+        node->isDefultLayoutRect_ = false;
         newRect = { lastRect.posX_, lastRect.posY_, rect.width_, rect.height_ };
     } else if (reason == WindowSizeChangeReason::DRAG) {
         if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
@@ -157,7 +158,6 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
             newRect = rect;
         }
     }
-
     property->SetWindowRect(newRect);
     WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_RECT);
     if (res != WMError::WM_OK) {
