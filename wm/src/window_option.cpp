@@ -188,9 +188,19 @@ void WindowOption::SetKeepScreenOn(bool keepScreenOn)
     keepScreenOn_ = keepScreenOn;
 }
 
-bool WindowOption::GetKeepScreenOn() const
+bool WindowOption::IsKeepScreenOn() const
 {
     return keepScreenOn_;
+}
+
+void WindowOption::SetTurnScreenOn(bool turnScreenOn)
+{
+    turnScreenOn_ = turnScreenOn;
+}
+
+bool WindowOption::IsTurnScreenOn() const
+{
+    return turnScreenOn_;
 }
 } // namespace Rosen
 } // namespace OHOS
