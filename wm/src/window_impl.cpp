@@ -370,6 +370,22 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     } else {
         uiContent_->Initialize(this, contentInfo, storage);
     }
+    if (state_ == WindowState::STATE_SHOWN) {
+        Ace::ViewportConfig config;
+        Rect rect = GetRect();
+        config.SetSize(rect.width_, rect.height_);
+        config.SetPosition(rect.posX_, rect.posY_);
+        auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
+        if (display == nullptr) {
+            WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
+                property_->GetWindowId());
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        float virtualPixelRatio = display->GetVirtualPixelRatio();
+        config.SetDensity(virtualPixelRatio);
+        uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED);
+        WLOGFI("notify uiContent window size change end");
+    }
     return WMError::WM_OK;
 }
 
