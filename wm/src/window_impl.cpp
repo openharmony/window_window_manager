@@ -1068,7 +1068,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reas
     if (reason == WindowSizeChangeReason::HIDE) { // if hide, no follow-up notification required
         return;
     }
-    WLOGFI("sizeChange callback size: %{public}u", windowChangeListeners_.size());
+    WLOGFI("sizeChange callback size: %{public}lu", (unsigned long)windowChangeListeners_.size());
     for (auto& listener : windowChangeListeners_) {
         if (listener != nullptr) {
             listener->OnSizeChange(rect, reason);
