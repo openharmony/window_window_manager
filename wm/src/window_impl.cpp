@@ -60,7 +60,8 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetHitOffset(option->GetHitOffset());
     windowTag_ = option->GetWindowTag();
-    keepScreenOn_ = option->GetKeepScreenOn();
+    keepScreenOn_ = option->IsKeepScreenOn();
+    turnScreenOn_ = option->IsTurnScreenOn();
     AdjustWindowAnimationFlag();
     auto& sysBarPropMap = option->GetSystemBarProperty();
     for (auto it : sysBarPropMap) {
@@ -561,6 +562,14 @@ void WindowImpl::HandleKeepScreenOn(bool keepScreenOn)
     }
 }
 
+void WindowImpl::HandleTurnScreenOn()
+{
+    if (turnScreenOn_ && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+        WLOGFI("handle turn screen on");
+        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+    }
+}
+
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGFI("[Client] Window Create");
@@ -728,6 +737,7 @@ WMError WindowImpl::Show(uint32_t reason)
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
         HandleKeepScreenOn(keepScreenOn_);
+        HandleTurnScreenOn();
     } else {
         WLOGFE("show errCode:%{public}d for winId:%{public}d", static_cast<int32_t>(ret), property_->GetWindowId());
     }
@@ -808,9 +818,22 @@ void WindowImpl::SetKeepScreenOn(bool keepScreenOn)
     }
 }
 
-bool WindowImpl::GetKeepScreenOn() const
+bool WindowImpl::IsKeepScreenOn() const
 {
     return keepScreenOn_;
+}
+
+void WindowImpl::SetTurnScreenOn(bool turnScreenOn)
+{
+    turnScreenOn_ = turnScreenOn;
+    if (state_ == WindowState::STATE_SHOWN) {
+        HandleTurnScreenOn();
+    }
+}
+
+bool WindowImpl::IsTurnScreenOn() const
+{
+    return turnScreenOn_;
 }
 
 WMError WindowImpl::Drag(const Rect& rect)
@@ -1400,8 +1423,8 @@ void WindowImpl::UpdateWindowState(WindowState state)
             } else {
                 state_ = WindowState::STATE_FROZEN;
                 NotifyAfterBackground();
+                HandleKeepScreenOn(false);
             }
-            HandleKeepScreenOn(false);
             break;
         }
         case WindowState::STATE_UNFROZEN: {
@@ -1412,8 +1435,8 @@ void WindowImpl::UpdateWindowState(WindowState state)
             } else {
                 state_ = WindowState::STATE_SHOWN;
                 NotifyAfterForeground();
+                HandleKeepScreenOn(keepScreenOn_);
             }
-            HandleKeepScreenOn(keepScreenOn_);
             break;
         }
         default: {
