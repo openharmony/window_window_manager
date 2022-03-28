@@ -143,8 +143,8 @@ void JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string 
         return;
     }
     jsCbMap_[type][callbackRef] = windowManagerListener;
-    WLOGFI("JsWindowRegisterManager::RegisterListener %{public}s success! callback map size: %{public}u",
-        type.c_str(), jsCbMap_[type].size());
+    WLOGFI("JsWindowRegisterManager::RegisterListener %{public}s success! callback map size: %{public}lu",
+        type.c_str(), (unsigned long)jsCbMap_[type].size());
 }
 
 void JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
@@ -188,8 +188,8 @@ void JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std::strin
             return;
         }
     }
-    WLOGFI("JsWindowRegisterManager::UnregisterListener %{public}s success! callback map size: %{public}u",
-        type.c_str(), jsCbMap_[type].size());
+    WLOGFI("JsWindowRegisterManager::UnregisterListener %{public}s success! callback map size: %{public}lu",
+        type.c_str(), (unsigned long)jsCbMap_[type].size());
     // erase type when there is no callback in one type
     if (jsCbMap_[type].empty()) {
         jsCbMap_.erase(type);
