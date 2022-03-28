@@ -105,7 +105,9 @@ public:
     virtual WMError MoveTo(int32_t x, int32_t y) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
     virtual void SetKeepScreenOn(bool keepScreenOn) override;
-    virtual bool GetKeepScreenOn() const override;
+    virtual bool IsKeepScreenOn() const override;
+    virtual void SetTurnScreenOn(bool turnScreenOn) override;
+    virtual bool IsTurnScreenOn() const override;
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;
@@ -224,6 +226,7 @@ private:
     WMError UpdateProperty(PropertyChangeAction action);
     WMError Destroy(bool needNotifyServer);
     void HandleKeepScreenOn(bool keepScreenOn);
+    void HandleTurnScreenOn();
     Rect GetSystemAlarmWindowDefaultSize(Rect defaultRect);
 
     // colorspace, gamut
@@ -268,6 +271,7 @@ private:
     Rect startRectExceptFrame_ = { 0, 0, 0, 0 };
     Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
     bool keepScreenOn_ = false;
+    bool turnScreenOn_ = false;
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 };
 }
