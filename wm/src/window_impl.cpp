@@ -265,6 +265,7 @@ WMError WindowImpl::SetWindowType(WindowType type)
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         property_->SetWindowType(type);
+        property_->SetDecorEnable(WindowHelper::IsMainWindow(property_->GetWindowType()));
         AdjustWindowAnimationFlag();
         return WMError::WM_OK;
     }
@@ -359,11 +360,6 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     if (uiContent_ == nullptr) {
         WLOGFE("fail to SetUIContent id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
-    }
-    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        property_->SetDecorEnable(true);
-    } else {
-        property_->SetDecorEnable(false);
     }
     if (isdistributed) {
         uiContent_->Restore(this, contentInfo, storage);
@@ -618,6 +614,7 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
         windowId, token);
     property_->SetWindowId(windowId);
+    property_->SetDecorEnable(WindowHelper::IsMainWindow(property_->GetWindowType()));
 
     if (ret != WMError::WM_OK) {
         WLOGFE("create window failed with errCode:%{public}d", static_cast<int32_t>(ret));
@@ -1044,6 +1041,26 @@ void WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& liste
     displayMoveListeners_.erase(iter);
 }
 
+void WindowImpl::RegisterInputEventListener(sptr<IInputEventListener>& listener)
+{
+    if (listener == nullptr) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    inputEventListeners_.emplace_back(listener);
+}
+
+void WindowImpl::UnregisterInputEventListener(sptr<IInputEventListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(inputEventListeners_.begin(), inputEventListeners_.end(), listener);
+    if (iter == inputEventListeners_.end()) {
+        WLOGFE("could not find the listener");
+        return;
+    }
+    inputEventListeners_.erase(iter);
+}
+
 void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
 {
     WLOGFE("JS RegisterWindowDestroyedListener the listener");
@@ -1119,6 +1136,16 @@ void WindowImpl::UpdateMode(WindowMode mode)
 
 void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
+    for (auto& listener : inputEventListeners_) {
+        if (listener != nullptr) {
+            WLOGI("ConsumeKeyEvent keyEvent is old api consumed");
+            listener->OnKeyEvent(keyEvent);
+        }
+    }
+    if (uiContent_ == nullptr) {
+        WLOGE("ConsumeKeyEvent uiContent is nullptr");
+        return;
+    }
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
     WLOGFI("ConsumeKeyEvent: enter GetKeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
@@ -1126,7 +1153,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
         if (keyAction != MMI::KeyEvent::KEY_ACTION_UP) {
             return;
         }
-        if (uiContent_ != nullptr && uiContent_->ProcessBackPressed()) {
+        if (uiContent_->ProcessBackPressed()) {
             WLOGI("ConsumeKeyEvent keyEvent is consumed");
             return;
         }
@@ -1139,10 +1166,6 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             Destroy();
         }
     } else {
-        if (uiContent_ == nullptr) {
-            WLOGE("ConsumeKeyEvent uiContent is nullptr");
-            return;
-        }
         if (!uiContent_->ProcessKeyEvent(keyEvent)) {
             WLOGI("ConsumeKeyEvent no consumer window exit");
         }
@@ -1305,7 +1328,7 @@ void WindowImpl::ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& poin
                    pointGlobalX, pointGlobalY, rect.posX_, rect.posY_, rect.width_, rect.height_);
             break;
         }
-        // Start to move or darg
+        // Start to move or drag
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
             HandleMoveEvent(pointGlobalX, pointGlobalY, pointId);
             HandleDragEvent(pointGlobalX, pointGlobalY, pointId);
@@ -1365,6 +1388,12 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
 
     if (IsPointerEventConsumed()) {
         return;
+    }
+    for (auto& listener : inputEventListeners_) {
+        if (listener != nullptr) {
+            WLOGI("ConsumePointEvent pointerEvent is old api consumed");
+            listener->OnPointerInputEvent(pointerEvent);
+        }
     }
     if (uiContent_ == nullptr) {
         WLOGE("ConsumePointerEvent uiContent is nullptr, windowId: %{public}u", GetWindowId());

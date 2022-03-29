@@ -97,6 +97,12 @@ public:
 };
 
 
+class IInputEventListener : virtual public RefBase {
+public:
+    virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
+    virtual void OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
+};
+
 class Window : public RefBase {
 public:
     static sptr<Window> Create(const std::string& windowName,
@@ -163,6 +169,8 @@ public:
     virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
+    virtual void RegisterInputEventListener(sptr<IInputEventListener>& listener) = 0;
+    virtual void UnregisterInputEventListener(sptr<IInputEventListener>& listener) = 0;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
