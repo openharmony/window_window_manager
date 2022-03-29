@@ -509,7 +509,7 @@ HWTEST_F(WindowImplTest, GetSystemBarPropertyByType03, Function | SmallTest | Le
  */
 HWTEST_F(WindowImplTest, IsDecorEnable01, Function | SmallTest | Level3)
 {
-    ASSERT_FALSE(window_->IsDecorEnable());
+    ASSERT_TRUE(window_->IsDecorEnable());
 }
 
 /**
