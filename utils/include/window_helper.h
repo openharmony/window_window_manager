@@ -200,6 +200,7 @@ public:
         return AvoidPosType::AVOID_POS_UNKNOWN;
     }
 
+private:
     WindowHelper() = default;
     ~WindowHelper() = default;
 };
