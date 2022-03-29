@@ -38,6 +38,7 @@ config("libwm_public_config") {
 ohos_shared_library("libwm") {
   sources = [
     "../wmserver/src/window_manager_proxy.cpp",
+    "src/color_parser.cpp",
     "src/input_transfer_station.cpp",
     "src/static_call.cpp",
     "src/vsync_station.cpp",
