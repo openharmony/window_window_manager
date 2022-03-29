@@ -345,9 +345,9 @@ bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScree
         info->width_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenWidth());
         info->height_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenHeight());
         info->refreshRate_ = rsScreenModeInfo.GetScreenRefreshRate();
-        info->modeId_ = rsScreenModeInfo.GetScreenModeId();
         absScreen->modes_.push_back(info);
-        WLOGD("fill screen mode%{public}d w/h:%{public}d/%{public}d", info->modeId_, info->width_, info->height_);
+        WLOGD("fill screen idx:%{public}d w/h:%{public}d/%{public}d",
+            rsScreenModeInfo.GetScreenModeId(), info->width_, info->height_);
     }
     int32_t activeModeId = rsInterface_.GetScreenActiveMode(rsScreenId).GetScreenModeId();
     WLOGD("fill screen activeModeId:%{public}d", activeModeId);
