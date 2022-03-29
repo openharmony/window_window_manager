@@ -144,6 +144,9 @@ public:
     virtual bool IsKeepScreenOn() const = 0;
     virtual void SetTurnScreenOn(bool turnScreenOn) = 0;
     virtual bool IsTurnScreenOn() const = 0;
+    virtual void SetBackgroundColor(const std::string& color) = 0;
+    virtual void SetTransparent(bool isTransparent) = 0;
+    virtual bool IsTransparent() const = 0;
 
     virtual WMError RequestFocus() const = 0;
     // AddInputEventListener is for api 7

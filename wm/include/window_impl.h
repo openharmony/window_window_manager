@@ -35,6 +35,25 @@
 
 namespace OHOS {
 namespace Rosen {
+union ColorParam {
+#if BIG_ENDIANNESS
+    struct {
+        uint8_t alpha;
+        uint8_t red;
+        uint8_t green;
+        uint8_t blue;
+    } argb;
+#else
+    struct {
+        uint8_t blue;
+        uint8_t green;
+        uint8_t red;
+        uint8_t alpha;
+    } argb;
+#endif
+    uint32_t value;
+};
+
 class WindowImpl : public Window {
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb)              \
     do {                                                        \
@@ -108,6 +127,9 @@ public:
     virtual bool IsKeepScreenOn() const override;
     virtual void SetTurnScreenOn(bool turnScreenOn) override;
     virtual bool IsTurnScreenOn() const override;
+    virtual void SetBackgroundColor(const std::string& color) override;
+    virtual void SetTransparent(bool isTransparent) override;
+    virtual bool IsTransparent() const override;
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;
@@ -272,6 +294,7 @@ private:
     Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
     bool keepScreenOn_ = false;
     bool turnScreenOn_ = false;
+    ColorParam backgroundColor_ = { .value = 0xff000000 };
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 };
 }
