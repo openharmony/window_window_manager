@@ -70,16 +70,17 @@ void WindowLayoutPolicyTile::InitTileWindowRects()
     uint32_t edgeIntervalVp = static_cast<uint32_t>(EDGE_INTERVAL * virtualPixelRatio);
     uint32_t midIntervalVp = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio);
 
-    constexpr float ratio = 0.75;  // 0.75: default height/width ratio
-    constexpr float edgeRatio = 0.125;
+    constexpr float ratio = 0.66; // 0.66: default height/width ratio
     constexpr int half = 2;
     maxTileWinNum_ = GetMaxTileWinNum();
     WLOGFI("set max tile window num %{public}u", maxTileWinNum_);
     presetRects_.clear();
-    int x = limitRect_.posX_ + (limitRect_.width_ * edgeRatio);
-    int y = limitRect_.posY_ + (limitRect_.height_ * edgeRatio);
-    uint32_t w = limitRect_.width_ * ratio;
-    uint32_t h = limitRect_.height_ * ratio;
+    uint32_t w = displayRect_.width_ * ratio;
+    uint32_t h = displayRect_.height_ * ratio;
+    w = w > limitRect_.width_ ? limitRect_.width_ : w;
+    h = h > limitRect_.height_ ? limitRect_.height_ : h;
+    int x = limitRect_.posX_ + ((limitRect_.width_ - w) / half);
+    int y = limitRect_.posY_ + ((limitRect_.height_ - h) / half);
     std::vector<Rect> single = {{ x, y, w, h }};
     presetRects_.emplace_back(single);
     for (uint32_t num = 2; num <= maxTileWinNum_; num++) { // start calc preset with 2 windows
