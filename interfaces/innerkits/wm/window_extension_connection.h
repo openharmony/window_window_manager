@@ -40,7 +40,8 @@ public:
     boolean RequestFocus();
 private:
     WindowExtensionClientProxy proxy_;
-    sptr<IRemoteObject::DeathRecipient> deathRecipient_;
+    sptr<IRemoteObject::DeathRecipient>& deathRecipient_;
+    sptr<WindowExtensionServerStub>& stub_;
 };
 } // namespace Rosen
 } // namespace OHOS
