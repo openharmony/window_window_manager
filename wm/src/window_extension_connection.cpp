@@ -30,7 +30,7 @@ boolean ConnectExtension(const AppExecFwk::ElementName &element, Rect rect, int3
 
     if (AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
         want, this, nullptr, uid / UID_MASK) != ERR_OK) {
-        WLOGFE("ConnectAbility failed");
+        WLOGFE("ConnectAbility failed!");
         return false;
     }
     return true;
