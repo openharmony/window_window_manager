@@ -20,6 +20,7 @@
 #include <ability_manager_client.h>
 #include <power_mgr_client.h>
 
+#include "color_parser.h"
 #include "display_manager.h"
 #include "singleton_container.h"
 #include "window_adapter.h"
@@ -196,6 +197,9 @@ bool WindowImpl::GetShowState() const
 
 void WindowImpl::SetFocusable(bool isFocusable)
 {
+    if (!IsWindowValid()) {
+        return;
+    }
     property_->SetFocusable(isFocusable);
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
 }
@@ -207,6 +211,9 @@ bool WindowImpl::GetFocusable() const
 
 void WindowImpl::SetTouchable(bool isTouchable)
 {
+    if (!IsWindowValid()) {
+        return;
+    }
     property_->SetTouchable(isTouchable);
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
 }
@@ -847,6 +854,39 @@ void WindowImpl::SetTurnScreenOn(bool turnScreenOn)
 bool WindowImpl::IsTurnScreenOn() const
 {
     return turnScreenOn_;
+}
+
+void WindowImpl::SetBackgroundColor(const std::string& color)
+{
+    uint32_t colorValue;
+    if (ColorParser::Parse(color, colorValue)) {
+        backgroundColor_.value = colorValue;
+        // need update background color for ace
+        return;
+    }
+    WLOGFE("invalid color string: %{public}s", color.c_str());
+}
+
+void WindowImpl::SetTransparent(bool isTransparent)
+{
+    if (isTransparent) {
+        backgroundColor_.argb.alpha = 0x00;
+    } else {
+        // need get background color from ace to backgroundColor_.value
+        if (backgroundColor_.argb.alpha == 0x00) {
+            backgroundColor_.argb.alpha = 0xff;
+            // need update background color for ace
+        }
+    }
+}
+
+bool WindowImpl::IsTransparent() const
+{
+    // need get background color from ace to backgroundColor_.value
+    if (backgroundColor_.argb.alpha == 0x00) {
+        return true;
+    }
+    return false;
 }
 
 WMError WindowImpl::Drag(const Rect& rect)
