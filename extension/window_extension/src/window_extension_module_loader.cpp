@@ -15,41 +15,19 @@
 
  #include "native_engine/native_engine.h"
 
-extern const char _binary_window_extension_js_start[];
-extern const char _binary_window_extension_js_end[];
-extern const char _binary_window_extension_abc_start[];
-extern const char _binary_window_extension_abc_end[];
+namespace OHOS::Window {
+WindowExtensionModuleLoader::WindowExtensionModuleLoader() = default;
+WindowExtensionModuleLoader::~WindowExtensionModuleLoader() = default;
 
-extern "C" __attribute__((constructor)) void NAPI_application_WindowExtension_AutoRegister()
+AbilityRuntime::Extension *WindowExtensionModuleLoader::Create(
+    const std::unique_ptr<AbilityRuntime::Runtime>& runtime) const
 {
-    auto moduleManager = NativeModuleManager::GetInstance();
-    NativeModule newModuleInfo = {
-        .name = "application.WindowExtension",
-        .fileName = "application/libwindowextension_napi.so/WindowExtension.js",
-    };
-
-    moduleManager->Register(&newModuleInfo);
+    return WindowExtension::Create(runtime);
 }
 
-extern "C" __attribute__((visibility("default"))) void NAPI_application_WindowExtension_GetJSCode(
-    const char **buf, int *bufLen)
+extern "C" __attribute__((visibility("default"))) void* OHOS_EXTENSION_GetExtensionModule()
 {
-    if (buf != nullptr) {
-        *buf = _binary_window_extension_js_start;
-    }
-
-    if (bufLen != nullptr) {
-        *bufLen = _binary_window_extension_js_end - _binary_window_extension_js_start;
-    }
+    return &WindowExtensionModuleLoader::GetInstance();
 }
+} // namespace OHOS::Window
 
-extern "C" __attribute__((visibility("default"))) void NAPI_application_WindowExtension_GetABCCode(
-    const char **buf, int *buflen)
-{
-    if (buf != nullptr) {
-        *buf = _binary_window_extension_abc_start;
-    }
-    if (buflen != nullptr) {
-        *buflen = _binary_window_extension_abc_end - _binary_window_extension_abc_start;
-    }
-}
