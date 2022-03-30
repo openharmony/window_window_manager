@@ -39,116 +39,112 @@ JsWindowStage::~JsWindowStage()
 }
 void JsWindowStage::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
-    WLOGFI("JsWindowStage::Finalizer is called");
+    WLOGFI("[NAPI]Finalizer");
     std::unique_ptr<JsWindowStage>(static_cast<JsWindowStage*>(data));
 }
 
 NativeValue* JsWindowStage::SetUIContent(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("JsWindowStage::SetUIContent is called");
+    WLOGFI("[NAPI]SetUIContent");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnSetUIContent(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::GetMainWindow(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("JsWindowStage::GetMainWindow is called");
+    WLOGFI("[NAPI]GetMainWindow");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnGetMainWindow(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::On(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("JsWindowStage::On is called");
+    WLOGFI("[NAPI]On");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnEvent(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::Off(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("JsWindowStage::Off is called");
+    WLOGFI("[NAPI]Off");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OffEvent(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::LoadContent(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("JsWindowStage::LoadContent is called");
+    WLOGFI("[NAPI]LoadContent");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnLoadContent(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::GetWindowMode(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("JsWindowStage::GetWindowMode is called");
+    WLOGFI("[NAPI]GetWindowMode");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnGetWindowMode(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::CreateSubWindow(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("JsWindowStage::CreateSubWindow is called");
+    WLOGFI("[NAPI]CreateSubWindow");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnCreateSubWindow(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::GetSubWindow(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("JsWindowStage::GetSubWindow is called");
+    WLOGFI("[NAPI]GetSubWindow");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnGetSubWindow(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsWindowStage::OnSetUIContent is called");
     if (info.argc < 2) { // 2: minimum param num
-        WLOGFE("JsWindowStage::OnSetUIContent Not enough params");
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         return engine.CreateUndefined();
     }
     if (windowScene_ == nullptr || windowScene_->GetMainWindow() == nullptr) {
-        WLOGFE("JsWindowStage::OnSetUIContent windowScene_ or MainWindow is nullptr");
+        WLOGFE("[NAPI]WindowScene is null or window is null");
         return engine.CreateUndefined();
     }
 
     // Parse info->argv[0] as abilitycontext
     auto objContext = ConvertNativeValueTo<NativeObject>(info.argv[0]);
     if (objContext == nullptr) {
-        WLOGFE("JsWindowStage::OnSetUIContent info->argv[0] InValid");
+        WLOGFE("[NAPI]Context is nullptr");
         return engine.CreateUndefined();
     }
 
     // Parse info->argv[1] as url
     std::string contextUrl;
     if (!ConvertFromJsValue(engine, info.argv[1], contextUrl)) {
-        WLOGFE("JsWindowStage::OnSetUIContent failed to convert parameter to url");
+        WLOGFE("[NAPI]Failed to convert parameter to url");
         return engine.CreateUndefined();
     }
-    WLOGFI("JsWindowStage::OnSetUIContent Get url");
-
     windowScene_->GetMainWindow()->SetUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
-
     return engine.CreateUndefined();
 }
 
 NativeValue* JsWindowStage::OnGetMainWindow(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsWindowStage::OnGetMainWindow is called");
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (windowScene_ == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
-                WLOGFE("JsWindowStage windowScene_ is nullptr!");
+                WLOGFE("[NAPI]WindowScene_ is nullptr!");
                 return;
             }
             auto window = windowScene_->GetMainWindow();
             if (window != nullptr) {
                 task.Resolve(engine, OHOS::Rosen::CreateJsWindowObject(engine, window, false));
-                WLOGFI("JsWindowStage::OnGetMainWindow success");
+                WLOGFI("[NAPI]Get main window [%{public}u, %{public}s]",
+                    window->GetWindowId(), window->GetWindowName().c_str());
             } else {
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(Rosen::WMError::WM_ERROR_NULLPTR),
-                    "JsWindowStage::OnGetMainWindow failed."));
+                    "Get main window failed."));
             }
         };
     NativeValue* callback = (info.argv[0]->TypeOf() == NATIVE_FUNCTION) ? info.argv[0] : nullptr;
@@ -160,76 +156,77 @@ NativeValue* JsWindowStage::OnGetMainWindow(NativeEngine& engine, NativeCallback
 
 NativeValue* JsWindowStage::OnEvent(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsWindowStage::OnEvent is called");
     if (windowScene_ == nullptr || info.argc < 2) { // 2: minimum param nums
-        WLOGFE("JsWindowStage::OnEvent windowScene_ is nullptr or params not match");
+        WLOGFE("[NAPI]Window scene is null or argc is invalid: %{public}zu", info.argc);
         return engine.CreateUndefined();
     }
     // Parse info->argv[0] as string
     std::string eventString;
     if (!ConvertFromJsValue(engine, info.argv[0], eventString)) {
-        WLOGFE("JsWindowStage::OnEvent info->argv[0] Failed to convert parameter to string");
+        WLOGFE("[NAPI]Failed to convert parameter to string");
         return engine.CreateUndefined();
     }
     NativeValue* value = info.argv[1];
     if (!value->IsCallable()) {
-        WLOGFE("JsWindowStage::OnEvent info->argv[1] is not callable");
+        WLOGFE("[NAPI]Callback(info->argv[1]) is not callable");
         return engine.CreateUndefined();
     }
 
     auto window = windowScene_->GetMainWindow();
     if (window == nullptr) {
-        WLOGFE("JsWindowStage::OnEvent GetMainWindow failed");
+        WLOGFE("[NAPI]Get window failed");
         return engine.CreateUndefined();
     }
     g_listenerManager->RegisterListener(window, eventString, CaseType::CASE_STAGE, engine, value);
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] register event %{public}s, callback %{public}p",
+        window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str(), value);
+
     return engine.CreateUndefined();
 }
 
 NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsWindowStage::OffEvent is called");
     if (windowScene_ == nullptr) {
-        WLOGFE("JsWindowStage::OffEvent windowScene_ is nullptr");
+        WLOGFE("[NAPI]Window scene is null");
         return engine.CreateUndefined();
     }
 
     // Parse info->argv[0] as string
     std::string eventString;
     if (!ConvertFromJsValue(engine, info.argv[0], eventString)) {
-        WLOGFE("JsWindowStage::OffEvent info->argv[0] Failed to convert parameter to string");
+        WLOGFE("[NAPI]Failed to convert parameter to string");
         return engine.CreateUndefined();
     }
     if (eventString.compare("windowStageEvent") != 0) {
-        WLOGFE("JsWindowStage::OffEvent info->argv[0] is InValid");
+        WLOGFE("[NAPI]Envent %{public}s is invalid", eventString.c_str());
         return engine.CreateUndefined();
     }
 
     NativeValue* value = info.argv[1];
     auto window = windowScene_->GetMainWindow();
     if (window == nullptr) {
-        WLOGFE("JsWindowStage::OnEvent GetMainWindow failed");
+        WLOGFE("[NAPI]Get window failed");
         return engine.CreateUndefined();
     }
     if (value->TypeOf() == NATIVE_FUNCTION) {
-        WLOGFI("JsWindowStage::OffEvent info->argv[1] is callable type");
         g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, value);
     } else if (value->TypeOf() == NativeValueType::NATIVE_UNDEFINED) {
-        WLOGFI("JsWindowStage::OffEvent info->argv[1] is native undefined type");
         g_listenerManager->UnregisterListener(window, eventString, CaseType::CASE_STAGE, nullptr);
     } else {
-        WLOGFE("JsWindowStage::OffEvent info->argv[1] is InValid param");
+        WLOGFE("[NAPI]Callback(info->argv[1]) is invalid");
     }
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] unregister event %{public}s, callback %{public}p",
+        window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str(), value);
+
     return engine.CreateUndefined();
 }
 
 NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsWindowStage::OnLoadContent is called");
     WMError errCode = WMError::WM_OK;
     std::string contextUrl;
     if (!ConvertFromJsValue(engine, info.argv[0], contextUrl)) {
-        WLOGFE("Failed to convert parameter to context url");
+        WLOGFE("[NAPI]Failed to convert parameter to context url");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     NativeValue* storage = nullptr;
@@ -250,12 +247,13 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (windowScene_ == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
-                WLOGFE("JsWindowStage windowScene_ is nullptr!");
+                WLOGFE("[NAPI]windowScene_ is nullptr");
                 return;
             }
             auto win = windowScene_->GetMainWindow();
             if (win == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+                WLOGFE("[NAPI]Get window failed");
                 return;
             }
             NativeValue* nativeStorage = (contentStorage == nullptr) ? nullptr : contentStorage->Get();
@@ -265,7 +263,8 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
                 return;
             }
             task.Resolve(engine, engine.CreateUndefined());
-            WLOGFI("JsWindowStage::OnLoadContent success");
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] load content %{public}s, storage %{public}p",
+                win->GetWindowId(), win->GetWindowName().c_str(), contextUrl.c_str(), nativeStorage);
         };
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
@@ -275,28 +274,29 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
 
 NativeValue* JsWindowStage::OnGetWindowMode(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsWindowStage::OnGetWindowMode is called");
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (windowScene_ == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
-                WLOGFE("JsWindowStage windowScene_ is nullptr!");
+                WLOGFE("[NAPI]windowScene_ is nullptr");
                 return;
             }
             auto window = windowScene_->GetMainWindow();
             if (window == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(Rosen::WMError::WM_ERROR_NULLPTR),
-                    "JsWindowStage::OnGetWindowMode failed."));
-                WLOGFE("JsWindowStage window is nullptr");
+                    "Get window failed"));
+                WLOGFE("[NAPI]Get window failed");
                 return;
             }
             Rosen::WindowMode mode = window->GetMode();
             if (NATIVE_TO_JS_WINDOW_MODE_MAP.count(mode) != 0) {
                 task.Resolve(engine, CreateJsValue(engine, NATIVE_TO_JS_WINDOW_MODE_MAP.at(mode)));
-                WLOGFI("JsWindowStage OnGetWindowMode success");
+                WLOGFI("[NAPI]Window [%{public}u, %{public}s] get mode %{public}u, api mode %{public}u",
+                    window->GetWindowId(), window->GetWindowName().c_str(),
+                    mode, NATIVE_TO_JS_WINDOW_MODE_MAP.at(mode));
             } else {
                 task.Resolve(engine, CreateJsValue(engine, mode));
-                WLOGFI("JsWindowStage OnGetWindowMode success, but not in apimode");
+                WLOGFE("[NAPI]Get mode %{public}u, but not in apimode", mode);
             }
         };
     NativeValue* callback = (info.argv[0]->TypeOf() == NATIVE_FUNCTION) ? info.argv[0] : nullptr;
@@ -308,18 +308,17 @@ NativeValue* JsWindowStage::OnGetWindowMode(NativeEngine& engine, NativeCallback
 
 NativeValue* JsWindowStage::OnCreateSubWindow(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsWindowStage::OnCreateSubWindow is called");
     WMError errCode = WMError::WM_OK;
     std::string windowName;
     if (!ConvertFromJsValue(engine, info.argv[0], windowName)) {
-        WLOGFE("Failed to convert parameter to windowName");
+        WLOGFE("[NAPI]Failed to convert parameter to windowName");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (windowScene_ == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
-                WLOGFE("JsWindowStage windowScene_ is nullptr or invaliad params!");
+                WLOGFE("[NAPI]Window scene is null or get invalid param");
                 return;
             }
             sptr<Rosen::WindowOption> windowOption = new Rosen::WindowOption();
@@ -328,12 +327,12 @@ NativeValue* JsWindowStage::OnCreateSubWindow(NativeEngine& engine, NativeCallba
             auto window = windowScene_->CreateWindow(windowName, windowOption);
             if (window == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(Rosen::WMError::WM_ERROR_NULLPTR),
-                    "JsWindowStage::OnCreateSubWindow failed."));
-                WLOGFE("JsWindowStage window is nullptr");
+                    "Get window failed"));
+                WLOGFE("[NAPI]Get window failed");
                 return;
             }
             task.Resolve(engine, CreateJsWindowObject(engine, window, false));
-            WLOGFI("JsWindowStage OnCreateSubWindow success");
+            WLOGFI("[NAPI]Create sub widdow %{public}s end", windowName.c_str());
         };
     NativeValue* callback = (info.argv[1]->TypeOf() == NATIVE_FUNCTION) ? info.argv[1] : nullptr;
     NativeValue* result = nullptr;
@@ -345,11 +344,10 @@ NativeValue* JsWindowStage::OnCreateSubWindow(NativeEngine& engine, NativeCallba
 NativeValue* JsWindowStage::CreateJsSubWindowArrayObject(NativeEngine& engine,
     std::vector<sptr<Window>> subWinVec)
 {
-    WLOGFI("JsWindowUtils::CreateJsSubWindowArrayObject is called");
     NativeValue* objValue = engine.CreateArray(subWinVec.size());
     NativeArray* array = ConvertNativeValueTo<NativeArray>(objValue);
     if (array == nullptr) {
-        WLOGFE("Failed to convert subWinVec to jsArrayObject");
+        WLOGFE("[NAPI]Failed to convert subWinVec to jsArrayObject");
         return nullptr;
     }
     uint32_t index = 0;
@@ -361,17 +359,16 @@ NativeValue* JsWindowStage::CreateJsSubWindowArrayObject(NativeEngine& engine,
 
 NativeValue* JsWindowStage::OnGetSubWindow(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsWindowStage::OnGetSubWindow is called");
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (windowScene_ == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
-                WLOGFE("JsWindowStage windowScene_ is nullptr!");
+                WLOGFE("[NAPI]Window scene is nullptr");
                 return;
             }
             std::vector<sptr<Window>> subWindowVec = windowScene_->GetSubWindow();
             task.Resolve(engine, CreateJsSubWindowArrayObject(engine, subWindowVec));
-            WLOGFI("JsWindowStage OnGetSubWindow success");
+            WLOGFI("[NAPI]Get sub windows, size = %{public}zu", subWindowVec.size());
         };
     NativeValue* callback = (info.argv[0]->TypeOf() == NATIVE_FUNCTION) ? info.argv[0] : nullptr;
     NativeValue* result = nullptr;
@@ -383,7 +380,7 @@ NativeValue* JsWindowStage::OnGetSubWindow(NativeEngine& engine, NativeCallbackI
 NativeValue* CreateJsWindowStage(NativeEngine& engine,
     std::shared_ptr<Rosen::WindowScene> windowScene)
 {
-    WLOGFI("JsWindowStage::CreateJsWindowStage is called");
+    WLOGFI("[NAPI]CreateJsWindowStage");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 

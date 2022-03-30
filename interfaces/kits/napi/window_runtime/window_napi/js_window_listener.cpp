@@ -26,14 +26,14 @@ constexpr uint32_t AVOID_AREA_NUM = 4;
 
 void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
 {
-    WLOGFI("CallJsMethod methodName = %{public}s", methodName);
+    WLOGFI("[NAPI]CallJsMethod methodName = %{public}s", methodName);
     if (engine_ == nullptr || jsCallBack_ == nullptr) {
-        WLOGFE("engine_ nullptr or jsCallBack_ is nullptr");
+        WLOGFE("[NAPI]engine_ nullptr or jsCallBack_ is nullptr");
         return;
     }
     NativeValue* method = jsCallBack_->Get();
     if (method == nullptr) {
-        WLOGFE("Failed to get method callback from object");
+        WLOGFE("[NAPI]Failed to get method callback from object");
         return;
     }
     engine_->CallFunction(engine_->CreateUndefined(), method, argv, argc);
@@ -41,7 +41,7 @@ void JsWindowListener::CallJsMethod(const char* methodName, NativeValue* const* 
 
 void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason)
 {
-    WLOGFI("JsWindowListener::OnSizeChange is called");
+    WLOGFI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [this, rect] (NativeEngine &engine, AsyncTask &task, int32_t status) {
@@ -65,19 +65,19 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason)
 
 void JsWindowListener::OnModeChange(WindowMode mode)
 {
-    WLOGFI("JsWindowListener::OnModeChange is called");
+    WLOGFI("[NAPI]OnModeChange %{public}u", mode);
 }
 
 void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
 {
-    WLOGFI("JsWindowListener::OnSystemBarPropertyChange is called");
+    WLOGFI("[NAPI]OnSystemBarPropertyChange");
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [this, displayId, tints] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* propertyValue = engine_->CreateObject();
             NativeObject* object = ConvertNativeValueTo<NativeObject>(propertyValue);
             if (object == nullptr) {
-                WLOGFE("Failed to convert prop to jsObject");
+                WLOGFE("[NAPI]Failed to convert prop to jsObject");
                 return;
             }
             object->SetProperty("displayId", CreateJsValue(*engine_, static_cast<uint32_t>(displayId)));
@@ -94,19 +94,19 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
 
 void JsWindowListener::OnAvoidAreaChanged(const std::vector<Rect> avoidAreas)
 {
-    WLOGFI("JsWindowListener::OnAvoidAreaChanged is called");
+    WLOGFI("[NAPI]OnAvoidAreaChanged");
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [this, avoidAreas] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* avoidAreaValue = engine_->CreateObject();
             NativeObject* object = ConvertNativeValueTo<NativeObject>(avoidAreaValue);
             if (object == nullptr) {
-                WLOGFE("JsWindowListener::OnAvoidAreaChanged Failed to convert rect to jsObject");
+                WLOGFE("[NAPI]Failed to convert rect to jsObject");
                 return;
             }
 
             if (static_cast<uint32_t>(avoidAreas.size()) != AVOID_AREA_NUM) {
-                WLOGFE("AvoidAreas size is not 4 (left, top, right, bottom). Current avoidAreas size is %{public}u",
+                WLOGFE("[NAPI]AvoidAreas size is not 4 (left, top, right, bottom), size is %{public}u",
                     static_cast<uint32_t>(avoidAreas.size()));
                 return;
             }
@@ -127,7 +127,7 @@ void JsWindowListener::OnAvoidAreaChanged(const std::vector<Rect> avoidAreas)
 
 void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
 {
-    WLOGFI("JsWindowListener::LifeCycleCallBack is called, type: %{public}d", eventType);
+    WLOGFI("[NAPI]LifeCycleCallBack, envent type: %{public}u", eventType);
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
         [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(eventType))};
