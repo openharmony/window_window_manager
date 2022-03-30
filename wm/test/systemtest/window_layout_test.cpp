@@ -139,7 +139,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
     activeWindows_.push_back(window);
 
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_TRUE(utils::RectEqualTo(window, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
+    Rect res = utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_);
+    ASSERT_TRUE(utils::RectEqualTo(window, utils::GetDecorateRect(res, virtualPixelRatio_)));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 
@@ -168,7 +169,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
     activeWindows_.push_back(statBar);
 
     ASSERT_EQ(WMError::WM_OK, appWin->Show());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
+    Rect res = utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_);
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetDecorateRect(res, virtualPixelRatio_)));
     ASSERT_EQ(WMError::WM_OK, statBar->Show());
     ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
     ASSERT_TRUE(utils::RectEqualTo(statBar, utils::statusBarRect_));
