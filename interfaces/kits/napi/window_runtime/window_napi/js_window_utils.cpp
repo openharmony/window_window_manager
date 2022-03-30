@@ -30,18 +30,17 @@ namespace {
 
 NativeValue* WindowTypeInit(NativeEngine* engine)
 {
-    WLOGFI("WindowTypeInit");
+    WLOGFI("[NAPI]WindowTypeInit");
 
     if (engine == nullptr) {
-        WLOGFE("Invalid input parameters");
+        WLOGFE("[NAPI]Engine is nullptr");
         return nullptr;
     }
 
     NativeValue *objValue = engine->CreateObject();
     NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
-
     if (object == nullptr) {
-        WLOGFE("Failed to get object");
+        WLOGFE("[NAPI]Failed to get object");
         return nullptr;
     }
 
@@ -68,18 +67,17 @@ NativeValue* WindowTypeInit(NativeEngine* engine)
 
 NativeValue* AvoidAreaTypeInit(NativeEngine* engine)
 {
-    WLOGFI("AvoidAreaTypeInit");
+    WLOGFI("[NAPI]AvoidAreaTypeInit");
 
     if (engine == nullptr) {
-        WLOGFE("Invalid input parameters");
+        WLOGFE("[NAPI]Engine is nullptr");
         return nullptr;
     }
 
     NativeValue *objValue = engine->CreateObject();
     NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
-
     if (object == nullptr) {
-        WLOGFE("Failed to get object");
+        WLOGFE("[NAPI]Failed to get object");
         return nullptr;
     }
 
@@ -92,18 +90,17 @@ NativeValue* AvoidAreaTypeInit(NativeEngine* engine)
 
 NativeValue* WindowModeInit(NativeEngine* engine)
 {
-    WLOGFI("WindowModeInit");
+    WLOGFI("[NAPI]WindowModeInit");
 
     if (engine == nullptr) {
-        WLOGFE("Invalid input parameters");
+        WLOGFE("[NAPI]Engine is nullptr");
         return nullptr;
     }
 
     NativeValue *objValue = engine->CreateObject();
     NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
-
     if (object == nullptr) {
-        WLOGFE("Failed to get object");
+        WLOGFE("[NAPI]Failed to get object");
         return nullptr;
     }
 
@@ -122,18 +119,17 @@ NativeValue* WindowModeInit(NativeEngine* engine)
 
 NativeValue* ColorSpaceInit(NativeEngine* engine)
 {
-    WLOGFI("ColorSpaceInit");
+    WLOGFI("[NAPI]ColorSpaceInit");
 
     if (engine == nullptr) {
-        WLOGFE("Invalid input parameters");
+        WLOGFE("[NAPI]Engine is nullptr");
         return nullptr;
     }
 
     NativeValue *objValue = engine->CreateObject();
     NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
-
     if (object == nullptr) {
-        WLOGFE("Failed to get object");
+        WLOGFE("[NAPI]Failed to get object");
         return nullptr;
     }
 
@@ -146,18 +142,17 @@ NativeValue* ColorSpaceInit(NativeEngine* engine)
 
 NativeValue* WindowStageEventTypeInit(NativeEngine* engine)
 {
-    WLOGFI("WindowStageEventTypeInit");
+    WLOGFI("[NAPI]WindowStageEventTypeInit");
 
     if (engine == nullptr) {
-        WLOGFE("Invalid input parameters");
+        WLOGFE("[NAPI]Engine is nullptr");
         return nullptr;
     }
 
     NativeValue *objValue = engine->CreateObject();
     NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
-
     if (object == nullptr) {
-        WLOGFE("Failed to get object");
+        WLOGFE("[NAPI]Failed to get object");
         return nullptr;
     }
 
@@ -177,7 +172,7 @@ NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect)
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
-        WLOGFE("Failed to convert rect to jsObject");
+        WLOGFE("[NAPI]Failed to convert rect to jsObject");
         return nullptr;
     }
     object->SetProperty("left", CreateJsValue(engine, rect.posX_));
@@ -189,18 +184,18 @@ NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect)
 
 NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window)
 {
-    WLOGFI("JsWindowUtils::CreateJsWindowPropertiesObject is called");
+    WLOGFI("[NAPI]CreateJsWindowPropertiesObject");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
-        WLOGFE("Failed to convert windowProperties to jsObject");
+        WLOGFE("[NAPI]Failed to convert windowProperties to jsObject");
         return nullptr;
     }
 
     Rect rect = window->GetRect();
     NativeValue* rectObj = GetRectAndConvertToJsValue(engine, rect);
     if (rectObj == nullptr) {
-        WLOGFE("GetRect failed!");
+        WLOGFE("[NAPI]GetRect failed!");
     }
     object->SetProperty("windowRect", rectObj);
     WindowType type = window->GetType();
@@ -232,39 +227,37 @@ static std::string GetHexColor(uint32_t color)
 
 static NativeValue* CreateJsSystemBarRegionTintObject(NativeEngine& engine, const SystemBarRegionTint& tint)
 {
-    WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintObject is called");
-
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
-        WLOGFE("Failed to convert SystemBarProperty to jsObject");
+        WLOGFE("[NAPI]Failed to convert SystemBarProperty to jsObject");
         return nullptr;
     }
     object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(tint.type_)));
     object->SetProperty("isEnable", CreateJsValue(engine, tint.prop_.enable_));
     std::string bkgColor = GetHexColor(tint.prop_.backgroundColor_);
-    WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintObject backgroundColir: %{public}s", bkgColor.c_str());
     object->SetProperty("backgroundColor", CreateJsValue(engine, bkgColor));
     std::string contentColor = GetHexColor(tint.prop_.contentColor_);
-    WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintObject contentColor: %{public}s", contentColor.c_str());
     object->SetProperty("contentColor", CreateJsValue(engine, contentColor));
     Rect rect = tint.region_;
     object->SetProperty("region", GetRectAndConvertToJsValue(engine, rect));
-    WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintObject rect: [%{public}d %{public}d %{public}d %{public}d]",
+
+    WLOGFI("[NAPI]Type %{public}u [%{public}u %{public}s %{public}s] [%{public}d %{public}d %{public}u %{public}u]",
+        tint.type_, tint.prop_.enable_, bkgColor.c_str(), contentColor.c_str(),
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     return objValue;
 }
 
 NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine, const SystemBarRegionTints& tints)
 {
-    WLOGFI("JsWindowUtils::CreateJsSystemBarRegionTintArrayObject is called");
     if (tints.empty()) {
+        WLOGFE("[NAPI]Empty tints");
         return nullptr;
     }
     NativeValue* objValue = engine.CreateArray(tints.size());
     NativeArray* array = ConvertNativeValueTo<NativeArray>(objValue);
     if (array == nullptr) {
-        WLOGFE("Failed to convert SystemBarPropertys to jsArrayObject");
+        WLOGFE("[NAPI]Failed to convert SystemBarPropertys to jsArrayObject");
         return nullptr;
     }
     uint32_t index = 0;
@@ -279,7 +272,7 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
 {
     NativeArray* nativeArray = ConvertNativeValueTo<NativeArray>(info.argv[0]);
     if (nativeArray == nullptr) {
-        WLOGFE("Failed to convert parameter to SystemBarArray");
+        WLOGFE("[NAPI]Failed to convert parameter to SystemBarArray");
         return false;
     }
     uint32_t size = nativeArray->GetLength();
@@ -292,7 +285,7 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
     for (uint32_t i = 0; i < size; i++) {
         std::string name;
         if (!ConvertFromJsValue(engine, nativeArray->GetElement(i), name)) {
-            WLOGFE("Failed to convert parameter to SystemBarName");
+            WLOGFE("[NAPI]Failed to convert parameter to SystemBarName");
             return false;
         }
         if (name.compare("status") == 0) {
@@ -311,12 +304,12 @@ static uint32_t GetColorFromJs(NativeEngine& engine, NativeObject* jsObject,
     if (jsColor->TypeOf() != NATIVE_UNDEFINED) {
         std::string colorStr;
         if (!ConvertFromJsValue(engine, jsColor, colorStr)) {
-            WLOGFE("Failed to convert parameter to color");
+            WLOGFE("[NAPI]Failed to convert parameter to color");
             return defaultColor;
         }
         std::regex pattern("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$");
         if (!std::regex_match(colorStr, pattern)) {
-            WLOGFE("invalid color input");
+            WLOGFE("[NAPI]Invalid color input");
             return defaultColor;
         }
         WLOGFI("origin color: %{public}s", colorStr.c_str());
@@ -328,7 +321,8 @@ static uint32_t GetColorFromJs(NativeEngine& engine, NativeObject* jsObject,
         uint32_t hexColor;
         ss << std::hex << color;
         ss >> hexColor;
-        WLOGFI("color: %{public}s, Final Color is %{public}x", color.c_str(), hexColor);
+        WLOGFI("[NAPI]Origin %{public}s, process %{public}s, final %{public}x",
+            colorStr.c_str(), color.c_str(), hexColor);
         return hexColor;
     }
     return defaultColor;
@@ -353,7 +347,7 @@ bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
     } else if (jsStatusIcon->TypeOf() != NATIVE_UNDEFINED) {
         bool isStatusBarLightIcon;
         if (!ConvertFromJsValue(engine, jsStatusIcon, isStatusBarLightIcon)) {
-            WLOGFE("Failed to convert parameter to isStatusBarLightIcon");
+            WLOGFE("[NAPI]Failed to convert parameter to isStatusBarLightIcon");
             return false;
         }
         if (isStatusBarLightIcon) {
@@ -370,7 +364,7 @@ bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
     } else if (jsNavigationIcon->TypeOf() != NATIVE_UNDEFINED) {
         bool isNavigationBarLightIcon;
         if (!ConvertFromJsValue(engine, jsNavigationIcon, isNavigationBarLightIcon)) {
-            WLOGFE("Failed to convert parameter to isNavigationBarLightIcon");
+            WLOGFE("[NAPI]Failed to convert parameter to isNavigationBarLightIcon");
             return false;
         }
         if (isNavigationBarLightIcon) {
@@ -387,7 +381,7 @@ NativeValue* ChangeAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avo
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
-        WLOGFE("Failed to convert rect to jsObject");
+        WLOGFE("[NAPI]Failed to convert rect to jsObject");
         return engine.CreateUndefined();
     }
     object->SetProperty("leftRect", GetRectAndConvertToJsValue(engine, avoidArea.leftRect));
@@ -399,14 +393,13 @@ NativeValue* ChangeAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avo
 
 bool CheckCallingPermission(std::string permission)
 {
-    WLOGFI("JsWindowUtils::CheckCallingPermission, permission:%{public}s", permission.c_str());
+    WLOGFI("[NAPI]Permission: %{public}s", permission.c_str());
     if (!permission.empty() &&
         Security::AccessToken::AccessTokenKit::VerifyAccessToken(IPCSkeleton::GetCallingTokenID(), permission)
         != AppExecFwk::Constants::PERMISSION_GRANTED) {
-        WLOGFE("%{public}s permission not granted.", permission.c_str());
+        WLOGFE("[NAPI]Permission %{public}s is not granted", permission.c_str());
         return false;
     }
-    WLOGFI("JsWindowUtils::CheckCallingPermission end.");
     return true;
 }
 } // namespace Rosen
