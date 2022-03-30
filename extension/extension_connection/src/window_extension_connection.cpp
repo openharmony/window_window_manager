@@ -27,9 +27,11 @@ boolean ConnectExtension(const AppExecFwk::ElementName &element, Rect rect, int3
     want.WriteInt32(RECT_FORM_KEY_POS_Y, rect.posY_);
     want.WriteInt32(RECT_FORM_KEY_WIDTH, rect.width_);
     want.WriteInt32(RECT_FORM_KEY_HEIGHT, rect.height_);
-
+    if (stub_ == nullptr) {
+        stub_ = new(std::nothrow) WindowExtensionServerStub();
+    }
     if (AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
-        want, this, nullptr, uid / UID_MASK) != ERR_OK) {
+        want, this, stub_, uid / UID_MASK) != ERR_OK) {
         WLOGFE("ConnectAbility failed!");
         return false;
     }
@@ -38,14 +40,23 @@ boolean ConnectExtension(const AppExecFwk::ElementName &element, Rect rect, int3
 
 boolean Show()
 {
+    if (proxy_ != nullptr) {
+        proxy_->Show();
+    }
 }
 
 boolean Hide()
 {
+    if (proxy_) {
+        proxy_->Hide();
+    }
 }
 
 boolean RequestFocus()
 {
+    if (proxy_->) {
+        proxy_->RequestFocus();
+    }
 }
 
 void OnAbilityConnectDone(const AppExecFwk::ElementName &element,
@@ -72,7 +83,7 @@ void OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     }
 
     if (!proxy_->AsObject() || !proxy_->AsObject()->AddDeathRecipient(deathRecipient_)) {
-        HILOG_ERROR("Failed to add death recipient");
+        WLOGFE("Failed to add death recipient");
     }
 }
 void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;

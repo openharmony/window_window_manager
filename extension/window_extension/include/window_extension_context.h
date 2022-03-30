@@ -12,3 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef WINDOW_EXTENSION_CONTEXT_H
+#define WINDOW_EXTENSION_CONTEXT_H
+namespace OHOS {
+namespace Rosen {
+class WindowExtensionContext : public AbilityRuntime::ExtensionContext {
+public:
+    WindowExtensionContext() = default;
+    ~WindowExtensionContext() = default;
+}
+} // namespace Rosen
+} // namespace OHOS
+#endif // WINDOW_EXTENSION_CONTEXT_H

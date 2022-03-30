@@ -108,7 +108,7 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)
     WLOGFI("called.");
     Extension::OnConnect(want);
 
-    sptr<WindowExtensionClientStub> stub = new WindowExtensionClientStub();
+    sptr<WindowExtensionClientStub> stub = new(std::nothrow) WindowExtensionClientStub();
     if (!stub) {
         WLOGFE("stub is nullptr.");
         return nullptr;
