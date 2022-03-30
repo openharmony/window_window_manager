@@ -198,10 +198,10 @@ bool SnapShotUtils::WriteToPngWithPixelMap(const std::string &fileName, PixelMap
     return SnapShotUtils::WriteToPng(fileName, param);
 }
 
-static bool ProcessDisplayId(DisplayId &displayId)
+static bool ProcessDisplayId(DisplayId &displayId, bool isDisplayIdSet)
 {
     WM_SCOPED_TRACE("snapshot:ProcessDisplayId(%" PRIu64")", displayId);
-    if (displayId == DISPLAY_ID_INVALID) {
+    if (!isDisplayIdSet) {
         displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     } else {
         bool validFlag = false;
@@ -213,7 +213,7 @@ static bool ProcessDisplayId(DisplayId &displayId)
             }
         }
         if (!validFlag) {
-            printf("error: displayId %" PRIu64 " invalid!\n", displayId);
+            printf("error: displayId %" PRId64 " invalid!\n", static_cast<int64_t>(displayId));
             printf("tips: supported displayIds:\n");
             for (auto dispId: displayIds) {
                 printf("\t%" PRIu64 "\n", dispId);
@@ -239,6 +239,7 @@ bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArgments &cmdA
         switch (opt) {
             case 'i': // display id
                 cmdArgments.displayId = static_cast<DisplayId>(atoll(optarg));
+                cmdArgments.isDisplayIdSet = true;
                 break;
             case 'w': // output width
                 cmdArgments.width = atoi(optarg);
@@ -258,7 +259,7 @@ bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArgments &cmdA
         }
     }
 
-    if (!ProcessDisplayId(cmdArgments.displayId)) {
+    if (!ProcessDisplayId(cmdArgments.displayId, cmdArgments.isDisplayIdSet)) {
         return false;
     }
 
