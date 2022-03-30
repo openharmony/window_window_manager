@@ -341,7 +341,11 @@ bool AbstractScreenController::FillAbstractScreen(sptr<AbstractScreen>& absScree
         return false;
     }
     for (const RSScreenModeInfo& rsScreenModeInfo : allModes) {
-        sptr<SupportedScreenModes> info = new SupportedScreenModes();
+        sptr<SupportedScreenModes> info = new(std::nothrow) SupportedScreenModes();
+        if (info == nullptr) {
+            WLOGFE("create SupportedScreenModes failed");
+            return false;
+        }
         info->width_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenWidth());
         info->height_ = static_cast<uint32_t>(rsScreenModeInfo.GetScreenHeight());
         info->refreshRate_ = rsScreenModeInfo.GetScreenRefreshRate();
