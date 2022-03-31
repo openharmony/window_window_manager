@@ -47,8 +47,7 @@ int32_t SnapshotProxy::GetSnapshot(const sptr<IRemoteObject> &token, AAFwk::Snap
 
     std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
     snapshot.SetPixelMap(pixelMap);
-    int32_t ret = reply.ReadInt32();
-    return ret;
+    return reply.ReadInt32();
 }
 }
 }

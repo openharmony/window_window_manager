@@ -668,16 +668,18 @@ void WindowNodeContainer::NotifyAccessibilityWindowInfo(const sptr<WindowNode>& 
     if (isNeedNotify) {
         std::vector<sptr<WindowInfo>> windowList;
         GetWindowList(windowList);
-        sptr<WindowInfo> windowInfo = new WindowInfo();
-        windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
-        windowInfo->windowRect_ = node->GetLayoutRect();
-        windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
-        windowInfo->mode_ = node->GetWindowMode();
-        windowInfo->type_ = node->GetWindowType();
-        sptr<AccessibilityWindowInfo> accessibilityWindowInfo = new AccessibilityWindowInfo();
-        accessibilityWindowInfo->currentWindowInfo_ = windowInfo;
-        accessibilityWindowInfo->windowList_ = windowList;
-        WindowManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(accessibilityWindowInfo, type);
+        sptr<WindowInfo> windowInfo = new (std::nothrow) WindowInfo();
+        sptr<AccessibilityWindowInfo> accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
+        if (windowInfo != nullptr && accessibilityWindowInfo != nullptr) {
+            windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
+            windowInfo->windowRect_ = node->GetLayoutRect();
+            windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
+            windowInfo->mode_ = node->GetWindowMode();
+            windowInfo->type_ = node->GetWindowType();
+            accessibilityWindowInfo->currentWindowInfo_ = windowInfo;
+            accessibilityWindowInfo->windowList_ = windowList;
+            WindowManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(accessibilityWindowInfo, type);
+        }
     }
 }
 

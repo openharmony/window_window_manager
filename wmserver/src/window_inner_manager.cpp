@@ -160,18 +160,22 @@ sptr<Window> WindowInnerManager::CreateWindow(DisplayId displayId, const WindowT
 {
     sptr<Window> window = GetDividerWindow(displayId);
     if (window == nullptr) {
-        sptr<WindowOption> divWindowOp = new WindowOption();
+        sptr<WindowOption> divWindowOp = new (std::nothrow) WindowOption();
+        if (divWindowOp == nullptr) {
+            WLOGFE("Window option is nullptr.");
+            return nullptr;
+        }
         divWindowOp->SetWindowRect(rect);
         divWindowOp->SetWindowType(type);
         divWindowOp->SetFocusable(false);
         divWindowOp->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         window = Window::Create("divider" + std::to_string(displayId), divWindowOp);
         if (window == nullptr) {
-            WLOGFE("Window is nullptr");
+            WLOGFE("Window is nullptr.");
             return nullptr;
         }
         dividerMap_.insert(std::make_pair(displayId, window));
-        WLOGFI("CreateWindow success");
+        WLOGFI("CreateWindow success.");
     }
     return window;
 }

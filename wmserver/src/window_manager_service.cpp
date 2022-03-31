@@ -133,7 +133,7 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
         "%{public}4d %{public}4d]", windowId, property->GetWindowType(), property->GetWindowMode(),
         property->GetWindowFlags(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 
-    WM_SCOPED_TRACE("wms:AddWindow(%d)", windowId);
+    WM_SCOPED_TRACE("wms:AddWindow(%u)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WMError res = windowController_->AddWindowNode(property);
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
