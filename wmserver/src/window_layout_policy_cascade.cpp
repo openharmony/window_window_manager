@@ -62,7 +62,7 @@ void WindowLayoutPolicyCascade::LayoutWindowNode(sptr<WindowNode>& node)
     }
     if (node->parent_ != nullptr) { // isn't root node
         if (!node->currentVisibility_) {
-            WLOGFI("window[%{public}d] currently not visible, no need layout", node->GetWindowId());
+            WLOGFI("window[%{public}u] currently not visible, no need layout", node->GetWindowId());
             return;
         }
         UpdateLayoutRect(node);
@@ -369,7 +369,7 @@ void WindowLayoutPolicyCascade::Reorder()
                 node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
                 node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             }
-            WLOGFI("Cascade reorder Id: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+            WLOGFI("Cascade reorder Id: %{public}u, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
                 node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         }
     }
@@ -381,7 +381,7 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
 {
     Rect cascadeRect = {0, 0, 0, 0};
     for (auto iter = appWindowNode_->children_.rbegin(); iter != appWindowNode_->children_.rend(); iter++) {
-        WLOGFI("GetCurCascadeRect id: %{public}d,", (*iter)->GetWindowId());
+        WLOGFI("GetCurCascadeRect id: %{public}u,", (*iter)->GetWindowId());
         if ((*iter)->GetWindowType() != WindowType::WINDOW_TYPE_DOCK_SLICE &&
             (*iter)->GetWindowId() != node->GetWindowId()) {
             auto property = (*iter)->GetWindowProperty();

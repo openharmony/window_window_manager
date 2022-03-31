@@ -140,7 +140,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
-    WLOGFI("AddWindowNode windowId: %{public}d end", node->GetWindowId());
+    WLOGFI("AddWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -161,7 +161,7 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
         NotifyIfSystemBarTintChanged();
     }
     DumpScreenWindowTree();
-    WLOGFI("UpdateWindowNode windowId: %{public}d end", node->GetWindowId());
+    WLOGFI("UpdateWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -173,14 +173,14 @@ void WindowNodeContainer::UpdateSizeChangeReason(sptr<WindowNode>& node, WindowS
                 childNode->GetWindowToken()->UpdateWindowRect(childNode->GetLayoutRect(), reason);
                 childNode->ResetWindowSizeChangeReason();
                 WLOGFI("Notify split window that the drag action is start or end, windowId: %{public}d, "
-                    "reason: %{public}d", childNode->GetWindowId(), reason);
+                    "reason: %{public}u", childNode->GetWindowId(), reason);
             }
         }
     } else {
         node->GetWindowToken()->UpdateWindowRect(node->GetLayoutRect(), reason);
         node->ResetWindowSizeChangeReason();
         WLOGFI("Notify window that the drag action is start or end, windowId: %{public}d, "
-            "reason: %{public}d", node->GetWindowId(), reason);
+            "reason: %{public}u", node->GetWindowId(), reason);
     }
 }
 
@@ -312,7 +312,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-    WLOGFI("RemoveWindowNode windowId: %{public}d end", node->GetWindowId());
+    WLOGFI("RemoveWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -618,7 +618,7 @@ void WindowNodeContainer::RaiseOrderedWindowToTop(std::vector<uint32_t> orderedI
             sptr<WindowNode> node = *iter;
             iter = windowNodes.erase(iter);
             UpdateWindowTree(node);
-            WLOGFI("raise group window to top %{public}d", node->GetWindowId());
+            WLOGFI("raise group window to top %{public}u", node->GetWindowId());
         } else {
             iter++;
         }
@@ -637,7 +637,7 @@ void WindowNodeContainer::RaiseWindowToTop(uint32_t windowId, std::vector<sptr<W
         sptr<WindowNode> node = *iter;
         windowNodes.erase(iter);
         UpdateWindowTree(node);
-        WLOGFI("raise window to top %{public}d", node->GetWindowId());
+        WLOGFI("raise window to top %{public}u", node->GetWindowId());
     }
 }
 
@@ -873,7 +873,7 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
         return WMError::WM_ERROR_NULLPTR;
     }
     if (IsTopAppWindow(node->GetWindowId())) {
-        WLOGFI("it is already top app window, id: %{public}d", node->GetWindowId());
+        WLOGFI("it is already top app window, id: %{public}u", node->GetWindowId());
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     if (WindowHelper::IsSubWindow(node->GetWindowType())) {
@@ -1048,11 +1048,11 @@ WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(bool fromUser, const s
 WMError WindowNodeContainer::EnterSplitWindowMode(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
-    WLOGFI("Enter split window mode: %{public}d", node->GetWindowId());
+    WLOGFI("Enter split window mode: %{public}u", node->GetWindowId());
     SwitchLayoutPolicy(WindowLayoutMode::CASCADE); // window split mode is belong to cascade
     auto pairNode = FindSplitPairNode(node);
     if (pairNode != nullptr) {
-        WLOGFI("Window %{public}d find pair %{public}d", node->GetWindowId(), pairNode->GetWindowId());
+        WLOGFI("Window %{public}d find pair %{public}u", node->GetWindowId(), pairNode->GetWindowId());
         WMError ret = UpdateWindowPairInfo(node, pairNode);
         if (ret != WMError::WM_OK) {
             return ret;
@@ -1081,7 +1081,7 @@ void WindowNodeContainer::ResetLayoutPolicy()
 WMError WindowNodeContainer::ExitSplitWindowMode(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
-    WLOGFI("exit split window mode %{public}d", node->GetWindowId());
+    WLOGFI("exit split window mode %{public}u", node->GetWindowId());
     node->GetWindowProperty()->ResumeLastWindowMode();
     node->GetWindowToken()->UpdateWindowMode(node->GetWindowMode());
     if (pairedWindowMap_.count(node->GetWindowId()) != 0) {
@@ -1090,11 +1090,11 @@ WMError WindowNodeContainer::ExitSplitWindowMode(sptr<WindowNode>& node)
         pairNode->GetWindowToken()->UpdateWindowMode(pairNode->GetWindowMode());
         pairedWindowMap_.erase(pairNode->GetWindowId());
         pairedWindowMap_.erase(node->GetWindowId());
-        WLOGFI("resume pair node mode, Id[%{public}d, %{public}d], Mode[%{public}d, %{public}d]", node->GetWindowId(),
+        WLOGFI("resume pair node mode, Id[%{public}u, %{public}u], Mode[%{public}d, %{public}d]", node->GetWindowId(),
             pairNode->GetWindowId(), node->GetWindowMode(), pairNode->GetWindowMode());
     }
     if (pairedWindowMap_.empty()) {
-        WLOGFI("send destroy msg to divider, Id: %{public}d", node->GetWindowId());
+        WLOGFI("send destroy msg to divider, Id: %{public}u", node->GetWindowId());
         SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, displayId_);
     }
     ResetLayoutPolicy();
@@ -1116,7 +1116,7 @@ WMError WindowNodeContainer::UpdateWindowPairInfo(sptr<WindowNode>& triggerNode,
             WLOGFE("Update window pair info failed");
             return ret;
         }
-        WLOGFI("Pair FullScreen [%{public}d, %{public}d], Mode[%{public}d, %{public}d], splitRatio = %{public}f",
+        WLOGFI("Pair FullScreen [%{public}u, %{public}u], Mode[%{public}d, %{public}d], splitRatio = %{public}f",
             triggerNode->GetWindowId(), pairNode->GetWindowId(), triggerMode, pairDstMode, splitRatio);
     } else {
         if (pairedWindowMap_.count(pairNode->GetWindowId()) != 0) {
@@ -1199,17 +1199,17 @@ void WindowNodeContainer::MoveWindowNode(sptr<WindowNodeContainer>& container)
     WLOGFI("disconnect expand display: %{public}" PRId64 ", move window node to display: "
         "%{public}" PRId64 "", from, displayId_);
     for (auto& node : container->aboveAppWindowNode_->children_) {
-        WLOGFI("aboveAppWindowNode_: move windowNode: %{public}d", node->GetWindowId());
+        WLOGFI("aboveAppWindowNode_: move windowNode: %{public}u", node->GetWindowId());
         aboveAppWindowNode_->children_.push_back(node);
         layoutPolicy_->AddWindowNode(node);
     }
     for (auto& node : container->appWindowNode_->children_) {
-        WLOGFI("appWindowNode_: move windowNode: %{public}d", node->GetWindowId());
+        WLOGFI("appWindowNode_: move windowNode: %{public}u", node->GetWindowId());
         appWindowNode_->children_.push_back(node);
         layoutPolicy_->AddWindowNode(node);
     }
     for (auto& node : container->belowAppWindowNode_->children_) {
-        WLOGFI("belowAppWindowNode_: move windowNode: %{public}d", node->GetWindowId());
+        WLOGFI("belowAppWindowNode_: move windowNode: %{public}u", node->GetWindowId());
         belowAppWindowNode_->children_.push_back(node);
         layoutPolicy_->AddWindowNode(node);
     }
