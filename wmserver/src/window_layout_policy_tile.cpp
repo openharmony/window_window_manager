@@ -123,7 +123,7 @@ void WindowLayoutPolicyTile::UpdateWindowNode(sptr<WindowNode>& node, bool isAdd
 void WindowLayoutPolicyTile::RemoveWindowNode(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
-    WLOGFI("RemoveWindowNode %{public}d in tile", node->GetWindowId());
+    WLOGFI("RemoveWindowNode %{public}u in tile", node->GetWindowId());
     auto type = node->GetWindowType();
     // affect other windows, trigger off global layout
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
@@ -169,13 +169,13 @@ void WindowLayoutPolicyTile::ForegroundNodeQueuePushBack(sptr<WindowNode>& node)
     if (node == nullptr) {
         return;
     }
-    WLOGFI("add win in tile for win id: %{public}d", node->GetWindowId());
+    WLOGFI("add win in tile for win id: %{public}u", node->GetWindowId());
     while (foregroundNodes_.size() >= maxTileWinNum_) {
         auto removeNode = foregroundNodes_.front();
         foregroundNodes_.pop_front();
-        WLOGFI("pop win in queue head id: %{public}d, for add new win", removeNode->GetWindowId());
+        WLOGFI("pop win in queue head id: %{public}u, for add new win", removeNode->GetWindowId());
         if (removeNode->abilityToken_ != nullptr) {
-            WLOGFI("minimize win %{public}d in tile", removeNode->GetWindowId());
+            WLOGFI("minimize win %{public}u in tile", removeNode->GetWindowId());
             AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(removeNode->abilityToken_);
         }
     }
@@ -189,7 +189,7 @@ void WindowLayoutPolicyTile::ForegroundNodeQueueRemove(sptr<WindowNode>& node)
     }
     auto iter = std::find(foregroundNodes_.begin(), foregroundNodes_.end(), node);
     if (iter != foregroundNodes_.end()) {
-        WLOGFI("remove win in tile for win id: %{public}d", node->GetWindowId());
+        WLOGFI("remove win in tile for win id: %{public}u", node->GetWindowId());
         foregroundNodes_.erase(iter);
     }
 }
@@ -214,7 +214,7 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows()
         node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         node->SetWindowRect(rect);
         node->hasDecorated_ = true;
-        WLOGFI("set rect for qwin id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
+        WLOGFI("set rect for qwin id: %{public}u [%{public}d %{public}d %{public}d %{public}d]",
             node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         rectIt++;
     }
@@ -236,7 +236,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
     Rect limitRect = displayRect;
     Rect winRect = node->GetWindowProperty()->GetWindowRect();
 
-    WLOGFI("Id:%{public}d, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
+    WLOGFI("Id:%{public}u, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
         "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}d, %{public}d]",
         node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnbale,
         static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
