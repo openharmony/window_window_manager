@@ -138,7 +138,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
     iter->windowsInfo.clear();
     for (auto& windowNode: windowNodes) {
         if (windowTypeSkipped_.find(windowNode->GetWindowProperty()->GetWindowType()) != windowTypeSkipped_.end()) {
-            WLOGFI("window has been skipped. [id: %{public}d, type: %{public}d]", windowNode->GetWindowId(),
+            WLOGFI("window has been skipped. [id: %{public}u, type: %{public}d]", windowNode->GetWindowId(),
                    windowNode->GetWindowProperty()->GetWindowType());
             continue;
         }

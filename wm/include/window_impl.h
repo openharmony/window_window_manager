@@ -72,7 +72,7 @@ class WindowImpl : public Window {
     } while (0)
 
 public:
-    WindowImpl(const sptr<WindowOption>& option);
+    explicit WindowImpl(const sptr<WindowOption>& option);
     ~WindowImpl();
 
     static sptr<Window> Find(const std::string& id);

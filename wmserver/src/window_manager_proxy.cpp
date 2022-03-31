@@ -56,7 +56,8 @@ WMError WindowManagerProxy::CreateWindow(sptr<IWindow>& window, sptr<WindowPrope
         }
     }
 
-    if (Remote()->SendRequest(TRANS_ID_CREATE_WINDOW, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_CREATE_WINDOW),
+        data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
     windowId = reply.ReadUint32();
@@ -79,7 +80,8 @@ WMError WindowManagerProxy::AddWindow(sptr<WindowProperty>& property)
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_ADD_WINDOW, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_ADD_WINDOW),
+        data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
@@ -102,7 +104,8 @@ WMError WindowManagerProxy::RemoveWindow(uint32_t windowId)
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_REMOVE_WINDOW, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_REMOVE_WINDOW),
+        data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
@@ -125,7 +128,8 @@ WMError WindowManagerProxy::DestroyWindow(uint32_t windowId, bool /* onlySelf */
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_DESTROY_WINDOW, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_DESTROY_WINDOW),
+        data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
@@ -147,7 +151,8 @@ WMError WindowManagerProxy::RequestFocus(uint32_t windowId)
         WLOGFE("Write windowId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(TRANS_ID_REQUEST_FOCUS, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_REQUEST_FOCUS),
+        data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
@@ -172,7 +177,8 @@ WMError WindowManagerProxy::SetWindowBackgroundBlur(uint32_t windowId, WindowBlu
         WLOGFE("Write blur level failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(TRANS_ID_SET_BACKGROUND_BLUR, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_BACKGROUND_BLUR),
+        data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
@@ -197,7 +203,8 @@ WMError WindowManagerProxy::SetAlpha(uint32_t windowId, float alpha)
         WLOGFE("Write alpha failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(TRANS_ID_SET_APLPHA, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_APLPHA),
+        data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
@@ -228,7 +235,8 @@ std::vector<Rect> WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, Avoi
         return avoidArea;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_GET_AVOID_AREA, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_AVOID_AREA),
+        data, reply, option) != ERR_NONE) {
         return avoidArea;
     }
 
@@ -275,7 +283,8 @@ void WindowManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
@@ -301,7 +310,8 @@ void WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType typ
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
@@ -323,7 +333,8 @@ void WindowManagerProxy::ProcessPointDown(uint32_t windowId, bool isStartDrag)
         WLOGFE("Write bool isStartDrag failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_PROCESS_POINT_DOWN, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
@@ -341,7 +352,8 @@ void WindowManagerProxy::ProcessPointUp(uint32_t windowId)
         WLOGFE("Write windowId failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_PROCESS_POINT_UP, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_PROCESS_POINT_UP),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
@@ -359,7 +371,8 @@ void WindowManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
         WLOGFE("Write displayId failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_MINIMIZE_ALL_APP_WINDOWS, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_MINIMIZE_ALL_APP_WINDOWS),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
@@ -377,7 +390,8 @@ WMError WindowManagerProxy::MaxmizeWindow(uint32_t windowId)
         WLOGFE("Write windowId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(TRANS_ID_MAXMIZE_WINDOW, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_MAXMIZE_WINDOW),
+        data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
@@ -402,7 +416,8 @@ WMError WindowManagerProxy::SetWindowLayoutMode(DisplayId displayId, WindowLayou
         WLOGFE("Write mode failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(TRANS_ID_UPDATE_LAYOUT_MODE, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE),
+        data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
@@ -430,7 +445,8 @@ WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty,
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_UPDATE_PROPERTY, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_PROPERTY),
+        data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
@@ -453,7 +469,8 @@ WMError WindowManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinI
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_GET_TOP_WINDOW_ID, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID),
+        data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
     topWinId = reply.ReadUint32();

@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Rosen {
 class WindowAgent : public WindowStub {
 public:
-    WindowAgent(sptr<WindowImpl>& window);
+    explicit WindowAgent(sptr<WindowImpl>& window);
     ~WindowAgent() = default;
     void UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason) override;
     void UpdateWindowMode(WindowMode mode) override;

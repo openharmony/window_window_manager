@@ -112,7 +112,7 @@ public:
 
     sptr<WindowInfo> currentWindowInfo_;
     std::vector<sptr<WindowInfo>> windowList_;
-        
+
 private:
     bool VectorMarshalling(Parcel& parcel) const;
     static void VectorUnmarshalling(Parcel& parcel, AccessibilityWindowInfo* windowInfo);

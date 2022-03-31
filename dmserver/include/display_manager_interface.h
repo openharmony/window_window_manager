@@ -32,7 +32,7 @@ class IDisplayManager : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IDisplayManager");
 
-    enum {
+    enum class DisplayManagerMessage : uint32_t {
         TRANS_ID_GET_DEFAULT_DISPLAY_ID = 0,
         TRANS_ID_GET_DISPLAY_BY_ID,
         TRANS_ID_GET_DISPLAY_BY_SCREEN,
