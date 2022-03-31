@@ -154,7 +154,7 @@ void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
         WLOGFE("mainWindow_ is null");
         return;
     }
-    WLOGFI("notify mainWindow winId:%{public}d", mainWindow_->GetWindowId());
+    WLOGFI("notify mainWindow winId:%{public}u", mainWindow_->GetWindowId());
     mainWindow_->UpdateConfiguration(configuration);
 }
 
