@@ -131,11 +131,17 @@ bool SurfaceReader::ProcessBuffer(const sptr<SurfaceBuffer> &buf)
         errno_t ret = memcpy_s(data + width * i * BPP,  width * BPP, addr + stride * i, width * BPP);
         if (ret != EOK) {
             WLOGFE("memcpy failed");
+            free(data);
             return false;
         }
     }
 
-    sptr<PixelMap> pixelMap = new PixelMap();
+    sptr<PixelMap> pixelMap = new(std::nothrow) PixelMap();
+    if (pixelMap == nullptr) {
+        WLOGFE("create pixelMap failed");
+        return false;
+    }
+
     ImageInfo info;
     info.size.width = static_cast<int32_t>(width);
     info.size.height = static_cast<int32_t>(height);

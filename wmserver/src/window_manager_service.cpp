@@ -105,7 +105,7 @@ bool WindowManagerService::Init()
 
 void WindowManagerService::OnStop()
 {
-    SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_THREAD);
+    SingletonContainer::Get<WindowInnerManager>().SendMessage(InnerWMCmd::INNER_WM_DESTROY_THREAD);
     WLOGFI("ready to stop service.");
 }
 

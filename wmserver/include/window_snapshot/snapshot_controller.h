@@ -27,7 +27,8 @@ namespace OHOS {
 namespace Rosen {
 class SnapshotController : public SnapshotStub {
 public:
-    SnapshotController(sptr<WindowRoot>& root) : windowRoot_(root), rsInterface_(RSInterfaces::GetInstance()) {};
+    explicit SnapshotController(sptr<WindowRoot>& root) : windowRoot_(root),
+        rsInterface_(RSInterfaces::GetInstance()) {};
     SnapshotController() : windowRoot_(nullptr), rsInterface_(RSInterfaces::GetInstance()) {};
     ~SnapshotController() = default;
     void Init(sptr<WindowRoot>& root);

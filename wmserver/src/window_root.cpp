@@ -119,7 +119,7 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
         WLOGFE("add window failed, node is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFI("save windowId %{public}d", node->GetWindowId());
+    WLOGFI("save windowId %{public}u", node->GetWindowId());
     windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
     auto remoteObject = node->GetWindowToken()->AsObject();
     windowIdMap_.insert(std::make_pair(remoteObject, node->GetWindowId()));

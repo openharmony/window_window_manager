@@ -37,25 +37,26 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         WLOGFE("InterfaceToken check failed");
         return -1;
     }
-    switch (code) {
-        case TRANS_ID_GET_DEFAULT_DISPLAY_ID: {
+    DisplayManagerMessage msgId = static_cast<DisplayManagerMessage>(code);
+    switch (msgId) {
+        case DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_ID: {
             DisplayId displayId = GetDefaultDisplayId();
             reply.WriteUint64(displayId);
             break;
         }
-        case TRANS_ID_GET_DISPLAY_BY_ID: {
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();
             auto info = GetDisplayInfoById(displayId);
             reply.WriteParcelable(info);
             break;
         }
-        case TRANS_ID_GET_DISPLAY_BY_SCREEN: {
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN: {
             ScreenId screenId = data.ReadUint64();
             auto info = GetDisplayInfoByScreen(screenId);
             reply.WriteParcelable(info);
             break;
         }
-        case TRANS_ID_CREATE_VIRTUAL_SCREEN: {
+        case DisplayManagerMessage::TRANS_ID_CREATE_VIRTUAL_SCREEN: {
             std::string name = data.ReadString();
             uint32_t width = data.ReadUint32();
             uint32_t height = data.ReadUint32();
@@ -83,13 +84,13 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteUint64(static_cast<uint64_t>(screenId));
             break;
         }
-        case TRANS_ID_DESTROY_VIRTUAL_SCREEN: {
+        case DisplayManagerMessage::TRANS_ID_DESTROY_VIRTUAL_SCREEN: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             DMError result = DestroyVirtualScreen(screenId);
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
-        case TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE: {
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
@@ -102,55 +103,55 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteInt32(static_cast<int32_t>(result));
             break;
         }
-        case TRANS_ID_SET_ORIENTATION: {
+        case DisplayManagerMessage::TRANS_ID_SET_ORIENTATION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             Orientation orientation = static_cast<Orientation>(data.ReadUint32());
             reply.WriteBool(SetOrientation(screenId, orientation));
             break;
         }
-        case TRANS_ID_GET_DISPLAY_SNAPSHOT: {
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT: {
             DisplayId displayId = data.ReadUint64();
             std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId);
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
             break;
         }
-        case TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT: {
+        case DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
             reply.WriteBool(RegisterDisplayManagerAgent(agent, type));
             break;
         }
-        case TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT: {
+        case DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT: {
             auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
             auto type = static_cast<DisplayManagerAgentType>(data.ReadUint32());
             reply.WriteBool(UnregisterDisplayManagerAgent(agent, type));
             break;
         }
-        case TRANS_ID_WAKE_UP_BEGIN: {
+        case DisplayManagerMessage::TRANS_ID_WAKE_UP_BEGIN: {
             PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
             reply.WriteBool(WakeUpBegin(reason));
             break;
         }
-        case TRANS_ID_WAKE_UP_END: {
+        case DisplayManagerMessage::TRANS_ID_WAKE_UP_END: {
             reply.WriteBool(WakeUpEnd());
             break;
         }
-        case TRANS_ID_SUSPEND_BEGIN: {
+        case DisplayManagerMessage::TRANS_ID_SUSPEND_BEGIN: {
             PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
             reply.WriteBool(SuspendBegin(reason));
             break;
         }
-        case TRANS_ID_SUSPEND_END: {
+        case DisplayManagerMessage::TRANS_ID_SUSPEND_END: {
             reply.WriteBool(SuspendEnd());
             break;
         }
-        case TRANS_ID_SET_SCREEN_POWER_FOR_ALL: {
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL: {
             ScreenPowerState state = static_cast<ScreenPowerState>(data.ReadUint32());
             PowerStateChangeReason reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
             reply.WriteBool(SetScreenPowerForAll(state, reason));
             break;
         }
-        case TRANS_ID_GET_SCREEN_POWER: {
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER: {
             ScreenId dmsScreenId;
             if (!data.ReadUint64(dmsScreenId)) {
                 WLOGFE("fail to read dmsScreenId.");
@@ -159,28 +160,28 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId)));
             break;
         }
-        case TRANS_ID_SET_DISPLAY_STATE: {
+        case DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE: {
             DisplayState state = static_cast<DisplayState>(data.ReadUint32());
             reply.WriteBool(SetDisplayState(state));
             break;
         }
-        case TRANS_ID_GET_DISPLAY_STATE: {
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE: {
             DisplayState state = GetDisplayState(data.ReadUint64());
             reply.WriteUint32(static_cast<uint32_t>(state));
             break;
         }
-        case TRANS_ID_NOTIFY_DISPLAY_EVENT: {
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT: {
             DisplayEvent event = static_cast<DisplayEvent>(data.ReadUint32());
             NotifyDisplayEvent(event);
             break;
         }
-        case TRANS_ID_SET_FREEZE_EVENT: {
+        case DisplayManagerMessage::TRANS_ID_SET_FREEZE_EVENT: {
             std::vector<DisplayId> ids;
             data.ReadUInt64Vector(&ids);
             SetFreeze(ids, data.ReadBool());
             break;
         }
-        case TRANS_ID_SCREEN_MAKE_MIRROR: {
+        case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR: {
             ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
             std::vector<ScreenId> mirrorScreenId;
             if (!data.ReadUInt64Vector(&mirrorScreenId)) {
@@ -191,31 +192,31 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteUint64(static_cast<uint64_t>(result));
             break;
         }
-        case TRANS_ID_GET_SCREEN_INFO_BY_ID: {
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_INFO_BY_ID: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenInfo = GetScreenInfoById(screenId);
             reply.WriteStrongParcelable(screenInfo);
             break;
         }
-        case TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID: {
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenGroupInfo = GetScreenGroupInfoById(screenId);
             reply.WriteStrongParcelable(screenGroupInfo);
             break;
         }
-        case TRANS_ID_GET_ALL_SCREEN_INFOS: {
+        case DisplayManagerMessage::TRANS_ID_GET_ALL_SCREEN_INFOS: {
             std::vector<sptr<ScreenInfo>> screenInfos = GetAllScreenInfos();
             if (!MarshallingHelper::MarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos)) {
                 WLOGE("fail to marshalling screenInfos in stub.");
             }
             break;
         }
-        case TRANS_ID_GET_ALL_DISPLAYIDS: {
+        case DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS: {
             std::vector<DisplayId> allDisplayIds = GetAllDisplayIds();
             reply.WriteUInt64Vector(allDisplayIds);
             break;
         }
-        case TRANS_ID_SCREEN_MAKE_EXPAND: {
+        case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND: {
             std::vector<ScreenId> screenId;
             if (!data.ReadUInt64Vector(&screenId)) {
                 WLOGE("fail to receive expand screen in stub.");
@@ -232,7 +233,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteUint64(static_cast<uint64_t>(result));
             break;
         }
-        case TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP: {
+        case DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP: {
             std::vector<ScreenId> screenId;
             if (!data.ReadUInt64Vector(&screenId)) {
                 WLOGE("fail to receive screens in stub.");
@@ -241,14 +242,14 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             RemoveVirtualScreenFromGroup(screenId);
             break;
         }
-        case TRANS_ID_SET_SCREEN_ACTIVE_MODE: {
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             uint32_t modeId = data.ReadUint32();
             bool res = SetScreenActiveMode(screenId, modeId);
             reply.WriteBool(res);
             break;
         }
-        case TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS: {
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             std::vector<ScreenColorGamut> colorGamuts;
             DMError ret = GetScreenSupportedColorGamuts(screenId, colorGamuts);
@@ -263,7 +264,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             );
             break;
         }
-        case TRANS_ID_SCREEN_GET_COLOR_GAMUT: {
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_GAMUT: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             ScreenColorGamut colorGamut;
             DMError ret = GetScreenColorGamut(screenId, colorGamut);
@@ -274,14 +275,14 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteUint32(static_cast<uint32_t>(colorGamut));
             break;
         }
-        case TRANS_ID_SCREEN_SET_COLOR_GAMUT: {
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_GAMUT: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             int32_t colorGamutIdx = data.ReadInt32();
             DMError ret = SetScreenColorGamut(screenId, colorGamutIdx);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
-        case TRANS_ID_SCREEN_GET_GAMUT_MAP: {
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_GAMUT_MAP: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             ScreenGamutMap gamutMap;
             DMError ret = GetScreenGamutMap(screenId, gamutMap);
@@ -292,14 +293,14 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteInt32(static_cast<uint32_t>(gamutMap));
             break;
         }
-        case TRANS_ID_SCREEN_SET_GAMUT_MAP: {
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_GAMUT_MAP: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             ScreenGamutMap gamutMap = static_cast<ScreenGamutMap>(data.ReadUint32());
             DMError ret = SetScreenGamutMap(screenId, gamutMap);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
-        case TRANS_ID_SCREEN_SET_COLOR_TRANSFORM: {
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_TRANSFORM: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             DMError ret = SetScreenColorTransform(screenId);
             reply.WriteInt32(static_cast<int32_t>(ret));

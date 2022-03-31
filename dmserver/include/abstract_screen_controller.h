@@ -41,7 +41,7 @@ public:
         OnAbstractScreenChangeCb onChange_;
     };
 
-    AbstractScreenController(std::recursive_mutex& mutex);
+    explicit AbstractScreenController(std::recursive_mutex& mutex);
     ~AbstractScreenController();
     WM_DISALLOW_COPY_AND_MOVE(AbstractScreenController);
 

@@ -33,8 +33,9 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
         WLOGFE("InterfaceToken check failed");
         return -1;
     }
-    switch (code) {
-        case TRANS_ID_UPDATE_FOCUS: {
+    WindowManagerAgentMsg msgId = static_cast<WindowManagerAgentMsg>(code);
+    switch (msgId) {
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS: {
             sptr<FocusChangeInfo> info = data.ReadParcelable<FocusChangeInfo>();
             if (info != nullptr) {
                 info->abilityToken_ = data.ReadRemoteObject();
@@ -43,7 +44,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateFocusChangeInfo(info, focused);
             break;
         }
-        case TRANS_ID_UPDATE_SYSTEM_BAR_PROPS: {
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_SYSTEM_BAR_PROPS: {
             DisplayId displayId = data.ReadUint64();
             SystemBarRegionTints tints;
             bool res = MarshallingHelper::UnmarshallingVectorObj<SystemBarRegionTint>(data, tints,
@@ -68,13 +69,13 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateSystemBarRegionTints(displayId, tints);
             break;
         }
-        case TRANS_ID_UPDATE_WINDOW_STATUS: {
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STATUS: {
             sptr<AccessibilityWindowInfo> windowInfo = data.ReadParcelable<AccessibilityWindowInfo>();
             WindowUpdateType type = static_cast<WindowUpdateType>(data.ReadUint32());
             NotifyAccessibilityWindowInfo(windowInfo, type);
             break;
         }
-        case TRANS_ID_UPDATE_WINDOW_VISIBILITY: {
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_VISIBILITY: {
             std::vector<sptr<WindowVisibilityInfo>> infos;
             if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowVisibilityInfo>(data, infos)) {
                 WLOGFE("fail to read WindowVisibilityInfo.");
