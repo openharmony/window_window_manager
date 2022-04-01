@@ -491,7 +491,8 @@ WMError WindowManagerProxy::GetAccessibilityWindowInfo(sptr<AccessibilityWindowI
         WLOGFE("Write windowInfo failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID),
+        data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
     windowInfo = reply.ReadParcelable<AccessibilityWindowInfo>();
