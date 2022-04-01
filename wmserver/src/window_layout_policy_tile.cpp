@@ -247,8 +247,9 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
     if (!floatingWindow) { // fullscreen window
         winRect = limitRect;
     } else { // floating window
-        if (node->GetWindowProperty()->GetDecorEnable()) { // is decorable
+        if (!node->hasDecorated_ && node->GetWindowProperty()->GetDecorEnable()) { // is decorable
             winRect = ComputeDecoratedWindowRect(winRect);
+            node->hasDecorated_ = true;
         }
         if (subWindow && parentLimit) { // subwidow and limited by parent
             limitRect = node->parent_->GetLayoutRect();
