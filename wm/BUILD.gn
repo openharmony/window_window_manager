@@ -42,6 +42,7 @@ ohos_shared_library("libwm") {
     "../extension/window_extension/src/js_window_extension.cpp",
     "../extension/window_extension/src/window_extension_client_proxy.cpp",
     "../extension/window_extension/src/window_extension_client_stub.cpp",
+    "../extension/window_extension/src/window_extension_client_stub_impl.cpp",
     "../extension/window_extension/src/window_extension_module_loader.cpp",
     "../extension/window_extension/src/window_extension.cpp",
     "../wmserver/src/window_manager_proxy.cpp",

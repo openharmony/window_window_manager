@@ -18,8 +18,6 @@
 
 #include <string>
 
-#include "window_extension_connection.h"
-
 #include <i_input_event_consumer.h>
 #include <key_event.h>
 #include <memory>

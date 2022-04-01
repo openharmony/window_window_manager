@@ -120,84 +120,32 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)
     WLOGFI("called.");
     Extension::OnConnect(want);
 
-    sptr<WindowExtensionClientStub> stub = new(std::nothrow) WindowExtensionClientStub();
-    if (!stub) {
+    ElementName elementName = want.GetElement(); // TODO 为何之前是GetElementName()？
+    std::string windowName = elementName.GetBundleName();
+
+    stub_ = new(std::nothrow) WindowExtensionClientStubImpl(windowName);
+    if (!stub_) {
         WLOGFE("stub is nullptr.");
         return nullptr;
     }
     WLOGFD("Create stub successfully");
-    return stub->AsObject();
+    return stub_->AsObject();
 }
 
 void JsWindowExtension::OnDisconnect(const AAFwk::Want &want)
 {
     Extension::OnDisconnect(want);
-    if (window_ != nullptr) {
-        // window_->RemoveDispatchInoutEventLisenser(); // TODO
-        window_->Destroy();
-    }
 }
 
 void JsWindowExtension::OnStart(const AAFwk::Want &want)
 {
     Extension::OnStart(want);
     WLOGFI("JsWindowExtension OnStart begin..");
-
-    sptr<WindowOption> option =  new (std::nothrow)WindowOption();
-    if (option == nullptr) {
-        WLOGFE("Get option failed");
-        return;
-    }
-
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
-    option->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
-
     Rect rect { want.GetIntParam(RECT_FORM_KEY_POS_X, 0), 
-        want.GetIntParam(RECT_FORM_KEY_POS_Y, 0),
-        want.GetIntParam(RECT_FORM_KEY_HEIGHT, 0),
-        want.GetIntParam(RECT_FORM_KEY_WIDTH, 0) };
-    option->SetWindowRect(rect);
-
-    ElementName elementName = want.GetElement(); // TODO 为何之前是GetElementName()？
-    std::string windowName;
-    windowName = elementName.GetBundleName();
-
-    window_ = Window::Create(windowName, option, nullptr);
-    if (window_ == nullptr) {
-        WLOGFE("create window failed");
-        return;
-    }
-
-    dispatchInputEventListener_ = new DispatchInputEventListener();
-    //window_->AddDispatchInputEventListener(dispatchInputEventListener_);
-}
-
-void JsWindowExtension::Resize(Rect rect)
-{
-    if (window_ != nullptr) {
-        window_->Resize(rect.width_, rect.height_);
-    }
-}
-
-void JsWindowExtension::Hide()
-{
-    if (window_ != nullptr) {
-        window_->Hide();
-    }
-}
-
-void JsWindowExtension::Show()
-{
-    if (window_ != nullptr) {
-        window_->Show();
-    }
-}
-
-void JsWindowExtension::RequestFocus()
-{
-    if (window_ != nullptr) {
-        window_->RequestFocus();
-    }
+    want.GetIntParam(RECT_FORM_KEY_POS_Y, 0),
+    want.GetIntParam(RECT_FORM_KEY_HEIGHT, 0),
+    want.GetIntParam(RECT_FORM_KEY_WIDTH, 0) };
+    stub_->CreateWindow(rect);
 }
 } // namespace Rosen
 } // namespace OHOS

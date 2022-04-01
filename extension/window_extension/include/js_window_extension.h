@@ -22,10 +22,11 @@
 #include "window.h"
 #include "window_extension.h"
 #include "window_extension_client_stub.h"
+#include "window_extension_client_stub_impl.h"
 
 namespace OHOS {
 namespace Rosen {
-class JsWindowExtension : public WindowExtension, public WindowExtensionClientStub {
+class JsWindowExtension : public WindowExtension {
 public:
     JsWindowExtension(AbilityRuntime::JsRuntime& jsRuntime);
     virtual ~JsWindowExtension() override;
@@ -78,21 +79,14 @@ public:
      * @param Want Indicates the {@link Want} structure containing startup information about the extension.
      */
     virtual void OnStart(const AAFwk::Want &want) override;
-
-    void Resize(Rect rect) override;
-    void Hide() override;
-    void Show() override;
-    void RequestFocus() override;
 private:
     void GetSrcPath(std::string &srcPath);
-
-    sptr<IDispatchInputEventListener> dispatchInputEventListener_;
-    sptr<Window> window_;
 
     //sptr<IWindowExtensionServer> extensionToken_; // TODO IWindowExtensionServer下沉到window_extension
     AbilityRuntime::JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
     std::shared_ptr<NativeReference> shellContextRef_;
+    sptr<WindowExtensionClientStubImpl> stub_;
 };
 } // namespace Rosen
 } // namespace OHOS
