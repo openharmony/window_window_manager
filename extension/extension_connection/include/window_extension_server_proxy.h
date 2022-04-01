@@ -22,14 +22,15 @@
 namespace OHOS {
 namespace Rosen {
 class WindowExtensionServerProxy : public IRemoteProxy<IWindowExtensionServer> {
+public:
     WindowExtensionServerProxy(const sptr<IRemoteObject> &impl)
         : IRemoteProxy<IWindowExtensionServer>(impl) {};
     ~WindowExtensionServerProxy() {};
     void OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
     void OnBackPress() override;
-    void OnKeyEvent(shared_ptr<IMM::KeyEvent>& keyEvent) override;
-    void OnPointerEvent(shared_ptr<IMM::PointerEvent>& pointerEvent) override;
-}
+    void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+};
 } // namespace Rosen
 } // namespace OHOS
 #endif // WINDOW_EXTESNION_SERVER_PROXY
