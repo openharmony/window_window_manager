@@ -88,6 +88,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case WindowManagerMessage::TRANS_ID_SET_BRIGHTNESS: {
+            uint32_t windowId = data.ReadUint32();
+            float brightness = data.ReadFloat();
+            SetBrightness(windowId, brightness);
+            break;
+        }
         case WindowManagerMessage::TRANS_ID_GET_AVOID_AREA: {
             uint32_t windowId = data.ReadUint32();
             AvoidAreaType avoidAreaType = static_cast<AvoidAreaType>(data.ReadUint32());

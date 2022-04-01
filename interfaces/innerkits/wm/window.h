@@ -153,6 +153,8 @@ public:
     virtual void SetBackgroundColor(const std::string& color) = 0;
     virtual void SetTransparent(bool isTransparent) = 0;
     virtual bool IsTransparent() const = 0;
+    virtual void SetBrightness(float brightness) = 0;
+    virtual float GetBrightness() const = 0;
 
     virtual WMError RequestFocus() const = 0;
     // AddInputEventListener is for api 7
