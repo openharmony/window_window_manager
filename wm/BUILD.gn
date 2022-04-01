@@ -18,6 +18,7 @@ config("libwm_private_config") {
 
   include_dirs = [
     "include",
+    "../extension/window_extension/include",
     "../wmserver/include",
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
@@ -37,6 +38,12 @@ config("libwm_public_config") {
 ## Build libwm.so
 ohos_shared_library("libwm") {
   sources = [
+    "../extension/window_extension/src/js_window_extension_context.cpp",
+    "../extension/window_extension/src/js_window_extension.cpp",
+    "../extension/window_extension/src/window_extension_client_proxy.cpp",
+    "../extension/window_extension/src/window_extension_client_stub.cpp",
+    "../extension/window_extension/src/window_extension_module_loader.cpp",
+    "../extension/window_extension/src/window_extension.cpp",
     "../wmserver/src/window_manager_proxy.cpp",
     "src/color_parser.cpp",
     "src/input_transfer_station.cpp",
@@ -72,6 +79,7 @@ ohos_shared_library("libwm") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
+    "ability_runtime:runtime",
     "ace_engine_standard:ace_uicontent",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",

@@ -16,11 +16,12 @@
 #ifndef JS_WINDOW_EXTENSION_H
 #define JS_WINDOW_EXTENSION_H
 
-#include "window_extension.h"
-
 #include "js_runtime.h"
-#include "native_reference.h"
-#include "native_value.h"
+#include "js_runtime_utils.h"
+
+#include "window.h"
+#include "window_extension.h"
+#include "window_extension_client_stub.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -35,7 +36,7 @@ public:
      * @param runtime The runtime.
      * @return The JsAccessibilityExtension instance.
      */
-    static JsAccessibilityExtension* Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
+    static JsWindowExtension* Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
 
     /**
      * @brief Init the extension.
@@ -78,15 +79,19 @@ public:
      */
     virtual void OnStart(const AAFwk::Want &want) override;
 
-    bool ConnectToClient(sptr<IWindowExtensionServer> token) override;
     void Resize(Rect rect) override;
     void Hide() override;
     void Show() override;
     void RequestFocus() override;
 private:
-    sptr<IDispatchInputEventListener>& dispatchInputEventListener_;
+    void GetSrcPath(std::string &srcPath);
+
+    sptr<IDispatchInputEventListener> dispatchInputEventListener_;
     sptr<Window> window_;
-    sptr<IWindowExtensionServer> extensionToken_;
+    //sptr<IWindowExtensionServer> extensionToken_; // TODO IWindowExtensionServer下沉到window_extension
+    AbilityRuntime::JsRuntime& jsRuntime_;
+    std::unique_ptr<NativeReference> jsObj_;
+    std::shared_ptr<NativeReference> shellContextRef_;
 };
 } // namespace Rosen
 } // namespace OHOS

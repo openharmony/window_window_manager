@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
- #include "window_extension.h"
- #include "window_extension_context.h"
- #include "window_manager_hilog.h"
+#include "window_extension.h"
+
+#include "js_window_extension.h"
+#include "window_extension_context.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowStub"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtension"};
 }
+
 WindowExtension* WindowExtension::Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
     if (!runtime) {
@@ -37,6 +40,7 @@ WindowExtension* WindowExtension::Create(const std::unique_ptr<AbilityRuntime::R
             return new WindowExtension();
         }
     }
+    return nullptr;
 }
 
 void WindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
@@ -48,7 +52,7 @@ void WindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRec
     WLOGFI("WindowExtension begin init");   
 }
 
-std::share_ptr<WindowExtensionContext> WindowExtension::CreateAndInitContext(
+std::shared_ptr<WindowExtensionContext> WindowExtension::CreateAndInitContext(
     const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
     const std::shared_ptr<AbilityRuntime::OHOSApplication> &application,
     std::shared_ptr<AbilityRuntime::AbilityHandler> &handler,
