@@ -34,13 +34,13 @@
 
 namespace OHOS {
 namespace Rosen {
-enum InnerWMCmd : uint32_t {
+enum class InnerWMCmd : uint32_t {
     INNER_WM_CREATE_DIVIDER,
     INNER_WM_DESTROY_DIVIDER,
     INNER_WM_DESTROY_THREAD,
 };
 
-struct WindowMessage {
+struct WindowInnerMessage {
     InnerWMCmd cmdType;
     DisplayId displayId;
     Rect dividerRect;
@@ -56,9 +56,9 @@ private:
 
     void HandleMessage();
     sptr<Window> CreateWindow(DisplayId displayId, const WindowType& type, const Rect& rect);
-    void CreateAndShowDivider(std::unique_ptr<WindowMessage> msg);
-    void HideAndDestroyDivider(std::unique_ptr<WindowMessage> msg);
-    void DestroyThread(std::unique_ptr<WindowMessage> msg);
+    void CreateAndShowDivider(std::unique_ptr<WindowInnerMessage> msg);
+    void HideAndDestroyDivider(std::unique_ptr<WindowInnerMessage> msg);
+    void DestroyThread(std::unique_ptr<WindowInnerMessage> msg);
     void DrawSurface(const sptr<Window>& window);
     void DrawColor(std::shared_ptr<RSSurface>& rsSurface, uint32_t width, uint32_t height);
     void DrawBitmap(std::shared_ptr<RSSurface>& rsSurface, uint32_t width, uint32_t height);
@@ -72,7 +72,7 @@ private:
     RenderContext* rc_ = nullptr;
 #endif
     std::map<uint32_t, sptr<Window>> dividerMap_;
-    std::vector<std::unique_ptr<WindowMessage>> messages_;
+    std::vector<std::unique_ptr<WindowInnerMessage>> messages_;
     bool hasInitThread_ = false;
     bool needDestroyThread_ = false;
     bool isDividerImageLoaded_ = false;

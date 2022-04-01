@@ -28,7 +28,7 @@ class IWindowManager : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowManager");
 
-    enum {
+    enum class WindowManagerMessage : uint32_t {
         TRANS_ID_CREATE_WINDOW,
         TRANS_ID_ADD_WINDOW,
         TRANS_ID_REMOVE_WINDOW,

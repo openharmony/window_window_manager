@@ -89,7 +89,7 @@ void WindowLayoutPolicyTile::InitTileWindowRects()
         for (uint32_t i = 0; i < num; i++) {
             int curX = limitRect_.posX_ + edgeIntervalVp + i * (w + midIntervalVp);
             Rect curRect = { curX, y, w, h };
-            WLOGFI("presetRects: level %{public}d, id %{public}d, [%{public}d %{public}d %{public}d %{public}d]",
+            WLOGFI("presetRects: level %{public}u, id %{public}u, [%{public}d %{public}d %{public}u %{public}u]",
                 num, i, curX, y, w, h);
             curLevel.emplace_back(curRect);
         }
@@ -214,7 +214,7 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows()
         node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         node->SetWindowRect(rect);
         node->hasDecorated_ = true;
-        WLOGFI("set rect for qwin id: %{public}u [%{public}d %{public}d %{public}d %{public}d]",
+        WLOGFI("set rect for qwin id: %{public}u [%{public}d %{public}d %{public}u %{public}u]",
             node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         rectIt++;
     }
@@ -237,7 +237,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
     Rect winRect = node->GetWindowProperty()->GetWindowRect();
 
     WLOGFI("Id:%{public}u, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
-        "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+        "deco:%{public}d, type:%{public}u, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnbale,
         static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     if (needAvoid) {

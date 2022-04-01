@@ -227,7 +227,6 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, bool isAdd)
         static const RSAnimationTimingProtocol timingProtocol(350);
         // default transition curve: EASE OUT
         static const Rosen::RSAnimationTimingCurve curve = Rosen::RSAnimationTimingCurve::EASE_OUT;
-
         // add or remove window with transition animation
         RSNode::Animate(timingProtocol, curve, updateRSTreeFunc);
     } else {
@@ -668,16 +667,18 @@ void WindowNodeContainer::NotifyAccessibilityWindowInfo(const sptr<WindowNode>& 
     if (isNeedNotify) {
         std::vector<sptr<WindowInfo>> windowList;
         GetWindowList(windowList);
-        sptr<WindowInfo> windowInfo = new WindowInfo();
-        windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
-        windowInfo->windowRect_ = node->GetLayoutRect();
-        windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
-        windowInfo->mode_ = node->GetWindowMode();
-        windowInfo->type_ = node->GetWindowType();
-        sptr<AccessibilityWindowInfo> accessibilityWindowInfo = new AccessibilityWindowInfo();
-        accessibilityWindowInfo->currentWindowInfo_ = windowInfo;
-        accessibilityWindowInfo->windowList_ = windowList;
-        WindowManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(accessibilityWindowInfo, type);
+        sptr<WindowInfo> windowInfo = new (std::nothrow) WindowInfo();
+        sptr<AccessibilityWindowInfo> accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
+        if (windowInfo != nullptr && accessibilityWindowInfo != nullptr) {
+            windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
+            windowInfo->windowRect_ = node->GetLayoutRect();
+            windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
+            windowInfo->mode_ = node->GetWindowMode();
+            windowInfo->type_ = node->GetWindowType();
+            accessibilityWindowInfo->currentWindowInfo_ = windowInfo;
+            accessibilityWindowInfo->windowList_ = windowList;
+            WindowManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(accessibilityWindowInfo, type);
+        }
     }
 }
 
@@ -1057,7 +1058,7 @@ WMError WindowNodeContainer::EnterSplitWindowMode(sptr<WindowNode>& node)
         if (ret != WMError::WM_OK) {
             return ret;
         }
-        SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_CREATE_DIVIDER, displayId_);
+        SingletonContainer::Get<WindowInnerManager>().SendMessage(InnerWMCmd::INNER_WM_CREATE_DIVIDER, displayId_);
         std::vector<uint32_t> exceptionalIds;
         for (auto iter = pairedWindowMap_.begin(); iter != pairedWindowMap_.end(); iter++) {
             exceptionalIds.emplace_back(iter->first);
@@ -1095,7 +1096,7 @@ WMError WindowNodeContainer::ExitSplitWindowMode(sptr<WindowNode>& node)
     }
     if (pairedWindowMap_.empty()) {
         WLOGFI("send destroy msg to divider, Id: %{public}u", node->GetWindowId());
-        SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, displayId_);
+        SingletonContainer::Get<WindowInnerManager>().SendMessage(InnerWMCmd::INNER_WM_DESTROY_DIVIDER, displayId_);
     }
     ResetLayoutPolicy();
     return WMError::WM_OK;
@@ -1155,7 +1156,7 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, bool r
     if (layoutMode_ != dstMode) {
         if (layoutMode_ == WindowLayoutMode::CASCADE && !pairedWindowMap_.empty()) {
             pairedWindowMap_.clear();
-            SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, displayId_);
+            SingletonContainer::Get<WindowInnerManager>().SendMessage(InnerWMCmd::INNER_WM_DESTROY_DIVIDER, displayId_);
         }
         layoutMode_ = dstMode;
         layoutPolicy_->Clean();
@@ -1169,7 +1170,7 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, bool r
         if (!pairedWindowMap_.empty()) {
             // exit divider window when reorder
             pairedWindowMap_.clear();
-            SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_DIVIDER, displayId_);
+            SingletonContainer::Get<WindowInnerManager>().SendMessage(InnerWMCmd::INNER_WM_DESTROY_DIVIDER, displayId_);
         }
         layoutPolicy_->Reorder();
         DumpScreenWindowTree();

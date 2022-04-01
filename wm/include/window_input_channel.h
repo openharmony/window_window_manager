@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Rosen {
 class WindowInputChannel : public RefBase {
 public:
-    WindowInputChannel(const sptr<Window>& window);
+    explicit WindowInputChannel(const sptr<Window>& window);
     ~WindowInputChannel() = default;
     void HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent);

@@ -28,7 +28,7 @@ class IWindow : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindow");
 
-    enum {
+    enum class WindowMessage : uint32_t {
         TRANS_ID_UPDATE_WINDOW_RECT,
         TRANS_ID_UPDATE_WINDOW_MODE,
         TRANS_ID_UPDATE_FOCUS_STATUS,

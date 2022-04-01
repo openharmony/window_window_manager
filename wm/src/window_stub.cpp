@@ -32,24 +32,25 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         WLOGFE("InterfaceToken check failed");
         return -1;
     }
-    switch (code) {
-        case TRANS_ID_UPDATE_WINDOW_RECT: {
+    WindowMessage msgId = static_cast<WindowMessage>(code);
+    switch (msgId) {
+        case WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT: {
             struct Rect rect { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
             WindowSizeChangeReason reason = static_cast<WindowSizeChangeReason>(data.ReadUint32());
             UpdateWindowRect(rect, reason);
             break;
         }
-        case TRANS_ID_UPDATE_WINDOW_MODE: {
+        case WindowMessage::TRANS_ID_UPDATE_WINDOW_MODE: {
             WindowMode mode = static_cast<WindowMode>(data.ReadUint32());
             UpdateWindowMode(mode);
             break;
         }
-        case TRANS_ID_UPDATE_FOCUS_STATUS: {
+        case WindowMessage::TRANS_ID_UPDATE_FOCUS_STATUS: {
             bool focused = data.ReadBool();
             UpdateFocusStatus(focused);
             break;
         }
-        case TRANS_ID_UPDATE_AVOID_AREA: {
+        case WindowMessage::TRANS_ID_UPDATE_AVOID_AREA: {
             std::vector<Rect> avoidArea;
             uint32_t len = data.ReadUint32();
             if (len != MAX_AVOID_NUM) {
@@ -74,11 +75,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             UpdateAvoidArea(avoidArea);
             break;
         }
-        case TRANS_ID_UPDATE_WINDOW_STATE: {
+        case WindowMessage::TRANS_ID_UPDATE_WINDOW_STATE: {
             UpdateWindowState(static_cast<WindowState>(data.ReadUint32()));
             break;
         }
-        case TRANS_ID_UPDATE_DRAG_EVENT: {
+        case WindowMessage::TRANS_ID_UPDATE_DRAG_EVENT: {
             PointInfo point;
             point.x = data.ReadInt32();
             point.y = data.ReadInt32();
@@ -86,16 +87,16 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             UpdateWindowDragInfo(point, event);
             break;
         }
-        case TRANS_ID_UPDATE_DISPLAY_ID: {
+        case WindowMessage::TRANS_ID_UPDATE_DISPLAY_ID: {
             UpdateDisplayId(data.ReadUint64(), data.ReadUint64());
             break;
         }
-        case TRANS_ID_UPDATE_OCCUPIED_AREA: {
+        case WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA: {
             sptr<OccupiedAreaChangeInfo> info = data.ReadParcelable<OccupiedAreaChangeInfo>();
             UpdateOccupiedAreaChangeInfo(info);
             break;
         }
-        case TRANS_ID_UPDATE_ACTIVE_STATUS: {
+        case WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS: {
             bool isActive = data.ReadBool();
             UpdateActiveStatus(isActive);
             break;

@@ -160,23 +160,27 @@ sptr<Window> WindowInnerManager::CreateWindow(DisplayId displayId, const WindowT
 {
     sptr<Window> window = GetDividerWindow(displayId);
     if (window == nullptr) {
-        sptr<WindowOption> divWindowOp = new WindowOption();
+        sptr<WindowOption> divWindowOp = new (std::nothrow) WindowOption();
+        if (divWindowOp == nullptr) {
+            WLOGFE("Window option is nullptr.");
+            return nullptr;
+        }
         divWindowOp->SetWindowRect(rect);
         divWindowOp->SetWindowType(type);
         divWindowOp->SetFocusable(false);
         divWindowOp->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         window = Window::Create("divider" + std::to_string(displayId), divWindowOp);
         if (window == nullptr) {
-            WLOGFE("Window is nullptr");
+            WLOGFE("Window is nullptr.");
             return nullptr;
         }
         dividerMap_.insert(std::make_pair(displayId, window));
-        WLOGFI("CreateWindow success");
+        WLOGFI("CreateWindow success.");
     }
     return window;
 }
 
-void WindowInnerManager::CreateAndShowDivider(std::unique_ptr<WindowMessage> msg)
+void WindowInnerManager::CreateAndShowDivider(std::unique_ptr<WindowInnerMessage> msg)
 {
     auto window = CreateWindow(msg->displayId, WindowType::WINDOW_TYPE_DOCK_SLICE, msg->dividerRect);
     if (window == nullptr) {
@@ -208,7 +212,7 @@ void WindowInnerManager::CreateAndShowDivider(std::unique_ptr<WindowMessage> msg
     WLOGFI("CreateAndShowDivider success");
 }
 
-void WindowInnerManager::HideAndDestroyDivider(std::unique_ptr<WindowMessage> msg)
+void WindowInnerManager::HideAndDestroyDivider(std::unique_ptr<WindowInnerMessage> msg)
 {
     sptr<Window> window = GetDividerWindow(msg->displayId);
     if (window == nullptr) {
@@ -229,7 +233,7 @@ void WindowInnerManager::HideAndDestroyDivider(std::unique_ptr<WindowMessage> ms
     WLOGFI("HideAndDestroyDivider success");
 }
 
-void WindowInnerManager::DestroyThread(std::unique_ptr<WindowMessage> msg)
+void WindowInnerManager::DestroyThread(std::unique_ptr<WindowInnerMessage> msg)
 {
     hasInitThread_ = false;
     needDestroyThread_ = true;
@@ -240,7 +244,7 @@ void WindowInnerManager::DestroyThread(std::unique_ptr<WindowMessage> msg)
 void WindowInnerManager::HandleMessage()
 {
     WLOGFI("HandleMessage");
-    std::vector<std::unique_ptr<WindowMessage>> handleMsgs;
+    std::vector<std::unique_ptr<WindowInnerMessage>> handleMsgs;
     while (!needDestroyThread_) {
         // lock to store massages
         {
@@ -258,11 +262,11 @@ void WindowInnerManager::HandleMessage()
                 continue;
             }
             auto cmdType = msg->cmdType;
-            using Func_t = void(WindowInnerManager::*)(std::unique_ptr<WindowMessage> winMsg);
+            using Func_t = void(WindowInnerManager::*)(std::unique_ptr<WindowInnerMessage> winMsg);
             static const std::map<InnerWMCmd, Func_t> funcMap = {
-                std::make_pair(INNER_WM_CREATE_DIVIDER,  &WindowInnerManager::CreateAndShowDivider),
-                std::make_pair(INNER_WM_DESTROY_DIVIDER, &WindowInnerManager::HideAndDestroyDivider),
-                std::make_pair(INNER_WM_DESTROY_THREAD,  &WindowInnerManager::DestroyThread)};
+                std::make_pair(InnerWMCmd::INNER_WM_CREATE_DIVIDER,  &WindowInnerManager::CreateAndShowDivider),
+                std::make_pair(InnerWMCmd::INNER_WM_DESTROY_DIVIDER, &WindowInnerManager::HideAndDestroyDivider),
+                std::make_pair(InnerWMCmd::INNER_WM_DESTROY_THREAD,  &WindowInnerManager::DestroyThread)};
             auto it = funcMap.find(cmdType);
             if (it != funcMap.end()) {
                 (this->*(it->second))(std::move(msg));
@@ -279,7 +283,7 @@ void WindowInnerManager::SendMessage(InnerWMCmd cmdType, DisplayId displayId)
         WLOGFI("Inner window manager thread has not been created");
         return;
     }
-    std::unique_ptr<WindowMessage> winMsg = std::make_unique<WindowMessage>();
+    std::unique_ptr<WindowInnerMessage> winMsg = std::make_unique<WindowInnerMessage>();
     if (!winMsg) {
         WLOGFI("alloc winMsg failed");
         return;

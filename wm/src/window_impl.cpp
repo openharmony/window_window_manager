@@ -133,7 +133,7 @@ sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRu
         auto win = iter->second.second;
         if (context.get() == win->GetContext().get() && WindowHelper::IsMainWindow(win->GetType())) {
             mainWinId = win->GetWindowId();
-            WLOGFI("GetTopWindow Find MainWinId:%{public}d with context %{public}p!", mainWinId, context.get());
+            WLOGFI("GetTopWindow Find MainWinId:%{public}u.", mainWinId);
             break;
         }
     }
@@ -262,13 +262,13 @@ WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 
 WMError WindowImpl::SetWindowType(WindowType type)
 {
-    WLOGFI("window id: %{public}u, type:%{public}u", property_->GetWindowId(), static_cast<uint32_t>(type));
+    WLOGFI("window id: %{public}u, type:%{public}u.", property_->GetWindowId(), static_cast<uint32_t>(type));
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (state_ == WindowState::STATE_CREATED) {
         if (!(WindowHelper::IsAppWindow(type) || WindowHelper::IsSystemWindow(type))) {
-            WLOGFE("window type is invalid %{public}d", type);
+            WLOGFE("window type is invalid %{public}u.", type);
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         property_->SetWindowType(type);
@@ -300,7 +300,7 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
         UpdateMode(mode);
     }
     if (property_->GetWindowMode() != mode) {
-        WLOGFE("set window mode filed! id: %{public}d", property_->GetWindowId());
+        WLOGFE("set window mode filed! id: %{public}u.", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     return WMError::WM_OK;
@@ -308,7 +308,7 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
 
 WMError WindowImpl::SetWindowBackgroundBlur(WindowBlurLevel level)
 {
-    WLOGFI("[Client] Window %{public}d blurlevel %{public}u", property_->GetWindowId(), static_cast<uint32_t>(level));
+    WLOGFI("[Client] Window %{public}u blurlevel %{public}u", property_->GetWindowId(), static_cast<uint32_t>(level));
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -318,7 +318,7 @@ WMError WindowImpl::SetWindowBackgroundBlur(WindowBlurLevel level)
 
 WMError WindowImpl::SetAlpha(float alpha)
 {
-    WLOGFI("[Client] Window %{public}d alpha %{public}f", property_->GetWindowId(), alpha);
+    WLOGFI("[Client] Window %{public}u alpha %{public}f", property_->GetWindowId(), alpha);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -340,7 +340,7 @@ WMError WindowImpl::RemoveWindowFlag(WindowFlag flag)
 
 WMError WindowImpl::SetWindowFlags(uint32_t flags)
 {
-    WLOGFI("[Client] Window %{public}d flags %{public}u", property_->GetWindowId(), flags);
+    WLOGFI("[Client] Window %{public}u flags %{public}u", property_->GetWindowId(), flags);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -353,7 +353,7 @@ WMError WindowImpl::SetWindowFlags(uint32_t flags)
     }
     WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_FLAGS);
     if (ret != WMError::WM_OK) {
-        WLOGFE("SetWindowFlags errCode:%{public}d winId:%{public}d",
+        WLOGFE("SetWindowFlags errCode:%{public}d winId:%{public}u",
             static_cast<int32_t>(ret), property_->GetWindowId());
     }
     return ret;
@@ -454,8 +454,8 @@ void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<st
 
 WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
-    WLOGFI("[Client] Window %{public}u SetSystemBarProperty type %{public}d " \
-        "enable:%{public}d, backgroundColor:%{public}x, contentColor:%{public}x ",
+    WLOGFI("[Client] Window %{public}u SetSystemBarProperty type %{public}u " \
+        "enable:%{public}u, backgroundColor:%{public}x, contentColor:%{public}x ",
         property_->GetWindowId(), static_cast<uint32_t>(type), property.enable_,
         property.backgroundColor_, property.contentColor_);
     if (!IsWindowValid()) {
@@ -478,7 +478,7 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
 
 WMError WindowImpl::SetLayoutFullScreen(bool status)
 {
-    WLOGFI("[Client] Window %{public}u SetLayoutFullScreen: %{public}d", property_->GetWindowId(), status);
+    WLOGFI("[Client] Window %{public}u SetLayoutFullScreen: %{public}u", property_->GetWindowId(), status);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -508,7 +508,7 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
 
 WMError WindowImpl::SetFullScreen(bool status)
 {
-    WLOGFI("[Client] Window %{public}d SetFullScreen: %{public}u", property_->GetWindowId(), status);
+    WLOGFI("[Client] Window %{public}u SetFullScreen: %{public}d", property_->GetWindowId(), status);
     SystemBarProperty statusProperty = GetSystemBarPropertyByType(
         WindowType::WINDOW_TYPE_STATUS_BAR);
     SystemBarProperty naviProperty = GetSystemBarPropertyByType(
@@ -1160,7 +1160,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reas
 
 void WindowImpl::UpdateMode(WindowMode mode)
 {
-    WLOGI("UpdateMode %{public}d", mode);
+    WLOGI("UpdateMode %{public}u", mode);
     property_->SetWindowMode(mode);
     for (auto& listener : windowChangeListeners_) {
         if (listener != nullptr) {
@@ -1460,7 +1460,7 @@ void WindowImpl::RequestFrame()
 
 void WindowImpl::UpdateFocusStatus(bool focused)
 {
-    WLOGFI("window focus status: %{public}d, id: %{public}d", focused, property_->GetWindowId());
+    WLOGFI("window focus status: %{public}d, id: %{public}u", focused, property_->GetWindowId());
     if (focused) {
         NotifyAfterFocused();
     } else {

@@ -42,7 +42,8 @@ DisplayId DisplayManagerProxy::GetDefaultDisplayId()
         WLOGFE("GetDefaultDisplayId: WriteInterfaceToken failed");
         return DISPLAY_ID_INVALID;
     }
-    if (remote->SendRequest(TRANS_ID_GET_DEFAULT_DISPLAY_ID, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_ID),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("GetDefaultDisplayId: SendRequest failed");
         return DISPLAY_ID_INVALID;
     }
@@ -71,7 +72,8 @@ sptr<DisplayInfo> DisplayManagerProxy::GetDisplayInfoById(DisplayId displayId)
         WLOGFW("GetDisplayInfoById: WriteUint64 displayId failed");
         return nullptr;
     }
-    if (remote->SendRequest(TRANS_ID_GET_DISPLAY_BY_ID, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("GetDisplayInfoById: SendRequest failed");
         return nullptr;
     }
@@ -103,7 +105,8 @@ sptr<DisplayInfo> DisplayManagerProxy::GetDisplayInfoByScreen(ScreenId screenId)
         WLOGFW("fail to get displayInfo by screenId: WriteUint64 displayId failed");
         return nullptr;
     }
-    if (remote->SendRequest(TRANS_ID_GET_DISPLAY_BY_SCREEN, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("fail to get displayInfo by screenId: SendRequest failed");
         return nullptr;
     }
@@ -151,7 +154,8 @@ ScreenId DisplayManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOpt
         WLOGFE("Write data failed");
         return SCREEN_ID_INVALID;
     }
-    if (remote->SendRequest(TRANS_ID_CREATE_VIRTUAL_SCREEN, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_CREATE_VIRTUAL_SCREEN),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("CreateVirtualScreen: SendRequest failed");
         return SCREEN_ID_INVALID;
     }
@@ -180,7 +184,8 @@ DMError DisplayManagerProxy::DestroyVirtualScreen(ScreenId screenId)
         WLOGFW("DestroyVirtualScreen: WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(TRANS_ID_DESTROY_VIRTUAL_SCREEN, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DESTROY_VIRTUAL_SCREEN),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("DestroyVirtualScreen: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
@@ -215,7 +220,8 @@ DMError DisplayManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sptr<Sur
         WLOGFW("SetVirtualScreenSurface: Write screenId/surface failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SetVirtualScreenSurface: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
@@ -245,7 +251,8 @@ bool DisplayManagerProxy::SetOrientation(ScreenId screenId, Orientation orientat
         WLOGFW("fail to set orientation: Write orientation failed");
         return false;
     }
-    if (remote->SendRequest(TRANS_ID_SET_ORIENTATION, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_ORIENTATION),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("fail to set orientation: SendRequest failed");
         return false;
     }
@@ -273,7 +280,8 @@ std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDisplaySnapshot(Display
         return nullptr;
     }
 
-    if (remote->SendRequest(TRANS_ID_GET_DISPLAY_SNAPSHOT, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("GetDisplaySnapshot: SendRequest failed");
         return nullptr;
     }
@@ -306,7 +314,8 @@ DMError DisplayManagerProxy::GetScreenSupportedColorGamuts(ScreenId screenId,
         WLOGFW("DisplayManagerProxy::GetScreenSupportedColorGamuts: WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("DisplayManagerProxy::GetScreenSupportedColorGamuts: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
@@ -344,7 +353,8 @@ DMError DisplayManagerProxy::GetScreenColorGamut(ScreenId screenId, ScreenColorG
         WLOGFW("DisplayManagerProxy::GetScreenColorGamut: WriteUint64 uint64_t failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(TRANS_ID_SCREEN_GET_COLOR_GAMUT, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_GAMUT),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("DisplayManagerProxy::GetScreenColorGamut: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
@@ -375,7 +385,8 @@ DMError DisplayManagerProxy::SetScreenColorGamut(ScreenId screenId, int32_t colo
         WLOGFW("DisplayManagerProxy::SetScreenColorGamut: Write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(TRANS_ID_SCREEN_SET_COLOR_GAMUT, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_GAMUT),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("DisplayManagerProxy::SetScreenColorGamut: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
@@ -401,7 +412,8 @@ DMError DisplayManagerProxy::GetScreenGamutMap(ScreenId screenId, ScreenGamutMap
         WLOGFW("DisplayManagerProxy::GetScreenGamutMap: WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(TRANS_ID_SCREEN_GET_GAMUT_MAP, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_GAMUT_MAP),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("DisplayManagerProxy::GetScreenGamutMap: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
@@ -432,7 +444,8 @@ DMError DisplayManagerProxy::SetScreenGamutMap(ScreenId screenId, ScreenGamutMap
         WLOGFW("DisplayManagerProxy::SetScreenGamutMap: Writ failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(TRANS_ID_SCREEN_SET_GAMUT_MAP, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_SET_GAMUT_MAP),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("DisplayManagerProxy::SetScreenGamutMap: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
@@ -458,7 +471,8 @@ DMError DisplayManagerProxy::SetScreenColorTransform(ScreenId screenId)
         WLOGFW("DisplayManagerProxy::SetScreenColorTransform: WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(TRANS_ID_SCREEN_SET_COLOR_TRANSFORM, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_TRANSFORM),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("DisplayManagerProxy::SetScreenColorTransform: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
@@ -486,7 +500,8 @@ bool DisplayManagerProxy::RegisterDisplayManagerAgent(const sptr<IDisplayManager
         return false;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return false;
     }
@@ -514,7 +529,8 @@ bool DisplayManagerProxy::UnregisterDisplayManagerAgent(const sptr<IDisplayManag
         return false;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return false;
     }
@@ -534,7 +550,8 @@ bool DisplayManagerProxy::WakeUpBegin(PowerStateChangeReason reason)
         WLOGFE("Write PowerStateChangeReason failed");
         return false;
     }
-    if (Remote()->SendRequest(TRANS_ID_WAKE_UP_BEGIN, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_BEGIN),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return false;
     }
@@ -550,7 +567,8 @@ bool DisplayManagerProxy::WakeUpEnd()
         WLOGFE("WriteInterfaceToken failed");
         return false;
     }
-    if (Remote()->SendRequest(TRANS_ID_WAKE_UP_END, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_END),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return false;
     }
@@ -570,7 +588,8 @@ bool DisplayManagerProxy::SuspendBegin(PowerStateChangeReason reason)
         WLOGFE("Write PowerStateChangeReason failed");
         return false;
     }
-    if (Remote()->SendRequest(TRANS_ID_SUSPEND_BEGIN, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_BEGIN),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return false;
     }
@@ -586,7 +605,8 @@ bool DisplayManagerProxy::SuspendEnd()
         WLOGFE("WriteInterfaceToken failed");
         return false;
     }
-    if (Remote()->SendRequest(TRANS_ID_SUSPEND_END, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_END),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return false;
     }
@@ -610,7 +630,8 @@ bool DisplayManagerProxy::SetScreenPowerForAll(ScreenPowerState state, PowerStat
         WLOGFE("Write PowerStateChangeReason failed");
         return false;
     }
-    if (Remote()->SendRequest(TRANS_ID_SET_SCREEN_POWER_FOR_ALL, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return false;
     }
@@ -630,7 +651,8 @@ ScreenPowerState DisplayManagerProxy::GetScreenPower(ScreenId dmsScreenId)
         WLOGFE("Write dmsScreenId failed");
         return ScreenPowerState::INVALID_STATE;
     }
-    if (Remote()->SendRequest(TRANS_ID_GET_SCREEN_POWER, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return ScreenPowerState::INVALID_STATE;
     }
@@ -650,7 +672,8 @@ bool DisplayManagerProxy::SetDisplayState(DisplayState state)
         WLOGFE("Write DisplayState failed");
         return false;
     }
-    if (Remote()->SendRequest(TRANS_ID_SET_DISPLAY_STATE, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return false;
     }
@@ -670,7 +693,8 @@ DisplayState DisplayManagerProxy::GetDisplayState(DisplayId displayId)
         WLOGFE("Write displayId failed");
         return DisplayState::UNKNOWN;
     }
-    if (Remote()->SendRequest(TRANS_ID_GET_DISPLAY_STATE, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return DisplayState::UNKNOWN;
     }
@@ -687,7 +711,8 @@ std::vector<DisplayId> DisplayManagerProxy::GetAllDisplayIds()
         WLOGFE("WriteInterfaceToken failed");
         return allDisplayIds;
     }
-    if (Remote()->SendRequest(TRANS_ID_GET_ALL_DISPLAYIDS, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return allDisplayIds;
     }
@@ -708,7 +733,8 @@ void DisplayManagerProxy::NotifyDisplayEvent(DisplayEvent event)
         WLOGFE("Write DisplayEvent failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_NOTIFY_DISPLAY_EVENT, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("SendRequest failed");
         return;
     }
@@ -732,7 +758,8 @@ bool DisplayManagerProxy::SetFreeze(std::vector<DisplayId> displayIds, bool isFr
         return false;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_SET_FREEZE_EVENT, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_FREEZE_EVENT),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return false;
     }
@@ -760,7 +787,8 @@ ScreenId DisplayManagerProxy::MakeMirror(ScreenId mainScreenId, std::vector<Scre
         WLOGFE("create mirror fail: data write failed");
         return SCREEN_ID_INVALID;
     }
-    if (remote->SendRequest(TRANS_ID_SCREEN_MAKE_MIRROR, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("create mirror fail: SendRequest failed");
         return SCREEN_ID_INVALID;
     }
@@ -786,7 +814,8 @@ sptr<ScreenInfo> DisplayManagerProxy::GetScreenInfoById(ScreenId screenId)
         WLOGFE("GetScreenInfoById: Write screenId failed");
         return nullptr;
     }
-    if (remote->SendRequest(TRANS_ID_GET_SCREEN_INFO_BY_ID, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_INFO_BY_ID),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("GetScreenInfoById: SendRequest failed");
         return nullptr;
     }
@@ -822,7 +851,8 @@ sptr<ScreenGroupInfo> DisplayManagerProxy::GetScreenGroupInfoById(ScreenId scree
         WLOGFE("GetScreenGroupInfoById: Write screenId failed");
         return nullptr;
     }
-    if (remote->SendRequest(TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("GetScreenGroupInfoById: SendRequest failed");
         return nullptr;
     }
@@ -851,7 +881,8 @@ std::vector<sptr<ScreenInfo>> DisplayManagerProxy::GetAllScreenInfos()
         WLOGFE("GetAllScreenInfos: WriteInterfaceToken failed");
         return screenInfos;
     }
-    if (remote->SendRequest(TRANS_ID_GET_ALL_SCREEN_INFOS, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_SCREEN_INFOS),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("GetAllScreenInfos: SendRequest failed");
         return screenInfos;
     }
@@ -885,7 +916,8 @@ ScreenId DisplayManagerProxy::MakeExpand(std::vector<ScreenId> screenId, std::ve
         WLOGFE("MakeExpand: write startPoint failed");
         return SCREEN_ID_INVALID;
     }
-    if (remote->SendRequest(TRANS_ID_SCREEN_MAKE_EXPAND, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("MakeExpand: SendRequest failed");
         return SCREEN_ID_INVALID;
     }
@@ -912,7 +944,9 @@ void DisplayManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenId> scr
         WLOGFE("cancel make mirror or expand fail: write screens failed.");
         return;
     }
-    if (remote->SendRequest(TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP),
+        data, reply, option) != ERR_NONE) {
         WLOGFW("cancel make mirror or expand fail: SendRequest failed");
     }
 }
@@ -936,7 +970,8 @@ bool DisplayManagerProxy::SetScreenActiveMode(ScreenId screenId, uint32_t modeId
         WLOGFE("SetScreenActiveMode: write screenId/modeId failed");
         return false;
     }
-    if (remote->SendRequest(TRANS_ID_SET_SCREEN_ACTIVE_MODE, data, reply, option) != ERR_NONE) {
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SetScreenActiveMode: SendRequest failed");
         return false;
     }
