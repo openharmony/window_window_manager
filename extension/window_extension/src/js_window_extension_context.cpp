@@ -14,43 +14,48 @@
  */
 
 #include "js_window_extension_context.h"
+
+#include "js_runtime_utils.h"
+#include "js_extension_context.h"
+
+#include "service_extension_context.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JSWindowExtensionContext"};
+    std::shared_ptr<AppExecFwk::EventHandler> handler_;
 }
 
-class JsWindowExtensionContext final {
-public:
-    explicit JsWindowExtensionContext(const std::shared_ptr<JsWindowExtensionContext>& context) : context_(context) {}
-    ~JsWindowExtensionContext() = default;
+JsWindowExtensionContext::JsWindowExtensionContext(const std::shared_ptr<JsWindowExtensionContext>& context)
+    : context_(context) {}
 
-    static void Finalizer(NativeEngine* engine, void* data, void* hint)
-    {
-        WLOGFI("Finalizer is called");
-        std::unique_ptr<JsExtensionContext>(static_cast<JsExtensionContext*>(data));
-    }
-
-    void OnWindowCreate(sptr<Window> window)
-    {
-        // call js api
-    }
-
-NativeValue* CreateJsServiceExtensionContext(NativeEngine& engine, std::shared_ptr<ServiceExtensionContext> context)
+void JsWindowExtensionContext::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
-    WLOGFI("CreateJsServiceExtensionContext begin");
-    NativeValue* objValue = CreateJsExtensionContext(engine, context);
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+    WLOGFI("Finalizer is called");
+    std::unique_ptr<JsWindowExtensionContext>(static_cast<JsWindowExtensionContext*>(data));
+}
 
-    std::unique_ptr<JsServiceExtensionContext> jsContext = std::make_unique<JsServiceExtensionContext>(context);
-    object->SetNativePointer(jsContext.release(), JsServiceExtensionContext::Finalizer, nullptr);
+void JsWindowExtensionContext::OnWindowCreate(sptr<Window> window)
+{
+    // call js api
+}
+
+NativeValue* CreateJsWindowExtensionContext(NativeEngine& engine,
+    std::shared_ptr<AbilityRuntime::ServiceExtensionContext> context)
+{
+    WLOGFI("CreateJsWindowExtensionContext begin");
+    NativeValue* objValue = CreateJsExtensionContext(engine, context); // TODO CreateJsBaseContext?
+    NativeObject* object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(objValue);
+
+    std::unique_ptr<JsWindowExtensionContext> jsContext
+        = std::make_unique<JsWindowExtensionContext>(context);
+    object->SetNativePointer(jsContext.release(), JsWindowExtensionContext::Finalizer, nullptr);
 
     // make handler
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     return objValue;
 }
-};
 } // namespace Rosen
 } // namespace OHOS

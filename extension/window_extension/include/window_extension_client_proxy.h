@@ -26,7 +26,6 @@ class WindowExtensionClientProxy : public IRemoteProxy<IWindowExtensionClient> {
         : IRemoteProxy<IWindowExtensionClient>(impl) {};
     ~WindowExtensionClientProxy() {};
 
-    bool ConnectToClient(sptr<IWindowExtensionServer> token) override;
     void Resize(Rect rect) = 0;
     void Hide() = 0;
     void Show() = 0;

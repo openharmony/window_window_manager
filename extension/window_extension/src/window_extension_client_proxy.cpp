@@ -24,38 +24,17 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionClientProxy"};
 }
 
-bool WindowExtensionClientProxy::ConnectToClient(sptr<IWindowExtensionServer> extensionServer)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option();
-
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("wirte descriptor failed");
-        return false;
-    }
-    if (!data.WriteRemoteObject(extensionServer)) {
-        WLOGFE("wirte object failed");
-        return false;
-    }
-    if (Remote()->SendRequest(TRANS_ID_CONNECT_TO_CLIENT, data, reply, option)) {
-        WLOGFE("sendRequest failed");
-        return false;
-    }
-    return true;
-}
-
 void WindowExtensionClientProxy::Resize(Rect rect)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option();
+    MessageOption option;
 
     if (data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write interface token failed");
         return;
     }
-    if (!(data.WriteInt32(rect.posX_ && data.WriteInt32(rect.posY_) &&
+    if (!(data.WriteInt32(rect.posX_) && data.WriteInt32(rect.posY_) &&
         data.WriteInt32(rect.height_) && data.WriteInt32(rect.width_))) {
         WLOGFE("write rect failed");
         return;
@@ -70,7 +49,7 @@ void WindowExtensionClientProxy::Hide()
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option();
+    MessageOption option{};
     if (data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write interface token failed");
         return;
@@ -84,7 +63,7 @@ void WindowExtensionClientProxy::Show()
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option();
+    MessageOption option{};
     if (data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write interface token failed");
         return;

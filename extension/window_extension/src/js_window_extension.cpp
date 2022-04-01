@@ -14,6 +14,12 @@
  */
 
 #include "js_window_extension.h"
+
+#include "native_engine/native_reference.h"
+#include "native_engine/native_value.h"
+
+#include "js_window_extension_context.h"
+#include "window_extension_connection.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 
@@ -21,6 +27,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JSWindowExtension"};
+    constexpr size_t ARGC_ONE = 1;
 }
 
 class DispatchInputEventListener : public IDispatchInputEventListener {
@@ -31,7 +38,7 @@ public:
     void OnDispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override
     {
     }
-}
+};
 
 JsWindowExtension* JsWindowExtension::Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
@@ -47,7 +54,7 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     const sptr<IRemoteObject> &token)
 {
     WindowExtension::Init(record, application, handler, token);
-    std::string srcPath = "";
+    std::string srcPath;
     GetSrcPath(srcPath);
     if (srcPath.empty()) {
         WLOGFE("Failed to get srcPath");
@@ -103,6 +110,11 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     WLOGFI("JsWindowExtension::Init end.");
 }
 
+void JsWindowExtension::GetSrcPath(std::string &srcPath)
+{
+    // TODO
+}
+
 sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)
 {
     WLOGFI("called.");
@@ -119,10 +131,9 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)
 
 void JsWindowExtension::OnDisconnect(const AAFwk::Want &want)
 {
-    BYTRACE_NAME(BYTRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     Extension::OnDisconnect(want);
     if (window_ != nullptr) {
-        window_->RemoveDispatchInoutEventLisenser();
+        // window_->RemoveDispatchInoutEventLisenser(); // TODO
         window_->Destroy();
     }
 }
@@ -131,9 +142,6 @@ void JsWindowExtension::OnStart(const AAFwk::Want &want)
 {
     Extension::OnStart(want);
     WLOGFI("JsWindowExtension OnStart begin..");
-    if (want == nullptr) {
-        return;
-    }
 
     sptr<WindowOption> option =  new (std::nothrow)WindowOption();
     if (option == nullptr) {
@@ -144,17 +152,15 @@ void JsWindowExtension::OnStart(const AAFwk::Want &want)
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
     option->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
 
-    Rect rect { want.GetIntParam(RECT_FORM_KEY_POS_X), 
-        want.GetIntParam(RECT_FORM_KEY_POS_Y),
-        want.GetIntParam(RECT_FORM_KEY_HEIGHT),
-        want.GetIntParam(RECT_FORM_KEY_WIDTH) };
+    Rect rect { want.GetIntParam(RECT_FORM_KEY_POS_X, 0), 
+        want.GetIntParam(RECT_FORM_KEY_POS_Y, 0),
+        want.GetIntParam(RECT_FORM_KEY_HEIGHT, 0),
+        want.GetIntParam(RECT_FORM_KEY_WIDTH, 0) };
     option->SetWindowRect(rect);
 
-    ElementName elementName = want.GetElementName();
-    stt::String windowName;
-    if (elementName != nullptr) {
-        windowName = elementName.GetBundleName();
-    }
+    ElementName elementName = want.GetElement(); // TODO 为何之前是GetElementName()？
+    std::string windowName;
+    windowName = elementName.GetBundleName();
 
     window_ = Window::Create(windowName, option, nullptr);
     if (window_ == nullptr) {
@@ -163,18 +169,13 @@ void JsWindowExtension::OnStart(const AAFwk::Want &want)
     }
 
     dispatchInputEventListener_ = new DispatchInputEventListener();
-    window_->AddDispatchInputEventListener(dispatchInputEventListener_);
-}
-
-bool JsWindowExtension::ConnectToClient(sptr<IWindowExtensionServer>& token)
-{
-    extensionToken_ = token;
+    //window_->AddDispatchInputEventListener(dispatchInputEventListener_);
 }
 
 void JsWindowExtension::Resize(Rect rect)
 {
     if (window_ != nullptr) {
-        window_->Resize(rect);
+        window_->Resize(rect.width_, rect.height_);
     }
 }
 

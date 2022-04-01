@@ -31,11 +31,6 @@ int WindowExtensionClientStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
     }
     WLOGFI("code is %{public}u", code);
     switch (code) {
-        case TRANS_ID_CONNECT_TO_CLIENT: {
-            sptr<IWindowExtensionServer> token = data.ReadRemoteObject();
-            ConnectToClient(token);
-            break;
-        }
         case TRANS_ID_RESIZE_WINDOW: {
             Rect rect {data.ReadInt32(), data.ReadInt32(),
                 data.ReadInt32(), data.ReadInt32()};

@@ -17,18 +17,27 @@
 #define JS_WINDOW_EXTENSION_CONTEXT_H
 
 #include "ability_connect_callback.h"
-#include "window_extension_context.h"
 #include "event_handler.h"
+#include "extension_context.h"
+#include "native_engine/native_engine.h"
+
+#include "window.h"
+#include "window_extension_context.h"
 
 namespace OHOS {
 namespace Rosen {
-class JsWindowExtensionContext : public AbilityConnectCallback {
+class JsWindowExtensionContext : public AbilityRuntime::AbilityConnectCallback {
 public:
-    explicit JsWindowExtensionContext(NativeEngine& engine);
+    explicit JsWindowExtensionContext(const std::shared_ptr<JsWindowExtensionContext>& context);
     ~JsWindowExtensionContext() = default;
-    void OnWindowCreated(sptr<Window> window);
+    static void Finalizer(NativeEngine* engine, void* data, void* hint);
+    void OnWindowCreate(sptr<Window> window);
+private:
+    std::shared_ptr<JsWindowExtensionContext> context_;
 };
-NativeValue* CreateJsWindowExtensionConttext(NativeEngine& engine, std::shared_ptr<ExtensionContext> context);
+
+NativeValue* CreateJsWindowExtensionContext(NativeEngine& engine,
+    std::shared_ptr<AbilityRuntime::ExtensionContext> context);
 } // namespace Rosen
 } // namespace OHOS
 #endif // JS_WINDOW_EXTENSION_CONTEXT_H

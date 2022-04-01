@@ -13,9 +13,14 @@
  * limitations under the License.
  */
 
- #include "native_engine/native_engine.h"
+#include "window_extension_module_loader.h"
 
-namespace OHOS::Window {
+#include "ability_connection.h"
+#include "native_engine/native_engine.h"
+
+#include "window_extension.h"
+
+namespace OHOS::Rosen {
 WindowExtensionModuleLoader::WindowExtensionModuleLoader() = default;
 WindowExtensionModuleLoader::~WindowExtensionModuleLoader() = default;
 

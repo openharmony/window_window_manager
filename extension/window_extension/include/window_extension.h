@@ -18,6 +18,8 @@
 
 #include "extension_base.h"
 
+#include "service_extension.h"
+
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
@@ -60,10 +62,10 @@ public:
      * @brief Create Extension.
      *
      * @param runtime The runtime.
-     * @return The ServiceExtension instance.
+     * @return The WindowExtension instance.
      */
-    static ServiceExtension* Create(const std::unique_ptr<Runtime>& runtime);
+    static WindowExtension* Create(const std::unique_ptr<Runtime>& runtime);
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif WINDOW_EXTENSION_H
+#endif

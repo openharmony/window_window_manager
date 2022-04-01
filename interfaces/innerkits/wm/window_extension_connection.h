@@ -16,16 +16,25 @@
 #ifndef WINDOW_EXTENSION_CONNECTION_H
 #define WINDOW_EXTENSION_CONNECTION_H
 
+#include <string>
+
 #include "window_extension_connection.h"
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    const static std::string RECT_FORM_KEY_POS_X = "ext_pos_x";
+    const static std::string RECT_FORM_KEY_POS_Y = "ext_pos_y";
+    const static std::string RECT_FORM_KEY_HEIGHT = "ext_pos_heigh";
+    const static std::string RECT_FORM_KEY_WIDTH = "ext_pos_width";
+}
+
 class WindowExtensionClientRecipient : public IRemoteObject::DeathRecipient {
 public:
     virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
 };
 
-class WindowExtensionConnection : public  public AAFwk::AbilityConnectionStub {
+class WindowExtensionConnection : public AbilityConnectCallback, public AAFwk::AbilityConnectionStub {
 public:
     WindowExtensionConnection() = default;
     ~WindowExtensionConnection() = default;
@@ -34,10 +43,10 @@ public:
         const sptr<IRemoteObject> &remoteObject, int resultCode) override;
     virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
 
-    boolean ConnectExtension(const AppExecFwk::ElementName &element);
-    boolean Show();
-    boolean Hide();
-    boolean RequestFocus();
+    bool ConnectExtension(const AppExecFwk::ElementName &element);
+    bool Show();
+    bool Hide();
+    bool RequestFocus();
 private:
     WindowExtensionClientProxy proxy_;
     sptr<IRemoteObject::DeathRecipient>& deathRecipient_;
