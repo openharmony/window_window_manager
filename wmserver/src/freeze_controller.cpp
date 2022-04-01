@@ -105,7 +105,11 @@ bool FreezeController::UnfreezeDisplay(DisplayId displayId)
 
 sptr<Window> FreezeController::CreateCoverWindow(DisplayId displayId)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    if (option == nullptr) {
+        WLOGFE("window option is null");
+        return nullptr;
+    }
     option->SetWindowType(WindowType::WINDOW_TYPE_FREEZE_DISPLAY);
     option->SetFocusable(false);
     option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);

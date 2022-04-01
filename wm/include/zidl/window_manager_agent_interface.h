@@ -33,7 +33,7 @@ class IWindowManagerAgent : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowManagerAgent");
 
-    enum {
+    enum class WindowManagerAgentMsg : uint32_t {
         TRANS_ID_UPDATE_FOCUS  = 1,
         TRANS_ID_UPDATE_SYSTEM_BAR_PROPS,
         TRANS_ID_UPDATE_WINDOW_STATUS,

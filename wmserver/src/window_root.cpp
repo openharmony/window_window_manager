@@ -698,13 +698,21 @@ void WindowRoot::NotifyDisplayDestroy(DisplayId expandDisplayId)
 float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
 {
     auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("window container could not be found");
+        return 1.0;  // Use DefaultVPR 1.0
+    }
     return container->GetVirtualPixelRatio();
 }
 
 Rect WindowRoot::GetDisplayLimitRect(DisplayId displayId) const
 {
     auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
-    return container->GetDisplayLimitRect();
+    Rect rect = {0, 0, 0, 0};
+    if (container != nullptr) {
+        rect = container->GetDisplayLimitRect();
+    }
+    return rect;
 }
 } // namespace OHOS::Rosen
 } // namespace OHOS

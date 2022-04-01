@@ -38,7 +38,11 @@ bool WindowVisibilityInfo::Marshalling(Parcel &parcel) const
 
 WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
 {
-    WindowVisibilityInfo* windowVisibilityInfo = new WindowVisibilityInfo();
+    WindowVisibilityInfo* windowVisibilityInfo = new (std::nothrow) WindowVisibilityInfo();
+    if (windowVisibilityInfo == nullptr) {
+        WLOGFE("window visibility info is nullptr.");
+        return nullptr;
+    }
     bool res = parcel.ReadUint32(windowVisibilityInfo->windowId_) && parcel.ReadInt32(windowVisibilityInfo->pid_) &&
     parcel.ReadInt32(windowVisibilityInfo->uid_) && parcel.ReadBool(windowVisibilityInfo->isVisible_);
     if (!res) {
@@ -60,6 +64,7 @@ WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
 {
     WindowInfo* windowInfo = new (std::nothrow) WindowInfo();
     if (windowInfo == nullptr) {
+        WLOGFE("window info is nullptr.");
         return nullptr;
     }
     bool res = parcel.ReadInt32(windowInfo->wid_) && parcel.ReadUint32(windowInfo->windowRect_.width_) &&
@@ -82,7 +87,11 @@ bool AccessibilityWindowInfo::Marshalling(Parcel &parcel) const
 
 AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel &parcel)
 {
-    AccessibilityWindowInfo* accessibilityWindowInfo = new AccessibilityWindowInfo();
+    AccessibilityWindowInfo* accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
+    if (accessibilityWindowInfo == nullptr) {
+        WLOGFE("accessibility window info is nullptr.");
+        return nullptr;
+    }
     accessibilityWindowInfo->currentWindowInfo_ = parcel.ReadParcelable<WindowInfo>();
     if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowInfo>(parcel,
         accessibilityWindowInfo->windowList_)) {
