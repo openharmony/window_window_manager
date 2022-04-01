@@ -27,8 +27,8 @@ class WindowExtensionServerProxy : public IRemoteProxy<IWindowExtensionServer> {
     ~WindowExtensionServerProxy() {};
     void OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
     void OnBackPress() override;
-    void OnKeyEvent(share_ptr<IMM::KeyEvent>& keyEvent) override;
-    void OnPointerEvent(share_ptr<IMM::PointerEvent>& pointerEvent) override;
+    void OnKeyEvent(shared_ptr<IMM::KeyEvent>& keyEvent) override;
+    void OnPointerEvent(shared_ptr<IMM::PointerEvent>& pointerEvent) override;
 }
 } // namespace Rosen
 } // namespace OHOS

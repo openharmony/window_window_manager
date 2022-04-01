@@ -88,6 +88,7 @@ private:
 
     sptr<IDispatchInputEventListener> dispatchInputEventListener_;
     sptr<Window> window_;
+
     //sptr<IWindowExtensionServer> extensionToken_; // TODO IWindowExtensionServer下沉到window_extension
     AbilityRuntime::JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;

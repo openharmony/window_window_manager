@@ -15,7 +15,12 @@
 
 #ifndef WINDOW_EXTENSION_SERVER_INTERFACE
 #define WINDOW_EXTENSION_SERVER_INTERFACE
+
 #include "iremote_broker.h"
+
+#include <i_input_event_consumer.h>
+#include <key_event.h>
+#include <ui/rs_surface_node.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -30,9 +35,9 @@ class IWindowExtensionServer : public IRemoteBroker {
 
     virtual void OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode) = 0;
     virtual void OnBackPress() = 0;
-    virtual void OnKeyEvent(share_ptr<IMM::KeyEvent>& keyEvent) = 0;
-    virtual void OnPointerEvent(share_ptr<IMM::PointerEvent>& pointerEvent) = 0;
-}
+    virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
+    virtual void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
+};
 } // namespace Rosen
 } // namespace OHOS
 #endif // WINDOW_EXTENSION_SERVER_INTERFACE

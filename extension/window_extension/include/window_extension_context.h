@@ -26,4 +26,4 @@ public:
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // WINDOW_EXTENSION_CONTEXT_H
+#endif // WINDOW_EXTENSION_CONTEXT_HP

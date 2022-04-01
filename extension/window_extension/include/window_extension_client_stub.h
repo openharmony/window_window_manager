@@ -17,6 +17,8 @@
 #define WINDOW_EXTENSION_CLIENT_STUB_H
 
 #include "window_extension_client_interface.h"
+
+#include "iremote_object.h"
 #include "iremote_stub.h"
 
 namespace OHOS {

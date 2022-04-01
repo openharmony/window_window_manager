@@ -21,14 +21,14 @@
 
 namespace OHOS {
 namespace Rosen {
-class WindowExtensionServerStub : public public IRemoteStub<IWindowExtensionServer> {
+class WindowExtensionServerStub : public IRemoteStub<IWindowExtensionServer> {
 public:
     WindowExtensionServerStub() = default;
     ~WindowExtensionServerStub() = default;
 
     virtual int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
         MessageOption &option) override;
-}
+};
 } // namespace Rosen
 } // namespace OHOS
 #endif // WINDOW_EXTESNISON_SERVER_STUB

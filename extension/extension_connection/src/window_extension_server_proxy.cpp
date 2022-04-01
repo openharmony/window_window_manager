@@ -46,8 +46,8 @@ void WindowExtensionServerProxy::OnWindowReady(const std::shared_ptr<RSSurfaceNo
 
 void WindowExtensionClientProxy::OnBackPress()
 {
-    MessageParcel message;
-    MeeeageParcel message;
+    MessageParcel data;
+    MeeeageParcel replay;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {

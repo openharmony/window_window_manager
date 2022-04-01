@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
+#include <string>
+
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
@@ -171,6 +173,10 @@ namespace {
     constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
     constexpr float MINIMUM_BRIGHTNESS = 0.0f;
     constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
+    const std::string RECT_FORM_KEY_POS_X = "rect.posx";
+    const std::string RECT_FORM_KEY_POS_Y = "rect.posy";
+    const std::string RECT_FORM_KEY_WIDTH = "rect.width";
+    const std::string RECT_FORM_KEY_HEIGHT = "rect.height";
 }
 
 struct SystemBarProperty {
