@@ -248,6 +248,11 @@ WMError WindowController::SetAlpha(uint32_t windowId, float dstAlpha)
     return WMError::WM_OK;
 }
 
+void WindowController::SetBrightness(uint32_t windowId, float brightness)
+{
+    windowRoot_->SetBrightness(windowId, brightness);
+}
+
 void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStateChangeType type)
 {
     WLOGFD("DisplayStateChangeType:%{public}u", type);

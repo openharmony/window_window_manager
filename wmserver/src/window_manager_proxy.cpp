@@ -212,6 +212,29 @@ WMError WindowManagerProxy::SetAlpha(uint32_t windowId, float alpha)
     return static_cast<WMError>(ret);
 }
 
+void WindowManagerProxy::SetBrightness(uint32_t windowId, float brightness)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return;
+    }
+    if (!data.WriteFloat(brightness)) {
+        WLOGFE("Write brightness failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_BRIGHTNESS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 std::vector<Rect> WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type)
 {
     MessageParcel data;

@@ -93,6 +93,11 @@ void WindowProperty::SetAlpha(float alpha)
     alpha_ = alpha;
 }
 
+void WindowProperty::SetBrightness(float brightness)
+{
+    brightness_ = brightness;
+}
+
 void WindowProperty::SetDisplayId(DisplayId displayId)
 {
     displayId_ = displayId;
@@ -200,6 +205,11 @@ float WindowProperty::GetAlpha() const
     return alpha_;
 }
 
+float WindowProperty::GetBrightness() const
+{
+    return brightness_;
+}
+
 DisplayId WindowProperty::GetDisplayId() const
 {
     return displayId_;
@@ -293,95 +303,17 @@ void WindowProperty::MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& prop
 
 bool WindowProperty::Marshalling(Parcel& parcel) const
 {
-    if (!parcel.WriteString(windowName_)) {
-        return false;
-    }
-
-    if (!(parcel.WriteInt32(windowRect_.posX_) && parcel.WriteInt32(windowRect_.posY_) &&
-        parcel.WriteUint32(windowRect_.width_) && parcel.WriteUint32(windowRect_.height_))) {
-        return false;
-    }
-
-    if (!parcel.WriteUint32(static_cast<uint32_t>(type_))) {
-        return false;
-    }
-
-    if (!parcel.WriteUint32(static_cast<uint32_t>(mode_))) {
-        return false;
-    }
-
-    if (!parcel.WriteUint32(static_cast<uint32_t>(lastMode_))) {
-        return false;
-    }
-
-    if (!parcel.WriteUint32(static_cast<uint32_t>(level_))) {
-        return false;
-    }
-
-    if (!parcel.WriteUint32(flags_)) {
-        return false;
-    }
-
-    if (!parcel.WriteBool(isFullScreen_)) {
-        return false;
-    }
-
-    if (!parcel.WriteBool(focusable_)) {
-        return false;
-    }
-
-    if (!parcel.WriteBool(touchable_)) {
-        return false;
-    }
-
-    if (!parcel.WriteBool(isPrivacyMode_)) {
-        return false;
-    }
-
-    if (!parcel.WriteBool(isTransparent_)) {
-        return false;
-    }
-
-    if (!parcel.WriteFloat(alpha_)) {
-        return false;
-    }
-
-    if (!parcel.WriteUint64(displayId_)) {
-        return false;
-    }
-
-    if (!parcel.WriteUint32(windowId_)) {
-        return false;
-    }
-
-    if (!parcel.WriteUint32(parentId_)) {
-        return false;
-    }
-
-    if (!MapMarshalling(parcel)) {
-        return false;
-    }
-
-    if (!parcel.WriteBool(isDecorEnable_)) {
-        return false;
-    }
-
-    if (!(parcel.WriteInt32(hitOffset_.x) and parcel.WriteInt32(hitOffset_.y))) {
-        return false;
-    }
-
-    if (!parcel.WriteUint32(animationFlag_)) {
-        return false;
-    }
-
-    if (!parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_))) {
-        return false;
-    }
-
-    if (!parcel.WriteBool(tokenState_)) {
-        return false;
-    }
-    return true;
+    return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
+        parcel.WriteInt32(windowRect_.posY_) && parcel.WriteUint32(windowRect_.width_) &&
+        parcel.WriteUint32(windowRect_.height_) && parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
+        parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(lastMode_)) &&
+        parcel.WriteUint32(static_cast<uint32_t>(level_)) && parcel.WriteUint32(flags_) &&
+        parcel.WriteBool(isFullScreen_) && parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) &&
+        parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isTransparent_) && parcel.WriteFloat(alpha_) &&
+        parcel.WriteFloat(brightness_) && parcel.WriteUint64(displayId_) && parcel.WriteUint32(windowId_) &&
+        parcel.WriteUint32(parentId_) && MapMarshalling(parcel) && parcel.WriteBool(isDecorEnable_) &&
+        parcel.WriteInt32(hitOffset_.x) && parcel.WriteInt32(hitOffset_.y) && parcel.WriteUint32(animationFlag_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteBool(tokenState_);
 }
 
 sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
@@ -401,6 +333,7 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetTransparent(parcel.ReadBool());
     property->SetAlpha(parcel.ReadFloat());
+    property->SetBrightness(parcel.ReadFloat());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetWindowId(parcel.ReadUint32());
     property->SetParentId(parcel.ReadUint32());
@@ -429,6 +362,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     isPrivacyMode_ = property->isPrivacyMode_;
     isTransparent_ = property->isTransparent_;
     alpha_ = property->alpha_;
+    brightness_ = property->brightness_;
     displayId_ = property->displayId_;
     windowId_ = property->windowId_;
     parentId_ = property->parentId_;
