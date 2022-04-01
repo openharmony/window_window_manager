@@ -20,6 +20,15 @@
 
 #include "window_extension_connection.h"
 
+#include <i_input_event_consumer.h>
+#include <key_event.h>
+#include <memory>
+
+#include "element_name.h"
+#include "input_manager.h"
+#include "pointer_event.h"
+#include "wm_common.h"
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -29,28 +38,27 @@ namespace {
     const static std::string RECT_FORM_KEY_WIDTH = "ext_pos_width";
 }
 
-class WindowExtensionClientRecipient : public IRemoteObject::DeathRecipient {
+class RSSurfaceNode;
+class IWindowExtensionCallback : virtual public RefBase {
 public:
-    virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+    virtual void OnWindowReady(std::shared_ptr<RSSurfaceNode>& rsSurfaceNode) = 0;
+    virtual void OnExtensionDisconnected() = 0;
+    virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& event) = 0;
+    virtual void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& event) = 0;
+    virtual void OnBackPress() = 0;
 };
 
-class WindowExtensionConnection : public AbilityConnectCallback, public AAFwk::AbilityConnectionStub {
+class WindowExtensionConnection : public RefBase {
 public:
-    WindowExtensionConnection() = default;
-    ~WindowExtensionConnection() = default;
+    //static sptr<WindowExtensionConnection> Init();
+    virtual void ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
+        uint32_t uid, sptr<IWindowExtensionCallback>& callback) = 0;
+    virtual void Show() = 0;
+    virtual void Hide() = 0;
+    virtual void RequestFocus() = 0;
 
-    virtual void OnAbilityConnectDone(const AppExecFwk::ElementName &element,
-        const sptr<IRemoteObject> &remoteObject, int resultCode) override;
-    virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
-
-    bool ConnectExtension(const AppExecFwk::ElementName &element);
-    bool Show();
-    bool Hide();
-    bool RequestFocus();
 private:
-    WindowExtensionClientProxy proxy_;
-    sptr<IRemoteObject::DeathRecipient>& deathRecipient_;
-    sptr<WindowExtensionServerStub>& stub_;
+    sptr<WindowExtensionConnection> impl_;
 };
 } // namespace Rosen
 } // namespace OHOS

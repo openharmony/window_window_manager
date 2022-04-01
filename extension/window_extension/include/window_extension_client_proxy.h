@@ -22,14 +22,22 @@
 namespace OHOS {
 namespace Rosen {
 class WindowExtensionClientProxy : public IRemoteProxy<IWindowExtensionClient> {
+public:
     explicit WindowExtensionClientProxy(const sptr<IRemoteObject>& impl)
         : IRemoteProxy<IWindowExtensionClient>(impl) {};
     ~WindowExtensionClientProxy() {};
 
+<<<<<<< HEAD
     void Resize(Rect rect) = 0;
     void Hide() = 0;
     void Show() = 0;
     void RequestFocus() = 0;
+=======
+    void Resize(Rect rect) override;
+    void Hide() override;
+    void Show() override;
+    void RequestFocus() override;
+>>>>>>> Add build.gn
 };
 } // namespace Rosen
 } // namespace OHOS
