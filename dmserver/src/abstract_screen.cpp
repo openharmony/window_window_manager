@@ -79,7 +79,7 @@ void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, b
     }
 }
 
-void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
+void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint)
 {
     std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
     if (rsDisplayNode == nullptr) {
@@ -88,6 +88,8 @@ void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
     }
     rsDisplayNode_ = rsDisplayNode;
     rSDisplayNodeConfig_ = config;
+    WLOGFI("SetDisplayOffset: posX:%{public}d, posY:%{public}d", startPoint.posX_, startPoint.posY_);
+    rsDisplayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
@@ -332,7 +334,7 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
     if (!GetRSDisplayNodeConfig(dmsScreen, config)) {
         return false;
     }
-    dmsScreen->InitRSDisplayNode(config);
+    dmsScreen->InitRSDisplayNode(config, startPoint);
     dmsScreen->groupDmsId_ = dmsId_;
     abstractScreenMap_.insert(std::make_pair(screenId, std::make_pair(dmsScreen, startPoint)));
     return true;
