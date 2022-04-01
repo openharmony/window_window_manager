@@ -28,14 +28,14 @@ void WindowExtensionServerProxy::OnWindowReady(const std::shared_ptr<RSSurfaceNo
 {
     MessageParcel data;
     MessageParcel replay;
-    MessageParcel option;
+    MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write token failed");
-        retrun;
+        return;
     }
     
-    if (!surfaceNode.Marshalling(data)) {
+    if (!surfaceNode->Marshalling(data)) {
         WLOGFE("write surfaceNode failed");
         return;
     }
@@ -44,10 +44,10 @@ void WindowExtensionServerProxy::OnWindowReady(const std::shared_ptr<RSSurfaceNo
     }
 }
 
-void WindowExtensionClientProxy::OnBackPress()
+void WindowExtensionServerProxy::OnBackPress()
 {
     MessageParcel data;
-    MeeeageParcel replay;
+    MessageParcel replay;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
@@ -59,10 +59,10 @@ void WindowExtensionClientProxy::OnBackPress()
     }
 }
 
-void WindowExtensionClientProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+void WindowExtensionServerProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    MessageParcel message;
-    MeeeageParcel message;
+    MessageParcel data;
+    MessageParcel replay;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
@@ -70,10 +70,10 @@ void WindowExtensionClientProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyE
         return;
     }
 
-    if (!keyEvent.Marshalling(data)) {
-        WLOGFE("write key event failed");
-        return;
-    }
+    // if (!keyEvent->Marshalling(data)) {
+    //     WLOGFE("write key event failed");
+    //     return;
+    // }
     if (Remote()->SendRequest(TRANS_ID_ON_KEY_EVENT, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
@@ -81,8 +81,8 @@ void WindowExtensionClientProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyE
 
 void WindowExtensionServerProxy::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    MessageParcel message;
-    MeeeageParcel message;
+    MessageParcel data;
+    MessageParcel replay;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
@@ -90,10 +90,10 @@ void WindowExtensionServerProxy::OnPointerEvent(std::shared_ptr<MMI::PointerEven
         return;
     }
 
-    if (!pointerEvent.Marshalling(data)) {
-        WLOGFE("write key event failed");
-        return;
-    }
+    // if (!pointerEvent->Marshalling(data)) {
+    //     WLOGFE("write key event failed");
+    //     return;
+    // }
     if (Remote()->SendRequest(TRANS_ID_ON_POINTER_EVENT, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }

@@ -29,6 +29,13 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    const static std::string RECT_FORM_KEY_POS_X = "ext_pos_x";
+    const static std::string RECT_FORM_KEY_POS_Y = "ext_pos_y";
+    const static std::string RECT_FORM_KEY_HEIGHT = "ext_pos_heigh";
+    const static std::string RECT_FORM_KEY_WIDTH = "ext_pos_width";
+}
+
 class RSSurfaceNode;
 class IWindowExtensionCallback : virtual public RefBase {
 public:
@@ -41,13 +48,13 @@ public:
 
 class WindowExtensionConnection : public RefBase {
 public:
-    WindowExtensionConnection() = default;
+    WindowExtensionConnection();
     ~WindowExtensionConnection() = default;
-    virtual void ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
-        uint32_t uid, sptr<IWindowExtensionCallback>& callback) = 0;
-    virtual void Show() = 0;
-    virtual void Hide() = 0;
-    virtual void RequestFocus() = 0;
+    void ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
+        uint32_t uid, sptr<IWindowExtensionCallback>& callback);
+    void Show();
+    void Hide();
+    void RequestFocus();
 
 private:
     class Impl;

@@ -40,7 +40,7 @@ int WindowExtensionServerStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
             break;
         }
     }
-    retrun 0;
+    return 0;
 }
 } // namespace Rosen
 } // namespace OHOS

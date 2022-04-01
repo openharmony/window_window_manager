@@ -15,11 +15,14 @@
 
 #include "window_extension_connection.h"
 
+#include "ability_connect_callback_stub.h"
 #include "ability_manager_client.h"
 #include "element_name.h"
 #include <iremote_object.h>
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "window_extension_client_proxy.h"
+#include "window_extension_server_stub.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -27,14 +30,20 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionConnection"};
 }
 
+class WindowExtensionClientRecipient 
+    : public IRemoteObject::DeathRecipient {
+    void OnRemoteDied(const wptr<IRemoteObject>& remote);
+};
+
+
 class WindowExtensionConnection::Impl 
-    : public AAFwk::AbilityConnectionStub, public RefBase {
+    : public AAFwk::AbilityConnectionStub {
 public:
     Impl() = default;
     ~Impl() = default;
-    void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
+    void OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int resultCode) override;
-    void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
+    void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
 
     void ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
         uint32_t uid, sptr<IWindowExtensionCallback>& callback);
@@ -42,10 +51,15 @@ public:
     void Hide();
     void Resize(Rect rect);
     void RequestFocus();
+private:
+    sptr<WindowExtensionServerStub> stub_;
+    sptr<IWindowExtensionCallback> componentCallback_;
+    sptr<WindowExtensionClientProxy> proxy_;
+    sptr<WindowExtensionClientRecipient> deathRecipient_;
 };
 
 WindowExtensionConnection::WindowExtensionConnection()
-:: pImpl_(new Impl())
+    : pImpl_(new Impl())
 {
 }
 
@@ -54,6 +68,7 @@ void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::Element
 {
     AAFwk::Want want;
     want.SetElement(element);
+    // TODO
     // want.SetParam(RECT_FORM_KEY_POS_X, rect.posX_);
     // want.SetParam(RECT_FORM_KEY_POS_Y, rect.posY_);
     // want.SetParam(RECT_FORM_KEY_WIDTH, rect.width_);
@@ -90,7 +105,7 @@ void WindowExtensionConnection::Impl::RequestFocus()
     }
 }
 
-void WindowExtensionConnection::Impp::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
+void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
     if (!remoteObject) {
@@ -125,22 +140,22 @@ void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::
 void WindowExtensionConnection::ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
         uint32_t uid, sptr<IWindowExtensionCallback>& callback)
 {
-    impl_->ConnectExtension(element, rect, uid, callback);
+    pImpl_->ConnectExtension(element, rect, uid, callback);
 }
 
 void WindowExtensionConnection::Show()
 {
-    impl_->Show();
+    pImpl_->Show();
 }
 
 void WindowExtensionConnection::Hide()
 {
-    impl_->Hide();
+    pImpl_->Hide();
 }
 
 void WindowExtensionConnection::RequestFocus()
 {
-    impl_->RequestFocus();
+    pImpl_->RequestFocus();
 }
 } // namespace Rosen
 } // namespace OHOS

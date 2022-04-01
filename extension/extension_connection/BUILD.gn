@@ -31,7 +31,6 @@ ohos_shared_library("libwindowextension") {
 
   sources = [
     "src/window_extension_connection.cpp",
-    "src/window_extension_connection_impl.cpp",
     "src/window_extension_server_proxy.cpp",
     "src/window_extension_server_stub.cpp",
   ]
