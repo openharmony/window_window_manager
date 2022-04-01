@@ -36,12 +36,15 @@ public:
     void OnChange(DisplayId id) override;
 
 private:
-    void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
+    void CallJsMethod(const std::string& methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
     NativeEngine* engine_ = nullptr;
     std::mutex mtx_;
     std::vector<std::unique_ptr<NativeReference>> jsCallBack_;
     NativeValue* CreateDisplayIdArray(NativeEngine& engine, const std::vector<DisplayId>& data);
 };
+const std::string EVENT_ADD = "add";
+const std::string EVENT_REMOVE = "remove";
+const std::string EVENT_CHANGE = "change";
 }  // namespace Rosen
 }  // namespace OHOS
 #endif /* OHOS_JS_DISPLAY_LISTENER_H */

@@ -158,7 +158,7 @@ void RegisterDisplayListenerWithType(NativeEngine& engine, const std::string& ty
         WLOGFE("displayListener is nullptr");
         return;
     }
-    if (type == "add" || type == "remove" || type == "change") {
+    if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
         SingletonContainer::Get<DisplayManager>().RegisterDisplayListener(displayListener);
         WLOGFI("JsDisplayManager::RegisterDisplayListenerWithType success");
     } else {
@@ -195,7 +195,7 @@ void UnregisterAllDisplayListenerWithType(const std::string& type)
     }
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         it->second->RemoveAllCallback();
-        if (type == "add" || type == "remove" || type == "change") {
+        if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
             sptr<DisplayManager::IDisplayListener> thisListener(it->second);
             SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
             WLOGFI("JsDisplayManager::UnregisterAllDisplayListenerWithType success");
@@ -215,7 +215,7 @@ void UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* val
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         if (value->StrictEquals(it->first->Get())) {
             it->second->RemoveCallback(value);
-            if (type == "add" || type == "remove" || type == "change") {
+            if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
                 sptr<DisplayManager::IDisplayListener> thisListener(it->second);
                 SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
                 WLOGFI("JsDisplayManager::UnRegisterDisplayListenerWithType success");
@@ -292,6 +292,10 @@ NativeValue* CreateJsDisplayArrayObject(NativeEngine& engine, std::vector<sptr<D
     WLOGFI("JsDisplayManager::CreateJsDisplayArrayObject is called");
     NativeValue* arrayValue = engine.CreateArray(displays.size());
     NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
+    if (array == nullptr) {
+        WLOGFE("Failed to create display array");
+        return engine.CreateUndefined();
+    }
     int32_t i = 0;
     for (auto& display : displays) {
         array->SetElement(i++, CreateJsDisplayObject(engine, display));

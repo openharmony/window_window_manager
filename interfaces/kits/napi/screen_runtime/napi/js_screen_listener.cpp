@@ -55,9 +55,13 @@ void JsScreenListener::RemoveCallback(NativeValue* jsListenerObject)
         static_cast<uint32_t>(jsCallBack_.size()));
 }
 
-void JsScreenListener::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
+void JsScreenListener::CallJsMethod(const std::string& methodName, NativeValue* const* argv, size_t argc)
 {
-    WLOGFI("CallJsMethod methodName = %{public}s", methodName);
+    if (methodName.empty()) {
+        WLOGFE("empty method name str, call method failed");
+        return;
+    }
+    WLOGFI("CallJsMethod methodName = %{public}s", methodName.c_str());
     if (engine_ == nullptr) {
         WLOGFE("engine_ nullptr");
         return;
@@ -84,7 +88,7 @@ void JsScreenListener::OnConnect(ScreenId id)
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
-            CallJsMethod("connect", argv, ArraySize(argv));
+            CallJsMethod(EVENT_CONNECT, argv, ArraySize(argv));
         }
     );
 
@@ -106,7 +110,7 @@ void JsScreenListener::OnDisconnect(ScreenId id)
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
-            CallJsMethod("disconnect", argv, ArraySize(argv));
+            CallJsMethod(EVENT_DISCONNECT, argv, ArraySize(argv));
         }
     );
 
@@ -128,7 +132,7 @@ void JsScreenListener::OnChange(ScreenId id)
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
-            CallJsMethod("change", argv, ArraySize(argv));
+            CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
         }
     );
 
@@ -142,6 +146,10 @@ NativeValue* JsScreenListener::CreateScreenIdArray(NativeEngine& engine, const s
 {
     NativeValue* arrayValue = engine.CreateArray(data.size());
     NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
+    if (array == nullptr) {
+        WLOGFE("Failed to create screenid array");
+        return engine.CreateUndefined();
+    }
     uint32_t index = 0;
     for (const auto& item : data) {
         array->SetElement(index++, CreateJsValue(engine, static_cast<uint32_t>(item)));
