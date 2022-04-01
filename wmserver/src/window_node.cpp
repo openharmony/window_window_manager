@@ -97,6 +97,11 @@ void WindowNode::SetAlpha(float alpha)
     surfaceNode_->SetAlpha(alpha);
 }
 
+void WindowNode::SetBrightness(float brightness)
+{
+    property_->SetBrightness(brightness);
+}
+
 void WindowNode::SetFocusable(bool focusable)
 {
     property_->SetFocusable(focusable);
@@ -170,6 +175,11 @@ WindowBlurLevel WindowNode::GetWindowBackgroundBlur() const
 float WindowNode::GetAlpha() const
 {
     return property_->GetAlpha();
+}
+
+float WindowNode::GetBrightness() const
+{
+    return property_->GetBrightness();
 }
 
 uint32_t WindowNode::GetWindowFlags() const

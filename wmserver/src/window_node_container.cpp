@@ -390,6 +390,33 @@ void WindowNodeContainer::UpdateActiveStatus(uint32_t id, bool isActive) const
     node->GetWindowToken()->UpdateActiveStatus(isActive);
 }
 
+void WindowNodeContainer::UpdateBrightness(uint32_t id, bool byRemoved)
+{
+    auto node = FindWindowNodeById(id);
+    if (node == nullptr) {
+        WLOGFE("cannot find active window id: %{public}d", id);
+        return;
+    }
+
+    if (!byRemoved) {
+        if (!WindowHelper::IsAppWindow(node->GetWindowType())) {
+            return;
+        }
+    }
+    if (node->GetBrightness() == UNDEFINED_BRIGHTNESS) {
+        if (GetDisplayBrightness() != node->GetBrightness()) {
+            WLOGFI("adjust brightness with default value");
+            // need notify display power manager to set default brightness
+        }
+    } else {
+        if (GetDisplayBrightness() != node->GetBrightness()) {
+            WLOGFI("adjust brightness with value: %{public}f", node->GetBrightness());
+            // need notify display power manager to set brightness: node->GetBrightness()
+        }
+    }
+    SetDisplayBrightness(node->GetBrightness());
+}
+
 void WindowNodeContainer::AssignZOrder()
 {
     zOrder_ = 0;
@@ -424,7 +451,7 @@ uint32_t WindowNodeContainer::GetFocusWindow() const
     return focusedWindow_;
 }
 
-WMError WindowNodeContainer::SetActiveWindow(uint32_t windowId)
+WMError WindowNodeContainer::SetActiveWindow(uint32_t windowId, bool byRemoved)
 {
     if (activeWindow_ == windowId) {
         WLOGFI("active window do not change, id: %{public}u", windowId);
@@ -433,7 +460,18 @@ WMError WindowNodeContainer::SetActiveWindow(uint32_t windowId)
     UpdateActiveStatus(activeWindow_, false);
     activeWindow_ = windowId;
     UpdateActiveStatus(activeWindow_, true);
+    UpdateBrightness(activeWindow_, byRemoved);
     return WMError::WM_OK;
+}
+
+void WindowNodeContainer::SetDisplayBrightness(float brightness)
+{
+    displayBrightness_ = brightness;
+}
+
+float WindowNodeContainer::GetDisplayBrightness() const
+{
+    return displayBrightness_;
 }
 
 uint32_t WindowNodeContainer::GetActiveWindow() const
