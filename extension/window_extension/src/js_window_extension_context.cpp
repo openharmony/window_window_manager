@@ -28,22 +28,38 @@ namespace {
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
 }
 
-JsWindowExtensionContext::JsWindowExtensionContext(const std::shared_ptr<JsWindowExtensionContext>& context)
-    : context_(context) {}
+class JsWindowExtensionContext final {
+public:
+    explicit JsWindowExtensionContext(
+        const std::shared_ptr<WindowExtensionContext>& context) : context_(context) {}
+    ~JsWindowExtensionContext() = default;
 
-void JsWindowExtensionContext::Finalizer(NativeEngine* engine, void* data, void* hint)
+    static void Finalizer(NativeEngine* engine, void* data, void* hint)
+    {
+        WLOGI("JsWindowExtensionContext::Finalizer is called");
+        std::unique_ptr<JsWindowExtensionContext>(static_cast<JsWindowExtensionContext*>(data));
+    }
+private:
+    std::shared_ptr<WindowExtensionContext> context_;
+};
+// void JsAbilityConnectCallback::OnWindowCreate(sptr<Window> window)
+// {
+//     // call js api
+// }
+
+void JsAbilityConnectCallback::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
+        const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
-    WLOGFI("Finalizer is called");
-    std::unique_ptr<JsWindowExtensionContext>(static_cast<JsWindowExtensionContext*>(data));
+    
 }
 
-void JsWindowExtensionContext::OnWindowCreate(sptr<Window> window)
+void JsAbilityConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
 {
-    // call js api
+
 }
 
 NativeValue* CreateJsWindowExtensionContext(NativeEngine& engine,
-    std::shared_ptr<AbilityRuntime::ServiceExtensionContext> context)
+    std::shared_ptr<WindowExtensionContext> context)
 {
     WLOGFI("CreateJsWindowExtensionContext begin");
     NativeValue* objValue = CreateJsExtensionContext(engine, context); // TODO CreateJsBaseContext?
