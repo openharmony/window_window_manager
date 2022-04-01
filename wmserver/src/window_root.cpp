@@ -218,7 +218,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
         needCheckFocusWindow = true;
     }
     if (res == WMError::WM_OK) {
-        container->SetActiveWindow(node->GetWindowId());
+        container->SetActiveWindow(node->GetWindowId(), false);
         NotifyKeyboardSizeChangeInfo(node, container, node->GetLayoutRect());
     }
     return res;
@@ -233,7 +233,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
     }
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("add window failed, window container could not be found");
+        WLOGFE("remove window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
     UpdateFocusWindowWithWindowRemoved(node, container);
@@ -255,7 +255,7 @@ WMError WindowRoot::UpdateWindowNode(uint32_t windowId, WindowUpdateReason reaso
     }
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("add window failed, window container could not be found");
+        WLOGFE("update window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
     return container->UpdateWindowNode(node, reason);
@@ -275,6 +275,32 @@ WMError WindowRoot::UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeRe
     }
     container->UpdateSizeChangeReason(node, reason);
     return WMError::WM_OK;
+}
+
+void WindowRoot::SetBrightness(uint32_t windowId, float brightness)
+{
+    auto node = GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return;
+    }
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("set brightness failed, window container could not be found");
+        return;
+    }
+    if (!WindowHelper::IsAppWindow(node->GetWindowType())) {
+        WLOGFI("non app window does not support set brightness");
+        return;
+    }
+    if (windowId == container->GetActiveWindow()) {
+        if (container->GetDisplayBrightness() != brightness) {
+            // need notify display power manager to set brightness
+            container->SetDisplayBrightness(brightness);
+        }
+    } else {
+        node->SetBrightness(brightness);
+    }
 }
 
 WMError WindowRoot::EnterSplitWindowMode(sptr<WindowNode>& node)
@@ -438,7 +464,7 @@ void WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& nod
     auto nextActiveWindow = container->GetNextActiveWindow(windowId);
     if (nextActiveWindow != nullptr) {
         WLOGFI("adjust active window, next active window id: %{public}u", nextActiveWindow->GetWindowId());
-        container->SetActiveWindow(nextActiveWindow->GetWindowId());
+        container->SetActiveWindow(nextActiveWindow->GetWindowId(), true);
     }
 }
 
@@ -486,7 +512,7 @@ WMError WindowRoot::RequestActiveWindow(uint32_t windowId)
         WLOGFE("window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return container->SetActiveWindow(windowId);
+    return container->SetActiveWindow(windowId, false);
 }
 
 std::shared_ptr<RSSurfaceNode> WindowRoot::GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject> &abilityToken) const

@@ -130,6 +130,8 @@ public:
     virtual void SetBackgroundColor(const std::string& color) override;
     virtual void SetTransparent(bool isTransparent) override;
     virtual bool IsTransparent() const override;
+    virtual void SetBrightness(float brightness) override;
+    virtual float GetBrightness() const override;
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;
@@ -294,6 +296,7 @@ private:
     Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
     bool keepScreenOn_ = false;
     bool turnScreenOn_ = false;
+    float brightness_ = UNDEFINED_BRIGHTNESS;
     ColorParam backgroundColor_ = { .value = 0xff000000 };
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 };

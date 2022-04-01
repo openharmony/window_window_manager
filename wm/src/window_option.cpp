@@ -202,6 +202,16 @@ bool WindowOption::IsTurnScreenOn() const
 {
     return turnScreenOn_;
 }
+
+void WindowOption::SetBrightness(float brightness)
+{
+    brightness_ = brightness;
+}
+
+float WindowOption::GetBrightness() const
+{
+    return brightness_;
+}
 } // namespace Rosen
 } // namespace OHOS
 

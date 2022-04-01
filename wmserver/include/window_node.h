@@ -49,6 +49,7 @@ public:
     void SetWindowMode(WindowMode mode);
     void SetWindowBackgroundBlur(WindowBlurLevel level);
     void SetAlpha(float alpha);
+    void SetBrightness(float brightness);
     void SetFocusable(bool focusable);
     void SetTouchable(bool touchable);
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
@@ -63,6 +64,7 @@ public:
     WindowMode GetWindowMode() const;
     WindowBlurLevel GetWindowBackgroundBlur() const;
     float GetAlpha() const;
+    float GetBrightness() const;
     uint32_t GetWindowFlags() const;
     const sptr<WindowProperty>& GetWindowProperty() const;
     int32_t GetCallingPid() const;
