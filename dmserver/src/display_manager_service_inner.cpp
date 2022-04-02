@@ -117,4 +117,14 @@ void DisplayManagerServiceInner::RegisterDisplayChangeListener(sptr<IDisplayChan
 {
     DisplayManagerService::GetInstance().RegisterDisplayChangeListener(listener);
 }
+
+bool DisplayManagerServiceInner::SetOrientationFromWindow(DisplayId displayId, Orientation orientation)
+{
+    auto displayInfo = GetDisplayById(displayId);
+    if (displayInfo == nullptr) {
+        return false;
+    }
+    return DisplayManagerService::GetInstance().
+        SetOrientationFromWindow(displayInfo->GetScreenId(), orientation);
+}
 } // namespace OHOS::Rosen
