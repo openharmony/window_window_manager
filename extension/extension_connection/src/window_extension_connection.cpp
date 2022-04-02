@@ -22,44 +22,12 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "window_extension_client_proxy.h"
-#include "window_extension_server_stub.h"
+#include "window_extension_server_stub_impl.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionConnection"};
-}
-
-class WindowExtensionClientRecipient
-    : public IRemoteObject::DeathRecipient {
-public:
-    explicit WindowExtensionClientRecipient(sptr<IWindowExtensionCallback> callback);
-    virtual void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
-private:
-    sptr<IWindowExtensionCallback> callback_;
-};
-
-WindowExtensionClientRecipient::WindowExtensionClientRecipient(sptr<IWindowExtensionCallback> callback)
-{
-    callback_ = callback;
-}
-
-void WindowExtensionClientRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
-{
-    if (wptrDeath == nullptr) {
-        WLOGFE("wptrDeath is null");
-        return;
-    }
-
-    sptr<IRemoteObject> object = wptrDeath.promote();
-    if (!object) {
-        WLOGFE("object is null");
-        return;
-    }
-    // TODO clear
-    if (callback_ != nullptr) {
-        callback_->OnExtensionDisconnected();
-    }
 }
 
 class WindowExtensionConnection::Impl 
@@ -78,6 +46,16 @@ public:
     void Resize(Rect rect);
     void RequestFocus();
 private:
+    class WindowExtensionClientRecipient
+        final : public IRemoteObject::DeathRecipient {
+    public:
+        explicit WindowExtensionClientRecipient(sptr<IWindowExtensionCallback> callback);
+        ~WindowExtensionClientRecipient() = default;
+        void OnRemoteDied(const wptr<IRemoteObject>& remote);
+    private:
+        sptr<IWindowExtensionCallback> callback_;
+    };
+
     sptr<WindowExtensionServerStub> stub_;
     sptr<IWindowExtensionCallback> componentCallback_;
     sptr<WindowExtensionClientProxy> proxy_;
@@ -89,6 +67,28 @@ WindowExtensionConnection::WindowExtensionConnection()
 {
 }
 
+WindowExtensionConnection::Impl::WindowExtensionClientRecipient::WindowExtensionClientRecipient(sptr<IWindowExtensionCallback> callback)
+{
+    callback_ = callback;
+}
+
+void WindowExtensionConnection::Impl::WindowExtensionClientRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
+{
+    if (wptrDeath == nullptr) {
+        WLOGFE("wptrDeath is null");
+        return;
+    }
+
+    sptr<IRemoteObject> object = wptrDeath.promote();
+    if (!object) {
+        WLOGFE("object is null");
+        return;
+    }
+
+    if (callback_ != nullptr) {
+        callback_->OnExtensionDisconnected();
+    }
+}
 void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
         uint32_t uid, sptr<IWindowExtensionCallback>& callback)
 {
@@ -100,7 +100,7 @@ void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::Element
     want.SetParam(RECT_FORM_KEY_WIDTH, static_cast<int>(rect.width_));
     want.SetParam(RECT_FORM_KEY_HEIGHT, static_cast<int>(rect.height_));
     if (stub_ == nullptr) {
-        // stub_ = new(std::nothrow) WindowExtensionServerStub();
+        stub_ = new(std::nothrow) WindowExtensionServerStubImpl(callback);
     }
     if (AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
         want, this, stub_, uid / 200000) != ERR_OK) { // 200000 is uid mask
@@ -153,7 +153,6 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
             return;
         }
     }
-
     if (!proxy_->AsObject() || !proxy_->AsObject()->AddDeathRecipient(deathRecipient_)) {
         WLOGFE("Failed to add death recipient");
     }

@@ -30,8 +30,7 @@ void WindowExtensionServerProxy::OnWindowReady(const std::shared_ptr<RSSurfaceNo
     MessageParcel replay;
     MessageOption option;
 
-    if (!data.WriteInterfaceToken(GetDescri
-    ptor())) {
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write token failed");
         return;
     }
