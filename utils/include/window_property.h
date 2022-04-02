@@ -46,6 +46,7 @@ public:
     void SetPrivacyMode(bool isPrivate);
     void SetTransparent(bool isTransparent);
     void SetAlpha(float alpha);
+    void SetBrightness(float brightness);
     void SetDisplayId(DisplayId displayId);
     void SetWindowId(uint32_t windowId);
     void SetParentId(uint32_t parentId);
@@ -72,6 +73,7 @@ public:
     bool GetTransparent() const;
     bool GetTokenState() const;
     float GetAlpha() const;
+    float GetBrightness() const;
     DisplayId GetDisplayId() const;
     uint32_t GetWindowId() const;
     uint32_t GetParentId() const;
@@ -101,6 +103,7 @@ private:
     bool isTransparent_ { false };
     bool tokenState_ { false };
     float alpha_ { 1.0f };
+    float brightness_ = UNDEFINED_BRIGHTNESS;
     DisplayId displayId_ { 0 };
     uint32_t windowId_ { 0 };
     uint32_t parentId_ { 0 };

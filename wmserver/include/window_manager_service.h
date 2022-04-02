@@ -56,6 +56,7 @@ public:
     WMError RequestFocus(uint32_t windowId) override;
     WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) override;
     WMError SetAlpha(uint32_t windowId, float alpha) override;
+    void SetBrightness(uint32_t windowId, float brightness) override;
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) override;
     void ProcessPointDown(uint32_t windowId, bool isStartDrag) override;
     void ProcessPointUp(uint32_t windowId) override;
