@@ -63,6 +63,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     windowTag_ = option->GetWindowTag();
     keepScreenOn_ = option->IsKeepScreenOn();
     turnScreenOn_ = option->IsTurnScreenOn();
+    brightness_ = option->GetBrightness();
     AdjustWindowAnimationFlag();
     auto& sysBarPropMap = option->GetSystemBarProperty();
     for (auto it : sysBarPropMap) {
@@ -887,6 +888,27 @@ bool WindowImpl::IsTransparent() const
         return true;
     }
     return false;
+}
+
+void WindowImpl::SetBrightness(float brightness)
+{
+    if (!IsWindowValid()) {
+        return;
+    }
+    if (brightness < MINIMUM_BRIGHTNESS || brightness > MAXIMUM_BRIGHTNESS) {
+        WLOGFE("invalid brightness value: %{public}f", brightness);
+        return;
+    }
+    if (!WindowHelper::IsAppWindow(GetType())) {
+        WLOGFE("non app window does not support set brightness, type: %{public}u", GetType());
+        return;
+    }
+    SingletonContainer::Get<WindowAdapter>().SetBrightness(GetWindowId(), brightness);
+}
+
+float WindowImpl::GetBrightness() const
+{
+    return brightness_;
 }
 
 WMError WindowImpl::Drag(const Rect& rect)

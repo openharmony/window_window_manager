@@ -223,5 +223,12 @@ WMError WindowAdapter::UpdateProperty(sptr<WindowProperty>& windowProperty, Prop
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     return windowManagerServiceProxy_->UpdateProperty(windowProperty, action);
 }
+
+void WindowAdapter::SetBrightness(uint32_t windowId, float brightness)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    windowManagerServiceProxy_->SetBrightness(windowId, brightness);
+}
 } // namespace Rosen
 } // namespace OHOS
