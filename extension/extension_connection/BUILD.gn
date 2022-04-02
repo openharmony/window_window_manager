@@ -33,6 +33,7 @@ ohos_shared_library("libwindowextension") {
     "src/window_extension_connection.cpp",
     "src/window_extension_server_proxy.cpp",
     "src/window_extension_server_stub.cpp",
+    "src/window_extension_server_stub_impl.cpp",
   ]
 
   configs = [ ":libwm_private_config" ]
@@ -42,6 +43,7 @@ ohos_shared_library("libwindowextension") {
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/wm:libwm",
+    "//foundation/windowmanager/extension/window_extension:libwe",
     "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
     "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler:libeventhandler",
   ]

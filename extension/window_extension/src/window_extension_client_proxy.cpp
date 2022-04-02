@@ -75,7 +75,6 @@ void WindowExtensionClientProxy::Show()
 
 void WindowExtensionClientProxy::RequestFocus()
 {
-
 }
 } // namespace Rosen
 } // namespace OHOS
