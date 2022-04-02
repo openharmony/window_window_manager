@@ -108,6 +108,10 @@ NativeValue* CreateJsScreenVectorObject(NativeEngine& engine, std::vector<sptr<S
 {
     NativeValue* arrayValue = engine.CreateArray(screens.size());
     NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
+    if (array == nullptr) {
+        WLOGFE("Failed to get screens");
+        return engine.CreateUndefined();
+    }
     size_t i = 0;
     for (auto& screen : screens) {
         array->SetElement(i++, CreateJsScreenObject(engine, screen));
@@ -144,7 +148,7 @@ void RegisterScreenListenerWithType(NativeEngine& engine, const std::string& typ
         WLOGFE("screenListener is nullptr");
         return;
     }
-    if (type == "connect" || type == "disconnect" || type == "change") {
+    if (type == EVENT_CONNECT || type == EVENT_DISCONNECT || type == EVENT_CHANGE) {
         SingletonContainer::Get<ScreenManager>().RegisterScreenListener(screenListener);
         WLOGFI("JsScreenManager::RegisterScreenListenerWithType success");
     } else {
@@ -165,7 +169,7 @@ void UnregisterAllScreenListenerWithType(const std::string& type)
     }
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         it->second->RemoveAllCallback();
-        if (type == "connect" || type == "disconnect" || type == "change") {
+        if (type == EVENT_CONNECT || type == EVENT_DISCONNECT || type == EVENT_CHANGE) {
             sptr<ScreenManager::IScreenListener> thisListener(it->second);
             SingletonContainer::Get<ScreenManager>().UnregisterScreenListener(thisListener);
             WLOGFI("JsScreenManager::UnregisterAllScreenListenerWithType success");
@@ -189,7 +193,7 @@ void UnRegisterScreenListenerWithType(const std::string& type, NativeValue* valu
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         if (value->StrictEquals(it->first->Get())) {
             it->second->RemoveCallback(value);
-            if (type == "connect" || type == "disconnect" || type == "change") {
+            if (type == EVENT_CONNECT || type == EVENT_DISCONNECT || type == EVENT_CHANGE) {
                 sptr<ScreenManager::IScreenListener> thisListener(it->second);
                 SingletonContainer::Get<ScreenManager>().UnregisterScreenListener(thisListener);
                 WLOGFI("JsScreenManager::UnRegisterScreenListenerWithType success");
@@ -364,15 +368,15 @@ int32_t GetExpandOptionFromJs(NativeEngine& engine, NativeObject* optionObject, 
     uint32_t startX;
     uint32_t startY;
     if (!ConvertFromJsValue(engine, screedIdValue, screenId)) {
-        WLOGFE("Failed to convert parameter to callbackType");
+        WLOGFE("Failed to convert screedIdValue to callbackType");
         return -1;
     }
     if (!ConvertFromJsValue(engine, startXValue, startX)) {
-        WLOGFE("Failed to convert parameter to callbackType");
+        WLOGFE("Failed to convert startXValue to callbackType");
         return -1;
     }
     if (!ConvertFromJsValue(engine, startYValue, startY)) {
-        WLOGFE("Failed to convert parameter to callbackType");
+        WLOGFE("Failed to convert startYValue to callbackType");
         return -1;
     }
     option = {screenId, startX, startY};
