@@ -13,12 +13,12 @@
 
 import("//build/ohos.gni")
 
-config("libwm_private_config") {
+config("libwe_private_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
     "include",
-    "../wmserver/include",
+    "../../wmserver/include",
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
     "//foundation/aafwk/standard/interfaces/innerkits/app_manager/include/appmgr",
@@ -27,41 +27,32 @@ config("libwm_private_config") {
   ]
 }
 
-config("libwm_public_config") {
+config("libwe_public_config") {
   include_dirs = [
-    "../interfaces/innerkits/wm",
-    "../utils/include",
+    "../../interfaces/innerkits/wm",
+    "../../utils/include",
   ]
 }
 
-## Build libwm.so
-ohos_shared_library("libwm") {
+## Build libwe.so
+ohos_shared_library("libwe") {
   sources = [
-    "../wmserver/src/window_manager_proxy.cpp",
-    "src/color_parser.cpp",
-    "src/input_transfer_station.cpp",
-    "src/static_call.cpp",
-    "src/vsync_station.cpp",
-    "src/window.cpp",
-    "src/window_adapter.cpp",
-    "src/window_agent.cpp",
-    "src/window_impl.cpp",
-    "src/window_input_channel.cpp",
-    "src/window_manager.cpp",
-    "src/window_manager_agent.cpp",
-    "src/window_option.cpp",
-    "src/window_scene.cpp",
-    "src/window_stub.cpp",
-    "src/zidl/window_manager_agent_stub.cpp",
+    "src/js_window_extension_context.cpp",
+    "src/js_window_extension.cpp",
+    "src/window_extension_client_proxy.cpp",
+    "src/window_extension_client_stub.cpp",
+    "src/window_extension_client_stub_impl.cpp",
+    "src/window_extension_module_loader.cpp",
+    "src/window_extension.cpp",
   ]
 
-  configs = [ ":libwm_private_config" ]
+  configs = [ ":libwe_private_config" ]
 
-  public_configs = [ ":libwm_public_config" ]
+  public_configs = [ ":libwe_public_config" ]
 
   deps = [
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/windowmanager/dm:libdm",
+    "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/utils:libwmutil",
 
     # vsync
@@ -72,18 +63,20 @@ ohos_shared_library("libwm") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
+    "ability_runtime:runtime",
+    "ability_runtime:abilitykit_native",
     "ace_engine_standard:ace_uicontent",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bytrace_standard:bytrace_core",
     "graphic_standard:surface",
-    "graphic_standard:window_animation",
     "hilog_native:libhilog",
     "input:libmmi-client",
     "inputmethod_native:inputmethod_client",
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
     "napi:ace_napi",
+    "power_manager_native:powermgr_client",
 
     # because appexecfwk_core depends on global_resmgr
     "resmgr_standard:global_resmgr",
@@ -94,9 +87,4 @@ ohos_shared_library("libwm") {
 
   part_name = "window_manager"
   subsystem_name = "window"
-}
-
-group("test") {
-  testonly = true
-  deps = [ "test:test" ]
 }

@@ -52,6 +52,7 @@
           "//foundation/windowmanager/dm:libdm",
           "//foundation/windowmanager/dmserver:libdms",
           "//foundation/windowmanager/extension/extension_connection:libwindowextension",
+          "//foundation/windowmanager/extension/window_extension:libwe",
           "//foundation/windowmanager/wm:libwm",
           "//foundation/windowmanager/wmserver:libwms",
           "//foundation/windowmanager/utils:libwmutil",
