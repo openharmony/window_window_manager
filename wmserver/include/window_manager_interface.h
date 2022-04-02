@@ -48,6 +48,7 @@ public:
         TRANS_ID_UPDATE_LAYOUT_MODE,
         TRANS_ID_MAXMIZE_WINDOW,
         TRANS_ID_UPDATE_PROPERTY,
+        TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -70,6 +71,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
+    virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) = 0;
 };
 }
 }

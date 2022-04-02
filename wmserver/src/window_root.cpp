@@ -714,5 +714,18 @@ Rect WindowRoot::GetDisplayLimitRect(DisplayId displayId) const
     }
     return rect;
 }
+
+WMError WindowRoot::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
+{
+    for (auto iter = windowNodeContainerMap_.begin(); iter != windowNodeContainerMap_.end(); ++iter) {
+        auto container = iter->second;
+        std::vector<sptr<WindowInfo>> windowList;
+        container->GetWindowList(windowList);
+        for (auto window : windowList) {
+            windowInfo->windowList_.emplace_back(window);
+        }
+    }
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen
 } // namespace OHOS

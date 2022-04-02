@@ -98,6 +98,7 @@ public:
     int32_t wid_;
     Rect windowRect_;
     bool focused_;
+    DisplayId displayId_;
     WindowMode mode_;
     WindowType type_;
 };
@@ -136,6 +137,7 @@ public:
     void UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId);
+    WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const;
 
 private:
     WindowManager();

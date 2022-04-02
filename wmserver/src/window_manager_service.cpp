@@ -296,5 +296,17 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
     }
     return res;
 }
+
+WMError WindowManagerService::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
+{
+    if (windowInfo == nullptr) {
+        WLOGFE("windowInfo is invalid");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WM_SCOPED_TRACE("wms:GetAccessibilityWindowInfo");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    WMError res = windowRoot_->GetAccessibilityWindowInfo(windowInfo);
+    return res;
+}
 } // namespace Rosen
 } // namespace OHOS
