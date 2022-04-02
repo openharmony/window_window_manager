@@ -23,7 +23,7 @@ namespace {
 } // namespace
 bool SurfaceReaderHandlerImpl::OnImageAvalible(sptr<Media::PixelMap> pixleMap)
 {
-    std::lock_guard<std::recursive_mutex> locl(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!flag_) {
         flag_ = true;
         pixleMap_ = pixleMap;
