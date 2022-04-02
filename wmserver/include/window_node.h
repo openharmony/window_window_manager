@@ -58,6 +58,7 @@ public:
     void SetCallingWindow(uint32_t windowId);
     uint32_t GetCallingWindow() const;
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
+    void SetRequestedOrientation(Orientation orientation);
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
     uint32_t GetParentId() const;
@@ -79,6 +80,7 @@ public:
     const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
     bool IsSplitMode() const;
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
+    Orientation GetRequestedOrientation() const;
     void ResetWindowSizeChangeReason();
 
     sptr<WindowNode> parent_;

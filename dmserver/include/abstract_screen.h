@@ -70,6 +70,7 @@ public:
     float virtualPixelRatio_ = { 1.0 };
     Orientation orientation_ { Orientation::UNSPECIFIED };
     Rotation rotation_ { Rotation::ROTATION_0 };
+    Orientation screenRequestedOrientation_ { Orientation::UNSPECIFIED };
 protected:
     void FillScreenInfo(sptr<ScreenInfo>) const;
     const sptr<AbstractScreenController> screenController_;
