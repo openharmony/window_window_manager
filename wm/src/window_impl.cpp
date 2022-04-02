@@ -359,6 +359,14 @@ WMError WindowImpl::SetWindowFlags(uint32_t flags)
     return ret;
 }
 
+void WindowImpl::OnNewWant(const AAFwk::Want& want)
+{
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] OnNewWant", name_.c_str(), property_->GetWindowId());
+    if (uiContent_ != nullptr) {
+        uiContent_->OnNewWant(want);
+    }
+}
+
 WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed)
 {
