@@ -31,6 +31,8 @@ public:
     void Hide() override;
     void Show() override;
     void RequestFocus() override;
+private:
+    static inline BrokerDelegator<WindowExtensionClientProxy> delegator_;
 };
 } // namespace Rosen
 } // namespace OHOS

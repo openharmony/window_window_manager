@@ -30,11 +30,37 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionConnection"};
 }
 
-class WindowExtensionClientRecipient 
+class WindowExtensionClientRecipient
     : public IRemoteObject::DeathRecipient {
-    void OnRemoteDied(const wptr<IRemoteObject>& remote);
+public:
+    explicit WindowExtensionClientRecipient(sptr<IWindowExtensionCallback> callback);
+    virtual void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+private:
+    sptr<IWindowExtensionCallback> callback_;
 };
 
+WindowExtensionClientRecipient::WindowExtensionClientRecipient(sptr<IWindowExtensionCallback> callback)
+{
+    callback_ = callback;
+}
+
+void WindowExtensionClientRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
+{
+    if (wptrDeath == nullptr) {
+        WLOGFE("wptrDeath is null");
+        return;
+    }
+
+    sptr<IRemoteObject> object = wptrDeath.promote();
+    if (!object) {
+        WLOGFE("object is null");
+        return;
+    }
+    // TODO clear
+    if (callback_ != nullptr) {
+        callback_->OnExtensionDisconnected();
+    }
+}
 
 class WindowExtensionConnection::Impl 
     : public AAFwk::AbilityConnectionStub {
@@ -68,11 +94,11 @@ void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::Element
 {
     AAFwk::Want want;
     want.SetElement(element);
-    // TODO
-    // want.SetParam(RECT_FORM_KEY_POS_X, rect.posX_);
-    // want.SetParam(RECT_FORM_KEY_POS_Y, rect.posY_);
-    // want.SetParam(RECT_FORM_KEY_WIDTH, rect.width_);
-    // want.SetParam(RECT_FORM_KEY_HEIGHT, rect.height_);
+
+    want.SetParam(RECT_FORM_KEY_POS_X, rect.posX_);
+    want.SetParam(RECT_FORM_KEY_POS_Y, rect.posY_);
+    want.SetParam(RECT_FORM_KEY_WIDTH, static_cast<int>(rect.width_));
+    want.SetParam(RECT_FORM_KEY_HEIGHT, static_cast<int>(rect.height_));
     if (stub_ == nullptr) {
         // stub_ = new(std::nothrow) WindowExtensionServerStub();
     }
@@ -121,16 +147,16 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
         }
     }
     if (!deathRecipient_) {
-        deathRecipient_ = new(std::nothrow) WindowExtensionClientRecipient();
+        deathRecipient_ = new(std::nothrow) WindowExtensionClientRecipient(componentCallback_);
         if (!deathRecipient_) {
             WLOGFE("get death recipient failed");
             return;
         }
     }
 
-    // if (!proxy_->AsObject() || !proxy_->AsObject()->AddDeathRecipient(deathRecipient_)) {
-    //     WLOGFE("Failed to add death recipient");
-    // }
+    if (!proxy_->AsObject() || !proxy_->AsObject()->AddDeathRecipient(deathRecipient_)) {
+        WLOGFE("Failed to add death recipient");
+    }
 }
 void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
 {
