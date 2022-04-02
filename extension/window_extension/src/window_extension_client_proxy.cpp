@@ -72,5 +72,10 @@ void WindowExtensionClientProxy::Show()
         WLOGFE("send request failed");
     }
 }
+
+void WindowExtensionClientProxy::RequestFocus()
+{
+
+}
 } // namespace Rosen
 } // namespace OHOS
