@@ -36,12 +36,15 @@ public:
     void OnChange(ScreenId id) override;
 
 private:
-    void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
+    void CallJsMethod(const std::string& methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
     NativeEngine* engine_ = nullptr;
     std::mutex mtx_;
     std::vector<std::unique_ptr<NativeReference>> jsCallBack_;
     NativeValue* CreateScreenIdArray(NativeEngine& engine, const std::vector<ScreenId>& data);
 };
+const std::string EVENT_CONNECT = "connect";
+const std::string EVENT_DISCONNECT = "disconnect";
+const std::string EVENT_CHANGE = "change";
 }  // namespace Rosen
 }  // namespace OHOS
 #endif /* OHOS_JS_SCREEN_LISTENER_H */

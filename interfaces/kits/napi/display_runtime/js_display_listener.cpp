@@ -57,9 +57,13 @@ void JsDisplayListener::RemoveCallback(NativeValue* jsListenerObject)
         static_cast<uint32_t>(jsCallBack_.size()));
 }
 
-void JsDisplayListener::CallJsMethod(const char* methodName, NativeValue* const* argv, size_t argc)
+void JsDisplayListener::CallJsMethod(const std::string& methodName, NativeValue* const* argv, size_t argc)
 {
-    WLOGFI("CallJsMethod methodName = %{public}s", methodName);
+    if (methodName.empty()) {
+        WLOGFE("empty method name str, call method failed");
+        return;
+    }
+    WLOGFI("CallJsMethod methodName = %{public}s", methodName.c_str());
     if (engine_ == nullptr) {
         WLOGFE("engine_ nullptr");
         return;
@@ -86,7 +90,7 @@ void JsDisplayListener::OnCreate(DisplayId id)
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
-            CallJsMethod("add", argv, ArraySize(argv));
+            CallJsMethod(EVENT_ADD, argv, ArraySize(argv));
         }
     );
 
@@ -108,7 +112,7 @@ void JsDisplayListener::OnDestroy(DisplayId id)
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
-            CallJsMethod("remove", argv, ArraySize(argv));
+            CallJsMethod(EVENT_REMOVE, argv, ArraySize(argv));
         }
     );
 
@@ -130,7 +134,7 @@ void JsDisplayListener::OnChange(DisplayId id)
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             NativeValue* argv[] = {CreateJsValue(*engine_, static_cast<uint32_t>(id))};
-            CallJsMethod("change", argv, ArraySize(argv));
+            CallJsMethod(EVENT_CHANGE, argv, ArraySize(argv));
         }
     );
 
