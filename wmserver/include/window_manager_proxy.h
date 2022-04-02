@@ -50,6 +50,8 @@ public:
     void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
 
+    WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
+    
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
 };

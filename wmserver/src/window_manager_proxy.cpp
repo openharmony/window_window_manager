@@ -477,5 +477,27 @@ WMError WindowManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinI
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
 }
+
+WMError WindowManagerProxy::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(windowInfo)) {
+        WLOGFE("Write windowInfo failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID),
+        data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    windowInfo = reply.ReadParcelable<AccessibilityWindowInfo>();
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
 } // namespace Rosen
 } // namespace OHOS
