@@ -38,6 +38,10 @@ namespace OHOS::AbilityRuntime {
     class Context;
 }
 
+namespace OHOS::AAFwk {
+    class Want;
+}
+
 namespace OHOS::Ace {
     class UIContent;
 }
@@ -181,6 +185,7 @@ public:
         NativeValue* storage, bool isdistributed = false) = 0;
     virtual std::string GetContentInfo() = 0;
     virtual Ace::UIContent* GetUIContent() const = 0;
+    virtual void OnNewWant(const AAFwk::Want& want) = 0;
 
     virtual bool IsDecorEnable() const = 0;
     virtual WMError Maximize() = 0;
