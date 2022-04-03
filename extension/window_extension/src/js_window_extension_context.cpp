@@ -36,7 +36,7 @@ public:
 
     static void Finalizer(NativeEngine* engine, void* data, void* hint)
     {
-        WLOGI("JsWindowExtensionContext::Finalizer is called");
+        WLOGFI("JsWindowExtensionContext::Finalizer is called");
         std::unique_ptr<JsWindowExtensionContext>(static_cast<JsWindowExtensionContext*>(data));
     }
 private:
@@ -50,12 +50,12 @@ private:
 void JsAbilityConnectCallback::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
         const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
-    
+    WLOGFI("called");
 }
 
 void JsAbilityConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
 {
-
+    WLOGFI("called");
 }
 
 NativeValue* CreateJsWindowExtensionContext(NativeEngine& engine,

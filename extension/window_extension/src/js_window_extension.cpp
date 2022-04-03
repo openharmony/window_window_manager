@@ -34,9 +34,11 @@ class DispatchInputEventListener : public IDispatchInputEventListener {
 public:
     void OnDispatchPointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) override
     {
+        WLOGFI("called");
     }
     void OnDispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override
     {
+        WLOGFI("called");
     }
 };
 
@@ -135,6 +137,7 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)
 void JsWindowExtension::OnDisconnect(const AAFwk::Want &want)
 {
     Extension::OnDisconnect(want);
+    WLOGFI("called.");
 }
 
 void JsWindowExtension::OnStart(const AAFwk::Want &want)
