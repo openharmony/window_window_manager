@@ -34,7 +34,7 @@ public:
         TRANS_ID_ON_POINTER_EVENT,
     };
 
-    virtual void OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode) = 0;
+    virtual void OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode) = 0;
     virtual void OnBackPress() = 0;
     virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
     virtual void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;

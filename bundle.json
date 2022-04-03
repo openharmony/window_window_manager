@@ -51,7 +51,7 @@
           "//foundation/windowmanager/sa_profile:wms_sa_profile",
           "//foundation/windowmanager/dm:libdm",
           "//foundation/windowmanager/dmserver:libdms",
-          "//foundation/windowmanager/extension/extension_connection:libwindowextension",
+          "//foundation/windowmanager/extension/extension_connection:libwec",
           "//foundation/windowmanager/extension/window_extension:libwe",
           "//foundation/windowmanager/wm:libwm",
           "//foundation/windowmanager/wmserver:libwms",
