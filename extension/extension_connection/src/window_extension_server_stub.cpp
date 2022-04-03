@@ -29,6 +29,7 @@ int WindowExtensionServerStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
         WLOGFE("InterfaceToken check failed");
         return -1;
     }
+    WLOGFI(" code is %{public}d", code);
     switch (code) {
         case TRANS_ID_ON_WINDOW_READY: {
             std::shared_ptr<RSSurfaceNode> surfaceNode(data.ReadParcelable<RSSurfaceNode>());

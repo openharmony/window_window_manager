@@ -86,8 +86,10 @@ void WindowExtensionConnection::Impl::WindowExtensionClientRecipient::OnRemoteDi
     }
 
     if (callback_ != nullptr) {
+        WLOGFI("on extension disconnected");
         callback_->OnExtensionDisconnected();
     }
+    WLOGFI("Remote died");
 }
 void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
         uint32_t uid, sptr<IWindowExtensionCallback>& callback)
@@ -107,20 +109,25 @@ void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::Element
         WLOGFE("ConnectAbility failed!");
         return;
     }
+    WLOGFI("Connection extension");
     componentCallback_ = callback;
 }
 
 void WindowExtensionConnection::Impl::Show()
 {
+
     if (proxy_ != nullptr) {
         proxy_->Show();
+        WLOGFI("show window");
     }
+    
 }
 
 void WindowExtensionConnection::Impl::Hide()
 {
-    if (proxy_) {
+    if (proxy_ != nullptr) {
         proxy_->Hide();
+        WLOGFI("hide window");
     }
 }
 
@@ -155,9 +162,11 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
     if (!proxy_->AsObject() || !proxy_->AsObject()->AddDeathRecipient(deathRecipient_)) {
         WLOGFE("Failed to add death recipient");
     }
+    WLOGFI("end");
 }
 void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
 {
+    WLOGFI("end");
 }
 
 // WindowExtensionConnection

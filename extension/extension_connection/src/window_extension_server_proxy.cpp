@@ -40,8 +40,9 @@ void WindowExtensionServerProxy::OnWindowReady(std::shared_ptr<RSSurfaceNode>& s
         return;
     }
     if (Remote()->SendRequest(TRANS_ID_ON_WINDOW_READY, data, replay, option) != ERR_NONE) {
-        WLOGE("send request failed");
+        WLOGFE("send request failed");
     }
+    WLOGFI("end");
 }
 
 void WindowExtensionServerProxy::OnBackPress()
@@ -57,6 +58,7 @@ void WindowExtensionServerProxy::OnBackPress()
     if (Remote()->SendRequest(TRANS_ID_ON_BACK_PRESS, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
+    WLOGFI("end");
 }
 
 void WindowExtensionServerProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -77,6 +79,7 @@ void WindowExtensionServerProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyE
     if (Remote()->SendRequest(TRANS_ID_ON_KEY_EVENT, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
+    WLOGFI("end");
 }
 
 void WindowExtensionServerProxy::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -97,6 +100,7 @@ void WindowExtensionServerProxy::OnPointerEvent(std::shared_ptr<MMI::PointerEven
     if (Remote()->SendRequest(TRANS_ID_ON_POINTER_EVENT, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
+    WLOGFI("end");
 }
 } // namespace Rosen
 } // namespace OHOS
