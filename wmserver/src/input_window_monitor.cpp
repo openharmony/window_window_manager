@@ -157,6 +157,10 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
             .displayId = static_cast<int32_t>(windowNode->GetDisplayId()),
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };
+        if (!windowNode->GetWindowProperty()->GetTouchable()) {
+            WLOGFI("window is not touchable: %{public}u", windowNode->GetWindowId());
+            windowInfo.flags |= MMI::FLAG_NOT_TOUCHABLE;
+        }
         iter->windowsInfo.emplace_back(windowInfo);
     }
 }
