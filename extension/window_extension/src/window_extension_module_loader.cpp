@@ -19,19 +19,25 @@
 #include "native_engine/native_engine.h"
 
 #include "window_extension.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
+namespace {
+    constexpr  HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionClientStub"};
+}
 WindowExtensionModuleLoader::WindowExtensionModuleLoader() = default;
 WindowExtensionModuleLoader::~WindowExtensionModuleLoader() = default;
 
 AbilityRuntime::Extension *WindowExtensionModuleLoader::Create(
     const std::unique_ptr<AbilityRuntime::Runtime>& runtime) const
 {
+    WLOGFI("called");
     return WindowExtension::Create(runtime);
 }
 
 extern "C" __attribute__((visibility("default"))) void* OHOS_EXTENSION_GetExtensionModule()
 {
+    WLOGFI("called");
     return &WindowExtensionModuleLoader::GetInstance();
 }
 } // namespace OHOS::Window
