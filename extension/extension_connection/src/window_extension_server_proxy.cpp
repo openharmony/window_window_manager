@@ -24,7 +24,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionProxy"};
 }
 
-void WindowExtensionServerProxy::OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+void WindowExtensionServerProxy::OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     MessageParcel data;
     MessageParcel replay;
@@ -35,7 +35,7 @@ void WindowExtensionServerProxy::OnWindowReady(const std::shared_ptr<RSSurfaceNo
         return;
     }
     
-    if (!surfaceNode->Marshalling(data)) {
+    if ((!data.WriteParcelable(surfaceNode.get()))) {
         WLOGFE("write surfaceNode failed");
         return;
     }
@@ -70,10 +70,10 @@ void WindowExtensionServerProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyE
         return;
     }
 
-    // if (!keyEvent->Marshalling(data)) {
-    //     WLOGFE("write key event failed");
-    //     return;
-    // }
+     if (keyEvent->WriteToParcel(data)) {
+         WLOGFE("write key event failed");
+         return;
+    }
     if (Remote()->SendRequest(TRANS_ID_ON_KEY_EVENT, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
@@ -90,10 +90,10 @@ void WindowExtensionServerProxy::OnPointerEvent(std::shared_ptr<MMI::PointerEven
         return;
     }
 
-    // if (!pointerEvent->Marshalling(data)) {
-    //     WLOGFE("write key event failed");
-    //     return;
-    // }
+    if (pointerEvent->WriteToParcel(data)) {
+        WLOGFE("write key event failed");
+        return;
+    }
     if (Remote()->SendRequest(TRANS_ID_ON_POINTER_EVENT, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }

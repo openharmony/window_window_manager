@@ -19,7 +19,6 @@
 #include "iremote_broker.h"
 #include "refbase.h"
 #include "wm_common.h"
-
 #include "window.h"
 
 namespace OHOS {

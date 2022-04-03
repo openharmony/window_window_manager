@@ -31,9 +31,32 @@ int WindowExtensionServerStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
     }
     switch (code) {
         case TRANS_ID_ON_WINDOW_READY: {
+            std::shared_ptr<RSSurfaceNode> surfaceNode(data.ReadParcelable<RSSurfaceNode>());
+            OnWindowReady(surfaceNode);
             break;
         }
         case TRANS_ID_ON_BACK_PRESS: {
+            OnBackPress();
+            break;
+        }
+        case TRANS_ID_ON_KEY_EVENT: {
+            std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+            if (keyEvent == nullptr) {
+                WLOGFE("create keyevent failed");
+                break;
+            }
+            keyEvent->ReadFromParcel(data);
+            OnKeyEvent(keyEvent);
+            break;
+        }
+        case TRANS_ID_ON_POINTER_EVENT: {
+            std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+            if (pointerEvent == nullptr) {
+                WLOGFE("create pointer event failed");
+                break;
+            }
+            pointerEvent->ReadFromParcel(data);
+            OnPointerEvent(pointerEvent);
             break;
         }
         default: {

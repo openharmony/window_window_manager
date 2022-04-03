@@ -17,30 +17,30 @@
 
 namespace OHOS {
 namespace Rosen {
-void WindowExtensionServerStubImpl::OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+void WindowExtensionServerStubImpl::OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     if (componentCallback_ != nullptr) {
-        componentCallback_.OnwWindowReady(surfaceNode);
+        componentCallback_->OnWindowReady(surfaceNode);
     }
 }
 void WindowExtensionServerStubImpl::OnBackPress()
 {
     if (componentCallback_ != nullptr) {
-        componentCallback_.OnBackPress();
+        componentCallback_->OnBackPress();
     }
 }
 
 void WindowExtensionServerStubImpl::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (componentCallback_ != nullptr) {
-        componentCallback_.OnKeyEvent(keyEvent);
+        componentCallback_->OnKeyEvent(keyEvent);
     }
 }
 
 void WindowExtensionServerStubImpl::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (componentCallback_ != nullptr) {
-        componentCallback_.OnPointerEvent(pointerEvent);
+        componentCallback_->OnPointerEvent(pointerEvent);
     }
 }
 } // namespace Rosen

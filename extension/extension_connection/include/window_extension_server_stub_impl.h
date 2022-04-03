@@ -27,7 +27,7 @@ public:
     : componentCallback_(componentCallback) {};
     ~WindowExtensionServerStubImpl() = default;
 
-    void OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
+    void OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
     void OnBackPress() override;
     void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
