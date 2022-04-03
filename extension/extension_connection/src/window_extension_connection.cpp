@@ -58,7 +58,7 @@ private:
 
     sptr<WindowExtensionServerStub> stub_;
     sptr<IWindowExtensionCallback> componentCallback_;
-    sptr<WindowExtensionClientProxy> proxy_;
+    sptr<IWindowExtensionClient> proxy_;
     sptr<WindowExtensionClientRecipient> deathRecipient_;
 };
 
@@ -138,7 +138,6 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
         WLOGFE("remote object is null");
         return;
     }
-
     if (!proxy_) {
         proxy_ = new(std::nothrow) WindowExtensionClientProxy(remoteObject);
         if (!proxy_) {
