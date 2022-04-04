@@ -91,6 +91,6 @@ ohos_shared_library("window_extension_module") {
     "hilog_native:libhilog",
   ]
 
-  subsystem_name = "window_manager"
-  part_name = "window"
+  subsystem_name = "window"
+  part_name = "window_manager"
 }
