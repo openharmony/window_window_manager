@@ -75,6 +75,7 @@ void WindowExtensionClientProxy::Show()
 
 void WindowExtensionClientProxy::RequestFocus()
 {
+    WLOGFI("called.");
 }
 } // namespace Rosen
 } // namespace OHOS
