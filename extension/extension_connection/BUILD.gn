@@ -13,7 +13,7 @@
 
 import("//build/ohos.gni")
 
-config("libwm_private_config") {
+config("libwec_private_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
@@ -22,7 +22,6 @@ config("libwm_private_config") {
     "../../interface/innerkits/wm",
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/app_manager/include/appmgr",
   ]
 }
 
@@ -36,7 +35,7 @@ ohos_shared_library("libwec") {
     "src/window_extension_server_stub_impl.cpp",
   ]
 
-  configs = [ ":libwm_private_config" ]
+  configs = [ ":libwec_private_config" ]
 
   deps = [
     "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
@@ -51,7 +50,6 @@ ohos_shared_library("libwec") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:runtime",
-    "bundle_framework:appexecfwk_core",
     "graphic_standard:surface",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
