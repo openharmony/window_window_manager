@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     SurfaceReader surfaceReader;
     sptr<SurfaceReaderHandlerImpl> surfaceReaderHandler = new SurfaceReaderHandlerImpl();
     if (!surfaceReader.Init()) {
-        printf("surfaceReader init failed!\n");
+        std::cout << "surfaceReader init failed!" << std::endl;
         return 0;
     }
     surfaceReader.SetHandler(surfaceReaderHandler);
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         while (!surfaceReaderHandler->IsImageOk()) {
             waitCount++;
             if (waitCount >= MAX_WAIT_COUNT) {
-                printf("wait image overtime\n");
+                std::cout << "wait image overtime" << std::endl;
                 break;
             }
             usleep(SLEEP_US);
@@ -82,16 +82,16 @@ int main(int argc, char *argv[])
         auto pixelMap = surfaceReaderHandler->GetPixelMap();
         bool ret = SnapShotUtils::WriteToPngWithPixelMap(FILE_NAME + std::to_string(fileIndex) + ".png", *pixelMap);
         if (ret) {
-            printf("snapshot %" PRIu64 ", write to %s as png\n",
-                mainId, (FILE_NAME + std::to_string(fileIndex)).c_str());
+            std::cout << "snapshot "<< mainId << " write to " <<
+                (FILE_NAME + std::to_string(fileIndex)).c_str() << " as png" << std::endl;
         } else {
-            printf("snapshot %" PRIu64 " write to %s failed!\n",
-                mainId, (FILE_NAME + std::to_string(fileIndex)).c_str());
+            std::cout << "snapshot "<< mainId << " write to " <<
+                (FILE_NAME + std::to_string(fileIndex)).c_str() << " failed!" << std::endl;
         }
         surfaceReaderHandler->ResetFlag();
         fileIndex++;
     }
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
-    printf("DestroyVirtualScreen %" PRIu64 "\n", virtualScreenId);
+    std::cout << "DestroyVirtualScreen " << virtualScreenId << std::endl;
     return 0;
 }
