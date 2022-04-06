@@ -17,6 +17,7 @@
 #define SNAPSHOT_UTILS_H
 
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <pixel_map.h>
 
