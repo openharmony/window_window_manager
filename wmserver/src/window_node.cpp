@@ -112,6 +112,16 @@ void WindowNode::SetTouchable(bool touchable)
     property_->SetTouchable(touchable);
 }
 
+void WindowNode::SetCallingWindow(uint32_t windowId)
+{
+    property_->SetCallingWindow(windowId);
+}
+
+uint32_t WindowNode::GetCallingWindow() const
+{
+    return property_->GetCallingWindow();
+}
+
 void WindowNode::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
 {
     windowSizeChangeReason_ = reason;

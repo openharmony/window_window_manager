@@ -539,6 +539,10 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->SetTouchable(property->GetTouchable());
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW: {
+            node->SetCallingWindow(property->GetCallingWindow());
+            break;
+        }
         default:
             break;
     }
