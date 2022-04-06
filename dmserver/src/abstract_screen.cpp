@@ -287,6 +287,7 @@ bool AbstractScreenGroup::GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen
     }
     switch (combination_) {
         case ScreenCombination::SCREEN_ALONE:
+            [[fallthrough]];
         case ScreenCombination::SCREEN_EXPAND:
             config = { dmsScreen->rsId_ };
             break;

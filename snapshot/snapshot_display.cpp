@@ -32,12 +32,12 @@ int main(int argc, char *argv[])
 
     auto display = DisplayManager::GetInstance().GetDisplayById(cmdArgments.displayId);
     if (display == nullptr) {
-        printf("error: GetDisplayById %" PRIu64 " error!\n", cmdArgments.displayId);
+        std::cout << "error: GetDisplayById " << cmdArgments.displayId << " error!" << std::endl;
         return -1;
     }
 
-    printf("process: display %" PRIu64 ": width %d, height %d\n",
-        cmdArgments.displayId, display->GetWidth(), display->GetHeight());
+    std::cout << "process: display " << cmdArgments.displayId <<
+        ": width " << display->GetWidth() << ", height " << display->GetHeight() << std::endl;
 
     // get PixelMap from DisplayManager API
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = nullptr;
@@ -46,14 +46,15 @@ int main(int argc, char *argv[])
     } else {
         if (!cmdArgments.isWidthSet) {
             cmdArgments.width = display->GetWidth();
-            printf("process: reset to display's width %d\n", cmdArgments.width);
+            std::cout << "process: reset to display's width " << cmdArgments.width << std::endl;
         }
         if (!cmdArgments.isHeightSet) {
             cmdArgments.height = display->GetHeight();
-            printf("process: reset to display's height %d\n", cmdArgments.height);
+            std::cout << "process: reset to display's height " << cmdArgments.height << std::endl;
         }
         if (!SnapShotUtils::CheckWidthAndHeightValid(cmdArgments)) {
-            printf("error: width %d, height %d invalid!\n", cmdArgments.width, cmdArgments.height);
+            std::cout << "error: width " << cmdArgments.width << " height " <<
+            cmdArgments.height << " invalid!" << std::endl;
             return -1;
         }
         const Media::Rect rect = {0, 0, display->GetWidth(), display->GetHeight()};
@@ -67,12 +68,13 @@ int main(int argc, char *argv[])
         ret = SnapShotUtils::WriteToPngWithPixelMap(cmdArgments.fileName, *pixelMap);
     }
     if (!ret) {
-        printf("\nerror: snapshot display %" PRIu64 ", write to %s as png failed!\n",
-            cmdArgments.displayId, cmdArgments.fileName.c_str());
+        std::cout << "\nerror: snapshot display " << cmdArgments.displayId <<
+            ", write to " << cmdArgments.fileName.c_str() << " as png failed!" << std::endl;
         return -1;
     }
 
-    printf("\nsuccess: snapshot display %" PRIu64 ", write to %s as png, width %d, height %d\n",
-        cmdArgments.displayId, cmdArgments.fileName.c_str(), pixelMap->GetWidth(), pixelMap->GetHeight());
+    std::cout << "\nsuccess: snapshot display " << cmdArgments.displayId << " , write to " <<
+        cmdArgments.fileName.c_str() << " as png, width " << pixelMap->GetWidth() <<
+        ", height " << pixelMap->GetHeight() << std::endl;
     return 0;
 }
