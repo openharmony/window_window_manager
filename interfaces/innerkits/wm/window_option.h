@@ -50,6 +50,8 @@ public:
     bool IsTurnScreenOn() const;
     void SetBrightness(float brightness);
     float GetBrightness() const;
+    void SetCallingWindow(uint32_t windowId);
+    uint32_t GetCallingWindow() const;
 
     Rect GetWindowRect() const;
     WindowType GetWindowType() const;
@@ -82,6 +84,7 @@ private:
     bool keepScreenOn_ = false;
     bool turnScreenOn_ = false;
     float brightness_ = UNDEFINED_BRIGHTNESS;
+    uint32_t callingWindow_ = INVALID_WINDOW_ID;
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
