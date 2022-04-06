@@ -62,6 +62,7 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_OTHER_PROPS = 1 << 3,
     ACTION_UPDATE_FOCUSABLE = 1 << 4,
     ACTION_UPDATE_TOUCHABLE = 1 << 5,
+    ACTION_UPDATE_CALLING_WINDOW = 1 << 6,
 };
 
 namespace {
