@@ -52,6 +52,8 @@ public:
     void SetBrightness(float brightness);
     void SetFocusable(bool focusable);
     void SetTouchable(bool touchable);
+    void SetCallingWindow(uint32_t windowId);
+    uint32_t GetCallingWindow() const;
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
