@@ -98,6 +98,11 @@ void WindowProperty::SetBrightness(float brightness)
     brightness_ = brightness;
 }
 
+void WindowProperty::SetCallingWindow(uint32_t windowId)
+{
+    callingWindow_ = windowId;
+}
+
 void WindowProperty::SetDisplayId(DisplayId displayId)
 {
     displayId_ = displayId;
@@ -188,6 +193,11 @@ bool WindowProperty::GetFocusable() const
 bool WindowProperty::GetTouchable() const
 {
     return touchable_;
+}
+
+uint32_t WindowProperty::GetCallingWindow() const
+{
+    return callingWindow_;
 }
 
 bool WindowProperty::GetPrivacyMode() const
@@ -313,7 +323,8 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteFloat(brightness_) && parcel.WriteUint64(displayId_) && parcel.WriteUint32(windowId_) &&
         parcel.WriteUint32(parentId_) && MapMarshalling(parcel) && parcel.WriteBool(isDecorEnable_) &&
         parcel.WriteInt32(hitOffset_.x) && parcel.WriteInt32(hitOffset_.y) && parcel.WriteUint32(animationFlag_) &&
-        parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteBool(tokenState_);
+        parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteBool(tokenState_) &&
+        parcel.WriteUint32(callingWindow_);
 }
 
 sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
@@ -344,6 +355,7 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetAnimationFlag(parcel.ReadUint32());
     property->SetWindowSizeChangeReason(static_cast<WindowSizeChangeReason>(parcel.ReadUint32()));
     property->SetTokenState(parcel.ReadBool());
+    property->SetCallingWindow(parcel.ReadUint32());
     return property;
 }
 
@@ -372,6 +384,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     sysBarPropMap_ = property->sysBarPropMap_;
     isDecorEnable_ = property->isDecorEnable_;
     tokenState_ = property->tokenState_;
+    callingWindow_ = property->callingWindow_;
 }
 }
 }

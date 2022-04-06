@@ -58,6 +58,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetFocusable(option->GetFocusable());
     property_->SetTouchable(option->GetTouchable());
     property_->SetDisplayId(option->GetDisplayId());
+    property_->SetCallingWindow(option->GetCallingWindow());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetHitOffset(option->GetHitOffset());
     windowTag_ = option->GetWindowTag();
@@ -909,6 +910,15 @@ void WindowImpl::SetBrightness(float brightness)
 float WindowImpl::GetBrightness() const
 {
     return brightness_;
+}
+
+void WindowImpl::SetCallingWindow(uint32_t windowId)
+{
+    if (!IsWindowValid()) {
+        return;
+    }
+    property_->SetCallingWindow(windowId);
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
 }
 
 WMError WindowImpl::Drag(const Rect& rect)

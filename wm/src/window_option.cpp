@@ -212,6 +212,16 @@ float WindowOption::GetBrightness() const
 {
     return brightness_;
 }
+
+void WindowOption::SetCallingWindow(uint32_t windowId)
+{
+    callingWindow_ = windowId;
+}
+
+uint32_t WindowOption::GetCallingWindow() const
+{
+    return callingWindow_;
+}
 } // namespace Rosen
 } // namespace OHOS
 

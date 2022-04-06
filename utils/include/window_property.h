@@ -47,6 +47,7 @@ public:
     void SetTransparent(bool isTransparent);
     void SetAlpha(float alpha);
     void SetBrightness(float brightness);
+    void SetCallingWindow(uint32_t windowId);
     void SetDisplayId(DisplayId displayId);
     void SetWindowId(uint32_t windowId);
     void SetParentId(uint32_t parentId);
@@ -69,6 +70,7 @@ public:
     bool GetFullScreen() const;
     bool GetFocusable() const;
     bool GetTouchable() const;
+    uint32_t GetCallingWindow() const;
     bool GetPrivacyMode() const;
     bool GetTransparent() const;
     bool GetTokenState() const;
@@ -104,6 +106,7 @@ private:
     bool tokenState_ { false };
     float alpha_ { 1.0f };
     float brightness_ = UNDEFINED_BRIGHTNESS;
+    uint32_t callingWindow_ = INVALID_WINDOW_ID;
     DisplayId displayId_ { 0 };
     uint32_t windowId_ { 0 };
     uint32_t parentId_ { 0 };
