@@ -302,7 +302,6 @@ private:
     bool keepScreenOn_ = false;
     bool turnScreenOn_ = false;
     float brightness_ = UNDEFINED_BRIGHTNESS;
-    ColorParam backgroundColor_ = { .value = 0xff000000 };
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 };
 }
