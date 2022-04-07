@@ -878,24 +878,31 @@ sptr<WindowNode> WindowNodeContainer::FindDividerNode() const
 
 void WindowNodeContainer::RaiseSplitRelatedWindowToTop(sptr<WindowNode>& node)
 {
-    sptr<WindowNode> deviderNode = nullptr;
-    sptr<WindowNode> primaryNode = nullptr;
-    sptr<WindowNode> secondaryNode = nullptr;
+    if (node == nullptr) {
+        return;
+    }
+    if (!node->IsSplitMode() && node->GetWindowType() != WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        return;
+    }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE && !pairedWindowMap_.empty()) {
-        deviderNode = node;
-        primaryNode = pairedWindowMap_.begin()->second.pairNode_;
-        secondaryNode = pairedWindowMap_[primaryNode->GetWindowId()].pairNode_;
-        std::vector<uint32_t> raiseNodeIds = {secondaryNode->GetWindowId(), primaryNode->GetWindowId()};
+        std::vector<uint32_t> raiseNodeIds;
+        for (auto& splitInfo : pairedWindowMap_) {
+            auto pairNode = splitInfo.second.pairNode_;
+            if (pairNode != nullptr) {
+                raiseNodeIds.push_back(pairNode->GetWindowId());
+            }
+        }
         // raise primary and secondary window to top, keep raw zorder
         RaiseOrderedWindowToTop(raiseNodeIds, appWindowNode_->children_);
         // raise divider final, keep divider on top
-        RaiseWindowToTop(deviderNode->GetWindowId(), appWindowNode_->children_);
+        RaiseWindowToTop(node->GetWindowId(), appWindowNode_->children_);
     } else if (!pairedWindowMap_.empty()) {
-        deviderNode = FindDividerNode();
-        primaryNode = node;
-        secondaryNode = pairedWindowMap_.at(primaryNode->GetWindowId()).pairNode_;
-        RaiseWindowToTop(secondaryNode->GetWindowId(), appWindowNode_->children_);
-        RaiseWindowToTop(primaryNode->GetWindowId(), appWindowNode_->children_);
+        if (pairedWindowMap_.count(node->GetWindowId())) {
+            auto pairNode = pairedWindowMap_.at(node->GetWindowId()).pairNode_;
+            RaiseWindowToTop(pairNode->GetWindowId(), appWindowNode_->children_);
+        }
+        RaiseWindowToTop(node->GetWindowId(), appWindowNode_->children_);
+        sptr<WindowNode> deviderNode = FindDividerNode();
         if (deviderNode != nullptr) {
             // raise divider final, keep divider on top
             RaiseWindowToTop(deviderNode->GetWindowId(), appWindowNode_->children_);
@@ -993,7 +1000,7 @@ sptr<WindowNode> WindowNodeContainer::GetNextActiveWindow(uint32_t windowId) con
             return nullptr;
         }
         int index = std::distance(windowNodes.begin(), iter);
-        for (size_t i = index + 1; i < windowNodes.size(); i++) {
+        for (size_t i = static_cast<size_t>(index) + 1; i < windowNodes.size(); i++) {
             if (windowNodes[i]->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
                 continue;
             }
