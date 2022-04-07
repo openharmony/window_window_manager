@@ -189,6 +189,7 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
     WM_FUNCTION_TRACE();
     node->priority_ = zorderPolicy_->GetWindowPriority(node->GetWindowType());
     RaiseInputMethodWindowPriorityIfNeeded(node);
+    RaiseShowWhenLockedWindowIfNeeded(node);
     auto parentNode = node->parent_;
     auto position = parentNode->children_.end();
     for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
@@ -1231,6 +1232,23 @@ void WindowNodeContainer::RaiseInputMethodWindowPriorityIfNeeded(const sptr<Wind
     if (iter != aboveAppWindowNode_->children_.end()) {
         WLOGFI("raise input method float window priority.");
         node->priority_ = WINDOW_TYPE_RAISED_INPUT_METHOD;
+    }
+}
+
+void WindowNodeContainer::RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node) const
+{
+    if (!(node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))) {
+        return;
+    }
+
+    auto iter = std::find_if(aboveAppWindowNode_->children_.begin(), aboveAppWindowNode_->children_.end(),
+                             [](sptr<WindowNode> node) {
+        return node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD;
+    });
+    if (iter != aboveAppWindowNode_->children_.end()) {
+        WLOGFI("raise showWhenLocked window");
+        node->priority_ = WINDOW_TYPE_RAISED_INPUT_METHOD + 1;
+        node->parent_ = aboveAppWindowNode_;
     }
 }
 
