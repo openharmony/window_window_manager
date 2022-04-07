@@ -178,6 +178,7 @@ public:
     virtual std::string GetContentInfo() override;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
     virtual Ace::UIContent* GetUIContent() const override;
+    virtual void OnNewWant(const AAFwk::Want& want) override;
 
     // colorspace, gamut
     virtual bool IsSupportWideGamut() override;
