@@ -133,6 +133,8 @@ public:
     virtual void SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
     virtual void SetCallingWindow(uint32_t windowId) override;
+    virtual void SetPrivacyMode(bool isPrivacyMode) override;
+    virtual bool IsPrivacyMode() const override;
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;

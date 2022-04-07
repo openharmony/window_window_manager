@@ -929,6 +929,16 @@ void WindowImpl::SetCallingWindow(uint32_t windowId)
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
 }
 
+void WindowImpl::SetPrivacyMode(bool isPrivacyMode)
+{
+    property_->SetPrivacyMode(isPrivacyMode);
+}
+
+bool WindowImpl::IsPrivacyMode() const
+{
+    return property_->GetPrivacyMode();
+}
+
 WMError WindowImpl::Drag(const Rect& rect)
 {
     if (!IsWindowValid()) {
