@@ -69,6 +69,9 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+
+    WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override;
+
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;
