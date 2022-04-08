@@ -26,6 +26,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowController"};
 }
+
 uint32_t WindowController::GenWindowId()
 {
     return ++windowId_;
@@ -372,6 +373,22 @@ WMError WindowController::SetSystemBarProperty(uint32_t windowId, WindowType typ
 void WindowController::NotifySystemBarTints()
 {
     windowRoot_->NotifySystemBarTints();
+}
+
+WMError WindowController::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
+{
+    if (controller == nullptr) {
+        WLOGFE("RSWindowAnimation: failed to set window animation controller, controller is null!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    if (windowAnimationController_ != nullptr) {
+        WLOGFE("RSWindowAnimation: failed to set window animation controller, Already had a controller!");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+
+    windowAnimationController_ = controller;
+    return WMError::WM_OK;
 }
 
 std::vector<Rect> WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)

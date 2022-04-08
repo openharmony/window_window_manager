@@ -78,6 +78,7 @@ ohos_shared_library("libwm") {
     "bundle_framework:appexecfwk_core",
     "bytrace_standard:bytrace_core",
     "graphic_standard:surface",
+    "graphic_standard:window_animation",
     "hilog_native:libhilog",
     "input:libmmi-client",
     "inputmethod_native:inputmethod_client",

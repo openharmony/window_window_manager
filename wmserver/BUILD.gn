@@ -90,6 +90,7 @@ ohos_shared_library("libwms") {
     "bytrace_standard:bytrace_core",
     "ces_standard:cesfwk_innerkits",
     "graphic_standard:surface",
+    "graphic_standard:window_animation",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
     "input:libmmi-client",

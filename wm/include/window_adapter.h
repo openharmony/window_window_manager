@@ -57,6 +57,8 @@ public:
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
 
+    virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
+
     virtual void ClearWindowAdapter();
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

@@ -86,6 +86,12 @@ void WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 }
 
+WMError WindowAdapter::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->SetWindowAnimationController(controller);
+}
+
 WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, std::vector<Rect>& avoidRect)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
