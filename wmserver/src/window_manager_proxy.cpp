@@ -361,7 +361,7 @@ WMError WindowManagerProxy::SetWindowAnimationController(const sptr<RSIWindowAni
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    auto error = Remote()->SendRequest(TRANS_ID_ANIMATION_SET_CONTROLLER, data, reply, option);
+    auto error = Remote()->SendRequest(WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER, data, reply, option);
     if (error != ERR_NONE) {
         WLOGFE("Send request error: %{public}d", error);
         return WMError::WM_ERROR_IPC_FAILED;
