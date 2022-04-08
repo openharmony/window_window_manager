@@ -20,11 +20,9 @@
 
 #include <include/core/SkBitmap.h>
 #include <pixel_map.h>
-#ifdef ACE_ENABLE_GL
-#include <render_context/render_context.h>
-#endif
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_extractor.h>
+#include "drawing_engine/drawing_proxy.h"
 
 #include "display.h"
 #include "window.h"
@@ -33,7 +31,7 @@ namespace OHOS {
 namespace Rosen {
 class FreezeController : public RefBase {
 public:
-    FreezeController() {};
+    FreezeController() {}
     ~FreezeController() = default;
 
     bool FreezeDisplay(DisplayId displayId);
@@ -46,9 +44,7 @@ private:
         uint32_t width, uint32_t height, std::shared_ptr<Media::PixelMap> pixelMap);
 
     std::map<DisplayId, sptr<Window>> coverWindowMap_;
-#ifdef ACE_ENABLE_GL
-    RenderContext* rc_ = nullptr;
-#endif
+    DrawingProxy* dp_ = nullptr;
 };
 }
 }
