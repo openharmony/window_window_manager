@@ -350,6 +350,10 @@ bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDispl
 
 void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realAbsScreen)
 {
+    if (realAbsScreen == nullptr) {
+        WLOGE("BindAloneScreenLocked failed, realAbsScreen is nullptr");
+        return;
+    }
     ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     if (defaultScreenId != SCREEN_ID_INVALID) {
         if (defaultScreenId != realAbsScreen->dmsId_) {
@@ -362,8 +366,13 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
             return;
         }
         if (dummyDisplay_ == nullptr) {
-            sptr<AbstractDisplay> display = new AbstractDisplay(displayCount_.fetch_add(1),
+            sptr<AbstractDisplay> display = new(std::nothrow) AbstractDisplay(displayCount_.fetch_add(1),
                 realAbsScreen->dmsId_, info->width_, info->height_, info->refreshRate_);
+            if (display == nullptr) {
+                WLOGFE("create display failed");
+                return;
+            }
+
             abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
             WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, display->GetId());
@@ -390,6 +399,10 @@ void AbstractDisplayController::AddScreenToMirrorLocked(sptr<AbstractScreen> abs
 
 void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> absScreen)
 {
+    if (absScreen == nullptr) {
+        WLOGE("AddScreenToExpandLocked failed, absScreen is nullptr");
+        return;
+    }
     for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
         sptr<AbstractDisplay> abstractDisplay = iter->second;
         if (abstractDisplay->GetAbstractScreenId() == absScreen->dmsId_) {
@@ -439,14 +452,14 @@ void AbstractDisplayController::SetFreeze(std::vector<DisplayId> displayIds, boo
             std::lock_guard<std::recursive_mutex> lock(mutex_);
             auto iter = abstractDisplayMap_.find(displayId);
             if (iter == abstractDisplayMap_.end()) {
-                WLOGI("setfreeze fail, cannot get display %{public}" PRIu64"", displayId);
+                WLOGE("setfreeze fail, cannot get display %{public}" PRIu64"", displayId);
                 continue;
             }
             abstractDisplay = iter->second;
             FreezeFlag curFlag = abstractDisplay->GetFreezeFlag();
             if ((toFreeze && (curFlag == FreezeFlag::FREEZING))
                 || (!toFreeze && (curFlag == FreezeFlag::UNFREEZING))) {
-                WLOGI("setfreeze fail, display %{public}" PRIu64" freezeflag is %{public}u",
+                WLOGE("setfreeze fail, display %{public}" PRIu64" freezeflag is %{public}u",
                     displayId, curFlag);
                 continue;
             }

@@ -32,8 +32,9 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         WLOGFE("InterfaceToken check failed");
         return -1;
     }
-    switch (code) {
-        case TRANS_ID_CREATE_WINDOW: {
+    WindowManagerMessage msgId = static_cast<WindowManagerMessage>(code);
+    switch (msgId) {
+        case WindowManagerMessage::TRANS_ID_CREATE_WINDOW: {
             sptr<IRemoteObject> windowObject = data.ReadRemoteObject();
             sptr<IWindow> windowProxy = iface_cast<IWindow>(windowObject);
             sptr<WindowProperty> windowProperty = data.ReadStrongParcelable<WindowProperty>();
@@ -50,45 +51,51 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case TRANS_ID_ADD_WINDOW: {
+        case WindowManagerMessage::TRANS_ID_ADD_WINDOW: {
             sptr<WindowProperty> windowProperty = data.ReadStrongParcelable<WindowProperty>();
             WMError errCode = AddWindow(windowProperty);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case TRANS_ID_REMOVE_WINDOW: {
+        case WindowManagerMessage::TRANS_ID_REMOVE_WINDOW: {
             uint32_t windowId = data.ReadUint32();
             WMError errCode = RemoveWindow(windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case TRANS_ID_DESTROY_WINDOW: {
+        case WindowManagerMessage::TRANS_ID_DESTROY_WINDOW: {
             uint32_t windowId = data.ReadUint32();
             WMError errCode = DestroyWindow(windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case TRANS_ID_REQUEST_FOCUS: {
+        case WindowManagerMessage::TRANS_ID_REQUEST_FOCUS: {
             uint32_t windowId = data.ReadUint32();
             WMError errCode = RequestFocus(windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case TRANS_ID_SET_BACKGROUND_BLUR: {
+        case WindowManagerMessage::TRANS_ID_SET_BACKGROUND_BLUR: {
             uint32_t windowId = data.ReadUint32();
             WindowBlurLevel level = static_cast<WindowBlurLevel>(data.ReadUint32());
             WMError errCode = SetWindowBackgroundBlur(windowId, level);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case TRANS_ID_SET_APLPHA: {
+        case WindowManagerMessage::TRANS_ID_SET_APLPHA: {
             uint32_t windowId = data.ReadUint32();
             float alpha = data.ReadFloat();
             WMError errCode = SetAlpha(windowId, alpha);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case TRANS_ID_GET_AVOID_AREA: {
+        case WindowManagerMessage::TRANS_ID_SET_BRIGHTNESS: {
+            uint32_t windowId = data.ReadUint32();
+            float brightness = data.ReadFloat();
+            SetBrightness(windowId, brightness);
+            break;
+        }
+        case WindowManagerMessage::TRANS_ID_GET_AVOID_AREA: {
             uint32_t windowId = data.ReadUint32();
             AvoidAreaType avoidAreaType = static_cast<AvoidAreaType>(data.ReadUint32());
             std::vector<Rect> avoidArea = GetAvoidAreaByType(windowId, avoidAreaType);
@@ -104,7 +111,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             }
             break;
         }
-        case TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
+        case WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
             WindowManagerAgentType type = static_cast<WindowManagerAgentType>(data.ReadUint32());
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
@@ -112,7 +119,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             RegisterWindowManagerAgent(type, windowManagerAgentProxy);
             break;
         }
-        case TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
+        case WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
             WindowManagerAgentType type = static_cast<WindowManagerAgentType>(data.ReadUint32());
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
@@ -120,18 +127,18 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
             break;
         }
-        case TRANS_ID_PROCESS_POINT_DOWN: {
+        case WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN: {
             uint32_t windowId = data.ReadUint32();
             bool isStartDrag = data.ReadBool();
             ProcessPointDown(windowId, isStartDrag);
             break;
         }
-        case TRANS_ID_PROCESS_POINT_UP: {
+        case WindowManagerMessage::TRANS_ID_PROCESS_POINT_UP: {
             uint32_t windowId = data.ReadUint32();
             ProcessPointUp(windowId);
             break;
         }
-        case TRANS_ID_GET_TOP_WINDOW_ID: {
+        case WindowManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID: {
             uint32_t mainWinId = data.ReadUint32();
             uint32_t topWinId;
             WMError errCode = GetTopWindowId(mainWinId, topWinId);
@@ -139,33 +146,41 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case TRANS_ID_MINIMIZE_ALL_APP_WINDOWS: {
+        case WindowManagerMessage::TRANS_ID_MINIMIZE_ALL_APP_WINDOWS: {
             MinimizeAllAppWindows(data.ReadUint64());
             break;
         }
-        case TRANS_ID_MAXMIZE_WINDOW: {
+        case WindowManagerMessage::TRANS_ID_MAXMIZE_WINDOW: {
             MaxmizeWindow(data.ReadUint32());
             break;
         }
-        case TRANS_ID_UPDATE_LAYOUT_MODE: {
+        case WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE: {
             DisplayId displayId = data.ReadUint64();
             WindowLayoutMode mode = static_cast<WindowLayoutMode>(data.ReadUint32());
             WMError errCode = SetWindowLayoutMode(displayId, mode);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case TRANS_ID_UPDATE_PROPERTY: {
+        case WindowManagerMessage::TRANS_ID_UPDATE_PROPERTY: {
             sptr<WindowProperty> windowProperty = data.ReadStrongParcelable<WindowProperty>();
             PropertyChangeAction action = static_cast<PropertyChangeAction>(data.ReadUint32());
             WMError errCode = UpdateProperty(windowProperty, action);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case TRANS_ID_ANIMATION_SET_CONTROLLER: {
+
+        case WindowManagerMessage::TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID: {
+            sptr<AccessibilityWindowInfo> windowInfo = data.ReadParcelable<AccessibilityWindowInfo>();
+            WMError errCode = GetAccessibilityWindowInfo(windowInfo);
+            reply.WriteParcelable(windowInfo);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER: {
             auto controller = iface_cast<RSIWindowAnimationController>(data.ReadParcelable<IRemoteObject>());
             WMError errCode = SetWindowAnimationController(controller);
             reply.WriteInt32(static_cast<int32_t>(errCode));
-            break;
+            break
         }
         default:
             WLOGFW("unknown transaction code");

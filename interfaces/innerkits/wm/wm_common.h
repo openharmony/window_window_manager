@@ -98,7 +98,8 @@ enum class WMError : int32_t {
 enum class WindowFlag : uint32_t {
     WINDOW_FLAG_NEED_AVOID = 1,
     WINDOW_FLAG_PARENT_LIMIT = 1 << 1,
-    WINDOW_FLAG_END = 1 << 2,
+    WINDOW_FLAG_SHOW_WHEN_LOCKED = 1 << 2,
+    WINDOW_FLAG_END = 1 << 3,
 };
 
 enum class WindowSizeChangeReason : uint32_t {
@@ -161,6 +162,9 @@ namespace {
     constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
     constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
     constexpr uint32_t INVALID_WINDOW_ID = 0;
+    constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
+    constexpr float MINIMUM_BRIGHTNESS = 0.0f;
+    constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
 }
 
 struct SystemBarProperty {
@@ -188,7 +192,7 @@ enum class OccupiedAreaType : uint32_t {
 
 enum class ColorSpace : uint32_t {
     COLOR_SPACE_DEFAULT = 0, // Default color space.
-    COLOR_SPACE_WIDE_GAMUT,  // Wide gamut color space. The specific wide color gamut depends on thr screen.
+    COLOR_SPACE_WIDE_GAMUT,  // Wide gamut color space. The specific wide color gamut depends on the screen.
 };
 
 enum class WindowAnimation : uint32_t {

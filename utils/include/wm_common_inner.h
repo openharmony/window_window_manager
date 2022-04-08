@@ -62,14 +62,15 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_OTHER_PROPS = 1 << 3,
     ACTION_UPDATE_FOCUSABLE = 1 << 4,
     ACTION_UPDATE_TOUCHABLE = 1 << 5,
+    ACTION_UPDATE_CALLING_WINDOW = 1 << 6,
 };
 
 namespace {
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
     constexpr uint32_t DIVIDER_WIDTH = 8;
-    constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 48;
-    constexpr uint32_t WINDOW_FRAME_WIDTH = 4;
-    constexpr uint32_t WINDOW_FRAME_TOP_WIDTH = 1; // the frame width of top position
+    constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 37;
+    constexpr uint32_t WINDOW_FRAME_WIDTH = 5;
+    constexpr uint32_t WINDOW_FRAME_CORNER_WIDTH = 16; // the frame width of corner
     constexpr uint32_t HOTZONE = 20;
     constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 240;
     constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 320;

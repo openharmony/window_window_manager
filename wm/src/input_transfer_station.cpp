@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,7 +93,7 @@ void InputTransferStation::RemoveInputWindow(const sptr<Window>& window)
             inputChannel->Destroy();
         }
     } else {
-        WLOGFE("Can not find windowId: %{public}d", windowId);
+        WLOGFE("Can not find windowId: %{public}u", windowId);
     }
 }
 
@@ -114,7 +114,7 @@ sptr<WindowInputChannel> InputTransferStation::GetInputChannel(uint32_t windowId
     std::lock_guard<std::mutex> lock(mtx_);
     auto iter = windowInputChannels_.find(windowId);
     if (iter == windowInputChannels_.end()) {
-        WLOGFE("Can not find channel according to windowId: %{public}d", windowId);
+        WLOGFE("Can not find channel according to windowId: %{public}u", windowId);
         return nullptr;
     }
     return iter->second;

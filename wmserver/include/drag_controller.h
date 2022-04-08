@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Rosen {
 class DragController : public RefBase {
 public:
-    DragController(sptr<WindowRoot>& root) : windowRoot_(root) {}
+    explicit DragController(sptr<WindowRoot>& root) : windowRoot_(root) {}
     ~DragController() = default;
     void StartDrag(uint32_t windowId);
     void UpdateDragInfo(uint32_t windowId);

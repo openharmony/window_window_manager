@@ -36,6 +36,7 @@ public:
     WMError RequestFocus(uint32_t windowId) override;
     WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) override;
     WMError SetAlpha(uint32_t windowId, float alpha) override;
+    void SetBrightness(uint32_t windowId, float brightness) override;
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void ProcessPointDown(uint32_t windowId, bool isStartDrag) override;
@@ -51,6 +52,8 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override;
 
+    WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
+    
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
 };

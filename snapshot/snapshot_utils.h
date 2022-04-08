@@ -17,6 +17,7 @@
 #define SNAPSHOT_UTILS_H
 
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <pixel_map.h>
 
@@ -32,6 +33,7 @@ using  WriteToPngParam = struct {
 };
 
 using CmdArgments = struct {
+    bool isDisplayIdSet = false;
     Rosen::DisplayId displayId = Rosen::DISPLAY_ID_INVALID;
     std::string fileName;
     bool isWidthSet = false;

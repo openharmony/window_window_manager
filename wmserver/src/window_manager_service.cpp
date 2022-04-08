@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,7 +106,7 @@ bool WindowManagerService::Init()
 
 void WindowManagerService::OnStop()
 {
-    SingletonContainer::Get<WindowInnerManager>().SendMessage(INNER_WM_DESTROY_THREAD);
+    SingletonContainer::Get<WindowInnerManager>().SendMessage(InnerWMCmd::INNER_WM_DESTROY_THREAD);
     WLOGFI("ready to stop service.");
 }
 
@@ -134,7 +134,7 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
         "%{public}4d %{public}4d]", windowId, property->GetWindowType(), property->GetWindowMode(),
         property->GetWindowFlags(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 
-    WM_SCOPED_TRACE("wms:AddWindow(%d)", windowId);
+    WM_SCOPED_TRACE("wms:AddWindow(%u)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WMError res = windowController_->AddWindowNode(property);
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
@@ -183,6 +183,12 @@ WMError WindowManagerService::SetAlpha(uint32_t windowId, float alpha)
     WM_SCOPED_TRACE("wms:SetAlpha");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->SetAlpha(windowId, alpha);
+}
+
+void WindowManagerService::SetBrightness(uint32_t windowId, float brightness)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    windowController_->SetBrightness(windowId, brightness);
 }
 
 std::vector<Rect> WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
@@ -306,6 +312,18 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
         dragController_->UpdateDragInfo(windowProperty->GetWindowId());
     }
+    return res;
+}
+
+WMError WindowManagerService::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
+{
+    if (windowInfo == nullptr) {
+        WLOGFE("windowInfo is invalid");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WM_SCOPED_TRACE("wms:GetAccessibilityWindowInfo");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    WMError res = windowRoot_->GetAccessibilityWindowInfo(windowInfo);
     return res;
 }
 } // namespace Rosen

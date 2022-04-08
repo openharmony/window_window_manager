@@ -32,7 +32,7 @@ class IWindowManager : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowManager");
 
-    enum {
+    enum class WindowManagerMessage : uint32_t {
         TRANS_ID_CREATE_WINDOW,
         TRANS_ID_ADD_WINDOW,
         TRANS_ID_REMOVE_WINDOW,
@@ -49,9 +49,11 @@ public:
         TRANS_ID_MINIMIZE_ALL_APP_WINDOWS,
         TRANS_ID_SET_BACKGROUND_BLUR,
         TRANS_ID_SET_APLPHA,
+        TRANS_ID_SET_BRIGHTNESS,
         TRANS_ID_UPDATE_LAYOUT_MODE,
         TRANS_ID_MAXMIZE_WINDOW,
         TRANS_ID_UPDATE_PROPERTY,
+        TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID,
         TRANS_ID_ANIMATION_SET_CONTROLLER,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
@@ -63,6 +65,7 @@ public:
     virtual WMError RequestFocus(uint32_t windowId) = 0;
     virtual WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) = 0;
     virtual WMError SetAlpha(uint32_t windowId, float alpha) = 0;
+    virtual void SetBrightness(uint32_t windowId, float brightness) = 0;
     virtual std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
     virtual void ProcessPointDown(uint32_t windowId, bool isStartDrag) = 0;
@@ -75,6 +78,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
+    virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) = 0;
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) = 0;
 };
 }

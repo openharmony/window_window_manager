@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,27 +125,6 @@ Rect WindowTestUtils::GetDefaultFoatingRect(const sptr<Window>& window)
     return resRect;
 }
 
-Rect WindowTestUtils::GetLimitedDecoRect(const Rect& rect, float virtualPixelRatio)
-{
-    constexpr uint32_t windowTitleBarHeight = 48;
-    constexpr uint32_t windowFrameWidth = 4;
-    uint32_t winFrameH = static_cast<uint32_t>((windowTitleBarHeight + windowFrameWidth) * virtualPixelRatio);
-    uint32_t winFrameW = static_cast<uint32_t>((windowFrameWidth + windowFrameWidth) * virtualPixelRatio);
-    uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
-    uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
-
-    bool vertical = displayRect_.width_ < displayRect_.height_;
-    uint32_t minFloatingW = vertical ? minVerticalFloatingW : minVerticalFloatingH;
-    uint32_t minFloatingH = vertical ? minVerticalFloatingH : minVerticalFloatingW;
-    Rect resRect = {
-        rect.posX_,
-        rect.posY_,
-        std::max(minFloatingW, rect.width_ + winFrameW),
-        std::max(minFloatingH, rect.height_ + winFrameH),
-    };
-    return resRect;
-}
-
 Rect WindowTestUtils::CalcLimitedRect(const Rect& rect, float virtualPixelRatio)
 {
     constexpr uint32_t maxLimitLen = 2560;
@@ -183,6 +162,19 @@ Rect WindowTestUtils::GetFloatingLimitedRect(const Rect& rect, float virtualPixe
     return resRect;
 }
 
+Rect WindowTestUtils::GetDecorateRect(const Rect& rect, float virtualPixelRatio)
+{
+    uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
+    uint32_t winTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
+
+    Rect resRect;
+    resRect.posX_ = rect.posX_;
+    resRect.posY_ = rect.posY_;
+    resRect.width_ = rect.width_ + winFrameW + winFrameW;
+    resRect.height_ = rect.height_ + winTitleBarH + winFrameW;
+    return resRect;
+}
+
 void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
 {
     const float barRatio = 0.07;
@@ -205,17 +197,19 @@ void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
 
 void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window)
 {
-    constexpr uint32_t edgeInterval = 48;
-    constexpr uint32_t midInterval = 24;
-    constexpr float ratio = 0.75;  // 0.75: default height/width ratio
-    constexpr float edgeRatio = 0.125;
+    float virtualPixelRatio = GetVirtualPixelRatio(0);
+    uint32_t edgeInterval = 48 * virtualPixelRatio; // 48 is edge interval
+    uint32_t midInterval = 24 * virtualPixelRatio; // 24 is mid interval
+    constexpr float ratio = 0.66;  // 0.66: default height/width ratio
     constexpr int half = 2;
     limitDisplayRect_ = displayRect_;
     UpdateSplitRects(window);
-    int x = limitDisplayRect_.posX_ + (limitDisplayRect_.width_ * edgeRatio);
-    int y = limitDisplayRect_.posY_ + (limitDisplayRect_.height_ * edgeRatio);
-    uint32_t w = limitDisplayRect_.width_ * ratio;
-    uint32_t h = limitDisplayRect_.height_ * ratio;
+    uint32_t w = displayRect_.width_ * ratio;
+    uint32_t h = displayRect_.height_ * ratio;
+    w = w > limitDisplayRect_.width_ ? limitDisplayRect_.width_ : w;
+    h = h > limitDisplayRect_.height_ ? limitDisplayRect_.height_ : h;
+    int x = limitDisplayRect_.posX_ + ((limitDisplayRect_.width_ - w) / half);
+    int y = limitDisplayRect_.posY_ + ((limitDisplayRect_.height_ - h) / half);
     singleTileRect_ = { x, y, w, h };
     WLOGFI("singleRect_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
     x = edgeInterval;

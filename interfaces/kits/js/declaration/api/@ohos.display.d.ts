@@ -16,156 +16,155 @@
 import { AsyncCallback, Callback } from './basic';
 
 /**
- * interface of display manager
+ * Interface of display manager.
  * @syscap SystemCapability.WindowManager.WindowManager.Core
  * @devices tv, phone, tablet, wearable
  */
 declare namespace display {
 
   /**
-   * get the default display
+   * Obtain the default display.
    * @devices tv, phone, tablet, wearable
    */
   function getDefaultDisplay(callback: AsyncCallback<Display>): void;
 
   /**
-   * get the default display
+   * Obtain the default display.
    * @devices tv, phone, tablet, wearable
    */
   function getDefaultDisplay(): Promise<Display>;
 
   /**
-   * get all displays
+   * Obtain all displays.
    * @devices tv, phone, tablet, wearable
    * @param callback
    */
   function getAllDisplay(callback: AsyncCallback<Array<Display>>): void;
 
   /**
-   * get all displays
+   * Obtain all displays.
    * @devices tv, phone, tablet, wearable
    */
   function getAllDisplay() : Promise<Array<Display>>;
 
   /**
-   * register the callback of display change
+   * Register the callback for display changes.
    * @param type: type of callback
    * @devices tv, phone, tablet, wearable, car
    */
   function on(type: 'add' | 'remove' | 'change', callback: Callback<number>): void;
 
   /**
-   * unregister the callback of display change
+   * Unregister the callback for display changes.
    * @param type: type of callback
    * #devices tv, phone, tablet, wearable, car
    */
   function off(type: 'add' | 'remove' | 'change', callback?: Callback<number>): void;
 
   /**
-  /**
-   * the state of display
+   * Enumerates the display states.
    * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @devices tv, phone, tablet, wearable
    */
   enum DisplayState {
     /**
-     * unknown
+     * Unknown.
      */
     STATE_UNKNOWN = 0,
     /**
-     * screen off
+     * Screen off.
      */
     STATE_OFF,
     /**
-     * screen on
+     * Screen on.
      */
     STATE_ON,
     /**
-     * doze, but it will update for some important system messages
+     * Doze, but it will update for some important system messages.
      */
     STATE_DOZE,
     /**
-     * doze and not update
+     * Doze and not update.
      */
     STATE_DOZE_SUSPEND,
     /**
-     * VR node
+     * VR node.
      */
     STATE_VR,
     /**
-     * screen on and not update
+     * Screen on and not update.
      */
     STATE_ON_SUSPEND,
   }
 
   /**
-   * Properties of display, it couldn't update automatically
+   * Defines properties of the display. They cannot be updated automatically.
    * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @devices tv, phone, tablet, wearable
    */
   interface Display {
     /**
-     * display id
+     * Display ID.
      */
     id: number;
 
     /**
-     * display name
+     * Display name.
      */
     name: string;
 
     /**
-     * the display is alive
+     * The display is alive.
      */
     alive: boolean;
 
     /**
-     * the state of display
+     * The state of display.
      */
     state: DisplayState;
 
     /**
-     * refresh rate, unit: Hz
+     * Refresh rate, in Hz.
      */
     refreshRate: number;
 
     /**
-     * the rotation degrees of the display
+     * Rotation degrees of the display.
      */
     rotation: number;
 
     /**
-     * the width of display, unit: pixel
+     * Display width, in pixels.
      */
     width: number;
 
     /**
-     * the height of display, unit: pixel
+     * Display height, in pixels.
      */
     height: number;
 
     /**
-     * indicates the display resolution.
+     * Display resolution.
      */
     densityDPI: number;
 
     /**
-     * indicates the display density in pixels. The value of a low-resolution display is 1.0
+     * Display density, in pixels. The value for a low-resolution display is 1.0.
      */
     densityPixels: number;
 
     /**
-     * indicates the text scale density of a display.
+     * Text scale density of the display.
      */
     scaledDensity: number;
 
     /**
-     * the DPI on X-axis.
+     * DPI on the x-axis.
      */
     xDPI: number;
 
     /**
-     * the DPI on Y-axis.
+     * DPI on the y-axis.
      */
     yDPI: number;
   }

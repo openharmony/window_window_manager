@@ -86,6 +86,13 @@ void WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 }
 
+WMError WindowAdapter::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
+    return windowManagerServiceProxy_->GetAccessibilityWindowInfo(windowInfo);
+}
+
 WMError WindowAdapter::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
@@ -221,6 +228,13 @@ WMError WindowAdapter::UpdateProperty(sptr<WindowProperty>& windowProperty, Prop
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     return windowManagerServiceProxy_->UpdateProperty(windowProperty, action);
+}
+
+void WindowAdapter::SetBrightness(uint32_t windowId, float brightness)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    windowManagerServiceProxy_->SetBrightness(windowId, brightness);
 }
 } // namespace Rosen
 } // namespace OHOS

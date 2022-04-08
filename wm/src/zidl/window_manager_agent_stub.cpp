@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,22 +28,14 @@ namespace {
 int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     MessageParcel& reply, MessageOption& option)
 {
-    WLOGFI("WindowManagerAgentStub::OnRemoteRequest code is %{public}d", code);
+    WLOGFI("WindowManagerAgentStub::OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
         return -1;
     }
-    switch (code) {
-        case TRANS_ID_UPDATE_FOCUS_STATUS: {
-            uint32_t windowId = data.ReadUint32();
-            sptr<IRemoteObject> abilityToken = data.ReadRemoteObject();
-            WindowType windowType = static_cast<WindowType>(data.ReadUint32());
-            DisplayId displayId = data.ReadUint64();
-            bool focused = data.ReadBool();
-            UpdateFocusStatus(windowId, abilityToken, windowType, displayId, focused);
-            break;
-        }
-        case TRANS_ID_UPDATE_FOCUS: {
+    WindowManagerAgentMsg msgId = static_cast<WindowManagerAgentMsg>(code);
+    switch (msgId) {
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS: {
             sptr<FocusChangeInfo> info = data.ReadParcelable<FocusChangeInfo>();
             if (info != nullptr) {
                 info->abilityToken_ = data.ReadRemoteObject();
@@ -52,7 +44,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateFocusChangeInfo(info, focused);
             break;
         }
-        case TRANS_ID_UPDATE_SYSTEM_BAR_PROPS: {
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_SYSTEM_BAR_PROPS: {
             DisplayId displayId = data.ReadUint64();
             SystemBarRegionTints tints;
             bool res = MarshallingHelper::UnmarshallingVectorObj<SystemBarRegionTint>(data, tints,
@@ -77,13 +69,13 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateSystemBarRegionTints(displayId, tints);
             break;
         }
-        case TRANS_ID_UPDATE_WINDOW_STATUS: {
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STATUS: {
             sptr<AccessibilityWindowInfo> windowInfo = data.ReadParcelable<AccessibilityWindowInfo>();
             WindowUpdateType type = static_cast<WindowUpdateType>(data.ReadUint32());
             NotifyAccessibilityWindowInfo(windowInfo, type);
             break;
         }
-        case TRANS_ID_UPDATE_WINDOW_VISIBILITY: {
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_VISIBILITY: {
             std::vector<sptr<WindowVisibilityInfo>> infos;
             if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowVisibilityInfo>(data, infos)) {
                 WLOGFE("fail to read WindowVisibilityInfo.");

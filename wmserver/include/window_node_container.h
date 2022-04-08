@@ -40,6 +40,10 @@ public:
     void AssignZOrder();
     WMError SetFocusWindow(uint32_t windowId);
     uint32_t GetFocusWindow() const;
+    WMError SetActiveWindow(uint32_t windowId, bool byRemoved);
+    void SetDisplayBrightness(float brightness);
+    float GetDisplayBrightness() const;
+    uint32_t GetActiveWindow() const;
     std::vector<Rect> GetAvoidAreaByType(AvoidAreaType avoidAreaType);
     WMError MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node);
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
@@ -55,6 +59,7 @@ public:
     bool isVerticalDisplay() const;
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     sptr<WindowNode> GetNextFocusableWindow(uint32_t windowId) const;
+    sptr<WindowNode> GetNextActiveWindow(uint32_t windowId) const;
     void MinimizeAllAppWindows();
     void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifySystemBarTints();
@@ -68,13 +73,16 @@ public:
     void MoveWindowNode(sptr<WindowNodeContainer>& container);
     float GetVirtualPixelRatio() const;
     void TraverseWindowTree(const WindowNodeOperationFunc& func, bool isFromTopToBottom = true) const;
-    void UpdateSizeChangeReasonForPointUp(sptr<WindowNode>& node);
+    void UpdateSizeChangeReason(sptr<WindowNode>& node, WindowSizeChangeReason reason);
+    void GetWindowList(std::vector<sptr<WindowInfo>>& windowList) const;
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
     sptr<WindowNode> FindWindowNodeById(uint32_t id) const;
     void UpdateFocusStatus(uint32_t id, bool focused) const;
+    void UpdateActiveStatus(uint32_t id, bool isActive) const;
+    void UpdateBrightness(uint32_t id, bool byRemoved);
     void UpdateWindowTree(sptr<WindowNode>& node);
     bool UpdateRSTree(sptr<WindowNode>& node, bool isAdd);
 
@@ -100,7 +108,6 @@ private:
     void UpdateWindowVisibilityInfos(std::vector<sptr<WindowVisibilityInfo>>& infos);
     void RaiseOrderedWindowToTop(std::vector<uint32_t> orderedIds, std::vector<sptr<WindowNode>>& windowNodes);
     static bool ReadIsWindowAnimationEnabledProperty();
-    void GetWindowList(std::vector<sptr<WindowInfo>>& windowList) const;
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
@@ -124,6 +131,8 @@ private:
     sptr<WindowLayoutPolicy> layoutPolicy_;
     uint32_t zOrder_ { 0 };
     uint32_t focusedWindow_ { INVALID_WINDOW_ID };
+    uint32_t activeWindow_ = INVALID_WINDOW_ID;
+    float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     void DumpScreenWindowTree();
 
     struct WindowPairInfo {
@@ -132,6 +141,7 @@ private:
     };
     std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
+    void RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node) const;
     const int32_t WINDOW_TYPE_RAISED_INPUT_METHOD = 115;
 };
 } // namespace Rosen

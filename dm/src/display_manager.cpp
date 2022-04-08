@@ -69,7 +69,7 @@ private:
 
 class DisplayManager::Impl::DisplayManagerListener : public DisplayManagerAgentDefault {
 public:
-    DisplayManagerListener(sptr<Impl> impl) : pImpl_(impl)
+    explicit DisplayManagerListener(sptr<Impl> impl) : pImpl_(impl)
     {
     }
 
@@ -127,7 +127,7 @@ private:
 
 class DisplayManager::Impl::DisplayManagerAgent : public DisplayManagerAgentDefault {
 public:
-    DisplayManagerAgent(sptr<Impl> impl) : pImpl_(impl)
+    explicit DisplayManagerAgent(sptr<Impl> impl) : pImpl_(impl)
     {
     }
     ~DisplayManagerAgent() = default;

@@ -132,6 +132,15 @@ WMError WindowScene::GoDestroy()
     return WMError::WM_OK;
 }
 
+WMError WindowScene::OnNewWant(const AAFwk::Want& want)
+{
+    if (mainWindow_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    mainWindow_->OnNewWant(want);
+    return WMError::WM_OK;
+}
+
 WMError WindowScene::SetSystemBarProperty(WindowType type, const SystemBarProperty& property) const
 {
     if (mainWindow_ == nullptr) {
@@ -154,7 +163,7 @@ void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
         WLOGFE("mainWindow_ is null");
         return;
     }
-    WLOGFI("notify mainWindow winId:%{public}d", mainWindow_->GetWindowId());
+    WLOGFI("notify mainWindow winId:%{public}u", mainWindow_->GetWindowId());
     mainWindow_->UpdateConfiguration(configuration);
 }
 

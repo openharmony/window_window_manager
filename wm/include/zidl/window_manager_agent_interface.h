@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,16 +33,13 @@ class IWindowManagerAgent : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowManagerAgent");
 
-    enum {
-        TRANS_ID_UPDATE_FOCUS_STATUS = 1,
-        TRANS_ID_UPDATE_FOCUS,
+    enum class WindowManagerAgentMsg : uint32_t {
+        TRANS_ID_UPDATE_FOCUS  = 1,
         TRANS_ID_UPDATE_SYSTEM_BAR_PROPS,
         TRANS_ID_UPDATE_WINDOW_STATUS,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY,
     };
 
-    virtual void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
-        DisplayId displayId, bool focused) = 0;
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
     virtual void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) = 0;
     virtual void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,

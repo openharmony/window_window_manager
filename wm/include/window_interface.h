@@ -28,7 +28,7 @@ class IWindow : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindow");
 
-    enum {
+    enum class WindowMessage : uint32_t {
         TRANS_ID_UPDATE_WINDOW_RECT,
         TRANS_ID_UPDATE_WINDOW_MODE,
         TRANS_ID_UPDATE_FOCUS_STATUS,
@@ -37,6 +37,7 @@ public:
         TRANS_ID_UPDATE_DRAG_EVENT,
         TRANS_ID_UPDATE_DISPLAY_ID,
         TRANS_ID_UPDATE_OCCUPIED_AREA,
+        TRANS_ID_UPDATE_ACTIVE_STATUS,
     };
 
     virtual void UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason) = 0;
@@ -47,6 +48,7 @@ public:
     virtual void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) = 0;
     virtual void UpdateDisplayId(DisplayId from, DisplayId to) = 0;
     virtual void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) = 0;
+    virtual void UpdateActiveStatus(bool isActive) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

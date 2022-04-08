@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,6 +97,11 @@ void WindowNode::SetAlpha(float alpha)
     surfaceNode_->SetAlpha(alpha);
 }
 
+void WindowNode::SetBrightness(float brightness)
+{
+    property_->SetBrightness(brightness);
+}
+
 void WindowNode::SetFocusable(bool focusable)
 {
     property_->SetFocusable(focusable);
@@ -105,6 +110,16 @@ void WindowNode::SetFocusable(bool focusable)
 void WindowNode::SetTouchable(bool touchable)
 {
     property_->SetTouchable(touchable);
+}
+
+void WindowNode::SetCallingWindow(uint32_t windowId)
+{
+    property_->SetCallingWindow(windowId);
+}
+
+uint32_t WindowNode::GetCallingWindow() const
+{
+    return property_->GetCallingWindow();
 }
 
 void WindowNode::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
@@ -170,6 +185,11 @@ WindowBlurLevel WindowNode::GetWindowBackgroundBlur() const
 float WindowNode::GetAlpha() const
 {
     return property_->GetAlpha();
+}
+
+float WindowNode::GetBrightness() const
+{
+    return property_->GetBrightness();
 }
 
 uint32_t WindowNode::GetWindowFlags() const

@@ -30,36 +30,129 @@ namespace OHOS {
 namespace Rosen {
 class WindowScene : public RefBase {
 public:
-    static const DisplayId DEFAULT_DISPLAY_ID = 0;
-    static const std::string MAIN_WINDOW_ID;
-
+    /**
+     * Default constructor used to create an empty WindowScene instance.
+     */
     WindowScene() = default;
+
+    /**
+     * Default deconstructor used to deconstruct.
+     *
+     */
     ~WindowScene();
 
+    /**
+     * Init a WindowScene instance based on the parameters displayId, context, listener and option.
+     *
+     * @param displayId the id of current display
+     * @param context current ability context
+     * @param listener the life cycle listener of the window
+     * @param option the settings for window, such as WindowType, width, height, etc
+     * @return the error code of window
+     */
     WMError Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
         sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option = nullptr);
 
+    /**
+     * Create a window instance based on the parameters windowName and option.
+     *
+     * @param windowName the id of this window
+     * @param option the settings for window, such as WindowType, width, height, etc.
+     * @return the shared pointer of window
+     */
     sptr<Window> CreateWindow(const std::string& windowName, sptr<WindowOption>& option) const;
+
+    /**
+     * Get shared pointer of main window.
+     *
+     * @return the shared pointer of window
+     */
     const sptr<Window>& GetMainWindow() const;
+
+    /**
+     * Get a set of sub window.
+     *
+     * @return a set of sub window
+     */
     std::vector<sptr<Window>> GetSubWindow();
 
+    /**
+     * window go foreground.
+     *
+     * @param reason the reason of window to go to foreground, default 0.
+     * @return the error code of window
+     */
     WMError GoForeground(uint32_t reason = 0);
+
+    /**
+     * Window go background.
+     *
+     * @param reason the reason of window to go to background, default 0.
+     * @return the error code of window
+     */
     WMError GoBackground(uint32_t reason = 0);
+
+    /**
+     * Window go distroy.
+     *
+     * @return the error code of window
+     */
     WMError GoDestroy();
 
+    /**
+     * Window handle new want.
+     *
+     * @param want ability want.
+     * @return the error code of window
+     */
+    WMError OnNewWant(const AAFwk::Want& want);
+
+    /**
+     * Request to get the focus.
+     *
+     * @return the error code of window
+     */
     WMError RequestFocus() const;
+
+    /**
+     * Update ability configuration.
+     *
+     * @param configuration the configuration of ability
+     */
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
+    /**
+     * Set main window system bar property
+     *
+     * @param type the type of window
+     * @param property the property of system bar
+     * @return the error code of window
+     */
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) const;
 
+    /**
+     * Get content info of main window.
+     *
+     * @return content info of main window
+     */
     std::string GetContentInfo() const;
 
-private:
-    static inline std::atomic<uint32_t> count { 0 };
-    sptr<Window> mainWindow_ = nullptr;
-    DisplayId displayId_ = DEFAULT_DISPLAY_ID;
+public:
+    static const DisplayId DEFAULT_DISPLAY_ID = 0;
+    static const std::string MAIN_WINDOW_ID;
 
-    std::shared_ptr<AbilityRuntime::Context> context_ = nullptr;
+private:
+    /**
+     * @param context the context of a main window
+     * @return the name of main window
+     */
     std::string GenerateMainWindowName(const std::shared_ptr<AbilityRuntime::Context>& context) const;
+
+private:
+    sptr<Window> mainWindow_ = nullptr;
+    static inline std::atomic<uint32_t> count { 0 };
+    DisplayId displayId_ = DEFAULT_DISPLAY_ID;
+    std::shared_ptr<AbilityRuntime::Context> context_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

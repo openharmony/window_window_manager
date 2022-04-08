@@ -49,8 +49,11 @@ public:
     void SetWindowMode(WindowMode mode);
     void SetWindowBackgroundBlur(WindowBlurLevel level);
     void SetAlpha(float alpha);
+    void SetBrightness(float brightness);
     void SetFocusable(bool focusable);
     void SetTouchable(bool touchable);
+    void SetCallingWindow(uint32_t windowId);
+    uint32_t GetCallingWindow() const;
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
@@ -63,6 +66,7 @@ public:
     WindowMode GetWindowMode() const;
     WindowBlurLevel GetWindowBackgroundBlur() const;
     float GetAlpha() const;
+    float GetBrightness() const;
     uint32_t GetWindowFlags() const;
     const sptr<WindowProperty>& GetWindowProperty() const;
     int32_t GetCallingPid() const;
@@ -80,6 +84,7 @@ public:
     bool requestedVisibility_ { false };
     bool currentVisibility_ { false };
     bool hasDecorated_ { false };
+    bool isDefultLayoutRect_ { false };
     bool isCovered_ { true }; // initial value true to ensure notification when this window is shown
 
 private:

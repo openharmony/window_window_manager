@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,21 +35,44 @@
 
 namespace OHOS {
 namespace Rosen {
+union ColorParam {
+#if BIG_ENDIANNESS
+    struct {
+        uint8_t alpha;
+        uint8_t red;
+        uint8_t green;
+        uint8_t blue;
+    } argb;
+#else
+    struct {
+        uint8_t blue;
+        uint8_t green;
+        uint8_t red;
+        uint8_t alpha;
+    } argb;
+#endif
+    uint32_t value;
+};
+
 class WindowImpl : public Window {
-#define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, uiContentCb) \
+#define CALL_LIFECYCLE_LISTENER(windowLifecycleCb)              \
     do {                                                        \
         for (auto& listener : lifecycleListeners_) {            \
             if (listener != nullptr) {                          \
                 listener->windowLifecycleCb();                  \
             }                                                   \
         }                                                       \
+    } while (0)
+
+#define CALL_UI_CONTENT(uiContentCb)                            \
+    do {                                                        \
         if (uiContent_ != nullptr) {                            \
             uiContent_->uiContentCb();                          \
         }                                                       \
     } while (0)
 
 public:
-    WindowImpl(const sptr<WindowOption>& option);
+    explicit WindowImpl(const sptr<WindowOption>& option);
     ~WindowImpl();
 
     static sptr<Window> Find(const std::string& id);
@@ -101,7 +124,17 @@ public:
     virtual WMError MoveTo(int32_t x, int32_t y) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
     virtual void SetKeepScreenOn(bool keepScreenOn) override;
-    virtual bool GetKeepScreenOn() const override;
+    virtual bool IsKeepScreenOn() const override;
+    virtual void SetTurnScreenOn(bool turnScreenOn) override;
+    virtual bool IsTurnScreenOn() const override;
+    virtual void SetBackgroundColor(const std::string& color) override;
+    virtual void SetTransparent(bool isTransparent) override;
+    virtual bool IsTransparent() const override;
+    virtual void SetBrightness(float brightness) override;
+    virtual float GetBrightness() const override;
+    virtual void SetCallingWindow(uint32_t windowId) override;
+    virtual void SetPrivacyMode(bool isPrivacyMode) override;
+    virtual bool IsPrivacyMode() const override;
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;
@@ -123,6 +156,8 @@ public:
     virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
+    virtual void RegisterInputEventListener(sptr<IInputEventListener>& listener) override;
+    virtual void UnregisterInputEventListener(sptr<IInputEventListener>& listener) override;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
@@ -138,12 +173,14 @@ public:
     void UpdateDragEvent(const PointInfo& point, DragEvent event);
     void UpdateDisplayId(DisplayId from, DisplayId to);
     void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info);
+    void UpdateActiveStatus(bool isActive);
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed) override;
     virtual std::string GetContentInfo() override;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
     virtual Ace::UIContent* GetUIContent() const override;
+    virtual void OnNewWant(const AAFwk::Want& want) override;
 
     // colorspace, gamut
     virtual bool IsSupportWideGamut() override;
@@ -154,33 +191,31 @@ public:
 private:
     inline void NotifyAfterForeground() const
     {
-        CALL_LIFECYCLE_LISTENER(AfterForeground, Foreground);
+        CALL_LIFECYCLE_LISTENER(AfterForeground);
+        CALL_UI_CONTENT(Foreground);
     }
     inline void NotifyAfterBackground() const
     {
-        CALL_LIFECYCLE_LISTENER(AfterBackground, Background);
+        CALL_LIFECYCLE_LISTENER(AfterBackground);
+        CALL_UI_CONTENT(Background);
     }
     inline void NotifyAfterFocused() const
     {
-        CALL_LIFECYCLE_LISTENER(AfterFocused, Focus);
+        CALL_LIFECYCLE_LISTENER(AfterFocused);
+        CALL_UI_CONTENT(Focus);
     }
     inline void NotifyAfterUnfocused() const
     {
-        CALL_LIFECYCLE_LISTENER(AfterUnfocused, UnFocus);
+        CALL_LIFECYCLE_LISTENER(AfterUnfocused);
+        CALL_UI_CONTENT(UnFocus);
     }
     inline void NotifyListenerAfterUnfocused() const
     {
-        for (auto& listener : lifecycleListeners_) {
-            if (listener != nullptr) {
-                listener->AfterUnfocused();
-            }
-        }
+        CALL_LIFECYCLE_LISTENER(AfterUnfocused);
     }
     inline void NotifyBeforeDestroy(std::string windowName) const
     {
-        if (uiContent_ != nullptr) {
-            uiContent_->Destroy();
-        }
+        CALL_UI_CONTENT(Destroy);
         if (notifyNativefunc_) {
             notifyNativefunc_(windowName);
         }
@@ -194,6 +229,14 @@ private:
         if (window->GetNativeDestroyCallback()) {
             window->GetNativeDestroyCallback()(window->GetWindowName());
         }
+    }
+    inline void NotifyAfterActive() const
+    {
+        CALL_LIFECYCLE_LISTENER(AfterActive);
+    }
+    inline void NotifyAfterInactive() const
+    {
+        CALL_LIFECYCLE_LISTENER(AfterInactive);
     }
     void DestroyFloatingWindow();
     void DestroySubWindow();
@@ -213,6 +256,7 @@ private:
     WMError UpdateProperty(PropertyChangeAction action);
     WMError Destroy(bool needNotifyServer);
     void HandleKeepScreenOn(bool keepScreenOn);
+    void HandleTurnScreenOn();
     Rect GetSystemAlarmWindowDefaultSize(Rect defaultRect);
 
     // colorspace, gamut
@@ -238,6 +282,7 @@ private:
     std::vector<sptr<IWindowDragListener>> windowDragListeners_;
     std::vector<sptr<IDisplayMoveListener>> displayMoveListeners_;
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners_;
+    std::vector<sptr<IInputEventListener>> inputEventListeners_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
@@ -255,7 +300,11 @@ private:
     bool pointEventStarted_ = false;
     Rect startPointRect_ = { 0, 0, 0, 0 };
     Rect startRectExceptFrame_ = { 0, 0, 0, 0 };
+    Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
     bool keepScreenOn_ = false;
+    bool turnScreenOn_ = false;
+    float brightness_ = UNDEFINED_BRIGHTNESS;
+    ColorParam backgroundColor_ = { .value = 0xff000000 };
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 };
 }

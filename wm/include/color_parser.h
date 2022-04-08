@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_LIFE_CYCLE_H
-#define OHOS_ROSEN_WINDOW_LIFE_CYCLE_H
+#ifndef OHOS_ROSEN_COLOR_PARSER_H
+#define OHOS_ROSEN_COLOR_PARSER_H
 
-#include <refbase.h>
+#include <string>
 
 namespace OHOS {
 namespace Rosen {
-class IWindowLifeCycle : virtual public RefBase {
+class ColorParser {
 public:
-    virtual void AfterForeground() = 0;
-    virtual void AfterBackground() = 0;
-    virtual void AfterFocused() = 0;
-    virtual void AfterUnfocused() {}
+    static bool Parse(const std::string& colorStr, uint32_t& colorValue);
+
+private:
+    static bool IsValidHexString(const std::string& colorStr);
+
+    ColorParser() = default;
+    ~ColorParser() = default;
 };
 }
 }
-#endif // OHOS_ROSEN_WINDOW_LIFE_CYCLE_H
+#endif // OHOS_ROSEN_COLOR_PARSER_H

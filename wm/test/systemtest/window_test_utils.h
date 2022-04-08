@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include "display_manager.h"
 #include "window.h"
 #include "window_layout_policy.h"
-#include "window_life_cycle_interface.h"
 #include "window_option.h"
 #include "window_scene.h"
 #include "wm_common.h"
@@ -66,8 +65,8 @@ public:
     static void UpdateSplitRects(const sptr<Window>& window);
     static bool RectEqualToRect(const Rect& l, const Rect& r);
     static Rect GetDefaultFoatingRect(const sptr<Window>& window);
-    static Rect GetLimitedDecoRect(const Rect& rect, float virtualPixelRatio);
     static Rect CalcLimitedRect(const Rect& rect, float virtualPixelRatio);
+    static Rect GetDecorateRect(const Rect& rect, float virtualPixelRatio);
     static Rect GetFloatingLimitedRect(const Rect& rect, float virtualPixelRatio);
     static void InitTileWindowRects(const sptr<Window>& window);
     static float GetVirtualPixelRatio(DisplayId displayId);

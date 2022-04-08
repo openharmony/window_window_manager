@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,6 +135,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
         }
     } else if (reason == WindowSizeChangeReason::RESIZE) {
         node->hasDecorated_ = false;
+        node->isDefultLayoutRect_ = false;
         newRect = { lastRect.posX_, lastRect.posY_, rect.width_, rect.height_ };
     } else if (reason == WindowSizeChangeReason::DRAG) {
         if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
@@ -149,7 +150,6 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
             newRect = rect;
         }
     }
-
     property->SetWindowRect(newRect);
     WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_RECT);
     if (res != WMError::WM_OK) {
@@ -247,6 +247,11 @@ WMError WindowController::SetAlpha(uint32_t windowId, float dstAlpha)
 
     FlushWindowInfo(windowId);
     return WMError::WM_OK;
+}
+
+void WindowController::SetBrightness(uint32_t windowId, float brightness)
+{
+    windowRoot_->SetBrightness(windowId, brightness);
 }
 
 void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStateChangeType type)
@@ -406,13 +411,14 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
     }
 
     if (isStartDrag) {
-        node->GetWindowToken()->UpdateWindowRect(node->GetLayoutRect(), WindowSizeChangeReason::DRAG_START);
-        WLOGFI("Notify window that the drag action is start: %{public}d", node->GetWindowId());
-        return WMError::WM_OK;
+        WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
+        return res;
     }
 
+    WLOGFI("process point down, windowId: %{public}u", windowId);
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     WMError focusRes = windowRoot_->RequestFocus(windowId);
+    windowRoot_->RequestActiveWindow(windowId);
     if (zOrderRes == WMError::WM_OK || focusRes == WMError::WM_OK) {
         FlushWindowInfo(windowId);
         WLOGFI("ProcessPointDown end");
@@ -429,7 +435,7 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
         WLOGFW("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WMError res = windowRoot_->UpdateSizeChangeReasonForPointUp(windowId);
+    WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_END);
     if (res != WMError::WM_OK) {
         return res;
     }
@@ -538,6 +544,10 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         }
         case PropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
             node->SetTouchable(property->GetTouchable());
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW: {
+            node->SetCallingWindow(property->GetCallingWindow());
             break;
         }
         default:

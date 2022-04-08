@@ -25,8 +25,10 @@
 #include <transaction/rs_interfaces.h>
 
 #include "abstract_screen.h"
+#include "display_manager_agent_controller.h"
 #include "dm_common.h"
 #include "screen.h"
+#include "zidl/display_manager_agent_interface.h"
 
 namespace OHOS::Rosen {
 class AbstractScreenController : public RefBase {
@@ -39,7 +41,7 @@ public:
         OnAbstractScreenChangeCb onChange_;
     };
 
-    AbstractScreenController(std::recursive_mutex& mutex);
+    explicit AbstractScreenController(std::recursive_mutex& mutex);
     ~AbstractScreenController();
     WM_DISALLOW_COPY_AND_MOVE(AbstractScreenController);
 
@@ -54,7 +56,7 @@ public:
     ScreenId ConvertToRsScreenId(ScreenId dmsScreenId) const;
     ScreenId ConvertToDmsScreenId(ScreenId rsScreenId) const;
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
-    ScreenId CreateVirtualScreen(VirtualScreenOption option);
+    ScreenId CreateVirtualScreen(VirtualScreenOption option, const sptr<IRemoteObject>& displayManagerAgent);
     DMError DestroyVirtualScreen(ScreenId screenId);
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     bool SetOrientation(ScreenId screenId, Orientation orientation);
@@ -64,6 +66,7 @@ public:
     void UpdateRSTree(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     bool MakeMirror(ScreenId, std::vector<ScreenId> screens);
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
+    void SetShotScreen(ScreenId mainScreenId, std::vector<ScreenId> shotScreenIds);
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
     void DumpScreenInfo() const;
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) const;
@@ -80,6 +83,8 @@ public:
 private:
     void RegisterRsScreenConnectionChangeListener();
     void OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent);
+    bool OnRemoteDied(const sptr<IRemoteObject>& agent);
+    bool RegisterVirtualScreenAgent(const sptr<IRemoteObject>& displayManagerAgent);
     void ProcessScreenConnected(ScreenId rsScreenId);
     sptr<AbstractScreen> InitAndGetScreen(ScreenId rsScreenId);
     void ProcessScreenDisconnected(ScreenId rsScreenId);
@@ -122,13 +127,13 @@ private:
         std::map<ScreenId, ScreenId> dms2RsScreenIdMap_;
     };
 
-    const std::string CONTROLLER_THREAD_ID = "abstract_screen_controller_thread";
-
     std::recursive_mutex& mutex_;
     OHOS::Rosen::RSInterfaces& rsInterface_;
     ScreenIdManager screenIdManager_;
     std::map<ScreenId, sptr<AbstractScreen>> dmsScreenMap_;
     std::map<ScreenId, sptr<AbstractScreenGroup>> dmsScreenGroupMap_;
+    std::map<ScreenId, std::shared_ptr<RSDisplayNode>> displayNodeMap_;
+    std::map<sptr<IRemoteObject>, std::vector<ScreenId>> screenAgentMap_;
     sptr<AbstractScreenCallback> abstractScreenCallback_;
     std::shared_ptr<AppExecFwk::EventHandler> controllerHandler_;
 };
