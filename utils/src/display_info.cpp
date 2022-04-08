@@ -18,7 +18,7 @@
 namespace OHOS::Rosen {
 bool DisplayInfo::Marshalling(Parcel &parcel) const
 {
-    return parcel.WriteUint64(id_) && parcel.WriteUint32(type_) &&
+    return parcel.WriteUint64(id_) && parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteInt32(width_) && parcel.WriteInt32(height_) &&
         parcel.WriteUint32(refreshRate_) && parcel.WriteUint64(screenId_) &&
         parcel.WriteFloat(virtualPixelRatio_) && parcel.WriteFloat(xDpi_) && parcel.WriteFloat(yDpi_) &&

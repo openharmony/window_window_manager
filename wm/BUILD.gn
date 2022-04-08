@@ -19,8 +19,6 @@ config("libwm_private_config") {
   include_dirs = [
     "include",
     "../wmserver/include",
-
-    # todo for abilitycontext need delete it
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
     "//foundation/aafwk/standard/interfaces/innerkits/app_manager/include/appmgr",
@@ -40,6 +38,7 @@ config("libwm_public_config") {
 ohos_shared_library("libwm") {
   sources = [
     "../wmserver/src/window_manager_proxy.cpp",
+    "src/color_parser.cpp",
     "src/input_transfer_station.cpp",
     "src/static_call.cpp",
     "src/vsync_station.cpp",

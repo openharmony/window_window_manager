@@ -27,7 +27,7 @@ namespace OHOS {
 namespace Rosen {
 class InputWindowMonitor : public RefBase {
 public:
-    InputWindowMonitor(sptr<WindowRoot>& root) : windowRoot_(root) {}
+    explicit InputWindowMonitor(sptr<WindowRoot>& root) : windowRoot_(root) {}
     ~InputWindowMonitor() = default;
     void UpdateInputWindow(uint32_t windowId);
     void UpdateInputWindowByDisplayId(DisplayId displayId);

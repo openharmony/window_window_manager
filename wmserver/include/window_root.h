@@ -48,6 +48,7 @@ public:
     bool isVerticalDisplay(sptr<WindowNode>& node) const;
 
     WMError RequestFocus(uint32_t windowId);
+    WMError RequestActiveWindow(uint32_t windowId);
     WMError MinimizeStructuredAppWindowsExceptSelf(sptr<WindowNode>& node);
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
     WMError EnterSplitWindowMode(sptr<WindowNode>& node);
@@ -66,12 +67,16 @@ public:
     void FocusFaultDetection() const;
     float GetVirtualPixelRatio(DisplayId displayId) const;
     Rect GetDisplayLimitRect(DisplayId displayId) const;
-    WMError UpdateSizeChangeReasonForPointUp(uint32_t windowId);
+    WMError UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeReason reason);
+    void SetBrightness(uint32_t windowId, float brightness);
+    WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
     void UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node,
+        const sptr<WindowNodeContainer>& container) const;
+    void UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& node,
         const sptr<WindowNodeContainer>& container) const;
     std::string GenAllWindowsLogInfo() const;
     bool CheckDisplayInfo(const sptr<DisplayInfo>& display);

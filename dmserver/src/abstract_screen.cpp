@@ -79,7 +79,7 @@ void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, b
     }
 }
 
-void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
+void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint)
 {
     std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
     if (rsDisplayNode == nullptr) {
@@ -88,6 +88,8 @@ void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config)
     }
     rsDisplayNode_ = rsDisplayNode;
     rSDisplayNodeConfig_ = config;
+    WLOGFI("SetDisplayOffset: posX:%{public}d, posY:%{public}d", startPoint.posX_, startPoint.posY_);
+    rsDisplayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();
@@ -182,11 +184,15 @@ DMError AbstractScreen::SetScreenColorTransform()
 
 void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
 {
+    if (info == nullptr) {
+        WLOGE("FillScreenInfo failed! info is nullptr");
+        return;
+    }
     info->id_ = dmsId_;
     uint32_t width = 0;
     uint32_t height = 0;
-    if (activeIdx_ >= 0 && activeIdx_ < modes_.size()) {
-        sptr<SupportedScreenModes> abstractScreenModes = modes_[activeIdx_];
+    sptr<SupportedScreenModes> abstractScreenModes = GetActiveScreenMode();
+    if (abstractScreenModes != nullptr) {
         height = abstractScreenModes->height_;
         width = abstractScreenModes->width_;
     }
@@ -215,11 +221,10 @@ bool AbstractScreen::SetOrientation(Orientation orientation)
 
 Rotation AbstractScreen::CalcRotation(Orientation orientation) const
 {
-    if (activeIdx_ < 0 || activeIdx_ >= modes_.size()) {
-        WLOGE("active mode index is wrong: %{public}d", activeIdx_);
+    sptr<SupportedScreenModes> info = GetActiveScreenMode();
+    if (info == nullptr) {
         return Rotation::ROTATION_0;
     }
-    sptr<SupportedScreenModes> info = modes_[activeIdx_];
     // virtical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = info->width_ < info->height_;
     switch (orientation) {
@@ -282,6 +287,7 @@ bool AbstractScreenGroup::GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen
     }
     switch (combination_) {
         case ScreenCombination::SCREEN_ALONE:
+            [[fallthrough]];
         case ScreenCombination::SCREEN_EXPAND:
             config = { dmsScreen->rsId_ };
             break;
@@ -329,7 +335,7 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
     if (!GetRSDisplayNodeConfig(dmsScreen, config)) {
         return false;
     }
-    dmsScreen->InitRSDisplayNode(config);
+    dmsScreen->InitRSDisplayNode(config, startPoint);
     dmsScreen->groupDmsId_ = dmsId_;
     abstractScreenMap_.insert(std::make_pair(screenId, std::make_pair(dmsScreen, startPoint)));
     return true;

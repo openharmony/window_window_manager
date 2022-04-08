@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -138,7 +138,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
     iter->windowsInfo.clear();
     for (auto& windowNode: windowNodes) {
         if (windowTypeSkipped_.find(windowNode->GetWindowProperty()->GetWindowType()) != windowTypeSkipped_.end()) {
-            WLOGFI("window has been skipped. [id: %{public}d, type: %{public}d]", windowNode->GetWindowId(),
+            WLOGFI("window has been skipped. [id: %{public}u, type: %{public}d]", windowNode->GetWindowId(),
                    windowNode->GetWindowProperty()->GetWindowType());
             continue;
         }
@@ -157,6 +157,10 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
             .displayId = static_cast<int32_t>(windowNode->GetDisplayId()),
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };
+        if (!windowNode->GetWindowProperty()->GetTouchable()) {
+            WLOGFI("window is not touchable: %{public}u", windowNode->GetWindowId());
+            windowInfo.flags |= MMI::FLAG_NOT_TOUCHABLE;
+        }
         iter->windowsInfo.emplace_back(windowInfo);
     }
 }

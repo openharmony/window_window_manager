@@ -41,8 +41,6 @@ void WindowLayoutTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    printf("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
-        display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
     utils::InitByDisplayRect(displayRect);
 
@@ -139,7 +137,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
     activeWindows_.push_back(window);
 
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_TRUE(utils::RectEqualTo(window, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
+    Rect res = utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_);
+    ASSERT_TRUE(utils::RectEqualTo(window, utils::GetDecorateRect(res, virtualPixelRatio_)));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 
@@ -168,7 +167,8 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
     activeWindows_.push_back(statBar);
 
     ASSERT_EQ(WMError::WM_OK, appWin->Show());
-    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
+    Rect res = utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_);
+    ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetDecorateRect(res, virtualPixelRatio_)));
     ASSERT_EQ(WMError::WM_OK, statBar->Show());
     ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetFloatingLimitedRect(utils::customAppRect_, virtualPixelRatio_)));
     ASSERT_TRUE(utils::RectEqualTo(statBar, utils::statusBarRect_));
@@ -462,13 +462,6 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
     Rect expect = utils::GetDefaultFoatingRect(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(utils::RectEqualTo(window, expect));
-    window->MoveTo(INT_MIN, INT_MIN);
-    AvoidArea avoidArea;
-    auto res = window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidArea);
-    ASSERT_EQ(WMError::WM_OK, res);
-    Rect expect2 = {INT_MIN, avoidArea.topRect.height_, expect.width_, expect.height_};
-    expect2 = utils::CalcLimitedRect(expect2, virtualPixelRatio_);
-    ASSERT_TRUE(utils::RectEqualTo(window, expect2));
 }
 
 /**
@@ -478,7 +471,7 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
 {
-    const uint32_t negativeW = UINT32_MAX;
+    const uint32_t negativeW = 0;
     const uint32_t negativeH = 0;
     utils::TestWindowInfo info = {
         .name = "main",

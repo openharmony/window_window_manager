@@ -61,6 +61,7 @@ ohos_shared_library("window_native_kit") {
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "utils_base:utils",
   ]
 
   part_name = "window_manager"
@@ -115,6 +116,7 @@ ohos_shared_library("windowstage_kit") {
     "ability_runtime:runtime",
     "hiviewdfx_hilog_native:libhilog",
     "napi:ace_napi",
+    "utils_base:utils",
   ]
 
   part_name = "window_manager"

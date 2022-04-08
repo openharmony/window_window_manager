@@ -51,6 +51,7 @@ public:
     virtual WMError MaxmizeWindow(uint32_t windowId);
     virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);
+    virtual void SetBrightness(uint32_t windowId, float brightness);
 
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
@@ -60,6 +61,8 @@ public:
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
 
     virtual void ClearWindowAdapter();
+
+    virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();

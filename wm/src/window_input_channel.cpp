@@ -33,7 +33,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
         WLOGFE("keyEvent is nullptr");
         return;
     }
-    WLOGFI("Receive key event, windowId: %{public}d, keyCode: %{public}d",
+    WLOGFI("Receive key event, windowId: %{public}u, keyCode: %{public}d",
         window_->GetWindowId(), keyEvent->GetKeyCode());
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
     bool inputMethodHasProcessed = false;
@@ -80,13 +80,13 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
                 pointerEvent->MarkProcessed();
             }
         }
-        WLOGFI("Receive move event, windowId: %{public}d, action: %{public}d",
+        WLOGFI("Receive move event, windowId: %{public}u, action: %{public}d",
             window_->GetWindowId(), pointerEvent->GetPointerAction());
         if (pointerEventTemp != nullptr) {
             pointerEventTemp->MarkProcessed();
         }
     } else {
-        WLOGFI("Dispatch non-move event, windowId: %{public}d, action: %{public}d",
+        WLOGFI("Dispatch non-move event, windowId: %{public}u, action: %{public}d",
             window_->GetWindowId(), pointerEvent->GetPointerAction());
         window_->ConsumePointerEvent(pointerEvent);
         pointerEvent->MarkProcessed();
@@ -105,7 +105,7 @@ void WindowInputChannel::OnVsync(int64_t timeStamp)
         WLOGFE("moveEvent_ is nullptr");
         return;
     }
-    WLOGFI("Dispatch move event, windowId: %{public}d, action: %{public}d",
+    WLOGFI("Dispatch move event, windowId: %{public}u, action: %{public}d",
         window_->GetWindowId(), pointerEvent->GetPointerAction());
     window_->ConsumePointerEvent(pointerEvent);
     pointerEvent->MarkProcessed();
@@ -119,7 +119,7 @@ void WindowInputChannel::SetInputListener(const std::shared_ptr<MMI::IInputEvent
 void WindowInputChannel::Destroy()
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGFI("Destroy WindowInputChannel, windowId:%{public}d", window_->GetWindowId());
+    WLOGFI("Destroy WindowInputChannel, windowId:%{public}u", window_->GetWindowId());
     isAvailable_ = false;
     VsyncStation::GetInstance().RemoveCallback(VsyncStation::CallbackType::CALLBACK_INPUT, callback_);
     if (moveEvent_ != nullptr) {

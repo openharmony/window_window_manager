@@ -28,7 +28,7 @@ public:
     MOCK_METHOD3(CreateWindow, sptr<Window>(const std::string& windowName,
         sptr<WindowOption>& option, std::shared_ptr<AbilityRuntime::Context> abilityContext));
 };
-}
+} // namepsace Rosen
 } // namespace OHOS
 
 #endif // FRAMEWORKS_WM_TEST_UT_MOCK_STATIC_CALL_H+

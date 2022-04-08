@@ -37,7 +37,8 @@ const char *VALID_SNAPSHOT_SUFFIX = ".png";
 
 void SnapShotUtils::PrintUsage(const std::string &cmdLine)
 {
-    printf("usage: %s [-i displayId] [-f output_file] [-w width] [-h height] [-m]\n", cmdLine.c_str());
+    std::cout << "usage: " << cmdLine.c_str() <<
+        " [-i displayId] [-f output_file] [-w width] [-h height] [-m]" << std::endl;
 }
 
 std::string SnapShotUtils::GenerateFileName(int offset)
@@ -66,7 +67,7 @@ bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
 {
     WM_SCOPED_TRACE("snapshot:CheckFileNameValid(%s)", fileName.c_str());
     if (fileName.length() <= strlen(VALID_SNAPSHOT_SUFFIX)) {
-        printf("error: fileName %s invalid, file length too short!\n", fileName.c_str());
+        std::cout << "error: fileName " << fileName.c_str() << " invalid, file length too short!" << std::endl;
         return false;
     }
     // check file path
@@ -80,12 +81,12 @@ bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
     char resolvedPath[PATH_MAX] = { 0 };
     char *realPath = realpath(fileDir.c_str(), resolvedPath);
     if (realPath == nullptr) {
-        printf("error: fileName %s invalid, realpath nullptr!\n", fileName.c_str());
+        std::cout << "error: fileName " << fileName.c_str() << " invalid, realpath nullptr!" << std::endl;
         return false;
     }
     if (strncmp(realPath, VALID_SNAPSHOT_PATH, strlen(VALID_SNAPSHOT_PATH)) != 0) {
-        printf("error: fileName %s invalid, realpath %s must dump at dir: %s \n",
-            fileName.c_str(), realPath, VALID_SNAPSHOT_PATH);
+        std::cout << "error: fileName " << fileName.c_str() << " invalid, realpath "
+            << realPath << " must dump at dir: " << VALID_SNAPSHOT_PATH << std::endl;
         return false;
     }
 
@@ -95,7 +96,8 @@ bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
         return true; // valid suffix
     }
 
-    printf("error: fileName %s invalid, suffix must be %s\n", fileName.c_str(), VALID_SNAPSHOT_SUFFIX);
+    std::cout << "error: fileName " << fileName.c_str() <<
+        " invalid, suffix must be " << VALID_SNAPSHOT_SUFFIX << std::endl;
     return false;
 }
 
@@ -145,18 +147,18 @@ bool SnapShotUtils::WriteToPng(const std::string &fileName, const WriteToPngPara
 
     png_structp pngStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if (pngStruct == nullptr) {
-        printf("error: png_create_write_struct nullptr!\n");
+        std::cout << "error: png_create_write_struct nullptr!" << std::endl;
         return false;
     }
     png_infop pngInfo = png_create_info_struct(pngStruct);
     if (pngInfo == nullptr) {
-        printf("error: png_create_info_struct error nullptr!\n");
+        std::cout << "error: png_create_info_struct error nullptr!" << std::endl;
         png_destroy_write_struct(&pngStruct, nullptr);
         return false;
     }
     FILE *fp = fopen(fileName.c_str(), "wb");
     if (fp == nullptr) {
-        printf("error: open file [%s] error, %d!\n", fileName.c_str(), errno);
+        std::cout << "error: open file [" << fileName.c_str() << "] error, " << errno << "!" << std::endl;
         png_destroy_write_struct(&pngStruct, &pngInfo);
         return false;
     }
@@ -198,10 +200,10 @@ bool SnapShotUtils::WriteToPngWithPixelMap(const std::string &fileName, PixelMap
     return SnapShotUtils::WriteToPng(fileName, param);
 }
 
-static bool ProcessDisplayId(DisplayId &displayId)
+static bool ProcessDisplayId(DisplayId &displayId, bool isDisplayIdSet)
 {
     WM_SCOPED_TRACE("snapshot:ProcessDisplayId(%" PRIu64")", displayId);
-    if (displayId == DISPLAY_ID_INVALID) {
+    if (!isDisplayIdSet) {
         displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     } else {
         bool validFlag = false;
@@ -213,10 +215,10 @@ static bool ProcessDisplayId(DisplayId &displayId)
             }
         }
         if (!validFlag) {
-            printf("error: displayId %" PRIu64 " invalid!\n", displayId);
-            printf("tips: supported displayIds:\n");
+            std::cout << "error: displayId " << static_cast<int64_t>(displayId) << " invalid!" << std::endl;
+            std::cout << "tips: supported displayIds:" << std::endl;
             for (auto dispId: displayIds) {
-                printf("\t%" PRIu64 "\n", dispId);
+                std::cout << "\t" << dispId << std::endl;
             }
             return false;
         }
@@ -239,6 +241,7 @@ bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArgments &cmdA
         switch (opt) {
             case 'i': // display id
                 cmdArgments.displayId = static_cast<DisplayId>(atoll(optarg));
+                cmdArgments.isDisplayIdSet = true;
                 break;
             case 'w': // output width
                 cmdArgments.width = atoi(optarg);
@@ -258,18 +261,18 @@ bool SnapShotUtils::ProcessArgs(int argc, char * const argv[], CmdArgments &cmdA
         }
     }
 
-    if (!ProcessDisplayId(cmdArgments.displayId)) {
+    if (!ProcessDisplayId(cmdArgments.displayId, cmdArgments.isDisplayIdSet)) {
         return false;
     }
 
     if (cmdArgments.fileName == "") {
         cmdArgments.fileName = GenerateFileName();
-        printf("process: set filename to %s\n", cmdArgments.fileName.c_str());
+        std::cout << "process: set filename to " << cmdArgments.fileName.c_str() << std::endl;
     }
 
     // check fileName
     if (!SnapShotUtils::CheckFileNameValid(cmdArgments.fileName)) {
-        printf("error: filename %s invalid!\n", cmdArgments.fileName.c_str());
+        std::cout << "error: filename " << cmdArgments.fileName.c_str() << " invalid!" << std::endl;
         return false;
     }
     return true;

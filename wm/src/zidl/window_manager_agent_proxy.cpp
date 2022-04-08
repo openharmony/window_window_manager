@@ -25,46 +25,6 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerAgentProxy"};
 }
 
-void WindowManagerAgentProxy::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-    WindowType windowType, DisplayId displayId, bool focused)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return;
-    }
-
-    if (!data.WriteUint32(windowId)) {
-        WLOGFE("Write windowId failed");
-        return;
-    }
-
-    if (!data.WriteRemoteObject(abilityToken)) {
-        WLOGFI("Write abilityToken failed");
-    }
-
-    if (!data.WriteUint32(static_cast<uint32_t>(windowType))) {
-        WLOGFE("Write windowType failed");
-        return;
-    }
-
-    if (!data.WriteUint64(displayId)) {
-        WLOGFE("Write displayId failed");
-        return;
-    }
-
-    if (!data.WriteBool(focused)) {
-        WLOGFE("Write Focus failed");
-        return;
-    }
-
-    if (Remote()->SendRequest(TRANS_ID_UPDATE_FOCUS_STATUS, data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-    }
-}
-
 void WindowManagerAgentProxy::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused)
 {
     MessageParcel data;
@@ -74,7 +34,7 @@ void WindowManagerAgentProxy::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>&
         WLOGFE("Invalid focus change info");
         return;
     }
-    
+
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return;
@@ -94,7 +54,8 @@ void WindowManagerAgentProxy::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>&
         return;
     }
 
-    if (Remote()->SendRequest(TRANS_ID_UPDATE_FOCUS, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
@@ -125,7 +86,8 @@ void WindowManagerAgentProxy::UpdateSystemBarRegionTints(DisplayId displayId, co
         WLOGFE("Write SystemBarRegionTint failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_UPDATE_SYSTEM_BAR_PROPS, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_SYSTEM_BAR_PROPS),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
@@ -150,7 +112,8 @@ void WindowManagerAgentProxy::NotifyAccessibilityWindowInfo(const sptr<Accessibi
         WLOGFE("Write windowUpdateType failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_UPDATE_WINDOW_STATUS, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STATUS),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
@@ -176,7 +139,8 @@ void WindowManagerAgentProxy::UpdateWindowVisibilityInfo(
         }
     }
 
-    if (Remote()->SendRequest(TRANS_ID_UPDATE_WINDOW_VISIBILITY, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_VISIBILITY),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }

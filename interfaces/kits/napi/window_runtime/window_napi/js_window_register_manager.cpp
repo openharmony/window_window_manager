@@ -48,7 +48,7 @@ bool JsWindowRegisterManager::ProcessWindowChangeRegister(sptr<JsWindowListener>
     sptr<Window> window, bool isRegister)
 {
     if (window == nullptr) {
-        WLOGFE("window is nullptr");
+        WLOGFE("[NAPI]Window is nullptr");
         return false;
     }
     sptr<IWindowChangeListener> thisListener(listener);
@@ -64,7 +64,7 @@ bool JsWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<JsWindowListen
     sptr<Window> window, bool isRegister)
 {
     if (window == nullptr) {
-        WLOGFE("window is nullptr");
+        WLOGFE("[NAPI]Window is nullptr");
         return false;
     }
     sptr<IAvoidAreaChangedListener> thisListener(listener);
@@ -80,7 +80,7 @@ bool JsWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<JsWindowListene
     sptr<Window> window, bool isRegister)
 {
     if (window == nullptr) {
-        WLOGFE("window is nullptr");
+        WLOGFE("[NAPI]Window is nullptr");
         return false;
     }
     sptr<IWindowLifeCycle> thisListener(listener);
@@ -107,13 +107,13 @@ bool JsWindowRegisterManager::ProcessSystemBarChangeRegister(sptr<JsWindowListen
 bool JsWindowRegisterManager::IsCallbackRegistered(std::string type, NativeValue* jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFI("JsWindowRegisterManager::IsCallbackRegistered methodName %{public}s not registerted!", type.c_str());
+        WLOGFI("[NAPI]Method %{public}s has not been registerted", type.c_str());
         return false;
     }
 
     for (auto iter = jsCbMap_[type].begin(); iter != jsCbMap_[type].end(); ++iter) {
         if (jsListenerObject->StrictEquals(iter->first->Get())) {
-            WLOGFE("JsWindowRegisterManager::IsCallbackRegistered %{public}s already registered!", type.c_str());
+            WLOGFE("[NAPI]Method %{public}s has already been registered", type.c_str());
             return true;
         }
     }
@@ -128,22 +128,22 @@ void JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string 
         return;
     }
     if (listenerProcess_[caseType].count(type) == 0) {
-        WLOGFE("JsWindowRegisterManager not support method: %{public}s!", type.c_str());
+        WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return;
     }
     std::shared_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine.CreateReference(value, 1));
     sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(&engine, callbackRef);
     if (windowManagerListener == nullptr) {
-        WLOGFE("JsWindowRegisterManager::RegisterListener malloc failed");
+        WLOGFE("[NAPI]New JsWindowListener failed");
         return;
     }
     if (!((this->*listenerProcess_[caseType][type])(windowManagerListener, window, true))) {
-        WLOGFE("JsWindowRegisterManager::RegisterListener %{public}s failed!", type.c_str());
+        WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());
         return;
     }
     jsCbMap_[type][callbackRef] = windowManagerListener;
-    WLOGFI("JsWindowRegisterManager::RegisterListener %{public}s success! callback map size: %{public}u",
+    WLOGFI("[NAPI]Register type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
 }
 
@@ -152,18 +152,17 @@ void JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std::strin
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFI("JsWindowRegisterManager::UnregisterListener methodName %{public}s not registerted!",
-            type.c_str());
+        WLOGFE("[NAPI]Type %{public}s was not registerted", type.c_str());
         return;
     }
     if (listenerProcess_[caseType].count(type) == 0) {
-        WLOGFE("JsWindowRegisterManager not support method: %{public}s!", type.c_str());
+        WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
         return;
     }
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
             if (!((this->*listenerProcess_[caseType][type])(it->second, window, false))) {
-                WLOGFE("JsWindowRegisterManager::UnregisterListener %{public}s failed!", type.c_str());
+                WLOGFE("[NAPI]Unregister type %{public}s failed, no value", type.c_str());
                 return;
             }
             jsCbMap_[type].erase(it++);
@@ -176,19 +175,18 @@ void JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std::strin
             }
             findFlag = true;
             if (!(this->*listenerProcess_[caseType][type])(it->second, window, false)) {
-                WLOGFE("JsWindowRegisterManager::UnregisterListener %{public}s failed!", type.c_str());
+                WLOGFE("[NAPI]Unregister type %{public}s failed", type.c_str());
                 return;
             }
             jsCbMap_[type].erase(it);
             break;
         }
         if (!findFlag) {
-            WLOGFE("JsWindowRegisterManager::UnregisterListener %{public}s failed because not found callback!",
-                type.c_str());
+            WLOGFE("[NAPI]Unregister type %{public}s failed because not found callback!", type.c_str());
             return;
         }
     }
-    WLOGFI("JsWindowRegisterManager::UnregisterListener %{public}s success! callback map size: %{public}u",
+    WLOGFI("[NAPI]Unregister type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
     // erase type when there is no callback in one type
     if (jsCbMap_[type].empty()) {

@@ -32,7 +32,7 @@ class IDisplayManager : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IDisplayManager");
 
-    enum {
+    enum class DisplayManagerMessage : uint32_t {
         TRANS_ID_GET_DEFAULT_DISPLAY_ID = 0,
         TRANS_ID_GET_DISPLAY_BY_ID,
         TRANS_ID_GET_DISPLAY_BY_SCREEN,
@@ -76,7 +76,8 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) = 0;
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) = 0;
 
-    virtual ScreenId CreateVirtualScreen(VirtualScreenOption option) = 0;
+    virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
+        const sptr<IRemoteObject>& displayManagerAgent) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) = 0;
     virtual bool SetOrientation(ScreenId screenId, Orientation orientation) = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicyCascade"};
-    constexpr uint32_t WINDOW_CASCADE_HEIGHT = 48;
-    constexpr uint32_t WINDOW_CASCADE_WIDTH = 48;
 }
 WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const Rect& displayRect, const uint64_t& screenId,
     sptr<WindowNode>& belowAppNode, sptr<WindowNode>& appNode, sptr<WindowNode>& aboveAppNode)
@@ -64,7 +62,7 @@ void WindowLayoutPolicyCascade::LayoutWindowNode(sptr<WindowNode>& node)
     }
     if (node->parent_ != nullptr) { // isn't root node
         if (!node->currentVisibility_) {
-            WLOGFI("window[%{public}d] currently not visible, no need layout", node->GetWindowId());
+            WLOGFI("window[%{public}u] currently not visible, no need layout", node->GetWindowId());
             return;
         }
         UpdateLayoutRect(node);
@@ -86,10 +84,7 @@ void WindowLayoutPolicyCascade::LayoutWindowNode(sptr<WindowNode>& node)
 void WindowLayoutPolicyCascade::LayoutWindowTree()
 {
     InitLimitRects();
-    std::vector<sptr<WindowNode>> rootNodes = { aboveAppWindowNode_, appWindowNode_, belowAppWindowNode_ };
-    for (auto& node : rootNodes) { // ensure that the avoid area windows are traversed first
-        LayoutWindowNode(node);
-    }
+    WindowLayoutPolicy::LayoutWindowTree();
 }
 
 void WindowLayoutPolicyCascade::UpdateWindowNode(sptr<WindowNode>& node, bool isAddWindow)
@@ -356,20 +351,26 @@ void WindowLayoutPolicyCascade::Reorder()
     Rect rect = firstCascadeRect_;
     bool isFirstReorderedWindow = true;
     for (auto iter = appWindowNode_->children_.begin(); iter != appWindowNode_->children_.end(); iter++) {
-        if ((*iter)->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        auto node = *iter;
+        if (node == nullptr) {
+            WLOGFI("get node failed.");
+            continue;
+        }
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
             if (isFirstReorderedWindow) {
                 isFirstReorderedWindow = false;
             } else {
                 rect = StepCascadeRect(rect);
             }
-            (*iter)->hasDecorated_ = true;
-            (*iter)->SetWindowRect(rect);
-            if ((*iter)->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
-                (*iter)->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-                (*iter)->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            node->hasDecorated_ = true;
+            node->isDefultLayoutRect_ = true;
+            node->SetWindowRect(rect);
+            if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+                node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+                node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             }
-            WLOGFI("Cascade reorder Id: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
-                (*iter)->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+            WLOGFI("Cascade reorder Id: %{public}u, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+                node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         }
     }
     LayoutWindowTree();
@@ -380,7 +381,7 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
 {
     Rect cascadeRect = {0, 0, 0, 0};
     for (auto iter = appWindowNode_->children_.rbegin(); iter != appWindowNode_->children_.rend(); iter++) {
-        WLOGFI("GetCurCascadeRect id: %{public}d,", (*iter)->GetWindowId());
+        WLOGFI("GetCurCascadeRect id: %{public}u,", (*iter)->GetWindowId());
         if ((*iter)->GetWindowType() != WindowType::WINDOW_TYPE_DOCK_SLICE &&
             (*iter)->GetWindowId() != node->GetWindowId()) {
             auto property = (*iter)->GetWindowProperty();
@@ -402,8 +403,8 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
 Rect WindowLayoutPolicyCascade::StepCascadeRect(Rect rect) const
 {
     float virtualPixelRatio = GetVirtualPixelRatio();
-    uint32_t cascadeWidth = static_cast<uint32_t>(WINDOW_CASCADE_WIDTH * virtualPixelRatio);
-    uint32_t cascadeHeight = static_cast<uint32_t>(WINDOW_CASCADE_HEIGHT * virtualPixelRatio);
+    uint32_t cascadeWidth = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
+    uint32_t cascadeHeight = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
 
     Rect cascadeRect = {0, 0, 0, 0};
     cascadeRect.width_ = rect.width_;
@@ -441,6 +442,7 @@ void WindowLayoutPolicyCascade::SetCascadeRect(const sptr<WindowNode>& node)
         rect = firstCascadeRect_;
     }
     node->hasDecorated_ = true;
+    node->isDefultLayoutRect_ = true;
     WLOGFI("set  cascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     node->SetWindowRect(rect);

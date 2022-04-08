@@ -23,9 +23,9 @@
 namespace OHOS::Rosen {
 class DisplayInfo;
 
-typedef enum DisplayType {
+enum class DisplayType : uint32_t {
     DEFAULT = 0,
-} DisplayType;
+};
 
 class Display : public RefBase {
 friend class DisplayManager;

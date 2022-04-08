@@ -383,20 +383,6 @@ HWTEST_F(DisplayPowerTest, set_display_state_power_event_callback_001, Function 
 }
 
 /**
-* @tc.name: get_display_power_001
-* @tc.desc: Call SetScreenPowerForAll OFF and check the GetScreenPower return value
-* @tc.type: FUNC
-*/
-HWTEST_F(DisplayPowerTest, get_display_power_001, Function | MediumTest | Level2)
-{
-    ScreenPowerState stateToSet = ScreenPowerState::POWER_OFF;
-    bool ret = ScreenManager::GetInstance().SetScreenPowerForAll(stateToSet, PowerStateChangeReason::POWER_BUTTON);
-    ASSERT_EQ(true, ret);
-    ScreenPowerState stateGet = ScreenManager::GetInstance().GetScreenPower(defaultId_);
-    ASSERT_EQ(stateGet, stateToSet);
-}
-
-/**
 * @tc.name: get_display_power_002
 * @tc.desc: Call SetScreenPowerForAll ON and check the GetScreenPower return value
 * @tc.type: FUNC

@@ -136,7 +136,12 @@ public:
             }
         }
         // minimum position y
-        dstRect.posY_ = std::max(displayLimitRect.posY_, oriDstRect.posY_);
+        if (oriDstRect.posY_ < displayLimitRect.posY_) {
+            dstRect.posY_ = displayLimitRect.posY_;
+            if (oriDstRect.height_ != lastRect.height_) {
+                dstRect.height_ = lastRect.height_;
+            }
+        }
         // maximum position y
         if (dstRect.posY_ > (displayLimitRect.posY_ +
                              static_cast<int32_t>(displayLimitRect.height_ - windowTitleBarH))) {
@@ -154,6 +159,17 @@ public:
             (pointPosX < (targetRect.posX_ + static_cast<int32_t>(targetRect.width_))) &&
             (pointPosY > targetRect.posY_) &&
             (pointPosY < (targetRect.posY_ + static_cast<int32_t>(targetRect.height_)))) {
+            return true;
+        }
+        return false;
+    }
+
+    static bool IsPointInWindowExceptCorner(int32_t pointPosX, int32_t pointPosY, const Rect& rectExceptCorner)
+    {
+        if ((pointPosX > rectExceptCorner.posX_ &&
+            pointPosX < (rectExceptCorner.posX_ + static_cast<int32_t>(rectExceptCorner.width_))) ||
+            (pointPosY > rectExceptCorner.posY_ &&
+            pointPosY < (rectExceptCorner.posY_ + static_cast<int32_t>(rectExceptCorner.height_)))) {
             return true;
         }
         return false;
@@ -184,6 +200,7 @@ public:
         return AvoidPosType::AVOID_POS_UNKNOWN;
     }
 
+private:
     WindowHelper() = default;
     ~WindowHelper() = default;
 };

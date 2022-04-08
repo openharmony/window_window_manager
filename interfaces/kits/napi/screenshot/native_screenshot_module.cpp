@@ -217,6 +217,10 @@ napi_value MainFunc(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     auto param = std::make_unique<Param>();
+    if (param == nullptr) {
+        WLOGFE("Create param failed.");
+        return nullptr;
+    }
     param->option.displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     napi_ref ref = nullptr;
     if (argc == 0) {

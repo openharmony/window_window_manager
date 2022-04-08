@@ -18,6 +18,7 @@
 
 #include <snapshot.h>
 #include <transaction/rs_interfaces.h>
+#include "future.h"
 #include "window_root.h"
 #include "snapshot_stub.h"
 #include "window_manager_hilog.h"
@@ -26,7 +27,8 @@ namespace OHOS {
 namespace Rosen {
 class SnapshotController : public SnapshotStub {
 public:
-    SnapshotController(sptr<WindowRoot>& root) : windowRoot_(root), rsInterface_(RSInterfaces::GetInstance()) {};
+    explicit SnapshotController(sptr<WindowRoot>& root) : windowRoot_(root),
+        rsInterface_(RSInterfaces::GetInstance()) {};
     SnapshotController() : windowRoot_(nullptr), rsInterface_(RSInterfaces::GetInstance()) {};
     ~SnapshotController() = default;
     void Init(sptr<WindowRoot>& root);
@@ -41,22 +43,27 @@ private:
 
     WMError TakeSnapshot(const std::shared_ptr<RSSurfaceNode>& surfaceNode, AAFwk::Snapshot& snapshot);
 
-    class GetSurfaceCapture : public SurfaceCaptureCallback {
+    class GetSurfaceCapture : public SurfaceCaptureCallback, public Future<std::shared_ptr<Media::PixelMap>> {
     public:
         GetSurfaceCapture() = default;
         ~GetSurfaceCapture() {};
         void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelmap) override
         {
-            if (flag_ == false) {
+            FutureCall(pixelmap);
+        }
+    protected:
+        void Call(std::shared_ptr<Media::PixelMap> pixelmap) override
+        {
+            if (!flag_) {
                 pixelMap_ = pixelmap;
                 flag_ = true;
             }
         }
-        bool IsPixelMapOk()
+        bool IsReady() override
         {
             return flag_;
         }
-        std::shared_ptr<Media::PixelMap> GetPixelMap()
+        std::shared_ptr<Media::PixelMap> FetchResult() override
         {
             return pixelMap_;
         }

@@ -56,15 +56,9 @@ public:
 
 class IFocusChangedListener : public RefBase {
 public:
-    virtual void OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
-        WindowType windowType, DisplayId displayId);
+    virtual void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo) = 0;
 
-    virtual void OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
-        WindowType windowType, DisplayId displayId);
-
-    virtual void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo);
-
-    virtual void OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
+    virtual void OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo) = 0;
 };
 
 class ISystemBarChangedListener : virtual public RefBase {
@@ -104,6 +98,7 @@ public:
     int32_t wid_;
     Rect windowRect_;
     bool focused_;
+    DisplayId displayId_;
     WindowMode mode_;
     WindowType type_;
 };
@@ -118,7 +113,7 @@ public:
 
     sptr<WindowInfo> currentWindowInfo_;
     std::vector<sptr<WindowInfo>> windowList_;
-        
+
 private:
     bool VectorMarshalling(Parcel& parcel) const;
     static void VectorUnmarshalling(Parcel& parcel, AccessibilityWindowInfo* windowInfo);
@@ -142,6 +137,7 @@ public:
     void UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId);
+    WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const;
 
 private:
     WindowManager();

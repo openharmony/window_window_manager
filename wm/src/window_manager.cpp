@@ -38,7 +38,11 @@ bool WindowVisibilityInfo::Marshalling(Parcel &parcel) const
 
 WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
 {
-    WindowVisibilityInfo* windowVisibilityInfo = new WindowVisibilityInfo();
+    WindowVisibilityInfo* windowVisibilityInfo = new (std::nothrow) WindowVisibilityInfo();
+    if (windowVisibilityInfo == nullptr) {
+        WLOGFE("window visibility info is nullptr.");
+        return nullptr;
+    }
     bool res = parcel.ReadUint32(windowVisibilityInfo->windowId_) && parcel.ReadInt32(windowVisibilityInfo->pid_) &&
     parcel.ReadInt32(windowVisibilityInfo->uid_) && parcel.ReadBool(windowVisibilityInfo->isVisible_);
     if (!res) {
@@ -52,7 +56,7 @@ bool WindowInfo::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteInt32(wid_) && parcel.WriteUint32(windowRect_.width_) &&
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(windowRect_.posX_) &&
-        parcel.WriteInt32(windowRect_.posY_) && parcel.WriteBool(focused_) &&
+        parcel.WriteInt32(windowRect_.posY_) && parcel.WriteBool(focused_) && parcel.WriteUint64(displayId_) &&
         parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(type_));
 }
 
@@ -60,11 +64,13 @@ WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
 {
     WindowInfo* windowInfo = new (std::nothrow) WindowInfo();
     if (windowInfo == nullptr) {
+        WLOGFE("window info is nullptr.");
         return nullptr;
     }
     bool res = parcel.ReadInt32(windowInfo->wid_) && parcel.ReadUint32(windowInfo->windowRect_.width_) &&
         parcel.ReadUint32(windowInfo->windowRect_.height_) && parcel.ReadInt32(windowInfo->windowRect_.posX_) &&
-        parcel.ReadInt32(windowInfo->windowRect_.posY_) && parcel.ReadBool(windowInfo->focused_);
+        parcel.ReadInt32(windowInfo->windowRect_.posY_) && parcel.ReadBool(windowInfo->focused_) &&
+        parcel.ReadUint64(windowInfo->displayId_);
     if (!res) {
         delete windowInfo;
         return nullptr;
@@ -82,7 +88,11 @@ bool AccessibilityWindowInfo::Marshalling(Parcel &parcel) const
 
 AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel &parcel)
 {
-    AccessibilityWindowInfo* accessibilityWindowInfo = new AccessibilityWindowInfo();
+    AccessibilityWindowInfo* accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
+    if (accessibilityWindowInfo == nullptr) {
+        WLOGFE("accessibility window info is nullptr.");
+        return nullptr;
+    }
     accessibilityWindowInfo->currentWindowInfo_ = parcel.ReadParcelable<WindowInfo>();
     if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowInfo>(parcel,
         accessibilityWindowInfo->windowList_)) {
@@ -138,26 +148,6 @@ public:
     sptr<WindowManagerAgent> windowVisibilityListenerAgent_;
 };
 
-void WindowManager::Impl::NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-    WindowType windowType, DisplayId displayId) const
-{
-    WLOGFI("NotifyFocused [%{public}u; %{public}p; %{public}d; %{public}" PRIu64"]", windowId, abilityToken.GetRefPtr(),
-        static_cast<uint32_t>(windowType), displayId);
-    for (auto& listener : focusChangedListeners_) {
-        listener->OnFocused(windowId, abilityToken, windowType, displayId);
-    }
-}
-
-void WindowManager::Impl::NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-    WindowType windowType, DisplayId displayId) const
-{
-    WLOGFI("NotifyUnfocused [%{public}u; %{public}p; %{public}d; %{public}" PRIu64"]", windowId,
-        abilityToken.GetRefPtr(), static_cast<uint32_t>(windowType), displayId);
-    for (auto& listener : focusChangedListeners_) {
-        listener->OnUnfocused(windowId, abilityToken, windowType, displayId);
-    }
-}
-
 void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo) const
 {
     WLOGFI("NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
@@ -199,14 +189,14 @@ void WindowManager::Impl::NotifyAccessibilityWindowInfo(const sptr<Accessibility
         WLOGFE("windowInfo is nullptr");
         return;
     }
-    WLOGFI("NotifyAccessibilityWindowInfo: wid[%{public}d],width[%{public}d], \
-        height[%{public}d],positionX[%{public}d],positionY[%{public}d],\
-        isFocused[%{public}d],mode[%{public}d],type[%{public}d]",
+    WLOGFI("NotifyAccessibilityWindowInfo: wid[%{public}d], width[%{public}d]," \
+        "height[%{public}d], positionX[%{public}d], positionY[%{public}d]," \
+        "isFocused[%{public}d], displayId[%{public}" PRIu64"], mode[%{public}d], type[%{public}d]",
         windowInfo->currentWindowInfo_->wid_, windowInfo->currentWindowInfo_->windowRect_.width_,
         windowInfo->currentWindowInfo_->windowRect_.height_,
         windowInfo->currentWindowInfo_->windowRect_.posX_, windowInfo->currentWindowInfo_->windowRect_.posY_,
-        windowInfo->currentWindowInfo_->focused_, windowInfo->currentWindowInfo_->mode_,
-        windowInfo->currentWindowInfo_->type_);
+        windowInfo->currentWindowInfo_->focused_, windowInfo->currentWindowInfo_->displayId_,
+        windowInfo->currentWindowInfo_->mode_, windowInfo->currentWindowInfo_->type_);
     for (auto& listener : windowUpdateListeners_) {
         listener->OnWindowUpdate(windowInfo, type);
     }
@@ -225,24 +215,6 @@ WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>())
 }
 
 WindowManager::~WindowManager()
-{
-}
-
-void IFocusChangedListener::OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
-    WindowType windowType, DisplayId displayId)
-{
-}
-
-void IFocusChangedListener::OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken,
-    WindowType windowType, DisplayId displayId)
-{
-}
-
-void IFocusChangedListener::OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
-{
-}
-
-void IFocusChangedListener::OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
 }
 
@@ -429,17 +401,6 @@ void WindowManager::UnregisterVisibilityChangedListener(const sptr<IVisibilityCh
     }
 }
 
-void WindowManager::UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
-    DisplayId displayId, bool focused) const
-{
-    WLOGFI("window focus status: %{public}d, id: %{public}u", focused, windowId);
-    if (focused) {
-        pImpl_->NotifyFocused(windowId, abilityToken, windowType, displayId);
-    } else {
-        pImpl_->NotifyUnfocused(windowId, abilityToken, windowType, displayId);
-    }
-}
-
 void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const
 {
     if (focusChangeInfo == nullptr) {
@@ -470,6 +431,15 @@ void WindowManager::UpdateWindowVisibilityInfo(
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const
 {
     pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
+}
+
+WMError WindowManager::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAccessibilityWindowInfo(windowInfo);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("get window info failed");
+    }
+    return ret;
 }
 } // namespace Rosen
 } // namespace OHOS

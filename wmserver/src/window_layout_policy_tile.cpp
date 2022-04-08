@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicyTile"};
-    constexpr uint32_t MAX_WIN_NUM_VERTICAL = 2;
-    constexpr uint32_t MAX_WIN_NUM_HORIZONTAL = 3;
+    constexpr uint32_t EDGE_INTERVAL = 48;
+    constexpr uint32_t MID_INTERVAL = 24;
 }
 WindowLayoutPolicyTile::WindowLayoutPolicyTile(const Rect& displayRect, const uint64_t& screenId,
     sptr<WindowNode>& belowAppNode, sptr<WindowNode>& appNode, sptr<WindowNode>& aboveAppNode)
@@ -52,23 +52,35 @@ void WindowLayoutPolicyTile::UpdateDisplayInfo()
     InitTileWindowRects();
 }
 
+uint32_t WindowLayoutPolicyTile::GetMaxTileWinNum() const
+{
+    float virtualPixelRatio = GetVirtualPixelRatio();
+    constexpr uint32_t half = 2;
+    uint32_t edgeIntervalVp = static_cast<uint32_t>(EDGE_INTERVAL * half * virtualPixelRatio);
+    uint32_t midIntervalVp = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio);
+    uint32_t minFloatingW = IsVertical() ? MIN_VERTICAL_FLOATING_WIDTH : MIN_VERTICAL_FLOATING_HEIGHT;
+    minFloatingW = static_cast<uint32_t>(minFloatingW * virtualPixelRatio);
+    uint32_t drawableW = limitRect_.width_ - edgeIntervalVp + midIntervalVp;
+    return static_cast<uint32_t>(drawableW / (minFloatingW + midIntervalVp));
+}
+
 void WindowLayoutPolicyTile::InitTileWindowRects()
 {
-    constexpr uint32_t edgeInterval = 48;
-    constexpr uint32_t midInterval = 24;
     float virtualPixelRatio = GetVirtualPixelRatio();
-    uint32_t edgeIntervalVp = static_cast<uint32_t>(edgeInterval * virtualPixelRatio);
-    uint32_t midIntervalVp = static_cast<uint32_t>(midInterval * virtualPixelRatio);
+    uint32_t edgeIntervalVp = static_cast<uint32_t>(EDGE_INTERVAL * virtualPixelRatio);
+    uint32_t midIntervalVp = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio);
 
-    constexpr float ratio = 0.75;  // 0.75: default height/width ratio
-    constexpr float edgeRatio = 0.125;
+    constexpr float ratio = 0.66; // 0.66: default height/width ratio
     constexpr int half = 2;
-    maxTileWinNum_ = IsVertical() ? MAX_WIN_NUM_VERTICAL : MAX_WIN_NUM_HORIZONTAL;
+    maxTileWinNum_ = GetMaxTileWinNum();
+    WLOGFI("set max tile window num %{public}u", maxTileWinNum_);
     presetRects_.clear();
-    int x = limitRect_.posX_ + (limitRect_.width_ * edgeRatio);
-    int y = limitRect_.posY_ + (limitRect_.height_ * edgeRatio);
-    uint32_t w = limitRect_.width_ * ratio;
-    uint32_t h = limitRect_.height_ * ratio;
+    uint32_t w = displayRect_.width_ * ratio;
+    uint32_t h = displayRect_.height_ * ratio;
+    w = w > limitRect_.width_ ? limitRect_.width_ : w;
+    h = h > limitRect_.height_ ? limitRect_.height_ : h;
+    int x = limitRect_.posX_ + ((limitRect_.width_ - w) / half);
+    int y = limitRect_.posY_ + ((limitRect_.height_ - h) / half);
     std::vector<Rect> single = {{ x, y, w, h }};
     presetRects_.emplace_back(single);
     for (uint32_t num = 2; num <= maxTileWinNum_; num++) { // start calc preset with 2 windows
@@ -77,7 +89,7 @@ void WindowLayoutPolicyTile::InitTileWindowRects()
         for (uint32_t i = 0; i < num; i++) {
             int curX = limitRect_.posX_ + edgeIntervalVp + i * (w + midIntervalVp);
             Rect curRect = { curX, y, w, h };
-            WLOGFI("presetRects: level %{public}d, id %{public}d, [%{public}d %{public}d %{public}d %{public}d]",
+            WLOGFI("presetRects: level %{public}u, id %{public}u, [%{public}d %{public}d %{public}u %{public}u]",
                 num, i, curX, y, w, h);
             curLevel.emplace_back(curRect);
         }
@@ -111,7 +123,7 @@ void WindowLayoutPolicyTile::UpdateWindowNode(sptr<WindowNode>& node, bool isAdd
 void WindowLayoutPolicyTile::RemoveWindowNode(sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
-    WLOGFI("RemoveWindowNode %{public}d in tile", node->GetWindowId());
+    WLOGFI("RemoveWindowNode %{public}u in tile", node->GetWindowId());
     auto type = node->GetWindowType();
     // affect other windows, trigger off global layout
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
@@ -157,13 +169,13 @@ void WindowLayoutPolicyTile::ForegroundNodeQueuePushBack(sptr<WindowNode>& node)
     if (node == nullptr) {
         return;
     }
-    WLOGFI("add win in tile for win id: %{public}d", node->GetWindowId());
+    WLOGFI("add win in tile for win id: %{public}u", node->GetWindowId());
     while (foregroundNodes_.size() >= maxTileWinNum_) {
         auto removeNode = foregroundNodes_.front();
         foregroundNodes_.pop_front();
-        WLOGFI("pop win in queue head id: %{public}d, for add new win", removeNode->GetWindowId());
+        WLOGFI("pop win in queue head id: %{public}u, for add new win", removeNode->GetWindowId());
         if (removeNode->abilityToken_ != nullptr) {
-            WLOGFI("minimize win %{public}d in tile", removeNode->GetWindowId());
+            WLOGFI("minimize win %{public}u in tile", removeNode->GetWindowId());
             AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(removeNode->abilityToken_);
         }
     }
@@ -177,7 +189,7 @@ void WindowLayoutPolicyTile::ForegroundNodeQueueRemove(sptr<WindowNode>& node)
     }
     auto iter = std::find(foregroundNodes_.begin(), foregroundNodes_.end(), node);
     if (iter != foregroundNodes_.end()) {
-        WLOGFI("remove win in tile for win id: %{public}d", node->GetWindowId());
+        WLOGFI("remove win in tile for win id: %{public}u", node->GetWindowId());
         foregroundNodes_.erase(iter);
     }
 }
@@ -202,7 +214,7 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows()
         node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         node->SetWindowRect(rect);
         node->hasDecorated_ = true;
-        WLOGFI("set rect for qwin id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
+        WLOGFI("set rect for qwin id: %{public}u [%{public}d %{public}d %{public}u %{public}u]",
             node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         rectIt++;
     }
@@ -224,8 +236,8 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
     Rect limitRect = displayRect;
     Rect winRect = node->GetWindowProperty()->GetWindowRect();
 
-    WLOGFI("Id:%{public}d, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
-        "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFI("Id:%{public}u, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
+        "deco:%{public}d, type:%{public}u, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnbale,
         static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     if (needAvoid) {
@@ -235,8 +247,9 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
     if (!floatingWindow) { // fullscreen window
         winRect = limitRect;
     } else { // floating window
-        if (node->GetWindowProperty()->GetDecorEnable()) { // is decorable
+        if (!node->hasDecorated_ && node->GetWindowProperty()->GetDecorEnable()) { // is decorable
             winRect = ComputeDecoratedWindowRect(winRect);
+            node->hasDecorated_ = true;
         }
         if (subWindow && parentLimit) { // subwidow and limited by parent
             limitRect = node->parent_->GetLayoutRect();
@@ -252,6 +265,9 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
         if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
             node->ResetWindowSizeChangeReason();
         }
+    }
+    // update node bounds
+    if (node->surfaceNode_ != nullptr) {
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     }
 }

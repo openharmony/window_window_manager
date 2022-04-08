@@ -47,7 +47,7 @@ public:
     Rotation CalcRotation(Orientation orientation) const;
 
     void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
-    void InitRSDisplayNode(RSDisplayNodeConfig& config);
+    void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);
