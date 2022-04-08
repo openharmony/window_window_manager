@@ -160,6 +160,8 @@ public:
     virtual void SetBrightness(float brightness) = 0;
     virtual float GetBrightness() const = 0;
     virtual void SetCallingWindow(uint32_t windowId) = 0;
+    virtual void SetPrivacyMode(bool isPrivacyMode) = 0;
+    virtual bool IsPrivacyMode() const = 0;
 
     virtual WMError RequestFocus() const = 0;
     // AddInputEventListener is for api 7
