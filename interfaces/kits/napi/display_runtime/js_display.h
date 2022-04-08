@@ -22,6 +22,7 @@
 
 namespace OHOS {
 namespace Rosen {
+std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId);
 NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& Display);
 class JsDisplay final {
 public:
