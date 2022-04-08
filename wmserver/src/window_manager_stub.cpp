@@ -179,7 +179,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             auto controller = iface_cast<RSIWindowAnimationController>(data.ReadParcelable<IRemoteObject>());
             WMError errCode = SetWindowAnimationController(controller);
             reply.WriteInt32(static_cast<int32_t>(errCode));
-            break
+            break;
         }
         default:
             WLOGFW("unknown transaction code");
