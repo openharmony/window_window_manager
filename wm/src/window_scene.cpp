@@ -132,6 +132,15 @@ WMError WindowScene::GoDestroy()
     return WMError::WM_OK;
 }
 
+WMError WindowScene::OnNewWant(const AAFwk::Want& want)
+{
+    if (mainWindow_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    mainWindow_->OnNewWant(want);
+    return WMError::WM_OK;
+}
+
 WMError WindowScene::SetSystemBarProperty(WindowType type, const SystemBarProperty& property) const
 {
     if (mainWindow_ == nullptr) {

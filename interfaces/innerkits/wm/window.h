@@ -38,6 +38,10 @@ namespace OHOS::AbilityRuntime {
     class Context;
 }
 
+namespace OHOS::AAFwk {
+    class Want;
+}
+
 namespace OHOS::Ace {
     class UIContent;
 }
@@ -156,6 +160,8 @@ public:
     virtual void SetBrightness(float brightness) = 0;
     virtual float GetBrightness() const = 0;
     virtual void SetCallingWindow(uint32_t windowId) = 0;
+    virtual void SetPrivacyMode(bool isPrivacyMode) = 0;
+    virtual bool IsPrivacyMode() const = 0;
 
     virtual WMError RequestFocus() const = 0;
     // AddInputEventListener is for api 7
@@ -184,6 +190,7 @@ public:
         NativeValue* storage, bool isdistributed = false) = 0;
     virtual std::string GetContentInfo() = 0;
     virtual Ace::UIContent* GetUIContent() const = 0;
+    virtual void OnNewWant(const AAFwk::Want& want) = 0;
 
     virtual bool IsDecorEnable() const = 0;
     virtual WMError Maximize() = 0;

@@ -361,6 +361,14 @@ WMError WindowImpl::SetWindowFlags(uint32_t flags)
     return ret;
 }
 
+void WindowImpl::OnNewWant(const AAFwk::Want& want)
+{
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] OnNewWant", name_.c_str(), property_->GetWindowId());
+    if (uiContent_ != nullptr) {
+        uiContent_->OnNewWant(want);
+    }
+}
+
 WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed)
 {
@@ -862,8 +870,7 @@ void WindowImpl::SetBackgroundColor(const std::string& color)
 {
     uint32_t colorValue;
     if (ColorParser::Parse(color, colorValue)) {
-        backgroundColor_.value = colorValue;
-        // need update background color for ace
+        uiContent_->SetBackgroundColor(colorValue);
         return;
     }
     WLOGFE("invalid color string: %{public}s", color.c_str());
@@ -871,24 +878,25 @@ void WindowImpl::SetBackgroundColor(const std::string& color)
 
 void WindowImpl::SetTransparent(bool isTransparent)
 {
+    ColorParam backgroundColor;
+    backgroundColor.value = uiContent_->GetBackgroundColor();
     if (isTransparent) {
-        backgroundColor_.argb.alpha = 0x00;
+        backgroundColor.argb.alpha = 0x00; // 0x00: completely transparent
+        uiContent_->SetBackgroundColor(backgroundColor.value);
     } else {
-        // need get background color from ace to backgroundColor_.value
-        if (backgroundColor_.argb.alpha == 0x00) {
-            backgroundColor_.argb.alpha = 0xff;
-            // need update background color for ace
+        backgroundColor.value = uiContent_->GetBackgroundColor();
+        if (backgroundColor.argb.alpha == 0x00) {
+            backgroundColor.argb.alpha = 0xff; // 0xff: completely opaque
+            uiContent_->SetBackgroundColor(backgroundColor.value);
         }
     }
 }
 
 bool WindowImpl::IsTransparent() const
 {
-    // need get background color from ace to backgroundColor_.value
-    if (backgroundColor_.argb.alpha == 0x00) {
-        return true;
-    }
-    return false;
+    ColorParam backgroundColor;
+    backgroundColor.value = uiContent_->GetBackgroundColor();
+    return backgroundColor.argb.alpha == 0x00; // 0x00: completely transparent
 }
 
 void WindowImpl::SetBrightness(float brightness)
@@ -919,6 +927,16 @@ void WindowImpl::SetCallingWindow(uint32_t windowId)
     }
     property_->SetCallingWindow(windowId);
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
+}
+
+void WindowImpl::SetPrivacyMode(bool isPrivacyMode)
+{
+    property_->SetPrivacyMode(isPrivacyMode);
+}
+
+bool WindowImpl::IsPrivacyMode() const
+{
+    return property_->GetPrivacyMode();
 }
 
 WMError WindowImpl::Drag(const Rect& rect)

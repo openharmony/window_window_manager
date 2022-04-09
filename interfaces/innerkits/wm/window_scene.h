@@ -100,6 +100,14 @@ public:
     WMError GoDestroy();
 
     /**
+     * Window handle new want.
+     *
+     * @param want ability want.
+     * @return the error code of window
+     */
+    WMError OnNewWant(const AAFwk::Want& want);
+
+    /**
      * Request to get the focus.
      *
      * @return the error code of window
