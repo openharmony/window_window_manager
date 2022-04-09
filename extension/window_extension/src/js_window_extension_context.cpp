@@ -42,18 +42,18 @@ public:
 private:
     std::shared_ptr<WindowExtensionContext> context_;
 };
-// void JsAbilityConnectCallback::OnWindowCreate(sptr<Window> window)
+// void JsWindowConnectCallback::OnWindowCreate(sptr<Window> window)
 // {
 //     // call js api
 // }
 
-void JsAbilityConnectCallback::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
+void JsWindowConnectCallback::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
         const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
     WLOGFI("called");
 }
 
-void JsAbilityConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
+void JsWindowConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
 {
     WLOGFI("called");
 }

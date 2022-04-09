@@ -26,7 +26,7 @@ namespace OHOS {
 namespace Rosen {
 class IWindowExtensionServer : public IRemoteBroker {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowExtensionServer");
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.aafwk.AbilityToken");
     enum {
         TRANS_ID_ON_WINDOW_READY,
         TRANS_ID_ON_BACK_PRESS,

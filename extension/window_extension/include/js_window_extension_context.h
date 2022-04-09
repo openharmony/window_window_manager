@@ -26,11 +26,10 @@
 
 namespace OHOS {
 namespace Rosen {
-class JsWindowExtensionContext;
-class JsAbilityConnectCallback : public AbilityRuntime::AbilityConnectCallback {
+class JsWindowConnectCallback : public AbilityRuntime::AbilityConnectCallback {
 public:
-    explicit JsAbilityConnectCallback() = default;
-    ~JsAbilityConnectCallback() = default;
+    explicit JsWindowConnectCallback() = default;
+    ~JsWindowConnectCallback() = default;
     // void OnWindowCreate(sptr<Window> window); //TODO 
     virtual void OnAbilityConnectDone(const AppExecFwk::ElementName &element,
         const sptr<IRemoteObject> &remoteObject, int resultCode) override;
@@ -38,7 +37,7 @@ public:
 };
 
 NativeValue* CreateJsWindowExtensionContext(NativeEngine& engine,
-    std::shared_ptr<AbilityRuntime::ExtensionContext> context);
+    std::shared_ptr<Rosen::WindowExtensionContext> context);
 } // namespace Rosen
 } // namespace OHOS
 #endif // JS_WINDOW_EXTENSION_CONTEXT_H
