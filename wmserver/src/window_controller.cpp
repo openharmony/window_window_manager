@@ -55,6 +55,10 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (node->currentVisibility_) {
+        WLOGFE("current window is visible, windowId: %{public}u", node->GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     node->GetWindowProperty()->CopyFrom(property);
 
     // Need 'check permission'
