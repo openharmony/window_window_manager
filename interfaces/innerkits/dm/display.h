@@ -41,6 +41,7 @@ public:
     uint32_t GetRefreshRate() const;
     ScreenId GetScreenId() const;
     float GetVirtualPixelRatio() const;
+    int GetDpi() const;
     Rotation GetRotation() const;
     Orientation GetOrientation() const;
 
