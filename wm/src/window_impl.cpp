@@ -746,6 +746,10 @@ WMError WindowImpl::Show(uint32_t reason)
         NotifyAfterForeground();
         return WMError::WM_OK;
     }
+    if (state_ == WindowState::STATE_FROZEN) {
+        WLOGFE("window is frozen, can not be shown, windowId: %{public}u", property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     if (state_ == WindowState::STATE_SHOWN) {
         if (property_->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
             WLOGFI("desktop window [id:%{public}u] is shown, minimize all app windows", property_->GetWindowId());
