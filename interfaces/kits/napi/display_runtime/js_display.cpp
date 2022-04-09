@@ -61,9 +61,25 @@ void JsDisplay::Finalizer(NativeEngine* engine, void* data, void* hint)
     }
 }
 
+std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId)
+{
+    WLOGFI("[NAPI]Try to find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
+    std::lock_guard<std::recursive_mutex> lock(g_mutex);
+    if (g_JsDisplayMap.find(displayId) == g_JsDisplayMap.end()) {
+        WLOGFI("[NAPI]Can not find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
+        return nullptr;
+    }
+    return g_JsDisplayMap[displayId];
+}
+
 NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
 {
     WLOGFI("JsDisplay::CreateJsDisplay is called");
+    std::shared_ptr<NativeReference> jsDisplayObj = FindJsDisplayObject(display->GetId());
+    if (jsDisplayObj != nullptr && jsDisplayObj->Get() != nullptr) {
+        WLOGFI("[NAPI]FindJsDisplayObject %{public}" PRIu64"", display->GetId());
+        return jsDisplayObj->Get();
+    }
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
