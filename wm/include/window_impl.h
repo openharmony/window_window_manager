@@ -133,6 +133,8 @@ public:
     virtual void SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
     virtual void SetCallingWindow(uint32_t windowId) override;
+    virtual void SetPrivacyMode(bool isPrivacyMode) override;
+    virtual bool IsPrivacyMode() const override;
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;
@@ -178,6 +180,7 @@ public:
     virtual std::string GetContentInfo() override;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const override;
     virtual Ace::UIContent* GetUIContent() const override;
+    virtual void OnNewWant(const AAFwk::Want& want) override;
 
     // colorspace, gamut
     virtual bool IsSupportWideGamut() override;
@@ -301,7 +304,6 @@ private:
     bool keepScreenOn_ = false;
     bool turnScreenOn_ = false;
     float brightness_ = UNDEFINED_BRIGHTNESS;
-    ColorParam backgroundColor_ = { .value = 0xff000000 };
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 };
 }
