@@ -17,8 +17,9 @@
 
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
-
+#include "js_extension_context.h"
 #include "js_window_extension_context.h"
+
 #include "window_extension_connection.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -67,7 +68,6 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     moduleName.append("::").append(abilityInfo_->name);
     WLOGFI("JsWindowExtension::Init module:%{public}s,srcPath:%{public}s.", moduleName.c_str(), srcPath.c_str());
     HandleScope handleScope(jsRuntime_);
-    auto& engine = jsRuntime_.GetNativeEngine();
 
     jsObj_ = jsRuntime_.LoadModule(moduleName, srcPath);
     if (jsObj_ == nullptr) {
@@ -87,7 +87,8 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
         return;
     }
     WLOGFI("JsWindowExtension::Init CreateJsWindowExtensionContext.");
-    NativeValue* contextObj = CreateJsWindowExtensionContext(engine, context);
+
+    NativeValue* contextObj = CreateJsWindowExtensionContext(jsRuntime_.GetNativeEngine(), context);
     shellContextRef_ = jsRuntime_.LoadSystemModule("application.WindowExtensionContext", &contextObj, ARGC_ONE);
     contextObj = shellContextRef_->Get();
     WLOGFI("JsWindowExtension::Init Bind.");
@@ -114,7 +115,27 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
 
 void JsWindowExtension::GetSrcPath(std::string &srcPath)
 {
-    // TODO
+    if (!Extension::abilityInfo_) {
+        HILOG_ERROR("abilityInfo_ is nullptr");
+        return;
+    }
+
+   if (!Extension::abilityInfo_->isModuleJson) {
+        srcPath.append(Extension::abilityInfo_->package);
+       srcPath.append("/assets/js/");
+        if (!Extension::abilityInfo_->srcPath.empty()) {
+            srcPath.append(Extension::abilityInfo_->srcPath);
+        }
+        srcPath.append("/").append(Extension::abilityInfo_->name).append(".abc");
+        return;
+   }
+
+    if (!Extension::abilityInfo_->srcEntrance.empty()) {
+        srcPath.append(Extension::abilityInfo_->moduleName + "/");
+        srcPath.append(Extension::abilityInfo_->srcEntrance);
+        srcPath.erase(srcPath.rfind('.'));
+        srcPath.append(".abc");
+    }
 }
 
 sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)

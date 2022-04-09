@@ -105,11 +105,11 @@ void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::Element
         stub_ = new(std::nothrow) WindowExtensionServerStubImpl(callback);
     }
     if (AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
-        want, this, stub_, uid / 200000) != ERR_OK) { // 200000 is uid mask
+        want, this, stub_, 100) != ERR_OK) { // default userId
         WLOGFE("ConnectAbility failed!");
         return;
     }
-    WLOGFI("Connection extension");
+    WLOGFI("Connection extension end");
     componentCallback_ = callback;
 }
 
