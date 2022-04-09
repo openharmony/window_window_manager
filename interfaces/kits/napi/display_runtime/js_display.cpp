@@ -80,8 +80,8 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
     object->SetProperty("name", engine.CreateUndefined());
     object->SetProperty("alive", engine.CreateUndefined());
     object->SetProperty("state", engine.CreateUndefined());
-    object->SetProperty("rotation", engine.CreateUndefined());
-    object->SetProperty("densityDPI", engine.CreateUndefined());
+    object->SetProperty("rotation", CreateJsValue(engine, display->GetRotation()));
+    object->SetProperty("densityDPI", CreateJsValue(engine, display->GetDpi()));
     object->SetProperty("densityPixels", engine.CreateUndefined());
     object->SetProperty("scaledDensity", engine.CreateUndefined());
     object->SetProperty("xDPI", engine.CreateUndefined());
