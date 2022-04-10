@@ -26,17 +26,18 @@ JsWindowRegisterManager::JsWindowRegisterManager()
 {
     // white register list for window manager
     listenerProcess_[CaseType::CASE_WINDOW_MANAGER] = {
-        {SYSTEM_BAR_TINT_CHANGE_CB,     &JsWindowRegisterManager::ProcessSystemBarChangeRegister }
+        {SYSTEM_BAR_TINT_CHANGE_CB,     &JsWindowRegisterManager::ProcessSystemBarChangeRegister   }
     };
     // white register list for window
     listenerProcess_[CaseType::CASE_WINDOW] = {
-        {WINDOW_SIZE_CHANGE_CB,         &JsWindowRegisterManager::ProcessWindowChangeRegister    },
-        {SYSTEM_AVOID_AREA_CHANGE_CB,   &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister },
-        {LIFECYCLE_EVENT_CB,            &JsWindowRegisterManager::ProcessLifeCycleEventRegister  }
+        {WINDOW_SIZE_CHANGE_CB,         &JsWindowRegisterManager::ProcessWindowChangeRegister      },
+        {SYSTEM_AVOID_AREA_CHANGE_CB,   &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister   },
+        {LIFECYCLE_EVENT_CB,            &JsWindowRegisterManager::ProcessLifeCycleEventRegister    },
+        {KEYBOARD_HEIGHT_CHANGE_CB,     &JsWindowRegisterManager::ProcesOccupiedAreaChangeRegister }
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
-        {WINDOW_STAGE_EVENT_CB,         &JsWindowRegisterManager::ProcessLifeCycleEventRegister  }
+        {WINDOW_STAGE_EVENT_CB,         &JsWindowRegisterManager::ProcessLifeCycleEventRegister    }
     };
 }
 
@@ -88,6 +89,22 @@ bool JsWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<JsWindowListene
         window->RegisterLifeCycleListener(thisListener);
     } else {
         window->UnregisterLifeCycleListener(thisListener);
+    }
+    return true;
+}
+
+bool JsWindowRegisterManager::ProcesOccupiedAreaChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        WLOGFE("[NAPI]Window is nullptr");
+        return false;
+    }
+    sptr<IOccupiedAreaChangeListener> thisListener(listener);
+    if (isRegister) {
+        window->RegisterOccupiedAreaChangeListener(thisListener);
+    } else {
+        window->UnregisterOccupiedAreaChangeListener(thisListener);
     }
     return true;
 }
