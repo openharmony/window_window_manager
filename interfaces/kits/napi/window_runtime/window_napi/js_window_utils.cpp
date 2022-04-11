@@ -210,6 +210,9 @@ NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& 
     object->SetProperty("focusable", CreateJsValue(engine, window->GetFocusable()));
     object->SetProperty("name", CreateJsValue(engine, window->GetWindowName()));
     object->SetProperty("isPrivacyMode", CreateJsValue(engine, window->IsPrivacyMode()));
+    object->SetProperty("isKeepScreenOn", CreateJsValue(engine, window->IsKeepScreenOn()));
+    object->SetProperty("brightness", CreateJsValue(engine, window->GetBrightness()));
+    object->SetProperty("isTransparent", CreateJsValue(engine, window->IsTransparent()));
     return objValue;
 }
 static std::string GetHexColor(uint32_t color)

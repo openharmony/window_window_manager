@@ -872,6 +872,10 @@ bool WindowImpl::IsTurnScreenOn() const
 
 void WindowImpl::SetBackgroundColor(const std::string& color)
 {
+    if (uiContent_ == nullptr) {
+        WLOGFE("invalid operation, uiContent is nullptr, windowId: %{public}u", GetWindowId());
+        return;
+    }
     uint32_t colorValue;
     if (ColorParser::Parse(color, colorValue)) {
         uiContent_->SetBackgroundColor(colorValue);
@@ -882,6 +886,10 @@ void WindowImpl::SetBackgroundColor(const std::string& color)
 
 void WindowImpl::SetTransparent(bool isTransparent)
 {
+    if (uiContent_ == nullptr) {
+        WLOGFE("invalid operation, uiContent is nullptr, windowId: %{public}u", GetWindowId());
+        return;
+    }
     ColorParam backgroundColor;
     backgroundColor.value = uiContent_->GetBackgroundColor();
     if (isTransparent) {
@@ -898,6 +906,10 @@ void WindowImpl::SetTransparent(bool isTransparent)
 
 bool WindowImpl::IsTransparent() const
 {
+    if (uiContent_ == nullptr) {
+        WLOGFE("invalid operation, uiContent is nullptr, windowId: %{public}u", GetWindowId());
+        return false;
+    }
     ColorParam backgroundColor;
     backgroundColor.value = uiContent_->GetBackgroundColor();
     return backgroundColor.argb.alpha == 0x00; // 0x00: completely transparent
@@ -917,6 +929,7 @@ void WindowImpl::SetBrightness(float brightness)
         return;
     }
     SingletonContainer::Get<WindowAdapter>().SetBrightness(GetWindowId(), brightness);
+    brightness_ = brightness;
 }
 
 float WindowImpl::GetBrightness() const
@@ -1157,7 +1170,7 @@ void WindowImpl::UnregisterInputEventListener(sptr<IInputEventListener>& listene
 
 void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
 {
-    WLOGFE("JS RegisterWindowDestroyedListener the listener");
+    WLOGFI("JS RegisterWindowDestroyedListener the listener");
     notifyNativefunc_ = std::move(func);
 }
 
