@@ -25,7 +25,6 @@
 
 namespace OHOS {
 namespace Rosen {
-
 class RSIWindowAnimationController;
 
 class IWindowManager : public IRemoteBroker {
