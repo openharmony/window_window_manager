@@ -109,6 +109,7 @@ const std::map<ApiWindowMode, WindowMode> JS_TO_NATIVE_WINDOW_MODE_MAP {
     NativeValue* WindowModeInit(NativeEngine* engine);
     NativeValue* ColorSpaceInit(NativeEngine* engine);
     NativeValue* WindowStageEventTypeInit(NativeEngine* engine);
+    bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability);
 }
 }
 #endif

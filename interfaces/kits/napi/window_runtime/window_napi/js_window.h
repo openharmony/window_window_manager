@@ -25,11 +25,11 @@
 
 namespace OHOS {
 namespace Rosen {
-NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window, bool isOldApi);
+NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window);
 std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName);
 class JsWindow final {
 public:
-    JsWindow(const sptr<Window>& window, bool isOldApi);
+    explicit JsWindow(const sptr<Window>& window);
     ~JsWindow();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* Show(NativeEngine* engine, NativeCallbackInfo* info);
@@ -102,7 +102,6 @@ private:
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
-    bool isOldApi_ = false;
 };
 }  // namespace Rosen
 }  // namespace OHOS

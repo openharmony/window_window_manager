@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import router from '@system.router';
-import windowManager from '@ohos.window'
+import window from '@ohos.window'
 @Entry
 @Component
 struct Index {

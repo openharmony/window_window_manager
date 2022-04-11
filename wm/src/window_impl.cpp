@@ -370,10 +370,18 @@ void WindowImpl::OnNewWant(const AAFwk::Want& want)
 }
 
 WMError WindowImpl::SetUIContent(const std::string& contentInfo,
-    NativeEngine* engine, NativeValue* storage, bool isdistributed)
+    NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
 {
     WLOGFI("SetUIContent contentInfo: %{public}s", contentInfo.c_str());
-    uiContent_ = Ace::UIContent::Create(context_.get(), engine);
+    if (ability != nullptr) {
+        uiContent_ = Ace::UIContent::Create(ability);
+    } else {
+        if (context_.get() == nullptr) {
+            WLOGFE("fail to SetUIContent id: %{public}u in StageMode because null context", property_->GetWindowId());
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        uiContent_ = Ace::UIContent::Create(context_.get(), engine);
+    }
     if (uiContent_ == nullptr) {
         WLOGFE("fail to SetUIContent id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
