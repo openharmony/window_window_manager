@@ -138,7 +138,7 @@ NativeValue* JsWindowStage::OnGetMainWindow(NativeEngine& engine, NativeCallback
             }
             auto window = windowScene_->GetMainWindow();
             if (window != nullptr) {
-                task.Resolve(engine, OHOS::Rosen::CreateJsWindowObject(engine, window, false));
+                task.Resolve(engine, OHOS::Rosen::CreateJsWindowObject(engine, window));
                 WLOGFI("[NAPI]Get main window [%{public}u, %{public}s]",
                     window->GetWindowId(), window->GetWindowName().c_str());
             } else {
@@ -331,7 +331,7 @@ NativeValue* JsWindowStage::OnCreateSubWindow(NativeEngine& engine, NativeCallba
                 WLOGFE("[NAPI]Get window failed");
                 return;
             }
-            task.Resolve(engine, CreateJsWindowObject(engine, window, false));
+            task.Resolve(engine, CreateJsWindowObject(engine, window));
             WLOGFI("[NAPI]Create sub widdow %{public}s end", windowName.c_str());
         };
     NativeValue* callback = (info.argv[1]->TypeOf() == NATIVE_FUNCTION) ? info.argv[1] : nullptr;
@@ -352,7 +352,7 @@ NativeValue* JsWindowStage::CreateJsSubWindowArrayObject(NativeEngine& engine,
     }
     uint32_t index = 0;
     for (size_t i = 0; i < subWinVec.size(); i++) {
-        array->SetElement(index++, CreateJsWindowObject(engine, subWinVec[i], false));
+        array->SetElement(index++, CreateJsWindowObject(engine, subWinVec[i]));
     }
     return objValue;
 }
