@@ -17,9 +17,10 @@
 
 #include <cinttypes>
 
-#include <ipc_skeleton.h>
-#include <system_ability_definition.h>
 #include <ability_manager_client.h>
+#include <ipc_skeleton.h>
+#include <rs_iwindow_animation_controller.h>
+#include <system_ability_definition.h>
 
 #include "dm_common.h"
 #include "display_manager_service_inner.h"
@@ -220,6 +221,17 @@ void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType t
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WindowManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
+}
+
+WMError WindowManagerService::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
+{
+    if (controller == nullptr) {
+        WLOGFE("Failed to set window animation controller, controller is null!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->SetWindowAnimationController(controller);
 }
 
 void WindowManagerService::OnWindowEvent(Event event, uint32_t windowId)

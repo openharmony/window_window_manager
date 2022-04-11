@@ -15,6 +15,7 @@
 
 #include "window_manager_proxy.h"
 #include <ipc_types.h>
+#include <rs_iwindow_animation_controller.h>
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -337,6 +338,38 @@ void WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType typ
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
+}
+
+WMError WindowManagerProxy::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (controller == nullptr) {
+        WLOGFE("Failed to set window animation controller, controller is null!");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Failed to WriteInterfaceToken!");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteParcelable(controller->AsObject())) {
+        WLOGFE("Failed to write controller!");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    auto error = Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER),
+        data, reply, option);
+    if (error != ERR_NONE) {
+        WLOGFE("Send request error: %{public}d", error);
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
 }
 
 void WindowManagerProxy::ProcessPointDown(uint32_t windowId, bool isStartDrag)

@@ -18,12 +18,15 @@
 
 #include <iremote_broker.h>
 #include <ui/rs_surface_node.h>
+
 #include "window_property.h"
 #include "window_interface.h"
 #include "zidl/window_manager_agent_interface.h"
 
 namespace OHOS {
 namespace Rosen {
+class RSIWindowAnimationController;
+
 class IWindowManager : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowManager");
@@ -50,6 +53,7 @@ public:
         TRANS_ID_MAXMIZE_WINDOW,
         TRANS_ID_UPDATE_PROPERTY,
         TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID,
+        TRANS_ID_ANIMATION_SET_CONTROLLER,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -74,6 +78,7 @@ public:
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) = 0;
+    virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) = 0;
 };
 }
 }
