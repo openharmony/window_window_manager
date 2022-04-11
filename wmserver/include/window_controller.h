@@ -17,6 +17,8 @@
 #define OHOS_ROSEN_WINDOW_CONTROLLER_H
 
 #include <refbase.h>
+#include <rs_iwindow_animation_controller.h>
+
 #include "input_window_monitor.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "window_root.h"
@@ -50,6 +52,7 @@ public:
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
     WMError UpdateProperty(sptr<WindowProperty>& property, PropertyChangeAction action);
     void NotifySystemBarTints();
+    WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
 
 private:
     uint32_t GenWindowId();
@@ -66,6 +69,7 @@ private:
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
+    sptr<RSIWindowAnimationController> windowAnimationController_;
     std::atomic<uint32_t> windowId_ { INVALID_WINDOW_ID };
     // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
     std::unordered_map<WindowType, uint32_t> sysBarWinId_ {

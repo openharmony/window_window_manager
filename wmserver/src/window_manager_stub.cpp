@@ -15,6 +15,7 @@
 
 #include "window_manager_stub.h"
 #include <ipc_skeleton.h>
+#include <rs_iwindow_animation_controller.h>
 #include "window_manager_hilog.h"
 
 
@@ -171,6 +172,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             sptr<AccessibilityWindowInfo> windowInfo = data.ReadParcelable<AccessibilityWindowInfo>();
             WMError errCode = GetAccessibilityWindowInfo(windowInfo);
             reply.WriteParcelable(windowInfo);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER: {
+            auto controller = iface_cast<RSIWindowAnimationController>(data.ReadParcelable<IRemoteObject>());
+            WMError errCode = SetWindowAnimationController(controller);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
