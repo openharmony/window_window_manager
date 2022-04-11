@@ -442,9 +442,14 @@ ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds
     if (iter != allExpandScreenIds.end()) {
         allExpandScreenIds.erase(iter);
     }
+    std::shared_ptr<RSDisplayNode> rsDisplayNode;
+    for (int32_t i = 0; i < expandScreenIds.size(); i++) {
+        rsDisplayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(expandScreenIds[i]);
+        if (rsDisplayNode != nullptr) {
+            rsDisplayNode->SetDisplayOffset(startPoints[i].posX_, startPoints[i].posY_);
+        }
+    }
     if (startPointIter != startPoints.end()) {
-        auto defaultRsDisplayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(defaultScreenId);
-        defaultRsDisplayNode->SetDisplayOffset((*startPointIter).posX_, (*startPointIter).posY_);
         startPoints.erase(startPointIter);
     }
     abstractScreenController_->SetShotScreen(defaultScreenId, shotScreenIds);
