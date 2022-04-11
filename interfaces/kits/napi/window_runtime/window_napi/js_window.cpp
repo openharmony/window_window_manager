@@ -256,6 +256,20 @@ NativeValue* JsWindow::SetTouchable(NativeEngine* engine, NativeCallbackInfo* in
     return (me != nullptr) ? me->OnSetTouchable(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::SetTransparent(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]SetTransparent");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetTransparent(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::SetCallingWindow(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]SetCallingWindow");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetCallingWindow(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::SetColorSpace(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGFI("[NAPI]SetColorSpace");
@@ -632,16 +646,15 @@ NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCa
     }
 
     NativeValue* value = nullptr;
-    if (info.argc == 1) {
-        registerManager_->UnregisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, value);
-    } else {
+    if (info.argc == 2) { // 2: maximum params nums
         value = info.argv[1];
         if (!value->IsCallable()) {
             WLOGFI("[NAPI]Callback(info->argv[1]) is not callable");
             return engine.CreateUndefined();
         }
-        registerManager_->UnregisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, value);
     }
+    registerManager_->UnregisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, value);
+
     WLOGFI("[NAPI]Unregister end, window [%{public}u, %{public}s], type = %{public}s, callback = %{public}p",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str(), value);
     return engine.CreateUndefined();
@@ -977,10 +990,28 @@ NativeValue* JsWindow::OnIsSupportWideGamut(NativeEngine& engine, NativeCallback
 
 NativeValue* JsWindow::OnSetBackgroundColor(NativeEngine& engine, NativeCallbackInfo& info)
 {
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    std::string color;
+    if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[0], color)) {
+        WLOGFE("[NAPI]Failed to convert parameter to background color");
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
-    };
+            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            windowToken_->SetBackgroundColor(color);
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set background color end",
+                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+        };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
         (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
@@ -992,9 +1023,32 @@ NativeValue* JsWindow::OnSetBackgroundColor(NativeEngine& engine, NativeCallback
 
 NativeValue* JsWindow::OnSetBrightness(NativeEngine& engine, NativeCallbackInfo& info)
 {
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    float brightness = UNDEFINED_BRIGHTNESS;
+    if (errCode == WMError::WM_OK) {
+        NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to brightness");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            brightness = static_cast<double>(*nativeVal);
+        }
+    }
+
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            windowToken_->SetBrightness(brightness);
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set brightnesss end",
+                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1022,9 +1076,32 @@ NativeValue* JsWindow::OnSetDimBehind(NativeEngine& engine, NativeCallbackInfo& 
 
 NativeValue* JsWindow::OnSetFocusable(NativeEngine& engine, NativeCallbackInfo& info)
 {
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool focusable = true;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to focusable");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            focusable = static_cast<bool>(*nativeVal);
+        }
+    }
+
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            windowToken_->SetFocusable(focusable);
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set focusable end",
+                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1037,9 +1114,32 @@ NativeValue* JsWindow::OnSetFocusable(NativeEngine& engine, NativeCallbackInfo& 
 
 NativeValue* JsWindow::OnSetKeepScreenOn(NativeEngine& engine, NativeCallbackInfo& info)
 {
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool keepScreenOn = true;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to keepScreenOn");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            keepScreenOn = static_cast<bool>(*nativeVal);
+        }
+    }
+
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            windowToken_->SetKeepScreenOn(keepScreenOn);
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set keep screen on end",
+                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1105,9 +1205,108 @@ NativeValue* JsWindow::OnSetPrivacyMode(NativeEngine& engine, NativeCallbackInfo
 
 NativeValue* JsWindow::OnSetTouchable(NativeEngine& engine, NativeCallbackInfo& info)
 {
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool touchable = true;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to touchable");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            touchable = static_cast<bool>(*nativeVal);
+        }
+    }
+
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            windowToken_->SetTouchable(touchable);
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set touchable end",
+                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+        };
+
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnSetTransparent(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool isTransparent = true;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to isTransparent");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            isTransparent = static_cast<bool>(*nativeVal);
+        }
+    }
+
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            windowToken_->SetTransparent(isTransparent);
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set transparent end",
+                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+        };
+
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnSetCallingWindow(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    uint32_t callingWindow = INVALID_WINDOW_ID;
+    if (errCode == WMError::WM_OK) {
+        NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to touchable");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            callingWindow = static_cast<uint32_t>(*nativeVal);
+        }
+    }
+
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            windowToken_->SetCallingWindow(callingWindow);
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set calling window end",
+                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1244,6 +1443,8 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window, bo
     BindNativeFunction(engine, *object, "setOutsideTouchable", JsWindow::SetOutsideTouchable);
     BindNativeFunction(engine, *object, "setPrivacyMode", JsWindow::SetPrivacyMode);
     BindNativeFunction(engine, *object, "setTouchable", JsWindow::SetTouchable);
+    BindNativeFunction(engine, *object, "setTransparent", JsWindow::SetTransparent);
+    BindNativeFunction(engine, *object, "setCallingWindow", JsWindow::SetCallingWindow);
     std::shared_ptr<NativeReference> jsWindowRef;
     jsWindowRef.reset(engine.CreateReference(objValue, 1));
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
