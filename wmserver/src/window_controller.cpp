@@ -93,6 +93,10 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
 void WindowController::ReSizeSystemBarPropertySizeIfNeed(sptr<WindowProperty>& property)
 {
     auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(property->GetDisplayId());
+    if (displayInfo == nullptr) {
+        WLOGFE("displayInfo is null");
+        return;
+    }
     uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
     uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
