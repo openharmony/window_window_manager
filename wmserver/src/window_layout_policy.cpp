@@ -32,15 +32,8 @@ WindowLayoutPolicy::WindowLayoutPolicy(const Rect& displayRect, const uint64_t& 
 {
 }
 
-void WindowLayoutPolicy::UpdateDisplayInfo()
-{
-    limitRect_ = displayRect_;
-    UpdateDefaultFoatingRect();
-}
-
 void WindowLayoutPolicy::Launch()
 {
-    UpdateDisplayInfo();
     WLOGFI("WindowLayoutPolicy::Launch");
 }
 
@@ -86,51 +79,6 @@ void WindowLayoutPolicy::LayoutWindowNode(sptr<WindowNode>& node)
     }
 }
 
-void WindowLayoutPolicy::AddWindowNode(sptr<WindowNode>& node)
-{
-    WM_FUNCTION_TRACE();
-    if (WindowHelper::IsEmptyRect(node->GetWindowProperty()->GetWindowRect())) {
-        SetRectForFloating(node);
-    }
-    UpdateWindowNode(node); // currently, update and add do the same process
-}
-
-void WindowLayoutPolicy::UpdateDefaultFoatingRect()
-{
-    constexpr uint32_t half = 2;
-    constexpr float ratio = 0.75;  // 0.75: default height/width ratio
-
-    // calculate default H and w
-    uint32_t defaultW = static_cast<uint32_t>(displayRect_.width_ * ratio);
-    uint32_t defaultH = static_cast<uint32_t>(displayRect_.height_ * ratio);
-
-    // calculate default x and y
-    Rect resRect = {0, 0, defaultW, defaultH};
-    if (defaultW <= limitRect_.width_ && defaultH <= limitRect_.height_) {
-        int32_t centerPosX = limitRect_.posX_ + static_cast<int32_t>(limitRect_.width_ / half);
-        resRect.posX_ = centerPosX - static_cast<int32_t>(defaultW / half);
-
-        int32_t centerPosY = limitRect_.posY_ + static_cast<int32_t>(limitRect_.height_ / half);
-        resRect.posY_ = centerPosY - static_cast<int32_t>(defaultH / half);
-    }
-    defaultFloatingRect_ = resRect;
-}
-
-void WindowLayoutPolicy::SetRectForFloating(const sptr<WindowNode>& node)
-{
-    float virtualPixelRatio = GetVirtualPixelRatio();
-    uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
-    uint32_t winTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
-    // deduct decor size
-    Rect rect = defaultFloatingRect_;
-    if (node->GetWindowProperty()->GetDecorEnable()) {
-        rect.width_ -= (winFrameW + winFrameW);
-        rect.height_ -= (winTitleBarH + winFrameW);
-    }
-
-    node->SetWindowRect(rect);
-}
-
 bool WindowLayoutPolicy::IsVertical() const
 {
     return displayRect_.width_ < displayRect_.height_;
@@ -146,10 +94,8 @@ void WindowLayoutPolicy::RemoveWindowNode(sptr<WindowNode>& node)
     } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
         LayoutWindowTree();
     }
-    Rect winRect = node->GetWindowProperty()->GetWindowRect();
-    Rect emptyRect = { 0, 0, 0, 0 };
-    node->SetLayoutRect(emptyRect);
-    node->GetWindowToken()->UpdateWindowRect(winRect, WindowSizeChangeReason::HIDE);
+    Rect reqRect = node->GetRequestRect();
+    node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
 }
 
 void WindowLayoutPolicy::UpdateWindowNode(sptr<WindowNode>& node, bool isAddWindow)
@@ -180,21 +126,31 @@ void WindowLayoutPolicy::UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect
         winRect.posY_);
 }
 
-Rect WindowLayoutPolicy::ComputeDecoratedWindowRect(const Rect& winRect)
+void WindowLayoutPolicy::ComputeDecoratedRequestRect(sptr<WindowNode>& node) const
 {
+    auto property = node->GetWindowProperty();
+    if (property == nullptr) {
+        WLOGE("window property is nullptr");
+        return;
+    }
+    auto reqRect = property->GetRequestRect();
+    if (!property->GetDecorEnable() || property->GetDecoStatus()) {
+        return;
+    }
     float virtualPixelRatio = GetVirtualPixelRatio();
     uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
     uint32_t winTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
 
     Rect rect;
-    rect.posX_ = winRect.posX_;
-    rect.posY_ = winRect.posY_;
-    rect.width_ = winRect.width_ + winFrameW + winFrameW;
-    rect.height_ = winRect.height_ + winTitleBarH + winFrameW;
-    return rect;
+    rect.posX_ = reqRect.posX_;
+    rect.posY_ = reqRect.posY_;
+    rect.width_ = reqRect.width_ + winFrameW + winFrameW;
+    rect.height_ = reqRect.height_ + winTitleBarH + winFrameW;
+    property->SetRequestRect(rect);
+    property->SetDecoStatus(true);
 }
 
-void WindowLayoutPolicy::CalcAndSetNodeHotZone(Rect layoutOutRect, sptr<WindowNode>& node)
+void WindowLayoutPolicy::CalcAndSetNodeHotZone(Rect layoutOutRect, sptr<WindowNode>& node) const
 {
     Rect rect = layoutOutRect;
     float virtualPixelRatio = GetVirtualPixelRatio();
@@ -219,7 +175,7 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(Rect layoutOutRect, sptr<WindowNo
     node->SetHotZoneRect(rect);
 }
 
-void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect)
+void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect)  const
 {
     float virtualPixelRatio = GetVirtualPixelRatio();
     uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
@@ -259,7 +215,7 @@ void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rec
     }
 }
 
-AvoidPosType WindowLayoutPolicy::GetAvoidPosType(const Rect& rect)
+AvoidPosType WindowLayoutPolicy::GetAvoidPosType(const Rect& rect) const
 {
     auto display = DisplayManagerServiceInner::GetInstance().GetDisplayById(screenId_);
     if (display == nullptr) {
@@ -274,7 +230,7 @@ AvoidPosType WindowLayoutPolicy::GetAvoidPosType(const Rect& rect)
 
 void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect)
 {
-    auto& layoutRect = node->GetLayoutRect();
+    const auto& layoutRect = node->GetWindowRect();
     int32_t limitH = static_cast<int32_t>(limitRect.height_);
     int32_t limitW = static_cast<int32_t>(limitRect.width_);
     int32_t layoutH = static_cast<int32_t>(layoutRect.height_);
@@ -344,11 +300,6 @@ bool WindowLayoutPolicy::IsFullScreenRecentWindowExist() const
         }
     }
     return false;
-}
-
-Rect WindowLayoutPolicy::GetDisplayLimitRect() const
-{
-    return limitRect_;
 }
 }
 }

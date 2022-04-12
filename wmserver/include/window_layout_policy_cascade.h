@@ -58,9 +58,10 @@ private:
     void LayoutWindowNode(sptr<WindowNode>& node) override;
     void LayoutWindowTree() override;
     void InitLimitRects();
-    void LimitMoveBounds(Rect& rect);
+    void LimitMoveBounds(Rect& rect) const;
     void InitCascadeRect();
     void SetCascadeRect(const sptr<WindowNode>& node);
+    void ApplyWindowRectConstraints(const sptr<WindowNode>& node, Rect& winRect) const;
 
     Rect GetRectByWindowMode(const WindowMode& mode) const;
     Rect GetLimitRect(const WindowMode mode) const;

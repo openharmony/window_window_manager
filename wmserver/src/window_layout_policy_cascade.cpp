@@ -96,7 +96,7 @@ void WindowLayoutPolicyCascade::UpdateWindowNode(sptr<WindowNode>& node, bool is
         LayoutWindowTree();
     } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
         UpdateLayoutRect(node);
-        auto splitDockerRect = node->GetLayoutRect();
+        auto splitDockerRect = node->GetWindowRect();
         SetSplitRect(splitDockerRect); // calculate primary/secondary depend on divider rect
         WLOGFI("UpdateDividerRects WinId: %{public}u, Rect: %{public}d %{public}d %{public}u %{public}u",
             node->GetWindowId(), splitDockerRect.posX_, splitDockerRect.posY_,
@@ -122,21 +122,16 @@ void WindowLayoutPolicyCascade::AddWindowNode(sptr<WindowNode>& node)
         WLOGFE("window property is nullptr.");
         return;
     }
-    if (WindowHelper::IsEmptyRect(property->GetWindowRect())) {
+    if (WindowHelper::IsEmptyRect(property->GetRequestRect())) {
         SetCascadeRect(node);
     }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        node->SetWindowRect(dividerRect_); // init divider bar
+        node->SetRequestRect(dividerRect_); // init divider bar
     }
     UpdateWindowNode(node, true); // currently, update and add do the same process
 }
 
-static bool IsLayoutChanged(const Rect& l, const Rect& r)
-{
-    return !((l.posX_ == r.posX_) && (l.posY_ == r.posY_) && (l.width_ == r.width_) && (l.height_ == r.height_));
-}
-
-void WindowLayoutPolicyCascade::LimitMoveBounds(Rect& rect)
+void WindowLayoutPolicyCascade::LimitMoveBounds(Rect& rect) const
 {
     float virtualPixelRatio = GetVirtualPixelRatio();
     uint32_t minHorizontalSplitW = static_cast<uint32_t>(MIN_HORIZONTAL_SPLIT_WIDTH * virtualPixelRatio);
@@ -184,6 +179,31 @@ void WindowLayoutPolicyCascade::InitCascadeRect()
     firstCascadeRect_ = resRect;
 }
 
+void WindowLayoutPolicyCascade::ApplyWindowRectConstraints(const sptr<WindowNode>& node, Rect& winRect) const
+{
+    WLOGFI("Before apply constraints winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+    auto reason = node->GetWindowSizeChangeReason();
+    float virtualPixelRatio = GetVirtualPixelRatio();
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) { // if divider, limit position
+        LimitMoveBounds(winRect);
+    }
+    if (reason == WindowSizeChangeReason::DRAG) { // if drag window, limit size and position
+        if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+            const Rect lastRect = node->GetWindowRect();
+            // fix rect in case of moving window when dragging
+            winRect = WindowHelper::GetFixedWindowRectByLimitSize(winRect, lastRect,
+                IsVertical(), virtualPixelRatio);
+            winRect = WindowHelper::GetFixedWindowRectByLimitPosition(winRect, lastRect,
+                virtualPixelRatio, limitRect_);
+        }
+    }
+    // Limit window to the maximum window size
+    LimitWindowSize(node, displayRect_, winRect);
+    WLOGFI("After apply constraints winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+}
+
 void WindowLayoutPolicyCascade::UpdateLayoutRect(sptr<WindowNode>& node)
 {
     auto type = node->GetWindowType();
@@ -198,10 +218,11 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(sptr<WindowNode>& node)
     bool parentLimit = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
     bool subWindow = WindowHelper::IsSubWindow(type);
     bool floatingWindow = (mode == WindowMode::WINDOW_MODE_FLOATING);
-    const Rect lastLayoutRect = node->GetLayoutRect();
+    const Rect lastWinRect = node->GetWindowRect();
     Rect displayRect = GetDisplayRect(mode);
     Rect limitRect = displayRect;
-    Rect winRect = property->GetWindowRect();
+    ComputeDecoratedRequestRect(node);
+    Rect winRect = property->GetRequestRect();
 
     WLOGFI("Id:%{public}u, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
         "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
@@ -214,27 +235,18 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(sptr<WindowNode>& node)
     if (!floatingWindow) { // fullscreen window
         winRect = limitRect;
     } else { // floating window
-        // decorate window only once in case of changing width or height continuously
-        if (!node->hasDecorated_ && property->GetDecorEnable()) {
-            winRect = ComputeDecoratedWindowRect(winRect);
-            node->hasDecorated_ = true;
-        }
         if (subWindow && parentLimit) { // subwidow and limited by parent
-            limitRect = node->parent_->GetLayoutRect();
+            limitRect = node->parent_->GetWindowRect();
             UpdateFloatingLayoutRect(limitRect, winRect);
         }
     }
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        LimitMoveBounds(winRect); // limit divider pos first
-    }
-    // Limit window to the maximum window size
-    LimitWindowSize(node, displayRect_, winRect);
-    node->SetLayoutRect(winRect);
+    ApplyWindowRectConstraints(node, winRect);
+    node->SetWindowRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
 
-    if (IsLayoutChanged(lastLayoutRect, winRect) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+    if (!(lastWinRect == winRect) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         auto reason = node->GetWindowSizeChangeReason();
-        node->GetWindowToken()->UpdateWindowRect(node->GetLayoutRect(), reason);
+        node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
         if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
             node->ResetWindowSizeChangeReason();
         }
@@ -362,9 +374,8 @@ void WindowLayoutPolicyCascade::Reorder()
             } else {
                 rect = StepCascadeRect(rect);
             }
-            node->hasDecorated_ = true;
-            node->isDefultLayoutRect_ = true;
-            node->SetWindowRect(rect);
+            node->SetRequestRect(rect);
+            node->SetDecoStatus(true);
             if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
                 node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
                 node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -386,7 +397,7 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
             (*iter)->GetWindowId() != node->GetWindowId()) {
             auto property = (*iter)->GetWindowProperty();
             if (property != nullptr) {
-                cascadeRect = property->GetWindowRect();
+                cascadeRect = property->GetRequestRect();
             }
             WLOGFI("get current cascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
                 cascadeRect.posX_, cascadeRect.posY_, cascadeRect.width_, cascadeRect.height_);
@@ -441,11 +452,10 @@ void WindowLayoutPolicyCascade::SetCascadeRect(const sptr<WindowNode>& node)
         WLOGFI("set system window cascade rect");
         rect = firstCascadeRect_;
     }
-    node->hasDecorated_ = true;
-    node->isDefultLayoutRect_ = true;
     WLOGFI("set  cascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
-    node->SetWindowRect(rect);
+    node->SetRequestRect(rect);
+    node->SetDecoStatus(true);
 }
 } // Rosen
 } // OHOS

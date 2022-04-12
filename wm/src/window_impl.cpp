@@ -49,7 +49,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     property_ = new (std::nothrow) WindowProperty();
     property_->SetWindowName(option->GetWindowName());
-    property_->SetWindowRect(option->GetWindowRect());
+    property_->SetRequestRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowBackgroundBlur(option->GetWindowBackgroundBlur());
@@ -171,6 +171,11 @@ std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
 Rect WindowImpl::GetRect() const
 {
     return property_->GetWindowRect();
+}
+
+Rect WindowImpl::GetRequestRect() const
+{
+    return property_->GetRequestRect();
 }
 
 WindowType WindowImpl::GetType() const
@@ -808,39 +813,41 @@ WMError WindowImpl::Hide(uint32_t reason)
 
 WMError WindowImpl::MoveTo(int32_t x, int32_t y)
 {
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}d] MoveTo %{public}d %{public}d",
+        name_.c_str(), property_->GetWindowId(), x, y);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
-    Rect rect = GetRect();
-    Rect moveRect = { x, y, rect.width_, rect.height_ };
+    Rect rect = property_->GetRequestRect();
+    Rect moveRect = { x, y, rect.width_, rect.height_ }; // must keep w/h, which may maintain stashed resize info
+    property_->SetRequestRect(moveRect);
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         WLOGFI("window is hidden or created! id: %{public}u, oriPos: [%{public}d, %{public}d, "
                "movePos: [%{public}d, %{public}d]", property_->GetWindowId(), rect.posX_, rect.posY_, x, y);
-        property_->SetWindowRect(moveRect);
         return WMError::WM_OK;
     }
-    property_->SetWindowRect(moveRect);
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
 
 WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 {
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}d] Resize %{public}u %{public}u",
+        name_.c_str(), property_->GetWindowId(), width, height);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    Rect rect = GetRect();
+    Rect rect = property_->GetRequestRect();
     Rect resizeRect = { rect.posX_, rect.posY_, width, height };
+    property_->SetRequestRect(resizeRect);
+    property_->SetDecoStatus(false);
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
         WLOGFI("window is hidden or created! id: %{public}u, oriRect: [%{public}u, %{public}u], "
                "resizeRect: [%{public}u, %{public}u]", property_->GetWindowId(), rect.width_,
                rect.height_, width, height);
-        property_->SetWindowRect(resizeRect);
         return WMError::WM_OK;
     }
-    property_->SetWindowRect(resizeRect);
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
@@ -962,7 +969,8 @@ WMError WindowImpl::Drag(const Rect& rect)
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    property_->SetWindowRect(rect);
+    Rect requestRect = rect;
+    property_->SetRequestRect(requestRect);
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
@@ -1194,7 +1202,7 @@ void WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaCh
         }), occupiedAreaChangeListeners_.end());
 }
 
-void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reason)
+void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
@@ -1205,10 +1213,12 @@ void WindowImpl::UpdateRect(const struct Rect& rect, WindowSizeChangeReason reas
     float virtualPixelRatio = display->GetVirtualPixelRatio();
     WLOGFI("winId:%{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], vpr:%{public}f, reason:%{public}u",
         GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, virtualPixelRatio, reason);
-    property_->SetWindowRect(rect);
-    if (reason == WindowSizeChangeReason::HIDE) { // if hide, no follow-up notification required
+    property_->SetDecoStatus(decoStatus);
+    if (reason == WindowSizeChangeReason::HIDE) {
+        property_->SetRequestRect(rect);
         return;
     }
+    property_->SetWindowRect(rect);
     WLOGFI("sizeChange callback size: %{public}lu", (unsigned long)windowChangeListeners_.size());
     for (auto& listener : windowChangeListeners_) {
         if (listener != nullptr) {
@@ -1675,7 +1685,7 @@ void WindowImpl::SetDefaultOption()
             break;
         }
         case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW: {
-            property_->SetWindowRect(GetSystemAlarmWindowDefaultSize(property_->GetWindowRect()));
+            property_->SetRequestRect(GetSystemAlarmWindowDefaultSize(property_->GetRequestRect()));
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
