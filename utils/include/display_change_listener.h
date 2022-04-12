@@ -25,6 +25,7 @@ enum class DisplayStateChangeType : uint32_t {
     BEFORE_UNLOCK,
     UPDATE_ROTATION,
     SIZE_CHANGE,
+    CREATE,
     DESTROY,
     FREEZE,
     UNFREEZE,
