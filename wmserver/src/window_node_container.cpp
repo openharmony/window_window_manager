@@ -315,8 +315,18 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-    WLOGFI("RemoveWindowNode windowId: %{public}d end", node->GetWindowId());
+    RcoveryScreenDefaultOrientationIfNeed();
+    WLOGFI("RemoveWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
+}
+
+void WindowNodeContainer::RcoveryScreenDefaultOrientationIfNeed()
+{
+    if (appWindowNode_->children_.empty()) {
+        WLOGFI("appWindowNode_ child is empty in display  %{public}" PRIu64"", displayId_);
+        DisplayManagerServiceInner::GetInstance().
+            SetOrientationFromWindow(displayId_, Orientation::UNSPECIFIED);
+    }
 }
 
 const std::vector<uint32_t>& WindowNodeContainer::Destroy()
