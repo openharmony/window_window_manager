@@ -28,11 +28,6 @@ void WindowNode::SetDisplayId(DisplayId displayId)
     property_->SetDisplayId(displayId);
 }
 
-void WindowNode::SetLayoutRect(const Rect& rect)
-{
-    layoutRect_ = rect;
-}
-
 void WindowNode::SetHotZoneRect(const Rect& rect)
 {
     hotZoneRect_ = rect;
@@ -41,6 +36,16 @@ void WindowNode::SetHotZoneRect(const Rect& rect)
 void WindowNode::SetWindowRect(const Rect& rect)
 {
     property_->SetWindowRect(rect);
+}
+
+void WindowNode::SetDecoStatus(bool status)
+{
+    property_->SetDecoStatus(status);
+}
+
+void WindowNode::SetRequestRect(const Rect& rect)
+{
+    property_->SetRequestRect(rect);
 }
 
 void WindowNode::SetWindowProperty(const sptr<WindowProperty>& property)
@@ -162,14 +167,24 @@ uint32_t WindowNode::GetParentId() const
     return property_->GetParentId();
 }
 
-const Rect& WindowNode::GetLayoutRect() const
-{
-    return layoutRect_;
-}
-
 Rect WindowNode::GetHotZoneRect() const
 {
     return hotZoneRect_;
+}
+
+Rect WindowNode::GetWindowRect() const
+{
+    return property_->GetWindowRect();
+}
+
+bool WindowNode::GetDecoStatus() const
+{
+    return property_->GetDecoStatus();
+}
+
+Rect WindowNode::GetRequestRect() const
+{
+    return property_->GetRequestRect();
 }
 
 WindowType WindowNode::GetWindowType() const

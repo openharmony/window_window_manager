@@ -118,7 +118,7 @@ sptr<WindowNode> DragController::GetHitWindow(DisplayId id, PointInfo point)
         if (windowNode->GetWindowType() >= WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
             continue;
         }
-        if (WindowHelper::IsPointInTargetRect(point.x, point.y, windowNode->GetLayoutRect())) {
+        if (WindowHelper::IsPointInTargetRect(point.x, point.y, windowNode->GetWindowRect())) {
             return windowNode;
         }
     }

@@ -170,14 +170,15 @@ void WindowNodeContainer::UpdateSizeChangeReason(sptr<WindowNode>& node, WindowS
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         for (auto& childNode : appWindowNode_->children_) {
             if (childNode->IsSplitMode()) {
-                childNode->GetWindowToken()->UpdateWindowRect(childNode->GetLayoutRect(), reason);
+                childNode->GetWindowToken()->UpdateWindowRect(childNode->GetWindowRect(),
+                    childNode->GetDecoStatus(), reason);
                 childNode->ResetWindowSizeChangeReason();
                 WLOGFI("Notify split window that the drag action is start or end, windowId: %{public}d, "
                     "reason: %{public}u", childNode->GetWindowId(), reason);
             }
         }
     } else {
-        node->GetWindowToken()->UpdateWindowRect(node->GetLayoutRect(), reason);
+        node->GetWindowToken()->UpdateWindowRect(node->GetWindowRect(), node->GetDecoStatus(), reason);
         node->ResetWindowSizeChangeReason();
         WLOGFI("Notify window that the drag action is start or end, windowId: %{public}d, "
             "reason: %{public}u", node->GetWindowId(), reason);
@@ -280,7 +281,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     }
     node->requestedVisibility_ = false;
     node->currentVisibility_ = false;
-    node->hasDecorated_ = node->isDefultLayoutRect_ ? true : false;
     node->isCovered_ = true;
     std::vector<sptr<WindowVisibilityInfo>> infos = {new WindowVisibilityInfo(node->GetWindowId(),
         node->GetCallingPid(), node->GetCallingUid(), false)};
@@ -567,10 +567,10 @@ void WindowNodeContainer::NotifyIfSystemBarRegionChanged()
     SystemBarRegionTints tints;
     for (auto it : sysBarTintMap_) { // split screen mode not support yet
         auto sysNode = sysBarNodeMap_[it.first];
-        if (sysNode == nullptr || it.second.region_ == sysNode->GetLayoutRect()) {
+        if (sysNode == nullptr || it.second.region_ == sysNode->GetWindowRect()) {
             continue;
         }
-        auto& newRegion = sysNode->GetLayoutRect();
+        const auto& newRegion = sysNode->GetWindowRect();
         sysBarTintMap_[it.first].region_ = newRegion;
         sysBarTintMap_[it.first].type_ = it.first;
         tints.emplace_back(sysBarTintMap_[it.first]);
@@ -710,7 +710,7 @@ void WindowNodeContainer::NotifyAccessibilityWindowInfo(const sptr<WindowNode>& 
         sptr<AccessibilityWindowInfo> accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
         if (windowInfo != nullptr && accessibilityWindowInfo != nullptr) {
             windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
-            windowInfo->windowRect_ = node->GetLayoutRect();
+            windowInfo->windowRect_ = node->GetWindowRect();
             windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
             windowInfo->displayId_ = node->GetDisplayId();
             windowInfo->mode_ = node->GetWindowMode();
@@ -729,7 +729,7 @@ void WindowNodeContainer::GetWindowList(std::vector<sptr<WindowInfo>>& windowLis
     for (auto node : windowNodes) {
         sptr<WindowInfo> windowInfo = new WindowInfo();
         windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
-        windowInfo->windowRect_ = node->GetLayoutRect();
+        windowInfo->windowRect_ = node->GetWindowRect();
         windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
         windowInfo->displayId_ = node->GetDisplayId();
         windowInfo->mode_ = node->GetWindowMode();
@@ -778,7 +778,6 @@ std::vector<Rect> WindowNodeContainer::GetAvoidAreaByType(AvoidAreaType avoidAre
 
 void WindowNodeContainer::OnAvoidAreaChange(const std::vector<Rect>& avoidArea)
 {
-    layoutPolicy_->UpdateDefaultFoatingRect();
     for (auto& node : appWindowNode_->children_) {
         if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && node->GetWindowToken() != nullptr) {
             // notify client
@@ -793,7 +792,7 @@ void WindowNodeContainer::DumpScreenWindowTree()
     WLOGFI("WindowName WinId Type Mode Flag ZOrd [   x    y    w    h]");
     uint32_t zOrder = zOrder_;
     WindowNodeOperationFunc func = [&zOrder](sptr<WindowNode> node) {
-        Rect rect = node->GetLayoutRect();
+        Rect rect = node->GetWindowRect();
         const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
             node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
         WLOGI("DumpScreenWindowTree: %{public}10s %{public}5u %{public}4u %{public}4u %{public}4u %{public}4u " \
@@ -819,11 +818,6 @@ DisplayId WindowNodeContainer::GetDisplayId() const
 Rect WindowNodeContainer::GetDisplayRect() const
 {
     return displayRect_;
-}
-
-Rect WindowNodeContainer::GetDisplayLimitRect() const
-{
-    return layoutPolicy_->GetDisplayLimitRect();
 }
 
 bool WindowNodeContainer::isVerticalDisplay() const
@@ -1362,7 +1356,7 @@ void WindowNodeContainer::UpdateWindowVisibilityInfos(std::vector<sptr<WindowVis
         if (node == nullptr) {
             return false;
         }
-        Rect layoutRect = node->GetLayoutRect();
+        Rect layoutRect = node->GetWindowRect();
         int32_t nodeX = std::max(0, layoutRect.posX_);
         int32_t nodeY = std::max(0, layoutRect.posY_);
         int32_t nodeXEnd = std::min(displayRect_.posX_ + static_cast<int32_t>(displayRect_.width_),

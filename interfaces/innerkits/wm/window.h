@@ -118,6 +118,7 @@ public:
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
     virtual Rect GetRect() const = 0;
+    virtual Rect GetRequestRect() const = 0;
     virtual WindowType GetType() const = 0;
     virtual WindowMode GetMode() const = 0;
     virtual WindowBlurLevel GetWindowBackgroundBlur() const = 0;
