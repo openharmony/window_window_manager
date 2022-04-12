@@ -258,11 +258,11 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
     WLOGFD("DisplayStateChangeType:%{public}u", type);
     switch (type) {
         case DisplayStateChangeType::BEFORE_SUSPEND: {
-            windowRoot_->NotifyWindowStateChange(WindowState::STATE_FROZEN, WindowStateChangeReason::KEYGUARD);
+            windowRoot_->ProcessWindowStateChange(WindowState::STATE_FROZEN, WindowStateChangeReason::KEYGUARD);
             break;
         }
         case DisplayStateChangeType::BEFORE_UNLOCK: {
-            windowRoot_->NotifyWindowStateChange(WindowState::STATE_UNFROZEN, WindowStateChangeReason::KEYGUARD);
+            windowRoot_->ProcessWindowStateChange(WindowState::STATE_UNFROZEN, WindowStateChangeReason::KEYGUARD);
             break;
         }
         case DisplayStateChangeType::SIZE_CHANGE:
@@ -270,8 +270,12 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             ProcessDisplayChange(displayId, type);
             break;
         }
+        case DisplayStateChangeType::CREATE: {
+            windowRoot_->ProcessDisplayCreate(displayId);
+            break;
+        }
         case DisplayStateChangeType::DESTROY: {
-            windowRoot_->NotifyDisplayDestroy(displayId);
+            windowRoot_->ProcessDisplayDestroy(displayId);
             break;
         }
         default: {
@@ -285,7 +289,7 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
 {
     const sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
     if (displayInfo == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRId64 "", displayId);
+        WLOGFE("get display failed displayId:%{public}" PRIu64 "", displayId);
         return;
     }
 
@@ -306,7 +310,7 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
                     = navigationBarNode->GetWindowProperty()->GetWindowRect();
             }
             curDisplayInfo_[displayId] = displayInfo;
-            windowRoot_->NotifyDisplayChange(displayInfo);
+            windowRoot_->ProcessDisplayChange(displayInfo);
             // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
             uint32_t width = static_cast<uint32_t>(displayInfo->GetWidth());
             uint32_t height = static_cast<uint32_t>(displayInfo->GetHeight() * SYSTEM_BAR_HEIGHT_RATIO);
