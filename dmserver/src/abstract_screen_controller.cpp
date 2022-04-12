@@ -597,7 +597,7 @@ DMError AbstractScreenController::SetVirtualScreenSurface(ScreenId screenId, spt
     return DMError::DM_OK;
 }
 
-bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation newOrientation)
+bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation newOrientation, bool isFromWindow)
 {
     WLOGD("set orientation. screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);
     auto screen = GetAbstractScreen(screenId);
@@ -608,6 +608,13 @@ bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation new
     if (screen->isScreenGroup_) {
         WLOGE("cannot set orientation to the combination. screen: %{public}" PRIu64"", screenId);
         return false;
+    }
+    if (isFromWindow) {
+        if (newOrientation == Orientation::UNSPECIFIED) {
+            newOrientation = screen->screenRequestedOrientation_;
+        }
+    } else {
+        screen->screenRequestedOrientation_ = newOrientation;
     }
     if (screen->orientation_ == newOrientation) {
         WLOGI("skip setting orientation. screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);

@@ -66,6 +66,7 @@ private:
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
     WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
     WMError SetWindowMode(uint32_t windowId, WindowMode dstMode);
+    void ReSizeSystemBarPropertySizeIfNeed(sptr<WindowProperty>& property);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
@@ -76,6 +77,8 @@ private:
         { WindowType::WINDOW_TYPE_STATUS_BAR,     INVALID_WINDOW_ID },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, INVALID_WINDOW_ID },
     };
+    std::unordered_map<WindowType, std::map<uint32_t, std::map<uint32_t, Rect>>> systemBarRect_;
+    std::unordered_map<DisplayId, sptr<DisplayInfo>> curDisplayInfo_;
     constexpr static float SYSTEM_BAR_HEIGHT_RATIO = 0.08;
 };
 }
