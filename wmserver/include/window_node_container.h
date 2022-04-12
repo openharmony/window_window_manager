@@ -103,7 +103,7 @@ private:
     bool IsSplitImmersiveNode(sptr<WindowNode> node) const;
     bool TraverseFromTopToBottom(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
     bool TraverseFromBottomToTop(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
-
+    void RcoveryScreenDefaultOrientationIfNeed();
     // cannot determine in case of a window covered by union of several windows or with transparent value
     void UpdateWindowVisibilityInfos(std::vector<sptr<WindowVisibilityInfo>>& infos);
     void RaiseOrderedWindowToTop(std::vector<uint32_t> orderedIds, std::vector<sptr<WindowNode>>& windowNodes);
