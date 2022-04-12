@@ -50,6 +50,7 @@ public:
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     bool SetOrientation(ScreenId screenId, Orientation orientation) override;
+    bool SetOrientationFromWindow(ScreenId screenId, Orientation orientation);
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
     ScreenId GetRSScreenId(DisplayId displayId) const;
 

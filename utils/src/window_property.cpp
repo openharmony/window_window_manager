@@ -324,7 +324,7 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(parentId_) && MapMarshalling(parcel) && parcel.WriteBool(isDecorEnable_) &&
         parcel.WriteInt32(hitOffset_.x) && parcel.WriteInt32(hitOffset_.y) && parcel.WriteUint32(animationFlag_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteBool(tokenState_) &&
-        parcel.WriteUint32(callingWindow_);
+        parcel.WriteUint32(callingWindow_) && parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_));
 }
 
 sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
@@ -356,6 +356,7 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowSizeChangeReason(static_cast<WindowSizeChangeReason>(parcel.ReadUint32()));
     property->SetTokenState(parcel.ReadBool());
     property->SetCallingWindow(parcel.ReadUint32());
+    property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     return property;
 }
 
@@ -385,6 +386,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     isDecorEnable_ = property->isDecorEnable_;
     tokenState_ = property->tokenState_;
     callingWindow_ = property->callingWindow_;
+    requestedOrientation_ = property->requestedOrientation_;
 }
 }
 }

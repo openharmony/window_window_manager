@@ -20,6 +20,9 @@
 #include <string>
 #include <unordered_map>
 #include "parcel.h"
+
+#include "class_var_definition.h"
+#include "dm_common.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -118,6 +121,7 @@ private:
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
     bool isDecorEnable_ { false };
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
 };
 }
 }
