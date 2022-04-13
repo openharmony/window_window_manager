@@ -28,6 +28,7 @@ group("systemtest") {
     ":wm_window_layout_test",
     ":wm_window_move_drag_test",
     ":wm_window_multi_ability_test",
+    ":wm_window_rotation_test",
     ":wm_window_split_immersive_test",
     ":wm_window_split_test",
     ":wm_window_subwindow_test",
@@ -101,7 +102,7 @@ ohos_systemtest("wm_window_focus_test") {
 
 ## SystemTest wm_window_focus_test }}}
 
-## SystemTest wm_window_split_test {{{
+## SystemTest wm_window_split_immersive_test {{{
 ohos_systemtest("wm_window_split_immersive_test") {
   module_out_path = module_out_path
 
@@ -110,7 +111,7 @@ ohos_systemtest("wm_window_split_immersive_test") {
   deps = [ ":wm_systemtest_common" ]
 }
 
-## SystemTest wm_window_split_test }}}
+## SystemTest wm_window_split_immersive_test }}}
 
 ## SystemTest wm_window_split_test {{{
 ohos_systemtest("wm_window_split_test") {
@@ -176,7 +177,18 @@ ohos_systemtest("wm_window_drag_test") {
   deps = [ ":wm_systemtest_common" ]
 }
 
-## SystemTest drag_window_test }}}
+## SystemTest wm_window_drag_test }}}
+
+## SystemTest wm_window_rotation_test {{{
+ohos_systemtest("wm_window_rotation_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_rotation_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+}
+
+## SystemTest wm_window_rotation_test }}}
 
 ## Build wm_systemtest_common.a {{{
 config("wm_systemtest_common_public_config") {
