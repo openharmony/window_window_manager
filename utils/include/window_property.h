@@ -47,6 +47,7 @@ public:
     void SetTransparent(bool isTransparent);
     void SetAlpha(float alpha);
     void SetBrightness(float brightness);
+    void SetTurnScreenOn(bool turnScreenOn);
     void SetCallingWindow(uint32_t windowId);
     void SetDisplayId(DisplayId displayId);
     void SetWindowId(uint32_t windowId);
@@ -74,6 +75,7 @@ public:
     bool GetTransparent() const;
     float GetAlpha() const;
     float GetBrightness() const;
+    bool IsTurnScreenOn() const;
     DisplayId GetDisplayId() const;
     uint32_t GetWindowId() const;
     uint32_t GetParentId() const;
@@ -103,6 +105,7 @@ private:
     bool isTransparent_ { false };
     float alpha_ { 1.0f };
     float brightness_ = UNDEFINED_BRIGHTNESS;
+    bool turnScreenOn_ = false;
     uint32_t callingWindow_ = INVALID_WINDOW_ID;
     DisplayId displayId_ { 0 };
     uint32_t windowId_ { 0 };
