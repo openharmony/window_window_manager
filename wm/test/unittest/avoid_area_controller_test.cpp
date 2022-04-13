@@ -160,7 +160,7 @@ HWTEST_F(AvoidAreaControllerTest, AddAvoidAreaNode01, Function | SmallTest | Lev
     property->SetWindowId(100u);
     property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
     node->SetWindowProperty(property);
-    node->SetLayoutRect(topAvoidRect_);
+    node->SetWindowRect(topAvoidRect_);
 
     sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
     ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_ADD));
@@ -181,7 +181,7 @@ HWTEST_F(AvoidAreaControllerTest, AddAvoidAreaNode02, Function | SmallTest | Lev
     property1->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
     property1->SetWindowRect(topAvoidRect_);
     node1->SetWindowProperty(property1);
-    node1->SetLayoutRect(topAvoidRect_);
+    node1->SetWindowRect(topAvoidRect_);
     ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node1, AvoidControlType::AVOID_NODE_ADD));
 
     sptr<WindowNode> node2 = new WindowNode();
@@ -189,7 +189,7 @@ HWTEST_F(AvoidAreaControllerTest, AddAvoidAreaNode02, Function | SmallTest | Lev
     property2->SetWindowId(100u);
     property2->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
     node2->SetWindowProperty(property2);
-    node2->SetLayoutRect(topAvoidRect_);
+    node2->SetWindowRect(topAvoidRect_);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
         avoidAreaController->AvoidControl(node2, AvoidControlType::AVOID_NODE_ADD));
 }
@@ -208,7 +208,7 @@ HWTEST_F(AvoidAreaControllerTest, AddAvoidAreaNode03, Function | SmallTest | Lev
     property1->SetWindowId(100u);
     property1->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
     node1->SetWindowProperty(property1);
-    node1->SetLayoutRect(topAvoidRect_);
+    node1->SetWindowRect(topAvoidRect_);
     ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node1, AvoidControlType::AVOID_NODE_ADD));
 
     sptr<WindowNode> node2 = new WindowNode();
@@ -216,7 +216,7 @@ HWTEST_F(AvoidAreaControllerTest, AddAvoidAreaNode03, Function | SmallTest | Lev
     property2->SetWindowId(101u);
     property2->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
     node2->SetWindowProperty(property2);
-    node2->SetLayoutRect(leftAvoidRect_);
+    node2->SetWindowRect(leftAvoidRect_);
     ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node2, AvoidControlType::AVOID_NODE_ADD));
 }
 
@@ -246,7 +246,7 @@ HWTEST_F(AvoidAreaControllerTest, RemoveAvoidAreaNode01, Function | SmallTest | 
     property1->SetWindowId(100u);
     property1->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
     node1->SetWindowProperty(property1);
-    node1->SetLayoutRect(leftAvoidRect_);
+    node1->SetWindowRect(leftAvoidRect_);
     ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node1, AvoidControlType::AVOID_NODE_ADD));
 
     ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node1, AvoidControlType::AVOID_NODE_REMOVE));
@@ -265,7 +265,7 @@ HWTEST_F(AvoidAreaControllerTest, RemoveAvoidAreaNode02, Function | SmallTest | 
     sptr<WindowProperty> property = new WindowProperty();
     property->SetWindowId(100u);
     property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node->SetLayoutRect(topAvoidRect_);
+    node->SetWindowRect(topAvoidRect_);
     node->SetWindowProperty(property);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
         avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_REMOVE));
@@ -297,7 +297,7 @@ HWTEST_F(AvoidAreaControllerTest, UpdateAvoidAreaNode01, Function | SmallTest | 
     property->SetWindowId(100u);
     property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
     node->SetWindowProperty(property);
-    node->SetLayoutRect(topAvoidRect_);
+    node->SetWindowRect(topAvoidRect_);
     ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_ADD));
 
     property->SetWindowRect(leftAvoidRect_);
@@ -318,7 +318,7 @@ HWTEST_F(AvoidAreaControllerTest, UpdateAvoidAreaNode02, Function | SmallTest | 
     property->SetWindowId(100u);
     property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
     node->SetWindowProperty(property);
-    node->SetLayoutRect(topAvoidRect_);
+    node->SetWindowRect(topAvoidRect_);
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
         avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_UPDATE));

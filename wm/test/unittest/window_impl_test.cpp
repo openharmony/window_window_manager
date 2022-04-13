@@ -143,10 +143,10 @@ HWTEST_F(WindowImplTest, CreateWindow06, Function | SmallTest | Level2)
     EXPECT_CALL(m_->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
 
-    ASSERT_EQ(1, window->GetRect().posX_);
-    ASSERT_EQ(2, window->GetRect().posY_);
-    ASSERT_EQ(3u, window->GetRect().width_);
-    ASSERT_EQ(4u, window->GetRect().height_);
+    ASSERT_EQ(1, window->GetRequestRect().posX_);
+    ASSERT_EQ(2, window->GetRequestRect().posY_);
+    ASSERT_EQ(3u, window->GetRequestRect().width_);
+    ASSERT_EQ(4u, window->GetRequestRect().height_);
     ASSERT_EQ(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, window->GetType());
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
     ASSERT_EQ("CreateWindow06", window->GetWindowName());
@@ -706,7 +706,7 @@ HWTEST_F(WindowImplTest, MoveTo01, Function | SmallTest | Level3)
     const float moveRatio = 0.5;
     Rect newRect = {winRect.posX_ * moveRatio, winRect.posY_ * moveRatio, winRect.width_, winRect.height_};
     window->MoveTo(newRect.posX_, newRect.posY_);
-    ASSERT_EQ(newRect, window->GetRect());
+    ASSERT_EQ(newRect, window->GetRequestRect());
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -733,7 +733,7 @@ HWTEST_F(WindowImplTest, Resize01, Function | SmallTest | Level3)
     const float resizeRatio = 0.5;
     Rect newRect = {winRect.posX_, winRect.posY_, winRect.width_ * resizeRatio, winRect.height_ * resizeRatio};
     window->Resize(newRect.width_, newRect.height_);
-    ASSERT_EQ(newRect, window->GetRect());
+    ASSERT_EQ(newRect, window->GetRequestRect());
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

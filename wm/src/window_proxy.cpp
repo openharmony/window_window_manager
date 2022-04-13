@@ -25,7 +25,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowProxy"};
 }
 
-void WindowProxy::UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason)
+void WindowProxy::UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -39,7 +39,10 @@ void WindowProxy::UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReas
         WLOGFE("Write WindowRect failed");
         return;
     }
-
+    if (!data.WriteBool(decoStatus)) {
+        WLOGFE("Write deco status failed");
+        return;
+    }
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
         WLOGFE("Write WindowSizeChangeReason failed");
         return;

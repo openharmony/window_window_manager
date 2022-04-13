@@ -41,9 +41,10 @@ public:
     ~WindowNode() = default;
 
     void SetDisplayId(DisplayId displayId);
-    void SetLayoutRect(const Rect& rect);
     void SetHotZoneRect(const Rect& rect);
     void SetWindowRect(const Rect& rect);
+    void SetDecoStatus(bool decoStatus);
+    void SetRequestRect(const Rect& rect);
     void SetWindowProperty(const sptr<WindowProperty>& property);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
     void SetWindowMode(WindowMode mode);
@@ -61,8 +62,10 @@ public:
     uint32_t GetParentId() const;
     const std::string& GetWindowName() const;
     DisplayId GetDisplayId() const;
-    const Rect& GetLayoutRect() const;
     Rect GetHotZoneRect() const;
+    Rect GetWindowRect() const;
+    bool GetDecoStatus() const;
+    Rect GetRequestRect() const;
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;
     WindowBlurLevel GetWindowBackgroundBlur() const;
@@ -85,14 +88,11 @@ public:
     int32_t priority_ { 0 };
     bool requestedVisibility_ { false };
     bool currentVisibility_ { false };
-    bool hasDecorated_ { false };
-    bool isDefultLayoutRect_ { false };
     bool isCovered_ { true }; // initial value true to ensure notification when this window is shown
 
 private:
     sptr<WindowProperty> property_;
     sptr<IWindow> windowToken_;
-    Rect layoutRect_ { 0, 0, 0, 0 };
     Rect hotZoneRect_ { 0, 0, 0, 0 };
     int32_t callingPid_;
     int32_t callingUid_;

@@ -152,8 +152,8 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
             .hotZoneTopLeftY = hotZone.posY_,
             .hotZoneWidth = static_cast<int32_t>(hotZone.width_),
             .hotZoneHeight = static_cast<int32_t>(hotZone.height_),
-            .winTopLeftX = windowNode->GetLayoutRect().posX_,
-            .winTopLeftY = windowNode->GetLayoutRect().posY_,
+            .winTopLeftX = windowNode->GetWindowRect().posX_,
+            .winTopLeftY = windowNode->GetWindowRect().posY_,
             .displayId = static_cast<int32_t>(windowNode->GetDisplayId()),
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };

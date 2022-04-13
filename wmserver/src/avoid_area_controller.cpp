@@ -104,7 +104,7 @@ std::vector<Rect> AvoidAreaController::GetAvoidArea() const
 {
     std::vector<Rect> avoidArea(AVOID_NUM, {0, 0, 0, 0});  // avoid area  left, top, right, bottom
     for (auto iter = avoidNodes_.begin(); iter != avoidNodes_.end(); ++iter) {
-        Rect curRect = iter->second->GetLayoutRect();
+        Rect curRect = iter->second->GetWindowRect();
         auto curPos = GetAvoidPosType(curRect);
         if (curPos == AvoidPosType::AVOID_POS_UNKNOWN) {
             WLOGFE("GetAvoidArea AVOID_POS_UNKNOWN Rect: x : %{public}d, y:  %{public}d, w: %{public}u h: %{public}u",
