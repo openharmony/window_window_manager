@@ -950,6 +950,7 @@ void WindowImpl::SetCallingWindow(uint32_t windowId)
 void WindowImpl::SetPrivacyMode(bool isPrivacyMode)
 {
     property_->SetPrivacyMode(isPrivacyMode);
+    surfaceNode_->SetSecurityLayer(isPrivacyMode);
 }
 
 bool WindowImpl::IsPrivacyMode() const
