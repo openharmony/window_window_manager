@@ -52,6 +52,7 @@ public:
     void SetBrightness(float brightness);
     void SetFocusable(bool focusable);
     void SetTouchable(bool touchable);
+    void SetTurnScreenOn(bool turnScreenOn);
     void SetCallingWindow(uint32_t windowId);
     uint32_t GetCallingWindow() const;
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
@@ -67,6 +68,7 @@ public:
     WindowBlurLevel GetWindowBackgroundBlur() const;
     float GetAlpha() const;
     float GetBrightness() const;
+    bool IsTurnScreenOn() const;
     uint32_t GetWindowFlags() const;
     const sptr<WindowProperty>& GetWindowProperty() const;
     int32_t GetCallingPid() const;

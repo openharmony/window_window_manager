@@ -251,7 +251,6 @@ private:
     WMError Destroy(bool needNotifyServer);
     WMError UpdateProperty(PropertyChangeAction action);
     void HandleKeepScreenOn(bool keepScreenOn);
-    void HandleTurnScreenOn();
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
@@ -296,7 +295,6 @@ private:
     Rect startRectExceptFrame_ = { 0, 0, 0, 0 };
     Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
     bool keepScreenOn_ = false;
-    bool turnScreenOn_ = false;
     float brightness_ = UNDEFINED_BRIGHTNESS;
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 };

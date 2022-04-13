@@ -63,6 +63,7 @@ private:
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
     WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
     WMError SetWindowMode(uint32_t windowId, WindowMode dstMode);
+    void HandleTurnScreenOn(const sptr<WindowNode>& node);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
