@@ -34,6 +34,16 @@ void WindowProperty::SetWindowRect(const struct Rect& rect)
     windowRect_ = rect;
 }
 
+void WindowProperty::SetDecoStatus(bool decoStatus)
+{
+    decoStatus_ = decoStatus;
+}
+
+void WindowProperty::SetRequestRect(const Rect& requestRect)
+{
+    requestRect_ = requestRect;
+}
+
 void WindowProperty::SetWindowType(WindowType type)
 {
     type_ = type;
@@ -158,6 +168,16 @@ const std::string& WindowProperty::GetWindowName() const
 Rect WindowProperty::GetWindowRect() const
 {
     return windowRect_;
+}
+
+bool WindowProperty::GetDecoStatus() const
+{
+    return decoStatus_;
+}
+
+Rect WindowProperty::GetRequestRect() const
+{
+    return requestRect_;
 }
 
 WindowType WindowProperty::GetWindowType() const
@@ -315,7 +335,10 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteUint32(windowRect_.width_) &&
-        parcel.WriteUint32(windowRect_.height_) && parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
+        parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(requestRect_.posX_) &&
+        parcel.WriteInt32(requestRect_.posY_) && parcel.WriteUint32(requestRect_.width_) &&
+        parcel.WriteUint32(requestRect_.height_) && parcel.WriteBool(decoStatus_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(lastMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(level_)) && parcel.WriteUint32(flags_) &&
         parcel.WriteBool(isFullScreen_) && parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) &&
@@ -333,6 +356,9 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowName(parcel.ReadString());
     Rect rect = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
     property->SetWindowRect(rect);
+    Rect reqRect = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
+    property->SetRequestRect(reqRect);
+    property->SetDecoStatus(parcel.ReadBool());
     property->SetWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetLastWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
@@ -364,6 +390,8 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
 {
     windowName_ = property->windowName_;
     windowRect_ = property->windowRect_;
+    requestRect_ = property->requestRect_;
+    decoStatus_ = property->decoStatus_;
     type_ = property->type_;
     mode_ = property->mode_;
     level_ = property->level_;

@@ -151,10 +151,14 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        WLOGFE("fullscreen window could not resize");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     auto property = node->GetWindowProperty();
+    node->SetWindowSizeChangeReason(reason);
     Rect lastRect = property->GetWindowRect();
     Rect newRect;
-    node->SetWindowSizeChangeReason(reason);
     if (reason == WindowSizeChangeReason::MOVE) {
         newRect = { rect.posX_, rect.posY_, lastRect.width_, lastRect.height_ };
         if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
@@ -165,23 +169,11 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
             }
         }
     } else if (reason == WindowSizeChangeReason::RESIZE) {
-        node->hasDecorated_ = false;
-        node->isDefultLayoutRect_ = false;
         newRect = { lastRect.posX_, lastRect.posY_, rect.width_, rect.height_ };
     } else if (reason == WindowSizeChangeReason::DRAG) {
-        if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
-            // fix rect in case of moving window when dragging
-            float virtualPixelRatio = windowRoot_->GetVirtualPixelRatio(node->GetDisplayId());
-            Rect displayLimitRect = windowRoot_->GetDisplayLimitRect(node->GetDisplayId());
-            newRect = WindowHelper::GetFixedWindowRectByLimitSize(rect, lastRect,
-                windowRoot_->isVerticalDisplay(node), virtualPixelRatio);
-            newRect = WindowHelper::GetFixedWindowRectByLimitPosition(newRect, lastRect,
-                virtualPixelRatio, displayLimitRect);
-        } else {
-            newRect = rect;
-        }
+        newRect = rect;
     }
-    property->SetWindowRect(newRect);
+    property->SetRequestRect(newRect);
     WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_RECT);
     if (res != WMError::WM_OK) {
         return res;
@@ -576,7 +568,8 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
     }
     switch (action) {
         case PropertyChangeAction::ACTION_UPDATE_RECT: {
-            ResizeRect(windowId, property->GetWindowRect(), property->GetWindowSizeChangeReason());
+            node->SetDecoStatus(property->GetDecoStatus());
+            ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_MODE: {

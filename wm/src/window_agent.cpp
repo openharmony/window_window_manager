@@ -28,13 +28,13 @@ WindowAgent::WindowAgent(sptr<WindowImpl>& windowImpl)
     window_ = windowImpl;
 }
 
-void WindowAgent::UpdateWindowRect(const struct Rect& rect, WindowSizeChangeReason reason)
+void WindowAgent::UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
         return;
     }
-    window_->UpdateRect(rect, reason);
+    window_->UpdateRect(rect, decoStatus, reason);
 }
 
 void WindowAgent::UpdateWindowMode(WindowMode mode)

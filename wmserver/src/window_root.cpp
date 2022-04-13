@@ -219,7 +219,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
     }
     if (res == WMError::WM_OK) {
         container->SetActiveWindow(node->GetWindowId(), false);
-        NotifyKeyboardSizeChangeInfo(node, container, node->GetLayoutRect());
+        NotifyKeyboardSizeChangeInfo(node, container, node->GetWindowRect());
     }
     WLOGFI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
         node->GetWindowId(), node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
@@ -746,16 +746,6 @@ float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
         return 1.0;  // Use DefaultVPR 1.0
     }
     return container->GetVirtualPixelRatio();
-}
-
-Rect WindowRoot::GetDisplayLimitRect(DisplayId displayId) const
-{
-    auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
-    Rect rect = {0, 0, 0, 0};
-    if (container != nullptr) {
-        rect = container->GetDisplayLimitRect();
-    }
-    return rect;
 }
 
 WMError WindowRoot::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)

@@ -66,7 +66,6 @@ public:
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
     void FocusFaultDetection() const;
     float GetVirtualPixelRatio(DisplayId displayId) const;
-    Rect GetDisplayLimitRect(DisplayId displayId) const;
     WMError UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeReason reason);
     void SetBrightness(uint32_t windowId, float brightness);
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);

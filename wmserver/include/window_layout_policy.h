@@ -35,15 +35,13 @@ public:
     virtual void Clean();
     virtual void Reset();
     virtual void Reorder();
-    virtual void UpdateDisplayInfo();
-    virtual void AddWindowNode(sptr<WindowNode>& node);
+    virtual void UpdateDisplayInfo() = 0;
+    virtual void AddWindowNode(sptr<WindowNode>& node) = 0;
     virtual void LayoutWindowTree();
     virtual void RemoveWindowNode(sptr<WindowNode>& node);
     virtual void UpdateWindowNode(sptr<WindowNode>& node, bool isAddWindow = false);
     virtual void UpdateLayoutRect(sptr<WindowNode>& node) = 0;
-    void UpdateDefaultFoatingRect();
     float GetVirtualPixelRatio() const;
-    Rect GetDisplayLimitRect() const;
 
 protected:
     const Rect& displayRect_;
@@ -59,14 +57,12 @@ protected:
     void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
     void UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect);
     virtual void LayoutWindowNode(sptr<WindowNode>& node);
-    AvoidPosType GetAvoidPosType(const Rect& rect);
-    void CalcAndSetNodeHotZone(Rect layoutOutRect, sptr<WindowNode>& node);
-    void LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect);
-    void SetRectForFloating(const sptr<WindowNode>& node);
-    Rect ComputeDecoratedWindowRect(const Rect& winRect);
+    AvoidPosType GetAvoidPosType(const Rect& rect) const;
+    void CalcAndSetNodeHotZone(Rect layoutOutRect, sptr<WindowNode>& node) const;
+    void LimitWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect) const;
+    void ComputeDecoratedRequestRect(sptr<WindowNode>& node) const;
     bool IsVertical() const;
     bool IsFullScreenRecentWindowExist() const;
-    Rect defaultFloatingRect_ = { 0, 0, 0, 0 };
 };
 }
 }

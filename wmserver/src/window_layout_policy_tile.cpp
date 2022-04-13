@@ -133,19 +133,19 @@ void WindowLayoutPolicyTile::RemoveWindowNode(sptr<WindowNode>& node)
         AssignNodePropertyForTileWindows();
         LayoutForegroundNodeQueue();
     }
-    Rect winRect = node->GetWindowProperty()->GetWindowRect();
-    node->GetWindowToken()->UpdateWindowRect(winRect, WindowSizeChangeReason::HIDE);
+    Rect reqRect = node->GetRequestRect();
+    node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
 }
 
 void WindowLayoutPolicyTile::LayoutForegroundNodeQueue()
 {
     for (auto& node : foregroundNodes_) {
-        Rect lastRect = node->GetLayoutRect();
-        Rect winRect = node->GetWindowProperty()->GetWindowRect();
-        node->SetLayoutRect(winRect);
+        Rect lastRect = node->GetWindowRect();
+        Rect winRect = node->GetRequestRect();
+        node->SetWindowRect(winRect);
         CalcAndSetNodeHotZone(winRect, node);
         if (!(lastRect == winRect)) {
-            node->GetWindowToken()->UpdateWindowRect(winRect, node->GetWindowSizeChangeReason());
+            node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), node->GetWindowSizeChangeReason());
             node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
         }
         for (auto& childNode : node->children_) {
@@ -212,9 +212,9 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows()
         auto& rect = (*rectIt);
         node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-        node->SetWindowRect(rect);
-        node->hasDecorated_ = true;
-        WLOGFI("set rect for qwin id: %{public}u [%{public}d %{public}d %{public}u %{public}u]",
+        node->SetRequestRect(rect);
+        node->SetDecoStatus(true);
+        WLOGFI("set rect for qwin id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
             node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         rectIt++;
     }
@@ -225,16 +225,20 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
     auto type = node->GetWindowType();
     auto mode = node->GetWindowMode();
     auto flags = node->GetWindowFlags();
-    auto decorEnbale = node->GetWindowProperty()->GetDecorEnable();
+    auto property = node->GetWindowProperty();
+    if (property == nullptr) {
+        WLOGFE("window property is nullptr.");
+        return;
+    }
+    auto decorEnbale = property->GetDecorEnable();
     bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     bool parentLimit = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
     bool subWindow = WindowHelper::IsSubWindow(type);
     bool floatingWindow = (mode == WindowMode::WINDOW_MODE_FLOATING);
-    const Rect& layoutRect = node->GetLayoutRect();
-    Rect lastRect = layoutRect;
-    Rect displayRect = displayRect_;
-    Rect limitRect = displayRect;
-    Rect winRect = node->GetWindowProperty()->GetWindowRect();
+    const Rect lastRect = node->GetWindowRect();
+    Rect limitRect = displayRect_;
+    ComputeDecoratedRequestRect(node);
+    Rect winRect = node->GetRequestRect();
 
     WLOGFI("Id:%{public}u, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
         "deco:%{public}d, type:%{public}u, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
@@ -247,21 +251,17 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(sptr<WindowNode>& node)
     if (!floatingWindow) { // fullscreen window
         winRect = limitRect;
     } else { // floating window
-        if (!node->hasDecorated_ && node->GetWindowProperty()->GetDecorEnable()) { // is decorable
-            winRect = ComputeDecoratedWindowRect(winRect);
-            node->hasDecorated_ = true;
-        }
         if (subWindow && parentLimit) { // subwidow and limited by parent
-            limitRect = node->parent_->GetLayoutRect();
+            limitRect = node->parent_->GetWindowRect();
             UpdateFloatingLayoutRect(limitRect, winRect);
         }
     }
-    LimitWindowSize(node, displayRect, winRect);
-    node->SetLayoutRect(winRect);
+    LimitWindowSize(node, displayRect_, winRect);
+    node->SetWindowRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
     if (!(lastRect == winRect)) {
         auto reason = node->GetWindowSizeChangeReason();
-        node->GetWindowToken()->UpdateWindowRect(winRect, reason);
+        node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
         if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
             node->ResetWindowSizeChangeReason();
         }
