@@ -44,15 +44,22 @@ bool FreezeController::FreezeDisplay(DisplayId displayId)
         WLOGFE("Show window failed");
         return false;
     }
-    WLOGFI("Draw cover window");
 
-    dp_ = new DrawingProxy();
-    if (dp_) {
-        dp_->InitDrawContext();
-    } else {
-        WLOGFE("dp_ is null");
-        return false;
+#ifdef ACE_ENABLE_GL
+    WLOGFI("Draw cover window on gpu");
+    // init render context
+    static bool hasInitRC = false;
+    if (!hasInitRC) {
+        rc_ = RenderContextFactory::GetInstance().CreateEngine();
+        if (rc_ != nullptr) {
+            rc_->InitializeEglContext();
+            hasInitRC = true;
+        } else {
+            WLOGFE("InitilizeEglContext failed");
+            return false;
+        }
     }
+#endif
 
     std::shared_ptr<RSSurfaceNode> surfaceNode = window->GetSurfaceNode();
     if (surfaceNode == nullptr) {
@@ -69,14 +76,15 @@ bool FreezeController::FreezeDisplay(DisplayId displayId)
         return false;
     }
 
-    rsSurface->SetDrawingProxy(dp_);
+#ifdef ACE_ENABLE_GL
+    rsSurface->SetRenderContext(rc_);
+#endif
 
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManagerServiceInner::GetInstance().GetDisplaySnapshot(displayId);
     if (pixelMap == nullptr) {
         WLOGE("freeze display fail, pixel map is null. display %{public}" PRIu64"", displayId);
         return false;
     }
-
     return DrawSkImage(rsSurface, winRect.width_, winRect.height_, pixelMap);
 }
 
@@ -92,7 +100,6 @@ bool FreezeController::UnfreezeDisplay(DisplayId displayId)
         WLOGW("unfreeze fail, window is null. display %{public}" PRIu64"", displayId);
         return false;
     }
-
     return WMError::WM_OK == window->Destroy();
 }
 
@@ -126,7 +133,7 @@ bool FreezeController::DrawSkImage(std::shared_ptr<RSSurface>& rsSurface,
         WLOGFE("fail to request frame");
         return false;
     }
-    auto canvas = rsSurface->GetCanvas(frame);
+    auto canvas = frame->GetCanvas();
     if (canvas == nullptr) {
         WLOGFE("fail to get canvas");
         return false;
