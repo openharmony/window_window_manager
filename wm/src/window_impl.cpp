@@ -382,10 +382,6 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     if (ability != nullptr) {
         uiContent_ = Ace::UIContent::Create(ability);
     } else {
-        if (context_.get() == nullptr) {
-            WLOGFE("fail to SetUIContent id: %{public}u in StageMode because null context", property_->GetWindowId());
-            return WMError::WM_ERROR_NULLPTR;
-        }
         uiContent_ = Ace::UIContent::Create(context_.get(), engine);
     }
     if (uiContent_ == nullptr) {
