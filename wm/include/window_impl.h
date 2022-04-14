@@ -22,7 +22,6 @@
 #include <i_input_event_consumer.h>
 #include <key_event.h>
 #include <refbase.h>
-#include <running_lock.h>
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
 
@@ -294,9 +293,7 @@ private:
     Rect startPointRect_ = { 0, 0, 0, 0 };
     Rect startRectExceptFrame_ = { 0, 0, 0, 0 };
     Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
-    bool keepScreenOn_ = false;
     float brightness_ = UNDEFINED_BRIGHTNESS;
-    std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
 };
 }
 }

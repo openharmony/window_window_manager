@@ -44,6 +44,7 @@ public:
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
     uint32_t GetActiveWindow() const;
+    void HandleKeepScreenOn(const sptr<WindowNode>& node, bool requireLock);
     std::vector<Rect> GetAvoidAreaByType(AvoidAreaType avoidAreaType);
     WMError MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node);
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
@@ -92,6 +93,7 @@ private:
     void NotifyIfSystemBarRegionChanged();
     void TraverseAndUpdateWindowState(WindowState state, int32_t topPriority);
     void UpdateWindowState(sptr<WindowNode> node, int32_t topPriority, WindowState state);
+    void HandleKeepScreenOn(const sptr<WindowNode>& node, WindowState state);
     bool IsTopAppWindow(uint32_t windowId) const;
     sptr<WindowNode> FindDividerNode() const;
     void RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes);

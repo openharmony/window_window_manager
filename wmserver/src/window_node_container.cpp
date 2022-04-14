@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cinttypes>
 #include <ctime>
+#include <power_mgr_client.h>
 
 #include "common_event_manager.h"
 #include "display_manager_service_inner.h"
@@ -479,6 +480,35 @@ uint32_t WindowNodeContainer::GetActiveWindow() const
     return activeWindow_;
 }
 
+void WindowNodeContainer::HandleKeepScreenOn(const sptr<WindowNode>& node, bool requireLock)
+{
+    if (requireLock && node->keepScreenLock_ == nullptr) {
+        // reset ipc identity
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        node->keepScreenLock_ = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(node->GetWindowName(),
+            PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);
+        // set ipc identity to raw
+        IPCSkeleton::SetCallingIdentity(identity);
+    }
+    if (node->keepScreenLock_ == nullptr) {
+        return;
+    }
+    WLOGFI("handle keep screen on: [%{public}s, %{public}d]", node->GetWindowName().c_str(), requireLock);
+    ErrCode res;
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    if (requireLock) {
+        res = node->keepScreenLock_->Lock();
+    } else {
+        res = node->keepScreenLock_->UnLock();
+    }
+    // set ipc identity to raw
+    IPCSkeleton::SetCallingIdentity(identity);
+    if (res != ERR_OK) {
+        WLOGFE("handle keep screen running lock failed: [operation: %{public}d, err: %{public}d]", requireLock, res);
+    }
+}
+
 bool WindowNodeContainer::IsAboveSystemBarNode(sptr<WindowNode> node) const
 {
     int32_t curPriority = zorderPolicy_->GetWindowPriority(node->GetWindowType());
@@ -852,10 +882,26 @@ void WindowNodeContainer::UpdateWindowState(sptr<WindowNode> node, int32_t topPr
     if (node->parent_ != nullptr && node->currentVisibility_) {
         if (node->priority_ < topPriority) {
             node->GetWindowToken()->UpdateWindowState(state);
+            HandleKeepScreenOn(node, state);
         }
     }
     for (auto& childNode : node->children_) {
         UpdateWindowState(childNode, topPriority, state);
+    }
+}
+
+void WindowNodeContainer::HandleKeepScreenOn(const sptr<WindowNode>& node, WindowState state)
+{
+    if (node == nullptr) {
+        WLOGFE("window is invalid");
+        return;
+    }
+    if (state == WindowState::STATE_FROZEN) {
+        HandleKeepScreenOn(node, false);
+    } else if (state == WindowState::STATE_UNFROZEN) {
+        HandleKeepScreenOn(node, node->IsKeepScreenOn());
+    } else {
+        // do nothing
     }
 }
 

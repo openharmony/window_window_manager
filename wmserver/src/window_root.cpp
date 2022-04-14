@@ -303,6 +303,21 @@ void WindowRoot::SetBrightness(uint32_t windowId, float brightness)
     }
 }
 
+void WindowRoot::HandleKeepScreenOn(uint32_t windowId, bool requireLock)
+{
+    auto node = GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return;
+    }
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("handle keep screen on failed, window container could not be found");
+        return;
+    }
+    container->HandleKeepScreenOn(node, requireLock);
+}
+
 WMError WindowRoot::EnterSplitWindowMode(sptr<WindowNode>& node)
 {
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());

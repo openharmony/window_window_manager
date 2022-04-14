@@ -103,6 +103,11 @@ void WindowProperty::SetTurnScreenOn(bool turnScreenOn)
     turnScreenOn_ = turnScreenOn;
 }
 
+void WindowProperty::SetKeepScreenOn(bool keepScreenOn)
+{
+    keepScreenOn_ = keepScreenOn;
+}
+
 void WindowProperty::SetCallingWindow(uint32_t windowId)
 {
     callingWindow_ = windowId;
@@ -230,6 +235,11 @@ bool WindowProperty::IsTurnScreenOn() const
     return turnScreenOn_;
 }
 
+bool WindowProperty::IsKeepScreenOn() const
+{
+    return keepScreenOn_;
+}
+
 DisplayId WindowProperty::GetDisplayId() const
 {
     return displayId_;
@@ -324,7 +334,7 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(parentId_) && MapMarshalling(parcel) && parcel.WriteBool(isDecorEnable_) &&
         parcel.WriteInt32(hitOffset_.x) && parcel.WriteInt32(hitOffset_.y) && parcel.WriteUint32(animationFlag_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteUint32(callingWindow_) &&
-        parcel.WriteBool(turnScreenOn_);
+        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_);
 }
 
 sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
@@ -356,6 +366,7 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowSizeChangeReason(static_cast<WindowSizeChangeReason>(parcel.ReadUint32()));
     property->SetCallingWindow(parcel.ReadUint32());
     property->SetTurnScreenOn(parcel.ReadBool());
+    property->SetKeepScreenOn(parcel.ReadBool());
     return property;
 }
 
@@ -385,6 +396,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     isDecorEnable_ = property->isDecorEnable_;
     callingWindow_ = property->callingWindow_;
     turnScreenOn_ = property->turnScreenOn_;
+    keepScreenOn_ = property->keepScreenOn_;
 }
 }
 }
