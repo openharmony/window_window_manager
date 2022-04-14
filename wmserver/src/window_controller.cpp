@@ -77,6 +77,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     windowRoot_->FocusFaultDetection();
     FlushWindowInfo(property->GetWindowId());
     HandleTurnScreenOn(node);
+    windowRoot_->HandleKeepScreenOn(node->GetWindowId(), node->IsKeepScreenOn());
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
         node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
@@ -103,10 +104,14 @@ void WindowController::HandleTurnScreenOn(const sptr<WindowNode>& node)
         WLOGFE("window is invalid");
         return;
     }
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
     if (node->IsTurnScreenOn() && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
         WLOGFI("handle turn screen on");
         PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
     }
+    // set ipc identity to raw
+    IPCSkeleton::SetCallingIdentity(identity);
 }
 
 WMError WindowController::RemoveWindowNode(uint32_t windowId)
@@ -117,6 +122,7 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
     }
     windowRoot_->FocusFaultDetection();
     FlushWindowInfo(windowId);
+    windowRoot_->HandleKeepScreenOn(windowId, false);
     return res;
 }
 
@@ -133,6 +139,7 @@ WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
     }
     windowRoot_->FocusFaultDetection();
     FlushWindowInfoWithDisplayId(displayId);
+    windowRoot_->HandleKeepScreenOn(windowId, false);
     return res;
 }
 
@@ -560,6 +567,12 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         case PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON: {
             node->SetTurnScreenOn(property->IsTurnScreenOn());
             HandleTurnScreenOn(node);
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON: {
+            node->SetKeepScreenOn(property->IsKeepScreenOn());
+            windowRoot_->HandleKeepScreenOn(node->GetWindowId(), node->IsKeepScreenOn());
+            break;
         }
         default:
             break;

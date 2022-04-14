@@ -69,6 +69,7 @@ public:
     Rect GetDisplayLimitRect(DisplayId displayId) const;
     WMError UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeReason reason);
     void SetBrightness(uint32_t windowId, float brightness);
+    void HandleKeepScreenOn(uint32_t windowId, bool requireLock);
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
