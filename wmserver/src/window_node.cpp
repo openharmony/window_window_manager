@@ -122,6 +122,11 @@ void WindowNode::SetTurnScreenOn(bool turnScreenOn)
     property_->SetTurnScreenOn(turnScreenOn);
 }
 
+void WindowNode::SetKeepScreenOn(bool keepScreenOn)
+{
+    property_->SetKeepScreenOn(keepScreenOn);
+}
+
 void WindowNode::SetCallingWindow(uint32_t windowId)
 {
     property_->SetCallingWindow(windowId);
@@ -220,6 +225,11 @@ float WindowNode::GetBrightness() const
 bool WindowNode::IsTurnScreenOn() const
 {
     return property_->IsTurnScreenOn();
+}
+
+bool WindowNode::IsKeepScreenOn() const
+{
+    return property_->IsKeepScreenOn();
 }
 
 uint32_t WindowNode::GetWindowFlags() const
