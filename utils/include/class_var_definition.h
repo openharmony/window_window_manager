@@ -16,8 +16,6 @@
 #ifndef OHOS_ROSEN_CLASS_VAR_DEFINITION_H
 #define OHOS_ROSEN_CLASS_VAR_DEFINITION_H
 
-#include <mutex>
-
 namespace OHOS::Rosen {
 #define DEFINE_VAR(type, memberName)                                               \
 private:                                                                           \
