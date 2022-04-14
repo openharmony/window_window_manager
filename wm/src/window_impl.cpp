@@ -1060,6 +1060,10 @@ void WindowImpl::RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener)
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(lifecycleListeners_.begin(), lifecycleListeners_.end(), listener) != lifecycleListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     lifecycleListeners_.emplace_back(listener);
 }
 
@@ -1069,6 +1073,11 @@ void WindowImpl::RegisterWindowChangeListener(sptr<IWindowChangeListener>& liste
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(windowChangeListeners_.begin(), windowChangeListeners_.end(), listener) !=
+        windowChangeListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     windowChangeListeners_.emplace_back(listener);
 }
 
@@ -1097,6 +1106,11 @@ void WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(avoidAreaChangeListeners_.begin(), avoidAreaChangeListeners_.end(), listener) !=
+        avoidAreaChangeListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     avoidAreaChangeListeners_.emplace_back(listener);
 }
 
@@ -1115,6 +1129,10 @@ void WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(windowDragListeners_.begin(), windowDragListeners_.end(), listener) != windowDragListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     windowDragListeners_.emplace_back(listener);
 }
 
@@ -1135,6 +1153,11 @@ void WindowImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listene
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(displayMoveListeners_.begin(), displayMoveListeners_.end(), listener) !=
+        displayMoveListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     displayMoveListeners_.emplace_back(listener);
 }
 
@@ -1155,6 +1178,10 @@ void WindowImpl::RegisterInputEventListener(sptr<IInputEventListener>& listener)
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(inputEventListeners_.begin(), inputEventListeners_.end(), listener) != inputEventListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     inputEventListeners_.emplace_back(listener);
 }
 
@@ -1182,6 +1209,11 @@ void WindowImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChan
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(occupiedAreaChangeListeners_.begin(), occupiedAreaChangeListeners_.end(), listener) !=
+        occupiedAreaChangeListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     occupiedAreaChangeListeners_.emplace_back(listener);
 }
 
