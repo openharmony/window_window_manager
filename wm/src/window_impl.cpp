@@ -64,7 +64,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetRequestedOrientation(option->GetRequestedOrientation());
     windowTag_ = option->GetWindowTag();
     keepScreenOn_ = option->IsKeepScreenOn();
-    turnScreenOn_ = option->IsTurnScreenOn();
+    property_->SetTurnScreenOn(option->IsTurnScreenOn());
     brightness_ = option->GetBrightness();
     AdjustWindowAnimationFlag();
     auto& sysBarPropMap = option->GetSystemBarProperty();
@@ -605,14 +605,6 @@ void WindowImpl::HandleKeepScreenOn(bool keepScreenOn)
     }
 }
 
-void WindowImpl::HandleTurnScreenOn()
-{
-    if (turnScreenOn_ && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-        WLOGFI("handle turn screen on");
-        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
-    }
-}
-
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGFI("[Client] Window Create");
@@ -785,7 +777,6 @@ WMError WindowImpl::Show(uint32_t reason)
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
         HandleKeepScreenOn(keepScreenOn_);
-        HandleTurnScreenOn();
     } else {
         WLOGFE("show errCode:%{public}d for winId:%{public}u", static_cast<int32_t>(ret), property_->GetWindowId());
     }
@@ -875,15 +866,18 @@ bool WindowImpl::IsKeepScreenOn() const
 
 void WindowImpl::SetTurnScreenOn(bool turnScreenOn)
 {
-    turnScreenOn_ = turnScreenOn;
+    if (!IsWindowValid()) {
+        return;
+    }
+    property_->SetTurnScreenOn(turnScreenOn);
     if (state_ == WindowState::STATE_SHOWN) {
-        HandleTurnScreenOn();
+        UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     }
 }
 
 bool WindowImpl::IsTurnScreenOn() const
 {
-    return turnScreenOn_;
+    return property_->IsTurnScreenOn();
 }
 
 void WindowImpl::SetBackgroundColor(const std::string& color)
