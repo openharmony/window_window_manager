@@ -15,6 +15,7 @@
 
 #include "window_controller.h"
 #include <parameters.h>
+#include <power_mgr_client.h>
 #include <transaction/rs_transaction.h>
 #include "window_manager_hilog.h"
 #include "window_helper.h"
@@ -70,6 +71,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     }
     windowRoot_->FocusFaultDetection();
     FlushWindowInfo(property->GetWindowId());
+    HandleTurnScreenOn(node);
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
         node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
@@ -114,6 +116,18 @@ void WindowController::ReSizeSystemBarPropertySizeIfNeed(sptr<WindowProperty>& p
     }
     if (curDisplayInfo_.find(displayInfo->GetDisplayId()) == curDisplayInfo_.end()) {
         curDisplayInfo_[displayInfo->GetDisplayId()] = displayInfo;
+    }
+}
+
+void WindowController::HandleTurnScreenOn(const sptr<WindowNode>& node)
+{
+    if (node == nullptr) {
+        WLOGFE("window is invalid");
+        return;
+    }
+    if (node->IsTurnScreenOn() && !PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+        WLOGFI("handle turn screen on");
+        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
     }
 }
 
@@ -604,6 +618,10 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             DisplayManagerServiceInner::GetInstance().
                 SetOrientationFromWindow(node->GetDisplayId(), property->GetRequestedOrientation());
             break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON: {
+            node->SetTurnScreenOn(property->IsTurnScreenOn());
+            HandleTurnScreenOn(node);
         }
         default:
             break;

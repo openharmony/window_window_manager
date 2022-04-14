@@ -117,6 +117,11 @@ void WindowNode::SetTouchable(bool touchable)
     property_->SetTouchable(touchable);
 }
 
+void WindowNode::SetTurnScreenOn(bool turnScreenOn)
+{
+    property_->SetTurnScreenOn(turnScreenOn);
+}
+
 void WindowNode::SetCallingWindow(uint32_t windowId)
 {
     property_->SetCallingWindow(windowId);
@@ -210,6 +215,11 @@ float WindowNode::GetAlpha() const
 float WindowNode::GetBrightness() const
 {
     return property_->GetBrightness();
+}
+
+bool WindowNode::IsTurnScreenOn() const
+{
+    return property_->IsTurnScreenOn();
 }
 
 uint32_t WindowNode::GetWindowFlags() const
