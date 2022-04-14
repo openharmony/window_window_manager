@@ -84,7 +84,6 @@ ohos_shared_library("libwm") {
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
     "napi:ace_napi",
-    "power_manager_native:powermgr_client",
 
     # because appexecfwk_core depends on global_resmgr
     "resmgr_standard:global_resmgr",
