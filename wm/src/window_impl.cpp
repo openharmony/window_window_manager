@@ -335,12 +335,22 @@ WMError WindowImpl::SetAlpha(float alpha)
 
 WMError WindowImpl::AddWindowFlag(WindowFlag flag)
 {
+    if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && state_ != WindowState::STATE_CREATED) {
+        WLOGFE("Only support add show when locked when window create, id: %{public}u", property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     uint32_t updateFlags = property_->GetWindowFlags() | (static_cast<uint32_t>(flag));
     return SetWindowFlags(updateFlags);
 }
 
 WMError WindowImpl::RemoveWindowFlag(WindowFlag flag)
 {
+    if (flag == WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED && state_ != WindowState::STATE_CREATED) {
+        WLOGFE("Only support remove show when locked when window create, id: %{public}u", property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     uint32_t updateFlags = property_->GetWindowFlags() & (~(static_cast<uint32_t>(flag)));
     return SetWindowFlags(updateFlags);
 }
@@ -719,6 +729,13 @@ WMError WindowImpl::Show(uint32_t reason)
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+
+    if ((GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) &&
+        WindowHelper::IsSplitWindowMode(GetMode())) {
+        WLOGFE("show when locked window does not support split mode, windowId: %{public}u", property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
     if (stateChangeReason == WindowStateChangeReason::KEYGUARD) {
         state_ = WindowState::STATE_SHOWN;

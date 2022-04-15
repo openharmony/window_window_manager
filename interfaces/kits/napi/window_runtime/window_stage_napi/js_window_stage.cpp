@@ -99,6 +99,13 @@ NativeValue* JsWindowStage::GetSubWindow(NativeEngine* engine, NativeCallbackInf
     return (me != nullptr) ? me->OnGetSubWindow(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindowStage::SetShowOnLockScreen(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]SetShowOnLockScreen");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
+    return (me != nullptr) ? me->OnSetShowOnLockScreen(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (info.argc < 2) { // 2: minimum param num
@@ -377,6 +384,39 @@ NativeValue* JsWindowStage::OnGetSubWindow(NativeEngine& engine, NativeCallbackI
     return result;
 }
 
+NativeValue* JsWindowStage::OnSetShowOnLockScreen(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (info.argc != 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        return engine.CreateUndefined();
+    }
+    if (windowScene_ == nullptr || windowScene_->GetMainWindow() == nullptr) {
+        WLOGFE("[NAPI]WindowScene is null or window is null");
+        return engine.CreateUndefined();
+    }
+
+    bool showOnLockScreen = false;
+    NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+    if (nativeVal == nullptr) {
+        WLOGFE("[NAPI]Failed to convert parameter to boolean");
+        return engine.CreateUndefined();
+    } else {
+        showOnLockScreen = static_cast<bool>(*nativeVal);
+    }
+
+    auto window = windowScene_->GetMainWindow();
+    WMError ret;
+    if (showOnLockScreen) {
+        ret = window->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+    } else {
+        ret = window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+    }
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetShowOnLockScreen %{public}u, ret = %{public}u",
+        window->GetWindowId(), window->GetWindowName().c_str(), showOnLockScreen, ret);
+
+    return engine.CreateUndefined();
+}
+
 NativeValue* CreateJsWindowStage(NativeEngine& engine,
     std::shared_ptr<Rosen::WindowScene> windowScene)
 {
@@ -401,6 +441,8 @@ NativeValue* CreateJsWindowStage(NativeEngine& engine,
         *object, "getSubWindow", JsWindowStage::GetSubWindow);
     BindNativeFunction(engine, *object, "on", JsWindowStage::On);
     BindNativeFunction(engine, *object, "off", JsWindowStage::Off);
+    BindNativeFunction(engine,
+        *object, "setShowOnLockScreen", JsWindowStage::SetShowOnLockScreen);
 
     return objValue;
 }
