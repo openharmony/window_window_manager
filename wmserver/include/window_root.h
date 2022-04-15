@@ -68,6 +68,7 @@ public:
     float GetVirtualPixelRatio(DisplayId displayId) const;
     WMError UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeReason reason);
     void SetBrightness(uint32_t windowId, float brightness);
+    void HandleKeepScreenOn(uint32_t windowId, bool requireLock);
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
 
 private:

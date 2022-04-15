@@ -18,6 +18,7 @@
 
 #include <ipc_skeleton.h>
 #include <refbase.h>
+#include <running_lock.h>
 #include <ui/rs_surface_node.h>
 #include "window_interface.h"
 #include "window_manager_hilog.h"
@@ -54,6 +55,7 @@ public:
     void SetFocusable(bool focusable);
     void SetTouchable(bool touchable);
     void SetTurnScreenOn(bool turnScreenOn);
+    void SetKeepScreenOn(bool keepScreenOn);
     void SetCallingWindow(uint32_t windowId);
     uint32_t GetCallingWindow() const;
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
@@ -73,6 +75,7 @@ public:
     float GetAlpha() const;
     float GetBrightness() const;
     bool IsTurnScreenOn() const;
+    bool IsKeepScreenOn() const;
     uint32_t GetWindowFlags() const;
     const sptr<WindowProperty>& GetWindowProperty() const;
     int32_t GetCallingPid() const;
@@ -87,6 +90,7 @@ public:
     std::vector<sptr<WindowNode>> children_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     sptr<IRemoteObject> abilityToken_ = nullptr;
+    std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
     int32_t priority_ { 0 };
     bool requestedVisibility_ { false };
     bool currentVisibility_ { false };
