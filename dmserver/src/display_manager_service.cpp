@@ -449,7 +449,7 @@ ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds
         allExpandScreenIds.erase(iter);
     }
     std::shared_ptr<RSDisplayNode> rsDisplayNode;
-    for (int32_t i = 0; i < expandScreenIds.size(); i++) {
+    for (uint32_t i = 0; i < expandScreenIds.size(); i++) {
         rsDisplayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(expandScreenIds[i]);
         if (rsDisplayNode != nullptr) {
             rsDisplayNode->SetDisplayOffset(startPoints[i].posX_, startPoints[i].posY_);
