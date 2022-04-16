@@ -1321,7 +1321,7 @@ void WindowNodeContainer::ReZOrderShowWhenLockedWindows(const sptr<WindowNode>& 
         auto parentNode = needReZOrderNode->parent_;
         auto position = parentNode->children_.end();
         for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
-            if ((*iter)->priority_ > node->priority_) {
+            if ((*iter)->priority_ > needReZOrderNode->priority_) {
                 position = iter;
                 break;
             }
