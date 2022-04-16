@@ -155,7 +155,7 @@ bool DisplayManagerService::SetOrientation(ScreenId screenId, Orientation orient
 
 bool DisplayManagerService::SetOrientationFromWindow(ScreenId screenId, Orientation orientation)
 {
-    WM_SCOPED_TRACE("dms:SetOrientation(%" PRIu64")", screenId);
+    WM_SCOPED_TRACE("dms:SetOrientationFromWindow(%" PRIu64")", screenId);
     return abstractScreenController_->SetOrientation(screenId, orientation, true);
 }
 

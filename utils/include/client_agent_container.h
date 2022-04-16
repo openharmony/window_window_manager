@@ -68,6 +68,11 @@ template<typename T1, typename T2>
 bool ClientAgentContainer<T1, T2>::RegisterAgent(const sptr<T1>& agent, T2 type)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find_if(agentMap_[type].begin(), agentMap_[type].end(), finder_t(agent->AsObject()));
+    if (iter != agentMap_[type].end()) {
+        WLOGFW("failed to register agent");
+        return false;
+    }
     agentMap_[type].insert(agent);
     if (deathRecipient_ == nullptr || !agent->AsObject()->AddDeathRecipient(deathRecipient_)) {
         WLOGFI("failed to add death recipient");
