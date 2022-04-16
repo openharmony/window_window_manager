@@ -388,18 +388,18 @@ NativeValue* JsWindowStage::OnSetShowOnLockScreen(NativeEngine& engine, NativeCa
 {
     if (info.argc != 1) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
-        return engine.CreateUndefined();
+        return CreateJsValue(engine, static_cast<int32_t>(WMError::WM_ERROR_INVALID_PARAM));
     }
     if (windowScene_ == nullptr || windowScene_->GetMainWindow() == nullptr) {
         WLOGFE("[NAPI]WindowScene is null or window is null");
-        return engine.CreateUndefined();
+        return CreateJsValue(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR));
     }
 
     bool showOnLockScreen = false;
     NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
     if (nativeVal == nullptr) {
         WLOGFE("[NAPI]Failed to convert parameter to boolean");
-        return engine.CreateUndefined();
+        return CreateJsValue(engine, static_cast<int32_t>(WMError::WM_ERROR_INVALID_PARAM));
     } else {
         showOnLockScreen = static_cast<bool>(*nativeVal);
     }
@@ -414,7 +414,7 @@ NativeValue* JsWindowStage::OnSetShowOnLockScreen(NativeEngine& engine, NativeCa
     WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetShowOnLockScreen %{public}u, ret = %{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), showOnLockScreen, ret);
 
-    return engine.CreateUndefined();
+    return CreateJsValue(engine, static_cast<int32_t>(ret));
 }
 
 NativeValue* CreateJsWindowStage(NativeEngine& engine,
