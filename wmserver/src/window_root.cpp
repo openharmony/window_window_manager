@@ -76,17 +76,25 @@ void WindowRoot::NotifyKeyboardSizeChangeInfo(const sptr<WindowNode>& node,
     if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         return;
     }
-    auto focusWindow = GetWindowNode(container->GetFocusWindow());
-    if (focusWindow != nullptr && (focusWindow->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN ||
-        focusWindow->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        focusWindow->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-        focusWindow->GetWindowToken() != nullptr) {
-        WLOGFI("keyboard size change callWindow: %{public}u, " \
-            "input rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-            focusWindow->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
-        sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, rect);
-        focusWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
+
+    auto callingWindow = GetWindowNode(node->GetCallingWindow());
+    if (callingWindow == nullptr) {
+        WLOGFI("callingWindow: %{public}u does not be set", node->GetCallingWindow());
+        callingWindow = GetWindowNode(container->GetFocusWindow());
     }
+    if (callingWindow != nullptr && callingWindow->GetWindowToken() != nullptr &&
+        (callingWindow->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN ||
+        callingWindow->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        callingWindow->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
+        WLOGFI("keyboard size change callingWindow: [%{public}s, %{public}u], " \
+            "input rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+            callingWindow->GetWindowName().c_str(), callingWindow->GetWindowId(),
+            rect.posX_, rect.posY_, rect.width_, rect.height_);
+        sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, rect);
+        callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
+        return;
+    }
+    WLOGFE("does not have correct callingWindow for input method window");
 }
 
 void WindowRoot::NotifyDisplayRemoved(DisplayId displayId)
