@@ -13,29 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef WINDOW_EXTENSION_CLIENT_STUB_IMPL_H
-#define WINDOW_EXTENSION_CLIENT_STUB_IMPL_H
+#ifndef WINDOW_EXTENSION_STUB_IMPL_H
+#define WINDOW_EXTENSION_STUB_IMPL_H
 
 #include "wm_common.h"
 
 #include <string>
 
 #include "window.h"
-#include "window_extension_client_stub.h"
-#include "window_extension_server_interface.h"
+#include "window_extension_stub.h"
+#include "window_extension_client_interface.h"
 
 namespace OHOS {
 namespace Rosen {
-class WindowExtensionClientStubImpl : public WindowExtensionClientStub {
+class WindowExtensionStubImpl : public WindowExtensionStub {
 public:
-    WindowExtensionClientStubImpl(const std::string& windowName);
-    ~WindowExtensionClientStubImpl();
+    WindowExtensionStubImpl(const std::string& windowName);
+    ~WindowExtensionStubImpl();
 
     virtual void Resize(Rect rect) override;
     virtual void Hide() override;
     virtual void Show() override;
     virtual void RequestFocus() override;
-    virtual void ConnectToClient(sptr<IWindowExtensionServer>& token) override;
+    virtual void ConnectToExtension(sptr<IWindowExtensionClient>& token) override;
 
     std::shared_ptr<RSSurfaceNode> CreateWindow(Rect& rect);
 private:
@@ -43,8 +43,8 @@ private:
     sptr<IDispatchInputEventListener> dispatchInputEventListener_;
     sptr<Window> window_;
     std::string windowName_;
-    sptr<IWindowExtensionServer> token_;
+    sptr<IWindowExtensionClient> token_;
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // WINDOW_EXTENSION_CLIENT_STUB_IMPL_H
+#endif // WINDOW_EXTENSION_STUB_IMPL_H

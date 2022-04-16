@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef WINDOW_EXTENSION_CLIENT_PROXY_H
-#define WINDOW_EXTENSION_CLIENT_PROXY_H
+#ifndef WINDOW_EXTENSION_PROXY_H
+#define WINDOW_EXTENSION_PROXY_H
 
-#include "window_extension_client_interface.h"
+#include "window_extension_interface.h"
 #include "iremote_proxy.h"
 
 namespace OHOS {
 namespace Rosen {
-class WindowExtensionClientProxy : public IRemoteProxy<IWindowExtensionClient> {
+class WindowExtensionProxy : public IRemoteProxy<IWindowExtension> {
 public:
-    explicit WindowExtensionClientProxy(const sptr<IRemoteObject>& impl)
-        : IRemoteProxy<IWindowExtensionClient>(impl) {};
-    ~WindowExtensionClientProxy() {};
+    explicit WindowExtensionProxy(const sptr<IRemoteObject>& impl)
+        : IRemoteProxy<IWindowExtension>(impl) {};
+    ~WindowExtensionProxy() {};
 
     void Resize(Rect rect) override;
     void Hide() override;
     void Show() override;
     void RequestFocus() override;
-    void ConnectToClient(sptr<IWindowExtensionServer>& token) override;
+    void ConnectToExtension(sptr<IWindowExtensionClient>& token) override;
 private:
-    static inline BrokerDelegator<WindowExtensionClientProxy> delegator_;
+    static inline BrokerDelegator<WindowExtensionProxy> delegator_;
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // WINDOW_EXTENSION_CLIENT_PROXY_H
+#endif // WINDOW_EXTENSION_PROXY_H

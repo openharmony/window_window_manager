@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef WINODW_EXTENSION_SERVER_PROXY
-#define WINODW_EXTENSION_SERVER_PROXY
+#ifndef WINODW_EXTENSION_CLIENT_PROXY
+#define WINODW_EXTENSION_CLIENT_PROXY
 
-#include "window_extension_server_interface.h"
+#include "window_extension_client_interface.h"
 #include "iremote_proxy.h"
 
 namespace OHOS {
 namespace Rosen {
-class WindowExtensionServerProxy : public IRemoteProxy<IWindowExtensionServer> {
+class WindowExtensionClientProxy : public IRemoteProxy<IWindowExtensionClient> {
 public:
-    WindowExtensionServerProxy(const sptr<IRemoteObject> &impl)
-        : IRemoteProxy<IWindowExtensionServer>(impl) {};
-    ~WindowExtensionServerProxy() {};
+    WindowExtensionClientProxy(const sptr<IRemoteObject> &impl)
+        : IRemoteProxy<IWindowExtensionClient>(impl) {};
+    ~WindowExtensionClientProxy() {};
     void OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
     void OnBackPress() override;
     void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 private:
-    static inline BrokerDelegator<WindowExtensionServerProxy> delegator_;
+    static inline BrokerDelegator<WindowExtensionClientProxy> delegator_;
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // WINDOW_EXTESNION_SERVER_PROXY
+#endif // WINODW_EXTENSION_CLIENT_PROXY

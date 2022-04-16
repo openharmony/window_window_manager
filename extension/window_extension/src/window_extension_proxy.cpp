@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "window_extension_server_proxy.h"
+#include "window_extension_proxy.h"
 #include <ipc_types.h>
 #include "message_option.h"
 #include "window_manager_hilog.h"
@@ -24,83 +24,76 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionProxy"};
 }
 
-void WindowExtensionServerProxy::OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode)
+void WindowExtensionProxy::Resize(Rect rect)
 {
     MessageParcel data;
-    MessageParcel replay;
+    MessageParcel reply;
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("write token failed");
+        WLOGFE("write interface token failed");
         return;
     }
-    
-    if ((!data.WriteParcelable(surfaceNode.get()))) {
-        WLOGFE("write surfaceNode failed");
+    if (!(data.WriteInt32(rect.posX_) && data.WriteInt32(rect.posY_) &&
+        data.WriteInt32(rect.height_) && data.WriteInt32(rect.width_))) {
+        WLOGFE("write rect failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_WINDOW_READY, data, replay, option) != ERR_NONE) {
+    if (Remote()->SendRequest(TRANS_ID_RESIZE_WINDOW, data, reply, option) != ERR_NONE) {
         WLOGFE("send request failed");
+        return;
     }
-    WLOGFI("end");
 }
 
-void WindowExtensionServerProxy::OnBackPress()
+void WindowExtensionProxy::Hide()
 {
     MessageParcel data;
-    MessageParcel replay;
+    MessageParcel reply;
     MessageOption option;
-    WLOGFI("call");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("write token failed");
+        WLOGFE("write interface token failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_BACK_PRESS, data, replay, option) != ERR_NONE) {
+    if (Remote()->SendRequest(TRANS_ID_HIDE_WINDOW, data, reply, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
-    WLOGFI("end");
 }
 
-void WindowExtensionServerProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+void WindowExtensionProxy::Show()
 {
     MessageParcel data;
-    MessageParcel replay;
+    MessageParcel reply;
     MessageOption option;
-
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("write token failed");
+        WLOGFE("write interface token failed");
         return;
     }
-
-     if (!keyEvent->WriteToParcel(data)) {
-         WLOGFE("write key event failed");
-         return;
-    }
-    if (Remote()->SendRequest(TRANS_ID_ON_KEY_EVENT, data, replay, option) != ERR_NONE) {
+    if (Remote()->SendRequest(TRANS_ID_SHOW_WINDOW, data, reply, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
-    WLOGFI("end");
 }
 
-void WindowExtensionServerProxy::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void WindowExtensionProxy::ConnectToExtension(sptr<IWindowExtensionClient>& token)
 {
     MessageParcel data;
     MessageParcel replay;
     MessageOption option;
-
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("write token failed");
+        WLOGFE("write interface token failed");
         return;
     }
-
-    if (!pointerEvent->WriteToParcel(data)) {
-        WLOGFE("write key event failed");
+    if (!data.WriteRemoteObject(token->AsObject())) {
+        WLOGFE("write object failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_ON_POINTER_EVENT, data, replay, option) != ERR_NONE) {
+    if (Remote()->SendRequest(TRANS_ID_CONNECT_TO_EXTENSION, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
-    WLOGFI("end");
+}
+
+void WindowExtensionProxy::RequestFocus()
+{
+    WLOGFI("called.");
 }
 } // namespace Rosen
 } // namespace OHOS

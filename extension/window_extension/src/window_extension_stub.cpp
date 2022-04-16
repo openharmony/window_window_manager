@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#include "window_extension_client_stub.h"
+#include "window_extension_stub.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr  HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionClientStub"};
+    constexpr  HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionStub"};
 }
 
-int WindowExtensionClientStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
+int WindowExtensionStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
@@ -49,10 +49,10 @@ int WindowExtensionClientStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
             RequestFocus();
             break;
         }
-        case TRANS_ID_CONNECT_CLIENT: {
+        case TRANS_ID_CONNECT_TO_EXTENSION: {
             sptr<IRemoteObject> object = data.ReadRemoteObject();
-            sptr<IWindowExtensionServer> token = iface_cast<IWindowExtensionServer>(object);
-            ConnectToClient(token);
+            sptr<IWindowExtensionClient> token = iface_cast<IWindowExtensionClient>(object);
+            ConnectToExtension(token);
             break;
         }
         default: {

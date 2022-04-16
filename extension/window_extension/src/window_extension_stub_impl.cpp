@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "window_extension_client_stub_impl.h"
+#include "window_extension_stub_impl.h"
 
 #include<unistd.h> //TODO
 
@@ -25,14 +25,14 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionClientStubImpl"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionStubImpl"};
 }
 
-WindowExtensionClientStubImpl::WindowExtensionClientStubImpl(const std::string& windowName) : windowName_(windowName)
+WindowExtensionStubImpl::WindowExtensionStubImpl(const std::string& windowName) : windowName_(windowName)
 {
 }
 
-WindowExtensionClientStubImpl::~WindowExtensionClientStubImpl()
+WindowExtensionStubImpl::~WindowExtensionStubImpl()
 {
     if (window_ != nullptr) {
         // window_->RemoveDispatchInoutEventLisenser(); // TODO
@@ -40,7 +40,7 @@ WindowExtensionClientStubImpl::~WindowExtensionClientStubImpl()
     }
 }
 
-std::shared_ptr<RSSurfaceNode> WindowExtensionClientStubImpl::CreateWindow(Rect& rect)
+std::shared_ptr<RSSurfaceNode> WindowExtensionStubImpl::CreateWindow(Rect& rect)
 {
  //   WLOGFI("call start windowName_ %{public}s", windowName_.c_str());
     sptr<WindowOption> option =  new (std::nothrow)WindowOption();
@@ -62,37 +62,38 @@ std::shared_ptr<RSSurfaceNode> WindowExtensionClientStubImpl::CreateWindow(Rect&
     return nullptr; //window_->GetSurfaceNode();
 }
 
-void WindowExtensionClientStubImpl::Resize(Rect rect)
+void WindowExtensionStubImpl::Resize(Rect rect)
 {
     if (window_ != nullptr) {
         window_->Resize(rect.width_, rect.height_);
     }
 }
 
-void WindowExtensionClientStubImpl::Hide()
+void WindowExtensionStubImpl::Hide()
 {
     if (window_ != nullptr) {
         window_->Hide();
     }
 }
 
-void WindowExtensionClientStubImpl::Show()
+void WindowExtensionStubImpl::Show()
 {
     if (window_ != nullptr) {
         window_->Show();
     }
 }
 
-void WindowExtensionClientStubImpl::RequestFocus()
+void WindowExtensionStubImpl::RequestFocus()
 {
     if (window_ != nullptr) {
         window_->RequestFocus();
     }
 }
 
-void WindowExtensionClientStubImpl::ConnectToClient(sptr<IWindowExtensionServer>& token)
+void WindowExtensionStubImpl::ConnectToExtension(sptr<IWindowExtensionClient>& token)
 {
     token_ = token;
+    token_->OnBackPress();
     WLOGFI("called");
 }
 } // namespace Rosen

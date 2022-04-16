@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef WINDOW_EXTENSION_SERVER_STUB_IMPL_H
-#define WINDOW_EXTENSION_SERVER_STUB_IMPL_H
+#ifndef WINDOW_EXTENSION_CLIENT_STUB_IMPL_H
+#define WINDOW_EXTENSION_CLIENT_STUB_IMPL_H
 
 #include "window_extension_connection.h"
-#include "window_extension_server_stub.h"
+#include "window_extension_client_stub.h"
 
 namespace OHOS {
 namespace Rosen {
-class WindowExtensionServerStubImpl : public WindowExtensionServerStub {
+class WindowExtensionClientStubImpl : public WindowExtensionClientStub {
 public:
-    explicit WindowExtensionServerStubImpl(sptr<IWindowExtensionCallback>& componentCallback)
+    explicit WindowExtensionClientStubImpl(sptr<IWindowExtensionCallback>& componentCallback)
     : componentCallback_(componentCallback) {};
-    ~WindowExtensionServerStubImpl() = default;
+    ~WindowExtensionClientStubImpl() = default;
 
     void OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
     void OnBackPress() override;
@@ -36,4 +36,4 @@ private:
 };
 } // namespcce Rosen
 } // namespace OHOS
-#endif // WINDOW_EXTENSION_SERVER_STUB_IMPL_H
+#endif // WINDOW_EXTENSION_CLIENT_STUB_IMPL_H

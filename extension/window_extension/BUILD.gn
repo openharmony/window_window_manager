@@ -18,7 +18,9 @@ config("libwe_private_config") {
 
   include_dirs = [
     "include",
+    "include/zidl",
     "../extension_connection/include",
+    "../extension_connection/include/zidl",
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
   ]
 }
@@ -33,11 +35,11 @@ config("libwe_public_config") {
 ## Build libwe.so
 ohos_shared_library("libwe") {
   sources = [
-    "../extension_connection/src/window_extension_server_proxy.cpp",
+    "../extension_connection/src/window_extension_client_proxy.cpp",
     "src/js_window_extension_context.cpp",
     "src/js_window_extension.cpp",
-    "src/window_extension_client_stub.cpp",
-    "src/window_extension_client_stub_impl.cpp",
+    "src/window_extension_stub.cpp",
+    "src/window_extension_stub_impl.cpp",
     "src/window_extension.cpp",
   ]
 

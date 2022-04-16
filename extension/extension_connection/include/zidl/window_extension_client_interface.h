@@ -13,35 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef WINDOW_EXTENSION_CLIENT_INTERFACE_H
-#define WINDOW_EXTENSION_CLIENT_INTERFACE_H
+#ifndef WINDOW_EXTENSION_CLIENT_INTERFACE
+#define WINDOW_EXTENSION_CLIENT_INTERFACE
 
-#include "iremote_broker.h"
-#include "refbase.h"
-#include "wm_common.h"
-#include "window.h"
-#include "window_extension_server_interface.h"
+#include <iremote_broker.h>
+#include <i_input_event_consumer.h>
+#include <key_event.h>
+#include <ui/rs_surface_node.h>
 
 namespace OHOS {
 namespace Rosen {
 class IWindowExtensionClient : public IRemoteBroker {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowExtensionClient");
-
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.resen.window.extension");
     enum {
-            TRANS_ID_RESIZE_WINDOW = 0,
-            TRANS_ID_HIDE_WINDOW,
-            TRANS_ID_SHOW_WINDOW,
-            TRANS_ID_REQUESTFOCUS,
-            TRANS_ID_CONNECT_CLIENT,
+        TRANS_ID_ON_WINDOW_READY = 1,
+        TRANS_ID_ON_BACK_PRESS,
+        TRANS_ID_ON_KEY_EVENT,
+        TRANS_ID_ON_POINTER_EVENT,
     };
 
-    virtual void Resize(Rect rect) = 0;
-    virtual void Hide() = 0;
-    virtual void Show() = 0;
-    virtual void RequestFocus() = 0;
-    virtual void ConnectToClient(sptr<IWindowExtensionServer>& token) = 0;
+    virtual void OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode) = 0;
+    virtual void OnBackPress() = 0;
+    virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
+    virtual void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // WINDOW_EXTENSION_CLIENT_INTERFACE_H
+#endif // WINDOW_EXTENSION_CLIENT_INTERFACE
