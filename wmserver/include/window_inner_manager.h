@@ -22,6 +22,9 @@
 #include <thread>
 #include <vector>
 #include "include/core/SkBitmap.h"
+#ifdef ACE_ENABLE_GL
+#include "render_context/render_context.h"
+#endif
 #include "transaction/rs_transaction.h"
 #include "ui/rs_surface_extractor.h"
 #include "wm_single_instance.h"
@@ -42,7 +45,7 @@ struct WindowInnerMessage {
     DisplayId displayId;
     Rect dividerRect;
 };
-class DrawingProxy;
+
 class WindowInnerManager {
 WM_DECLARE_SINGLE_INSTANCE(WindowInnerManager);
 public:
@@ -65,7 +68,9 @@ private:
     std::mutex mutex_;
     std::condition_variable conVar_;
     bool ready_ = false;
-    DrawingProxy* dp_ = nullptr;
+#ifdef ACE_ENABLE_GL
+    RenderContext* rc_ = nullptr;
+#endif
     std::map<uint32_t, sptr<Window>> dividerMap_;
     std::vector<std::unique_ptr<WindowInnerMessage>> messages_;
     bool hasInitThread_ = false;
