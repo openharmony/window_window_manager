@@ -13,7 +13,7 @@
 
 import("//build/ohos.gni")
 
-config("libwec_private_config") {
+config("libwindow_extension_client_private_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
@@ -27,7 +27,7 @@ config("libwec_private_config") {
   ]
 }
 
-ohos_shared_library("libwec") {
+ohos_shared_library("libwindow_extension_client") {
   install_enable = true
 
   sources = [
@@ -37,14 +37,14 @@ ohos_shared_library("libwec") {
     "src/window_extension_client_stub_impl.cpp",
   ]
 
-  configs = [ ":libwec_private_config" ]
+  configs = [ ":libwindow_extension_client_private_config" ]
 
   deps = [
     "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/extension/window_extension:libwe",
+    "//foundation/windowmanager/extension/window_extension:libwindow_exteinsion",
     "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
     "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler:libeventhandler",
   ]

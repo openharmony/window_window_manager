@@ -15,8 +15,8 @@
 
 #include "js_window_extension_context.h"
 
-#include "js_runtime_utils.h"
-#include "js_extension_context.h"
+#include <js_runtime_utils.h>
+#include <js_extension_context.h>
 
 #include "service_extension_context.h"
 #include "window_manager_hilog.h"

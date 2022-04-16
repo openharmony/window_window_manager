@@ -16,10 +16,10 @@
 #ifndef JS_WINDOW_EXTENSION_CONTEXT_H
 #define JS_WINDOW_EXTENSION_CONTEXT_H
 
-#include "ability_connect_callback.h"
-#include "event_handler.h"
-#include "extension_context.h"
-#include "native_engine/native_engine.h"
+#include <ability_connect_callback.h>
+#include <event_handler.h>
+#include <extension_context.h>
+#include <native_engine/native_engine.h>
 
 #include "window.h"
 #include "window_extension_context.h"

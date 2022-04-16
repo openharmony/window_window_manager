@@ -16,7 +16,7 @@
 #ifndef WINDOW_EXTENSION_MODULE_LOADER_H
 #define WINDOW_EXTENSION_MODULE_LOADER_H
 
-#include "extension_module_loader.h"
+#include <extension_module_loader.h>
 
 namespace OHOS::Rosen {
 class WindowExtensionModuleLoader : public AbilityRuntime::ExtensionModuleLoader,

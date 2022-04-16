@@ -16,8 +16,8 @@
 #ifndef WINDOW_EXTENSION_PROXY_H
 #define WINDOW_EXTENSION_PROXY_H
 
+#include <iremote_proxy.h>
 #include "window_extension_interface.h"
-#include "iremote_proxy.h"
 
 namespace OHOS {
 namespace Rosen {

@@ -15,14 +15,15 @@
 
 #include "window_extension_connection.h"
 
-#include "ability_connect_callback_stub.h"
-#include "ability_manager_client.h"
-#include "element_name.h"
+#include <ability_connect_callback_stub.h>
+#include <ability_manager_client.h>
+#include <element_name.h>
 #include <iremote_object.h>
+
+#include "window_extension_proxy.h"
+#include "window_extension_client_stub_impl.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#include "./zidl/window_extension_proxy.h"
-#include "window_extension_client_stub_impl.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -167,8 +168,9 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
         proxy_->ConnectToExtension(clientToken);
         WLOGFI("ConnectToExtension");
     }
-    WLOGFI("end");
+    WLOGFI("call end");
 }
+
 void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
 {
     WLOGFI("end");

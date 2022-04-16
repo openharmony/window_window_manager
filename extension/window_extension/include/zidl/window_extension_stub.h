@@ -16,10 +16,9 @@
 #ifndef WINDOW_EXTENSION_STUB_H
 #define WINDOW_EXTENSION_STUB_H
 
+#include <iremote_object.h>
+#include <iremote_stub.h>
 #include "window_extension_interface.h"
-
-#include "iremote_object.h"
-#include "iremote_stub.h"
 
 namespace OHOS {
 namespace Rosen {

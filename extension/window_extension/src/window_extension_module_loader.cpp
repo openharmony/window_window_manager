@@ -15,8 +15,8 @@
 
 #include "window_extension_module_loader.h"
 
-#include "ability_connection.h"
-#include "native_engine/native_engine.h"
+#include <ability_connection.h>
+#include <native_engine/native_engine.h>
 
 #include "window_extension.h"
 #include "window_manager_hilog.h"
