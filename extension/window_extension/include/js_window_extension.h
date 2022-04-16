@@ -21,8 +21,8 @@
 #include "js_window_extension_context.h"
 #include "window.h"
 #include "window_extension.h"
-#include "window_extension_client_stub.h"
-#include "window_extension_client_stub_impl.h"
+#include "window_extension_stub.h"
+#include "window_extension_stub_impl.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -82,11 +82,11 @@ public:
 private:
     void GetSrcPath(std::string &srcPath);
 
-    //sptr<IWindowExtensionServer> extensionToken_; // TODO IWindowExtensionServer下沉到window_extension
+    //sptr<IWindowExtensionClient> extensionToken_; // TODO IWindowExtensionClient下沉到window_extension
     AbilityRuntime::JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
     std::shared_ptr<NativeReference> shellContextRef_;
-    sptr<WindowExtensionClientStubImpl> stub_;
+    sptr<WindowExtensionStubImpl> stub_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -145,7 +145,7 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)
     ElementName elementName = want.GetElement(); // TODO 为何之前是GetElementName()？
     std::string windowName = elementName.GetBundleName();
 
-    stub_ = new(std::nothrow) WindowExtensionClientStubImpl(windowName);
+    stub_ = new(std::nothrow) WindowExtensionStubImpl(windowName);
     if (!stub_) {
         WLOGFE("stub is nullptr.");
         return nullptr;

@@ -21,82 +21,86 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionClientProxy"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionProxy"};
 }
 
-void WindowExtensionClientProxy::Resize(Rect rect)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("write interface token failed");
-        return;
-    }
-    if (!(data.WriteInt32(rect.posX_) && data.WriteInt32(rect.posY_) &&
-        data.WriteInt32(rect.height_) && data.WriteInt32(rect.width_))) {
-        WLOGFE("write rect failed");
-        return;
-    }
-    if (Remote()->SendRequest(TRANS_ID_RESIZE_WINDOW, data, reply, option) != ERR_NONE) {
-        WLOGFE("send request failed");
-        return;
-    }
-}
-
-void WindowExtensionClientProxy::Hide()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("write interface token failed");
-        return;
-    }
-    if (Remote()->SendRequest(TRANS_ID_HIDE_WINDOW, data, reply, option) != ERR_NONE) {
-        WLOGFE("send request failed");
-    }
-}
-
-void WindowExtensionClientProxy::Show()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("write interface token failed");
-        return;
-    }
-    if (Remote()->SendRequest(TRANS_ID_SHOW_WINDOW, data, reply, option) != ERR_NONE) {
-        WLOGFE("send request failed");
-    }
-}
-
-void WindowExtensionClientProxy::ConnectToClient(sptr<IWindowExtensionServer>& token)
+void WindowExtensionClientProxy::OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     MessageParcel data;
     MessageParcel replay;
     MessageOption option;
+
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("write interface token failed");
+        WLOGFE("write token failed");
         return;
     }
-    if (token->AsObject()) {
-        WLOGFE("AsObject is null");
-    }
-    if (!data.WriteRemoteObject(token->AsObject())) {
-        WLOGFE("write object failed");
+    
+    if ((!data.WriteParcelable(surfaceNode.get()))) {
+        WLOGFE("write surfaceNode failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_CONNECT_CLIENT, data, replay, option) != ERR_NONE) {
+    if (Remote()->SendRequest(TRANS_ID_ON_WINDOW_READY, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
+    WLOGFI("end");
 }
 
-void WindowExtensionClientProxy::RequestFocus()
+void WindowExtensionClientProxy::OnBackPress()
 {
-    WLOGFI("called.");
+    MessageParcel data;
+    MessageParcel replay;
+    MessageOption option;
+    WLOGFI("call");
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("write token failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_ON_BACK_PRESS, data, replay, option) != ERR_NONE) {
+        WLOGFE("send request failed");
+    }
+    WLOGFI("end");
+}
+
+void WindowExtensionClientProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    MessageParcel data;
+    MessageParcel replay;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("write token failed");
+        return;
+    }
+
+     if (!keyEvent->WriteToParcel(data)) {
+         WLOGFE("write key event failed");
+         return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_ON_KEY_EVENT, data, replay, option) != ERR_NONE) {
+        WLOGFE("send request failed");
+    }
+    WLOGFI("end");
+}
+
+void WindowExtensionClientProxy::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    MessageParcel data;
+    MessageParcel replay;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("write token failed");
+        return;
+    }
+
+    if (!pointerEvent->WriteToParcel(data)) {
+        WLOGFE("write key event failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_ON_POINTER_EVENT, data, replay, option) != ERR_NONE) {
+        WLOGFE("send request failed");
+    }
+    WLOGFI("end");
 }
 } // namespace Rosen
 } // namespace OHOS

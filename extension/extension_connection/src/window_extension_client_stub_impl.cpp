@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#include "window_extension_server_stub_impl.h"
+#include "window_extension_client_stub_impl.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionServerStubImpl"};
+constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionClientStubImpl"};
 }
 
-void WindowExtensionServerStubImpl::OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode)
+void WindowExtensionClientStubImpl::OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     if (componentCallback_ != nullptr) {
         componentCallback_->OnWindowReady(surfaceNode);
@@ -30,7 +30,7 @@ void WindowExtensionServerStubImpl::OnWindowReady(std::shared_ptr<RSSurfaceNode>
     }
 }
 
-void WindowExtensionServerStubImpl::OnBackPress()
+void WindowExtensionClientStubImpl::OnBackPress()
 {
     if (componentCallback_ != nullptr) {
         componentCallback_->OnBackPress();
@@ -38,7 +38,7 @@ void WindowExtensionServerStubImpl::OnBackPress()
     }
 }
 
-void WindowExtensionServerStubImpl::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+void WindowExtensionClientStubImpl::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (componentCallback_ != nullptr) {
         componentCallback_->OnKeyEvent(keyEvent);
@@ -46,7 +46,7 @@ void WindowExtensionServerStubImpl::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& k
     }
 }
 
-void WindowExtensionServerStubImpl::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void WindowExtensionClientStubImpl::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (componentCallback_ != nullptr) {
         componentCallback_->OnPointerEvent(pointerEvent);

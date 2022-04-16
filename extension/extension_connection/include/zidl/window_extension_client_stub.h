@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef WINDOW_EXTENSION_CLIENT_STUB_H
-#define WINDOW_EXTENSION_CLIENT_STUB_H
+#ifndef WINDOW_EXTENSION_CLIENT_STUB
+#define WINDOW_EXTENSION_CLIENT_STUB
 
 #include "window_extension_client_interface.h"
-
-#include "iremote_object.h"
 #include "iremote_stub.h"
 
 namespace OHOS {
@@ -27,9 +25,10 @@ class WindowExtensionClientStub : public IRemoteStub<IWindowExtensionClient> {
 public:
     WindowExtensionClientStub() = default;
     ~WindowExtensionClientStub() = default;
-    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+
+    virtual int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
         MessageOption &option) override;
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // WINDOW_EXTENSION_CLIENT_STUB_H
+#endif // WINDOW_EXTENSION_CLIENT_STUB

@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#include "window_extension_server_stub.h"
+#include "window_extension_client_stub.h"
 
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionServerStub"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionClientStub"};
 }
-int WindowExtensionServerStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
+int WindowExtensionClientStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {

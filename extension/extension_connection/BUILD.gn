@@ -18,7 +18,9 @@ config("libwec_private_config") {
 
   include_dirs = [
     "include",
+    "include/zidl",
     "../window_extension/include",
+    "../window_extension/include/zidl",
     "../../interface/innerkits/wm",
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
@@ -29,10 +31,10 @@ ohos_shared_library("libwec") {
   install_enable = true
 
   sources = [
-    "../window_extension/src/window_extension_client_proxy.cpp",
+    "../window_extension/src/window_extension_proxy.cpp",
     "src/window_extension_connection.cpp",
-    "src/window_extension_server_stub.cpp",
-    "src/window_extension_server_stub_impl.cpp",
+    "src/window_extension_client_stub.cpp",
+    "src/window_extension_client_stub_impl.cpp",
   ]
 
   configs = [ ":libwec_private_config" ]

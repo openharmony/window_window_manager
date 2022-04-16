@@ -21,8 +21,8 @@
 #include <iremote_object.h>
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#include "window_extension_client_proxy.h"
-#include "window_extension_server_stub_impl.h"
+#include "./zidl/window_extension_proxy.h"
+#include "window_extension_client_stub_impl.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -56,9 +56,9 @@ private:
         sptr<IWindowExtensionCallback> callback_;
     };
 
-    sptr<WindowExtensionServerStub> stub_;
+    sptr<WindowExtensionClientStub> stub_;
     sptr<IWindowExtensionCallback> componentCallback_;
-    sptr<IWindowExtensionClient> proxy_;
+    sptr<IWindowExtension> proxy_;
     sptr<WindowExtensionClientRecipient> deathRecipient_;
 };
 
@@ -102,7 +102,7 @@ void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::Element
     want.SetParam(RECT_FORM_KEY_WIDTH, static_cast<int>(rect.width_));
     want.SetParam(RECT_FORM_KEY_HEIGHT, static_cast<int>(rect.height_));
     if (stub_ == nullptr) {
-        stub_ = new(std::nothrow) WindowExtensionServerStubImpl(callback);
+        stub_ = new(std::nothrow) WindowExtensionClientStubImpl(callback);
     }
     if (AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
         want, this, nullptr, 100) != ERR_OK) { // 100 default userId
@@ -146,7 +146,7 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
         return;
     }
     if (!proxy_) {
-        proxy_ = new(std::nothrow) WindowExtensionClientProxy(remoteObject);
+        proxy_ = new(std::nothrow) WindowExtensionProxy(remoteObject);
         if (!proxy_) {
             WLOGFE("get proxy failed");
             return;
@@ -162,10 +162,10 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
     if (!proxy_->AsObject() || !proxy_->AsObject()->AddDeathRecipient(deathRecipient_)) {
         WLOGFE("Failed to add death recipient");
     }
-    sptr<IWindowExtensionServer> serverToken(new WindowExtensionServerStubImpl(componentCallback_));
-    if (serverToken != nullptr) {
-        proxy_->ConnectToClient(serverToken);
-        WLOGFI("connectToClient");
+    sptr<IWindowExtensionClient> clientToken(new WindowExtensionClientStubImpl(componentCallback_));
+    if (clientToken != nullptr) {
+        proxy_->ConnectToExtension(clientToken);
+        WLOGFI("ConnectToExtension");
     }
     WLOGFI("end");
 }

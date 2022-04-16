@@ -23,7 +23,7 @@
 
 namespace OHOS::Rosen {
 namespace {
-    constexpr  HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionClientStub"};
+    constexpr  HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionStub"};
 }
 WindowExtensionModuleLoader::WindowExtensionModuleLoader() = default;
 WindowExtensionModuleLoader::~WindowExtensionModuleLoader() = default;
