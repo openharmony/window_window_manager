@@ -25,7 +25,6 @@
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
-#include "drawing_engine/drawing_proxy.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -65,7 +64,9 @@ void WindowInnerManager::DrawSurface(const sptr<Window>& window)
         WLOGFE("RSSurface is nullptr");
         return;
     }
-    rsSurface->SetDrawingProxy(dp_);
+#ifdef ACE_ENABLE_GL
+    rsSurface->SetRenderContext(rc_);
+#endif
     if (!isDividerImageLoaded_) {
         isDividerImageLoaded_ = DecodeImageFile(splitIconPath_, dividerBitmap_);
     }
@@ -78,12 +79,12 @@ void WindowInnerManager::DrawSurface(const sptr<Window>& window)
 
 void WindowInnerManager::DrawBitmap(std::shared_ptr<RSSurface>& rsSurface, uint32_t width, uint32_t height)
 {
-    auto frame = rsSurface->RequestFrame(width, height);
+    std::unique_ptr<RSSurfaceFrame> frame = rsSurface->RequestFrame(width, height);
     if (frame == nullptr) {
         WLOGFE("DrawSurface frameptr is nullptr");
         return;
     }
-    auto canvas = rsSurface->GetCanvas(frame);
+    auto canvas = frame->GetCanvas();
     if (canvas == nullptr) {
         WLOGFE("DrawSurface canvas is nullptr");
         return;
@@ -117,12 +118,12 @@ void WindowInnerManager::DrawBitmap(std::shared_ptr<RSSurface>& rsSurface, uint3
 
 void WindowInnerManager::DrawColor(std::shared_ptr<RSSurface>& rsSurface, uint32_t width, uint32_t height)
 {
-    auto frame = rsSurface->RequestFrame(width, height);
+    std::unique_ptr<RSSurfaceFrame> frame = rsSurface->RequestFrame(width, height);
     if (frame == nullptr) {
         WLOGFE("DrawSurface frameptr is nullptr");
         return;
     }
-    auto canvas = rsSurface->GetCanvas(frame);
+    auto canvas = frame->GetCanvas();
     if (canvas == nullptr) {
         WLOGFE("DrawSurface canvas is nullptr");
         return;
@@ -192,16 +193,21 @@ void WindowInnerManager::CreateAndShowDivider(std::unique_ptr<WindowInnerMessage
         return;
     }
 
-    WLOGFI("Draw divider");
+#ifdef ACE_ENABLE_GL
+    WLOGFI("Draw divider on gpu");
     // init render context
-    dp_ = new OHOS::Rosen::DrawingProxy();
-    if (dp_) {
-        dp_->InitDrawContext();
-    } else {
-        WLOGFE("dp_ is null!");
-        return;
+    static bool hasInitRC = false;
+    if (!hasInitRC) {
+        rc_ = RenderContextFactory::GetInstance().CreateEngine();
+        if (rc_) {
+            rc_->InitializeEglContext();
+            hasInitRC = true;
+        } else {
+            WLOGFE("InitilizeEglContext failed");
+            return;
+        }
     }
-
+#endif
     DrawSurface(window);
     WLOGFI("CreateAndShowDivider success");
 }
