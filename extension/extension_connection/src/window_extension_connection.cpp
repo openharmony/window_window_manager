@@ -105,7 +105,7 @@ void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::Element
         stub_ = new(std::nothrow) WindowExtensionServerStubImpl(callback);
     }
     if (AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
-        want, this, stub_, 100) != ERR_OK) { // default userId
+        want, this, nullptr, 100) != ERR_OK) { // 100 default userId
         WLOGFE("ConnectAbility failed!");
         return;
     }
@@ -120,7 +120,7 @@ void WindowExtensionConnection::Impl::Show()
         proxy_->Show();
         WLOGFI("show window");
     }
-    
+    WLOGFI("called");
 }
 
 void WindowExtensionConnection::Impl::Hide()
@@ -161,6 +161,11 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
     }
     if (!proxy_->AsObject() || !proxy_->AsObject()->AddDeathRecipient(deathRecipient_)) {
         WLOGFE("Failed to add death recipient");
+    }
+    sptr<IWindowExtensionServer> serverToken(new WindowExtensionServerStubImpl(componentCallback_));
+    if (serverToken != nullptr) {
+        proxy_->ConnectToClient(serverToken);
+        WLOGFI("connectToClient");
     }
     WLOGFI("end");
 }

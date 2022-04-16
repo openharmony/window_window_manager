@@ -50,7 +50,7 @@ void WindowExtensionServerProxy::OnBackPress()
     MessageParcel data;
     MessageParcel replay;
     MessageOption option;
-
+    WLOGFI("call");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write token failed");
         return;
@@ -72,7 +72,7 @@ void WindowExtensionServerProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyE
         return;
     }
 
-     if (keyEvent->WriteToParcel(data)) {
+     if (!keyEvent->WriteToParcel(data)) {
          WLOGFE("write key event failed");
          return;
     }
@@ -93,7 +93,7 @@ void WindowExtensionServerProxy::OnPointerEvent(std::shared_ptr<MMI::PointerEven
         return;
     }
 
-    if (pointerEvent->WriteToParcel(data)) {
+    if (!pointerEvent->WriteToParcel(data)) {
         WLOGFE("write key event failed");
         return;
     }

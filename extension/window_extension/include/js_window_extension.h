@@ -18,7 +18,7 @@
 
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
-
+#include "js_window_extension_context.h"
 #include "window.h"
 #include "window_extension.h"
 #include "window_extension_client_stub.h"

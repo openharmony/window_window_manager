@@ -28,7 +28,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JSWindowExtension"};
-    constexpr size_t ARGC_ONE = 1;
 }
 
 class DispatchInputEventListener : public IDispatchInputEventListener {
@@ -89,7 +88,7 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     WLOGFI("JsWindowExtension::Init CreateJsWindowExtensionContext.");
 
     NativeValue* contextObj = CreateJsWindowExtensionContext(jsRuntime_.GetNativeEngine(), context);
-    shellContextRef_ = jsRuntime_.LoadSystemModule("application.WindowExtensionContext", &contextObj, ARGC_ONE);
+    shellContextRef_ = jsRuntime_.LoadSystemModule("application.WindowExtensionContext", &contextObj, 1);
     contextObj = shellContextRef_->Get();
     WLOGFI("JsWindowExtension::Init Bind.");
     context->Bind(jsRuntime_, shellContextRef_.get());
@@ -151,7 +150,7 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)
         WLOGFE("stub is nullptr.");
         return nullptr;
     }
-    WLOGFD("Create stub successfully");
+    WLOGFD("Create stub successfully!");
     return stub_->AsObject();
 }
 
@@ -167,9 +166,11 @@ void JsWindowExtension::OnStart(const AAFwk::Want &want)
     WLOGFI("JsWindowExtension OnStart begin..");
     Rect rect { want.GetIntParam(RECT_FORM_KEY_POS_X, 0), 
     want.GetIntParam(RECT_FORM_KEY_POS_Y, 0),
-    want.GetIntParam(RECT_FORM_KEY_HEIGHT, 0),
-    want.GetIntParam(RECT_FORM_KEY_WIDTH, 0) };
-    stub_->CreateWindow(rect);
+    want.GetIntParam(RECT_FORM_KEY_WIDTH, 0),
+    want.GetIntParam(RECT_FORM_KEY_HEIGHT, 0) };
+  //  stub_->CreateWindow(rect);
+    WLOGFI(" create window rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
+    rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 } // namespace Rosen
 } // namespace OHOS
