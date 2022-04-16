@@ -49,6 +49,12 @@ int WindowExtensionClientStub::OnRemoteRequest(uint32_t code, MessageParcel &dat
             RequestFocus();
             break;
         }
+        case TRANS_ID_CONNECT_CLIENT: {
+            sptr<IRemoteObject> object = data.ReadRemoteObject();
+            sptr<IWindowExtensionServer> token = iface_cast<IWindowExtensionServer>(object);
+            ConnectToClient(token);
+            break;
+        }
         default: {
             break;
         }

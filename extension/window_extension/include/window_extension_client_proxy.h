@@ -31,6 +31,7 @@ public:
     void Hide() override;
     void Show() override;
     void RequestFocus() override;
+    void ConnectToClient(sptr<IWindowExtensionServer>& token) override;
 private:
     static inline BrokerDelegator<WindowExtensionClientProxy> delegator_;
 };

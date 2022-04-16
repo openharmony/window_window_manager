@@ -55,7 +55,6 @@ public:
     void Show();
     void Hide();
     void RequestFocus();
-
 private:
     class Impl;
     sptr<Impl> pImpl_;

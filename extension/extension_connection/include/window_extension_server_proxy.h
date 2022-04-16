@@ -30,6 +30,8 @@ public:
     void OnBackPress() override;
     void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+private:
+    static inline BrokerDelegator<WindowExtensionServerProxy> delegator_;
 };
 } // namespace Rosen
 } // namespace OHOS

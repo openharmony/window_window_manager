@@ -20,24 +20,27 @@
 #include "refbase.h"
 #include "wm_common.h"
 #include "window.h"
+#include "window_extension_server_interface.h"
 
 namespace OHOS {
 namespace Rosen {
 class IWindowExtensionClient : public IRemoteBroker {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.WINDOW.IWINDOWEXTENSION");
+    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowExtensionClient");
 
     enum {
             TRANS_ID_RESIZE_WINDOW = 0,
             TRANS_ID_HIDE_WINDOW,
             TRANS_ID_SHOW_WINDOW,
             TRANS_ID_REQUESTFOCUS,
+            TRANS_ID_CONNECT_CLIENT,
     };
 
     virtual void Resize(Rect rect) = 0;
     virtual void Hide() = 0;
     virtual void Show() = 0;
     virtual void RequestFocus() = 0;
+    virtual void ConnectToClient(sptr<IWindowExtensionServer>& token) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -29,8 +29,8 @@ ohos_shared_library("libwec") {
   install_enable = true
 
   sources = [
+    "../window_extension/src/window_extension_client_proxy.cpp",
     "src/window_extension_connection.cpp",
-    "src/window_extension_server_proxy.cpp",
     "src/window_extension_server_stub.cpp",
     "src/window_extension_server_stub_impl.cpp",
   ]

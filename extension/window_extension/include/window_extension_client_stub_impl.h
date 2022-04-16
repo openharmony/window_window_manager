@@ -22,6 +22,7 @@
 
 #include "window.h"
 #include "window_extension_client_stub.h"
+#include "window_extension_server_interface.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -34,13 +35,15 @@ public:
     virtual void Hide() override;
     virtual void Show() override;
     virtual void RequestFocus() override;
+    virtual void ConnectToClient(sptr<IWindowExtensionServer>& token) override;
 
-    void CreateWindow(Rect& rect);
+    std::shared_ptr<RSSurfaceNode> CreateWindow(Rect& rect);
 private:
 
     sptr<IDispatchInputEventListener> dispatchInputEventListener_;
     sptr<Window> window_;
     std::string windowName_;
+    sptr<IWindowExtensionServer> token_;
 };
 } // namespace Rosen
 } // namespace OHOS

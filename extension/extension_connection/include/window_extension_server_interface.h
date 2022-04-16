@@ -16,8 +16,7 @@
 #ifndef WINDOW_EXTENSION_SERVER_INTERFACE
 #define WINDOW_EXTENSION_SERVER_INTERFACE
 
-#include "iremote_broker.h"
-
+#include <iremote_broker.h>
 #include <i_input_event_consumer.h>
 #include <key_event.h>
 #include <ui/rs_surface_node.h>
@@ -26,9 +25,9 @@ namespace OHOS {
 namespace Rosen {
 class IWindowExtensionServer : public IRemoteBroker {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.aafwk.AbilityToken");
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.resen.window.extension");
     enum {
-        TRANS_ID_ON_WINDOW_READY,
+        TRANS_ID_ON_WINDOW_READY = 1,
         TRANS_ID_ON_BACK_PRESS,
         TRANS_ID_ON_KEY_EVENT,
         TRANS_ID_ON_POINTER_EVENT,

@@ -18,6 +18,7 @@ config("libwe_private_config") {
 
   include_dirs = [
     "include",
+    "../extension_connection/include",
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
   ]
 }
@@ -32,9 +33,9 @@ config("libwe_public_config") {
 ## Build libwe.so
 ohos_shared_library("libwe") {
   sources = [
+    "../extension_connection/src/window_extension_server_proxy.cpp",
     "src/js_window_extension_context.cpp",
     "src/js_window_extension.cpp",
-    "src/window_extension_client_proxy.cpp",
     "src/window_extension_client_stub.cpp",
     "src/window_extension_client_stub_impl.cpp",
     "src/window_extension.cpp",
@@ -45,6 +46,7 @@ ohos_shared_library("libwe") {
   public_configs = [ ":libwe_public_config" ]
 
   deps = [
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/utils:libwmutil",
   ]
@@ -56,6 +58,7 @@ ohos_shared_library("libwe") {
     "ability_runtime:runtime",
     "ability_runtime:abilitykit_native",
     "bytrace_standard:bytrace_core",
+    "graphic_standard:surface",
     "hilog_native:libhilog",
     "input:libmmi-client",
   ]

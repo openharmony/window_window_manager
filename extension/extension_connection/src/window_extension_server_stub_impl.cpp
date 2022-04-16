@@ -21,6 +21,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionServerStubImpl"};
 }
+
 void WindowExtensionServerStubImpl::OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     if (componentCallback_ != nullptr) {
@@ -28,6 +29,7 @@ void WindowExtensionServerStubImpl::OnWindowReady(std::shared_ptr<RSSurfaceNode>
         WLOGFI("end");
     }
 }
+
 void WindowExtensionServerStubImpl::OnBackPress()
 {
     if (componentCallback_ != nullptr) {

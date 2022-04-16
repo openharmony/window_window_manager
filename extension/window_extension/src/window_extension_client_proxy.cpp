@@ -30,7 +30,7 @@ void WindowExtensionClientProxy::Resize(Rect rect)
     MessageParcel reply;
     MessageOption option;
 
-    if (data.WriteInterfaceToken(GetDescriptor())) {
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write interface token failed");
         return;
     }
@@ -39,7 +39,7 @@ void WindowExtensionClientProxy::Resize(Rect rect)
         WLOGFE("write rect failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_RESIZE_WINDOW, data, reply, option)) {
+    if (Remote()->SendRequest(TRANS_ID_RESIZE_WINDOW, data, reply, option) != ERR_NONE) {
         WLOGFE("send request failed");
         return;
     }
@@ -49,12 +49,12 @@ void WindowExtensionClientProxy::Hide()
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option{};
-    if (data.WriteInterfaceToken(GetDescriptor())) {
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write interface token failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_HIDE_WINDOW, data, reply, option)) {
+    if (Remote()->SendRequest(TRANS_ID_HIDE_WINDOW, data, reply, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
 }
@@ -63,12 +63,33 @@ void WindowExtensionClientProxy::Show()
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option{};
-    if (data.WriteInterfaceToken(GetDescriptor())) {
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write interface token failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_SHOW_WINDOW, data, reply, option)) {
+    if (Remote()->SendRequest(TRANS_ID_SHOW_WINDOW, data, reply, option) != ERR_NONE) {
+        WLOGFE("send request failed");
+    }
+}
+
+void WindowExtensionClientProxy::ConnectToClient(sptr<IWindowExtensionServer>& token)
+{
+    MessageParcel data;
+    MessageParcel replay;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("write interface token failed");
+        return;
+    }
+    if (token->AsObject()) {
+        WLOGFE("AsObject is null");
+    }
+    if (!data.WriteRemoteObject(token->AsObject())) {
+        WLOGFE("write object failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_CONNECT_CLIENT, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");
     }
 }
