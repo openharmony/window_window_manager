@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "native_engine/native_engine.h"
+#include <native_engine/native_engine.h>
 
 extern const char _binary_window_extension_js_start[];
 extern const char _binary_window_extension_js_end[];

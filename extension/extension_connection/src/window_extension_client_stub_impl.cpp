@@ -14,6 +14,7 @@
  */
 
 #include "window_extension_client_stub_impl.h"
+
 #include "window_manager_hilog.h"
 
 namespace OHOS {

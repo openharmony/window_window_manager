@@ -15,8 +15,6 @@
 
 #include "window_extension_stub_impl.h"
 
-#include<unistd.h> //TODO
-
 #include "js_window_extension.h"
 #include "window_extension_connection.h"
 #include "window_manager_hilog.h"

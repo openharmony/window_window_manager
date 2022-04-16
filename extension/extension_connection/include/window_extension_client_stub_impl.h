@@ -16,8 +16,8 @@
 #ifndef WINDOW_EXTENSION_CLIENT_STUB_IMPL_H
 #define WINDOW_EXTENSION_CLIENT_STUB_IMPL_H
 
-#include "window_extension_connection.h"
 #include "window_extension_client_stub.h"
+#include "window_extension_connection.h"
 
 namespace OHOS {
 namespace Rosen {

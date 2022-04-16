@@ -16,8 +16,8 @@
 #ifndef WINDOW_EXTENSION_CLIENT_STUB
 #define WINDOW_EXTENSION_CLIENT_STUB
 
+#include <iremote_stub.h>
 #include "window_extension_client_interface.h"
-#include "iremote_stub.h"
 
 namespace OHOS {
 namespace Rosen {

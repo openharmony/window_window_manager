@@ -16,11 +16,12 @@
 #ifndef WINDOW_EXTENSION_INTERFACE_H
 #define WINDOW_EXTENSION_INTERFACE_H
 
-#include "iremote_broker.h"
-#include "refbase.h"
-#include "wm_common.h"
+#include <iremote_broker.h>
+#include <refbase.h>
+
 #include "window.h"
 #include "window_extension_client_interface.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {

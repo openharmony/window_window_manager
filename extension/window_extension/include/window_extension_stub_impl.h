@@ -16,13 +16,12 @@
 #ifndef WINDOW_EXTENSION_STUB_IMPL_H
 #define WINDOW_EXTENSION_STUB_IMPL_H
 
-#include "wm_common.h"
-
 #include <string>
 
 #include "window.h"
 #include "window_extension_stub.h"
 #include "window_extension_client_interface.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {

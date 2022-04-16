@@ -14,8 +14,9 @@
  */
 
 #include "window_extension_client_proxy.h"
+
 #include <ipc_types.h>
-#include "message_option.h"
+#include <message_option.h>
 #include "window_manager_hilog.h"
 
 namespace OHOS {

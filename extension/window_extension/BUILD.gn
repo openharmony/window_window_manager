@@ -13,7 +13,7 @@
 
 import("//build/ohos.gni")
 
-config("libwe_private_config") {
+config("libwindow_exteinsion_private_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
@@ -25,15 +25,15 @@ config("libwe_private_config") {
   ]
 }
 
-config("libwe_public_config") {
+config("libwindow_exteinsion_public_config") {
   include_dirs = [
     "../../interfaces/innerkits/wm",
     "../../utils/include",
   ]
 }
 
-## Build libwe.so
-ohos_shared_library("libwe") {
+## Build libwindow_exteinsion.so
+ohos_shared_library("libwindow_exteinsion") {
   sources = [
     "../extension_connection/src/window_extension_client_proxy.cpp",
     "src/js_window_extension_context.cpp",
@@ -43,9 +43,9 @@ ohos_shared_library("libwe") {
     "src/window_extension.cpp",
   ]
 
-  configs = [ ":libwe_private_config" ]
+  configs = [ ":libwindow_exteinsion_private_config" ]
 
-  public_configs = [ ":libwe_public_config" ]
+  public_configs = [ ":libwindow_exteinsion_public_config" ]
 
   deps = [
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
@@ -84,7 +84,7 @@ ohos_shared_library("window_extension_module") {
   configs = [ ":window_extension_module_private_config" ]
 
   deps = [
-    "//foundation/windowmanager/extension/window_extension:libwe",
+    "//foundation/windowmanager/extension/window_extension:libwindow_exteinsion",
   ]
 
   external_deps = [

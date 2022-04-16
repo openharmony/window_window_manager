@@ -16,9 +16,8 @@
 #ifndef WINDOW_EXTENSION_H
 #define WINDOW_EXTENSION_H
 
-#include "extension_base.h"
-
-#include "service_extension.h"
+#include <extension_base.h>
+#include <service_extension.h>
 
 namespace OHOS {
 namespace Rosen {

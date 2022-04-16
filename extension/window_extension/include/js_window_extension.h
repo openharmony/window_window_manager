@@ -16,8 +16,9 @@
 #ifndef JS_WINDOW_EXTENSION_H
 #define JS_WINDOW_EXTENSION_H
 
-#include "js_runtime.h"
-#include "js_runtime_utils.h"
+#include <js_runtime.h>
+#include <js_runtime_utils.h>
+
 #include "js_window_extension_context.h"
 #include "window.h"
 #include "window_extension.h"

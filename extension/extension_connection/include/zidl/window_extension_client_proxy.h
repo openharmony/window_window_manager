@@ -16,8 +16,8 @@
 #ifndef WINODW_EXTENSION_CLIENT_PROXY
 #define WINODW_EXTENSION_CLIENT_PROXY
 
+#include <iremote_proxy.h>
 #include "window_extension_client_interface.h"
-#include "iremote_proxy.h"
 
 namespace OHOS {
 namespace Rosen {

@@ -15,11 +15,11 @@
 
 #include "js_window_extension.h"
 
-#include "native_engine/native_reference.h"
-#include "native_engine/native_value.h"
-#include "js_extension_context.h"
-#include "js_window_extension_context.h"
+#include <native_engine/native_reference.h>
+#include <native_engine/native_value.h>
+#include <js_extension_context.h>
 
+#include "js_window_extension_context.h"
 #include "window_extension_connection.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
