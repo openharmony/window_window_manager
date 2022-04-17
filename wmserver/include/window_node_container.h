@@ -94,7 +94,7 @@ private:
     void TraverseAndUpdateWindowState(WindowState state, int32_t topPriority);
     void UpdateWindowState(sptr<WindowNode> node, int32_t topPriority, WindowState state);
     void HandleKeepScreenOn(const sptr<WindowNode>& node, WindowState state);
-    bool IsTopAppWindow(uint32_t windowId) const;
+    bool IsTopWindow(uint32_t windowId, sptr<WindowNode>& rootNode) const;
     sptr<WindowNode> FindDividerNode() const;
     void RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes);
     void MinimizeWindowFromAbility(const sptr<WindowNode>& node, bool fromUser);
@@ -142,8 +142,9 @@ private:
     };
     std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
-    void RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node) const;
-    const int32_t WINDOW_TYPE_RAISED_INPUT_METHOD = 115;
+    void RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
+    void DropShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
+    void ReZOrderShowWhenLockedWindows(const sptr<WindowNode>& node, bool up);
 };
 } // namespace Rosen
 } // namespace OHOS
