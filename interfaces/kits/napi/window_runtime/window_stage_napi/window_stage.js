@@ -49,6 +49,10 @@ class WindowStage {
     off(type, callback) {
         return this.__window_stage__.off(type, callback)
     }
+
+    setShowOnLockScreen(showOnLockScreen) {
+        return this.__window_stage__.setShowOnLockScreen(showOnLockScreen)
+    }
 }
 
 export default WindowStage
