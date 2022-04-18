@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cinttypes>
 #include <ctime>
+#include <display_power_mgr_client.h>
 #include <power_mgr_client.h>
 
 #include "common_event_manager.h"
@@ -41,6 +42,7 @@ namespace {
     constexpr int WINDOW_NAME_MAX_LENGTH = 10;
     const std::string SPLIT_SCREEN_EVENT_NAME = "common.event.SPLIT_SCREEN";
     const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
+    constexpr uint32_t MAX_BRIGHTNESS = 255;
 }
 
 WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height) : displayId_(displayId)
@@ -418,18 +420,23 @@ void WindowNodeContainer::UpdateBrightness(uint32_t id, bool byRemoved)
             return;
         }
     }
+    WLOGFI("brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), node->GetBrightness());
     if (node->GetBrightness() == UNDEFINED_BRIGHTNESS) {
         if (GetDisplayBrightness() != node->GetBrightness()) {
             WLOGFI("adjust brightness with default value");
-            // need notify display power manager to set default brightness
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+            SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
         }
+        SetBrightnessWindow(INVALID_WINDOW_ID);
     } else {
         if (GetDisplayBrightness() != node->GetBrightness()) {
-            WLOGFI("adjust brightness with value: %{public}f", node->GetBrightness());
-            // need notify display power manager to set brightness: node->GetBrightness()
+            WLOGFI("adjust brightness with value: %{public}u", ToOverrideBrightness(node->GetBrightness()));
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
+                ToOverrideBrightness(node->GetBrightness()));
+            SetDisplayBrightness(node->GetBrightness());
         }
+        SetBrightnessWindow(node->GetWindowId());
     }
-    SetDisplayBrightness(node->GetBrightness());
 }
 
 void WindowNodeContainer::AssignZOrder()
@@ -487,6 +494,21 @@ void WindowNodeContainer::SetDisplayBrightness(float brightness)
 float WindowNodeContainer::GetDisplayBrightness() const
 {
     return displayBrightness_;
+}
+
+void WindowNodeContainer::SetBrightnessWindow(uint32_t windowId)
+{
+    brightnessWindow_ = windowId;
+}
+
+uint32_t WindowNodeContainer::GetBrightnessWindow() const
+{
+    return brightnessWindow_;
+}
+
+uint32_t WindowNodeContainer::ToOverrideBrightness(float brightness)
+{
+    return static_cast<uint32_t>(brightness * MAX_BRIGHTNESS);
 }
 
 uint32_t WindowNodeContainer::GetActiveWindow() const

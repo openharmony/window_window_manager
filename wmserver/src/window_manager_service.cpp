@@ -185,12 +185,6 @@ WMError WindowManagerService::SetAlpha(uint32_t windowId, float alpha)
     return windowController_->SetAlpha(windowId, alpha);
 }
 
-void WindowManagerService::SetBrightness(uint32_t windowId, float brightness)
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    windowController_->SetBrightness(windowId, brightness);
-}
-
 std::vector<Rect> WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
 {
     WLOGFI("[WMS] GetAvoidAreaByType: %{public}u, Type: %{public}u", windowId, static_cast<uint32_t>(avoidAreaType));
