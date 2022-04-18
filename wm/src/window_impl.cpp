@@ -63,7 +63,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     windowTag_ = option->GetWindowTag();
     property_->SetTurnScreenOn(option->IsTurnScreenOn());
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
-    brightness_ = option->GetBrightness();
+    property_->SetBrightness(option->GetBrightness());
     AdjustWindowAnimationFlag();
     auto& sysBarPropMap = option->GetSystemBarProperty();
     for (auto it : sysBarPropMap) {
@@ -900,13 +900,15 @@ void WindowImpl::SetBrightness(float brightness)
         WLOGFE("non app window does not support set brightness, type: %{public}u", GetType());
         return;
     }
-    SingletonContainer::Get<WindowAdapter>().SetBrightness(GetWindowId(), brightness);
-    brightness_ = brightness;
+    property_->SetBrightness(brightness);
+    if (state_ == WindowState::STATE_SHOWN) {
+        UpdateProperty(PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
+    }
 }
 
 float WindowImpl::GetBrightness() const
 {
-    return brightness_;
+    return property_->GetBrightness();
 }
 
 void WindowImpl::SetCallingWindow(uint32_t windowId)

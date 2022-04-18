@@ -89,6 +89,7 @@ ohos_shared_library("libwms") {
     "ability_runtime:ability_manager",
     "bytrace_standard:bytrace_core",
     "ces_standard:cesfwk_innerkits",
+    "display_manager_native:displaymgr",
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
