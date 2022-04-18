@@ -827,7 +827,6 @@ declare namespace window {
      */
     setFocusable(isFocusable: boolean): Promise<void>;
 
-
     /**
      * Sets whether focusable or not.
      * @param isFocusable can be focus if true, or can not be focus if false.
@@ -842,14 +841,12 @@ declare namespace window {
      */
     setKeepScreenOn(isKeepScreenOn: boolean): Promise<void>;
 
-
     /**
      * Sets whether keep screen on or not.
      * @param isKeepScreenOn keep screen on if true, or not if false.
      * @since 7
      */
     setKeepScreenOn(isKeepScreenOn: boolean, callback: AsyncCallback<void>): void;
-
 
     /**
      * Sets whether outside can be touch or not.
@@ -858,14 +855,12 @@ declare namespace window {
      */
     setOutsideTouchable(touchable: boolean): Promise<void>;
 
-
     /**
      * Sets whether outside can be touch or not.
      * @param touchable outside can be touch if true, or not if false.
      * @since 7
      */
     setOutsideTouchable(touchable: boolean, callback: AsyncCallback<void>): void;
-
 
     /**
      * Sets whether is private mode or not.
@@ -874,14 +869,12 @@ declare namespace window {
      */
     setPrivacyMode(isPrivacyMode: boolean): Promise<void>;
 
-
     /**
      * Sets whether is private mode or not.
      * @param isPrivacyMode in private mode if true, or not if false.
      * @since 7
      */
     setPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback<void>): void;
-
 
     /**
      * Sets whether is touchable or not.
@@ -910,6 +903,20 @@ declare namespace window {
     * @since 7
     */
     setTransparent(isTransparent: boolean, callback: AsyncCallback<void>): void;
+
+    /**
+     * disable window decoration. It must be called before loadContent.
+     * @systemapi
+     * @since 9
+     */
+    disableWindowDecor(): Promise<void>;
+
+    /**
+     * disable window decoration. It must be called before loadContent.
+     * @systemapi
+     * @since 9
+     */
+     disableWindowDecor(callback: AsyncCallback<void>): void;
   }
 
   enum WindowStageEventType {

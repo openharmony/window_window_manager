@@ -51,6 +51,7 @@ public:
     virtual WMError MaxmizeWindow(uint32_t windowId);
     virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);
+    virtual WMError GetSystemDecorEnable(bool& isSystemDecorEnable);
 
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);

@@ -532,5 +532,27 @@ WMError WindowManagerProxy::GetAccessibilityWindowInfo(sptr<AccessibilityWindowI
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
 }
+
+WMError WindowManagerProxy::GetSystemDecorEnable(bool& isSystemDecorEnable)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isSystemDecorEnable)) {
+        WLOGFE("Write bool isSystemDecorEnable failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_SYSTEM_DECOR_ENABLE),
+        data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    isSystemDecorEnable = reply.ReadBool();
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
 } // namespace Rosen
 } // namespace OHOS

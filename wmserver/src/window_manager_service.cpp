@@ -100,7 +100,62 @@ bool WindowManagerService::Init()
         WLOGFW("WindowManagerService::Init failed");
         return false;
     }
+    if (!LoadConfigXmlFile(WINDOW_MANAGER_CONFIG_XML)) {
+        WLOGFW("Failed to load %{public}s", WINDOW_MANAGER_CONFIG_XML.c_str());
+        return false;
+    }
     WLOGFI("WindowManagerService::Init success");
+    return true;
+}
+
+bool WindowManagerService::LoadConfigXmlFile(std::string configFile)
+{
+    xmlKeepBlanksDefault(0);
+    xmlDoc* file = xmlReadFile(configFile.c_str(), nullptr, 0);
+    if (!file) {
+        WLOGFE("Failed to open xml file");
+        return false;
+    }
+    xmlNode* rootNode = xmlDocGetRootElement(file);
+    if (!rootNode) {
+        WLOGFE("Failed to get xml file's RootNode");
+        xmlFreeDoc(file);
+        return false;
+    }
+    if (!xmlStrcmp(rootNode->name, reinterpret_cast<const xmlChar*>("Configs"))) {
+        xmlNode* child = rootNode->children;
+        for (; child; child = child->next) {
+            if (!ParseChildNode(child)) {
+                WLOGFE("Invalid resource name for %{public}s", configFile.c_str());
+                xmlFreeDoc(file);
+                return false;
+            }
+        }
+    } else {
+        WLOGFE("Wrong format for xml file");
+        xmlFreeDoc(file);
+        return false;
+    }
+    xmlFreeDoc(file);
+    WLOGFI("Success to Load %{public}s", configFile.c_str());
+    return true;
+}
+
+bool WindowManagerService::ParseChildNode(xmlNode* child)
+{
+    if (!xmlStrcmp(child->name, reinterpret_cast<const xmlChar*>("decor"))) {
+        char* enable = reinterpret_cast<char*>(xmlGetProp(child, reinterpret_cast<const xmlChar*>("enable")));
+        if (!enable) {
+            return false;
+        }
+        if (!strcmp(enable, "false")) {
+            isSystemDecorEnable_ = false;
+        } else if (!strcmp(enable, "true")) {
+            isSystemDecorEnable_ = true;
+        } else {
+            WLOGFW("Invalid resource prop");
+        }
+    }
     return true;
 }
 
@@ -319,6 +374,12 @@ WMError WindowManagerService::GetAccessibilityWindowInfo(sptr<AccessibilityWindo
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WMError res = windowRoot_->GetAccessibilityWindowInfo(windowInfo);
     return res;
+}
+
+WMError WindowManagerService::GetSystemDecorEnable(bool& isSystemDecorEnable)
+{
+    isSystemDecorEnable = isSystemDecorEnable_;
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
