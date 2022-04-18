@@ -41,9 +41,13 @@ public:
     WMError SetFocusWindow(uint32_t windowId);
     uint32_t GetFocusWindow() const;
     WMError SetActiveWindow(uint32_t windowId, bool byRemoved);
+    uint32_t GetActiveWindow() const;
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
-    uint32_t GetActiveWindow() const;
+    void SetBrightnessWindow(uint32_t windowId);
+    uint32_t GetBrightnessWindow() const;
+    uint32_t ToOverrideBrightness(float brightness);
+    void UpdateBrightness(uint32_t id, bool byRemoved);
     void HandleKeepScreenOn(const sptr<WindowNode>& node, bool requireLock);
     std::vector<Rect> GetAvoidAreaByType(AvoidAreaType avoidAreaType);
     WMError MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node);
@@ -83,7 +87,6 @@ private:
     sptr<WindowNode> FindWindowNodeById(uint32_t id) const;
     void UpdateFocusStatus(uint32_t id, bool focused) const;
     void UpdateActiveStatus(uint32_t id, bool isActive) const;
-    void UpdateBrightness(uint32_t id, bool byRemoved);
     void UpdateWindowTree(sptr<WindowNode>& node);
     bool UpdateRSTree(sptr<WindowNode>& node, bool isAdd);
 
@@ -134,7 +137,8 @@ private:
     uint32_t zOrder_ { 0 };
     uint32_t focusedWindow_ { INVALID_WINDOW_ID };
     uint32_t activeWindow_ = INVALID_WINDOW_ID;
-    float displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    float displayBrightness_ = UNDEFINED_BRIGHTNESS; // UNDEFINED_BRIGHTNESS means system default brightness
+    uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
     void DumpScreenWindowTree();
 
     struct WindowPairInfo {

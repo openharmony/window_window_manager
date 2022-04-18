@@ -293,11 +293,6 @@ WMError WindowController::SetAlpha(uint32_t windowId, float dstAlpha)
     return WMError::WM_OK;
 }
 
-void WindowController::SetBrightness(uint32_t windowId, float brightness)
-{
-    windowRoot_->SetBrightness(windowId, brightness);
-}
-
 void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStateChangeType type)
 {
     WLOGFD("DisplayStateChangeType:%{public}u", type);
@@ -587,6 +582,8 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         WLOGFE("window is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
+    WLOGFI("window: [%{public}s, %{public}u] update property for action: %{public}u", node->GetWindowName().c_str(),
+        node->GetWindowId(), static_cast<uint32_t>(action));
     switch (action) {
         case PropertyChangeAction::ACTION_UPDATE_RECT: {
             node->SetDecoStatus(property->GetDecoStatus());
@@ -634,6 +631,11 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         case PropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON: {
             node->SetKeepScreenOn(property->IsKeepScreenOn());
             windowRoot_->HandleKeepScreenOn(node->GetWindowId(), node->IsKeepScreenOn());
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
+            node->SetBrightness(property->GetBrightness());
+            windowRoot_->SetBrightness(node->GetWindowId(), node->GetBrightness());
             break;
         }
         default:
