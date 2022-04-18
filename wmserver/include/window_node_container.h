@@ -75,6 +75,7 @@ public:
     void TraverseWindowTree(const WindowNodeOperationFunc& func, bool isFromTopToBottom = true) const;
     void UpdateSizeChangeReason(sptr<WindowNode>& node, WindowSizeChangeReason reason);
     void GetWindowList(std::vector<sptr<WindowInfo>>& windowList) const;
+    void DropShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
@@ -143,7 +144,6 @@ private:
     std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
     void RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
-    void DropShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
     void ReZOrderShowWhenLockedWindows(const sptr<WindowNode>& node, bool up);
 };
 } // namespace Rosen

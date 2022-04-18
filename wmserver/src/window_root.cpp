@@ -252,6 +252,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
         WLOGFE("remove window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
+    container->DropShowWhenLockedWindowIfNeeded(node);
     UpdateFocusWindowWithWindowRemoved(node, container);
     UpdateActiveWindowWithWindowRemoved(node, container);
     WMError res = container->RemoveWindowNode(node);
