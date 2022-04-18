@@ -78,6 +78,7 @@ private:
         const sptr<WindowNodeContainer>& container) const;
     void UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& node,
         const sptr<WindowNodeContainer>& container) const;
+    void UpdateBrightnessWithWindowRemoved(uint32_t windowId, const sptr<WindowNodeContainer>& container) const;
     std::string GenAllWindowsLogInfo() const;
     bool CheckDisplayInfo(const sptr<DisplayInfo>& display);
     void NotifyKeyboardSizeChangeInfo(const sptr<WindowNode>& node,

@@ -16,6 +16,7 @@
 #include "window_root.h"
 
 #include <cinttypes>
+#include <display_power_mgr_client.h>
 #include <hisysevent.h>
 
 #include "display_manager_service_inner.h"
@@ -246,6 +247,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
     }
     UpdateFocusWindowWithWindowRemoved(node, container);
     UpdateActiveWindowWithWindowRemoved(node, container);
+    UpdateBrightnessWithWindowRemoved(windowId, container);
     WMError res = container->RemoveWindowNode(node);
     if (res == WMError::WM_OK) {
         Rect rect = { 0, 0, 0, 0 };
@@ -303,11 +305,12 @@ void WindowRoot::SetBrightness(uint32_t windowId, float brightness)
     }
     if (windowId == container->GetActiveWindow()) {
         if (container->GetDisplayBrightness() != brightness) {
-            // need notify display power manager to set brightness
+            WLOGFI("set brightness with value: %{public}u", container->ToOverrideBrightness(node->GetBrightness()));
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
+                container->ToOverrideBrightness(brightness));
             container->SetDisplayBrightness(brightness);
         }
-    } else {
-        node->SetBrightness(brightness);
+        container->SetBrightnessWindow(windowId);
     }
 }
 
@@ -357,6 +360,7 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
     if (container != nullptr) {
         UpdateFocusWindowWithWindowRemoved(node, container);
         UpdateActiveWindowWithWindowRemoved(node, container);
+        UpdateBrightnessWithWindowRemoved(windowId, container);
         if (onlySelf) {
             for (auto& child : node->children_) {
                 child->parent_ = nullptr;
@@ -488,6 +492,18 @@ void WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& nod
     if (nextActiveWindow != nullptr) {
         WLOGFI("adjust active window, next active window id: %{public}u", nextActiveWindow->GetWindowId());
         container->SetActiveWindow(nextActiveWindow->GetWindowId(), true);
+    }
+}
+
+void WindowRoot::UpdateBrightnessWithWindowRemoved(uint32_t windowId, const sptr<WindowNodeContainer>& container) const
+{
+    if (container == nullptr) {
+        WLOGFE("window container could not be found");
+        return;
+    }
+    if (windowId == container->GetBrightnessWindow()) {
+        WLOGFI("adjust brightness window with active window: %{public}u", container->GetActiveWindow());
+        container->UpdateBrightness(container->GetActiveWindow(), true);
     }
 }
 
