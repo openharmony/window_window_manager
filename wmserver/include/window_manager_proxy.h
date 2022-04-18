@@ -52,6 +52,7 @@ public:
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override;
 
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
+    WMError GetSystemDecorEnable(bool& isSystemDecorEnable) override;
     
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;

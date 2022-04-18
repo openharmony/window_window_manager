@@ -149,6 +149,13 @@ WMError WindowAdapter::MaxmizeWindow(uint32_t windowId)
     return windowManagerServiceProxy_->MaxmizeWindow(windowId);
 }
 
+WMError WindowAdapter::GetSystemDecorEnable(bool& isSystemDecorEnable)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
+    return windowManagerServiceProxy_->GetSystemDecorEnable(isSystemDecorEnable);
+}
+
 bool WindowAdapter::InitWMSProxy()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
