@@ -311,7 +311,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
         NotifyIfSystemBarTintChanged();
     }
     UpdateWindowVisibilityInfos(infos);
-    DropShowWhenLockedWindowIfNeeded(node);
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     RcoveryScreenDefaultOrientationIfNeed();
