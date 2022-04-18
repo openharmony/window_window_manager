@@ -96,6 +96,11 @@ public:
     virtual void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) = 0;
 };
 
+class IAceAbilityHandler : virtual public RefBase {
+public:
+    virtual void SetBackgroundColor(uint32_t color) = 0;
+    virtual uint32_t GetBackgroundColor() = 0;
+};
 
 class Window : public RefBase {
 public:
@@ -172,6 +177,7 @@ public:
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
+    virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed = false) = 0;
     virtual std::string GetContentInfo() = 0;
