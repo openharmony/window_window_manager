@@ -871,15 +871,36 @@ bool WindowImpl::IsTurnScreenOn() const
     return property_->IsTurnScreenOn();
 }
 
-void WindowImpl::SetBackgroundColor(const std::string& color)
+void WindowImpl::SetBackgroundColor(uint32_t color)
 {
-    if (uiContent_ == nullptr) {
-        WLOGFE("invalid operation, uiContent is nullptr, windowId: %{public}u", GetWindowId());
+    if (uiContent_ != nullptr) {
+        uiContent_->SetBackgroundColor(color);
         return;
     }
+    WLOGFI("uiContent is nullptr, windowId: %{public}u, use FA mode", GetWindowId());
+    if (aceAbilityHandler_ != nullptr) {
+        aceAbilityHandler_->SetBackgroundColor(color);
+    }
+}
+
+uint32_t WindowImpl::GetBackgroundColor() const
+{
+    if (uiContent_ != nullptr) {
+        return uiContent_->GetBackgroundColor();
+    }
+    WLOGFI("uiContent is nullptr, windowId: %{public}u, use FA mode", GetWindowId());
+    if (aceAbilityHandler_ != nullptr) {
+        return aceAbilityHandler_->GetBackgroundColor();
+    }
+    WLOGFE("FA mode does not get background color: %{public}u", GetWindowId());
+    return 0xffffffff; // means no background color been set, default color is white
+}
+
+void WindowImpl::SetBackgroundColor(const std::string& color)
+{
     uint32_t colorValue;
     if (ColorParser::Parse(color, colorValue)) {
-        uiContent_->SetBackgroundColor(colorValue);
+        SetBackgroundColor(colorValue);
         return;
     }
     WLOGFE("invalid color string: %{public}s", color.c_str());
@@ -892,15 +913,15 @@ void WindowImpl::SetTransparent(bool isTransparent)
         return;
     }
     ColorParam backgroundColor;
-    backgroundColor.value = uiContent_->GetBackgroundColor();
+    backgroundColor.value = GetBackgroundColor();
     if (isTransparent) {
         backgroundColor.argb.alpha = 0x00; // 0x00: completely transparent
-        uiContent_->SetBackgroundColor(backgroundColor.value);
+        SetBackgroundColor(backgroundColor.value);
     } else {
-        backgroundColor.value = uiContent_->GetBackgroundColor();
+        backgroundColor.value = GetBackgroundColor();
         if (backgroundColor.argb.alpha == 0x00) {
             backgroundColor.argb.alpha = 0xff; // 0xff: completely opaque
-            uiContent_->SetBackgroundColor(backgroundColor.value);
+            SetBackgroundColor(backgroundColor.value);
         }
     }
 }
@@ -912,7 +933,7 @@ bool WindowImpl::IsTransparent() const
         return false;
     }
     ColorParam backgroundColor;
-    backgroundColor.value = uiContent_->GetBackgroundColor();
+    backgroundColor.value = GetBackgroundColor();
     return backgroundColor.argb.alpha == 0x00; // 0x00: completely transparent
 }
 
@@ -1226,6 +1247,15 @@ void WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaCh
         occupiedAreaChangeListeners_.end(), [listener](sptr<IOccupiedAreaChangeListener> registeredListener) {
             return registeredListener == listener;
         }), occupiedAreaChangeListeners_.end());
+}
+
+void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
+{
+    if (handler == nullptr) {
+        WLOGFI("ace ability handler is nullptr");
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    aceAbilityHandler_ = handler;
 }
 
 void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
