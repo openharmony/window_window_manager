@@ -62,6 +62,7 @@ public:
     void ProcessPointUp(uint32_t windowId) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
+    void ToggleShownStateForAllAppWindow() override;
     WMError MaxmizeWindow(uint32_t windowId) override;
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) override;

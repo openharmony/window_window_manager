@@ -98,10 +98,10 @@ public:
     uint32_t GetAnimationFlag() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
-    static sptr<WindowProperty> Unmarshalling(Parcel& parcel);
+    static WindowProperty* Unmarshalling(Parcel& parcel);
 private:
     bool MapMarshalling(Parcel& parcel) const;
-    static void MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& property);
+    static void MapUnmarshalling(Parcel& parcel, WindowProperty* property);
 
     std::string windowName_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)

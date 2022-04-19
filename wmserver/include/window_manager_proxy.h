@@ -42,6 +42,7 @@ public:
     void ProcessPointDown(uint32_t windowId, bool isStartDrag) override;
     void ProcessPointUp(uint32_t windowId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
+    void ToggleShownStateForAllAppWindow() override;
     WMError MaxmizeWindow(uint32_t windowId) override;
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) override;
