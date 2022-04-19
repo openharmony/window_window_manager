@@ -329,6 +329,29 @@ void WindowRoot::HandleKeepScreenOn(uint32_t windowId, bool requireLock)
     container->HandleKeepScreenOn(node, requireLock);
 }
 
+void WindowRoot::UpdateFocusableProperty(uint32_t windowId)
+{
+    auto node = GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return;
+    }
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("handle focusable failed, window container could not be found");
+        return;
+    }
+
+    if (windowId != container->GetFocusWindow() || node->GetWindowProperty()->GetFocusable()) {
+        return;
+    }
+    auto nextFocusableWindow = container->GetNextFocusableWindow(windowId);
+    if (nextFocusableWindow != nullptr) {
+        WLOGFI("adjust focus window, next focus window id: %{public}u", nextFocusableWindow->GetWindowId());
+        container->SetFocusWindow(nextFocusableWindow->GetWindowId());
+    }
+}
+
 WMError WindowRoot::EnterSplitWindowMode(sptr<WindowNode>& node)
 {
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());

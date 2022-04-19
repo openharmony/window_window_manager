@@ -551,10 +551,13 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         }
         case PropertyChangeAction::ACTION_UPDATE_FOCUSABLE: {
             node->SetFocusable(property->GetFocusable());
+            windowRoot_->UpdateFocusableProperty(windowId);
+            FlushWindowInfo(windowId);
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
             node->SetTouchable(property->GetTouchable());
+            FlushWindowInfo(windowId);
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW: {
