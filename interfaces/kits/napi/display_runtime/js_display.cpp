@@ -27,7 +27,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsDisplay"};
 }
 
-static std::map<DisplayId, std::shared_ptr<NativeReference>> g_JsDisplayMap;
+static thread_local std::map<DisplayId, std::shared_ptr<NativeReference>> g_JsDisplayMap;
 std::recursive_mutex g_mutex;
 
 JsDisplay::JsDisplay(const sptr<Display>& display) : display_(display)
