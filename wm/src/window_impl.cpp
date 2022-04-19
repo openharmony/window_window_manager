@@ -208,7 +208,9 @@ void WindowImpl::SetFocusable(bool isFocusable)
         return;
     }
     property_->SetFocusable(isFocusable);
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+    if (state_ == WindowState::STATE_SHOWN) {
+        UpdateProperty(PropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+    }
 }
 
 bool WindowImpl::GetFocusable() const
@@ -222,7 +224,9 @@ void WindowImpl::SetTouchable(bool isTouchable)
         return;
     }
     property_->SetTouchable(isTouchable);
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
+    if (state_ == WindowState::STATE_SHOWN) {
+        UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
+    }
 }
 
 bool WindowImpl::GetTouchable() const
