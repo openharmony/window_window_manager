@@ -305,7 +305,7 @@ void WindowRoot::SetBrightness(uint32_t windowId, float brightness)
     }
     if (windowId == container->GetActiveWindow()) {
         if (container->GetDisplayBrightness() != brightness) {
-            WLOGFI("set brightness with value: %{public}u", container->ToOverrideBrightness(node->GetBrightness()));
+            WLOGFI("set brightness with value: %{public}u", container->ToOverrideBrightness(brightness));
             DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
                 container->ToOverrideBrightness(brightness));
             container->SetDisplayBrightness(brightness);
