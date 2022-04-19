@@ -69,6 +69,8 @@ public:
     sptr<WindowNode> GetNextActiveWindow(uint32_t windowId) const;
     void MinimizeAllAppWindows(DisplayId displayId);
     void MinimizeOldestAppWindow();
+    void ToggleShownStateForAllAppWindow(std::function<bool(uint32_t)> restoreFunc, bool restore);
+    bool IsAppWindowsEmpty() const;
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifySystemBarTints(std::vector<DisplayId> displayIdVec);
     void NotifySystemBarDismiss(sptr<WindowNode>& node);
@@ -142,6 +144,7 @@ private:
     uint32_t activeWindow_ = INVALID_WINDOW_ID;
 
     sptr<AvoidAreaController> avoidController_;
+    std::vector<uint32_t> backupWindowIds_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
     std::unordered_map<WindowLayoutMode, sptr<WindowLayoutPolicy>> layoutPolicys_;
     WindowLayoutMode layoutMode_ = WindowLayoutMode::CASCADE;

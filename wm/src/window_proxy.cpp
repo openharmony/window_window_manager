@@ -230,6 +230,22 @@ void WindowProxy::UpdateActiveStatus(bool isActive)
     }
     return;
 }
+
+sptr<WindowProperty> WindowProxy::GetWindowProperty()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+    uint32_t requestCode = static_cast<uint32_t>(WindowMessage::TRANS_ID_GET_WINDOW_PROPERTY);
+    if (Remote()->SendRequest(requestCode, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+    return reply.ReadParcelable<WindowProperty>();
+}
 } // namespace Rosen
 } // namespace OHOS
 
