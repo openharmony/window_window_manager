@@ -107,6 +107,6 @@ float Display::GetVirtualPixelRatio() const
 
 int Display::GetDpi() const
 {
-    return static_cast<int>(GetVirtualPixelRatio()) / DOT_PER_INCH;
+    return static_cast<int>(GetVirtualPixelRatio() * DOT_PER_INCH);
 }
 } // namespace OHOS::Rosen
