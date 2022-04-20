@@ -40,6 +40,7 @@ public:
     void AddWindowNode(sptr<WindowNode>& node) override;
     void UpdateWindowNode(sptr<WindowNode>& node, bool isAddWindow = false) override;
     void UpdateLayoutRect(sptr<WindowNode>& node) override;
+    void RemoveWindowNode(sptr<WindowNode>& node) override;
 
 private:
     // Rects for split screen

@@ -87,6 +87,21 @@ void WindowLayoutPolicyCascade::LayoutWindowTree()
     WindowLayoutPolicy::LayoutWindowTree();
 }
 
+void WindowLayoutPolicyCascade::RemoveWindowNode(sptr<WindowNode>& node)
+{
+    WM_FUNCTION_TRACE();
+    auto type = node->GetWindowType();
+    // affect other windows, trigger off global layout
+    if (avoidTypes_.find(type) != avoidTypes_.end()) {
+        LayoutWindowTree();
+    } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
+        InitSplitRects();
+        LayoutWindowTree();
+    }
+    Rect reqRect = node->GetRequestRect();
+    node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
+}
+
 void WindowLayoutPolicyCascade::UpdateWindowNode(sptr<WindowNode>& node, bool isAddWindow)
 {
     WM_FUNCTION_TRACE();
@@ -108,6 +123,8 @@ void WindowLayoutPolicyCascade::UpdateWindowNode(sptr<WindowNode>& node, bool is
                 }
             }
         }
+        LayoutWindowTree();
+    } else if (node->IsSplitMode()) {
         LayoutWindowTree();
     } else { // layout single window
         LayoutWindowNode(node);
@@ -159,7 +176,7 @@ void WindowLayoutPolicyCascade::LimitMoveBounds(Rect& rect) const
 void WindowLayoutPolicyCascade::InitCascadeRect()
 {
     constexpr uint32_t half = 2;
-    constexpr float ratio = 0.75;  // 0.75: default height/width ratio
+    constexpr float ratio = 0.66;  // 0.66: default height/width ratio
 
     // calculate default H and w
     uint32_t defaultW = static_cast<uint32_t>(displayRect_.width_ * ratio);

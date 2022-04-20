@@ -219,47 +219,10 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WindowMode srcMode = node->GetWindowMode();
-    if (srcMode == dstMode) {
-        return WMError::WM_OK;
+    WMError ret = windowRoot_->SetWindowMode(node, dstMode);
+    if (ret != WMError::WM_OK) {
+        return ret;
     }
-    WMError res = WMError::WM_OK;
-    if ((srcMode == WindowMode::WINDOW_MODE_FULLSCREEN) && (dstMode == WindowMode::WINDOW_MODE_FLOATING)) {
-        node->SetWindowSizeChangeReason(WindowSizeChangeReason::RECOVER);
-    } else if (dstMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        node->SetWindowSizeChangeReason(WindowSizeChangeReason::MAXIMIZE);
-    } else {
-        node->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
-    }
-    if (WindowHelper::IsSplitWindowMode(srcMode)) {
-        // change split mode to other
-        res = windowRoot_->ExitSplitWindowMode(node);
-        node->SetWindowMode(dstMode);
-    } else if (!WindowHelper::IsSplitWindowMode(srcMode) && WindowHelper::IsSplitWindowMode(dstMode)) {
-        // change other mode to split
-        node->SetWindowMode(dstMode);
-        res = windowRoot_->EnterSplitWindowMode(node);
-    } else {
-        node->SetWindowMode(dstMode);
-    }
-    if (res != WMError::WM_OK) {
-        node->GetWindowProperty()->ResumeLastWindowMode();
-        return res;
-    }
-    if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        WindowHelper::IsAppWindow(node->GetWindowType())) {
-        // minimize other app window
-        res = windowRoot_->MinimizeStructuredAppWindowsExceptSelf(node);
-        if (res != WMError::WM_OK) {
-            return res;
-        }
-    }
-    res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_MODE);
-    if (res != WMError::WM_OK) {
-        WLOGFE("Set window mode failed, update node failed");
-        return res;
-    }
-    node->GetWindowToken()->UpdateWindowMode(node->GetWindowMode());
     FlushWindowInfo(windowId);
     return WMError::WM_OK;
 }
