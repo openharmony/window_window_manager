@@ -24,6 +24,7 @@
 #include "window_zorder_policy.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
+#include "window_pair.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -70,9 +71,8 @@ public:
     void NotifySystemBarDismiss(sptr<WindowNode>& node);
     WMError MinimizeAppNodeExceptOptions(bool fromUser, const std::vector<uint32_t> &exceptionalIds = {},
                                          const std::vector<WindowMode> &exceptionalModes = {});
-    WMError EnterSplitWindowMode(sptr<WindowNode>& node);
-    WMError ExitSplitWindowMode(sptr<WindowNode>& node);
     WMError SwitchLayoutPolicy(WindowLayoutMode mode, bool reorder = false);
+    WMError SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode);
     void RaiseSplitRelatedWindowToTop(sptr<WindowNode>& node);
     void MoveWindowNode(sptr<WindowNodeContainer>& container);
     float GetVirtualPixelRatio() const;
@@ -90,9 +90,6 @@ private:
     void UpdateWindowTree(sptr<WindowNode>& node);
     bool UpdateRSTree(sptr<WindowNode>& node, bool isAdd);
 
-    void SendSplitScreenEvent(sptr<WindowNode>& node);
-    sptr<WindowNode> FindSplitPairNode(sptr<WindowNode>& node) const;
-    WMError UpdateWindowPairInfo(sptr<WindowNode>& triggerNode, sptr<WindowNode>& pairNode);
     void NotifyIfSystemBarTintChanged();
     void NotifyIfSystemBarRegionChanged();
     void TraverseAndUpdateWindowState(WindowState state, int32_t topPriority);
@@ -111,7 +108,8 @@ private:
     void RcoveryScreenDefaultOrientationIfNeed();
     // cannot determine in case of a window covered by union of several windows or with transparent value
     void UpdateWindowVisibilityInfos(std::vector<sptr<WindowVisibilityInfo>>& infos);
-    void RaiseOrderedWindowToTop(std::vector<uint32_t> orderedIds, std::vector<sptr<WindowNode>>& windowNodes);
+    void RaiseOrderedWindowToTop(std::vector<sptr<WindowNode>>& orderedNodes,
+        std::vector<sptr<WindowNode>>& windowNodes);
     static bool ReadIsWindowAnimationEnabledProperty();
 
     sptr<AvoidAreaController> avoidController_;
@@ -140,12 +138,7 @@ private:
     float displayBrightness_ = UNDEFINED_BRIGHTNESS; // UNDEFINED_BRIGHTNESS means system default brightness
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
     void DumpScreenWindowTree();
-
-    struct WindowPairInfo {
-        sptr<WindowNode> pairNode_;
-        float splitRatio_;
-    };
-    std::unordered_map<uint32_t, WindowPairInfo> pairedWindowMap_;
+    sptr<WindowPair> windowPair_;
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
     void RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
     void ReZOrderShowWhenLockedWindows(const sptr<WindowNode>& node, bool up);

@@ -361,24 +361,14 @@ void WindowRoot::UpdateFocusableProperty(uint32_t windowId)
     }
 }
 
-WMError WindowRoot::EnterSplitWindowMode(sptr<WindowNode>& node)
+WMError WindowRoot::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
 {
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
-        WLOGFE("Enter split window mode failed, window container could not be found");
+        WLOGFE("set window mode failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return container->EnterSplitWindowMode(node);
-}
-
-WMError WindowRoot::ExitSplitWindowMode(sptr<WindowNode>& node)
-{
-    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
-    if (container == nullptr) {
-        WLOGFE("Exit split window mode failed, window container could not be found");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    return container->ExitSplitWindowMode(node);
+    return container->SetWindowMode(node, dstMode);
 }
 
 WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
