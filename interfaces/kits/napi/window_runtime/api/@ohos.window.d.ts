@@ -909,14 +909,7 @@ declare namespace window {
      * @systemapi
      * @since 9
      */
-    disableWindowDecor(): Promise<void>;
-
-    /**
-     * disable window decoration. It must be called before loadContent.
-     * @systemapi
-     * @since 9
-     */
-     disableWindowDecor(callback: AsyncCallback<void>): void;
+    disableWindowDecor(): void;
   }
 
   enum WindowStageEventType {
