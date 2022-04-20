@@ -270,6 +270,13 @@ NativeValue* JsWindow::SetCallingWindow(NativeEngine* engine, NativeCallbackInfo
     return (me != nullptr) ? me->OnSetCallingWindow(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]DisableWindowDecor");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnDisableWindowDecor(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::SetColorSpace(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGFI("[NAPI]SetColorSpace");
@@ -1319,6 +1326,33 @@ NativeValue* JsWindow::OnSetCallingWindow(NativeEngine& engine, NativeCallbackIn
     return result;
 }
 
+NativeValue* JsWindow::OnDisableWindowDecor(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (info.argc > 1) { // 1: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            windowToken_->DisableAppWindowDecor();
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set decorEnable end",
+                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+        };
+
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 NativeValue* JsWindow::OnSetColorSpace(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WMError errCode = WMError::WM_OK;
@@ -1447,6 +1481,8 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     BindNativeFunction(engine, *object, "setTouchable", JsWindow::SetTouchable);
     BindNativeFunction(engine, *object, "setTransparent", JsWindow::SetTransparent);
     BindNativeFunction(engine, *object, "setCallingWindow", JsWindow::SetCallingWindow);
+    BindNativeFunction(engine, *object, "disableWindowDecor", JsWindow::DisableWindowDecor);
+
     std::shared_ptr<NativeReference> jsWindowRef;
     jsWindowRef.reset(engine.CreateReference(objValue, 1));
     std::lock_guard<std::recursive_mutex> lock(g_mutex);

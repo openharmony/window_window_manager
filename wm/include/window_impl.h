@@ -135,6 +135,7 @@ public:
     virtual void SetCallingWindow(uint32_t windowId) override;
     virtual void SetPrivacyMode(bool isPrivacyMode) override;
     virtual bool IsPrivacyMode() const override;
+    virtual void DisableAppWindowDecor() override;
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;
@@ -305,6 +306,8 @@ private:
     Rect startPointRect_ = { 0, 0, 0, 0 };
     Rect startRectExceptFrame_ = { 0, 0, 0, 0 };
     Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
+    bool isAppDecorEnbale_ = true;
+    bool isSystemDecorEnable_ = true;
 };
 }
 }

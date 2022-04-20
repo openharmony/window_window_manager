@@ -42,6 +42,13 @@ ohos_prebuilt_etc("window_divider_image") {
   relative_install_dir = "window/resources"
 }
 
+ohos_prebuilt_etc("window_manager_config") {
+  source = "//foundation/windowmanager/resources/window_manager_config.xml"
+  part_name = "window_manager"
+  subsystem_name = "window"
+  relative_install_dir = "window/resources"
+}
+
 ohos_shared_library("libwms") {
   sources = [
     "../wm/src/window_proxy.cpp",
@@ -71,12 +78,14 @@ ohos_shared_library("libwms") {
 
   deps = [
     ":window_divider_image",
+    ":window_manager_config",
     "//foundation/ace/ace_engine/build/external_config/flutter/skia:ace_skia_ohos",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/dmserver:libdms",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
+    "//third_party/libxml2:xml2",
   ]
 
   public_deps = [
