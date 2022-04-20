@@ -283,7 +283,9 @@ WMError WindowImpl::SetWindowType(WindowType type)
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         property_->SetWindowType(type);
-        property_->SetDecorEnable(WindowHelper::IsMainWindow(property_->GetWindowType()));
+        if (isAppDecorEnbale_ && isSystemDecorEnable_) {
+            property_->SetDecorEnable(WindowHelper::IsMainWindow(property_->GetWindowType()));
+        }
         AdjustWindowAnimationFlag();
         return WMError::WM_OK;
     }
@@ -401,6 +403,10 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     if (uiContent == nullptr) {
         WLOGFE("fail to SetUIContent id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!isAppDecorEnbale_ || !isSystemDecorEnable_) {
+        WLOGFI("app set decor enable false");
+        property_->SetDecorEnable(false);
     }
     if (isdistributed) {
         uiContent->Restore(this, contentInfo, storage);
@@ -628,8 +634,14 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
         windowId, token);
     property_->SetWindowId(windowId);
-    property_->SetDecorEnable(WindowHelper::IsMainWindow(property_->GetWindowType()));
-
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        if (SingletonContainer::Get<WindowAdapter>().GetSystemDecorEnable(isSystemDecorEnable_) == WMError::WM_OK) {
+            WLOGFE("get system decor enable:%{public}d", isSystemDecorEnable_);
+            if (isSystemDecorEnable_) {
+                property_->SetDecorEnable(true);
+            }
+        }
+    }
     if (ret != WMError::WM_OK) {
         WLOGFE("create window failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return ret;
@@ -988,6 +1000,22 @@ bool WindowImpl::IsPrivacyMode() const
     return property_->GetPrivacyMode();
 }
 
+void WindowImpl::DisableAppWindowDecor()
+{
+    if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        WLOGFE("window decoration is invalid on sub window");
+        return;
+    }
+    WLOGFI("disable app window decoration.");
+    isAppDecorEnbale_ = false;
+}
+
+bool WindowImpl::IsDecorEnable() const
+{
+    WLOGFE("get decor enable %{public}d", property_->GetDecorEnable());
+    return property_->GetDecorEnable();
+}
+
 WMError WindowImpl::Drag(const Rect& rect)
 {
     if (!IsWindowValid()) {
@@ -997,11 +1025,6 @@ WMError WindowImpl::Drag(const Rect& rect)
     property_->SetRequestRect(requestRect);
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
-}
-
-bool WindowImpl::IsDecorEnable() const
-{
-    return property_->GetDecorEnable();
 }
 
 WMError WindowImpl::Maximize()

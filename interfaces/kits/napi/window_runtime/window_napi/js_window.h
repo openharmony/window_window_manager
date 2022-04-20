@@ -60,6 +60,7 @@ public:
     static NativeValue* SetTransparent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetCallingWindow(NativeEngine* engine, NativeCallbackInfo* info);
 
+    static NativeValue* DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info);
     // colorspace, gamut
     static NativeValue* IsSupportWideGamut(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetColorSpace(NativeEngine* engine, NativeCallbackInfo* info);
@@ -99,6 +100,7 @@ private:
     NativeValue* OnSetTouchable(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetTransparent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetCallingWindow(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnDisableWindowDecor(NativeEngine& engine, NativeCallbackInfo& info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
