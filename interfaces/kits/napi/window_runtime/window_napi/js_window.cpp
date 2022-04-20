@@ -1328,29 +1328,13 @@ NativeValue* JsWindow::OnSetCallingWindow(NativeEngine& engine, NativeCallbackIn
 
 NativeValue* JsWindow::OnDisableWindowDecor(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WMError errCode = WMError::WM_OK;
-    if (info.argc > 1) { // 1: maximum params num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    if (windowToken_ == nullptr) {
+        return engine.CreateUndefined();
     }
-    AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
-                return;
-            }
-            windowToken_->DisableAppWindowDecor();
-            task.Resolve(engine, engine.CreateUndefined());
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set decorEnable end",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
-        };
-
-    NativeValue* lastParam = (info.argc == 0) ? nullptr :
-        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
-    NativeValue* result = nullptr;
-    AsyncTask::Schedule(
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    windowToken_->DisableAppWindowDecor();
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] disable app window decor end",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    return engine.CreateUndefined();
 }
 
 NativeValue* JsWindow::OnSetColorSpace(NativeEngine& engine, NativeCallbackInfo& info)
