@@ -392,20 +392,23 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
 {
     WLOGFI("SetUIContent contentInfo: %{public}s", contentInfo.c_str());
+    std::unique_ptr<Ace::UIContent> uiContent;
     if (ability != nullptr) {
-        uiContent_ = Ace::UIContent::Create(ability);
+        uiContent = Ace::UIContent::Create(ability);
     } else {
-        uiContent_ = Ace::UIContent::Create(context_.get(), engine);
+        uiContent = Ace::UIContent::Create(context_.get(), engine);
     }
-    if (uiContent_ == nullptr) {
+    if (uiContent == nullptr) {
         WLOGFE("fail to SetUIContent id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
     if (isdistributed) {
-        uiContent_->Restore(this, contentInfo, storage);
+        uiContent->Restore(this, contentInfo, storage);
     } else {
-        uiContent_->Initialize(this, contentInfo, storage);
+        uiContent->Initialize(this, contentInfo, storage);
     }
+    // make uiContent_ available after Initialize/Restore
+    uiContent_ = std::move(uiContent);
     if (state_ == WindowState::STATE_SHOWN) {
         Ace::ViewportConfig config;
         Rect rect = GetRect();
