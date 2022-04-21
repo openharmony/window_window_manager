@@ -73,7 +73,7 @@ void WindowExtensionClientProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyE
         return;
     }
 
-     if (!keyEvent->WriteToParcel(data)) {
+    if (!keyEvent->WriteToParcel(data)) {
          WLOGFE("write key event failed");
          return;
     }

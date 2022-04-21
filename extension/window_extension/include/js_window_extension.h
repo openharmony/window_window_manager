@@ -82,8 +82,9 @@ public:
     virtual void OnStart(const AAFwk::Want &want) override;
 private:
     void GetSrcPath(std::string &srcPath);
+    NativeValue* CallJsMethod(const char* name, NativeValue* const* argv = nullptr, size_t argc = 0);
+    void OnWindowCreated();
 
-    //sptr<IWindowExtensionClient> extensionToken_; // TODO IWindowExtensionClient下沉到window_extension
     AbilityRuntime::JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
     std::shared_ptr<NativeReference> shellContextRef_;
