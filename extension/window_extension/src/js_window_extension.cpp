@@ -18,7 +18,9 @@
 #include <native_engine/native_reference.h>
 #include <native_engine/native_value.h>
 #include <js_extension_context.h>
+#include <js_runtime_utils.h>
 
+#include "js_window.h"
 #include "js_window_extension_context.h"
 #include "window_extension_connection.h"
 #include "window_manager_hilog.h"
@@ -115,11 +117,11 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
 void JsWindowExtension::GetSrcPath(std::string &srcPath)
 {
     if (!Extension::abilityInfo_) {
-        HILOG_ERROR("abilityInfo_ is nullptr");
+        WLOGFE("abilityInfo_ is nullptr");
         return;
     }
 
-   if (!Extension::abilityInfo_->isModuleJson) {
+    if (!Extension::abilityInfo_->isModuleJson) {
         srcPath.append(Extension::abilityInfo_->package);
        srcPath.append("/assets/js/");
         if (!Extension::abilityInfo_->srcPath.empty()) {
@@ -142,10 +144,6 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)
     WLOGFI("called.");
     Extension::OnConnect(want);
 
-    ElementName elementName = want.GetElement(); // TODO 为何之前是GetElementName()？
-    std::string windowName = elementName.GetBundleName();
-
-    stub_ = new(std::nothrow) WindowExtensionStubImpl(windowName);
     if (!stub_) {
         WLOGFE("stub is nullptr.");
         return nullptr;
@@ -163,14 +161,84 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want &want)
 void JsWindowExtension::OnStart(const AAFwk::Want &want)
 {
     Extension::OnStart(want);
+
+    ElementName elementName = want.GetElement(); // TODO 为何之前是GetElementName()？
+    std::string windowName = elementName.GetBundleName();
+
+    stub_ = new(std::nothrow)WindowExtensionStubImpl(windowName);
     WLOGFI("JsWindowExtension OnStart begin..");
     Rect rect { want.GetIntParam(RECT_FORM_KEY_POS_X, 0), 
     want.GetIntParam(RECT_FORM_KEY_POS_Y, 0),
     want.GetIntParam(RECT_FORM_KEY_WIDTH, 0),
     want.GetIntParam(RECT_FORM_KEY_HEIGHT, 0) };
-  //  stub_->CreateWindow(rect);
-    WLOGFI(" create window rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
-    rect.posX_, rect.posY_, rect.width_, rect.height_);
+    if (stub_ != nullptr) {
+        auto context = GetContext();
+        if (context == nullptr) {
+            WLOGFE("get context failed");
+            return;
+        }
+        sptr<Window> window = stub_->CreateWindow(rect, context);
+        if (window == nullptr) {
+            WLOGFE("create window failed");
+            return;
+        }
+        OnWindowCreated();
+        WLOGFI("ability context onWindowReady rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
+}
+
+void JsWindowExtension::OnWindowCreated()
+{
+    NativeEngine& engine = jsRuntime_.GetNativeEngine();
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            auto window = stub_->GetWindow();
+            if (window == nullptr) {
+                WLOGFE("get window failed");
+                return;
+            }
+            NativeValue* value =  CreateJsWindowObject(engine, window, false);
+            if (value == nullptr) {
+                WLOGFE("Create js window failed");
+                return;
+            }
+            NativeValue* argv[] = { value };
+            CallJsMethod("onWindowReady", argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule(engine, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+NativeValue* JsWindowExtension::CallJsMethod(const char* name, NativeValue* const* argv, size_t argc)
+{
+    WLOGFI("called (%{public}s), begin", name);
+
+    if (!jsObj_) {
+        WLOGFW("Not found ServiceExtension.js");
+        return nullptr;
+    }
+
+    HandleScope handleScope(jsRuntime_);
+    auto& nativeEngine = jsRuntime_.GetNativeEngine();
+
+    NativeValue* value = jsObj_->Get();
+    NativeObject* obj = ConvertNativeValueTo<NativeObject>(value);
+    if (obj == nullptr) {
+        WLOGFE("Failed to get ServiceExtension object");
+        return nullptr;
+    }
+
+    NativeValue* method = obj->GetProperty(name);
+    if (method == nullptr || method->TypeOf() != NATIVE_FUNCTION) {
+        WLOGFE("Failed to get '%{public}s' from ServiceExtension object", name);
+        return nullptr;
+    }
+    WLOGFI("(%{public}s), success", name);
+    return nativeEngine.CallFunction(value, method, argv, argc);
 }
 } // namespace Rosen
 } // namespace OHOS

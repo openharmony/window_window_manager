@@ -59,7 +59,7 @@ void JsWindowConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementN
 }
 
 NativeValue* CreateJsWindowExtensionContext(NativeEngine& engine,
-    std::shared_ptr<WindowExtensionContext> context)
+                                            std::shared_ptr<WindowExtensionContext> context)
 {
     WLOGFI("CreateJsWindowExtensionContext begin");
     NativeValue* objValue = CreateJsExtensionContext(engine, context); // TODO CreateJsBaseContext?

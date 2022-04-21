@@ -44,7 +44,7 @@ ohos_shared_library("libwindow_extension_client") {
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/extension/window_extension:libwindow_exteinsion",
+    "//foundation/windowmanager/extension/window_extension:libwindow_extension",
     "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
     "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler:libeventhandler",
   ]

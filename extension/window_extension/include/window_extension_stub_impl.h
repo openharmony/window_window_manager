@@ -36,7 +36,9 @@ public:
     virtual void RequestFocus() override;
     virtual void ConnectToExtension(sptr<IWindowExtensionClient>& token) override;
 
-    std::shared_ptr<RSSurfaceNode> CreateWindow(Rect& rect);
+    sptr<Window> CreateWindow(Rect& rect, const std::shared_ptr<AbilityRuntime::Context>& context);
+    void DestroyWindow();
+    sptr<Window> GetWindow() const;
 private:
 
     sptr<IDispatchInputEventListener> dispatchInputEventListener_;

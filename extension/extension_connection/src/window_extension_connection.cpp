@@ -31,8 +31,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionConnection"};
 }
 
-class WindowExtensionConnection::Impl 
-    : public AAFwk::AbilityConnectionStub {
+class WindowExtensionConnection::Impl : public AAFwk::AbilityConnectionStub {
 public:
     Impl() = default;
     ~Impl() = default;
@@ -68,7 +67,8 @@ WindowExtensionConnection::WindowExtensionConnection()
 {
 }
 
-WindowExtensionConnection::Impl::WindowExtensionClientRecipient::WindowExtensionClientRecipient(sptr<IWindowExtensionCallback> callback)
+WindowExtensionConnection::Impl::WindowExtensionClientRecipient::WindowExtensionClientRecipient(
+    sptr<IWindowExtensionCallback> callback)
 {
     callback_ = callback;
 }
@@ -93,7 +93,7 @@ void WindowExtensionConnection::Impl::WindowExtensionClientRecipient::OnRemoteDi
     WLOGFI("Remote died");
 }
 void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
-        uint32_t uid, sptr<IWindowExtensionCallback>& callback)
+                                                       uint32_t uid, sptr<IWindowExtensionCallback>& callback)
 {
     AAFwk::Want want;
     want.SetElement(element);
@@ -140,7 +140,7 @@ void WindowExtensionConnection::Impl::RequestFocus()
 }
 
 void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
-    const sptr<IRemoteObject> &remoteObject, int resultCode)
+                                                           const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
     if (!remoteObject) {
         WLOGFE("remote object is null");
@@ -178,7 +178,7 @@ void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::
 
 // WindowExtensionConnection
 void WindowExtensionConnection::ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
-        uint32_t uid, sptr<IWindowExtensionCallback>& callback)
+                                                 uint32_t uid, sptr<IWindowExtensionCallback>& callback)
 {
     pImpl_->ConnectExtension(element, rect, uid, callback);
 }

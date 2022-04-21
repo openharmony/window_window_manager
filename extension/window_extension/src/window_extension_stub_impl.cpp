@@ -38,26 +38,21 @@ WindowExtensionStubImpl::~WindowExtensionStubImpl()
     }
 }
 
-std::shared_ptr<RSSurfaceNode> WindowExtensionStubImpl::CreateWindow(Rect& rect)
+sptr<Window> WindowExtensionStubImpl::CreateWindow(Rect& rect,
+                                                   const std::shared_ptr<AbilityRuntime::Context>& context)
 {
- //   WLOGFI("call start windowName_ %{public}s", windowName_.c_str());
     sptr<WindowOption> option =  new (std::nothrow)WindowOption();
     if (option == nullptr) {
         WLOGFE("Get option failed");
         return nullptr;
     }
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
-    option->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
-    option->SetWindowRect(rect);
-    WLOGFI("create window");
-    window_ = Window::Create(windowName_, option, nullptr);
-    if (window_ == nullptr) {
-        WLOGFE("create window failed");
-        return nullptr;
-    }
-    WLOGFI("call end");
-    return nullptr; //window_->GetSurfaceNode();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+    // option->SetWindowRect(rect);
+    WLOGFI("Window::Create");
+    window_ = Window::Create(windowName_, option, context);
+    return window_;
 }
 
 void WindowExtensionStubImpl::Resize(Rect rect)
@@ -91,8 +86,12 @@ void WindowExtensionStubImpl::RequestFocus()
 void WindowExtensionStubImpl::ConnectToExtension(sptr<IWindowExtensionClient>& token)
 {
     token_ = token;
-    token_->OnBackPress();
     WLOGFI("called");
+}
+
+sptr<Window> WindowExtensionStubImpl::GetWindow() const
+{
+    return window_;
 }
 } // namespace Rosen
 } // namespace OHOS

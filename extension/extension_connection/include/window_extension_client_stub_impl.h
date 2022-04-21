@@ -24,7 +24,7 @@ namespace Rosen {
 class WindowExtensionClientStubImpl : public WindowExtensionClientStub {
 public:
     explicit WindowExtensionClientStubImpl(sptr<IWindowExtensionCallback>& componentCallback)
-    : componentCallback_(componentCallback) {};
+        : componentCallback_(componentCallback) {};
     ~WindowExtensionClientStubImpl() = default;
 
     void OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
