@@ -26,7 +26,7 @@ namespace {
     constexpr Rect g_emptyRect = {0, 0, 0, 0};
 }
 
-static std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
+static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
 std::recursive_mutex g_mutex;
 JsWindow::JsWindow(const sptr<Window>& window)
     : windowToken_(window), registerManager_(std::make_unique<JsWindowRegisterManager>())
