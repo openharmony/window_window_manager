@@ -107,6 +107,7 @@ namespace {
 HWTEST_F(WindowDragTest, DragIn, Function | MediumTest | Level3) {
     const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
+    firstWindow->SetTurnScreenOn(true);
     firstWindow->Show();
 
     const sptr<Window> &dragWindow = utils::CreateTestWindow(dragWindowInfo_);
@@ -130,6 +131,7 @@ HWTEST_F(WindowDragTest, DragIn, Function | MediumTest | Level3) {
 HWTEST_F(WindowDragTest, DragMove, Function | MediumTest | Level3) {
     const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
+    firstWindow->SetTurnScreenOn(true);
     firstWindow->Show();
 
     const sptr<Window> &dragWindow = utils::CreateTestWindow(dragWindowInfo_);
@@ -159,6 +161,7 @@ HWTEST_F(WindowDragTest, DragMove, Function | MediumTest | Level3) {
 HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
     const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
+    firstWindow->SetTurnScreenOn(true);
     firstWindow->Show();
 
     secondWindowInfo_.rect = {500, 500, 500, 500};
@@ -202,6 +205,7 @@ HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
 HWTEST_F(WindowDragTest, DragEnd, Function | MediumTest | Level3) {
     const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
+    firstWindow->SetTurnScreenOn(true);
     firstWindow->Show();
 
     const sptr<Window> &dragWindow = utils::CreateTestWindow(dragWindowInfo_);
