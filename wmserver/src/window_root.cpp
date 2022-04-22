@@ -229,6 +229,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
     if (res == WMError::WM_OK) {
         container->SetActiveWindow(node->GetWindowId(), false);
         NotifyKeyboardSizeChangeInfo(node, container, node->GetLayoutRect());
+        HandleKeepScreenOn(node->GetWindowId(), node->IsKeepScreenOn());
     }
     return res;
 }
@@ -252,6 +253,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
     if (res == WMError::WM_OK) {
         Rect rect = { 0, 0, 0, 0 };
         NotifyKeyboardSizeChangeInfo(node, container, rect);
+        HandleKeepScreenOn(windowId, false);
     }
     return res;
 }
@@ -384,6 +386,7 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
         UpdateFocusWindowWithWindowRemoved(node, container);
         UpdateActiveWindowWithWindowRemoved(node, container);
         UpdateBrightnessWithWindowRemoved(windowId, container);
+        HandleKeepScreenOn(windowId, false);
         if (onlySelf) {
             for (auto& child : node->children_) {
                 child->parent_ = nullptr;

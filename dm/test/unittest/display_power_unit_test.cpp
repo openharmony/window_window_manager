@@ -235,19 +235,6 @@ HWTEST_F(DisplayPowerUnitTest, set_screen_brightness_001, Function | MediumTest 
 }
 
 /**
-* @tc.name: set_screen_brightness_002
-* @tc.desc: Call SetScreenBrightness with an invalid value and check the GetScreenBrightness return value
-* @tc.type: FUNC
-*/
-HWTEST_F(DisplayPowerUnitTest, set_screen_brightness_002, Function | MediumTest | Level2)
-{
-    bool ret = DisplayManager::GetInstance().SetScreenBrightness(defaultId_, invalidBrightnessLevel_);
-    ASSERT_EQ(false, ret);
-    uint32_t level = DisplayManager::GetInstance().GetScreenBrightness(defaultId_);
-    ASSERT_NE(level, invalidBrightnessLevel_);
-}
-
-/**
 * @tc.name: set_screen_power_for_all_001
 * @tc.desc: Call SetScreenPowerForAll with valid value and check the GetScreenPower return value
 * @tc.type: FUNC

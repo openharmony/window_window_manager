@@ -121,9 +121,9 @@ public:
     virtual uint32_t GetWindowId() const = 0;
     virtual uint32_t GetWindowFlags() const = 0;
     virtual bool GetShowState() const = 0;
-    virtual void SetFocusable(bool isFocusable) = 0;
+    virtual WMError SetFocusable(bool isFocusable) = 0;
     virtual bool GetFocusable() const = 0;
-    virtual void SetTouchable(bool isTouchable) = 0;
+    virtual WMError SetTouchable(bool isTouchable) = 0;
     virtual bool GetTouchable() const = 0;
     virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) const = 0;
     virtual bool IsFullScreen() const = 0;
@@ -145,16 +145,16 @@ public:
 
     virtual WMError MoveTo(int32_t x, int32_t y) = 0;
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
-    virtual void SetKeepScreenOn(bool keepScreenOn) = 0;
+    virtual WMError SetKeepScreenOn(bool keepScreenOn) = 0;
     virtual bool IsKeepScreenOn() const = 0;
-    virtual void SetTurnScreenOn(bool turnScreenOn) = 0;
+    virtual WMError SetTurnScreenOn(bool turnScreenOn) = 0;
     virtual bool IsTurnScreenOn() const = 0;
-    virtual void SetBackgroundColor(const std::string& color) = 0;
-    virtual void SetTransparent(bool isTransparent) = 0;
+    virtual WMError SetBackgroundColor(const std::string& color) = 0;
+    virtual WMError SetTransparent(bool isTransparent) = 0;
     virtual bool IsTransparent() const = 0;
-    virtual void SetBrightness(float brightness) = 0;
+    virtual WMError SetBrightness(float brightness) = 0;
     virtual float GetBrightness() const = 0;
-    virtual void SetCallingWindow(uint32_t windowId) = 0;
+    virtual WMError SetCallingWindow(uint32_t windowId) = 0;
 
     virtual WMError RequestFocus() const = 0;
     // AddInputEventListener is for api 7

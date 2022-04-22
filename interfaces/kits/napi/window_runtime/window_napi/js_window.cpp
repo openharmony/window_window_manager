@@ -1003,8 +1003,13 @@ NativeValue* JsWindow::OnSetBackgroundColor(NativeEngine& engine, NativeCallback
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            windowToken_->SetBackgroundColor(color);
-            task.Resolve(engine, engine.CreateUndefined());
+            WMError ret = windowToken_->SetBackgroundColor(color);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
+                    "Window set background color failed"));
+            }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set background color end",
                 windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         };
@@ -1041,9 +1046,13 @@ NativeValue* JsWindow::OnSetBrightness(NativeEngine& engine, NativeCallbackInfo&
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            windowToken_->SetBrightness(brightness);
-            task.Resolve(engine, engine.CreateUndefined());
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set brightnesss end",
+            WMError ret = windowToken_->SetBrightness(brightness);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set brightness failed"));
+            }
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set brightness end",
                 windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         };
 
@@ -1095,8 +1104,12 @@ NativeValue* JsWindow::OnSetFocusable(NativeEngine& engine, NativeCallbackInfo& 
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            windowToken_->SetFocusable(focusable);
-            task.Resolve(engine, engine.CreateUndefined());
+            WMError ret = windowToken_->SetFocusable(focusable);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set focusable failed"));
+            }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set focusable end",
                 windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         };
@@ -1133,8 +1146,13 @@ NativeValue* JsWindow::OnSetKeepScreenOn(NativeEngine& engine, NativeCallbackInf
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            windowToken_->SetKeepScreenOn(keepScreenOn);
-            task.Resolve(engine, engine.CreateUndefined());
+            WMError ret = windowToken_->SetKeepScreenOn(keepScreenOn);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
+                    "Window set keep screen on failed"));
+            }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set keep screen on end",
                 windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         };
@@ -1203,8 +1221,12 @@ NativeValue* JsWindow::OnSetTouchable(NativeEngine& engine, NativeCallbackInfo& 
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            windowToken_->SetTouchable(touchable);
-            task.Resolve(engine, engine.CreateUndefined());
+            WMError ret = windowToken_->SetTouchable(touchable);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set touchable failed"));
+            }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set touchable end",
                 windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         };
@@ -1241,8 +1263,13 @@ NativeValue* JsWindow::OnSetCallingWindow(NativeEngine& engine, NativeCallbackIn
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            windowToken_->SetCallingWindow(callingWindow);
-            task.Resolve(engine, engine.CreateUndefined());
+            WMError ret = windowToken_->SetCallingWindow(callingWindow);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
+                    "Window set calling window failed"));
+            }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set calling window end",
                 windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         };
