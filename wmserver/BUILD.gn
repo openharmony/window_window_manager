@@ -43,7 +43,15 @@ ohos_prebuilt_etc("window_divider_image") {
 }
 
 ohos_prebuilt_etc("window_manager_config") {
-  source = "//foundation/windowmanager/resources/window_manager_config.xml"
+  if (device_name == "rk3568") {
+    source =
+        "//foundation/windowmanager/resources/rk3568/window_manager_config.xml"
+    install_enable = true
+  } else {
+    source =
+        "//foundation/windowmanager/resources/other/window_manager_config.xml"
+    install_enable = false
+  }
   part_name = "window_manager"
   subsystem_name = "window"
   relative_install_dir = "window/resources"
