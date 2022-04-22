@@ -77,6 +77,8 @@ public:
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
     void SetMaxAppWindowNumber(int windowNum);
     void SetMinimizedByOtherWindow(bool isMinimizedByOtherWindow);
+    WMError GetModeChangeHotZones(DisplayId displayId,
+        ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);

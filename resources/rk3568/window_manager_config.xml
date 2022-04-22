@@ -14,9 +14,11 @@
  * limitations under the License.
  -->
  <Configs>
-   <!--decor enable is true means app main window show decoration-->
+    <!--decor enable is true means app main window show decoration-->
     <decor enable="false"></decor>
     <maxAppWindowNumber>100</maxAppWindowNumber>
     <!--minimizeByOther enable is true means fullscreen window will be minmized by other fullscreen window-->
     <minimizeByOther enable="true"></minimizeByOther>
+    <!--window mdoe change hot zones config, fullscreen primary secondary-->
+    <modeChangeHotZones>50 50 50</modeChangeHotZones>
  </Configs>

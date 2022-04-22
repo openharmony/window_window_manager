@@ -1447,7 +1447,34 @@ void WindowImpl::HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId)
     }
 }
 
-void WindowImpl::EndMoveOrDragWindow(int32_t pointId)
+void WindowImpl::HandleModeChangeHotZones(int32_t posX, int32_t posY)
+{
+    if (!WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
+        return;
+    }
+
+    ModeChangeHotZones hotZones;
+    auto res = SingletonContainer::Get<WindowAdapter>().GetModeChangeHotZones(property_->GetDisplayId(), hotZones);
+    WLOGFI("[HotZone] Window %{public}u, Pointer[%{public}d, %{public}d]", GetWindowId(), posX, posY);
+    if (res == WMError::WM_OK) {
+        WLOGFI("[HotZone] Fullscreen [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.fullscreen_.posX_,
+            hotZones.fullscreen_.posY_, hotZones.fullscreen_.width_, hotZones.fullscreen_.height_);
+        WLOGFI("[HotZone] Primary [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.primary_.posX_,
+            hotZones.primary_.posY_, hotZones.primary_.width_, hotZones.primary_.height_);
+        WLOGFI("[HotZone] Secondary [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.secondary_.posX_,
+            hotZones.secondary_.posY_, hotZones.secondary_.width_, hotZones.secondary_.height_);
+
+        if (WindowHelper::IsPointInTargetRect(posX, posY, hotZones.fullscreen_)) {
+            SetFullScreen(true);
+        } else if (WindowHelper::IsPointInTargetRect(posX, posY, hotZones.primary_)) {
+            SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+        } else if (WindowHelper::IsPointInTargetRect(posX, posY, hotZones.secondary_)) {
+            SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+        }
+    }
+}
+
+void WindowImpl::EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId)
 {
     if (pointId != startPointerId_) {
         return;
@@ -1463,6 +1490,7 @@ void WindowImpl::EndMoveOrDragWindow(int32_t pointId)
             SingletonContainer::Get<WindowAdapter>().ProcessPointUp(GetWindowId());
         }
         startMoveFlag_ = false;
+        HandleModeChangeHotZones(posX, posY);
     }
     pointEventStarted_ = false;
 }
@@ -1551,7 +1579,7 @@ void WindowImpl::ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& poin
         case MMI::PointerEvent::POINTER_ACTION_UP:
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
         case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
-            EndMoveOrDragWindow(pointId);
+            EndMoveOrDragWindow(pointGlobalX, pointGlobalY, pointId);
             WLOGFI("[Point Up/Cancel]: windowId: %{public}u, action: %{public}d, startMove: %{public}d, "
                    "startDrag: %{public}d", GetWindowId(), action, startMoveFlag_, startDragFlag_);
             break;

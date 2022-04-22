@@ -253,7 +253,7 @@ private:
     void HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId);
     void HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId);
     void ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId, const Rect& rect);
-    void EndMoveOrDragWindow(int32_t pointId);
+    void EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId);
     bool IsPointerEventConsumed();
     void AdjustWindowAnimationFlag();
     void MapFloatingWindowToAppIfNeeded();
@@ -262,6 +262,7 @@ private:
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     Rect GetSystemAlarmWindowDefaultSize(Rect defaultRect);
+    void HandleModeChangeHotZones(int32_t posX, int32_t posY);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
