@@ -198,7 +198,7 @@ void JsWindowExtension::OnWindowCreated()
                 WLOGFE("get window failed");
                 return;
             }
-            NativeValue* value =  CreateJsWindowObject(engine, window, false);
+            NativeValue* value =  CreateJsWindowObject(engine, window);
             if (value == nullptr) {
                 WLOGFE("Create js window failed");
                 return;
