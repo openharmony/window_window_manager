@@ -213,6 +213,14 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
     }
 
     auto parentNode = GetWindowNode(parentId);
+
+    // limit number of main window
+
+    int mainWindowNumber = container->GetWindowCountByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    if (mainWindowNumber >= maxAppWindowNumber_) {
+        container->MinimizeOldestAppWindow();
+    }
+
     WMError res = container->AddWindowNode(node, parentNode);
     if (res == WMError::WM_OK && WindowHelper::IsSubWindow(node->GetWindowType())) {
         if (parentNode == nullptr) {
@@ -812,6 +820,11 @@ WMError WindowRoot::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& wi
         }
     }
     return WMError::WM_OK;
+}
+
+void WindowRoot::SetMaxAppWindowNumber(int windowNum)
+{
+    maxAppWindowNumber_ = windowNum;
 }
 } // namespace OHOS::Rosen
 } // namespace OHOS
