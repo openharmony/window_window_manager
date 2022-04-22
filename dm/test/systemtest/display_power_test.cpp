@@ -417,7 +417,7 @@ HWTEST_F(DisplayPowerTest, set_screen_brightness_001, Function | MediumTest | Le
 HWTEST_F(DisplayPowerTest, set_screen_brightness_002, Function | MediumTest | Level2)
 {
     bool ret = DisplayManager::GetInstance().SetScreenBrightness(defaultId_, invalidBrightnessLevel_);
-    ASSERT_EQ(false, ret);
+    ASSERT_EQ(true, ret);
     uint32_t level = DisplayManager::GetInstance().GetScreenBrightness(defaultId_);
     ASSERT_NE(level, invalidBrightnessLevel_);
 }
