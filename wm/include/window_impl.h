@@ -86,9 +86,9 @@ public:
     virtual WindowBlurLevel GetWindowBackgroundBlur() const override;
     virtual float GetAlpha() const override;
     virtual bool GetShowState() const override;
-    virtual void SetFocusable(bool isFocusable) override;
+    virtual WMError SetFocusable(bool isFocusable) override;
     virtual bool GetFocusable() const override;
-    virtual void SetTouchable(bool isTouchable) override;
+    virtual WMError SetTouchable(bool isTouchable) override;
     virtual bool GetTouchable() const override;
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() const override;
@@ -123,16 +123,16 @@ public:
     virtual WMError Hide(uint32_t reason = 0) override;
     virtual WMError MoveTo(int32_t x, int32_t y) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
-    virtual void SetKeepScreenOn(bool keepScreenOn) override;
+    virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
     virtual bool IsKeepScreenOn() const override;
-    virtual void SetTurnScreenOn(bool turnScreenOn) override;
+    virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
     virtual bool IsTurnScreenOn() const override;
-    virtual void SetBackgroundColor(const std::string& color) override;
-    virtual void SetTransparent(bool isTransparent) override;
+    virtual WMError SetBackgroundColor(const std::string& color) override;
+    virtual WMError SetTransparent(bool isTransparent) override;
     virtual bool IsTransparent() const override;
-    virtual void SetBrightness(float brightness) override;
+    virtual WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
-    virtual void SetCallingWindow(uint32_t windowId) override;
+    virtual WMError SetCallingWindow(uint32_t windowId) override;
     virtual void SetPrivacyMode(bool isPrivacyMode) override;
     virtual bool IsPrivacyMode() const override;
 
@@ -258,7 +258,7 @@ private:
     void MapFloatingWindowToAppIfNeeded();
     WMError UpdateProperty(PropertyChangeAction action);
     WMError Destroy(bool needNotifyServer);
-    void SetBackgroundColor(uint32_t color);
+    WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     Rect GetSystemAlarmWindowDefaultSize(Rect defaultRect);
 
