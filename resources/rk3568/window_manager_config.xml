@@ -16,4 +16,5 @@
  <Configs>
    <!--decor enable is true means app main window show decoration-->
     <decor enable="false"></decor>
+    <maxAppWindowNumber>100</maxAppWindowNumber>
  </Configs>
