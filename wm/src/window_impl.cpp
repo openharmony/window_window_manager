@@ -202,15 +202,16 @@ bool WindowImpl::GetShowState() const
     return state_ == WindowState::STATE_SHOWN;
 }
 
-void WindowImpl::SetFocusable(bool isFocusable)
+WMError WindowImpl::SetFocusable(bool isFocusable)
 {
     if (!IsWindowValid()) {
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetFocusable(isFocusable);
     if (state_ == WindowState::STATE_SHOWN) {
-        UpdateProperty(PropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
+        return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_FOCUSABLE);
     }
+    return WMError::WM_OK;
 }
 
 bool WindowImpl::GetFocusable() const
@@ -218,15 +219,16 @@ bool WindowImpl::GetFocusable() const
     return property_->GetFocusable();
 }
 
-void WindowImpl::SetTouchable(bool isTouchable)
+WMError WindowImpl::SetTouchable(bool isTouchable)
 {
     if (!IsWindowValid()) {
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetTouchable(isTouchable);
     if (state_ == WindowState::STATE_SHOWN) {
-        UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
+        return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TOUCHABLE);
     }
+    return WMError::WM_OK;
 }
 
 bool WindowImpl::GetTouchable() const
@@ -843,15 +845,16 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
 
-void WindowImpl::SetKeepScreenOn(bool keepScreenOn)
+WMError WindowImpl::SetKeepScreenOn(bool keepScreenOn)
 {
     if (!IsWindowValid()) {
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetKeepScreenOn(keepScreenOn);
     if (state_ == WindowState::STATE_SHOWN) {
-        UpdateProperty(PropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+        return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     }
+    return WMError::WM_OK;
 }
 
 bool WindowImpl::IsKeepScreenOn() const
@@ -859,15 +862,16 @@ bool WindowImpl::IsKeepScreenOn() const
     return property_->IsKeepScreenOn();
 }
 
-void WindowImpl::SetTurnScreenOn(bool turnScreenOn)
+WMError WindowImpl::SetTurnScreenOn(bool turnScreenOn)
 {
     if (!IsWindowValid()) {
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetTurnScreenOn(turnScreenOn);
     if (state_ == WindowState::STATE_SHOWN) {
-        UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
+        return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON);
     }
+    return WMError::WM_OK;
 }
 
 bool WindowImpl::IsTurnScreenOn() const
@@ -875,16 +879,18 @@ bool WindowImpl::IsTurnScreenOn() const
     return property_->IsTurnScreenOn();
 }
 
-void WindowImpl::SetBackgroundColor(uint32_t color)
+WMError WindowImpl::SetBackgroundColor(uint32_t color)
 {
     if (uiContent_ != nullptr) {
         uiContent_->SetBackgroundColor(color);
-        return;
+        return WMError::WM_OK;
     }
     WLOGFI("uiContent is nullptr, windowId: %{public}u, use FA mode", GetWindowId());
     if (aceAbilityHandler_ != nullptr) {
         aceAbilityHandler_->SetBackgroundColor(color);
+        return WMError::WM_OK;
     }
+    return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
 uint32_t WindowImpl::GetBackgroundColor() const
@@ -900,64 +906,65 @@ uint32_t WindowImpl::GetBackgroundColor() const
     return 0xffffffff; // means no background color been set, default color is white
 }
 
-void WindowImpl::SetBackgroundColor(const std::string& color)
+WMError WindowImpl::SetBackgroundColor(const std::string& color)
 {
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     uint32_t colorValue;
     if (ColorParser::Parse(color, colorValue)) {
-        SetBackgroundColor(colorValue);
-        return;
+        return SetBackgroundColor(colorValue);
     }
     WLOGFE("invalid color string: %{public}s", color.c_str());
+    return WMError::WM_ERROR_INVALID_PARAM;
 }
 
-void WindowImpl::SetTransparent(bool isTransparent)
+WMError WindowImpl::SetTransparent(bool isTransparent)
 {
-    if (uiContent_ == nullptr) {
-        WLOGFE("invalid operation, uiContent is nullptr, windowId: %{public}u", GetWindowId());
-        return;
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     ColorParam backgroundColor;
     backgroundColor.value = GetBackgroundColor();
     if (isTransparent) {
         backgroundColor.argb.alpha = 0x00; // 0x00: completely transparent
-        SetBackgroundColor(backgroundColor.value);
+        return SetBackgroundColor(backgroundColor.value);
     } else {
         backgroundColor.value = GetBackgroundColor();
         if (backgroundColor.argb.alpha == 0x00) {
             backgroundColor.argb.alpha = 0xff; // 0xff: completely opaque
-            SetBackgroundColor(backgroundColor.value);
+            return SetBackgroundColor(backgroundColor.value);
         }
     }
+    return WMError::WM_OK;
 }
 
 bool WindowImpl::IsTransparent() const
 {
-    if (uiContent_ == nullptr) {
-        WLOGFE("invalid operation, uiContent is nullptr, windowId: %{public}u", GetWindowId());
-        return false;
-    }
     ColorParam backgroundColor;
     backgroundColor.value = GetBackgroundColor();
+    WLOGFI("color: %{public}u, alpha: %{public}u", backgroundColor.value, backgroundColor.argb.alpha);
     return backgroundColor.argb.alpha == 0x00; // 0x00: completely transparent
 }
 
-void WindowImpl::SetBrightness(float brightness)
+WMError WindowImpl::SetBrightness(float brightness)
 {
     if (!IsWindowValid()) {
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (brightness < MINIMUM_BRIGHTNESS || brightness > MAXIMUM_BRIGHTNESS) {
         WLOGFE("invalid brightness value: %{public}f", brightness);
-        return;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (!WindowHelper::IsAppWindow(GetType())) {
         WLOGFE("non app window does not support set brightness, type: %{public}u", GetType());
-        return;
+        return WMError::WM_ERROR_INVALID_TYPE;
     }
     property_->SetBrightness(brightness);
     if (state_ == WindowState::STATE_SHOWN) {
-        UpdateProperty(PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
+        return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS);
     }
+    return WMError::WM_OK;
 }
 
 float WindowImpl::GetBrightness() const
@@ -965,13 +972,13 @@ float WindowImpl::GetBrightness() const
     return property_->GetBrightness();
 }
 
-void WindowImpl::SetCallingWindow(uint32_t windowId)
+WMError WindowImpl::SetCallingWindow(uint32_t windowId)
 {
     if (!IsWindowValid()) {
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     property_->SetCallingWindow(windowId);
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
+    return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
 }
 
 void WindowImpl::SetPrivacyMode(bool isPrivacyMode)
