@@ -503,16 +503,6 @@ HWTEST_F(WindowImplTest, GetSystemBarPropertyByType03, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: IsDecorEnable01
- * @tc.desc: IsDecorEnable default value is false
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImplTest, IsDecorEnable01, Function | SmallTest | Level3)
-{
-    ASSERT_TRUE(window_->IsDecorEnable());
-}
-
-/**
  * @tc.name: Maximize02
  * @tc.desc: Maximize the sub window
  * @tc.type: FUNC
