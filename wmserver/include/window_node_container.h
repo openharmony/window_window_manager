@@ -87,6 +87,8 @@ public:
     void ProcessDisplayDestroy(DisplayId displayId, std::vector<uint32_t>& windowIds);
     void ProcessDisplayChange(DisplayId displayId, const Rect& displayRect);
     void SetMinimizedByOther(bool isMinimizedByOther);
+    void GetModeChangeHotZones(DisplayId displayId,
+        ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;

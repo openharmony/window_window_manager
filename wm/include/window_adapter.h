@@ -52,6 +52,7 @@ public:
     virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);
     virtual WMError GetSystemDecorEnable(bool& isSystemDecorEnable);
+    virtual WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones);
 
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);

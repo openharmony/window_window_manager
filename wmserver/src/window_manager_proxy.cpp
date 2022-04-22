@@ -583,5 +583,44 @@ void WindowManagerProxy::NotifyWindowTransition(WindowTransitionInfo from, Windo
         return;
     }
 }
+
+WMError WindowManagerProxy::GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("Write displayId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE),
+        data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    WMError ret = static_cast<WMError>(reply.ReadInt32());
+    if (ret == WMError::WM_OK) {
+        hotZones.fullscreen_.posX_ = reply.ReadInt32();
+        hotZones.fullscreen_.posY_ = reply.ReadInt32();
+        hotZones.fullscreen_.width_ = reply.ReadUint32();
+        hotZones.fullscreen_.height_ = reply.ReadUint32();
+
+        hotZones.primary_.posX_ = reply.ReadInt32();
+        hotZones.primary_.posY_ = reply.ReadInt32();
+        hotZones.primary_.width_ = reply.ReadUint32();
+        hotZones.primary_.height_ = reply.ReadUint32();
+
+        hotZones.secondary_.posX_ = reply.ReadInt32();
+        hotZones.secondary_.posY_ = reply.ReadInt32();
+        hotZones.secondary_.width_ = reply.ReadUint32();
+        hotZones.secondary_.height_ = reply.ReadUint32();
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS

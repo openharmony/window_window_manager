@@ -1575,5 +1575,21 @@ void WindowNodeContainer::SetMinimizedByOther(bool isMinimizedByOther)
 {
     isMinimizedByOther_ = isMinimizedByOther;
 }
+
+void WindowNodeContainer::GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones,
+    const ModeChangeHotZonesConfig& config)
+{
+    auto displayRect = displayRectMap_[displayId];
+
+    hotZones.fullscreen_.width_ = displayRect.width_;
+    hotZones.fullscreen_.height_ = config.fullscreenRange_;
+
+    hotZones.primary_.width_ = config.primaryRange_;
+    hotZones.primary_.height_ = displayRect.height_;
+
+    hotZones.secondary_.posX_ = static_cast<int32_t>(displayRect.width_) - config.secondaryRange_;
+    hotZones.secondary_.width_ = config.secondaryRange_;
+    hotZones.secondary_.height_ = displayRect.height_;
+}
 } // namespace Rosen
 } // namespace OHOS

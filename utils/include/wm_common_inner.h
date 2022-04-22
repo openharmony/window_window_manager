@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WM_COMMON_INNER_H
 
 #include <cinttypes>
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -73,6 +74,19 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_TURN_SCREEN_ON = 1 << 8,
     ACTION_UPDATE_KEEP_SCREEN_ON = 1 << 9,
     ACTION_UPDATE_SET_BRIGHTNESS = 1 << 10,
+};
+
+struct ModeChangeHotZonesConfig {
+    bool isModeChangeHotZoneConfigured_;
+    uint32_t fullscreenRange_;
+    uint32_t primaryRange_;
+    uint32_t secondaryRange_;
+};
+
+struct ModeChangeHotZones {
+    Rect fullscreen_;
+    Rect primary_;
+    Rect secondary_;
 };
 
 namespace {
