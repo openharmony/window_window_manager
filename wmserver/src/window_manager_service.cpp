@@ -155,7 +155,30 @@ bool WindowManagerService::ParseChildNode(xmlNode* child)
         } else {
             WLOGFW("Invalid resource prop");
         }
+    } else if (!xmlStrcmp(child->name, reinterpret_cast<const xmlChar*>("maxAppWindowNumber"))) {
+        const char* maxAppWindowNumberStr = reinterpret_cast<const char*>(xmlNodeGetContent(child));
+        if (!maxAppWindowNumberStr) {
+            return false;
+        }
+        int maxAppWindowNumber = 0;
+        const char* strEnd = maxAppWindowNumberStr + strlen(maxAppWindowNumberStr);
+        auto it = std::find_if(maxAppWindowNumberStr, strEnd, [&maxAppWindowNumber](char c) {
+            if (c < '0' || c > '9') {
+                return true;
+            } else {
+                maxAppWindowNumber *= 10;
+                maxAppWindowNumber += c - '0';
+                return false;
+            }
+            });
+        if (it != strEnd) {
+            WLOGFW("Invalid maxAppWindowNumber");
+            return false;
+        } else {
+            windowRoot_->SetMaxAppWindowNumber(maxAppWindowNumber);
+        }
     }
+    
     return true;
 }
 
@@ -188,7 +211,6 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
     WLOGFI("[WMS] Add: %{public}5d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
         "%{public}4d %{public}4d]", windowId, property->GetWindowType(), property->GetWindowMode(),
         property->GetWindowFlags(), rect.posX_, rect.posY_, rect.width_, rect.height_);
-
     WM_SCOPED_TRACE("wms:AddWindow(%u)", windowId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     WMError res = windowController_->AddWindowNode(property);
