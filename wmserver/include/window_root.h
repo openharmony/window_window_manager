@@ -70,6 +70,7 @@ public:
     void HandleKeepScreenOn(uint32_t windowId, bool requireLock);
     void UpdateFocusableProperty(uint32_t windowId);
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
+    void SetMaxAppWindowNumber(int windowNum);
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
@@ -95,6 +96,7 @@ private:
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(std::bind(&WindowRoot::OnRemoteDied,
         this, std::placeholders::_1));
     Callback callback_;
+    int maxAppWindowNumber_ = 100;
 };
 }
 }
