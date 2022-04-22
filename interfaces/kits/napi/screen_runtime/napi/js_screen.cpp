@@ -27,7 +27,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsScreen"};
 }
 
-static std::map<ScreenId, std::shared_ptr<NativeReference>> g_JsScreenMap;
+static thread_local std::map<ScreenId, std::shared_ptr<NativeReference>> g_JsScreenMap;
 std::recursive_mutex g_mutex;
 
 JsScreen::JsScreen(const sptr<Screen>& screen) : screen_(screen)
