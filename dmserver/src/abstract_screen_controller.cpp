@@ -566,7 +566,7 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
             transactionProxy->FlushImplicitTransaction();
         }
     }
-    
+
     if (rsScreenId != SCREEN_ID_INVALID && GetAbstractScreen(screenId) != nullptr) {
         ProcessScreenDisconnected(rsScreenId);
     }

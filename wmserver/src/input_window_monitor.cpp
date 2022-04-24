@@ -52,7 +52,7 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
     if (displayId == DISPLAY_ID_INVALID) {
         return;
     }
-    auto container = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
+    auto container = windowRoot_->GetWindowNodeContainer(displayId);
     if (container == nullptr) {
         WLOGFE("can not get window node container.");
         return;
@@ -85,7 +85,7 @@ void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& con
         return;
     }
     MMI::PhysicalDisplayInfo physicalDisplayInfo = {
-        .id = static_cast<int32_t>(container->GetScreenId()),
+        .id = static_cast<int32_t>(container->GetScreenId(displayId)),
         .leftDisplayId = static_cast<int32_t>(DISPLAY_ID_INVALID),
         .upDisplayId = static_cast<int32_t>(DISPLAY_ID_INVALID),
         .topLeftX = 0,
@@ -110,11 +110,11 @@ void InputWindowMonitor::UpdateDisplaysInfo(const sptr<WindowNodeContainer>& con
     }
 
     MMI::LogicalDisplayInfo logicalDisplayInfo = {
-        .id = static_cast<int32_t>(container->GetScreenId()),
-        .topLeftX = container->GetDisplayRect().posX_,
-        .topLeftY = container->GetDisplayRect().posY_,
-        .width = static_cast<int32_t>(container->GetDisplayRect().width_),
-        .height = static_cast<int32_t>(container->GetDisplayRect().height_),
+        .id = static_cast<int32_t>(container->GetScreenId(displayId)),
+        .topLeftX = container->GetDisplayRect(displayId).posX_,
+        .topLeftY = container->GetDisplayRect(displayId).posY_,
+        .width = static_cast<int32_t>(container->GetDisplayRect(displayId).width_),
+        .height = static_cast<int32_t>(container->GetDisplayRect(displayId).height_),
         .name = "logical_display0",
         .seatId = "seat0",
         .seatName = "default0",

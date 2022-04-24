@@ -27,6 +27,22 @@ namespace {
 
 const int32_t AVOID_NUM = 4;
 
+AvoidAreaController::AvoidAreaController(DisplayId displayId, UpdateAvoidAreaFunc callback)
+{
+    UpdateAvoidNodesMap(displayId, true);
+    updateAvoidAreaCallBack_ = callback;
+}
+
+void AvoidAreaController::UpdateAvoidNodesMap(DisplayId displayId, bool isAdd)
+{
+    if (isAdd) {
+        auto avoidNodesMapPtr = std::make_unique<std::map<uint32_t, sptr<WindowNode>>>();
+        avoidNodesMaps_.insert(std::make_pair(displayId, std::move(avoidNodesMapPtr)));
+    } else {
+        avoidNodesMaps_.erase(displayId);
+    }
+}
+
 bool AvoidAreaController::IsAvoidAreaNode(const sptr<WindowNode>& node) const
 {
     if (node == nullptr) {
@@ -42,11 +58,21 @@ bool AvoidAreaController::IsAvoidAreaNode(const sptr<WindowNode>& node) const
     return true;
 }
 
-AvoidPosType AvoidAreaController::GetAvoidPosType(const Rect& rect) const
+std::map<uint32_t, sptr<WindowNode>>* AvoidAreaController::GetAvoidNodesByDisplayId(
+    DisplayId displayId)
 {
-    auto display = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId_);
+    if ((const_cast<AvoidAreaController*>(this)->avoidNodesMaps_).find(displayId) !=
+        (const_cast<AvoidAreaController*>(this)->avoidNodesMaps_).end()) {
+        return (const_cast<AvoidAreaController*>(this)->avoidNodesMaps_)[displayId].get();
+    }
+    return nullptr;
+}
+
+AvoidPosType AvoidAreaController::GetAvoidPosType(const Rect& rect, DisplayId displayId) const
+{
+    auto display = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
-        WLOGFE("GetAvoidPosType fail. Get display fail. displayId:%{public}" PRIu64"", displayId_);
+        WLOGFE("GetAvoidPosType fail. Get display fail. displayId:%{public}" PRIu64"", displayId);
         return AvoidPosType::AVOID_POS_UNKNOWN;
     }
     uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
@@ -62,30 +88,32 @@ WMError AvoidAreaController::AvoidControl(const sptr<WindowNode>& node, AvoidCon
         WLOGFE("AvoidControl check param Failed. Type: %{public}u", type);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
+
+    auto avoidNodes = GetAvoidNodesByDisplayId(node->GetDisplayId());
     uint32_t windowId = node->GetWindowId();
-    auto iter = avoidNodes_.find(windowId);
+    auto iter = avoidNodes->find(windowId);
     // do not add a exist node(the same id)
-    if (type == AvoidControlType::AVOID_NODE_ADD && iter != avoidNodes_.end()) {
+    if (type == AvoidControlType::AVOID_NODE_ADD && iter != avoidNodes->end()) {
         WLOGFE("WinId:%{public}d is added. AvoidControl Add Failed. Type: %{public}u", windowId, type);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     // do not update or removew a unexist node
-    if (type != AvoidControlType::AVOID_NODE_ADD && iter == avoidNodes_.end()) {
+    if (type != AvoidControlType::AVOID_NODE_ADD && iter == avoidNodes->end()) {
         WLOGFE("WinId:%{public}d not exist. AvoidControl Update or Remove Failed. Type: %{public}u", windowId, type);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
     switch (type) {
         case AvoidControlType::AVOID_NODE_ADD:
-            avoidNodes_[windowId] = node;
+            (*avoidNodes)[windowId] = node;
             WLOGFI("WinId:%{public}d add. And the windowType is %{public}d", windowId, node->GetWindowType());
             break;
         case AvoidControlType::AVOID_NODE_UPDATE:
-            avoidNodes_[windowId] = node;
+            (*avoidNodes)[windowId] = node;
             WLOGFI("WinId:%{public}d update. And the windowType is %{public}d", windowId, node->GetWindowType());
             break;
         case AvoidControlType::AVOID_NODE_REMOVE:
-            avoidNodes_.erase(iter);
+            avoidNodes->erase(iter);
             WLOGFI("WinId:%{public}d remove. And the windowType is %{public}d", windowId, node->GetWindowType());
             break;
         default:
@@ -94,18 +122,19 @@ WMError AvoidAreaController::AvoidControl(const sptr<WindowNode>& node, AvoidCon
     }
 
     // get all Area info and notify windowcontainer
-    std::vector<Rect> avoidAreas = GetAvoidArea();
+    std::vector<Rect> avoidAreas = GetAvoidArea(node->GetDisplayId());
     DumpAvoidArea(avoidAreas);
-    UseCallbackNotifyAvoidAreaChanged(avoidAreas);
+    UseCallbackNotifyAvoidAreaChanged(avoidAreas, node->GetDisplayId());
     return WMError::WM_OK;
 }
 
-std::vector<Rect> AvoidAreaController::GetAvoidArea() const
+std::vector<Rect> AvoidAreaController::GetAvoidArea(DisplayId displayId) const
 {
+    auto avoidNodesPtr = const_cast<AvoidAreaController*>(this)->GetAvoidNodesByDisplayId(displayId);
     std::vector<Rect> avoidArea(AVOID_NUM, {0, 0, 0, 0});  // avoid area  left, top, right, bottom
-    for (auto iter = avoidNodes_.begin(); iter != avoidNodes_.end(); ++iter) {
+    for (auto iter = avoidNodesPtr->begin(); iter != avoidNodesPtr->end(); ++iter) {
         Rect curRect = iter->second->GetWindowRect();
-        auto curPos = GetAvoidPosType(curRect);
+        auto curPos = GetAvoidPosType(curRect, iter->second->GetDisplayId());
         if (curPos == AvoidPosType::AVOID_POS_UNKNOWN) {
             WLOGFE("GetAvoidArea AVOID_POS_UNKNOWN Rect: x : %{public}d, y:  %{public}d, w: %{public}u h: %{public}u",
                 static_cast<uint32_t>(curRect.posX_), static_cast<uint32_t>(curRect.posY_),
@@ -117,7 +146,7 @@ std::vector<Rect> AvoidAreaController::GetAvoidArea() const
     return avoidArea;
 }
 
-std::vector<Rect> AvoidAreaController::GetAvoidAreaByType(AvoidAreaType avoidAreaType) const
+std::vector<Rect> AvoidAreaController::GetAvoidAreaByType(AvoidAreaType avoidAreaType, DisplayId displayId) const
 {
     if (avoidAreaType != AvoidAreaType::TYPE_SYSTEM) {
         WLOGFE("GetAvoidAreaByType. Support Type is AvoidAreaType::TYPE_SYSTEM. But current type is %{public}u",
@@ -126,13 +155,13 @@ std::vector<Rect> AvoidAreaController::GetAvoidAreaByType(AvoidAreaType avoidAre
         return avoidArea;
     }
     WLOGFI("AvoidAreaController::GetAvoidAreaByType Success");
-    return GetAvoidArea();
+    return GetAvoidArea(displayId);
 }
 
-void AvoidAreaController::UseCallbackNotifyAvoidAreaChanged(std::vector<Rect>& avoidArea) const
+void AvoidAreaController::UseCallbackNotifyAvoidAreaChanged(std::vector<Rect>& avoidArea, DisplayId displayId) const
 {
     if (updateAvoidAreaCallBack_) {
-        updateAvoidAreaCallBack_(avoidArea);
+        updateAvoidAreaCallBack_(avoidArea, displayId);
     }
 }
 

@@ -92,6 +92,16 @@ sptr<ScreenInfo> DisplayManagerServiceInner::GetScreenInfoByDisplayId(DisplayId 
     return DisplayManagerService::GetInstance().GetScreenInfoById(displayInfo->GetScreenId());
 }
 
+ScreenId DisplayManagerServiceInner::GetScreenGroupIdByDisplayId(DisplayId displayId) const
+{
+    auto displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
+    if (displayInfo == nullptr) {
+        WLOGFE("can not get display.");
+        return INVALID_SCREEN_ID;
+    }
+    return DisplayManagerService::GetInstance().GetScreenGroupIdByScreenId(displayInfo->GetScreenId());
+}
+
 sptr<SupportedScreenModes> DisplayManagerServiceInner::GetScreenModesByDisplayId(DisplayId displayId) const
 {
     const sptr<ScreenInfo> screenInfo = GetScreenInfoByDisplayId(displayId);

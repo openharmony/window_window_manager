@@ -344,7 +344,7 @@ HWTEST_F(AvoidAreaControllerTest, UpdateAvoidAreaNode03, Function | SmallTest | 
 HWTEST_F(AvoidAreaControllerTest, GetAvoidAreaByType01, Function | SmallTest | Level2)
 {
     sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-    std::vector<Rect> avoidArea = avoidAreaController->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT);
+    std::vector<Rect> avoidArea = avoidAreaController->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, displayId_);
 
     ASSERT_EQ(4u, static_cast<uint32_t>(avoidArea.size()));
     ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[LEFT]));

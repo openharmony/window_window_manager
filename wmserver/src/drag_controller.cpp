@@ -106,7 +106,7 @@ sptr<WindowNode> DragController::GetHitWindow(DisplayId id, PointInfo point)
         WLOGFE("Get invalid display");
         return nullptr;
     }
-    sptr<WindowNodeContainer> container = windowRoot_->GetOrCreateWindowNodeContainer(id);
+    sptr<WindowNodeContainer> container = windowRoot_->GetWindowNodeContainer(id);
     if (container == nullptr) {
         WLOGFE("get container failed %{public}" PRIu64"", id);
         return nullptr;

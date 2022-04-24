@@ -33,6 +33,7 @@ public:
 
 private:
     static void InitByScreenRect(const Rect& screenRect);
+    DisplayId displayId_ = 0;
 };
 } // namespace ROSEN
 } // namespace OHOS

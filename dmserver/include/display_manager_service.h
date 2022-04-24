@@ -84,6 +84,7 @@ public:
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
     sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
+    ScreenId GetScreenGroupIdByScreenId(ScreenId screenId);
     std::vector<sptr<ScreenInfo>> GetAllScreenInfos() override;
 
     std::vector<DisplayId> GetAllDisplayIds() override;
