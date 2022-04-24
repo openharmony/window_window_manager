@@ -15,6 +15,7 @@
 
 #include "js_window_extension.h"
 
+#include <napi_common_want.h>
 #include <native_engine/native_reference.h>
 #include <native_engine/native_value.h>
 #include <js_extension_context.h>
@@ -143,6 +144,19 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)
 {
     WLOGFI("called.");
     Extension::OnConnect(want);
+    NativeEngine& engine = jsRuntime_.GetNativeEngine();
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+        NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
+        napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
+        NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
+        NativeValue* argv[] = { nativeWant };
+        CallJsMethod("onConnect", argv, ArraySize(argv));
+        }
+    );
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule(engine, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 
     if (!stub_) {
         WLOGFE("stub is nullptr.");
@@ -155,6 +169,19 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)
 void JsWindowExtension::OnDisconnect(const AAFwk::Want &want)
 {
     Extension::OnDisconnect(want);
+    NativeEngine& engine = jsRuntime_.GetNativeEngine();
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
+        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+        NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
+        napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
+        NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
+        NativeValue* argv[] = { nativeWant };
+        CallJsMethod("onDisconnect", argv, ArraySize(argv));
+        }
+    );
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule(engine, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
     WLOGFI("called.");
 }
 

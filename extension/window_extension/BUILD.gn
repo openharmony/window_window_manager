@@ -23,6 +23,7 @@ config("libwindow_extension_private_config") {
     "../extension_connection/include/zidl",
     "../../interfaces/kits/napi/window_runtime/window_napi",
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
+    "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common",
     "//foundation/aafwk/standard/interfaces/innerkits/runtime/include",
   ]
 }
@@ -50,6 +51,7 @@ ohos_shared_library("libwindow_extension") {
   public_configs = [ ":libwindow_extension_public_config" ]
 
   deps = [
+    "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common:napi_common",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/interfaces/kits/napi/window_runtime:window_native_kit",
     "//foundation/windowmanager/wm:libwm",
