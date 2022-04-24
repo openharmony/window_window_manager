@@ -41,7 +41,7 @@ public:
     virtual void Hide() = 0;
     virtual void Show() = 0;
     virtual void RequestFocus() = 0;
-    virtual void ConnectToExtension(sptr<IWindowExtensionClient>& token) = 0;
+    virtual void GeExtensionWindow(sptr<IWindowExtensionClient>& token) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

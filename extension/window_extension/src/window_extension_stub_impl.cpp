@@ -47,11 +47,15 @@ sptr<Window> WindowExtensionStubImpl::CreateWindow(Rect& rect,
         return nullptr;
     }
 
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
-    // option->SetWindowRect(rect);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
+    option->SetWindowRect(rect);
     WLOGFI("Window::Create");
     window_ = Window::Create(windowName_, option, context);
+    std::shared_ptr<RSSurfaceNode> node = (window_ != nullptr ? window_->GetSurfaceNode() : nullptr);
+    if (node != nullptr) {
+        node->CreateNodeInRenderThread();
+        WLOGFI("call CreateNodeInRenderThread");
+    }
     return window_;
 }
 
@@ -83,9 +87,20 @@ void WindowExtensionStubImpl::RequestFocus()
     }
 }
 
-void WindowExtensionStubImpl::ConnectToExtension(sptr<IWindowExtensionClient>& token)
+void WindowExtensionStubImpl::GeExtensionWindow(sptr<IWindowExtensionClient>& token)
 {
     token_ = token;
+    if (token_ == nullptr) {
+        WLOGFE("token is null");
+        return;
+    }
+
+    std::shared_ptr<RSSurfaceNode> node = (window_ != nullptr ? window_->GetSurfaceNode() : nullptr);
+    if (node == nullptr) {
+        WLOGFE("node is null");
+        return;
+    }
+    token_->OnWindowReady(node);
     WLOGFI("called");
 }
 

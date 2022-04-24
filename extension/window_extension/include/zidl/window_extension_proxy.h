@@ -31,7 +31,7 @@ public:
     void Hide() override;
     void Show() override;
     void RequestFocus() override;
-    void ConnectToExtension(sptr<IWindowExtensionClient>& token) override;
+    void GeExtensionWindow(sptr<IWindowExtensionClient>& token) override;
 private:
     static inline BrokerDelegator<WindowExtensionProxy> delegator_;
 };

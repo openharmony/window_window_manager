@@ -34,7 +34,7 @@ public:
     virtual void Hide() override;
     virtual void Show() override;
     virtual void RequestFocus() override;
-    virtual void ConnectToExtension(sptr<IWindowExtensionClient>& token) override;
+    virtual void GeExtensionWindow(sptr<IWindowExtensionClient>& token) override;
 
     sptr<Window> CreateWindow(Rect& rect, const std::shared_ptr<AbilityRuntime::Context>& context);
     void DestroyWindow();
