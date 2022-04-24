@@ -14,12 +14,16 @@
  */
 
 class WindowExtension {
-    onAbilityConnected() {
-        console.log('onAbilityConnected');
+    onWindowReady(window) {
+        console.log('WindowExtension windowReady');
     }
 
-    onWindowReady(window) {
-        console.log('windowReady');
+    onConnect(want) {
+        console.log('WindowExtension onConnect, want:' + want.abilityName);
+    }
+
+    onDisconnect(want) {
+        console.log('WindowExtension  onDisconnect' + want.abilityName);
     }
 }
 
