@@ -215,6 +215,11 @@ WMError WindowNodeContainer::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, s
     return WMError::WM_OK;
 }
 
+WMError WindowNodeContainer::ShowInTransition(sptr<WindowNode>& node)
+{
+    return WMError::WM_OK;
+}
+
 WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
 {
     if (!node->surfaceNode_) {
@@ -234,7 +239,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     if (node->IsSplitMode() || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         RaiseSplitRelatedWindowToTop(node);
     }
-    UpdateRSTree(node, true);
+    UpdateRSTree(node, true, node->isPlayAnimationShow_);
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
     if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
@@ -253,10 +258,6 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
 
 WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpdateReason reason)
 {
-    if (!node->surfaceNode_) {
-        WLOGFE("surface node is nullptr!");
-        return WMError::WM_ERROR_NULLPTR;
-    }
     if (WindowHelper::IsMainWindow(node->GetWindowType()) && WindowHelper::IsSwitchCascadeReason(reason)) {
         SwitchLayoutPolicy(WindowLayoutMode::CASCADE, node->GetDisplayId());
     }
@@ -274,6 +275,10 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
 
 void WindowNodeContainer::UpdateSizeChangeReason(sptr<WindowNode>& node, WindowSizeChangeReason reason)
 {
+    if (!node->GetWindowToken()) {
+        WLOGFE("windowToken is null");
+        return;
+    }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         for (auto& childNode : appWindowNode_->children_) {
             if (childNode->IsSplitMode()) {
@@ -309,7 +314,7 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
     parentNode->children_.insert(position, node);
 }
 
-bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, bool isAdd)
+bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, bool isAdd, bool animationPlayed)
 {
     WM_FUNCTION_TRACE();
     static const bool IsWindowAnimationEnabled = ReadIsWindowAnimationEnabledProperty();
@@ -324,14 +329,18 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, bool isAdd)
                 }
             }
         } else {
-            dms.UpdateRSTree(displayId, node->surfaceNode_, false);
+            if (node->leashWinSurfaceNode_) {
+                dms.UpdateRSTree(displayId, node->leashWinSurfaceNode_, false);
+            } else {
+                dms.UpdateRSTree(displayId, node->surfaceNode_, false);
+            }
             for (auto& child : node->children_) {
                 dms.UpdateRSTree(displayId, child->surfaceNode_, false);
             }
         }
     };
 
-    if (IsWindowAnimationEnabled) {
+    if (IsWindowAnimationEnabled && !animationPlayed) {
         // default transition duration: 350ms
         static const RSAnimationTimingProtocol timingProtocol(350);
         // default transition curve: EASE OUT
@@ -355,6 +364,8 @@ WMError WindowNodeContainer::DestroyWindowNode(sptr<WindowNode>& node, std::vect
         WLOGFE("RemoveWindowNode failed");
         return ret;
     }
+    node->leashWinSurfaceNode_ = nullptr;
+    node->startingWinSurfaceNode_ = nullptr;
     node->surfaceNode_ = nullptr;
     windowIds.push_back(node->GetWindowId());
 
@@ -412,7 +423,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
                 child->GetCallingUid(), false));
         }
     }
-    UpdateRSTree(node, false);
+    UpdateRSTree(node, false, node->isPlayAnimationHide_);
     layoutPolicy_->RemoveWindowNode(node);
     windowPair_->HandleRemoveWindow(node);
     if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
@@ -492,7 +503,9 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
     if (node == nullptr) {
         WLOGFW("cannot find focused window id:%{public}d", id);
     } else {
-        node->GetWindowToken()->UpdateFocusStatus(focused);
+        if (node->GetWindowToken()) {
+            node->GetWindowToken()->UpdateFocusStatus(focused);
+        }
         if (node->abilityToken_ == nullptr) {
             WLOGFI("abilityToken is null, window : %{public}d", id);
         }
@@ -514,7 +527,9 @@ void WindowNodeContainer::UpdateActiveStatus(uint32_t id, bool isActive) const
         WLOGFE("cannot find active window id: %{public}d", id);
         return;
     }
-    node->GetWindowToken()->UpdateActiveStatus(isActive);
+    if (node->GetWindowToken()) {
+        node->GetWindowToken()->UpdateActiveStatus(isActive);
+    }
 }
 
 void WindowNodeContainer::UpdateBrightness(uint32_t id, bool byRemoved)
@@ -1033,7 +1048,9 @@ void WindowNodeContainer::UpdateWindowState(sptr<WindowNode> node, int32_t topPr
     if (node->parent_ != nullptr && node->currentVisibility_) {
         if (node->priority_ < topPriority &&
             !(node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))) {
-            node->GetWindowToken()->UpdateWindowState(state);
+            if (node->GetWindowToken()) {
+                node->GetWindowToken()->UpdateWindowState(state);
+            }
             HandleKeepScreenOn(node, state);
         }
     }

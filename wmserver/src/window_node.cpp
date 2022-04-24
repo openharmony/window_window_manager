@@ -157,6 +157,21 @@ const sptr<IWindow>& WindowNode::GetWindowToken() const
     return windowToken_;
 }
 
+void WindowNode::SetWindowToken(sptr<IWindow> window)
+{
+    windowToken_ = window;
+}
+
+void WindowNode::SetCallingPid()
+{
+    callingPid_ = IPCSkeleton::GetCallingPid();
+}
+
+void WindowNode::SetCallingUid()
+{
+    callingUid_ = IPCSkeleton::GetCallingUid();
+}
+
 DisplayId WindowNode::GetDisplayId() const
 {
     return property_->GetDisplayId();

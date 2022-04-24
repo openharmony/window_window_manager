@@ -41,6 +41,10 @@ public:
     sptr<WindowNode> GetWindowNode(uint32_t windowId) const;
 
     WMError SaveWindow(const sptr<WindowNode>& node);
+    WMError SaveWindowWithWindowToken(sptr<WindowNode> node);
+    WMError SaveDesWindowNode(sptr<WindowNode>& node);
+    WMError ShowInTransition(sptr<WindowNode>& node);
+    sptr<WindowNode> FindWindowNodeWithToken(const sptr<IRemoteObject>& token) const;
     WMError AddWindowNode(uint32_t parentId, sptr<WindowNode>& node);
     WMError RemoveWindowNode(uint32_t windowId);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);

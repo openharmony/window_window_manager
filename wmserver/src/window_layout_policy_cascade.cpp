@@ -288,13 +288,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
     node->SetWindowRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
 
-    if (!(lastWinRect == winRect) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        auto reason = node->GetWindowSizeChangeReason();
-        node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
-        if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
-            node->ResetWindowSizeChangeReason();
-        }
-    }
+    UpdateClientRectAndResetReason(node, lastWinRect, winRect);
     // update node bounds
     if (node->surfaceNode_ != nullptr) {
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
@@ -419,26 +413,24 @@ void WindowLayoutPolicyCascade::Reorder()
         const auto& appWindowNodeVec = *(windowNodeMaps_[displayId][WindowRootNodeType::APP_WINDOW_NODE]);
         for (auto iter = appWindowNodeVec.begin(); iter != appWindowNodeVec.end(); iter++) {
             auto node = *iter;
-            if (node == nullptr) {
-                WLOGFI("get node failed.");
+            if (node == nullptr || node->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+                WLOGFI("get node failed or not app window.");
                 continue;
             }
-            if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-                if (isFirstReorderedWindow) {
-                    isFirstReorderedWindow = false;
-                } else {
-                    rect = StepCascadeRect(rect, displayId);
-                }
-                node->SetRequestRect(rect);
-                node->SetDecoStatus(true);
-                if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
-                    node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            if (isFirstReorderedWindow) {
+                isFirstReorderedWindow = false;
+            } else {
+                rect = StepCascadeRect(rect, displayId);
+            }
+            node->SetRequestRect(rect);
+            node->SetDecoStatus(true);
+            if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+                node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+                if (node->GetWindowToken()) {
                     node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
                 }
-                WLOGFI("Cascade reorder Id: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
-                    node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
             }
-            WLOGFI("Cascade reorder Id: %{public}u, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+            WLOGFI("Cascade reorder Id: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
                 node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         }
         LayoutWindowTree(displayId);

@@ -32,6 +32,7 @@ public:
         uint32_t& windowId, sptr<IRemoteObject> token) override;
     WMError AddWindow(sptr<WindowProperty>& property) override;
     WMError RemoveWindow(uint32_t windowId) override;
+    void NotifyWindowTransition(WindowTransitionInfo from, WindowTransitionInfo to) override;
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override;
     WMError RequestFocus(uint32_t windowId) override;
     WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) override;
@@ -53,7 +54,7 @@ public:
 
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
     WMError GetSystemDecorEnable(bool& isSystemDecorEnable) override;
-    
+
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
 };

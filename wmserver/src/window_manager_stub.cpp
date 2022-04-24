@@ -182,6 +182,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION: {
+            auto from = data.ReadParcelable<WindowTransitionInfo>();
+            auto to = data.ReadParcelable<WindowTransitionInfo>();
+            NotifyWindowTransition(*from, *to);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

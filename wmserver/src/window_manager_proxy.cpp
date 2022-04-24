@@ -554,5 +554,34 @@ WMError WindowManagerProxy::GetSystemDecorEnable(bool& isSystemDecorEnable)
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
 }
+
+void WindowManagerProxy::NotifyWindowTransition(WindowTransitionInfo from, WindowTransitionInfo to)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("Failed to WriteInterfaceToken!");
+        return;
+    }
+
+    if (!data.WriteParcelable(&from)) {
+        WLOGFE("Failed to write from ability window info!");
+        return;
+    }
+
+    if (!data.WriteParcelable(&to)) {
+        WLOGFE("Failed to write to ability window info!");
+        return;
+    }
+
+    auto error = Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION),
+        data, reply, option);
+    if (error != ERR_NONE) {
+        WLOGFE("Send request error: %{public}d", static_cast<uint32_t>(error));
+        return;
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

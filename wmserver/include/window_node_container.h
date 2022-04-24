@@ -35,6 +35,7 @@ class WindowNodeContainer : public RefBase {
 public:
     WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height, bool isMinimizedByOther);
     ~WindowNodeContainer();
+    WMError ShowInTransition(sptr<WindowNode>& node);
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);
     WMError UpdateWindowNode(sptr<WindowNode>& node, WindowUpdateReason reason);
@@ -94,7 +95,7 @@ private:
     void UpdateFocusStatus(uint32_t id, bool focused) const;
     void UpdateActiveStatus(uint32_t id, bool isActive) const;
     void UpdateWindowTree(sptr<WindowNode>& node);
-    bool UpdateRSTree(sptr<WindowNode>& node, bool isAdd);
+    bool UpdateRSTree(sptr<WindowNode>& node, bool isAdd, bool animationPlayed = false);
 
     void NotifyIfSystemBarTintChanged(DisplayId displayId);
     void NotifyIfSystemBarRegionChanged(DisplayId displayId);
