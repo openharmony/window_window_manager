@@ -38,6 +38,7 @@ public:
     std::vector<DisplayId> GetAllDisplayIds() const;
     ScreenId GetRSScreenId(DisplayId displayId) const;
     sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId) const;
+    ScreenId GetScreenGroupIdByDisplayId(DisplayId displayId) const;
     sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId) const;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId) const;
     void UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);

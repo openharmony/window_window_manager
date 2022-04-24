@@ -36,8 +36,8 @@ public:
     WindowRoot(std::recursive_mutex& mutex, Callback callback) : mutex_(mutex), callback_(callback) {}
     ~WindowRoot() = default;
 
-    sptr<WindowNodeContainer> GetOrCreateWindowNodeContainer(DisplayId displayId);
-    void NotifyDisplayRemoved(DisplayId displayId);
+    sptr<WindowNodeContainer> GetWindowNodeContainer(DisplayId displayId);
+    sptr<WindowNodeContainer> CreateWindowNodeContainer(DisplayId displayId);
     sptr<WindowNode> GetWindowNode(uint32_t windowId) const;
 
     WMError SaveWindow(const sptr<WindowNode>& node);
@@ -58,9 +58,10 @@ public:
     WMError MaxmizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
-    void NotifyWindowStateChange(WindowState state, WindowStateChangeReason reason);
-    void NotifyDisplayChange(sptr<DisplayInfo> abstractDisplay);
-    void NotifyDisplayDestroy(DisplayId displayId);
+    void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
+    void ProcessDisplayChange(sptr<DisplayInfo> abstractDisplay);
+    void ProcessDisplayDestroy(DisplayId displayId);
+    void ProcessDisplayCreate(DisplayId displayId);
     void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
     void FocusFaultDetection() const;
@@ -85,11 +86,13 @@ private:
     bool CheckDisplayInfo(const sptr<DisplayInfo>& display);
     void NotifyKeyboardSizeChangeInfo(const sptr<WindowNode>& node,
         const sptr<WindowNodeContainer>& container, Rect rect);
+    ScreenId GetScreenGroupId(DisplayId displayId);
 
     std::recursive_mutex& mutex_;
-    std::map<int32_t, sptr<WindowNodeContainer>> windowNodeContainerMap_;
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
+    std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainerMap_;
+    std::map<ScreenId, std::vector<DisplayId>> displayIdMap_;
     bool needCheckFocusWindow = false;
     bool isMinimizedByOtherWindow_ = true;
 

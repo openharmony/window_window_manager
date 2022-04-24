@@ -48,6 +48,7 @@ public:
 
     void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
+    ScreenId GetScreenGroupId() const;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);

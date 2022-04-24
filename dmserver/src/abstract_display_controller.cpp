@@ -377,6 +377,7 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
             WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, display->GetId());
             DisplayManagerAgentController::GetInstance().OnDisplayCreate(display->ConvertToDisplayInfo());
+            displayStateChangeListener_(display->GetId(), DisplayStateChangeType::CREATE);
         } else {
             WLOGI("bind display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, dummyDisplay_->GetId());
@@ -436,6 +437,7 @@ void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> abs
     WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
         absScreen->dmsId_, display->GetId());
     DisplayManagerAgentController::GetInstance().OnDisplayCreate(display->ConvertToDisplayInfo());
+    displayStateChangeListener_(display->GetId(), DisplayStateChangeType::CREATE);
 }
 
 void AbstractDisplayController::SetFreeze(std::vector<DisplayId> displayIds, bool toFreeze)

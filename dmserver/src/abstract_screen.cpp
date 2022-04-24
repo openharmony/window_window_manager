@@ -96,6 +96,11 @@ void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& start
     }
 }
 
+ScreenId AbstractScreen::GetScreenGroupId() const
+{
+    return groupDmsId_;
+}
+
 DMError AbstractScreen::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts)
 {
     auto ret = RSInterfaces::GetInstance().GetScreenSupportedColorGamuts(rsId_, colorGamuts);

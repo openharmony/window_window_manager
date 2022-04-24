@@ -377,6 +377,7 @@ WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWi
 
 WMError WindowManagerService::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode)
 {
+    WLOGFI("SetWindowLayoutMode, displayId: %{public}" PRIu64", layoutMode: %{public}u", displayId, mode);
     WM_SCOPED_TRACE("wms:SetWindowLayoutMode");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->SetWindowLayoutMode(displayId, mode);
