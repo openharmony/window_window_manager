@@ -71,6 +71,7 @@ public:
     void UpdateFocusableProperty(uint32_t windowId);
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
     void SetMaxAppWindowNumber(int windowNum);
+    void SetMinimizedByOtherWindow(bool isMinimizedByOtherWindow);
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
@@ -90,6 +91,7 @@ private:
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
     bool needCheckFocusWindow = false;
+    bool isMinimizedByOtherWindow_ = true;
 
     std::map<WindowManagerAgentType, std::vector<sptr<IWindowManagerAgent>>> windowManagerAgents_;
 
