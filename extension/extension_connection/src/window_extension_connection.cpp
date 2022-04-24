@@ -165,8 +165,8 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
     }
     sptr<IWindowExtensionClient> clientToken(new WindowExtensionClientStubImpl(componentCallback_));
     if (clientToken != nullptr) {
-        proxy_->ConnectToExtension(clientToken);
-        WLOGFI("ConnectToExtension");
+        proxy_->GeExtensionWindow(clientToken);
+        WLOGFI("GeExtensionWindow");
     }
     WLOGFI("call end");
 }
