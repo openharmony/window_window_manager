@@ -45,7 +45,8 @@ namespace {
     constexpr uint32_t MAX_BRIGHTNESS = 255;
 }
 
-WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height) : displayId_(displayId)
+WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height, bool isMinimizedByOther)
+    : displayId_(displayId), isMinimizedByOther_(isMinimizedByOther)
 {
     displayRect_ = {
         .posX_ = 0,
@@ -1092,6 +1093,10 @@ void WindowNodeContainer::MinimizeWindowFromAbility(const sptr<WindowNode>& node
 {
     if (node->abilityToken_ == nullptr) {
         WLOGFW("Target abilityToken is nullptr, windowId:%{public}u", node->GetWindowId());
+        return;
+    }
+    WLOGFI("minimize window fromUser:%{public}d, isMinimizedByOther:%{public}d", fromUser, isMinimizedByOther_);
+    if (!fromUser && !isMinimizedByOther_) {
         return;
     }
     AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(node->abilityToken_, fromUser);

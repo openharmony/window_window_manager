@@ -31,7 +31,7 @@ namespace Rosen {
 using WindowNodeOperationFunc = std::function<bool(sptr<WindowNode>)>; // return true indicates to stop traverse
 class WindowNodeContainer : public RefBase {
 public:
-    WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height);
+    WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height, bool isMinimizedByOther);
     ~WindowNodeContainer();
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);
@@ -144,6 +144,8 @@ private:
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
     void RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
     void ReZOrderShowWhenLockedWindows(const sptr<WindowNode>& node, bool up);
+
+    bool isMinimizedByOther_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS
