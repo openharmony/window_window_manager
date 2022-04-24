@@ -45,10 +45,12 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId d
         return nullptr;
     }
 
-    WLOGFI("create new window node container display width:%{public}d, height:%{public}d, screenId:%{public}" PRIu64"",
-        displayInfo->GetWidth(), displayInfo->GetHeight(), displayInfo->GetDisplayId());
+    WLOGFI("create new window node container display width:%{public}d, height:%{public}d, " \
+        "isMinimized:%{public}d, screenId:%{public}" PRIu64"", displayInfo->GetWidth(),
+        displayInfo->GetHeight(), isMinimizedByOtherWindow_, displayInfo->GetDisplayId());
     sptr<WindowNodeContainer> container = new WindowNodeContainer(displayInfo->GetDisplayId(),
-        static_cast<uint32_t>(displayInfo->GetWidth()), static_cast<uint32_t>(displayInfo->GetHeight()));
+        static_cast<uint32_t>(displayInfo->GetWidth()), static_cast<uint32_t>(displayInfo->GetHeight()),
+        isMinimizedByOtherWindow_);
     windowNodeContainerMap_.insert(std::make_pair(displayId, container));
     return container;
 }
@@ -825,6 +827,12 @@ WMError WindowRoot::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& wi
 void WindowRoot::SetMaxAppWindowNumber(int windowNum)
 {
     maxAppWindowNumber_ = windowNum;
+}
+
+void WindowRoot::SetMinimizedByOtherWindow(bool isMinimizedByOtherWindow)
+{
+    WLOGFI("isMinimizedByOtherWindow:%{public}d", isMinimizedByOtherWindow);
+    isMinimizedByOtherWindow_ = isMinimizedByOtherWindow;
 }
 } // namespace OHOS::Rosen
 } // namespace OHOS
