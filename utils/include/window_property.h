@@ -59,6 +59,7 @@ public:
     void SetWindowId(uint32_t windowId);
     void SetParentId(uint32_t parentId);
     void SetWindowFlags(uint32_t flags);
+    void AddWindowFlag(WindowFlag flag);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& state);
     void SetDecorEnable(bool decorEnable);
     void SetHitOffset(const PointInfo& offset);

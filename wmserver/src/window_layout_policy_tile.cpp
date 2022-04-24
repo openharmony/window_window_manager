@@ -152,7 +152,9 @@ void WindowLayoutPolicyTile::RemoveWindowNode(const sptr<WindowNode>& node)
         LayoutForegroundNodeQueue(displayId);
     }
     Rect reqRect = node->GetRequestRect();
-    node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
+    if (node->GetWindowToken()) {
+        node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
+    }
 }
 
 void WindowLayoutPolicyTile::LayoutForegroundNodeQueue(DisplayId displayId)
@@ -163,8 +165,13 @@ void WindowLayoutPolicyTile::LayoutForegroundNodeQueue(DisplayId displayId)
         node->SetWindowRect(winRect);
         CalcAndSetNodeHotZone(winRect, node);
         if (!(lastRect == winRect)) {
-            node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), node->GetWindowSizeChangeReason());
-            node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+            if (node->GetWindowToken()) {
+                node->GetWindowToken()->UpdateWindowRect(
+                    winRect, node->GetDecoStatus(), node->GetWindowSizeChangeReason());
+            }
+            if (node->surfaceNode_) {
+                node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+            }
         }
         for (auto& childNode : node->children_) {
             LayoutWindowNode(childNode);
@@ -237,7 +244,9 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows(DisplayId displayI
     for (auto node : foregroundNodesMap_[displayId]) {
         auto& rect = (*rectIt);
         node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-        node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        if (node->GetWindowToken()) {
+            node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        }
         node->SetRequestRect(rect);
         node->SetDecoStatus(true);
         WLOGFI("set rect for qwin id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
@@ -285,13 +294,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
     LimitWindowSize(node, displayRectMap_[node->GetDisplayId()], winRect);
     node->SetWindowRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
-    if (!(lastRect == winRect)) {
-        auto reason = node->GetWindowSizeChangeReason();
-        node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
-        if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
-            node->ResetWindowSizeChangeReason();
-        }
-    }
+    UpdateClientRectAndResetReason(node, lastRect, winRect);
     // update node bounds
     if (node->surfaceNode_ != nullptr) {
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);

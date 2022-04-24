@@ -32,6 +32,18 @@ uint32_t WindowController::GenWindowId()
     return ++windowId_;
 }
 
+void WindowController::CreateDesWindowNodeAndShow(sptr<WindowNode>& desNode, const WindowTransitionInfo& toInfo)
+{
+}
+
+void WindowController::NotifyWindowTransition(
+    const WindowTransitionInfo& fromInfo, const WindowTransitionInfo& toInfo)
+{
+    if (!windowAnimationController_) {
+        return;
+    }
+}
+
 WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token)
 {

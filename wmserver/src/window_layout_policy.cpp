@@ -106,6 +106,20 @@ bool WindowLayoutPolicy::IsVerticalDisplay(DisplayId displayId) const
     return displayRectMap_[displayId].width_ < displayRectMap_[displayId].height_;
 }
 
+void WindowLayoutPolicy::UpdateClientRectAndResetReason(const sptr<WindowNode>& node,
+    const Rect& lastLayoutRect, const Rect& winRect)
+{
+    if ((!(lastLayoutRect == winRect)) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        auto reason = node->GetWindowSizeChangeReason();
+        if (node->GetWindowToken()) {
+            node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
+        }
+        if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
+            node->ResetWindowSizeChangeReason();
+        }
+    }
+}
+
 void WindowLayoutPolicy::RemoveWindowNode(const sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
@@ -117,7 +131,9 @@ void WindowLayoutPolicy::RemoveWindowNode(const sptr<WindowNode>& node)
         LayoutWindowTree(node->GetDisplayId());
     }
     Rect reqRect = node->GetRequestRect();
-    node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
+    if (node->GetWindowToken()) {
+        node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
+    }
 }
 
 void WindowLayoutPolicy::UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow)

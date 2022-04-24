@@ -133,6 +133,11 @@ void WindowProperty::SetWindowFlags(uint32_t flags)
     flags_ = flags;
 }
 
+void WindowProperty::AddWindowFlag(WindowFlag flag)
+{
+    flags_ |= static_cast<uint32_t>(flag);
+}
+
 void WindowProperty::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {

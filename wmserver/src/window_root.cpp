@@ -18,7 +18,7 @@
 #include <cinttypes>
 #include <display_power_mgr_client.h>
 #include <hisysevent.h>
-
+#include <transaction/rs_transaction.h>
 #include "display_manager_service_inner.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -129,6 +129,43 @@ sptr<WindowNode> WindowRoot::GetWindowNode(uint32_t windowId) const
         return nullptr;
     }
     return iter->second;
+}
+
+sptr<WindowNode> WindowRoot::FindWindowNodeWithToken(const sptr<IRemoteObject>& token) const
+{
+    if (token == nullptr) {
+        WLOGFE("token is null");
+        return nullptr;
+    }
+    auto iter = std::find_if(windowNodeMap_.begin(), windowNodeMap_.end(),
+        [token](const std::map<uint32_t, sptr<WindowNode>>::value_type& pair) {
+            if (!(WindowHelper::IsSubWindow(pair.second->GetWindowType()))) {
+                return pair.second->abilityToken_ == token;
+            }
+            return false;
+        });
+    if (iter == windowNodeMap_.end()) {
+        WLOGFE("cannot find windowNode");
+        return nullptr;
+    }
+    return iter->second;
+}
+
+WMError WindowRoot::ShowInTransition(sptr<WindowNode>& node)
+{
+    return WMError::WM_OK;
+}
+
+// NotifyWindowTransition Create
+WMError WindowRoot::SaveDesWindowNode(sptr<WindowNode>& node)
+{
+    return WMError::WM_OK;
+}
+
+// ability create
+WMError WindowRoot::SaveWindowWithWindowToken(sptr<WindowNode> node)
+{
+    return WMError::WM_OK;
 }
 
 WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
