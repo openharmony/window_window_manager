@@ -58,6 +58,7 @@ public:
     void SetOffsetY(int32_t offsetY);
     void SetWidth(int32_t width);
     void SetHeight(int32_t height);
+    void SetOffset(int32_t offsetX, int32_t offsetY);
     void SetRefreshRate(uint32_t refreshRate);
     void SetVirtualPixelRatio(float virtualPixelRatio);
     void SetOrientation(Orientation orientation);

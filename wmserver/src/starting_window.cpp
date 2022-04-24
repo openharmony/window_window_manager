@@ -136,10 +136,13 @@ void StartingWindow::UpdateRSTree(sptr<WindowNode>& node)
         dms.UpdateRSTree(displayId, node->leashWinSurfaceNode_, true);
         node->leashWinSurfaceNode_->AddChild(node->startingWinSurfaceNode_, -1);
     } else { // hot start
-        if (node->leashWinSurfaceNode_) { // to app
-            dms.UpdateRSTree(displayId, node->leashWinSurfaceNode_, true);
-        } else { // to launcher
-            dms.UpdateRSTree(displayId, node->surfaceNode_, true);
+        const auto& displayIdVec = node->GetShowingDisplays();
+        for (auto& shownDisplayId : displayIdVec) {
+            if (node->leashWinSurfaceNode_) { // to app
+                dms.UpdateRSTree(shownDisplayId, node->leashWinSurfaceNode_, true);
+            } else { // to launcher
+                dms.UpdateRSTree(shownDisplayId, node->surfaceNode_, true);
+            }
         }
     }
 }

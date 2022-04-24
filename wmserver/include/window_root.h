@@ -62,7 +62,7 @@ public:
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
-    void ProcessDisplayChange(const sptr<DisplayInfo>& displayInfo, DisplayStateChangeType type);
+    void ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type);
     void ProcessDisplayDestroy(DisplayId displayId);
     void ProcessDisplayCreate(DisplayId displayId);
 
@@ -70,6 +70,7 @@ public:
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
     void FocusFaultDetection() const;
     float GetVirtualPixelRatio(DisplayId displayId) const;
+    Rect GetDisplayGroupRect(DisplayId displayId) const;
     WMError UpdateSizeChangeReason(uint32_t windowId, WindowSizeChangeReason reason);
     void SetBrightness(uint32_t windowId, float brightness);
     void HandleKeepScreenOn(uint32_t windowId, bool requireLock);
@@ -78,7 +79,6 @@ public:
     void SetMaxAppWindowNumber(int windowNum);
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
-    void NotifyVirtualPixelRatioChange(sptr<DisplayInfo> displayInfo);
     std::vector<DisplayId> GetAllDisplayIds() const;
     void SetWindowStretchable(bool stretchable);
 
@@ -96,6 +96,7 @@ private:
         const sptr<WindowNodeContainer>& container, Rect rect);
     ScreenId GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay);
     void ProcessExpandDisplayCreate(DisplayId displayId, ScreenId screenGroupId);
+    std::map<DisplayId, sptr<DisplayInfo>> GetAllDisplayInfos(const std::vector<DisplayId>& displayIdVec);
 
     std::recursive_mutex& mutex_;
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;

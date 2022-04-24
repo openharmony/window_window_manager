@@ -56,6 +56,7 @@ void WindowLayoutPolicyTile::Launch()
 
 void WindowLayoutPolicyTile::InitAllRects()
 {
+    displayGroupLimitRect_ = displayGroupRect_;
     for (auto& iter : displayRectMap_) {
         DisplayId displayId = iter.first;
         limitRectMap_[displayId] = iter.second;
@@ -293,7 +294,10 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
             UpdateFloatingLayoutRect(limitRect, winRect);
         }
     }
-    LimitWindowSize(node, displayRectMap_[node->GetDisplayId()], winRect);
+
+    LimitFloatingWindowSize(node, displayRectMap_[node->GetDisplayId()], winRect);
+    LimitMainFloatingWindowPosition(node, winRect);
+
     node->SetWindowRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
     UpdateClientRectAndResetReason(node, lastRect, winRect);
