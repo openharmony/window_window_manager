@@ -65,7 +65,7 @@ public:
     static bool InitSplitRects();
     static void UpdateSplitRects(const sptr<Window>& window);
     static bool RectEqualToRect(const Rect& l, const Rect& r);
-    static Rect GetDefaultFoatingRect(const sptr<Window>& window);
+    static Rect GetDefaultFloatingRect(const sptr<Window>& window);
     static Rect CalcLimitedRect(const Rect& rect, float virtualPixelRatio);
     static Rect GetDecorateRect(const Rect& rect, float virtualPixelRatio);
     static Rect GetFloatingLimitedRect(const Rect& rect, float virtualPixelRatio);

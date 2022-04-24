@@ -176,7 +176,7 @@ void WindowLayoutPolicyCascade::LimitMoveBounds(Rect& rect) const
 void WindowLayoutPolicyCascade::InitCascadeRect()
 {
     constexpr uint32_t half = 2;
-    constexpr float ratio = 0.66;  // 0.66: default height/width ratio
+    constexpr float ratio = DEFAULT_ASPECT_RATIO;
 
     // calculate default H and w
     uint32_t defaultW = static_cast<uint32_t>(displayRect_.width_ * ratio);

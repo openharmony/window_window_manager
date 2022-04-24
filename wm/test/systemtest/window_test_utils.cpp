@@ -102,7 +102,7 @@ sptr<WindowScene> WindowTestUtils::CreateWindowScene()
     return scene;
 }
 
-Rect WindowTestUtils::GetDefaultFoatingRect(const sptr<Window>& window)
+Rect WindowTestUtils::GetDefaultFloatingRect(const sptr<Window>& window)
 {
     limitDisplayRect_ = displayRect_;
     UpdateSplitRects(window);
@@ -201,7 +201,7 @@ void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window)
     float virtualPixelRatio = GetVirtualPixelRatio(0);
     uint32_t edgeInterval = 48 * virtualPixelRatio; // 48 is edge interval
     uint32_t midInterval = 24 * virtualPixelRatio; // 24 is mid interval
-    constexpr float ratio = 0.66;  // 0.66: default height/width ratio
+    constexpr float ratio = DEFAULT_ASPECT_RATIO;
     constexpr int half = 2;
     limitDisplayRect_ = displayRect_;
     UpdateSplitRects(window);

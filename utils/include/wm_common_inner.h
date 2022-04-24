@@ -71,6 +71,7 @@ enum class PropertyChangeAction : uint32_t {
 
 namespace {
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
+    constexpr float DEFAULT_ASPECT_RATIO = 0.66;
     constexpr uint32_t DIVIDER_WIDTH = 8;
     constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 37;
     constexpr uint32_t WINDOW_FRAME_WIDTH = 5;

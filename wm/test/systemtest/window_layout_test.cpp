@@ -111,7 +111,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
     };
     const sptr<Window>& window = utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = utils::GetDefaultFoatingRect(window);
+    Rect expect = utils::GetDefaultFloatingRect(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(utils::RectEqualTo(window, expect));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
@@ -270,7 +270,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
     };
     const sptr<Window>& window = utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = utils::GetDefaultFoatingRect(window);
+    Rect expect = utils::GetDefaultFloatingRect(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(utils::RectEqualTo(window, expect));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
@@ -294,7 +294,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
     };
     const sptr<Window>& window = utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = utils::GetDefaultFoatingRect(window);
+    Rect expect = utils::GetDefaultFloatingRect(window);
 
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(utils::RectEqualTo(window, expect));
@@ -324,7 +324,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
     };
     const sptr<Window>& window = utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = utils::GetDefaultFoatingRect(window);
+    Rect expect = utils::GetDefaultFloatingRect(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(utils::RectEqualTo(window, expect));
     ASSERT_EQ(WMError::WM_OK, window->Maximize());
@@ -353,7 +353,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     };
     const sptr<Window>& window = utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = utils::GetDefaultFoatingRect(window);
+    Rect expect = utils::GetDefaultFloatingRect(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     utils::InitTileWindowRects(window);
     ASSERT_TRUE(utils::RectEqualTo(window, expect));
@@ -459,7 +459,7 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
     };
     const sptr<Window>& window = utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = utils::GetDefaultFoatingRect(window);
+    Rect expect = utils::GetDefaultFloatingRect(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(utils::RectEqualTo(window, expect));
 }
@@ -484,7 +484,7 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
     };
     const sptr<Window>& window = utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
-    Rect expect = utils::GetDefaultFoatingRect(window);
+    Rect expect = utils::GetDefaultFloatingRect(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(utils::RectEqualTo(window, expect));
     window->Resize(negativeW, negativeH);
