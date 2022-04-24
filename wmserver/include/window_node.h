@@ -68,6 +68,7 @@ public:
     uint32_t GetCallingWindow() const;
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     void SetRequestedOrientation(Orientation orientation);
+    void SetShowingDisplays(const std::vector<DisplayId>& displayIdVec);
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
     uint32_t GetParentId() const;
@@ -92,6 +93,7 @@ public:
     bool IsSplitMode() const;
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
     Orientation GetRequestedOrientation() const;
+    std::vector<DisplayId> GetShowingDisplays() const;
     void ResetWindowSizeChangeReason();
 
     sptr<WindowNode> parent_;
@@ -108,6 +110,9 @@ public:
     bool isPlayAnimationShow_ { false };
     bool isPlayAnimationHide_ { false };
     bool startingWindowShown_ { false };
+    bool isShowingOnMultiDisplays_ { false };
+    std::vector<DisplayId> showingDisplays_;
+
 private:
     sptr<WindowProperty> property_ = nullptr;
     sptr<IWindow> windowToken_ = nullptr;

@@ -80,7 +80,7 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
         WLOGFE("There is no display for this window action.");
         return;
     }
-    WLOGFI("update display info to IMS.");
+    WLOGFI("update display info to IMS, displayId: %{public}" PRIu64"", displayId);
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(physicalDisplays_, logicalDisplays_);
 }
 
