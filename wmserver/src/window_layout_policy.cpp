@@ -49,6 +49,7 @@ void WindowLayoutPolicy::Reorder()
 
 void WindowLayoutPolicy::LimitWindowToBottomRightCorner(const sptr<WindowNode>& node)
 {
+<<<<<<< HEAD
     Rect windowRect = node->GetRequestRect();
     Rect displayRect = displayRectMap_[node->GetDisplayId()];
     windowRect.posX_ = std::max(windowRect.posX_, displayRect.posX_);
@@ -75,10 +76,14 @@ void WindowLayoutPolicy::LimitWindowToBottomRightCorner(const sptr<WindowNode>& 
     for (auto& childNode : node->children_) {
         LimitWindowToBottomRightCorner(childNode);
     }
+=======
+    WLOGFI("LimitWindowToBottomRightCorner");
+>>>>>>> support drag cross display
 }
 
 void WindowLayoutPolicy::UpdateDisplayGroupRect()
 {
+<<<<<<< HEAD
     Rect newDisplayGroupRect = { 0, 0, 0, 0 };
     // current mutiDisplay is only support left-right combination, maxNum is two
     for (auto& elem : displayRectMap_) {
@@ -92,10 +97,14 @@ void WindowLayoutPolicy::UpdateDisplayGroupRect()
     displayGroupRect_ = newDisplayGroupRect;
     WLOGFI("displayGroupRect_: [ %{public}d, %{public}d, %{public}d, %{public}d]",
         displayGroupRect_.posX_, displayGroupRect_.posY_, displayGroupRect_.width_, displayGroupRect_.height_);
+=======
+    WLOGFI("UpdateDisplayGroupRect");
+>>>>>>> support drag cross display
 }
 
 void WindowLayoutPolicy::UpdateDisplayGroupLimitRect_()
 {
+<<<<<<< HEAD
     auto firstDisplayLimitRect = limitRectMap_.begin()->second;
     Rect newDisplayGroupLimitRect = { firstDisplayLimitRect.posX_, firstDisplayLimitRect.posY_, 0, 0 };
     for (auto& elem : limitRectMap_) {
@@ -135,6 +144,16 @@ void WindowLayoutPolicy::UpdateRectInDisplayGroup(const sptr<WindowNode>& node,
     for (auto& childNode : node->children_) {
         UpdateRectInDisplayGroup(childNode, srcDisplayRect, dstDisplayRect);
     }
+=======
+    WLOGFI("UpdateDisplayGroupLimitRect_");
+}
+
+void WindowLayoutPolicy::UpdateNodeAbsoluteCordinate(const sptr<WindowNode>& node,
+                                                     const Rect& srcDisplayRect,
+                                                     const Rect& dstDisplayRect)
+{
+    WLOGFI("UpdateNodeAbsoluteCordinate");
+>>>>>>> support drag cross display
 }
 
 bool WindowLayoutPolicy::IsMultiDisplay()
@@ -150,6 +169,7 @@ void WindowLayoutPolicy::UpdateMultiDisplayFlag()
     } else {
         isMultiDisplay_ = false;
         WLOGFI("current mode is not muti-display");
+<<<<<<< HEAD
     }
 }
 
@@ -178,6 +198,18 @@ void WindowLayoutPolicy::UpdateRectInDisplayGroupForAllNodes(DisplayId displayId
     }
 }
 
+=======
+    }
+}
+
+void WindowLayoutPolicy::UpdateNodesAbsoluteCordinatesInAllDisplay(DisplayId displayId,
+                                                                   const Rect& srcDisplayRect,
+                                                                   const Rect& dstDisplayRect)
+{
+    WLOGFI("UpdateNodesAbsoluteCordinatesInAllDisplay");
+}
+
+>>>>>>> support drag cross display
 void WindowLayoutPolicy::PostProcessWhenDisplayChange()
 {
     UpdateMultiDisplayFlag();
@@ -195,7 +227,11 @@ void WindowLayoutPolicy::ProcessDisplayCreate(DisplayId displayId, const std::ma
     for (auto& elem : displayRectMap) {
         auto iter = displayRectMap_.find(elem.first);
         if (iter != displayRectMap_.end()) {
+<<<<<<< HEAD
             UpdateRectInDisplayGroupForAllNodes(elem.first, iter->second, elem.second);
+=======
+            UpdateNodesAbsoluteCordinatesInAllDisplay(elem.first, iter->second, elem.second);
+>>>>>>> support drag cross display
             iter->second = elem.second;
         } else {
             if (elem.first != displayId) {
@@ -215,7 +251,11 @@ void WindowLayoutPolicy::ProcessDisplayDestroy(DisplayId displayId, const std::m
     for (auto oriIter = displayRectMap_.begin(); oriIter != displayRectMap_.end();) {
         auto newIter = displayRectMap.find(oriIter->first);
         if (newIter != displayRectMap.end()) {
+<<<<<<< HEAD
             UpdateRectInDisplayGroupForAllNodes(oriIter->first, oriIter->second, newIter->second);
+=======
+            UpdateNodesAbsoluteCordinatesInAllDisplay(oriIter->first, oriIter->second, newIter->second);
+>>>>>>> support drag cross display
             oriIter->second = newIter->second;
             ++oriIter;
         } else {
@@ -225,6 +265,7 @@ void WindowLayoutPolicy::ProcessDisplayDestroy(DisplayId displayId, const std::m
             }
             displayRectMap_.erase(oriIter++);
         }
+<<<<<<< HEAD
     }
 
     PostProcessWhenDisplayChange();
@@ -243,6 +284,26 @@ void WindowLayoutPolicy::ProcessDisplaySizeChangeOrRotation(DisplayId displayId,
     }
 
     PostProcessWhenDisplayChange();
+=======
+    }
+
+    PostProcessWhenDisplayChange();
+    WLOGFI("Process display destroy, displayId: %{public}" PRIu64"", displayId);
+}
+
+void WindowLayoutPolicy::ProcessDisplaySizeChangeOrRotation(DisplayId displayId,
+                                                            const std::map<DisplayId, Rect>& displayRectMap)
+{
+    for (auto& elem : displayRectMap) {
+        auto iter = displayRectMap_.find(elem.first);
+        if (iter != displayRectMap_.end()) {
+            UpdateNodesAbsoluteCordinatesInAllDisplay(elem.first, iter->second, elem.second);
+            iter->second = elem.second;
+        }
+    }
+
+    PostProcessWhenDisplayChange();
+>>>>>>> support drag cross display
     WLOGFI("Process display change, displayId: %{public}" PRIu64"", displayId);
 }
 
