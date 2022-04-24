@@ -72,7 +72,6 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     windowRoot_->FocusFaultDetection();
     FlushWindowInfo(property->GetWindowId());
     HandleTurnScreenOn(node);
-    windowRoot_->HandleKeepScreenOn(node->GetWindowId(), node->IsKeepScreenOn());
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
         node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
@@ -144,7 +143,6 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
     }
     windowRoot_->FocusFaultDetection();
     FlushWindowInfo(windowId);
-    windowRoot_->HandleKeepScreenOn(windowId, false);
     return res;
 }
 
@@ -161,7 +159,6 @@ WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
     }
     windowRoot_->FocusFaultDetection();
     FlushWindowInfoWithDisplayId(displayId);
-    windowRoot_->HandleKeepScreenOn(windowId, false);
     return res;
 }
 
