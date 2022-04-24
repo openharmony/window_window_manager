@@ -70,7 +70,7 @@ void WindowLayoutPolicyTile::InitTileWindowRects()
     uint32_t edgeIntervalVp = static_cast<uint32_t>(EDGE_INTERVAL * virtualPixelRatio);
     uint32_t midIntervalVp = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio);
 
-    constexpr float ratio = 0.66; // 0.66: default height/width ratio
+    constexpr float ratio = DEFAULT_ASPECT_RATIO;
     constexpr int half = 2;
     maxTileWinNum_ = GetMaxTileWinNum();
     WLOGFI("set max tile window num %{public}u", maxTileWinNum_);
