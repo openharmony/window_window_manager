@@ -156,6 +156,13 @@ WMError WindowAdapter::GetSystemDecorEnable(bool& isSystemDecorEnable)
     return windowManagerServiceProxy_->GetSystemDecorEnable(isSystemDecorEnable);
 }
 
+WMError WindowAdapter::GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
+    return windowManagerServiceProxy_->GetModeChangeHotZones(displayId, hotZones);
+}
+
 bool WindowAdapter::InitWMSProxy()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);

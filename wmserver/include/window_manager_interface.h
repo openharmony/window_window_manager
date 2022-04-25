@@ -55,6 +55,7 @@ public:
         TRANS_ID_ANIMATION_SET_CONTROLLER,
         TRANS_ID_GET_SYSTEM_DECOR_ENABLE,
         TRANS_ID_NOTIFY_WINDOW_TRANSITION,
+        TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -81,6 +82,7 @@ public:
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) = 0;
     virtual WMError GetSystemDecorEnable(bool& isSystemDecorEnable) = 0;
     virtual void NotifyWindowTransition(WindowTransitionInfo from, WindowTransitionInfo to) = 0;
+    virtual WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) = 0;
 };
 }
 }

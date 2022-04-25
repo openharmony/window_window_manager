@@ -188,6 +188,28 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             NotifyWindowTransition(*from, *to);
             break;
         }
+        case WindowManagerMessage::TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE: {
+            DisplayId displayId = data.ReadUint64();
+            ModeChangeHotZones hotZones = { { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
+            WMError errCode = GetModeChangeHotZones(displayId, hotZones);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+
+            reply.WriteInt32(hotZones.fullscreen_.posX_);
+            reply.WriteInt32(hotZones.fullscreen_.posY_);
+            reply.WriteUint32(hotZones.fullscreen_.width_);
+            reply.WriteUint32(hotZones.fullscreen_.height_);
+
+            reply.WriteInt32(hotZones.primary_.posX_);
+            reply.WriteInt32(hotZones.primary_.posY_);
+            reply.WriteUint32(hotZones.primary_.width_);
+            reply.WriteUint32(hotZones.primary_.height_);
+
+            reply.WriteInt32(hotZones.secondary_.posX_);
+            reply.WriteInt32(hotZones.secondary_.posY_);
+            reply.WriteUint32(hotZones.secondary_.width_);
+            reply.WriteUint32(hotZones.secondary_.height_);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

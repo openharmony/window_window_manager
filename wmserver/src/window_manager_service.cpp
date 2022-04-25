@@ -26,8 +26,9 @@
 #include "display_manager_service_inner.h"
 #include "drag_controller.h"
 #include "singleton_container.h"
-#include "window_manager_agent_controller.h"
+#include "window_helper.h"
 #include "window_inner_manager.h"
+#include "window_manager_agent_controller.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_trace.h"
@@ -162,26 +163,11 @@ bool WindowManagerService::ParseChildNode(xmlNode* child)
         }
     } else if (!xmlStrcmp(child->name, reinterpret_cast<const xmlChar*>("maxAppWindowNumber"))) {
         const char* maxAppWindowNumberStr = reinterpret_cast<const char*>(xmlNodeGetContent(child));
-        if (!maxAppWindowNumberStr) {
-            return false;
-        }
-        int maxAppWindowNumber = 0;
-        const char* strEnd = maxAppWindowNumberStr + strlen(maxAppWindowNumberStr);
-        auto it = std::find_if(maxAppWindowNumberStr, strEnd, [&maxAppWindowNumber](char c) {
-            if (c < '0' || c > '9') {
-                return true;
-            } else {
-                maxAppWindowNumber *= 10;
-                maxAppWindowNumber += c - '0';
-                return false;
-            }
-            });
-        if (it != strEnd) {
+        if (!maxAppWindowNumberStr || !WindowHelper::IsNumber(maxAppWindowNumberStr)) {
             WLOGFW("Invalid maxAppWindowNumber");
             return false;
-        } else {
-            windowRoot_->SetMaxAppWindowNumber(maxAppWindowNumber);
         }
+        windowRoot_->SetMaxAppWindowNumber(std::atoi(maxAppWindowNumberStr));
     } else if (!xmlStrcmp(child->name, reinterpret_cast<const xmlChar*>("minimizeByOther"))) {
         char* enable = reinterpret_cast<char*>(xmlGetProp(child, reinterpret_cast<const xmlChar*>("enable")));
         if (!enable) {
@@ -194,6 +180,22 @@ bool WindowManagerService::ParseChildNode(xmlNode* child)
         } else {
             WLOGFW("Invalid resource prop");
         }
+    } else if (!xmlStrcmp(child->name, reinterpret_cast<const xmlChar*>("modeChangeHotZones"))) {
+        const char* hotZones = reinterpret_cast<const char*>(xmlNodeGetContent(child));
+        if (!hotZones) {
+            WLOGFW("Invalid hotZones");
+            return false;
+        }
+        std::string hotZonesStr = hotZones;
+        auto result = WindowHelper::Split(hotZonesStr, " ");
+        if (result.size() != 3 || !WindowHelper::IsNumber(result[0]) ||                 // 3 hot zones, 0 fullscreen
+            !WindowHelper::IsNumber(result[1]) || !WindowHelper::IsNumber(result[2])) { // 1 primary, 2 secondary
+            return false;
+        }
+        hotZonesConfig_.fullscreenRange_ = static_cast<uint32_t>(std::stoi(result[0])); // 0 fullscreen
+        hotZonesConfig_.primaryRange_ = static_cast<uint32_t>(std::stoi(result[1]));    // 1 primary
+        hotZonesConfig_.secondaryRange_ = static_cast<uint32_t>(std::stoi(result[2]));  // 2 secondary
+        hotZonesConfig_.isModeChangeHotZoneConfigured_ = true;
     }
 
     return true;
@@ -425,6 +427,15 @@ WMError WindowManagerService::GetSystemDecorEnable(bool& isSystemDecorEnable)
 {
     isSystemDecorEnable = isSystemDecorEnable_;
     return WMError::WM_OK;
+}
+
+WMError WindowManagerService::GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones)
+{
+    if (!hotZonesConfig_.isModeChangeHotZoneConfigured_) {
+        return WMError::WM_DO_NOTHING;
+    }
+
+    return windowController_->GetModeChangeHotZones(displayId, hotZones, hotZonesConfig_);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -77,6 +77,7 @@ public:
 
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override;
     WMError GetSystemDecorEnable(bool& isSystemDecorEnable) override;
+    WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) override;
 
 protected:
     WindowManagerService();
@@ -100,6 +101,7 @@ private:
     sptr<DragController> dragController_;
     sptr<FreezeController> freezeDisplayController_;
     bool isSystemDecorEnable_ = true;
+    ModeChangeHotZonesConfig hotZonesConfig_ { false, 0, 0, 0 };
 };
 }
 }
