@@ -69,8 +69,8 @@ sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(DisplayId displa
         displayInfo->GetHeight(), isMinimizedByOtherWindow_, screenGroupId, displayId);
 
     sptr<WindowNodeContainer> container = new WindowNodeContainer(displayId,
-        static_cast<uint32_t>(displayInfo->GetWidth()), static_cast<uint32_t>(displayInfo->GetHeight()),
-        isMinimizedByOtherWindow_);
+        static_cast<uint32_t>(displayInfo->GetWidth()), static_cast<uint32_t>(displayInfo->GetHeight()));
+    container->SetMinimizedByOther(isMinimizedByOtherWindow_);
     windowNodeContainerMap_.insert(std::make_pair(screenGroupId, container));
     std::vector<DisplayId> displayVec = { displayId };
     displayIdMap_.insert(std::make_pair(screenGroupId, displayVec));
