@@ -77,6 +77,8 @@ ohos_systemtest("wm_window_subwindow_test") {
   sources = [ "window_subwindow_test.cpp" ]
 
   deps = [ ":wm_systemtest_common" ]
+
+  external_deps = [ "bundle_framework:appexecfwk_base" ]
 }
 
 ## SystemTest wm_window_subwindow_test }}}
@@ -132,6 +134,8 @@ ohos_systemtest("wm_window_move_drag_test") {
   sources = [ "window_move_drag_test.cpp" ]
 
   deps = [ ":wm_systemtest_common" ]
+
+  external_deps = [ "bundle_framework:appexecfwk_base" ]
 }
 
 ## SystemTest wm_window_move_drag_test }}}
@@ -216,7 +220,6 @@ config("wm_systemtest_common_public_config") {
 
     # for abilityContext
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
     "//foundation/aafwk/standard/frameworks/kits/appkit/native/ability_runtime/context",
     "//base/global/resmgr_standard/interfaces/innerkits/include",
     "//third_party/node/deps/icu-small/source/common",
@@ -264,5 +267,6 @@ ohos_static_library("wm_systemtest_common") {
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
+  external_deps = [ "bundle_framework:appexecfwk_base" ]
 }
 ## Build wm_systemtest_common.a }}}
