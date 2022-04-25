@@ -69,7 +69,7 @@ private:
     std::condition_variable conVar_;
     bool ready_ = false;
 #ifdef ACE_ENABLE_GL
-    RenderContext* rc_ = nullptr;
+    std::unique_ptr<RenderContext> renderContext_;
 #endif
     std::map<uint32_t, sptr<Window>> dividerMap_;
     std::vector<std::unique_ptr<WindowInnerMessage>> messages_;
