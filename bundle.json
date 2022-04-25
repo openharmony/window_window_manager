@@ -91,6 +91,16 @@
               ],
               "header_base": "//foundation/windowmanager/interfaces/innerkits/dm"
             }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/windowmanager/extension/extension_connection:libwindow_extension_client",
+            "header": {
+              "header_files": [
+                "window_extension_connection.h"
+              ],
+              "header_base": "//foundation/windowmanager/interfaces/innerkits/extension"
+            }
           }
         ],
         "test": [

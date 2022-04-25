@@ -42,13 +42,9 @@ public:
 private:
     std::shared_ptr<WindowExtensionContext> context_;
 };
-// void JsWindowConnectCallback::OnWindowCreate(sptr<Window> window)
-// {
-//     // call js api
-// }
 
 void JsWindowConnectCallback::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
-        const sptr<IRemoteObject> &remoteObject, int resultCode)
+                                                   const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
     WLOGFI("called");
 }
@@ -62,7 +58,7 @@ NativeValue* CreateJsWindowExtensionContext(NativeEngine& engine,
                                             std::shared_ptr<WindowExtensionContext> context)
 {
     WLOGFI("CreateJsWindowExtensionContext begin");
-    NativeValue* objValue = CreateJsExtensionContext(engine, context); // TODO CreateJsBaseContext?
+    NativeValue* objValue = CreateJsExtensionContext(engine, context);
     NativeObject* object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(objValue);
 
     std::unique_ptr<JsWindowExtensionContext> jsContext

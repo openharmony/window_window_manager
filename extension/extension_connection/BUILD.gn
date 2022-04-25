@@ -19,17 +19,16 @@ config("libwindow_extension_client_private_config") {
   include_dirs = [
     "include",
     "include/zidl",
-    "../window_extension/include",
     "../window_extension/include/zidl",
-    "../../interface/innerkits/wm",
-    "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
   ]
+}
+
+config("libextension_connection_public_config") {
+  include_dirs = [ "../../interfaces/innerkits/extension" ]
 }
 
 ohos_shared_library("libwindow_extension_client") {
   install_enable = true
-
   sources = [
     "../window_extension/src/window_extension_proxy.cpp",
     "src/window_extension_connection.cpp",
@@ -37,21 +36,23 @@ ohos_shared_library("libwindow_extension_client") {
     "src/window_extension_client_stub_impl.cpp",
   ]
 
+  public_configs = [ ":libextension_connection_public_config" ]
+
   configs = [ ":libwindow_extension_client_private_config" ]
 
   deps = [
-    "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/extension/window_extension:libwindow_extension",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base:appexecfwk_base",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/libeventhandler:libeventhandler",
   ]
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:ability_manager",
     "ability_runtime:runtime",
+    "bundle_framework:appexecfwk_base",
+    "eventhandler:libeventhandler",
     "graphic_standard:surface",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",

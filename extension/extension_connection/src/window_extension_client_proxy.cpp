@@ -74,8 +74,8 @@ void WindowExtensionClientProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyE
     }
 
     if (!keyEvent->WriteToParcel(data)) {
-         WLOGFE("write key event failed");
-         return;
+        WLOGFE("write key event failed");
+        return;
     }
     if (Remote()->SendRequest(TRANS_ID_ON_KEY_EVENT, data, replay, option) != ERR_NONE) {
         WLOGFE("send request failed");

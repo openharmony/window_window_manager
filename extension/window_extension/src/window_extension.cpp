@@ -49,7 +49,7 @@ void WindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRec
     const sptr<IRemoteObject> &token)
 {
     ExtensionBase<WindowExtensionContext>::Init(record, application, handler, token);
-    WLOGFI("WindowExtension begin init");   
+    WLOGFI("WindowExtension begin init");
 }
 
 std::shared_ptr<WindowExtensionContext> WindowExtension::CreateAndInitContext(

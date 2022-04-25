@@ -30,7 +30,6 @@ class JsWindowConnectCallback : public AbilityRuntime::AbilityConnectCallback {
 public:
     explicit JsWindowConnectCallback() = default;
     ~JsWindowConnectCallback() = default;
-    // void OnWindowCreate(sptr<Window> window); //TODO 
     virtual void OnAbilityConnectDone(const AppExecFwk::ElementName &element,
         const sptr<IRemoteObject> &remoteObject, int resultCode) override;
     virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;

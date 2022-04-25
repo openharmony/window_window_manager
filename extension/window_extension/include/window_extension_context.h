@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include <extension_context.h>
-
 #ifndef WINDOW_EXTENSION_CONTEXT_H
 #define WINDOW_EXTENSION_CONTEXT_H
+
+#include <extension_context.h>
+
 namespace OHOS {
 namespace Rosen {
 class WindowExtensionContext : public AbilityRuntime::ExtensionContext {
