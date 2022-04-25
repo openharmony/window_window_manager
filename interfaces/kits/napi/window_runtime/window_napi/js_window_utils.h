@@ -16,6 +16,7 @@
 #ifndef OHOS_JS_WINDOW_UTILS_H
 #define OHOS_JS_WINDOW_UTILS_H
 #include <map>
+#include "js_runtime_utils.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "window.h"
@@ -110,6 +111,22 @@ const std::map<ApiWindowMode, WindowMode> JS_TO_NATIVE_WINDOW_MODE_MAP {
     NativeValue* ColorSpaceInit(NativeEngine* engine);
     NativeValue* WindowStageEventTypeInit(NativeEngine* engine);
     bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability);
+    template<class T>
+    inline bool ConvertNativeValueToVector(NativeEngine& engine, NativeValue* nativeValue, std::vector<T>& out)
+    {
+        NativeArray* nativeArray = AbilityRuntime::ConvertNativeValueTo<NativeArray>(nativeValue);
+        if (nativeArray == nullptr) {
+            return false;
+        }
+        T value;
+        for (uint32_t i = 0; i < nativeArray->GetLength(); i++) {
+            if (!AbilityRuntime::ConvertFromJsValue(engine, nativeArray->GetElement(i), value)) {
+                return false;
+            }
+            out.emplace_back(value);
+        }
+        return true;
+    }
 }
 }
 #endif
