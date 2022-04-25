@@ -32,9 +32,6 @@
 #include "window_root.h"
 #include "snapshot_controller.h"
 
-#include "libxml/parser.h"
-#include "libxml/tree.h"
-
 namespace OHOS {
 namespace Rosen {
 class DisplayChangeListener : public IDisplayChangeListener {
@@ -89,8 +86,7 @@ private:
     void RegisterWindowManagerServiceHandler();
     void OnWindowEvent(Event event, uint32_t windowId);
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
-    bool LoadConfigXmlFile(std::string configFile);
-    bool ParseChildNode(xmlNode* child);
+    void ConfigureWindowManagerService();
 
     static inline SingletonDelegator<WindowManagerService> delegator;
     std::recursive_mutex mutex_;

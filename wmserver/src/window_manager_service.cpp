@@ -29,6 +29,7 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_agent_controller.h"
+#include "window_manager_config.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_trace.h"
@@ -106,99 +107,43 @@ bool WindowManagerService::Init()
         WLOGFW("WindowManagerService::Init failed");
         return false;
     }
-    if (!LoadConfigXmlFile(WINDOW_MANAGER_CONFIG_XML)) {
-        WLOGFW("Failed to load %{public}s", WINDOW_MANAGER_CONFIG_XML.c_str());
-        return false;
+    if (WindowManagerConfig::LoadConfigXml(WINDOW_MANAGER_CONFIG_XML)) {
+        WindowManagerConfig::DumpConfig();
+        ConfigureWindowManagerService();
     }
     WLOGFI("WindowManagerService::Init success");
     return true;
 }
 
-bool WindowManagerService::LoadConfigXmlFile(std::string configFile)
+void WindowManagerService::ConfigureWindowManagerService()
 {
-    xmlKeepBlanksDefault(0);
-    xmlDoc* file = xmlReadFile(configFile.c_str(), nullptr, 0);
-    if (!file) {
-        WLOGFE("Failed to open xml file");
-        return false;
-    }
-    xmlNode* rootNode = xmlDocGetRootElement(file);
-    if (!rootNode) {
-        WLOGFE("Failed to get xml file's RootNode");
-        xmlFreeDoc(file);
-        return false;
-    }
-    if (!xmlStrcmp(rootNode->name, reinterpret_cast<const xmlChar*>("Configs"))) {
-        xmlNode* child = rootNode->children;
-        for (; child; child = child->next) {
-            if (!ParseChildNode(child)) {
-                WLOGFE("Invalid resource name for %{public}s", configFile.c_str());
-                xmlFreeDoc(file);
-                return false;
-            }
-        }
-    } else {
-        WLOGFE("Wrong format for xml file");
-        xmlFreeDoc(file);
-        return false;
-    }
-    xmlFreeDoc(file);
-    WLOGFI("Success to Load %{public}s", configFile.c_str());
-    return true;
-}
+    auto enableConfig = WindowManagerConfig::GetEnableConfig();
+    auto numbersConfig = WindowManagerConfig::GetNumbersConfig();
 
-bool WindowManagerService::ParseChildNode(xmlNode* child)
-{
-    if (!xmlStrcmp(child->name, reinterpret_cast<const xmlChar*>("decor"))) {
-        char* enable = reinterpret_cast<char*>(xmlGetProp(child, reinterpret_cast<const xmlChar*>("enable")));
-        if (!enable) {
-            return false;
-        }
-        if (!strcmp(enable, "false")) {
-            isSystemDecorEnable_ = false;
-        } else if (!strcmp(enable, "true")) {
-            isSystemDecorEnable_ = true;
-        } else {
-            WLOGFW("Invalid resource prop");
-        }
-    } else if (!xmlStrcmp(child->name, reinterpret_cast<const xmlChar*>("maxAppWindowNumber"))) {
-        const char* maxAppWindowNumberStr = reinterpret_cast<const char*>(xmlNodeGetContent(child));
-        if (!maxAppWindowNumberStr || !WindowHelper::IsNumber(maxAppWindowNumberStr)) {
-            WLOGFW("Invalid maxAppWindowNumber");
-            return false;
-        }
-        windowRoot_->SetMaxAppWindowNumber(std::atoi(maxAppWindowNumberStr));
-    } else if (!xmlStrcmp(child->name, reinterpret_cast<const xmlChar*>("minimizeByOther"))) {
-        char* enable = reinterpret_cast<char*>(xmlGetProp(child, reinterpret_cast<const xmlChar*>("enable")));
-        if (!enable) {
-            return false;
-        }
-        if (!strcmp(enable, "false")) {
-            windowRoot_->SetMinimizedByOtherWindow(false);
-        } else if (!strcmp(enable, "true")) {
-            windowRoot_->SetMinimizedByOtherWindow(true);
-        } else {
-            WLOGFW("Invalid resource prop");
-        }
-    } else if (!xmlStrcmp(child->name, reinterpret_cast<const xmlChar*>("modeChangeHotZones"))) {
-        const char* hotZones = reinterpret_cast<const char*>(xmlNodeGetContent(child));
-        if (!hotZones) {
-            WLOGFW("Invalid hotZones");
-            return false;
-        }
-        std::string hotZonesStr = hotZones;
-        auto result = WindowHelper::Split(hotZonesStr, " ");
-        if (result.size() != 3 || !WindowHelper::IsNumber(result[0]) ||                 // 3 hot zones, 0 fullscreen
-            !WindowHelper::IsNumber(result[1]) || !WindowHelper::IsNumber(result[2])) { // 1 primary, 2 secondary
-            return false;
-        }
-        hotZonesConfig_.fullscreenRange_ = static_cast<uint32_t>(std::stoi(result[0])); // 0 fullscreen
-        hotZonesConfig_.primaryRange_ = static_cast<uint32_t>(std::stoi(result[1]));    // 1 primary
-        hotZonesConfig_.secondaryRange_ = static_cast<uint32_t>(std::stoi(result[2]));  // 2 secondary
-        hotZonesConfig_.isModeChangeHotZoneConfigured_ = true;
+    if (enableConfig.count("decor") != 0) {
+        isSystemDecorEnable_ = enableConfig["decor"];
     }
 
-    return true;
+    if (enableConfig.count("minimizeByOther") != 0) {
+        windowRoot_->SetMinimizedByOtherWindow(enableConfig["minimizeByOther"]);
+    }
+
+    if (numbersConfig.count("maxAppWindowNumber") != 0) {
+        auto numbers = numbersConfig["maxAppWindowNumber"];
+        if (numbers.size() == 1) {
+            windowRoot_->SetMaxAppWindowNumber(numbers[0]);
+        }
+    }
+
+    if (numbersConfig.count("modeChangeHotZones") != 0) {
+        auto numbers = numbersConfig["modeChangeHotZones"];
+        if (numbers.size() == 3) { // 3 hot zones
+            hotZonesConfig_.fullscreenRange_ = static_cast<uint32_t>(numbers[0]); // 0 fullscreen
+            hotZonesConfig_.primaryRange_ = static_cast<uint32_t>(numbers[1]);    // 1 primary
+            hotZonesConfig_.secondaryRange_ = static_cast<uint32_t>(numbers[2]);  // 2 secondary
+            hotZonesConfig_.isModeChangeHotZoneConfigured_ = true;
+        }
+    }
 }
 
 void WindowManagerService::OnStop()
