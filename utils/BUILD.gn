@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-
+import("//foundation/graphic/standard/graphic_config.gni")
 config("libwmutil_private_config") {
   include_dirs = [
     "include",
@@ -20,6 +20,10 @@ config("libwmutil_private_config") {
     "../interfaces/innerkits/dm",
     "../interfaces/innerkits/wm",
   ]
+  defines = []
+
+  # Get gpu defines
+  defines += gpu_defines
 }
 
 config("libwmutil_public_config") {
@@ -34,6 +38,7 @@ ohos_shared_library("libwmutil") {
     "src/screen_group_info.cpp",
     "src/screen_info.cpp",
     "src/singleton_container.cpp",
+    "src/surface_draw.cpp",
     "src/surface_reader.cpp",
     "src/surface_reader_handler_impl.cpp",
     "src/window_property.cpp",
@@ -44,7 +49,11 @@ ohos_shared_library("libwmutil") {
 
   public_configs = [ ":libwmutil_public_config" ]
 
-  deps = [ "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base" ]
+  deps = [
+    "//foundation/ace/ace_engine/build/external_config/flutter/skia:ace_skia_ohos",
+    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+  ]
 
   external_deps = [
     "bytrace_standard:bytrace_core",

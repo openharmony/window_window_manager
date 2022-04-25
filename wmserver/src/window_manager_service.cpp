@@ -62,6 +62,7 @@ void WindowManagerService::OnStart()
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     DisplayManagerServiceInner::GetInstance().RegisterDisplayChangeListener(listener);
     RegisterSnapshotHandler();
+    RegisterWindowManagerServiceHandler();
 }
 
 void WindowManagerService::RegisterSnapshotHandler()
@@ -90,6 +91,10 @@ void WindowManagerService::RegisterSnapshotHandler()
     } else {
         WLOGFI("WindowManagerService::RegisterSnapshotHandler OnStart succeed!");
     }
+}
+
+void WindowManagerService::RegisterWindowManagerServiceHandler()
+{
 }
 
 bool WindowManagerService::Init()
@@ -190,7 +195,7 @@ bool WindowManagerService::ParseChildNode(xmlNode* child)
             WLOGFW("Invalid resource prop");
         }
     }
-    
+
     return true;
 }
 
@@ -198,6 +203,11 @@ void WindowManagerService::OnStop()
 {
     SingletonContainer::Get<WindowInnerManager>().SendMessage(InnerWMCmd::INNER_WM_DESTROY_THREAD);
     WLOGFI("ready to stop service.");
+}
+
+void WindowManagerService::NotifyWindowTransition(WindowTransitionInfo fromInfo, WindowTransitionInfo toInfo)
+{
+    windowController_->NotifyWindowTransition(fromInfo, toInfo);
 }
 
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
@@ -218,7 +228,7 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
 
 WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 {
-    Rect rect = property->GetWindowRect();
+    Rect rect = property->GetRequestRect();
     uint32_t windowId = property->GetWindowId();
     WLOGFI("[WMS] Add: %{public}5d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
         "%{public}4d %{public}4d]", windowId, property->GetWindowType(), property->GetWindowMode(),

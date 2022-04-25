@@ -103,6 +103,19 @@ public:
     WindowType type_;
 };
 
+struct WindowTransitionInfo : public Parcelable {
+    std::string bundleName_;
+    std::string abilityName_;
+    WindowMode mode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    Rect windowRect_ = {0, 0, 0, 0};
+    sptr<IRemoteObject> abilityToken_ = nullptr;
+    DisplayId displayId_ = 0;
+    WindowType windowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    bool isShowWhenLocked_ = false;
+    virtual bool Marshalling(Parcel& parcel) const override;
+    static WindowTransitionInfo* Unmarshalling(Parcel& parcel);
+};
+
 class AccessibilityWindowInfo : public Parcelable {
 public:
     AccessibilityWindowInfo() = default;
