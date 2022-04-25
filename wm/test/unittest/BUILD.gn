@@ -144,7 +144,6 @@ config("wm_unittest_common_public_config") {
 
     # for abilityContext
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
-    "//foundation/appexecfwk/standard/interfaces/innerkits/appexecfwk_base/include",
     "//foundation/aafwk/standard/frameworks/kits/appkit/native/ability_runtime/context",
     "//base/global/resmgr_standard/interfaces/innerkits/include",
     "//third_party/node/deps/icu-small/source/common",
@@ -192,6 +191,9 @@ ohos_static_library("wm_unittest_common") {
     "//utils/native/base:utils",
   ]
 
-  external_deps = [ "ability_runtime:ability_context_native" ]
+  external_deps = [
+    "ability_runtime:ability_context_native",
+    "bundle_framework:appexecfwk_base",
+  ]
 }
 ## Build wm_unittest_common.a }}}
