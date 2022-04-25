@@ -33,7 +33,7 @@ using SysBarNodeMap = std::unordered_map<WindowType, sptr<WindowNode>>;
 using SysBarTintMap = std::unordered_map<WindowType, SystemBarRegionTint>;
 class WindowNodeContainer : public RefBase {
 public:
-    WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height, bool isMinimizedByOther);
+    WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height);
     ~WindowNodeContainer();
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);
@@ -85,6 +85,7 @@ public:
     void ProcessDisplayCreate(DisplayId displayId, const Rect& displayRect);
     void ProcessDisplayDestroy(DisplayId displayId, std::vector<uint32_t>& windowIds);
     void ProcessDisplayChange(DisplayId displayId, const Rect& displayRect);
+    void SetMinimizedByOther(bool isMinimizedByOther);
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
