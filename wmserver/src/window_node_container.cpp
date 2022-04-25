@@ -45,9 +45,8 @@ namespace {
     constexpr uint32_t MAX_BRIGHTNESS = 255;
 }
 
-WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height, bool isMinimizedByOther)
+WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height)
 {
-    isMinimizedByOther_ = isMinimizedByOther;
     Rect displayRect = {
         .posX_ = 0,
         .posY_ = 0,
@@ -1570,6 +1569,11 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
         return res;
     }
     return WMError::WM_OK;
+}
+
+void WindowNodeContainer::SetMinimizedByOther(bool isMinimizedByOther)
+{
+    isMinimizedByOther_ = isMinimizedByOther;
 }
 } // namespace Rosen
 } // namespace OHOS
