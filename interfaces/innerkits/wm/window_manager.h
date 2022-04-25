@@ -54,7 +54,7 @@ public:
     sptr<IRemoteObject> abilityToken_;
 };
 
-class IFocusChangedListener : public RefBase {
+class IFocusChangedListener : virtual public RefBase {
 public:
     virtual void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo) = 0;
 
@@ -82,7 +82,7 @@ public:
     bool isVisible_ { false };
 };
 
-class IVisibilityChangedListener : public RefBase {
+class IVisibilityChangedListener : virtual public RefBase {
 public:
     virtual void OnWindowVisibilityChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo) = 0;
 };
@@ -131,7 +131,7 @@ private:
     bool VectorMarshalling(Parcel& parcel) const;
     static void VectorUnmarshalling(Parcel& parcel, AccessibilityWindowInfo* windowInfo);
 };
-class IWindowUpdateListener : public RefBase {
+class IWindowUpdateListener : virtual public RefBase {
 public:
     virtual void OnWindowUpdate(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) = 0;
 };
