@@ -47,7 +47,7 @@ private:
 
     std::map<DisplayId, sptr<Window>> coverWindowMap_;
 #ifdef ACE_ENABLE_GL
-    RenderContext* rc_ = nullptr;
+    std::unique_ptr<RenderContext> renderContext_;
 #endif
 };
 }

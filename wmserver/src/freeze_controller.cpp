@@ -46,18 +46,9 @@ bool FreezeController::FreezeDisplay(DisplayId displayId)
     }
 
 #ifdef ACE_ENABLE_GL
-    WLOGFI("Draw cover window on gpu");
-    // init render context
-    static bool hasInitRC = false;
-    if (!hasInitRC) {
-        rc_ = RenderContextFactory::GetInstance().CreateEngine();
-        if (rc_ != nullptr) {
-            rc_->InitializeEglContext();
-            hasInitRC = true;
-        } else {
-            WLOGFE("InitilizeEglContext failed");
-            return false;
-        }
+    if (renderContext_ == nullptr) {
+        renderContext_ = std::make_unique<RenderContext>();
+        renderContext_->InitializeEglContext();
     }
 #endif
 
@@ -77,7 +68,7 @@ bool FreezeController::FreezeDisplay(DisplayId displayId)
     }
 
 #ifdef ACE_ENABLE_GL
-    rsSurface->SetRenderContext(rc_);
+    rsSurface->SetRenderContext(renderContext_.get());
 #endif
 
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManagerServiceInner::GetInstance().GetDisplaySnapshot(displayId);
