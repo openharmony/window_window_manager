@@ -458,6 +458,10 @@ ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds
     if (iter != allExpandScreenIds.end()) {
         allExpandScreenIds.erase(iter);
     }
+    if (allExpandScreenIds.empty()) {
+        WLOGFE("allExpandScreenIds is empty. make expand failed.");
+        return SCREEN_ID_INVALID;
+    }
     std::shared_ptr<RSDisplayNode> rsDisplayNode;
     for (uint32_t i = 0; i < expandScreenIds.size(); i++) {
         rsDisplayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(expandScreenIds[i]);
