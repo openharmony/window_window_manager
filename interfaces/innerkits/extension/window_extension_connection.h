@@ -52,9 +52,11 @@ public:
     ~WindowExtensionConnection() = default;
     void ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
         uint32_t uid, sptr<IWindowExtensionCallback>& callback);
+    void DisconnectExtension();
     void Show();
     void Hide();
     void RequestFocus();
+    void SetBounds(Rect rect);
 private:
     class Impl;
     sptr<Impl> pImpl_;

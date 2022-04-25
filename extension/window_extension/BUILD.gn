@@ -22,16 +22,8 @@ config("libwindow_extension_private_config") {
     "../extension_connection/include",
     "../extension_connection/include/zidl",
     "../../interfaces/kits/napi/window_runtime/window_napi",
-    "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
-    "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common",
-    "//foundation/aafwk/standard/interfaces/innerkits/runtime/include",
-  ]
-}
-
-config("libwindow_extension_public_config") {
-  include_dirs = [
+    "../../interfaces/innerkits/extension",
     "../../interfaces/innerkits/wm",
-    "../../utils/include",
   ]
 }
 
@@ -47,8 +39,6 @@ ohos_shared_library("libwindow_extension") {
   ]
 
   configs = [ ":libwindow_extension_private_config" ]
-
-  public_configs = [ ":libwindow_extension_public_config" ]
 
   deps = [
     "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common:napi_common",

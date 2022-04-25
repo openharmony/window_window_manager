@@ -124,13 +124,13 @@ void JsWindowExtension::GetSrcPath(std::string &srcPath)
 
     if (!Extension::abilityInfo_->isModuleJson) {
         srcPath.append(Extension::abilityInfo_->package);
-       srcPath.append("/assets/js/");
+        srcPath.append("/assets/js/");
         if (!Extension::abilityInfo_->srcPath.empty()) {
             srcPath.append(Extension::abilityInfo_->srcPath);
         }
         srcPath.append("/").append(Extension::abilityInfo_->name).append(".abc");
         return;
-   }
+    }
 
     if (!Extension::abilityInfo_->srcEntrance.empty()) {
         srcPath.append(Extension::abilityInfo_->moduleName + "/");
@@ -189,12 +189,12 @@ void JsWindowExtension::OnStart(const AAFwk::Want &want)
 {
     Extension::OnStart(want);
 
-    ElementName elementName = want.GetElement(); // TODO 为何之前是GetElementName()？
+    ElementName elementName = want.GetElement();
     std::string windowName = elementName.GetBundleName();
 
     stub_ = new(std::nothrow)WindowExtensionStubImpl(windowName);
     WLOGFI("JsWindowExtension OnStart begin..");
-    Rect rect { want.GetIntParam(RECT_FORM_KEY_POS_X, 0), 
+    Rect rect { want.GetIntParam(RECT_FORM_KEY_POS_X, 0),
     want.GetIntParam(RECT_FORM_KEY_POS_Y, 0),
     want.GetIntParam(RECT_FORM_KEY_WIDTH, 0),
     want.GetIntParam(RECT_FORM_KEY_HEIGHT, 0) };
@@ -211,7 +211,7 @@ void JsWindowExtension::OnStart(const AAFwk::Want &want)
         }
         OnWindowCreated();
         WLOGFI("ability context onWindowReady rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
-        rect.posX_, rect.posY_, rect.width_, rect.height_);
+            rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
 }
 

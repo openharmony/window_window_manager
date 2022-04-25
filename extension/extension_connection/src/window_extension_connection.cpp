@@ -116,7 +116,6 @@ void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::Element
 
 void WindowExtensionConnection::Impl::Show()
 {
-
     if (proxy_ != nullptr) {
         proxy_->Show();
         WLOGFI("show window");
@@ -136,6 +135,13 @@ void WindowExtensionConnection::Impl::RequestFocus()
 {
     if (proxy_ != nullptr) {
         proxy_->RequestFocus();
+    }
+}
+
+void WindowExtensionConnection::Impl::Resize(Rect rect)
+{
+    if (proxy_ != nullptr) {
+        proxy_->Resize(rect);
     }
 }
 
@@ -196,6 +202,11 @@ void WindowExtensionConnection::Hide()
 void WindowExtensionConnection::RequestFocus()
 {
     pImpl_->RequestFocus();
+}
+
+void WindowExtensionConnection::SetBounds(Rect rect)
+{
+    pImpl_->Resize(rect);
 }
 } // namespace Rosen
 } // namespace OHOS

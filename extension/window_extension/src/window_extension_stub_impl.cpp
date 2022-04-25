@@ -33,7 +33,6 @@ WindowExtensionStubImpl::WindowExtensionStubImpl(const std::string& windowName) 
 WindowExtensionStubImpl::~WindowExtensionStubImpl()
 {
     if (window_ != nullptr) {
-        // window_->RemoveDispatchInoutEventLisenser(); // TODO
         window_->Destroy();
     }
 }
