@@ -65,7 +65,7 @@ void WindowInnerManager::DrawSurface(const sptr<Window>& window)
         return;
     }
 #ifdef ACE_ENABLE_GL
-    rsSurface->SetRenderContext(rc_);
+    rsSurface->SetRenderContext(renderContext_.get());
 #endif
     if (!isDividerImageLoaded_) {
         isDividerImageLoaded_ = DecodeImageFile(splitIconPath_, dividerBitmap_);
@@ -194,18 +194,9 @@ void WindowInnerManager::CreateAndShowDivider(std::unique_ptr<WindowInnerMessage
     }
 
 #ifdef ACE_ENABLE_GL
-    WLOGFI("Draw divider on gpu");
-    // init render context
-    static bool hasInitRC = false;
-    if (!hasInitRC) {
-        rc_ = RenderContextFactory::GetInstance().CreateEngine();
-        if (rc_) {
-            rc_->InitializeEglContext();
-            hasInitRC = true;
-        } else {
-            WLOGFE("InitilizeEglContext failed");
-            return;
-        }
+    if (renderContext_ == nullptr) {
+        renderContext_ = std::make_unique<RenderContext>();
+        renderContext_->InitializeEglContext();
     }
 #endif
     DrawSurface(window);
