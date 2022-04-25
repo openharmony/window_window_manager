@@ -92,15 +92,11 @@ bool ColorGamutsFuzzTest(const uint8_t *data, size_t size)
     screen->SetScreenColorGamut(index);
     ScreenColorGamut colorGamut;
     screen->GetScreenColorGamut(colorGamut);
-    if (colorGamuts[index] != colorGamut) {
-        std::cout << "colorGamuts not equals." << std::endl;
-    }
+    // It is necessary to judge whether colorGamuts[index] and colorGamut are equal.
     screen->SetScreenGamutMap(static_cast<ScreenGamutMap>(gamutMap));
     ScreenGamutMap screenGamutMap;
     screen->GetScreenGamutMap(screenGamutMap);
-    if (static_cast<ScreenGamutMap>(gamutMap) != screenGamutMap) {
-        std::cout << "screenGamutMaps not equals." << std::endl;
-    }
+    // It is necessary to judge whether gamutMap and screenGamutMap are equal.
     return true;
 }
 } // namespace.OHOS::Rosen
