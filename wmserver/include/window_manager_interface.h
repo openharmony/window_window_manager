@@ -54,6 +54,7 @@ public:
         TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID,
         TRANS_ID_ANIMATION_SET_CONTROLLER,
         TRANS_ID_GET_SYSTEM_DECOR_ENABLE,
+        TRANS_ID_NOTIFY_WINDOW_TRANSITION,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -79,6 +80,7 @@ public:
     virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) = 0;
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) = 0;
     virtual WMError GetSystemDecorEnable(bool& isSystemDecorEnable) = 0;
+    virtual void NotifyWindowTransition(WindowTransitionInfo from, WindowTransitionInfo to) = 0;
 };
 }
 }

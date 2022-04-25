@@ -39,6 +39,7 @@ public:
         callingPid_ = IPCSkeleton::GetCallingPid();
         callingUid_ = IPCSkeleton::GetCallingUid();
     }
+    explicit WindowNode(const sptr<WindowProperty>& property) : property_(property) {}
     ~WindowNode() = default;
 
     void SetDisplayId(DisplayId displayId);
@@ -57,6 +58,9 @@ public:
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetCallingWindow(uint32_t windowId);
+    void SetCallingPid();
+    void SetCallingUid();
+    void SetWindowToken(sptr<IWindow> window);
     uint32_t GetCallingWindow() const;
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     void SetRequestedOrientation(Orientation orientation);
@@ -89,16 +93,19 @@ public:
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
+    std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_ = nullptr;
+    std::shared_ptr<RSSurfaceNode> startingWinSurfaceNode_ = nullptr;
     sptr<IRemoteObject> abilityToken_ = nullptr;
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
     int32_t priority_ { 0 };
     bool requestedVisibility_ { false };
     bool currentVisibility_ { false };
     bool isCovered_ { true }; // initial value true to ensure notification when this window is shown
-
+    bool isPlayAnimationShow_ { false };
+    bool isPlayAnimationHide_ { false };
 private:
-    sptr<WindowProperty> property_;
-    sptr<IWindow> windowToken_;
+    sptr<WindowProperty> property_ = nullptr;
+    sptr<IWindow> windowToken_ = nullptr;
     Rect hotZoneRect_ { 0, 0, 0, 0 };
     int32_t callingPid_;
     int32_t callingUid_;

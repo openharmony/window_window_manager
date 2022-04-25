@@ -80,6 +80,62 @@ WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
     return windowInfo;
 }
 
+bool WindowTransitionInfo::Marshalling(Parcel& parcel) const
+{
+    if (!parcel.WriteString(bundleName_) || !parcel.WriteString(abilityName_)) {
+        WLOGFE("Write ability name failed");
+        return false;
+    }
+
+    if (!parcel.WriteUint32(static_cast<uint32_t>(mode_))) {
+        WLOGFE("Write mode failed");
+        return false;
+    }
+
+    if (!(parcel.WriteInt32(windowRect_.posX_) && parcel.WriteInt32(windowRect_.posY_) &&
+        parcel.WriteUint32(windowRect_.width_) && parcel.WriteUint32(windowRect_.height_))) {
+        return false;
+    }
+
+    if (!parcel.WriteRemoteObject(abilityToken_)) {
+        WLOGFE("Write abilityToken failed");
+        return false;
+    }
+
+    if (!parcel.WriteUint64(displayId_)) {
+        WLOGFE("Write displayId failed");
+        return false;
+    }
+
+    if (!parcel.WriteUint32(static_cast<uint32_t>(windowType_))) {
+        WLOGFE("Write windowType_ failed");
+        return false;
+    }
+
+    if (!parcel.WriteBool(static_cast<uint32_t>(isShowWhenLocked_))) {
+        WLOGFE("Write windowType_ failed");
+        return false;
+    }
+    return true;
+}
+
+WindowTransitionInfo* WindowTransitionInfo::Unmarshalling(Parcel& parcel)
+{
+    auto windowTransitionInfo = new WindowTransitionInfo();
+    windowTransitionInfo->bundleName_ = parcel.ReadString();
+    windowTransitionInfo->abilityName_ = parcel.ReadString();
+    windowTransitionInfo->mode_ = static_cast<WindowMode>(parcel.ReadUint32());
+    windowTransitionInfo->windowRect_.posX_ = parcel.ReadInt32();
+    windowTransitionInfo->windowRect_.posY_  = parcel.ReadInt32();
+    windowTransitionInfo->windowRect_.width_  = parcel.ReadUint32();
+    windowTransitionInfo->windowRect_.height_  = parcel.ReadUint32();
+    windowTransitionInfo->abilityToken_ = parcel.ReadObject<IRemoteObject>();
+    windowTransitionInfo->displayId_ = parcel.ReadUint64();
+    windowTransitionInfo->windowType_ = static_cast<WindowType>(parcel.ReadUint32());
+    windowTransitionInfo->isShowWhenLocked_ = parcel.ReadBool();
+    return windowTransitionInfo;
+}
+
 bool AccessibilityWindowInfo::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteParcelable(currentWindowInfo_) &&
