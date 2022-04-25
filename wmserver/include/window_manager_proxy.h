@@ -54,6 +54,7 @@ public:
 
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
     WMError GetSystemDecorEnable(bool& isSystemDecorEnable) override;
+    WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) override;
 
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;

@@ -908,5 +908,17 @@ void WindowRoot::SetMinimizedByOtherWindow(bool isMinimizedByOtherWindow)
     WLOGFI("isMinimizedByOtherWindow:%{public}d", isMinimizedByOtherWindow);
     isMinimizedByOtherWindow_ = isMinimizedByOtherWindow;
 }
+
+WMError WindowRoot::GetModeChangeHotZones(DisplayId displayId,
+    ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config)
+{
+    auto container = GetWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("GetModeChangeHotZones failed, window container could not be found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    container->GetModeChangeHotZones(displayId, hotZones, config);
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen
 } // namespace OHOS

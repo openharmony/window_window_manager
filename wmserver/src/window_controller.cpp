@@ -626,5 +626,11 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
     }
     return WMError::WM_OK;
 }
+
+WMError WindowController::GetModeChangeHotZones(DisplayId displayId,
+    ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config)
+{
+    return windowRoot_->GetModeChangeHotZones(displayId, hotZones, config);
+}
 } // namespace OHOS
 } // namespace Rosen
