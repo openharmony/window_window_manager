@@ -444,19 +444,26 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
     const DisplayId& displayId = node->GetDisplayId();
     const auto& appWindowNodeVec = *(const_cast<WindowLayoutPolicyCascade*>(this)->
         windowNodeMaps_[displayId][WindowRootNodeType::APP_WINDOW_NODE]);
-    for (auto iter = appWindowNodeVec.rbegin(); iter != appWindowNodeVec.rend(); iter++) {
-        WLOGFI("GetCurCascadeRect id: %{public}d,", (*iter)->GetWindowId());
-        if ((*iter)->GetWindowType() != WindowType::WINDOW_TYPE_DOCK_SLICE &&
-            (*iter)->GetWindowId() != node->GetWindowId()) {
-            auto property = (*iter)->GetWindowProperty();
-            if (property != nullptr) {
-                cascadeRect = property->GetRequestRect();
+    const auto& aboveAppWindowNodeVec = *(const_cast<WindowLayoutPolicyCascade*>(this)->
+        windowNodeMaps_[displayId][WindowRootNodeType::ABOVE_WINDOW_NODE]);
+
+    std::vector<std::vector<sptr<WindowNode>>> roots = { aboveAppWindowNodeVec, appWindowNodeVec };
+    for (auto& root : roots) {
+        for (auto iter = root.rbegin(); iter != root.rend(); iter++) {
+            if ((*iter)->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+                (*iter)->GetWindowId() != node->GetWindowId()) {
+                auto property = (*iter)->GetWindowProperty();
+                if (property != nullptr) {
+                    cascadeRect = property->GetRequestRect();
+                }
+                WLOGFI("Get current cascadeRect: %{public}u [%{public}d, %{public}d, %{public}u, %{public}u]",
+                    (*iter)->GetWindowId(), cascadeRect.posX_, cascadeRect.posY_,
+                    cascadeRect.width_, cascadeRect.height_);
+                break;
             }
-            WLOGFI("get current cascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
-                cascadeRect.posX_, cascadeRect.posY_, cascadeRect.width_, cascadeRect.height_);
-            break;
         }
     }
+
     if (WindowHelper::IsEmptyRect(cascadeRect)) {
         WLOGFI("cascade rect is empty use first cascade rect");
         return cascadeRectsMap_[displayId].firstCascadeRect_;
@@ -502,13 +509,13 @@ void WindowLayoutPolicyCascade::SetCascadeRect(const sptr<WindowNode>& node)
         isFirstAppWindow = false;
     } else if (WindowHelper::IsAppWindow(property->GetWindowType()) && !isFirstAppWindow) {
         WLOGFI("set other app window cascade rect");
-        rect= GetCurCascadeRect(node);
+        rect = GetCurCascadeRect(node);
     } else {
         // system window
         WLOGFI("set system window cascade rect");
         rect = cascadeRectsMap_[node->GetDisplayId()].firstCascadeRect_;
     }
-    WLOGFI("set  cascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFI("set cascadeRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     node->SetRequestRect(rect);
     node->SetDecoStatus(true);
