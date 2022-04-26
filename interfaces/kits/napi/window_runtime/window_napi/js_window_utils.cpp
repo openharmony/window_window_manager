@@ -19,8 +19,8 @@
 #include "accesstoken_kit.h"
 #include "bundle_constants.h"
 #include "ipc_skeleton.h"
-#include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
+
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;

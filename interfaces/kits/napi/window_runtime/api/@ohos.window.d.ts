@@ -910,6 +910,15 @@ declare namespace window {
      * @since 9
      */
     disableWindowDecor(): void;
+
+    /**
+     * Dump window client information.
+     * Called in the dump callback of ability is the typical usage scenario.
+     * @since 9
+     * @param params Indicates the params from command.
+     * @return The dump info array.
+     */
+    dump(params: Array<string>): Array<string>;
   }
 
   enum WindowStageEventType {

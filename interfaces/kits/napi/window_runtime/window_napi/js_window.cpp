@@ -15,6 +15,7 @@
 
 #include "js_window.h"
 #include <new>
+#include "js_window_utils.h"
 #include "window.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
@@ -289,6 +290,13 @@ NativeValue* JsWindow::GetColorSpace(NativeEngine* engine, NativeCallbackInfo* i
     WLOGFI("[NAPI]GetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnGetColorSpace(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::Dump(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]Dump");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnDump(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
@@ -1438,6 +1446,30 @@ NativeValue* JsWindow::OnGetColorSpace(NativeEngine& engine, NativeCallbackInfo&
     return result;
 }
 
+NativeValue* JsWindow::OnDump(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("[NAPI]dump window start");
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        return nullptr;
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("[NAPI]window is nullptr or get invalid param");
+        return nullptr;
+    }
+    std::vector<std::string> params;
+    if (!ConvertNativeValueToVector(engine, info.argv[0], params)) {
+        WLOGFE("[NAPI]ConvertNativeValueToVector fail");
+        return nullptr;
+    }
+    std::vector<std::string> dumpInfo;
+    windowToken_->DumpInfo(params, dumpInfo);
+    NativeValue* dumpInfoValue = CreateNativeArray(engine, dumpInfo);
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] dump end",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    return dumpInfoValue;
+}
+
 std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 {
     WLOGFI("[NAPI]Try to find window %{public}s in g_jsWindowMap", windowName.c_str());
@@ -1497,6 +1529,7 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     BindNativeFunction(engine, *object, "setTransparent", JsWindow::SetTransparent);
     BindNativeFunction(engine, *object, "setCallingWindow", JsWindow::SetCallingWindow);
     BindNativeFunction(engine, *object, "disableWindowDecor", JsWindow::DisableWindowDecor);
+    BindNativeFunction(engine, *object, "dump", JsWindow::Dump);
 
     std::shared_ptr<NativeReference> jsWindowRef;
     jsWindowRef.reset(engine.CreateReference(objValue, 1));
