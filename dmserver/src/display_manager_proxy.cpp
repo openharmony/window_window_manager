@@ -934,7 +934,7 @@ void DisplayManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenId> scr
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("cancel make mirror or expand fail: WriteInterfaceToken failed");
         return;
