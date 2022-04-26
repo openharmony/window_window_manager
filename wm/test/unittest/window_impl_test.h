@@ -32,10 +32,7 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
 
-    static inline sptr<WindowImpl> window_ = nullptr;
-    static inline sptr<WindowOption> option_ = nullptr;
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
-    static inline std::unique_ptr<Mocker> m_;
 };
 } // namespace ROSEN
 } // namespace OHOS
