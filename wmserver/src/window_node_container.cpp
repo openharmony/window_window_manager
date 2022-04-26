@@ -195,7 +195,9 @@ WMError WindowNodeContainer::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, s
     }
     node->requestedVisibility_ = true;
     if (parentNode != nullptr) { // subwindow
-        if (parentNode->parent_ != root) {
+        if (parentNode->parent_ != root &&
+            !((node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) &&
+            (node->parent_ == aboveAppWindowNode_))) {
             WLOGFE("window type and parent window not match or try to add subwindow to subwindow, which is forbidden");
             return WMError::WM_ERROR_INVALID_PARAM;
         }
@@ -350,9 +352,6 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, bool isAdd, bool 
         // add or remove window without animation
         updateRSTreeFunc();
     }
-
-    UpdateWindowNodeMaps();
-
     return true;
 }
 
@@ -423,6 +422,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
         }
     }
     UpdateRSTree(node, false, node->isPlayAnimationHide_);
+    UpdateWindowNodeMaps();
     layoutPolicy_->RemoveWindowNode(node);
     windowPair_->HandleRemoveWindow(node);
     if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
@@ -576,6 +576,7 @@ void WindowNodeContainer::AssignZOrder()
         return false;
     };
     TraverseWindowTree(func, false);
+    UpdateWindowNodeMaps();
 }
 
 WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
