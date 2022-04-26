@@ -480,12 +480,14 @@ void WindowManager::UpdateSystemBarRegionTints(DisplayId displayId,
 void WindowManager::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
     WindowUpdateType type)
 {
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->NotifyAccessibilityWindowInfo(windowInfo, type);
 }
 
 void WindowManager::UpdateWindowVisibilityInfo(
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const
 {
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
 }
 
