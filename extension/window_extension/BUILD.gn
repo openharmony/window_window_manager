@@ -31,11 +31,11 @@ config("libwindow_extension_private_config") {
 ohos_shared_library("libwindow_extension") {
   sources = [
     "../extension_connection/src/window_extension_client_proxy.cpp",
-    "src/js_window_extension_context.cpp",
     "src/js_window_extension.cpp",
+    "src/js_window_extension_context.cpp",
+    "src/window_extension.cpp",
     "src/window_extension_stub.cpp",
     "src/window_extension_stub_impl.cpp",
-    "src/window_extension.cpp",
   ]
 
   configs = [ ":libwindow_extension_private_config" ]
@@ -44,16 +44,16 @@ ohos_shared_library("libwindow_extension") {
     "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common:napi_common",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/interfaces/kits/napi/window_runtime:window_native_kit",
-    "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/utils:libwmutil",
+    "//foundation/windowmanager/wm:libwm",
   ]
 
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
-    "ability_runtime:runtime",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:runtime",
     "bytrace_standard:bytrace_core",
     "graphic_standard:surface",
     "hilog_native:libhilog",
@@ -87,8 +87,8 @@ ohos_shared_library("window_extension_module") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
-    "ability_runtime:runtime",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:runtime",
     "hilog_native:libhilog",
   ]
 

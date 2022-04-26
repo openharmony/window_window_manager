@@ -34,7 +34,6 @@ gen_js_obj("window_extension_abc") {
   dep = ":gen_window_extension_abc"
 }
 
-
 ohos_shared_library("windowextension_napi") {
   sources = [ "window_extension_module.cpp" ]
 
