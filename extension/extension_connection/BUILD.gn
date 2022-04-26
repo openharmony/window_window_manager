@@ -31,9 +31,9 @@ ohos_shared_library("libwindow_extension_client") {
   install_enable = true
   sources = [
     "../window_extension/src/window_extension_proxy.cpp",
-    "src/window_extension_connection.cpp",
     "src/window_extension_client_stub.cpp",
     "src/window_extension_client_stub_impl.cpp",
+    "src/window_extension_connection.cpp",
   ]
 
   public_configs = [ ":libextension_connection_public_config" ]
@@ -42,14 +42,14 @@ ohos_shared_library("libwindow_extension_client") {
 
   deps = [
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/extension/window_extension:libwindow_extension",
+    "//foundation/windowmanager/wm:libwm",
   ]
 
   external_deps = [
     "ability_base:want",
-    "ability_runtime:abilitykit_native",
     "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
     "ability_runtime:runtime",
     "bundle_framework:appexecfwk_base",
     "eventhandler:libeventhandler",

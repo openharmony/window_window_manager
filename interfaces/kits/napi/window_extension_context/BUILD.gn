@@ -22,7 +22,6 @@ ts2abc_gen_abc("gen_window_extension_context_abc") {
   extra_args = [ "--module" ]
 }
 
-
 gen_js_obj("window_extension_context_js") {
   input = "window_extension_context.js"
   output = target_out_dir + "/window_extension_context.o"
