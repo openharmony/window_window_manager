@@ -36,7 +36,7 @@ public:
     WindowRoot(std::recursive_mutex& mutex, Callback callback) : mutex_(mutex), callback_(callback) {}
     ~WindowRoot() = default;
 
-    sptr<WindowNodeContainer> GetWindowNodeContainer(DisplayId displayId);
+    sptr<WindowNodeContainer> GetOrCreateWindowNodeContainer(DisplayId displayId);
     sptr<WindowNodeContainer> CreateWindowNodeContainer(DisplayId displayId);
     sptr<WindowNode> GetWindowNode(uint32_t windowId) const;
 
