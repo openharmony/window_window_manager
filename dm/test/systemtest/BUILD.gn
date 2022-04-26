@@ -119,7 +119,7 @@ config("dm_systemtest_common_public_config") {
     "//foundation/windowmanager/utils/include",
 
     # RSSurface
-    "//foundation/graphic/standard/interfaces/innerkits/surface",
+    "//foundation/graphic/standard/interfaces/inner_api/surface",
     "//foundation/graphic/standard/rosen/modules/render_service_client",
   ]
 }
