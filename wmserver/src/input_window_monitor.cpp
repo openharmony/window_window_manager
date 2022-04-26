@@ -52,7 +52,7 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
     if (displayId == DISPLAY_ID_INVALID) {
         return;
     }
-    auto container = windowRoot_->GetWindowNodeContainer(displayId);
+    auto container = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
     if (container == nullptr) {
         WLOGFE("can not get window node container.");
         return;
