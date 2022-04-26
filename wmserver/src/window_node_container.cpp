@@ -196,8 +196,8 @@ WMError WindowNodeContainer::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, s
     node->requestedVisibility_ = true;
     if (parentNode != nullptr) { // subwindow
         if (parentNode->parent_ != root &&
-            !((node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) &&
-            (node->parent_ == aboveAppWindowNode_))) {
+            !((parentNode->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) &&
+            (parentNode->parent_ == aboveAppWindowNode_))) {
             WLOGFE("window type and parent window not match or try to add subwindow to subwindow, which is forbidden");
             return WMError::WM_ERROR_INVALID_PARAM;
         }
