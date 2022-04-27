@@ -29,27 +29,34 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowRoot"};
 }
 
-ScreenId WindowRoot::GetScreenGroupId(DisplayId displayId)
+ScreenId WindowRoot::GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay)
 {
     for (auto iter : displayIdMap_) {
         auto displayIdVec = iter.second;
         if (std::find(displayIdVec.begin(), displayIdVec.end(), displayId) != displayIdVec.end()) {
+            isRecordedDisplay = true;
             return iter.first;
         }
     }
-
+    isRecordedDisplay = false;
     WLOGFE("Current display is not be recorded, displayId: %{public}" PRIu64 "", displayId);
     return DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
 }
 
 sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId displayId)
 {
-    ScreenId screenGroupId = GetScreenGroupId(displayId);
+    bool isRecordedDisplay;
+    ScreenId screenGroupId = GetScreenGroupId(displayId, isRecordedDisplay);
     auto iter = windowNodeContainerMap_.find(screenGroupId);
     if (iter != windowNodeContainerMap_.end()) {
+        // if container exist for screenGroup and display is not be recorded, process expand display
+        if (!isRecordedDisplay) {
+            ProcessExpandDisplayCreate(displayId, screenGroupId);
+        }
         return iter->second;
     }
 
+    // In case of have no container for default display, create container
     WLOGFE("Create container for current display, displayId: %{public}" PRIu64 "", displayId);
     return CreateWindowNodeContainer(displayId);
 }
@@ -816,6 +823,27 @@ void WindowRoot::FocusFaultDetection() const
     }
 }
 
+void WindowRoot::ProcessExpandDisplayCreate(DisplayId displayId, ScreenId screenGroupId)
+{
+    const sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+    if (displayInfo == nullptr || !CheckDisplayInfo(displayInfo)) {
+        WLOGFE("get display failed or get invailed display info, displayId :%{public}" PRIu64 "", displayId);
+        return;
+    }
+    auto container = windowNodeContainerMap_[screenGroupId];
+    if (container == nullptr) {
+        WLOGFE("window node container is nullptr, displayId :%{public}" PRIu64 "", displayId);
+        return;
+    }
+    // add displayId in displayIdMap
+    displayIdMap_[screenGroupId].push_back(displayId);
+    Rect displayRect = { 0, 0, displayInfo->GetWidth(), displayInfo->GetHeight() };
+    container->ProcessDisplayCreate(displayId, displayRect);
+    WLOGFI("[Display Create] Container exist, add new display, displayId: %{public}" PRIu64", Rect: ["
+        "%{public}d, %{public}d, %{public}d, %{public}d]", displayId, displayRect.posX_, displayRect.posY_,
+        displayRect.width_, displayRect.height_);
+}
+
 void WindowRoot::ProcessDisplayCreate(DisplayId displayId)
 {
     ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
@@ -829,22 +857,7 @@ void WindowRoot::ProcessDisplayCreate(DisplayId displayId)
             WLOGFI("[Display Create] Current display is already exist, displayId: %{public}" PRIu64"", displayId);
             return;
         }
-        const sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
-        if (displayInfo == nullptr || !CheckDisplayInfo(displayInfo)) {
-            WLOGFE("get display failed or get invailed display info, displayId :%{public}" PRIu64 "", displayId);
-            return;
-        }
-        auto container = iter->second;
-        if (container == nullptr) {
-            WLOGFE("window node container is nullptr, displayId :%{public}" PRIu64 "", displayId);
-        }
-        // add displayId in displayIdMap
-        displayIdMap_[screenGroupId].push_back(displayId);
-        Rect displayRect = { 0, 0, displayInfo->GetWidth(), displayInfo->GetHeight() };
-        container->ProcessDisplayCreate(displayId, displayRect);
-        WLOGFI("[Display Create] Container exist, add new display, displayId: %{public}" PRIu64", Rect: ["
-            "%{public}d, %{public}d, %{public}d, %{public}d]", displayId, displayRect.posX_, displayRect.posY_,
-            displayRect.width_, displayRect.height_);
+        ProcessExpandDisplayCreate(displayId, screenGroupId);
     }
 }
 

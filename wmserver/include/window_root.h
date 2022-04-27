@@ -92,7 +92,8 @@ private:
     bool CheckDisplayInfo(const sptr<DisplayInfo>& display);
     void NotifyKeyboardSizeChangeInfo(const sptr<WindowNode>& node,
         const sptr<WindowNodeContainer>& container, Rect rect);
-    ScreenId GetScreenGroupId(DisplayId displayId);
+    ScreenId GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay);
+    void ProcessExpandDisplayCreate(DisplayId displayId, ScreenId screenGroupId);
 
     std::recursive_mutex& mutex_;
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
