@@ -318,6 +318,43 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange02, Function | MediumTest | Le
         }
     }
 }
+
+/**
+ * @tc.name: CheckScreenDensityChange01
+ * @tc.desc: Check screen density change as set another density for screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayChangeTest, CheckScreenDensityChange01, Function | SmallTest | Level2)
+{
+    auto modes = defaultScreen_->GetSupportedModes();
+    uint32_t densityDpi = 320;
+    ASSERT_EQ(true, defaultScreen_->SetDensityDpi(densityDpi));
+}
+
+/**
+ * @tc.name: CheckScreenDensityChange02
+ * @tc.desc: Check screen density change as set another density for screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayChangeTest, CheckScreenDensityChange02, Function | SmallTest | Level2)
+{
+    auto modes = defaultScreen_->GetSupportedModes();
+    uint32_t densityDpi = 120;
+    ASSERT_EQ(true, defaultScreen_->SetDensityDpi(densityDpi));
+}
+
+/**
+ * @tc.name: CheckScreenDensityChange03
+ * @tc.desc: Check screen density change as set another density for screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayChangeTest, CheckScreenDensityChange03, Function | SmallTest | Level2)
+{
+    auto modes = defaultScreen_->GetSupportedModes();
+    uint32_t densityDpi = 160;
+    ASSERT_EQ(true, defaultScreen_->SetDensityDpi(densityDpi));
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS

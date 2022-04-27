@@ -126,6 +126,7 @@ enum class DisplayChangeEvent : uint32_t {
     DISPLAY_FREEZED,
     DISPLAY_UNFREEZED,
     UNKNOWN,
+    DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED,
 };
 }
 }

@@ -224,6 +224,17 @@ bool AbstractScreen::SetOrientation(Orientation orientation)
     return true;
 }
 
+bool AbstractScreen::SetVirtualPixelRatio(float virtualPixelRatio)
+{
+    virtualPixelRatio_ = virtualPixelRatio;
+    return true;
+}
+
+float AbstractScreen::GetVirtualPixelRatio() const
+{
+    return virtualPixelRatio_;
+}
+
 Rotation AbstractScreen::CalcRotation(Orientation orientation) const
 {
     sptr<SupportedScreenModes> info = GetActiveScreenMode();

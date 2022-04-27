@@ -44,6 +44,8 @@ public:
     virtual void UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow = false);
     virtual void UpdateLayoutRect(const sptr<WindowNode>& node) = 0;
     float GetVirtualPixelRatio(DisplayId displayId) const;
+    bool GetVirtualPixelRatioChangedFlag() const;
+    void SetVirtualPixelRatioChangedFlag(bool flag);
     void UpdateClientRectAndResetReason(const sptr<WindowNode>& node, const Rect& lastLayoutRect, const Rect& winRect);
 
 protected:
@@ -57,6 +59,8 @@ protected:
     bool IsVerticalDisplay(DisplayId displayId) const;
     bool IsFullScreenRecentWindowExist(const std::vector<sptr<WindowNode>>& nodeVec) const;
     void LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec);
+
+    bool VirtualPixelRatioChangedFlag_ = false;
 
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
