@@ -89,8 +89,8 @@ public:
     void SetMinimizedByOther(bool isMinimizedByOther);
     void GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
-    void SetLastVirutalPixelRatio(float virtualPixelRatio);
-    float GetLastVirtualPixelRatio() const;
+    void SetLastVirutalPixelRatio(DisplayId displayId, float virtualPixelRatio);
+    float GetLastVirtualPixelRatio(DisplayId displayId);
     void UpdateVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio);
 
 private:
@@ -143,7 +143,7 @@ private:
     uint32_t focusedWindow_ { INVALID_WINDOW_ID };
     uint32_t activeWindow_ = INVALID_WINDOW_ID;
 
-    float LastVirtualPixelRatio_ = { 1.0 };
+    std::map<DisplayId, float> lastVirtualPixelRatioMap_;
 
     sptr<AvoidAreaController> avoidController_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();

@@ -944,5 +944,5 @@ void WindowRoot::NotifyVirtualPixelRatioChange(sptr<DisplayInfo> displayInfo)
     }
     container->UpdateVirtualPixelRatio(displayInfo->GetDisplayId(), displayInfo->GetVirtualPixelRatio());
 }
-} // namespace OHOS::Rosen
+} // namespace Rosen
 } // namespace OHOS

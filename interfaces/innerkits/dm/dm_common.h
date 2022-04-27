@@ -28,6 +28,8 @@ namespace {
     constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
     constexpr int DOT_PER_INCH = 160;
     const static std::string DEFAULT_SCREEN_NAME = "buildIn";
+    constexpr int DOT_PER_INCH_MAXIMUM_VALUE = 640;
+    constexpr int DOT_PER_INCH_MINIMIM_VALUE = 80;
 }
 
 enum class PowerStateChangeReason : uint32_t {
@@ -125,8 +127,8 @@ enum class DisplayChangeEvent : uint32_t {
     DISPLAY_SIZE_CHANGED,
     DISPLAY_FREEZED,
     DISPLAY_UNFREEZED,
-    UNKNOWN,
     DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED,
+    UNKNOWN,
 };
 }
 }
