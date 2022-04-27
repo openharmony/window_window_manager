@@ -32,7 +32,7 @@ ohos_fuzztest("WindowFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "window_fuzzer.cpp" ]
-  public_deps = [
+  deps = [
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/wmserver:libwms",
     "//utils/native/base:utils",

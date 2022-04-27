@@ -1876,7 +1876,9 @@ void WindowImpl::SetRequestedOrientation(Orientation orientation)
         return;
     }
     property_->SetRequestedOrientation(orientation);
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ORIENTATION);
+    if (state_ == WindowState::STATE_SHOWN) {
+        UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ORIENTATION);
+    }
 }
 
 Orientation WindowImpl::GetRequestedOrientation()
