@@ -1592,5 +1592,27 @@ void WindowNodeContainer::GetModeChangeHotZones(DisplayId displayId, ModeChangeH
     hotZones.secondary_.width_ = config.secondaryRange_;
     hotZones.secondary_.height_ = displayRect.height_;
 }
+
+void WindowNodeContainer::SetLastVirutalPixelRatio(float virtualPixelRatio)
+{
+    LastVirtualPixelRatio_ = virtualPixelRatio;
+}
+
+float WindowNodeContainer::GetLastVirtualPixelRatio() const
+{
+    return LastVirtualPixelRatio_;
+}
+
+void WindowNodeContainer::UpdateVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio)
+{
+    if (fabs(GetLastVirtualPixelRatio() - virtualPixelRatio) > 1e-6) {
+        layoutPolicy_->SetVirtualPixelRatioChangedFlag(true);
+        SetLastVirutalPixelRatio(virtualPixelRatio);
+    }
+    layoutPolicy_->LayoutWindowTree(displayId);
+    if (layoutPolicy_->GetVirtualPixelRatioChangedFlag()) {
+        layoutPolicy_->SetVirtualPixelRatioChangedFlag(false);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -933,5 +933,16 @@ WMError WindowRoot::GetModeChangeHotZones(DisplayId displayId,
     container->GetModeChangeHotZones(displayId, hotZones, config);
     return WMError::WM_OK;
 }
+
+void WindowRoot::NotifyVirtualPixelRatioChange(sptr<DisplayInfo> displayInfo)
+{
+    WLOGFD("window should be updated for virtual pixel ratio changed");
+    auto container = GetOrCreateWindowNodeContainer(displayInfo->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("can't find window node container, failed!");
+        return;
+    }
+    container->UpdateVirtualPixelRatio(displayInfo->GetDisplayId(), displayInfo->GetVirtualPixelRatio());
+}
 } // namespace OHOS::Rosen
 } // namespace OHOS

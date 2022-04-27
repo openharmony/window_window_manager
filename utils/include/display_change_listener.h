@@ -29,6 +29,7 @@ enum class DisplayStateChangeType : uint32_t {
     DESTROY,
     FREEZE,
     UNFREEZE,
+    VIRTUAL_PIXEL_RATIO_CHANGE,
 };
 class IDisplayChangeListener : public RefBase {
 public:
