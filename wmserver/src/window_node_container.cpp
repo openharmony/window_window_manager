@@ -1601,7 +1601,7 @@ void WindowNodeContainer::SetLastVirutalPixelRatio(DisplayId displayId, float vi
 float WindowNodeContainer::GetLastVirtualPixelRatio(DisplayId displayId)
 {
     if (lastVirtualPixelRatioMap_.find(displayId) == lastVirtualPixelRatioMap_.end()) {
-        WLOGE("cannot find last virtual pixel ratio for display: %{public}llu", displayId);
+        WLOGE("cannot find last virtual pixel ratio for display: %{public}" PRIu64"", displayId);
         return -1;
     }
     return lastVirtualPixelRatioMap_[displayId];
