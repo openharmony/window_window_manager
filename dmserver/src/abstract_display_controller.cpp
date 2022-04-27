@@ -248,7 +248,7 @@ void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absS
     } else if (event == DisplayChangeEvent::DISPLAY_SIZE_CHANGED) {
         ProcessDisplaySizeChange(absScreen);
     } else if (event == DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED) {
-        
+        ProcessDisplayDensityChange(absScreen);
     } else {
         WLOGE("unknown screen change event. id:%{public}" PRIu64" event %{public}u", absScreen->dmsId_, event);
     }
