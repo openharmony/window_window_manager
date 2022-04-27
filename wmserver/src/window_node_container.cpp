@@ -1593,21 +1593,25 @@ void WindowNodeContainer::GetModeChangeHotZones(DisplayId displayId, ModeChangeH
     hotZones.secondary_.height_ = displayRect.height_;
 }
 
-void WindowNodeContainer::SetLastVirutalPixelRatio(float virtualPixelRatio)
+void WindowNodeContainer::SetLastVirutalPixelRatio(DisplayId displayId, float virtualPixelRatio)
 {
-    LastVirtualPixelRatio_ = virtualPixelRatio;
+    lastVirtualPixelRatioMap_[displayId] = virtualPixelRatio;
 }
 
-float WindowNodeContainer::GetLastVirtualPixelRatio() const
+float WindowNodeContainer::GetLastVirtualPixelRatio(DisplayId displayId)
 {
-    return LastVirtualPixelRatio_;
+    if (lastVirtualPixelRatioMap_.find(displayId) == lastVirtualPixelRatioMap_.end()) {
+        WLOGE("cannot find last virtual pixel ratio for display: %{public}llu", displayId);
+        return -1;
+    }
+    return lastVirtualPixelRatioMap_[displayId];
 }
 
 void WindowNodeContainer::UpdateVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio)
 {
-    if (fabs(GetLastVirtualPixelRatio() - virtualPixelRatio) > 1e-6) {
+    if (fabs(GetLastVirtualPixelRatio(displayId) - virtualPixelRatio) > 1e-6) {
         layoutPolicy_->SetVirtualPixelRatioChangedFlag(true);
-        SetLastVirutalPixelRatio(virtualPixelRatio);
+        SetLastVirutalPixelRatio(displayId, virtualPixelRatio);
     }
     layoutPolicy_->LayoutWindowTree(displayId);
     if (layoutPolicy_->GetVirtualPixelRatioChangedFlag()) {
