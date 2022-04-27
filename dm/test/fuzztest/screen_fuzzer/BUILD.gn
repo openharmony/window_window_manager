@@ -32,7 +32,7 @@ ohos_fuzztest("ScreenFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "screen_fuzzer.cpp" ]
-  public_deps = [
+  deps = [
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
     "//utils/native/base:utils",
