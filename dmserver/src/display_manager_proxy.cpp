@@ -993,7 +993,7 @@ bool DisplayManagerProxy::SetVirtualPixelRatio(ScreenId screenId, float virtualP
         WLOGFE("SetVirtualPixelRatio: WriteInterfaceToken failed");
         return false;
     }
-    if (!data.WriteUint64(screenId) || !data.WriteUint32(virtualPixelRatio)) {
+    if (!data.WriteUint64(screenId) || !data.WriteFloat(virtualPixelRatio)) {
         WLOGFE("SetVirtualPixelRatio: write screenId/modeId failed");
         return false;
     }
