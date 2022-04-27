@@ -182,6 +182,11 @@ Rect WindowNode::GetHotZoneRect() const
     return hotZoneRect_;
 }
 
+Rect WindowNode::GetWindowRect() const
+{
+    return property_->GetWindowRect();
+}
+
 WindowType WindowNode::GetWindowType() const
 {
     return property_->GetWindowType();

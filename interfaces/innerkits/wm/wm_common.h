@@ -145,6 +145,11 @@ struct Rect {
         return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
     }
 
+    bool operator!=(const Rect& a) const
+    {
+        return !this->operator==(a);
+    }
+
     bool IsInsideOf(const Rect& a) const
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&

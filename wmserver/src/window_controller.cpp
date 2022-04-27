@@ -66,7 +66,6 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    ReSizeSystemBarPropertySizeIfNeed(property);
     node->GetWindowProperty()->CopyFrom(property);
 
     // Need 'check permission'
@@ -82,6 +81,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
         node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
         sysBarWinId_[node->GetWindowType()] = node->GetWindowId();
+        ReSizeSystemBarPropertySizeIfNeed(node);
     }
 
     if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
@@ -98,29 +98,35 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     return WMError::WM_OK;
 }
 
-void WindowController::ReSizeSystemBarPropertySizeIfNeed(sptr<WindowProperty>& property) {
-    auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(property->GetDisplayId());
+void WindowController::ReSizeSystemBarPropertySizeIfNeed(sptr<WindowNode> node)
+{
+    auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(node->GetDisplayId());
     if (displayInfo == nullptr) {
         WLOGFE("displayInfo is null");
         return;
     }
     uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
     uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
-    if (property->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
+    Rect targetRect = node->GetWindowRect();
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
         auto statusBarRectIter =
             systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].find(displayHeight);
         if (statusBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].end()) {
-            property->SetWindowRect(statusBarRectIter->second);
+            targetRect = statusBarRectIter->second;
         }
-    } else if (property->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+    } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
         auto navigationBarRectIter =
             systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].find(displayHeight);
         if (navigationBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].end()) {
-            property->SetWindowRect(navigationBarRectIter->second);
+            targetRect = navigationBarRectIter->second;
         }
     }
     if (curDisplayInfo_.find(displayInfo->GetDisplayId()) == curDisplayInfo_.end()) {
         curDisplayInfo_[displayInfo->GetDisplayId()] = displayInfo;
+    }
+    Rect propertyRect = node->GetWindowRect();
+    if (propertyRect != targetRect) {
+        ResizeRect(node->GetWindowId(), targetRect, WindowSizeChangeReason::DRAG);
     }
 }
 
@@ -614,6 +620,15 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->SetCallingWindow(property->GetCallingWindow());
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_ORIENTATION: {
+            node->SetRequestedOrientation(property->GetRequestedOrientation());
+            if (WindowHelper::IsMainWindow(node->GetWindowType()) &&
+                node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+                DisplayManagerServiceInner::GetInstance().
+                    SetOrientationFromWindow(node->GetDisplayId(), property->GetRequestedOrientation());
+            }
+            break;
+        }
         case PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON: {
             node->SetTurnScreenOn(property->IsTurnScreenOn());
             HandleTurnScreenOn(node);
@@ -627,12 +642,6 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         case PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS: {
             node->SetBrightness(property->GetBrightness());
             windowRoot_->SetBrightness(node->GetWindowId(), node->GetBrightness());
-            break;
-        }
-        case PropertyChangeAction::ACTION_UPDATE_ORIENTATION: {
-            node->SetRequestedOrientation(property->GetRequestedOrientation());
-            DisplayManagerServiceInner::GetInstance().
-                SetOrientationFromWindow(node->GetDisplayId(), property->GetRequestedOrientation());
             break;
         }
         default:
