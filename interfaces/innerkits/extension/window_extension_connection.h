@@ -49,7 +49,7 @@ public:
 class WindowExtensionConnection : public RefBase {
 public:
     WindowExtensionConnection();
-    ~WindowExtensionConnection() = default;
+    ~WindowExtensionConnection();
     void ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
         uint32_t uid, sptr<IWindowExtensionCallback>& callback);
     void DisconnectExtension();
