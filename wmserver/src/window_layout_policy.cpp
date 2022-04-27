@@ -109,7 +109,8 @@ bool WindowLayoutPolicy::IsVerticalDisplay(DisplayId displayId) const
 void WindowLayoutPolicy::UpdateClientRectAndResetReason(const sptr<WindowNode>& node,
     const Rect& lastLayoutRect, const Rect& winRect)
 {
-    if ((!(lastLayoutRect == winRect)) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE || GetVirtualPixelRatioChangedFlag()) {
+    if ((!(lastLayoutRect == winRect)) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE || 
+        GetVirtualPixelRatioChangedFlag()) {
         auto reason = node->GetWindowSizeChangeReason();
         if (node->GetWindowToken()) {
             node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);

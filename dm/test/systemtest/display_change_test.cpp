@@ -354,7 +354,6 @@ HWTEST_F(DisplayChangeTest, CheckScreenDensityChange03, Function | SmallTest | L
     uint32_t densityDpi = 160;
     ASSERT_EQ(true, defaultScreen_->SetDensityDpi(densityDpi));
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS

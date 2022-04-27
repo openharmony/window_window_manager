@@ -291,7 +291,8 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             break;
         }
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
-            ProcessDisplayChange(displayId, type);
+            const sptr<DisplayInfo> displayInfo_ = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+            windowRoot_->NotifyVirtualPixelRatioChange(displayInfo_);
             break;
         }
         default: {
@@ -346,10 +347,6 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
                 newRect = navigationBarRectIter->second;
             }
             ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
-            break;
-        }
-        case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
-            windowRoot_->NotifyVirtualPixelRatioChange(displayInfo);
             break;
         }
         default: {
