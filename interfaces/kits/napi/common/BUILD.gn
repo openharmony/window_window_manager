@@ -40,7 +40,7 @@ ohos_static_library("wm_napi_common") {
 
   public_deps = [
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
-    "//foundation/ace/napi:ace_napi",
+    "//foundation/arkui/napi:ace_napi",
     "//foundation/windowmanager/wm:libwm",
   ]
 

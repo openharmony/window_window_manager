@@ -252,10 +252,10 @@ ohos_static_library("wm_systemtest_common") {
 
   public_deps = [
     "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
-    "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
 
     # need delete it for abilitycontext
-    "//foundation/ace/napi:ace_napi",
+    "//foundation/arkui/napi:ace_napi",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/windowmanager/dm:libdm",
