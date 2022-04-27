@@ -1237,7 +1237,8 @@ ScreenPowerState AbstractScreenController::GetScreenPower(ScreenId dmsScreenId) 
 
 bool AbstractScreenController::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
 {
-    WLOGD("set virtual pixel ratio. screen %{public}" PRIu64" virtualPixelRatio %{public}f", screenId, virtualPixelRatio);
+    WLOGD("set virtual pixel ratio. screen %{public}" PRIu64" virtualPixelRatio %{public}f", 
+        screenId, virtualPixelRatio);
     auto screen = GetAbstractScreen(screenId);
     if (screen == nullptr) {
         WLOGFE("fail to set virtual pixel ratio, cannot find screen %{public}" PRIu64"", screenId);
