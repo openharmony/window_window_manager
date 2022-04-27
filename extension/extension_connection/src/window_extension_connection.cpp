@@ -41,6 +41,7 @@ public:
 
     void ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
         uint32_t uid, sptr<IWindowExtensionCallback>& callback);
+    void DisconnectExtension();
     void Show();
     void Hide();
     void Resize(Rect rect);
@@ -66,6 +67,11 @@ WindowExtensionConnection::WindowExtensionConnection()
     : pImpl_(new Impl())
 {
 }
+
+WindowExtensionConnection::~WindowExtensionConnection()
+{
+}
+
 
 WindowExtensionConnection::Impl::WindowExtensionClientRecipient::WindowExtensionClientRecipient(
     sptr<IWindowExtensionCallback> callback)
@@ -145,6 +151,14 @@ void WindowExtensionConnection::Impl::Resize(Rect rect)
     }
 }
 
+void WindowExtensionConnection::Impl::DisconnectExtension()
+{
+    if (AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(this) != ERR_OK) {
+        WLOGFE("ConnectAbility failed!");
+        return;
+    }
+}
+
 void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
                                                            const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
@@ -196,6 +210,7 @@ void WindowExtensionConnection::Show()
 
 void WindowExtensionConnection::Hide()
 {
+
     pImpl_->Hide();
 }
 
@@ -207,6 +222,11 @@ void WindowExtensionConnection::RequestFocus()
 void WindowExtensionConnection::SetBounds(Rect rect)
 {
     pImpl_->Resize(rect);
+}
+
+void WindowExtensionConnection::DisconnectExtension()
+{
+    pImpl_->DisconnectExtension();
 }
 } // namespace Rosen
 } // namespace OHOS
