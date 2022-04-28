@@ -198,7 +198,8 @@ bool Screen::SetDensityDpi(uint32_t dpi) const
             DOT_PER_INCH_MINIMIM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
         return false;
     }
-    float density = float(dpi) / 160.0; // calculate display density
+    // Calculate display density, Density = Dpi / 160.
+    float density = static_cast<float>(dpi) / 160; // 160 is the coefficient between density and dpi.
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualPixelRatio(GetId(), density);
 }
 } // namespace OHOS::Rosen

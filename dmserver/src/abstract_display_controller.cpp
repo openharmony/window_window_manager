@@ -248,7 +248,7 @@ void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absS
     } else if (event == DisplayChangeEvent::DISPLAY_SIZE_CHANGED) {
         ProcessDisplaySizeChange(absScreen);
     } else if (event == DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED) {
-        ProcessDisplayDensityChange(absScreen);
+        ProcessVirtualPixelRatioChange(absScreen);
     } else {
         WLOGE("unknown screen change event. id:%{public}" PRIu64" event %{public}u", absScreen->dmsId_, event);
     }
@@ -350,7 +350,7 @@ bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDispl
     return true;
 }
 
-void AbstractDisplayController::ProcessDisplayDensityChange(sptr<AbstractScreen> absScreen)
+void AbstractDisplayController::ProcessVirtualPixelRatioChange(sptr<AbstractScreen> absScreen)
 {
     sptr<AbstractDisplay> abstractDisplay = nullptr;
     {
@@ -364,6 +364,10 @@ void AbstractDisplayController::ProcessDisplayDensityChange(sptr<AbstractScreen>
                 break;
             }
         }
+    }
+    if (abstractDisplay == nullptr) {
+        WLOGE("Failed to find abstract display of the screen.");
+        return;
     }
     abstractDisplay->SetVirtualPixelRatio(absScreen->virtualPixelRatio_);
     // Notify virtual pixel ratio change event to WMS

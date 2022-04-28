@@ -1593,30 +1593,11 @@ void WindowNodeContainer::GetModeChangeHotZones(DisplayId displayId, ModeChangeH
     hotZones.secondary_.height_ = displayRect.height_;
 }
 
-void WindowNodeContainer::SetLastVirutalPixelRatio(DisplayId displayId, float virtualPixelRatio)
-{
-    lastVirtualPixelRatioMap_[displayId] = virtualPixelRatio;
-}
-
-float WindowNodeContainer::GetLastVirtualPixelRatio(DisplayId displayId)
-{
-    if (lastVirtualPixelRatioMap_.find(displayId) == lastVirtualPixelRatioMap_.end()) {
-        WLOGE("cannot find last virtual pixel ratio for display: %{public}" PRIu64"", displayId);
-        return -1;
-    }
-    return lastVirtualPixelRatioMap_[displayId];
-}
-
 void WindowNodeContainer::UpdateVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio)
 {
-    if (fabs(GetLastVirtualPixelRatio(displayId) - virtualPixelRatio) > 1e-6) {
-        layoutPolicy_->SetVirtualPixelRatioChangedFlag(true);
-        SetLastVirutalPixelRatio(displayId, virtualPixelRatio);
-    }
+    layoutPolicy_->SetVirtualPixelRatioChangedFlag(true);
     layoutPolicy_->LayoutWindowTree(displayId);
-    if (layoutPolicy_->GetVirtualPixelRatioChangedFlag()) {
-        layoutPolicy_->SetVirtualPixelRatioChangedFlag(false);
-    }
+    layoutPolicy_->SetVirtualPixelRatioChangedFlag(false);
 }
 } // namespace Rosen
 } // namespace OHOS
