@@ -99,6 +99,8 @@ declare namespace screen {
     setOrientation(orientation: Orientation): Promise<boolean>;
 
     setScreenActiveMode(modeIndex: number): Promise<boolean>;
+
+    setDensityDpi(densityDpi: number): Promise<boolean>;
   }
 
   /**
