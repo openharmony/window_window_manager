@@ -97,6 +97,39 @@ void WindowManagerService::RegisterSnapshotHandler()
 
 void WindowManagerService::RegisterWindowManagerServiceHandler()
 {
+    if (wmsHandler_ == nullptr) {
+        wmsHandler_ = new WindowManagerServiceHandler();
+    }
+    if (AAFwk::AbilityManagerClient::GetInstance()->RegisterWindowManagerServiceHandler(wmsHandler_) != ERR_OK) {
+        WLOGFW("RegisterWindowManagerServiceHandler failed, create async thread!");
+        auto fun = [this]() {
+            WLOGFI("RegisterWindowManagerServiceHandler async thread enter!");
+            int counter = 0;
+            while (AAFwk::AbilityManagerClient::GetInstance()->
+                RegisterWindowManagerServiceHandler(wmsHandler_) != ERR_OK) {
+                usleep(10000); // 10000us equals to 10ms
+                counter++;
+                if (counter >= 2000) { // wait for 2000 * 10ms = 20s
+                    WLOGFE("RegisterWindowManagerServiceHandler timeout!");
+                    return;
+                }
+            }
+            WLOGFI("RegisterWindowManagerServiceHandler async thread register handler successfully!");
+        };
+        std::thread thread(fun);
+        thread.detach();
+        WLOGFI("RegisterWindowManagerServiceHandler async thread has been detached!");
+    } else {
+        WLOGFI("RegisterWindowManagerServiceHandler OnStart succeed!");
+    }
+}
+
+void WindowManagerServiceHandler::NotifyWindowTransition(
+    sptr<AAFwk::AbilityTransitionInfo> from, sptr<AAFwk::AbilityTransitionInfo> to)
+{
+    sptr<WindowTransitionInfo> fromInfo = new WindowTransitionInfo(from);
+    sptr<WindowTransitionInfo> toInfo = new WindowTransitionInfo(to);
+    WindowManagerService::GetInstance().NotifyWindowTransition(fromInfo, toInfo);
 }
 
 bool WindowManagerService::Init()
@@ -125,7 +158,7 @@ void WindowManagerService::ConfigureWindowManagerService()
     }
 
     if (enableConfig.count("minimizeByOther") != 0) {
-        windowRoot_->SetMinimizedByOtherWindow(enableConfig["minimizeByOther"]);
+        windowController_->SetMinimizedByOtherWindow(enableConfig["minimizeByOther"]);
     }
 
     if (numbersConfig.count("maxAppWindowNumber") != 0) {
@@ -152,8 +185,10 @@ void WindowManagerService::OnStop()
     WLOGFI("ready to stop service.");
 }
 
-void WindowManagerService::NotifyWindowTransition(WindowTransitionInfo fromInfo, WindowTransitionInfo toInfo)
+void WindowManagerService::NotifyWindowTransition(
+    sptr<WindowTransitionInfo>& fromInfo, sptr<WindowTransitionInfo>& toInfo)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     windowController_->NotifyWindowTransition(fromInfo, toInfo);
 }
 

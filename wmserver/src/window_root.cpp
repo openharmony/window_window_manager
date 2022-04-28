@@ -159,21 +159,23 @@ sptr<WindowNode> WindowRoot::FindWindowNodeWithToken(const sptr<IRemoteObject>& 
     return iter->second;
 }
 
-WMError WindowRoot::ShowInTransition(sptr<WindowNode>& node)
+void WindowRoot::AddDeathRecipient(sptr<WindowNode> node)
 {
-    return WMError::WM_OK;
-}
+    if (node == nullptr) {
+        WLOGFE("AddDeathRecipient failed, node is nullptr");
+        return;
+    }
 
-// NotifyWindowTransition Create
-WMError WindowRoot::SaveDesWindowNode(sptr<WindowNode>& node)
-{
-    return WMError::WM_OK;
-}
+    auto remoteObject = node->GetWindowToken()->AsObject();
+    windowIdMap_.insert(std::make_pair(remoteObject, node->GetWindowId()));
 
-// ability create
-WMError WindowRoot::SaveWindowWithWindowToken(sptr<WindowNode> node)
-{
-    return WMError::WM_OK;
+    if (windowDeath_ == nullptr) {
+        WLOGFI("failed to create death Recipient ptr WindowDeathRecipient");
+        return;
+    }
+    if (!remoteObject->AddDeathRecipient(windowDeath_)) {
+        WLOGFI("failed to add death recipient");
+    }
 }
 
 WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
@@ -182,18 +184,13 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
         WLOGFE("add window failed, node is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
+
     WLOGFI("save windowId %{public}u", node->GetWindowId());
     windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
-    auto remoteObject = node->GetWindowToken()->AsObject();
-    windowIdMap_.insert(std::make_pair(remoteObject, node->GetWindowId()));
+    if (node->GetWindowToken()) {
+        AddDeathRecipient(node);
+    }
 
-    if (windowDeath_ == nullptr) {
-        WLOGFI("failed to create death Recipient ptr WindowDeathRecipient");
-        return WMError::WM_OK;
-    }
-    if (!remoteObject->AddDeathRecipient(windowDeath_)) {
-        WLOGFI("failed to add death recipient");
-    }
     return WMError::WM_OK;
 }
 
@@ -290,7 +287,7 @@ WMError WindowRoot::MaxmizeWindow(uint32_t windowId)
     return WMError::WM_OK;
 }
 
-WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
+WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromRemoteAnimation)
 {
     if (node == nullptr) {
         WLOGFE("add window failed, node is nullptr");
@@ -302,16 +299,16 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
         WLOGFE("add window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-
-    auto parentNode = GetWindowNode(parentId);
-
+    if (fromRemoteAnimation) {
+        return container->ShowInTransition(node);
+    }
     // limit number of main window
-
     int mainWindowNumber = container->GetWindowCountByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     if (mainWindowNumber >= maxAppWindowNumber_) {
         container->MinimizeOldestAppWindow();
     }
 
+    auto parentNode = GetWindowNode(parentId);
     WMError res = container->AddWindowNode(node, parentNode);
     if (res == WMError::WM_OK && WindowHelper::IsSubWindow(node->GetWindowType())) {
         if (parentNode == nullptr) {
@@ -547,7 +544,6 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
         }
         windowIdMap_.erase(window->AsObject());
     }
-
     windowNodeMap_.erase(node->GetWindowId());
     return WMError::WM_OK;
 }

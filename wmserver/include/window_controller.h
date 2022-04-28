@@ -18,11 +18,10 @@
 
 #include <refbase.h>
 #include <rs_iwindow_animation_controller.h>
-
 #include "input_window_monitor.h"
-#include "surface_draw.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "window_root.h"
+#include "window_transition_info.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -38,8 +37,7 @@ public:
         uint32_t& windowId, sptr<IRemoteObject> token);
     WMError AddWindowNode(sptr<WindowProperty>& property);
     WMError RemoveWindowNode(uint32_t windowId);
-    void NotifyWindowTransition(
-        const WindowTransitionInfo& fromInfo, const WindowTransitionInfo& toInfo);
+    void NotifyWindowTransition(sptr<WindowTransitionInfo>& fromInfo, sptr<WindowTransitionInfo>& toInfo);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);
     WMError RequestFocus(uint32_t windowId);
     WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level);
@@ -58,9 +56,9 @@ public:
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
+    void SetMinimizedByOtherWindow(bool isMinimizedByOtherWindow);
 
 private:
-    void CreateDesWindowNodeAndShow(sptr<WindowNode>& desNode, const WindowTransitionInfo& toInfo);
     uint32_t GenWindowId();
     void FlushWindowInfo(uint32_t windowId);
     void FlushWindowInfoWithDisplayId(DisplayId displayId);
@@ -74,10 +72,10 @@ private:
     WMError SetWindowMode(uint32_t windowId, WindowMode dstMode);
     void ReSizeSystemBarPropertySizeIfNeed(sptr<WindowNode> node);
     void HandleTurnScreenOn(const sptr<WindowNode>& node);
+    bool IsWindowNeedMinimizedByOther(const sptr<WindowNode>& target, const sptr<WindowNode>& other);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
-    sptr<RSIWindowAnimationController> windowAnimationController_ = nullptr;
     std::atomic<uint32_t> windowId_ { INVALID_WINDOW_ID };
     // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
     std::unordered_map<WindowType, uint32_t> sysBarWinId_ {
@@ -87,8 +85,8 @@ private:
     std::unordered_map<WindowType, std::map<uint32_t, std::map<uint32_t, Rect>>> systemBarRect_;
     std::unordered_map<DisplayId, sptr<DisplayInfo>> curDisplayInfo_;
     constexpr static float SYSTEM_BAR_HEIGHT_RATIO = 0.08;
-    SurfaceDraw surfaceDraw_;
+    bool isMinimizedByOtherWindow_ = true;
 };
-}
-}
+} // Rosen
+} // OHOS
 #endif // OHOS_ROSEN_WINDOW_CONTROLLER_H

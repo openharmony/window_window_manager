@@ -42,6 +42,7 @@ ohos_shared_library("libwmutil") {
     "src/surface_reader.cpp",
     "src/surface_reader_handler_impl.cpp",
     "src/window_property.cpp",
+    "src/window_transition_info.cpp",
     "src/wm_trace.cpp",
   ]
 
@@ -56,6 +57,7 @@ ohos_shared_library("libwmutil") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "bytrace_standard:bytrace_core",
     "graphic_standard:surface",
     "hilog_native:libhilog",
