@@ -160,6 +160,51 @@ NativeValue* JsScreen::OnSetScreenActiveMode(NativeEngine& engine, NativeCallbac
     return result;
 }
 
+NativeValue* JsScreen::SetDensityDpi(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("JsScreen::SetDensityDpi is called");
+    JsScreen* me = CheckParamsAndGetThis<JsScreen>(engine, info);
+    return (me != nullptr) ? me->OnSetDensityDpi(*engine, *info) : nullptr;
+}
+
+NativeValue* JsScreen::OnSetDensityDpi(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsScreen::OnSetDensityDpi is called");
+    bool paramValidFlag = true;
+    uint32_t densityDpi = 0;
+    if (info.argc != ARGC_ONE) {
+        WLOGFE("OnSetDensityDpi Params not match %{public}zu", info.argc);
+        paramValidFlag = false;
+    } else {
+        if (!ConvertFromJsValue(engine, info.argv[0], densityDpi)) {
+            WLOGFE("Failed to convert parameter to densityDpi");
+            paramValidFlag = false;
+        }
+    }
+
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (!paramValidFlag) {
+                WLOGFE("JsScreen::OnSetDensityDpi paramValidFlag error");
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM),
+                                                  "JsScreen::OnSetDensityDpi failed."));
+                return;
+            }
+            bool res = screen_->SetDensityDpi(densityDpi);
+            if (res) {
+                task.Resolve(engine, CreateJsValue(engine, true));
+                WLOGFI("JsScreen::OnSetDensityDpi success");
+            } else {
+                task.Reject(engine, CreateJsError(engine, false, "JsScreen::OnSetDensityDpi failed."));
+                WLOGFE("JsScreen::OnSetDensityDpi failed");
+            }
+        };
+    NativeValue* lastParam = nullptr;
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
 
 NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
 {
@@ -177,6 +222,8 @@ NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
     object->SetProperty("orientation", CreateJsValue(engine, screen->GetOrientation()));
     object->SetProperty("activeModeIndex", CreateJsValue(engine, screen->GetModeId()));
     object->SetProperty("supportedModeInfo", CreateJsScreenModeArrayObject(engine, screen->GetSupportedModes()));
+    object->SetProperty("densityDpi", CreateJsValue(engine, 
+        static_cast<uint32_t>(screen->GetVirtualPixelRatio() * 160))); // Dpi = Density(VPR) * 160.
 
     std::shared_ptr<NativeReference> JsScreenRef;
     JsScreenRef.reset(engine.CreateReference(objValue, 1));
@@ -185,6 +232,7 @@ NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
     g_JsScreenMap[screenId] = JsScreenRef;
     BindNativeFunction(engine, *object, "setScreenActiveMode", JsScreen::SetScreenActiveMode);
     BindNativeFunction(engine, *object, "setOrientation", JsScreen::SetOrientation);
+    BindNativeFunction(engine, *object, "setDensityDpi", JsScreen::SetDensityDpi);
     return objValue;
 }
 
