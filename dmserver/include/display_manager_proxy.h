@@ -72,6 +72,7 @@ public:
     ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) override;
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
+    bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
 
 private:
     static inline BrokerDelegator<DisplayManagerProxy> delegator_;

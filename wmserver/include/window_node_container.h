@@ -89,6 +89,7 @@ public:
     void SetMinimizedByOther(bool isMinimizedByOther);
     void GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
+    void UpdateVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio);
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;

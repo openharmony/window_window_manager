@@ -88,6 +88,7 @@ public:
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId>);
     virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
+    virtual bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
 
     // colorspace, gamut
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);

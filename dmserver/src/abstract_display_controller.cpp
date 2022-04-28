@@ -247,6 +247,8 @@ void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absS
         ProcessDisplayUpdateOrientation(absScreen);
     } else if (event == DisplayChangeEvent::DISPLAY_SIZE_CHANGED) {
         ProcessDisplaySizeChange(absScreen);
+    } else if (event == DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED) {
+        ProcessVirtualPixelRatioChange(absScreen);
     } else {
         WLOGE("unknown screen change event. id:%{public}" PRIu64" event %{public}u", absScreen->dmsId_, event);
     }
@@ -346,6 +348,34 @@ bool AbstractDisplayController::UpdateDisplaySize(sptr<AbstractDisplay> absDispl
     WLOGFI("Reset H&W. id %{public}" PRIu64", size: %{public}d %{public}d",
           absDisplay->GetId(), absDisplay->GetWidth(), absDisplay->GetHeight());
     return true;
+}
+
+void AbstractDisplayController::ProcessVirtualPixelRatioChange(sptr<AbstractScreen> absScreen)
+{
+    sptr<AbstractDisplay> abstractDisplay = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto iter = abstractDisplayMap_.begin();
+        for (; iter != abstractDisplayMap_.end(); iter++) {
+            abstractDisplay = iter->second;
+            if (abstractDisplay->GetAbstractScreenId() == absScreen->dmsId_) {
+                WLOGFD("find abstract display of the screen. display %{public}" PRIu64", screen %{public}" PRIu64"",
+                    abstractDisplay->GetId(), absScreen->dmsId_);
+                break;
+            }
+        }
+    }
+    if (abstractDisplay == nullptr) {
+        WLOGE("Failed to find abstract display of the screen.");
+        return;
+    }
+    abstractDisplay->SetVirtualPixelRatio(absScreen->virtualPixelRatio_);
+    // Notify virtual pixel ratio change event to WMS
+    displayStateChangeListener_(abstractDisplay->GetId(), DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE);
+    // Notify virtual pixel ratio change event to DisplayManager
+    sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
+    DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo,
+        DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED);
 }
 
 void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realAbsScreen)

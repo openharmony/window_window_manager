@@ -190,4 +190,16 @@ void Screen::UpdateScreenInfo() const
     auto screenInfo = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenInfo(GetId());
     UpdateScreenInfo(screenInfo);
 }
+
+bool Screen::SetDensityDpi(uint32_t dpi) const
+{
+    if (dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMIM_VALUE) {
+        WLOGE("Invalid input dpi value, the valid input range for DPI values is %{public}u ~ %{public}u",
+            DOT_PER_INCH_MINIMIM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
+        return false;
+    }
+    // Calculate display density, Density = Dpi / 160.
+    float density = static_cast<float>(dpi) / 160; // 160 is the coefficient between density and dpi.
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualPixelRatio(GetId(), density);
+}
 } // namespace OHOS::Rosen

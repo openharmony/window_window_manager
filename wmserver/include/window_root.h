@@ -79,6 +79,7 @@ public:
     void SetMinimizedByOtherWindow(bool isMinimizedByOtherWindow);
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
+    void NotifyVirtualPixelRatioChange(sptr<DisplayInfo> displayInfo);
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);

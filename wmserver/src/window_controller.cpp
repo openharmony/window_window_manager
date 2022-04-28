@@ -295,6 +295,11 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             windowRoot_->ProcessDisplayDestroy(displayId);
             break;
         }
+        case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
+            const sptr<DisplayInfo> displayInfo_ = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+            windowRoot_->NotifyVirtualPixelRatioChange(displayInfo_);
+            break;
+        }
         default: {
             WLOGFE("unknown DisplayStateChangeType:%{public}u", type);
             return;

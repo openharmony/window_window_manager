@@ -59,6 +59,7 @@ public:
         TRANS_ID_SET_SCREEN_ACTIVE_MODE,
         TRANS_ID_GET_ALL_SCREEN_INFOS,
         TRANS_ID_SET_ORIENTATION,
+        TRANS_ID_SET_VIRTUAL_PIXEL_RATIO,
         TRANS_ID_SCREENGROUP_BASE = 1100,
         TRANS_ID_SCREEN_MAKE_MIRROR = TRANS_ID_SCREENGROUP_BASE,
         TRANS_ID_SCREEN_MAKE_EXPAND,
@@ -113,6 +114,7 @@ public:
     virtual ScreenId MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint) = 0;
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) = 0;
     virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) = 0;
+    virtual bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) = 0;
 };
 } // namespace OHOS::Rosen
 

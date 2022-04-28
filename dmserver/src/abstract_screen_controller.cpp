@@ -1234,4 +1234,29 @@ ScreenPowerState AbstractScreenController::GetScreenPower(ScreenId dmsScreenId) 
     WLOGFI("GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, rsId);
     return state;
 }
+
+bool AbstractScreenController::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
+{
+    WLOGD("set virtual pixel ratio. screen %{public}" PRIu64" virtualPixelRatio %{public}f",
+        screenId, virtualPixelRatio);
+    auto screen = GetAbstractScreen(screenId);
+    if (screen == nullptr) {
+        WLOGFE("fail to set virtual pixel ratio, cannot find screen %{public}" PRIu64"", screenId);
+        return false;
+    }
+    if (screen->isScreenGroup_) {
+        WLOGE("cannot set virtual pixel ratio to the combination. screen: %{public}" PRIu64"", screenId);
+        return false;
+    }
+    if (fabs(screen->virtualPixelRatio_ - virtualPixelRatio) < 1e-6) {
+        WLOGE("The density is equivalent to the original value, no update operation is required, aborted.");
+        return false;
+    }
+    screen->SetVirtualPixelRatio(virtualPixelRatio);
+    // Notify rotation event to AbstractDisplayController
+    if (abstractScreenCallback_ != nullptr) {
+        abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED);
+    }
+    return true;
+}
 } // namespace OHOS::Rosen

@@ -30,6 +30,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayChangeTest"};
     constexpr uint32_t MAX_TIME_WAITING_FOR_CALLBACK = 20;
     constexpr uint32_t SLEEP_TIME_IN_US = 10000; // 10ms
+    constexpr uint32_t SPLIT_TEST_SLEEP_S = 2;
 }
 
 class DisplayChangeEventListener : public DisplayManager::IDisplayListener {
@@ -317,6 +318,42 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange02, Function | MediumTest | Le
             break;
         }
     }
+}
+
+/**
+ * @tc.name: CheckScreenDensityChange01
+ * @tc.desc: Check screen density change as set another density for screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayChangeTest, CheckScreenDensityChange01, Function | SmallTest | Level2)
+{
+    uint32_t densityDpi = 320;
+    ASSERT_EQ(true, defaultScreen_->SetDensityDpi(densityDpi));
+    sleep(SPLIT_TEST_SLEEP_S);
+}
+
+/**
+ * @tc.name: CheckScreenDensityChange02
+ * @tc.desc: Check screen density change as set another density for screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayChangeTest, CheckScreenDensityChange02, Function | SmallTest | Level2)
+{
+    uint32_t densityDpi = 80;
+    ASSERT_EQ(true, defaultScreen_->SetDensityDpi(densityDpi));
+    sleep(SPLIT_TEST_SLEEP_S);
+}
+
+/**
+ * @tc.name: CheckScreenDensityChange03
+ * @tc.desc: Check screen density change as set another density for screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayChangeTest, CheckScreenDensityChange03, Function | SmallTest | Level2)
+{
+    uint32_t densityDpi = 160;
+    ASSERT_EQ(true, defaultScreen_->SetDensityDpi(densityDpi));
+    sleep(SPLIT_TEST_SLEEP_S);
 }
 }
 } // namespace Rosen

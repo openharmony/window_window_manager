@@ -81,6 +81,7 @@ public:
     std::vector<sptr<SupportedScreenModes>> GetSupportedModes() const;
     bool SetScreenActiveMode(uint32_t modeId);
     bool SetOrientation(Orientation orientation) const;
+    bool SetDensityDpi(uint32_t dpi) const;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const;

@@ -1592,5 +1592,12 @@ void WindowNodeContainer::GetModeChangeHotZones(DisplayId displayId, ModeChangeH
     hotZones.secondary_.width_ = config.secondaryRange_;
     hotZones.secondary_.height_ = displayRect.height_;
 }
+
+void WindowNodeContainer::UpdateVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio)
+{
+    layoutPolicy_->SetVirtualPixelRatioChangedFlag(true);
+    layoutPolicy_->LayoutWindowTree(displayId);
+    layoutPolicy_->SetVirtualPixelRatioChangedFlag(false);
+}
 } // namespace Rosen
 } // namespace OHOS
