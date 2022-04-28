@@ -16,8 +16,6 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include <string>
-
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;

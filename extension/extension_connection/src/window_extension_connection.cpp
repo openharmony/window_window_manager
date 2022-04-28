@@ -72,7 +72,6 @@ WindowExtensionConnection::~WindowExtensionConnection()
 {
 }
 
-
 WindowExtensionConnection::Impl::WindowExtensionClientRecipient::WindowExtensionClientRecipient(
     sptr<IWindowExtensionCallback> callback)
 {
@@ -210,7 +209,6 @@ void WindowExtensionConnection::Show()
 
 void WindowExtensionConnection::Hide()
 {
-
     pImpl_->Hide();
 }
 

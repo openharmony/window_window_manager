@@ -40,7 +40,6 @@ public:
     void DestroyWindow();
     sptr<Window> GetWindow() const;
 private:
-
     sptr<IDispatchInputEventListener> dispatchInputEventListener_;
     sptr<Window> window_;
     std::string windowName_;

@@ -17,14 +17,13 @@
 #define WINDOW_EXTENSION_CONNECTION_H
 
 #include <string>
-
+#include <element_name.h>
 #include <i_input_event_consumer.h>
+#include <input_manager.h>
 #include <key_event.h>
+#include <pointer_event.h>
 #include <memory>
 
-#include "element_name.h"
-#include "input_manager.h"
-#include "pointer_event.h"
 #include "wm_common.h"
 
 namespace OHOS {
