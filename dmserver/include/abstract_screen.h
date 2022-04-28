@@ -45,6 +45,8 @@ public:
     sptr<ScreenInfo> ConvertToScreenInfo() const;
     bool SetOrientation(Orientation orientation);
     Rotation CalcRotation(Orientation orientation) const;
+    bool SetVirtualPixelRatio(float virtualPixelRatio);
+    float GetVirtualPixelRatio() const;
 
     void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);

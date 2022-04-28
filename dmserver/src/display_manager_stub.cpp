@@ -249,6 +249,13 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteBool(res);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            float virtualPixelRatio = data.ReadFloat();
+            bool res = SetVirtualPixelRatio(screenId, virtualPixelRatio);
+            reply.WriteBool(res);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             std::vector<ScreenColorGamut> colorGamuts;

@@ -492,4 +492,10 @@ bool DisplayManagerService::SetScreenActiveMode(ScreenId screenId, uint32_t mode
     WM_SCOPED_TRACE("dms:SetScreenActiveMode(%" PRIu64", %u)", screenId, modeId);
     return abstractScreenController_->SetScreenActiveMode(screenId, modeId);
 }
+
+bool DisplayManagerService::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
+{
+    WM_SCOPED_TRACE("dms:SetVirtualPixelRatio(%" PRIu64", %f)", screenId, virtualPixelRatio);
+    return abstractScreenController_->SetVirtualPixelRatio(screenId, virtualPixelRatio);
+}
 } // namespace OHOS::Rosen

@@ -977,4 +977,31 @@ bool DisplayManagerProxy::SetScreenActiveMode(ScreenId screenId, uint32_t modeId
     }
     return reply.ReadBool();
 }
+
+bool DisplayManagerProxy::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("SetVirtualPixelRatio: remote is null");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("SetVirtualPixelRatio: WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint64(screenId) || !data.WriteFloat(virtualPixelRatio)) {
+        WLOGFE("SetVirtualPixelRatio: write screenId/modeId failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SetVirtualPixelRatio: SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
 } // namespace OHOS::Rosen

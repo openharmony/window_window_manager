@@ -109,7 +109,8 @@ bool WindowLayoutPolicy::IsVerticalDisplay(DisplayId displayId) const
 void WindowLayoutPolicy::UpdateClientRectAndResetReason(const sptr<WindowNode>& node,
     const Rect& lastLayoutRect, const Rect& winRect)
 {
-    if ((!(lastLayoutRect == winRect)) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+    if ((!(lastLayoutRect == winRect)) || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE ||
+        GetVirtualPixelRatioChangedFlag()) {
         auto reason = node->GetWindowSizeChangeReason();
         if (node->GetWindowToken()) {
             node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
@@ -328,6 +329,16 @@ float WindowLayoutPolicy::GetVirtualPixelRatio(DisplayId displayId) const
 
     WLOGFI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", displayId, virtualPixelRatio);
     return virtualPixelRatio;
+}
+
+bool WindowLayoutPolicy::GetVirtualPixelRatioChangedFlag() const
+{
+    return VirtualPixelRatioChangedFlag_;
+}
+
+void WindowLayoutPolicy::SetVirtualPixelRatioChangedFlag(bool flag)
+{
+    VirtualPixelRatioChangedFlag_ = flag;
 }
 
 bool WindowLayoutPolicy::IsFullScreenRecentWindowExist(const std::vector<sptr<WindowNode>>& nodeVec) const

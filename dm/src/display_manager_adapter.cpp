@@ -357,4 +357,11 @@ bool ScreenManagerAdapter::SetScreenActiveMode(ScreenId screenId, uint32_t modeI
 
     return displayManagerServiceProxy_->SetScreenActiveMode(screenId, modeId);
 }
+
+bool ScreenManagerAdapter::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->SetVirtualPixelRatio(screenId, virtualPixelRatio);
+}
 } // namespace OHOS::Rosen
