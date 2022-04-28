@@ -318,6 +318,10 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
 bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, bool isAdd, bool animationPlayed)
 {
     WM_FUNCTION_TRACE();
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        WLOGFI("WINDOW_TYPE_APP_COMPONENT not need to update RsTree");
+        return true;
+    }
     static const bool IsWindowAnimationEnabled = ReadIsWindowAnimationEnabledProperty();
     DisplayId displayId = node->GetDisplayId();
     auto updateRSTreeFunc = [&]() {

@@ -91,7 +91,7 @@ ohos_shared_library("window_extension_module") {
     "ability_runtime:runtime",
     "hilog_native:libhilog",
   ]
-
+  relative_install_dir = "extensionability/"
   subsystem_name = "window"
   part_name = "window_manager"
 }
