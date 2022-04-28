@@ -571,7 +571,7 @@ WMError WindowManagerProxy::GetSystemDecorEnable(bool& isSystemDecorEnable)
     return static_cast<WMError>(ret);
 }
 
-void WindowManagerProxy::NotifyWindowTransition(WindowTransitionInfo from, WindowTransitionInfo to)
+void WindowManagerProxy::NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -582,12 +582,12 @@ void WindowManagerProxy::NotifyWindowTransition(WindowTransitionInfo from, Windo
         return;
     }
 
-    if (!data.WriteParcelable(&from)) {
+    if (!data.WriteParcelable(from)) {
         WLOGFE("Failed to write from ability window info!");
         return;
     }
 
-    if (!data.WriteParcelable(&to)) {
+    if (!data.WriteParcelable(to)) {
         WLOGFE("Failed to write to ability window info!");
         return;
     }

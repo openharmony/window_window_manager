@@ -20,6 +20,7 @@
 #include <ui/rs_surface_node.h>
 
 #include "window_property.h"
+#include "window_transition_info.h"
 #include "zidl/window_interface.h"
 #include "zidl/window_manager_agent_interface.h"
 
@@ -83,7 +84,7 @@ public:
     virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) = 0;
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) = 0;
     virtual WMError GetSystemDecorEnable(bool& isSystemDecorEnable) = 0;
-    virtual void NotifyWindowTransition(WindowTransitionInfo from, WindowTransitionInfo to) = 0;
+    virtual void NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to) = 0;
     virtual WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) = 0;
 };
 }

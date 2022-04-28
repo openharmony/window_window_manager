@@ -635,6 +635,10 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     }
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
         windowId, token);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("create window failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        return ret;
+    }
     property_->SetWindowId(windowId);
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         if (SingletonContainer::Get<WindowAdapter>().GetSystemDecorEnable(isSystemDecorEnable_) == WMError::WM_OK) {
@@ -643,10 +647,6 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
                 property_->SetDecorEnable(true);
             }
         }
-    }
-    if (ret != WMError::WM_OK) {
-        WLOGFE("create window failed with errCode:%{public}d", static_cast<int32_t>(ret));
-        return ret;
     }
     windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, this)));
     if (parentName != "") { // add to subWindowMap_
@@ -1326,6 +1326,8 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
 
     if (uiContent_ != nullptr) {
         Ace::ViewportConfig config;
+        WLOGFI("UpdateViewportConfig Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+            property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         config.SetSize(rect.width_, rect.height_);
         config.SetPosition(rect.posX_, rect.posY_);
         config.SetDensity(virtualPixelRatio);

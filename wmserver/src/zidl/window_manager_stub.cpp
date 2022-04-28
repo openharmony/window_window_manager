@@ -18,7 +18,6 @@
 #include <rs_iwindow_animation_controller.h>
 #include "window_manager_hilog.h"
 
-
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -187,9 +186,9 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION: {
-            auto from = data.ReadParcelable<WindowTransitionInfo>();
-            auto to = data.ReadParcelable<WindowTransitionInfo>();
-            NotifyWindowTransition(*from, *to);
+            sptr<WindowTransitionInfo> from = data.ReadParcelable<WindowTransitionInfo>();
+            sptr<WindowTransitionInfo> to = data.ReadParcelable<WindowTransitionInfo>();
+            NotifyWindowTransition(from, to);
             break;
         }
         case WindowManagerMessage::TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE: {

@@ -25,6 +25,7 @@
 #include "common_event_manager.h"
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
+#include "remote_animation.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_layout_policy_cascade.h"
@@ -186,7 +187,7 @@ void WindowNodeContainer::UpdateWindowNodeMaps()
     }
 }
 
-WMError WindowNodeContainer::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
+WMError WindowNodeContainer::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, const sptr<WindowNode>& parentNode)
 {
     sptr<WindowNode> root = FindRoot(node->GetWindowType());
     if (root == nullptr) {
@@ -218,30 +219,43 @@ WMError WindowNodeContainer::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, s
 
 WMError WindowNodeContainer::ShowInTransition(sptr<WindowNode>& node)
 {
+    WM_SCOPED_TRACE_BEGIN("WindowNodeContainer::ShowInTransition");
+    WMError res = AddWindowNodeOnWindowTree(node, nullptr);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
+    windowPair_->UpdateIfSplitRelated(node);
+    UpdateWindowTree(node);
+    if (node->IsSplitMode() || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        RaiseSplitRelatedWindowToTop(node);
+    }
+
+    RemoteAnimation::UpdateRSTree(node);
+    AssignZOrder();
+    layoutPolicy_->AddWindowNode(node);
+    WM_SCOPED_TRACE_END();
+    WLOGFI("ShowInTransition windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
 
 WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
 {
-    if (!node->surfaceNode_) {
-        WLOGFE("surface node is nullptr!");
-        return WMError::WM_ERROR_NULLPTR;
+    if (!node->isPlayAnimationShow_) {
+        WMError res = AddWindowNodeOnWindowTree(node, parentNode);
+        if (res != WMError::WM_OK) {
+            return res;
+        }
+        windowPair_->UpdateIfSplitRelated(node);
+        UpdateWindowTree(node);
+        if (node->IsSplitMode() || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+            RaiseSplitRelatedWindowToTop(node);
+        }
+        UpdateRSTree(node, true, node->isPlayAnimationShow_);
+        AssignZOrder();
+    } else {
+        node->isPlayAnimationShow_ = false;
     }
 
-    WMError ret = AddWindowNodeOnWindowTree(node, parentNode);
-    if (ret != WMError::WM_OK) {
-        WLOGFE("Add window failed!");
-        return ret;
-    }
-
-    windowPair_->UpdateIfSplitRelated(node);
-
-    UpdateWindowTree(node);
-    if (node->IsSplitMode() || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        RaiseSplitRelatedWindowToTop(node);
-    }
-    UpdateRSTree(node, true, node->isPlayAnimationShow_);
-    AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
     if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
         avoidController_->AvoidControl(node, AvoidControlType::AVOID_NODE_ADD);
@@ -326,7 +340,11 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, bool isAdd, bool 
     auto updateRSTreeFunc = [&]() {
         auto& dms = DisplayManagerServiceInner::GetInstance();
         if (isAdd) {
-            dms.UpdateRSTree(displayId, node->surfaceNode_, true);
+            if (node->leashWinSurfaceNode_) {
+                dms.UpdateRSTree(displayId, node->leashWinSurfaceNode_, true);
+            } else {
+                dms.UpdateRSTree(displayId, node->surfaceNode_, true);
+            }
             for (auto& child : node->children_) {
                 if (child->currentVisibility_) {
                     dms.UpdateRSTree(displayId, child->surfaceNode_, true);
@@ -438,6 +456,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     RcoveryScreenDefaultOrientationIfNeed(node->GetDisplayId());
+    node->isPlayAnimationHide_ = false;
     WLOGFI("RemoveWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
@@ -570,11 +589,17 @@ void WindowNodeContainer::AssignZOrder()
 {
     zOrder_ = 0;
     WindowNodeOperationFunc func = [this](sptr<WindowNode> node) {
-        if (node->surfaceNode_ == nullptr) {
-            WLOGE("AssignZOrder: surfaceNode is nullptr, window Id:%{public}u", node->GetWindowId());
-            return false;
+        if (node->leashWinSurfaceNode_ != nullptr) {
+            node->leashWinSurfaceNode_->SetPositionZ(zOrder_);
         }
-        node->surfaceNode_->SetPositionZ(zOrder_);
+
+        if (node->surfaceNode_ != nullptr) {
+            node->surfaceNode_->SetPositionZ(zOrder_);
+        }
+
+        if (node->startingWinSurfaceNode_ != nullptr) {
+            node->startingWinSurfaceNode_->SetPositionZ(zOrder_);
+        }
         ++zOrder_;
         return false;
     };
