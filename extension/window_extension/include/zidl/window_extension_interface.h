@@ -30,11 +30,11 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IWindowExtension");
 
     enum {
-            TRANS_ID_RESIZE_WINDOW = 0,
-            TRANS_ID_HIDE_WINDOW,
-            TRANS_ID_SHOW_WINDOW,
-            TRANS_ID_REQUESTFOCUS,
-            TRANS_ID_CONNECT_TO_EXTENSION,
+        TRANS_ID_RESIZE_WINDOW = 0,
+        TRANS_ID_HIDE_WINDOW,
+        TRANS_ID_SHOW_WINDOW,
+        TRANS_ID_REQUESTFOCUS,
+        TRANS_ID_CONNECT_TO_EXTENSION,
     };
 
     virtual void Resize(Rect rect) = 0;

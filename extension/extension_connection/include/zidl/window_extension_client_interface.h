@@ -16,8 +16,8 @@
 #ifndef WINDOW_EXTENSION_CLIENT_INTERFACE
 #define WINDOW_EXTENSION_CLIENT_INTERFACE
 
-#include <iremote_broker.h>
 #include <i_input_event_consumer.h>
+#include <iremote_broker.h>
 #include <key_event.h>
 #include <ui/rs_surface_node.h>
 
