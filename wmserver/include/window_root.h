@@ -79,6 +79,7 @@ public:
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     void NotifyVirtualPixelRatioChange(sptr<DisplayInfo> displayInfo);
+    std::vector<DisplayId> GetAllDisplayIds() const;
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);

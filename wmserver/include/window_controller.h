@@ -50,7 +50,7 @@ public:
     void MinimizeAllAppWindows(DisplayId displayId);
     void ToggleShownStateForAllAppWindows();
     WMError MaxmizeWindow(uint32_t windowId);
-    WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
+    WMError SetWindowLayoutMode(WindowLayoutMode mode);
     WMError UpdateProperty(sptr<WindowProperty>& property, PropertyChangeAction action);
     void NotifySystemBarTints();
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);

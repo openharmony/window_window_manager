@@ -152,9 +152,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE: {
-            DisplayId displayId = data.ReadUint64();
             WindowLayoutMode mode = static_cast<WindowLayoutMode>(data.ReadUint32());
-            WMError errCode = SetWindowLayoutMode(displayId, mode);
+            WMError errCode = SetWindowLayoutMode(mode);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }

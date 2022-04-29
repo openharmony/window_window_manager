@@ -511,12 +511,11 @@ NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, Native
 {
     WLOGFI("[NAPI]OnSetWindowLayoutMode");
     WMError errCode = WMError::WM_OK;
-    if (info.argc < 2 || info.argc > 3) { // 2: minimum params num; 3: maximum params num
+    if (info.argc < 1 || info.argc > 2) { // 1: minimum params num; 2: maximum params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     WindowLayoutMode winLayoutMode = WindowLayoutMode::CASCADE;
-    int64_t displayId = 0;
     if (errCode == WMError::WM_OK) {
         NativeNumber* nativeMode = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
         if (nativeMode == nullptr) {
@@ -525,23 +524,16 @@ NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, Native
         } else {
             winLayoutMode = static_cast<WindowLayoutMode>(static_cast<uint32_t>(*nativeMode));
         }
-
-        if (!ConvertFromJsValue(engine, info.argv[1], displayId)) {
-            WLOGFE("[NAPI]Failed to convert parameter to displayId");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
-        }
     }
 
-    WLOGFI("[NAPI]Display id = %{public}" PRIu64", LayoutMode = %{public}u, err = %{public}d",
-        static_cast<uint64_t>(displayId), winLayoutMode, errCode);
+    WLOGFI("[NAPI]LayoutMode = %{public}u, err = %{public}d", winLayoutMode, errCode);
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params"));
                 return;
             }
-            WMError ret = SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(winLayoutMode,
-                static_cast<uint64_t>(displayId));
+            WMError ret = SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(winLayoutMode);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
                 WLOGFI("[NAPI]SetWindowLayoutMode success");
@@ -549,9 +541,9 @@ NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, Native
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "SetWindowLayoutMode failed"));
             }
         };
-    // 2: maximum params num; 2: index of callback
-    NativeValue* lastParam = (info.argc <= 2) ? nullptr :
-        (info.argv[2]->TypeOf() == NATIVE_FUNCTION ? info.argv[2] : nullptr);
+    // 1: maximum params num; 1: index of callback
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
