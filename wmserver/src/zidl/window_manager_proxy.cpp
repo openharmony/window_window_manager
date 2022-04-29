@@ -448,17 +448,13 @@ WMError WindowManagerProxy::MaxmizeWindow(uint32_t windowId)
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode)
+WMError WindowManagerProxy::SetWindowLayoutMode(WindowLayoutMode mode)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint64(displayId)) {
-        WLOGFE("Write displayId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(mode))) {

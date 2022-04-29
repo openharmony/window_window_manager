@@ -95,10 +95,10 @@ namespace {
  */
 HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
 {
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE, displayId_);
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE, displayId_);
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
 
     utils::TestWindowInfo info = {
         .name = "main",
@@ -373,7 +373,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Show());
     utils::InitTileWindowRects(window);
     ASSERT_TRUE(utils::RectEqualTo(window, expect));
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE, displayId_);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
     ASSERT_TRUE(utils::RectEqualTo(window, utils::singleTileRect_));
     info.name = "test1";
     const sptr<Window>& test1 = utils::CreateTestWindow(info);
@@ -388,7 +388,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     if (utils::isVerticalDisplay_) {
         ASSERT_TRUE(utils::RectEqualTo(test1, utils::doubleTileRects_[0]));
         ASSERT_TRUE(utils::RectEqualTo(test2, utils::doubleTileRects_[1]));
-        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
+        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
         return;
     } else {
         ASSERT_TRUE(utils::RectEqualTo(window, utils::tripleTileRects_[0]));
@@ -402,7 +402,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     ASSERT_TRUE(utils::RectEqualTo(test1, utils::tripleTileRects_[0]));
     ASSERT_TRUE(utils::RectEqualTo(test2, utils::tripleTileRects_[1]));
     ASSERT_TRUE(utils::RectEqualTo(test3, utils::tripleTileRects_[2])); // 2 is second rect idx
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
 }
 
 /**
@@ -425,7 +425,7 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
     activeWindows_.push_back(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     utils::InitTileWindowRects(window);
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE, displayId_);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
     ASSERT_TRUE(utils::RectEqualTo(window, utils::singleTileRect_));
     info.name = "test1";
     const sptr<Window>& test1 = utils::CreateTestWindow(info);
@@ -440,7 +440,7 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
     if (utils::isVerticalDisplay_) {
         ASSERT_TRUE(utils::RectEqualTo(test1, utils::doubleTileRects_[0]));
         ASSERT_TRUE(utils::RectEqualTo(test2, utils::doubleTileRects_[1]));
-        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
+        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
         return;
     } else {
         ASSERT_TRUE(utils::RectEqualTo(window, utils::tripleTileRects_[0]));
@@ -454,7 +454,7 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
     ASSERT_TRUE(utils::RectEqualTo(test1, utils::tripleTileRects_[0]));
     ASSERT_TRUE(utils::RectEqualTo(test2, utils::tripleTileRects_[1]));
     ASSERT_TRUE(utils::RectEqualTo(test3, utils::tripleTileRects_[2])); // 2 is second rect idx
-    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE, displayId_);
+    WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
 }
 
 /**

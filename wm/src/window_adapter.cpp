@@ -238,11 +238,11 @@ WMError WindowAdapter::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
     return windowManagerServiceProxy_->GetTopWindowId(mainWinId, topWinId);
 }
 
-WMError WindowAdapter::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode)
+WMError WindowAdapter::SetWindowLayoutMode(WindowLayoutMode mode)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
-    return windowManagerServiceProxy_->SetWindowLayoutMode(displayId, mode);
+    return windowManagerServiceProxy_->SetWindowLayoutMode(mode);
 }
 
 WMError WindowAdapter::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action)

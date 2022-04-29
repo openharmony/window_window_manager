@@ -119,13 +119,6 @@ int WindowNodeContainer::GetWindowCountByType(WindowType windowType)
     return windowNumber;
 }
 
-WMError WindowNodeContainer::MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node)
-{
-    std::vector<uint32_t> exceptionalIds = { node->GetWindowId() };
-    std::vector<WindowMode> exceptionalModes = { WindowMode::WINDOW_MODE_FLOATING, WindowMode::WINDOW_MODE_PIP };
-    return MinimizeAppNodeExceptOptions(false, exceptionalIds, exceptionalModes);
-}
-
 std::vector<sptr<WindowNode>>* WindowNodeContainer::FindNodeVectorOfRoot(DisplayId displayId, WindowRootNodeType type)
 {
     if (windowNodeMaps_.find(displayId) != windowNodeMaps_.end()) {
@@ -1327,6 +1320,13 @@ WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(bool fromUser, const s
         MinimizeWindowFromAbility(appNode, fromUser);
     }
     return WMError::WM_OK;
+}
+
+WMError WindowNodeContainer::MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node)
+{
+    std::vector<uint32_t> exceptionalIds = { node->GetWindowId() };
+    std::vector<WindowMode> exceptionalModes = { WindowMode::WINDOW_MODE_FLOATING, WindowMode::WINDOW_MODE_PIP };
+    return MinimizeAppNodeExceptOptions(false, exceptionalIds, exceptionalModes);
 }
 
 void WindowNodeContainer::ResetLayoutPolicy()
