@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "window_manager_stub.h"
+#include "zidl/window_manager_stub.h"
 #include <ipc_skeleton.h>
 #include <rs_iwindow_animation_controller.h>
 #include "window_manager_hilog.h"
