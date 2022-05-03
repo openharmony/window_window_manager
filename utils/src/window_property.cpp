@@ -345,7 +345,7 @@ bool WindowProperty::MapMarshalling(Parcel& parcel) const
     return true;
 }
 
-void WindowProperty::MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& property)
+void WindowProperty::MapUnmarshalling(Parcel& parcel, WindowProperty* property)
 {
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap;
     uint32_t size = parcel.ReadUint32();
@@ -376,9 +376,12 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_);
 }
 
-sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
+WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
 {
-    sptr<WindowProperty> property(new WindowProperty());
+    WindowProperty* property = new(std::nothrow) WindowProperty();
+    if (property == nullptr) {
+        return nullptr;
+    }
     property->SetWindowName(parcel.ReadString());
     Rect rect = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
     property->SetWindowRect(rect);
