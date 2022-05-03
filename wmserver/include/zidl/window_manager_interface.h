@@ -19,7 +19,7 @@
 #include <iremote_broker.h>
 #include <ui/rs_surface_node.h>
 #include "window_property.h"
-#include "window_interface.h"
+#include "zidl/window_interface.h"
 #include "zidl/window_manager_agent_interface.h"
 
 namespace OHOS {

@@ -20,7 +20,7 @@
 #include <refbase.h>
 #include <running_lock.h>
 #include <ui/rs_surface_node.h>
-#include "window_interface.h"
+#include "zidl/window_interface.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {

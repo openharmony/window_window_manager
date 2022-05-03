@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "window_manager_proxy.h"
+#include "zidl/window_manager_proxy.h"
 #include <ipc_types.h>
 #include "window_manager_hilog.h"
 

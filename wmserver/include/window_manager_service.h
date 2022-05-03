@@ -28,7 +28,7 @@
 #include "singleton_delegator.h"
 #include "wm_single_instance.h"
 #include "window_controller.h"
-#include "window_manager_stub.h"
+#include "zidl/window_manager_stub.h"
 #include "window_root.h"
 #include "snapshot_controller.h"
 
