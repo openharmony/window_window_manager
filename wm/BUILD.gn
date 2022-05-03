@@ -37,7 +37,7 @@ config("libwm_public_config") {
 ## Build libwm.so
 ohos_shared_library("libwm") {
   sources = [
-    "../wmserver/src/window_manager_proxy.cpp",
+    "../wmserver/src/zidl/window_manager_proxy.cpp",
     "src/color_parser.cpp",
     "src/input_transfer_station.cpp",
     "src/static_call.cpp",
@@ -51,8 +51,8 @@ ohos_shared_library("libwm") {
     "src/window_manager_agent.cpp",
     "src/window_option.cpp",
     "src/window_scene.cpp",
-    "src/window_stub.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
+    "src/zidl/window_stub.cpp",
   ]
 
   configs = [ ":libwm_private_config" ]

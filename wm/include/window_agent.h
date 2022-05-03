@@ -16,7 +16,7 @@
 #ifndef OHOS_WINDOW_AGENT_H
 #define OHOS_WINDOW_AGENT_H
 
-#include "window_stub.h"
+#include "zidl/window_stub.h"
 #include "window_impl.h"
 #include "window_property.h"
 #include "wm_common.h"
