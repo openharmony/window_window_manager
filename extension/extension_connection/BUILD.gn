@@ -49,14 +49,7 @@ ohos_shared_library("libwindow_extension_client") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
-    "ability_runtime:abilitykit_native",
-    "ability_runtime:runtime",
-    "bundle_framework:appexecfwk_base",
-    "eventhandler:libeventhandler",
-    "graphic_standard:surface",
-    "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
-    "ipc:ipc_core",
   ]
 
   part_name = "window_manager"
