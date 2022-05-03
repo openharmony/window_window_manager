@@ -36,16 +36,16 @@ public:
     Impl() = default;
     ~Impl() = default;
     void OnAbilityConnectDone(const AppExecFwk::ElementName &element,
-    const sptr<IRemoteObject> &remoteObject, int resultCode) override;
+        const sptr<IRemoteObject> &remoteObject, int resultCode) override;
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
 
     void ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
         uint32_t uid, sptr<IWindowExtensionCallback>& callback);
     void DisconnectExtension();
-    void Show();
-    void Hide();
-    void Resize(Rect rect);
-    void RequestFocus();
+    void Show() const;
+    void Hide() const;
+    void Resize(Rect rect) const;
+    void RequestFocus() const;
 private:
     class WindowExtensionClientRecipient
         final : public IRemoteObject::DeathRecipient {
@@ -119,7 +119,7 @@ void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::Element
     componentCallback_ = callback;
 }
 
-void WindowExtensionConnection::Impl::Show()
+void WindowExtensionConnection::Impl::Show() const
 {
     if (proxy_ != nullptr) {
         proxy_->Show();
@@ -128,7 +128,7 @@ void WindowExtensionConnection::Impl::Show()
     WLOGFI("called");
 }
 
-void WindowExtensionConnection::Impl::Hide()
+void WindowExtensionConnection::Impl::Hide() const
 {
     if (proxy_ != nullptr) {
         proxy_->Hide();
@@ -136,14 +136,14 @@ void WindowExtensionConnection::Impl::Hide()
     }
 }
 
-void WindowExtensionConnection::Impl::RequestFocus()
+void WindowExtensionConnection::Impl::RequestFocus() const
 {
     if (proxy_ != nullptr) {
         proxy_->RequestFocus();
     }
 }
 
-void WindowExtensionConnection::Impl::Resize(Rect rect)
+void WindowExtensionConnection::Impl::Resize(Rect rect) const
 {
     if (proxy_ != nullptr) {
         proxy_->Resize(rect);
@@ -192,37 +192,40 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
 
 void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
 {
+    if (componentCallback_ != nullptr) {
+        componentCallback_->OnExtensionDisconnected();
+    }
     WLOGFI("end");
 }
 
 // WindowExtensionConnection
 void WindowExtensionConnection::ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
-                                                 uint32_t uid, sptr<IWindowExtensionCallback>& callback)
+                                                 uint32_t uid, sptr<IWindowExtensionCallback>& callback) const
 {
     pImpl_->ConnectExtension(element, rect, uid, callback);
 }
 
-void WindowExtensionConnection::Show()
+void WindowExtensionConnection::Show() const
 {
     pImpl_->Show();
 }
 
-void WindowExtensionConnection::Hide()
+void WindowExtensionConnection::Hide() const
 {
     pImpl_->Hide();
 }
 
-void WindowExtensionConnection::RequestFocus()
+void WindowExtensionConnection::RequestFocus() const
 {
     pImpl_->RequestFocus();
 }
 
-void WindowExtensionConnection::SetBounds(Rect rect)
+void WindowExtensionConnection::SetBounds(Rect rect) const
 {
     pImpl_->Resize(rect);
 }
 
-void WindowExtensionConnection::DisconnectExtension()
+void WindowExtensionConnection::DisconnectExtension() const
 {
     pImpl_->DisconnectExtension();
 }

@@ -81,9 +81,9 @@ public:
      */
     virtual void OnStart(const AAFwk::Want &want) override;
 private:
-    void GetSrcPath(std::string &srcPath);
-    NativeValue* CallJsMethod(const char* name, NativeValue* const* argv = nullptr, size_t argc = 0);
-    void OnWindowCreated();
+    void GetSrcPath(std::string &srcPath) const;
+    NativeValue* CallJsMethod(const char* name, NativeValue* const* argv = nullptr, size_t argc = 0) const;
+    void OnWindowCreated() const;
 
     AbilityRuntime::JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
