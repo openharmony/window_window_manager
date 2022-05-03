@@ -75,8 +75,10 @@ bool ScreenPowerFuzzTest(const uint8_t *data, size_t size)
         static_cast<PowerStateChangeReason>(startPos));
     auto allScreen = screenManager.GetAllScreens();
     for (auto screen: allScreen) {
-        screenManager.GetScreenPower(screen->GetId());
-        // It is necessary to judge whether powerState and screenPowerState are equal.
+        ScreenPowerState powerState = screenManager.GetScreenPower(screen->GetId());
+        if (static_cast<ScreenPowerState>(screenPowerState) != powerState) {
+            std::cout << "powerState and screenPowerState are not equal." << std::endl;
+        }
     }
 
     screenManager.UnregisterScreenGroupListener(screenGroupListener);
@@ -108,8 +110,12 @@ bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     screenManager.SetVirtualScreenSurface(screenId, nullptr);
-    // It is necessary to judge whether screenId is in screens.
-    screenManager.GetAllScreens();
+    std::vector<sptr<Screen>> screens = screenManager.GetAllScreens();
+    for (auto screen : screens) {
+        if (screen->GetId() != screenId) {
+            std::cout << "screenId is not in screens." << std::endl;
+        }
+    }
 
     // make mirror
     ScreenId groupId = screenManager.MakeMirror(0, { screenId });
@@ -157,8 +163,12 @@ bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     screenManager.SetVirtualScreenSurface(screenId, nullptr);
-    // It is necessary to judge whether screenId is in screens.
-    screenManager.GetAllScreens();
+    std::vector<sptr<Screen>> screens = screenManager.GetAllScreens();
+    for (auto screen : screens) {
+        if (screen->GetId() != screenId) {
+            std::cout << "screenId is not in screens." << std::endl;
+        }
+    }
     // make expand
     std::vector<ExpandOption> options = {{0, 0, 0}, {screenId, 0, 0}};
     ScreenId groupId = screenManager.MakeExpand(options);
@@ -299,9 +309,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::Rosen::ScreenPowerFuzzTest(data, size);
-    // should MakeMirrorWithVirtualScreenFuzzTest here.
+    OHOS::Rosen::MakeMirrorWithVirtualScreenFuzzTest(data, size);
     OHOS::Rosen::MakeMirrorFuzzTest(data, size);
-    // should MakeExpandWithVirtualScreenFuzzTest here.
+    OHOS::Rosen::MakeExpandWithVirtualScreenFuzzTest(data, size);
     OHOS::Rosen::MakeExpandFuzzTest(data, size);
     OHOS::Rosen::CreateAndDestroyVirtualScreenFuzzTest(data, size);
     OHOS::Rosen::SetVirtualScreenSurfaceFuzzTest(data, size);

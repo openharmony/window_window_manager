@@ -78,6 +78,7 @@ public:
             return;
         }
         pImpl_->NotifyScreenConnect(screenInfo);
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         for (auto listener : pImpl_->screenListeners_) {
             listener->OnConnect(screenInfo->GetScreenId());
         }
@@ -94,6 +95,7 @@ public:
             return;
         }
         pImpl_->NotifyScreenDisconnect(screenId);
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         for (auto listener : pImpl_->screenListeners_) {
             listener->OnDisconnect(screenId);
         }
@@ -111,6 +113,7 @@ public:
         }
         WLOGFD("OnScreenChange. event %{public}u", event);
         pImpl_->NotifyScreenChange(screenInfo);
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         for (auto listener: pImpl_->screenListeners_) {
             listener->OnChange(screenInfo->GetScreenId());
         }
@@ -134,6 +137,7 @@ public:
                 screenIds.push_back(screenInfo->GetScreenId());
             }
         }
+        std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         for (auto listener: pImpl_->screenGroupListeners_) {
             listener->OnChange(screenIds, groupEvent);
         }

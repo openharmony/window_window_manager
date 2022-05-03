@@ -17,16 +17,15 @@ import("//build/test.gni")
 module_output_path = "window_manager/wm"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("WindowSceneFuzzTest") {
+ohos_fuzztest("WindowIPCFuzzTest") {
   fuzz_config_file =
-      "//foundation/windowmanager/wm/test/fuzztest/windowscene_fuzzer"
+      "//foundation/windowmanager/wm/test/fuzztest/windowipc_fuzzer"
   module_out_path = module_output_path
   include_dirs = [
-    "//foundation/windowmanager/wmserver/include",
-    "//foundation/windowmanager/interfaces/innerkits/dm",
     "//foundation/windowmanager/interfaces/innerkits/wm",
-    "//foundation/graphic/standard/interfaces/innerkits/surface",
-    "//utils/native/base/include",
+    "//foundation/windowmanager/interfaces/innerkits/dm",
+    "//foundation/windowmanager/wmserver/include",
+    "//foundation/windowmanager/wm/include",
   ]
   cflags = [
     "-g",
@@ -34,14 +33,12 @@ ohos_fuzztest("WindowSceneFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "windowscene_fuzzer.cpp" ]
+  sources = [ "windowipc_fuzzer.cpp" ]
   deps = [
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wmserver:libwms",
-    "//utils/native/base:utils",
   ]
+  external_deps = [ "samgr_standard:samgr_proxy" ]
 }
 
 ###############################################################################
@@ -51,7 +48,7 @@ group("fuzztest") {
 
   deps += [
     # deps file
-    ":WindowSceneFuzzTest",
+    ":WindowIPCFuzzTest",
   ]
 }
 ###############################################################################
