@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "parcel.h"
 #include "window.h"
 #include "window_manager.h"
 
