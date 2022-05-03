@@ -81,15 +81,15 @@ ohos_shared_library("window_extension_module") {
 
   deps = [
     "//foundation/windowmanager/extension/window_extension:libwindow_extension",
+    "//foundation/windowmanager/wm:libwm",
   ]
 
   external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
-    "ability_runtime:abilitykit_native",
     "ability_runtime:runtime",
-    "hilog_native:libhilog",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "resmgr_standard:global_resmgr",
   ]
   relative_install_dir = "extensionability/"
   subsystem_name = "window"
