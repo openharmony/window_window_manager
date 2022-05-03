@@ -22,6 +22,7 @@
 #include "display_manager_service_inner.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
+#include "window_manager_service.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -231,6 +232,43 @@ void WindowRoot::MinimizeAllAppWindows(DisplayId displayId)
         return;
     }
     return container->MinimizeAllAppWindows(displayId);
+}
+
+void WindowRoot::ToggleShownStateForAllAppWindow()
+{
+    std::vector<DisplayId> displays = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
+    std::vector<sptr<WindowNodeContainer>> containers;
+    bool isAllAppWindowsEmpty = true;
+    for (auto displayId : displays) {
+        auto container = GetOrCreateWindowNodeContainer(displayId);
+        if (container == nullptr) {
+            WLOGFE("can't find window node container, failed!");
+            continue;
+        }
+        containers.emplace_back(container);
+        isAllAppWindowsEmpty = isAllAppWindowsEmpty && container->IsAppWindowsEmpty();
+    }
+    std::for_each(containers.begin(), containers.end(),
+        [this, isAllAppWindowsEmpty] (sptr<WindowNodeContainer> container) {
+        std::function<bool(uint32_t)> restoreFunc = [this](uint32_t windowId) {
+            auto windowNode = GetWindowNode(windowId);
+            if (windowNode == nullptr) {
+                return false;
+            }
+            windowNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_SHOWN);
+            auto property = windowNode->GetWindowToken()->GetWindowProperty();
+            if (property == nullptr) {
+                return false;
+            }
+            WindowManagerService::GetInstance().AddWindow(property);
+            return true;
+        };
+        if (isAllAppWindowsEmpty) {
+            container->ToggleShownStateForAllAppWindow(restoreFunc, true);
+        } else {
+            container->ToggleShownStateForAllAppWindow(restoreFunc, false);
+        }
+    });
 }
 
 WMError WindowRoot::MaxmizeWindow(uint32_t windowId)

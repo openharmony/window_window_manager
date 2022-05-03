@@ -144,6 +144,10 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             MinimizeAllAppWindows(data.ReadUint64());
             break;
         }
+        case WindowManagerMessage::TRANS_ID_TOGGLE_SHOWN_STATE_FOR_ALL_APP_WINDOWS: {
+            ToggleShownStateForAllAppWindow();
+            break;
+        }
         case WindowManagerMessage::TRANS_ID_MAXMIZE_WINDOW: {
             MaxmizeWindow(data.ReadUint32());
             break;

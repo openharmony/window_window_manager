@@ -46,6 +46,7 @@ public:
         TRANS_ID_PROCESS_POINT_DOWN,
         TRANS_ID_PROCESS_POINT_UP,
         TRANS_ID_MINIMIZE_ALL_APP_WINDOWS,
+        TRANS_ID_TOGGLE_SHOWN_STATE_FOR_ALL_APP_WINDOWS,
         TRANS_ID_SET_BACKGROUND_BLUR,
         TRANS_ID_SET_APLPHA,
         TRANS_ID_UPDATE_LAYOUT_MODE,
@@ -71,6 +72,7 @@ public:
     virtual void ProcessPointDown(uint32_t windowId, bool isStartDrag) = 0;
     virtual void ProcessPointUp(uint32_t windowId) = 0;
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
+    virtual void ToggleShownStateForAllAppWindow() = 0;
     virtual WMError MaxmizeWindow(uint32_t windowId) = 0;
     virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) = 0;
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) = 0;

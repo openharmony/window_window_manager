@@ -108,5 +108,14 @@ void WindowAgent::UpdateActiveStatus(bool isActive)
     }
     window_->UpdateActiveStatus(isActive);
 }
+
+sptr<WindowProperty> WindowAgent::GetWindowProperty()
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return nullptr;
+    }
+    return window_->GetWindowProperty();
+}
 } // namespace Rosen
 } // namespace OHOS

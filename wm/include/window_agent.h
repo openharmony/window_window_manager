@@ -36,6 +36,7 @@ public:
     void UpdateDisplayId(DisplayId from, DisplayId to) override;
     void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override;
     void UpdateActiveStatus(bool isActive) override;
+    sptr<WindowProperty> GetWindowProperty() override;
 private:
     sptr<WindowImpl> window_;
 };

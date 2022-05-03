@@ -746,7 +746,8 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
 
 WMError WindowImpl::Show(uint32_t reason)
 {
-    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Show", name_.c_str(), property_->GetWindowId());
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Show, reason:%{public}u",
+        name_.c_str(), property_->GetWindowId(), reason);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -758,7 +759,8 @@ WMError WindowImpl::Show(uint32_t reason)
     }
 
     WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
-    if (stateChangeReason == WindowStateChangeReason::KEYGUARD) {
+    if (stateChangeReason == WindowStateChangeReason::KEYGUARD ||
+        stateChangeReason == WindowStateChangeReason::TOGGLING) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
         return WMError::WM_OK;
@@ -1696,7 +1698,7 @@ void WindowImpl::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
 
 void WindowImpl::UpdateWindowState(WindowState state)
 {
-    WLOGFI("[Client] Window %{public}u, WindowState to set:%{public}u", GetWindowId(), state);
+    WLOGFI("[Client] Window %{public}u, %{public}s WindowState to set:%{public}u", GetWindowId(), name_.c_str(), state);
     if (!IsWindowValid()) {
         return;
     }
@@ -1724,11 +1726,41 @@ void WindowImpl::UpdateWindowState(WindowState state)
             }
             break;
         }
+        case WindowState::STATE_HIDDEN: {
+            if (abilityContext != nullptr && windowTag_ == WindowTag::MAIN_WINDOW) {
+                WLOGFD("MinimizeAbility, id: %{public}u", GetWindowId());
+                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(abilityContext->GetToken(), true);
+            } else {
+                state_ = WindowState::STATE_HIDDEN;
+                NotifyAfterBackground();
+            }
+            break;
+        }
+        case WindowState::STATE_SHOWN: {
+            if (abilityContext != nullptr && windowTag_ == WindowTag::MAIN_WINDOW) {
+                WLOGFD("WindowState::STATE_SHOWN, id: %{public}u", GetWindowId());
+                AAFwk::AbilityManagerClient::GetInstance()->DoAbilityForeground(abilityContext->GetToken(),
+                    static_cast<uint32_t>(WindowStateChangeReason::TOGGLING));
+            } else {
+                state_ = WindowState::STATE_SHOWN;
+                NotifyAfterForeground();
+            }
+            break;
+        }
         default: {
             WLOGFE("windowState to set is invalid");
             break;
         }
     }
+}
+
+sptr<WindowProperty> WindowImpl::GetWindowProperty()
+{
+    WLOGFI("[Client] Window %{public}u, %{public}s", GetWindowId(), name_.c_str());
+    if (!IsWindowValid()) {
+        return nullptr;
+    }
+    return property_;
 }
 
 void WindowImpl::UpdateDragEvent(const PointInfo& point, DragEvent event)

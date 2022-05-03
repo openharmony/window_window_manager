@@ -254,6 +254,9 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     WLOGFI("AddWindowNode windowId: %{public}u end", node->GetWindowId());
+    if (WindowHelper::IsAppWindow(node->GetWindowType())) {
+        backupWindowIds_.clear();
+    }
     return WMError::WM_OK;
 }
 
@@ -1222,6 +1225,49 @@ void WindowNodeContainer::MinimizeOldestAppWindow()
         }
     }
     WLOGFI("no window needs to minimize");
+}
+
+void WindowNodeContainer::ToggleShownStateForAllAppWindow(std::function<bool(uint32_t)> restoreFunc, bool restore)
+{
+    WLOGFI("ToggleShownStateForAllAppWindow");
+    // to do, backup reentry: 1.ToggleShownStateForAllAppWindow fast; 2.this display should reset backupWindowIds_.
+    if (!restore && appWindowNode_->children_.empty() && !backupWindowIds_.empty()) {
+        backupWindowIds_.clear();
+    }
+    if (!restore && !appWindowNode_->children_.empty() && backupWindowIds_.empty()) {
+        // backup
+        WLOGFI("backup");
+        for (auto& appNode : appWindowNode_->children_) {
+            // exclude exceptional window
+            if (!WindowHelper::IsMainWindow(appNode->GetWindowType())) {
+                WLOGFE("is not main window, windowId:%{public}u", appNode->GetWindowId());
+                continue;
+            }
+            // minimize window
+            WLOGFD("minimize window, windowId:%{public}u", appNode->GetWindowId());
+            backupWindowIds_.emplace_back(appNode->GetWindowId());
+            appNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_HIDDEN);
+        }
+    } else if (restore && !backupWindowIds_.empty()) {
+        // restore
+        WLOGFI("restore");
+        std::vector<uint32_t> backupWindowIds(backupWindowIds_);
+        for (auto windowId: backupWindowIds) {
+            if (!restoreFunc(windowId)) {
+                WLOGFE("restore %{public}u failed", windowId);
+                continue;
+            }
+            WLOGFD("restore %{public}u", windowId);
+        }
+        backupWindowIds_.clear();
+    } else {
+        WLOGFI("do nothing because shown app windows is empty or backup windows is empty.");
+    }
+}
+
+bool WindowNodeContainer::IsAppWindowsEmpty() const
+{
+    return appWindowNode_->children_.empty();
 }
 
 void WindowNodeContainer::MinimizeWindowFromAbility(const sptr<WindowNode>& node, bool fromUser)

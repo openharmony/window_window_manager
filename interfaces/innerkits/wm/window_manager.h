@@ -149,6 +149,7 @@ public:
     void RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     void UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     void MinimizeAllAppWindows(DisplayId displayId);
+    void ToggleShownStateForAllAppWindow();
     WMError SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId);
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const;
 

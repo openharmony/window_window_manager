@@ -410,6 +410,22 @@ void WindowManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
     }
 }
 
+void WindowManagerProxy::ToggleShownStateForAllAppWindow()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (Remote()->SendRequest(
+        static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_TOGGLE_SHOWN_STATE_FOR_ALL_APP_WINDOWS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 WMError WindowManagerProxy::MaxmizeWindow(uint32_t windowId)
 {
     MessageParcel data;
