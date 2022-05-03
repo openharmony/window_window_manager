@@ -29,7 +29,7 @@ void WindowExtensionClientProxy::OnWindowReady(std::shared_ptr<RSSurfaceNode>& s
 {
     MessageParcel data;
     MessageParcel replay;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write token failed");
@@ -50,7 +50,7 @@ void WindowExtensionClientProxy::OnBackPress()
 {
     MessageParcel data;
     MessageParcel replay;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
     WLOGFI("call");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write token failed");
@@ -66,7 +66,7 @@ void WindowExtensionClientProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyE
 {
     MessageParcel data;
     MessageParcel replay;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write token failed");
@@ -87,7 +87,7 @@ void WindowExtensionClientProxy::OnPointerEvent(std::shared_ptr<MMI::PointerEven
 {
     MessageParcel data;
     MessageParcel replay;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("write token failed");

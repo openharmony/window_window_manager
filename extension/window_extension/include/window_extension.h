@@ -16,15 +16,16 @@
 #ifndef WINDOW_EXTENSION_H
 #define WINDOW_EXTENSION_H
 
+// #include <ability_connect_callback.h>
 #include <extension_base.h>
 #include <service_extension.h>
 
 namespace OHOS {
 namespace Rosen {
-using namespace AbilityRuntime;
+// using namespace AbilityRuntime;
 class WindowExtensionContext;
 
-class WindowExtension : public ExtensionBase<WindowExtensionContext> {
+class WindowExtension : public AbilityRuntime::ExtensionBase<WindowExtensionContext> {
 public:
     WindowExtension() = default;
     virtual ~WindowExtension() = default;
@@ -39,9 +40,9 @@ public:
      * @return The created context.
      */
     virtual std::shared_ptr<WindowExtensionContext> CreateAndInitContext(
-        const std::shared_ptr<AbilityLocalRecord> &record,
-        const std::shared_ptr<OHOSApplication> &application,
-        std::shared_ptr<AbilityHandler> &handler,
+        const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
+        const std::shared_ptr<AbilityRuntime::OHOSApplication> &application,
+        std::shared_ptr<AbilityRuntime::AbilityHandler> &handler,
         const sptr<IRemoteObject> &token) override;
 
     /**
@@ -52,9 +53,9 @@ public:
      * @param handler the extension handler.
      * @param token the remote token.
      */
-    virtual void Init(const std::shared_ptr<AbilityLocalRecord> &record,
-        const std::shared_ptr<OHOSApplication> &application,
-        std::shared_ptr<AbilityHandler> &handler,
+    virtual void Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
+        const std::shared_ptr<AbilityRuntime::OHOSApplication> &application,
+        std::shared_ptr<AbilityRuntime::AbilityHandler> &handler,
         const sptr<IRemoteObject> &token) override;
 
     /**
@@ -63,7 +64,7 @@ public:
      * @param runtime The runtime.
      * @return The WindowExtension instance.
      */
-    static WindowExtension* Create(const std::unique_ptr<Runtime>& runtime);
+    static WindowExtension* Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
 };
 } // namespace Rosen
 } // namespace OHOS

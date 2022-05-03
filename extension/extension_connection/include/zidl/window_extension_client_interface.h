@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Rosen {
 class IWindowExtensionClient : public IRemoteBroker {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.resen.window.extension");
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.rosen.window.extension");
     enum {
         TRANS_ID_ON_WINDOW_READY = 1,
         TRANS_ID_ON_BACK_PRESS,

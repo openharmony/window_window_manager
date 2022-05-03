@@ -27,15 +27,16 @@ void WindowExtensionClientStubImpl::OnWindowReady(std::shared_ptr<RSSurfaceNode>
 {
     if (componentCallback_ != nullptr) {
         componentCallback_->OnWindowReady(surfaceNode);
-        WLOGFI("end");
+        WLOGFI("called");
     }
+
 }
 
 void WindowExtensionClientStubImpl::OnBackPress()
 {
     if (componentCallback_ != nullptr) {
         componentCallback_->OnBackPress();
-        WLOGFI("end");
+        WLOGFI("called");
     }
 }
 
@@ -43,7 +44,7 @@ void WindowExtensionClientStubImpl::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& k
 {
     if (componentCallback_ != nullptr) {
         componentCallback_->OnKeyEvent(keyEvent);
-        WLOGFI("end");
+        WLOGFI("called");
     }
 }
 
@@ -51,7 +52,7 @@ void WindowExtensionClientStubImpl::OnPointerEvent(std::shared_ptr<MMI::PointerE
 {
     if (componentCallback_ != nullptr) {
         componentCallback_->OnPointerEvent(pointerEvent);
-        WLOGFI("end");
+        WLOGFI("called");
     }
 }
 } // namespace Rosen
