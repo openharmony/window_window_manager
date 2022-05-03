@@ -115,7 +115,7 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     WLOGFI("JsWindowExtension::Init end.");
 }
 
-void JsWindowExtension::GetSrcPath(std::string &srcPath)
+void JsWindowExtension::GetSrcPath(std::string &srcPath) const
 {
     if (!Extension::abilityInfo_) {
         WLOGFE("abilityInfo_ is nullptr");
@@ -215,7 +215,7 @@ void JsWindowExtension::OnStart(const AAFwk::Want &want)
     }
 }
 
-void JsWindowExtension::OnWindowCreated()
+void JsWindowExtension::OnWindowCreated() const
 {
     NativeEngine& engine = jsRuntime_.GetNativeEngine();
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
@@ -240,7 +240,7 @@ void JsWindowExtension::OnWindowCreated()
     AsyncTask::Schedule(engine, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-NativeValue* JsWindowExtension::CallJsMethod(const char* name, NativeValue* const* argv, size_t argc)
+NativeValue* JsWindowExtension::CallJsMethod(const char* name, NativeValue* const* argv, size_t argc) const
 {
     WLOGFI("called (%{public}s), begin", name);
 
