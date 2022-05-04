@@ -30,7 +30,7 @@ public:
     WindowExtensionStubImpl(const std::string& windowName);
     ~WindowExtensionStubImpl();
 
-    virtual void Resize(Rect rect) override;
+    virtual void Resize(const Rect& rect) override;
     virtual void Hide() override;
     virtual void Show() override;
     virtual void RequestFocus() override;

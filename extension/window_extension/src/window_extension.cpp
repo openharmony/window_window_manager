@@ -43,20 +43,20 @@ WindowExtension* WindowExtension::Create(const std::unique_ptr<AbilityRuntime::R
     return nullptr;
 }
 
-void WindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
-    const std::shared_ptr<AbilityRuntime::OHOSApplication> &application,
-    std::shared_ptr<AbilityRuntime::AbilityHandler> &handler,
-    const sptr<IRemoteObject> &token)
+void WindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord>& record,
+    const std::shared_ptr<AbilityRuntime::OHOSApplication>& application,
+    std::shared_ptr<AbilityRuntime::AbilityHandler>& handler,
+    const sptr<IRemoteObject>& token)
 {
     ExtensionBase<WindowExtensionContext>::Init(record, application, handler, token);
     WLOGFI("WindowExtension begin init");
 }
 
 std::shared_ptr<WindowExtensionContext> WindowExtension::CreateAndInitContext(
-    const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
-    const std::shared_ptr<AbilityRuntime::OHOSApplication> &application,
-    std::shared_ptr<AbilityRuntime::AbilityHandler> &handler,
-    const sptr<IRemoteObject> &token)
+    const std::shared_ptr<AbilityRuntime::AbilityLocalRecord>& record,
+    const std::shared_ptr<AbilityRuntime::OHOSApplication>& application,
+    std::shared_ptr<AbilityRuntime::AbilityHandler>& handler,
+    const sptr<IRemoteObject>& token)
 {
     if (!record) {
         WLOGFE("WindowExtension::CreateAndInitContext record is nullptr");

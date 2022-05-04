@@ -43,19 +43,19 @@ private:
     std::shared_ptr<WindowExtensionContext> context_;
 };
 
-void JsWindowConnectCallback::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
-                                                   const sptr<IRemoteObject> &remoteObject, int resultCode)
+void JsWindowConnectCallback::OnAbilityConnectDone(const AppExecFwk::ElementName& element,
+                                                   const sptr<IRemoteObject>& remoteObject, int resultCode)
 {
     WLOGFI("called");
 }
 
-void JsWindowConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
+void JsWindowConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode)
 {
     WLOGFI("called");
 }
 
 NativeValue* CreateJsWindowExtensionContext(NativeEngine& engine,
-                                            std::shared_ptr<WindowExtensionContext> context)
+                                            const std::shared_ptr<WindowExtensionContext>& context)
 {
     WLOGFI("CreateJsWindowExtensionContext begin");
     NativeValue* objValue = CreateJsExtensionContext(engine, context);

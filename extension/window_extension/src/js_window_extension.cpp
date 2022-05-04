@@ -54,10 +54,10 @@ JsWindowExtension* JsWindowExtension::Create(const std::unique_ptr<AbilityRuntim
 JsWindowExtension::JsWindowExtension(AbilityRuntime::JsRuntime& jsRuntime) : jsRuntime_(jsRuntime) {}
 JsWindowExtension::~JsWindowExtension() = default;
 
-void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
-    const std::shared_ptr<AbilityRuntime::OHOSApplication> &application,
-    std::shared_ptr<AbilityRuntime::AbilityHandler> &handler,
-    const sptr<IRemoteObject> &token)
+void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord>& record,
+    const std::shared_ptr<AbilityRuntime::OHOSApplication>& application,
+    std::shared_ptr<AbilityRuntime::AbilityHandler>& handler,
+    const sptr<IRemoteObject>& token)
 {
     WindowExtension::Init(record, application, handler, token);
     std::string srcPath;
@@ -89,7 +89,6 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
         WLOGFE("Failed to get context");
         return;
     }
-    WLOGFI("JsWindowExtension::Init CreateJsWindowExtensionContext.");
 
     NativeValue* contextObj = CreateJsWindowExtensionContext(jsRuntime_.GetNativeEngine(), context);
     shellContextRef_ = jsRuntime_.LoadSystemModule("application.WindowExtensionContext", &contextObj, 1);
@@ -105,8 +104,6 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
         return;
     }
 
-    WLOGFI("Set extension context pointer: %{public}p", context.get());
-
     nativeObj->SetNativePointer(new std::weak_ptr<AbilityRuntime::Context>(context),
         [](NativeEngine*, void* data, void*) {
             WLOGFI("Finalizer for weak_ptr extension context is called");
@@ -116,7 +113,7 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
     WLOGFI("JsWindowExtension::Init end.");
 }
 
-void JsWindowExtension::GetSrcPath(std::string &srcPath) const
+void JsWindowExtension::GetSrcPath(std::string& srcPath) const
 {
     if (!Extension::abilityInfo_) {
         WLOGFE("abilityInfo_ is nullptr");
@@ -141,14 +138,14 @@ void JsWindowExtension::GetSrcPath(std::string &srcPath) const
     }
 }
 
-sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)
+sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
 {
     WLOGFI("called.");
     Extension::OnConnect(want);
     NativeEngine& engine = jsRuntime_.GetNativeEngine();
     std::unique_ptr<AbilityRuntime::AsyncTask::CompleteCallback> complete =
         std::make_unique<AbilityRuntime::AsyncTask::CompleteCallback>(
-        [=] (NativeEngine &engine, AbilityRuntime::AsyncTask &task, int32_t status) {
+        [=] (NativeEngine& engine, AbilityRuntime::AsyncTask& task, int32_t status) {
         NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
         napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
         NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
@@ -169,13 +166,13 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want &want)
     return stub_->AsObject();
 }
 
-void JsWindowExtension::OnDisconnect(const AAFwk::Want &want)
+void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
 {
     Extension::OnDisconnect(want);
     NativeEngine& engine = jsRuntime_.GetNativeEngine();
     std::unique_ptr<AbilityRuntime::AsyncTask::CompleteCallback> complete =
         std::make_unique<AbilityRuntime::AsyncTask::CompleteCallback>(
-        [=] (NativeEngine &engine, AbilityRuntime::AsyncTask &task, int32_t status) {
+        [=] (NativeEngine& engine, AbilityRuntime::AsyncTask& task, int32_t status) {
         NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
         napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
         NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
@@ -190,7 +187,7 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want &want)
     WLOGFI("called.");
 }
 
-void JsWindowExtension::OnStart(const AAFwk::Want &want)
+void JsWindowExtension::OnStart(const AAFwk::Want& want)
 {
     Extension::OnStart(want);
 
@@ -225,7 +222,7 @@ void JsWindowExtension::OnWindowCreated() const
     NativeEngine& engine = jsRuntime_.GetNativeEngine();
     std::unique_ptr<AbilityRuntime::AsyncTask::CompleteCallback> complete =
         std::make_unique<AbilityRuntime::AsyncTask::CompleteCallback>(
-        [=] (NativeEngine &engine, AbilityRuntime::AsyncTask &task, int32_t status) {
+        [=] (NativeEngine& engine, AbilityRuntime::AsyncTask& task, int32_t status) {
             auto window = stub_->GetWindow();
             if (window == nullptr) {
                 WLOGFE("get window failed");

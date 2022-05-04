@@ -26,7 +26,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionProxy"};
 }
 
-void WindowExtensionProxy::Resize(Rect rect)
+void WindowExtensionProxy::Resize(const Rect& rect)
 {
     MessageParcel data;
     MessageParcel reply;

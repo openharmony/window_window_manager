@@ -40,10 +40,10 @@ public:
      * @return The created context.
      */
     virtual std::shared_ptr<WindowExtensionContext> CreateAndInitContext(
-        const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
-        const std::shared_ptr<AbilityRuntime::OHOSApplication> &application,
-        std::shared_ptr<AbilityRuntime::AbilityHandler> &handler,
-        const sptr<IRemoteObject> &token) override;
+        const std::shared_ptr<AbilityRuntime::AbilityLocalRecord>& record,
+        const std::shared_ptr<AbilityRuntime::OHOSApplication>& application,
+        std::shared_ptr<AbilityRuntime::AbilityHandler>& handler,
+        const sptr<IRemoteObject>& token) override;
 
     /**
      * @brief Init the extension.
@@ -53,10 +53,10 @@ public:
      * @param handler the extension handler.
      * @param token the remote token.
      */
-    virtual void Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord> &record,
-        const std::shared_ptr<AbilityRuntime::OHOSApplication> &application,
-        std::shared_ptr<AbilityRuntime::AbilityHandler> &handler,
-        const sptr<IRemoteObject> &token) override;
+    virtual void Init(const std::shared_ptr<AbilityRuntime::AbilityLocalRecord>& record,
+        const std::shared_ptr<AbilityRuntime::OHOSApplication>& application,
+        std::shared_ptr<AbilityRuntime::AbilityHandler>& handler,
+        const sptr<IRemoteObject>& token) override;
 
     /**
      * @brief Create Extension.
