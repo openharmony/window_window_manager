@@ -66,6 +66,7 @@ ohos_shared_library("libwms") {
     "src/freeze_controller.cpp",
     "src/input_window_monitor.cpp",
     "src/window_controller.cpp",
+    "src/window_dumper.cpp",
     "src/window_inner_manager.cpp",
     "src/window_layout_policy.cpp",
     "src/window_layout_policy_cascade.cpp",
