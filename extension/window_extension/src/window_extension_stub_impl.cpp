@@ -37,10 +37,10 @@ WindowExtensionStubImpl::~WindowExtensionStubImpl()
     }
 }
 
-sptr<Window> WindowExtensionStubImpl::CreateWindow(Rect& rect,
+sptr<Window> WindowExtensionStubImpl::CreateWindow(const Rect& rect,
                                                    const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    sptr<WindowOption> option = new(std::nothrow)WindowOption();
+    sptr<WindowOption> option = new(std::nothrow) WindowOption();
     if (option == nullptr) {
         WLOGFE("Get option failed");
         return nullptr;
@@ -86,7 +86,7 @@ void WindowExtensionStubImpl::RequestFocus()
     }
 }
 
-void WindowExtensionStubImpl::GeExtensionWindow(sptr<IWindowExtensionClient>& token)
+void WindowExtensionStubImpl::GetExtensionWindow(sptr<IWindowExtensionClient>& token)
 {
     token_ = token;
     if (token_ == nullptr) {

@@ -16,13 +16,11 @@
 #ifndef WINDOW_EXTENSION_H
 #define WINDOW_EXTENSION_H
 
-// #include <ability_connect_callback.h>
 #include <extension_base.h>
 #include <service_extension.h>
 
 namespace OHOS {
 namespace Rosen {
-// using namespace AbilityRuntime;
 class WindowExtensionContext;
 
 class WindowExtension : public AbilityRuntime::ExtensionBase<WindowExtensionContext> {

@@ -29,19 +29,19 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const static std::string RECT_FORM_KEY_POS_X = "ext_pos_x";
-    const static std::string RECT_FORM_KEY_POS_Y = "ext_pos_y";
-    const static std::string RECT_FORM_KEY_HEIGHT = "ext_pos_heigh";
-    const static std::string RECT_FORM_KEY_WIDTH = "ext_pos_width";
+    const std::string RECT_FORM_KEY_POS_X = "ext_pos_x";
+    const std::string RECT_FORM_KEY_POS_Y = "ext_pos_y";
+    const std::string RECT_FORM_KEY_HEIGHT = "ext_pos_heigh";
+    const std::string RECT_FORM_KEY_WIDTH = "ext_pos_width";
 }
 
 class RSSurfaceNode;
 class IWindowExtensionCallback : virtual public RefBase {
 public:
-    virtual void OnWindowReady(std::shared_ptr<RSSurfaceNode>& rsSurfaceNode) = 0;
+    virtual void OnWindowReady(const std::shared_ptr<RSSurfaceNode>& rsSurfaceNode) = 0;
     virtual void OnExtensionDisconnected() = 0;
-    virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& event) = 0;
-    virtual void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& event) = 0;
+    virtual void OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event) = 0;
+    virtual void OnPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event) = 0;
     virtual void OnBackPress() = 0;
 };
 
@@ -49,8 +49,8 @@ class WindowExtensionConnection : public RefBase {
 public:
     WindowExtensionConnection();
     ~WindowExtensionConnection();
-    void ConnectExtension(const AppExecFwk::ElementName &element, Rect rect,
-        uint32_t uid, sptr<IWindowExtensionCallback>& callback) const;
+    void ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
+        uint32_t uid, const sptr<IWindowExtensionCallback>& callback) const;
     void DisconnectExtension() const;
     void Show() const;
     void Hide() const;
