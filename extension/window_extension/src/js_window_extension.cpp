@@ -146,11 +146,11 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
     std::unique_ptr<AbilityRuntime::AsyncTask::CompleteCallback> complete =
         std::make_unique<AbilityRuntime::AsyncTask::CompleteCallback>(
         [=] (NativeEngine& engine, AbilityRuntime::AsyncTask& task, int32_t status) {
-        NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
-        napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
-        NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
-        NativeValue* argv[] = { nativeWant };
-        CallJsMethod("onConnect", argv, AbilityRuntime::ArraySize(argv));
+            NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
+            napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
+            NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
+            NativeValue* argv[] = { nativeWant };
+            CallJsMethod("onConnect", argv, AbilityRuntime::ArraySize(argv));
         }
     );
     NativeReference* callback = nullptr;
@@ -173,11 +173,11 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
     std::unique_ptr<AbilityRuntime::AsyncTask::CompleteCallback> complete =
         std::make_unique<AbilityRuntime::AsyncTask::CompleteCallback>(
         [=] (NativeEngine& engine, AbilityRuntime::AsyncTask& task, int32_t status) {
-        NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
-        napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
-        NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
-        NativeValue* argv[] = { nativeWant };
-        CallJsMethod("onDisconnect", argv, AbilityRuntime::ArraySize(argv));
+            NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
+            napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
+            NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
+            NativeValue* argv[] = { nativeWant };
+            CallJsMethod("onDisconnect", argv, AbilityRuntime::ArraySize(argv));
         }
     );
     NativeReference* callback = nullptr;
@@ -194,7 +194,7 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want)
     AbilityRuntime::ElementName elementName = want.GetElement();
     std::string windowName = elementName.GetBundleName();
 
-    stub_ = new(std::nothrow)WindowExtensionStubImpl(windowName);
+    stub_ = new(std::nothrow) WindowExtensionStubImpl(windowName);
     WLOGFI("JsWindowExtension OnStart begin..");
     Rect rect { want.GetIntParam(RECT_FORM_KEY_POS_X, 0),
     want.GetIntParam(RECT_FORM_KEY_POS_Y, 0),
@@ -228,7 +228,7 @@ void JsWindowExtension::OnWindowCreated() const
                 WLOGFE("get window failed");
                 return;
             }
-            NativeValue* value =  CreateJsWindowObject(engine, window);
+            NativeValue* value = CreateJsWindowObject(engine, window);
             if (value == nullptr) {
                 WLOGFE("Create js window failed");
                 return;

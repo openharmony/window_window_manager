@@ -25,7 +25,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionProxy"};
 }
 
-void WindowExtensionClientProxy::OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode)
+void WindowExtensionClientProxy::OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     MessageParcel data;
     MessageParcel replay;
@@ -62,7 +62,7 @@ void WindowExtensionClientProxy::OnBackPress()
     WLOGFI("end");
 }
 
-void WindowExtensionClientProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+void WindowExtensionClientProxy::OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     MessageParcel data;
     MessageParcel replay;
@@ -83,7 +83,7 @@ void WindowExtensionClientProxy::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyE
     WLOGFI("end");
 }
 
-void WindowExtensionClientProxy::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void WindowExtensionClientProxy::OnPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     MessageParcel data;
     MessageParcel replay;

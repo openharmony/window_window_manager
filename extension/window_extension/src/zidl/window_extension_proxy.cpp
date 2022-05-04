@@ -75,7 +75,7 @@ void WindowExtensionProxy::Show()
     }
 }
 
-void WindowExtensionProxy::GeExtensionWindow(sptr<IWindowExtensionClient>& token)
+void WindowExtensionProxy::GetExtensionWindow(sptr<IWindowExtensionClient>& token)
 {
     MessageParcel data;
     MessageParcel replay;

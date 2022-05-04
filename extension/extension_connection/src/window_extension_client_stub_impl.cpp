@@ -23,7 +23,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionClientStubImpl"};
 }
 
-void WindowExtensionClientStubImpl::OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode)
+void WindowExtensionClientStubImpl::OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     if (componentCallback_ != nullptr) {
         componentCallback_->OnWindowReady(surfaceNode);
@@ -40,7 +40,7 @@ void WindowExtensionClientStubImpl::OnBackPress()
     }
 }
 
-void WindowExtensionClientStubImpl::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+void WindowExtensionClientStubImpl::OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (componentCallback_ != nullptr) {
         componentCallback_->OnKeyEvent(keyEvent);
@@ -48,7 +48,7 @@ void WindowExtensionClientStubImpl::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& k
     }
 }
 
-void WindowExtensionClientStubImpl::OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void WindowExtensionClientStubImpl::OnPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (componentCallback_ != nullptr) {
         componentCallback_->OnPointerEvent(pointerEvent);

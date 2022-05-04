@@ -23,13 +23,13 @@ namespace OHOS {
 namespace Rosen {
 class WindowExtensionClientProxy : public IRemoteProxy<IWindowExtensionClient> {
 public:
-    WindowExtensionClientProxy(const sptr<IRemoteObject> &impl)
+    WindowExtensionClientProxy(const sptr<IRemoteObject>& impl)
         : IRemoteProxy<IWindowExtensionClient>(impl) {};
     ~WindowExtensionClientProxy() {};
-    void OnWindowReady(std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
+    void OnWindowReady(const std::shared_ptr<RSSurfaceNode>& surfaceNode) override;
     void OnBackPress() override;
-    void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    void OnPointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    void OnPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 private:
     static inline BrokerDelegator<WindowExtensionClientProxy> delegator_;
 };

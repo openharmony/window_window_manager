@@ -39,8 +39,8 @@ public:
         const sptr<IRemoteObject>& remoteObject, int resultCode) override;
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
 
-    void ConnectExtension(const AppExecFwk::ElementName& element, Rect rect,
-        uint32_t uid, sptr<IWindowExtensionCallback>& callback);
+    void ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
+        uint32_t uid, const sptr<IWindowExtensionCallback>& callback);
     void DisconnectExtension();
     void Show() const;
     void Hide() const;
@@ -96,8 +96,8 @@ void WindowExtensionConnection::Impl::WindowExtensionClientRecipient::OnRemoteDi
     }
     WLOGFI("Remote died");
 }
-void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementName& element, Rect rect,
-                                                       uint32_t uid, sptr<IWindowExtensionCallback>& callback)
+void WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
+                                                       uint32_t uid, const sptr<IWindowExtensionCallback>& callback)
 {
     AAFwk::Want want;
     want.SetElement(element);
@@ -122,7 +122,6 @@ void WindowExtensionConnection::Impl::Show() const
         proxy_->Show();
         WLOGFI("show window");
     }
-    WLOGFI("called");
 }
 
 void WindowExtensionConnection::Impl::Hide() const
@@ -181,8 +180,8 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
     }
     sptr<IWindowExtensionClient> clientToken(new WindowExtensionClientStubImpl(componentCallback_));
     if (clientToken != nullptr) {
-        proxy_->GeExtensionWindow(clientToken);
-        WLOGFI("GeExtensionWindow");
+        proxy_->GetExtensionWindow(clientToken);
+        WLOGFI("GetExtensionWindow");
     }
     WLOGFI("call end");
 }
@@ -196,8 +195,8 @@ void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::
 }
 
 // WindowExtensionConnection
-void WindowExtensionConnection::ConnectExtension(const AppExecFwk::ElementName& element, Rect rect,
-                                                 uint32_t uid, sptr<IWindowExtensionCallback>& callback) const
+void WindowExtensionConnection::ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
+                                                 uint32_t uid, const sptr<IWindowExtensionCallback>& callback) const
 {
     pImpl_->ConnectExtension(element, rect, uid, callback);
 }
