@@ -48,10 +48,10 @@ public:
      * @param handler the extension handler.
      * @param token the remote token.
      */
-    void Init(const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &record,
-        const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
-        std::shared_ptr<AppExecFwk::AbilityHandler> &handler,
-        const sptr<IRemoteObject> &token) override;
+    void Init(const std::shared_ptr<AppExecFwk::AbilityLocalRecord>& record,
+        const std::shared_ptr<AppExecFwk::OHOSApplication>& application,
+        std::shared_ptr<AppExecFwk::AbilityHandler>& handler,
+        const sptr<IRemoteObject>& token) override;
 
     /**
      * @brief Called when this Accessibility extension is connected for the first time.
@@ -62,7 +62,7 @@ public:
      * about the Accessibility extension.
      * @return Returns a pointer to the <b>sid</b> of the connected Accessibility extension.
      */
-    sptr<IRemoteObject> OnConnect(const AAFwk::Want &want) override;
+    sptr<IRemoteObject> OnConnect(const AAFwk::Want& want) override;
 
     /**
      * @brief Called when all abilities connected to this Service extension are disconnected.
@@ -70,7 +70,7 @@ public:
      * You can override this function to implement your own processing logic.
      *
      */
-    void OnDisconnect(const AAFwk::Want &want) override;
+    void OnDisconnect(const AAFwk::Want& want) override;
 
     /**
      * @brief Called when this extension is started. You must override this function if you want to perform some
@@ -79,9 +79,9 @@ public:
      * This function can be called only once in the entire lifecycle of an extension.
      * @param Want Indicates the {@link Want} structure containing startup information about the extension.
      */
-    virtual void OnStart(const AAFwk::Want &want) override;
+    virtual void OnStart(const AAFwk::Want& want) override;
 private:
-    void GetSrcPath(std::string &srcPath) const;
+    void GetSrcPath(std::string& srcPath) const;
     NativeValue* CallJsMethod(const char* name, NativeValue* const* argv = nullptr, size_t argc = 0) const;
     void OnWindowCreated() const;
 

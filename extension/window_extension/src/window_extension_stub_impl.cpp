@@ -40,7 +40,7 @@ WindowExtensionStubImpl::~WindowExtensionStubImpl()
 sptr<Window> WindowExtensionStubImpl::CreateWindow(Rect& rect,
                                                    const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    sptr<WindowOption> option =  new (std::nothrow)WindowOption();
+    sptr<WindowOption> option = new(std::nothrow)WindowOption();
     if (option == nullptr) {
         WLOGFE("Get option failed");
         return nullptr;
@@ -58,7 +58,7 @@ sptr<Window> WindowExtensionStubImpl::CreateWindow(Rect& rect,
     return window_;
 }
 
-void WindowExtensionStubImpl::Resize(Rect rect)
+void WindowExtensionStubImpl::Resize(const Rect& rect)
 {
     if (window_ != nullptr) {
         window_->Resize(rect.width_, rect.height_);

@@ -55,7 +55,7 @@ public:
     void Show() const;
     void Hide() const;
     void RequestFocus() const;
-    void SetBounds(Rect rect) const;
+    void SetBounds(const Rect& rect) const;
 private:
     class Impl;
     sptr<Impl> pImpl_;

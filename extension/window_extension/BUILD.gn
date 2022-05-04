@@ -30,11 +30,11 @@ config("libwindow_extension_private_config") {
 ## Build libwindow_extension.so
 ohos_shared_library("libwindow_extension") {
   sources = [
-    "../extension_connection/src/window_extension_client_proxy.cpp",
+    "../extension_connection/src/zidl/window_extension_client_proxy.cpp",
     "src/js_window_extension.cpp",
     "src/js_window_extension_context.cpp",
     "src/window_extension.cpp",
-    "src/window_extension_stub.cpp",
+    "src/zidl/window_extension_stub.cpp",
     "src/window_extension_stub_impl.cpp",
   ]
 
@@ -87,9 +87,9 @@ ohos_shared_library("window_extension_module") {
   external_deps = [
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
-    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "resmgr_standard:global_resmgr",
+     "hiviewdfx_hilog_native:libhilog",
   ]
   relative_install_dir = "extensionability/"
   subsystem_name = "window"

@@ -37,7 +37,7 @@ public:
         TRANS_ID_CONNECT_TO_EXTENSION,
     };
 
-    virtual void Resize(Rect rect) = 0;
+    virtual void Resize(const Rect& rect) = 0;
     virtual void Hide() = 0;
     virtual void Show() = 0;
     virtual void RequestFocus() = 0;
