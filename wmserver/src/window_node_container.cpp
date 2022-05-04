@@ -321,6 +321,10 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
 bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, bool isAdd, bool animationPlayed)
 {
     WM_FUNCTION_TRACE();
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        WLOGFI("WINDOW_TYPE_APP_COMPONENT not need to update RsTree");
+        return true;
+    }
     static const bool IsWindowAnimationEnabled = ReadIsWindowAnimationEnabledProperty();
     DisplayId displayId = node->GetDisplayId();
     auto updateRSTreeFunc = [&]() {
@@ -469,7 +473,8 @@ const std::vector<uint32_t>& WindowNodeContainer::Destroy()
 
 sptr<WindowNode> WindowNodeContainer::FindRoot(WindowType type) const
 {
-    if (WindowHelper::IsAppWindow(type) || type == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+    if (WindowHelper::IsAppWindow(type) || type == WindowType::WINDOW_TYPE_DOCK_SLICE ||
+        type == WindowType::WINDOW_TYPE_APP_COMPONENT) {
         return appWindowNode_;
     }
     if (WindowHelper::IsBelowSystemWindow(type)) {
