@@ -90,7 +90,7 @@ public:
     std::vector<DisplayId> GetAllDisplayIds() override;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
-    static float customVirtualPixelValue;
+    static float customVirtualPixelRatio;
 
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
 private:
