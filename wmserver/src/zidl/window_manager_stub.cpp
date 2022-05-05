@@ -144,7 +144,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_TOGGLE_SHOWN_STATE_FOR_ALL_APP_WINDOWS: {
-            ToggleShownStateForAllAppWindow();
+            ToggleShownStateForAllAppWindows();
             break;
         }
         case WindowManagerMessage::TRANS_ID_MAXMIZE_WINDOW: {

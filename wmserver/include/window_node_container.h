@@ -69,7 +69,7 @@ public:
     sptr<WindowNode> GetNextActiveWindow(uint32_t windowId) const;
     void MinimizeAllAppWindows(DisplayId displayId);
     void MinimizeOldestAppWindow();
-    void ToggleShownStateForAllAppWindow(std::function<bool(uint32_t)> restoreFunc, bool restore);
+    void ToggleShownStateForAllAppWindows(std::function<bool(uint32_t)> restoreFunc, bool restore);
     bool IsAppWindowsEmpty() const;
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifySystemBarTints(std::vector<DisplayId> displayIdVec);

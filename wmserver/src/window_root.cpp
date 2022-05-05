@@ -231,7 +231,7 @@ void WindowRoot::MinimizeAllAppWindows(DisplayId displayId)
     return container->MinimizeAllAppWindows(displayId);
 }
 
-void WindowRoot::ToggleShownStateForAllAppWindow()
+void WindowRoot::ToggleShownStateForAllAppWindows()
 {
     std::vector<DisplayId> displays = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
     std::vector<sptr<WindowNodeContainer>> containers;
@@ -261,9 +261,9 @@ void WindowRoot::ToggleShownStateForAllAppWindow()
             return true;
         };
         if (isAllAppWindowsEmpty) {
-            container->ToggleShownStateForAllAppWindow(restoreFunc, true);
+            container->ToggleShownStateForAllAppWindows(restoreFunc, true);
         } else {
-            container->ToggleShownStateForAllAppWindow(restoreFunc, false);
+            container->ToggleShownStateForAllAppWindows(restoreFunc, false);
         }
     });
 }
