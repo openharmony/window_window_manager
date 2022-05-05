@@ -29,6 +29,7 @@
 #include "vsync_station.h"
 #include "window.h"
 #include "window_property.h"
+#include "window_transition_info.h"
 #include "wm_common_inner.h"
 #include "wm_common.h"
 
@@ -264,6 +265,7 @@ private:
     uint32_t GetBackgroundColor() const;
     Rect GetSystemAlarmWindowDefaultSize(Rect defaultRect);
     void HandleModeChangeHotZones(int32_t posX, int32_t posY);
+    WMError NotifyWindowTransition(TransitionReason reason);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
