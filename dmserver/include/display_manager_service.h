@@ -90,6 +90,7 @@ public:
     std::vector<DisplayId> GetAllDisplayIds() override;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
+    static float customVirtualPixelValue;
 
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
 private:
@@ -99,6 +100,7 @@ private:
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
     ScreenId GetScreenIdByDisplayId(DisplayId displayId) const;
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByDisplayId(DisplayId displayId) const;
+    void ConfigureDisplayManagerService();
 
     std::recursive_mutex mutex_;
     static inline SingletonDelegator<DisplayManagerService> delegator_;
