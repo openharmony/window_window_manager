@@ -31,9 +31,9 @@ ohos_shared_library("libwindow_extension_client") {
   install_enable = true
   sources = [
     "../window_extension/src/zidl/window_extension_proxy.cpp",
+    "src/window_extension_client_stub_impl.cpp",
     "src/window_extension_connection.cpp",
     "src/zidl/window_extension_client_stub.cpp",
-    "src/window_extension_client_stub_impl.cpp",
   ]
 
   public_configs = [ ":libextension_connection_public_config" ]
