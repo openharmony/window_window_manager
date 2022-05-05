@@ -15,7 +15,7 @@
 
 #include "wm_trace.h"
 
-#include <bytrace.h>
+#include <hitrace_meter.h>
 
 #ifndef WINDOWS_PLATFORM
 #include <securec.h>
