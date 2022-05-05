@@ -410,7 +410,7 @@ void WindowManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
     }
 }
 
-void WindowManagerProxy::ToggleShownStateForAllAppWindow()
+void WindowManagerProxy::ToggleShownStateForAllAppWindows()
 {
     MessageParcel data;
     MessageParcel reply;

@@ -310,10 +310,10 @@ void WindowManager::MinimizeAllAppWindows(DisplayId displayId)
     SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(displayId);
 }
 
-void WindowManager::ToggleShownStateForAllAppWindow()
+void WindowManager::ToggleShownStateForAllAppWindows()
 {
-    WLOGFI("ToggleShownStateForAllAppWindow");
-    SingletonContainer::Get<WindowAdapter>().ToggleShownStateForAllAppWindow();
+    WLOGFI("ToggleShownStateForAllAppWindows");
+    SingletonContainer::Get<WindowAdapter>().ToggleShownStateForAllAppWindows();
 }
 
 WMError WindowManager::SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId)

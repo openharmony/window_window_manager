@@ -33,6 +33,7 @@ public:
     static NativeValue* CreateWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* FindWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* MinimizeAll(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* ToggleShownStateForAllAppWindows(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RegisterWindowManagerCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* UnregisterWindowMangerCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetTopWindow(NativeEngine* engine, NativeCallbackInfo* info);
@@ -42,6 +43,7 @@ private:
     NativeValue* OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnFindWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnMinimizeAll(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnToggleShownStateForAllAppWindows(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRegisterWindowMangerCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnUnregisterWindowManagerCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetTopWindow(NativeEngine& engine, NativeCallbackInfo& info);

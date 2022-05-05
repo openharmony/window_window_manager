@@ -1252,10 +1252,10 @@ void WindowNodeContainer::MinimizeOldestAppWindow()
     WLOGFI("no window needs to minimize");
 }
 
-void WindowNodeContainer::ToggleShownStateForAllAppWindow(std::function<bool(uint32_t)> restoreFunc, bool restore)
+void WindowNodeContainer::ToggleShownStateForAllAppWindows(std::function<bool(uint32_t)> restoreFunc, bool restore)
 {
-    WLOGFI("ToggleShownStateForAllAppWindow");
-    // to do, backup reentry: 1.ToggleShownStateForAllAppWindow fast; 2.this display should reset backupWindowIds_.
+    WLOGFI("ToggleShownStateForAllAppWindows");
+    // to do, backup reentry: 1.ToggleShownStateForAllAppWindows fast; 2.this display should reset backupWindowIds_.
     if (!restore && appWindowNode_->children_.empty() && !backupWindowIds_.empty()) {
         backupWindowIds_.clear();
     }
