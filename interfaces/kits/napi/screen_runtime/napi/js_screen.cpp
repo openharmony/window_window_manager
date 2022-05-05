@@ -222,7 +222,7 @@ NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
     object->SetProperty("orientation", CreateJsValue(engine, screen->GetOrientation()));
     object->SetProperty("activeModeIndex", CreateJsValue(engine, screen->GetModeId()));
     object->SetProperty("supportedModeInfo", CreateJsScreenModeArrayObject(engine, screen->GetSupportedModes()));
-    object->SetProperty("densityDpi", CreateJsValue(engine, 
+    object->SetProperty("densityDpi", CreateJsValue(engine,
         static_cast<uint32_t>(screen->GetVirtualPixelRatio() * 160))); // Dpi = Density(VPR) * 160.
 
     std::shared_ptr<NativeReference> JsScreenRef;

@@ -82,7 +82,6 @@ void DisplayManagerService::ConfigureDisplayManagerService()
 {
     auto enableConfig = DisplayManagerConfig::GetEnableConfig();
     auto numbersConfig = DisplayManagerConfig::GetNumbersConfig();
-
     if (numbersConfig.count("dpi") != 0) {
         uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["dpi"][0]);
         if (densityDpi == 0) {
@@ -91,7 +90,7 @@ void DisplayManagerService::ConfigureDisplayManagerService()
         }
         if (densityDpi < DOT_PER_INCH_MINIMUM_VALUE || densityDpi > DOT_PER_INCH_MAXIMUM_VALUE) {
             WLOGE("Invalid input dpi value, the valid input range for DPI values is %{public}u ~ %{public}u",
-            DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
+                DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
             return;
         }
         float virtualPixelRatio = static_cast<float>(densityDpi) / 160;
