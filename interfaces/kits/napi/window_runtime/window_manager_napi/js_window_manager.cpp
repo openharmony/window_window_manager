@@ -64,6 +64,12 @@ NativeValue* JsWindowManager::MinimizeAll(NativeEngine* engine, NativeCallbackIn
     return (me != nullptr) ? me->OnMinimizeAll(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindowManager::ToggleShownStateForAllAppWindows(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(engine, info);
+    return (me != nullptr) ? me->OnToggleShownStateForAllAppWindows(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindowManager::RegisterWindowManagerCallback(NativeEngine* engine, NativeCallbackInfo* info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(engine, info);
@@ -344,6 +350,32 @@ NativeValue* JsWindowManager::OnMinimizeAll(NativeEngine& engine, NativeCallback
     return result;
 }
 
+NativeValue* JsWindowManager::OnToggleShownStateForAllAppWindows(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("[NAPI]OnToggleShownStateForAllAppWindows");
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 0 || info.argc > 1) { // 1: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params"));
+                return;
+            }
+            SingletonContainer::Get<WindowManager>().ToggleShownStateForAllAppWindows();
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("[NAPI]OnToggleShownStateForAllAppWindows success");
+        };
+    NativeValue* lastParam = (info.argc <= 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 NativeValue* JsWindowManager::OnRegisterWindowMangerCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("[NAPI]OnRegisterWindowMangerCallback");
@@ -554,6 +586,8 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "off", JsWindowManager::UnregisterWindowMangerCallback);
     BindNativeFunction(*engine, *object, "getTopWindow", JsWindowManager::GetTopWindow);
     BindNativeFunction(*engine, *object, "minimizeAll", JsWindowManager::MinimizeAll);
+    BindNativeFunction(*engine, *object, "toggleShownStateForAllAppWindows",
+        JsWindowManager::ToggleShownStateForAllAppWindows);
     BindNativeFunction(*engine, *object, "setWindowLayoutMode", JsWindowManager::SetWindowLayoutMode);
     return engine->CreateUndefined();
 }
