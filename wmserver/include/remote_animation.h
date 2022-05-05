@@ -18,6 +18,7 @@
 
 #include <refbase.h>
 #include <rs_iwindow_animation_controller.h>
+#include <rs_window_animation_target.h>
 #include "surface_draw.h"
 #include "wm_common.h"
 #include "window_node.h"
@@ -40,9 +41,10 @@ public:
     RemoteAnimation() = delete;
     ~RemoteAnimation() = default;
 
-    static bool CheckTransition(sptr<WindowTransitionInfo> info);
+    static bool CheckTransition(sptr<WindowTransitionInfo> srcInfo,
+        sptr<WindowTransitionInfo> dstInfo);
     static TransitionEvent GetTransitionEvent(sptr<WindowTransitionInfo> srcInfo,
-    sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode);
+        sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode);
     static sptr<WindowNode> CreateWindowNode(sptr<WindowTransitionInfo> info, uint32_t winId);
     static void HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,
         uint32_t& windowId, const std::shared_ptr<RSSurfaceNode>& surfaceNode);
@@ -51,11 +53,14 @@ public:
     static void DrawStartingWindow(sptr<WindowNode>& node);
     static void UpdateRSTree(sptr<WindowNode>& node);
     static WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
-
+    static void NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
+    static void NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
 private:
     static SurfaceDraw surfaceDraw_;
     static sptr<RSIWindowAnimationController> windowAnimationController_;
     static WMError CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node);
+    static sptr<RSWindowAnimationTarget> SetAnimationTarget(const sptr<WindowNode>& node,
+        sptr<WindowTransitionInfo> info);
 };
 } // Rosen
 } // OHOS

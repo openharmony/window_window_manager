@@ -251,11 +251,11 @@ WMError WindowAdapter::UpdateProperty(sptr<WindowProperty>& windowProperty, Prop
     return windowManagerServiceProxy_->UpdateProperty(windowProperty, action);
 }
 
-void WindowAdapter::NotifyWindowTransition(sptr<WindowTransitionInfo> from, sptr<WindowTransitionInfo> to)
+WMError WindowAdapter::NotifyWindowTransition(sptr<WindowTransitionInfo> from, sptr<WindowTransitionInfo> to)
 {
-    INIT_PROXY_CHECK_RETURN();
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
-    windowManagerServiceProxy_->NotifyWindowTransition(from, to);
+    return windowManagerServiceProxy_->NotifyWindowTransition(from, to);
 }
 } // namespace Rosen
 } // namespace OHOS

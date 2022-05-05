@@ -49,53 +49,55 @@ bool WindowController::IsWindowNeedMinimizedByOther(const sptr<WindowNode>& targ
         WindowMode::WINDOW_MODE_FULLSCREEN) && (WindowHelper::IsMainWindow(target->GetWindowType()));
 }
 
-void WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& srcInfo,
+WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& srcInfo,
     sptr<WindowTransitionInfo>& dstInfo)
 {
-    if (!RemoteAnimation::CheckTransition(dstInfo)) {
-        return;
+    if (!RemoteAnimation::CheckTransition(srcInfo, dstInfo)) {
+        return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
-
     auto dstNode = windowRoot_->FindWindowNodeWithToken(dstInfo->GetAbilityToken());
     auto srcNode = windowRoot_->FindWindowNodeWithToken(srcInfo->GetAbilityToken());
-
     auto transitionEvent = RemoteAnimation::GetTransitionEvent(srcInfo, dstInfo, srcNode, dstNode);
     auto needMinimizeSrcNode = IsWindowNeedMinimizedByOther(srcNode, dstNode);
+    WMError ret = WMError::WM_OK;
     switch (transitionEvent) {
         case TransitionEvent::COLD_START: {
             dstNode = RemoteAnimation::CreateWindowNode(dstInfo, GenWindowId());
             if (dstNode == nullptr) {
-                return;
+                return WMError::WM_ERROR_NULLPTR;
             }
-            if (windowRoot_->SaveWindow(dstNode) != WMError::WM_OK) {
-                return;
+            WMError ret = windowRoot_->SaveWindow(dstNode);
+            if (ret != WMError::WM_OK) {
+                return ret;
             }
-            if (windowRoot_->AddWindowNode(0, dstNode, true) != WMError::WM_OK) {
-                return;
+            ret = windowRoot_->AddWindowNode(0, dstNode, true);
+            if (ret != WMError::WM_OK) {
+                return ret;
             }
             RemoteAnimation::DrawStartingWindow(dstNode);
             RemoteAnimation::NotifyAnimationTransition(srcInfo, dstInfo, srcNode, dstNode, needMinimizeSrcNode);
             break;
         }
         case TransitionEvent::HOT_START: {
-            if (windowRoot_->AddWindowNode(0, dstNode, true) != WMError::WM_OK) {
-                return;
+            ret = windowRoot_->AddWindowNode(0, dstNode, true);
+            if (ret != WMError::WM_OK) {
+                return ret;
             }
             RemoteAnimation::NotifyAnimationTransition(srcInfo, dstInfo, srcNode, dstNode, needMinimizeSrcNode);
             break;
         }
         case TransitionEvent::MINIMIZE:
-            // NotifyAnimationMinimize
+            RemoteAnimation::NotifyAnimationMinimize(srcInfo, srcNode);
             break;
         case TransitionEvent::CLOSE:
-            // NotifyAnimationClose
+            RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode);
             break;
         default:
-            return;
+            return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
     RSTransaction::FlushImplicitTransaction();
     // Minimize Other judge need : isMinimizedByOtherWindow_, self type.mode
-    return;
+    return WMError::WM_OK;
 }
 
 WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,

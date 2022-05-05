@@ -185,11 +185,11 @@ void WindowManagerService::OnStop()
     WLOGFI("ready to stop service.");
 }
 
-void WindowManagerService::NotifyWindowTransition(
+WMError WindowManagerService::NotifyWindowTransition(
     sptr<WindowTransitionInfo>& fromInfo, sptr<WindowTransitionInfo>& toInfo)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    windowController_->NotifyWindowTransition(fromInfo, toInfo);
+    return windowController_->NotifyWindowTransition(fromInfo, toInfo);
 }
 
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
