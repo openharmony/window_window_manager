@@ -40,7 +40,7 @@
           "inputmethod_client",
           "libmmi-client",
           "ace_napi",
-          "resmgr_standard"
+          "resource_management"
         ],
         "third_party": [
         ]

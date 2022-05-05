@@ -221,7 +221,7 @@ config("wm_systemtest_common_public_config") {
     # for abilityContext
     "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
     "//foundation/aafwk/standard/frameworks/kits/appkit/native/ability_runtime/context",
-    "//base/global/resmgr_standard/interfaces/innerkits/include",
+    "//base/global/resource_management/interfaces/innerkits/include",
     "//third_party/node/deps/icu-small/source/common",
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
     "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
