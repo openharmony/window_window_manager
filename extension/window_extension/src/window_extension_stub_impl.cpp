@@ -50,11 +50,6 @@ sptr<Window> WindowExtensionStubImpl::CreateWindow(const Rect& rect,
     option->SetWindowRect(rect);
     WLOGFI("Window::Create");
     window_ = Window::Create(windowName_, option, context);
-    std::shared_ptr<RSSurfaceNode> node = (window_ != nullptr ? window_->GetSurfaceNode() : nullptr);
-    if (node != nullptr) {
-        node->CreateNodeInRenderThread();
-        WLOGFI("call CreateNodeInRenderThread");
-    }
     return window_;
 }
 
