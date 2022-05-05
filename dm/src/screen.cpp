@@ -193,9 +193,9 @@ void Screen::UpdateScreenInfo() const
 
 bool Screen::SetDensityDpi(uint32_t dpi) const
 {
-    if (dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMIM_VALUE) {
-        WLOGE("Invalid input dpi value, the valid input range for DPI values is %{public}u ~ %{public}u",
-            DOT_PER_INCH_MINIMIM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
+    if (dpi > DOT_PER_INCH_MAXIMUM_VALUE || dpi < DOT_PER_INCH_MINIMUM_VALUE) {
+        WLOGE("Invalid input dpi value, valid input range for DPI is %{public}u ~ %{public}u",
+            DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
         return false;
     }
     // Calculate display density, Density = Dpi / 160.
