@@ -557,9 +557,9 @@ void WindowController::MinimizeAllAppWindows(DisplayId displayId)
     windowRoot_->MinimizeAllAppWindows(displayId);
 }
 
-void WindowController::ToggleShownStateForAllAppWindow()
+void WindowController::ToggleShownStateForAllAppWindows()
 {
-    windowRoot_->ToggleShownStateForAllAppWindow();
+    windowRoot_->ToggleShownStateForAllAppWindows();
 }
 
 WMError WindowController::MaxmizeWindow(uint32_t windowId)
