@@ -13,67 +13,173 @@
  * limitations under the License.
  */
 
-#include "parcel.h"
+#include "display_manager.h"
 #include "window.h"
 #include "window_manager.h"
+#include "window_scene.h"
 
 using namespace OHOS::Rosen;
 
 namespace OHOS {
 namespace {
     constexpr size_t DATA_MIN_SIZE = 2;
+    constexpr char END_CHAR = '\0';
+    constexpr size_t LEN = 10;
 }
-class FocusChangedListener : public IFocusChangedListener {
+class WindowLifeCycle : public IWindowLifeCycle {
 public:
-    virtual void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo) override
+    virtual void AfterForeground() override
     {
     }
-
-    virtual void OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo) override
+    virtual void AfterBackground() override
+    {
+    }
+    virtual void AfterFocused() override
+    {
+    }
+    virtual void AfterUnfocused() override
+    {
+    }
+    virtual void AfterActive() override
+    {
+    }
+    virtual void AfterInactive() override
     {
     }
 };
 
-class SystemBarChangedListener : public ISystemBarChangedListener {
-public:
-    virtual void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override
-    {
+template<class T>
+size_t GetObject(T &object, const uint8_t *data, size_t size)
+{
+    size_t objectSize = sizeof(object);
+    if (objectSize > size) {
+        return 0;
     }
-};
+    std::memcpy(&object, data, objectSize);
+    return objectSize;
+}
 
-class VisibilityChangedListener : public IVisibilityChangedListener {
-public:
-    virtual void OnWindowVisibilityChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo) override
-    {
+size_t InitWindowOption1(WindowOption &windowOption, const uint8_t *data, size_t size)
+{
+    size_t startPos = 0;
+    Rect windowRect;
+    startPos += GetObject<Rect>(windowRect, data + startPos, size - startPos);
+    windowOption.SetWindowRect(windowRect);
+    uint32_t type;
+    startPos += GetObject<uint32_t>(type, data + startPos, size - startPos);
+    windowOption.SetWindowType(static_cast<WindowType>(type));
+    uint32_t mode;
+    startPos += GetObject<uint32_t>(mode, data + startPos, size - startPos);
+    windowOption.SetWindowMode(static_cast<WindowMode>(mode));
+    uint32_t level;
+    startPos += GetObject<uint32_t>(level, data + startPos, size - startPos);
+    windowOption.SetWindowBackgroundBlur(static_cast<WindowBlurLevel>(level));
+    float alpha;
+    startPos += GetObject<float>(alpha, data + startPos, size - startPos);
+    windowOption.SetAlpha(alpha);
+    bool focusable;
+    startPos += GetObject<bool>(focusable, data + startPos, size - startPos);
+    windowOption.SetFocusable(focusable);
+    bool touchable;
+    startPos += GetObject<bool>(touchable, data + startPos, size - startPos);
+    windowOption.SetTouchable(touchable);
+    DisplayId displayId;
+    startPos += GetObject<DisplayId>(displayId, data + startPos, size - startPos);
+    windowOption.SetDisplayId(displayId);
+    char name[LEN + 1];
+    name[LEN] = END_CHAR;
+    for (int i = 0; i < LEN; i++) {
+        startPos += GetObject<char>(name[i], data + startPos, size - startPos);
     }
-};
+    std::string parentName(name);
+    windowOption.SetParentName(parentName);
+    for (int i = 0; i < LEN; i++) {
+        startPos += GetObject<char>(name[i], data + startPos, size - startPos);
+    }
+    std::string windowName(name);
+    windowOption.SetWindowName(windowName);
+    return startPos;
+}
 
-class WindowUpdateListener : public IWindowUpdateListener {
-public:
-    virtual void OnWindowUpdate(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) override
-    {
-    }
-};
+size_t InitWindowOption2(WindowOption &windowOption, const uint8_t *data, size_t size)
+{
+    size_t startPos = 0;
+    uint32_t flags;
+    startPos += GetObject<uint32_t>(flags, data + startPos, size - startPos);
+    windowOption.SetWindowFlags(flags);
+    PointInfo hitOffset;
+    startPos += GetObject<PointInfo>(hitOffset, data + startPos, size - startPos);
+    windowOption.SetHitOffset(hitOffset.x, hitOffset.y);
+    WindowTag windowTag;
+    startPos += GetObject<WindowTag>(windowTag, data + startPos, size - startPos);
+    windowOption.SetWindowTag(windowTag);
+    bool keepScreenOn;
+    startPos += GetObject<bool>(keepScreenOn, data + startPos, size - startPos);
+    windowOption.SetKeepScreenOn(keepScreenOn);
+    bool turnScreenOn;
+    startPos += GetObject<bool>(turnScreenOn, data + startPos, size - startPos);
+    windowOption.SetTurnScreenOn(turnScreenOn);
+    float brightness;
+    startPos += GetObject<float>(brightness, data + startPos, size - startPos);
+    windowOption.SetBrightness(brightness);
+    uint32_t callingWindow;
+    startPos += GetObject<uint32_t>(callingWindow, data + startPos, size - startPos);
+    windowOption.SetCallingWindow(callingWindow);
+    SystemBarProperty statusBarProperty;
+    SystemBarProperty navigationBarProperty;
+    startPos += GetObject<SystemBarProperty>(statusBarProperty, data + startPos, size - startPos);
+    startPos += GetObject<SystemBarProperty>(navigationBarProperty, data + startPos, size - startPos);
+    windowOption.SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty);
+    windowOption.SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, navigationBarProperty);
+    Orientation requestedOrientation;
+    startPos += GetObject<Orientation>(requestedOrientation, data + startPos, size - startPos);
+    windowOption.SetRequestedOrientation(requestedOrientation);
+    return startPos;
+}
+
+size_t InitWindowOption(WindowOption &windowOption, const uint8_t *data, size_t size)
+{
+    size_t startPos = 0;
+    startPos += InitWindowOption1(windowOption, data + startPos, size - startPos);
+    startPos += InitWindowOption2(windowOption, data + startPos, size - startPos);
+    return startPos;
+}
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
     }
-    std::string name = "WindowFuzzTest";
-    sptr<WindowOption> option = nullptr;
-    sptr<Window> window = Window::Create(name, option);
-    if (window == nullptr) {
-        return false;
+    DisplayId displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
+    sptr<WindowScene> windowScene = new WindowScene();
+    sptr<IWindowLifeCycle> listener = new WindowLifeCycle();
+    sptr<WindowOption> option = new WindowOption();
+    size_t startPos = 0;
+    startPos += InitWindowOption(*option, data, size);
+    windowScene->Init(displayId, nullptr, listener, option);
+    char name[LEN + 1];
+    name[LEN] = END_CHAR;
+    for (int i = 0; i < LEN; i++) {
+        startPos += GetObject<char>(name[i], data + startPos, size - startPos);
     }
-    window->Show(0);
-    Orientation orientation = static_cast<Orientation>(data[0]);
-    window->SetRequestedOrientation(static_cast<Orientation>(data[0]));
-    if (window->GetRequestedOrientation() != orientation) {
-        return false;
+    std::string windowName(name);
+    sptr<WindowOption> windowOption = new WindowOption();
+    startPos += InitWindowOption(*windowOption, data + startPos, size - startPos);
+    sptr<Window> window = windowScene->CreateWindow(windowName, windowOption);
+    uint32_t reason;
+    startPos += GetObject<uint32_t>(reason, data + startPos, size - startPos);
+    windowScene->GoForeground(reason);
+    SystemBarProperty systemBarProperty;
+    WindowType type;
+    startPos += GetObject<SystemBarProperty>(systemBarProperty, data + startPos, size - startPos);
+    startPos += GetObject<WindowType>(type, data + startPos, size - startPos);
+    windowScene->SetSystemBarProperty(type, systemBarProperty);
+    startPos += GetObject<uint32_t>(reason, data + startPos, size - startPos);
+    windowScene->GoBackground(reason);
+    if (window != nullptr) {
+        window->Destroy();
     }
-    window->Hide(0);
-    window->Destroy();
+    windowScene->GoDestroy();
     return true;
 }
 } // namespace.OHOS
