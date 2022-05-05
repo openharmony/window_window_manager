@@ -81,12 +81,12 @@ void WindowInnerManager::DrawBitmap(std::shared_ptr<RSSurface>& rsSurface, uint3
 {
     std::unique_ptr<RSSurfaceFrame> frame = rsSurface->RequestFrame(width, height);
     if (frame == nullptr) {
-        WLOGFE("DrawSurface frameptr is nullptr");
+        WLOGFE("DrawBitmap frameptr is nullptr");
         return;
     }
     auto canvas = frame->GetCanvas();
     if (canvas == nullptr) {
-        WLOGFE("DrawSurface canvas is nullptr");
+        WLOGFE("DrawBitmap canvas is nullptr");
         return;
     }
     canvas->clear(SK_ColorTRANSPARENT);
@@ -120,12 +120,12 @@ void WindowInnerManager::DrawColor(std::shared_ptr<RSSurface>& rsSurface, uint32
 {
     std::unique_ptr<RSSurfaceFrame> frame = rsSurface->RequestFrame(width, height);
     if (frame == nullptr) {
-        WLOGFE("DrawSurface frameptr is nullptr");
+        WLOGFE("DrawColor frameptr is nullptr");
         return;
     }
     auto canvas = frame->GetCanvas();
     if (canvas == nullptr) {
-        WLOGFE("DrawSurface canvas is nullptr");
+        WLOGFE("DrawColor canvas is nullptr");
         return;
     }
     canvas->clear(SK_ColorTRANSPARENT);

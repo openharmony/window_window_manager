@@ -131,7 +131,7 @@ private:
 
     void InitSysBarMapForDisplay(DisplayId displayId);
     void InitWindowNodeMapForDisplay(DisplayId displayId);
-    WMError AddWindowNodeOnWindowTree(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
+    WMError AddWindowNodeOnWindowTree(sptr<WindowNode>& node, const sptr<WindowNode>& parentNode);
     void RemoveWindowNodeFromWindowTree(sptr<WindowNode>& node);
     void AddWindowNodeInRootNodeVector(sptr<WindowNode>& node, WindowRootNodeType rootType);
     void RemoveWindowNodeFromRootNodeVector(sptr<WindowNode>& node, WindowRootNodeType rootType);

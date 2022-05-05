@@ -57,6 +57,13 @@ ohos_prebuilt_etc("window_manager_config") {
   relative_install_dir = "window/resources"
 }
 
+ohos_prebuilt_etc("window_starting_image") {
+  source = "//foundation/windowmanager/resources/starting_window.png"
+  part_name = "window_manager"
+  subsystem_name = "window"
+  relative_install_dir = "window/resources"
+}
+
 ohos_shared_library("libwms") {
   sources = [
     "../wm/src/zidl/window_manager_agent_proxy.cpp",
@@ -65,6 +72,7 @@ ohos_shared_library("libwms") {
     "src/drag_controller.cpp",
     "src/freeze_controller.cpp",
     "src/input_window_monitor.cpp",
+    "src/remote_animation.cpp",
     "src/window_controller.cpp",
     "src/window_inner_manager.cpp",
     "src/window_layout_policy.cpp",
@@ -89,6 +97,7 @@ ohos_shared_library("libwms") {
   deps = [
     ":window_divider_image",
     ":window_manager_config",
+    ":window_starting_image",
     "//foundation/arkui/ace_engine/build/external_config/flutter/skia:ace_skia_ohos",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",

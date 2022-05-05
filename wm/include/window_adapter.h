@@ -61,7 +61,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
 
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
-
+    virtual void NotifyWindowTransition(sptr<WindowTransitionInfo> from, sptr<WindowTransitionInfo> to);
     virtual void ClearWindowAdapter();
 
     virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
