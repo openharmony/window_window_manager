@@ -17,7 +17,6 @@ import("//build/ohos.gni")
 config("libdms_private_config") {
   include_dirs = [
     "//foundation/windowmanager/dm/include",
-    "//foundation/windowmanager/interfaces/innerkits/wm",
     "//foundation/windowmanager/interfaces/innerkits/dm",
   ]
 }

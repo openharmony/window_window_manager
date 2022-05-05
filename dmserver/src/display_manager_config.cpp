@@ -15,7 +15,6 @@
 
 #include "display_manager_config.h"
 #include "window_manager_hilog.h"
-#include "window_helper.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -23,8 +22,34 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayManagerConfig"};
 }
 
-std::map<std::string, bool> DisplayManagerConfig::enableConfig_;
 std::map<std::string, std::vector<int>> DisplayManagerConfig::numbersConfig_;
+
+std::vector<std::string> DisplayManagerConfig::Split(std::string str, std::string pattern)
+{
+    int32_t position;
+    std::vector<std::string> result;
+    str += pattern;
+    int32_t length = static_cast<int32_t>(str.size());
+    for (int32_t i = 0; i < length; i++) {
+        position = static_cast<int32_t>(str.find(pattern, i));
+        if (position < length) {
+            std::string tmp = str.substr(i, position - i);
+            result.push_back(tmp);
+            i = position + static_cast<int32_t>(pattern.size()) - 1;
+        }
+    }
+    return result;
+}
+
+bool inline DisplayManagerConfig::IsNumber(std::string str)
+{
+    for (int32_t i = 0; i < static_cast<int32_t>(str.size()); i++) {
+        if (str.at(i) < '0' || str.at(i) > '9') {
+            return false;
+        }
+    }
+    return true;
+}
 
 bool DisplayManagerConfig::LoadConfigXml(const std::string& configFilePath)
 {
@@ -67,19 +92,6 @@ bool DisplayManagerConfig::IsValidNode(const xmlNode& currNode)
     return true;
 }
 
-void DisplayManagerConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
-{
-    xmlChar* enable = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("enable"));
-    if (enable == nullptr) {
-        WLOGFE("[DmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
-        return;
-    }
-
-    std::string nodeName = reinterpret_cast<const char *>(currNode->name);
-    enableConfig_[nodeName] = xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("true")) ? false : true;
-    xmlFree(enable);
-}
-
 void DisplayManagerConfig::ReadNumbersConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
@@ -90,9 +102,9 @@ void DisplayManagerConfig::ReadNumbersConfigInfo(const xmlNodePtr& currNode)
 
     std::vector<int> numbersVec;
     std::string numbersStr = reinterpret_cast<const char*>(context);
-    auto numbers = WindowHelper::Split(numbersStr, " ");
+    auto numbers = Split(numbersStr, " ");
     for (auto& num : numbers) {
-        if (!WindowHelper::IsNumber(num)) {
+        if (!IsNumber(num)) {
             WLOGFE("[DmConfig] read number error: nodeName:(%{public}s)", currNode->name);
             xmlFree(context);
             return;
@@ -105,11 +117,6 @@ void DisplayManagerConfig::ReadNumbersConfigInfo(const xmlNodePtr& currNode)
     xmlFree(context);
 }
 
-const std::map<std::string, bool>& DisplayManagerConfig::GetEnableConfig()
-{
-    return enableConfig_;
-}
-
 const std::map<std::string, std::vector<int>>& DisplayManagerConfig::GetNumbersConfig()
 {
     return numbersConfig_;
@@ -117,10 +124,6 @@ const std::map<std::string, std::vector<int>>& DisplayManagerConfig::GetNumbersC
 
 void DisplayManagerConfig::DumpConfig()
 {
-    for (auto& enable : enableConfig_) {
-        WLOGFI("[DmConfig] Enable: %{public}s %{public}u", enable.first.c_str(), enable.second);
-    }
-
     for (auto& numbers : numbersConfig_) {
         WLOGFI("[DmConfig] Numbers: %{public}s %{public}zu", numbers.first.c_str(), numbers.second.size());
         for (auto& num : numbers.second) {

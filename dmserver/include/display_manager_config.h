@@ -31,17 +31,17 @@ public:
     ~DisplayManagerConfig() = default;
 
     static bool LoadConfigXml(const std::string& configFilePath);
-    static const std::map<std::string, bool>& GetEnableConfig();
     static const std::map<std::string, std::vector<int>>& GetNumbersConfig();
     static void DumpConfig();
 
 private:
-    static std::map<std::string, bool> enableConfig_;
     static std::map<std::string, std::vector<int>> numbersConfig_;
 
     static bool IsValidNode(const xmlNode& currNode);
-    static void ReadEnableConfigInfo(const xmlNodePtr& currNode);
     static void ReadNumbersConfigInfo(const xmlNodePtr& currNode);
+
+    static std::vector<std::string> Split(std::string str, std::string pattern);
+    static inline bool IsNumber(std::string str);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_DISPLAY_MANAGER_CONFIG_H
