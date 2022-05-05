@@ -25,9 +25,10 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicy"};
 }
+
 WindowLayoutPolicy::WindowLayoutPolicy(const std::map<DisplayId, Rect>& displayRectMap,
-    WindowNodeMaps& windowNodeMaps)
-    : displayRectMap_(displayRectMap), windowNodeMaps_(windowNodeMaps)
+    WindowNodeMaps& windowNodeMaps, std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap)
+    : displayRectMap_(displayRectMap), windowNodeMaps_(windowNodeMaps), displayInfosMap_(displayInfosMap)
 {
 }
 
@@ -256,15 +257,12 @@ void WindowLayoutPolicy::LimitWindowSize(const sptr<WindowNode>& node, const Rec
 
 AvoidPosType WindowLayoutPolicy::GetAvoidPosType(const Rect& rect, DisplayId displayId) const
 {
-    auto display = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
-    if (display == nullptr) {
+    if (displayInfosMap_.find(displayId) == std::end(displayInfosMap_)) {
         WLOGFE("GetAvoidPosType fail. Get display fail. displayId: %{public}" PRIu64"", displayId);
         return AvoidPosType::AVOID_POS_UNKNOWN;
     }
-    uint32_t displayWidth = display->GetWidth();
-    uint32_t displayHeight = display->GetHeight();
-
-    return WindowHelper::GetAvoidPosType(rect, displayWidth, displayHeight);
+    return WindowHelper::GetAvoidPosType(rect, displayInfosMap_[displayId]->GetWidth(),
+        displayInfosMap_[displayId]->GetHeight());
 }
 
 void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect)
@@ -314,30 +312,16 @@ void WindowLayoutPolicy::Reset()
 
 float WindowLayoutPolicy::GetVirtualPixelRatio(DisplayId displayId) const
 {
-    auto display = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
-    if (display == nullptr) {
-        WLOGFE("GetVirtualPixel fail. Get display fail. displayId:%{public}" PRIu64", use Default vpr:1.0", displayId);
-        return 1.0;  // Use DefaultVPR 1.0
+    if (displayInfosMap_.find(displayId) == std::end(displayInfosMap_)) {
+        return 1.0; // 1.0 is default vpr
     }
-
-    float virtualPixelRatio = display->GetVirtualPixelRatio();
+    float virtualPixelRatio = displayInfosMap_[displayId]->GetVirtualPixelRatio();
     if (virtualPixelRatio == 0.0) {
         WLOGFE("GetVirtualPixel fail. vpr is 0.0. displayId:%{public}" PRIu64", use Default vpr:1.0", displayId);
         return 1.0;  // Use DefaultVPR 1.0
     }
-
     WLOGFI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", displayId, virtualPixelRatio);
     return virtualPixelRatio;
-}
-
-bool WindowLayoutPolicy::GetVirtualPixelRatioChangedFlag() const
-{
-    return VirtualPixelRatioChangedFlag_;
-}
-
-void WindowLayoutPolicy::SetVirtualPixelRatioChangedFlag(bool flag)
-{
-    VirtualPixelRatioChangedFlag_ = flag;
 }
 
 bool WindowLayoutPolicy::IsFullScreenRecentWindowExist(const std::vector<sptr<WindowNode>>& nodeVec) const

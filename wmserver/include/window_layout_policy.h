@@ -20,8 +20,10 @@
 #include <refbase.h>
 #include <set>
 
+#include "display_info.h"
 #include "window_node.h"
 #include "wm_common.h"
+
 
 namespace OHOS {
 namespace Rosen {
@@ -30,8 +32,8 @@ using WindowNodeMaps = std::map<DisplayId,
 class WindowLayoutPolicy : public RefBase {
 public:
     WindowLayoutPolicy() = delete;
-    WindowLayoutPolicy(const std::map<DisplayId, Rect>& displayRectMap,
-                       WindowNodeMaps& windowNodeMaps);
+    WindowLayoutPolicy(const std::map<DisplayId, Rect>& displayRectMap, WindowNodeMaps& windowNodeMaps,
+        std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap);
     ~WindowLayoutPolicy() = default;
     virtual void Launch();
     virtual void Clean();
@@ -44,8 +46,6 @@ public:
     virtual void UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow = false);
     virtual void UpdateLayoutRect(const sptr<WindowNode>& node) = 0;
     float GetVirtualPixelRatio(DisplayId displayId) const;
-    bool GetVirtualPixelRatioChangedFlag() const;
-    void SetVirtualPixelRatioChangedFlag(bool flag);
     void UpdateClientRectAndResetReason(const sptr<WindowNode>& node, const Rect& lastLayoutRect, const Rect& winRect);
 
 protected:
@@ -61,8 +61,6 @@ protected:
     void LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec);
     void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect);
 
-    bool VirtualPixelRatioChangedFlag_ = false;
-
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowType::WINDOW_TYPE_NAVIGATION_BAR,
@@ -70,6 +68,7 @@ protected:
     mutable std::map<DisplayId, Rect> displayRectMap_;
     mutable std::map<DisplayId, Rect> limitRectMap_;
     WindowNodeMaps& windowNodeMaps_;
+    std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap_;
 };
 }
 }

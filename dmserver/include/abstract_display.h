@@ -41,6 +41,8 @@ public:
         return (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
     }
     DisplayId GetId() const;
+    int32_t GetOffsetX() const;
+    int32_t GetOffsetY() const;
     int32_t GetWidth() const;
     int32_t GetHeight() const;
     uint32_t GetRefreshRate() const;
@@ -52,6 +54,8 @@ public:
     FreezeFlag GetFreezeFlag() const;
 
     void SetId(DisplayId displayId);
+    void SetOffsetX(int32_t offsetX);
+    void SetOffsetY(int32_t offsetY);
     void SetWidth(int32_t width);
     void SetHeight(int32_t height);
     void SetRefreshRate(uint32_t refreshRate);
@@ -63,6 +67,8 @@ public:
 private:
     DisplayId id_ { DISPLAY_ID_INVALID };
     ScreenId screenId_ { SCREEN_ID_INVALID };
+    int32_t offsetX_ { 0 };
+    int32_t offsetY_ { 0 };
     int32_t width_ { 0 };
     int32_t height_ { 0 };
     uint32_t refreshRate_ { 0 };

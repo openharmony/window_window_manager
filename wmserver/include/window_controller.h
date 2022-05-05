@@ -73,6 +73,7 @@ private:
     void ReSizeSystemBarPropertySizeIfNeed(sptr<WindowNode> node);
     void HandleTurnScreenOn(const sptr<WindowNode>& node);
     bool IsWindowNeedMinimizedByOther(const sptr<WindowNode>& target, const sptr<WindowNode>& other);
+    void ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;

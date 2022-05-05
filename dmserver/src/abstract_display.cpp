@@ -69,6 +69,26 @@ float AbstractDisplay::GetVirtualPixelRatio() const
     return virtualPixelRatio_;
 }
 
+int32_t AbstractDisplay::GetOffsetX() const
+{
+    return offsetX_;
+}
+
+int32_t AbstractDisplay::GetOffsetY() const
+{
+    return offsetY_;
+}
+
+void AbstractDisplay::SetOffsetX(int32_t offsetX)
+{
+    offsetX_ = offsetX;
+}
+
+void AbstractDisplay::SetOffsetY(int32_t offsetY)
+{
+    offsetY_ = offsetY;
+}
+
 void AbstractDisplay::SetWidth(int32_t width)
 {
     width_ = width;
@@ -160,14 +180,16 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     if (displayInfo == nullptr) {
         return displayInfo;
     }
-    displayInfo->width_ = width_;
-    displayInfo->height_ = height_;
-    displayInfo->id_ = id_;
-    displayInfo->refreshRate_ = refreshRate_;
-    displayInfo->screenId_ = screenId_;
-    displayInfo->virtualPixelRatio_ = virtualPixelRatio_;
-    displayInfo->rotation_ = rotation_;
-    displayInfo->orientation_ = orientation_;
+    displayInfo->SetOffsetX(offsetX_);
+    displayInfo->SetOffsetY(offsetY_);
+    displayInfo->SetWidth(width_);
+    displayInfo->SetHeight(height_);
+    displayInfo->SetDisplayId(id_);
+    displayInfo->SetRefreshRate(refreshRate_);
+    displayInfo->SetScreenId(screenId_);
+    displayInfo->SetVirtualPixelRatio(virtualPixelRatio_);
+    displayInfo->SetRotation(rotation_);
+    displayInfo->SetOrientation(orientation_);
     return displayInfo;
 }
 } // namespace OHOS::Rosen

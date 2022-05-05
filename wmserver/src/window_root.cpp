@@ -71,13 +71,10 @@ sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(DisplayId displa
     }
 
     ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
-
     WLOGFI("create new container for display, width: %{public}d, height: %{public}d, isMinimized:%{public}d, "
         "screenGroupId:%{public}" PRIu64", displayId:%{public}" PRIu64"", displayInfo->GetWidth(),
         displayInfo->GetHeight(), isMinimizedByOtherWindow_, screenGroupId, displayId);
-
-    sptr<WindowNodeContainer> container = new WindowNodeContainer(displayId,
-        static_cast<uint32_t>(displayInfo->GetWidth()), static_cast<uint32_t>(displayInfo->GetHeight()));
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(displayInfo);
     container->SetMinimizedByOther(isMinimizedByOtherWindow_);
     windowNodeContainerMap_.insert(std::make_pair(screenGroupId, container));
     std::vector<DisplayId> displayVec = { displayId };
@@ -884,11 +881,10 @@ void WindowRoot::ProcessExpandDisplayCreate(DisplayId displayId, ScreenId screen
     }
     // add displayId in displayIdMap
     displayIdMap_[screenGroupId].push_back(displayId);
-    Rect displayRect = { 0, 0, displayInfo->GetWidth(), displayInfo->GetHeight() };
-    container->ProcessDisplayCreate(displayId, displayRect);
+    container->ProcessDisplayCreate(displayInfo);
     WLOGFI("[Display Create] Container exist, add new display, displayId: %{public}" PRIu64", Rect: ["
-        "%{public}d, %{public}d, %{public}d, %{public}d]", displayId, displayRect.posX_, displayRect.posY_,
-        displayRect.width_, displayRect.height_);
+        "%{public}d, %{public}d, %{public}u, %{public}u]", displayId, displayInfo->GetOffsetX(),
+        displayInfo->GetOffsetY(), displayInfo->GetWidth(), displayInfo->GetHeight());
 }
 
 void WindowRoot::ProcessDisplayCreate(DisplayId displayId)
@@ -913,7 +909,7 @@ void WindowRoot::ProcessDisplayDestroy(DisplayId displayId)
     WLOGFI("[Display Destroy] displayId: %{public}" PRIu64" ", displayId);
 }
 
-void WindowRoot::ProcessDisplayChange(sptr<DisplayInfo> displayInfo)
+void WindowRoot::ProcessDisplayChange(const sptr<DisplayInfo>& displayInfo, DisplayStateChangeType type)
 {
     DisplayId displayId = displayInfo->GetDisplayId();
     ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
@@ -924,15 +920,29 @@ void WindowRoot::ProcessDisplayChange(sptr<DisplayInfo> displayInfo)
         WLOGFE("[Display Change] could not find display, change failed, displayId: %{public}" PRIu64"", displayId);
         return;
     }
-
     // container process display change
     auto container = iter->second;
     if (container == nullptr) {
         WLOGFE("window node container is nullptr, displayId :%{public}" PRIu64 "", displayId);
     }
 
-    Rect displayRect = { 0, 0, displayInfo->GetWidth(), displayInfo->GetHeight() };
-    container->ProcessDisplayChange(displayId, displayRect);
+    switch (type) {
+        case DisplayStateChangeType::SIZE_CHANGE:
+        case DisplayStateChangeType::UPDATE_ROTATION: {
+            WLOGFI("update display: %{public}" PRIu64" rotation", displayId);
+            container->SetDisplayOrientation(displayId, displayInfo->GetOrientation());
+            container->SetDisplaySize(displayId, displayInfo->GetWidth(), displayInfo->GetHeight());
+            break;
+        }
+        case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
+            WLOGFI("update display: %{public}" PRIu64" virtual pixel ratio", displayId);
+            container->SetDisplayVirtualPixelRatio(displayId, displayInfo->GetVirtualPixelRatio());
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 
 float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
@@ -942,7 +952,7 @@ float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
         WLOGFE("window container could not be found");
         return 1.0;  // Use DefaultVPR 1.0
     }
-    return container->GetVirtualPixelRatio(displayId);
+    return container->GetDisplayVirtualPixelRatio(displayId);
 }
 
 WMError WindowRoot::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
