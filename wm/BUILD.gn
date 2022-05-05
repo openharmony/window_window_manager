@@ -86,7 +86,7 @@ ohos_shared_library("libwm") {
     "napi:ace_napi",
 
     # because appexecfwk_core depends on global_resmgr
-    "resmgr_standard:global_resmgr",
+    "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
     "utils_base:utils",
