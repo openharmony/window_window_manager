@@ -30,6 +30,7 @@
 #include "wm_single_instance.h"
 #include "window_controller.h"
 #include "zidl/window_manager_stub.h"
+#include "window_dumper.h"
 #include "window_root.h"
 #include "snapshot_controller.h"
 
@@ -55,6 +56,7 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManagerService);
 public:
     void OnStart() override;
     void OnStop() override;
+    int Dump(int fd, const std::vector<std::u16string>& args) override;
 
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -107,6 +109,7 @@ private:
     sptr<WindowManagerServiceHandler> wmsHandler_;
     sptr<DragController> dragController_;
     sptr<FreezeController> freezeDisplayController_;
+    sptr<WindowDumper> windowDumper_;
     bool isSystemDecorEnable_ = true;
     ModeChangeHotZonesConfig hotZonesConfig_ { false, 0, 0, 0 };
 };

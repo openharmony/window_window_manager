@@ -74,6 +74,7 @@ ohos_shared_library("libwms") {
     "src/input_window_monitor.cpp",
     "src/remote_animation.cpp",
     "src/window_controller.cpp",
+    "src/window_dumper.cpp",
     "src/window_inner_manager.cpp",
     "src/window_layout_policy.cpp",
     "src/window_layout_policy_cascade.cpp",
