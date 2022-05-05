@@ -32,7 +32,7 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerService)
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<DisplayManagerService>());
-float DisplayManagerService::customVirtualPixelValue = -1.0f;
+float DisplayManagerService::customVirtualPixelRatio = -1.0f;
 
 #define CHECK_SCREEN_AND_RETURN(ret) \
     do { \
@@ -94,7 +94,7 @@ void DisplayManagerService::ConfigureDisplayManagerService()
             return;
         }
         float virtualPixelRatio = static_cast<float>(densityDpi) / 160;
-        DisplayManagerService::customVirtualPixelValue = virtualPixelRatio;
+        DisplayManagerService::customVirtualPixelRatio = virtualPixelRatio;
     }
 }
 
