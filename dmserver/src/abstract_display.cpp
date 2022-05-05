@@ -33,9 +33,9 @@ AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width,
       height_(height),
       refreshRate_(refreshRate)
 {
-    if (DisplayManagerService::customVirtualPixelRatio &&
-        fabs(DisplayManagerService::customVirtualPixelRatio + 1) > 1e-6) {
-        virtualPixelRatio_ = DisplayManagerService::customVirtualPixelRatio;
+    if (DisplayManagerService::GetCustomVirtualPixelRatio() &&
+        fabs(DisplayManagerService::GetCustomVirtualPixelRatio() + 1) > 1e-6) {
+        virtualPixelRatio_ = DisplayManagerService::GetCustomVirtualPixelRatio();
         return;
     }
     if ((width_ >= PHONE_SCREEN_WIDTH) || (height_ >= PHONE_SCREEN_WIDTH)) {

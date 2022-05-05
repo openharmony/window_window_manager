@@ -32,7 +32,7 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerService)
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<DisplayManagerService>());
-float DisplayManagerService::customVirtualPixelRatio = -1.0f;
+float DisplayManagerService::customVirtualPixelRatio_ = -1.0f;
 
 #define CHECK_SCREEN_AND_RETURN(ret) \
     do { \
@@ -80,7 +80,6 @@ bool DisplayManagerService::Init()
 
 void DisplayManagerService::ConfigureDisplayManagerService()
 {
-    auto enableConfig = DisplayManagerConfig::GetEnableConfig();
     auto numbersConfig = DisplayManagerConfig::GetNumbersConfig();
     if (numbersConfig.count("dpi") != 0) {
         uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["dpi"][0]);
@@ -94,7 +93,7 @@ void DisplayManagerService::ConfigureDisplayManagerService()
             return;
         }
         float virtualPixelRatio = static_cast<float>(densityDpi) / 160;
-        DisplayManagerService::customVirtualPixelRatio = virtualPixelRatio;
+        DisplayManagerService::customVirtualPixelRatio_ = virtualPixelRatio;
     }
 }
 
@@ -524,5 +523,10 @@ bool DisplayManagerService::SetVirtualPixelRatio(ScreenId screenId, float virtua
 {
     WM_SCOPED_TRACE("dms:SetVirtualPixelRatio(%" PRIu64", %f)", screenId, virtualPixelRatio);
     return abstractScreenController_->SetVirtualPixelRatio(screenId, virtualPixelRatio);
+}
+
+float DisplayManagerService::GetCustomVirtualPixelRatio()
+{
+    return DisplayManagerService::customVirtualPixelRatio_;
 }
 } // namespace OHOS::Rosen
