@@ -83,6 +83,12 @@ public:
     virtual void OnDisplayMove(DisplayId from, DisplayId to) = 0;
 };
 
+class IDispatchInputEventListener : virtual public RefBase {
+public:
+    virtual void OnDispatchPointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
+    virtual void OnDispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
+};
+
 class OccupiedAreaChangeInfo : public Parcelable {
 public:
     OccupiedAreaChangeInfo() = default;

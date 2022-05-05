@@ -22,5 +22,7 @@ group("napi_packages") {
     "window_runtime:window_napi",
     "window_runtime:window_native_kit",
     "window_runtime:windowstage_kit",
+    "window_extension:windowextension_napi",
+    "window_extension_context:windowextensioncontext_napi",
   ]
 }
