@@ -89,7 +89,7 @@ ohos_shared_library("window_extension_module") {
     "ability_runtime:runtime",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "resmgr_standard:global_resmgr",
+    "resource_management:global_resmgr",
   ]
   relative_install_dir = "extensionability/"
   subsystem_name = "window"
