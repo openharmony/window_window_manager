@@ -27,9 +27,10 @@ namespace {
     constexpr uint32_t EDGE_INTERVAL = 48;
     constexpr uint32_t MID_INTERVAL = 24;
 }
+
 WindowLayoutPolicyTile::WindowLayoutPolicyTile(const std::map<DisplayId, Rect>& displayRectMap,
-    WindowNodeMaps& windowNodeMaps)
-    : WindowLayoutPolicy(displayRectMap, windowNodeMaps)
+    WindowNodeMaps& windowNodeMaps, std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap)
+    : WindowLayoutPolicy(displayRectMap, windowNodeMaps, displayInfosMap)
 {
     for (auto& iter : displayRectMap) {
         maxTileWinNumMap_.insert(std::make_pair(iter.first, static_cast<uint32_t>(1)));

@@ -363,6 +363,7 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
             break;
         }
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
+            ProcessDisplayChange(displayId, type);
             const sptr<DisplayInfo> displayInfo_ = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
             windowRoot_->NotifyVirtualPixelRatioChange(displayInfo_);
             break;
@@ -374,6 +375,44 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
     }
 }
 
+void WindowController::ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo)
+{
+    DisplayId displayId = displayInfo->GetDisplayId();
+    auto iter = curDisplayInfo_.find(displayId);
+    if (iter != curDisplayInfo_.end()) {
+        auto lastDisplayInfo = iter->second;
+        uint32_t lastDisplayWidth = static_cast<uint32_t>(lastDisplayInfo->GetWidth());
+        uint32_t lastDisplayHeight = static_cast<uint32_t>(lastDisplayInfo->GetHeight());
+        auto statusBarNode = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
+        auto navigationBarNode =
+            windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR]);
+        systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][lastDisplayWidth][lastDisplayHeight]
+            = statusBarNode->GetWindowProperty()->GetWindowRect();
+        systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][lastDisplayWidth][lastDisplayHeight]
+            = navigationBarNode->GetWindowProperty()->GetWindowRect();
+    }
+    curDisplayInfo_[displayId] = displayInfo;
+    // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
+    uint32_t width = static_cast<uint32_t>(displayInfo->GetWidth());
+    uint32_t height = static_cast<uint32_t>(displayInfo->GetHeight() * SYSTEM_BAR_HEIGHT_RATIO);
+    Rect newRect = { 0, 0, width, height };
+    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
+    auto statusBarRectIter =
+        systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].find(displayHeight);
+    if (statusBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].end()) {
+        newRect = statusBarRectIter->second;
+    }
+    ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
+    newRect = { 0, displayInfo->GetHeight() - static_cast<int32_t>(height), width, height };
+    auto navigationBarRectIter =
+        systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].find(displayHeight);
+    if (navigationBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].end()) {
+        newRect = navigationBarRectIter->second;
+    }
+    ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
+}
+
 void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type)
 {
     const sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
@@ -381,44 +420,15 @@ void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateCha
         WLOGFE("get display failed displayId:%{public}" PRIu64 "", displayId);
         return;
     }
-
     switch (type) {
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION: {
-            auto iter = curDisplayInfo_.find(displayId);
-            if (iter != curDisplayInfo_.end()) {
-                auto lastDisplayInfo = iter->second;
-                uint32_t lastDisplayWidth = static_cast<uint32_t>(lastDisplayInfo->GetWidth());
-                uint32_t lastDisplayHeight = static_cast<uint32_t>(lastDisplayInfo->GetHeight());
-                auto statusBarNode = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
-                auto navigationBarNode =
-                    windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR]);
-                systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][lastDisplayWidth][lastDisplayHeight]
-                    = statusBarNode->GetWindowProperty()->GetWindowRect();
-                systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][lastDisplayWidth][lastDisplayHeight]
-                    = navigationBarNode->GetWindowProperty()->GetWindowRect();
-            }
-            curDisplayInfo_[displayId] = displayInfo;
-            windowRoot_->ProcessDisplayChange(displayInfo);
-            // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
-            uint32_t width = static_cast<uint32_t>(displayInfo->GetWidth());
-            uint32_t height = static_cast<uint32_t>(displayInfo->GetHeight() * SYSTEM_BAR_HEIGHT_RATIO);
-            Rect newRect = { 0, 0, width, height };
-            uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
-            uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
-            auto statusBarRectIter =
-                systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].find(displayHeight);
-            if (statusBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].end()) {
-                newRect = statusBarRectIter->second;
-            }
-            ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
-            newRect = { 0, displayInfo->GetHeight() - static_cast<int32_t>(height), width, height };
-            auto navigationBarRectIter =
-                systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].find(displayHeight);
-            if (navigationBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].end()) {
-                newRect = navigationBarRectIter->second;
-            }
-            ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
+            ProcessSystemBarChange(displayInfo);
+            windowRoot_->ProcessDisplayChange(displayInfo, type);
+            break;
+        }
+        case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
+            windowRoot_->ProcessDisplayChange(displayInfo, type);
             break;
         }
         default: {

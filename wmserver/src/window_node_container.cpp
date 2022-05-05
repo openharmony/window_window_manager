@@ -41,28 +41,25 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowNodeContainer"};
     constexpr int WINDOW_NAME_MAX_LENGTH = 10;
-    const std::string SPLIT_SCREEN_EVENT_NAME = "common.event.SPLIT_SCREEN";
     const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
     constexpr uint32_t MAX_BRIGHTNESS = 255;
 }
 
-WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height)
+WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo)
 {
-    Rect displayRect = {
-        .posX_ = 0,
-        .posY_ = 0,
-        .width_ = width,
-        .height_ = height
-    };
-    displayRectMap_.insert(std::make_pair(displayId, displayRect));
+    DisplayId displayId = displayInfo->GetDisplayId();
+    displayRectMap_.insert(std::make_pair(displayId, displayInfo->GetDisplayRegion()));
+    displayInfosMap_.insert(std::make_pair(displayId, displayInfo));
     windowPair_ = new WindowPair(displayId, appWindowNode_);
 
     // init window node maps
     InitWindowNodeMapForDisplay(displayId);
 
     // init layout policy
-    layoutPolicys_[WindowLayoutMode::CASCADE] = new WindowLayoutPolicyCascade(displayRectMap_, windowNodeMaps_);
-    layoutPolicys_[WindowLayoutMode::TILE] = new WindowLayoutPolicyTile(displayRectMap_, windowNodeMaps_);
+    layoutPolicys_[WindowLayoutMode::CASCADE] = new WindowLayoutPolicyCascade(displayRectMap_,
+        windowNodeMaps_, displayInfosMap_);
+    layoutPolicys_[WindowLayoutMode::TILE] = new WindowLayoutPolicyTile(displayRectMap_,
+        windowNodeMaps_, displayInfosMap_);
     layoutPolicy_ = layoutPolicys_[WindowLayoutMode::CASCADE];
     layoutPolicy_->Launch();
 
@@ -1454,8 +1451,11 @@ void WindowNodeContainer::MoveWindowNodes(DisplayId displayId, std::vector<uint3
     WLOGFI("Move window nodes when destroy display");
 }
 
-void WindowNodeContainer::ProcessDisplayCreate(DisplayId displayId, const Rect& displayRect)
+void WindowNodeContainer::ProcessDisplayCreate(const sptr<DisplayInfo>& displayInfo)
 {
+    DisplayId displayId = displayInfo->GetDisplayId();
+    Rect displayRect = displayInfo->GetDisplayRegion();
+    AddDisplay(displayInfo);
     avoidController_->UpdateAvoidNodesMap(displayId, true);
     InitSysBarMapForDisplay(displayId);
     InitWindowNodeMapForDisplay(displayId);
@@ -1666,9 +1666,66 @@ void WindowNodeContainer::GetModeChangeHotZones(DisplayId displayId, ModeChangeH
 
 void WindowNodeContainer::UpdateVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio)
 {
-    layoutPolicy_->SetVirtualPixelRatioChangedFlag(true);
     layoutPolicy_->LayoutWindowTree(displayId);
-    layoutPolicy_->SetVirtualPixelRatioChangedFlag(false);
+}
+
+void WindowNodeContainer::SetDisplaySize(DisplayId displayId, uint32_t width, uint32_t height)
+{
+    if (displayInfosMap_.find(displayId) == std::end(displayInfosMap_)) {
+        return;
+    }
+    displayInfosMap_[displayId]->SetWidth(width);
+    displayInfosMap_[displayId]->SetHeight(width);
+    displayRectMap_[displayId] = displayInfosMap_[displayId]->GetDisplayRegion();
+    layoutPolicy_->UpdateDisplayInfo(displayRectMap_);
+}
+
+void WindowNodeContainer::SetDisplayOrientation(DisplayId displayId, Orientation orientation)
+{
+    if (displayInfosMap_.find(displayId) == std::end(displayInfosMap_)) {
+        return;
+    }
+    displayInfosMap_[displayId]->SetOrientation(orientation);
+}
+
+void WindowNodeContainer::SetDisplayVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio)
+{
+    if (displayInfosMap_.find(displayId) == std::end(displayInfosMap_)) {
+        return;
+    }
+    displayInfosMap_[displayId]->SetVirtualPixelRatio(virtualPixelRatio);
+}
+
+float WindowNodeContainer::GetDisplayVirtualPixelRatio(DisplayId displayId) const
+{
+    if (displayInfosMap_.find(displayId) == std::end(displayInfosMap_)) {
+        return 1.0; // 1.0 is default vpr
+    }
+    return displayInfosMap_.at(displayId)->GetVirtualPixelRatio();
+}
+
+void WindowNodeContainer::AddDisplay(const sptr<DisplayInfo>& displayInfo)
+{
+    DisplayId id = displayInfo->GetDisplayId();
+    if (displayInfosMap_.find(id) != std::end(displayInfosMap_)) {
+        displayInfosMap_[id] = displayInfo;
+        return;
+    }
+    displayInfosMap_.insert(std::make_pair(id, displayInfo));
+}
+
+void WindowNodeContainer::DeleteDisplay(const sptr<DisplayInfo>& displayInfo)
+{
+    DisplayId id = displayInfo->GetDisplayId();
+    displayInfosMap_.erase(id);
+}
+
+sptr<DisplayInfo> WindowNodeContainer::GetDisplayInfo(DisplayId displayId)
+{
+    if (displayInfosMap_.find(displayId) != std::end(displayInfosMap_)) {
+        return displayInfosMap_[displayId];
+    }
+    return nullptr;
 }
 } // namespace Rosen
 } // namespace OHOS
