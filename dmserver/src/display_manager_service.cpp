@@ -92,7 +92,7 @@ void DisplayManagerService::ConfigureDisplayManagerService()
                 DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
             return;
         }
-        float virtualPixelRatio = static_cast<float>(densityDpi) / 160;
+        float virtualPixelRatio = static_cast<float>(densityDpi) / BASELINE_DENSITY;
         DisplayManagerService::customVirtualPixelRatio_ = virtualPixelRatio;
     }
 }

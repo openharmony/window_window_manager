@@ -31,7 +31,6 @@ namespace {
     constexpr uint32_t MAX_TIME_WAITING_FOR_CALLBACK = 20;
     constexpr uint32_t SLEEP_TIME_IN_US = 10000; // 10ms
     constexpr uint32_t SPLIT_TEST_SLEEP_S = 2;
-    constexpr uint32_t BASELINE_DENSITY = 160;
 }
 
 class DisplayChangeEventListener : public DisplayManager::IDisplayListener {
