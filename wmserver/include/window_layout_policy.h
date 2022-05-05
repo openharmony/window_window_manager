@@ -59,6 +59,7 @@ protected:
     bool IsVerticalDisplay(DisplayId displayId) const;
     bool IsFullScreenRecentWindowExist(const std::vector<sptr<WindowNode>>& nodeVec) const;
     void LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec);
+    void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect);
 
     bool VirtualPixelRatioChangedFlag_ = false;
 

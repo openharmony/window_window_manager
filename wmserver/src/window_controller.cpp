@@ -14,9 +14,11 @@
  */
 
 #include "window_controller.h"
+#include <ability_manager_client.h>
 #include <parameters.h>
 #include <power_mgr_client.h>
 #include <transaction/rs_transaction.h>
+#include "remote_animation.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "wm_common.h"
@@ -27,21 +29,73 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowController"};
 }
+
 uint32_t WindowController::GenWindowId()
 {
     return ++windowId_;
 }
 
-void WindowController::CreateDesWindowNodeAndShow(sptr<WindowNode>& desNode, const WindowTransitionInfo& toInfo)
+bool WindowController::IsWindowNeedMinimizedByOther(const sptr<WindowNode>& target, const sptr<WindowNode>& other)
 {
+    if (target == nullptr || other == nullptr) {
+        return false;
+    }
+    if (!isMinimizedByOtherWindow_ || (target->GetWindowId() == other->GetWindowId())) {
+        return false;
+    }
+
+    return (other->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) &&
+        (WindowHelper::IsAppWindow(other->GetWindowType())) && (target->GetWindowMode() ==
+        WindowMode::WINDOW_MODE_FULLSCREEN) && (WindowHelper::IsMainWindow(target->GetWindowType()));
 }
 
-void WindowController::NotifyWindowTransition(
-    const WindowTransitionInfo& fromInfo, const WindowTransitionInfo& toInfo)
+void WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& srcInfo,
+    sptr<WindowTransitionInfo>& dstInfo)
 {
-    if (!windowAnimationController_) {
+    if (!RemoteAnimation::CheckTransition(dstInfo)) {
         return;
     }
+
+    auto dstNode = windowRoot_->FindWindowNodeWithToken(dstInfo->GetAbilityToken());
+    auto srcNode = windowRoot_->FindWindowNodeWithToken(srcInfo->GetAbilityToken());
+
+    auto transitionEvent = RemoteAnimation::GetTransitionEvent(srcInfo, dstInfo, srcNode, dstNode);
+    auto needMinimizeSrcNode = IsWindowNeedMinimizedByOther(srcNode, dstNode);
+    switch (transitionEvent) {
+        case TransitionEvent::COLD_START: {
+            dstNode = RemoteAnimation::CreateWindowNode(dstInfo, GenWindowId());
+            if (dstNode == nullptr) {
+                return;
+            }
+            if (windowRoot_->SaveWindow(dstNode) != WMError::WM_OK) {
+                return;
+            }
+            if (windowRoot_->AddWindowNode(0, dstNode, true) != WMError::WM_OK) {
+                return;
+            }
+            RemoteAnimation::DrawStartingWindow(dstNode);
+            RemoteAnimation::NotifyAnimationTransition(srcInfo, dstInfo, srcNode, dstNode, needMinimizeSrcNode);
+            break;
+        }
+        case TransitionEvent::HOT_START: {
+            if (windowRoot_->AddWindowNode(0, dstNode, true) != WMError::WM_OK) {
+                return;
+            }
+            RemoteAnimation::NotifyAnimationTransition(srcInfo, dstInfo, srcNode, dstNode, needMinimizeSrcNode);
+            break;
+        }
+        case TransitionEvent::MINIMIZE:
+            // NotifyAnimationMinimize
+            break;
+        case TransitionEvent::CLOSE:
+            // NotifyAnimationClose
+            break;
+        default:
+            return;
+    }
+    RSTransaction::FlushImplicitTransaction();
+    // Minimize Other judge need : isMinimizedByOtherWindow_, self type.mode
+    return;
 }
 
 WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
@@ -52,10 +106,17 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
         WLOGFE("create window failed, type is error");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
+    sptr<WindowNode> node = windowRoot_->FindWindowNodeWithToken(token);
+    if (node != nullptr && WindowHelper::IsMainWindow(node->GetWindowType()) &&
+        property->GetWindowName().find("permission") == std::string::npos) {
+        RemoteAnimation::HandleClientWindowCreate(node, window, windowId, surfaceNode);
+        windowRoot_->AddDeathRecipient(node);
+        return WMError::WM_OK;
+    }
     windowId = GenWindowId();
     sptr<WindowProperty> windowProperty = new WindowProperty(property);
     windowProperty->SetWindowId(windowId);
-    sptr<WindowNode> node = new WindowNode(windowProperty, window, surfaceNode);
+    node = new WindowNode(windowProperty, window, surfaceNode);
     node->abilityToken_ = token;
     UpdateWindowAnimation(node);
     return windowRoot_->SaveWindow(node);
@@ -68,9 +129,14 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (node->currentVisibility_) {
+    if (node->currentVisibility_ && !node->isPlayAnimationShow_) {
         WLOGFE("current window is visible, windowId: %{public}u", node->GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    // using starting window rect if client rect is empty
+    if (WindowHelper::IsEmptyRect(property->GetRequestRect())) { // for tile and cascade
+        property->SetRequestRect(node->GetRequestRect());
+        property->SetWindowRect(node->GetWindowRect());
     }
     node->GetWindowProperty()->CopyFrom(property);
 
@@ -91,7 +157,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     }
 
     if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        WindowHelper::IsAppWindow(node->GetWindowType())) {
+        WindowHelper::IsAppWindow(node->GetWindowType()) && !node->isPlayAnimationHide_) {
         WM_SCOPED_TRACE_BEGIN("controller:MinimizeStructuredAppWindowsExceptSelf");
         res = windowRoot_->MinimizeStructuredAppWindowsExceptSelf(node);
         WM_SCOPED_TRACE_END();
@@ -433,18 +499,7 @@ void WindowController::NotifySystemBarTints()
 
 WMError WindowController::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
 {
-    if (controller == nullptr) {
-        WLOGFE("RSWindowAnimation: failed to set window animation controller, controller is null!");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    if (windowAnimationController_ != nullptr) {
-        WLOGFE("RSWindowAnimation: failed to set window animation controller, Already had a controller!");
-        return WMError::WM_ERROR_INVALID_OPERATION;
-    }
-
-    windowAnimationController_ = controller;
-    return WMError::WM_OK;
+    return RemoteAnimation::SetWindowAnimationController(controller);
 }
 
 std::vector<Rect> WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
@@ -650,6 +705,12 @@ WMError WindowController::GetModeChangeHotZones(DisplayId displayId,
     ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config)
 {
     return windowRoot_->GetModeChangeHotZones(displayId, hotZones, config);
+}
+
+void WindowController::SetMinimizedByOtherWindow(bool isMinimizedByOtherWindow)
+{
+    isMinimizedByOtherWindow_ = isMinimizedByOtherWindow;
+    windowRoot_->SetMinimizedByOtherWindow(isMinimizedByOtherWindow);
 }
 } // namespace OHOS
 } // namespace Rosen

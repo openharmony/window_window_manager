@@ -22,6 +22,7 @@
 #include <input_window_monitor.h>
 #include <nocopyable.h>
 #include <system_ability.h>
+#include <window_manager_service_handler_stub.h>
 #include "display_change_listener.h"
 #include "drag_controller.h"
 #include "freeze_controller.h"
@@ -38,8 +39,16 @@ class DisplayChangeListener : public IDisplayChangeListener {
 public:
     virtual void OnDisplayStateChange(DisplayId id, DisplayStateChangeType type) override;
 };
+
+class WindowManagerServiceHandler : public AAFwk::WindowManagerServiceHandlerStub {
+public:
+    virtual void NotifyWindowTransition(
+        sptr<AAFwk::AbilityTransitionInfo> from, sptr<AAFwk::AbilityTransitionInfo> to) override;
+};
+
 class WindowManagerService : public SystemAbility, public WindowManagerStub {
 friend class DisplayChangeListener;
+friend class WindowManagerServiceHandler;
 DECLARE_SYSTEM_ABILITY(WindowManagerService);
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManagerService);
 
@@ -52,7 +61,7 @@ public:
         uint32_t& windowId, sptr<IRemoteObject> token) override;
     WMError AddWindow(sptr<WindowProperty>& property) override;
     WMError RemoveWindow(uint32_t windowId) override;
-    void NotifyWindowTransition(WindowTransitionInfo fromInfo, WindowTransitionInfo toInfo) override;
+    void NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to) override;
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override;
     WMError RequestFocus(uint32_t windowId) override;
     WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) override;
@@ -95,6 +104,7 @@ private:
     sptr<WindowController> windowController_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
     sptr<SnapshotController> snapshotController_;
+    sptr<WindowManagerServiceHandler> wmsHandler_;
     sptr<DragController> dragController_;
     sptr<FreezeController> freezeDisplayController_;
     bool isSystemDecorEnable_ = true;
