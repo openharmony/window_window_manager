@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 
 ## Build libdms.so
 config("libdms_private_config") {
-  include_dirs = [ 
+  include_dirs = [
     "//foundation/windowmanager/dm/include",
     "//foundation/windowmanager/interfaces/innerkits/wm",
     "//foundation/windowmanager/interfaces/innerkits/dm",
@@ -49,11 +49,11 @@ ohos_shared_library("libdms") {
     "src/abstract_screen.cpp",
     "src/abstract_screen_controller.cpp",
     "src/display_manager_agent_controller.cpp",
+    "src/display_manager_config.cpp",
     "src/display_manager_service.cpp",
     "src/display_manager_service_inner.cpp",
     "src/display_manager_stub.cpp",
     "src/display_power_controller.cpp",
-    "src/display_manager_config.cpp",
   ]
 
   configs = [ ":libdms_private_config" ]
@@ -61,9 +61,9 @@ ohos_shared_library("libdms") {
   public_configs = [ ":libdms_public_config" ]
 
   deps = [
+    ":display_manager_config",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/utils:libwmutil",
-    ":display_manager_config",
 
     # RSSurface
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
