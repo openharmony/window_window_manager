@@ -1051,6 +1051,31 @@ WMError WindowImpl::Maximize()
     }
 }
 
+WMError WindowImpl::NotifyWindowTransition(TransitionReason reason)
+{
+    sptr<WindowTransitionInfo> fromInfo = new(std::nothrow) WindowTransitionInfo();
+    sptr<WindowTransitionInfo> toInfo = new(std::nothrow) WindowTransitionInfo();
+    if (fromInfo == nullptr || toInfo == nullptr) {
+        WLOGFE("client new windowTransitionInfo failed");
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext == nullptr) {
+        WLOGFE("id:%{public}d is not ability Window", property_->GetWindowId());
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    auto abilityInfo = abilityContext->GetAbilityInfo();
+    fromInfo->SetBundleName(context_->GetBundleName());
+    fromInfo->SetAbilityName(abilityInfo->name);
+    fromInfo->SetWindowMode(property_->GetWindowMode());
+    fromInfo->SetWindowRect(property_->GetWindowRect());
+    fromInfo->SetAbilityToken(context_->GetToken());
+    fromInfo->SetWindowType(property_->GetWindowType());
+    fromInfo->SetDisplayId(property_->GetDisplayId());
+    fromInfo->SetTransitionReason(reason);
+    return SingletonContainer::Get<WindowAdapter>().NotifyWindowTransition(fromInfo, toInfo);
+}
+
 WMError WindowImpl::Minimize()
 {
     WLOGFI("[Client] Window %{public}u Minimize", property_->GetWindowId());
@@ -1059,7 +1084,12 @@ WMError WindowImpl::Minimize()
     }
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         if (context_ != nullptr) {
-            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(context_->GetToken(), true);
+            WMError ret = NotifyWindowTransition(TransitionReason::MINIMIZE);
+            if (ret != WMError::WM_OK) {
+                WLOGFI("[Client] Window %{public}u Minimize without remote animation ret:%{public}u",
+                    property_->GetWindowId(), static_cast<uint32_t>(ret));
+                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(context_->GetToken(), true);
+            }
         } else {
             Hide();
         }
@@ -1088,7 +1118,12 @@ WMError WindowImpl::Close()
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
         if (abilityContext != nullptr) {
-            abilityContext->CloseAbility();
+            WMError ret = NotifyWindowTransition(TransitionReason::CLOSE);
+            if (ret != WMError::WM_OK) {
+                WLOGFI("[Client] Window %{public}u Close without remote animation ret:%{public}u",
+                    property_->GetWindowId(), static_cast<uint32_t>(ret));
+                abilityContext->CloseAbility();
+            }
         } else {
             Destroy();
         }

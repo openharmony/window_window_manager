@@ -132,8 +132,14 @@ bool WindowTransitionInfo::Marshalling(Parcel& parcel) const
         return false;
     }
 
-    if (!parcel.WriteRemoteObject(abilityToken_)) {
-        return false;
+    if (!abilityToken_) {
+        if (!parcel.WriteBool(false)) {
+            return false;
+        }
+    } else {
+        if (!parcel.WriteBool(true) || !parcel.WriteObject(abilityToken_)) {
+            return false;
+        }
     }
 
     if (!parcel.WriteUint64(displayId_)) {
@@ -144,7 +150,7 @@ bool WindowTransitionInfo::Marshalling(Parcel& parcel) const
         return false;
     }
 
-    if (!parcel.WriteBool(static_cast<uint32_t>(isShowWhenLocked_))) {
+    if (!parcel.WriteBool(isShowWhenLocked_)) {
         return false;
     }
 
@@ -167,7 +173,9 @@ WindowTransitionInfo* WindowTransitionInfo::Unmarshalling(Parcel& parcel)
     windowTransitionInfo->windowRect_.posY_  = parcel.ReadInt32();
     windowTransitionInfo->windowRect_.width_  = parcel.ReadUint32();
     windowTransitionInfo->windowRect_.height_  = parcel.ReadUint32();
-    windowTransitionInfo->abilityToken_ = parcel.ReadObject<IRemoteObject>();
+    if (parcel.ReadBool()) {
+        windowTransitionInfo->abilityToken_ = parcel.ReadObject<IRemoteObject>();
+    }
     windowTransitionInfo->displayId_ = parcel.ReadUint64();
     windowTransitionInfo->windowType_ = static_cast<WindowType>(parcel.ReadUint32());
     windowTransitionInfo->isShowWhenLocked_ = parcel.ReadBool();

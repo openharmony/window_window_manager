@@ -18,7 +18,6 @@
 #include <ability_manager_client.h>
 #include <display_manager_service_inner.h>
 #include <rs_window_animation_finished_callback.h>
-#include <rs_window_animation_target.h>
 #include <transaction/rs_transaction.h>
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -54,13 +53,15 @@ WMError RemoteAnimation::SetWindowAnimationController(const sptr<RSIWindowAnimat
     return WMError::WM_OK;
 }
 
-bool RemoteAnimation::CheckTransition(sptr<WindowTransitionInfo> info)
+bool RemoteAnimation::CheckTransition(sptr<WindowTransitionInfo> srcInfo,
+    sptr<WindowTransitionInfo> dstInfo)
 {
-    if (windowAnimationController_ == nullptr) {
-        WLOGFI("not use transition animation because windowAnimationController_ not set.");
+    if (srcInfo->GetBundleName().find("permission") != std::string::npos ||
+        dstInfo->GetBundleName().find("permission") != std::string::npos) {
         return false;
     }
-    if (info->GetBundleName().find("permission") != std::string::npos) {
+
+    if (windowAnimationController_ == nullptr) {
         return false;
     }
     return true;
@@ -70,7 +71,7 @@ TransitionEvent RemoteAnimation::GetTransitionEvent(sptr<WindowTransitionInfo> s
     sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode)
 {
     auto transitionReason = srcInfo->GetTransitionReason(); // src reason same as dst reason
-    if (eventMap_.find(transitionReason) != eventMap_.end()) {
+    if (srcNode != nullptr && eventMap_.find(transitionReason) != eventMap_.end()) {
         return eventMap_[transitionReason];
     }
     WLOGFI("Ability Transition");
@@ -172,28 +173,34 @@ void RemoteAnimation::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWin
     RSTransaction::FlushImplicitTransaction();
 }
 
+sptr<RSWindowAnimationTarget> RemoteAnimation::SetAnimationTarget(const sptr<WindowNode>& node,
+    sptr<WindowTransitionInfo> info)
+{
+    sptr<RSWindowAnimationTarget> target = new(std::nothrow) RSWindowAnimationTarget();
+    if (target == nullptr) {
+        WLOGFE("new RSWindowAnimationTarget failed");
+        return nullptr;
+    }
+    target->bundleName_ = info->GetBundleName();
+    target->abilityName_ = info->GetAbilityName();
+    if (node != nullptr) {
+        if (WindowHelper::IsAppWindow(node->GetWindowType())) {
+            target->surfaceNode_ = node->leashWinSurfaceNode_;
+        } else {
+            target->surfaceNode_ = node->surfaceNode_;
+        }
+    }
+    return target;
+}
+
 void RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> srcInfo,
     sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode,
     const sptr<WindowNode>&  dstNode, bool needMinimizeSrcNode)
 {
-    sptr<RSWindowAnimationTarget> srcTarget = new RSWindowAnimationTarget();
-    srcTarget->bundleName_ = srcInfo->GetBundleName();
-    srcTarget->abilityName_ = srcInfo->GetAbilityName();
-    if (srcNode != nullptr) {
-        if (WindowHelper::IsAppWindow(srcNode->GetWindowType())) {
-            srcTarget->surfaceNode_ = srcNode->leashWinSurfaceNode_;
-        } else {
-            srcTarget->surfaceNode_ = srcNode->surfaceNode_;
-        }
-    }
-
-    sptr<RSWindowAnimationTarget> dstTarget = new RSWindowAnimationTarget();
-    dstTarget->bundleName_ = dstInfo->GetBundleName();
-    dstTarget->abilityName_ = dstInfo->GetAbilityName();
-    if (WindowHelper::IsAppWindow(dstNode->GetWindowType())) {
-        dstTarget->surfaceNode_ = dstNode->leashWinSurfaceNode_;
-    } else {
-        dstTarget->surfaceNode_ = dstNode->surfaceNode_;
+    sptr<RSWindowAnimationTarget> srcTarget = SetAnimationTarget(srcNode, srcInfo);
+    sptr<RSWindowAnimationTarget> dstTarget = SetAnimationTarget(dstNode, dstInfo);
+    if (srcTarget == nullptr || dstTarget == nullptr) {
+        return;
     }
     if (needMinimizeSrcNode && srcNode != nullptr) { // from App To App
         srcTarget->actionType_ = WindowAnimationActionType::GO_BACKGROUND;
@@ -206,7 +213,7 @@ void RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> srcIn
         dstTarget->actionType_ = WindowAnimationActionType::GO_FOREGROUND;
         dstNode->isPlayAnimationShow_ = true;
     }
-    auto callback = [srcNode, dstNode, needMinimizeSrcNode]() {
+    auto callback = [srcNode, needMinimizeSrcNode]() {
         if (needMinimizeSrcNode && srcNode != nullptr && srcNode->abilityToken_ != nullptr) {
             WLOGFI("minimize windowId: %{public}u, name:%{public}s",
                 srcNode->GetWindowId(), srcNode->GetWindowName().c_str());
@@ -226,20 +233,68 @@ void RemoteAnimation::UpdateRSTree(sptr<WindowNode>& node)
 {
     auto& dms = DisplayManagerServiceInner::GetInstance();
     DisplayId displayId = node->GetDisplayId();
-    if (!node->surfaceNode_) {
+    if (!node->surfaceNode_) { // cold start
         if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
             WLOGFE("window id:%{public}d type: %{public}u is not Main Window!",
                 node->GetWindowId(), static_cast<uint32_t>(node->GetWindowType()));
         }
         dms.UpdateRSTree(displayId, node->leashWinSurfaceNode_, true);
         node->leashWinSurfaceNode_->AddChild(node->startingWinSurfaceNode_, -1);
-    } else {
+    } else { // hot start
         if (node->leashWinSurfaceNode_) { // to app
             dms.UpdateRSTree(displayId, node->leashWinSurfaceNode_, true);
         } else { // to launcher
             dms.UpdateRSTree(displayId, node->surfaceNode_, true);
         }
     }
+}
+
+void RemoteAnimation::NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode)
+{
+    sptr<RSWindowAnimationTarget> srcTarget = SetAnimationTarget(srcNode, srcInfo);
+    if (srcTarget == nullptr) {
+        return;
+    }
+    srcTarget->actionType_ = WindowAnimationActionType::MINIMIZE;
+    srcNode->isPlayAnimationHide_ = true;
+    auto minimizeFunc = [srcNode]() {
+        if (srcNode != nullptr && srcNode->abilityToken_ != nullptr) {
+            WLOGFI("minimize windowId: %{public}u, name:%{public}s",
+                srcNode->GetWindowId(), srcNode->GetWindowName().c_str());
+            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(srcNode->abilityToken_, true);
+        }
+    };
+    sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
+        minimizeFunc);
+    if (finishedCallback == nullptr) {
+        WLOGFE("New RSIWindowAnimationFinishedCallback failed");
+        return;
+    }
+    windowAnimationController_->OnMinimizeWindow(srcTarget, finishedCallback);
+}
+
+void RemoteAnimation::NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode)
+{
+    sptr<RSWindowAnimationTarget> srcTarget = SetAnimationTarget(srcNode, srcInfo);
+    if (srcTarget == nullptr) {
+        return;
+    }
+    srcTarget->actionType_ = WindowAnimationActionType::CLOSE;
+    srcNode->isPlayAnimationHide_ = true;
+    auto closeFunc = [srcNode]() {
+        if (srcNode != nullptr && srcNode->abilityToken_ != nullptr) {
+            WLOGFI("close windowId: %{public}u, name:%{public}s",
+                srcNode->GetWindowId(), srcNode->GetWindowName().c_str());
+            AAFwk::AbilityManagerClient::GetInstance()->CloseAbility(srcNode->abilityToken_);
+        }
+    };
+    sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
+        closeFunc);
+    if (finishedCallback == nullptr) {
+        WLOGFE("New RSIWindowAnimationFinishedCallback failed");
+        return;
+    }
+    windowAnimationController_->OnCloseWindow(srcTarget, finishedCallback);
 }
 } // Rosen
 } // OHOS
