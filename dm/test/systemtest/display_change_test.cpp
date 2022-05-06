@@ -77,7 +77,7 @@ public:
 DisplayId DisplayChangeTest::defaultDisplayId_ = DISPLAY_ID_INVALID;
 sptr<Screen> DisplayChangeTest::defaultScreen_ = nullptr;
 sptr<DisplayChangeEventListener> DisplayChangeTest::listener_ = new DisplayChangeEventListener();
-uint32_t DisplayChangeTest::originalDisplayDpi = NULL;
+uint32_t DisplayChangeTest::originalDisplayDpi = 0;
 
 void DisplayChangeTest::SetUpTestCase()
 {
@@ -331,7 +331,7 @@ HWTEST_F(DisplayChangeTest, CheckScreenDensityChange01, Function | SmallTest | L
 {
     DisplayChangeTest::originalDisplayDpi = static_cast<uint32_t>(DisplayManager::GetInstance().
         GetDisplayById(defaultDisplayId_)->GetVirtualPixelRatio() * BASELINE_DENSITY);
-    ASSERT_NE(NULL, DisplayChangeTest::originalDisplayDpi);
+    ASSERT_NE(0, DisplayChangeTest::originalDisplayDpi);
     uint32_t densityDpi = 320;
     ASSERT_EQ(true, defaultScreen_->SetDensityDpi(densityDpi));
     sleep(SPLIT_TEST_SLEEP_S);
