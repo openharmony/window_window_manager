@@ -71,11 +71,13 @@ public:
     static DisplayId defaultDisplayId_;
     static sptr<Screen> defaultScreen_;
     static sptr<DisplayChangeEventListener> listener_;
+    static uint32_t originalDisplayDpi;
     static inline uint32_t times_ = 0;
 };
 DisplayId DisplayChangeTest::defaultDisplayId_ = DISPLAY_ID_INVALID;
 sptr<Screen> DisplayChangeTest::defaultScreen_ = nullptr;
 sptr<DisplayChangeEventListener> DisplayChangeTest::listener_ = new DisplayChangeEventListener();
+uint32_t DisplayChangeTest::originalDisplayDpi = NULL;
 
 void DisplayChangeTest::SetUpTestCase()
 {
@@ -327,6 +329,9 @@ HWTEST_F(DisplayChangeTest, CheckDisplaySizeChange02, Function | MediumTest | Le
  */
 HWTEST_F(DisplayChangeTest, CheckScreenDensityChange01, Function | SmallTest | Level2)
 {
+    DisplayChangeTest::originalDisplayDpi = static_cast<uint32_t>(DisplayManager::GetInstance().
+        GetDisplayById(defaultDisplayId_)->GetVirtualPixelRatio() * BASELINE_DENSITY);
+    ASSERT_NE(NULL, DisplayChangeTest::originalDisplayDpi);
     uint32_t densityDpi = 320;
     ASSERT_EQ(true, defaultScreen_->SetDensityDpi(densityDpi));
     sleep(SPLIT_TEST_SLEEP_S);
@@ -346,13 +351,34 @@ HWTEST_F(DisplayChangeTest, CheckScreenDensityChange02, Function | SmallTest | L
 
 /**
  * @tc.name: CheckScreenDensityChange03
- * @tc.desc: Check screen density change as set another density for screen
+ * @tc.desc: Check screen density change as set an invalid density for screen
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayChangeTest, CheckScreenDensityChange03, Function | SmallTest | Level2)
 {
-    uint32_t densityDpi = 160;
-    ASSERT_EQ(true, defaultScreen_->SetDensityDpi(densityDpi));
+    uint32_t densityDpi = 700;
+    ASSERT_EQ(false, defaultScreen_->SetDensityDpi(densityDpi));
+}
+
+/**
+ * @tc.name: CheckScreenDensityChange04
+ * @tc.desc: Check screen density change as set an invalid density for screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayChangeTest, CheckScreenDensityChange04, Function | SmallTest | Level2)
+{
+    uint32_t densityDpi = 40;
+    ASSERT_EQ(false, defaultScreen_->SetDensityDpi(densityDpi));
+}
+
+/**
+ * @tc.name: CheckScreenDensityChange05
+ * @tc.desc: Restore original display density
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayChangeTest, CheckScreenDensityChange05, Function | SmallTest | Level2)
+{
+    ASSERT_EQ(true, defaultScreen_->SetDensityDpi(DisplayChangeTest::originalDisplayDpi));
     sleep(SPLIT_TEST_SLEEP_S);
 }
 }

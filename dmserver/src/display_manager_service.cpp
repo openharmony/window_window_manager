@@ -23,6 +23,8 @@
 #include "transaction/rs_interfaces.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
+#include "display_manager_config.h"
+#include "dm_common.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -30,6 +32,7 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerService)
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<DisplayManagerService>());
+float DisplayManagerService::customVirtualPixelRatio_ = -1.0f;
 
 #define CHECK_SCREEN_AND_RETURN(ret) \
     do { \
@@ -65,10 +68,33 @@ bool DisplayManagerService::Init()
         WLOGFW("DisplayManagerService::Init failed");
         return false;
     }
+    if (DisplayManagerConfig::LoadConfigXml(DISPLAY_MANAGER_CONFIG_XML)) {
+        DisplayManagerConfig::DumpConfig();
+        ConfigureDisplayManagerService();
+    }
     abstractScreenController_->Init();
     abstractDisplayController_->Init(abstractScreenController_);
     WLOGFI("DisplayManagerService::Init success");
     return true;
+}
+
+void DisplayManagerService::ConfigureDisplayManagerService()
+{
+    auto numbersConfig = DisplayManagerConfig::GetNumbersConfig();
+    if (numbersConfig.count("dpi") != 0) {
+        uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["dpi"][0]);
+        if (densityDpi == 0) {
+            WLOGI("No custom virtual pixel ratio value is configured, use default value instead");
+            return;
+        }
+        if (densityDpi < DOT_PER_INCH_MINIMUM_VALUE || densityDpi > DOT_PER_INCH_MAXIMUM_VALUE) {
+            WLOGE("Invalid input dpi value, the valid input range for DPI values is %{public}u ~ %{public}u",
+                DOT_PER_INCH_MINIMUM_VALUE, DOT_PER_INCH_MAXIMUM_VALUE);
+            return;
+        }
+        float virtualPixelRatio = static_cast<float>(densityDpi) / BASELINE_DENSITY;
+        DisplayManagerService::customVirtualPixelRatio_ = virtualPixelRatio;
+    }
 }
 
 void DisplayManagerService::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
@@ -497,5 +523,10 @@ bool DisplayManagerService::SetVirtualPixelRatio(ScreenId screenId, float virtua
 {
     WM_SCOPED_TRACE("dms:SetVirtualPixelRatio(%" PRIu64", %f)", screenId, virtualPixelRatio);
     return abstractScreenController_->SetVirtualPixelRatio(screenId, virtualPixelRatio);
+}
+
+float DisplayManagerService::GetCustomVirtualPixelRatio()
+{
+    return DisplayManagerService::customVirtualPixelRatio_;
 }
 } // namespace OHOS::Rosen

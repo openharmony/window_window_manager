@@ -33,6 +33,11 @@ AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width,
       height_(height),
       refreshRate_(refreshRate)
 {
+    if (DisplayManagerService::GetCustomVirtualPixelRatio() &&
+        fabs(DisplayManagerService::GetCustomVirtualPixelRatio() + 1) > 1e-6) {
+        virtualPixelRatio_ = DisplayManagerService::GetCustomVirtualPixelRatio();
+        return;
+    }
     if ((width_ >= PHONE_SCREEN_WIDTH) || (height_ >= PHONE_SCREEN_WIDTH)) {
         if ((width_ == PAD_SCREEN_WIDTH) || (height_ == PAD_SCREEN_WIDTH)) {
             virtualPixelRatio_ = 2.0f; // Pad is 2.0

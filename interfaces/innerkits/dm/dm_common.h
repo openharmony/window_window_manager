@@ -29,7 +29,8 @@ namespace {
     constexpr int DOT_PER_INCH = 160;
     const static std::string DEFAULT_SCREEN_NAME = "buildIn";
     constexpr int DOT_PER_INCH_MAXIMUM_VALUE = 640;
-    constexpr int DOT_PER_INCH_MINIMIM_VALUE = 80;
+    constexpr int DOT_PER_INCH_MINIMUM_VALUE = 80;
+    constexpr uint32_t BASELINE_DENSITY = 160; //
 }
 
 enum class PowerStateChangeReason : uint32_t {
