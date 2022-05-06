@@ -34,6 +34,9 @@
 #include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
+namespace {
+    const std::string DISPLAY_MANAGER_CONFIG_XML = "/system/etc/window/resources/display_manager_config.xml";
+}
 class DisplayManagerService : public SystemAbility, public DisplayManagerStub {
 DECLARE_SYSTEM_ABILITY(DisplayManagerService);
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
@@ -90,7 +93,7 @@ public:
     std::vector<DisplayId> GetAllDisplayIds() override;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
-
+    static float GetCustomVirtualPixelRatio();
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
 private:
     DisplayManagerService();
@@ -99,6 +102,7 @@ private:
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
     ScreenId GetScreenIdByDisplayId(DisplayId displayId) const;
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByDisplayId(DisplayId displayId) const;
+    void ConfigureDisplayManagerService();
 
     std::recursive_mutex mutex_;
     static inline SingletonDelegator<DisplayManagerService> delegator_;
@@ -106,6 +110,7 @@ private:
     sptr<AbstractScreenController> abstractScreenController_;
     sptr<DisplayPowerController> displayPowerController_;
     sptr<IDisplayChangeListener> displayChangeListener_;
+    static float customVirtualPixelRatio_;
 };
 } // namespace OHOS::Rosen
 
