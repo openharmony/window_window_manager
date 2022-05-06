@@ -99,7 +99,9 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     }
     node->requestedVisibility_ = true;
     if (parentNode != nullptr) { // subwindow
-        if (parentNode->parent_ != root) {
+        if (parentNode->parent_ != root &&
+            !((parentNode->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) &&
+            (parentNode->parent_ == aboveAppWindowNode_))) {
             WLOGFE("window type and parent window not match or try to add subwindow to subwindow, which is forbidden");
             return WMError::WM_ERROR_INVALID_PARAM;
         }
@@ -189,6 +191,7 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
     WM_FUNCTION_TRACE();
     node->priority_ = zorderPolicy_->GetWindowPriority(node->GetWindowType());
     RaiseInputMethodWindowPriorityIfNeeded(node);
+    RaiseShowWhenLockedWindowIfNeeded(node);
     auto parentNode = node->parent_;
     auto position = parentNode->children_.end();
     for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
@@ -555,13 +558,13 @@ void WindowNodeContainer::NotifySystemBarTints()
     WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId_, tints);
 }
 
-bool WindowNodeContainer::IsTopAppWindow(uint32_t windowId) const
+bool WindowNodeContainer::IsTopWindow(uint32_t windowId, sptr<WindowNode>& rootNode) const
 {
-    if (appWindowNode_->children_.empty()) {
-        WLOGFE("app root does not have any node");
+    if (rootNode->children_.empty()) {
+        WLOGFE("root does not have any node");
         return false;
     }
-    auto node = *(appWindowNode_->children_.rbegin());
+    auto node = *(rootNode->children_.rbegin());
     if (node == nullptr) {
         WLOGFE("window tree does not have any node");
         return false;
@@ -843,7 +846,7 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
     if (node == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (IsTopAppWindow(node->GetWindowId())) {
+    if (IsTopWindow(node->GetWindowId(), appWindowNode_) || IsTopWindow(node->GetWindowId(), aboveAppWindowNode_)) {
         WLOGFI("it is already top app window, id: %{public}d", node->GetWindowId());
         return WMError::WM_ERROR_INVALID_TYPE;
     }
@@ -856,13 +859,13 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
         if (parentNode->IsSplitMode()) {
             RaiseSplitRelatedWindowToTop(parentNode);
         } else {
-            RaiseWindowToTop(node->GetParentId(), appWindowNode_->children_); // raise parent window
+            RaiseWindowToTop(node->GetParentId(), parentNode->parent_->children_); // raise parent window
         }
     } else if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         if (node->IsSplitMode()) {
             RaiseSplitRelatedWindowToTop(node);
         } else {
-            RaiseWindowToTop(node->GetWindowId(), appWindowNode_->children_);
+            RaiseWindowToTop(node->GetWindowId(), node->parent_->children_);
         }
     } else {
         // do nothing
@@ -1116,7 +1119,75 @@ void WindowNodeContainer::RaiseInputMethodWindowPriorityIfNeeded(const sptr<Wind
     });
     if (iter != aboveAppWindowNode_->children_.end()) {
         WLOGFI("raise input method float window priority.");
-        node->priority_ = WINDOW_TYPE_RAISED_INPUT_METHOD;
+        node->priority_ = zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_KEYGUARD) + 1;
+    }
+}
+
+void WindowNodeContainer::ReZOrderShowWhenLockedWindows(const sptr<WindowNode>& node, bool up)
+{
+    WLOGFI("Keyguard change %{public}u, re-zorder showWhenLocked window", up);
+    std::vector<sptr<WindowNode>> needReZOrderNodes;
+    auto& srcRoot = up ? appWindowNode_ : aboveAppWindowNode_;
+    auto& dstRoot = up ? aboveAppWindowNode_ : appWindowNode_;
+    auto dstPriority = up ? zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_KEYGUARD) + 1 :
+        zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    for (auto iter = srcRoot->children_.begin(); iter != srcRoot->children_.end();) {
+        if ((*iter)->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) {
+            needReZOrderNodes.emplace_back(*iter);
+            iter = srcRoot->children_.erase(iter);
+        } else {
+            iter++;
+        }
+    }
+
+    for (auto& needReZOrderNode : needReZOrderNodes) {
+        needReZOrderNode->priority_ = dstPriority;
+        needReZOrderNode->parent_ = dstRoot;
+        auto parentNode = needReZOrderNode->parent_;
+        auto position = parentNode->children_.end();
+        for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
+            if ((*iter)->priority_ > needReZOrderNode->priority_) {
+                position = iter;
+                break;
+            }
+        }
+        parentNode->children_.insert(position, needReZOrderNode);
+        WLOGFI("ShowWhenLocked window %{public}u re-zorder when keyguard change %{public}u",
+            needReZOrderNode->GetWindowId(), up);
+    }
+}
+
+void WindowNodeContainer::RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node)
+{
+    // if keyguard window show, raise show when locked windows
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
+        ReZOrderShowWhenLockedWindows(node, true);
+        return;
+    }
+
+    // if show when locked window show, raise itself when exist keyguard
+    if (!(node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))) {
+        return;
+    }
+
+    auto iter = std::find_if(aboveAppWindowNode_->children_.begin(), aboveAppWindowNode_->children_.end(),
+                             [](sptr<WindowNode> node) {
+        return node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD;
+    });
+    if (iter != aboveAppWindowNode_->children_.end()) {
+        WLOGFI("ShowWhenLocked window %{public}u raise itself", node->GetWindowId());
+        node->priority_ = zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_KEYGUARD) + 1;
+        node->parent_ = aboveAppWindowNode_;
+    }
+}
+
+void WindowNodeContainer::DropShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node)
+{
+    // if keyguard window hide, drop show when locked windows
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
+        ReZOrderShowWhenLockedWindows(node, false);
+        AssignZOrder();
     }
 }
 
