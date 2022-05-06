@@ -54,7 +54,6 @@ ohos_shared_library("libwindow_extension") {
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
     "ability_runtime:runtime",
-    "bytrace_standard:bytrace_core",
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "input:libmmi-client",
