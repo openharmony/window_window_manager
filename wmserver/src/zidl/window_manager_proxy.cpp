@@ -567,7 +567,7 @@ WMError WindowManagerProxy::GetSystemDecorEnable(bool& isSystemDecorEnable)
     return static_cast<WMError>(ret);
 }
 
-void WindowManagerProxy::NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to)
+WMError WindowManagerProxy::NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -575,25 +575,27 @@ void WindowManagerProxy::NotifyWindowTransition(sptr<WindowTransitionInfo>& from
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("Failed to WriteInterfaceToken!");
-        return;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteParcelable(from)) {
         WLOGFE("Failed to write from ability window info!");
-        return;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteParcelable(to)) {
         WLOGFE("Failed to write to ability window info!");
-        return;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
 
     auto error = Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION),
         data, reply, option);
     if (error != ERR_NONE) {
         WLOGFE("Send request error: %{public}d", static_cast<uint32_t>(error));
-        return;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
+    WMError ret = static_cast<WMError>(reply.ReadInt32());
+    return ret;
 }
 
 WMError WindowManagerProxy::GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones)

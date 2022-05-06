@@ -187,7 +187,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         case WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION: {
             sptr<WindowTransitionInfo> from = data.ReadParcelable<WindowTransitionInfo>();
             sptr<WindowTransitionInfo> to = data.ReadParcelable<WindowTransitionInfo>();
-            NotifyWindowTransition(from, to);
+            WMError errCode = NotifyWindowTransition(from, to);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         case WindowManagerMessage::TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE: {
