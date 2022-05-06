@@ -29,7 +29,6 @@ void WindowExtensionClientStubImpl::OnWindowReady(const std::shared_ptr<RSSurfac
         componentCallback_->OnWindowReady(surfaceNode);
         WLOGFI("called");
     }
-
 }
 
 void WindowExtensionClientStubImpl::OnBackPress()

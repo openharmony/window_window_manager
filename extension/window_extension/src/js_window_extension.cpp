@@ -183,7 +183,7 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
     NativeReference* callback = nullptr;
     std::unique_ptr<AbilityRuntime::AsyncTask::ExecuteCallback> execute = nullptr;
     AbilityRuntime::AsyncTask::Schedule(engine,
-       std::make_unique<AbilityRuntime::AsyncTask>(callback, std::move(execute), std::move(complete)));
+        std::make_unique<AbilityRuntime::AsyncTask>(callback, std::move(execute), std::move(complete)));
     WLOGFI("called.");
 }
 
