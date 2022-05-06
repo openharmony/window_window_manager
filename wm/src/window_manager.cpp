@@ -316,10 +316,10 @@ void WindowManager::ToggleShownStateForAllAppWindows()
     SingletonContainer::Get<WindowAdapter>().ToggleShownStateForAllAppWindows();
 }
 
-WMError WindowManager::SetWindowLayoutMode(WindowLayoutMode mode, DisplayId displayId)
+WMError WindowManager::SetWindowLayoutMode(WindowLayoutMode mode)
 {
-    WLOGFI("set window layout mode: %{public}u, displayId %{public}" PRIu64"", mode, displayId);
-    WMError ret  = SingletonContainer::Get<WindowAdapter>().SetWindowLayoutMode(displayId, mode);
+    WLOGFI("set window layout mode: %{public}u", mode);
+    WMError ret  = SingletonContainer::Get<WindowAdapter>().SetWindowLayoutMode(mode);
     if (ret != WMError::WM_OK) {
         WLOGFE("set layout mode failed");
     }
