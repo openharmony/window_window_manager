@@ -27,7 +27,7 @@ declare namespace screen {
    * @devices tv, phone, tablet, wearable
    * @since 8
    */
-  function getAllScreen(): Promise<Array<Screen>>;
+  function getAllScreens(): Promise<Array<Screen>>;
 
   // Screen plug-in event; Screen resolution ratio and other parameters, combination relationship changes
   function on(eventType: 'connect' | 'disconnect' | 'change', callback: Callback<number>): void;
