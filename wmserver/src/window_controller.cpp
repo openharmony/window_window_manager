@@ -100,6 +100,25 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
     return WMError::WM_OK;
 }
 
+WMError WindowController::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)
+{
+    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
+    if (windowNodeContainer == nullptr) {
+        WLOGFE("windowNodeContainer is null, displayId: %{public}" PRIu64"", displayId);
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    uint32_t focusWindowId = windowNodeContainer->GetFocusWindow();
+    auto windowNode = windowRoot_->GetWindowNode(focusWindowId);
+    if (windowNode == nullptr || !windowNode->currentVisibility_) {
+        WLOGFE("focusWindowNode is null or invisible, focusWindowId: %{public}u", focusWindowId);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    abilityToken = windowNode->abilityToken_;
+    WLOGFI("focusWindowId: %{public}u", focusWindowId);
+    return WMError::WM_OK;
+}
+
 WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token)
 {

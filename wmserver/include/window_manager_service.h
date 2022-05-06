@@ -45,6 +45,7 @@ class WindowManagerServiceHandler : public AAFwk::WindowManagerServiceHandlerStu
 public:
     virtual void NotifyWindowTransition(
         sptr<AAFwk::AbilityTransitionInfo> from, sptr<AAFwk::AbilityTransitionInfo> to) override;
+    int32_t GetFocusWindow(sptr<IRemoteObject>& abilityToken) override;
 };
 
 class WindowManagerService : public SystemAbility, public WindowManagerStub {
@@ -98,6 +99,7 @@ private:
     void RegisterWindowManagerServiceHandler();
     void OnWindowEvent(Event event, uint32_t windowId);
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
+    WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
     void ConfigureWindowManagerService();
 
     static inline SingletonDelegator<WindowManagerService> delegator;
