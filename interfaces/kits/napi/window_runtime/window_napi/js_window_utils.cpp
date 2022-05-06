@@ -167,6 +167,28 @@ NativeValue* WindowStageEventTypeInit(NativeEngine* engine)
     return objValue;
 }
 
+NativeValue* WindowLayoutModeInit(NativeEngine* engine)
+{
+    WLOGFI("[NAPI]WindowLayoutModeInit");
+    if (engine == nullptr) {
+        WLOGFE("[NAPI]Engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("[NAPI]Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("WINDOW_LAYOUT_MODE_CASCADE", CreateJsValue(*engine,
+        static_cast<int32_t>(WindowLayoutMode::CASCADE)));
+    object->SetProperty("WINDOW_LAYOUT_MODE_TILE", CreateJsValue(*engine,
+        static_cast<int32_t>(WindowLayoutMode::TILE)));
+    return objValue;
+}
+
 NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect)
 {
     NativeValue* objValue = engine.CreateObject();
