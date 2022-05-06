@@ -804,6 +804,21 @@ WMError WindowRoot::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mo
     return ret;
 }
 
+std::vector<DisplayId> WindowRoot::GetAllDisplayIds() const
+{
+    std::vector<DisplayId> displayIds;
+    for (auto& it : windowNodeContainerMap_) {
+        if (!it.second) {
+            return std::vector<DisplayId>();
+        }
+        std::vector<DisplayId>& displayIdVec = const_cast<WindowRoot*>(this)->displayIdMap_[it.first];
+        for (auto displayId : displayIdVec) {
+            displayIds.push_back(displayId);
+        }
+    }
+    return displayIds;
+}
+
 std::string WindowRoot::GenAllWindowsLogInfo() const
 {
     std::ostringstream os;

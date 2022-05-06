@@ -103,7 +103,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     windowManager.RegisterVisibilityChangedListener(visibilityChangedListener);
     sptr<IWindowUpdateListener> windowUpdateListener = new WindowUpdateListener();
     windowManager.RegisterWindowUpdateListener(windowUpdateListener);
-    windowManager.SetWindowLayoutMode(static_cast<WindowLayoutMode>(data[1]), static_cast<DisplayId>(data[0]));
+    windowManager.SetWindowLayoutMode(static_cast<WindowLayoutMode>(data[0]));
     windowManager.UnregisterFocusChangedListener(focusChangedListener);
     windowManager.UnregisterSystemBarChangedListener(systemBarChangedListener);
     windowManager.UnregisterVisibilityChangedListener(visibilityChangedListener);

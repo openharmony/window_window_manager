@@ -220,7 +220,7 @@ declare namespace window {
    * @systemapi Hide this for inner system use.
    * @since 8
    */
-  function setWindowLayoutMode(mode: WindowLayoutMode, displayId: number, callback: AsyncCallback<void>): void;
+  function setWindowLayoutMode(mode: WindowLayoutMode, callback: AsyncCallback<void>): void;
 
   /**
    * Set the layout mode of a window.
@@ -228,7 +228,7 @@ declare namespace window {
    * @systemapi Hide this for inner system use.
    * @since 8
    */
-  function setWindowLayoutMode(mode: WindowLayoutMode, displayId: number): Promise<void>;
+  function setWindowLayoutMode(mode: WindowLayoutMode): Promise<void>;
 
   /**
    * register the callback of systemBarTintChange

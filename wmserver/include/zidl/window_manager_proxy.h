@@ -44,7 +44,7 @@ public:
     void MinimizeAllAppWindows(DisplayId displayId) override;
     void ToggleShownStateForAllAppWindows() override;
     WMError MaxmizeWindow(uint32_t windowId) override;
-    WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode) override;
+    WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) override;
 
     void RegisterWindowManagerAgent(WindowManagerAgentType type,

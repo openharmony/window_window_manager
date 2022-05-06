@@ -611,13 +611,17 @@ void WindowController::UpdateWindowAnimation(const sptr<WindowNode>& node)
     }
 }
 
-WMError WindowController::SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode)
+WMError WindowController::SetWindowLayoutMode(WindowLayoutMode mode)
 {
-    WMError res = windowRoot_->SetWindowLayoutMode(displayId, mode);
-    if (res != WMError::WM_OK) {
-        return res;
+    WMError res = WMError::WM_OK;
+    auto displayIds = windowRoot_->GetAllDisplayIds();
+    for (auto displayId : displayIds) {
+        WMError res = windowRoot_->SetWindowLayoutMode(displayId, mode);
+        if (res != WMError::WM_OK) {
+            return res;
+        }
+        FlushWindowInfoWithDisplayId(displayId);
     }
-    FlushWindowInfoWithDisplayId(displayId);
     return res;
 }
 
