@@ -88,33 +88,6 @@ NativeValue* JsWindowManager::SetWindowLayoutMode(NativeEngine* engine, NativeCa
     return (me != nullptr) ? me->OnSetWindowLayoutMode(*engine, *info) : nullptr;
 }
 
-static bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability)
-{
-    napi_value global;
-    auto env = reinterpret_cast<napi_env>(&engine);
-    if (napi_get_global(env, &global) != napi_ok) {
-        WLOGFE("JsWindowManager::GetAPI7Ability get global failed");
-        return false;
-    }
-    napi_value jsAbility;
-    napi_status status = napi_get_named_property(env, global, "ability", &jsAbility);
-    if (status != napi_ok || jsAbility == nullptr) {
-        WLOGFE("JsWindowManager::GetAPI7Ability get global failed");
-        return false;
-    }
-
-    if (napi_get_value_external(env, jsAbility, reinterpret_cast<void **>(&ability)) != napi_ok) {
-        WLOGFE("JsWindowManager::GetAPI7Ability get global failed");
-        return false;
-    }
-    if (ability == nullptr) {
-        return false;
-    } else {
-        WLOGI("JsWindowManager::GetAPI7Ability ability is success!");
-    }
-    return true;
-}
-
 static void GetNativeContext(NativeValue* nativeContext, void*& contextPtr, WMError& errCode)
 {
     if (nativeContext != nullptr) {
@@ -204,7 +177,7 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
     windowOption->SetWindowType(winType);
     sptr<Window> window = Window::Create(windowName, windowOption, context->lock());
     if (window != nullptr) {
-        task.Resolve(engine, CreateJsWindowObject(engine, window, false));
+        task.Resolve(engine, CreateJsWindowObject(engine, window));
         WLOGFI("JsWindowManager::OnCreateWindow success");
     } else {
         task.Reject(engine, CreateJsError(engine,
@@ -228,7 +201,7 @@ static void CreateSubWindowTask(std::string parentWinName, std::string windowNam
     windowOption->SetParentName(parentWinName);
     sptr<Window> window = Window::Create(windowName, windowOption);
     if (window != nullptr) {
-        task.Resolve(engine, CreateJsWindowObject(engine, window, true));
+        task.Resolve(engine, CreateJsWindowObject(engine, window));
         WLOGFI("JsWindowManager::OnCreateWindow success");
     } else {
         task.Reject(engine, CreateJsError(engine,
@@ -319,8 +292,7 @@ NativeValue* JsWindowManager::OnFindWindow(NativeEngine& engine, NativeCallbackI
                     task.Reject(engine, CreateJsError(engine,
                         static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindowManager::OnFindWindow failed."));
                 } else {
-                    AppExecFwk::Ability* ability = nullptr;
-                    task.Resolve(engine, CreateJsWindowObject(engine, window, GetAPI7Ability(engine, ability)));
+                    task.Resolve(engine, CreateJsWindowObject(engine, window));
                 }
             }
         };
@@ -455,7 +427,7 @@ static void GetTopWindowTask(void* contextPtr, bool isOldApi, NativeEngine& engi
     if (jsWindowObj != nullptr && jsWindowObj->Get() != nullptr) {
         task.Resolve(engine, jsWindowObj->Get());
     } else {
-        task.Resolve(engine, CreateJsWindowObject(engine, window, isOldApi));
+        task.Resolve(engine, CreateJsWindowObject(engine, window));
     }
     WLOGFI("JsWindowManager::OnGetTopWindow success");
     return;
