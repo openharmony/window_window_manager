@@ -46,6 +46,10 @@ public:
     virtual void NotifyWindowTransition(
         sptr<AAFwk::AbilityTransitionInfo> from, sptr<AAFwk::AbilityTransitionInfo> to) override;
     int32_t GetFocusWindow(sptr<IRemoteObject>& abilityToken) override;
+    virtual void StartingWindow(
+        sptr<AAFwk::AbilityTransitionInfo> info, sptr<Media::PixelMap> pixelMap, uint32_t bgColor) override;
+    virtual void StartingWindow(sptr<AAFwk::AbilityTransitionInfo> info, sptr<Media::PixelMap> pixelMap) override;
+    virtual void CancelStartingWindow(sptr<IRemoteObject> abilityToken) override;
 };
 
 class WindowManagerService : public SystemAbility, public WindowManagerStub {
@@ -88,7 +92,9 @@ public:
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override;
     WMError GetSystemDecorEnable(bool& isSystemDecorEnable) override;
     WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) override;
-
+    void StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
+        bool isColdStart, uint32_t bkgColor = 0xffffffff);
+    void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;

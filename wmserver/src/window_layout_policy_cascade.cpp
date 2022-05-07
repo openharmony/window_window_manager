@@ -123,7 +123,9 @@ void WindowLayoutPolicyCascade::RemoveWindowNode(const sptr<WindowNode>& node)
         LayoutWindowTree(node->GetDisplayId());
     }
     Rect reqRect = node->GetRequestRect();
-    node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
+    if (node->GetWindowToken()) {
+        node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
+    }
 }
 
 void WindowLayoutPolicyCascade::UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow)

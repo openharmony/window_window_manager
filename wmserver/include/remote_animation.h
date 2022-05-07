@@ -19,7 +19,6 @@
 #include <refbase.h>
 #include <rs_iwindow_animation_controller.h>
 #include <rs_window_animation_target.h>
-#include "surface_draw.h"
 #include "wm_common.h"
 #include "window_node.h"
 #include "window_transition_info.h"
@@ -27,8 +26,7 @@
 namespace OHOS {
 namespace Rosen {
 enum class TransitionEvent : uint32_t {
-    COLD_START,
-    HOT_START,
+    APP_TRANSITION,
     BACK,
     HOME,
     MINIMIZE,
@@ -41,24 +39,17 @@ public:
     RemoteAnimation() = delete;
     ~RemoteAnimation() = default;
 
-    static bool CheckTransition(sptr<WindowTransitionInfo> srcInfo,
-        sptr<WindowTransitionInfo> dstInfo);
+    static bool CheckTransition(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode,
+        sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& dstNode);
     static TransitionEvent GetTransitionEvent(sptr<WindowTransitionInfo> srcInfo,
         sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode);
-    static sptr<WindowNode> CreateWindowNode(sptr<WindowTransitionInfo> info, uint32_t winId);
-    static void HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,
-        uint32_t& windowId, const std::shared_ptr<RSSurfaceNode>& surfaceNode);
-    static void NotifyAnimationTransition(sptr<WindowTransitionInfo> srcInfo, sptr<WindowTransitionInfo> dstInfo,
-        const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode, bool needMinimizeSrcNode);
-    static void DrawStartingWindow(sptr<WindowNode>& node);
-    static void UpdateRSTree(sptr<WindowNode>& node);
     static WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
-    static void NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
-    static void NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
+    static WMError NotifyAnimationTransition(sptr<WindowTransitionInfo> srcInfo, sptr<WindowTransitionInfo> dstInfo,
+        const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode, bool needMinimizeSrcNode);
+    static WMError NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
+    static WMError NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
 private:
-    static SurfaceDraw surfaceDraw_;
     static sptr<RSIWindowAnimationController> windowAnimationController_;
-    static WMError CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node);
     static sptr<RSWindowAnimationTarget> SetAnimationTarget(const sptr<WindowNode>& node,
         sptr<WindowTransitionInfo> info);
 };

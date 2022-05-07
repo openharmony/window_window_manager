@@ -14,7 +14,7 @@
  */
 
 #include "window_root.h"
-
+#include <ability_manager_client.h>
 #include <cinttypes>
 #include <display_power_mgr_client.h>
 #include <hisysevent.h>
@@ -187,7 +187,6 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
     if (node->GetWindowToken()) {
         AddDeathRecipient(node);
     }
-
     return WMError::WM_OK;
 }
 
@@ -249,6 +248,9 @@ void WindowRoot::ToggleShownStateForAllAppWindows()
             if (windowNode == nullptr) {
                 return false;
             }
+            if (!windowNode->GetWindowToken()) {
+                return false;
+            }
             windowNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_SHOWN);
             auto property = windowNode->GetWindowToken()->GetWindowProperty();
             if (property == nullptr) {
@@ -284,7 +286,7 @@ WMError WindowRoot::MaxmizeWindow(uint32_t windowId)
     return WMError::WM_OK;
 }
 
-WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromRemoteAnimation)
+WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin)
 {
     if (node == nullptr) {
         WLOGFE("add window failed, node is nullptr");
@@ -296,7 +298,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
         WLOGFE("add window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (fromRemoteAnimation) {
+    if (fromStartingWin) {
         return container->ShowInTransition(node);
     }
     // limit number of main window

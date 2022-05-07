@@ -19,6 +19,7 @@
 #include <power_mgr_client.h>
 #include <transaction/rs_transaction.h>
 #include "remote_animation.h"
+#include "starting_window.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "wm_common.h"
@@ -49,54 +50,73 @@ bool WindowController::IsWindowNeedMinimizedByOther(const sptr<WindowNode>& targ
         WindowMode::WINDOW_MODE_FULLSCREEN) && (WindowHelper::IsMainWindow(target->GetWindowType()));
 }
 
+void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
+    uint32_t bkgColor, bool isColdStart)
+{
+    if (info->GetAbilityToken() == nullptr || info->GetBundleName().find("permission") != std::string::npos) {
+        WLOGFE("AbilityToken is nullptr!");
+        return;
+    }
+    auto node = windowRoot_->FindWindowNodeWithToken(info->GetAbilityToken());
+    if (node == nullptr) {
+        if (!isColdStart) {
+            WLOGFE("no windowNode exists but is hot start!");
+            return;
+        }
+        node = StartingWindow::CreateWindowNode(info, GenWindowId());
+        if (node == nullptr) {
+            return;
+        }
+        if (windowRoot_->SaveWindow(node) != WMError::WM_OK) {
+            return;
+        }
+    } else {
+        if (isColdStart) {
+            WLOGFE("windowNode exists but is cold start!");
+            return;
+        }
+    }
+    if (windowRoot_->AddWindowNode(0, node, true) != WMError::WM_OK) {
+        return;
+    }
+    StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart);
+    RSTransaction::FlushImplicitTransaction();
+    node->startingWindowShown_ = true;
+    WLOGFI("StartingWindow show success with id:%{public}u!", node->GetWindowId());
+}
+
+void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
+{
+    auto node = windowRoot_->FindWindowNodeWithToken(abilityToken);
+    if (node == nullptr) {
+        WLOGFI("cannot find windowNode!");
+        return;
+    }
+    DestroyWindow(node->GetWindowId(), true);
+}
+
 WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& srcInfo,
     sptr<WindowTransitionInfo>& dstInfo)
 {
-    if (!RemoteAnimation::CheckTransition(srcInfo, dstInfo)) {
-        return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
-    }
     auto dstNode = windowRoot_->FindWindowNodeWithToken(dstInfo->GetAbilityToken());
     auto srcNode = windowRoot_->FindWindowNodeWithToken(srcInfo->GetAbilityToken());
+    if (!RemoteAnimation::CheckTransition(srcInfo, srcNode, dstInfo, dstNode)) {
+        return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
+    }
     auto transitionEvent = RemoteAnimation::GetTransitionEvent(srcInfo, dstInfo, srcNode, dstNode);
     auto needMinimizeSrcNode = IsWindowNeedMinimizedByOther(srcNode, dstNode);
-    WMError ret = WMError::WM_OK;
     switch (transitionEvent) {
-        case TransitionEvent::COLD_START: {
-            dstNode = RemoteAnimation::CreateWindowNode(dstInfo, GenWindowId());
-            if (dstNode == nullptr) {
-                return WMError::WM_ERROR_NULLPTR;
-            }
-            WMError ret = windowRoot_->SaveWindow(dstNode);
-            if (ret != WMError::WM_OK) {
-                return ret;
-            }
-            ret = windowRoot_->AddWindowNode(0, dstNode, true);
-            if (ret != WMError::WM_OK) {
-                return ret;
-            }
-            RemoteAnimation::DrawStartingWindow(dstNode);
-            RemoteAnimation::NotifyAnimationTransition(srcInfo, dstInfo, srcNode, dstNode, needMinimizeSrcNode);
-            break;
-        }
-        case TransitionEvent::HOT_START: {
-            ret = windowRoot_->AddWindowNode(0, dstNode, true);
-            if (ret != WMError::WM_OK) {
-                return ret;
-            }
-            RemoteAnimation::NotifyAnimationTransition(srcInfo, dstInfo, srcNode, dstNode, needMinimizeSrcNode);
-            break;
-        }
+        case TransitionEvent::APP_TRANSITION:
+            return RemoteAnimation::NotifyAnimationTransition(srcInfo, dstInfo, srcNode, dstNode, needMinimizeSrcNode);
         case TransitionEvent::MINIMIZE:
-            RemoteAnimation::NotifyAnimationMinimize(srcInfo, srcNode);
-            break;
+            return RemoteAnimation::NotifyAnimationMinimize(srcInfo, srcNode);
         case TransitionEvent::CLOSE:
-            RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode);
-            break;
+            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode);
         default:
             return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
-    RSTransaction::FlushImplicitTransaction();
     // Minimize Other judge need : isMinimizedByOtherWindow_, self type.mode
+    WLOGFI("NotifyWindowTransition Success!");
     return WMError::WM_OK;
 }
 
@@ -129,8 +149,8 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     }
     sptr<WindowNode> node = windowRoot_->FindWindowNodeWithToken(token);
     if (node != nullptr && WindowHelper::IsMainWindow(node->GetWindowType()) &&
-        property->GetWindowName().find("permission") == std::string::npos) {
-        RemoteAnimation::HandleClientWindowCreate(node, window, windowId, surfaceNode);
+        property->GetWindowName().find("permission") == std::string::npos && node->startingWindowShown_) {
+        StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode);
         windowRoot_->AddDeathRecipient(node);
         return WMError::WM_OK;
     }
@@ -150,7 +170,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (node->currentVisibility_ && !node->isPlayAnimationShow_) {
+    if (node->currentVisibility_ && !node->startingWindowShown_) {
         WLOGFE("current window is visible, windowId: %{public}u", node->GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
