@@ -137,6 +137,27 @@ int32_t WindowManagerServiceHandler::GetFocusWindow(sptr<IRemoteObject>& ability
     return static_cast<int32_t>(WindowManagerService::GetInstance().GetFocusWindowInfo(abilityToken));
 }
 
+void WindowManagerServiceHandler::StartingWindow(
+    sptr<AAFwk::AbilityTransitionInfo> info, sptr<Media::PixelMap> pixelMap)
+{
+    sptr<WindowTransitionInfo> windowInfo = new WindowTransitionInfo(info);
+    WLOGFI("hot start is called");
+    WindowManagerService::GetInstance().StartingWindow(windowInfo, pixelMap, false);
+}
+
+void WindowManagerServiceHandler::StartingWindow(
+    sptr<AAFwk::AbilityTransitionInfo> info, sptr<Media::PixelMap> pixelMap, uint32_t bgColor)
+{
+    sptr<WindowTransitionInfo> windowInfo = new WindowTransitionInfo(info);
+    WLOGFI("cold start is called");
+    WindowManagerService::GetInstance().StartingWindow(windowInfo, pixelMap, true, bgColor);
+}
+
+void WindowManagerServiceHandler::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
+{
+    WindowManagerService::GetInstance().CancelStartingWindow(abilityToken);
+}
+
 bool WindowManagerService::Init()
 {
     WLOGFI("WindowManagerService::Init start");
@@ -209,6 +230,19 @@ WMError WindowManagerService::GetFocusWindowInfo(sptr<IRemoteObject>& abilityTok
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->GetFocusWindowInfo(abilityToken);
+}
+
+void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
+    bool isColdStart, uint32_t bkgColor)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->StartingWindow(info, pixelMap, bkgColor, isColdStart);
+}
+
+void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->CancelStartingWindow(abilityToken);
 }
 
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,

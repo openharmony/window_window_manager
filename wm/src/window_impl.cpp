@@ -606,7 +606,7 @@ WMError WindowImpl::UpdateProperty(PropertyChangeAction action)
 
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    WLOGFI("[Client] Window Create");
+    WLOGFI("[Client] Window [name:%{public}s] Create", name_.c_str());
     // check window name, same window names are forbidden
     if (windowMap_.find(name_) != windowMap_.end()) {
         WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());

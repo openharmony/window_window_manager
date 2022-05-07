@@ -25,7 +25,7 @@
 #include "common_event_manager.h"
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
-#include "remote_animation.h"
+#include "starting_window.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_layout_policy_cascade.h"
@@ -209,6 +209,10 @@ WMError WindowNodeContainer::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, c
 
 WMError WindowNodeContainer::ShowInTransition(sptr<WindowNode>& node)
 {
+    if (node->currentVisibility_) {
+        WLOGFE("current window is visible, windowId: %{public}u", node->GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     WM_SCOPED_TRACE_BEGIN("WindowNodeContainer::ShowInTransition");
     WMError res = AddWindowNodeOnWindowTree(node, nullptr);
     if (res != WMError::WM_OK) {
@@ -220,7 +224,7 @@ WMError WindowNodeContainer::ShowInTransition(sptr<WindowNode>& node)
         RaiseSplitRelatedWindowToTop(node);
     }
 
-    RemoteAnimation::UpdateRSTree(node);
+    StartingWindow::UpdateRSTree(node);
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
     WM_SCOPED_TRACE_END();
@@ -230,7 +234,7 @@ WMError WindowNodeContainer::ShowInTransition(sptr<WindowNode>& node)
 
 WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
 {
-    if (!node->isPlayAnimationShow_) {
+    if (!node->startingWindowShown_) {
         WMError res = AddWindowNodeOnWindowTree(node, parentNode);
         if (res != WMError::WM_OK) {
             return res;
@@ -244,6 +248,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
         AssignZOrder();
     } else {
         node->isPlayAnimationShow_ = false;
+        node->startingWindowShown_ = false;
     }
 
     layoutPolicy_->AddWindowNode(node);
@@ -1266,7 +1271,9 @@ void WindowNodeContainer::ToggleShownStateForAllAppWindows(std::function<bool(ui
             // minimize window
             WLOGFD("minimize window, windowId:%{public}u", appNode->GetWindowId());
             backupWindowIds_.emplace_back(appNode->GetWindowId());
-            appNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_HIDDEN);
+            if (appNode->GetWindowToken()) {
+                appNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_HIDDEN);
+            }
         }
     } else if (restore && !backupWindowIds_.empty()) {
         // restore

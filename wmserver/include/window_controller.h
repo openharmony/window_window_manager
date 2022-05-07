@@ -58,7 +58,9 @@ public:
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     void SetMinimizedByOtherWindow(bool isMinimizedByOtherWindow);
-
+    void StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
+        uint32_t bkgColor, bool isColdStart);
+    void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
 private:
     uint32_t GenWindowId();
     void FlushWindowInfo(uint32_t windowId);

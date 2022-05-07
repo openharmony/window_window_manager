@@ -39,7 +39,11 @@ public:
         callingPid_ = IPCSkeleton::GetCallingPid();
         callingUid_ = IPCSkeleton::GetCallingUid();
     }
-    explicit WindowNode(const sptr<WindowProperty>& property) : property_(property) {}
+    explicit WindowNode(const sptr<WindowProperty>& property) : property_(property)
+    {
+        callingPid_ = IPCSkeleton::GetCallingPid();
+        callingUid_ = IPCSkeleton::GetCallingUid();
+    }
     ~WindowNode() = default;
 
     void SetDisplayId(DisplayId displayId);
@@ -103,6 +107,7 @@ public:
     bool isCovered_ { true }; // initial value true to ensure notification when this window is shown
     bool isPlayAnimationShow_ { false };
     bool isPlayAnimationHide_ { false };
+    bool startingWindowShown_ { false };
 private:
     sptr<WindowProperty> property_ = nullptr;
     sptr<IWindow> windowToken_ = nullptr;

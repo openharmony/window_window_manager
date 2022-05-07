@@ -43,7 +43,7 @@ public:
     WMError SaveWindow(const sptr<WindowNode>& node);
     void AddDeathRecipient(sptr<WindowNode> node);
     sptr<WindowNode> FindWindowNodeWithToken(const sptr<IRemoteObject>& token) const;
-    WMError AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromRemoteAnimation = false);
+    WMError AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin = false);
     WMError RemoveWindowNode(uint32_t windowId);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);
     WMError UpdateWindowNode(uint32_t windowId, WindowUpdateReason reason);
