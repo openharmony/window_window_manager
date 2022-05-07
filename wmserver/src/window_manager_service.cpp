@@ -132,6 +132,11 @@ void WindowManagerServiceHandler::NotifyWindowTransition(
     WindowManagerService::GetInstance().NotifyWindowTransition(fromInfo, toInfo);
 }
 
+int32_t WindowManagerServiceHandler::GetFocusWindow(sptr<IRemoteObject>& abilityToken)
+{
+    return static_cast<int32_t>(WindowManagerService::GetInstance().GetFocusWindowInfo(abilityToken));
+}
+
 bool WindowManagerService::Init()
 {
     WLOGFI("WindowManagerService::Init start");
@@ -198,6 +203,12 @@ WMError WindowManagerService::NotifyWindowTransition(
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->NotifyWindowTransition(fromInfo, toInfo);
+}
+
+WMError WindowManagerService::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return windowController_->GetFocusWindowInfo(abilityToken);
 }
 
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
