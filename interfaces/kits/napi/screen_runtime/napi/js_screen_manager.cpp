@@ -52,7 +52,7 @@ static void Finalizer(NativeEngine* engine, void* data, void* hint)
 static NativeValue* GetAllScreen(NativeEngine* engine, NativeCallbackInfo* info)
 {
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(engine, info);
-    return (me != nullptr) ? me->OnGetAllScreen(*engine, *info) : nullptr;
+    return (me != nullptr) ? me->OnGetAllScreens(*engine, *info) : nullptr;
 }
 
 static NativeValue* RegisterScreenManagerCallback(NativeEngine* engine, NativeCallbackInfo* info)
@@ -83,18 +83,18 @@ private:
 std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsScreenListener>>> jsCbMap_;
 std::mutex mtx_;
 
-NativeValue* OnGetAllScreen(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* OnGetAllScreens(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsScreenManager::OnGetAllScreen is called");
+    WLOGFI("JsScreenManager::OnGetAllScreens is called");
     AsyncTask::CompleteCallback complete =
         [this](NativeEngine& engine, AsyncTask& task, int32_t status) {
             std::vector<sptr<Screen>> screens = SingletonContainer::Get<ScreenManager>().GetAllScreens();
             if (!screens.empty()) {
                 task.Resolve(engine, CreateJsScreenVectorObject(engine, screens));
-                WLOGFI("JsScreenManager::OnGetAllScreen success");
+                WLOGFI("JsScreenManager::OnGetAllScreens success");
             } else {
                 task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsScreenManager::OnGetAllScreen failed."));
+                    static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsScreenManager::OnGetAllScreens failed."));
             }
         };
     NativeValue* lastParam = nullptr;
