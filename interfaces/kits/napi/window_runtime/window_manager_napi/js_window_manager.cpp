@@ -94,8 +94,14 @@ NativeValue* JsWindowManager::SetWindowLayoutMode(NativeEngine* engine, NativeCa
     return (me != nullptr) ? me->OnSetWindowLayoutMode(*engine, *info) : nullptr;
 }
 
-static void GetNativeContext(NativeValue* nativeContext, void*& contextPtr, WMError& errCode)
+static void GetNativeContext(NativeEngine& engine, NativeValue* nativeContext, void*& contextPtr, WMError& errCode)
 {
+    AppExecFwk::Ability* ability = nullptr;
+    bool isOldApi = GetAPI7Ability(engine, ability);
+    WLOGFI("[NAPI]FA mode:%{public}u", isOldApi);
+    if (isOldApi) {
+        return;
+    }
     if (nativeContext != nullptr) {
         auto objContext = AbilityRuntime::ConvertNativeValueTo<NativeObject>(nativeContext);
         if (objContext == nullptr) {
@@ -247,7 +253,7 @@ NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbac
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     void* contextPtr = nullptr;
-    GetNativeContext(nativeContext, contextPtr, errCode);
+    GetNativeContext(engine, nativeContext, contextPtr, errCode);
 
     WLOGFI("[NAPI]Window name = %{public}s, type = %{public}u, err = %{public}d", windowName.c_str(), winType, errCode);
     AsyncTask::CompleteCallback complete =
@@ -427,13 +433,14 @@ NativeValue* JsWindowManager::OnUnregisterWindowManagerCallback(NativeEngine& en
     return engine.CreateUndefined();
 }
 
-static void GetTopWindowTask(void* contextPtr, bool isOldApi, NativeEngine& engine, AsyncTask& task)
+static void GetTopWindowTask(void* contextPtr, NativeEngine& engine, AsyncTask& task)
 {
     std::string windowName;
     sptr<Window> window = nullptr;
+    AppExecFwk::Ability* ability = nullptr;
+    bool isOldApi = GetAPI7Ability(engine, ability);
     if (isOldApi) {
-        AppExecFwk::Ability* ability = nullptr;
-        if (!GetAPI7Ability(engine, ability) || ability->GetWindow() == nullptr) {
+        if (ability->GetWindow() == nullptr) {
             task.Reject(engine, CreateJsError(engine,
                 static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "FA mode can not get ability window"));
             WLOGE("[NAPI]FA mode can not get ability window");
@@ -474,32 +481,29 @@ NativeValue* JsWindowManager::OnGetTopWindow(NativeEngine& engine, NativeCallbac
     NativeValue* nativeContext = nullptr;
     NativeValue* nativeCallback = nullptr;
     void* contextPtr = nullptr;
-    bool isOldApi = false;
     if (info.argc > 2) { // 2: maximum params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     } else {
         if (info.argc > 0 && info.argv[0]->TypeOf() == NATIVE_OBJECT) { // (context, callback?)
-            isOldApi = false;
             nativeContext = info.argv[0];
             nativeCallback = (info.argc == 1) ? nullptr :
                 (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
         } else { // (callback?)
-            isOldApi = true;
             nativeCallback = (info.argc == 0) ? nullptr :
                 (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
         }
-        GetNativeContext(nativeContext, contextPtr, errCode);
+        GetNativeContext(engine, nativeContext, contextPtr, errCode);
     }
 
-    WLOGFI("[NAPI]Context %{public}p, FA mode %{public}u, err %{public}u", contextPtr, isOldApi, errCode);
+    WLOGFI("[NAPI]Context %{public}p, err %{public}u", contextPtr, errCode);
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params"));
                 return;
             }
-            return GetTopWindowTask(contextPtr, isOldApi, engine, task);
+            return GetTopWindowTask(contextPtr, engine, task);
         };
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
