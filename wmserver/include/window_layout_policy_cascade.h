@@ -30,7 +30,7 @@ class WindowLayoutPolicyCascade : public WindowLayoutPolicy {
 public:
     WindowLayoutPolicyCascade() = delete;
     WindowLayoutPolicyCascade(const std::map<DisplayId, Rect>& displayRectMap,
-                              WindowNodeMaps& windowNodeMaps);
+        WindowNodeMaps& windowNodeMaps, std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap);
     ~WindowLayoutPolicyCascade() = default;
     void Launch() override;
     void Clean() override;

@@ -62,9 +62,10 @@ public:
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
-    void ProcessDisplayChange(sptr<DisplayInfo> abstractDisplay);
+    void ProcessDisplayChange(const sptr<DisplayInfo>& displayInfo, DisplayStateChangeType type);
     void ProcessDisplayDestroy(DisplayId displayId);
     void ProcessDisplayCreate(DisplayId displayId);
+
     void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
     void FocusFaultDetection() const;
@@ -101,6 +102,7 @@ private:
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
     std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainerMap_;
     std::map<ScreenId, std::vector<DisplayId>> displayIdMap_;
+
     bool needCheckFocusWindow = false;
     bool isMinimizedByOtherWindow_ = true;
 
