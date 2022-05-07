@@ -785,7 +785,7 @@ NativeValue* JsWindow::OnSetSystemBarEnable(NativeEngine& engine, NativeCallback
 {
     WLOGFI("JsWindow::OnSetSystemBarEnable is called");
     WMError errCode = WMError::WM_OK;
-    if (info.argc < 1 || info.argc > 2 || windowToken_ == nullptr) { // 2: maximum params num
+    if (info.argc > 2 || windowToken_ == nullptr) { // 2: maximum params num
         WLOGFE("JsWindow params not match or window token is nullptr!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -812,8 +812,12 @@ NativeValue* JsWindow::OnSetSystemBarEnable(NativeEngine& engine, NativeCallback
             }
         };
 
-    NativeValue* lastParam = (info.argc <= 1) ?  nullptr :
-        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* lastParam = nullptr;
+    if (info.argc > 0 && info.argv[0]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[0];
+    } else if (info.argc > 1 && info.argv[1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[1];
+    }
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
