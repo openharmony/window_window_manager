@@ -25,9 +25,10 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicyCascade"};
 }
+
 WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const std::map<DisplayId, Rect>& displayRectMap,
-    WindowNodeMaps& windowNodeMaps)
-    : WindowLayoutPolicy(displayRectMap, windowNodeMaps)
+    WindowNodeMaps& windowNodeMaps, std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap)
+    : WindowLayoutPolicy(displayRectMap, windowNodeMaps, displayInfosMap)
 {
     CascadeRects cascadeRects {
         .primaryRect_        = {0, 0, 0, 0},

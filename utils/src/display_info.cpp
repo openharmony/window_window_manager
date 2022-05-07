@@ -23,7 +23,8 @@ bool DisplayInfo::Marshalling(Parcel &parcel) const
         parcel.WriteUint32(refreshRate_) && parcel.WriteUint64(screenId_) &&
         parcel.WriteFloat(virtualPixelRatio_) && parcel.WriteFloat(xDpi_) && parcel.WriteFloat(yDpi_) &&
         parcel.WriteUint32(static_cast<uint32_t>(rotation_)) &&
-        parcel.WriteUint32(static_cast<uint32_t>(orientation_));
+        parcel.WriteUint32(static_cast<uint32_t>(orientation_)) &&
+        parcel.WriteInt32(offsetX_) && parcel.WriteInt32(offsetY_);
 }
 
 DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
@@ -40,7 +41,8 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadUint32(displayInfo->refreshRate_) && parcel.ReadUint64(displayInfo->screenId_) &&
         parcel.ReadFloat(displayInfo->virtualPixelRatio_) &&
         parcel.ReadFloat(displayInfo->xDpi_) && parcel.ReadFloat(displayInfo->yDpi_) &&
-        parcel.ReadUint32(rotation) && parcel.ReadUint32(orientation);
+        parcel.ReadUint32(rotation) && parcel.ReadUint32(orientation) &&
+        parcel.ReadInt32(displayInfo->offsetX_) && parcel.ReadInt32(displayInfo->offsetY_);
     if (!res) {
         delete displayInfo;
         return nullptr;
@@ -49,5 +51,10 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
     displayInfo->rotation_ = static_cast<Rotation>(rotation);
     displayInfo->orientation_ = static_cast<Orientation>(orientation);
     return displayInfo;
+}
+
+Rect DisplayInfo::GetDisplayRegion() const
+{
+    return {offsetX_, offsetY_, width_, height_};
 }
 } // namespace OHOS::Rosen

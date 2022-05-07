@@ -18,6 +18,7 @@
 
 #include <ui/rs_display_node.h>
 #include "avoid_area_controller.h"
+#include "display_info.h"
 #include "window_layout_policy.h"
 #include "window_manager.h"
 #include "window_node.h"
@@ -33,7 +34,7 @@ using SysBarNodeMap = std::unordered_map<WindowType, sptr<WindowNode>>;
 using SysBarTintMap = std::unordered_map<WindowType, SystemBarRegionTint>;
 class WindowNodeContainer : public RefBase {
 public:
-    WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height);
+    WindowNodeContainer(const sptr<DisplayInfo>& displayInfo);
     ~WindowNodeContainer();
     WMError ShowInTransition(sptr<WindowNode>& node);
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
@@ -85,13 +86,21 @@ public:
     void UpdateSizeChangeReason(sptr<WindowNode>& node, WindowSizeChangeReason reason);
     void GetWindowList(std::vector<sptr<WindowInfo>>& windowList) const;
     void DropShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
-    void ProcessDisplayCreate(DisplayId displayId, const Rect& displayRect);
+
+    void ProcessDisplayCreate(const sptr<DisplayInfo>& displayInfo);
     void ProcessDisplayDestroy(DisplayId displayId, std::vector<uint32_t>& windowIds);
     void ProcessDisplayChange(DisplayId displayId, const Rect& displayRect);
     void SetMinimizedByOther(bool isMinimizedByOther);
     void GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     void UpdateVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio);
+    void SetDisplaySize(DisplayId displayId, uint32_t width, uint32_t height);
+    void SetDisplayVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio);
+    void SetDisplayOrientation(DisplayId displayId, Orientation orientation);
+    void AddDisplay(const sptr<DisplayInfo>& displayInfo);
+    void DeleteDisplay(const sptr<DisplayInfo>& displayInfo);
+    sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
+    float GetDisplayVirtualPixelRatio(DisplayId displayId) const;
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
@@ -137,6 +146,7 @@ private:
     void RemoveWindowNodeFromRootNodeVector(sptr<WindowNode>& node, WindowRootNodeType rootType);
     void UpdateWindowNodeMaps();
 
+private:
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
     uint32_t zOrder_ { 0 };
@@ -160,6 +170,8 @@ private:
     sptr<WindowNode> appWindowNode_ = new WindowNode();
     sptr<WindowNode> aboveAppWindowNode_ = new WindowNode();
     std::map<DisplayId, Rect> displayRectMap_;
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfosMap_;
+
     WindowNodeMaps windowNodeMaps_;
     bool isMinimizedByOther_ = true;
 };

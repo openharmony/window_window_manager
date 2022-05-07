@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
+#include "../common/base_type.h"
+
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
@@ -134,29 +136,6 @@ enum class WindowTag : uint32_t {
     MAIN_WINDOW = 0,
     SUB_WINDOW = 1,
     SYSTEM_WINDOW = 2,
-};
-
-struct Rect {
-    int32_t posX_;
-    int32_t posY_;
-    uint32_t width_;
-    uint32_t height_;
-
-    bool operator==(const Rect& a) const
-    {
-        return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
-    }
-
-    bool operator!=(const Rect& a) const
-    {
-        return !this->operator==(a);
-    }
-
-    bool IsInsideOf(const Rect& a) const
-    {
-        return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
-            posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
-    }
 };
 
 struct PointInfo {
