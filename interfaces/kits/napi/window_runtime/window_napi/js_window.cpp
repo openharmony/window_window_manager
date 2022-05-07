@@ -28,8 +28,8 @@ namespace {
 
 static std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
 std::recursive_mutex g_mutex;
-JsWindow::JsWindow(const sptr<Window>& window, bool isOldApi)
-    : windowToken_(window), registerManager_(std::make_unique<JsWindowRegisterManager>()), isOldApi_(isOldApi)
+JsWindow::JsWindow(const sptr<Window>& window)
+    : windowToken_(window), registerManager_(std::make_unique<JsWindowRegisterManager>())
 {
     NotifyNativeWinDestroyFunc func = [](std::string windowName) {
         WLOGE("NotifyNativeWinDestroyFunc is called %{public}s", windowName.c_str());
@@ -676,13 +676,15 @@ NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& i
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK || isOldApi_) {
+            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
-                WLOGFE("JsWindow windowToken_ is nullptr or invalid param or is old version API");
+                WLOGFE("JsWindow windowToken_ is nullptr or invalid param");
                 return;
             }
             NativeValue* nativeStorage = (contentStorage == nullptr) ? nullptr : contentStorage->Get();
-            Rosen::WMError ret = windowToken_->SetUIContent(contextUrl, &engine, nativeStorage, false);
+            AppExecFwk::Ability* ability = nullptr;
+            GetAPI7Ability(engine, ability);
+            WMError ret = windowToken_->SetUIContent(contextUrl, &engine, nativeStorage, false, ability);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
                 WLOGFI("JsWindow::OnLoadContent success");
@@ -1185,7 +1187,7 @@ std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
     return g_jsWindowMap[windowName];
 }
 
-NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window, bool isOldApi)
+NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
 {
     WLOGFI("JsWindow::CreateJsWindow is called");
     std::string windowName = window->GetWindowName();
@@ -1198,8 +1200,7 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window, bo
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 
-    WLOGFI("JsWindow::CreateJsWindow isOldApi %{public}d", isOldApi);
-    std::unique_ptr<JsWindow> jsWindow = std::make_unique<JsWindow>(window, isOldApi);
+    std::unique_ptr<JsWindow> jsWindow = std::make_unique<JsWindow>(window);
     object->SetNativePointer(jsWindow.release(), JsWindow::Finalizer, nullptr);
 
     BindNativeFunction(engine, *object, "show", JsWindow::Show);
