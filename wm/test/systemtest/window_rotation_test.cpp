@@ -20,6 +20,7 @@
 #include "display_manager.h"
 #include "future.h"
 #include "screen_manager.h"
+#include "window_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -192,7 +193,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest2, Function | MediumTest | Level3
 
 /**
 * @tc.name: WindowRotationTest3
-* @tc.desc: create window with orientation property after setting screen default orientation.
+* @tc.desc: create floating window with orientation property
 * @tc.type: FUNC
 */
 HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3)
@@ -222,7 +223,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest3, Function | MediumTest | Level3
 
 /**
 * @tc.name: WindowRotationTest4
-* @tc.desc: create window with orientation.
+* @tc.desc: create window with orientation after setting screen default orientation.
 * @tc.type: FUNC
 */
 HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3)
@@ -259,6 +260,57 @@ HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3
     ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, display->GetOrientation());
     sleep(SPLIT_TEST_SLEEP_S);
     defaultScreen->SetOrientation(Orientation::UNSPECIFIED);
+    sleep(SPLIT_TEST_SLEEP_S);
+}
+
+/**
+* @tc.name: WindowRotationTest5
+* @tc.desc: create window with orientation after setting screen default orientation, and toggle shown state for all app
+*           windows.
+* @tc.type: FUNC
+*/
+HWTEST_F(WindowRotationTest, WindowRotationTest5, Function | MediumTest | Level3)
+{
+    ScreenId defaultScreenId = DisplayManager::GetInstance().GetDefaultDisplay()->GetScreenId();
+    auto defaultScreen = ScreenManager::GetInstance().GetScreenById(defaultScreenId);
+    defaultScreen->SetOrientation(Orientation::REVERSE_HORIZONTAL);
+    fullInfo_.name  = "fullscreen.5";
+    fullInfo_.orientation_ = Orientation::HORIZONTAL;
+    const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
+    activeWindows_.push_back(fullWindow);
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
+
+    ASSERT_EQ(Orientation::HORIZONTAL, fullWindow->GetRequestedOrientation());
+    DisplayId displayId = displayListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
+    displayListener_->changeFuture_.Reset(-1);
+    ScreenId screenId = screenListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
+    screenListener_->changeFuture_.Reset(-1);
+    auto screen = ScreenManager::GetInstance().GetScreenById(screenId);
+    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+    ASSERT_EQ(Orientation::HORIZONTAL, screen->GetOrientation());
+    ASSERT_EQ(Orientation::HORIZONTAL, display->GetOrientation());
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    WindowManager::GetInstance().ToggleShownStateForAllAppWindows();
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    WindowManager::GetInstance().ToggleShownStateForAllAppWindows();
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
+    displayId = displayListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
+    displayListener_->changeFuture_.Reset(-1);
+    screenId = screenListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
+    screenListener_->changeFuture_.Reset(-1);
+    screen = ScreenManager::GetInstance().GetScreenById(screenId);
+    display = DisplayManager::GetInstance().GetDisplayById(displayId);
+    ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, screen->GetOrientation());
+    ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, display->GetOrientation());
+    sleep(SPLIT_TEST_SLEEP_S);
+    defaultScreen->SetOrientation(Orientation::UNSPECIFIED);
+    sleep(SPLIT_TEST_SLEEP_S);
 }
 }
 } // namespace Rosen
