@@ -363,11 +363,13 @@ void WindowController::NotifyDisplayStateChange(DisplayId displayId, DisplayStat
     WLOGFD("DisplayStateChangeType:%{public}u", type);
     switch (type) {
         case DisplayStateChangeType::BEFORE_SUSPEND: {
+            isScreenLocked_ = true;
             windowRoot_->ProcessWindowStateChange(WindowState::STATE_FROZEN, WindowStateChangeReason::KEYGUARD);
             break;
         }
         case DisplayStateChangeType::BEFORE_UNLOCK: {
             windowRoot_->ProcessWindowStateChange(WindowState::STATE_UNFROZEN, WindowStateChangeReason::KEYGUARD);
+            isScreenLocked_ = false;
             break;
         }
         case DisplayStateChangeType::SIZE_CHANGE:
@@ -590,6 +592,9 @@ void WindowController::MinimizeAllAppWindows(DisplayId displayId)
 
 void WindowController::ToggleShownStateForAllAppWindows()
 {
+    if (isScreenLocked_) {
+        return;
+    }
     windowRoot_->ToggleShownStateForAllAppWindows();
 }
 
