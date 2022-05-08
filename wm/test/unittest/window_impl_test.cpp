@@ -850,7 +850,7 @@ HWTEST_F(WindowImplTest, SetBackgroundColor01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
@@ -875,7 +875,7 @@ HWTEST_F(WindowImplTest, SetTurnScreenOn01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     ASSERT_FALSE(window->IsTurnScreenOn());
     ASSERT_EQ(WMError::WM_OK, window->SetTurnScreenOn(true));
@@ -899,7 +899,7 @@ HWTEST_F(WindowImplTest, SetTurnScreenOn02, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -926,7 +926,7 @@ HWTEST_F(WindowImplTest, SetKeepScreenOn01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     ASSERT_FALSE(window->IsKeepScreenOn());
     ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(true));
@@ -949,7 +949,7 @@ HWTEST_F(WindowImplTest, SetKeepScreenOn02, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -976,7 +976,7 @@ HWTEST_F(WindowImplTest, SetBrightness01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -999,7 +999,7 @@ HWTEST_F(WindowImplTest, SetBrightness02, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -1026,7 +1026,7 @@ HWTEST_F(WindowImplTest, SetBrightness03, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -1049,7 +1049,7 @@ HWTEST_F(WindowImplTest, SetFocusable01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     ASSERT_TRUE(window->GetFocusable());
     ASSERT_EQ(WMError::WM_OK, window->SetFocusable(false));
@@ -1072,7 +1072,7 @@ HWTEST_F(WindowImplTest, SetFocusable02, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -1099,7 +1099,7 @@ HWTEST_F(WindowImplTest, SetTouchable01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     ASSERT_TRUE(window->GetTouchable());
     ASSERT_EQ(WMError::WM_OK, window->SetTouchable(false));
@@ -1122,7 +1122,7 @@ HWTEST_F(WindowImplTest, SetTouchable02, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
