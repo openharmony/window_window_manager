@@ -662,18 +662,19 @@ HWTEST_F(WindowImplTest, GetSystemBarPropertyByType03, Function | SmallTest | Le
  */
 HWTEST_F(WindowImplTest, Maximize02, Function | SmallTest | Level3)
 {
-    auto option = new WindowOption();
-    option->SetWindowName("Maximize02");
-    auto window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("Maximize02");
+    sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Create("");
-    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
     window->Maximize();
     ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetMode());
+
     EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Hide();
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -687,15 +688,15 @@ HWTEST_F(WindowImplTest, Maximize02, Function | SmallTest | Level3)
  */
 HWTEST_F(WindowImplTest, Recover01, Function | SmallTest | Level3)
 {
-    auto option = new WindowOption();
-    option->SetWindowName("Recover01");
-    auto window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("Recover01");
+    sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Create("");
-    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
     EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Recover();
@@ -713,15 +714,15 @@ HWTEST_F(WindowImplTest, Recover01, Function | SmallTest | Level3)
  */
 HWTEST_F(WindowImplTest, Recover02, Function | SmallTest | Level3)
 {
-    auto option = new WindowOption();
-    option->SetWindowName("Recover02");
-    auto window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("Recover02");
+    sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Create("");
-    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
     window->Recover();
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
@@ -740,7 +741,7 @@ HWTEST_F(WindowImplTest, Minimize01, Function | SmallTest | Level3)
 {
     auto option = new WindowOption();
     option->SetWindowName("Minimize01");
-    auto window = new WindowImpl(option);
+    sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Create("");
@@ -765,7 +766,7 @@ HWTEST_F(WindowImplTest, Minimize02, Function | SmallTest | Level3)
 {
     auto option = new WindowOption();
     option->SetWindowName("Minimize02");
-    auto window = new WindowImpl(option);
+    sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Create("");
@@ -789,7 +790,7 @@ HWTEST_F(WindowImplTest, IsSupportWideGamut01, Function | SmallTest | Level3)
 {
     auto option = new WindowOption();
     option->SetWindowName("IsSupportWideGamut01");
-    auto window = new WindowImpl(option);
+    sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Create("");
@@ -809,7 +810,7 @@ HWTEST_F(WindowImplTest, SetColorSpace01, Function | SmallTest | Level3)
 {
     auto option = new WindowOption();
     option->SetWindowName("SetColorSpace01");
-    auto window = new WindowImpl(option);
+    sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Create("");
@@ -829,7 +830,7 @@ HWTEST_F(WindowImplTest, GetColorSpace01, Function | SmallTest | Level3)
 {
     auto option = new WindowOption();
     option->SetWindowName("GetColorSpace01");
-    auto window = new WindowImpl(option);
+    sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Create("");
