@@ -174,10 +174,11 @@ ohos_static_library("wm_unittest_common") {
   public_configs = [ ":wm_unittest_common_public_config" ]
 
   public_deps = [
-    "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
+    "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
 
     # need delete it for abilitycontext
     "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
+    "//foundation/ace/ace_engine/interfaces/innerkits/ace:ace_uicontent",
     "//foundation/ace/napi:ace_napi",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",

@@ -158,5 +158,23 @@ void JsWindowListener::AfterUnfocused()
 {
     LifeCycleCallBack(LifeCycleEventType::INACTIVE);
 }
+
+void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info)
+{
+    WLOGFI("[NAPI]OccupiedAreaChangeInfo, type: %{public}u, " \
+        "input rect: [%{public}d, %{public}d, %{public}u, %{public}u]", static_cast<uint32_t>(info->type_),
+        info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
+    // js callback should run in js thread
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            NativeValue* argv[] = {CreateJsValue(*engine_, info->rect_.height_)};
+            CallJsMethod(KEYBOARD_HEIGHT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
 } // namespace Rosen
 } // namespace OHOS

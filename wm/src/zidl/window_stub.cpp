@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "window_stub.h"
+#include "zidl/window_stub.h"
 #include <vector>
 #include "ipc_skeleton.h"
 #include "window_manager_hilog.h"
@@ -93,6 +93,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         case TRANS_ID_UPDATE_OCCUPIED_AREA: {
             sptr<OccupiedAreaChangeInfo> info = data.ReadParcelable<OccupiedAreaChangeInfo>();
             UpdateOccupiedAreaChangeInfo(info);
+            break;
+        }
+        case TRANS_ID_UPDATE_ACTIVE_STATUS: {
+            bool isActive = data.ReadBool();
+            UpdateActiveStatus(isActive);
             break;
         }
         default:
