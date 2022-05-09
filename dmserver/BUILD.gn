@@ -65,7 +65,7 @@ ohos_shared_library("libdms") {
     "//foundation/windowmanager/utils:libwmutil",
 
     # RSSurface
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [

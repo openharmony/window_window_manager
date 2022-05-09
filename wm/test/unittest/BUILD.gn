@@ -179,7 +179,7 @@ ohos_static_library("wm_unittest_common") {
     "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
     "//foundation/arkui/napi:ace_napi",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/dmserver:libdms",

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/graphic/standard/graphic_config.gni")
+import("//foundation/graphic/graphic/graphic_config.gni")
 config("libwmutil_private_config") {
   include_dirs = [
     "include",
@@ -52,8 +52,8 @@ ohos_shared_library("libwmutil") {
 
   deps = [
     "//foundation/arkui/ace_engine/build/external_config/flutter/skia:ace_skia_ohos",
-    "//foundation/graphic/standard/rosen/modules/render_service_base:librender_service_base",
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic/rosen/modules/render_service_base:librender_service_base",
+    "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [

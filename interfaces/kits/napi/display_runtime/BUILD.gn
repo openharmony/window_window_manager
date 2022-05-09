@@ -39,7 +39,7 @@ ohos_shared_library("display_napi") {
     "//foundation/aafwk/standard/frameworks/kits/appkit:app_context",
     "//foundation/aafwk/standard/frameworks/kits/appkit:appkit_native",
     "//foundation/aafwk/standard/interfaces/innerkits/want:want",
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/utils:libwmutil",
   ]
