@@ -90,6 +90,7 @@ private:
     std::unordered_map<DisplayId, sptr<DisplayInfo>> curDisplayInfo_;
     constexpr static float SYSTEM_BAR_HEIGHT_RATIO = 0.08;
     bool isMinimizedByOtherWindow_ = true;
+    bool isScreenLocked_ { false };
 };
 } // Rosen
 } // OHOS
