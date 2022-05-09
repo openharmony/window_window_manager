@@ -23,53 +23,62 @@
 #include "include/codec/SkCodec.h"
 #include "include/core/SkData.h"
 #include "include/core/SkImage.h"
-
+#include "include/core/SkPixmap.h"
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SurfaceDraw"};
 } // namespace
-SurfaceDraw::SurfaceDraw()
+
+void SurfaceDraw::Init()
 {
 #ifdef ACE_ENABLE_GL
     WLOGFI("Draw divider on gpu");
     if (!rc_) {
         rc_ = std::make_unique<RenderContext>();
         rc_->InitializeEglContext();
+        WLOGFI("Draw Init Success");
     }
 #endif
 }
 
-SurfaceDraw::~SurfaceDraw()
+std::shared_ptr<RSSurface> SurfaceDraw::PrepareDraw(std::shared_ptr<RSSurfaceNode> surfaceNode,
+    std::unique_ptr<RSSurfaceFrame>& frame, SkCanvas*& canvas, uint32_t width, uint32_t height)
 {
-}
-
-void SurfaceDraw::DrawSurface(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect winRect)
-{
-    WLOGFI("DrawSurface winRect, x : %{public}d, y : %{public}d, width: %{public}d, height: %{public}d",
-        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-    auto width = winRect.width_;
-    auto height = winRect.height_;
-
     std::shared_ptr<RSSurface> rsSurface = RSSurfaceExtractor::ExtractRSSurface(surfaceNode);
     if (rsSurface == nullptr) {
         WLOGFE("RSSurface is nullptr");
-        return;
+        return nullptr;
     }
 #ifdef ACE_ENABLE_GL
     rsSurface->SetRenderContext(rc_.get());
 #endif
-    std::unique_ptr<RSSurfaceFrame> frame = rsSurface->RequestFrame(width, height);
+    frame = rsSurface->RequestFrame(width, height);
     if (frame == nullptr) {
-        WLOGFE("DrawSurface frameptr is nullptr");
-        return;
+        WLOGFE("DrawBackgroundColor frameptr is nullptr");
+        return nullptr;
     }
-    auto canvas = frame->GetCanvas();
+    canvas = frame->GetCanvas();
     if (canvas == nullptr) {
-        WLOGFE("DrawSurface canvas is nullptr");
+        WLOGFE("DrawBackgroundColor canvas is nullptr");
+        return nullptr;
+    }
+    return rsSurface;
+}
+
+void SurfaceDraw::DrawBackgroundColor(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect winRect, uint32_t bkgColor)
+{
+    WLOGFI("DrawBackgroundColor winRect, x : %{public}d, y : %{public}d, width: %{public}d, height: %{public}d",
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+    auto width = winRect.width_;
+    auto height = winRect.height_;
+    std::unique_ptr<RSSurfaceFrame> frame;
+    SkCanvas* canvas;
+    auto rsSurface = PrepareDraw(surfaceNode, frame, canvas, width, height);
+    if (rsSurface == nullptr) {
         return;
     }
-    canvas->clear(SK_ColorGREEN);
+    canvas->clear(bkgColor);
     frame->SetDamageRegion(0, 0, width, height);
     rsSurface->FlushFrame(frame);
 }
@@ -107,22 +116,10 @@ void SurfaceDraw::DrawBitmap(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect wi
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     auto width = static_cast<int32_t>(winRect.width_);
     auto height = static_cast<int32_t>(winRect.height_);
-    std::shared_ptr<RSSurface> rsSurface = RSSurfaceExtractor::ExtractRSSurface(surfaceNode);
+    std::unique_ptr<RSSurfaceFrame> frame;
+    SkCanvas* canvas;
+    auto rsSurface = PrepareDraw(surfaceNode, frame, canvas, width, height);
     if (rsSurface == nullptr) {
-        WLOGFE("RSSurface is nullptr");
-        return;
-    }
-#ifdef ACE_ENABLE_GL
-    rsSurface->SetRenderContext(rc_.get());
-#endif
-    auto frame = rsSurface->RequestFrame(width, height);
-    if (frame == nullptr) {
-        WLOGFE("DrawBitmap frameptr is nullptr");
-        return;
-    }
-    auto canvas = frame->GetCanvas();
-    if (canvas == nullptr) {
-        WLOGFE("DrawBitmap canvas is nullptr");
         return;
     }
     SkPaint bkgPaint;
@@ -142,6 +139,99 @@ void SurfaceDraw::DrawBitmap(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect wi
     }
     canvas->drawImageRect(image.get(), rect, &paint);
     rsSurface->FlushFrame(frame);
+}
+
+static SkAlphaType AlphaTypeToSkAlphaType(const sptr<Media::PixelMap>& pixmap)
+{
+    switch (pixmap->GetAlphaType()) {
+        case Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN:
+            return SkAlphaType::kUnknown_SkAlphaType;
+        case Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE:
+            return SkAlphaType::kOpaque_SkAlphaType;
+        case Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL:
+            return SkAlphaType::kPremul_SkAlphaType;
+        case Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL:
+            return SkAlphaType::kUnpremul_SkAlphaType;
+        default:
+            return SkAlphaType::kUnknown_SkAlphaType;
+    }
+}
+
+static SkColorType PixelFormatToSkColorType(const sptr<Media::PixelMap>& pixmap)
+{
+    switch (pixmap->GetPixelFormat()) {
+        case Media::PixelFormat::RGB_565:
+            return SkColorType::kRGB_565_SkColorType;
+        case Media::PixelFormat::RGBA_8888:
+            return SkColorType::kRGBA_8888_SkColorType;
+        case Media::PixelFormat::BGRA_8888:
+            return SkColorType::kBGRA_8888_SkColorType;
+        case Media::PixelFormat::ALPHA_8:
+            return SkColorType::kAlpha_8_SkColorType;
+        case Media::PixelFormat::RGBA_F16:
+            return SkColorType::kRGBA_F16_SkColorType;
+        case Media::PixelFormat::UNKNOWN:
+        case Media::PixelFormat::ARGB_8888:
+        case Media::PixelFormat::RGB_888:
+        case Media::PixelFormat::NV21:
+        case Media::PixelFormat::NV12:
+        case Media::PixelFormat::CMYK:
+        default:
+            return SkColorType::kUnknown_SkColorType;
+    }
+}
+
+static SkImageInfo MakeSkImageInfoFromPixelMap(sptr<Media::PixelMap>& pixmap)
+{
+    SkColorType colorType = PixelFormatToSkColorType(pixmap);
+    SkAlphaType alphaType = AlphaTypeToSkAlphaType(pixmap);
+    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+    return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), colorType, alphaType, colorSpace);
+}
+
+void SurfaceDraw::DrawSkImage(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect winRect,
+    sptr<Media::PixelMap> pixelMap, uint32_t bkgColor)
+{
+    // Get canvas
+    WLOGFI("DrawSkImage winRect, x : %{public}d, y : %{public}d, width: %{public}d, height: %{public}d",
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+    auto width = static_cast<int32_t>(winRect.width_);
+    auto height = static_cast<int32_t>(winRect.height_);
+    std::unique_ptr<RSSurfaceFrame> frame;
+    SkCanvas* canvas;
+    auto rsSurface = PrepareDraw(surfaceNode, frame, canvas, width, height);
+    if (rsSurface == nullptr) {
+        return;
+    }
+    SkPaint bkgPaint;
+    bkgPaint.setColor(bkgColor);
+    canvas->drawRect(SkRect::MakeXYWH(0.0, 0.0, width, height), bkgPaint);
+
+    // Create SkPixmap from PixelMap
+    auto imageInfo = MakeSkImageInfoFromPixelMap(pixelMap);
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
+
+    // Create SkImage from SkPixmap
+    sk_sp<SkImage> skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+    if (!skImage) {
+        WLOGFE("sk image is null");
+        return;
+    }
+
+    SkPaint paint;
+    SkRect rect;
+    int realHeight = std::min(height, skImage->height()); // need to scale
+    int realWidth = std::min(width, skImage->width());
+    int pointX = (width - realWidth) / 2; // 2 is mid point
+    int pointY = (height - realHeight) / 2; // 2 is mid point
+    rect.setXYWH(pointX, pointY, realWidth, realHeight);
+
+    canvas->drawImageRect(skImage.get(), rect, &paint);
+    if (!rsSurface->FlushFrame(frame)) {
+        WLOGFE("fail to flush frame");
+        return;
+    }
+    return;
 }
 } // Rosen
 } // OHOS

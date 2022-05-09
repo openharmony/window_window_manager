@@ -17,6 +17,7 @@
 #define SURFACE_DRAW_H
 
 #include <ui/rs_surface_node.h>
+#include "pixel_map.h"
 #ifdef ACE_ENABLE_GL
 #include "render_context/render_context.h"
 #endif
@@ -27,13 +28,20 @@ namespace OHOS {
 namespace Rosen {
 class SurfaceDraw {
 public:
-    SurfaceDraw();
-    ~SurfaceDraw();
-    void DrawSurface(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect winRect);
+    SurfaceDraw() = default;
+    ~SurfaceDraw() = default;
+    void Init();
+    void DrawBackgroundColor(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect winRect, uint32_t bkgColor);
     void DrawBitmap(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect winRect,
         SkBitmap& bitmap, uint32_t bkgColor);
     bool DecodeImageFile(const char* filename, SkBitmap& bitmap);
+    void DrawSkImage(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect winRect,
+        sptr<Media::PixelMap> pixelMap, uint32_t bkgColor);
 private:
+
+    std::shared_ptr<RSSurface> PrepareDraw(std::shared_ptr<RSSurfaceNode> surfaceNode,
+        std::unique_ptr<RSSurfaceFrame>& frame, SkCanvas*& canvas, uint32_t width, uint32_t height);
+
 #ifdef ACE_ENABLE_GL
     std::unique_ptr<RenderContext> rc_ = nullptr;
 #endif
