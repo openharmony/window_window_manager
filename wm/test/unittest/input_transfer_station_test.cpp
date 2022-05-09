@@ -65,7 +65,7 @@ HWTEST_F(InputTransferStationTest, AddInputWindow, Function | SmallTest | Level2
  */
 HWTEST_F(InputTransferStationTest, RemoveInputWindow, Function | SmallTest | Level2)
 {
-    InputTransferStation::GetInstance().RemoveInputWindow(window_);
+    InputTransferStation::GetInstance().RemoveInputWindow(window_->GetWindowId());
 }
 
 /**

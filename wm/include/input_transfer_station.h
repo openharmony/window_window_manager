@@ -32,7 +32,7 @@ WM_DECLARE_SINGLE_INSTANCE(InputTransferStation);
 friend class InputEventListener;
 public:
     void AddInputWindow(const sptr<Window>& window);
-    void RemoveInputWindow(const sptr<Window>& window);
+    void RemoveInputWindow(uint32_t windowId);
     void SetInputListener(uint32_t windowId, const std::shared_ptr<MMI::IInputEventConsumer>& listener);
 
 private:
