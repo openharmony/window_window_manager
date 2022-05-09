@@ -1889,6 +1889,11 @@ void WindowImpl::SetDefaultOption()
             property_->SetWindowFlags(0);
             break;
         }
+        case WindowType::WINDOW_TYPE_APP_COMPONENT: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
+            break;
+        }
         case WindowType::WINDOW_TYPE_TOAST:
         case WindowType::WINDOW_TYPE_FLOAT:
         case WindowType::WINDOW_TYPE_LAUNCHER_DOCK:
