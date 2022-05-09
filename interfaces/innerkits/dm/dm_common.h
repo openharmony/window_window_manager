@@ -19,8 +19,6 @@
 #include <refbase.h>
 #include <string>
 
-#include "../common/base_type.h"
-
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
