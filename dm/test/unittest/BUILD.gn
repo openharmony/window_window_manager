@@ -111,7 +111,7 @@ config("dm_unittest_common_public_config") {
     "//foundation/windowmanager/snapshot",
     "//foundation/windowmanager/interfaces/innerkits/dm",
     "//foundation/windowmanager/utils/include",
-    "//foundation/graphic/standard/rosen/modules/render_service_client",  # RSSurface
+    "//foundation/graphic/graphic/rosen/modules/render_service_client",  # RSSurface
   ]
 }
 
@@ -122,7 +122,7 @@ ohos_static_library("dm_unittest_common") {
   public_configs = [ ":dm_unittest_common_public_config" ]
 
   public_deps = [
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",  # PixelMap
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/windowmanager/dm:libdm",

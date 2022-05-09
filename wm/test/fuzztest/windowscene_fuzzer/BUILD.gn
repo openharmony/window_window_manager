@@ -25,7 +25,7 @@ ohos_fuzztest("WindowSceneFuzzTest") {
     "//foundation/windowmanager/wmserver/include",
     "//foundation/windowmanager/interfaces/innerkits/dm",
     "//foundation/windowmanager/interfaces/innerkits/wm",
-    "//foundation/graphic/standard/interfaces/innerkits/surface",
+    "//foundation/graphic/graphic/interfaces/innerkits/surface",
     "//utils/native/base/include",
   ]
   cflags = [
@@ -36,7 +36,7 @@ ohos_fuzztest("WindowSceneFuzzTest") {
   ]
   sources = [ "windowscene_fuzzer.cpp" ]
   deps = [
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/wmserver:libwms",
