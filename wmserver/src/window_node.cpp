@@ -137,6 +137,11 @@ void WindowNode::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
     windowSizeChangeReason_ = reason;
 }
 
+void WindowNode::SetRequestedOrientation(Orientation orientation)
+{
+    property_->SetRequestedOrientation(orientation);
+}
+
 void WindowNode::ResetWindowSizeChangeReason()
 {
     windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
@@ -175,6 +180,11 @@ const Rect& WindowNode::GetLayoutRect() const
 Rect WindowNode::GetHotZoneRect() const
 {
     return hotZoneRect_;
+}
+
+Rect WindowNode::GetWindowRect() const
+{
+    return property_->GetWindowRect();
 }
 
 WindowType WindowNode::GetWindowType() const
@@ -246,6 +256,11 @@ bool WindowNode::IsSplitMode() const
 WindowSizeChangeReason WindowNode::GetWindowSizeChangeReason() const
 {
     return windowSizeChangeReason_;
+}
+
+Orientation WindowNode::GetRequestedOrientation() const
+{
+    return property_->GetRequestedOrientation();
 }
 } // namespace Rosen
 } // namespace OHOS

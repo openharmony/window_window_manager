@@ -222,6 +222,16 @@ uint32_t WindowOption::GetCallingWindow() const
 {
     return callingWindow_;
 }
+
+Orientation WindowOption::GetRequestedOrientation() const
+{
+    return requestedOrientation_;
+}
+
+void WindowOption::SetRequestedOrientation(Orientation orientation)
+{
+    requestedOrientation_ = orientation;
+}
 } // namespace Rosen
 } // namespace OHOS
 
