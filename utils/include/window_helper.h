@@ -228,6 +228,18 @@ public:
         return result;
     }
 
+    static PointInfo CalculateOriginPosition(const Rect& rOrigin, const Rect& rActial, const PointInfo& pos)
+    {
+        PointInfo ret = pos;
+        ret.x += rActial.posX_ - pos.x;
+        ret.y += rActial.posY_ - pos.y;
+        ret.x += rOrigin.posX_ - rActial.posX_;
+        ret.y += rOrigin.posY_ - rActial.posY_;
+        ret.x += (pos.x - rActial.posX_) * rOrigin.width_ / rActial.width_;
+        ret.y += (pos.y - rActial.posY_) * rOrigin.height_ / rActial.height_;
+        return ret;
+    }
+
 private:
     WindowHelper() = default;
     ~WindowHelper() = default;
