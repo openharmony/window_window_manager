@@ -1690,7 +1690,7 @@ void WindowNodeContainer::SetDisplaySize(DisplayId displayId, uint32_t width, ui
         return;
     }
     displayInfosMap_[displayId]->SetWidth(width);
-    displayInfosMap_[displayId]->SetHeight(width);
+    displayInfosMap_[displayId]->SetHeight(height);
     displayRectMap_[displayId].width_ = width;
     displayRectMap_[displayId].height_ = height;
     layoutPolicy_->UpdateDisplayInfo(displayRectMap_);

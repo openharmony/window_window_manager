@@ -187,6 +187,13 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
     if (node->GetWindowToken()) {
         AddDeathRecipient(node);
     }
+    // Register FirstFrame Callback to rs, inform ability to get snapshot
+    auto firstFrameCompleteCallback = [node]() {
+        AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(node->abilityToken_);
+    };
+    if (node->surfaceNode_ && WindowHelper::IsMainWindow(node->GetWindowType())) {
+        node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
+    }
     return WMError::WM_OK;
 }
 
