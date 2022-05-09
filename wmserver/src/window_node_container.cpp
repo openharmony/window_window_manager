@@ -315,8 +315,18 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-    WLOGFI("RemoveWindowNode windowId: %{public}d end", node->GetWindowId());
+    RcoveryScreenDefaultOrientationIfNeed();
+    WLOGFI("RemoveWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
+}
+
+void WindowNodeContainer::RcoveryScreenDefaultOrientationIfNeed()
+{
+    if (appWindowNode_->children_.empty()) {
+        WLOGFI("appWindowNode_ child is empty in display  %{public}" PRIu64"", displayId_);
+        DisplayManagerServiceInner::GetInstance().
+            SetOrientationFromWindow(displayId_, Orientation::UNSPECIFIED);
+    }
 }
 
 const std::vector<uint32_t>& WindowNodeContainer::Destroy()
@@ -834,16 +844,17 @@ void WindowNodeContainer::OnAvoidAreaChange(const std::vector<Rect>& avoidArea)
 void WindowNodeContainer::DumpScreenWindowTree()
 {
     WLOGFI("-------- display %{public}" PRIu64" dump window info begin---------", displayId_);
-    WLOGFI("WindowName WinId Type Mode Flag ZOrd [   x    y    w    h]");
+    WLOGFI("WindowName WinId Type Mode Flag ZOrd Orientation [   x    y    w    h]");
     uint32_t zOrder = zOrder_;
     WindowNodeOperationFunc func = [&zOrder](sptr<WindowNode> node) {
         Rect rect = node->GetLayoutRect();
         const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
             node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
         WLOGI("DumpScreenWindowTree: %{public}10s %{public}5u %{public}4u %{public}4u %{public}4u %{public}4u " \
-            "[%{public}4d %{public}4d %{public}4u %{public}4u]",
+            "%{public}11u [%{public}4d %{public}4d %{public}4u %{public}4u]",
             windowName.c_str(), node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
-            node->GetWindowFlags(), --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
+            node->GetWindowFlags(), --zOrder, static_cast<uint32_t>(node->GetRequestedOrientation()),
+            rect.posX_, rect.posY_, rect.width_, rect.height_);
         return false;
     };
     TraverseWindowTree(func, true);

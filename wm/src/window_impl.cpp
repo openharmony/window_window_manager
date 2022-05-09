@@ -60,6 +60,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetCallingWindow(option->GetCallingWindow());
     property_->SetWindowFlags(option->GetWindowFlags());
     property_->SetHitOffset(option->GetHitOffset());
+    property_->SetRequestedOrientation(option->GetRequestedOrientation());
     windowTag_ = option->GetWindowTag();
     property_->SetTurnScreenOn(option->IsTurnScreenOn());
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
@@ -1038,6 +1039,10 @@ void WindowImpl::RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener)
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(lifecycleListeners_.begin(), lifecycleListeners_.end(), listener) != lifecycleListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     lifecycleListeners_.emplace_back(listener);
 }
 
@@ -1047,6 +1052,11 @@ void WindowImpl::RegisterWindowChangeListener(sptr<IWindowChangeListener>& liste
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(windowChangeListeners_.begin(), windowChangeListeners_.end(), listener) !=
+        windowChangeListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     windowChangeListeners_.emplace_back(listener);
 }
 
@@ -1075,6 +1085,11 @@ void WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(avoidAreaChangeListeners_.begin(), avoidAreaChangeListeners_.end(), listener) !=
+        avoidAreaChangeListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     avoidAreaChangeListeners_.emplace_back(listener);
 }
 
@@ -1093,6 +1108,10 @@ void WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(windowDragListeners_.begin(), windowDragListeners_.end(), listener) != windowDragListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     windowDragListeners_.emplace_back(listener);
 }
 
@@ -1113,6 +1132,11 @@ void WindowImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listene
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(displayMoveListeners_.begin(), displayMoveListeners_.end(), listener) !=
+        displayMoveListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     displayMoveListeners_.emplace_back(listener);
 }
 
@@ -1140,6 +1164,11 @@ void WindowImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChan
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(occupiedAreaChangeListeners_.begin(), occupiedAreaChangeListeners_.end(), listener) !=
+        occupiedAreaChangeListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
     occupiedAreaChangeListeners_.emplace_back(listener);
 }
 
@@ -1683,6 +1712,22 @@ bool WindowImpl::IsFullScreen() const
     auto statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto naviProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
     return (IsLayoutFullScreen() && !statusProperty.enable_ && !naviProperty.enable_);
+}
+
+void WindowImpl::SetRequestedOrientation(Orientation orientation)
+{
+    if (property_->GetRequestedOrientation() == orientation) {
+        return;
+    }
+    property_->SetRequestedOrientation(orientation);
+    if (state_ == WindowState::STATE_SHOWN) {
+        UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ORIENTATION);
+    }
+}
+
+Orientation WindowImpl::GetRequestedOrientation()
+{
+    return property_->GetRequestedOrientation();
 }
 }
 }

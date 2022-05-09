@@ -237,6 +237,14 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node)
         }
         HandleKeepScreenOn(node->GetWindowId(), node->IsKeepScreenOn());
     }
+    WLOGFI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
+        node->GetWindowId(), node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
+        node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
+    if (res == WMError::WM_OK && WindowHelper::IsMainWindow(node->GetWindowType()) &&
+        node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        DisplayManagerServiceInner::GetInstance().
+            SetOrientationFromWindow(node->GetDisplayId(), node->GetRequestedOrientation());
+    }
     return res;
 }
 
@@ -590,7 +598,16 @@ WMError WindowRoot::RequestActiveWindow(uint32_t windowId)
         WLOGFE("window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return container->SetActiveWindow(windowId, false);
+    auto res =  container->SetActiveWindow(windowId, false);
+    WLOGFI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
+        windowId, node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
+        node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
+    if (res == WMError::WM_OK && WindowHelper::IsMainWindow(node->GetWindowType()) &&
+        node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        DisplayManagerServiceInner::GetInstance().
+            SetOrientationFromWindow(node->GetDisplayId(), node->GetRequestedOrientation());
+    }
+    return res;
 }
 
 std::shared_ptr<RSSurfaceNode> WindowRoot::GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject> &abilityToken) const
