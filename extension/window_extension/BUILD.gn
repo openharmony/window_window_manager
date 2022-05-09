@@ -1,0 +1,96 @@
+# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+config("libwindow_extension_private_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "include",
+    "include/zidl",
+    "../extension_connection/include",
+    "../extension_connection/include/zidl",
+    "../../interfaces/kits/napi/window_runtime/window_napi",
+    "../../interfaces/innerkits/extension",
+    "../../interfaces/innerkits/wm",
+  ]
+}
+
+## Build libwindow_extension.so
+ohos_shared_library("libwindow_extension") {
+  sources = [
+    "../extension_connection/src/zidl/window_extension_client_proxy.cpp",
+    "src/js_window_extension.cpp",
+    "src/js_window_extension_context.cpp",
+    "src/window_extension.cpp",
+    "src/window_extension_stub_impl.cpp",
+    "src/zidl/window_extension_stub.cpp",
+  ]
+
+  configs = [ ":libwindow_extension_private_config" ]
+
+  deps = [
+    "//foundation/aafwk/standard/interfaces/kits/napi/aafwk/inner/napi_common:napi_common",
+    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/windowmanager/interfaces/kits/napi/window_runtime:window_native_kit",
+    "//foundation/windowmanager/utils:libwmutil",
+    "//foundation/windowmanager/wm:libwm",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:runtime",
+    "graphic_standard:surface",
+    "hilog_native:libhilog",
+    "input:libmmi-client",
+    "utils_base:utils",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+config("window_extension_module_private_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "include",
+    "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
+  ]
+}
+
+ohos_shared_library("window_extension_module") {
+  sources = [ "src/window_extension_module_loader.cpp" ]
+
+  configs = [ ":window_extension_module_private_config" ]
+
+  deps = [
+    "//foundation/windowmanager/extension/window_extension:libwindow_extension",
+    "//foundation/windowmanager/wm:libwm",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "ability_runtime:runtime",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "resource_management:global_resmgr",
+  ]
+  relative_install_dir = "extensionability/"
+  subsystem_name = "window"
+  part_name = "window_manager"
+}
