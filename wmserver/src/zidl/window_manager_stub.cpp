@@ -172,7 +172,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER: {
-            auto controller = iface_cast<RSIWindowAnimationController>(data.ReadParcelable<IRemoteObject>());
+            sptr<IRemoteObject> controllerObject = data.ReadRemoteObject();
+            sptr<RSIWindowAnimationController> controller = iface_cast<RSIWindowAnimationController>(controllerObject);
             WMError errCode = SetWindowAnimationController(controller);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
