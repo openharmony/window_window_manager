@@ -52,9 +52,4 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
     displayInfo->orientation_ = static_cast<Orientation>(orientation);
     return displayInfo;
 }
-
-Rect DisplayInfo::GetDisplayRegion() const
-{
-    return {offsetX_, offsetY_, width_, height_};
-}
 } // namespace OHOS::Rosen

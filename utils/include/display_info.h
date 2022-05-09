@@ -31,7 +31,6 @@ public:
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static DisplayInfo *Unmarshalling(Parcel& parcel);
-    Rect GetDisplayRegion() const;
 
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(DisplayId, DisplayId, id, DISPLAY_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(DisplayType, DisplayType, type, DisplayType::DEFAULT);
