@@ -55,6 +55,8 @@ public:
     bool GetShowFlagWhenLocked();
     void SetTransitionReason(TransitionReason reason);
     TransitionReason GetTransitionReason();
+    void SetIsRecent(bool isRecent);
+    bool GetIsRecent() const;
 private:
     std::string bundleName_;
     std::string abilityName_;
@@ -64,6 +66,7 @@ private:
     DisplayId displayId_ = 0;
     WindowType windowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     bool isShowWhenLocked_ = false;
+    bool isRecent_ = false;
     TransitionReason reason_ = TransitionReason::ABILITY_TRANSITION;
 };
 } // Rosen
