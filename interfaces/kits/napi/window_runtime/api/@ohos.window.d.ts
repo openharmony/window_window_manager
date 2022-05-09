@@ -102,19 +102,19 @@ declare namespace window {
    * Describes the mode of window layout
    * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @systemapi Hide this for inner system use.
-   * @since 8
+   * @since 9
    */
   enum WindowLayoutMode {
     /**
      * CASCADE
      * @systemapi Hide this for inner system use.
-     * @since 8
+     * @since 9
      */
     WINDOW_LAYOUT_MODE_CASCADE,
     /**
      * TILE
      * @systemapi Hide this for inner system use.
-     * @since 8
+     * @since 9
      */
     WINDOW_LAYOUT_MODE_TILE
   }
@@ -218,7 +218,7 @@ declare namespace window {
    * Set the layout mode of a window.
    * @param mode the layout mode of a window.
    * @systemapi Hide this for inner system use.
-   * @since 8
+   * @since 9
    */
   function setWindowLayoutMode(mode: WindowLayoutMode, callback: AsyncCallback<void>): void;
 
@@ -226,7 +226,7 @@ declare namespace window {
    * Set the layout mode of a window.
    * @param mode the layout mode of a window.
    * @systemapi Hide this for inner system use.
-   * @since 8
+   * @since 9
    */
   function setWindowLayoutMode(mode: WindowLayoutMode): Promise<void>;
 

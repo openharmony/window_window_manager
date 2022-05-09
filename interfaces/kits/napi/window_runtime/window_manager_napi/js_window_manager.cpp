@@ -529,7 +529,10 @@ NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, Native
             winLayoutMode = static_cast<WindowLayoutMode>(static_cast<uint32_t>(*nativeMode));
         }
     }
-
+    if (winLayoutMode != WindowLayoutMode::CASCADE && winLayoutMode != WindowLayoutMode::TILE) {
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    
     WLOGFI("[NAPI]LayoutMode = %{public}u, err = %{public}d", winLayoutMode, errCode);
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
@@ -576,6 +579,7 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetProperty("WindowMode", WindowModeInit(engine));
     object->SetProperty("ColorSpace", ColorSpaceInit(engine));
     object->SetProperty("WindowStageEventType", WindowStageEventTypeInit(engine));
+    object->SetProperty("WindowLayoutMode", WindowLayoutModeInit(engine));
     BindNativeFunction(*engine, *object, "create", JsWindowManager::CreateWindow);
     BindNativeFunction(*engine, *object, "find", JsWindowManager::FindWindow);
     BindNativeFunction(*engine, *object, "on", JsWindowManager::RegisterWindowManagerCallback);
