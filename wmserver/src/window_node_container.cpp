@@ -48,7 +48,9 @@ namespace {
 WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo)
 {
     DisplayId displayId = displayInfo->GetDisplayId();
-    displayRectMap_.insert(std::make_pair(displayId, displayInfo->GetDisplayRegion()));
+    Rect displayRect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
+        displayInfo->GetWidth(), displayInfo->GetHeight() };
+    displayRectMap_.insert(std::make_pair(displayId, displayRect));
     displayInfosMap_.insert(std::make_pair(displayId, displayInfo));
     windowPair_ = new WindowPair(displayId, appWindowNode_);
 
@@ -1459,7 +1461,8 @@ void WindowNodeContainer::MoveWindowNodes(DisplayId displayId, std::vector<uint3
 void WindowNodeContainer::ProcessDisplayCreate(const sptr<DisplayInfo>& displayInfo)
 {
     DisplayId displayId = displayInfo->GetDisplayId();
-    Rect displayRect = displayInfo->GetDisplayRegion();
+    Rect displayRect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
+        displayInfo->GetWidth(), displayInfo->GetHeight() };
     AddDisplay(displayInfo);
     avoidController_->UpdateAvoidNodesMap(displayId, true);
     InitSysBarMapForDisplay(displayId);
@@ -1681,7 +1684,8 @@ void WindowNodeContainer::SetDisplaySize(DisplayId displayId, uint32_t width, ui
     }
     displayInfosMap_[displayId]->SetWidth(width);
     displayInfosMap_[displayId]->SetHeight(width);
-    displayRectMap_[displayId] = displayInfosMap_[displayId]->GetDisplayRegion();
+    displayRectMap_[displayId].width_ = width;
+    displayRectMap_[displayId].height_ = height;
     layoutPolicy_->UpdateDisplayInfo(displayRectMap_);
 }
 
