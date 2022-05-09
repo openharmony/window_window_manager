@@ -34,7 +34,7 @@ ohos_fuzztest("DisplayManagerIPCFuzzTest") {
   ]
   sources = [ "displaymanageripc_fuzzer.cpp" ]
   deps = [
-    "//foundation/graphic/standard/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
   ]
   external_deps = [ "samgr_standard:samgr_proxy" ]
