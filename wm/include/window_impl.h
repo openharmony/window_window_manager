@@ -97,6 +97,8 @@ public:
     virtual WMError Hide(uint32_t reason = 0) override;
     virtual WMError MoveTo(int32_t x, int32_t y) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
+    virtual void SetPrivacyMode(bool isPrivacyMode) override;
+    virtual bool IsPrivacyMode() const override;
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;

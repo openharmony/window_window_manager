@@ -1073,10 +1073,32 @@ NativeValue* JsWindow::OnSetOutsideTouchable(NativeEngine& engine, NativeCallbac
 
 NativeValue* JsWindow::OnSetPrivacyMode(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsWindow::OnSetPrivacyMode is called");
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool isPrivacyMode = false;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to isPrivacyMode");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            isPrivacyMode = static_cast<bool>(*nativeVal);
+        }
+    }
+
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params"));
+                return;
+            }
+            windowToken_->SetPrivacyMode(isPrivacyMode);
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set privacy mode end, mode = %{public}u",
+                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isPrivacyMode);
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
