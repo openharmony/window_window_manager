@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <cinttypes>
 #include <ctime>
+#include <display_power_mgr_client.h>
+#include <power_mgr_client.h>
 
 #include "common_event_manager.h"
 #include "display_manager_service_inner.h"
@@ -40,6 +42,7 @@ namespace {
     constexpr int WINDOW_NAME_MAX_LENGTH = 10;
     const std::string SPLIT_SCREEN_EVENT_NAME = "common.event.SPLIT_SCREEN";
     const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
+    constexpr uint32_t MAX_BRIGHTNESS = 255;
 }
 
 WindowNodeContainer::WindowNodeContainer(DisplayId displayId, uint32_t width, uint32_t height) : displayId_(displayId)
@@ -315,8 +318,18 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-    WLOGFI("RemoveWindowNode windowId: %{public}d end", node->GetWindowId());
+    RcoveryScreenDefaultOrientationIfNeed();
+    WLOGFI("RemoveWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
+}
+
+void WindowNodeContainer::RcoveryScreenDefaultOrientationIfNeed()
+{
+    if (appWindowNode_->children_.empty()) {
+        WLOGFI("appWindowNode_ child is empty in display  %{public}" PRIu64"", displayId_);
+        DisplayManagerServiceInner::GetInstance().
+            SetOrientationFromWindow(displayId_, Orientation::UNSPECIFIED);
+    }
 }
 
 const std::vector<uint32_t>& WindowNodeContainer::Destroy()
@@ -376,12 +389,52 @@ void WindowNodeContainer::UpdateFocusStatus(uint32_t id, bool focused) const
         if (node->abilityToken_ == nullptr) {
             WLOGFI("abilityToken is null, window : %{public}d", id);
         }
-        WindowManagerAgentController::GetInstance().UpdateFocusStatus(
-            node->GetWindowId(), node->abilityToken_, node->GetWindowType(), node->GetDisplayId(), focused);
         sptr<FocusChangeInfo> focusChangeInfo = new FocusChangeInfo(node->GetWindowId(), node->GetDisplayId(),
             node->GetCallingPid(), node->GetCallingUid(), node->GetWindowType(), node->abilityToken_);
         WindowManagerAgentController::GetInstance().UpdateFocusChangeInfo(
             focusChangeInfo, focused);
+    }
+}
+
+void WindowNodeContainer::UpdateActiveStatus(uint32_t id, bool isActive) const
+{
+    auto node = FindWindowNodeById(id);
+    if (node == nullptr) {
+        WLOGFE("cannot find active window id: %{public}d", id);
+        return;
+    }
+    node->GetWindowToken()->UpdateActiveStatus(isActive);
+}
+
+void WindowNodeContainer::UpdateBrightness(uint32_t id, bool byRemoved)
+{
+    auto node = FindWindowNodeById(id);
+    if (node == nullptr) {
+        WLOGFE("cannot find active window id: %{public}d", id);
+        return;
+    }
+
+    if (!byRemoved) {
+        if (!WindowHelper::IsAppWindow(node->GetWindowType())) {
+            return;
+        }
+    }
+    WLOGFI("brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), node->GetBrightness());
+    if (node->GetBrightness() == UNDEFINED_BRIGHTNESS) {
+        if (GetDisplayBrightness() != node->GetBrightness()) {
+            WLOGFI("adjust brightness with default value");
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
+            SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
+        }
+        SetBrightnessWindow(INVALID_WINDOW_ID);
+    } else {
+        if (GetDisplayBrightness() != node->GetBrightness()) {
+            WLOGFI("adjust brightness with value: %{public}u", ToOverrideBrightness(node->GetBrightness()));
+            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
+                ToOverrideBrightness(node->GetBrightness()));
+            SetDisplayBrightness(node->GetBrightness());
+        }
+        SetBrightnessWindow(node->GetWindowId());
     }
 }
 
@@ -403,7 +456,7 @@ void WindowNodeContainer::AssignZOrder()
 WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
 {
     if (focusedWindow_ == windowId) {
-        WLOGFI("focused window do not change");
+        WLOGFI("focused window do not change, id: %{public}u", windowId);
         return WMError::WM_DO_NOTHING;
     }
     UpdateFocusStatus(focusedWindow_, false);
@@ -417,6 +470,78 @@ WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
 uint32_t WindowNodeContainer::GetFocusWindow() const
 {
     return focusedWindow_;
+}
+
+WMError WindowNodeContainer::SetActiveWindow(uint32_t windowId, bool byRemoved)
+{
+    if (activeWindow_ == windowId) {
+        WLOGFI("active window do not change, id: %{public}u", windowId);
+        return WMError::WM_DO_NOTHING;
+    }
+    UpdateActiveStatus(activeWindow_, false);
+    activeWindow_ = windowId;
+    UpdateActiveStatus(activeWindow_, true);
+    UpdateBrightness(activeWindow_, byRemoved);
+    return WMError::WM_OK;
+}
+
+void WindowNodeContainer::SetDisplayBrightness(float brightness)
+{
+    displayBrightness_ = brightness;
+}
+
+float WindowNodeContainer::GetDisplayBrightness() const
+{
+    return displayBrightness_;
+}
+
+void WindowNodeContainer::SetBrightnessWindow(uint32_t windowId)
+{
+    brightnessWindow_ = windowId;
+}
+
+uint32_t WindowNodeContainer::GetBrightnessWindow() const
+{
+    return brightnessWindow_;
+}
+
+uint32_t WindowNodeContainer::ToOverrideBrightness(float brightness)
+{
+    return static_cast<uint32_t>(brightness * MAX_BRIGHTNESS);
+}
+
+uint32_t WindowNodeContainer::GetActiveWindow() const
+{
+    return activeWindow_;
+}
+
+void WindowNodeContainer::HandleKeepScreenOn(const sptr<WindowNode>& node, bool requireLock)
+{
+    if (requireLock && node->keepScreenLock_ == nullptr) {
+        // reset ipc identity
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        node->keepScreenLock_ = PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock(node->GetWindowName(),
+            PowerMgr::RunningLockType::RUNNINGLOCK_SCREEN);
+        // set ipc identity to raw
+        IPCSkeleton::SetCallingIdentity(identity);
+    }
+    if (node->keepScreenLock_ == nullptr) {
+        return;
+    }
+    WLOGFI("handle keep screen on: [%{public}s, %{public}d]", node->GetWindowName().c_str(), requireLock);
+    ErrCode res;
+    // reset ipc identity
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    if (requireLock) {
+        res = node->keepScreenLock_->Lock();
+    } else {
+        res = node->keepScreenLock_->UnLock();
+    }
+    // set ipc identity to raw
+    IPCSkeleton::SetCallingIdentity(identity);
+    if (res != ERR_OK) {
+        WLOGFE("handle keep screen running lock failed: [operation: %{public}d, err: %{public}d]", requireLock, res);
+    }
 }
 
 bool WindowNodeContainer::IsAboveSystemBarNode(sptr<WindowNode> node) const
@@ -722,16 +847,17 @@ void WindowNodeContainer::OnAvoidAreaChange(const std::vector<Rect>& avoidArea)
 void WindowNodeContainer::DumpScreenWindowTree()
 {
     WLOGFI("-------- display %{public}" PRIu64" dump window info begin---------", displayId_);
-    WLOGFI("WindowName WinId Type Mode Flag ZOrd [   x    y    w    h]");
+    WLOGFI("WindowName WinId Type Mode Flag ZOrd Orientation [   x    y    w    h]");
     uint32_t zOrder = zOrder_;
     WindowNodeOperationFunc func = [&zOrder](sptr<WindowNode> node) {
         Rect rect = node->GetLayoutRect();
         const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
             node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
         WLOGI("DumpScreenWindowTree: %{public}10s %{public}5u %{public}4u %{public}4u %{public}4u %{public}4u " \
-            "[%{public}4d %{public}4d %{public}4u %{public}4u]",
+            "%{public}11u [%{public}4d %{public}4d %{public}4u %{public}4u]",
             windowName.c_str(), node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
-            node->GetWindowFlags(), --zOrder, rect.posX_, rect.posY_, rect.width_, rect.height_);
+            node->GetWindowFlags(), --zOrder, static_cast<uint32_t>(node->GetRequestedOrientation()),
+            rect.posX_, rect.posY_, rect.width_, rect.height_);
         return false;
     };
     TraverseWindowTree(func, true);
@@ -792,10 +918,26 @@ void WindowNodeContainer::UpdateWindowState(sptr<WindowNode> node, int32_t topPr
     if (node->parent_ != nullptr && node->currentVisibility_) {
         if (node->priority_ < topPriority) {
             node->GetWindowToken()->UpdateWindowState(state);
+            HandleKeepScreenOn(node, state);
         }
     }
     for (auto& childNode : node->children_) {
         UpdateWindowState(childNode, topPriority, state);
+    }
+}
+
+void WindowNodeContainer::HandleKeepScreenOn(const sptr<WindowNode>& node, WindowState state)
+{
+    if (node == nullptr) {
+        WLOGFE("window is invalid");
+        return;
+    }
+    if (state == WindowState::STATE_FROZEN) {
+        HandleKeepScreenOn(node, false);
+    } else if (state == WindowState::STATE_UNFROZEN) {
+        HandleKeepScreenOn(node, node->IsKeepScreenOn());
+    } else {
+        // do nothing
     }
 }
 
@@ -893,6 +1035,50 @@ sptr<WindowNode> WindowNodeContainer::GetNextFocusableWindow(uint32_t windowId) 
     };
     TraverseWindowTree(func, true);
     return nextFocusableWindow;
+}
+
+sptr<WindowNode> WindowNodeContainer::GetNextActiveWindow(uint32_t windowId) const
+{
+    auto currentNode = FindWindowNodeById(windowId);
+    if (currentNode == nullptr) {
+        WLOGFE("cannot find window id: %{public}u by tree", windowId);
+        return nullptr;
+    }
+    WLOGFI("current window: [%{public}u, %{public}u]", windowId, static_cast<uint32_t>(currentNode->GetWindowType()));
+    if (WindowHelper::IsSystemWindow(currentNode->GetWindowType())) {
+        for (auto& node : appWindowNode_->children_) {
+            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+                continue;
+            }
+            return node;
+        }
+        for (auto& node : belowAppWindowNode_->children_) {
+            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+                return node;
+            }
+        }
+    } else if (WindowHelper::IsAppWindow(currentNode->GetWindowType())) {
+        std::vector<sptr<WindowNode>> windowNodes;
+        TraverseContainer(windowNodes);
+        auto iter = std::find_if(windowNodes.begin(), windowNodes.end(), [windowId](sptr<WindowNode>& node) {
+            return node->GetWindowId() == windowId;
+            });
+        if (iter == windowNodes.end()) {
+            WLOGFE("could not find this window");
+            return nullptr;
+        }
+        int index = std::distance(windowNodes.begin(), iter);
+        for (size_t i = index + 1; i < windowNodes.size(); i++) {
+            if (windowNodes[i]->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+                continue;
+            }
+            return windowNodes[i];
+        }
+    } else {
+        // do nothing
+    }
+    WLOGFE("could not get next active window");
+    return nullptr;
 }
 
 void WindowNodeContainer::MinimizeAllAppWindows()

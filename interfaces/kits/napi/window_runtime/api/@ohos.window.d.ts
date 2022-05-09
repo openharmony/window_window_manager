@@ -227,10 +227,9 @@ declare namespace window {
   /**
    * register the callback of keyboardHeightChange
    * @param type: 'keyboardHeightChange'
-   * @systemapi Hide this for inner system use.
    * @since 7
    */
-  function on(type: 'keyboardHeightChange', callback: AsyncCallback<number>): void;
+  function on(type: 'keyboardHeightChange', callback: Callback<number>): void;
 
   /**
   * unregister the callback of systemBarTintChange
@@ -244,10 +243,9 @@ declare namespace window {
   /**
    * unregister the callback of keyboardHeightChange
    * @param type: 'keyboardHeightChange'
-   * @systemapi Hide this for inner system use.
    * @since 7
    */
-  function off(type: 'keyboardHeightChange', callback: AsyncCallback<number>): void;
+  function off(type: 'keyboardHeightChange', callback?: Callback<number>): void;
 
   /**
    * Properties of status bar and navigation bar, it couldn't update automatically

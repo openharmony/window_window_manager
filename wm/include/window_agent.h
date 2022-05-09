@@ -16,7 +16,7 @@
 #ifndef OHOS_WINDOW_AGENT_H
 #define OHOS_WINDOW_AGENT_H
 
-#include "window_stub.h"
+#include "zidl/window_stub.h"
 #include "window_impl.h"
 #include "window_property.h"
 #include "wm_common.h"
@@ -35,6 +35,7 @@ public:
     void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override;
     void UpdateDisplayId(DisplayId from, DisplayId to) override;
     void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override;
+    void UpdateActiveStatus(bool isActive) override;
 private:
     sptr<WindowImpl> window_;
 };

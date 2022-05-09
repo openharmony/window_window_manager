@@ -55,6 +55,20 @@ enum class AvoidPosType : uint32_t {
     AVOID_POS_UNKNOWN
 };
 
+enum class PropertyChangeAction : uint32_t {
+    ACTION_UPDATE_RECT = 1,
+    ACTION_UPDATE_MODE = 1 << 1,
+    ACTION_UPDATE_FLAGS = 1 << 2,
+    ACTION_UPDATE_OTHER_PROPS = 1 << 3,
+    ACTION_UPDATE_FOCUSABLE = 1 << 4,
+    ACTION_UPDATE_TOUCHABLE = 1 << 5,
+    ACTION_UPDATE_CALLING_WINDOW = 1 << 6,
+    ACTION_UPDATE_ORIENTATION = 1 << 7,
+    ACTION_UPDATE_TURN_SCREEN_ON = 1 << 8,
+    ACTION_UPDATE_KEEP_SCREEN_ON = 1 << 9,
+    ACTION_UPDATE_SET_BRIGHTNESS = 1 << 10,
+};
+
 namespace {
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
     constexpr uint32_t DIVIDER_WIDTH = 8;

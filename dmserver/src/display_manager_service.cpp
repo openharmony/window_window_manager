@@ -162,7 +162,13 @@ DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<S
 bool DisplayManagerService::SetOrientation(ScreenId screenId, Orientation orientation)
 {
     WM_SCOPED_TRACE("dms:SetOrientation(%" PRIu64")", screenId);
-    return abstractScreenController_->SetOrientation(screenId, orientation);
+    return abstractScreenController_->SetOrientation(screenId, orientation, false);
+}
+
+bool DisplayManagerService::SetOrientationFromWindow(ScreenId screenId, Orientation orientation)
+{
+    WM_SCOPED_TRACE("dms:SetOrientationFromWindow(%" PRIu64")", screenId);
+    return abstractScreenController_->SetOrientation(screenId, orientation, true);
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId)

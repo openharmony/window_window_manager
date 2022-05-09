@@ -34,11 +34,6 @@ class TestFocusChangedListener : public IFocusChangedListener {
 public:
     uint32_t focusedWindow_ = INVALID_WINDOW_ID;
     uint32_t unfocusedWindow_ = INVALID_WINDOW_ID;
-    void OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
-                   DisplayId displayId) override;
-
-    void OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
-                     DisplayId displayId) override;
     void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo) override;
     void OnUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo) override;
 };
@@ -57,16 +52,6 @@ public:
 
 sptr<TestFocusChangedListener> WindowFocusTest::testFocusChangedListener_ =
     new TestFocusChangedListener();
-
-void TestFocusChangedListener::OnFocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
-                                         DisplayId displayId)
-{
-}
-
-void TestFocusChangedListener::OnUnfocused(uint32_t windowId, sptr<IRemoteObject> abilityToken, WindowType windowType,
-                                           DisplayId displayId)
-{
-}
 
 void TestFocusChangedListener::OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
@@ -139,19 +124,22 @@ namespace {
  */
 HWTEST_F(WindowFocusTest, FocusChangedTest01, Function | MediumTest | Level3)
 {
-    fullScreenAppInfo_.name = "window1";
+    fullScreenAppInfo_.name = "FocusChangedTest01_1";
     fullScreenAppInfo_.focusable_ = false;
     const sptr<Window>& window1 = utils::CreateTestWindow(fullScreenAppInfo_);
+    ASSERT_NE(nullptr, window1);
 
-    floatAppInfo_.name = "window2";
+    floatAppInfo_.name = "FocusChangedTest01_2";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
     const sptr<Window>& window2 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, window2);
 
-    floatAppInfo_.name = "window3";
+    floatAppInfo_.name = "FocusChangedTest01_3";
     floatAppInfo_.rect = { 250, 150, 300, 500 };
     const sptr<Window>& window3 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, window3);
 
-    subAppInfo_.name = "subWindow";
+    subAppInfo_.name = "FocusChangedTest01_4";
     subAppInfo_.rect = { 400, 200, 100, 100 };
     subAppInfo_.parentName = window3->GetWindowName();
     const sptr<Window>& subWindow = utils::CreateTestWindow(subAppInfo_);
@@ -191,15 +179,17 @@ HWTEST_F(WindowFocusTest, FocusChangedTest01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowFocusTest, FocusChangedTest02, Function | MediumTest | Level3)
 {
-    floatAppInfo_.name = "mainWindow";
+    floatAppInfo_.name = "FocusChangedTest02_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
     const sptr<Window>& mainWindow = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow);
     ASSERT_EQ(WMError::WM_OK, mainWindow->Show());
 
-    subAppInfo_.name = "subWindow";
+    subAppInfo_.name = "FocusChangedTest02_2";
     subAppInfo_.rect = { 400, 200, 100, 100 };
     subAppInfo_.parentName = mainWindow->GetWindowName();
     const sptr<Window>& subWindow = utils::CreateTestWindow(subAppInfo_);
+    ASSERT_NE(nullptr, subWindow);
     ASSERT_EQ(WMError::WM_OK, subWindow->Show());
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(subWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
@@ -220,20 +210,23 @@ HWTEST_F(WindowFocusTest, FocusChangedTest02, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowFocusTest, FocusChangedTest03, Function | MediumTest | Level3)
 {
-    floatAppInfo_.name = "mainWindow1";
+    floatAppInfo_.name = "FocusChangedTest03_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
     const sptr<Window>& mainWindow1 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow1);
     ASSERT_EQ(WMError::WM_OK, mainWindow1->Show());
 
-    subAppInfo_.name = "aboveSubWindow";
+    subAppInfo_.name = "FocusChangedTest03_2";
     subAppInfo_.rect = { 400, 200, 100, 100 };
     subAppInfo_.parentName = mainWindow1->GetWindowName();
     const sptr<Window>& aboveSubWindow = utils::CreateTestWindow(subAppInfo_);
+    ASSERT_NE(nullptr, aboveSubWindow);
     ASSERT_EQ(WMError::WM_OK, aboveSubWindow->Show());
 
-    floatAppInfo_.name = "mainWindow2";
+    floatAppInfo_.name = "FocusChangedTest03_3";
     floatAppInfo_.rect = { 200, 200, 100, 100 };
     const sptr<Window>& mainWindow2 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow2);
     ASSERT_EQ(WMError::WM_OK, mainWindow2->Show());
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(mainWindow2->GetWindowId(), testFocusChangedListener_->focusedWindow_);
@@ -256,21 +249,24 @@ HWTEST_F(WindowFocusTest, FocusChangedTest03, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowFocusTest, FocusChangedTest04, Function | MediumTest | Level3)
 {
-    floatAppInfo_.name = "mainWindow1";
+    floatAppInfo_.name = "FocusChangedTest04_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
     const sptr<Window>& mainWindow1 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow1);
     ASSERT_EQ(WMError::WM_OK, mainWindow1->Show());
 
-    subAppInfo_.name = "belowSubWindow";
+    subAppInfo_.name = "FocusChangedTest04_2";
     subAppInfo_.rect = { 400, 200, 100, 100 };
     subAppInfo_.parentName = mainWindow1->GetWindowName();
     subAppInfo_.type = WindowType::WINDOW_TYPE_MEDIA;
     const sptr<Window>& belowSubWindow = utils::CreateTestWindow(subAppInfo_);
+    ASSERT_NE(nullptr, belowSubWindow);
     ASSERT_EQ(WMError::WM_OK, belowSubWindow->Show());
 
-    floatAppInfo_.name = "mainWindow2";
+    floatAppInfo_.name = "FocusChangedTest04_3";
     floatAppInfo_.rect = { 200, 200, 100, 100 };
     const sptr<Window>& mainWindow2 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow2);
     ASSERT_EQ(WMError::WM_OK, mainWindow2->Show());
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(mainWindow2->GetWindowId(), testFocusChangedListener_->focusedWindow_);
@@ -293,21 +289,24 @@ HWTEST_F(WindowFocusTest, FocusChangedTest04, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowFocusTest, FocusChangedTest05, Function | MediumTest | Level3)
 {
-    floatAppInfo_.name = "mainWindow1";
+    floatAppInfo_.name = "FocusChangedTest05_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
     const sptr<Window>& mainWindow1 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow1);
     ASSERT_EQ(WMError::WM_OK, mainWindow1->Show());
 
-    floatAppInfo_.name = "mainWindow2";
+    floatAppInfo_.name = "FocusChangedTest05_2";
     floatAppInfo_.rect = { 200, 200, 100, 100 };
     const sptr<Window>& mainWindow2 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow2);
     ASSERT_EQ(WMError::WM_OK, mainWindow2->Show());
 
-    subAppInfo_.name = "belowSubWindow";
+    subAppInfo_.name = "FocusChangedTest05_3";
     subAppInfo_.rect = { 400, 200, 100, 100 };
     subAppInfo_.parentName = mainWindow2->GetWindowName();
     subAppInfo_.type = WindowType::WINDOW_TYPE_MEDIA;
     const sptr<Window>& belowSubWindow = utils::CreateTestWindow(subAppInfo_);
+    ASSERT_NE(nullptr, belowSubWindow);
     ASSERT_EQ(WMError::WM_OK, belowSubWindow->Show());
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(belowSubWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
@@ -339,23 +338,26 @@ HWTEST_F(WindowFocusTest, FocusChangedTest05, Function | MediumTest | Level3)
 */
 HWTEST_F(WindowFocusTest, FocusChangedTest06, Function | MediumTest | Level3)
 {
-    floatAppInfo_.name = "mainWindow";
+    floatAppInfo_.name = "FocusChangedTest06_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
     const sptr<Window>& mainWindow = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow);
     ASSERT_EQ(WMError::WM_OK, mainWindow->Show());
 
-    subAppInfo_.name = "belowSubWindow";
+    subAppInfo_.name = "FocusChangedTest06_2";
     subAppInfo_.rect = { 100, 200, 100, 100 };
     subAppInfo_.parentName = mainWindow->GetWindowName();
     subAppInfo_.type = WindowType::WINDOW_TYPE_MEDIA;
     const sptr<Window>& belowSubWindow = utils::CreateTestWindow(subAppInfo_);
+    ASSERT_NE(nullptr, belowSubWindow);
     ASSERT_EQ(WMError::WM_OK, belowSubWindow->Show());
 
-    subAppInfo_.name = "aboveSubWindow";
+    subAppInfo_.name = "FocusChangedTest06_3";
     subAppInfo_.rect = { 400, 200, 100, 100 };
     subAppInfo_.parentName = mainWindow->GetWindowName();
     subAppInfo_.type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
     const sptr<Window>& aboveSubWindow = utils::CreateTestWindow(subAppInfo_);
+    ASSERT_NE(nullptr, aboveSubWindow);
     ASSERT_EQ(WMError::WM_OK, aboveSubWindow->Show());
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(aboveSubWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
@@ -364,10 +366,6 @@ HWTEST_F(WindowFocusTest, FocusChangedTest06, Function | MediumTest | Level3)
     // Await 100ms and get callback result in listener.
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(aboveSubWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
-
-    mainWindow->Destroy();
-    belowSubWindow->Destroy();
-    aboveSubWindow->Destroy();
 }
 
 /**
@@ -377,38 +375,44 @@ HWTEST_F(WindowFocusTest, FocusChangedTest06, Function | MediumTest | Level3)
 */
 HWTEST_F(WindowFocusTest, FocusChangedTest07, Function | MediumTest | Level3)
 {
-    floatAppInfo_.name = "mainWindow1";
+    floatAppInfo_.name = "FocusChangedTest07_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
     const sptr<Window>& mainWindow1 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow1);
     ASSERT_EQ(WMError::WM_OK, mainWindow1->Show());
 
-    floatAppInfo_.name = "mainWindow2";
+    floatAppInfo_.name = "FocusChangedTest07_2";
     floatAppInfo_.rect = { 250, 150, 300, 500 };
     const sptr<Window>& mainWindow2 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow2);
     ASSERT_EQ(WMError::WM_OK, mainWindow2->Show());
 
-    floatAppInfo_.name = "mainWindow3";
+    floatAppInfo_.name = "FocusChangedTest07_3";
     floatAppInfo_.rect = { 300, 400, 10, 400 };
     const sptr<Window>& mainWindow3 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow3);
     ASSERT_EQ(WMError::WM_OK, mainWindow3->Show());
 
-    subAppInfo_.name = "belowSubWindow1";
+    subAppInfo_.name = "FocusChangedTest07_4";
     subAppInfo_.rect = { 20, 100, 100, 100 };
     subAppInfo_.parentName = mainWindow1->GetWindowName();
     subAppInfo_.type = WindowType::WINDOW_TYPE_MEDIA;
     const sptr<Window>& belowSubWindow1 = utils::CreateTestWindow(subAppInfo_);
+    ASSERT_NE(nullptr, belowSubWindow1);
 
-    subAppInfo_.name = "aboveSubWindow";
+    subAppInfo_.name = "FocusChangedTest07_5";
     subAppInfo_.rect = { 400, 200, 100, 100 };
     subAppInfo_.parentName = mainWindow2->GetWindowName();
     subAppInfo_.type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
     const sptr<Window>& aboveSubWindow = utils::CreateTestWindow(subAppInfo_);
+    ASSERT_NE(nullptr, aboveSubWindow);
 
-    subAppInfo_.name = "belowSubWindow2";
+    subAppInfo_.name = "FocusChangedTest07_6";
     subAppInfo_.rect = { 310, 410, 100, 100 };
     subAppInfo_.parentName = mainWindow3->GetWindowName();
     subAppInfo_.type = WindowType::WINDOW_TYPE_MEDIA;
     const sptr<Window>& belowSubWindow2 = utils::CreateTestWindow(subAppInfo_);
+    ASSERT_NE(nullptr, belowSubWindow2);
 
     ASSERT_EQ(WMError::WM_OK, aboveSubWindow->Show());
     ASSERT_EQ(WMError::WM_OK, belowSubWindow2->Show());
@@ -442,21 +446,24 @@ HWTEST_F(WindowFocusTest, FocusChangedTest07, Function | MediumTest | Level3)
 */
 HWTEST_F(WindowFocusTest, FocusChangedTest08, Function | MediumTest | Level3)
 {
-    floatAppInfo_.name = "mainWindow1";
+    floatAppInfo_.name = "FocusChangedTest08_1";
     floatAppInfo_.rect = { 10, 200, 300, 400 };
     const sptr<Window>& mainWindow1 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow1);
     ASSERT_EQ(WMError::WM_OK, mainWindow1->Show());
 
-    floatAppInfo_.name = "mainWindow2";
+    floatAppInfo_.name = "FocusChangedTest08_2";
     floatAppInfo_.rect = { 250, 150, 300, 500 };
     const sptr<Window>& mainWindow2 = utils::CreateTestWindow(floatAppInfo_);
+    ASSERT_NE(nullptr, mainWindow2);
     ASSERT_EQ(WMError::WM_OK, mainWindow2->Show());
 
-    subAppInfo_.name = "belowSubWindow";
+    subAppInfo_.name = "FocusChangedTest08_3";
     subAppInfo_.rect = { 20, 100, 100, 100 };
     subAppInfo_.parentName = mainWindow1->GetWindowName();
     subAppInfo_.type = WindowType::WINDOW_TYPE_MEDIA;
     const sptr<Window>& belowSubWindow = utils::CreateTestWindow(subAppInfo_);
+    ASSERT_NE(nullptr, belowSubWindow);
     ASSERT_EQ(WMError::WM_OK, belowSubWindow->Show());
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(belowSubWindow->GetWindowId(), testFocusChangedListener_->focusedWindow_);
