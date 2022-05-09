@@ -105,7 +105,8 @@
         ],
         "test": [
           "//foundation/windowmanager/wm:test",
-          "//foundation/windowmanager/dm:test"
+          "//foundation/windowmanager/dm:test",
+          "//foundation/windowmanager/extension:test"
         ]
       }
     }
