@@ -277,12 +277,16 @@ NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine, const 
 bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
                         NativeEngine& engine, NativeCallbackInfo& info, sptr<Window>& window)
 {
-    NativeArray* nativeArray = ConvertNativeValueTo<NativeArray>(info.argv[0]);
-    if (nativeArray == nullptr) {
-        WLOGFE("Failed to convert parameter to SystemBarArray");
-        return false;
+    NativeArray* nativeArray = nullptr;
+    uint32_t size = 0;
+    if (info.argc > 0 && info.argv[0]->TypeOf() != NATIVE_FUNCTION) {
+        nativeArray = ConvertNativeValueTo<NativeArray>(info.argv[0]);
+        if (nativeArray == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to SystemBarArray");
+            return false;
+        }
+        size = nativeArray->GetLength();
     }
-    uint32_t size = nativeArray->GetLength();
     auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
     statusProperty.enable_ = false;
