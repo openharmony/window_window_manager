@@ -16,8 +16,6 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include "../common/base_type.h"
-
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
@@ -163,6 +161,29 @@ struct SystemBarProperty {
     bool operator == (const SystemBarProperty& a) const
     {
         return (enable_ == a.enable_ && backgroundColor_ == a.backgroundColor_ && contentColor_ == a.contentColor_);
+    }
+};
+
+struct Rect {
+    int32_t posX_;
+    int32_t posY_;
+    uint32_t width_;
+    uint32_t height_;
+
+    bool operator==(const Rect& a) const
+    {
+        return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
+    }
+
+    bool operator!=(const Rect& a) const
+    {
+        return !this->operator==(a);
+    }
+
+    bool IsInsideOf(const Rect& a) const
+    {
+        return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
+            posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
     }
 };
 
