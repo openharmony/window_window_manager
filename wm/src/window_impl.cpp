@@ -715,7 +715,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
     }
 
     WLOGFI("[Client] Window %{public}u Destroy", property_->GetWindowId());
-    InputTransferStation::GetInstance().RemoveInputWindow(this);
+    InputTransferStation::GetInstance().RemoveInputWindow(property_->GetWindowId());
     WMError ret = WMError::WM_OK;
     if (needNotifyServer) {
         NotifyBeforeDestroy(GetWindowName());
