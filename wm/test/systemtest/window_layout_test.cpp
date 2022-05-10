@@ -183,7 +183,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
     } else {
         ASSERT_TRUE(utils::RectEqualTo(appWin, res));
     }
-    ASSERT_TRUE(utils::RectEqualTo(statBar, utils::statusBarRect_));
     ASSERT_EQ(WMError::WM_OK, statBar->Hide());
     if (appWin->IsDecorEnable()) {
         ASSERT_TRUE(utils::RectEqualTo(appWin, utils::GetDecorateRect(res, virtualPixelRatio_)));
@@ -221,7 +220,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
     activeWindows_.push_back(sysWin);
 
     ASSERT_EQ(WMError::WM_OK, statBar->Show());
-    ASSERT_TRUE(utils::RectEqualTo(statBar, utils::statusBarRect_));
     ASSERT_EQ(WMError::WM_OK, sysWin->Show());
     ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::displayRect_));
     ASSERT_EQ(WMError::WM_OK, naviBar->Show());
@@ -259,7 +257,6 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
     activeWindows_.push_back(sysWin);
 
     ASSERT_EQ(WMError::WM_OK, statBar->Show());
-    ASSERT_TRUE(utils::RectEqualTo(statBar, utils::statusBarRect_));
     ASSERT_EQ(WMError::WM_OK, sysWin->Show());
     ASSERT_TRUE(utils::RectEqualTo(sysWin, utils::customAppRect_));
     ASSERT_EQ(WMError::WM_OK, naviBar->Show());
