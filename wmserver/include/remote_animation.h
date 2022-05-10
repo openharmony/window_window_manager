@@ -19,6 +19,7 @@
 #include <refbase.h>
 #include <rs_iwindow_animation_controller.h>
 #include <rs_window_animation_target.h>
+
 #include "wm_common.h"
 #include "window_node.h"
 #include "window_transition_info.h"
@@ -48,10 +49,12 @@ public:
         const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode, bool needMinimizeSrcNode);
     static WMError NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
     static WMError NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
+    static void OnRemoteDie(const sptr<IRemoteObject>& remoteObject);
+
 private:
+    static sptr<RSWindowAnimationTarget> CreateWindowAnimationTarget(sptr<WindowTransitionInfo> info,
+        const sptr<WindowNode>& windowNode);
     static sptr<RSIWindowAnimationController> windowAnimationController_;
-    static sptr<RSWindowAnimationTarget> SetAnimationTarget(const sptr<WindowNode>& node,
-        sptr<WindowTransitionInfo> info);
 };
 } // Rosen
 } // OHOS

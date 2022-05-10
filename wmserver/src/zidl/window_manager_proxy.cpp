@@ -324,24 +324,24 @@ WMError WindowManagerProxy::SetWindowAnimationController(const sptr<RSIWindowAni
     MessageOption option;
 
     if (controller == nullptr) {
-        WLOGFE("Failed to set window animation controller, controller is null!");
+        WLOGFE("RSWindowAnimation Failed to set window animation controller, controller is null!");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("Failed to WriteInterfaceToken!");
+        WLOGFE("RSWindowAnimation Failed to WriteInterfaceToken!");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteParcelable(controller->AsObject())) {
-        WLOGFE("Failed to write controller!");
+    if (!data.WriteRemoteObject(controller->AsObject())) {
+        WLOGFE("RSWindowAnimation Failed to write controller!");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
     auto error = Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER),
         data, reply, option);
     if (error != ERR_NONE) {
-        WLOGFE("Send request error: %{public}d", error);
+        WLOGFE("RSWindowAnimation Send request error: %{public}d", error);
         return WMError::WM_ERROR_IPC_FAILED;
     }
 

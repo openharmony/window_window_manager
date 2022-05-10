@@ -25,6 +25,7 @@ WindowTransitionInfo::WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> in
     abilityToken_ = info->abilityToken_;
     displayId_ = info->displayId_;
     isShowWhenLocked_ = info->isShowWhenLocked_;
+    isRecent_ = info->isRecent_;
 }
 
 void WindowTransitionInfo::SetBundleName(std::string name)
@@ -117,6 +118,16 @@ TransitionReason WindowTransitionInfo::GetTransitionReason()
     return reason_;
 }
 
+void WindowTransitionInfo::SetIsRecent(bool isRecent)
+{
+    isRecent_ = isRecent;
+}
+
+bool WindowTransitionInfo::GetIsRecent() const
+{
+    return isRecent_;
+}
+
 bool WindowTransitionInfo::Marshalling(Parcel& parcel) const
 {
     if (!parcel.WriteString(bundleName_) || !parcel.WriteString(abilityName_)) {
@@ -154,6 +165,10 @@ bool WindowTransitionInfo::Marshalling(Parcel& parcel) const
         return false;
     }
 
+    if (!parcel.WriteBool(isRecent_)) {
+        return false;
+    }
+
     if (!parcel.WriteUint32(static_cast<uint32_t>(reason_))) {
         return false;
     }
@@ -179,6 +194,7 @@ WindowTransitionInfo* WindowTransitionInfo::Unmarshalling(Parcel& parcel)
     windowTransitionInfo->displayId_ = parcel.ReadUint64();
     windowTransitionInfo->windowType_ = static_cast<WindowType>(parcel.ReadUint32());
     windowTransitionInfo->isShowWhenLocked_ = parcel.ReadBool();
+    windowTransitionInfo->isRecent_ = parcel.ReadBool();
     windowTransitionInfo->reason_ = static_cast<TransitionReason>(parcel.ReadUint32());
     return windowTransitionInfo;
 }
