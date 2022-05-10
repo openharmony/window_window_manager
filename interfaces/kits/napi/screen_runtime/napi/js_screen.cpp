@@ -23,6 +23,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
+constexpr size_t ARGC_TWO = 2;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsScreen"};
 }
@@ -107,6 +108,9 @@ NativeValue* JsScreen::OnSetOrientation(NativeEngine& engine, NativeCallbackInfo
             }
         };
     NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_TWO && info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_TWO - 1];
+    }
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -154,6 +158,9 @@ NativeValue* JsScreen::OnSetScreenActiveMode(NativeEngine& engine, NativeCallbac
             }
         };
     NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_TWO && info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_TWO - 1];
+    }
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -200,6 +207,9 @@ NativeValue* JsScreen::OnSetDensityDpi(NativeEngine& engine, NativeCallbackInfo&
             }
         };
     NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_TWO && info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_TWO - 1];
+    }
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
