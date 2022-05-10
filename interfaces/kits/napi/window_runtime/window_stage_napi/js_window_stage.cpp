@@ -150,7 +150,7 @@ NativeValue* JsWindowStage::OnGetMainWindow(NativeEngine& engine, NativeCallback
             }
             auto window = windowScene_->GetMainWindow();
             if (window != nullptr) {
-                task.Resolve(engine, OHOS::Rosen::CreateJsWindowObject(engine, window, false));
+                task.Resolve(engine, OHOS::Rosen::CreateJsWindowObject(engine, window));
                 WLOGFI("JsWindowStage::OnGetMainWindow success");
             } else {
                 task.Reject(engine, CreateJsError(engine,
@@ -339,7 +339,7 @@ NativeValue* JsWindowStage::OnCreateSubWindow(NativeEngine& engine, NativeCallba
                 WLOGFE("JsWindowStage window is nullptr");
                 return;
             }
-            task.Resolve(engine, CreateJsWindowObject(engine, window, false));
+            task.Resolve(engine, CreateJsWindowObject(engine, window));
             WLOGFI("JsWindowStage OnCreateSubWindow success");
         };
     NativeValue* callback = (info.argv[1]->TypeOf() == NATIVE_FUNCTION) ? info.argv[1] : nullptr;
@@ -361,7 +361,7 @@ NativeValue* JsWindowStage::CreateJsSubWindowArrayObject(NativeEngine& engine,
     }
     uint32_t index = 0;
     for (size_t i = 0; i < subWinVec.size(); i++) {
-        array->SetElement(index++, CreateJsWindowObject(engine, subWinVec[i], false));
+        array->SetElement(index++, CreateJsWindowObject(engine, subWinVec[i]));
     }
     return objValue;
 }

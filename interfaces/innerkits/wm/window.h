@@ -32,6 +32,7 @@ namespace OHOS::MMI {
 }
 namespace OHOS::AppExecFwk {
     class Configuration;
+    class Ability;
 }
 
 namespace OHOS::AbilityRuntime {
@@ -153,7 +154,7 @@ public:
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
-        NativeValue* storage, bool isdistributed = false) = 0;
+        NativeValue* storage, bool isdistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;
     virtual std::string GetContentInfo() = 0;
     virtual Ace::UIContent* GetUIContent() const = 0;
 
