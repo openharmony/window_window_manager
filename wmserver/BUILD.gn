@@ -44,8 +44,8 @@ ohos_prebuilt_etc("window_divider_image") {
 
 ohos_shared_library("libwms") {
   sources = [
-    "../wm/src/window_proxy.cpp",
     "../wm/src/zidl/window_manager_agent_proxy.cpp",
+    "../wm/src/zidl/window_proxy.cpp",
     "src/avoid_area_controller.cpp",
     "src/drag_controller.cpp",
     "src/freeze_controller.cpp",
@@ -57,7 +57,6 @@ ohos_shared_library("libwms") {
     "src/window_layout_policy_tile.cpp",
     "src/window_manager_agent_controller.cpp",
     "src/window_manager_service.cpp",
-    "src/window_manager_stub.cpp",
     "src/window_node.cpp",
     "src/window_node_container.cpp",
     "src/window_root.cpp",
@@ -65,6 +64,7 @@ ohos_shared_library("libwms") {
     "src/window_snapshot/snapshot_proxy.cpp",
     "src/window_snapshot/snapshot_stub.cpp",
     "src/window_zorder_policy.cpp",
+    "src/zidl/window_manager_stub.cpp",
   ]
 
   configs = [ ":libwms_config" ]
@@ -89,11 +89,13 @@ ohos_shared_library("libwms") {
     "ability_runtime:ability_manager",
     "bytrace_standard:bytrace_core",
     "ces_standard:cesfwk_innerkits",
+    "display_manager_native:displaymgr",
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
     "ipc:ipc_core",
     "multimodalinput_base:libmmi-client",
+    "power_manager_native:powermgr_client",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
     "utils_base:utils",

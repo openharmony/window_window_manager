@@ -20,11 +20,11 @@
 #include <zidl/window_manager_agent_interface.h>
 
 #include "window.h"
-#include "window_interface.h"
+#include "zidl/window_interface.h"
 #include "wm_single_instance.h"
 #include "singleton_delegator.h"
 #include "window_property.h"
-#include "window_manager_interface.h"
+#include "zidl/window_manager_interface.h"
 namespace OHOS {
 namespace Rosen {
 class WMSDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -41,12 +41,8 @@ public:
     virtual WMError RemoveWindow(uint32_t windowId);
     virtual WMError DestroyWindow(uint32_t windowId);
     virtual WMError SaveAbilityToken(const sptr<IRemoteObject>& abilityToken, uint32_t windowId);
-    virtual WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
     virtual WMError RequestFocus(uint32_t windowId);
-    virtual WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
-    virtual WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
     virtual WMError GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, std::vector<Rect>& avoidRect);
-    virtual WMError SetWindowMode(uint32_t windowId, WindowMode mode);
     virtual WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level);
     virtual WMError SetAlpha(uint32_t windowId, float alpha);
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
@@ -55,6 +51,7 @@ public:
     virtual void MinimizeAllAppWindows(DisplayId displayId);
     virtual WMError MaxmizeWindow(uint32_t windowId);
     virtual WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
+    virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);
 
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);

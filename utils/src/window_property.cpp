@@ -19,6 +19,11 @@
 
 namespace OHOS {
 namespace Rosen {
+WindowProperty::WindowProperty(const sptr<WindowProperty>& property)
+{
+    CopyFrom(property);
+}
+
 void WindowProperty::SetWindowName(const std::string& name)
 {
     windowName_ = name;
@@ -88,6 +93,26 @@ void WindowProperty::SetAlpha(float alpha)
     alpha_ = alpha;
 }
 
+void WindowProperty::SetBrightness(float brightness)
+{
+    brightness_ = brightness;
+}
+
+void WindowProperty::SetTurnScreenOn(bool turnScreenOn)
+{
+    turnScreenOn_ = turnScreenOn;
+}
+
+void WindowProperty::SetKeepScreenOn(bool keepScreenOn)
+{
+    keepScreenOn_ = keepScreenOn;
+}
+
+void WindowProperty::SetCallingWindow(uint32_t windowId)
+{
+    callingWindow_ = windowId;
+}
+
 void WindowProperty::SetDisplayId(DisplayId displayId)
 {
     displayId_ = displayId;
@@ -118,6 +143,16 @@ void WindowProperty::SetHitOffset(const PointInfo& offset)
 void WindowProperty::SetAnimationFlag(uint32_t animationFlag)
 {
     animationFlag_ = animationFlag;
+}
+
+void WindowProperty::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
+{
+    windowSizeChangeReason_ = reason;
+}
+
+WindowSizeChangeReason WindowProperty::GetWindowSizeChangeReason() const
+{
+    return windowSizeChangeReason_;
 }
 
 void WindowProperty::ResumeLastWindowMode()
@@ -170,6 +205,11 @@ bool WindowProperty::GetTouchable() const
     return touchable_;
 }
 
+uint32_t WindowProperty::GetCallingWindow() const
+{
+    return callingWindow_;
+}
+
 bool WindowProperty::GetPrivacyMode() const
 {
     return isPrivacyMode_;
@@ -183,6 +223,21 @@ bool WindowProperty::GetTransparent() const
 float WindowProperty::GetAlpha() const
 {
     return alpha_;
+}
+
+float WindowProperty::GetBrightness() const
+{
+    return brightness_;
+}
+
+bool WindowProperty::IsTurnScreenOn() const
+{
+    return turnScreenOn_;
+}
+
+bool WindowProperty::IsKeepScreenOn() const
+{
+    return keepScreenOn_;
 }
 
 DisplayId WindowProperty::GetDisplayId() const
@@ -268,107 +323,19 @@ void WindowProperty::MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& prop
 
 bool WindowProperty::Marshalling(Parcel& parcel) const
 {
-    // write windowName_
-    if (!parcel.WriteString(windowName_)) {
-        return false;
-    }
-
-    // write windowRect_
-    if (!(parcel.WriteInt32(windowRect_.posX_) && parcel.WriteInt32(windowRect_.posY_) &&
-        parcel.WriteUint32(windowRect_.width_) && parcel.WriteUint32(windowRect_.height_))) {
-        return false;
-    }
-
-    // write type_
-    if (!parcel.WriteUint32(static_cast<uint32_t>(type_))) {
-        return false;
-    }
-
-    // write mode_
-    if (!parcel.WriteUint32(static_cast<uint32_t>(mode_))) {
-        return false;
-    }
-
-    // write last mode_
-    if (!parcel.WriteUint32(static_cast<uint32_t>(lastMode_))) {
-        return false;
-    }
-
-    // write blur level_
-    if (!parcel.WriteUint32(static_cast<uint32_t>(level_))) {
-        return false;
-    }
-
-    // write flags_
-    if (!parcel.WriteUint32(flags_)) {
-        return false;
-    }
-
-    // write isFullScreen_
-    if (!parcel.WriteBool(isFullScreen_)) {
-        return false;
-    }
-
-    // write focusable_
-    if (!parcel.WriteBool(focusable_)) {
-        return false;
-    }
-
-    // write touchable_
-    if (!parcel.WriteBool(touchable_)) {
-        return false;
-    }
-
-    // write isPrivacyMode_
-    if (!parcel.WriteBool(isPrivacyMode_)) {
-        return false;
-    }
-
-    // write isTransparent_
-    if (!parcel.WriteBool(isTransparent_)) {
-        return false;
-    }
-
-    // write alpha_
-    if (!parcel.WriteFloat(alpha_)) {
-        return false;
-    }
-
-    // write displayId_
-    if (!parcel.WriteUint64(displayId_)) {
-        return false;
-    }
-
-    // write windowId_
-    if (!parcel.WriteUint32(windowId_)) {
-        return false;
-    }
-
-    // write parentId_
-    if (!parcel.WriteUint32(parentId_)) {
-        return false;
-    }
-
-    // write sysUIStateMap_
-    if (!MapMarshalling(parcel)) {
-        return false;
-    }
-
-    // write isDecorEnable_
-    if (!parcel.WriteBool(isDecorEnable_)) {
-        return false;
-    }
-
-    // write hitOffset_
-    if (!(parcel.WriteInt32(hitOffset_.x) and parcel.WriteInt32(hitOffset_.y))) {
-        return false;
-    }
-
-    // write parentId_
-    if (!parcel.WriteUint32(animationFlag_)) {
-        return false;
-    }
-    return true;
+    return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
+        parcel.WriteInt32(windowRect_.posY_) && parcel.WriteUint32(windowRect_.width_) &&
+        parcel.WriteUint32(windowRect_.height_) && parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
+        parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(lastMode_)) &&
+        parcel.WriteUint32(static_cast<uint32_t>(level_)) && parcel.WriteUint32(flags_) &&
+        parcel.WriteBool(isFullScreen_) && parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) &&
+        parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isTransparent_) && parcel.WriteFloat(alpha_) &&
+        parcel.WriteFloat(brightness_) && parcel.WriteUint64(displayId_) && parcel.WriteUint32(windowId_) &&
+        parcel.WriteUint32(parentId_) && MapMarshalling(parcel) && parcel.WriteBool(isDecorEnable_) &&
+        parcel.WriteInt32(hitOffset_.x) && parcel.WriteInt32(hitOffset_.y) && parcel.WriteUint32(animationFlag_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteUint32(callingWindow_) &&
+        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_));
 }
 
 sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
@@ -388,6 +355,7 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetPrivacyMode(parcel.ReadBool());
     property->SetTransparent(parcel.ReadBool());
     property->SetAlpha(parcel.ReadFloat());
+    property->SetBrightness(parcel.ReadFloat());
     property->SetDisplayId(parcel.ReadUint64());
     property->SetWindowId(parcel.ReadUint32());
     property->SetParentId(parcel.ReadUint32());
@@ -396,7 +364,42 @@ sptr<WindowProperty> WindowProperty::Unmarshalling(Parcel& parcel)
     PointInfo offset = {parcel.ReadInt32(), parcel.ReadInt32()};
     property->SetHitOffset(offset);
     property->SetAnimationFlag(parcel.ReadUint32());
+    property->SetWindowSizeChangeReason(static_cast<WindowSizeChangeReason>(parcel.ReadUint32()));
+    property->SetCallingWindow(parcel.ReadUint32());
+    property->SetTurnScreenOn(parcel.ReadBool());
+    property->SetKeepScreenOn(parcel.ReadBool());
+    property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     return property;
+}
+
+void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
+{
+    windowName_ = property->windowName_;
+    windowRect_ = property->windowRect_;
+    type_ = property->type_;
+    mode_ = property->mode_;
+    level_ = property->level_;
+    lastMode_ = property->lastMode_;
+    flags_ = property->flags_;
+    isFullScreen_ = property->isFullScreen_;
+    focusable_ = property->focusable_;
+    touchable_ = property->touchable_;
+    isPrivacyMode_ = property->isPrivacyMode_;
+    isTransparent_ = property->isTransparent_;
+    alpha_ = property->alpha_;
+    brightness_ = property->brightness_;
+    displayId_ = property->displayId_;
+    windowId_ = property->windowId_;
+    parentId_ = property->parentId_;
+    hitOffset_ = property->hitOffset_;
+    animationFlag_ = property->animationFlag_;
+    windowSizeChangeReason_ = property->windowSizeChangeReason_;
+    sysBarPropMap_ = property->sysBarPropMap_;
+    isDecorEnable_ = property->isDecorEnable_;
+    callingWindow_ = property->callingWindow_;
+    turnScreenOn_ = property->turnScreenOn_;
+    keepScreenOn_ = property->keepScreenOn_;
+    requestedOrientation_ = property->requestedOrientation_;
 }
 }
 }

@@ -146,6 +146,11 @@ struct Rect {
         return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
     }
 
+    bool operator!=(const Rect& a) const
+    {
+        return !this->operator==(a);
+    }
+
     bool IsInsideOf(const Rect& a) const
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
@@ -162,6 +167,9 @@ namespace {
     constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
     constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
     constexpr uint32_t INVALID_WINDOW_ID = 0;
+    constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
+    constexpr float MINIMUM_BRIGHTNESS = 0.0f;
+    constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
 }
 
 struct SystemBarProperty {

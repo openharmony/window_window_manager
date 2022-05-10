@@ -19,7 +19,6 @@
 #include "display_manager.h"
 #include "window.h"
 #include "window_layout_policy.h"
-#include "window_life_cycle_interface.h"
 #include "window_option.h"
 #include "window_scene.h"
 #include "wm_common.h"
@@ -43,6 +42,7 @@ public:
         bool parentLimit;
         std::string parentName;
         bool focusable_ { true };
+        Orientation orientation_ { Orientation::UNSPECIFIED };
     };
     static Rect displayRect_;
     static Rect limitDisplayRect_;

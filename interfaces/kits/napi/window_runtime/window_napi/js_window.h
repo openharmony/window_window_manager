@@ -57,6 +57,7 @@ public:
     static NativeValue* SetOutsideTouchable(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetPrivacyMode(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetTouchable(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetCallingWindow(NativeEngine* engine, NativeCallbackInfo* info);
 
     // colorspace, gamut
     static NativeValue* IsSupportWideGamut(NativeEngine* engine, NativeCallbackInfo* info);
@@ -95,6 +96,7 @@ private:
     NativeValue* OnSetOutsideTouchable(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetPrivacyMode(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetTouchable(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetCallingWindow(NativeEngine& engine, NativeCallbackInfo& info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;

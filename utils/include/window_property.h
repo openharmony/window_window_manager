@@ -20,6 +20,9 @@
 #include <string>
 #include <unordered_map>
 #include "parcel.h"
+
+#include "class_var_definition.h"
+#include "dm_common.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -27,7 +30,10 @@ namespace Rosen {
 class WindowProperty : public Parcelable {
 public:
     WindowProperty() = default;
+    WindowProperty(const sptr<WindowProperty>& property);
     ~WindowProperty() = default;
+
+    void CopyFrom(const sptr<WindowProperty>& property);
 
     void SetWindowName(const std::string& name);
     void SetWindowRect(const struct Rect& rect);
@@ -43,6 +49,10 @@ public:
     void SetPrivacyMode(bool isPrivate);
     void SetTransparent(bool isTransparent);
     void SetAlpha(float alpha);
+    void SetBrightness(float brightness);
+    void SetTurnScreenOn(bool turnScreenOn);
+    void SetKeepScreenOn(bool keepScreenOn);
+    void SetCallingWindow(uint32_t windowId);
     void SetDisplayId(DisplayId displayId);
     void SetWindowId(uint32_t windowId);
     void SetParentId(uint32_t parentId);
@@ -51,6 +61,8 @@ public:
     void SetDecorEnable(bool decorEnable);
     void SetHitOffset(const PointInfo& offset);
     void SetAnimationFlag(uint32_t animationFlag);
+    void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
+    WindowSizeChangeReason GetWindowSizeChangeReason() const;
 
     const std::string& GetWindowName() const;
     Rect GetWindowRect() const;
@@ -62,9 +74,13 @@ public:
     bool GetFullScreen() const;
     bool GetFocusable() const;
     bool GetTouchable() const;
+    uint32_t GetCallingWindow() const;
     bool GetPrivacyMode() const;
     bool GetTransparent() const;
     float GetAlpha() const;
+    float GetBrightness() const;
+    bool IsTurnScreenOn() const;
+    bool IsKeepScreenOn() const;
     DisplayId GetDisplayId() const;
     uint32_t GetWindowId() const;
     uint32_t GetParentId() const;
@@ -77,6 +93,9 @@ public:
     virtual bool Marshalling(Parcel& parcel) const override;
     static sptr<WindowProperty> Unmarshalling(Parcel& parcel);
 private:
+    bool MapMarshalling(Parcel& parcel) const;
+    static void MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& property);
+
     std::string windowName_;
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -90,19 +109,22 @@ private:
     bool isPrivacyMode_ { false };
     bool isTransparent_ { false };
     float alpha_ { 1.0f };
+    float brightness_ = UNDEFINED_BRIGHTNESS;
+    bool turnScreenOn_ = false;
+    bool keepScreenOn_ = false;
+    uint32_t callingWindow_ = INVALID_WINDOW_ID;
     DisplayId displayId_ { 0 };
     uint32_t windowId_ { 0 };
     uint32_t parentId_ { 0 };
     PointInfo hitOffset_ { 0, 0 };
     uint32_t animationFlag_ { static_cast<uint32_t>(WindowAnimation::DEFAULT) };
-
+    WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
     bool isDecorEnable_ { false };
-    bool MapMarshalling(Parcel& parcel) const;
-    static void MapUnmarshalling(Parcel& parcel, sptr<WindowProperty>& property);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
 };
 }
 }

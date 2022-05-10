@@ -97,9 +97,49 @@ void WindowNode::SetAlpha(float alpha)
     surfaceNode_->SetAlpha(alpha);
 }
 
+void WindowNode::SetBrightness(float brightness)
+{
+    property_->SetBrightness(brightness);
+}
+
+void WindowNode::SetFocusable(bool focusable)
+{
+    property_->SetFocusable(focusable);
+}
+
+void WindowNode::SetTouchable(bool touchable)
+{
+    property_->SetTouchable(touchable);
+}
+
+void WindowNode::SetTurnScreenOn(bool turnScreenOn)
+{
+    property_->SetTurnScreenOn(turnScreenOn);
+}
+
+void WindowNode::SetKeepScreenOn(bool keepScreenOn)
+{
+    property_->SetKeepScreenOn(keepScreenOn);
+}
+
+void WindowNode::SetCallingWindow(uint32_t windowId)
+{
+    property_->SetCallingWindow(windowId);
+}
+
+uint32_t WindowNode::GetCallingWindow() const
+{
+    return property_->GetCallingWindow();
+}
+
 void WindowNode::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
 {
     windowSizeChangeReason_ = reason;
+}
+
+void WindowNode::SetRequestedOrientation(Orientation orientation)
+{
+    property_->SetRequestedOrientation(orientation);
 }
 
 void WindowNode::ResetWindowSizeChangeReason()
@@ -142,6 +182,11 @@ Rect WindowNode::GetHotZoneRect() const
     return hotZoneRect_;
 }
 
+Rect WindowNode::GetWindowRect() const
+{
+    return property_->GetWindowRect();
+}
+
 WindowType WindowNode::GetWindowType() const
 {
     return property_->GetWindowType();
@@ -160,6 +205,21 @@ WindowBlurLevel WindowNode::GetWindowBackgroundBlur() const
 float WindowNode::GetAlpha() const
 {
     return property_->GetAlpha();
+}
+
+float WindowNode::GetBrightness() const
+{
+    return property_->GetBrightness();
+}
+
+bool WindowNode::IsTurnScreenOn() const
+{
+    return property_->IsTurnScreenOn();
+}
+
+bool WindowNode::IsKeepScreenOn() const
+{
+    return property_->IsKeepScreenOn();
 }
 
 uint32_t WindowNode::GetWindowFlags() const
@@ -196,6 +256,11 @@ bool WindowNode::IsSplitMode() const
 WindowSizeChangeReason WindowNode::GetWindowSizeChangeReason() const
 {
     return windowSizeChangeReason_;
+}
+
+Orientation WindowNode::GetRequestedOrientation() const
+{
+    return property_->GetRequestedOrientation();
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -18,8 +18,9 @@
 
 #include <ipc_skeleton.h>
 #include <refbase.h>
+#include <running_lock.h>
 #include <ui/rs_surface_node.h>
-#include "window_interface.h"
+#include "zidl/window_interface.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -49,7 +50,15 @@ public:
     void SetWindowMode(WindowMode mode);
     void SetWindowBackgroundBlur(WindowBlurLevel level);
     void SetAlpha(float alpha);
+    void SetBrightness(float brightness);
+    void SetFocusable(bool focusable);
+    void SetTouchable(bool touchable);
+    void SetTurnScreenOn(bool turnScreenOn);
+    void SetKeepScreenOn(bool keepScreenOn);
+    void SetCallingWindow(uint32_t windowId);
+    uint32_t GetCallingWindow() const;
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
+    void SetRequestedOrientation(Orientation orientation);
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
     uint32_t GetParentId() const;
@@ -57,10 +66,14 @@ public:
     DisplayId GetDisplayId() const;
     const Rect& GetLayoutRect() const;
     Rect GetHotZoneRect() const;
+    Rect GetWindowRect() const;
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;
     WindowBlurLevel GetWindowBackgroundBlur() const;
     float GetAlpha() const;
+    float GetBrightness() const;
+    bool IsTurnScreenOn() const;
+    bool IsKeepScreenOn() const;
     uint32_t GetWindowFlags() const;
     const sptr<WindowProperty>& GetWindowProperty() const;
     int32_t GetCallingPid() const;
@@ -68,12 +81,14 @@ public:
     const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
     bool IsSplitMode() const;
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
+    Orientation GetRequestedOrientation() const;
     void ResetWindowSizeChangeReason();
 
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     sptr<IRemoteObject> abilityToken_ = nullptr;
+    std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
     int32_t priority_ { 0 };
     bool requestedVisibility_ { false };
     bool currentVisibility_ { false };
