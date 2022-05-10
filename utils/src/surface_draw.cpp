@@ -68,8 +68,8 @@ std::shared_ptr<RSSurface> SurfaceDraw::PrepareDraw(std::shared_ptr<RSSurfaceNod
 
 void SurfaceDraw::DrawBackgroundColor(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect winRect, uint32_t bkgColor)
 {
-    WLOGFI("DrawBackgroundColor winRect, x : %{public}d, y : %{public}d, width: %{public}d, height: %{public}d",
-        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+    WLOGFI("DrawBackgroundColor winRect, [%{public}d, %{public}d, %{public}d, %{public}d], bkgColor:%{public}x",
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, bkgColor);
     auto width = winRect.width_;
     auto height = winRect.height_;
     std::unique_ptr<RSSurfaceFrame> frame;
@@ -193,8 +193,8 @@ void SurfaceDraw::DrawSkImage(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect w
     sptr<Media::PixelMap> pixelMap, uint32_t bkgColor)
 {
     // Get canvas
-    WLOGFI("DrawSkImage winRect, x : %{public}d, y : %{public}d, width: %{public}d, height: %{public}d",
-        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+    WLOGFI("DrawSkImage winRect, [%{public}d, %{public}d, %{public}d, %{public}d], bkgColor:%{public}x",
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, bkgColor);
     auto width = static_cast<int32_t>(winRect.width_);
     auto height = static_cast<int32_t>(winRect.height_);
     std::unique_ptr<RSSurfaceFrame> frame;
