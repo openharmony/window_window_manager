@@ -31,6 +31,7 @@ namespace Rosen {
 using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
+constexpr size_t ARGC_THREE = 3;
 constexpr int32_t INDEX_ONE = 1;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsScreenManager"};
@@ -49,7 +50,7 @@ static void Finalizer(NativeEngine* engine, void* data, void* hint)
     std::unique_ptr<JsScreenManager>(static_cast<JsScreenManager*>(data));
 }
 
-static NativeValue* GetAllScreen(NativeEngine* engine, NativeCallbackInfo* info)
+static NativeValue* GetAllScreens(NativeEngine* engine, NativeCallbackInfo* info)
 {
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(engine, info);
     return (me != nullptr) ? me->OnGetAllScreens(*engine, *info) : nullptr;
@@ -98,6 +99,9 @@ NativeValue* OnGetAllScreens(NativeEngine& engine, NativeCallbackInfo& info)
             }
         };
     NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_ONE && info.argv[ARGC_ONE - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_ONE - 1];
+    }
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -308,6 +312,9 @@ NativeValue* OnMakeMirror(NativeEngine& engine, NativeCallbackInfo& info)
             }
         };
     NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_THREE && info.argv[ARGC_THREE - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_THREE - 1];
+    }
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -353,6 +360,9 @@ NativeValue* OnMakeExpand(NativeEngine& engine, NativeCallbackInfo& info)
             }
         };
     NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_TWO && info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_TWO - 1];
+    }
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -402,7 +412,7 @@ NativeValue* JsScreenManagerInit(NativeEngine* engine, NativeValue* exportObj)
     std::unique_ptr<JsScreenManager> jsScreenManager = std::make_unique<JsScreenManager>(engine);
     object->SetNativePointer(jsScreenManager.release(), JsScreenManager::Finalizer, nullptr);
 
-    BindNativeFunction(*engine, *object, "getAllScreen", JsScreenManager::GetAllScreen);
+    BindNativeFunction(*engine, *object, "getAllScreens", JsScreenManager::GetAllScreens);
     BindNativeFunction(*engine, *object, "on", JsScreenManager::RegisterScreenManagerCallback);
     BindNativeFunction(*engine, *object, "off", JsScreenManager::UnregisterScreenMangerCallback);
     BindNativeFunction(*engine, *object, "makeMirror", JsScreenManager::MakeMirror);
