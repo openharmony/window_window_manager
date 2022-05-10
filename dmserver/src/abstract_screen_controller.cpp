@@ -1250,7 +1250,7 @@ bool AbstractScreenController::SetVirtualPixelRatio(ScreenId screenId, float vir
     }
     if (fabs(screen->virtualPixelRatio_ - virtualPixelRatio) < 1e-6) {
         WLOGE("The density is equivalent to the original value, no update operation is required, aborted.");
-        return false;
+        return true;
     }
     screen->SetVirtualPixelRatio(virtualPixelRatio);
     // Notify rotation event to AbstractDisplayController
