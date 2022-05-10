@@ -346,10 +346,14 @@ WMError WindowImpl::SetWindowFlags(uint32_t flags)
 }
 
 WMError WindowImpl::SetUIContent(const std::string& contentInfo,
-    NativeEngine* engine, NativeValue* storage, bool isdistributed)
+    NativeEngine* engine, NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability)
 {
     WLOGFI("SetUIContent contentInfo: %{public}s", contentInfo.c_str());
-    uiContent_ = Ace::UIContent::Create(context_.get(), engine);
+    if (ability != nullptr) {
+        uiContent_ = Ace::UIContent::Create(ability);
+    } else {
+        uiContent_ = Ace::UIContent::Create(context_.get(), engine);
+    }
     if (uiContent_ == nullptr) {
         WLOGFE("fail to SetUIContent id: %{public}d", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
@@ -363,6 +367,22 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         uiContent_->Restore(this, contentInfo, storage);
     } else {
         uiContent_->Initialize(this, contentInfo, storage);
+    }
+    if (state_ == WindowState::STATE_SHOWN) {
+        Ace::ViewportConfig config;
+        Rect rect = GetRect();
+        config.SetSize(rect.width_, rect.height_);
+        config.SetPosition(rect.posX_, rect.posY_);
+        auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
+        if (display == nullptr) {
+            WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
+                property_->GetWindowId());
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        float virtualPixelRatio = display->GetVirtualPixelRatio();
+        config.SetDensity(virtualPixelRatio);
+        uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED);
+        WLOGFI("notify uiContent window size change end");
     }
     return WMError::WM_OK;
 }

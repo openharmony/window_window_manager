@@ -278,12 +278,16 @@ NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine, const 
 bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
                         NativeEngine& engine, NativeCallbackInfo& info, sptr<Window>& window)
 {
-    NativeArray* nativeArray = ConvertNativeValueTo<NativeArray>(info.argv[0]);
-    if (nativeArray == nullptr) {
-        WLOGFE("Failed to convert parameter to SystemBarArray");
-        return false;
+    NativeArray* nativeArray = nullptr;
+    uint32_t size = 0;
+    if (info.argc > 0 && info.argv[0]->TypeOf() != NATIVE_FUNCTION) {
+        nativeArray = ConvertNativeValueTo<NativeArray>(info.argv[0]);
+        if (nativeArray == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to SystemBarArray");
+            return false;
+        }
+        size = nativeArray->GetLength();
     }
-    uint32_t size = nativeArray->GetLength();
     auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
     statusProperty.enable_ = false;
@@ -408,6 +412,33 @@ bool CheckCallingPermission(std::string permission)
         return false;
     }
     WLOGFI("JsWindowUtils::CheckCallingPermission end.");
+    return true;
+}
+
+bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability)
+{
+    napi_value global;
+    auto env = reinterpret_cast<napi_env>(&engine);
+    if (napi_get_global(env, &global) != napi_ok) {
+        WLOGFE("[NAPI]Get global failed");
+        return false;
+    }
+    napi_value jsAbility;
+    napi_status status = napi_get_named_property(env, global, "ability", &jsAbility);
+    if (status != napi_ok || jsAbility == nullptr) {
+        WLOGFE("[NAPI]Get ability property failed");
+        return false;
+    }
+
+    if (napi_get_value_external(env, jsAbility, reinterpret_cast<void **>(&ability)) != napi_ok) {
+        WLOGFE("[NAPI]Get ability external failed");
+        return false;
+    }
+    if (ability == nullptr) {
+        return false;
+    } else {
+        WLOGI("[NAPI]Get ability");
+    }
     return true;
 }
 } // namespace Rosen
