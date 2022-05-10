@@ -17,40 +17,65 @@ import { AsyncCallback, Callback } from './basic';
 
 /**
  * interface of screen manager
- * @devices tv, phone, tablet, wearable
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
  * @systemapi Hide this for inner system use.
- * @since 8
+ * @since 9
  */
 declare namespace screen {
   /**
    * get all screen
-   * @devices tv, phone, tablet, wearable
-   * @since 8
+   * @since 9
+   */
+  function getAllScreens(callback: AsyncCallback<Array<Screen>>): void;
+
+  /**
+   * get all screen
+   * @since 9
    */
   function getAllScreens(): Promise<Array<Screen>>;
 
-  // Screen plug-in event; Screen resolution ratio and other parameters, combination relationship changes
+  /**
+   * Register the callback for screen changes.
+   * @param eventType: type of callback
+   * @since 9
+   */
   function on(eventType: 'connect' | 'disconnect' | 'change', callback: Callback<number>): void;
+
+  /**
+   * Unregister the callback for screen changes.
+   * @param eventType: type of callback
+   * @since 9
+   */
   function off(eventType: 'connect' | 'disconnect' | 'change', callback?: Callback<number>): void;
 
   /**
    * make screens as expand-screen
-   * @devices tv, phone, tablet, wearable
-   * @since 8
+   * @since 9
+   */
+   function makeExpand(options:Array<ExpandOption>, callback: AsyncCallback<number>): void;
+
+   /**
+   * make screens as expand-screen
+   * @since 9
    */
   function makeExpand(options:Array<ExpandOption>): Promise<number>;
 
   /**
    * make screens as mirror-screen
-   * @devices tv, phone, tablet, wearable
-   * @since 8
+   * @since 9
+   */
+   function makeMirror(mainScreen:number, mirrorScreen:Array<number>, callback: AsyncCallback<number>): void;
+
+  /**
+   * make screens as mirror-screen
+   * @since 9
    */
   function makeMirror(mainScreen:number, mirrorScreen:Array<number>): Promise<number>;
 
   /**
    * the parameter of making expand screen
-   * @devices tv, phone, tablet, wearable
-   * @since 8
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
    */
   interface ExpandOption {
     /**
@@ -71,48 +96,70 @@ declare namespace screen {
 
   /**
    * interface for screen
-   * @devices tv, phone, tablet, wearable
-   * @since 8
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
    */
   interface Screen {
     /**
-     * get screen id
-     * @devices tv, phone, tablet, wearable
-     * @since 8
+     * screen id
      */
     readonly id: number;
 
-    // return group id
+    /**
+     * group id
+     */
     readonly parent: number;
 
+    /**
+     * mode supported by the screen
+     */
     readonly supportedModeInfo: Array<ScreenModeInfo>;
 
+    /**
+     * currently active mode
+     */
     readonly activeModeIndex: number;
 
+    /**
+     * orientation of the screen
+     */
     readonly orientation: Orientation;
 
     /**
      * set the orientation of the screen
-     * @devices tv, phone, tablet, wearable
-     * @since 8
+     * @since 9
+     */
+     setOrientation(orientation: Orientation, callback: AsyncCallback<boolean>): void;
+
+     /**
+     * set the orientation of the screen
+     * @since 9
      */
     setOrientation(orientation: Orientation): Promise<boolean>;
 
+    /**
+     * active the mode
+     */
+    setScreenActiveMode(modeIndex: number, callback: AsyncCallback<boolean>): void;
+
+    /**
+     * active the mode
+     */
     setScreenActiveMode(modeIndex: number): Promise<boolean>;
+
+    setDensityDpi(densityDpi: number, callback: AsyncCallback<boolean>): void;
 
     setDensityDpi(densityDpi: number): Promise<boolean>;
   }
 
   /**
    * interface for screen group
-   * @devices tv, phone, tablet, wearable
-   * @since 8
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
    */
    interface ScreenGroup {
     /**
      * get screen group id
-     * @devices tv, phone, tablet, wearable
-     * @since 8
      */
     id: number;
 
@@ -130,6 +177,11 @@ declare namespace screen {
     mirrorScreenId: Array<number>;
   }
 
+  /**
+   * screen orientation
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
+   */
   enum Orientation {
     UNSPECIFIED = 0,
     VERTICAL = 1,
@@ -141,6 +193,11 @@ declare namespace screen {
     SENSOR_HORIZONTAL = 7,
   }
 
+  /**
+   * the infomation of the screen
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
+   */
   interface ScreenModeInfo {
     id: number;
     width: number;
