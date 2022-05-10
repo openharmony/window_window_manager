@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "window_proxy.h"
+#include "zidl/window_proxy.h"
 #include <ipc_types.h>
 #include "message_option.h"
 #include "window_manager_hilog.h"
@@ -90,7 +90,6 @@ void WindowProxy::UpdateFocusStatus(bool focused)
     }
     return;
 }
-
 
 void WindowProxy::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
 {
@@ -198,6 +197,26 @@ void WindowProxy::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo
     if (Remote()->SendRequest(TRANS_ID_UPDATE_OCCUPIED_AREA, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
+}
+
+void WindowProxy::UpdateActiveStatus(bool isActive)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteBool(isActive)) {
+        WLOGFE("Write Focus failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(TRANS_ID_UPDATE_ACTIVE_STATUS, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+    return;
 }
 } // namespace Rosen
 } // namespace OHOS

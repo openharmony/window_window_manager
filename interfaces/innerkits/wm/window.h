@@ -21,7 +21,6 @@
 
 #include "wm_common.h"
 #include "window_option.h"
-#include "window_life_cycle_interface.h"
 
 class NativeValue;
 class NativeEngine;
@@ -48,6 +47,17 @@ namespace OHOS {
 namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 class RSSurfaceNode;
+
+class IWindowLifeCycle : virtual public RefBase {
+public:
+    virtual void AfterForeground() = 0;
+    virtual void AfterBackground() = 0;
+    virtual void AfterFocused() = 0;
+    virtual void AfterUnfocused() = 0;
+    virtual void AfterActive() {}
+    virtual void AfterInactive() {}
+};
+
 class IWindowChangeListener : virtual public RefBase {
 public:
     virtual void OnSizeChange(Rect rect, WindowSizeChangeReason reason) = 0;
@@ -87,6 +97,11 @@ public:
     virtual void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) = 0;
 };
 
+class IAceAbilityHandler : virtual public RefBase {
+public:
+    virtual void SetBackgroundColor(uint32_t color) = 0;
+    virtual uint32_t GetBackgroundColor() = 0;
+};
 
 class Window : public RefBase {
 public:
@@ -107,7 +122,9 @@ public:
     virtual uint32_t GetWindowId() const = 0;
     virtual uint32_t GetWindowFlags() const = 0;
     virtual bool GetShowState() const = 0;
+    virtual WMError SetFocusable(bool isFocusable) = 0;
     virtual bool GetFocusable() const = 0;
+    virtual WMError SetTouchable(bool isTouchable) = 0;
     virtual bool GetTouchable() const = 0;
     virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) const = 0;
     virtual bool IsFullScreen() const = 0;
@@ -129,6 +146,16 @@ public:
 
     virtual WMError MoveTo(int32_t x, int32_t y) = 0;
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
+    virtual WMError SetKeepScreenOn(bool keepScreenOn) = 0;
+    virtual bool IsKeepScreenOn() const = 0;
+    virtual WMError SetTurnScreenOn(bool turnScreenOn) = 0;
+    virtual bool IsTurnScreenOn() const = 0;
+    virtual WMError SetBackgroundColor(const std::string& color) = 0;
+    virtual WMError SetTransparent(bool isTransparent) = 0;
+    virtual bool IsTransparent() const = 0;
+    virtual WMError SetBrightness(float brightness) = 0;
+    virtual float GetBrightness() const = 0;
+    virtual WMError SetCallingWindow(uint32_t windowId) = 0;
     virtual void SetPrivacyMode(bool isPrivacyMode) = 0;
     virtual bool IsPrivacyMode() const = 0;
 
@@ -153,10 +180,13 @@ public:
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
+    virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;
     virtual std::string GetContentInfo() = 0;
     virtual Ace::UIContent* GetUIContent() const = 0;
+    virtual void SetRequestedOrientation(Orientation) = 0;
+    virtual Orientation GetRequestedOrientation() = 0;
 
     virtual bool IsDecorEnable() const = 0;
     virtual WMError Maximize() = 0;
