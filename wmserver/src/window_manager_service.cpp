@@ -25,6 +25,7 @@
 #include "dm_common.h"
 #include "display_manager_service_inner.h"
 #include "drag_controller.h"
+#include "remote_animation.h"
 #include "singleton_container.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
@@ -354,9 +355,18 @@ void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType t
 WMError WindowManagerService::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
 {
     if (controller == nullptr) {
-        WLOGFE("Failed to set window animation controller, controller is null!");
+        WLOGFE("RSWindowAnimation: Failed to set window animation controller, controller is null!");
         return WMError::WM_ERROR_NULLPTR;
     }
+
+    auto& mutex = mutex_;
+    sptr<AgentDeathRecipient> deathRecipient = new AgentDeathRecipient(
+        [&mutex](sptr<IRemoteObject>& remoteObject) {
+            std::lock_guard<std::recursive_mutex> lock(mutex);
+            RemoteAnimation::OnRemoteDie(remoteObject);
+        }
+    );
+    controller->AsObject()->AddDeathRecipient(deathRecipient);
 
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return windowController_->SetWindowAnimationController(controller);
