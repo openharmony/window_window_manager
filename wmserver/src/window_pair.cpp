@@ -17,6 +17,7 @@
 
 #include <ability_manager_client.h>
 #include "common_event_manager.h"
+#include "minimize_app.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "wm_trace.h"
@@ -387,7 +388,7 @@ void WindowPair::Insert(sptr<WindowNode>& node)
     }
     // minimize invalid paired window
     if (pairedNode != nullptr && pairedNode->abilityToken_ != nullptr) {
-        AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(pairedNode->abilityToken_, false);
+        MinimizeApp::AddNeedMinimizeApp(pairedNode, MinimizeReason::OTHER_WINDOW);
     }
     UpdateWindowPairStatus();
 }

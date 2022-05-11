@@ -26,6 +26,7 @@
 #include "display_manager_service_inner.h"
 #include "drag_controller.h"
 #include "remote_animation.h"
+#include "minimize_app.h"
 #include "singleton_container.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
@@ -194,6 +195,7 @@ void WindowManagerService::ConfigureWindowManagerService()
 
     if (enableConfig.count("minimizeByOther") != 0) {
         windowController_->SetMinimizedByOtherWindow(enableConfig.at("minimizeByOther"));
+        MinimizeApp::SetMinimizedByOtherConfig(enableConfig.at("minimizeByOther"));
     }
 
     if (enableConfig.count("stretchable") != 0) {

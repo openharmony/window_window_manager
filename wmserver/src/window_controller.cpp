@@ -18,6 +18,8 @@
 #include <parameters.h>
 #include <power_mgr_client.h>
 #include <transaction/rs_transaction.h>
+
+#include "minimize_app.h"
 #include "remote_animation.h"
 #include "starting_window.h"
 #include "window_manager_hilog.h"
@@ -212,6 +214,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         }
     }
     StopBootAnimationIfNeed(node->GetWindowType());
+    MinimizeApp::ExecuteMinimizeAll();
     return WMError::WM_OK;
 }
 
@@ -350,6 +353,7 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
         return ret;
     }
     FlushWindowInfo(windowId);
+    MinimizeApp::ExecuteMinimizeAll();
     return WMError::WM_OK;
 }
 
@@ -612,6 +616,7 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
 void WindowController::MinimizeAllAppWindows(DisplayId displayId)
 {
     windowRoot_->MinimizeAllAppWindows(displayId);
+    MinimizeApp::ExecuteMinimizeAll();
 }
 
 void WindowController::ToggleShownStateForAllAppWindows()
@@ -682,6 +687,7 @@ WMError WindowController::SetWindowLayoutMode(WindowLayoutMode mode)
         }
         FlushWindowInfoWithDisplayId(displayId);
     }
+    MinimizeApp::ExecuteMinimizeAll();
     return res;
 }
 
@@ -774,7 +780,6 @@ WMError WindowController::GetModeChangeHotZones(DisplayId displayId,
 void WindowController::SetMinimizedByOtherWindow(bool isMinimizedByOtherWindow)
 {
     isMinimizedByOtherWindow_ = isMinimizedByOtherWindow;
-    windowRoot_->SetMinimizedByOtherWindow(isMinimizedByOtherWindow);
 }
 } // namespace OHOS
 } // namespace Rosen

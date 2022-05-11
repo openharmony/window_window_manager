@@ -19,6 +19,7 @@
 #include <ui/rs_display_node.h>
 #include "avoid_area_controller.h"
 #include "display_info.h"
+#include "minimize_app.h"
 #include "window_layout_policy.h"
 #include "window_manager.h"
 #include "window_node.h"
@@ -75,7 +76,7 @@ public:
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifySystemBarTints(std::vector<DisplayId> displayIdVec);
     void NotifySystemBarDismiss(sptr<WindowNode>& node);
-    WMError MinimizeAppNodeExceptOptions(bool fromUser, const std::vector<uint32_t> &exceptionalIds = {},
+    WMError MinimizeAppNodeExceptOptions(MinimizeReason reason, const std::vector<uint32_t> &exceptionalIds = {},
                                          const std::vector<WindowMode> &exceptionalModes = {});
     WMError SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode);
     WMError SwitchLayoutPolicy(WindowLayoutMode mode, DisplayId displayId, bool reorder = false);
@@ -120,7 +121,6 @@ private:
     bool IsTopWindow(uint32_t windowId, sptr<WindowNode>& rootNode) const;
     sptr<WindowNode> FindDividerNode() const;
     void RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes);
-    void MinimizeWindowFromAbility(const sptr<WindowNode>& node, bool fromUser);
     void ResetLayoutPolicy();
     bool IsAboveSystemBarNode(sptr<WindowNode> node) const;
     bool IsFullImmersiveNode(sptr<WindowNode> node) const;
@@ -173,7 +173,6 @@ private:
     std::map<DisplayId, sptr<DisplayInfo>> displayInfosMap_;
 
     WindowNodeMaps windowNodeMaps_;
-    bool isMinimizedByOther_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS

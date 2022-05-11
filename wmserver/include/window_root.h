@@ -76,7 +76,6 @@ public:
     void UpdateFocusableProperty(uint32_t windowId);
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
     void SetMaxAppWindowNumber(int windowNum);
-    void SetMinimizedByOtherWindow(bool isMinimizedByOtherWindow);
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     void NotifyVirtualPixelRatioChange(sptr<DisplayInfo> displayInfo);
@@ -105,7 +104,6 @@ private:
     std::map<ScreenId, std::vector<DisplayId>> displayIdMap_;
 
     bool needCheckFocusWindow = false;
-    bool isMinimizedByOtherWindow_ = true;
 
     std::map<WindowManagerAgentType, std::vector<sptr<IWindowManagerAgent>>> windowManagerAgents_;
 
