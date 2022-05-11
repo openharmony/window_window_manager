@@ -337,6 +337,10 @@ bool WindowLayoutPolicy::IsFullScreenRecentWindowExist(const std::vector<sptr<Wi
 
 void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect)
 {
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        WLOGFI("not need to update bounds");
+        return;
+    }
     if (node->leashWinSurfaceNode_) {
         node->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
         if (node->startingWinSurfaceNode_) {

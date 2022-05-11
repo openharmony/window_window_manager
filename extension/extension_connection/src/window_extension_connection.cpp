@@ -107,9 +107,9 @@ int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementN
     want.SetParam(RECT_FORM_KEY_POS_Y, rect.posY_);
     want.SetParam(RECT_FORM_KEY_WIDTH, static_cast<int>(rect.width_));
     want.SetParam(RECT_FORM_KEY_HEIGHT, static_cast<int>(rect.height_));
-
+     // 100 default userId
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, nullptr, 100);
-    if (ret == ERR_OK) { // 100 default userId
+    if (ret == ERR_OK) {
         componentCallback_ = callback;
     }
     WLOGFI("Connection extension end ret = %{public}d", ret);
