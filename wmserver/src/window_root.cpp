@@ -953,8 +953,8 @@ void WindowRoot::ProcessDisplayChange(const sptr<DisplayInfo>& displayInfo, Disp
     switch (type) {
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION: {
-            WLOGFI("update display: %{public}" PRIu64" rotation", displayId);
-            container->SetDisplayOrientation(displayId, displayInfo->GetOrientation());
+            WLOGFI("update display: %{public}" PRIu64", rotation: %{public}u", displayId, displayInfo->GetRotation());
+            container->SetDisplayRotation(displayId, displayInfo->GetRotation());
             container->SetDisplaySize(displayId, displayInfo->GetWidth(), displayInfo->GetHeight());
             break;
         }

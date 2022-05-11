@@ -54,6 +54,9 @@ void WindowLayoutPolicy::UpdateDisplayInfo(const std::map<DisplayId, Rect>& disp
         displayRectMap_.insert(displayRect);
     }
     Launch();
+    for (auto& displayRect : displayRectMap) {
+        LayoutWindowTree(displayRect.first);
+    }
 }
 
 void WindowLayoutPolicy::LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec)

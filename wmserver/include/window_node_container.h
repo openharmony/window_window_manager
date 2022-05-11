@@ -96,7 +96,7 @@ public:
     void UpdateVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio);
     void SetDisplaySize(DisplayId displayId, uint32_t width, uint32_t height);
     void SetDisplayVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio);
-    void SetDisplayOrientation(DisplayId displayId, Orientation orientation);
+    void SetDisplayRotation(DisplayId displayId, Rotation rotation);
     void AddDisplay(const sptr<DisplayInfo>& displayInfo);
     void DeleteDisplay(const sptr<DisplayInfo>& displayInfo);
     sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);

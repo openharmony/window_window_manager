@@ -1696,12 +1696,12 @@ void WindowNodeContainer::SetDisplaySize(DisplayId displayId, uint32_t width, ui
     layoutPolicy_->UpdateDisplayInfo(displayRectMap_);
 }
 
-void WindowNodeContainer::SetDisplayOrientation(DisplayId displayId, Orientation orientation)
+void WindowNodeContainer::SetDisplayRotation(DisplayId displayId, Rotation rotation)
 {
     if (displayInfosMap_.find(displayId) == std::end(displayInfosMap_)) {
         return;
     }
-    displayInfosMap_[displayId]->SetOrientation(orientation);
+    displayInfosMap_[displayId]->SetRotation(rotation);
 }
 
 void WindowNodeContainer::SetDisplayVirtualPixelRatio(DisplayId displayId, float virtualPixelRatio)
