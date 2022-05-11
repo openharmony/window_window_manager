@@ -100,12 +100,12 @@ ohos_shared_library("libwms") {
     ":window_divider_image",
     ":window_manager_config",
     ":window_starting_image",
-    "//foundation/arkui/ace_engine/build/external_config/flutter/skia:ace_skia_ohos",
     "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/dmserver:libdms",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
+    "//third_party/flutter/build/skia:ace_skia_ohos",
     "//third_party/libxml2:xml2",
   ]
 
