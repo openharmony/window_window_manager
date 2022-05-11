@@ -53,8 +53,8 @@ bool WindowController::IsWindowNeedMinimizedByOther(const sptr<WindowNode>& targ
 void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
     uint32_t bkgColor, bool isColdStart)
 {
-    if (info->GetAbilityToken() == nullptr || info->GetBundleName().find("permission") != std::string::npos) {
-        WLOGFE("AbilityToken is nullptr!");
+    if (!info || info->GetAbilityToken() == nullptr || info->GetBundleName().find("permission") != std::string::npos) {
+        WLOGFE("info or AbilityToken is nullptr!");
         return;
     }
     auto node = windowRoot_->FindWindowNodeWithToken(info->GetAbilityToken());
@@ -98,6 +98,10 @@ void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& srcInfo,
     sptr<WindowTransitionInfo>& dstInfo)
 {
+    if (!srcInfo || !dstInfo) {
+        WLOGFE("srcInfo or dstInfo is nullptr!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     auto dstNode = windowRoot_->FindWindowNodeWithToken(dstInfo->GetAbilityToken());
     auto srcNode = windowRoot_->FindWindowNodeWithToken(srcInfo->GetAbilityToken());
     if (!RemoteAnimation::CheckTransition(srcInfo, srcNode, dstInfo, dstNode)) {
@@ -148,8 +152,7 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     sptr<WindowNode> node = windowRoot_->FindWindowNodeWithToken(token);
-    if (node != nullptr && WindowHelper::IsMainWindow(node->GetWindowType()) &&
-        property->GetWindowName().find("permission") == std::string::npos && node->startingWindowShown_) {
+    if (node != nullptr && WindowHelper::IsMainWindow(property->GetWindowType()) && node->startingWindowShown_) {
         StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode);
         windowRoot_->AddDeathRecipient(node);
         return WMError::WM_OK;
