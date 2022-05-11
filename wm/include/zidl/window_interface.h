@@ -38,6 +38,7 @@ public:
         TRANS_ID_UPDATE_DISPLAY_ID,
         TRANS_ID_UPDATE_OCCUPIED_AREA,
         TRANS_ID_UPDATE_ACTIVE_STATUS,
+        TRANS_ID_UPDATE_WINDOW_STRETCHABLE,
         TRANS_ID_GET_WINDOW_PROPERTY,
     };
 
@@ -51,6 +52,7 @@ public:
     virtual void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) = 0;
     virtual void UpdateActiveStatus(bool isActive) = 0;
     virtual sptr<WindowProperty> GetWindowProperty() = 0;
+    virtual void UpdateWindowStretchable(bool stretchable) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
