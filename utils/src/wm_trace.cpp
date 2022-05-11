@@ -38,13 +38,13 @@ void WmTraceBegin(const char* name)
         return;
     }
     std::string nameStr(name);
-    StartTrace(BYTRACE_TAG_WINDOW_MANAGER, nameStr);
+    StartTrace(HITRACE_TAG_WINDOW_MANAGER, nameStr);
 }
 
 void WmTraceEnd()
 {
     if (WmTraceEnabled()) {
-        FinishTrace(BYTRACE_TAG_WINDOW_MANAGER);
+        FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
     }
 }
 
