@@ -154,8 +154,7 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     sptr<WindowNode> node = windowRoot_->FindWindowNodeWithToken(token);
-    if (node != nullptr && WindowHelper::IsMainWindow(property->GetWindowType()) &&
-        property->GetWindowName().find("permission") == std::string::npos && node->startingWindowShown_) {
+    if (node != nullptr && WindowHelper::IsMainWindow(property->GetWindowType()) && node->startingWindowShown_) {
         StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode);
         windowRoot_->AddDeathRecipient(node);
         return WMError::WM_OK;

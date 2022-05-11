@@ -54,11 +54,6 @@ WMError RemoteAnimation::SetWindowAnimationController(const sptr<RSIWindowAnimat
 bool RemoteAnimation::CheckTransition(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode,
     sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& dstNode)
 {
-    if (srcInfo->GetBundleName().find("permission") != std::string::npos ||
-        dstInfo->GetBundleName().find("permission") != std::string::npos) {
-        return false;
-    }
-
     if (srcNode != nullptr && !srcNode->leashWinSurfaceNode_ && !srcNode->surfaceNode_) {
         return false;
     }
@@ -130,7 +125,6 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
         finishedCallback->OnAnimationFinished();
         return WMError::WM_ERROR_NO_MEM;
     }
-    
     dstNode->isPlayAnimationShow_ = true;
     // from app to app
     if (needMinimizeSrcNode && srcNode != nullptr) {
@@ -141,7 +135,6 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
         windowAnimationController_->OnAppTransition(srcTarget, dstTarget, finishedCallback);
         return WMError::WM_OK;
     }
-    
     // start app from launcher
     if (srcNode != nullptr && srcNode->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
         WLOGFD("RSWindowAnimation: start app from launcher!");
