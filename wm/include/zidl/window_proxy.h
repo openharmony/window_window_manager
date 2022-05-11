@@ -37,6 +37,7 @@ public:
     void UpdateDisplayId(DisplayId from, DisplayId to) override;
     void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override;
     void UpdateActiveStatus(bool isActive) override;
+    void UpdateWindowStretchable(bool stretchable) override;
     sptr<WindowProperty> GetWindowProperty() override;
 private:
     static inline BrokerDelegator<WindowProxy> delegator_;

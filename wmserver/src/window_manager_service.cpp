@@ -185,26 +185,30 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 
 void WindowManagerService::ConfigureWindowManagerService()
 {
-    auto enableConfig = WindowManagerConfig::GetEnableConfig();
-    auto numbersConfig = WindowManagerConfig::GetNumbersConfig();
+    const auto& enableConfig = WindowManagerConfig::GetEnableConfig();
+    const auto& numbersConfig = WindowManagerConfig::GetNumbersConfig();
 
     if (enableConfig.count("decor") != 0) {
-        isSystemDecorEnable_ = enableConfig["decor"];
+        isSystemDecorEnable_ = enableConfig.at("decor");
     }
 
     if (enableConfig.count("minimizeByOther") != 0) {
-        windowController_->SetMinimizedByOtherWindow(enableConfig["minimizeByOther"]);
+        windowController_->SetMinimizedByOtherWindow(enableConfig.at("minimizeByOther"));
+    }
+
+    if (enableConfig.count("stretchable") != 0) {
+        windowRoot_->SetWindowStretchable(enableConfig.at("stretchable"));
     }
 
     if (numbersConfig.count("maxAppWindowNumber") != 0) {
-        auto numbers = numbersConfig["maxAppWindowNumber"];
+        auto numbers = numbersConfig.at("maxAppWindowNumber");
         if (numbers.size() == 1) {
             windowRoot_->SetMaxAppWindowNumber(numbers[0]);
         }
     }
 
     if (numbersConfig.count("modeChangeHotZones") != 0) {
-        auto numbers = numbersConfig["modeChangeHotZones"];
+        auto numbers = numbersConfig.at("modeChangeHotZones");
         if (numbers.size() == 3) { // 3 hot zones
             hotZonesConfig_.fullscreenRange_ = static_cast<uint32_t>(numbers[0]); // 0 fullscreen
             hotZonesConfig_.primaryRange_ = static_cast<uint32_t>(numbers[1]);    // 1 primary

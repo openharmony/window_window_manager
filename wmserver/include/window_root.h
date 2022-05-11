@@ -81,6 +81,7 @@ public:
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     void NotifyVirtualPixelRatioChange(sptr<DisplayInfo> displayInfo);
     std::vector<DisplayId> GetAllDisplayIds() const;
+    void SetWindowStretchable(bool stretchable);
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
@@ -112,6 +113,7 @@ private:
         this, std::placeholders::_1));
     Callback callback_;
     int maxAppWindowNumber_ = 100;
+    bool isWindowStretchable_ = false;
 };
 }
 }

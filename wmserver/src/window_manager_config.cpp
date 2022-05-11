@@ -51,7 +51,8 @@ bool WindowManagerConfig::LoadConfigXml(const std::string& configFilePath)
 
         auto nodeName = curNodePtr->name;
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("decor")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("minimizeByOther"))) {
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("minimizeByOther")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("stretchable"))) {
             ReadEnableConfigInfo(curNodePtr);
             continue;
         }
