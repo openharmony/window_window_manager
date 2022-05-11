@@ -52,7 +52,9 @@ WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args) cons
     }
 
     std::string dumpInfo;
-    if (params[0] == ARG_DUMP_HELP) {
+    if (params.empty()) {
+        ShowIllegalArgsInfo(dumpInfo);
+    } else if (params[0] == ARG_DUMP_HELP) {
         ShowHelpInfo(dumpInfo);
     } else {
         WMError errCode = DumpWindowInfo(params, dumpInfo);
@@ -136,6 +138,9 @@ WMError WindowDumper::DumpAllWindowInfo(std::string& dumpInfo) const
 
 WMError WindowDumper::DumpWindowInfo(const std::vector<std::string>& args, std::string& dumpInfo) const
 {
+    if (args.empty()) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     DumpType dumpType = DumpType::DUMP_NONE;
     if (args[0] == ARG_DUMP_ALL) {
         dumpType = DumpType::DUMP_ALL;
