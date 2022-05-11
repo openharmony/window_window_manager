@@ -15,7 +15,6 @@
 
 #include "window_node_container.h"
 
-#include <ability_manager_client.h>
 #include <algorithm>
 #include <cinttypes>
 #include <ctime>
@@ -1227,7 +1226,7 @@ sptr<WindowNode> WindowNodeContainer::GetNextActiveWindow(uint32_t windowId) con
 
 void WindowNodeContainer::MinimizeAllAppWindows(DisplayId displayId)
 {
-    WMError ret =  MinimizeAppNodeExceptOptions(true);
+    WMError ret =  MinimizeAppNodeExceptOptions(MinimizeReason::MINIMIZE_ALL);
     SwitchLayoutPolicy(WindowLayoutMode::CASCADE, displayId);
     if (ret != WMError::WM_OK) {
         WLOGFE("Minimize all app window failed");
@@ -1239,15 +1238,13 @@ void WindowNodeContainer::MinimizeOldestAppWindow()
 {
     for (auto& appNode : appWindowNode_->children_) {
         if (appNode->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-            WLOGFI("minimize window, windowId:%{public}u", appNode->GetWindowId());
-            MinimizeWindowFromAbility(appNode, true);
+            MinimizeApp::AddNeedMinimizeApp(appNode, MinimizeReason::MAX_APP_COUNT);
             return;
         }
     }
     for (auto& appNode : aboveAppWindowNode_->children_) {
         if (appNode->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-            WLOGFI("minimize window, windowId:%{public}u", appNode->GetWindowId());
-            MinimizeWindowFromAbility(appNode, true);
+            MinimizeApp::AddNeedMinimizeApp(appNode, MinimizeReason::MAX_APP_COUNT);
             return;
         }
     }
@@ -1299,21 +1296,8 @@ bool WindowNodeContainer::IsAppWindowsEmpty() const
     return appWindowNode_->children_.empty();
 }
 
-void WindowNodeContainer::MinimizeWindowFromAbility(const sptr<WindowNode>& node, bool fromUser)
-{
-    if (node->abilityToken_ == nullptr) {
-        WLOGFW("Target abilityToken is nullptr, windowId:%{public}u", node->GetWindowId());
-        return;
-    }
-    WLOGFI("minimize window fromUser:%{public}d, isMinimizedByOther:%{public}d", fromUser, isMinimizedByOther_);
-    if (!fromUser && !isMinimizedByOther_) {
-        return;
-    }
-    AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(node->abilityToken_, fromUser);
-}
-
-WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(bool fromUser, const std::vector<uint32_t> &exceptionalIds,
-                                                          const std::vector<WindowMode> &exceptionalModes)
+WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(MinimizeReason reason,
+    const std::vector<uint32_t> &exceptionalIds, const std::vector<WindowMode> &exceptionalModes)
 {
     if (appWindowNode_->children_.empty()) {
         return WMError::WM_OK;
@@ -1326,9 +1310,7 @@ WMError WindowNodeContainer::MinimizeAppNodeExceptOptions(bool fromUser, const s
                 appNode->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
             continue;
         }
-        // minimize window
-        WLOGFI("minimize window, windowId:%{public}u", appNode->GetWindowId());
-        MinimizeWindowFromAbility(appNode, fromUser);
+        MinimizeApp::AddNeedMinimizeApp(appNode, reason);
     }
     return WMError::WM_OK;
 }
@@ -1337,7 +1319,7 @@ WMError WindowNodeContainer::MinimizeStructuredAppWindowsExceptSelf(const sptr<W
 {
     std::vector<uint32_t> exceptionalIds = { node->GetWindowId() };
     std::vector<WindowMode> exceptionalModes = { WindowMode::WINDOW_MODE_FLOATING, WindowMode::WINDOW_MODE_PIP };
-    return MinimizeAppNodeExceptOptions(false, exceptionalIds, exceptionalModes);
+    return MinimizeAppNodeExceptOptions(MinimizeReason::OTHER_WINDOW, exceptionalIds, exceptionalModes);
 }
 
 void WindowNodeContainer::ResetLayoutPolicy()
@@ -1658,10 +1640,6 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
     return WMError::WM_OK;
 }
 
-void WindowNodeContainer::SetMinimizedByOther(bool isMinimizedByOther)
-{
-    isMinimizedByOther_ = isMinimizedByOther;
-}
 
 void WindowNodeContainer::GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones,
     const ModeChangeHotZonesConfig& config)
