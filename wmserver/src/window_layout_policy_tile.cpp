@@ -15,6 +15,7 @@
 
 #include "window_layout_policy_tile.h"
 #include <ability_manager_client.h>
+#include "minimize_app.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
@@ -208,10 +209,7 @@ void WindowLayoutPolicyTile::ForegroundNodeQueuePushBack(const sptr<WindowNode>&
         auto removeNode = foregroundNodes.front();
         foregroundNodes.pop_front();
         WLOGFI("pop win in queue head for add new win, windowId: %{public}d", removeNode->GetWindowId());
-        if (removeNode->abilityToken_ != nullptr) {
-            WLOGFI("minimize win %{public}u in tile", removeNode->GetWindowId());
-            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(removeNode->abilityToken_);
-        }
+        MinimizeApp::AddNeedMinimizeApp(removeNode, MinimizeReason::LAYOUT_TILE);
     }
     foregroundNodes.push_back(node);
 }

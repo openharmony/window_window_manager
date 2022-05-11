@@ -72,6 +72,7 @@ ohos_shared_library("libwms") {
     "src/drag_controller.cpp",
     "src/freeze_controller.cpp",
     "src/input_window_monitor.cpp",
+    "src/minimize_app.cpp",
     "src/remote_animation.cpp",
     "src/starting_window.cpp",
     "src/window_controller.cpp",

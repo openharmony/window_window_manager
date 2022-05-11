@@ -71,11 +71,10 @@ sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(DisplayId displa
     }
 
     ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
-    WLOGFI("create new container for display, width: %{public}d, height: %{public}d, isMinimized:%{public}d, "
+    WLOGFI("create new container for display, width: %{public}d, height: %{public}d, "
         "screenGroupId:%{public}" PRIu64", displayId:%{public}" PRIu64"", displayInfo->GetWidth(),
-        displayInfo->GetHeight(), isMinimizedByOtherWindow_, screenGroupId, displayId);
+        displayInfo->GetHeight(), screenGroupId, displayId);
     sptr<WindowNodeContainer> container = new WindowNodeContainer(displayInfo);
-    container->SetMinimizedByOther(isMinimizedByOtherWindow_);
     windowNodeContainerMap_.insert(std::make_pair(screenGroupId, container));
     std::vector<DisplayId> displayVec = { displayId };
     displayIdMap_.insert(std::make_pair(screenGroupId, displayVec));
@@ -996,12 +995,6 @@ WMError WindowRoot::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& wi
 void WindowRoot::SetMaxAppWindowNumber(int windowNum)
 {
     maxAppWindowNumber_ = windowNum;
-}
-
-void WindowRoot::SetMinimizedByOtherWindow(bool isMinimizedByOtherWindow)
-{
-    WLOGFI("isMinimizedByOtherWindow:%{public}d", isMinimizedByOtherWindow);
-    isMinimizedByOtherWindow_ = isMinimizedByOtherWindow;
 }
 
 WMError WindowRoot::GetModeChangeHotZones(DisplayId displayId,
