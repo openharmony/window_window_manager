@@ -41,7 +41,8 @@ private:
     const int INVALID_WINDOW_ID = -1;
     void TraverseWindowNodes(const std::vector<sptr<WindowNode>>& windowNodes,
                               std::vector<MMI::LogicalDisplayInfo>::iterator& iter);
-    void UpdateDisplaysInfo(const sptr<WindowNodeContainer>& container, DisplayId displayId);
+    void UpdatePhysicalDisplayInfo(const sptr<DisplayInfo>& displayInfo, DisplayId displayId);
+    void UpdateLogicalDisplayInfo(const sptr<DisplayInfo>& displayInfo, DisplayId displayId);
     void UpdateDisplayDirection(MMI::PhysicalDisplayInfo& physicalDisplayInfo, const sptr<DisplayInfo>& displayInfo);
 };
 }
