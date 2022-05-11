@@ -69,6 +69,8 @@ WindowExtensionConnection::WindowExtensionConnection()
 
 WindowExtensionConnection::~WindowExtensionConnection()
 {
+    DisconnectExtension();
+    WLOGI("disconnect");
 }
 
 WindowExtensionConnection::Impl::WindowExtensionClientRecipient::WindowExtensionClientRecipient(
