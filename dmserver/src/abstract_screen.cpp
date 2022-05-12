@@ -194,6 +194,7 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
         return;
     }
     info->id_ = dmsId_;
+    info->name_ = name_;
     uint32_t width = 0;
     uint32_t height = 0;
     sptr<SupportedScreenModes> abstractScreenModes = GetActiveScreenMode();

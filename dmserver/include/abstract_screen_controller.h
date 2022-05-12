@@ -137,6 +137,7 @@ private:
     std::map<sptr<IRemoteObject>, std::vector<ScreenId>> screenAgentMap_;
     sptr<AbstractScreenCallback> abstractScreenCallback_;
     std::shared_ptr<AppExecFwk::EventHandler> controllerHandler_;
+    std::atomic<ScreenId> defaultRsScreenId_ {SCREEN_ID_INVALID };
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_SCREEN_CONTROLLER_H
