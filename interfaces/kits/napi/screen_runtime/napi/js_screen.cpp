@@ -228,6 +228,7 @@ NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
     std::unique_ptr<JsScreen> jsScreen = std::make_unique<JsScreen>(screen);
     object->SetNativePointer(jsScreen.release(), JsScreen::Finalizer, nullptr);
 
+    object->SetProperty("id", CreateJsValue(engine, static_cast<uint32_t>(screen->GetId())));
     object->SetProperty("parent", CreateJsValue(engine, static_cast<uint32_t>(screen->GetParentId())));
     object->SetProperty("orientation", CreateJsValue(engine, screen->GetOrientation()));
     object->SetProperty("activeModeIndex", CreateJsValue(engine, screen->GetModeId()));
