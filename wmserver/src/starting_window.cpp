@@ -114,7 +114,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
 
     // Register FirstFrame Callback to rs, replace startwin
     auto firstFrameCompleteCallback = [node]() {
-        WLOGFI("Replace surfaceNode, id: %{public}u", node->GetWindowId());
+        WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", node->GetWindowId());
         node->leashWinSurfaceNode_->RemoveChild(node->startingWinSurfaceNode_);
         node->leashWinSurfaceNode_->AddChild(node->surfaceNode_, -1);
         AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(node->abilityToken_);
