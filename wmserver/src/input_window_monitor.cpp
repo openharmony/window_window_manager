@@ -86,8 +86,8 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
 
 void InputWindowMonitor::UpdatePhysicalDisplayInfo(const sptr<DisplayInfo>& displayInfo, DisplayId displayId)
 {
-    uint32_t physicalWidth = displayInfo->GetWidth();
-    uint32_t physicalHeight = displayInfo->GetHeight();
+    uint32_t physicalWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    uint32_t physicalHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     if (displayInfo->GetRotation() == Rotation::ROTATION_90 || displayInfo->GetRotation() == Rotation::ROTATION_270) {
         std::swap(physicalWidth, physicalHeight);
     }
