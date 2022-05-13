@@ -14,6 +14,9 @@
 import("//ark/ts2abc/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
 
+aainnerkits_path = "//foundation/aafwk/standard/interfaces/innerkits"
+aakits_path = "//foundation/aafwk/standard/frameworks/kits"
+
 config("screen_runtime_config") {
   visibility = [ ":*" ]
 
@@ -36,10 +39,10 @@ ohos_shared_library("screen_napi") {
 
   configs = [ ":screen_runtime_config" ]
   deps = [
-    "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-    "//foundation/aafwk/standard/frameworks/kits/appkit:app_context",
-    "//foundation/aafwk/standard/frameworks/kits/appkit:appkit_native",
-    "//foundation/aafwk/standard/interfaces/innerkits/want:want",
+    "${aainnerkits_path}/want:want",
+    "${aakits_path}/ability/native:abilitykit_native",
+    "${aakits_path}/appkit:app_context",
+    "${aakits_path}/appkit:appkit_native",
     "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/dmserver:libdms",
