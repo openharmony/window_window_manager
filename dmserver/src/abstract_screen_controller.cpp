@@ -182,20 +182,22 @@ sptr<AbstractScreenGroup> AbstractScreenController::GetAbstractScreenGroup(Scree
 
 ScreenId AbstractScreenController::GetDefaultAbstractScreenId()
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    ScreenId rsDefaultId = rsInterface_.GetDefaultScreenId();
-    if (rsDefaultId == SCREEN_ID_INVALID) {
+    if (defaultRsScreenId_ == SCREEN_ID_INVALID) {
+        defaultRsScreenId_ = rsInterface_.GetDefaultScreenId();
+    }
+    if (defaultRsScreenId_ == SCREEN_ID_INVALID) {
         WLOGFW("GetDefaultAbstractScreenId, rsDefaultId is invalid.");
         return SCREEN_ID_INVALID;
     }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     ScreenId defaultDmsScreenId;
-    if (screenIdManager_.ConvertToDmsScreenId(rsDefaultId, defaultDmsScreenId)) {
+    if (screenIdManager_.ConvertToDmsScreenId(defaultRsScreenId_, defaultDmsScreenId)) {
         WLOGI("GetDefaultAbstractScreenId, screen:%{public}" PRIu64"", defaultDmsScreenId);
         return defaultDmsScreenId;
     }
     WLOGFI("GetDefaultAbstractScreenId, default screen is null, try to get.");
-    ProcessScreenConnected(rsDefaultId);
-    return screenIdManager_.ConvertToDmsScreenId(rsDefaultId);
+    ProcessScreenConnected(defaultRsScreenId_);
+    return screenIdManager_.ConvertToDmsScreenId(defaultRsScreenId_);
 }
 
 ScreenId AbstractScreenController::ConvertToRsScreenId(ScreenId dmsScreenId) const
@@ -220,12 +222,14 @@ void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, S
 {
     WLOGFI("rs screen event. id:%{public}" PRIu64", event:%{public}u", rsScreenId, static_cast<uint32_t>(screenEvent));
     if (screenEvent == ScreenEvent::CONNECTED) {
-        ProcessScreenConnected(rsScreenId);
         auto task = [this, rsScreenId] {
             ProcessScreenConnected(rsScreenId);
         };
         controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
     } else if (screenEvent == ScreenEvent::DISCONNECTED) {
+        if (rsScreenId == defaultRsScreenId_) {
+            defaultRsScreenId_ = SCREEN_ID_INVALID;
+        }
         auto task = [this, rsScreenId] {
             ProcessScreenDisconnected(rsScreenId);
         };
@@ -1195,6 +1199,9 @@ bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state, Powe
     bool hasSetScreenPower = false;
     for (auto screenId : screenIds) {
         auto screen = GetAbstractScreen(screenId);
+        if (screen == nullptr) {
+            continue;
+        }
         if (screen->type_ != ScreenType::REAL) {
             WLOGD("skip virtual screen %{public}" PRIu64"", screen->dmsId_);
             continue;

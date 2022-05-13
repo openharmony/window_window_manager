@@ -75,10 +75,7 @@ bool ScreenPowerFuzzTest(const uint8_t *data, size_t size)
         static_cast<PowerStateChangeReason>(startPos));
     auto allScreen = screenManager.GetAllScreens();
     for (auto screen: allScreen) {
-        ScreenPowerState powerState = screenManager.GetScreenPower(screen->GetId());
-        if (static_cast<ScreenPowerState>(screenPowerState) != powerState) {
-            std::cout << "powerState and screenPowerState are not equal." << std::endl;
-        }
+        screenManager.GetScreenPower(screen->GetId());
     }
 
     screenManager.UnregisterScreenGroupListener(screenGroupListener);
@@ -110,12 +107,6 @@ bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     screenManager.SetVirtualScreenSurface(screenId, nullptr);
-    std::vector<sptr<Screen>> screens = screenManager.GetAllScreens();
-    for (auto screen : screens) {
-        if (screen->GetId() != screenId) {
-            std::cout << "screenId is not in screens." << std::endl;
-        }
-    }
 
     // make mirror
     ScreenId groupId = screenManager.MakeMirror(0, { screenId });
@@ -129,9 +120,6 @@ bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     std::vector<ScreenId> ids = group->GetChildIds();
-    if (std::find(ids.begin(), ids.end(), screenId) == ids.end()) {
-        std::cout << "screenId is not in group children." << std::endl;
-    }
     screenManager.RemoveVirtualScreenFromGroup(ids);
     screenManager.DestroyVirtualScreen(screenId);
     screenManager.UnregisterScreenGroupListener(screenGroupListener);
@@ -163,12 +151,6 @@ bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     screenManager.SetVirtualScreenSurface(screenId, nullptr);
-    std::vector<sptr<Screen>> screens = screenManager.GetAllScreens();
-    for (auto screen : screens) {
-        if (screen->GetId() != screenId) {
-            std::cout << "screenId is not in screens." << std::endl;
-        }
-    }
     // make expand
     std::vector<ExpandOption> options = {{0, 0, 0}, {screenId, 0, 0}};
     ScreenId groupId = screenManager.MakeExpand(options);
@@ -182,9 +164,6 @@ bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     std::vector<ScreenId> ids = group->GetChildIds();
-    if (std::find(ids.begin(), ids.end(), screenId) == ids.end()) {
-        std::cout << "screenId is not in group children." << std::endl;
-    }
     screenManager.RemoveVirtualScreenFromGroup(ids);
     screenManager.DestroyVirtualScreen(screenId);
     screenManager.UnregisterScreenGroupListener(screenGroupListener);
