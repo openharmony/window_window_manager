@@ -282,8 +282,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
         }
     }
 
-    displayGroupController_->PreProcessWindowNode(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-
     // Remove node from RSTree
     for (auto& displayId : node->GetShowingDisplays()) {
         UpdateRSTree(node, displayId, false, node->isPlayAnimationHide_);

@@ -49,24 +49,92 @@ void WindowLayoutPolicy::Reorder()
 
 void WindowLayoutPolicy::LimitWindowToBottomRightCorner(const sptr<WindowNode>& node)
 {
-    WLOGFI("LimitWindowToBottomRightCorner");
+    Rect windowRect = node->GetRequestRect();
+    Rect displayRect = displayRectMap_[node->GetDisplayId()];
+    windowRect.posX_ = std::max(windowRect.posX_, displayRect.posX_);
+    windowRect.posY_ = std::max(windowRect.posY_, displayRect.posY_);
+    windowRect.width_ = std::min(windowRect.width_, displayRect.width_);
+    windowRect.height_ = std::min(windowRect.height_, displayRect.height_);
+
+    if (windowRect.posX_ + static_cast<int32_t>(windowRect.width_) >
+        displayRect.posX_ + static_cast<int32_t>(displayRect.width_)) {
+        windowRect.posX_ = displayRect.posX_ + static_cast<int32_t>(displayRect.width_) -
+            static_cast<int32_t>(windowRect.width_);
+    }
+
+    if (windowRect.posY_ + static_cast<int32_t>(windowRect.height_) >
+        displayRect.posY_ + static_cast<int32_t>(displayRect.height_)) {
+        windowRect.posY_ = displayRect.posY_ + static_cast<int32_t>(displayRect.height_) -
+            static_cast<int32_t>(windowRect.height_);
+    }
+    node->SetRequestRect(windowRect);
+
+    WLOGFI("windowId: %{public}d, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        node->GetWindowId(), windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+
+    for (auto& childNode : node->children_) {
+        LimitWindowToBottomRightCorner(childNode);
+    }
 }
 
 void WindowLayoutPolicy::UpdateDisplayGroupRect()
 {
-    WLOGFI("UpdateDisplayGroupRect");
+    Rect newDisplayGroupRect = { 0, 0, 0, 0 };
+    // current mutiDisplay is only support left-right combination, maxNum is two
+    for (auto& elem : displayRectMap_) {
+        newDisplayGroupRect.posX_ = std::min(displayGroupRect_.posX_, elem.second.posX_);
+        newDisplayGroupRect.posY_ = std::min(displayGroupRect_.posY_, elem.second.posY_);
+        newDisplayGroupRect.width_ += elem.second.width_;
+        int32_t maxHeight = std::max(newDisplayGroupRect.posY_ + static_cast<int32_t>(newDisplayGroupRect.height_),
+                                     elem.second.posY_+ static_cast<int32_t>(elem.second.height_));
+        newDisplayGroupRect.height_ = maxHeight - newDisplayGroupRect.posY_;
+    }
+    displayGroupRect_ = newDisplayGroupRect;
+    WLOGFI("displayGroupRect_: [ %{public}d, %{public}d, %{public}d, %{public}d]",
+        displayGroupRect_.posX_, displayGroupRect_.posY_, displayGroupRect_.width_, displayGroupRect_.height_);
 }
 
 void WindowLayoutPolicy::UpdateDisplayGroupLimitRect_()
 {
-    WLOGFI("UpdateDisplayGroupLimitRect_");
+    auto firstDisplayLimitRect = limitRectMap_.begin()->second;
+    Rect newDisplayGroupLimitRect = { firstDisplayLimitRect.posX_, firstDisplayLimitRect.posY_, 0, 0 };
+    for (auto& elem : limitRectMap_) {
+        newDisplayGroupLimitRect.posX_ = std::min(newDisplayGroupLimitRect.posX_, elem.second.posX_);
+        newDisplayGroupLimitRect.posY_ = std::min(newDisplayGroupLimitRect.posY_, elem.second.posY_);
+
+        int32_t maxWidth = std::max(newDisplayGroupLimitRect.posX_ +
+                                    static_cast<int32_t>(newDisplayGroupLimitRect.width_),
+                                    elem.second.posX_+ static_cast<int32_t>(elem.second.width_));
+
+        int32_t maxHeight = std::max(newDisplayGroupLimitRect.posY_ +
+                                     static_cast<int32_t>(newDisplayGroupLimitRect.height_),
+                                     elem.second.posY_+ static_cast<int32_t>(elem.second.height_));
+        newDisplayGroupLimitRect.width_  = maxWidth - newDisplayGroupLimitRect.posX_;
+        newDisplayGroupLimitRect.height_ = maxHeight - newDisplayGroupLimitRect.posY_;
+    }
+    displayGroupLimitRect_ = newDisplayGroupLimitRect;
+    WLOGFI("displayGroupLimitRect_: [ %{public}d, %{public}d, %{public}d, %{public}d]",
+        displayGroupLimitRect_.posX_, displayGroupLimitRect_.posY_,
+        displayGroupLimitRect_.width_, displayGroupLimitRect_.height_);
 }
 
-void WindowLayoutPolicy::UpdateNodeAbsoluteCordinate(const sptr<WindowNode>& node,
-                                                     const Rect& srcDisplayRect,
-                                                     const Rect& dstDisplayRect)
+void WindowLayoutPolicy::UpdateRectInDisplayGroup(const sptr<WindowNode>& node,
+                                                  const Rect& srcDisplayRect,
+                                                  const Rect& dstDisplayRect)
 {
-    WLOGFI("UpdateNodeAbsoluteCordinate");
+    Rect newRect = node->GetRequestRect();
+    WLOGFI("before update rect in display group, windowId: %{public}d, rect: [%{public}d, %{public}d, "
+        "%{public}d, %{public}d]", node->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
+
+    newRect.posX_ = newRect.posX_ - srcDisplayRect.posX_ + dstDisplayRect.posX_;
+    newRect.posY_ = newRect.posY_ - srcDisplayRect.posY_ + dstDisplayRect.posY_;
+    node->SetRequestRect(newRect);
+    WLOGFI("after update rect in display group, windowId: %{public}d, newRect: [%{public}d, %{public}d, "
+        "%{public}d, %{public}d]", node->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
+
+    for (auto& childNode : node->children_) {
+        UpdateRectInDisplayGroup(childNode, srcDisplayRect, dstDisplayRect);
+    }
 }
 
 bool WindowLayoutPolicy::IsMultiDisplay()
@@ -85,11 +153,29 @@ void WindowLayoutPolicy::UpdateMultiDisplayFlag()
     }
 }
 
-void WindowLayoutPolicy::UpdateNodesAbsoluteCordinatesInAllDisplay(DisplayId displayId,
-                                                                   const Rect& srcDisplayRect,
-                                                                   const Rect& dstDisplayRect)
+void WindowLayoutPolicy::UpdateRectInDisplayGroupForAllNodes(DisplayId displayId,
+                                                             const Rect& srcDisplayRect,
+                                                             const Rect& dstDisplayRect)
 {
-    WLOGFI("UpdateNodesAbsoluteCordinatesInAllDisplay");
+    WLOGFI("displayId: %{public}" PRIu64", srcDisplayRect: [ %{public}d, %{public}d, %{public}d, %{public}d] "
+        "dstDisplayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
+        displayId, srcDisplayRect.posX_, srcDisplayRect.posY_, srcDisplayRect.width_, srcDisplayRect.height_,
+        dstDisplayRect.posX_, dstDisplayRect.posY_, dstDisplayRect.width_, dstDisplayRect.height_);
+
+    auto& windowNodeMap = windowNodeMaps_[displayId];
+    for (auto& iter : windowNodeMap) {
+        auto& nodeVector = *(iter.second);
+        for (auto& node : nodeVector) {
+            if (!node->isShowingOnMultiDisplays_) {
+                UpdateRectInDisplayGroup(node, srcDisplayRect, dstDisplayRect);
+            }
+            if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+                LimitWindowToBottomRightCorner(node);
+            }
+        }
+        WLOGFI("Recalculate window rect in display group, displayId: %{public}" PRIu64", rootType: %{public}d",
+            displayId, iter.first);
+    }
 }
 
 void WindowLayoutPolicy::PostProcessWhenDisplayChange()
@@ -109,7 +195,7 @@ void WindowLayoutPolicy::ProcessDisplayCreate(DisplayId displayId, const std::ma
     for (auto& elem : displayRectMap) {
         auto iter = displayRectMap_.find(elem.first);
         if (iter != displayRectMap_.end()) {
-            UpdateNodesAbsoluteCordinatesInAllDisplay(elem.first, iter->second, elem.second);
+            UpdateRectInDisplayGroupForAllNodes(elem.first, iter->second, elem.second);
             iter->second = elem.second;
         } else {
             if (elem.first != displayId) {
@@ -129,7 +215,7 @@ void WindowLayoutPolicy::ProcessDisplayDestroy(DisplayId displayId, const std::m
     for (auto oriIter = displayRectMap_.begin(); oriIter != displayRectMap_.end();) {
         auto newIter = displayRectMap.find(oriIter->first);
         if (newIter != displayRectMap.end()) {
-            UpdateNodesAbsoluteCordinatesInAllDisplay(oriIter->first, oriIter->second, newIter->second);
+            UpdateRectInDisplayGroupForAllNodes(oriIter->first, oriIter->second, newIter->second);
             oriIter->second = newIter->second;
             ++oriIter;
         } else {
@@ -151,7 +237,7 @@ void WindowLayoutPolicy::ProcessDisplaySizeChangeOrRotation(DisplayId displayId,
     for (auto& elem : displayRectMap) {
         auto iter = displayRectMap_.find(elem.first);
         if (iter != displayRectMap_.end()) {
-            UpdateNodesAbsoluteCordinatesInAllDisplay(elem.first, iter->second, elem.second);
+            UpdateRectInDisplayGroupForAllNodes(elem.first, iter->second, elem.second);
             iter->second = elem.second;
         }
     }

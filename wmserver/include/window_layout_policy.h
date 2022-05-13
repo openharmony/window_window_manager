@@ -65,12 +65,12 @@ protected:
     bool IsFullScreenRecentWindowExist(const std::vector<sptr<WindowNode>>& nodeVec) const;
     void LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec);
     void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect);
-    void UpdateNodesAbsoluteCordinatesInAllDisplay(DisplayId displayId,
-                                                   const Rect& srcDisplayRect,
-                                                   const Rect& dstDisplayRect);
-    void UpdateNodeAbsoluteCordinate(const sptr<WindowNode>& node,
-                                     const Rect& srcDisplayRect,
-                                     const Rect& dstDisplayRect);
+    void UpdateRectInDisplayGroupForAllNodes(DisplayId displayId,
+                                             const Rect& srcDisplayRect,
+                                             const Rect& dstDisplayRect);
+    void UpdateRectInDisplayGroup(const sptr<WindowNode>& node,
+                                  const Rect& srcDisplayRect,
+                                  const Rect& dstDisplayRect);
     void LimitWindowToBottomRightCorner(const sptr<WindowNode>& node);
     void UpdateDisplayGroupRect();
     void UpdateDisplayGroupLimitRect_();
