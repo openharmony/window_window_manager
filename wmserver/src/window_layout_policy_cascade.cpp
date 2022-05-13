@@ -61,6 +61,7 @@ void WindowLayoutPolicyCascade::Reset()
         InitSplitRects(iter.first);
         InitLimitRects(iter.first);
     }
+    displayGroupLimitRect_ = displayGroupRect_;
 }
 
 void WindowLayoutPolicyCascade::InitAllRects()
@@ -69,6 +70,8 @@ void WindowLayoutPolicyCascade::InitAllRects()
         // init split and limit rects
         InitSplitRects(iter.first);
         InitLimitRects(iter.first);
+        // init full displayRect
+        displayGroupLimitRect_ = displayGroupRect_;
         // init cascade rect
         auto& windowNodeMap = windowNodeMaps_[iter.first];
         LayoutWindowNodesByRootType(*(windowNodeMap[WindowRootNodeType::ABOVE_WINDOW_NODE]));
@@ -94,6 +97,7 @@ void WindowLayoutPolicyCascade::LayoutWindowNode(const sptr<WindowNode>& node)
             UpdateLimitRect(node, limitRectMap_[displayId]);
             UpdateSplitLimitRect(limitRectMap_[displayId], primaryLimitRect);
             UpdateSplitLimitRect(limitRectMap_[displayId], secondaryLimitRect);
+            UpdateDisplayGroupLimitRect_();
             WLOGFI("priLimitRect: %{public}d %{public}d %{public}u %{public}u, " \
                 "secLimitRect: %{public}d %{public}d %{public}u %{public}u", primaryLimitRect.posX_,
                 primaryLimitRect.posY_, primaryLimitRect.width_, primaryLimitRect.height_, secondaryLimitRect.posX_,
@@ -235,18 +239,31 @@ void WindowLayoutPolicyCascade::ApplyWindowRectConstraints(const sptr<WindowNode
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) { // if divider, limit position
         LimitMoveBounds(winRect, node->GetDisplayId());
     }
-    if (reason == WindowSizeChangeReason::DRAG) { // if drag window, limit size and position
+
+    // if drag or move window, limit size and position
+    if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::MOVE) {
         if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
             const Rect lastRect = node->GetWindowRect();
             // fix rect in case of moving window when dragging
             winRect = WindowHelper::GetFixedWindowRectByLimitSize(winRect, lastRect,
                 IsVerticalDisplay(node->GetDisplayId()), virtualPixelRatio);
+
+            // if is mutiDisplay, the limit rect should be full limitRect when move or drag
+            Rect limitRect;
+            if (isMultiDisplay_) {
+                limitRect = displayGroupLimitRect_;
+            } else {
+                limitRect = limitRectMap_[node->GetDisplayId()];
+            }
             winRect = WindowHelper::GetFixedWindowRectByLimitPosition(winRect, lastRect,
-                virtualPixelRatio, limitRectMap_[node->GetDisplayId()]);
+                virtualPixelRatio, limitRect);
         }
+    } else {
+        // Limit window to the maximum window size if size change is other reason, such as init window rect when show
+        LimitFloatingWindowSize(node, displayRectMap_[node->GetDisplayId()], winRect);
+        LimitMainFloatingWindowPosition(node, winRect);
     }
-    // Limit window to the maximum window size
-    LimitWindowSize(node, displayRectMap_[node->GetDisplayId()], winRect);
+
     WLOGFI("After apply constraints winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 }
