@@ -13,6 +13,8 @@
 
 import("//build/test.gni")
 module_out_path = "window_manager/wm"
+aainnerkits_path = "//foundation/aafwk/standard/interfaces/innerkits"
+aakits_path = "//foundation/aafwk/standard/frameworks/kits"
 
 group("unittest") {
   testonly = true
@@ -143,13 +145,13 @@ config("wm_unittest_common_public_config") {
     "//third_party/googletest/googlemock/include",
 
     # for abilityContext
-    "//foundation/aafwk/standard/frameworks/kits/ability/ability_runtime/include",
-    "//foundation/aafwk/standard/frameworks/kits/appkit/native/ability_runtime/context",
+    "${aakits_path}/ability/ability_runtime/include",
+    "${aakits_path}/appkit/native/ability_runtime/context",
     "//base/global/resource_management/interfaces/inner_api/include",
     "//third_party/node/deps/icu-small/source/common",
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager/include",
-    "//foundation/aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content",
-    "//foundation/aafwk/standard/interfaces/innerkits/base/include",
+    "${aainnerkits_path}/ability_manager/include",
+    "${aainnerkits_path}/want/include/ohos/aafwk/content",
+    "${aainnerkits_path}/base/include",
     "//third_party/jsoncpp/include",
     "//third_party/json/include",
 
@@ -175,7 +177,7 @@ ohos_static_library("wm_unittest_common") {
     "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
 
     # need delete it for abilitycontext
-    "//foundation/aafwk/standard/interfaces/innerkits/ability_manager:ability_manager",
+    "${aainnerkits_path}/ability_manager:ability_manager",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
     "//foundation/arkui/napi:ace_napi",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
