@@ -169,8 +169,6 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
     ScreenId screenId = abstractScreenController_->CreateVirtualScreen(option, displayManagerAgent);
     CHECK_SCREEN_AND_RETURN(SCREEN_ID_INVALID);
     accessTokenIdMaps_[screenId] = IPCSkeleton::GetCallingTokenID();
-    WLOGFI("DumpScreenInfo after Create VirtualScreen");
-    abstractScreenController_->DumpScreenInfo();
     return screenId;
 }
 
@@ -442,7 +440,6 @@ ScreenId DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Sc
         WLOGFE("make mirror failed.");
         return SCREEN_ID_INVALID;
     }
-    abstractScreenController_->DumpScreenInfo();
     auto screen = abstractScreenController_->GetAbstractScreen(mainScreenId);
     if (screen == nullptr || abstractScreenController_->GetAbstractScreenGroup(screen->groupDmsId_) == nullptr) {
         WLOGFE("get screen group failed.");
@@ -558,7 +555,6 @@ ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds
         WLOGFE("make expand failed.");
         return SCREEN_ID_INVALID;
     }
-    abstractScreenController_->DumpScreenInfo();
     auto screen = abstractScreenController_->GetAbstractScreen(allExpandScreenIds[0]);
     if (screen == nullptr || abstractScreenController_->GetAbstractScreenGroup(screen->groupDmsId_) == nullptr) {
         WLOGFE("get screen group failed.");

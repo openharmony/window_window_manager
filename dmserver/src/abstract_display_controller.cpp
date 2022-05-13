@@ -159,21 +159,19 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
     sptr<AbstractScreenGroup> screenGroup;
     DisplayId absDisplayId = DISPLAY_ID_INVALID;
     sptr<AbstractDisplay> abstractDisplay = nullptr;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        screenGroup = absScreen->GetGroup();
-        if (screenGroup == nullptr) {
-            WLOGE("the group information of the screen is wrong");
-            return;
-        }
-        if (screenGroup->combination_ == ScreenCombination::SCREEN_ALONE
-            || screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR) {
-            absDisplayId = ProcessNormalScreenDisconnected(absScreen, screenGroup, abstractDisplay);
-        } else if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
-            absDisplayId = ProcessExpandScreenDisconnected(absScreen, screenGroup, abstractDisplay);
-        } else {
-            WLOGE("support in future. combination:%{public}u", screenGroup->combination_);
-        }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    screenGroup = absScreen->GetGroup();
+    if (screenGroup == nullptr) {
+        WLOGE("the group information of the screen is wrong");
+        return;
+    }
+    if (screenGroup->combination_ == ScreenCombination::SCREEN_ALONE
+        || screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR) {
+        absDisplayId = ProcessNormalScreenDisconnected(absScreen, screenGroup, abstractDisplay);
+    } else if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
+        absDisplayId = ProcessExpandScreenDisconnected(absScreen, screenGroup, abstractDisplay);
+    } else {
+        WLOGE("support in future. combination:%{public}u", screenGroup->combination_);
     }
     if (absDisplayId == DISPLAY_ID_INVALID) {
         WLOGE("the displayId of the disconnected expand screen was not found");
@@ -571,6 +569,7 @@ std::map<DisplayId, sptr<DisplayInfo>> AbstractDisplayController::GetAllDisplayI
 {
     ScreenId screenGroupId = info->GetScreenGroupId();
     std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto& iter : abstractDisplayMap_) {
         sptr<AbstractDisplay> display = iter.second;
         if (display->GetAbstractScreenGroupId() == screenGroupId) {

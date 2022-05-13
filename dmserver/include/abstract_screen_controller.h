@@ -69,7 +69,6 @@ public:
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
     void SetShotScreen(ScreenId mainScreenId, std::vector<ScreenId> shotScreenIds);
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
-    void DumpScreenInfo() const;
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) const;
     ScreenPowerState GetScreenPower(ScreenId dmsScreenId) const;
     bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
@@ -107,7 +106,6 @@ private:
     void NotifyScreenChanged(sptr<ScreenInfo> screenInfo, ScreenChangeEvent event) const;
     void NotifyScreenGroupChanged(const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent event) const;
     void NotifyScreenGroupChanged(const std::vector<sptr<ScreenInfo>>& screenInfo, ScreenGroupChangeEvent event) const;
-    void DumpScreenGroupInfo() const;
 
     class ScreenIdManager {
     public:
@@ -122,7 +120,6 @@ private:
         ScreenId ConvertToRsScreenId(ScreenId) const;
         bool ConvertToDmsScreenId(ScreenId, ScreenId&) const;
         ScreenId ConvertToDmsScreenId(ScreenId) const;
-        void DumpScreenIdInfo() const;
     private:
         std::atomic<ScreenId> dmsScreenCount_ {0};
         std::map<ScreenId, ScreenId> rs2DmsScreenIdMap_;
