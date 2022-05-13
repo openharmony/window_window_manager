@@ -29,8 +29,8 @@ namespace {
     const std::string SPLIT_SCREEN_EVENT_NAME = "common.event.SPLIT_SCREEN";
 }
 
-WindowPair::WindowPair(const DisplayId& displayId, sptr<WindowNode>& appNode)
-    : displayId_(displayId), appWindowNode_(appNode) {
+WindowPair::WindowPair(const DisplayId& displayId, WindowNodeMaps& windowNodeMaps)
+    : displayId_(displayId), windowNodeMaps_(windowNodeMaps) {
 }
 
 WindowPair::~WindowPair()
@@ -228,7 +228,9 @@ sptr<WindowNode> WindowPair::FindPairableWindow(sptr<WindowNode>& node)
     if (!node->IsSplitMode()) {
         return nullptr;
     }
-    for (auto iter = appWindowNode_->children_.rbegin(); iter != appWindowNode_->children_.rend(); iter++) {
+
+    auto& appNodeVec = *(windowNodeMaps_[displayId_][WindowRootNodeType::APP_WINDOW_NODE]);
+    for (auto iter = appNodeVec.rbegin(); iter != appNodeVec.rend(); iter++) {
         auto pairNode = *iter;
         if (pairNode == nullptr) {
             continue;

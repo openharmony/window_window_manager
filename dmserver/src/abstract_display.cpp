@@ -104,6 +104,12 @@ void AbstractDisplay::SetHeight(int32_t height)
     height_ = height;
 }
 
+void AbstractDisplay::SetOffset(int32_t offsetX, int32_t offsetY)
+{
+    offsetX_ = offsetX;
+    offsetY_ = offsetY;
+}
+
 void AbstractDisplay::SetRefreshRate(uint32_t refreshRate)
 {
     refreshRate_ = refreshRate;
@@ -166,11 +172,15 @@ bool AbstractDisplay::BindAbstractScreen(sptr<AbstractScreen> abstractScreen)
             id_, dmsScreenId);
         return false;
     }
+
+    Point point = abstractScreen->GetGroup()->GetChildPosition(dmsScreenId);
+    offsetX_ = point.posX_;
+    offsetY_ = point.posY_;
     width_ = static_cast<int32_t>(info->width_);
     height_ = static_cast<int32_t>(info->height_);
     refreshRate_ = info->refreshRate_;
     screenId_ = dmsScreenId;
-    WLOGD("display bound to screen. display:%{public}" PRIu64", screen:%{public}" PRIu64"", id_, dmsScreenId);
+    WLOGD("display bind to screen. display:%{public}" PRIu64", screen:%{public}" PRIu64"", id_, dmsScreenId);
     return true;
 }
 

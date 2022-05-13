@@ -449,8 +449,8 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsFirstScreenLocked(sptr<
     dmsScreenGroupMap_.insert(std::make_pair(dmsGroupScreenId, screenGroup));
     dmsScreenMap_.insert(std::make_pair(dmsGroupScreenId, screenGroup));
     screenGroup->mirrorScreenId_ = newScreen->dmsId_;
-    WLOGI("connect new group screen. id=%{public}" PRIu64"/%{public}" PRIu64", combination:%{public}u",
-        newScreen->dmsId_, dmsGroupScreenId, newScreen->type_);
+    WLOGI("connect new group screen, screenId: %{public}" PRIu64", screenGroupId: %{public}" PRIu64", "
+        "combination:%{public}u", newScreen->dmsId_, dmsGroupScreenId, newScreen->type_);
     return screenGroup;
 }
 
@@ -472,6 +472,9 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsSuccedentScreenLocked(s
     }
     auto screenGroup = screenGroupIter->second;
     Point point;
+    if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
+        point = {screen->GetActiveScreenMode()->width_, 0};
+    }
     screenGroup->AddChild(newScreen, point);
     return screenGroup;
 }
@@ -865,6 +868,7 @@ void AbstractScreenController::AddScreenToGroup(sptr<AbstractScreenGroup> group,
             abstractScreenCallback_->onConnect_(screen);
         }
     }
+
     NotifyScreenGroupChanged(removeFromGroup, ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
     NotifyScreenGroupChanged(changeGroup, ScreenGroupChangeEvent::CHANGE_GROUP);
     NotifyScreenGroupChanged(addToGroup, ScreenGroupChangeEvent::ADD_TO_GROUP);

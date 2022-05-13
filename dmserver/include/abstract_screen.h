@@ -92,6 +92,7 @@ public:
     bool HasChild(ScreenId childScreen) const;
     std::vector<sptr<AbstractScreen>> GetChildren() const;
     std::vector<Point> GetChildrenPosition() const;
+    Point GetChildPosition(ScreenId screenId) const;
     size_t GetChildCount() const;
     sptr<ScreenGroupInfo> ConvertToScreenGroupInfo() const;
 

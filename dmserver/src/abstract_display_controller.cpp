@@ -224,16 +224,20 @@ DisplayId AbstractDisplayController::ProcessExpandScreenDisconnected(
         WLOGFE("Invalid params as nullptr.");
         return DISPLAY_ID_INVALID;
     }
+    DisplayId displayId = DISPLAY_ID_INVALID;
     for (auto iter = abstractDisplayMap_.begin(); iter != abstractDisplayMap_.end(); iter++) {
-        DisplayId displayId = iter->first;
         sptr<AbstractDisplay> abstractDisplay = iter->second;
         if (abstractDisplay->GetAbstractScreenId() == absScreen->dmsId_) {
             WLOGI("expand screen disconnect, displayId: %{public}" PRIu64", screenId: %{public}" PRIu64"",
                 displayId, abstractDisplay->GetAbstractScreenId());
-            return displayId;
+            displayId = iter->first;
+        } else {
+            abstractDisplay->SetOffset(0, 0);
+            auto screenId = abstractDisplay->GetAbstractScreenId();
+            abstractScreenController_->GetRSDisplayNodeByScreenId(screenId)->SetDisplayOffset(0, 0);
         }
     }
-    return DISPLAY_ID_INVALID;
+    return displayId;
 }
 
 void AbstractDisplayController::OnAbstractScreenChange(sptr<AbstractScreen> absScreen, DisplayChangeEvent event)
@@ -461,8 +465,12 @@ void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> abs
         WLOGE("bind display error, cannot get info.");
         return;
     }
+
     sptr<AbstractDisplay> display = new AbstractDisplay(displayCount_.fetch_add(1),
         absScreen->dmsId_, info->width_, info->height_, info->refreshRate_);
+    Point point = abstractScreenController_->GetAbstractScreenGroup(absScreen->groupDmsId_)->
+        GetChildPosition(absScreen->dmsId_);
+    display->SetOffset(point.posX_, point.posY_);
     abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
     WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
         absScreen->dmsId_, display->GetId());

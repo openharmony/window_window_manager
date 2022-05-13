@@ -19,6 +19,7 @@
 #include <refbase.h>
 #include "window_inner_manager.h"
 #include "window_node.h"
+#include "window_layout_policy.h"
 #include "wm_common_inner.h"
 #include "wm_common.h"
 
@@ -53,7 +54,7 @@ public:
      * @param displayId the disply of window pair
      * @param appNode the window root of app window
      */
-    WindowPair(const DisplayId& displayId, sptr<WindowNode>& appNode);
+    WindowPair(const DisplayId& displayId, WindowNodeMaps& windowNodeMaps);
 
     /**
      * Deconstructor used to deconstruct.
@@ -231,6 +232,7 @@ private:
     sptr<WindowNode> secondary_;
     sptr<WindowNode> divider_;
     WindowPairStatus status_ = {WindowPairStatus::STATUS_EMPTY};
+    WindowNodeMaps& windowNodeMaps_;
 };
 } // namespace Rosen
 } // namespace OHOS
