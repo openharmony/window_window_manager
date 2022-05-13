@@ -579,8 +579,6 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     rsInterface_.RemoveVirtualScreen(rsScreenId);
-    WLOGFI("DumpScreenInfo after Destroy VirtualScreen");
-    DumpScreenInfo();
     return DMError::DM_OK;
 }
 
@@ -982,79 +980,6 @@ bool AbstractScreenController::OnRemoteDied(const sptr<IRemoteObject>& agent)
     }
     return true;
 }
-
-void AbstractScreenController::DumpScreenInfo() const
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WLOGI("-------- dump screen info begin---------");
-    WLOGI("-------- the Screen Id Map Info---------");
-    WLOGI("         DmsScreenId           RsScreenId");
-    screenIdManager_.DumpScreenIdInfo();
-    WLOGI("--------    the Screen Info    ---------");
-    WLOGI("               dmsId                 rsId           groupDmsId    "
-        "isGroup       type               NodeId isMirrored         mirrorNodeId");
-    for (auto iter = dmsScreenMap_.begin(); iter != dmsScreenMap_.end(); iter++) {
-        auto screen = iter->second;
-        std::string screenType;
-        if (screen->type_ == ScreenType::UNDEFINE) {
-            screenType = "UNDEFINE";
-        } else if (screen->type_ == ScreenType::REAL) {
-            screenType = "REAL";
-        } else {
-            screenType = "VIRTUAL";
-        }
-        std::string isMirrored = screen->rSDisplayNodeConfig_.isMirrored ? "true" : "false";
-        std::string isGroup = (dmsScreenGroupMap_.find(screen->dmsId_) != dmsScreenGroupMap_.end()) ? "true" : "false";
-        NodeId nodeId = (screen->rsDisplayNode_ == nullptr) ? SCREEN_ID_INVALID : screen->rsDisplayNode_->GetId();
-        WLOGI("%{public}20" PRIu64" %{public}20" PRIu64" %{public}20" PRIu64" %{public}10s %{public}10s %{public}20"
-            PRIu64" %{public}10s %{public}20" PRIu64" ", screen->dmsId_, screen->rsId_, screen->groupDmsId_,
-            isGroup.c_str(), screenType.c_str(), nodeId, isMirrored.c_str(), screen->rSDisplayNodeConfig_.mirrorNodeId);
-    }
-    DumpScreenGroupInfo();
-}
-
-void AbstractScreenController::DumpScreenGroupInfo() const
-{
-    WLOGI("--------    the ScreenGroup Info    ---------");
-    WLOGI("    isGroup               dmsId                 rsId           groupDmsId       type               "
-        "NodeId isMirrored         mirrorNodeId");
-    for (auto iter = dmsScreenGroupMap_.begin(); iter != dmsScreenGroupMap_.end(); iter++) {
-        auto screenGroup = iter->second;
-        std::string isMirrored = "false";
-        std::string isGroup = "true";
-        std::string screenType = "UNDEFINE";
-        NodeId nodeId = (screenGroup->rsDisplayNode_ == nullptr) ? 0 : screenGroup->rsDisplayNode_->GetId();
-        WLOGI("%{public}10s %{public}20" PRIu64" %{public}20" PRIu64" %{public}20" PRIu64" %{public}10s %{public}20"
-            PRIu64" %{public}10s %{public}20" PRIu64" ", isGroup.c_str(), screenGroup->dmsId_, screenGroup->rsId_,
-            screenGroup->groupDmsId_, screenType.c_str(), nodeId,
-            isMirrored.c_str(), screenGroup->rSDisplayNodeConfig_.mirrorNodeId);
-        auto childrenScreen = screenGroup->GetChildren();
-        for (auto screen : childrenScreen) {
-            std::string isGroup =
-                (dmsScreenGroupMap_.find(screen->dmsId_) != dmsScreenGroupMap_.end()) ? "true" : "false";
-            if (screen->type_ == ScreenType::UNDEFINE) {
-                screenType = "UNDEFINE";
-            } else if (screen->type_ == ScreenType::REAL) {
-                screenType = "REAL";
-            } else {
-                screenType = "VIRTUAL";
-            }
-            isMirrored = screen->rSDisplayNodeConfig_.isMirrored ? "true" : "false";
-            nodeId = (screen->rsDisplayNode_ == nullptr) ? 0 : screen->rsDisplayNode_->GetId();
-            WLOGI("%{public}10s %{public}20" PRIu64" %{public}20" PRIu64" %{public}20" PRIu64" %{public}10s %{public}20"
-                PRIu64" %{public}10s %{public}20" PRIu64" ", isGroup.c_str(), screen->dmsId_, screen->rsId_,
-                screen->groupDmsId_, screenType.c_str(), nodeId,
-                isMirrored.c_str(), screen->rSDisplayNodeConfig_.mirrorNodeId);
-        }
-    }
-}
-
-void AbstractScreenController::ScreenIdManager::DumpScreenIdInfo() const
-{
-    for (auto& pair : dms2RsScreenIdMap_) {
-        WLOGI("%{public}20" PRIu64" %{public}20" PRIu64"", pair.first, pair.second);
-    }
-};
 
 ScreenId AbstractScreenController::ScreenIdManager::CreateAndGetNewScreenId(ScreenId rsScreenId)
 {

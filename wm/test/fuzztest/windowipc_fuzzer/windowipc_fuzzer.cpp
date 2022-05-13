@@ -141,7 +141,7 @@ void IPCSpecificInterfaceFuzzTest2(sptr<IRemoteObject> proxy, MessageParcel& sen
     proxy->SendRequest(
         static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_GET_SYSTEM_DECOR_ENABLE),
+    proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_GET_SYSTEM_CONFIG),
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION),
         sendData, reply, option);
@@ -152,9 +152,8 @@ void IPCSpecificInterfaceFuzzTest2(sptr<IRemoteObject> proxy, MessageParcel& sen
 
 bool IPCInterfaceFuzzTest(const uint8_t* data, size_t size)
 {
-    uint32_t code;
     int flags, waitTime;
-    if (data == nullptr || size < sizeof(code) + sizeof(flags) + sizeof(waitTime)) {
+    if (data == nullptr || size < sizeof(flags) + sizeof(waitTime)) {
         return false;
     }
     auto proxy = GetProxy();
@@ -162,7 +161,6 @@ bool IPCInterfaceFuzzTest(const uint8_t* data, size_t size)
         return false;
     }
     size_t startPos = 0;
-    startPos += GetObject<uint32_t>(code, data + startPos, size - startPos);
     startPos += GetObject<int>(flags, data + startPos, size - startPos);
     startPos += GetObject<int>(waitTime, data + startPos, size - startPos);
     MessageParcel sendData;
@@ -170,7 +168,6 @@ bool IPCInterfaceFuzzTest(const uint8_t* data, size_t size)
     MessageOption option(flags, waitTime);
     sendData.WriteInterfaceToken(proxy.first->GetDescriptor());
     sendData.WriteBuffer(data + startPos, size - startPos);
-    proxy.second->SendRequest(code, sendData, reply, option);
     IPCSpecificInterfaceFuzzTest1(proxy.second, sendData, reply, option);
     IPCSpecificInterfaceFuzzTest2(proxy.second, sendData, reply, option);
     return true;
