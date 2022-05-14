@@ -86,7 +86,7 @@ std::mutex mtx_;
 
 NativeValue* OnGetAllScreens(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsScreenManager::OnGetAllScreens is called");
+    WLOGFI("OnGetAllScreens is called");
     AsyncTask::CompleteCallback complete =
         [this](NativeEngine& engine, AsyncTask& task, int32_t status) {
             std::vector<sptr<Screen>> screens = SingletonContainer::Get<ScreenManager>().GetAllScreens();
@@ -271,8 +271,8 @@ NativeValue* OnUnregisterScreenManagerCallback(NativeEngine& engine, NativeCallb
 
 NativeValue* OnMakeMirror(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsScreenManager::OnMakeMirror is called");
-    if (info.argc != ARGC_TWO) {
+    WLOGFI("OnMakeMirror is called");
+    if (info.argc != ARGC_TWO && info.argc != ARGC_THREE) {
         WLOGFE("Params not match");
         return engine.CreateUndefined();
     }
@@ -304,11 +304,11 @@ NativeValue* OnMakeMirror(NativeEngine& engine, NativeCallbackInfo& info)
             ScreenId id = SingletonContainer::Get<ScreenManager>().MakeMirror(mainScreenId, screenIds);
             if (id != SCREEN_ID_INVALID) {
                 task.Resolve(engine, CreateJsValue(engine, static_cast<uint32_t>(id)));
-                WLOGFI("JsScreenManager::MakeMirror success");
+                WLOGFI("MakeMirror success");
             } else {
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsScreenManager::OnMakeMirror failed."));
-                WLOGFE("JsScreenManager::MakeMirror failed");
+                WLOGFE("MakeMirror failed");
             }
         };
     NativeValue* lastParam = nullptr;
@@ -323,8 +323,8 @@ NativeValue* OnMakeMirror(NativeEngine& engine, NativeCallbackInfo& info)
 
 NativeValue* OnMakeExpand(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("JsScreenManager::OnMakeExpand is called");
-    if (info.argc != ARGC_ONE) {
+    WLOGFI("OnMakeExpand is called");
+    if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
         WLOGFE("Params not match");
         return engine.CreateUndefined();
     }
@@ -352,11 +352,11 @@ NativeValue* OnMakeExpand(NativeEngine& engine, NativeCallbackInfo& info)
             ScreenId id = SingletonContainer::Get<ScreenManager>().MakeExpand(options);
             if (id != SCREEN_ID_INVALID) {
                 task.Resolve(engine, CreateJsValue(engine, static_cast<uint32_t>(id)));
-                WLOGFI("JsScreenManager::MakeExpand success");
+                WLOGFI("MakeExpand success");
             } else {
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsScreenManager::OnMakeExpand failed."));
-                WLOGFE("JsScreenManager::MakeExpand failed");
+                WLOGFE("MakeExpand failed");
             }
         };
     NativeValue* lastParam = nullptr;
