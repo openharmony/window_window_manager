@@ -27,11 +27,6 @@ declare namespace screen {
    * @since 9
    */
   function getAllScreens(callback: AsyncCallback<Array<Screen>>): void;
-
-  /**
-   * get all screen
-   * @since 9
-   */
   function getAllScreens(): Promise<Array<Screen>>;
 
   /**
@@ -52,24 +47,14 @@ declare namespace screen {
    * make screens as expand-screen
    * @since 9
    */
-   function makeExpand(options:Array<ExpandOption>, callback: AsyncCallback<number>): void;
-
-   /**
-   * make screens as expand-screen
-   * @since 9
-   */
+  function makeExpand(options:Array<ExpandOption>, callback: AsyncCallback<number>): void;
   function makeExpand(options:Array<ExpandOption>): Promise<number>;
 
   /**
    * make screens as mirror-screen
    * @since 9
    */
-   function makeMirror(mainScreen:number, mirrorScreen:Array<number>, callback: AsyncCallback<number>): void;
-
-  /**
-   * make screens as mirror-screen
-   * @since 9
-   */
+  function makeMirror(mainScreen:number, mirrorScreen:Array<number>, callback: AsyncCallback<number>): void;
   function makeMirror(mainScreen:number, mirrorScreen:Array<number>): Promise<number>;
 
   /**
@@ -129,27 +114,17 @@ declare namespace screen {
      * set the orientation of the screen
      * @since 9
      */
-     setOrientation(orientation: Orientation, callback: AsyncCallback<boolean>): void;
-
-     /**
-     * set the orientation of the screen
-     * @since 9
-     */
-    setOrientation(orientation: Orientation): Promise<boolean>;
+    setOrientation(orientation: Orientation, callback: AsyncCallback<void>): void;
+    setOrientation(orientation: Orientation): Promise<void>;
 
     /**
      * active the mode
      */
-    setScreenActiveMode(modeIndex: number, callback: AsyncCallback<boolean>): void;
+    setScreenActiveMode(modeIndex: number, callback: AsyncCallback<void>): void;
+    setScreenActiveMode(modeIndex: number): Promise<void>;
 
-    /**
-     * active the mode
-     */
-    setScreenActiveMode(modeIndex: number): Promise<boolean>;
-
-    setDensityDpi(densityDpi: number, callback: AsyncCallback<boolean>): void;
-
-    setDensityDpi(densityDpi: number): Promise<boolean>;
+    setDensityDpi(densityDpi: number, callback: AsyncCallback<void>): void;
+    setDensityDpi(densityDpi: number): Promise<void>;
   }
 
   /**
