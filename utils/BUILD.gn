@@ -51,9 +51,9 @@ ohos_shared_library("libwmutil") {
   public_configs = [ ":libwmutil_public_config" ]
 
   deps = [
-    "//foundation/arkui/ace_engine/build/external_config/flutter/skia:ace_skia_ohos",
     "//foundation/graphic/graphic/rosen/modules/render_service_base:librender_service_base",
     "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
+    "//third_party/flutter/build/skia:ace_skia_ohos",
   ]
 
   external_deps = [
