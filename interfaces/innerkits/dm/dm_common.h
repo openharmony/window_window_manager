@@ -70,7 +70,7 @@ enum class DMError : int32_t {
     DM_ERROR_WRITE_DATA_FAILED = 170,
     DM_ERROR_RENDER_SERVICE_FAILED = 180,
     DM_ERROR_UNREGISTER_AGENT_FAILED = 190,
-    DM_ERROR_UNKNOWN,
+    DM_ERROR_UNKNOWN = -1,
 };
 using DisplayStateCallback = std::function<void(DisplayState)>;
 
