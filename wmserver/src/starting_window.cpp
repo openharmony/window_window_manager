@@ -28,6 +28,8 @@ namespace {
 
 SurfaceDraw StartingWindow::surfaceDraw_;
 static bool g_hasInit = false;
+static bool g_initStart = false;
+static std::shared_ptr<RSSurfaceNode> g_startingWinSurfaceNode = nullptr;
 
 sptr<WindowNode> StartingWindow::CreateWindowNode(sptr<WindowTransitionInfo> info, uint32_t winId)
 {
@@ -65,14 +67,17 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
         WLOGFE("create leashWinSurfaceNode failed");
         return WMError::WM_ERROR_NULLPTR;
     }
-
-    rsSurfaceNodeConfig.SurfaceNodeName = "startingWindow" + std::to_string(node->GetWindowId());
-    node->startingWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
-    if (node->startingWinSurfaceNode_ == nullptr) {
-        WLOGFE("create startingWinSurfaceNode failed");
-        node->leashWinSurfaceNode_ = nullptr;
-        return WMError::WM_ERROR_NULLPTR;
+    if (!g_initStart) {
+        rsSurfaceNodeConfig.SurfaceNodeName = "startingWindow";
+        g_startingWinSurfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+        if (g_startingWinSurfaceNode == nullptr) {
+            WLOGFE("create startingWinSurfaceNode failed");
+            node->leashWinSurfaceNode_ = nullptr;
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        g_initStart = true;
     }
+    node->startingWinSurfaceNode_ = g_startingWinSurfaceNode;
     WLOGFI("Create leashWinSurfaceNode and startingWinSurfaceNode success!");
     return WMError::WM_OK;
 }
@@ -117,6 +122,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
         WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", node->GetWindowId());
         node->leashWinSurfaceNode_->RemoveChild(node->startingWinSurfaceNode_);
         node->leashWinSurfaceNode_->AddChild(node->surfaceNode_, -1);
+        node->startingWinSurfaceNode_ = nullptr;
         AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(node->abilityToken_);
         RSTransaction::FlushImplicitTransaction();
     };
