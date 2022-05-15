@@ -90,7 +90,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
 
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override;
-    WMError GetSystemDecorEnable(bool& isSystemDecorEnable) override;
+    WMError GetSystemConfig(SystemConfig& systemConfig) override;
     WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) override;
     void StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
         bool isColdStart, uint32_t bkgColor = 0xffffffff);
@@ -118,7 +118,7 @@ private:
     sptr<DragController> dragController_;
     sptr<FreezeController> freezeDisplayController_;
     sptr<WindowDumper> windowDumper_;
-    bool isSystemDecorEnable_ = true;
+    SystemConfig systemConfig_;
     ModeChangeHotZonesConfig hotZonesConfig_ { false, 0, 0, 0 };
 };
 }

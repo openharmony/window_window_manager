@@ -80,7 +80,6 @@ public:
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     std::vector<DisplayId> GetAllDisplayIds() const;
-    void SetWindowStretchable(bool stretchable);
 
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
@@ -112,7 +111,6 @@ private:
         this, std::placeholders::_1));
     Callback callback_;
     int maxAppWindowNumber_ = 100;
-    bool isWindowStretchable_ = false;
 };
 }
 }

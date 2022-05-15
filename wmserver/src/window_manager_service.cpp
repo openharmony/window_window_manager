@@ -190,7 +190,7 @@ void WindowManagerService::ConfigureWindowManagerService()
     const auto& numbersConfig = WindowManagerConfig::GetNumbersConfig();
 
     if (enableConfig.count("decor") != 0) {
-        isSystemDecorEnable_ = enableConfig.at("decor");
+        systemConfig_.isSystemDecorEnable_ = enableConfig.at("decor");
     }
 
     if (enableConfig.count("minimizeByOther") != 0) {
@@ -199,7 +199,7 @@ void WindowManagerService::ConfigureWindowManagerService()
     }
 
     if (enableConfig.count("stretchable") != 0) {
-        windowRoot_->SetWindowStretchable(enableConfig.at("stretchable"));
+        systemConfig_.isStretchable_ = enableConfig.at("stretchable");
     }
 
     if (numbersConfig.count("maxAppWindowNumber") != 0) {
@@ -479,9 +479,10 @@ WMError WindowManagerService::GetAccessibilityWindowInfo(sptr<AccessibilityWindo
     return res;
 }
 
-WMError WindowManagerService::GetSystemDecorEnable(bool& isSystemDecorEnable)
+WMError WindowManagerService::GetSystemConfig(SystemConfig& systemConfig)
 {
-    isSystemDecorEnable = isSystemDecorEnable_;
+    systemConfig.isSystemDecorEnable_ = systemConfig_.isSystemDecorEnable_;
+    systemConfig.isStretchable_ = systemConfig_.isStretchable_;
     return WMError::WM_OK;
 }
 

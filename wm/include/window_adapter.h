@@ -52,7 +52,7 @@ public:
     virtual WMError MaxmizeWindow(uint32_t windowId);
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode);
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);
-    virtual WMError GetSystemDecorEnable(bool& isSystemDecorEnable);
+    virtual WMError GetSystemConfig(SystemConfig& systemConfig);
     virtual WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones);
 
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,

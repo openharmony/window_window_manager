@@ -285,7 +285,7 @@ WMError WindowImpl::SetWindowType(WindowType type)
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         property_->SetWindowType(type);
-        if (isAppDecorEnbale_ && isSystemDecorEnable_) {
+        if (isAppDecorEnbale_ && windowSystemConfig_.isSystemDecorEnable_) {
             property_->SetDecorEnable(WindowHelper::IsMainWindow(property_->GetWindowType()));
         }
         AdjustWindowAnimationFlag();
@@ -406,7 +406,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         WLOGFE("fail to SetUIContent id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!isAppDecorEnbale_ || !isSystemDecorEnable_) {
+    if (!isAppDecorEnbale_ || !windowSystemConfig_.isSystemDecorEnable_) {
         WLOGFI("app set decor enable false");
         property_->SetDecorEnable(false);
     }
@@ -641,9 +641,9 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     }
     property_->SetWindowId(windowId);
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        if (SingletonContainer::Get<WindowAdapter>().GetSystemDecorEnable(isSystemDecorEnable_) == WMError::WM_OK) {
-            WLOGFE("get system decor enable:%{public}d", isSystemDecorEnable_);
-            if (isSystemDecorEnable_) {
+        if (SingletonContainer::Get<WindowAdapter>().GetSystemConfig(windowSystemConfig_) == WMError::WM_OK) {
+            WLOGFE("get system decor enable:%{public}d", windowSystemConfig_.isSystemDecorEnable_);
+            if (windowSystemConfig_.isSystemDecorEnable_) {
                 property_->SetDecorEnable(true);
             }
         }
@@ -1362,7 +1362,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
     Rect rectToAce = rect;
 
     // update rectToAce for stretchable window
-    if (isStretchable_ && GetMode() == WindowMode::WINDOW_MODE_FLOATING) {
+    if (windowSystemConfig_.isStretchable_ && GetMode() == WindowMode::WINDOW_MODE_FLOATING) {
         if (reason == WindowSizeChangeReason::RESIZE ||
         reason == WindowSizeChangeReason::RECOVER) {
             originRect_ = rect;
@@ -1707,7 +1707,7 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
     if (IsPointerEventConsumed()) {
         return;
     }
-    if (isStretchable_ && GetMode() == WindowMode::WINDOW_MODE_FLOATING) {
+    if (windowSystemConfig_.isStretchable_ && GetMode() == WindowMode::WINDOW_MODE_FLOATING) {
         WLOGFI("update pointer event for stretchable window");
         UpdatePointerEventForStretchableWindow(pointerEvent);
     }
@@ -1882,12 +1882,6 @@ void WindowImpl::UpdateActiveStatus(bool isActive)
     } else {
         NotifyAfterInactive();
     }
-}
-
-void WindowImpl::UpdateWindowStretchable(bool stretchable)
-{
-    WLOGFI("window stretchable: %{public}d, id: %{public}u", stretchable, property_->GetWindowId());
-    isStretchable_ = stretchable;
 }
 
 Rect WindowImpl::GetSystemAlarmWindowDefaultSize(Rect defaultRect)

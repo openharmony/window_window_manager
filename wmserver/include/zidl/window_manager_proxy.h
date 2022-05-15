@@ -54,7 +54,7 @@ public:
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override;
 
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
-    WMError GetSystemDecorEnable(bool& isSystemDecorEnable) override;
+    WMError GetSystemConfig(SystemConfig& systemConfig) override;
     WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) override;
 
 private:

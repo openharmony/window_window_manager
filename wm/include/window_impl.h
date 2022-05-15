@@ -178,7 +178,6 @@ public:
     void UpdateDisplayId(DisplayId from, DisplayId to);
     void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info);
     void UpdateActiveStatus(bool isActive);
-    void UpdateWindowStretchable(bool stretchable);
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
@@ -314,8 +313,7 @@ private:
     Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
     Rect originRect_ = {0, 0, 0, 0};
     bool isAppDecorEnbale_ = true;
-    bool isSystemDecorEnable_ = true;
-    bool isStretchable_ = false;
+    SystemConfig windowSystemConfig_ ;
     bool isStretchableSet_ = false;
 };
 }

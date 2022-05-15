@@ -231,27 +231,6 @@ void WindowProxy::UpdateActiveStatus(bool isActive)
     return;
 }
 
-void WindowProxy::UpdateWindowStretchable(bool stretchable)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return;
-    }
-    if (!data.WriteBool(stretchable)) {
-        WLOGFE("Write Focus failed");
-        return;
-    }
-
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_UPDATE_WINDOW_STRETCHABLE),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-    }
-    return;
-}
-
 sptr<WindowProperty> WindowProxy::GetWindowProperty()
 {
     MessageParcel data;
