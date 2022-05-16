@@ -545,7 +545,7 @@ WMError WindowManagerProxy::GetAccessibilityWindowInfo(sptr<AccessibilityWindowI
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::GetSystemDecorEnable(bool& isSystemDecorEnable)
+WMError WindowManagerProxy::GetSystemConfig(SystemConfig& systemConfig)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -554,15 +554,12 @@ WMError WindowManagerProxy::GetSystemDecorEnable(bool& isSystemDecorEnable)
         WLOGFE("WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteBool(isSystemDecorEnable)) {
-        WLOGFE("Write bool isSystemDecorEnable failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_SYSTEM_DECOR_ENABLE),
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_SYSTEM_CONFIG),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    isSystemDecorEnable = reply.ReadBool();
+    systemConfig.isSystemDecorEnable_ = reply.ReadBool();
+    systemConfig.isStretchable_ = reply.ReadBool();
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
 }
