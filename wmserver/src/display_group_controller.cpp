@@ -107,23 +107,133 @@ void DisplayGroupController::UpdateWindowNodeMaps()
 
 void DisplayGroupController::ProcessCrossNodes(DisplayStateChangeType type)
 {
-    WLOGFI("ProcessCrossNodes");
+    defaultDisplayId_ = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    for (auto& iter : windowNodeMaps_) {
+        auto& nodeVec = *(iter.second[WindowRootNodeType::APP_WINDOW_NODE]);
+        for (auto& node : nodeVec) {
+            if (node->isShowingOnMultiDisplays_) {
+                WLOGFI("process cross node, windowId: %{public}u, displayId: %{public}" PRIu64"",
+                    node->GetWindowId(), node->GetDisplayId());
+                auto showingDisplays = node->GetShowingDisplays();
+
+                DisplayId newDisplayId;
+                if (type == DisplayStateChangeType::SIZE_CHANGE || type == DisplayStateChangeType::UPDATE_ROTATION) {
+                    newDisplayId = node->GetDisplayId();
+                } else {
+                    newDisplayId = defaultDisplayId_;
+                }
+
+                for (auto& displayId : showingDisplays) {
+                    if (displayId == newDisplayId) {
+                        continue;
+                    }
+                    windowNodeContainer_->UpdateRSTree(node, displayId, false);
+                }
+                // update shown displays and displayId
+                MoveCrossNodeToTargetDisplay(node, newDisplayId);
+            }
+        }
+    }
+}
+
+void DisplayGroupController::FindMaxAndMinPosXDisplay()
+{
+    minPosXDisplay_ = displayRectMap_.begin()->first;
+    maxPosXDisplay_ = displayRectMap_.begin()->first;
+    for (auto& elem : displayRectMap_) {
+        auto& curDisplayRect = elem.second;
+        if (curDisplayRect.posX_ < displayRectMap_[minPosXDisplay_].posX_) {
+            minPosXDisplay_ = elem.first;
+        }
+        if ((curDisplayRect.posX_ + static_cast<int32_t>(curDisplayRect.width_)) >
+            (displayRectMap_[maxPosXDisplay_].posX_ + static_cast<int32_t>(displayRectMap_[maxPosXDisplay_].width_))) {
+            maxPosXDisplay_ = elem.first;
+        }
+    }
+    WLOGFI("max posX displayId: %{public}" PRIu64", min posX displayId: %{public}" PRIu64"",
+        maxPosXDisplay_, minPosXDisplay_);
 }
 
 void DisplayGroupController::UpdateWindowShowingDisplays(const sptr<WindowNode>& node, const Rect& requestRect)
 {
-    WLOGFI("UpdateWindowShowingDisplays");
+    auto showingDisplays = std::vector<DisplayId>();
+    for (auto& elem : displayRectMap_) {
+        auto& curDisplayRect = elem.second;
+
+        // if window is showing in display region
+        if (((requestRect.posX_ + static_cast<int32_t>(requestRect.width_)) > curDisplayRect.posX_) &&
+            (requestRect.posX_ < (curDisplayRect.posX_ + static_cast<int32_t>(curDisplayRect.width_)))) {
+            showingDisplays.push_back(elem.first);
+        }
+    }
+
+    // if window is not showing on any display, maybe in the left of minPosX display, or the right of maxPosX display
+    if (showingDisplays.empty()) {
+        if (((requestRect.posX_ + static_cast<int32_t>(requestRect.width_)) <=
+            displayRectMap_[minPosXDisplay_].posX_)) {
+            showingDisplays.push_back(minPosXDisplay_);
+        }
+        if (requestRect.posX_ >=
+            (displayRectMap_[maxPosXDisplay_].posX_ + static_cast<int32_t>(displayRectMap_[maxPosXDisplay_].width_))) {
+            showingDisplays.push_back(maxPosXDisplay_);
+        }
+    }
+
+    // mean that this is cross-display window
+    if (showingDisplays.size() > 1) {
+        node->isShowingOnMultiDisplays_ = true;
+    }
+    node->SetShowingDisplays(showingDisplays);
 }
 
 void DisplayGroupController::UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode>& node,
                                                            const std::vector<DisplayId>& curShowingDisplays)
 {
-    WLOGFI("UpdateWindowDisplayIdIfNeeded");
+    // current mutiDisplay is only support left-right combination, maxNum is two
+    DisplayId newDisplayId = node->GetDisplayId();
+    if (curShowingDisplays.size() == 1) {
+        newDisplayId = *(curShowingDisplays.begin());
+    } else {
+        // if more than half width of the window is showing on the display, means the window belongs to this display
+        const Rect& requestRect = node->GetRequestRect();
+        int32_t halfWidth = static_cast<int32_t>(requestRect.width_ * 0.5);
+        for (auto& elem : displayRectMap_) {
+            auto& displayRect = elem.second;
+            if ((requestRect.posX_ < displayRect.posX_) &&
+                (requestRect.posX_ + static_cast<int32_t>(requestRect.width_) >
+                displayRect.posX_ + static_cast<int32_t>(displayRect.width_))) { // window covers whole display region
+                newDisplayId = elem.first;
+                break;
+            }
+            if (requestRect.posX_ >= displayRect.posX_) { // current display is default display
+                if ((displayRect.posX_ + static_cast<int32_t>(displayRect.width_) - requestRect.posX_) >= halfWidth) {
+                    newDisplayId = elem.first;
+                    break;
+                }
+            } else { // current display is expand display
+                if ((requestRect.posX_ + static_cast<int32_t>(requestRect.width_) - displayRect.posX_) >= halfWidth) {
+                    newDisplayId = elem.first;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (node->GetDisplayId() != newDisplayId) {
+        UpdateWindowDisplayId(node, newDisplayId);
+    }
 }
 
-void DisplayGroupController::CalculateNodeAbsoluteCordinate(const sptr<WindowNode>& node)
+void DisplayGroupController::ChangeToRectInDisplayGroup(const sptr<WindowNode>& node)
 {
-    WLOGFI("CalculateNodeAbsoluteCordinate");
+    Rect requestRect = node->GetRequestRect();
+    const Rect& displayRect = displayRectMap_[node->GetDisplayId()];
+    requestRect.posX_ += displayRect.posX_;
+    requestRect.posY_ += displayRect.posY_;
+    node->SetRequestRect(requestRect);
+
+    std::vector<DisplayId> curShowingDisplays = { node->GetDisplayId() };
+    node->SetShowingDisplays(curShowingDisplays);
 }
 
 void DisplayGroupController::PreProcessWindowNode(const sptr<WindowNode>& node, WindowUpdateType type)
@@ -139,27 +249,120 @@ void DisplayGroupController::PreProcessWindowNode(const sptr<WindowNode>& node, 
         WLOGFI("Current mode is not muti-display");
         return;
     }
+
+    switch (type) {
+        case WindowUpdateType::WINDOW_UPDATE_ADDED: {
+            if (!node->isShowingOnMultiDisplays_) {
+                // change rect to rect in display group
+                ChangeToRectInDisplayGroup(node);
+            }
+            UpdateWindowShowingDisplays(node, node->GetRequestRect());
+            WLOGFI("preprocess node when add window");
+            break;
+        }
+        case WindowUpdateType::WINDOW_UPDATE_ACTIVE: {
+            // MoveTo can be called by user, calculate rect in display group if the reason is move
+            if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
+                ChangeToRectInDisplayGroup(node);
+            }
+            UpdateWindowShowingDisplays(node, node->GetRequestRect());
+            const auto& curShowingDisplays = node->GetShowingDisplays();
+            UpdateWindowDisplayIdIfNeeded(node, curShowingDisplays);
+            WLOGFI("preprocess node when update window");
+            break;
+        }
+        default:
+            break;
+    }
+
+    for (auto& childNode : node->children_) {
+        PreProcessWindowNode(childNode, type);
+    }
 }
 
 void DisplayGroupController::UpdateWindowDisplayId(const sptr<WindowNode>& node, DisplayId newDisplayId)
 {
-    WLOGFI("UpdateWindowDisplayId");
+    WLOGFI("update node displayId, srcDisplayId: %{public}" PRIu64", newDisplayId: %{public}" PRIu64"",
+        node->GetDisplayId(), newDisplayId);
+    if (node->GetWindowToken()) {
+        node->GetWindowToken()->UpdateDisplayId(node->GetDisplayId(), newDisplayId);
+    }
+    node->SetDisplayId(newDisplayId);
 }
 
 void DisplayGroupController::MoveCrossNodeToTargetDisplay(const sptr<WindowNode>& node, DisplayId targetDisplayId)
 {
-    WLOGFI("MoveCrossNodeToTargetDisplay");
+    node->isShowingOnMultiDisplays_ = false;
+    // update showing display
+    std::vector<DisplayId> newShownDisplays = { targetDisplayId };
+    node->SetShowingDisplays(newShownDisplays);
+    // update new displayId
+    if (node->GetDisplayId() != targetDisplayId) {
+        UpdateWindowDisplayId(node, targetDisplayId);
+    }
+
+    for (auto& childNode : node->children_) {
+        MoveCrossNodeToTargetDisplay(childNode, targetDisplayId);
+    }
 }
 
 void DisplayGroupController::MoveNotCrossNodeToDefaultDisplay(const sptr<WindowNode>& node, DisplayId displayId)
 {
-    WLOGFI("MoveNotCrossNodeToDefaultDisplay");
+    WLOGFI("windowId: %{public}d, displayId: %{public}" PRIu64"", node->GetWindowId(), displayId);
+
+    // update new rect in display group
+    Rect srcDisplayRect = displayRectMap_[displayId];
+    Rect dstDisplayRect = displayRectMap_[defaultDisplayId_];
+    Rect newRect = node->GetRequestRect();
+    newRect.posX_ = newRect.posX_ - srcDisplayRect.posX_ + dstDisplayRect.posX_;
+    newRect.posY_ = newRect.posY_ - srcDisplayRect.posY_ + dstDisplayRect.posY_;
+    node->SetRequestRect(newRect);
+    // update showing display
+    std::vector<DisplayId> newShownDisplays = { defaultDisplayId_ };
+    node->SetShowingDisplays(newShownDisplays);
+    // update new displayId
+    UpdateWindowDisplayId(node, defaultDisplayId_);
+
+    for (auto& childNode : node->children_) {
+        MoveNotCrossNodeToDefaultDisplay(childNode, displayId);
+    }
 }
 
 void DisplayGroupController::ProcessNotCrossNodesOnDestroiedDisplay(DisplayId displayId,
                                                                     std::vector<uint32_t>& windowIds)
 {
-    WLOGFI("ProcessNotCrossNodesOnDestroiedDisplay");
+    if (displayId == defaultDisplayId_) {
+        WLOGFE("Move window nodes failed, displayId is the same as defaultDisplayId");
+    }
+    WLOGFI("move window nodes for display destroy, displayId: %{public}" PRIu64"", displayId);
+
+    std::vector<WindowRootNodeType> rootNodeType = {
+        WindowRootNodeType::ABOVE_WINDOW_NODE,
+        WindowRootNodeType::APP_WINDOW_NODE,
+        WindowRootNodeType::BELOW_WINDOW_NODE
+    };
+    for (size_t index = 0; index < rootNodeType.size(); ++index) {
+        auto& nodesVec = *(windowNodeMaps_[displayId][rootNodeType[index]]);
+        for (auto& node : nodesVec) {
+            if (node->GetDisplayId() != displayId || node->isShowingOnMultiDisplays_) {
+                continue;
+            }
+            // destroy status and navigati
+            if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
+                node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+                windowNodeContainer_->DestroyWindowNode(node, windowIds);
+                WLOGFI("destroy status or navigationbar on destroied display, windowId: %{public}d",
+                    node->GetWindowId());
+                continue;
+            }
+            // move not cross-display nodes to default display
+            MoveNotCrossNodeToDefaultDisplay(node, displayId);
+
+            // update RS tree
+            windowNodeContainer_->UpdateRSTree(node, displayId, false);
+            windowNodeContainer_->UpdateRSTree(node, defaultDisplayId_, true);
+        }
+    }
 }
 
 void DisplayGroupController::ProcessDisplayCreate(DisplayId displayId,
@@ -200,6 +403,7 @@ void DisplayGroupController::ProcessDisplayCreate(DisplayId displayId,
         WLOGFI("displayId: %{public}" PRIu64", displayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
             elem.first, displayRect.posX_, displayRect.posY_, displayRect.width_, displayRect.height_);
     }
+    FindMaxAndMinPosXDisplay();
     windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayCreate(displayId, displayRectMap_);
 }
 
@@ -235,7 +439,7 @@ void DisplayGroupController::ProcessDisplayDestroy(DisplayId displayId,
                 elem.first, displayRect.posX_, displayRect.posY_, displayRect.width_, displayRect.height_);
         }
     }
-
+    FindMaxAndMinPosXDisplay();
     windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayDestroy(displayId, displayRectMap_);
 }
 
@@ -269,6 +473,7 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId displayId,
             break;
         }
     }
+    FindMaxAndMinPosXDisplay();
 }
 
 void DisplayGroupController::ProcessDisplaySizeChangeOrRotation(DisplayId displayId,

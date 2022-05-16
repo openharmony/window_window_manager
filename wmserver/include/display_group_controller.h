@@ -72,13 +72,16 @@ private:
                                        const std::vector<DisplayId>& curShowingDisplays);
     void UpdateWindowDisplayId(const sptr<WindowNode>& node, DisplayId newDisplayId);
     void ClearMapOfDestroiedDisplay(DisplayId displayId);
-    void CalculateNodeAbsoluteCordinate(const sptr<WindowNode>& node);
+    void ChangeToRectInDisplayGroup(const sptr<WindowNode>& node);
+    void FindMaxAndMinPosXDisplay();
 
     sptr<WindowNodeContainer> windowNodeContainer_;
     std::map<DisplayId, Rect>& displayRectMap_;
     std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap_;
     std::map<DisplayId, sptr<WindowPair>> windowPairMap_;
-    DisplayId defaultDisplayId_;
+    DisplayId defaultDisplayId_ { 0 };
+    DisplayId maxPosXDisplay_ { 0 };
+    DisplayId minPosXDisplay_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS
