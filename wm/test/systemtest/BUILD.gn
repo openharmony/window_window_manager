@@ -226,9 +226,6 @@ config("wm_systemtest_common_public_config") {
     "//base/global/resource_management/interfaces/inner_api/include",
     "//third_party/node/deps/icu-small/source/common",
     "${aainnerkits_path}/ability_manager/include",
-    "${aainnerkits_path}/want/include/ohos/aafwk/content",
-    "${aainnerkits_path}/base/include",
-    "${aainnerkits_path}/uri/include",
     "//third_party/jsoncpp/include",
     "//third_party/json/include",
 
@@ -270,6 +267,11 @@ ohos_static_library("wm_systemtest_common") {
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
-  external_deps = [ "bundle_framework:appexecfwk_base" ]
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
+  ]
 }
 ## Build wm_systemtest_common.a }}}
