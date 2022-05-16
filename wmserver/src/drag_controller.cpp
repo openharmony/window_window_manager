@@ -115,7 +115,7 @@ sptr<WindowNode> DragController::GetHitWindow(DisplayId id, PointInfo point)
     std::vector<sptr<WindowNode>> windowNodes;
     container->TraverseContainer(windowNodes);
     for (auto windowNode : windowNodes) {
-        if (windowNode->GetWindowType() >= WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
+        if (windowNode->GetWindowType() >= WindowType::WINDOW_TYPE_PANEL) {
             continue;
         }
         if (WindowHelper::IsPointInTargetRect(point.x, point.y, windowNode->GetWindowRect())) {
