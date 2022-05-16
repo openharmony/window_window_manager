@@ -102,11 +102,6 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             UpdateActiveStatus(isActive);
             break;
         }
-        case WindowMessage::TRANS_ID_UPDATE_WINDOW_STRETCHABLE: {
-            bool stretchable = data.ReadBool();
-            UpdateWindowStretchable(stretchable);
-            break;
-        }
         case WindowMessage::TRANS_ID_GET_WINDOW_PROPERTY: {
             auto property = GetWindowProperty();
             reply.WriteParcelable(property.GetRefPtr());

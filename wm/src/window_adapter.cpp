@@ -156,11 +156,11 @@ WMError WindowAdapter::MaxmizeWindow(uint32_t windowId)
     return windowManagerServiceProxy_->MaxmizeWindow(windowId);
 }
 
-WMError WindowAdapter::GetSystemDecorEnable(bool& isSystemDecorEnable)
+WMError WindowAdapter::GetSystemConfig(SystemConfig& systemConfig)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
-    return windowManagerServiceProxy_->GetSystemDecorEnable(isSystemDecorEnable);
+    return windowManagerServiceProxy_->GetSystemConfig(systemConfig);
 }
 
 WMError WindowAdapter::GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones)
