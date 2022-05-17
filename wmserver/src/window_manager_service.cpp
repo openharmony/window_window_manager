@@ -194,7 +194,6 @@ void WindowManagerService::ConfigureWindowManagerService()
     }
 
     if (enableConfig.count("minimizeByOther") != 0) {
-        windowController_->SetMinimizedByOtherWindow(enableConfig.at("minimizeByOther"));
         MinimizeApp::SetMinimizedByOtherConfig(enableConfig.at("minimizeByOther"));
     }
 

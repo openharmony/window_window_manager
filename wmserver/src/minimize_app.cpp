@@ -26,15 +26,18 @@ namespace {
 
 std::map<MinimizeReason, std::vector<sptr<WindowNode>>> MinimizeApp::needMinimizeAppNodes_;
 bool MinimizeApp::isMinimizedByOtherWindow_ = true;
+std::recursive_mutex MinimizeApp::mutex_;
 
 void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReason reason)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     WLOGFI("[Minimize] Add Window %{public}u to minimize list, reason %{public}u", node->GetWindowId(), reason);
     needMinimizeAppNodes_[reason].emplace_back(node);
 }
 
 void MinimizeApp::ExecuteMinimizeAll()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto& appNodes: needMinimizeAppNodes_) {
         bool isFromUser = IsFromUser(appNodes.first);
         if (!isMinimizedByOtherWindow_ && !isFromUser) {
@@ -52,8 +55,32 @@ void MinimizeApp::ExecuteMinimizeAll()
     needMinimizeAppNodes_.clear();
 }
 
+void MinimizeApp::ClearNodesWithReason(MinimizeReason reason)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
+        needMinimizeAppNodes_.at(reason).clear();
+    }
+}
+
+bool MinimizeApp::IsNodeNeedMinimize(const sptr<WindowNode>& node)
+{
+    if (node == nullptr) {
+        WLOGFE("[Minimize] node is nullptr");
+        return false;
+    }
+    for (auto iter : needMinimizeAppNodes_) {
+        auto nodes = iter.second;
+        if (std::find(nodes.begin(), nodes.end(), node) != nodes.end()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason reason)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
         bool isFromUser = IsFromUser(reason);
         if (!isMinimizedByOtherWindow_ && !isFromUser) {

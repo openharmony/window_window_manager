@@ -57,7 +57,6 @@ public:
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
-    void SetMinimizedByOtherWindow(bool isMinimizedByOtherWindow);
     void StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
         uint32_t bkgColor, bool isColdStart);
     void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
@@ -75,7 +74,6 @@ private:
     WMError SetWindowMode(uint32_t windowId, WindowMode dstMode);
     void ReSizeSystemBarPropertySizeIfNeed(sptr<WindowNode> node);
     void HandleTurnScreenOn(const sptr<WindowNode>& node);
-    bool IsWindowNeedMinimizedByOther(const sptr<WindowNode>& target, const sptr<WindowNode>& other);
     void ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo);
 
     sptr<WindowRoot> windowRoot_;
@@ -89,7 +87,6 @@ private:
     std::unordered_map<WindowType, std::map<uint32_t, std::map<uint32_t, Rect>>> systemBarRect_;
     std::unordered_map<DisplayId, sptr<DisplayInfo>> curDisplayInfo_;
     constexpr static float SYSTEM_BAR_HEIGHT_RATIO = 0.08;
-    bool isMinimizedByOtherWindow_ = true;
     bool isScreenLocked_ { false };
 };
 } // Rosen

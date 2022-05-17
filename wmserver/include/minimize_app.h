@@ -42,7 +42,8 @@ public:
     static void ExecuteMinimizeAll();
     static void ExecuteMinimizeTargetReason(MinimizeReason reason);
     static void SetMinimizedByOtherConfig(bool isMinimizedByOther);
-
+    static void ClearNodesWithReason(MinimizeReason reason);
+    static bool IsNodeNeedMinimize(const sptr<WindowNode>& node);
 private:
     static inline bool IsFromUser(MinimizeReason reason)
     {
@@ -52,6 +53,7 @@ private:
 
     static std::map<MinimizeReason, std::vector<sptr<WindowNode>>> needMinimizeAppNodes_;
     static bool isMinimizedByOtherWindow_;
+    static std::recursive_mutex mutex_;
 };
 } // Rosen
 } // OHOS

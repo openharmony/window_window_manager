@@ -439,24 +439,24 @@ bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability)
     napi_value global;
     auto env = reinterpret_cast<napi_env>(&engine);
     if (napi_get_global(env, &global) != napi_ok) {
-        WLOGFE("[NAPI]Get global failed");
+        WLOGFI("[NAPI]Get global failed");
         return false;
     }
     napi_value jsAbility;
     napi_status status = napi_get_named_property(env, global, "ability", &jsAbility);
     if (status != napi_ok || jsAbility == nullptr) {
-        WLOGFE("[NAPI]Get ability property failed");
+        WLOGFI("[NAPI]Get ability property failed");
         return false;
     }
 
     if (napi_get_value_external(env, jsAbility, reinterpret_cast<void **>(&ability)) != napi_ok) {
-        WLOGFE("[NAPI]Get ability external failed");
+        WLOGFI("[NAPI]Get ability external failed");
         return false;
     }
     if (ability == nullptr) {
         return false;
     } else {
-        WLOGI("[NAPI]Get ability");
+        WLOGFI("[NAPI]Get ability");
     }
     return true;
 }
