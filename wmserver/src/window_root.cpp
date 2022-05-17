@@ -30,9 +30,9 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowRoot"};
 }
 
-std::map<uint32_t, sptr<WindowNode>> WindowRoot::GetWindowNodeMap()
+uint32_t WindowRoot::GetTotalWindowNum()
 {
-    return windowNodeMap_;
+    return static_cast<uint32_t>(windowNodeMap_.size());
 }
 
 ScreenId WindowRoot::GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay)
@@ -192,8 +192,14 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
         AddDeathRecipient(node);
     }
     // Register FirstFrame Callback to rs, inform ability to get snapshot
-    auto firstFrameCompleteCallback = [node]() {
-        AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(node->abilityToken_);
+    wptr<WindowNode> weak = node;
+    auto firstFrameCompleteCallback = [weak]() {
+        auto weakNode = weak.promote();
+        if (weakNode == nullptr) {
+            WLOGFE("windowNode is nullptr");
+            return;
+        }
+        AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(weakNode->abilityToken_);
     };
     if (node->surfaceNode_ && WindowHelper::IsMainWindow(node->GetWindowType())) {
         node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
@@ -297,6 +303,55 @@ WMError WindowRoot::MaxmizeWindow(uint32_t windowId)
     return WMError::WM_OK;
 }
 
+void WindowRoot::DestroyLeakStartingWindow()
+{
+    std::vector<uint32_t> destroyIds;
+    for (auto& iter : windowNodeMap_) {
+        if (iter.second->startingWindowShown_ && !iter.second->GetWindowToken()) {
+            destroyIds.push_back(iter.second->GetWindowId());
+        }
+    }
+    for (auto& id : destroyIds) {
+        WLOGFI("Destroy Window id:%{public}u", id);
+        DestroyWindow(id, false);
+    }
+}
+
+WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode,
+    sptr<WindowNodeContainer>& container)
+{
+    if (WindowHelper::IsSubWindow(node->GetWindowType())) {
+        if (parentNode == nullptr) {
+            WLOGFE("window type is invalid");
+            return WMError::WM_ERROR_INVALID_TYPE;
+        }
+        sptr<WindowNode> parent = nullptr;
+        container->RaiseZOrderForAppWindow(parentNode, parent);
+    }
+    if (node->GetWindowProperty()->GetFocusable()) {
+        container->SetFocusWindow(node->GetWindowId());
+        needCheckFocusWindow = true;
+    }
+    container->SetActiveWindow(node->GetWindowId(), false);
+    NotifyKeyboardSizeChangeInfo(node, container, node->GetWindowRect());
+    for (auto& child : node->children_) {
+        if (child == nullptr || !child->currentVisibility_) {
+            break;
+        }
+        HandleKeepScreenOn(child->GetWindowId(), child->IsKeepScreenOn());
+    }
+    HandleKeepScreenOn(node->GetWindowId(), node->IsKeepScreenOn());
+    WLOGFI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
+        node->GetWindowId(), node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
+        node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
+    if (WindowHelper::IsMainWindow(node->GetWindowType()) &&
+        node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        DisplayManagerServiceInner::GetInstance().
+            SetOrientationFromWindow(node->GetDisplayId(), node->GetRequestedOrientation());
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin)
 {
     if (node == nullptr) {
@@ -320,38 +375,13 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
 
     auto parentNode = GetWindowNode(parentId);
     WMError res = container->AddWindowNode(node, parentNode);
-    if (res == WMError::WM_OK && WindowHelper::IsSubWindow(node->GetWindowType())) {
-        if (parentNode == nullptr) {
-            WLOGFE("window type is invalid");
-            return WMError::WM_ERROR_INVALID_TYPE;
-        }
-        sptr<WindowNode> parent = nullptr;
-        container->RaiseZOrderForAppWindow(parentNode, parent);
+    DestroyLeakStartingWindow();
+    if (res != WMError::WM_OK) {
+        WLOGFE("AddWindowNode failed with ret: %{public}u", static_cast<uint32_t>(res));
+        return res;
     }
-    if (res == WMError::WM_OK && node->GetWindowProperty()->GetFocusable()) {
-        container->SetFocusWindow(node->GetWindowId());
-        needCheckFocusWindow = true;
-    }
-    if (res == WMError::WM_OK) {
-        container->SetActiveWindow(node->GetWindowId(), false);
-        NotifyKeyboardSizeChangeInfo(node, container, node->GetWindowRect());
-        for (auto& child : node->children_) {
-            if (child == nullptr || !child->currentVisibility_) {
-                break;
-            }
-            HandleKeepScreenOn(child->GetWindowId(), child->IsKeepScreenOn());
-        }
-        HandleKeepScreenOn(node->GetWindowId(), node->IsKeepScreenOn());
-    }
-    WLOGFI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
-        node->GetWindowId(), node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
-        node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
-    if (res == WMError::WM_OK && WindowHelper::IsMainWindow(node->GetWindowType()) &&
-        node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        DisplayManagerServiceInner::GetInstance().
-            SetOrientationFromWindow(node->GetDisplayId(), node->GetRequestedOrientation());
-    }
-    return res;
+
+    return PostProcessAddWindowNode(node, parentNode, container);
 }
 
 WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
