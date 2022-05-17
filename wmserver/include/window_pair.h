@@ -54,7 +54,7 @@ public:
      * @param displayId the disply of window pair
      * @param appNode the window root of app window
      */
-    WindowPair(const DisplayId& displayId, WindowNodeMaps& windowNodeMaps);
+    WindowPair(const DisplayId& displayId, DisplayGroupWindowTree& displayGroupWindowTree);
 
     /**
      * Deconstructor used to deconstruct.
@@ -232,7 +232,7 @@ private:
     sptr<WindowNode> secondary_;
     sptr<WindowNode> divider_;
     WindowPairStatus status_ = {WindowPairStatus::STATUS_EMPTY};
-    WindowNodeMaps& windowNodeMaps_;
+    DisplayGroupWindowTree& displayGroupWindowTree_;
 };
 } // namespace Rosen
 } // namespace OHOS
