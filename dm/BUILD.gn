@@ -45,8 +45,8 @@ ohos_shared_library("libdm") {
   public_configs = [ ":libdm_public_config" ]
 
   deps = [
-    "//foundation/graphic/graphic/rosen/modules/render_service_base:librender_service_base",
-    "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/utils:libwmutil",
   ]
 
