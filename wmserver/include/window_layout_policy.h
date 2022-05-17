@@ -20,6 +20,7 @@
 #include <refbase.h>
 #include <set>
 
+#include "display_group_info.h"
 #include "display_info.h"
 #include "window_node.h"
 #include "wm_common.h"
@@ -27,13 +28,12 @@
 
 namespace OHOS {
 namespace Rosen {
-using WindowNodeMaps = std::map<DisplayId,
+using DisplayGroupWindowTree = std::map<DisplayId,
     std::map<WindowRootNodeType, std::unique_ptr<std::vector<sptr<WindowNode>>>>>;
 class WindowLayoutPolicy : public RefBase {
 public:
     WindowLayoutPolicy() = delete;
-    WindowLayoutPolicy(const std::map<DisplayId, Rect>& displayRectMap, WindowNodeMaps& windowNodeMaps,
-        std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap);
+    WindowLayoutPolicy(const sptr<DisplayGroupInfo>& displayGroupInfo, DisplayGroupWindowTree& displayGroupWindowTree);
     ~WindowLayoutPolicy() = default;
     virtual void Launch();
     virtual void Clean();
@@ -66,25 +66,25 @@ protected:
     void LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec);
     void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect);
     void UpdateRectInDisplayGroupForAllNodes(DisplayId displayId,
-                                             const Rect& srcDisplayRect,
-                                             const Rect& dstDisplayRect);
+                                             const Rect& oriDisplayRect,
+                                             const Rect& newDisplayRect);
     void UpdateRectInDisplayGroup(const sptr<WindowNode>& node,
-                                  const Rect& srcDisplayRect,
-                                  const Rect& dstDisplayRect);
+                                  const Rect& oriDisplayRect,
+                                  const Rect& newDisplayRect);
     void LimitWindowToBottomRightCorner(const sptr<WindowNode>& node);
     void UpdateDisplayGroupRect();
     void UpdateDisplayGroupLimitRect_();
     void UpdateMultiDisplayFlag();
     void PostProcessWhenDisplayChange();
+    void UpdateDisplayRectAndDisplayGroupInfo(const std::map<DisplayId, Rect>& displayRectMap);
 
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowType::WINDOW_TYPE_NAVIGATION_BAR,
     };
-    mutable std::map<DisplayId, Rect> displayRectMap_;
+    sptr<DisplayGroupInfo> displayGroupInfo_;
     mutable std::map<DisplayId, Rect> limitRectMap_;
-    WindowNodeMaps& windowNodeMaps_;
-    std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap_;
+    DisplayGroupWindowTree& displayGroupWindowTree_;
     Rect displayGroupRect_;
     Rect displayGroupLimitRect_;
     bool isMultiDisplay_ = false;

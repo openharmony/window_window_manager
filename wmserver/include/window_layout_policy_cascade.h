@@ -29,8 +29,8 @@ namespace Rosen {
 class WindowLayoutPolicyCascade : public WindowLayoutPolicy {
 public:
     WindowLayoutPolicyCascade() = delete;
-    WindowLayoutPolicyCascade(const std::map<DisplayId, Rect>& displayRectMap,
-        WindowNodeMaps& windowNodeMaps, std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap);
+    WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo>& displayGroupInfo,
+        DisplayGroupWindowTree& displayGroupWindowTree);
     ~WindowLayoutPolicyCascade() = default;
     void Launch() override;
     void Clean() override;

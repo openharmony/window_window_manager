@@ -70,6 +70,7 @@ ohos_shared_library("libwms") {
     "../wm/src/zidl/window_proxy.cpp",
     "src/avoid_area_controller.cpp",
     "src/display_group_controller.cpp",
+    "src/display_group_info.cpp",
     "src/drag_controller.cpp",
     "src/freeze_controller.cpp",
     "src/input_window_monitor.cpp",

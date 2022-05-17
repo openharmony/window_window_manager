@@ -21,6 +21,7 @@
 #include "display_info.h"
 #include "minimize_app.h"
 #include "display_group_controller.h"
+#include "display_group_info.h"
 #include "window_layout_policy.h"
 #include "window_manager.h"
 #include "window_node.h"
@@ -34,7 +35,7 @@ namespace Rosen {
 using WindowNodeOperationFunc = std::function<bool(sptr<WindowNode>)>; // return true indicates to stop traverse
 class WindowNodeContainer : public RefBase {
 public:
-    WindowNodeContainer(const sptr<DisplayInfo>& displayInfo);
+    WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, ScreenId displayGroupId);
     ~WindowNodeContainer();
     WMError ShowInTransition(sptr<WindowNode>& node);
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
@@ -157,9 +158,7 @@ private:
     sptr<WindowLayoutPolicy> layoutPolicy_;
     sptr<AvoidAreaController> avoidController_;
     sptr<DisplayGroupController> displayGroupController_;
-
-    std::map<DisplayId, Rect> displayRectMap_;
-    std::map<DisplayId, sptr<DisplayInfo>> displayInfosMap_;
+    sptr<DisplayGroupInfo> displayGroupInfo_;
 };
 } // namespace Rosen
 } // namespace OHOS
