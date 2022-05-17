@@ -13,7 +13,6 @@
 
 import("//build/ohos.gni")
 
-aainnerkits_path = "//foundation/aafwk/standard/interfaces/innerkits"
 aakits_path = "//foundation/aafwk/standard/frameworks/kits"
 
 config("display_config") {
@@ -37,7 +36,6 @@ ohos_shared_library("display_napi") {
   configs = [ ":display_config" ]
 
   deps = [
-    "${aainnerkits_path}/want:want",
     "${aakits_path}/ability/native:abilitykit_native",
     "${aakits_path}/appkit:app_context",
     "${aakits_path}/appkit:appkit_native",
@@ -48,6 +46,7 @@ ohos_shared_library("display_napi") {
   ]
 
   external_deps = [
+    "ability_base:want",
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
     "hiviewdfx_hilog_native:libhilog",
