@@ -80,7 +80,7 @@ public:
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     std::vector<DisplayId> GetAllDisplayIds() const;
-
+    std::map<uint32_t, sptr<WindowNode>> GetWindowNodeMap();
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);

@@ -30,6 +30,11 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowRoot"};
 }
 
+std::map<uint32_t, sptr<WindowNode>> WindowRoot::GetWindowNodeMap()
+{
+    return windowNodeMap_;
+}
+
 ScreenId WindowRoot::GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay)
 {
     for (auto iter : displayIdMap_) {
@@ -149,7 +154,7 @@ sptr<WindowNode> WindowRoot::FindWindowNodeWithToken(const sptr<IRemoteObject>& 
             return false;
         });
     if (iter == windowNodeMap_.end()) {
-        WLOGFE("cannot find windowNode");
+        WLOGFI("cannot find windowNode");
         return nullptr;
     }
     return iter->second;
@@ -305,7 +310,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
         return WMError::WM_ERROR_NULLPTR;
     }
     if (fromStartingWin) {
-        return container->ShowInTransition(node);
+        return container->ShowStartingWindow(node);
     }
     // limit number of main window
     int mainWindowNumber = container->GetWindowCountByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);

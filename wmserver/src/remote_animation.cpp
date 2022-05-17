@@ -18,7 +18,7 @@
 #include <ability_manager_client.h>
 #include <common/rs_rect.h>
 #include <rs_window_animation_finished_callback.h>
-
+#include "minimize_app.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -51,6 +51,15 @@ WMError RemoteAnimation::SetWindowAnimationController(const sptr<RSIWindowAnimat
     return WMError::WM_OK;
 }
 
+bool RemoteAnimation::CheckAnimationController()
+{
+    if (windowAnimationController_ == nullptr) {
+        WLOGFI("RSWindowAnimation: windowAnimationController_ null!");
+        return false;
+    }
+    return true;
+}
+
 bool RemoteAnimation::CheckTransition(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode,
     sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& dstNode)
 {
@@ -64,11 +73,7 @@ bool RemoteAnimation::CheckTransition(sptr<WindowTransitionInfo> srcInfo, const 
         return false;
     }
 
-    if (windowAnimationController_ == nullptr) {
-        WLOGFI("RSWindowAnimation: windowAnimationController_ null!");
-        return false;
-    }
-    return true;
+    return CheckAnimationController();
 }
 
 void RemoteAnimation::OnRemoteDie(const sptr<IRemoteObject>& remoteObject)
@@ -104,7 +109,7 @@ TransitionEvent RemoteAnimation::GetTransitionEvent(sptr<WindowTransitionInfo> s
 
 WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> srcInfo,
     sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode,
-    const sptr<WindowNode>&  dstNode, bool needMinimizeSrcNode)
+    const sptr<WindowNode>&  dstNode)
 {
     if (!dstNode || !dstNode->startingWindowShown_) {
         WLOGFE("RSWindowAnimation: no startingWindow for dst window id:%{public}u!", dstNode->GetWindowId());
@@ -112,13 +117,9 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
     }
     WLOGFI("RSWindowAnimation: nofity animation transition with dst currId:%{public}u!", dstNode->GetWindowId());
     sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
-        [srcNode, dstNode, needMinimizeSrcNode]() {
-            WLOGFI("RSWindowAnimation: on finish transition!");
-            if (needMinimizeSrcNode && srcNode != nullptr && srcNode->abilityToken_ != nullptr) {
-                WLOGFI("RSWindowAnimation minimize windowId: %{public}u, name:%{public}s",
-                    srcNode->GetWindowId(), srcNode->GetWindowName().c_str());
-                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(srcNode->abilityToken_, false);
-            }
+        []() {
+            WLOGFI("RSWindowAnimation: on finish transition with minimizeAll!");
+            MinimizeApp::ExecuteMinimizeAll();
         }
     );
     if (finishedCallback == nullptr) {
@@ -133,11 +134,12 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
         return WMError::WM_ERROR_NO_MEM;
     }
     dstNode->isPlayAnimationShow_ = true;
+    bool needMinimizeSrcNode = MinimizeApp::IsNodeNeedMinimize(srcNode);
     // from app to app
     if (needMinimizeSrcNode && srcNode != nullptr) {
         auto srcTarget = CreateWindowAnimationTarget(srcInfo, srcNode);
+        // to avoid normal animation
         srcNode->isPlayAnimationHide_ = true;
-
         WLOGFI("RSWindowAnimation: app transition from id:%{public}u to id:%{public}u!",
             srcNode->GetWindowId(), dstNode->GetWindowId());
         windowAnimationController_->OnAppTransition(srcTarget, dstTarget, finishedCallback);
