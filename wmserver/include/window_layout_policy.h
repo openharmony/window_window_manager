@@ -51,6 +51,7 @@ public:
     virtual void RemoveWindowNode(const sptr<WindowNode>& node);
     virtual void UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow = false);
     virtual void UpdateLayoutRect(const sptr<WindowNode>& node) = 0;
+    virtual void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) {};
     float GetVirtualPixelRatio(DisplayId displayId) const;
     void UpdateClientRectAndResetReason(const sptr<WindowNode>& node, const Rect& lastLayoutRect, const Rect& winRect);
     Rect GetDisplayGroupRect() const;

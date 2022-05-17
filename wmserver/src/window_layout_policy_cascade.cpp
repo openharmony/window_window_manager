@@ -178,8 +178,18 @@ void WindowLayoutPolicyCascade::AddWindowNode(const sptr<WindowNode>& node)
     }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         node->SetRequestRect(cascadeRectsMap_[node->GetDisplayId()].dividerRect_); // init divider bar
+        DisplayId displayId = node->GetDisplayId();
+        if (!WindowHelper::IsEmptyRect(restoringDividerWindowRects_[displayId])) {
+            node->SetRequestRect(restoringDividerWindowRects_[displayId]);
+        }
+        restoringDividerWindowRects_.erase(displayId);
     }
     UpdateWindowNode(node, true); // currently, update and add do the same process
+}
+
+void WindowLayoutPolicyCascade::SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects)
+{
+    restoringDividerWindowRects_ = dividerWindowRects;
 }
 
 void WindowLayoutPolicyCascade::LimitMoveBounds(Rect& rect, DisplayId displayId) const
