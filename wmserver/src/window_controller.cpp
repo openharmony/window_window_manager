@@ -78,18 +78,23 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
 
 void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
+    WLOGFI("begin CancelStartingWindow!");
     auto node = windowRoot_->FindWindowNodeWithToken(abilityToken);
     if (node == nullptr) {
         WLOGFI("cannot find windowNode!");
         return;
     }
-    WM_SCOPED_TRACE("wms:CancelStartingWindow(%u)", node->GetWindowId());
-    DestroyWindow(node->GetWindowId(), true);
+    WLOGFI("CancelStartingWindow with id:%{public}u!", node->GetWindowId());
+    WMError res = windowRoot_->DestroyWindow(node->GetWindowId(), false);
+    if (res != WMError::WM_OK) {
+        WLOGFE("DestroyWindow failed!");
+    }
 }
 
 WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& srcInfo,
     sptr<WindowTransitionInfo>& dstInfo)
 {
+    WLOGFI("NotifyWindowTransition begin!");
     if (!srcInfo || !dstInfo) {
         WLOGFE("srcInfo or dstInfo is nullptr!");
         return WMError::WM_ERROR_NULLPTR;
@@ -157,6 +162,8 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     node = new WindowNode(windowProperty, window, surfaceNode);
     node->abilityToken_ = token;
     UpdateWindowAnimation(node);
+    WLOGFI("createWindow name:%{public}u, windowName:%{public}s",
+        windowId, node->GetWindowName().c_str());
     return windowRoot_->SaveWindow(node);
 }
 
