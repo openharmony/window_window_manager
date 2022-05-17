@@ -36,7 +36,7 @@ class WindowNodeContainer : public RefBase {
 public:
     WindowNodeContainer(const sptr<DisplayInfo>& displayInfo);
     ~WindowNodeContainer();
-    WMError ShowInTransition(sptr<WindowNode>& node);
+    WMError ShowStartingWindow(sptr<WindowNode>& node);
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);
     WMError UpdateWindowNode(sptr<WindowNode>& node, WindowUpdateReason reason);

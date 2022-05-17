@@ -36,10 +36,11 @@ public:
     static void DrawStartingWindow(sptr<WindowNode>& node, sptr<Media::PixelMap> pixelMap, uint32_t bkgColor,
         bool isColdStart);
     static void UpdateRSTree(sptr<WindowNode>& node);
-
+    static void ReleaseStartWinSurfaceNode(sptr<WindowNode>& node);
 private:
     static SurfaceDraw surfaceDraw_;
     static WMError CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node);
+    static std::recursive_mutex mutex_;
 };
 } // Rosen
 } // OHOS

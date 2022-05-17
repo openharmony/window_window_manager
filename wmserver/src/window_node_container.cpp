@@ -116,13 +116,12 @@ WMError WindowNodeContainer::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, c
     return WMError::WM_OK;
 }
 
-WMError WindowNodeContainer::ShowInTransition(sptr<WindowNode>& node)
+WMError WindowNodeContainer::ShowStartingWindow(sptr<WindowNode>& node)
 {
     if (node->currentVisibility_) {
         WLOGFE("current window is visible, windowId: %{public}u", node->GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    WM_SCOPED_TRACE_BEGIN("WindowNodeContainer::ShowInTransition");
     WMError res = AddWindowNodeOnWindowTree(node, nullptr);
     if (res != WMError::WM_OK) {
         return res;
@@ -143,8 +142,7 @@ WMError WindowNodeContainer::ShowInTransition(sptr<WindowNode>& node)
     AssignZOrder();
 
     layoutPolicy_->AddWindowNode(node);
-    WM_SCOPED_TRACE_END();
-    WLOGFI("ShowInTransition windowId: %{public}u end", node->GetWindowId());
+    WLOGFI("ShowStartingWindow windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -319,8 +317,7 @@ WMError WindowNodeContainer::DestroyWindowNode(sptr<WindowNode>& node, std::vect
         WLOGFE("RemoveWindowNode failed");
         return ret;
     }
-    node->leashWinSurfaceNode_ = nullptr;
-    node->startingWinSurfaceNode_ = nullptr;
+    StartingWindow::ReleaseStartWinSurfaceNode(node);
     node->surfaceNode_ = nullptr;
     windowIds.push_back(node->GetWindowId());
 
@@ -336,6 +333,7 @@ WMError WindowNodeContainer::DestroyWindowNode(sptr<WindowNode>& node, std::vect
     // clear vector cache completely, swap with empty vector
     auto emptyVector = std::vector<sptr<WindowNode>>();
     node->children_.swap(emptyVector);
+    WLOGFI("DestroyWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -393,22 +391,16 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId display
         WLOGFI("UpdateRSTree windowId: %{public}d, displayId: %{public}" PRIu64", isAdd: %{public}d",
             node->GetWindowId(), displayId, isAdd);
         if (isAdd) {
-            if (node->leashWinSurfaceNode_) {
-                dms.UpdateRSTree(displayId, node->leashWinSurfaceNode_, true);
-            } else {
-                dms.UpdateRSTree(displayId, node->surfaceNode_, true);
-            }
+            auto& surfaceNode = node->leashWinSurfaceNode_ != nullptr ? node->leashWinSurfaceNode_ : node->surfaceNode_;
+            dms.UpdateRSTree(displayId, surfaceNode, true);
             for (auto& child : node->children_) {
                 if (child->currentVisibility_) {
                     dms.UpdateRSTree(displayId, child->surfaceNode_, true);
                 }
             }
         } else {
-            if (node->leashWinSurfaceNode_) {
-                dms.UpdateRSTree(displayId, node->leashWinSurfaceNode_, false);
-            } else {
-                dms.UpdateRSTree(displayId, node->surfaceNode_, false);
-            }
+            auto& surfaceNode = node->leashWinSurfaceNode_ != nullptr ? node->leashWinSurfaceNode_ : node->surfaceNode_;
+            dms.UpdateRSTree(displayId, surfaceNode, false);
             for (auto& child : node->children_) {
                 dms.UpdateRSTree(displayId, child->surfaceNode_, false);
             }
@@ -416,14 +408,16 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId display
     };
 
     if (IsWindowAnimationEnabled && !animationPlayed) {
+        WLOGFI("add or remove window with animation");
         // default transition duration: 350ms
         static const RSAnimationTimingProtocol timingProtocol(350);
         // default transition curve: EASE OUT
         static const Rosen::RSAnimationTimingCurve curve = Rosen::RSAnimationTimingCurve::EASE_OUT;
-        // add or remove window with transition animation
+        // add window with transition animation
         RSNode::Animate(timingProtocol, curve, updateRSTreeFunc);
     } else {
         // add or remove window without animation
+        WLOGFI("add or remove window without animation");
         updateRSTreeFunc();
     }
     return true;

@@ -46,11 +46,11 @@ public:
         sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode);
     static WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
     static WMError NotifyAnimationTransition(sptr<WindowTransitionInfo> srcInfo, sptr<WindowTransitionInfo> dstInfo,
-        const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode, bool needMinimizeSrcNode);
+        const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode);
     static WMError NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
     static WMError NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
     static void OnRemoteDie(const sptr<IRemoteObject>& remoteObject);
-
+    static bool CheckAnimationController();
 private:
     static sptr<RSWindowAnimationTarget> CreateWindowAnimationTarget(sptr<WindowTransitionInfo> info,
         const sptr<WindowNode>& windowNode);
