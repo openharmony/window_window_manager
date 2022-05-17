@@ -294,8 +294,8 @@ void DisplayGroupController::MoveCrossNodeToTargetDisplay(const sptr<WindowNode>
 {
     node->isShowingOnMultiDisplays_ = false;
     // update showing display
-    std::vector<DisplayId> newShownDisplays = { targetDisplayId };
-    node->SetShowingDisplays(newShownDisplays);
+    std::vector<DisplayId> newShowingDisplays = { targetDisplayId };
+    node->SetShowingDisplays(newShowingDisplays);
     // update new displayId
     if (node->GetDisplayId() != targetDisplayId) {
         UpdateWindowDisplayId(node, targetDisplayId);
@@ -318,8 +318,8 @@ void DisplayGroupController::MoveNotCrossNodeToDefaultDisplay(const sptr<WindowN
     newRect.posY_ = newRect.posY_ - srcDisplayRect.posY_ + dstDisplayRect.posY_;
     node->SetRequestRect(newRect);
     // update showing display
-    std::vector<DisplayId> newShownDisplays = { defaultDisplayId_ };
-    node->SetShowingDisplays(newShownDisplays);
+    std::vector<DisplayId> newShowingDisplays = { defaultDisplayId_ };
+    node->SetShowingDisplays(newShowingDisplays);
     // update new displayId
     UpdateWindowDisplayId(node, defaultDisplayId_);
 
