@@ -112,6 +112,7 @@ WMError WindowDumper::DumpDisplayWindowInfo(DisplayId displayId, std::string& du
             << std::endl;
     }
     oss << "Focus window: " << windowNodeContainer->GetFocusWindow() << std::endl;
+    oss << "total window num: " << windowRoot_->GetWindowNodeMap().size() << std::endl;
     dumpInfo.append(oss.str());
     return WMError::WM_OK;
 }
