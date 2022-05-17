@@ -31,6 +31,10 @@ std::recursive_mutex MinimizeApp::mutex_;
 void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReason reason)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    bool isFromUser = IsFromUser(reason);
+    if (!isMinimizedByOtherWindow_ && !isFromUser) {
+        return;
+    }
     WLOGFI("[Minimize] Add Window %{public}u to minimize list, reason %{public}u", node->GetWindowId(), reason);
     needMinimizeAppNodes_[reason].emplace_back(node);
 }
@@ -40,12 +44,8 @@ void MinimizeApp::ExecuteMinimizeAll()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto& appNodes: needMinimizeAppNodes_) {
         bool isFromUser = IsFromUser(appNodes.first);
-        if (!isMinimizedByOtherWindow_ && !isFromUser) {
-            continue;
-        }
-
         for (auto& node : appNodes.second) {
-            if (node->abilityToken_ != nullptr) {
+            if (node->abilityToken_ != nullptr && !node->startingWindowShown_) {
                 WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u", node->GetWindowId(), appNodes.first);
                 AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(node->abilityToken_, isFromUser);
             }
@@ -83,11 +83,8 @@ void MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason reason)
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
         bool isFromUser = IsFromUser(reason);
-        if (!isMinimizedByOtherWindow_ && !isFromUser) {
-            return;
-        }
         for (auto& node : needMinimizeAppNodes_.at(reason)) {
-            if (node->abilityToken_ != nullptr) {
+            if (node->abilityToken_ != nullptr && !node->startingWindowShown_) {
                 WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u", node->GetWindowId(), reason);
                 AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(node->abilityToken_, isFromUser);
             }
