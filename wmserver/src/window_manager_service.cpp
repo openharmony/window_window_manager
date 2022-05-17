@@ -242,13 +242,31 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, sptr<
     bool isColdStart, uint32_t bkgColor)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!startingOpen_) {
+        WLOGFI("startingWindow not open!");
+        return;
+    }
     return windowController_->StartingWindow(info, pixelMap, bkgColor, isColdStart);
 }
 
 void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!startingOpen_) {
+        WLOGFI("startingWindow not open!");
+        return;
+    }
     return windowController_->CancelStartingWindow(abilityToken);
+}
+
+void WindowManagerService::OpenStartingWindow()
+{
+    startingOpen_ = true;
+}
+
+void WindowManagerService::CloseStartingWindow()
+{
+    startingOpen_ = false;
 }
 
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
