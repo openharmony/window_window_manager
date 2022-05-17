@@ -606,12 +606,13 @@ void WindowController::MinimizeAllAppWindows(DisplayId displayId)
     MinimizeApp::ExecuteMinimizeAll();
 }
 
-void WindowController::ToggleShownStateForAllAppWindows()
+WMError WindowController::ToggleShownStateForAllAppWindows()
 {
     if (isScreenLocked_) {
-        return;
+        return WMError::WM_DO_NOTHING;
     }
     windowRoot_->ToggleShownStateForAllAppWindows();
+    return WMError::WM_OK;
 }
 
 WMError WindowController::MaxmizeWindow(uint32_t windowId)
