@@ -940,6 +940,23 @@ void WindowRoot::ProcessDisplayCreate(DisplayId displayId)
     }
 }
 
+void WindowRoot::MoveNotShowingWindowToDefaultDisplay(DisplayId displayId)
+{
+    DisplayId defaultDisplayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    for (auto& elem : windowNodeMap_) {
+        auto& windowNode = elem.second;
+        if (windowNode->GetDisplayId() == displayId && !windowNode->currentVisibility_) {
+            std::vector<DisplayId> newShowingDisplays = { defaultDisplayId };
+            windowNode->SetShowingDisplays(newShowingDisplays);
+            windowNode->isShowingOnMultiDisplays_ = false;
+            if (windowNode->GetWindowToken()) {
+                windowNode->GetWindowToken()->UpdateDisplayId(windowNode->GetDisplayId(), defaultDisplayId);
+            }
+            windowNode->SetDisplayId(defaultDisplayId);
+        }
+    }
+}
+
 void WindowRoot::ProcessDisplayDestroy(DisplayId displayId)
 {
     ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
@@ -972,7 +989,8 @@ void WindowRoot::ProcessDisplayDestroy(DisplayId displayId)
             DestroyWindowInner(node);
         }
     }
-
+    // move window which is not showing on destroied display to default display
+    MoveNotShowingWindowToDefaultDisplay(displayId);
     WLOGFI("[Display Destroy] displayId: %{public}" PRIu64" ", displayId);
 }
 

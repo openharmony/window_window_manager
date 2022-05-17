@@ -96,6 +96,7 @@ private:
     ScreenId GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay);
     void ProcessExpandDisplayCreate(DisplayId displayId, ScreenId screenGroupId);
     std::map<DisplayId, sptr<DisplayInfo>> GetAllDisplayInfos(const std::vector<DisplayId>& displayIdVec);
+    void MoveNotShowingWindowToDefaultDisplay(DisplayId displayId);
 
     std::recursive_mutex& mutex_;
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
