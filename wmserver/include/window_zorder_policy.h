@@ -57,10 +57,11 @@ private:
         { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,       112 },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR,       113 },
         { WindowType::WINDOW_TYPE_KEYGUARD,             114 },
-        { WindowType::WINDOW_TYPE_DRAGGING_EFFECT,      115 },
-        { WindowType::WINDOW_TYPE_POINTER,              116 },
-        { WindowType::WINDOW_TYPE_BOOT_ANIMATION,       117 },
-        { WindowType::WINDOW_TYPE_FREEZE_DISPLAY,       118 },
+        // reserve 115 for app window above keyguard, 116 for input method window above keyguard
+        { WindowType::WINDOW_TYPE_DRAGGING_EFFECT,      117 },
+        { WindowType::WINDOW_TYPE_POINTER,              118 },
+        { WindowType::WINDOW_TYPE_BOOT_ANIMATION,       119 },
+        { WindowType::WINDOW_TYPE_FREEZE_DISPLAY,       120 },
     };
 };
 }
