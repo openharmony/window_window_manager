@@ -300,6 +300,9 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     } else {
         NotifyIfSystemBarTintChanged(node->GetDisplayId());
     }
+    if (WindowHelper::IsMainFullScreenWindow(node->GetWindowType(), node->GetWindowMode())) {
+        NotifyDockWindowStateChanged(node, true);
+    }
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
@@ -835,6 +838,30 @@ void WindowNodeContainer::NotifySystemBarTints(std::vector<DisplayId> displayIdV
         }
         WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId, tints);
     }
+}
+
+void WindowNodeContainer::NotifyDockWindowStateChanged(sptr<WindowNode>& node, bool isEnable)
+{
+    WM_FUNCTION_TRACE();
+    WLOGFI("begin isEnable: %{public}d", isEnable);
+    if (!isEnable) {
+        for (auto& windowNode : appWindowNode_->children_) {
+            if (windowNode->GetWindowId() == node->GetWindowId()) {
+                continue;
+            }
+            if (!WindowHelper::IsFloatintWindow(windowNode->GetWindowMode())) {
+                return;
+            }
+        }
+    }
+    SystemBarProperty prop;
+    prop.enable_ = isEnable;
+    SystemBarRegionTint tint;
+    tint.type_ = WindowType::WINDOW_TYPE_LAUNCHER_DOCK;
+    tint.prop_ = prop;
+    SystemBarRegionTints tints;
+    tints.push_back(tint);
+    WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(node->GetDisplayId(), tints);
 }
 
 bool WindowNodeContainer::IsTopWindow(uint32_t windowId, sptr<WindowNode>& rootNode) const
@@ -1617,6 +1644,14 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
         return WMError::WM_ERROR_NULLPTR;
     }
     windowPair->UpdateIfSplitRelated(node);
+    if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+        if (WindowHelper::IsFloatintWindow(node->GetWindowMode())) {
+            NotifyDockWindowStateChanged(node, true);
+        } else {
+            NotifyDockWindowStateChanged(node, false);
+        }
+    }
+
     if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
         WindowHelper::IsAppWindow(node->GetWindowType())) {
         // minimize other app window

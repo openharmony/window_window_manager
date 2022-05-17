@@ -186,17 +186,6 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     }
     node->GetWindowProperty()->CopyFrom(property);
 
-    if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        WindowHelper::IsAppWindow(node->GetWindowType()) && !node->isPlayAnimationShow_) {
-        WM_SCOPED_TRACE_BEGIN("controller:MinimizeStructuredAppWindowsExceptSelf");
-        WMError res = windowRoot_->MinimizeStructuredAppWindowsExceptSelf(node);
-        WM_SCOPED_TRACE_END();
-        if (res != WMError::WM_OK) {
-            WLOGFE("Minimize other structured window failed");
-            MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
-            return res;
-        }
-    }
     // Need 'check permission'
     // Need 'adjust property'
     WMError res = windowRoot_->AddWindowNode(property->GetParentId(), node);
@@ -213,7 +202,6 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         sysBarWinId_[node->GetWindowType()] = node->GetWindowId();
         ReSizeSystemBarPropertySizeIfNeed(node);
     }
-
     StopBootAnimationIfNeed(node->GetWindowType());
     MinimizeApp::ExecuteMinimizeAll();
     return WMError::WM_OK;

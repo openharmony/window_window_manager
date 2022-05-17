@@ -99,6 +99,7 @@ public:
     sptr<AvoidAreaController> GetAvoidController() const;
     sptr<DisplayGroupController> GetMutiDisplayController() const;
     sptr<WindowNode> GetRootNode(WindowRootNodeType type) const;
+    void NotifyDockWindowStateChanged(sptr<WindowNode>& node, bool isEnable);
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
