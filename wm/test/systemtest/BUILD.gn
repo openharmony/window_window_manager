@@ -259,7 +259,7 @@ ohos_static_library("wm_systemtest_common") {
     # need delete it for abilitycontext
     "${aainnerkits_path}/ability_manager:ability_manager",
     "//foundation/arkui/napi:ace_napi",
-    "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/dmserver:libdms",
