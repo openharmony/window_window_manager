@@ -1305,7 +1305,8 @@ void WindowNodeContainer::RaiseInputMethodWindowPriorityIfNeeded(const sptr<Wind
     });
     if (iter != aboveAppWindowNode_->children_.end()) {
         WLOGFI("raise input method float window priority.");
-        node->priority_ = zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_KEYGUARD) + 1;
+        node->priority_ = zorderPolicy_->GetWindowPriority(
+            WindowType::WINDOW_TYPE_KEYGUARD) + 2; // 2: higher than keyguard and show when locked window
     }
 }
 

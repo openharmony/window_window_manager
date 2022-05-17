@@ -385,7 +385,7 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
     for (auto& root : roots) {
         for (auto iter = root->children_.rbegin(); iter != root->children_.rend(); iter++) {
             WLOGFI("GetCurCascadeRect id: %{public}d,", (*iter)->GetWindowId());
-            if ((*iter)->GetWindowType() != WindowType::WINDOW_TYPE_DOCK_SLICE &&
+            if ((*iter)->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
                 (*iter)->GetWindowId() != node->GetWindowId()) {
                 auto property = (*iter)->GetWindowProperty();
                 if (property != nullptr) {
