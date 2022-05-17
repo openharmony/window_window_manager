@@ -129,8 +129,9 @@ private:
     static bool ReadIsWindowAnimationEnabledProperty();
     void DumpScreenWindowTree();
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
+    void ReZOrderShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
     void RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
-    void ReZOrderShowWhenLockedWindows(const sptr<WindowNode>& node, bool up);
+    void ReZOrderShowWhenLockedWindows(bool up);
 
     WMError AddWindowNodeOnWindowTree(sptr<WindowNode>& node, const sptr<WindowNode>& parentNode);
     void RemoveWindowNodeFromWindowTree(sptr<WindowNode>& node);

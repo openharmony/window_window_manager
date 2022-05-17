@@ -169,12 +169,13 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
         for (auto& displayId : node->GetShowingDisplays()) {
             UpdateRSTree(node, displayId, true, node->isPlayAnimationShow_);
         }
-        AssignZOrder();
     } else {
         node->isPlayAnimationShow_ = false;
         node->startingWindowShown_ = false;
+        ReZOrderShowWhenLockedWindowIfNeeded(node);
     }
 
+    AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
     if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
         avoidController_->AvoidControl(node, AvoidControlType::AVOID_NODE_ADD);
@@ -1373,7 +1374,7 @@ void WindowNodeContainer::RaiseInputMethodWindowPriorityIfNeeded(const sptr<Wind
     }
 }
 
-void WindowNodeContainer::ReZOrderShowWhenLockedWindows(const sptr<WindowNode>& node, bool up)
+void WindowNodeContainer::ReZOrderShowWhenLockedWindows(bool up)
 {
     WLOGFI("Keyguard change %{public}u, re-zorder showWhenLocked window", up);
     std::vector<sptr<WindowNode>> needReZOrderNodes;
@@ -1410,11 +1411,27 @@ void WindowNodeContainer::ReZOrderShowWhenLockedWindows(const sptr<WindowNode>& 
     }
 }
 
+void WindowNodeContainer::ReZOrderShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node)
+{
+    if (!(node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))) {
+        return;
+    }
+
+    auto iter = std::find_if(aboveAppWindowNode_->children_.begin(), aboveAppWindowNode_->children_.end(),
+                             [](sptr<WindowNode> node) {
+        return node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD;
+    });
+    if (iter != aboveAppWindowNode_->children_.end()) {
+        WLOGFI("ShowWhenLocked window %{public}u re-zorder to up", node->GetWindowId());
+        ReZOrderShowWhenLockedWindows(true);
+    }
+}
+
 void WindowNodeContainer::RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node)
 {
     // if keyguard window show, raise show when locked windows
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
-        ReZOrderShowWhenLockedWindows(node, true);
+        ReZOrderShowWhenLockedWindows(true);
         return;
     }
 
@@ -1438,7 +1455,7 @@ void WindowNodeContainer::DropShowWhenLockedWindowIfNeeded(const sptr<WindowNode
 {
     // if keyguard window hide, drop show when locked windows
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
-        ReZOrderShowWhenLockedWindows(node, false);
+        ReZOrderShowWhenLockedWindows(false);
         AssignZOrder();
     }
 }
