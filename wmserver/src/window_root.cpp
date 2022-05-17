@@ -23,6 +23,7 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
+#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -209,6 +210,7 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
 
 WMError WindowRoot::MinimizeStructuredAppWindowsExceptSelf(sptr<WindowNode>& node)
 {
+    WM_SCOPED_TRACE("root:MinimizeStructuredAppWindowsExceptSelf");
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
         WLOGFE("MinimizeAbility failed, window container could not be found");
@@ -363,6 +365,16 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
     if (container == nullptr) {
         WLOGFE("add window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        WindowHelper::IsAppWindow(node->GetWindowType()) && !node->isPlayAnimationShow_) {
+        container->NotifyDockWindowStateChanged(node, false);
+        WMError res = MinimizeStructuredAppWindowsExceptSelf(node);
+        if (res != WMError::WM_OK) {
+            WLOGFE("Minimize other structured window failed");
+            MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
+            return res;
+        }
     }
     if (fromStartingWin) {
         return container->ShowStartingWindow(node);
