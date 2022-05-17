@@ -410,20 +410,26 @@ void WindowManagerProxy::MinimizeAllAppWindows(DisplayId displayId)
     }
 }
 
-void WindowManagerProxy::ToggleShownStateForAllAppWindows()
+WMError WindowManagerProxy::ToggleShownStateForAllAppWindows()
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     if (Remote()->SendRequest(
         static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_TOGGLE_SHOWN_STATE_FOR_ALL_APP_WINDOWS),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
     }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
 }
 
 WMError WindowManagerProxy::MaxmizeWindow(uint32_t windowId)
