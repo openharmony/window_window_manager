@@ -153,6 +153,13 @@ public:
      */
     std::vector<sptr<WindowNode>> GetPairedWindows();
 
+    /**
+     * Get whether dock slice is forbidden to move.
+     *
+     * @return whether dock slice is forbidden to move
+     */
+    bool IsForbidDockSliceMove() const;
+
 private:
     /**
      * Gets whether the window is related to split window.

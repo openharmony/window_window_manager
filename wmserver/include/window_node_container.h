@@ -62,6 +62,7 @@ public:
     std::unordered_map<WindowType, SystemBarProperty> GetExpectImmersiveProperty() const;
     void NotifyAccessibilityWindowInfo(const sptr<WindowNode>& windowId, WindowUpdateType type) const;
     int GetWindowCountByType(WindowType windowType);
+    bool IsForbidDockSliceMove(DisplayId displayId) const;
 
     void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas, DisplayId displayId);
     bool isVerticalDisplay(DisplayId displayId) const;
