@@ -58,6 +58,31 @@ declare namespace screen {
   function makeMirror(mainScreen:number, mirrorScreen:Array<number>): Promise<number>;
 
   /**
+   * Create virtual screen.
+   * @param option Indicates the option of the virtual screen.
+   * @since 9
+   */
+  function createVirtualScreen(option:VirtualScreenOption, callback: AsyncCallback<Screen>): void;
+  function createVirtualScreen(option:VirtualScreenOption): Promise<Screen>;
+
+  /**
+   * Destroy virtual screen.
+   * @param screenId Indicates the screen id of the virtual screen.
+   * @since 9
+   */
+  function destroyVirtualScreen(screenId:number, callback: AsyncCallback<void>): void;
+  function destroyVirtualScreen(screenId:number): Promise<void>;
+
+  /**
+   * Set surface for the virtual screen.
+   * @param screenId Indicates the screen id of the virtual screen.
+   * @param surfaceId Indicates the surface id.
+   * @since 9
+   */
+  function setVirtualScreenSurface(screenId:number, surfaceId: string, callback: AsyncCallback<void>): void;
+  function setVirtualScreenSurface(screenId:number, surfaceId: string): Promise<void>;
+
+  /**
    * the parameter of making expand screen
    * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @since 9
@@ -77,6 +102,38 @@ declare namespace screen {
      * the start coordinate Y of the screen origin
      */
     startY: number;
+  }
+
+  /**
+   * The parameter for creating virtual screen.
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
+   */
+  interface VirtualScreenOption {
+    /**
+     * Indicates the name of the virtual screen.
+     */
+    name: string
+
+    /**
+     * Indicates the width of the virtual screen.
+     */
+    width: number
+
+    /**
+     * Indicates the height of the virtual screen.
+     */
+    height: number
+
+    /**
+     * Indicates the density of the virtual screen.
+     */
+    density: number
+
+    /**
+     * Indicates the surface id of the virtual screen.
+     */
+    surfaceId: string
   }
 
   /**

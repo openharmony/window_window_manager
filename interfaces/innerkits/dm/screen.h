@@ -42,7 +42,7 @@ struct SupportedScreenModes : public RefBase {
 };
 
 struct VirtualScreenOption {
-    const std::string name_;
+    std::string name_;
     uint32_t width_;
     uint32_t height_;
     float density_;
