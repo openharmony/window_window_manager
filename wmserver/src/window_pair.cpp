@@ -141,6 +141,19 @@ sptr<WindowNode> WindowPair::GetSecondaryWindow() const
     return secondary_;
 }
 
+bool WindowPair::IsForbidDockSliceMove() const
+{
+    if (status_ != WindowPairStatus::STATUS_PAIRED_DONE) {
+        return false;
+    }
+    uint32_t flag = static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
+    if (primary_ != nullptr && !(primary_->GetWindowFlags() & flag) && secondary_ != nullptr &&
+        !(secondary_->GetWindowFlags() & flag)) {
+        return false;
+    }
+    return true;
+}
+
 void WindowPair::Clear()
 {
     WLOGI("Clear window pair.");

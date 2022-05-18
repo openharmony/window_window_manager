@@ -305,7 +305,10 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     if (reason == WindowSizeChangeReason::MOVE) {
         newRect = { rect.posX_, rect.posY_, lastRect.width_, lastRect.height_ };
         if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-            if (windowRoot_->isVerticalDisplay(node)) {
+            if (windowRoot_->IsForbidDockSliceMove(node->GetDisplayId())) {
+                WLOGFI("dock slice is forbidden to move");
+                newRect = lastRect;
+            } else if (windowRoot_->isVerticalDisplay(node)) {
                 newRect.posX_ = lastRect.posX_;
             } else {
                 newRect.posY_ = lastRect.posY_;
@@ -512,7 +515,12 @@ WMError WindowController::SetWindowFlags(uint32_t windowId, uint32_t flags)
         return WMError::WM_ERROR_NULLPTR;
     }
     auto property = node->GetWindowProperty();
+    uint32_t oldFlags = property->GetWindowFlags();
     property->SetWindowFlags(flags);
+    // only forbid_split_move flag change, just set property
+    if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE)) {
+        return WMError::WM_OK;
+    }
     WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_FLAGS);
     if (res != WMError::WM_OK) {
         return res;
