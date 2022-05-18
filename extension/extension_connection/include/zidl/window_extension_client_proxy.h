@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef WINODW_EXTENSION_CLIENT_PROXY
-#define WINODW_EXTENSION_CLIENT_PROXY
+#ifndef WINODW_EXTENSION_CLIENT_PROXY_H
+#define WINODW_EXTENSION_CLIENT_PROXY_H
 
 #include <iremote_proxy.h>
 #include "window_extension_client_interface.h"
@@ -35,4 +35,4 @@ private:
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // WINODW_EXTENSION_CLIENT_PROXY
+#endif // WINODW_EXTENSION_CLIENT_PROXY_H
