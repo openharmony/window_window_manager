@@ -83,7 +83,11 @@ void WindowManagerConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
     }
 
     std::string nodeName = reinterpret_cast<const char *>(currNode->name);
-    enableConfig_[nodeName] = xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("true")) ? false : true;
+    if (!xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("true"))) {
+        enableConfig_[nodeName] = true;
+    } else if (!xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("false"))) {
+        enableConfig_[nodeName] = false;
+    }
     xmlFree(enable);
 }
 
