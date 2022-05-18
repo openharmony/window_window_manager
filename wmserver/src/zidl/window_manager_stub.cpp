@@ -144,7 +144,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_TOGGLE_SHOWN_STATE_FOR_ALL_APP_WINDOWS: {
-            ToggleShownStateForAllAppWindows();
+            WMError errCode = ToggleShownStateForAllAppWindows();
+            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         case WindowManagerMessage::TRANS_ID_MAXMIZE_WINDOW: {

@@ -370,9 +370,14 @@ NativeValue* JsWindowManager::OnToggleShownStateForAllAppWindows(NativeEngine& e
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params"));
                 return;
             }
-            SingletonContainer::Get<WindowManager>().ToggleShownStateForAllAppWindows();
-            task.Resolve(engine, engine.CreateUndefined());
-            WLOGFI("[NAPI]OnToggleShownStateForAllAppWindows success");
+            WMError ret = SingletonContainer::Get<WindowManager>().ToggleShownStateForAllAppWindows();
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+                WLOGFI("[NAPI]OnToggleShownStateForAllAppWindows success");
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
+                    "OnToggleShownStateForAllAppWindows failed"));
+            }
         };
     NativeValue* lastParam = (info.argc <= 0) ? nullptr :
         (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);

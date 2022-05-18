@@ -421,11 +421,11 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
     windowController_->MinimizeAllAppWindows(displayId);
 }
 
-void WindowManagerService::ToggleShownStateForAllAppWindows()
+WMError WindowManagerService::ToggleShownStateForAllAppWindows()
 {
     WM_SCOPED_TRACE("wms:ToggleShownStateForAllAppWindows");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    windowController_->ToggleShownStateForAllAppWindows();
+    return windowController_->ToggleShownStateForAllAppWindows();
 }
 
 WMError WindowManagerService::MaxmizeWindow(uint32_t windowId)

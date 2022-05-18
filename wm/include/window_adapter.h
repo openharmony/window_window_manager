@@ -48,7 +48,7 @@ public:
     virtual void ProcessPointDown(uint32_t windowId, bool isStartDrag = false);
     virtual void ProcessPointUp(uint32_t windowId);
     virtual void MinimizeAllAppWindows(DisplayId displayId);
-    virtual void ToggleShownStateForAllAppWindows();
+    virtual WMError ToggleShownStateForAllAppWindows();
     virtual WMError MaxmizeWindow(uint32_t windowId);
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode);
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);

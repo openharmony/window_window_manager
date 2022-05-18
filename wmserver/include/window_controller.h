@@ -49,7 +49,7 @@ public:
     WMError ProcessPointDown(uint32_t windowId, bool isStartDrag);
     WMError ProcessPointUp(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
-    void ToggleShownStateForAllAppWindows();
+    WMError ToggleShownStateForAllAppWindows();
     WMError MaxmizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
     WMError UpdateProperty(sptr<WindowProperty>& property, PropertyChangeAction action);
