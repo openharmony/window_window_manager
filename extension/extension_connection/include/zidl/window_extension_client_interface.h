@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef WINDOW_EXTENSION_CLIENT_INTERFACE
-#define WINDOW_EXTENSION_CLIENT_INTERFACE
+#ifndef WINDOW_EXTENSION_CLIENT_INTERFACE_H
+#define WINDOW_EXTENSION_CLIENT_INTERFACE_H
 
 #include <i_input_event_consumer.h>
 #include <iremote_broker.h>
@@ -40,4 +40,4 @@ public:
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // WINDOW_EXTENSION_CLIENT_INTERFACE
+#endif // WINDOW_EXTENSION_CLIENT_INTERFACE_H

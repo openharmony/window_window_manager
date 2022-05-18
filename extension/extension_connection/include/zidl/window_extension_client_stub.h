@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef WINDOW_EXTENSION_CLIENT_STUB
-#define WINDOW_EXTENSION_CLIENT_STUB
+#ifndef WINDOW_EXTENSION_CLIENT_STUB_H
+#define WINDOW_EXTENSION_CLIENT_STUB_H
 
 #include <iremote_stub.h>
 #include "window_extension_client_interface.h"
@@ -31,4 +31,4 @@ public:
 };
 } // namespace Rosen
 } // namespace OHOS
-#endif // WINDOW_EXTENSION_CLIENT_STUB
+#endif // WINDOW_EXTENSION_CLIENT_STUB_H
