@@ -172,9 +172,10 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     // using starting window rect if client rect is empty
-    if (WindowHelper::IsEmptyRect(property->GetRequestRect())) { // for tile and cascade
+    if (WindowHelper::IsEmptyRect(property->GetRequestRect()) && node->startingWindowShown_) { // for tile and cascade
         property->SetRequestRect(node->GetRequestRect());
         property->SetWindowRect(node->GetWindowRect());
+        property->SetDecoStatus(true);
     }
     node->GetWindowProperty()->CopyFrom(property);
 
