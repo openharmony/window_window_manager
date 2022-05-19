@@ -1326,6 +1326,12 @@ void WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaCh
         }), occupiedAreaChangeListeners_.end());
 }
 
+void WindowImpl::RegisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    outsidePressListener_ = listener;
+}
+
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
 {
     if (handler == nullptr) {
@@ -1881,6 +1887,20 @@ void WindowImpl::UpdateActiveStatus(bool isActive)
         NotifyAfterActive();
     } else {
         NotifyAfterInactive();
+    }
+}
+
+void WindowImpl::NotifyOutsidePressed()
+{
+    sptr<IOutsidePressedListener> outsidePressListener;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        outsidePressListener = outsidePressListener_;
+    }
+
+    if (outsidePressListener != nullptr) {
+        WLOGFI("called");
+        outsidePressListener->OnOutsidePressed();
     }
 }
 

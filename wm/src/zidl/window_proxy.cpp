@@ -246,6 +246,22 @@ sptr<WindowProperty> WindowProxy::GetWindowProperty()
     }
     return reply.ReadParcelable<WindowProperty>();
 }
+
+void WindowProxy::NotifyOutsidePressed()
+{
+    MessageParcel data;
+    MessageParcel replay;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_NOTIFY_OUTSIDE_PRESSED),
+        data, replay, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 
