@@ -575,6 +575,8 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
+    NotifyOutsidePressed(node);
+
     if (isStartDrag) {
         WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
         return res;
@@ -780,6 +782,58 @@ WMError WindowController::GetModeChangeHotZones(DisplayId displayId,
     ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config)
 {
     return windowRoot_->GetModeChangeHotZones(displayId, hotZones, config);
+}
+
+void WindowController::NotifyOutsidePressed(const sptr<WindowNode>& node)
+{
+    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (windowNodeContainer == nullptr) {
+        WLOGFE("window node container is null");
+        return;
+    }
+
+    std::vector<sptr<WindowNode>> windowNodes;
+    windowNodeContainer->TraverseContainer(windowNodes);
+    uint32_t skipNodeId = GetEmbedNodeId(windowNodes, node);
+    for (auto& windowNode : windowNodes) {
+        if (windowNode == nullptr || windowNode->GetWindowToken() == nullptr ||
+            windowNode->GetWindowId() == skipNodeId ||
+            windowNode->GetWindowId() == node->GetWindowId()) {
+            WLOGFD("continue %{public}s", windowNode == nullptr ? "nullptr" : windowNode->GetWindowName().c_str());
+            continue;
+        }
+        WLOGFD("notify %{public}s id %{public}d", windowNode->GetWindowName().c_str(), windowNode->GetWindowId());
+        windowNode->GetWindowToken()->NotifyOutsidePressed();
+    }
+}
+
+uint32_t WindowController::GetEmbedNodeId(const std::vector<sptr<WindowNode>>& windowNodes,
+    const sptr<WindowNode>& node)
+{
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        return 0;
+    }
+
+    Rect nodeRect = node->GetWindowRect();
+    bool isSkip = true;
+    for (auto& windowNode : windowNodes) {
+        if (windowNode == nullptr) {
+            continue;
+        }
+        if (windowNode->GetWindowId() == node->GetWindowId()) {
+            isSkip = false;
+            continue;
+        }
+        if (isSkip) {
+            continue;
+        }
+        if (nodeRect.IsInsideOf(windowNode->GetWindowRect())) {
+            WLOGI("OutsidePressed window type is component %{public}s windowNode %{public}d",
+                windowNode->GetWindowName().c_str(), windowNode->GetWindowId());
+            return windowNode->GetWindowId();
+        }
+    }
+    return 0;
 }
 } // namespace OHOS
 } // namespace Rosen

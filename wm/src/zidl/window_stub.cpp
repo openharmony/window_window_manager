@@ -107,6 +107,10 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             reply.WriteParcelable(property.GetRefPtr());
             break;
         }
+        case WindowMessage::TRANS_ID_NOTIFY_OUTSIDE_PRESSED: {
+            NotifyOutsidePressed();
+            break;
+        }
         default:
             break;
     }
