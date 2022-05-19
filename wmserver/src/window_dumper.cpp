@@ -25,6 +25,7 @@
 #include "string_ex.h"
 #include "unique_fd.h"
 #include "window_manager_hilog.h"
+#include "window_manager_service.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -35,6 +36,8 @@ namespace {
     constexpr int WINDOW_NAME_MAX_LENGTH = 20;
     const std::string ARG_DUMP_HELP = "-h";
     const std::string ARG_DUMP_ALL = "-a";
+    const std::string ARG_OPEN_STARTINGWIN = "-os";
+    const std::string ARG_CLOSE_STARTINGWIN = "-cs";
 }
 
 WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args) const
@@ -112,7 +115,7 @@ WMError WindowDumper::DumpDisplayWindowInfo(DisplayId displayId, std::string& du
             << std::endl;
     }
     oss << "Focus window: " << windowNodeContainer->GetFocusWindow() << std::endl;
-    oss << "total window num: " << windowRoot_->GetWindowNodeMap().size() << std::endl;
+    oss << "total window num: " << windowRoot_->GetTotalWindowNum()<< std::endl;
     dumpInfo.append(oss.str());
     return WMError::WM_OK;
 }
@@ -145,11 +148,21 @@ WMError WindowDumper::DumpWindowInfo(const std::vector<std::string>& args, std::
     DumpType dumpType = DumpType::DUMP_NONE;
     if (args[0] == ARG_DUMP_ALL) {
         dumpType = DumpType::DUMP_ALL;
+    } else if (args[0] == ARG_OPEN_STARTINGWIN) {
+        dumpType = DumpType::OPEN_STARTING;
+    } else if (args[0] == ARG_CLOSE_STARTINGWIN) {
+        dumpType = DumpType::CLOSE_STARTING;
     }
     WMError ret = WMError::WM_OK;
     switch (dumpType) {
         case DumpType::DUMP_ALL:
             ret = DumpAllWindowInfo(dumpInfo);
+            break;
+        case DumpType::OPEN_STARTING:
+            WindowManagerService::GetInstance().OpenStartingWindow();
+            break;
+        case DumpType::CLOSE_STARTING:
+            WindowManagerService::GetInstance().CloseStartingWindow();
             break;
         default:
             ret = WMError::WM_ERROR_INVALID_PARAM;
@@ -169,7 +182,11 @@ void WindowDumper::ShowHelpInfo(std::string& dumpInfo) const
         .append(" -h                    ")
         .append("|help text for the tool\n")
         .append(" -a                    ")
-        .append("|dump all window infomation in the system\n");
+        .append("|dump all window infomation in the system\n")
+        .append(" -o                    ")
+        .append("|open starting window\n")
+        .append(" -c                    ")
+        .append("|close starting window\n");
 }
 }
 }
