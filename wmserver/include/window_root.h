@@ -80,7 +80,7 @@ public:
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     std::vector<DisplayId> GetAllDisplayIds() const;
-    std::map<uint32_t, sptr<WindowNode>> GetWindowNodeMap();
+    uint32_t GetTotalWindowNum();
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
@@ -97,7 +97,9 @@ private:
     void ProcessExpandDisplayCreate(DisplayId displayId, ScreenId screenGroupId);
     std::map<DisplayId, sptr<DisplayInfo>> GetAllDisplayInfos(const std::vector<DisplayId>& displayIdVec);
     void MoveNotShowingWindowToDefaultDisplay(DisplayId displayId);
-
+    void DestroyLeakStartingWindow();
+    WMError PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode,
+        sptr<WindowNodeContainer>& container);
     std::recursive_mutex& mutex_;
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
