@@ -30,8 +30,6 @@ namespace {
 SurfaceDraw StartingWindow::surfaceDraw_;
 static bool g_hasInit = false;
 std::recursive_mutex StartingWindow::mutex_;
-static bool g_initStart = false;
-static std::shared_ptr<RSSurfaceNode> g_startingWinSurfaceNode = nullptr;
 
 sptr<WindowNode> StartingWindow::CreateWindowNode(sptr<WindowTransitionInfo> info, uint32_t winId)
 {
@@ -69,18 +67,15 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
         WLOGFE("create leashWinSurfaceNode failed");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!g_initStart) {
-        rsSurfaceNodeConfig.SurfaceNodeName = "startingWindow";
-        g_startingWinSurfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
-        if (g_startingWinSurfaceNode == nullptr) {
-            WLOGFE("create startingWinSurfaceNode failed");
-            node->leashWinSurfaceNode_ = nullptr;
-            return WMError::WM_ERROR_NULLPTR;
-        }
-        g_initStart = true;
+
+    rsSurfaceNodeConfig.SurfaceNodeName = "startingWindow" + std::to_string(node->GetWindowId());
+    node->startingWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    if (node->startingWinSurfaceNode_ == nullptr) {
+        WLOGFE("create startingWinSurfaceNode failed");
+        node->leashWinSurfaceNode_ = nullptr;
+        return WMError::WM_ERROR_NULLPTR;
     }
-    node->startingWinSurfaceNode_ = g_startingWinSurfaceNode;
-    WLOGFI("Create leashWinSurfaceNode and startingWinSurfaceNode success!");
+    WLOGFI("Create leashWinSurfaceNode and startingWinSurfaceNode success with id:%{public}u!", node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -120,17 +115,19 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
         node->GetRequestRect().width_, node->GetRequestRect().height_);
 
     // Register FirstFrame Callback to rs, replace startwin
-    auto firstFrameCompleteCallback = [node]() {
+    wptr<WindowNode> weak = node;
+    auto firstFrameCompleteCallback = [weak]() {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
-        if (node->leashWinSurfaceNode_ == nullptr) {
-            WLOGFE("leashWinSurfaceNode_ is nullptr");
+        auto weakNode = weak.promote();
+        if (weakNode == nullptr || weakNode->leashWinSurfaceNode_ == nullptr) {
+            WLOGFE("windowNode or leashWinSurfaceNode_ is nullptr");
             return;
         }
-        WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", node->GetWindowId());
-        node->leashWinSurfaceNode_->RemoveChild(node->startingWinSurfaceNode_);
-        node->leashWinSurfaceNode_->AddChild(node->surfaceNode_, -1);
-        node->startingWinSurfaceNode_ = nullptr;
-        AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(node->abilityToken_);
+        WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
+        weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
+        weakNode->leashWinSurfaceNode_->AddChild(weakNode->surfaceNode_, -1);
+        weakNode->startingWinSurfaceNode_ = nullptr;
+        AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(weakNode->abilityToken_);
         RSTransaction::FlushImplicitTransaction();
     };
     node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
