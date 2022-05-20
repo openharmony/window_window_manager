@@ -128,8 +128,8 @@ WMError WindowNodeContainer::ShowStartingWindow(sptr<WindowNode>& node)
         WLOGFE("Window pair is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    windowPair->UpdateIfSplitRelated(node);
     UpdateWindowTree(node);
+    windowPair->UpdateIfSplitRelated(node);
     if (node->IsSplitMode() || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         RaiseSplitRelatedWindowToTop(node);
     }
@@ -155,8 +155,8 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
             WLOGFE("Window pair is nullptr");
             return WMError::WM_ERROR_NULLPTR;
         }
-        windowPair->UpdateIfSplitRelated(node);
         UpdateWindowTree(node);
+        windowPair->UpdateIfSplitRelated(node);
         if (node->IsSplitMode() || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
             RaiseSplitRelatedWindowToTop(node);
         }
@@ -1442,6 +1442,18 @@ void WindowNodeContainer::ReZOrderShowWhenLockedWindows(bool up)
         }
 
         parentNode->children_.insert(position, needReZOrderNode);
+        if (up && WindowHelper::IsSplitWindowMode(needReZOrderNode->GetWindowMode())) {
+            needReZOrderNode->GetWindowProperty()->ResumeLastWindowMode();
+            if (needReZOrderNode->GetWindowToken() != nullptr) {
+                needReZOrderNode->GetWindowToken()->UpdateWindowMode(needReZOrderNode->GetWindowMode());
+            }
+            auto windowPair = displayGroupController_->GetWindowPairByDisplayId(needReZOrderNode->GetDisplayId());
+            if (windowPair == nullptr) {
+                WLOGFE("Window pair is nullptr");
+                return;
+            }
+            windowPair->UpdateIfSplitRelated(needReZOrderNode);
+        }
         WLOGFI("ShowWhenLocked window %{public}u re-zorder when keyguard change %{public}u",
             needReZOrderNode->GetWindowId(), up);
     }
@@ -1484,6 +1496,12 @@ void WindowNodeContainer::RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNod
         WLOGFI("ShowWhenLocked window %{public}u raise itself", node->GetWindowId());
         node->priority_ = zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_KEYGUARD) + 1;
         node->parent_ = aboveAppWindowNode_;
+        if (WindowHelper::IsSplitWindowMode(node->GetWindowMode())) {
+            node->GetWindowProperty()->ResumeLastWindowMode();
+            if (node->GetWindowToken() != nullptr) {
+                node->GetWindowToken()->UpdateWindowMode(node->GetWindowMode());
+            }
+        }
     }
 }
 
