@@ -59,9 +59,24 @@ public:
         return ((IsMainWindow(type)) && (mode == WindowMode::WINDOW_MODE_FLOATING));
     }
 
+    static inline bool IsMainFullScreenWindow(WindowType type, WindowMode mode)
+    {
+        return ((IsMainWindow(type)) && (mode == WindowMode::WINDOW_MODE_FULLSCREEN));
+    }
+
+    static inline bool IsFloatintWindow(WindowMode mode)
+    {
+        return mode == WindowMode::WINDOW_MODE_FLOATING;
+    }
+
     static inline bool IsAvoidAreaWindow(WindowType type)
     {
         return (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    }
+
+    static inline bool IsFullScreenWindow(WindowMode mode)
+    {
+        return mode == WindowMode::WINDOW_MODE_FULLSCREEN;
     }
 
     static inline bool IsSplitWindowMode(WindowMode mode)

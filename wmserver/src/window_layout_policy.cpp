@@ -469,6 +469,74 @@ void WindowLayoutPolicy::LimitFloatingWindowSize(const sptr<WindowNode>& node,
     }
 }
 
+DockWindowShowState WindowLayoutPolicy::GetDockWindowShowState(DisplayId displayId, Rect& dockWinRect) const
+{
+    auto& displayWindowTree = displayGroupWindowTree_[displayId];
+    auto& nodeVec = *(displayWindowTree[WindowRootNodeType::ABOVE_WINDOW_NODE]);
+    for (auto& node : nodeVec) {
+        if (node->GetWindowType() != WindowType::WINDOW_TYPE_LAUNCHER_DOCK) {
+            continue;
+        }
+
+        dockWinRect = node->GetWindowRect();
+        auto displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+        WLOGFI("begin dockWinRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
+            dockWinRect.posX_, dockWinRect.posY_, dockWinRect.width_, dockWinRect.height_);
+        if (dockWinRect.height_ < dockWinRect.width_) {
+            if (static_cast<uint32_t>(dockWinRect.posY_) + dockWinRect.height_ == displayRect.height_) {
+                return DockWindowShowState::SHOWN_IN_BOTTOM;
+            } else {
+                return DockWindowShowState::NOT_SHOWN;
+            }
+        } else {
+            if (dockWinRect.posX_ == 0) {
+                return DockWindowShowState::SHOWN_IN_LEFT;
+            } else if (static_cast<uint32_t>(dockWinRect.posX_) + dockWinRect.width_ == displayRect.width_) {
+                return DockWindowShowState::SHOWN_IN_RIGHT;
+            } else {
+                return DockWindowShowState::NOT_SHOWN;
+            }
+        }
+    }
+    return DockWindowShowState::NOT_SHOWN;
+}
+
+void WindowLayoutPolicy::LimitMainFloatingWindowPositionWithDrag(const sptr<WindowNode>& node, Rect& winRect) const
+{
+    if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+        float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
+        uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
+        const Rect lastRect = node->GetWindowRect();
+        // fix rect in case of moving window when dragging
+        winRect = WindowHelper::GetFixedWindowRectByLimitSize(winRect, lastRect,
+            IsVerticalDisplay(node->GetDisplayId()), virtualPixelRatio);
+
+        // if is mutiDisplay, the limit rect should be full limitRect when move or drag
+        Rect limitRect;
+        if (isMultiDisplay_) {
+            limitRect = displayGroupLimitRect_;
+        } else {
+            limitRect = limitRectMap_[node->GetDisplayId()];
+        }
+        winRect = WindowHelper::GetFixedWindowRectByLimitPosition(winRect, lastRect,
+            virtualPixelRatio, limitRect);
+        Rect dockWinRect;
+        DockWindowShowState dockShownState = GetDockWindowShowState(node->GetDisplayId(), dockWinRect);
+        if (dockShownState == DockWindowShowState::SHOWN_IN_BOTTOM) {
+            WLOGFI("dock window show in bottom");
+            winRect.posY_ = std::min(dockWinRect.posY_ - static_cast<int32_t>(windowTitleBarH), winRect.posY_);
+        } else if (dockShownState == DockWindowShowState::SHOWN_IN_LEFT) {
+            WLOGFI("dock window show in left");
+            winRect.posX_ = std::max(static_cast<int32_t>(dockWinRect.width_ + windowTitleBarH - winRect.width_),
+                                     winRect.posX_);
+        } else if (dockShownState == DockWindowShowState::SHOWN_IN_RIGHT) {
+            WLOGFI("dock window show in right");
+            winRect.posX_ = std::min(dockWinRect.posX_ - static_cast<int32_t>(windowTitleBarH),
+                                     winRect.posX_);
+        }
+    }
+}
+
 void WindowLayoutPolicy::LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const
 {
     float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
@@ -484,14 +552,30 @@ void WindowLayoutPolicy::LimitMainFloatingWindowPosition(const sptr<WindowNode>&
 
     // limit position of the main floating window(window which support dragging)
     if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+        Rect dockWinRect;
+        DockWindowShowState dockShownState = GetDockWindowShowState(node->GetDisplayId(), dockWinRect);
         winRect.posY_ = std::max(limitRect.posY_, winRect.posY_);
         winRect.posY_ = std::min(limitRect.posY_ + static_cast<int32_t>(limitRect.height_ - windowTitleBarH),
                                  winRect.posY_);
-
+        if (dockShownState == DockWindowShowState::SHOWN_IN_BOTTOM) {
+            WLOGFI("dock window show in bottom");
+            winRect.posY_ = std::min(dockWinRect.posY_ + static_cast<int32_t>(dockWinRect.height_ - windowTitleBarH),
+                                     winRect.posY_);
+        }
         winRect.posX_ = std::max(limitRect.posX_ + static_cast<int32_t>(windowTitleBarH - winRect.width_),
                                  winRect.posX_);
+        if (dockShownState == DockWindowShowState::SHOWN_IN_LEFT) {
+            WLOGFI("dock window show in left");
+            winRect.posX_ = std::max(static_cast<int32_t>(dockWinRect.width_ + windowTitleBarH - winRect.width_),
+                                     winRect.posX_);
+        }
         winRect.posX_ = std::min(limitRect.posX_ + static_cast<int32_t>(limitRect.width_ - windowTitleBarH),
                                  winRect.posX_);
+        if (dockShownState == DockWindowShowState::SHOWN_IN_RIGHT) {
+            WLOGFI("dock window show in right");
+            winRect.posX_ = std::min(dockWinRect.posX_ - static_cast<int32_t>(windowTitleBarH),
+                                     winRect.posX_);
+        }
     }
 }
 

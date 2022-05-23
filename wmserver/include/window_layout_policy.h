@@ -30,6 +30,13 @@ namespace OHOS {
 namespace Rosen {
 using DisplayGroupWindowTree = std::map<DisplayId,
     std::map<WindowRootNodeType, std::unique_ptr<std::vector<sptr<WindowNode>>>>>;
+enum class DockWindowShowState : uint32_t {
+    NOT_SHOWN = 0,
+    SHOWN_IN_BOTTOM = 1,
+    SHOWN_IN_LEFT = 2,
+    SHOWN_IN_RIGHT = 3,
+    SHOWN_IN_TOP = 4,
+};
 class WindowLayoutPolicy : public RefBase {
 public:
     WindowLayoutPolicy() = delete;
@@ -59,6 +66,7 @@ protected:
     AvoidPosType GetAvoidPosType(const Rect& rect, DisplayId displayId) const;
     void CalcAndSetNodeHotZone(Rect layoutOutRect, const sptr<WindowNode>& node) const;
     void LimitFloatingWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect) const;
+    void LimitMainFloatingWindowPositionWithDrag(const sptr<WindowNode>& node, Rect& winRect) const;
     void LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const;
     void ComputeDecoratedRequestRect(const sptr<WindowNode>& node) const;
     bool IsVerticalDisplay(DisplayId displayId) const;
@@ -77,6 +85,7 @@ protected:
     void UpdateMultiDisplayFlag();
     void PostProcessWhenDisplayChange();
     void UpdateDisplayRectAndDisplayGroupInfo(const std::map<DisplayId, Rect>& displayRectMap);
+    DockWindowShowState GetDockWindowShowState(DisplayId displayId, Rect& dockWinRect) const;
 
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
