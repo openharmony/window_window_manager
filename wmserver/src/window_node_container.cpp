@@ -1216,6 +1216,19 @@ sptr<WindowNode> WindowNodeContainer::GetNextActiveWindow(uint32_t windowId) con
     return nullptr;
 }
 
+bool WindowNodeContainer::IsForbidDockSliceMove(DisplayId displayId) const
+{
+    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(displayId);
+    if (windowPair == nullptr) {
+        WLOGFE("window pair is nullptr");
+        return true;
+    }
+    if (windowPair->IsForbidDockSliceMove()) {
+        return true;
+    }
+    return false;
+}
+
 void WindowNodeContainer::MinimizeAllAppWindows(DisplayId displayId)
 {
     WMError ret =  MinimizeAppNodeExceptOptions(MinimizeReason::MINIMIZE_ALL);
