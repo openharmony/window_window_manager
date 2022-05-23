@@ -39,27 +39,27 @@ void DisplayGroupController::InitNewDisplay(DisplayId displayId)
     sysBarTintMaps_.insert(std::make_pair(displayId, sysBarTintMap));
 
     // window node maps for display
-    std::map<WindowRootNodeType, std::unique_ptr<std::vector<sptr<WindowNode>>>> windowRootNodeMap;
-    windowRootNodeMap.insert(std::make_pair(WindowRootNodeType::APP_WINDOW_NODE,
+    std::map<WindowRootNodeType, std::unique_ptr<std::vector<sptr<WindowNode>>>> displayWindowTree;
+    displayWindowTree.insert(std::make_pair(WindowRootNodeType::APP_WINDOW_NODE,
         std::make_unique<std::vector<sptr<WindowNode>>>()));
-    windowRootNodeMap.insert(std::make_pair(WindowRootNodeType::ABOVE_WINDOW_NODE,
+    displayWindowTree.insert(std::make_pair(WindowRootNodeType::ABOVE_WINDOW_NODE,
         std::make_unique<std::vector<sptr<WindowNode>>>()));
-    windowRootNodeMap.insert(std::make_pair(WindowRootNodeType::BELOW_WINDOW_NODE,
+    displayWindowTree.insert(std::make_pair(WindowRootNodeType::BELOW_WINDOW_NODE,
         std::make_unique<std::vector<sptr<WindowNode>>>()));
-    windowNodeMaps_.insert(std::make_pair(displayId, std::move(windowRootNodeMap)));
+    displayGroupWindowTree_.insert(std::make_pair(displayId, std::move(displayWindowTree)));
 
     // window pair for display
-    auto windowPair = new WindowPair(displayId, windowNodeMaps_);
+    auto windowPair = new WindowPair(displayId, displayGroupWindowTree_);
     windowPairMap_.insert(std::make_pair(displayId, windowPair));
 }
 
 std::vector<sptr<WindowNode>>* DisplayGroupController::GetWindowNodesByDisplayIdAndRootType(DisplayId displayId,
                                                                                             WindowRootNodeType type)
 {
-    if (windowNodeMaps_.find(displayId) != windowNodeMaps_.end()) {
-        auto& rootNodemap = windowNodeMaps_[displayId];
-        if (rootNodemap.find(type) != rootNodemap.end()) {
-            return rootNodemap[type].get();
+    if (displayGroupWindowTree_.find(displayId) != displayGroupWindowTree_.end()) {
+        auto& displayWindowTree = displayGroupWindowTree_[displayId];
+        if (displayWindowTree.find(type) != displayWindowTree.end()) {
+            return displayWindowTree[type].get();
         }
     }
     return nullptr;
@@ -79,10 +79,10 @@ void DisplayGroupController::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, W
     }
 }
 
-void DisplayGroupController::UpdateWindowNodeMaps()
+void DisplayGroupController::UpdateDisplayGroupWindowTree()
 {
-    // clear ori windowNodeMaps
-    for (auto& elem : windowNodeMaps_) {
+    // clear ori window tree of displayGroup
+    for (auto& elem : displayGroupWindowTree_) {
         for (auto& nodeVec : elem.second) {
             auto emptyVector = std::vector<sptr<WindowNode>>();
             nodeVec.second->swap(emptyVector);
@@ -108,7 +108,7 @@ void DisplayGroupController::UpdateWindowNodeMaps()
 void DisplayGroupController::ProcessCrossNodes(DisplayStateChangeType type)
 {
     defaultDisplayId_ = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
-    for (auto& iter : windowNodeMaps_) {
+    for (auto& iter : displayGroupWindowTree_) {
         auto& nodeVec = *(iter.second[WindowRootNodeType::APP_WINDOW_NODE]);
         for (auto& node : nodeVec) {
             if (node->isShowingOnMultiDisplays_) {
@@ -136,28 +136,13 @@ void DisplayGroupController::ProcessCrossNodes(DisplayStateChangeType type)
     }
 }
 
-void DisplayGroupController::FindMaxAndMinPosXDisplay()
-{
-    minPosXDisplay_ = displayRectMap_.begin()->first;
-    maxPosXDisplay_ = displayRectMap_.begin()->first;
-    for (auto& elem : displayRectMap_) {
-        auto& curDisplayRect = elem.second;
-        if (curDisplayRect.posX_ < displayRectMap_[minPosXDisplay_].posX_) {
-            minPosXDisplay_ = elem.first;
-        }
-        if ((curDisplayRect.posX_ + static_cast<int32_t>(curDisplayRect.width_)) >
-            (displayRectMap_[maxPosXDisplay_].posX_ + static_cast<int32_t>(displayRectMap_[maxPosXDisplay_].width_))) {
-            maxPosXDisplay_ = elem.first;
-        }
-    }
-    WLOGFI("max posX displayId: %{public}" PRIu64", min posX displayId: %{public}" PRIu64"",
-        maxPosXDisplay_, minPosXDisplay_);
-}
-
 void DisplayGroupController::UpdateWindowShowingDisplays(const sptr<WindowNode>& node, const Rect& requestRect)
 {
+    auto leftDisplayId = displayGroupInfo_->GetLeftDisplayId();
+    auto rightDisplayId = displayGroupInfo_->GetRightDisplayId();
+    auto displayRectMap = displayGroupInfo_->GetAllDisplayRects();
     auto showingDisplays = std::vector<DisplayId>();
-    for (auto& elem : displayRectMap_) {
+    for (auto& elem : displayRectMap) {
         auto& curDisplayRect = elem.second;
 
         // if window is showing in display region
@@ -170,12 +155,12 @@ void DisplayGroupController::UpdateWindowShowingDisplays(const sptr<WindowNode>&
     // if window is not showing on any display, maybe in the left of minPosX display, or the right of maxPosX display
     if (showingDisplays.empty()) {
         if (((requestRect.posX_ + static_cast<int32_t>(requestRect.width_)) <=
-            displayRectMap_[minPosXDisplay_].posX_)) {
-            showingDisplays.push_back(minPosXDisplay_);
+            displayRectMap[leftDisplayId].posX_)) {
+            showingDisplays.push_back(leftDisplayId);
         }
         if (requestRect.posX_ >=
-            (displayRectMap_[maxPosXDisplay_].posX_ + static_cast<int32_t>(displayRectMap_[maxPosXDisplay_].width_))) {
-            showingDisplays.push_back(maxPosXDisplay_);
+            (displayRectMap[rightDisplayId].posX_ + static_cast<int32_t>(displayRectMap[rightDisplayId].width_))) {
+            showingDisplays.push_back(rightDisplayId);
         }
     }
 
@@ -197,7 +182,8 @@ void DisplayGroupController::UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode
         // if more than half width of the window is showing on the display, means the window belongs to this display
         const Rect& requestRect = node->GetRequestRect();
         int32_t halfWidth = static_cast<int32_t>(requestRect.width_ * 0.5);
-        for (auto& elem : displayRectMap_) {
+        const auto& displayRectMap = displayGroupInfo_->GetAllDisplayRects();
+        for (auto& elem : displayRectMap) {
             auto& displayRect = elem.second;
             if ((requestRect.posX_ < displayRect.posX_) &&
                 (requestRect.posX_ + static_cast<int32_t>(requestRect.width_) >
@@ -227,7 +213,7 @@ void DisplayGroupController::UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode
 void DisplayGroupController::ChangeToRectInDisplayGroup(const sptr<WindowNode>& node)
 {
     Rect requestRect = node->GetRequestRect();
-    const Rect& displayRect = displayRectMap_[node->GetDisplayId()];
+    const Rect& displayRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
     requestRect.posX_ += displayRect.posX_;
     requestRect.posY_ += displayRect.posY_;
     node->SetRequestRect(requestRect);
@@ -311,8 +297,8 @@ void DisplayGroupController::MoveNotCrossNodeToDefaultDisplay(const sptr<WindowN
     WLOGFI("windowId: %{public}d, displayId: %{public}" PRIu64"", node->GetWindowId(), displayId);
 
     // update new rect in display group
-    Rect srcDisplayRect = displayRectMap_[displayId];
-    Rect dstDisplayRect = displayRectMap_[defaultDisplayId_];
+    const Rect& srcDisplayRect = displayGroupInfo_->GetDisplayRect(displayId);
+    const Rect& dstDisplayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayId_);
     Rect newRect = node->GetRequestRect();
     newRect.posX_ = newRect.posX_ - srcDisplayRect.posX_ + dstDisplayRect.posX_;
     newRect.posY_ = newRect.posY_ - srcDisplayRect.posY_ + dstDisplayRect.posY_;
@@ -342,7 +328,7 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroiedDisplay(DisplayId di
         WindowRootNodeType::BELOW_WINDOW_NODE
     };
     for (size_t index = 0; index < rootNodeType.size(); ++index) {
-        auto& nodesVec = *(windowNodeMaps_[displayId][rootNodeType[index]]);
+        auto& nodesVec = *(displayGroupWindowTree_[displayId][rootNodeType[index]]);
         for (auto& node : nodesVec) {
             if (node->GetDisplayId() != displayId || node->isShowingOnMultiDisplays_) {
                 continue;
@@ -366,106 +352,60 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroiedDisplay(DisplayId di
 }
 
 void DisplayGroupController::ProcessDisplayCreate(DisplayId displayId,
-                                                  const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap)
+                                                  const std::map<DisplayId, Rect>& displayRectMap)
 {
-    if (displayInfosMap_.find(displayId) != displayInfosMap_.end() ||
-        displayInfoMap.size() != (displayInfosMap_.size() + 1)) {
-        WLOGFE("current display is exited or displayInfo map size is error, displayId: %{public}" PRIu64"", displayId);
-        return;
-    }
-
     defaultDisplayId_ = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
     WLOGFI("defaultDisplay, displayId: %{public}" PRIu64"", defaultDisplayId_);
 
     windowNodeContainer_->GetAvoidController()->UpdateAvoidNodesMap(displayId, true);
     InitNewDisplay(displayId);
 
-    // window pair for split window
-    auto windowPair = new WindowPair(displayId, windowNodeMaps_);
+    // add displayInfo in displayGroupInfo
+    auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+    displayGroupInfo_->AddDisplayInfo(displayInfo);
+
+    // create new window pair for split window
+    auto windowPair = new WindowPair(displayId, displayGroupWindowTree_);
     windowPairMap_.insert(std::make_pair(displayId, windowPair));
 
-    // modify RSTree and windowNodeMaps for cross-display nodes
+    // modify RSTree and window tree of displayGroup for cross-display nodes
     ProcessCrossNodes(DisplayStateChangeType::CREATE);
-    UpdateWindowNodeMaps();
-
-    for (auto& elem : displayInfoMap) {
-        auto iter = displayInfosMap_.find(elem.first);
-        const auto& displayInfo = elem.second;
-        Rect displayRect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
-            displayInfo->GetWidth(), displayInfo->GetHeight() };
-        if (iter != displayInfosMap_.end()) {
-            displayRectMap_[elem.first] = displayRect;
-            displayInfosMap_[elem.first] = displayInfo;
-        } else {
-            displayRectMap_.insert(std::make_pair(elem.first, displayRect));
-            displayInfosMap_.insert(std::make_pair(elem.first, displayInfo));
-        }
-        WLOGFI("displayId: %{public}" PRIu64", displayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
-            elem.first, displayRect.posX_, displayRect.posY_, displayRect.width_, displayRect.height_);
-    }
-    FindMaxAndMinPosXDisplay();
-    windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayCreate(displayId, displayRectMap_);
+    UpdateDisplayGroupWindowTree();
+    windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayCreate(displayId, displayRectMap);
 }
 
 void DisplayGroupController::ProcessDisplayDestroy(DisplayId displayId,
-                                                   const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap,
+                                                   const std::map<DisplayId, Rect>& displayRectMap,
                                                    std::vector<uint32_t>& windowIds)
 {
-    if (displayInfosMap_.find(displayId) == displayInfosMap_.end() ||
-        (displayInfoMap.size() + 1) != displayInfosMap_.size()) {
-        WLOGFE("can not find current display or displayInfo map size is error, displayId: %{public}" PRIu64"",
-               displayId);
-        return;
-    }
-
     windowNodeContainer_->GetAvoidController()->UpdateAvoidNodesMap(displayId, false);
 
     // delete nodes and map element of deleted display
     ProcessNotCrossNodesOnDestroiedDisplay(displayId, windowIds);
-    // modify RSTree and windowNodeMaps for cross-display nodes
+    // modify RSTree and window tree of displayGroup for cross-display nodes
     ProcessCrossNodes(DisplayStateChangeType::DESTROY);
-    UpdateWindowNodeMaps();
+    UpdateDisplayGroupWindowTree();
     ClearMapOfDestroiedDisplay(displayId);
-
-    for (auto& elem : displayInfoMap) {
-        auto iter = displayInfosMap_.find(elem.first);
-        const auto& displayInfo = elem.second;
-        Rect displayRect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
-            displayInfo->GetWidth(), displayInfo->GetHeight() };
-        if (iter != displayInfosMap_.end()) {
-            displayRectMap_[elem.first] = displayRect;
-            displayInfosMap_[elem.first] = displayInfo;
-            WLOGFI("displayId: %{public}" PRIu64", displayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
-                elem.first, displayRect.posX_, displayRect.posY_, displayRect.width_, displayRect.height_);
-        }
-    }
-    FindMaxAndMinPosXDisplay();
-    windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayDestroy(displayId, displayRectMap_);
+    windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayDestroy(displayId, displayRectMap);
 }
 
 void DisplayGroupController::ProcessDisplayChange(DisplayId displayId,
-                                                  const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap,
+                                                  const std::map<DisplayId, Rect>& displayRectMap,
                                                   DisplayStateChangeType type)
 {
     const sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
-    if (displayInfosMap_.find(displayId) == displayInfosMap_.end()) {
-        WLOGFE("can not find current display, displayId: %{public}" PRIu64", type: %{public}d", displayId, type);
-        return;
-    }
     WLOGFI("display change, displayId: %{public}" PRIu64", type: %{public}d", displayId, type);
     switch (type) {
         case DisplayStateChangeType::UPDATE_ROTATION: {
-            displayInfosMap_[displayId]->SetRotation(displayInfo->GetRotation());
+            displayGroupInfo_->SetDisplayRotation(displayId, displayInfo->GetRotation());
             [[fallthrough]];
         }
         case DisplayStateChangeType::SIZE_CHANGE: {
-            displayInfosMap_[displayId]->SetWidth(displayInfo->GetWidth());
-            displayInfosMap_[displayId]->SetHeight(displayInfo->GetHeight());
-            ProcessDisplaySizeChangeOrRotation(displayId, displayInfoMap, type);
+            ProcessDisplaySizeChangeOrRotation(displayId, displayRectMap, type);
             break;
         }
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
-            displayInfosMap_[displayId]->SetVirtualPixelRatio(displayInfo->GetVirtualPixelRatio());
+            displayGroupInfo_->SetDisplayVirtualPixelRatio(displayId, displayInfo->GetVirtualPixelRatio());
             windowNodeContainer_->GetLayoutPolicy()->LayoutWindowTree(displayId);
             break;
         }
@@ -473,37 +413,23 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId displayId,
             break;
         }
     }
-    FindMaxAndMinPosXDisplay();
 }
 
 void DisplayGroupController::ProcessDisplaySizeChangeOrRotation(DisplayId displayId,
-    const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
+    const std::map<DisplayId, Rect>& displayRectMap, DisplayStateChangeType type)
 {
-    // modify RSTree and windowNodeMaps for cross-display nodes
+    // modify RSTree and window tree of displayGroup for cross-display nodes
     ProcessCrossNodes(type);
-    UpdateWindowNodeMaps();
-    for (auto& elem : displayInfoMap) {
-        auto iter = displayInfosMap_.find(elem.first);
-        const auto& displayInfo = elem.second;
-        Rect displayRect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
-            displayInfo->GetWidth(), displayInfo->GetHeight() };
-        if (iter != displayInfosMap_.end()) {
-            displayRectMap_[elem.first] = displayRect;
-            displayInfosMap_[elem.first] = displayInfo;
-            WLOGFI("displayId: %{public}" PRIu64", displayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
-                elem.first, displayRect.posX_, displayRect.posY_, displayRect.width_, displayRect.height_);
-        }
-    }
-    windowNodeContainer_->GetLayoutPolicy()->ProcessDisplaySizeChangeOrRotation(displayId, displayRectMap_);
+    UpdateDisplayGroupWindowTree();
+    windowNodeContainer_->GetLayoutPolicy()->ProcessDisplaySizeChangeOrRotation(displayId, displayRectMap);
 }
 
 void DisplayGroupController::ClearMapOfDestroiedDisplay(DisplayId displayId)
 {
     sysBarTintMaps_.erase(displayId);
     sysBarNodeMaps_.erase(displayId);
-    windowNodeMaps_.erase(displayId);
-    displayRectMap_.erase(displayId);
-    displayInfosMap_.erase(displayId);
+    displayGroupWindowTree_.erase(displayId);
+    displayGroupInfo_->RemoveDisplayInfo(displayId);
     windowPairMap_.erase(displayId);
 }
 
@@ -514,5 +440,5 @@ sptr<WindowPair> DisplayGroupController::GetWindowPairByDisplayId(DisplayId disp
     }
     return nullptr;
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

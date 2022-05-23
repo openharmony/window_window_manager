@@ -96,6 +96,7 @@ private:
     ScreenId GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay);
     void ProcessExpandDisplayCreate(DisplayId displayId, ScreenId screenGroupId);
     std::map<DisplayId, sptr<DisplayInfo>> GetAllDisplayInfos(const std::vector<DisplayId>& displayIdVec);
+    std::map<DisplayId, Rect> GetAllDisplayRects(const std::vector<DisplayId>& displayIdVec);
     void MoveNotShowingWindowToDefaultDisplay(DisplayId displayId);
     void DestroyLeakStartingWindow();
     WMError PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode,
