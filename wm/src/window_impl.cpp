@@ -1951,6 +1951,10 @@ void WindowImpl::SetDefaultOption()
             property_->SetFocusable(false);
             break;
         }
+        case WindowType::WINDOW_TYPE_VOICE_INTERACTION: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            break;
+        }
         default:
             break;
     }
