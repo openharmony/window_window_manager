@@ -508,29 +508,24 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
     ScreenId dmsScreenId = SCREEN_ID_INVALID;
     if (!screenIdManager_.ConvertToDmsScreenId(rsId, dmsScreenId)) {
         dmsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsId);
-        if (!option.isForShot_) {
-            WLOGI("CreateVirtualScreen is not shot");
-            sptr<AbstractScreen> absScreen = new(std::nothrow) AbstractScreen(this, option.name_, dmsScreenId, rsId);
-            sptr<SupportedScreenModes> info = new(std::nothrow) SupportedScreenModes();
-            if (absScreen == nullptr || info == nullptr) {
-                WLOGFI("new AbstractScreen or SupportedScreenModes failed");
-                screenIdManager_.DeleteScreenId(dmsScreenId);
-                return SCREEN_ID_INVALID;
-            }
-            info->width_ = option.width_;
-            info->height_ = option.height_;
-            auto defaultScreen = GetAbstractScreen(GetDefaultAbstractScreenId());
-            if (defaultScreen != nullptr && defaultScreen->GetActiveScreenMode() != nullptr) {
-                info->refreshRate_ = defaultScreen->GetActiveScreenMode()->refreshRate_;
-            }
-            absScreen->modes_.emplace_back(info);
-            absScreen->activeIdx_ = 0;
-            absScreen->type_ = ScreenType::VIRTUAL;
-            dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));
-            NotifyScreenConnected(absScreen->ConvertToScreenInfo());
-        } else {
-            WLOGI("CreateVirtualScreen is shot");
+        sptr<AbstractScreen> absScreen = new(std::nothrow) AbstractScreen(this, option.name_, dmsScreenId, rsId);
+        sptr<SupportedScreenModes> info = new(std::nothrow) SupportedScreenModes();
+        if (absScreen == nullptr || info == nullptr) {
+            WLOGFI("new AbstractScreen or SupportedScreenModes failed");
+            screenIdManager_.DeleteScreenId(dmsScreenId);
+            return SCREEN_ID_INVALID;
         }
+        info->width_ = option.width_;
+        info->height_ = option.height_;
+        auto defaultScreen = GetAbstractScreen(GetDefaultAbstractScreenId());
+        if (defaultScreen != nullptr && defaultScreen->GetActiveScreenMode() != nullptr) {
+            info->refreshRate_ = defaultScreen->GetActiveScreenMode()->refreshRate_;
+        }
+        absScreen->modes_.emplace_back(info);
+        absScreen->activeIdx_ = 0;
+        absScreen->type_ = ScreenType::VIRTUAL;
+        dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));
+        NotifyScreenConnected(absScreen->ConvertToScreenInfo());
     } else {
         WLOGFI("id: %{public}" PRIu64" appears in screenIdManager_. ", rsId);
     }
