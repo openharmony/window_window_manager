@@ -29,11 +29,11 @@ namespace {
     constexpr uint32_t MID_INTERVAL = 24;
 }
 
-WindowLayoutPolicyTile::WindowLayoutPolicyTile(const std::map<DisplayId, Rect>& displayRectMap,
-    WindowNodeMaps& windowNodeMaps, std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap)
-    : WindowLayoutPolicy(displayRectMap, windowNodeMaps, displayInfosMap)
+WindowLayoutPolicyTile::WindowLayoutPolicyTile(const sptr<DisplayGroupInfo>& displayGroupInfo,
+    DisplayGroupWindowTree& displayGroupWindowTree)
+    : WindowLayoutPolicy(displayGroupInfo, displayGroupWindowTree)
 {
-    for (auto& iter : displayRectMap) {
+    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
         maxTileWinNumMap_.insert(std::make_pair(iter.first, static_cast<uint32_t>(1)));
     }
 }
@@ -44,12 +44,12 @@ void WindowLayoutPolicyTile::Launch()
     InitAllRects();
     // select app min win in queue, and minimize others
     InitForegroundNodeQueue();
-    for (auto& iter : displayRectMap_) {
+    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
         DisplayId displayId = iter.first;
         AssignNodePropertyForTileWindows(displayId);
         LayoutForegroundNodeQueue(displayId);
-        auto& windowNodeMap = windowNodeMaps_[displayId];
-        LayoutWindowNodesByRootType(*(windowNodeMap[WindowRootNodeType::BELOW_WINDOW_NODE]));
+        auto& displayWindowTree = displayGroupWindowTree_[displayId];
+        LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::BELOW_WINDOW_NODE]));
     }
     WLOGFI("WindowLayoutPolicyTile::Launch");
 }
@@ -57,11 +57,11 @@ void WindowLayoutPolicyTile::Launch()
 void WindowLayoutPolicyTile::InitAllRects()
 {
     displayGroupLimitRect_ = displayGroupRect_;
-    for (auto& iter : displayRectMap_) {
+    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
         DisplayId displayId = iter.first;
         limitRectMap_[displayId] = iter.second;
-        auto& windowNodeMap = windowNodeMaps_[displayId];
-        LayoutWindowNodesByRootType(*(windowNodeMap[WindowRootNodeType::ABOVE_WINDOW_NODE]));
+        auto& displayWindowTree = displayGroupWindowTree_[displayId];
+        LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::ABOVE_WINDOW_NODE]));
         InitTileWindowRects(displayId);
     }
 }
@@ -86,7 +86,7 @@ void WindowLayoutPolicyTile::InitTileWindowRects(DisplayId displayId)
 
     constexpr float ratio = DEFAULT_ASPECT_RATIO;
     const Rect& limitRect = limitRectMap_[displayId];
-    const Rect& displayRect = displayRectMap_[displayId];
+    const Rect& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
     constexpr int half = 2;
     maxTileWinNumMap_[displayId]  = GetMaxTileWinNum(displayId);
     WLOGFI("set max tile window num %{public}u", maxTileWinNumMap_[displayId]);
@@ -180,10 +180,10 @@ void WindowLayoutPolicyTile::LayoutForegroundNodeQueue(DisplayId displayId)
 
 void WindowLayoutPolicyTile::InitForegroundNodeQueue()
 {
-    for (auto& iter : displayRectMap_) {
+    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
         DisplayId displayId = iter.first;
         foregroundNodesMap_[displayId].clear();
-        const auto& appWindowNodes = *(windowNodeMaps_[displayId][WindowRootNodeType::APP_WINDOW_NODE]);
+        const auto& appWindowNodes = *(displayGroupWindowTree_[displayId][WindowRootNodeType::APP_WINDOW_NODE]);
         for (auto& node : appWindowNodes) {
             if (WindowHelper::IsMainWindow(node->GetWindowType())) {
                 ForegroundNodeQueuePushBack(node, displayId);
@@ -274,7 +274,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
     bool subWindow = WindowHelper::IsSubWindow(type);
     bool floatingWindow = (mode == WindowMode::WINDOW_MODE_FLOATING);
     const Rect lastRect = node->GetWindowRect();
-    Rect limitRect = displayRectMap_[node->GetDisplayId()];
+    Rect limitRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
     ComputeDecoratedRequestRect(node);
     Rect winRect = node->GetRequestRect();
 
@@ -295,7 +295,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
         }
     }
 
-    LimitFloatingWindowSize(node, displayRectMap_[node->GetDisplayId()], winRect);
+    LimitFloatingWindowSize(node, displayGroupInfo_->GetDisplayRect(node->GetDisplayId()), winRect);
     LimitMainFloatingWindowPosition(node, winRect);
 
     node->SetWindowRect(winRect);

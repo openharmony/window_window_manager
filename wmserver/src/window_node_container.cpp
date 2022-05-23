@@ -43,23 +43,20 @@ namespace {
     constexpr uint32_t MAX_BRIGHTNESS = 255;
 }
 
-WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo)
+WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, ScreenId displayGroupId)
 {
     DisplayId displayId = displayInfo->GetDisplayId();
-    Rect displayRect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
-        displayInfo->GetWidth(), displayInfo->GetHeight() };
-    displayRectMap_.insert(std::make_pair(displayId, displayRect));
-    displayInfosMap_.insert(std::make_pair(displayId, displayInfo));
 
-    // create mutiDisplayController and init nodes and systemBar map for display
-    displayGroupController_ = new DisplayGroupController(this, displayRectMap_, displayInfosMap_);
+    // create and displayGroupInfo and displayGroupController
+    displayGroupInfo_ = new DisplayGroupInfo(displayGroupId, displayInfo);
+    displayGroupController_ = new DisplayGroupController(this, displayGroupInfo_);
     displayGroupController_->InitNewDisplay(displayId);
 
     // init layout policy
-    layoutPolicys_[WindowLayoutMode::CASCADE] = new WindowLayoutPolicyCascade(displayRectMap_,
-        displayGroupController_->windowNodeMaps_, displayInfosMap_);
-    layoutPolicys_[WindowLayoutMode::TILE] = new WindowLayoutPolicyTile(displayRectMap_,
-        displayGroupController_->windowNodeMaps_, displayInfosMap_);
+    layoutPolicys_[WindowLayoutMode::CASCADE] = new WindowLayoutPolicyCascade(displayGroupInfo_,
+        displayGroupController_->displayGroupWindowTree_);
+    layoutPolicys_[WindowLayoutMode::TILE] = new WindowLayoutPolicyTile(displayGroupInfo_,
+        displayGroupController_->displayGroupWindowTree_);
     layoutPolicy_ = layoutPolicys_[WindowLayoutMode::CASCADE];
     layoutPolicy_->Launch();
 
@@ -288,7 +285,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     auto emptyVec = std::vector<DisplayId>();
     node->showingDisplays_.swap(emptyVec);
 
-    displayGroupController_->UpdateWindowNodeMaps();
+    displayGroupController_->UpdateDisplayGroupWindowTree();
 
     layoutPolicy_->RemoveWindowNode(node);
     auto windowPair = displayGroupController_->GetWindowPairByDisplayId(node->GetDisplayId());
@@ -426,7 +423,7 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId display
 
 void WindowNodeContainer::RcoveryScreenDefaultOrientationIfNeed(DisplayId displayId)
 {
-    if (displayGroupController_->windowNodeMaps_[displayId][WindowRootNodeType::APP_WINDOW_NODE]->empty()) {
+    if (displayGroupController_->displayGroupWindowTree_[displayId][WindowRootNodeType::APP_WINDOW_NODE]->empty()) {
         WLOGFI("appWindowNode_ child is empty in display  %{public}" PRIu64"", displayId);
         DisplayManagerServiceInner::GetInstance().
             SetOrientationFromWindow(displayId, Orientation::UNSPECIFIED);
@@ -569,7 +566,7 @@ void WindowNodeContainer::AssignZOrder()
         return false;
     };
     TraverseWindowTree(func, false);
-    displayGroupController_->UpdateWindowNodeMaps();
+    displayGroupController_->UpdateDisplayGroupWindowTree();
 }
 
 WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
@@ -1030,13 +1027,12 @@ uint64_t WindowNodeContainer::GetScreenId(DisplayId displayId) const
 
 Rect WindowNodeContainer::GetDisplayRect(DisplayId displayId) const
 {
-    return const_cast<WindowNodeContainer*>(this)->displayRectMap_[displayId];
+    return displayGroupInfo_->GetDisplayRect(displayId);
 }
 
 bool WindowNodeContainer::isVerticalDisplay(DisplayId displayId) const
 {
-    return const_cast<WindowNodeContainer*>(this)->displayRectMap_[displayId].width_ <
-        const_cast<WindowNodeContainer*>(this)->displayRectMap_[displayId].height_;
+    return displayGroupInfo_->GetDisplayRect(displayId).width_ < displayGroupInfo_->GetDisplayRect(displayId).height_;
 }
 
 void WindowNodeContainer::ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason)
@@ -1544,7 +1540,7 @@ void WindowNodeContainer::UpdateWindowVisibilityInfos(std::vector<sptr<WindowVis
             return false;
         }
         Rect layoutRect = node->GetWindowRect();
-        const Rect& displayRect = displayRectMap_[node->GetDisplayId()];
+        const Rect& displayRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
         int32_t nodeX = std::max(0, layoutRect.posX_);
         int32_t nodeY = std::max(0, layoutRect.posY_);
         int32_t nodeXEnd = std::min(displayRect.posX_ + static_cast<int32_t>(displayRect.width_),
@@ -1644,7 +1640,7 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
 void WindowNodeContainer::GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones,
     const ModeChangeHotZonesConfig& config)
 {
-    auto displayRect = displayRectMap_[displayId];
+    const auto& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
 
     hotZones.fullscreen_.width_ = displayRect.width_;
     hotZones.fullscreen_.height_ = config.fullscreenRange_;
@@ -1659,18 +1655,12 @@ void WindowNodeContainer::GetModeChangeHotZones(DisplayId displayId, ModeChangeH
 
 float WindowNodeContainer::GetDisplayVirtualPixelRatio(DisplayId displayId) const
 {
-    if (displayInfosMap_.find(displayId) == std::end(displayInfosMap_)) {
-        return 1.0; // 1.0 is default vpr
-    }
-    return displayInfosMap_.at(displayId)->GetVirtualPixelRatio();
+    return displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
 }
 
 sptr<DisplayInfo> WindowNodeContainer::GetDisplayInfo(DisplayId displayId)
 {
-    if (displayInfosMap_.find(displayId) != std::end(displayInfosMap_)) {
-        return displayInfosMap_[displayId];
-    }
-    return nullptr;
+    return displayGroupInfo_->GetDisplayInfo(displayId);
 }
 } // namespace Rosen
 } // namespace OHOS

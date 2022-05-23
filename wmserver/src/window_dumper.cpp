@@ -85,7 +85,7 @@ WMError WindowDumper::DumpDisplayWindowInfo(DisplayId displayId, std::string& du
     oss << "---------------------------------------Display " << displayId
         << "---------------------------------------"
         << std::endl;
-    oss << "WindowName           WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
+    oss << "WindowName           DisplayId WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
         << std::endl;
     std::vector<sptr<WindowNode>> windowNodes;
     windowNodeContainer->TraverseContainer(windowNodes);
@@ -100,6 +100,7 @@ WMError WindowDumper::DumpDisplayWindowInfo(DisplayId displayId, std::string& du
             windowNode->GetWindowName() : windowNode->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
         // std::setw is used to set the output width and different width values are set to keep the format aligned.
         oss << std::left << std::setw(21) << windowName
+            << std::left << std::setw(10) << windowNode->GetDisplayId()
             << std::left << std::setw(6) << windowNode->GetWindowId()
             << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowType())
             << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowMode())

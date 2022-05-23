@@ -1355,8 +1355,8 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
 
     // update originRect when window show for the first time.
     if (!isStretchableSet_) {
-            originRect_ = rect;
-            isStretchableSet_ = true;
+        originRect_ = rect;
+        isStretchableSet_ = true;
     }
 
     Rect rectToAce = rect;
