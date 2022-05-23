@@ -217,6 +217,16 @@ WMError WindowRoot::MinimizeStructuredAppWindowsExceptSelf(sptr<WindowNode>& nod
     return container->MinimizeStructuredAppWindowsExceptSelf(node);
 }
 
+bool WindowRoot::IsForbidDockSliceMove(DisplayId displayId) const
+{
+    auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("can't find container");
+        return true;
+    }
+    return container->IsForbidDockSliceMove(displayId);
+}
+
 std::vector<Rect> WindowRoot::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
 {
     std::vector<Rect> avoidArea;

@@ -299,6 +299,13 @@ NativeValue* JsWindow::Dump(NativeEngine* engine, NativeCallbackInfo* info)
     return (me != nullptr) ? me->OnDump(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::SetForbidSplitMove(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]SetForbidSplitMove");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetForbidSplitMove(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WMError errCode = WMError::WM_OK;
@@ -1473,6 +1480,54 @@ NativeValue* JsWindow::OnDump(NativeEngine& engine, NativeCallbackInfo& info)
     return dumpInfoValue;
 }
 
+NativeValue* JsWindow::OnSetForbidSplitMove(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool isForbidSplitMove = false;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to isForbidSplitMove");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            isForbidSplitMove = static_cast<bool>(*nativeVal);
+        }
+    }
+    wptr<Window> weak(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakToken = weak.promote();
+            if (weakToken == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            WMError ret;
+            if (isForbidSplitMove) {
+                ret = weakToken->AddWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
+            } else {
+                ret = weakToken->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
+            }
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(ret), "Window OnSetForbidSplitMove failed."));
+            }
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set forbid split move end, ret = %{public}d",
+                weakToken->GetWindowId(), weakToken->GetWindowName().c_str(), ret);
+        };
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 {
     WLOGFI("[NAPI]Try to find window %{public}s in g_jsWindowMap", windowName.c_str());
@@ -1533,6 +1588,7 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     BindNativeFunction(engine, *object, "setCallingWindow", JsWindow::SetCallingWindow);
     BindNativeFunction(engine, *object, "disableWindowDecor", JsWindow::DisableWindowDecor);
     BindNativeFunction(engine, *object, "dump", JsWindow::Dump);
+    BindNativeFunction(engine, *object, "setForbidSplitMove", JsWindow::SetForbidSplitMove);
 
     std::shared_ptr<NativeReference> jsWindowRef;
     jsWindowRef.reset(engine.CreateReference(objValue, 1));

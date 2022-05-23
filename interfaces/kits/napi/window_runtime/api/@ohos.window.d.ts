@@ -933,6 +933,24 @@ declare namespace window {
      * @return The dump info array.
      */
     dump(params: Array<string>): Array<string>;
+
+    /**
+     * set the flag of the window is forbidden to move in split screen mode
+     * @param isForbidSplitMove the flag of the window is forbidden to move in split screen mode
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi
+     * @since 9
+     */
+     setForbidSplitMove(isForbidSplitMove: boolean, callback: AsyncCallback<void>): void;
+
+    /**
+     * set the flag of the window is forbidden to move in split screen mode
+     * @param isForbidSplitMove the flag of the window is forbidden to move in split screen mode
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @systemapi
+     * @since 9
+     */
+     setForbidSplitMove(isForbidSplitMove: boolean): Promise<void>;
   }
 
   enum WindowStageEventType {

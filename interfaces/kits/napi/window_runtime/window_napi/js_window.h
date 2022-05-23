@@ -66,6 +66,7 @@ public:
     static NativeValue* SetColorSpace(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetColorSpace(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* Dump(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetForbidSplitMove(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     std::string GetWindowName();
@@ -103,6 +104,7 @@ private:
     NativeValue* OnSetCallingWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnDisableWindowDecor(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnDump(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetForbidSplitMove(NativeEngine& engine, NativeCallbackInfo& info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
