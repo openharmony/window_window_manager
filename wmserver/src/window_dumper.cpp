@@ -36,8 +36,6 @@ namespace {
     constexpr int WINDOW_NAME_MAX_LENGTH = 20;
     const std::string ARG_DUMP_HELP = "-h";
     const std::string ARG_DUMP_ALL = "-a";
-    const std::string ARG_OPEN_STARTINGWIN = "-os";
-    const std::string ARG_CLOSE_STARTINGWIN = "-cs";
 }
 
 WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args) const
@@ -149,21 +147,11 @@ WMError WindowDumper::DumpWindowInfo(const std::vector<std::string>& args, std::
     DumpType dumpType = DumpType::DUMP_NONE;
     if (args[0] == ARG_DUMP_ALL) {
         dumpType = DumpType::DUMP_ALL;
-    } else if (args[0] == ARG_OPEN_STARTINGWIN) {
-        dumpType = DumpType::OPEN_STARTING;
-    } else if (args[0] == ARG_CLOSE_STARTINGWIN) {
-        dumpType = DumpType::CLOSE_STARTING;
     }
     WMError ret = WMError::WM_OK;
     switch (dumpType) {
         case DumpType::DUMP_ALL:
             ret = DumpAllWindowInfo(dumpInfo);
-            break;
-        case DumpType::OPEN_STARTING:
-            WindowManagerService::GetInstance().OpenStartingWindow();
-            break;
-        case DumpType::CLOSE_STARTING:
-            WindowManagerService::GetInstance().CloseStartingWindow();
             break;
         default:
             ret = WMError::WM_ERROR_INVALID_PARAM;
