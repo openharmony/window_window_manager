@@ -517,6 +517,38 @@ HWTEST_F(WindowImmersiveTest, OnAvoidAreaChangedTest02, Function | MediumTest | 
     window->UnregisterAvoidAreaChangeListener(thisListener);
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
+
+/**
+ * @tc.name: DockWindowTest01
+ * @tc.desc: Add unexistavoid and remove this avoid. Test OnAvoidAreaChanged listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImmersiveTest, DockWindowTest01, Function | MediumTest | Level3)
+{
+    const sptr<Window>& dockWindow = utils::CreateDockWindow();
+    ASSERT_EQ(WMError::WM_OK, dockWindow->Show());
+
+    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppinfo_);
+
+    usleep(WAIT_ASYNC_US);
+    auto act = testSystemBarChangedListener_->tints_;
+    for (SystemBarRegionTint tint : act) {
+        if (tint.type_ == WindowType::WINDOW_TYPE_LAUNCHER_DOCK) {
+            ASSERT_FALSE(tint.prop_.enable_);
+        }
+    }
+
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
+
+    usleep(WAIT_ASYNC_US);
+    act = testSystemBarChangedListener_->tints_;
+    for (SystemBarRegionTint tint : act) {
+        if (tint.type_ == WindowType::WINDOW_TYPE_LAUNCHER_DOCK) {
+            ASSERT_TRUE(tint.prop_.enable_);
+        }
+    }
+    ASSERT_EQ(WMError::WM_OK, dockWindow->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

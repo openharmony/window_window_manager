@@ -50,6 +50,7 @@ public:
     static Rect naviBarRect_;
     static Rect customAppRect_;
     static Rect customAppDecoRect_;
+    static Rect dockWindowRect_;
     static SplitRects splitRects_;
     static bool isVerticalDisplay_;
     static Rect singleTileRect_;
@@ -60,6 +61,7 @@ public:
     static sptr<Window> CreateTestWindow(const TestWindowInfo& info);
     static sptr<Window> CreateStatusBarWindow();
     static sptr<Window> CreateNavigationBarWindow();
+    static sptr<Window> CreateDockWindow();
     static sptr<WindowScene> CreateWindowScene();
     static bool RectEqualTo(const sptr<Window>& window, const Rect& r);
     static bool InitSplitRects();
