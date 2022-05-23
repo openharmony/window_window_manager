@@ -23,8 +23,6 @@ namespace OHOS {
 namespace Rosen {
 enum DumpType : uint32_t {
     DUMP_ALL = 0,
-    OPEN_STARTING,
-    CLOSE_STARTING,
     DUMP_NONE = 100,
 };
 class WindowDumper : public RefBase {
