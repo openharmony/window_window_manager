@@ -752,12 +752,6 @@ WMError WindowImpl::Show(uint32_t reason)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if ((GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) &&
-        WindowHelper::IsSplitWindowMode(GetMode())) {
-        WLOGFE("show when locked window does not support split mode, windowId: %{public}u", property_->GetWindowId());
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-
     WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
     if (stateChangeReason == WindowStateChangeReason::KEYGUARD ||
         stateChangeReason == WindowStateChangeReason::TOGGLING) {
