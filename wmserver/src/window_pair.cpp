@@ -293,10 +293,12 @@ void WindowPair::UpdateIfSplitRelated(sptr<WindowNode>& node)
         status_, node->GetWindowId(), node->GetWindowMode());
     if (status_ == WindowPairStatus::STATUS_EMPTY) {
         Insert(node);
-        // find pairable window from trees or send broadcast
-        sptr<WindowNode> pairableNode = GetPairableWindow(node);
-        // insert pairable node
-        Insert(pairableNode);
+        if (!isAllAppWindowsRestoring_) {
+            // find pairable window from trees or send broadcast
+            sptr<WindowNode> pairableNode = GetPairableWindow(node);
+            // insert pairable node
+            Insert(pairableNode);
+        }
     } else {
         if (Find(node) == nullptr) {
             // add new split related node to pair
@@ -442,6 +444,11 @@ void WindowPair::HandleRemoveWindow(sptr<WindowNode>& node)
         WLOGI("Pairing window id: %{public}u is remove, clear window pair", node->GetWindowId());
         Clear();
     }
+}
+
+void WindowPair::SetAllAppWindowsRestoring(bool isAllAppWindowsRestoring)
+{
+    isAllAppWindowsRestoring_ = isAllAppWindowsRestoring;
 }
 } // namespace Rosen
 } // namespace OHOS
