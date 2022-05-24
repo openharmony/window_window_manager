@@ -158,6 +158,11 @@ void WindowNode::SetShowingDisplays(const std::vector<DisplayId>& displayIdVec)
     showingDisplays_.assign(displayIdVec.begin(), displayIdVec.end());
 }
 
+void WindowNode::SetModeSupportInfo(uint32_t modeSupportInfo)
+{
+    property_->SetModeSupportInfo(modeSupportInfo);
+}
+
 void WindowNode::ResetWindowSizeChangeReason()
 {
     windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
@@ -302,6 +307,11 @@ Orientation WindowNode::GetRequestedOrientation() const
 std::vector<DisplayId> WindowNode::GetShowingDisplays() const
 {
     return showingDisplays_;
+}
+
+uint32_t WindowNode::GetModeSupportInfo() const
+{
+    return property_->GetModeSupportInfo();
 }
 } // namespace Rosen
 } // namespace OHOS

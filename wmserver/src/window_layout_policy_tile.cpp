@@ -246,15 +246,17 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows(DisplayId displayI
     auto rectIt = presetRect.begin();
     for (auto node : foregroundNodesMap_[displayId]) {
         auto& rect = (*rectIt);
-        node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-        if (node->GetWindowToken()) {
-            node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        if (WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
+            node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            if (node->GetWindowToken()) {
+                node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            }
+            node->SetRequestRect(rect);
+            node->SetDecoStatus(true);
+            WLOGFI("set rect for qwin id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
+                node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+            rectIt++;
         }
-        node->SetRequestRect(rect);
-        node->SetDecoStatus(true);
-        WLOGFI("set rect for qwin id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
-            node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
-        rectIt++;
     }
 }
 

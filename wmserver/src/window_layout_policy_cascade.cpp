@@ -441,12 +441,13 @@ void WindowLayoutPolicyCascade::Reorder()
             }
             node->SetRequestRect(rect);
             node->SetDecoStatus(true);
-            if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
-                node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-                if (node->GetWindowToken()) {
-                    node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
+                WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
+                    node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+                    if (node->GetWindowToken()) {
+                        node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+                    }
                 }
-            }
             WLOGFI("Cascade reorder Id: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
                 node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         }
