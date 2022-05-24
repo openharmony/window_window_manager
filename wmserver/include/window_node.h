@@ -69,6 +69,8 @@ public:
     void SetRequestedOrientation(Orientation orientation);
     void SetShowingDisplays(const std::vector<DisplayId>& displayIdVec);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
+    void SetDragType(DragType dragType);
+
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
     uint32_t GetParentId() const;
@@ -95,6 +97,7 @@ public:
     Orientation GetRequestedOrientation() const;
     std::vector<DisplayId> GetShowingDisplays() const;
     uint32_t GetModeSupportInfo() const;
+    DragType GetDragType() const;
     void ResetWindowSizeChangeReason();
 
     sptr<WindowNode> parent_;

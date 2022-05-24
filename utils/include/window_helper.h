@@ -171,43 +171,6 @@ public:
         return dstRect;
     }
 
-    static Rect GetFixedWindowRectByLimitPosition(const Rect& oriDstRect, const Rect& lastRect,
-        float virtualPixelRatio, const Rect& displayLimitRect)
-    {
-        Rect dstRect = oriDstRect;
-        uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
-        // minimum (x + width)
-        if (dstRect.posX_ < (displayLimitRect.posX_ + static_cast<int32_t>(windowTitleBarH - oriDstRect.width_))) {
-            if (oriDstRect.width_ != lastRect.width_) {
-                dstRect.width_ = static_cast<uint32_t>(displayLimitRect.posX_  - oriDstRect.posX_) + windowTitleBarH;
-            }
-        }
-        // maximum position x
-        if (dstRect.posX_ > (displayLimitRect.posX_ +
-                             static_cast<int32_t>(displayLimitRect.width_ - windowTitleBarH))) {
-            dstRect.posX_ = displayLimitRect.posX_ + static_cast<int32_t>(displayLimitRect.width_ - windowTitleBarH);
-            if (oriDstRect.width_ != lastRect.width_) {
-                dstRect.width_ = lastRect.width_;
-            }
-        }
-        // minimum position y
-        if (oriDstRect.posY_ < displayLimitRect.posY_) {
-            dstRect.posY_ = displayLimitRect.posY_;
-            if (oriDstRect.height_ != lastRect.height_) {
-                dstRect.height_ = lastRect.height_;
-            }
-        }
-        // maximum position y
-        if (dstRect.posY_ > (displayLimitRect.posY_ +
-                             static_cast<int32_t>(displayLimitRect.height_ - windowTitleBarH))) {
-            dstRect.posY_ = displayLimitRect.posY_ + static_cast<int32_t>(displayLimitRect.height_ - windowTitleBarH);
-            if (oriDstRect.height_ != lastRect.height_) {
-                dstRect.height_ = lastRect.height_;
-            }
-        }
-        return dstRect;
-    }
-
     static bool IsPointInTargetRect(int32_t pointPosX, int32_t pointPosY, const Rect& targetRect)
     {
         if ((pointPosX > targetRect.posX_) &&
@@ -259,6 +222,17 @@ public:
     {
         for (int32_t i = 0; i < static_cast<int32_t>(str.size()); i++) {
             if (str.at(i) < '0' || str.at(i) > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static inline bool IsFloatingNumber(std::string str)
+    {
+        for (int32_t i = 0; i < static_cast<int32_t>(str.size()); i++) {
+            if ((str.at(i) < '0' || str.at(i) > '9') &&
+                (str.at(i) != '.' || std::count(str.begin(), str.end(), '.') > 1)) {
                 return false;
             }
         }
