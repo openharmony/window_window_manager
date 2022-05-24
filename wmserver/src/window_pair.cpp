@@ -241,16 +241,16 @@ sptr<WindowNode> WindowPair::FindPairableWindow(sptr<WindowNode>& node)
     if (!node->IsSplitMode()) {
         return nullptr;
     }
-
     auto& appNodeVec = *(displayGroupWindowTree_[displayId_][WindowRootNodeType::APP_WINDOW_NODE]);
+    WindowMode dstMode = (node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ?
+        WindowMode::WINDOW_MODE_SPLIT_SECONDARY : WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     for (auto iter = appNodeVec.rbegin(); iter != appNodeVec.rend(); iter++) {
         auto pairNode = *iter;
         if (pairNode == nullptr) {
             continue;
         }
-        if (pairNode->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-            WindowMode dstMode = (node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ?
-                WindowMode::WINDOW_MODE_SPLIT_SECONDARY : WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+        if (pairNode->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            WindowHelper::IsWindowModeSupported(pairNode->GetModeSupportInfo(), dstMode)) {
             pairNode->SetWindowMode(dstMode);
             if (pairNode->GetWindowToken() != nullptr) {
                 pairNode->GetWindowToken()->UpdateWindowMode(pairNode->GetWindowMode());
@@ -346,14 +346,16 @@ void WindowPair::SwitchPosition()
     WLOGFI("Switch the pair pos, pri: %{public}u pri-mode: %{public}u, sec: %{public}u sec-mode: %{public}u,",
         primary_->GetWindowId(), primary_->GetWindowMode(), secondary_->GetWindowId(), secondary_->GetWindowMode());
     if (primary_->GetWindowMode() == secondary_->GetWindowMode() &&
-        primary_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+        primary_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
+        WindowHelper::IsWindowModeSupported(primary_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
         primary_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
         if (primary_->GetWindowToken() != nullptr) {
             primary_->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
         }
         std::swap(primary_, secondary_);
     } else if (primary_->GetWindowMode() == secondary_->GetWindowMode() &&
-        primary_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        primary_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY &&
+        WindowHelper::IsWindowModeSupported(secondary_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
         secondary_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
         if (secondary_->GetWindowToken() != nullptr) {
             secondary_->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);

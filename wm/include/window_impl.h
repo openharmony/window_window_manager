@@ -94,6 +94,7 @@ public:
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() const override;
     virtual uint32_t GetWindowFlags() const override;
+    uint32_t GetModeSupportInfo() const;
     inline NotifyNativeWinDestroyFunc GetNativeDestroyCallback()
     {
         return notifyNativefunc_;
@@ -165,6 +166,7 @@ public:
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual void RegisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
+    virtual void SetModeSupportInfo(uint32_t modeSupportInfo) override;
     void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason);
     void UpdateMode(WindowMode mode);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;

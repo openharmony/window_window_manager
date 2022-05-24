@@ -768,6 +768,10 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             windowRoot_->SetBrightness(node->GetWindowId(), node->GetBrightness());
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO: {
+            node->SetModeSupportInfo(property->GetModeSupportInfo());
+            break;
+        }
         default:
             break;
     }
