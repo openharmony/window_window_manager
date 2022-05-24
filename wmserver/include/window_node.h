@@ -31,18 +31,12 @@ public:
         std::shared_ptr<RSSurfaceNode> surfaceNode)
         : surfaceNode_(surfaceNode), property_(property), windowToken_(window)
     {
-        callingPid_ = IPCSkeleton::GetCallingPid();
-        callingUid_ = IPCSkeleton::GetCallingUid();
     }
     WindowNode() : property_(new WindowProperty())
     {
-        callingPid_ = IPCSkeleton::GetCallingPid();
-        callingUid_ = IPCSkeleton::GetCallingUid();
     }
     explicit WindowNode(const sptr<WindowProperty>& property) : property_(property)
     {
-        callingPid_ = IPCSkeleton::GetCallingPid();
-        callingUid_ = IPCSkeleton::GetCallingUid();
     }
     ~WindowNode() = default;
 
@@ -62,8 +56,8 @@ public:
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetCallingWindow(uint32_t windowId);
-    void SetCallingPid();
-    void SetCallingUid();
+    void SetCallingPid(int32_t pid);
+    void SetCallingUid(int32_t uid);
     void SetWindowToken(sptr<IWindow> window);
     uint32_t GetCallingWindow() const;
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
@@ -117,8 +111,6 @@ private:
     sptr<WindowProperty> property_ = nullptr;
     sptr<IWindow> windowToken_ = nullptr;
     Rect hotZoneRect_ { 0, 0, 0, 0 };
-    int32_t callingPid_;
-    int32_t callingUid_;
     WindowSizeChangeReason windowSizeChangeReason_ {WindowSizeChangeReason::UNDEFINED};
 };
 } // Rosen

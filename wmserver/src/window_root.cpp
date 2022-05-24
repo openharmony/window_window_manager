@@ -826,16 +826,15 @@ WMError WindowRoot::RaiseZOrderForAppWindow(sptr<WindowNode>& node)
     return container->RaiseZOrderForAppWindow(node, parentNode);
 }
 
+uint32_t WindowRoot::GetWindowIdByObject(const sptr<IRemoteObject>& remoteObject)
+{
+    auto iter = windowIdMap_.find(remoteObject);
+    return iter == std::end(windowIdMap_) ? INVALID_WINDOW_ID : iter->second;
+}
+
 void WindowRoot::OnRemoteDied(const sptr<IRemoteObject>& remoteObject)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = windowIdMap_.find(remoteObject);
-    if (iter == windowIdMap_.end()) {
-        WLOGFE("window id could not be found");
-        return;
-    }
-    uint32_t windowId = iter->second;
-    callback_(Event::REMOTE_DIED, windowId);
+    callback_(Event::REMOTE_DIED, remoteObject);
 }
 
 WMError WindowRoot::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)

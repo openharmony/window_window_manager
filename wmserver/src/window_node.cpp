@@ -168,14 +168,14 @@ void WindowNode::SetWindowToken(sptr<IWindow> window)
     windowToken_ = window;
 }
 
-void WindowNode::SetCallingPid()
+void WindowNode::SetCallingPid(int32_t pid)
 {
-    callingPid_ = IPCSkeleton::GetCallingPid();
+    property_->SetWindowPid(pid);
 }
 
-void WindowNode::SetCallingUid()
+void WindowNode::SetCallingUid(int32_t uid)
 {
-    callingUid_ = IPCSkeleton::GetCallingUid();
+    property_->SetWindowPid(uid);
 }
 
 DisplayId WindowNode::GetDisplayId() const
@@ -265,12 +265,12 @@ const sptr<WindowProperty>& WindowNode::GetWindowProperty() const
 
 int32_t WindowNode::GetCallingPid() const
 {
-    return callingPid_;
+    return property_->GetWindowPid();
 }
 
 int32_t WindowNode::GetCallingUid() const
 {
-    return callingUid_;
+    return property_->GetWindowUid();
 }
 
 const std::unordered_map<WindowType, SystemBarProperty>& WindowNode::GetSystemBarProperty() const
