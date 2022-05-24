@@ -23,6 +23,7 @@ namespace OHOS {
 namespace Rosen {
 enum DumpType : uint32_t {
     DUMP_ALL = 0,
+    DUMP_WINDOW,
     DUMP_NONE = 100,
 };
 class WindowDumper : public RefBase {
@@ -33,9 +34,14 @@ public:
 private:
     WMError DumpWindowInfo(const std::vector<std::string>& args, std::string& dumpInfo) const;
     WMError DumpAllWindowInfo(std::string& dumpInfo) const;
-    WMError DumpDisplayWindowInfo(DisplayId displayId, std::string& dumpInfo) const;
+    WMError DumpScreenGroupWindowInfo(ScreenId screenGroupId, const sptr<WindowNodeContainer>& windowNodeContainer,
+        std::string& dumpInfo) const;
+    bool IsValidDigitString(const std::string& windowIdStr) const;
+    WMError DumpSpecifiedWindowInfo(uint32_t windowId, const std::vector<std::string>& params,
+        std::string& dumpInfo) const;
     void ShowHelpInfo(std::string& dumpInfo) const;
-    void ShowIllegalArgsInfo(std::string& dumpInfo) const;
+    void ShowAceDumpHelp(std::string& dumpInfo) const;
+    void ShowIllegalArgsInfo(std::string& dumpInfo, WMError errCode) const;
     const sptr<WindowRoot> windowRoot_;
 };
 }

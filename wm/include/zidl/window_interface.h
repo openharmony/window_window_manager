@@ -40,6 +40,7 @@ public:
         TRANS_ID_UPDATE_ACTIVE_STATUS,
         TRANS_ID_GET_WINDOW_PROPERTY,
         TRANS_ID_NOTIFY_OUTSIDE_PRESSED,
+        TRANS_ID_DUMP_INFO,
     };
 
     virtual void UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) = 0;
@@ -53,6 +54,7 @@ public:
     virtual void UpdateActiveStatus(bool isActive) = 0;
     virtual sptr<WindowProperty> GetWindowProperty() = 0;
     virtual void NotifyOutsidePressed() = 0;
+    virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

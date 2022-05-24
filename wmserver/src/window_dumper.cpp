@@ -31,11 +31,12 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowDumper"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowDumper"};
 
     constexpr int WINDOW_NAME_MAX_LENGTH = 20;
     const std::string ARG_DUMP_HELP = "-h";
     const std::string ARG_DUMP_ALL = "-a";
+    const std::string ARG_DUMP_WINDOW = "-w";
 }
 
 WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args) const
@@ -54,13 +55,13 @@ WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args) cons
 
     std::string dumpInfo;
     if (params.empty()) {
-        ShowIllegalArgsInfo(dumpInfo);
-    } else if (params[0] == ARG_DUMP_HELP) {
+        ShowIllegalArgsInfo(dumpInfo, WMError::WM_ERROR_INVALID_PARAM);
+    } else if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1: params num
         ShowHelpInfo(dumpInfo);
     } else {
         WMError errCode = DumpWindowInfo(params, dumpInfo);
-        if (errCode == WMError::WM_ERROR_INVALID_PARAM) {
-            ShowIllegalArgsInfo(dumpInfo);
+        if (errCode != WMError::WM_OK) {
+            ShowIllegalArgsInfo(dumpInfo, errCode);
         }
     }
     int ret = dprintf(fd, "%s\n", dumpInfo.c_str());
@@ -72,16 +73,16 @@ WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args) cons
     return WMError::WM_OK;
 }
 
-WMError WindowDumper::DumpDisplayWindowInfo(DisplayId displayId, std::string& dumpInfo) const
+WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
+    const sptr<WindowNodeContainer>& windowNodeContainer, std::string& dumpInfo) const
 {
-    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
     if (windowNodeContainer == nullptr) {
         WLOGFE("windowNodeContainer is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     std::ostringstream oss;
-    oss << "---------------------------------------Display " << displayId
-        << "---------------------------------------"
+    oss << "-------------------------------------ScreenGroup " << screenGroupId
+        << "-------------------------------------"
         << std::endl;
     oss << "WindowName           DisplayId WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
         << std::endl;
@@ -121,18 +122,80 @@ WMError WindowDumper::DumpDisplayWindowInfo(DisplayId displayId, std::string& du
 
 WMError WindowDumper::DumpAllWindowInfo(std::string& dumpInfo) const
 {
-    std::map<WindowNodeContainer*, DisplayId> windowNodeContainers;
+    std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainers;
     std::vector<DisplayId> displayIds = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
     for (DisplayId displayId : displayIds) {
+        ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
         auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
-        if (windowNodeContainer != nullptr) {
-            windowNodeContainers.emplace(windowNodeContainer.GetRefPtr(), displayId);
+        if (windowNodeContainers.count(screenGroupId) == 0 && windowNodeContainer != nullptr) {
+            windowNodeContainers.insert(std::make_pair(screenGroupId, windowNodeContainer));
         }
     }
     for (auto it = windowNodeContainers.begin(); it != windowNodeContainers.end(); it++) {
-        WMError ret = DumpDisplayWindowInfo(it->second, dumpInfo);
+        WMError ret = DumpScreenGroupWindowInfo(it->first, it->second, dumpInfo);
         if (ret != WMError::WM_OK) {
             return ret;
+        }
+    }
+    return WMError::WM_OK;
+}
+
+bool WindowDumper::IsValidDigitString(const std::string& windowIdStr) const
+{
+    if (windowIdStr.empty()) {
+        return false;
+    }
+    for (char ch : windowIdStr) {
+        if ((ch >= '0' && ch <= '9')) {
+            continue;
+        }
+        WLOGFE("invalid window id");
+        return false;
+    }
+    return true;
+}
+
+WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vector<std::string>& params,
+    std::string& dumpInfo) const
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("invalid window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::ostringstream oss;
+    oss << "WindowName           DisplayId WinId Type Mode Flag Orientation [ x    y    w    h    ]"
+        << std::endl;
+    Rect rect = node->GetWindowRect();
+    const std::string& windowName = node->GetWindowName().size() <= WINDOW_NAME_MAX_LENGTH ?
+        node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
+    // std::setw is used to set the output width and different width values are set to keep the format aligned.
+    oss << std::left << std::setw(21) << windowName
+        << std::left << std::setw(10) << node->GetDisplayId()
+        << std::left << std::setw(6) << node->GetWindowId()
+        << std::left << std::setw(5) << static_cast<uint32_t>(node->GetWindowType())
+        << std::left << std::setw(5) << static_cast<uint32_t>(node->GetWindowMode())
+        << std::left << std::setw(5) << node->GetWindowFlags()
+        << std::left << std::setw(12) << static_cast<uint32_t>(node->GetRequestedOrientation())
+        << "[ "
+        << std::left << std::setw(5) << rect.posX_
+        << std::left << std::setw(5) << rect.posY_
+        << std::left << std::setw(5) << rect.width_
+        << std::left << std::setw(5) << rect.height_
+        << "]"
+        << std::endl;
+    dumpInfo.append(oss.str());
+    if (node->GetWindowToken() != nullptr) {
+        std::vector<std::string> resetParams;
+        resetParams.assign(params.begin() + 2, params.end()); // 2: params num
+        if (resetParams.empty()) {
+            WLOGFI("do not dump ui info");
+            return WMError::WM_OK;
+        }
+        std::vector<std::string> infos;
+        node->GetWindowToken()->DumpInfo(resetParams, infos);
+        for (auto& info: infos) {
+            dumpInfo.append(info).append("\n");
         }
     }
     return WMError::WM_OK;
@@ -144,13 +207,22 @@ WMError WindowDumper::DumpWindowInfo(const std::vector<std::string>& args, std::
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     DumpType dumpType = DumpType::DUMP_NONE;
-    if (args[0] == ARG_DUMP_ALL) {
+    uint32_t windowId = INVALID_WINDOW_ID;
+    if (args.size() == 1 && args[0] == ARG_DUMP_ALL) { // 1: params num
         dumpType = DumpType::DUMP_ALL;
+    } else if (args.size() >= 2 && args[0] == ARG_DUMP_WINDOW && IsValidDigitString(args[1])) { // 2: params num
+        windowId = std::stoul(args[1]);
+        dumpType = DumpType::DUMP_WINDOW;
+    } else {
+        // do nothing
     }
     WMError ret = WMError::WM_OK;
     switch (dumpType) {
         case DumpType::DUMP_ALL:
             ret = DumpAllWindowInfo(dumpInfo);
+            break;
+        case DumpType::DUMP_WINDOW:
+            ret = DumpSpecifiedWindowInfo(windowId, args, dumpInfo);
             break;
         default:
             ret = WMError::WM_ERROR_INVALID_PARAM;
@@ -159,22 +231,50 @@ WMError WindowDumper::DumpWindowInfo(const std::vector<std::string>& args, std::
     return ret;
 }
 
-void WindowDumper::ShowIllegalArgsInfo(std::string& dumpInfo) const
+void WindowDumper::ShowIllegalArgsInfo(std::string& dumpInfo, WMError errCode) const
 {
-    dumpInfo.append("The arguments are illegal and you can enter '-h' for help.");
+    switch (errCode) {
+        case WMError::WM_ERROR_INVALID_PARAM:
+            dumpInfo.append("The arguments are illegal and you can enter '-h' for help.");
+            break;
+        case WMError::WM_ERROR_NULLPTR:
+            dumpInfo.append("The window is invalid,  you can enter '-a' to get valid window id.");
+            break;
+        default:
+            break;
+    }
 }
 
 void WindowDumper::ShowHelpInfo(std::string& dumpInfo) const
 {
     dumpInfo.append("Usage:\n")
-        .append(" -h                    ")
+        .append(" -h                             ")
         .append("|help text for the tool\n")
-        .append(" -a                    ")
+        .append(" -a                             ")
         .append("|dump all window infomation in the system\n")
-        .append(" -o                    ")
-        .append("|open starting window\n")
-        .append(" -c                    ")
-        .append("|close starting window\n");
+        .append(" -w {window id} [ArkUI Option]  ")
+        .append("|dump specified window information\n")
+        .append(" ------------------------------------[ArkUI Option]------------------------------------ \n");
+    ShowAceDumpHelp(dumpInfo);
+}
+
+void WindowDumper::ShowAceDumpHelp(std::string& dumpInfo) const
+{
+    std::vector<std::string> infos;
+    auto node = windowRoot_->GetWindowForDumpAceHelpInfo();
+    if (node == nullptr) {
+        WLOGFE("invalid window");
+        return;
+    }
+    if (node->GetWindowToken() != nullptr) {
+        std::vector<std::string> params;
+        params.emplace_back(ARG_DUMP_HELP);
+        std::vector<std::string> infos;
+        node->GetWindowToken()->DumpInfo(params, infos);
+        for (auto& info: infos) {
+            dumpInfo.append(info).append("\n");
+        }
+    }
 }
 }
 }
