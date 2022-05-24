@@ -33,6 +33,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
+    const std::string PARAM_DUMP_HELP = "-h";
 }
 
 const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
@@ -490,7 +491,12 @@ ColorSpace WindowImpl::GetColorSpace()
 
 void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
-    WLOGFI("Ace:DumpInfo");
+    if (params.size() == 1 && params[0] == PARAM_DUMP_HELP) { // 1: params num
+        WLOGFI("Dump ArkUI help Info");
+        Ace::UIContent::ShowDumpHelp(info);
+        return;
+    }
+    WLOGFI("ArkUI:DumpInfo");
     if (uiContent_ != nullptr) {
         uiContent_->DumpInfo(params, info);
     }
