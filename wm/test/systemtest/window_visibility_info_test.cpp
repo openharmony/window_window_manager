@@ -15,6 +15,13 @@
 
 // gtest
 #include <gtest/gtest.h>
+
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
+
+#include "display_manager.h"
 #include "wm_common.h"
 #include "window_manager.h"
 #include "window_test_utils.h"
@@ -29,23 +36,54 @@ namespace {
 }
 
 using utils = WindowTestUtils;
-constexpr int WAIT_ASYNC_US = 200000; // 200ms
+constexpr int WAIT_ASYNC_MS_TIME_OUT = 1500; // 1500ms
+
+#define CHECK_DISPLAY_POWER_STATE_RETURN()                              \
+    do {                                                                \
+        if (!displayPowerEventListener_->isDisplayPowerValid.load()) {  \
+            WLOGFE("isDisplayPowerValid false!");                       \
+            goto end;                                                   \
+        }                                                               \
+    } while (false)
 
 class VisibilityChangedListenerImpl : public IVisibilityChangedListener {
 public:
+    VisibilityChangedListenerImpl(std::mutex& mutex, std::condition_variable& cv) : mutex_(mutex), cv_(cv) {}
     void OnWindowVisibilityChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo) override;
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos_;
+    bool isCallbackCalled_ { false };
+private:
+    std::mutex& mutex_;
+    std::condition_variable& cv_;
+};
+
+class DisplayPowerEventListenerImpl : public IDisplayPowerEventListener {
+public:
+    DisplayPowerEventListenerImpl()
+    {
+        auto displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
+        auto state = DisplayManager::GetInstance().GetDisplayState(displayId);
+        isDisplayPowerValid = state == DisplayState::ON;
+    }
+    void OnDisplayPowerEvent(DisplayPowerEvent event, EventStatus status) override
+    {
+        isDisplayPowerValid.store(false);
+    }
+    std::atomic_bool isDisplayPowerValid;
 };
 
 void VisibilityChangedListenerImpl::OnWindowVisibilityChanged(
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
+    isCallbackCalled_ = true;
     WLOGFI("size:%{public}zu", windowVisibilityInfo.size());
     windowVisibilityInfos_ = std::move(windowVisibilityInfo);
     for (auto& info : windowVisibilityInfos_) {
         WLOGFI("windowId:%{public}u, covered:%{public}d, pid:%{public}d, uid:%{public}d", info->windowId_,
             info->isVisible_, info->pid_, info->uid_);
     }
+    cv_.notify_all();
 }
 
 class WindowVisibilityInfoTest : public testing::Test {
@@ -58,7 +96,20 @@ public:
 
     virtual void TearDown() override;
 
-    static inline sptr<VisibilityChangedListenerImpl> visibilityChangedListener_ = new VisibilityChangedListenerImpl();
+    static inline std::mutex mutex_;
+    static inline std::condition_variable cv_;
+    static inline sptr<VisibilityChangedListenerImpl> visibilityChangedListener_ =
+        new VisibilityChangedListenerImpl(mutex_, cv_);
+    static inline sptr<DisplayPowerEventListenerImpl> displayPowerEventListener_ =
+        new DisplayPowerEventListenerImpl();
+
+    static inline void ResetCallbackCalledFLag()
+    {
+        std::unique_lock<std::mutex> lock(mutex_);
+        visibilityChangedListener_->isCallbackCalled_ = false;
+    }
+
+    static void WaitForCallback();
     utils::TestWindowInfo fullScreenAppInfo_;
     utils::TestWindowInfo floatAppInfo_;
     utils::TestWindowInfo subAppInfo_;
@@ -74,11 +125,13 @@ void WindowVisibilityInfoTest::SetUpTestCase()
                         static_cast<uint32_t>(display->GetWidth()), static_cast<uint32_t>(display->GetHeight())};
     utils::InitByDisplayRect(displayRect);
     WindowManager::GetInstance().RegisterVisibilityChangedListener(visibilityChangedListener_);
+    DisplayManager::GetInstance().RegisterDisplayPowerEventListener(displayPowerEventListener_);
 }
 
 void WindowVisibilityInfoTest::TearDownTestCase()
 {
     WindowManager::GetInstance().UnregisterVisibilityChangedListener(visibilityChangedListener_);
+    DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(displayPowerEventListener_);
 }
 
 void WindowVisibilityInfoTest::SetUp()
@@ -116,6 +169,16 @@ void WindowVisibilityInfoTest::TearDown()
 {
 }
 
+void WindowVisibilityInfoTest::WaitForCallback()
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    auto now = std::chrono::system_clock::now();
+    if (!cv_.wait_until(lock, now + std::chrono::milliseconds(WAIT_ASYNC_MS_TIME_OUT),
+        []() { return visibilityChangedListener_->isCallbackCalled_; })) {
+        WLOGFI("wait_until time out");
+    }
+}
+
 namespace {
 /**
 * @tc.name: WindowVisibilityInfoTest01
@@ -134,33 +197,48 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, Function | Medium
     sptr<Window> subWindow1 = utils::CreateTestWindow(subAppInfo_);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, subWindow1->Show());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(2, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(2, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, subWindow1->Hide());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
+end:
     window1->Destroy();
     subWindow1->Destroy();
 }
@@ -179,13 +257,18 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest02, Function | Medium
     sptr<Window> window2 = utils::CreateTestWindow(fullScreenAppInfo_);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(2, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, window2->Show());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(2, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
+end:
     window1->Destroy();
     window2->Destroy();
 }
@@ -207,7 +290,6 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest03, Function | Medium
     sptr<Window> subWindow1 = utils::CreateTestWindow(subAppInfo_);
 
     floatAppInfo_.name = "window2";
-    floatAppInfo_.rect = {50, 150, 240, 426};
     sptr<Window> window2 = utils::CreateTestWindow(floatAppInfo_);
 
     subAppInfo_.name = "subWindow2";
@@ -216,21 +298,30 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest03, Function | Medium
     sptr<Window> subWindow2 = utils::CreateTestWindow(subAppInfo_);
 
     ASSERT_EQ(WMError::WM_OK, window2->Show());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, subWindow2->Show());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(2, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, subWindow1->Show());
-    usleep(WAIT_ASYNC_US);
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
     ASSERT_EQ(2, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
 
+end:
     window1->Destroy();
     subWindow1->Destroy();
     window2->Destroy();
