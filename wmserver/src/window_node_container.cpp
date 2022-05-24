@@ -844,7 +844,7 @@ void WindowNodeContainer::NotifyDockWindowStateChanged(sptr<WindowNode>& node, b
 {
     WM_FUNCTION_TRACE();
     WLOGFI("begin isEnable: %{public}d", isEnable);
-    if (!isEnable) {
+    if (isEnable) {
         for (auto& windowNode : appWindowNode_->children_) {
             if (windowNode->GetWindowId() == node->GetWindowId()) {
                 continue;
