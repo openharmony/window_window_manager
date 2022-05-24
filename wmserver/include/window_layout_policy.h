@@ -59,27 +59,23 @@ public:
     void ProcessDisplayCreate(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void ProcessDisplayDestroy(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void ProcessDisplaySizeChangeOrRotation(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
+    void SetFloatingWindowLimitsConfig(const FloatingWindowLimitsConfig& floatingWindowLimitsConfig);
 
 protected:
     void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
     void UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect);
     virtual void LayoutWindowNode(const sptr<WindowNode>& node);
     AvoidPosType GetAvoidPosType(const Rect& rect, DisplayId displayId) const;
-    void CalcAndSetNodeHotZone(Rect layoutOutRect, const sptr<WindowNode>& node) const;
-    void LimitFloatingWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect) const;
-    void LimitMainFloatingWindowPositionWithDrag(const sptr<WindowNode>& node, Rect& winRect) const;
-    void LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const;
+    void CalcAndSetNodeHotZone(const Rect& winRect, const sptr<WindowNode>& node) const;
     void ComputeDecoratedRequestRect(const sptr<WindowNode>& node) const;
     bool IsVerticalDisplay(DisplayId displayId) const;
     bool IsFullScreenRecentWindowExist(const std::vector<sptr<WindowNode>>& nodeVec) const;
     void LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec);
     void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect);
     void UpdateRectInDisplayGroupForAllNodes(DisplayId displayId,
-                                             const Rect& oriDisplayRect,
-                                             const Rect& newDisplayRect);
+        const Rect& oriDisplayRect, const Rect& newDisplayRect);
     void UpdateRectInDisplayGroup(const sptr<WindowNode>& node,
-                                  const Rect& oriDisplayRect,
-                                  const Rect& newDisplayRect);
+        const Rect& oriDisplayRect, const Rect& newDisplayRect);
     void LimitWindowToBottomRightCorner(const sptr<WindowNode>& node);
     void UpdateDisplayGroupRect();
     void UpdateDisplayGroupLimitRect_();
@@ -87,6 +83,19 @@ protected:
     void PostProcessWhenDisplayChange();
     void UpdateDisplayRectAndDisplayGroupInfo(const std::map<DisplayId, Rect>& displayRectMap);
     DockWindowShowState GetDockWindowShowState(DisplayId displayId, Rect& dockWinRect) const;
+    void LimitFloatingWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect) const;
+    void LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const;
+
+    void UpdateFloatingWindowSizeByCustomizedLimits(const sptr<WindowNode>& node,
+        const Rect& displayRect, Rect& winRect) const;
+    void UpdateFloatingWindowSizeBySystemLimits(const sptr<WindowNode>& node,
+        const Rect& displayRect, Rect& winRect) const;
+    void LimitWindowPositionWhenInitRectOrMove(const sptr<WindowNode>& node, Rect& winRect) const;
+    void LimitWindowPositionWhenDrag(const sptr<WindowNode>& node, Rect& winRect) const;
+    void FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect,
+        const FloatingWindowLimitsConfig& limitConfig);
+    FloatingWindowLimitsConfig GetCustomizedLimitsConfig(const Rect& displayRect, float virtualPixelRatio);
+    FloatingWindowLimitsConfig GetSystemLimitsConfig(const Rect& displayRect, float virtualPixelRatio);
 
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
@@ -98,6 +107,7 @@ protected:
     Rect displayGroupRect_;
     Rect displayGroupLimitRect_;
     bool isMultiDisplay_ = false;
+    FloatingWindowLimitsConfig floatingWindowLimitsConfig_;
 };
 }
 }

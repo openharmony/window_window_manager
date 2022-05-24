@@ -22,7 +22,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayManagerConfig"};
 }
 
-std::map<std::string, std::vector<int>> DisplayManagerConfig::numbersConfig_;
+std::map<std::string, std::vector<int>> DisplayManagerConfig::intNumbersConfig_;
 
 std::vector<std::string> DisplayManagerConfig::Split(std::string str, std::string pattern)
 {
@@ -76,7 +76,7 @@ bool DisplayManagerConfig::LoadConfigXml(const std::string& configFilePath)
 
         auto nodeName = curNodePtr->name;
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("dpi"))) {
-            ReadNumbersConfigInfo(curNodePtr);
+            ReadIntNumbersConfigInfo(curNodePtr);
             continue;
         }
     }
@@ -92,7 +92,7 @@ bool DisplayManagerConfig::IsValidNode(const xmlNode& currNode)
     return true;
 }
 
-void DisplayManagerConfig::ReadNumbersConfigInfo(const xmlNodePtr& currNode)
+void DisplayManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
@@ -113,18 +113,18 @@ void DisplayManagerConfig::ReadNumbersConfigInfo(const xmlNodePtr& currNode)
     }
 
     std::string nodeName = reinterpret_cast<const char *>(currNode->name);
-    numbersConfig_[nodeName] = numbersVec;
+    intNumbersConfig_[nodeName] = numbersVec;
     xmlFree(context);
 }
 
-const std::map<std::string, std::vector<int>>& DisplayManagerConfig::GetNumbersConfig()
+const std::map<std::string, std::vector<int>>& DisplayManagerConfig::GetIntNumbersConfig()
 {
-    return numbersConfig_;
+    return intNumbersConfig_;
 }
 
 void DisplayManagerConfig::DumpConfig()
 {
-    for (auto& numbers : numbersConfig_) {
+    for (auto& numbers : intNumbersConfig_) {
         WLOGFI("[DmConfig] Numbers: %{public}s %{public}zu", numbers.first.c_str(), numbers.second.size());
         for (auto& num : numbers.second) {
             WLOGFI("[DmConfig] Num: %{public}d", num);

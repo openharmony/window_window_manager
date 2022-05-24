@@ -276,6 +276,7 @@ private:
     void HandleModeChangeHotZones(int32_t posX, int32_t posY);
     WMError NotifyWindowTransition(TransitionReason reason);
     void UpdatePointerEventForStretchableWindow(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void UpdateDragType();
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
@@ -321,6 +322,7 @@ private:
     Rect startPointRect_ = { 0, 0, 0, 0 };
     Rect startRectExceptFrame_ = { 0, 0, 0, 0 };
     Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
+    DragType dragType_ = DragType::DRAG_UNDEFINED;
     Rect originRect_ = {0, 0, 0, 0};
     bool isAppDecorEnbale_ = true;
     SystemConfig windowSystemConfig_ ;

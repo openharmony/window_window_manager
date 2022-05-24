@@ -165,6 +165,11 @@ void WindowProperty::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
     windowSizeChangeReason_ = reason;
 }
 
+void WindowProperty::SetDragType(DragType dragType)
+{
+    dragType_ = dragType;
+}
+
 WindowSizeChangeReason WindowProperty::GetWindowSizeChangeReason() const
 {
     return windowSizeChangeReason_;
@@ -335,6 +340,11 @@ bool WindowProperty::GetTokenState() const
     return tokenState_;
 }
 
+DragType WindowProperty::GetDragType() const
+{
+    return dragType_;
+}
+
 bool WindowProperty::MapMarshalling(Parcel& parcel) const
 {
     auto size = sysBarPropMap_.size();
@@ -384,7 +394,7 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteBool(tokenState_) &&
         parcel.WriteUint32(callingWindow_) && parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
-        parcel.WriteUint32(modeSupportInfo_);
+        parcel.WriteUint32(modeSupportInfo_) && parcel.WriteUint32(static_cast<uint32_t>(dragType_));
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -426,6 +436,7 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetTurnScreenOn(parcel.ReadBool());
     property->SetKeepScreenOn(parcel.ReadBool());
     property->SetModeSupportInfo(parcel.ReadUint32());
+    property->SetDragType(static_cast<DragType>(parcel.ReadUint32()));
     return property;
 }
 
@@ -461,6 +472,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
     modeSupportInfo_ = property->modeSupportInfo_;
+    dragType_ = property->dragType_;
 }
 }
 }

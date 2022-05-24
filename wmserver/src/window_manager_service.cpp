@@ -195,7 +195,8 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 void WindowManagerService::ConfigureWindowManagerService()
 {
     const auto& enableConfig = WindowManagerConfig::GetEnableConfig();
-    const auto& numbersConfig = WindowManagerConfig::GetNumbersConfig();
+    const auto& intNumbersConfig = WindowManagerConfig::GetIntNumbersConfig();
+    const auto& floatNumbersConfig = WindowManagerConfig::GetFloatNumbersConfig();
 
     if (enableConfig.count("decor") != 0) {
         systemConfig_.isSystemDecorEnable_ = enableConfig.at("decor");
@@ -209,15 +210,15 @@ void WindowManagerService::ConfigureWindowManagerService()
         systemConfig_.isStretchable_ = enableConfig.at("stretchable");
     }
 
-    if (numbersConfig.count("maxAppWindowNumber") != 0) {
-        auto numbers = numbersConfig.at("maxAppWindowNumber");
+    if (intNumbersConfig.count("maxAppWindowNumber") != 0) {
+        auto numbers = intNumbersConfig.at("maxAppWindowNumber");
         if (numbers.size() == 1) {
             windowRoot_->SetMaxAppWindowNumber(numbers[0]);
         }
     }
 
-    if (numbersConfig.count("modeChangeHotZones") != 0) {
-        auto numbers = numbersConfig.at("modeChangeHotZones");
+    if (intNumbersConfig.count("modeChangeHotZones") != 0) {
+        auto numbers = intNumbersConfig.at("modeChangeHotZones");
         if (numbers.size() == 3) { // 3 hot zones
             hotZonesConfig_.fullscreenRange_ = static_cast<uint32_t>(numbers[0]); // 0 fullscreen
             hotZonesConfig_.primaryRange_ = static_cast<uint32_t>(numbers[1]);    // 1 primary
@@ -225,6 +226,30 @@ void WindowManagerService::ConfigureWindowManagerService()
             hotZonesConfig_.isModeChangeHotZoneConfigured_ = true;
         }
     }
+
+    FloatingWindowLimitsConfig floatingWindowLimitsConfig;
+
+    if (intNumbersConfig.count("floatingWindowLimitSize") != 0) {
+        auto numbers = intNumbersConfig.at("floatingWindowLimitSize");
+        if (numbers.size() == 4) { // 4, limitSize
+            floatingWindowLimitsConfig.maxWidth_ = static_cast<uint32_t>(numbers[0]);  // 0 max width
+            floatingWindowLimitsConfig.maxHeight_ = static_cast<uint32_t>(numbers[1]); // 1 max height
+            floatingWindowLimitsConfig.minWidth_ = static_cast<uint32_t>(numbers[2]);  // 2 min width
+            floatingWindowLimitsConfig.minHeight_ = static_cast<uint32_t>(numbers[3]); // 3 min height
+            floatingWindowLimitsConfig.isFloatingWindowLimitsConfigured_ = true;
+        }
+    }
+
+    if (floatNumbersConfig.count("floatingWindowLimitRatio") != 0) {
+        auto numbers = floatNumbersConfig.at("floatingWindowLimitRatio");
+        if (numbers.size() == 2) { // 2, limitRatio
+            floatingWindowLimitsConfig.maxRatio_ = static_cast<float>(numbers[0]); // 0 max ratio
+            floatingWindowLimitsConfig.minRatio_ = static_cast<float>(numbers[1]); // 1 min ratio
+            floatingWindowLimitsConfig.isFloatingWindowLimitsConfigured_ = true;
+        }
+    }
+
+    windowRoot_->SetFloatingWindowLimitsConfig(floatingWindowLimitsConfig);
 }
 
 void WindowManagerService::OnStop()

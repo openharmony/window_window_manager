@@ -24,7 +24,8 @@ namespace {
 }
 
 std::map<std::string, bool> WindowManagerConfig::enableConfig_;
-std::map<std::string, std::vector<int>> WindowManagerConfig::numbersConfig_;
+std::map<std::string, std::vector<int>> WindowManagerConfig::intNumbersConfig_;
+std::map<std::string, std::vector<float>> WindowManagerConfig::floatNumbersConfig_;
 
 bool WindowManagerConfig::LoadConfigXml(const std::string& configFilePath)
 {
@@ -57,8 +58,14 @@ bool WindowManagerConfig::LoadConfigXml(const std::string& configFilePath)
             continue;
         }
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("maxAppWindowNumber")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("modeChangeHotZones"))) {
-            ReadNumbersConfigInfo(curNodePtr);
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("modeChangeHotZones")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("floatingWindowLimitSize"))) {
+            ReadIntNumbersConfigInfo(curNodePtr);
+            continue;
+        }
+
+        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("floatingWindowLimitRatio"))) {
+            ReadFloatNumbersConfigInfo(curNodePtr);
             continue;
         }
     }
@@ -91,7 +98,7 @@ void WindowManagerConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
     xmlFree(enable);
 }
 
-void WindowManagerConfig::ReadNumbersConfigInfo(const xmlNodePtr& currNode)
+void WindowManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
@@ -104,15 +111,41 @@ void WindowManagerConfig::ReadNumbersConfigInfo(const xmlNodePtr& currNode)
     auto numbers = WindowHelper::Split(numbersStr, " ");
     for (auto& num : numbers) {
         if (!WindowHelper::IsNumber(num)) {
-            WLOGFE("[WmConfig] read number error: nodeName:(%{public}s)", currNode->name);
+            WLOGFE("[WmConfig] read int number error: nodeName:(%{public}s)", currNode->name);
             xmlFree(context);
             return;
         }
+
         numbersVec.emplace_back(std::stoi(num));
     }
 
     std::string nodeName = reinterpret_cast<const char *>(currNode->name);
-    numbersConfig_[nodeName] = numbersVec;
+    intNumbersConfig_[nodeName] = numbersVec;
+    xmlFree(context);
+}
+
+void WindowManagerConfig::ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode)
+{
+    xmlChar* context = xmlNodeGetContent(currNode);
+    if (context == nullptr) {
+        WLOGFE("[WmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        return;
+    }
+
+    std::vector<float> numbersVec;
+    std::string numbersStr = reinterpret_cast<const char*>(context);
+    auto numbers = WindowHelper::Split(numbersStr, " ");
+    for (auto& num : numbers) {
+        if (!WindowHelper::IsFloatingNumber(num)) {
+            WLOGFE("[WmConfig] read float number error: nodeName:(%{public}s)", currNode->name);
+            xmlFree(context);
+            return;
+        }
+        numbersVec.emplace_back(std::stof(num));
+    }
+
+    std::string nodeName = reinterpret_cast<const char *>(currNode->name);
+    floatNumbersConfig_[nodeName] = numbersVec;
     xmlFree(context);
 }
 
@@ -121,9 +154,14 @@ const std::map<std::string, bool>& WindowManagerConfig::GetEnableConfig()
     return enableConfig_;
 }
 
-const std::map<std::string, std::vector<int>>& WindowManagerConfig::GetNumbersConfig()
+const std::map<std::string, std::vector<int>>& WindowManagerConfig::GetIntNumbersConfig()
 {
-    return numbersConfig_;
+    return intNumbersConfig_;
+}
+
+const std::map<std::string, std::vector<float>>& WindowManagerConfig::GetFloatNumbersConfig()
+{
+    return floatNumbersConfig_;
 }
 
 void WindowManagerConfig::DumpConfig()
@@ -132,10 +170,17 @@ void WindowManagerConfig::DumpConfig()
         WLOGFI("[WmConfig] Enable: %{public}s %{public}u", enable.first.c_str(), enable.second);
     }
 
-    for (auto& numbers : numbersConfig_) {
-        WLOGFI("[WmConfig] Numbers: %{public}s %{public}zu", numbers.first.c_str(), numbers.second.size());
+    for (auto& numbers : intNumbersConfig_) {
+        WLOGFI("[WmConfig] Int numbers: %{public}s %{public}zu", numbers.first.c_str(), numbers.second.size());
         for (auto& num : numbers.second) {
             WLOGFI("[WmConfig] Num: %{public}d", num);
+        }
+    }
+
+    for (auto& numbers : floatNumbersConfig_) {
+        WLOGFI("[WmConfig] Float numbers: %{public}s %{public}zu", numbers.first.c_str(), numbers.second.size());
+        for (auto& num : numbers.second) {
+            WLOGFI("[WmConfig] Num: %{public}f", num);
         }
     }
 }
