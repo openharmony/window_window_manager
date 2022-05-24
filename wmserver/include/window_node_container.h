@@ -40,6 +40,7 @@ public:
     WMError ShowStartingWindow(sptr<WindowNode>& node);
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);
+    WMError HandleRemoveWindow(sptr<WindowNode>& node);
     WMError UpdateWindowNode(sptr<WindowNode>& node, WindowUpdateReason reason);
     WMError DestroyWindowNode(sptr<WindowNode>& node, std::vector<uint32_t>& windowIds);
     const std::vector<uint32_t>& Destroy();
@@ -72,7 +73,8 @@ public:
     sptr<WindowNode> GetNextActiveWindow(uint32_t windowId) const;
     void MinimizeAllAppWindows(DisplayId displayId);
     void MinimizeOldestAppWindow();
-    void ToggleShownStateForAllAppWindows(std::function<bool(uint32_t)> restoreFunc, bool restore);
+    void ToggleShownStateForAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc, bool restore);
+    void RestoreAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc);
     bool IsAppWindowsEmpty() const;
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifySystemBarTints(std::vector<DisplayId> displayIdVec);
@@ -149,6 +151,8 @@ private:
     uint32_t activeWindow_ = INVALID_WINDOW_ID;
 
     std::vector<uint32_t> backupWindowIds_;
+    std::map<uint32_t, WindowMode> backupWindowMode_;
+    std::map<DisplayId, Rect> backupDividerWindowRect_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
     std::unordered_map<WindowLayoutMode, sptr<WindowLayoutPolicy>> layoutPolicys_;
     WindowLayoutMode layoutMode_ = WindowLayoutMode::CASCADE;

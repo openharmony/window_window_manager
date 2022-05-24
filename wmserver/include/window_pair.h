@@ -160,6 +160,13 @@ public:
      */
     bool IsForbidDockSliceMove() const;
 
+    /**
+     * Set all app windows are restoring.
+     *
+     * @param ratio Indicates whether all app windows are restoring.
+     */
+    void SetAllAppWindowsRestoring(bool isAllAppWindowsRestoring);
+
 private:
     /**
      * Gets whether the window is related to split window.
@@ -240,6 +247,7 @@ private:
     sptr<WindowNode> divider_;
     WindowPairStatus status_ = {WindowPairStatus::STATUS_EMPTY};
     DisplayGroupWindowTree& displayGroupWindowTree_;
+    bool isAllAppWindowsRestoring_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS

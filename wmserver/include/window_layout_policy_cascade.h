@@ -39,6 +39,7 @@ public:
     void AddWindowNode(const sptr<WindowNode>& node) override;
     void UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow = false) override;
     void UpdateLayoutRect(const sptr<WindowNode>& node) override;
+    void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) override;
     void RemoveWindowNode(const sptr<WindowNode>& node) override;
 
 private:
@@ -70,6 +71,7 @@ private:
         Rect firstCascadeRect_;
     };
     mutable std::map<DisplayId, CascadeRects> cascadeRectsMap_;
+    std::map<DisplayId, Rect> restoringDividerWindowRects_;
 };
 }
 }

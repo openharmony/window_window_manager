@@ -41,6 +41,7 @@ namespace {
     constexpr int WINDOW_NAME_MAX_LENGTH = 10;
     const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
     constexpr uint32_t MAX_BRIGHTNESS = 255;
+    constexpr uint32_t SPLIT_WINDOWS_CNT = 2;
 }
 
 WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, ScreenId displayGroupId)
@@ -157,7 +158,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
         }
         UpdateWindowTree(node);
         windowPair->UpdateIfSplitRelated(node);
-        if (node->IsSplitMode() || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        if (node->IsSplitMode()) {
             RaiseSplitRelatedWindowToTop(node);
         }
 
@@ -288,12 +289,10 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     displayGroupController_->UpdateDisplayGroupWindowTree();
 
     layoutPolicy_->RemoveWindowNode(node);
-    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(node->GetDisplayId());
-    if (windowPair == nullptr) {
-        WLOGFE("Window pair is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
+    auto handleRes = HandleRemoveWindow(node);
+    if (handleRes != WMError::WM_OK) {
+        return handleRes;
     }
-    windowPair->HandleRemoveWindow(node);
     if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
         avoidController_->AvoidControl(node, AvoidControlType::AVOID_NODE_REMOVE);
         NotifyIfSystemBarRegionChanged(node->GetDisplayId());
@@ -308,6 +307,23 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     RcoveryScreenDefaultOrientationIfNeed(node->GetDisplayId());
     WLOGFI("RemoveWindowNode windowId: %{public}u end", node->GetWindowId());
+    return WMError::WM_OK;
+}
+
+WMError WindowNodeContainer::HandleRemoveWindow(sptr<WindowNode>& node)
+{
+    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(node->GetDisplayId());
+    if (windowPair == nullptr) {
+        WLOGFE("Window pair is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    windowPair->HandleRemoveWindow(node);
+    auto dividerWindow = windowPair->GetDividerWindow();
+    auto type = node->GetWindowType();
+    if ((type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) &&
+        dividerWindow != nullptr) {
+        UpdateWindowNode(dividerWindow, WindowUpdateReason::UPDATE_RECT);
+    }
     return WMError::WM_OK;
 }
 
@@ -370,7 +386,15 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
     RaiseShowWhenLockedWindowIfNeeded(node);
     auto parentNode = node->parent_;
     auto position = parentNode->children_.end();
+    int splitWindowCnt = 0;
     for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE && splitWindowCnt == SPLIT_WINDOWS_CNT) {
+            position = iter;
+            break;
+        }
+        if (WindowHelper::IsSplitWindowMode((*iter)->GetWindowMode())) {
+            splitWindowCnt++;
+        }
         if ((*iter)->priority_ > node->priority_) {
             position = iter;
             break;
@@ -1283,16 +1307,20 @@ void WindowNodeContainer::MinimizeOldestAppWindow()
     WLOGFI("no window needs to minimize");
 }
 
-void WindowNodeContainer::ToggleShownStateForAllAppWindows(std::function<bool(uint32_t)> restoreFunc, bool restore)
+void WindowNodeContainer::ToggleShownStateForAllAppWindows(
+    std::function<bool(uint32_t, WindowMode)> restoreFunc, bool restore)
 {
     WLOGFI("ToggleShownStateForAllAppWindows");
     // to do, backup reentry: 1.ToggleShownStateForAllAppWindows fast; 2.this display should reset backupWindowIds_.
     if (!restore && appWindowNode_->children_.empty() && !backupWindowIds_.empty()) {
         backupWindowIds_.clear();
+        backupWindowMode_.clear();
+        backupDividerWindowRect_.clear();
     }
     if (!restore && !appWindowNode_->children_.empty() && backupWindowIds_.empty()) {
-        // backup
         WLOGFI("backup");
+        std::set<DisplayId> displayIdSet;
+        backupWindowMode_.clear();
         for (auto& appNode : appWindowNode_->children_) {
             // exclude exceptional window
             if (!WindowHelper::IsMainWindow(appNode->GetWindowType())) {
@@ -1302,25 +1330,54 @@ void WindowNodeContainer::ToggleShownStateForAllAppWindows(std::function<bool(ui
             // minimize window
             WLOGFD("minimize window, windowId:%{public}u", appNode->GetWindowId());
             backupWindowIds_.emplace_back(appNode->GetWindowId());
+            backupWindowMode_[appNode->GetWindowId()] = appNode->GetWindowMode();
+            displayIdSet.insert(appNode->GetDisplayId());
             if (appNode->GetWindowToken()) {
                 appNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_HIDDEN);
             }
         }
-    } else if (restore && !backupWindowIds_.empty()) {
-        // restore
-        WLOGFI("restore");
-        std::vector<uint32_t> backupWindowIds(backupWindowIds_);
-        for (auto windowId: backupWindowIds) {
-            if (!restoreFunc(windowId)) {
-                WLOGFE("restore %{public}u failed", windowId);
+        backupDividerWindowRect_.clear();
+        for (auto displayId : displayIdSet) {
+            auto windowPair = displayGroupController_->GetWindowPairByDisplayId(displayId);
+            if (windowPair == nullptr || windowPair->GetDividerWindow() == nullptr) {
                 continue;
             }
-            WLOGFD("restore %{public}u", windowId);
+            backupDividerWindowRect_[displayId] = windowPair->GetDividerWindow()->GetWindowRect();
         }
-        backupWindowIds_.clear();
+    } else if (restore && !backupWindowIds_.empty()) {
+        WLOGFI("restore");
+        RestoreAllAppWindows(restoreFunc);
     } else {
         WLOGFI("do nothing because shown app windows is empty or backup windows is empty.");
     }
+}
+
+void WindowNodeContainer::RestoreAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc)
+{
+    std::vector<uint32_t> backupWindowIds(backupWindowIds_);
+    auto displayIds = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
+    std::vector<sptr<WindowPair>> windowPairs;
+    for (auto displayId : displayIds) {
+        auto windowPair = displayGroupController_->GetWindowPairByDisplayId(displayId);
+        if (windowPair != nullptr) {
+            windowPair->SetAllAppWindowsRestoring(true);
+            windowPairs.emplace_back(windowPair);
+        }
+    }
+    for (auto windowId: backupWindowIds) {
+        if (!restoreFunc(windowId, backupWindowMode_[windowId])) {
+            WLOGFE("restore %{public}u failed", windowId);
+            continue;
+        }
+        WLOGFD("restore %{public}u", windowId);
+    }
+    for (auto windowPair : windowPairs) {
+        windowPair->SetAllAppWindowsRestoring(false);
+    }
+    layoutPolicy_->SetSplitDividerWindowRects(backupDividerWindowRect_);
+    backupWindowIds_.clear();
+    backupWindowMode_.clear();
+    backupDividerWindowRect_.clear();
 }
 
 bool WindowNodeContainer::IsAppWindowsEmpty() const

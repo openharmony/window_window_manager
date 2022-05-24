@@ -272,7 +272,7 @@ void WindowRoot::ToggleShownStateForAllAppWindows()
     }
     std::for_each(containers.begin(), containers.end(),
         [this, isAllAppWindowsEmpty] (sptr<WindowNodeContainer> container) {
-        std::function<bool(uint32_t)> restoreFunc = [this](uint32_t windowId) {
+        auto restoreFunc = [this](uint32_t windowId, WindowMode mode) {
             auto windowNode = GetWindowNode(windowId);
             if (windowNode == nullptr) {
                 return false;
@@ -284,6 +284,10 @@ void WindowRoot::ToggleShownStateForAllAppWindows()
             auto property = windowNode->GetWindowToken()->GetWindowProperty();
             if (property == nullptr) {
                 return false;
+            }
+            if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+                property->SetWindowMode(mode);
             }
             WindowManagerService::GetInstance().AddWindow(property);
             return true;
