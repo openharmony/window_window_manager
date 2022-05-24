@@ -123,7 +123,6 @@ WMError WindowDumper::DumpAllWindowInfo(std::string& dumpInfo) const
 {
     std::map<WindowNodeContainer*, DisplayId> windowNodeContainers;
     std::vector<DisplayId> displayIds = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (DisplayId displayId : displayIds) {
         auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
         if (windowNodeContainer != nullptr) {

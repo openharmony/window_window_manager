@@ -30,10 +30,10 @@ enum class Event : uint32_t {
 };
 
 class WindowRoot : public RefBase {
-using Callback = std::function<void (Event event, uint32_t windowId)>;
+using Callback = std::function<void (Event event, const sptr<IRemoteObject>& remoteObject)>;
 
 public:
-    WindowRoot(std::recursive_mutex& mutex, Callback callback) : mutex_(mutex), callback_(callback) {}
+    explicit WindowRoot(Callback callback) : callback_(callback) {}
     ~WindowRoot() = default;
 
     sptr<WindowNodeContainer> GetOrCreateWindowNodeContainer(DisplayId displayId);
@@ -82,6 +82,7 @@ public:
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     std::vector<DisplayId> GetAllDisplayIds() const;
     uint32_t GetTotalWindowNum();
+    uint32_t GetWindowIdByObject(const sptr<IRemoteObject>& remoteObject);
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
@@ -102,7 +103,6 @@ private:
     void DestroyLeakStartingWindow();
     WMError PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode,
         sptr<WindowNodeContainer>& container);
-    std::recursive_mutex& mutex_;
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
     std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainerMap_;

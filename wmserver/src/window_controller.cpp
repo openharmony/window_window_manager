@@ -152,7 +152,7 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     }
     sptr<WindowNode> node = windowRoot_->FindWindowNodeWithToken(token);
     if (node != nullptr && WindowHelper::IsMainWindow(property->GetWindowType()) && node->startingWindowShown_) {
-        StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode);
+        StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode, property);
         windowRoot_->AddDeathRecipient(node);
         return WMError::WM_OK;
     }
