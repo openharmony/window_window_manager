@@ -28,6 +28,7 @@ Rect WindowTestUtils::statusBarRect_      = {0, 0, 0, 0};
 Rect WindowTestUtils::naviBarRect_        = {0, 0, 0, 0};
 Rect WindowTestUtils::customAppRect_      = {0, 0, 0, 0};
 Rect WindowTestUtils::limitDisplayRect_   = {0, 0, 0, 0};
+Rect WindowTestUtils::dockWindowRect_     = {0, 0, 0, 0};
 SplitRects WindowTestUtils::splitRects_   = {
     .primaryRect   = {0, 0, 0, 0},
     .secondaryRect = {0, 0, 0, 0},
@@ -62,6 +63,20 @@ sptr<Window> WindowTestUtils::CreateTestWindow(const TestWindowInfo& info)
     }
     sptr<Window> window = Window::Create(info.name, option);
     return window;
+}
+
+sptr<Window> WindowTestUtils::CreateDockWindow()
+{
+    TestWindowInfo info = {
+        .name = "dockWindow",
+        .rect = dockWindowRect_,
+        .type = WindowType::WINDOW_TYPE_LAUNCHER_DOCK,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = false,
+        .parentLimit = false,
+        .parentName = "",
+    };
+    return CreateTestWindow(info);
 }
 
 sptr<Window> WindowTestUtils::CreateStatusBarWindow()
@@ -188,6 +203,7 @@ void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
     }
     statusBarRect_ = {0, 0, displayRect_.width_, displayRect_.height_ * barRatio};
     naviBarRect_ = {0, displayRect_.height_ * (1 - barRatio), displayRect_.width_, displayRect_.height_ * barRatio};
+    dockWindowRect_ = {0, displayRect_.height_ * (1 - barRatio), displayRect_.width_, displayRect_.height_ * barRatio};
     customAppRect_ = {
         displayRect_.width_ * spaceRation,
         displayRect_.height_ * spaceRation,
