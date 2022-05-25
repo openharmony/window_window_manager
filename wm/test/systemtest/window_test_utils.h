@@ -40,6 +40,7 @@ public:
         WindowMode mode;
         bool needAvoid;
         bool parentLimit;
+        bool forbidSplitMove {false};
         std::string parentName;
         bool focusable_ { true };
         Orientation orientation_ { Orientation::UNSPECIFIED };
