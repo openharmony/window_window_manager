@@ -17,6 +17,7 @@
 
 #include <iremote_broker.h>
 #include <iservice_registry.h>
+#include <securec.h>
 #include <system_ability_definition.h>
 
 #include "zidl/window_manager_proxy.h"
@@ -33,8 +34,7 @@ size_t GetObject(T &object, const uint8_t *data, size_t size)
     if (objectSize > size) {
         return 0;
     }
-    std::memcpy(&object, data, objectSize);
-    return objectSize;
+    return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
 
 std::pair<sptr<IWindowManager>, sptr<IRemoteObject>> GetProxy()

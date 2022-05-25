@@ -16,6 +16,7 @@
 #include "screen_fuzzer.h"
 
 #include <iostream>
+#include <securec.h>
 
 #include "display_manager.h"
 #include "display.h"
@@ -31,8 +32,7 @@ size_t GetObject(T &object, const uint8_t *data, size_t size)
     if (objectSize > size) {
         return 0;
     }
-    std::memcpy(&object, data, objectSize);
-    return objectSize;
+    return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
 
 bool ScreenFuzzTest(const uint8_t *data, size_t size)
