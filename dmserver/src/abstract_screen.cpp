@@ -66,11 +66,12 @@ sptr<ScreenInfo> AbstractScreen::ConvertToScreenInfo() const
 
 void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd)
 {
-    if (rsDisplayNode_ == nullptr) {
-        WLOGFE("rsDisplayNode_ is nullptr");
+    if (rsDisplayNode_ == nullptr || surfaceNode == nullptr) {
+        WLOGFE("node is nullptr");
         return;
     }
-    WLOGFI("AbstractScreen::UpdateRSTree");
+    WLOGFI("%{public}s surface: %{public}s, %{public}" PRIu64"", (isAdd ? "add" : "remove"),
+        surfaceNode->GetName().c_str(), surfaceNode->GetId());
 
     if (isAdd) {
         rsDisplayNode_->AddChild(surfaceNode, -1);
