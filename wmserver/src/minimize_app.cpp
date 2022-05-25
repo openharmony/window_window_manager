@@ -24,7 +24,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MinimizeApp"};
 }
 
-std::map<MinimizeReason, std::vector<sptr<WindowNode>>> MinimizeApp::needMinimizeAppNodes_;
+std::map<MinimizeReason, std::vector<wptr<WindowNode>>> MinimizeApp::needMinimizeAppNodes_;
 bool MinimizeApp::isMinimizedByOtherWindow_ = true;
 std::recursive_mutex MinimizeApp::mutex_;
 
@@ -35,8 +35,9 @@ void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReaso
     if (!isMinimizedByOtherWindow_ && !isFromUser) {
         return;
     }
+    wptr<WindowNode> weakNode(node);
     WLOGFI("[Minimize] Add Window %{public}u to minimize list, reason %{public}u", node->GetWindowId(), reason);
-    needMinimizeAppNodes_[reason].emplace_back(node);
+    needMinimizeAppNodes_[reason].emplace_back(weakNode);
 }
 
 void MinimizeApp::ExecuteMinimizeAll()
@@ -45,9 +46,11 @@ void MinimizeApp::ExecuteMinimizeAll()
     for (auto& appNodes: needMinimizeAppNodes_) {
         bool isFromUser = IsFromUser(appNodes.first);
         for (auto& node : appNodes.second) {
-            if (node->abilityToken_ != nullptr && !node->startingWindowShown_) {
-                WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u", node->GetWindowId(), appNodes.first);
-                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(node->abilityToken_, isFromUser);
+            auto weakNode = node.promote();
+            if (weakNode != nullptr && weakNode->abilityToken_ != nullptr && !weakNode->startingWindowShown_) {
+                WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u",
+                    weakNode->GetWindowId(), appNodes.first);
+                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(weakNode->abilityToken_, isFromUser);
             }
         }
         appNodes.second.clear();
@@ -84,9 +87,10 @@ void MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason reason)
     if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
         bool isFromUser = IsFromUser(reason);
         for (auto& node : needMinimizeAppNodes_.at(reason)) {
-            if (node->abilityToken_ != nullptr && !node->startingWindowShown_) {
-                WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u", node->GetWindowId(), reason);
-                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(node->abilityToken_, isFromUser);
+            auto weakNode = node.promote();
+            if (weakNode != nullptr && weakNode->abilityToken_ != nullptr && !weakNode->startingWindowShown_) {
+                WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u", weakNode->GetWindowId(), reason);
+                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(weakNode->abilityToken_, isFromUser);
             }
         }
         needMinimizeAppNodes_.at(reason).clear();
