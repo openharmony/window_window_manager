@@ -149,6 +149,7 @@ private:
     uint32_t zOrder_ { 0 };
     uint32_t focusedWindow_ { INVALID_WINDOW_ID };
     uint32_t activeWindow_ = INVALID_WINDOW_ID;
+    bool isScreenLocked_ = false;
 
     std::vector<uint32_t> backupWindowIds_;
     std::map<uint32_t, WindowMode> backupWindowMode_;
