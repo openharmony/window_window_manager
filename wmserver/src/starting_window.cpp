@@ -138,13 +138,17 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!node->leashWinSurfaceNode_) {
+        WLOGFI("cannot release leashwindow since leash is null, id:%{public}u", node->GetWindowId());
         return;
     }
+    auto leashName = node->leashWinSurfaceNode_->GetName();
     node->leashWinSurfaceNode_->RemoveChild(node->startingWinSurfaceNode_);
     node->leashWinSurfaceNode_->RemoveChild(node->surfaceNode_);
     node->leashWinSurfaceNode_ = nullptr;
     node->startingWinSurfaceNode_ = nullptr;
-    WLOGFI("Release startwindow surfaceNode end id:%{public}u", node->GetWindowId());
+    WLOGFI("Release startwindow surfaceNode end id: %{public}u, [%{public}s]: use_count: %{public}ld, \
+        [startWinSurface]: use_count: %{public}ld ", node->GetWindowId(), leashName.c_str(),
+        node->leashWinSurfaceNode_.use_count(), node->startingWinSurfaceNode_.use_count());
 }
 
 void StartingWindow::UpdateRSTree(sptr<WindowNode>& node)
