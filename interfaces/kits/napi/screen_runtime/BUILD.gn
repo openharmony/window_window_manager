@@ -41,7 +41,7 @@ ohos_shared_library("screen_napi") {
     "${aakits_path}/ability/native:abilitykit_native",
     "${aakits_path}/appkit:app_context",
     "${aakits_path}/appkit:appkit_native",
-    "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/dmserver:libdms",
     "//foundation/windowmanager/utils:libwmutil",
