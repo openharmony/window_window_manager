@@ -61,6 +61,11 @@ sptr<Window> WindowTestUtils::CreateTestWindow(const TestWindowInfo& info)
     } else {
         option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_PARENT_LIMIT);
     }
+    if (info.forbidSplitMove) {
+        option->AddWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
+    } else {
+        option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
+    }
     sptr<Window> window = Window::Create(info.name, option);
     return window;
 }
