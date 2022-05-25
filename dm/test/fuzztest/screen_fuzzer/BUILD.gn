@@ -23,7 +23,7 @@ ohos_fuzztest("ScreenFuzzTest") {
   include_dirs = [
     "//foundation/windowmanager/interfaces/innerkits/dm",
     "//utils/native/base/include",
-    "//foundation/graphic/graphic/interfaces/innerkits/surface",
+    "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
   ]
   cflags = [
     "-g",
@@ -33,7 +33,7 @@ ohos_fuzztest("ScreenFuzzTest") {
   ]
   sources = [ "screen_fuzzer.cpp" ]
   deps = [
-    "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
     "//utils/native/base:utils",
   ]
