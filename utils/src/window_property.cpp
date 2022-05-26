@@ -165,6 +165,16 @@ void WindowProperty::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
     windowSizeChangeReason_ = reason;
 }
 
+void WindowProperty::SetWindowPid(int32_t pid)
+{
+    pid_ = pid;
+}
+
+void WindowProperty::SetWindowUid(int32_t uid)
+{
+    uid_ = uid;
+}
+
 WindowSizeChangeReason WindowProperty::GetWindowSizeChangeReason() const
 {
     return windowSizeChangeReason_;
@@ -325,6 +335,16 @@ bool WindowProperty::GetTokenState() const
     return tokenState_;
 }
 
+int32_t WindowProperty::GetWindowPid() const
+{
+    return pid_;
+}
+
+int32_t WindowProperty::GetWindowUid() const
+{
+    return uid_;
+}
+
 bool WindowProperty::MapMarshalling(Parcel& parcel) const
 {
     auto size = sysBarPropMap_.size();
@@ -373,7 +393,8 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(hitOffset_.x) && parcel.WriteInt32(hitOffset_.y) && parcel.WriteUint32(animationFlag_) &&
         parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteBool(tokenState_) &&
         parcel.WriteUint32(callingWindow_) && parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
-        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_);
+        parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
+        parcel.WriteInt32(pid_) && parcel.WriteInt32(uid_);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -414,6 +435,8 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
     property->SetTurnScreenOn(parcel.ReadBool());
     property->SetKeepScreenOn(parcel.ReadBool());
+    property->SetWindowPid(parcel.ReadInt32());
+    property->SetWindowUid(parcel.ReadInt32());
     return property;
 }
 
@@ -448,6 +471,8 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     requestedOrientation_ = property->requestedOrientation_;
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
+    pid_ = property->pid_;
+    uid_ = property->uid_;
 }
 }
 }
