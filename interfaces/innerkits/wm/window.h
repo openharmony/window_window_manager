@@ -119,6 +119,11 @@ public:
     virtual void OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
 };
 
+class IOutsidePressedListener : virtual public RefBase {
+public:
+    virtual void OnOutsidePressed() = 0;
+};
+
 class Window : public RefBase {
 public:
     static sptr<Window> Create(const std::string& windowName,
@@ -200,6 +205,7 @@ public:
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
+    virtual void RegisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener) = 0;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;
