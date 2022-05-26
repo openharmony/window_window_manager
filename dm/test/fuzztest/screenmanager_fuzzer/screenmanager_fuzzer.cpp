@@ -16,6 +16,7 @@
 #include "screenmanager_fuzzer.h"
 
 #include <iostream>
+#include <securec.h>
 
 #include "dm_common.h"
 #include "screen.h"
@@ -51,8 +52,7 @@ size_t GetObject(T &object, const uint8_t *data, size_t size)
     if (objectSize > size) {
         return 0;
     }
-    std::memcpy(&object, data, objectSize);
-    return objectSize;
+    return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
 
 bool ScreenPowerFuzzTest(const uint8_t *data, size_t size)
