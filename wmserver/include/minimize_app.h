@@ -51,7 +51,7 @@ private:
             reason == MinimizeReason::MAX_APP_COUNT || reason == MinimizeReason::LAYOUT_TILE);
     }
 
-    static std::map<MinimizeReason, std::vector<sptr<WindowNode>>> needMinimizeAppNodes_;
+    static std::map<MinimizeReason, std::vector<wptr<WindowNode>>> needMinimizeAppNodes_;
     static bool isMinimizedByOtherWindow_;
     static std::recursive_mutex mutex_;
 };
