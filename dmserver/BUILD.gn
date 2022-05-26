@@ -51,6 +51,8 @@ ohos_shared_library("libdms") {
 
   external_deps = [
     "bytrace_standard:bytrace_core",
+    "ability_runtime:ability_manager",
+    "access_token:libaccesstoken_sdk",
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "ipc:ipc_core",
