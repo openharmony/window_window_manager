@@ -189,6 +189,10 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     if (WindowHelper::IsAppWindow(node->GetWindowType())) {
         backupWindowIds_.clear();
     }
+
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
+        isScreenLocked_ = true;
+    }
     return WMError::WM_OK;
 }
 
@@ -289,9 +293,8 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     displayGroupController_->UpdateDisplayGroupWindowTree();
 
     layoutPolicy_->RemoveWindowNode(node);
-    auto handleRes = HandleRemoveWindow(node);
-    if (handleRes != WMError::WM_OK) {
-        return handleRes;
+    if (HandleRemoveWindow(node) != WMError::WM_OK) {
+        return WMError::WM_ERROR_NULLPTR;
     }
     if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
         avoidController_->AvoidControl(node, AvoidControlType::AVOID_NODE_REMOVE);
@@ -306,6 +309,9 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     RcoveryScreenDefaultOrientationIfNeed(node->GetDisplayId());
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
+        isScreenLocked_ = false;
+    }
     WLOGFI("RemoveWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
@@ -1453,18 +1459,13 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, Displa
 
 void WindowNodeContainer::RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const
 {
-    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || !isScreenLocked_) {
         return;
     }
-    auto iter = std::find_if(aboveAppWindowNode_->children_.begin(), aboveAppWindowNode_->children_.end(),
-                             [](sptr<WindowNode> node) {
-        return node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD;
-    });
-    if (iter != aboveAppWindowNode_->children_.end()) {
-        WLOGFI("raise input method float window priority.");
-        node->priority_ = zorderPolicy_->GetWindowPriority(
-            WindowType::WINDOW_TYPE_KEYGUARD) + 2; // 2: higher than keyguard and show when locked window
-    }
+
+    WLOGFI("raise input method float window priority.");
+    node->priority_ = zorderPolicy_->GetWindowPriority(
+        WindowType::WINDOW_TYPE_KEYGUARD) + 2; // 2: higher than keyguard and show when locked window
 }
 
 void WindowNodeContainer::ReZOrderShowWhenLockedWindows(bool up)
@@ -1518,18 +1519,13 @@ void WindowNodeContainer::ReZOrderShowWhenLockedWindows(bool up)
 
 void WindowNodeContainer::ReZOrderShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node)
 {
-    if (!(node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))) {
+    if (!(node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) ||
+        !isScreenLocked_) {
         return;
     }
 
-    auto iter = std::find_if(aboveAppWindowNode_->children_.begin(), aboveAppWindowNode_->children_.end(),
-                             [](sptr<WindowNode> node) {
-        return node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD;
-    });
-    if (iter != aboveAppWindowNode_->children_.end()) {
-        WLOGFI("ShowWhenLocked window %{public}u re-zorder to up", node->GetWindowId());
-        ReZOrderShowWhenLockedWindows(true);
-    }
+    WLOGFI("ShowWhenLocked window %{public}u re-zorder to up", node->GetWindowId());
+    ReZOrderShowWhenLockedWindows(true);
 }
 
 void WindowNodeContainer::RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node)
@@ -1541,23 +1537,18 @@ void WindowNodeContainer::RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNod
     }
 
     // if show when locked window show, raise itself when exist keyguard
-    if (!(node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))) {
+    if (!(node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) ||
+        !isScreenLocked_) {
         return;
     }
 
-    auto iter = std::find_if(aboveAppWindowNode_->children_.begin(), aboveAppWindowNode_->children_.end(),
-                             [](sptr<WindowNode> node) {
-        return node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD;
-    });
-    if (iter != aboveAppWindowNode_->children_.end()) {
-        WLOGFI("ShowWhenLocked window %{public}u raise itself", node->GetWindowId());
-        node->priority_ = zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_KEYGUARD) + 1;
-        node->parent_ = aboveAppWindowNode_;
-        if (WindowHelper::IsSplitWindowMode(node->GetWindowMode())) {
-            node->GetWindowProperty()->ResumeLastWindowMode();
-            if (node->GetWindowToken() != nullptr) {
-                node->GetWindowToken()->UpdateWindowMode(node->GetWindowMode());
-            }
+    WLOGFI("ShowWhenLocked window %{public}u raise itself", node->GetWindowId());
+    node->priority_ = zorderPolicy_->GetWindowPriority(WindowType::WINDOW_TYPE_KEYGUARD) + 1;
+    node->parent_ = aboveAppWindowNode_;
+    if (WindowHelper::IsSplitWindowMode(node->GetWindowMode())) {
+        node->GetWindowProperty()->ResumeLastWindowMode();
+        if (node->GetWindowToken() != nullptr) {
+            node->GetWindowToken()->UpdateWindowMode(node->GetWindowMode());
         }
     }
 }
@@ -1717,6 +1708,12 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
     if (srcMode == dstMode) {
         return WMError::WM_OK;
     }
+
+    if (WindowHelper::IsSplitWindowMode(dstMode) && isScreenLocked_ &&
+        (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
     WMError res = WMError::WM_OK;
     if ((srcMode == WindowMode::WINDOW_MODE_FULLSCREEN) && (dstMode == WindowMode::WINDOW_MODE_FLOATING)) {
         node->SetWindowSizeChangeReason(WindowSizeChangeReason::RECOVER);

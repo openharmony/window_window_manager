@@ -307,9 +307,11 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
         UpdateMode(mode);
     } else if (state_ == WindowState::STATE_SHOWN) {
+        WindowMode lastMode = property_->GetWindowMode();
         property_->SetWindowMode(mode);
         WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_MODE);
         if (ret != WMError::WM_OK) {
+            property_->SetWindowMode(lastMode);
             return ret;
         }
         // set client window mode if success.

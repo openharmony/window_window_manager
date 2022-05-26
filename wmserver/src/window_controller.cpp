@@ -711,16 +711,13 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
     switch (action) {
         case PropertyChangeAction::ACTION_UPDATE_RECT: {
             node->SetDecoStatus(property->GetDecoStatus());
-            ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
-            break;
+            return ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
         }
         case PropertyChangeAction::ACTION_UPDATE_MODE: {
-            SetWindowMode(windowId, property->GetWindowMode());
-            break;
+            return SetWindowMode(windowId, property->GetWindowMode());
         }
         case PropertyChangeAction::ACTION_UPDATE_FLAGS: {
-            SetWindowFlags(windowId, property->GetWindowFlags());
-            break;
+            return SetWindowFlags(windowId, property->GetWindowFlags());
         }
         case PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
             auto& props = property->GetSystemBarProperty();
