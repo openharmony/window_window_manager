@@ -38,6 +38,7 @@ public:
     static NativeValue* CreateSubWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetSubWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetShowOnLockScreen(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     NativeValue* CreateJsSubWindowArrayObject(NativeEngine& engine, std::vector<sptr<Window>> subWinVec);
@@ -50,6 +51,7 @@ private:
     NativeValue* OnCreateSubWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetSubWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetShowOnLockScreen(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnDisableWindowDecor(NativeEngine& engine, NativeCallbackInfo& info);
 
     std::shared_ptr<Rosen::WindowScene> windowScene_;
 };

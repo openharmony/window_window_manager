@@ -53,6 +53,10 @@ class WindowStage {
     setShowOnLockScreen(showOnLockScreen) {
         return this.__window_stage__.setShowOnLockScreen(showOnLockScreen)
     }
+
+    disableWindowDecor() {
+        return this.__window_stage__.disableWindowDecor()
+    }
 }
 
 export default WindowStage
