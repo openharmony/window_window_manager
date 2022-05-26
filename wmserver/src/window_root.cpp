@@ -31,9 +31,22 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowRoot"};
 }
 
-uint32_t WindowRoot::GetTotalWindowNum()
+uint32_t WindowRoot::GetTotalWindowNum() const
 {
     return static_cast<uint32_t>(windowNodeMap_.size());
+}
+
+sptr<WindowNode> WindowRoot::GetWindowForDumpAceHelpInfo() const
+{
+    for (auto& iter : windowNodeMap_) {
+        if (iter.second->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP ||
+            iter.second->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
+            iter.second->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
+            iter.second->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
+            return iter.second;
+        }
+    }
+    return nullptr;
 }
 
 ScreenId WindowRoot::GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay)
