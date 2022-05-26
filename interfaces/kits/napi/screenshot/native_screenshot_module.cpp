@@ -164,13 +164,6 @@ static void GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi
 
 static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
 {
-    if (!CheckCallingPermission("ohos.permission.CAPTURE_SCREEN")) {
-        WLOGFE("Get Screenshot failed. Do not have permission!");
-        param->image = nullptr;
-        param->wret = WMError::WM_ERROR_INVALID_PERMISSION;
-        param->errMessage = "Get Screenshot Failed: Do not have ohos.permission.CAPTURE_SCREEN";
-        return;
-    }
     if (!param->validInputParam) {
         WLOGFE("Invalid Input Param!");
         param->image = nullptr;
