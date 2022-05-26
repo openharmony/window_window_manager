@@ -262,6 +262,28 @@ void WindowProxy::NotifyOutsidePressed()
         WLOGFE("SendRequest failed");
     }
 }
+
+void WindowProxy::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteStringVector(params)) {
+        WLOGFE("Write params failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_DUMP_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+    if (!reply.ReadStringVector(&info)) {
+        WLOGFE("Read info failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 

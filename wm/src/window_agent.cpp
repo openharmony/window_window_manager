@@ -127,5 +127,14 @@ void WindowAgent::NotifyOutsidePressed()
     WLOGFI("called");
     window_->NotifyOutsidePressed();
 }
+
+void WindowAgent::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->DumpInfo(params, info);
+}
 } // namespace Rosen
 } // namespace OHOS
