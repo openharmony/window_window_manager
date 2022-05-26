@@ -69,6 +69,8 @@ ohos_shared_library("libdms") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
+    "access_token:libaccesstoken_sdk",
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "hitrace_native:hitrace_meter",
