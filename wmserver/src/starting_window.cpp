@@ -103,12 +103,12 @@ void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
 }
 
 void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,
-    uint32_t& windowId, const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+    uint32_t& windowId, const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowProperty>& property)
 {
     node->surfaceNode_ = surfaceNode;
     node->SetWindowToken(window);
-    node->SetCallingPid();
-    node->SetCallingUid();
+    node->SetCallingPid(property->GetWindowPid());
+    node->SetCallingUid(property->GetWindowUid());
     windowId = node->GetWindowId();
     WLOGFI("after set Id:%{public}u, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         node->GetWindowId(), node->GetRequestRect().posX_, node->GetRequestRect().posY_,
