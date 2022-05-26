@@ -75,7 +75,8 @@ private:
     void ReSizeSystemBarPropertySizeIfNeed(sptr<WindowNode> node);
     void HandleTurnScreenOn(const sptr<WindowNode>& node);
     void ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo);
-
+    void NotifyOutsidePressed(const sptr<WindowNode>& node);
+    uint32_t GetEmbedNodeId(const std::vector<sptr<WindowNode>>& windowNodes, const sptr<WindowNode>& node);
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
     std::atomic<uint32_t> windowId_ { INVALID_WINDOW_ID };

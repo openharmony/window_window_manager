@@ -163,6 +163,7 @@ public:
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    virtual void RegisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason);
     void UpdateMode(WindowMode mode);
@@ -178,6 +179,7 @@ public:
     void UpdateDisplayId(DisplayId from, DisplayId to);
     void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info);
     void UpdateActiveStatus(bool isActive);
+    void NotifyOutsidePressed();
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
@@ -286,6 +288,7 @@ private:
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowTag windowTag_;
     sptr<IAceAbilityHandler> aceAbilityHandler_;
+    sptr<IOutsidePressedListener> outsidePressListener_;
     std::vector<sptr<IWindowLifeCycle>> lifecycleListeners_;
     std::vector<sptr<IWindowChangeListener>> windowChangeListeners_;
     std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
