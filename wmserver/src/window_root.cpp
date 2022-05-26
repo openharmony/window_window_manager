@@ -613,6 +613,7 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
         windowIdMap_.erase(window->AsObject());
     }
     windowNodeMap_.erase(node->GetWindowId());
+    WLOGFI("destroy window node use_count:%{public}d", node->GetSptrRefCount());
     return WMError::WM_OK;
 }
 

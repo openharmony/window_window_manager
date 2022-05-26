@@ -38,7 +38,7 @@ public:
     explicit WindowNode(const sptr<WindowProperty>& property) : property_(property)
     {
     }
-    ~WindowNode() = default;
+    ~WindowNode();
 
     void SetDisplayId(DisplayId displayId);
     void SetHotZoneRect(const Rect& rect);

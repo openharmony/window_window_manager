@@ -23,6 +23,11 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowNode"};
 }
 
+WindowNode::~WindowNode()
+{
+    WLOGFI("~WindowNode id:%{public}u", GetWindowId());
+}
+
 void WindowNode::SetDisplayId(DisplayId displayId)
 {
     property_->SetDisplayId(displayId);
