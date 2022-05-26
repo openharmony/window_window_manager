@@ -106,6 +106,13 @@ NativeValue* JsWindowStage::SetShowOnLockScreen(NativeEngine* engine, NativeCall
     return (me != nullptr) ? me->OnSetShowOnLockScreen(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindowStage::DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]DisableWindowDecor");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
+    return (me != nullptr) ? me->OnDisableWindowDecor(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (info.argc < 2) { // 2: minimum param num
@@ -417,6 +424,20 @@ NativeValue* JsWindowStage::OnSetShowOnLockScreen(NativeEngine& engine, NativeCa
     return CreateJsValue(engine, static_cast<int32_t>(ret));
 }
 
+NativeValue* JsWindowStage::OnDisableWindowDecor(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    if (windowScene_ == nullptr || windowScene_->GetMainWindow() == nullptr) {
+        WLOGFE("[NAPI]WindowScene is null or window is null");
+        return CreateJsValue(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR));
+    }
+
+    auto window = windowScene_->GetMainWindow();
+    window->DisableAppWindowDecor();
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] disable app window decor end",
+        window->GetWindowId(), window->GetWindowName().c_str());
+    return engine.CreateUndefined();
+}
+
 NativeValue* CreateJsWindowStage(NativeEngine& engine,
     std::shared_ptr<Rosen::WindowScene> windowScene)
 {
@@ -443,6 +464,8 @@ NativeValue* CreateJsWindowStage(NativeEngine& engine,
     BindNativeFunction(engine, *object, "off", JsWindowStage::Off);
     BindNativeFunction(engine,
         *object, "setShowOnLockScreen", JsWindowStage::SetShowOnLockScreen);
+    BindNativeFunction(engine,
+        *object, "disableWindowDecor", JsWindowStage::DisableWindowDecor);
 
     return objValue;
 }
