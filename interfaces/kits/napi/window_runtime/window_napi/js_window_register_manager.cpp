@@ -129,11 +129,11 @@ bool JsWindowRegisterManager::ProcessOutsidePressedRegister(sptr<JsWindowListene
     if (window == nullptr) {
         return false;
     }
+    sptr<IOutsidePressedListener> thisListener(listener);
     if (isRegister) {
-        sptr<IOutsidePressedListener> thisListener(listener);
         window->RegisterOutsidePressedListener(thisListener);
     } else {
-        window->RegisterOutsidePressedListener(nullptr);
+        window->UnregisterOutsidePressedListener(thisListener);
     }
     return true;
 }
