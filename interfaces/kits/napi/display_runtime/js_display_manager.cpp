@@ -298,6 +298,9 @@ NativeValue* CreateJsDisplayArrayObject(NativeEngine& engine, std::vector<sptr<D
     }
     int32_t i = 0;
     for (auto& display : displays) {
+        if (display == nullptr) {
+            continue;
+        }
         array->SetElement(i++, CreateJsDisplayObject(engine, display));
     }
     return arrayValue;

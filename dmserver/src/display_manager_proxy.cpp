@@ -42,7 +42,7 @@ sptr<DisplayInfo> DisplayManagerProxy::GetDefaultDisplayInfo()
         WLOGFE("GetDefaultDisplayInfo: WriteInterfaceToken failed");
         return nullptr;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_ID),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO),
         data, reply, option) != ERR_NONE) {
         WLOGFW("GetDefaultDisplayInfo: SendRequest failed");
         return nullptr;

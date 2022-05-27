@@ -82,6 +82,7 @@ public:
     bool SetScreenActiveMode(uint32_t modeId);
     bool SetOrientation(Orientation orientation) const;
     bool SetDensityDpi(uint32_t dpi) const;
+    sptr<ScreenInfo> GetScreenInfo() const;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts) const;

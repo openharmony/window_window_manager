@@ -44,7 +44,7 @@ public:
     int GetDpi() const;
     Rotation GetRotation() const;
     Orientation GetOrientation() const;
-
+    sptr<DisplayInfo> GetDisplayInfo() const;
 protected:
     // No more methods or variables can be defined here.
     Display(const std::string& name, sptr<DisplayInfo> info);

@@ -84,7 +84,7 @@ bool IPCFuzzTest(const uint8_t* data, size_t size)
 void IPCSpecificInterfaceFuzzTest1(sptr<IRemoteObject> proxy, MessageParcel& sendData, MessageParcel& reply,
     MessageOption& option)
 {
-    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_ID),
+    proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO),
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(IDisplayManager::DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID),
         sendData, reply, option);

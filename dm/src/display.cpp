@@ -109,4 +109,9 @@ int Display::GetDpi() const
 {
     return static_cast<int>(GetVirtualPixelRatio() * DOT_PER_INCH);
 }
+
+sptr<DisplayInfo> Display::GetDisplayInfo() const
+{
+    return pImpl_->GetDisplayInfo();
+}
 } // namespace OHOS::Rosen

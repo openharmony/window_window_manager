@@ -17,6 +17,7 @@
 
 #include <cinttypes>
 #include "screen.h"
+#include "screen_info.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -219,10 +220,29 @@ NativeValue* JsScreen::OnSetDensityDpi(NativeEngine& engine, NativeCallbackInfo&
     return result;
 }
 
+std::shared_ptr<NativeReference> FindJsDisplayObject(ScreenId screenId)
+{
+    WLOGFI("[NAPI]Try to find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
+    std::lock_guard<std::recursive_mutex> lock(g_mutex);
+    if (g_JsScreenMap.find(screenId) == g_JsScreenMap.end()) {
+        WLOGFI("[NAPI]Can not find screen %{public}" PRIu64" in g_JsScreenMap", screenId);
+        return nullptr;
+    }
+    return g_JsScreenMap[screenId];
+}
+
 NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
 {
     WLOGFI("JsScreen::CreateJsScreen is called");
-    NativeValue* objValue = engine.CreateObject();
+    NativeValue* objValue = nullptr;
+    std::shared_ptr<NativeReference> jsScreenObj = FindJsDisplayObject(screen->GetId());
+    if (jsScreenObj != nullptr && jsScreenObj->Get() != nullptr) {
+        WLOGFI("[NAPI]FindJsScreenObject %{public}" PRIu64"", screen->GetId());
+        objValue = jsScreenObj->Get();
+    }
+    if (objValue == nullptr) {
+        objValue = engine.CreateObject();
+    }
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
         WLOGFE("Failed to convert prop to jsObject");
@@ -230,25 +250,31 @@ NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
     }
     std::unique_ptr<JsScreen> jsScreen = std::make_unique<JsScreen>(screen);
     object->SetNativePointer(jsScreen.release(), JsScreen::Finalizer, nullptr);
-    ScreenId screenId = screen->GetId();
+    auto info = screen->GetScreenInfo();
+    if (info == nullptr) {
+        WLOGFE("Failed to GetScreenInfo");
+        return engine.CreateUndefined();
+    }
+    ScreenId screenId = info->GetScreenId();
     object->SetProperty("id",
         CreateJsValue(engine, screenId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(screenId)));
-    ScreenId parentId = screen->GetParentId();
+    ScreenId parentId = info->GetParentId();
     object->SetProperty("parent",
         CreateJsValue(engine, parentId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(parentId)));
-    object->SetProperty("orientation", CreateJsValue(engine, screen->GetOrientation()));
-    object->SetProperty("activeModeIndex", CreateJsValue(engine, screen->GetModeId()));
-    object->SetProperty("supportedModeInfo", CreateJsScreenModeArrayObject(engine, screen->GetSupportedModes()));
+    object->SetProperty("orientation", CreateJsValue(engine, info->GetOrientation()));
+    object->SetProperty("activeModeIndex", CreateJsValue(engine, info->GetModeId()));
+    object->SetProperty("supportedModeInfo", CreateJsScreenModeArrayObject(engine, info->GetModes()));
     object->SetProperty("densityDpi", CreateJsValue(engine,
-        static_cast<uint32_t>(screen->GetVirtualPixelRatio() * 160))); // Dpi = Density(VPR) * 160.
-
-    std::shared_ptr<NativeReference> JsScreenRef;
-    JsScreenRef.reset(engine.CreateReference(objValue, 1));
-    std::lock_guard<std::recursive_mutex> lock(g_mutex);
-    g_JsScreenMap[screenId] = JsScreenRef;
-    BindNativeFunction(engine, *object, "setScreenActiveMode", JsScreen::SetScreenActiveMode);
-    BindNativeFunction(engine, *object, "setOrientation", JsScreen::SetOrientation);
-    BindNativeFunction(engine, *object, "setDensityDpi", JsScreen::SetDensityDpi);
+        static_cast<uint32_t>(info->GetVirtualPixelRatio() * DOT_PER_INCH))); // Dpi = Density(VPR) * 160.
+    if (jsScreenObj == nullptr || jsScreenObj->Get() == nullptr) {
+        std::shared_ptr<NativeReference> JsScreenRef;
+        JsScreenRef.reset(engine.CreateReference(objValue, 1));
+        std::lock_guard<std::recursive_mutex> lock(g_mutex);
+        g_JsScreenMap[screenId] = JsScreenRef;
+        BindNativeFunction(engine, *object, "setScreenActiveMode", JsScreen::SetScreenActiveMode);
+        BindNativeFunction(engine, *object, "setOrientation", JsScreen::SetOrientation);
+        BindNativeFunction(engine, *object, "setDensityDpi", JsScreen::SetDensityDpi);
+    }
     return objValue;
 }
 
