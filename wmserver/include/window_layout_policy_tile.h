@@ -30,8 +30,8 @@ namespace Rosen {
 class WindowLayoutPolicyTile : public WindowLayoutPolicy {
 public:
     WindowLayoutPolicyTile() = delete;
-    WindowLayoutPolicyTile(const std::map<DisplayId, Rect>& displayRectMap, WindowNodeMaps& windowNodeMaps,
-        std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap);
+    WindowLayoutPolicyTile(const sptr<DisplayGroupInfo>& displayGroupInfo,
+        DisplayGroupWindowTree& displayGroupWindowTree);
     ~WindowLayoutPolicyTile() = default;
     void Launch() override;
     void AddWindowNode(const sptr<WindowNode>& node) override;

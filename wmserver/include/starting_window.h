@@ -32,7 +32,7 @@ public:
 
     static sptr<WindowNode> CreateWindowNode(sptr<WindowTransitionInfo> info, uint32_t winId);
     static void HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,
-        uint32_t& windowId, const std::shared_ptr<RSSurfaceNode>& surfaceNode);
+        uint32_t& windowId, const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowProperty>& property);
     static void DrawStartingWindow(sptr<WindowNode>& node, sptr<Media::PixelMap> pixelMap, uint32_t bkgColor,
         bool isColdStart);
     static void UpdateRSTree(sptr<WindowNode>& node);

@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-// gtest
+#include <cinttypes>
 #include <cstdlib>
 #include <gtest/gtest.h>
+
 #include "display_test_utils.h"
 #include "pixel_map.h"
 
@@ -51,7 +52,7 @@ void ScreenshotCmdTest::SetUpTestCase()
         WLOGFE("GetDefaultDisplay: failed!\n");
         return;
     }
-    WLOGFI("GetDefaultDisplay: id %llu, w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
+    WLOGFI("GetDefaultDisplay: id %" PRIu64", w %d, h %d, fps %u\n", display->GetId(), display->GetWidth(),
         display->GetHeight(), display->GetRefreshRate());
 
     defaultId_ = display->GetId();

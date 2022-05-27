@@ -32,6 +32,7 @@
 #include "zidl/window_manager_stub.h"
 #include "window_dumper.h"
 #include "window_root.h"
+#include "window_task_looper.h"
 #include "snapshot_controller.h"
 
 namespace OHOS {
@@ -78,7 +79,7 @@ public:
     void ProcessPointUp(uint32_t windowId) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
-    void ToggleShownStateForAllAppWindows() override;
+    WMError ToggleShownStateForAllAppWindows() override;
     WMError MaxmizeWindow(uint32_t windowId) override;
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) override;
@@ -103,13 +104,12 @@ private:
     bool Init();
     void RegisterSnapshotHandler();
     void RegisterWindowManagerServiceHandler();
-    void OnWindowEvent(Event event, uint32_t windowId);
+    void OnWindowEvent(Event event, const sptr<IRemoteObject>& remoteObject);
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
     void ConfigureWindowManagerService();
 
     static inline SingletonDelegator<WindowManagerService> delegator;
-    std::recursive_mutex mutex_;
     sptr<WindowRoot> windowRoot_;
     sptr<WindowController> windowController_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
@@ -120,6 +120,8 @@ private:
     sptr<WindowDumper> windowDumper_;
     SystemConfig systemConfig_;
     ModeChangeHotZonesConfig hotZonesConfig_ { false, 0, 0, 0 };
+    std::unique_ptr<WindowTaskLooper> wmsTaskLooper_;
+    bool startingOpen_ = true;
 };
 }
 }

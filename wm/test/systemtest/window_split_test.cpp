@@ -204,6 +204,61 @@ HWTEST_F(WindowSplitTest, SplitCreen04, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, secWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
 }
+
+/**
+ * @tc.name: SplitCreen05
+ * @tc.desc: forbid dock slive to move test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSplitTest, SplitCreen05, Function | MediumTest | Level3)
+{
+    fullInfo_.name  = "fullscreen.5";
+    splitInfo_.name = "primary.5";
+    splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+
+    const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
+    activeWindows_.push_back(fullWindow);
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    const sptr<Window>& priWindow = utils::CreateTestWindow(splitInfo_);
+    activeWindows_.push_back(priWindow);
+    ASSERT_EQ(WMError::WM_OK, priWindow->Show());
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetMode());
+
+    utils::TestWindowInfo dividerInfo;
+    dividerInfo.name = "divider0";
+    dividerInfo.type = WindowType::WINDOW_TYPE_DOCK_SLICE;
+    dividerInfo.mode = WindowMode::WINDOW_MODE_FLOATING;
+    dividerInfo.focusable_ = false;
+
+    const sptr<Window>& divider = utils::CreateTestWindow(dividerInfo);
+    activeWindows_.push_back(divider);
+    ASSERT_EQ(WMError::WM_OK, divider->Show());
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    Rect lastRect = divider->GetRect();
+    WMError ret = divider->MoveTo(lastRect.posX_ + 10, lastRect.posY_ + 10);
+    sleep(SPLIT_TEST_SLEEP_S);
+    Rect rect = divider->GetRect();
+    ASSERT_TRUE(lastRect.posX_ != rect.posX_ || lastRect.posY_ != rect.posY_);
+
+    ret = fullWindow->AddWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
+    sleep(SPLIT_TEST_SLEEP_S);
+    ret = divider->MoveTo(rect.posX_ + 10, rect.posY_ + 10);
+    sleep(SPLIT_TEST_SLEEP_S);
+    Rect NewRect = divider->GetRect();
+    ASSERT_TRUE(rect.posX_ == NewRect.posX_ && rect.posY_ == NewRect.posY_);
+
+    ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
+    sleep(SPLIT_TEST_SLEEP_S);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
+    sleep(SPLIT_TEST_SLEEP_S);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

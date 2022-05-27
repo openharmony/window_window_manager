@@ -33,6 +33,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
+    const std::string PARAM_DUMP_HELP = "-h";
 }
 
 const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
@@ -251,6 +252,11 @@ uint32_t WindowImpl::GetWindowFlags() const
     return property_->GetWindowFlags();
 }
 
+uint32_t WindowImpl::GetModeSupportInfo() const
+{
+    return property_->GetModeSupportInfo();
+}
+
 SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
 {
     auto curProperties = property_->GetSystemBarProperty();
@@ -303,12 +309,19 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), mode)) {
+        WLOGFI("window %{public}u do not support window mode: %{public}u",
+               property_->GetWindowId(), static_cast<uint32_t>(mode));
+        return WMError::WM_DO_NOTHING;
+    }
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
         UpdateMode(mode);
     } else if (state_ == WindowState::STATE_SHOWN) {
+        WindowMode lastMode = property_->GetWindowMode();
         property_->SetWindowMode(mode);
         WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_MODE);
         if (ret != WMError::WM_OK) {
+            property_->SetWindowMode(lastMode);
             return ret;
         }
         // set client window mode if success.
@@ -490,7 +503,12 @@ ColorSpace WindowImpl::GetColorSpace()
 
 void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
-    WLOGFI("Ace:DumpInfo");
+    if (params.size() == 1 && params[0] == PARAM_DUMP_HELP) { // 1: params num
+        WLOGFI("Dump ArkUI help Info");
+        Ace::UIContent::ShowDumpHelp(info);
+        return;
+    }
+    WLOGFI("ArkUI:DumpInfo");
     if (uiContent_ != nullptr) {
         uiContent_->DumpInfo(params, info);
     }
@@ -752,12 +770,6 @@ WMError WindowImpl::Show(uint32_t reason)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if ((GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) &&
-        WindowHelper::IsSplitWindowMode(GetMode())) {
-        WLOGFE("show when locked window does not support split mode, windowId: %{public}u", property_->GetWindowId());
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-
     WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
     if (stateChangeReason == WindowStateChangeReason::KEYGUARD ||
         stateChangeReason == WindowStateChangeReason::TOGGLING) {
@@ -790,7 +802,8 @@ WMError WindowImpl::Show(uint32_t reason)
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
     } else {
-        WLOGFE("show errCode:%{public}d for winId:%{public}u", static_cast<int32_t>(ret), property_->GetWindowId());
+        NotifyForegroundFailed();
+        WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
 }
@@ -1326,6 +1339,12 @@ void WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaCh
         }), occupiedAreaChangeListeners_.end());
 }
 
+void WindowImpl::RegisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    outsidePressListener_ = listener;
+}
+
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
 {
     if (handler == nullptr) {
@@ -1333,6 +1352,22 @@ void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     aceAbilityHandler_ = handler;
+}
+
+void WindowImpl::SetModeSupportInfo(uint32_t modeSupportInfo)
+{
+    property_->SetModeSupportInfo(modeSupportInfo);
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+    if (!WindowHelper::IsWindowModeSupported(modeSupportInfo, GetMode())) {
+        WLOGFI("currunt window mode is not supported, force to transform to appropriate mode. window id:%{public}u",
+               GetWindowId());
+        WindowMode mode = WindowHelper::GetWindowModeFromModeSupportInfo(modeSupportInfo);
+        if (mode != WindowMode::WINDOW_MODE_UNDEFINED) {
+            SetWindowMode(mode);
+        } else {
+            WLOGFE("invalid modeSupportInfo %{public}u", modeSupportInfo);
+        }
+    }
 }
 
 void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
@@ -1355,8 +1390,8 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
 
     // update originRect when window show for the first time.
     if (!isStretchableSet_) {
-            originRect_ = rect;
-            isStretchableSet_ = true;
+        originRect_ = rect;
+        isStretchableSet_ = true;
     }
 
     Rect rectToAce = rect;
@@ -1884,6 +1919,20 @@ void WindowImpl::UpdateActiveStatus(bool isActive)
     }
 }
 
+void WindowImpl::NotifyOutsidePressed()
+{
+    sptr<IOutsidePressedListener> outsidePressListener;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        outsidePressListener = outsidePressListener_;
+    }
+
+    if (outsidePressListener != nullptr) {
+        WLOGFI("called");
+        outsidePressListener->OnOutsidePressed();
+    }
+}
+
 Rect WindowImpl::GetSystemAlarmWindowDefaultSize(Rect defaultRect)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
@@ -1955,6 +2004,10 @@ void WindowImpl::SetDefaultOption()
         case WindowType::WINDOW_TYPE_BOOT_ANIMATION:
         case WindowType::WINDOW_TYPE_POINTER: {
             property_->SetFocusable(false);
+            break;
+        }
+        case WindowType::WINDOW_TYPE_VOICE_INTERACTION: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
         default:

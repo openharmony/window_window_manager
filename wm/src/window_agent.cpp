@@ -117,5 +117,24 @@ sptr<WindowProperty> WindowAgent::GetWindowProperty()
     }
     return window_->GetWindowProperty();
 }
+
+void WindowAgent::NotifyOutsidePressed()
+{
+    if (window_ == nullptr) {
+        WLOGFI("window is null");
+        return;
+    }
+    WLOGFI("called");
+    window_->NotifyOutsidePressed();
+}
+
+void WindowAgent::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->DumpInfo(params, info);
+}
 } // namespace Rosen
 } // namespace OHOS

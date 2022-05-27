@@ -15,5 +15,5 @@
  -->
  <Configs>
     <!--Window display dpi, valid range is 80~640, use 0 if no configuration is requeired-->
-    <dpi>160</dpi>
+    <dpi>240</dpi>
  </Configs>

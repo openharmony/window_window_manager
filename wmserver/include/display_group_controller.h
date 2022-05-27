@@ -19,6 +19,7 @@
 #include <refbase.h>
 
 #include "avoid_area_controller.h"
+#include "display_group_info.h"
 #include "display_info.h"
 #include "display_manager_service_inner.h"
 #include "window_layout_policy.h"
@@ -36,25 +37,24 @@ class WindowNodeContainer;
 class DisplayGroupController : public RefBase {
 public:
     DisplayGroupController(const sptr<WindowNodeContainer>& windowNodeContainer,
-        std::map<DisplayId, Rect>& displayRectMap, std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap)
-        : windowNodeContainer_(windowNodeContainer), displayRectMap_(displayRectMap),
-          displayInfosMap_(displayInfosMap) {}
+        const sptr<DisplayGroupInfo>& displayGroupInfo)
+        : windowNodeContainer_(windowNodeContainer), displayGroupInfo_(displayGroupInfo) {}
     ~DisplayGroupController() = default;
 
     void InitNewDisplay(DisplayId displayId);
-    void UpdateWindowNodeMaps();
+    void UpdateDisplayGroupWindowTree();
     void PreProcessWindowNode(const sptr<WindowNode>& node, WindowUpdateType type);
     void ProcessDisplayCreate(DisplayId displayId,
-                              const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap);
+                              const std::map<DisplayId, Rect>& displayRectMap);
     void ProcessDisplayDestroy(DisplayId displayId,
-                               const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap,
+                               const std::map<DisplayId, Rect>& displayRectMap,
                                std::vector<uint32_t>& windowIds);
     void ProcessDisplayChange(DisplayId displayId,
-                              const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap,
+                              const std::map<DisplayId, Rect>& displayRectMap,
                               DisplayStateChangeType type);
     sptr<WindowPair> GetWindowPairByDisplayId(DisplayId displayId);
 
-    WindowNodeMaps windowNodeMaps_;
+    DisplayGroupWindowTree displayGroupWindowTree_;
     std::map<DisplayId, SysBarNodeMap> sysBarNodeMaps_;
     std::map<DisplayId, SysBarTintMap> sysBarTintMaps_;
 
@@ -63,7 +63,7 @@ private:
     void AddWindowNodeOnWindowTree(sptr<WindowNode>& node, WindowRootNodeType rootType);
     void ProcessNotCrossNodesOnDestroiedDisplay(DisplayId displayId, std::vector<uint32_t>& windowIds);
     void ProcessDisplaySizeChangeOrRotation(DisplayId displayId,
-        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
+        const std::map<DisplayId, Rect>& displayRectMap, DisplayStateChangeType type);
     void ProcessCrossNodes(DisplayStateChangeType type);
     void MoveCrossNodeToTargetDisplay(const sptr<WindowNode>& node, DisplayId targetDisplayId);
     void MoveNotCrossNodeToDefaultDisplay(const sptr<WindowNode>& node, DisplayId displayId);
@@ -73,15 +73,11 @@ private:
     void UpdateWindowDisplayId(const sptr<WindowNode>& node, DisplayId newDisplayId);
     void ClearMapOfDestroiedDisplay(DisplayId displayId);
     void ChangeToRectInDisplayGroup(const sptr<WindowNode>& node);
-    void FindMaxAndMinPosXDisplay();
 
     sptr<WindowNodeContainer> windowNodeContainer_;
-    std::map<DisplayId, Rect>& displayRectMap_;
-    std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap_;
+    sptr<DisplayGroupInfo> displayGroupInfo_;
     std::map<DisplayId, sptr<WindowPair>> windowPairMap_;
     DisplayId defaultDisplayId_ { 0 };
-    DisplayId maxPosXDisplay_ { 0 };
-    DisplayId minPosXDisplay_ { 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

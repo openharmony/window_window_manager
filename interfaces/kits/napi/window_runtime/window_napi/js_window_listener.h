@@ -34,12 +34,14 @@ const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
 const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
+const std::string OUTSIDE_PRESSED_CB = "outsidePressed";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
                          public IAvoidAreaChangedListener,
                          public IWindowLifeCycle,
-                         public IOccupiedAreaChangeListener {
+                         public IOccupiedAreaChangeListener,
+                         public IOutsidePressedListener {
 public:
     JsWindowListener(NativeEngine* engine, std::shared_ptr<NativeReference> callback)
         : engine_(engine), jsCallBack_(callback) {}
@@ -53,6 +55,7 @@ public:
     void AfterFocused() override;
     void AfterUnfocused() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) override;
+    void OnOutsidePressed() override;
 private:
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
     void LifeCycleCallBack(LifeCycleEventType eventType);

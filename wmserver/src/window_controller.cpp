@@ -78,18 +78,23 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
 
 void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
+    WLOGFI("begin CancelStartingWindow!");
     auto node = windowRoot_->FindWindowNodeWithToken(abilityToken);
     if (node == nullptr) {
         WLOGFI("cannot find windowNode!");
         return;
     }
-    WM_SCOPED_TRACE("wms:CancelStartingWindow(%u)", node->GetWindowId());
-    DestroyWindow(node->GetWindowId(), true);
+    WLOGFI("CancelStartingWindow with id:%{public}u!", node->GetWindowId());
+    WMError res = windowRoot_->DestroyWindow(node->GetWindowId(), false);
+    if (res != WMError::WM_OK) {
+        WLOGFE("DestroyWindow failed!");
+    }
 }
 
 WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& srcInfo,
     sptr<WindowTransitionInfo>& dstInfo)
 {
+    WLOGFI("NotifyWindowTransition begin!");
     if (!srcInfo || !dstInfo) {
         WLOGFE("srcInfo or dstInfo is nullptr!");
         return WMError::WM_ERROR_NULLPTR;
@@ -147,7 +152,7 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     }
     sptr<WindowNode> node = windowRoot_->FindWindowNodeWithToken(token);
     if (node != nullptr && WindowHelper::IsMainWindow(property->GetWindowType()) && node->startingWindowShown_) {
-        StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode);
+        StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode, property);
         windowRoot_->AddDeathRecipient(node);
         return WMError::WM_OK;
     }
@@ -157,6 +162,8 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     node = new WindowNode(windowProperty, window, surfaceNode);
     node->abilityToken_ = token;
     UpdateWindowAnimation(node);
+    WLOGFI("createWindow name:%{public}u, windowName:%{public}s",
+        windowId, node->GetWindowName().c_str());
     return windowRoot_->SaveWindow(node);
 }
 
@@ -172,23 +179,13 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     // using starting window rect if client rect is empty
-    if (WindowHelper::IsEmptyRect(property->GetRequestRect())) { // for tile and cascade
+    if (WindowHelper::IsEmptyRect(property->GetRequestRect()) && node->startingWindowShown_) { // for tile and cascade
         property->SetRequestRect(node->GetRequestRect());
         property->SetWindowRect(node->GetWindowRect());
+        property->SetDecoStatus(true);
     }
     node->GetWindowProperty()->CopyFrom(property);
 
-    if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        WindowHelper::IsAppWindow(node->GetWindowType()) && !node->isPlayAnimationShow_) {
-        WM_SCOPED_TRACE_BEGIN("controller:MinimizeStructuredAppWindowsExceptSelf");
-        WMError res = windowRoot_->MinimizeStructuredAppWindowsExceptSelf(node);
-        WM_SCOPED_TRACE_END();
-        if (res != WMError::WM_OK) {
-            WLOGFE("Minimize other structured window failed");
-            MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
-            return res;
-        }
-    }
     // Need 'check permission'
     // Need 'adjust property'
     WMError res = windowRoot_->AddWindowNode(property->GetParentId(), node);
@@ -205,7 +202,6 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         sysBarWinId_[node->GetWindowType()] = node->GetWindowId();
         ReSizeSystemBarPropertySizeIfNeed(node);
     }
-
     StopBootAnimationIfNeed(node->GetWindowType());
     MinimizeApp::ExecuteMinimizeAll();
     return WMError::WM_OK;
@@ -305,7 +301,10 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     if (reason == WindowSizeChangeReason::MOVE) {
         newRect = { rect.posX_, rect.posY_, lastRect.width_, lastRect.height_ };
         if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-            if (windowRoot_->isVerticalDisplay(node)) {
+            if (windowRoot_->IsForbidDockSliceMove(node->GetDisplayId())) {
+                WLOGFI("dock slice is forbidden to move");
+                newRect = lastRect;
+            } else if (windowRoot_->isVerticalDisplay(node)) {
                 newRect.posX_ = lastRect.posX_;
             } else {
                 newRect.posY_ = lastRect.posY_;
@@ -512,7 +511,12 @@ WMError WindowController::SetWindowFlags(uint32_t windowId, uint32_t flags)
         return WMError::WM_ERROR_NULLPTR;
     }
     auto property = node->GetWindowProperty();
+    uint32_t oldFlags = property->GetWindowFlags();
     property->SetWindowFlags(flags);
+    // only forbid_split_move flag change, just set property
+    if ((oldFlags ^ flags) == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE)) {
+        return WMError::WM_OK;
+    }
     WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_FLAGS);
     if (res != WMError::WM_OK) {
         return res;
@@ -567,6 +571,8 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
+    NotifyOutsidePressed(node);
+
     if (isStartDrag) {
         WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
         return res;
@@ -605,12 +611,13 @@ void WindowController::MinimizeAllAppWindows(DisplayId displayId)
     MinimizeApp::ExecuteMinimizeAll();
 }
 
-void WindowController::ToggleShownStateForAllAppWindows()
+WMError WindowController::ToggleShownStateForAllAppWindows()
 {
     if (isScreenLocked_) {
-        return;
+        return WMError::WM_DO_NOTHING;
     }
     windowRoot_->ToggleShownStateForAllAppWindows();
+    return WMError::WM_OK;
 }
 
 WMError WindowController::MaxmizeWindow(uint32_t windowId)
@@ -704,16 +711,13 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
     switch (action) {
         case PropertyChangeAction::ACTION_UPDATE_RECT: {
             node->SetDecoStatus(property->GetDecoStatus());
-            ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
-            break;
+            return ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
         }
         case PropertyChangeAction::ACTION_UPDATE_MODE: {
-            SetWindowMode(windowId, property->GetWindowMode());
-            break;
+            return SetWindowMode(windowId, property->GetWindowMode());
         }
         case PropertyChangeAction::ACTION_UPDATE_FLAGS: {
-            SetWindowFlags(windowId, property->GetWindowFlags());
-            break;
+            return SetWindowFlags(windowId, property->GetWindowFlags());
         }
         case PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
             auto& props = property->GetSystemBarProperty();
@@ -761,6 +765,10 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             windowRoot_->SetBrightness(node->GetWindowId(), node->GetBrightness());
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO: {
+            node->SetModeSupportInfo(property->GetModeSupportInfo());
+            break;
+        }
         default:
             break;
     }
@@ -771,6 +779,58 @@ WMError WindowController::GetModeChangeHotZones(DisplayId displayId,
     ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config)
 {
     return windowRoot_->GetModeChangeHotZones(displayId, hotZones, config);
+}
+
+void WindowController::NotifyOutsidePressed(const sptr<WindowNode>& node)
+{
+    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (windowNodeContainer == nullptr) {
+        WLOGFE("window node container is null");
+        return;
+    }
+
+    std::vector<sptr<WindowNode>> windowNodes;
+    windowNodeContainer->TraverseContainer(windowNodes);
+    uint32_t skipNodeId = GetEmbedNodeId(windowNodes, node);
+    for (auto& windowNode : windowNodes) {
+        if (windowNode == nullptr || windowNode->GetWindowToken() == nullptr ||
+            windowNode->GetWindowId() == skipNodeId ||
+            windowNode->GetWindowId() == node->GetWindowId()) {
+            WLOGFD("continue %{public}s", windowNode == nullptr ? "nullptr" : windowNode->GetWindowName().c_str());
+            continue;
+        }
+        WLOGFD("notify %{public}s id %{public}d", windowNode->GetWindowName().c_str(), windowNode->GetWindowId());
+        windowNode->GetWindowToken()->NotifyOutsidePressed();
+    }
+}
+
+uint32_t WindowController::GetEmbedNodeId(const std::vector<sptr<WindowNode>>& windowNodes,
+    const sptr<WindowNode>& node)
+{
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        return 0;
+    }
+
+    Rect nodeRect = node->GetWindowRect();
+    bool isSkip = true;
+    for (auto& windowNode : windowNodes) {
+        if (windowNode == nullptr) {
+            continue;
+        }
+        if (windowNode->GetWindowId() == node->GetWindowId()) {
+            isSkip = false;
+            continue;
+        }
+        if (isSkip) {
+            continue;
+        }
+        if (nodeRect.IsInsideOf(windowNode->GetWindowRect())) {
+            WLOGI("OutsidePressed window type is component %{public}s windowNode %{public}d",
+                windowNode->GetWindowName().c_str(), windowNode->GetWindowId());
+            return windowNode->GetWindowId();
+        }
+    }
+    return 0;
 }
 } // namespace OHOS
 } // namespace Rosen

@@ -21,6 +21,7 @@
 #include "display_info.h"
 #include "minimize_app.h"
 #include "display_group_controller.h"
+#include "display_group_info.h"
 #include "window_layout_policy.h"
 #include "window_manager.h"
 #include "window_node.h"
@@ -34,11 +35,12 @@ namespace Rosen {
 using WindowNodeOperationFunc = std::function<bool(sptr<WindowNode>)>; // return true indicates to stop traverse
 class WindowNodeContainer : public RefBase {
 public:
-    WindowNodeContainer(const sptr<DisplayInfo>& displayInfo);
+    WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, ScreenId displayGroupId);
     ~WindowNodeContainer();
     WMError ShowStartingWindow(sptr<WindowNode>& node);
     WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     WMError RemoveWindowNode(sptr<WindowNode>& node);
+    WMError HandleRemoveWindow(sptr<WindowNode>& node);
     WMError UpdateWindowNode(sptr<WindowNode>& node, WindowUpdateReason reason);
     WMError DestroyWindowNode(sptr<WindowNode>& node, std::vector<uint32_t>& windowIds);
     const std::vector<uint32_t>& Destroy();
@@ -62,6 +64,7 @@ public:
     std::unordered_map<WindowType, SystemBarProperty> GetExpectImmersiveProperty() const;
     void NotifyAccessibilityWindowInfo(const sptr<WindowNode>& windowId, WindowUpdateType type) const;
     int GetWindowCountByType(WindowType windowType);
+    bool IsForbidDockSliceMove(DisplayId displayId) const;
 
     void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas, DisplayId displayId);
     bool isVerticalDisplay(DisplayId displayId) const;
@@ -70,7 +73,8 @@ public:
     sptr<WindowNode> GetNextActiveWindow(uint32_t windowId) const;
     void MinimizeAllAppWindows(DisplayId displayId);
     void MinimizeOldestAppWindow();
-    void ToggleShownStateForAllAppWindows(std::function<bool(uint32_t)> restoreFunc, bool restore);
+    void ToggleShownStateForAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc, bool restore);
+    void RestoreAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc);
     bool IsAppWindowsEmpty() const;
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifySystemBarTints(std::vector<DisplayId> displayIdVec);
@@ -98,6 +102,7 @@ public:
     sptr<AvoidAreaController> GetAvoidController() const;
     sptr<DisplayGroupController> GetMutiDisplayController() const;
     sptr<WindowNode> GetRootNode(WindowRootNodeType type) const;
+    void NotifyDockWindowStateChanged(sptr<WindowNode>& node, bool isEnable);
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
@@ -129,8 +134,9 @@ private:
     static bool ReadIsWindowAnimationEnabledProperty();
     void DumpScreenWindowTree();
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
+    void ReZOrderShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
     void RaiseShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
-    void ReZOrderShowWhenLockedWindows(const sptr<WindowNode>& node, bool up);
+    void ReZOrderShowWhenLockedWindows(bool up);
 
     WMError AddWindowNodeOnWindowTree(sptr<WindowNode>& node, const sptr<WindowNode>& parentNode);
     void RemoveWindowNodeFromWindowTree(sptr<WindowNode>& node);
@@ -143,8 +149,11 @@ private:
     uint32_t zOrder_ { 0 };
     uint32_t focusedWindow_ { INVALID_WINDOW_ID };
     uint32_t activeWindow_ = INVALID_WINDOW_ID;
+    bool isScreenLocked_ = false;
 
     std::vector<uint32_t> backupWindowIds_;
+    std::map<uint32_t, WindowMode> backupWindowMode_;
+    std::map<DisplayId, Rect> backupDividerWindowRect_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
     std::unordered_map<WindowLayoutMode, sptr<WindowLayoutPolicy>> layoutPolicys_;
     WindowLayoutMode layoutMode_ = WindowLayoutMode::CASCADE;
@@ -157,9 +166,7 @@ private:
     sptr<WindowLayoutPolicy> layoutPolicy_;
     sptr<AvoidAreaController> avoidController_;
     sptr<DisplayGroupController> displayGroupController_;
-
-    std::map<DisplayId, Rect> displayRectMap_;
-    std::map<DisplayId, sptr<DisplayInfo>> displayInfosMap_;
+    sptr<DisplayGroupInfo> displayGroupInfo_;
 };
 } // namespace Rosen
 } // namespace OHOS

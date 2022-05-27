@@ -58,6 +58,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_LAUNCHER_DOCK,
     WINDOW_TYPE_BOOT_ANIMATION,
     WINDOW_TYPE_FREEZE_DISPLAY,
+    WINDOW_TYPE_VOICE_INTERACTION,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_WINDOW_END = ABOVE_APP_SYSTEM_WINDOW_END,
@@ -70,6 +71,19 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_SPLIT_SECONDARY,
     WINDOW_MODE_FLOATING,
     WINDOW_MODE_PIP
+};
+
+enum WindowModeSupport : uint32_t {
+    WINDOW_MODE_SUPPORT_FULLSCREEN = 1 << 0,
+    WINDOW_MODE_SUPPORT_FLOATING = 1 << 1,
+    WINDOW_MODE_SUPPORT_SPLIT_PRIMARY = 1 << 2,
+    WINDOW_MODE_SUPPORT_SPLIT_SECONDARY = 1 << 3,
+    WINDOW_MODE_SUPPORT_PIP = 1 << 4,
+    WINDOW_MODE_SUPPORT_ALL = WINDOW_MODE_SUPPORT_FULLSCREEN |
+                              WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                              WINDOW_MODE_SUPPORT_SPLIT_SECONDARY |
+                              WINDOW_MODE_SUPPORT_FLOATING |
+                              WINDOW_MODE_SUPPORT_PIP
 };
 
 enum class WindowBlurLevel : uint32_t {
@@ -101,7 +115,8 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_NEED_AVOID = 1,
     WINDOW_FLAG_PARENT_LIMIT = 1 << 1,
     WINDOW_FLAG_SHOW_WHEN_LOCKED = 1 << 2,
-    WINDOW_FLAG_END = 1 << 3,
+    WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
+    WINDOW_FLAG_END = 1 << 4,
 };
 
 enum class WindowSizeChangeReason : uint32_t {
@@ -149,6 +164,8 @@ namespace {
     constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
     constexpr float MINIMUM_BRIGHTNESS = 0.0f;
     constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
+    constexpr int32_t INVALID_PID = -1;
+    constexpr int32_t INVALID_UID = -1;
 }
 
 struct SystemBarProperty {

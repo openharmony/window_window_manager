@@ -33,7 +33,8 @@ JsWindowRegisterManager::JsWindowRegisterManager()
         {WINDOW_SIZE_CHANGE_CB,         &JsWindowRegisterManager::ProcessWindowChangeRegister      },
         {SYSTEM_AVOID_AREA_CHANGE_CB,   &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister   },
         {LIFECYCLE_EVENT_CB,            &JsWindowRegisterManager::ProcessLifeCycleEventRegister    },
-        {KEYBOARD_HEIGHT_CHANGE_CB,     &JsWindowRegisterManager::ProcesOccupiedAreaChangeRegister }
+        {KEYBOARD_HEIGHT_CHANGE_CB,     &JsWindowRegisterManager::ProcesOccupiedAreaChangeRegister },
+        {OUTSIDE_PRESSED_CB,            &JsWindowRegisterManager::ProcessOutsidePressedRegister    }
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -117,6 +118,22 @@ bool JsWindowRegisterManager::ProcessSystemBarChangeRegister(sptr<JsWindowListen
         SingletonContainer::Get<WindowManager>().RegisterSystemBarChangedListener(thisListener);
     } else {
         SingletonContainer::Get<WindowManager>().UnregisterSystemBarChangedListener(thisListener);
+    }
+    return true;
+}
+
+bool JsWindowRegisterManager::ProcessOutsidePressedRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    WLOGFI("called");
+    if (window == nullptr) {
+        return false;
+    }
+    if (isRegister) {
+        sptr<IOutsidePressedListener> thisListener(listener);
+        window->RegisterOutsidePressedListener(thisListener);
+    } else {
+        window->RegisterOutsidePressedListener(nullptr);
     }
     return true;
 }

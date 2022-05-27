@@ -31,6 +31,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         WLOGFE("InterfaceToken check failed");
         return -1;
     }
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t uid = IPCSkeleton::GetCallingUid();
     WindowManagerMessage msgId = static_cast<WindowManagerMessage>(code);
     switch (msgId) {
         case WindowManagerMessage::TRANS_ID_CREATE_WINDOW: {
@@ -45,6 +47,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             } else {
                 WLOGFI("accept token is nullptr");
             }
+            windowProperty->SetWindowPid(pid);
+            windowProperty->SetWindowUid(uid);
             WMError errCode = CreateWindow(windowProxy, windowProperty, surfaceNode, windowId, token);
             reply.WriteUint32(windowId);
             reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -52,6 +56,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         }
         case WindowManagerMessage::TRANS_ID_ADD_WINDOW: {
             sptr<WindowProperty> windowProperty = data.ReadStrongParcelable<WindowProperty>();
+            windowProperty->SetWindowPid(pid);
+            windowProperty->SetWindowUid(uid);
             WMError errCode = AddWindow(windowProperty);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -144,7 +150,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_TOGGLE_SHOWN_STATE_FOR_ALL_APP_WINDOWS: {
-            ToggleShownStateForAllAppWindows();
+            WMError errCode = ToggleShownStateForAllAppWindows();
+            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         case WindowManagerMessage::TRANS_ID_MAXMIZE_WINDOW: {

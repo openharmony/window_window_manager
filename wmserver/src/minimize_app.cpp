@@ -24,15 +24,20 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "MinimizeApp"};
 }
 
-std::map<MinimizeReason, std::vector<sptr<WindowNode>>> MinimizeApp::needMinimizeAppNodes_;
+std::map<MinimizeReason, std::vector<wptr<WindowNode>>> MinimizeApp::needMinimizeAppNodes_;
 bool MinimizeApp::isMinimizedByOtherWindow_ = true;
 std::recursive_mutex MinimizeApp::mutex_;
 
 void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReason reason)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    bool isFromUser = IsFromUser(reason);
+    if (!isMinimizedByOtherWindow_ && !isFromUser) {
+        return;
+    }
+    wptr<WindowNode> weakNode(node);
     WLOGFI("[Minimize] Add Window %{public}u to minimize list, reason %{public}u", node->GetWindowId(), reason);
-    needMinimizeAppNodes_[reason].emplace_back(node);
+    needMinimizeAppNodes_[reason].emplace_back(weakNode);
 }
 
 void MinimizeApp::ExecuteMinimizeAll()
@@ -40,14 +45,12 @@ void MinimizeApp::ExecuteMinimizeAll()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto& appNodes: needMinimizeAppNodes_) {
         bool isFromUser = IsFromUser(appNodes.first);
-        if (!isMinimizedByOtherWindow_ && !isFromUser) {
-            continue;
-        }
-
         for (auto& node : appNodes.second) {
-            if (node->abilityToken_ != nullptr) {
-                WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u", node->GetWindowId(), appNodes.first);
-                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(node->abilityToken_, isFromUser);
+            auto weakNode = node.promote();
+            if (weakNode != nullptr && weakNode->abilityToken_ != nullptr && !weakNode->startingWindowShown_) {
+                WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u",
+                    weakNode->GetWindowId(), appNodes.first);
+                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(weakNode->abilityToken_, isFromUser);
             }
         }
         appNodes.second.clear();
@@ -83,13 +86,11 @@ void MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason reason)
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
         bool isFromUser = IsFromUser(reason);
-        if (!isMinimizedByOtherWindow_ && !isFromUser) {
-            return;
-        }
         for (auto& node : needMinimizeAppNodes_.at(reason)) {
-            if (node->abilityToken_ != nullptr) {
-                WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u", node->GetWindowId(), reason);
-                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(node->abilityToken_, isFromUser);
+            auto weakNode = node.promote();
+            if (weakNode != nullptr && weakNode->abilityToken_ != nullptr && !weakNode->startingWindowShown_) {
+                WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u", weakNode->GetWindowId(), reason);
+                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(weakNode->abilityToken_, isFromUser);
             }
         }
         needMinimizeAppNodes_.at(reason).clear();

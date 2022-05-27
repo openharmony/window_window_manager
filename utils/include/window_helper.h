@@ -59,9 +59,24 @@ public:
         return ((IsMainWindow(type)) && (mode == WindowMode::WINDOW_MODE_FLOATING));
     }
 
+    static inline bool IsMainFullScreenWindow(WindowType type, WindowMode mode)
+    {
+        return ((IsMainWindow(type)) && (mode == WindowMode::WINDOW_MODE_FULLSCREEN));
+    }
+
+    static inline bool IsFloatintWindow(WindowMode mode)
+    {
+        return mode == WindowMode::WINDOW_MODE_FLOATING;
+    }
+
     static inline bool IsAvoidAreaWindow(WindowType type)
     {
         return (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    }
+
+    static inline bool IsFullScreenWindow(WindowMode mode)
+    {
+        return mode == WindowMode::WINDOW_MODE_FULLSCREEN;
     }
 
     static inline bool IsSplitWindowMode(WindowMode mode)
@@ -84,6 +99,45 @@ public:
     static inline bool IsEmptyRect(const Rect& r)
     {
         return (r.posX_ == 0 && r.posY_ == 0 && r.width_ == 0 && r.height_ == 0);
+    }
+
+    static bool IsWindowModeSupported(uint32_t modeSupportInfo, WindowMode mode)
+    {
+        switch (mode) {
+            case WindowMode::WINDOW_MODE_FULLSCREEN:
+                return WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN & modeSupportInfo;
+            case WindowMode::WINDOW_MODE_FLOATING:
+                return WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING & modeSupportInfo;
+            case WindowMode::WINDOW_MODE_SPLIT_PRIMARY:
+                return WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY & modeSupportInfo;
+            case WindowMode::WINDOW_MODE_SPLIT_SECONDARY:
+                return WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY & modeSupportInfo;
+            case WindowMode::WINDOW_MODE_PIP:
+                return WindowModeSupport::WINDOW_MODE_SUPPORT_PIP & modeSupportInfo;
+            default:
+                return true;
+        }
+    }
+
+    static WindowMode GetWindowModeFromModeSupportInfo(uint32_t modeSupportInfo)
+    {
+        // get the binary number consists of the last 1 and 0 behind it
+        uint32_t windowModeSupport = modeSupportInfo & (~modeSupportInfo + 1);
+
+        switch (windowModeSupport) {
+            case WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN:
+                return WindowMode::WINDOW_MODE_FULLSCREEN;
+            case WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING:
+                return WindowMode::WINDOW_MODE_FLOATING;
+            case WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY:
+                return WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+            case WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY:
+                return WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+            case WindowModeSupport::WINDOW_MODE_SUPPORT_PIP:
+                return WindowMode::WINDOW_MODE_PIP;
+            default:
+                return WindowMode::WINDOW_MODE_UNDEFINED;
+        }
     }
 
     static Rect GetFixedWindowRectByLimitSize(const Rect& oriDstRect, const Rect& lastRect, bool isVertical,

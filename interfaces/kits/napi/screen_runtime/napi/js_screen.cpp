@@ -230,9 +230,12 @@ NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
     }
     std::unique_ptr<JsScreen> jsScreen = std::make_unique<JsScreen>(screen);
     object->SetNativePointer(jsScreen.release(), JsScreen::Finalizer, nullptr);
-
-    object->SetProperty("id", CreateJsValue(engine, static_cast<uint32_t>(screen->GetId())));
-    object->SetProperty("parent", CreateJsValue(engine, static_cast<uint32_t>(screen->GetParentId())));
+    ScreenId screenId = screen->GetId();
+    object->SetProperty("id",
+        CreateJsValue(engine, screenId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(screenId)));
+    ScreenId parentId = screen->GetParentId();
+    object->SetProperty("parent",
+        CreateJsValue(engine, parentId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(parentId)));
     object->SetProperty("orientation", CreateJsValue(engine, screen->GetOrientation()));
     object->SetProperty("activeModeIndex", CreateJsValue(engine, screen->GetModeId()));
     object->SetProperty("supportedModeInfo", CreateJsScreenModeArrayObject(engine, screen->GetSupportedModes()));
@@ -241,7 +244,6 @@ NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
 
     std::shared_ptr<NativeReference> JsScreenRef;
     JsScreenRef.reset(engine.CreateReference(objValue, 1));
-    ScreenId screenId = screen->GetId();
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     g_JsScreenMap[screenId] = JsScreenRef;
     BindNativeFunction(engine, *object, "setScreenActiveMode", JsScreen::SetScreenActiveMode);

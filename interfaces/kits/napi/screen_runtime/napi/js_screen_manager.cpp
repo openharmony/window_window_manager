@@ -19,12 +19,13 @@
 #include <new>
 #include <ability.h>
 #include "js_runtime_utils.h"
+#include "js_screen.h"
 #include "js_screen_listener.h"
 #include "native_engine/native_reference.h"
 #include "screen_manager.h"
-#include "window_manager_hilog.h"
 #include "singleton_container.h"
-#include "js_screen.h"
+#include "surface_utils.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -80,6 +81,23 @@ static NativeValue* MakeExpand(NativeEngine* engine, NativeCallbackInfo* info)
     return (me != nullptr) ? me->OnMakeExpand(*engine, *info) : nullptr;
 }
 
+static NativeValue* CreateVirtualScreen(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(engine, info);
+    return (me != nullptr) ? me->OnCreateVirtualScreen(*engine, *info) : nullptr;
+}
+
+static NativeValue* DestroyVirtualScreen(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(engine, info);
+    return (me != nullptr) ? me->OnDestroyVirtualScreen(*engine, *info) : nullptr;
+}
+
+static NativeValue* SetVirtualScreenSurface(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(engine, info);
+    return (me != nullptr) ? me->OnSetVirtualScreenSurface(*engine, *info) : nullptr;
+}
 private:
 std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsScreenListener>>> jsCbMap_;
 std::mutex mtx_;
@@ -392,6 +410,200 @@ int32_t GetExpandOptionFromJs(NativeEngine& engine, NativeObject* optionObject, 
     option = {screenId, startX, startY};
     return 0;
 }
+
+NativeValue* OnCreateVirtualScreen(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsScreenManager::OnCreateVirtualScreen is called");
+    DMError errCode = DMError::DM_OK;
+    VirtualScreenOption option;
+    if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = DMError::DM_ERROR_INVALID_PARAM;
+    } else {
+        NativeObject* object = ConvertNativeValueTo<NativeObject>(info.argv[0]);
+        if (object == nullptr) {
+            WLOGFE("Failed to convert parameter to VirtualScreenOption.");
+            errCode = DMError::DM_ERROR_INVALID_PARAM;
+        } else {
+            errCode = GetVirtualScreenOptionFromJs(engine, object, option);
+        }
+    }
+    AsyncTask::CompleteCallback complete =
+        [option, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (errCode != DMError::DM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode),
+                    "JsScreenManager::OnCreateVirtualScreen, Invalidate params."));
+                WLOGFE("JsScreenManager::OnCreateVirtualScreen failed, Invalidate params.");
+            } else {
+                auto screenId = SingletonContainer::Get<ScreenManager>().CreateVirtualScreen(option);
+                auto screen = SingletonContainer::Get<ScreenManager>().GetScreenById(screenId);
+                if (screen == nullptr) {
+                    task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_UNKNOWN),
+                        "ScreenManager::CreateVirtualScreen failed."));
+                    WLOGFE("ScreenManager::CreateVirtualScreen failed.");
+                    return;
+                }
+                task.Resolve(engine, CreateJsScreenObject(engine, screen));
+                WLOGFI("JsScreenManager::OnCreateVirtualScreen success");
+            }
+        };
+    NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
+        info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_TWO - 1];
+    }
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+DMError GetVirtualScreenOptionFromJs(NativeEngine& engine, NativeObject* optionObject, VirtualScreenOption& option)
+{
+    NativeValue* name = optionObject->GetProperty("name");
+    if (!ConvertFromJsValue(engine, name, option.name_)) {
+        WLOGFE("Failed to convert parameter to name.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    NativeValue* width = optionObject->GetProperty("width");
+    if (!ConvertFromJsValue(engine, width, option.width_)) {
+        WLOGFE("Failed to convert parameter to width.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    NativeValue* height = optionObject->GetProperty("height");
+    if (!ConvertFromJsValue(engine, height, option.height_)) {
+        WLOGFE("Failed to convert parameter to height.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    NativeValue* density = optionObject->GetProperty("density");
+    double densityValue;
+    if (!ConvertFromJsValue(engine, density, densityValue)) {
+        WLOGFE("Failed to convert parameter to density.");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    option.density_ = static_cast<float>(densityValue);
+
+    NativeValue* surfaceIdNativeValue = optionObject->GetProperty("surfaceId");
+    if (!GetSurfaceFromJs(engine, surfaceIdNativeValue, option.surface_)) {
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return DMError::DM_OK;
+}
+
+bool GetSurfaceFromJs(NativeEngine& engine, NativeValue* surfaceIdNativeValue, sptr<Surface>& surface)
+{
+    if (surfaceIdNativeValue == nullptr || surfaceIdNativeValue->TypeOf() != NATIVE_STRING) {
+        WLOGFE("Failed to convert parameter to surface. Invalidate params.");
+        return false;
+    }
+    char buffer[PATH_MAX];
+    size_t length = 0;
+    uint64_t surfaceId = 0;
+    napi_env env = reinterpret_cast<napi_env>(&engine);
+    napi_value surfaceIdValue = reinterpret_cast<napi_value>(surfaceIdNativeValue);
+    if (napi_get_value_string_utf8(env, surfaceIdValue, buffer, PATH_MAX, &length) != napi_ok) {
+        WLOGFE("Failed to convert parameter to surface.");
+        return false;
+    }
+    std::istringstream inputStream(buffer);
+    inputStream >> surfaceId;
+    surface = SurfaceUtils::GetInstance()->GetSurface(surfaceId);
+    if (surface == nullptr) {
+        WLOGFI("GetSurfaceFromJs failed, surfaceId:%{public}" PRIu64"", surfaceId);
+    }
+    return true;
+}
+
+NativeValue* OnDestroyVirtualScreen(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsScreenManager::OnDestroyVirtualScreen is called");
+    DMError errCode = DMError::DM_OK;
+    int64_t screenId = -1LL;
+    if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = DMError::DM_ERROR_INVALID_PARAM;
+    } else {
+        if (!ConvertFromJsValue(engine, info.argv[0], screenId)) {
+            WLOGFE("Failed to convert parameter to screen id.");
+            errCode = DMError::DM_ERROR_INVALID_PARAM;
+        }
+    }
+    AsyncTask::CompleteCallback complete =
+        [screenId, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (errCode != DMError::DM_OK || screenId == -1LL) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM),
+                    "JsScreenManager::OnDestroyVirtualScreen, Invalidate params."));
+                WLOGFE("JsScreenManager::OnDestroyVirtualScreen failed, Invalidate params.");
+            } else {
+                auto res = SingletonContainer::Get<ScreenManager>().DestroyVirtualScreen(screenId);
+                if (res != DMError::DM_OK) {
+                    task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(res),
+                        "ScreenManager::DestroyVirtualScreen failed."));
+                    WLOGFE("ScreenManager::DestroyVirtualScreen failed.");
+                    return;
+                }
+                task.Resolve(engine, engine.CreateUndefined());
+                WLOGFI("JsScreenManager::OnDestroyVirtualScreen success");
+            }
+        };
+    NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
+        info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_TWO - 1];
+    }
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* OnSetVirtualScreenSurface(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsScreenManager::OnSetVirtualScreenSurface is called");
+    DMError errCode = DMError::DM_OK;
+    int64_t screenId = -1LL;
+    sptr<Surface> surface;
+    if (info.argc != ARGC_TWO && info.argc != ARGC_THREE) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = DMError::DM_ERROR_INVALID_PARAM;
+    } else {
+        if (!ConvertFromJsValue(engine, info.argv[0], screenId)) {
+            WLOGFE("Failed to convert parameter to screen id.");
+            errCode = DMError::DM_ERROR_INVALID_PARAM;
+        }
+        if (!GetSurfaceFromJs(engine, info.argv[1], surface)) {
+            WLOGFE("Failed to convert parameter to surface");
+            errCode = DMError::DM_ERROR_INVALID_PARAM;
+        }
+    }
+    AsyncTask::CompleteCallback complete =
+        [screenId, surface, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (errCode != DMError::DM_OK || surface == nullptr) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM),
+                    "JsScreenManager::OnSetVirtualScreenSurface, Invalidate params."));
+                WLOGFE("JsScreenManager::OnSetVirtualScreenSurface failed, Invalidate params.");
+            } else {
+                auto res = SingletonContainer::Get<ScreenManager>().SetVirtualScreenSurface(screenId, surface);
+                if (res != DMError::DM_OK) {
+                    task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(res),
+                        "ScreenManager::SetVirtualScreenSurface failed."));
+                    WLOGFE("ScreenManager::SetVirtualScreenSurface failed.");
+                    return;
+                }
+                task.Resolve(engine, engine.CreateUndefined());
+                WLOGFI("JsScreenManager::OnSetVirtualScreenSurface success");
+            }
+        };
+    NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_THREE && info.argv[ARGC_TWO - 1] != nullptr &&
+        info.argv[ARGC_THREE - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_THREE - 1];
+    }
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
 };
 
 NativeValue* JsScreenManagerInit(NativeEngine* engine, NativeValue* exportObj)
@@ -417,6 +629,9 @@ NativeValue* JsScreenManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "off", JsScreenManager::UnregisterScreenMangerCallback);
     BindNativeFunction(*engine, *object, "makeMirror", JsScreenManager::MakeMirror);
     BindNativeFunction(*engine, *object, "makeExpand", JsScreenManager::MakeExpand);
+    BindNativeFunction(*engine, *object, "createVirtualScreen", JsScreenManager::CreateVirtualScreen);
+    BindNativeFunction(*engine, *object, "destroyVirtualScreen", JsScreenManager::DestroyVirtualScreen);
+    BindNativeFunction(*engine, *object, "setVirtualScreenSurface", JsScreenManager::SetVirtualScreenSurface);
     return engine->CreateUndefined();
 }
 }  // namespace Rosen

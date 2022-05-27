@@ -23,6 +23,11 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "WindowNode"};
 }
 
+WindowNode::~WindowNode()
+{
+    WLOGFI("~WindowNode id:%{public}u", GetWindowId());
+}
+
 void WindowNode::SetDisplayId(DisplayId displayId)
 {
     property_->SetDisplayId(displayId);
@@ -153,6 +158,11 @@ void WindowNode::SetShowingDisplays(const std::vector<DisplayId>& displayIdVec)
     showingDisplays_.assign(displayIdVec.begin(), displayIdVec.end());
 }
 
+void WindowNode::SetModeSupportInfo(uint32_t modeSupportInfo)
+{
+    property_->SetModeSupportInfo(modeSupportInfo);
+}
+
 void WindowNode::ResetWindowSizeChangeReason()
 {
     windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
@@ -168,14 +178,14 @@ void WindowNode::SetWindowToken(sptr<IWindow> window)
     windowToken_ = window;
 }
 
-void WindowNode::SetCallingPid()
+void WindowNode::SetCallingPid(int32_t pid)
 {
-    callingPid_ = IPCSkeleton::GetCallingPid();
+    property_->SetWindowPid(pid);
 }
 
-void WindowNode::SetCallingUid()
+void WindowNode::SetCallingUid(int32_t uid)
 {
-    callingUid_ = IPCSkeleton::GetCallingUid();
+    property_->SetWindowPid(uid);
 }
 
 DisplayId WindowNode::GetDisplayId() const
@@ -265,12 +275,12 @@ const sptr<WindowProperty>& WindowNode::GetWindowProperty() const
 
 int32_t WindowNode::GetCallingPid() const
 {
-    return callingPid_;
+    return property_->GetWindowPid();
 }
 
 int32_t WindowNode::GetCallingUid() const
 {
-    return callingUid_;
+    return property_->GetWindowUid();
 }
 
 const std::unordered_map<WindowType, SystemBarProperty>& WindowNode::GetSystemBarProperty() const
@@ -297,6 +307,11 @@ Orientation WindowNode::GetRequestedOrientation() const
 std::vector<DisplayId> WindowNode::GetShowingDisplays() const
 {
     return showingDisplays_;
+}
+
+uint32_t WindowNode::GetModeSupportInfo() const
+{
+    return property_->GetModeSupportInfo();
 }
 } // namespace Rosen
 } // namespace OHOS
