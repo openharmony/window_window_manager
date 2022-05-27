@@ -12,10 +12,9 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("//foundation/windowmanager/windowmanager_aafwk.gni")
 
 module_out_path = "window_manager/wm"
-aainnerkits_path = "//foundation/aafwk/standard/interfaces/innerkits"
-aakits_path = "//foundation/aafwk/standard/frameworks/kits"
 
 group("systemtest") {
   testonly = true
@@ -221,11 +220,11 @@ config("wm_systemtest_common_public_config") {
     "//third_party/googletest/googlemock/include",
 
     # for abilityContext
-    "${aakits_path}/ability/ability_runtime/include",
-    "${aakits_path}/appkit/native/ability_runtime/context",
+    "${aafwk_kits_path}/ability/ability_runtime/include",
+    "${aafwk_kits_path}/appkit/native/ability_runtime/context",
     "//base/global/resource_management/interfaces/inner_api/include",
     "//third_party/node/deps/icu-small/source/common",
-    "${aainnerkits_path}/ability_manager/include",
+    "${aafwk_inner_api_path}/ability_manager/include",
     "//third_party/jsoncpp/include",
     "//third_party/json/include",
 
@@ -254,7 +253,7 @@ ohos_static_library("wm_systemtest_common") {
     "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
 
     # need delete it for abilitycontext
-    "${aainnerkits_path}/ability_manager:ability_manager",
+    "${aafwk_inner_api_path}/ability_manager:ability_manager",
     "//foundation/arkui/napi:ace_napi",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
