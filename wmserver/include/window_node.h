@@ -44,7 +44,7 @@ public:
         callingPid_ = IPCSkeleton::GetCallingPid();
         callingUid_ = IPCSkeleton::GetCallingUid();
     }
-    ~WindowNode() = default;
+    ~WindowNode();
 
     void SetDisplayId(DisplayId displayId);
     void SetHotZoneRect(const Rect& rect);
