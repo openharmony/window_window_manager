@@ -73,6 +73,19 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_PIP
 };
 
+enum WindowModeSupport : uint32_t {
+    WINDOW_MODE_SUPPORT_FULLSCREEN = 1 << 0,
+    WINDOW_MODE_SUPPORT_FLOATING = 1 << 1,
+    WINDOW_MODE_SUPPORT_SPLIT_PRIMARY = 1 << 2,
+    WINDOW_MODE_SUPPORT_SPLIT_SECONDARY = 1 << 3,
+    WINDOW_MODE_SUPPORT_PIP = 1 << 4,
+    WINDOW_MODE_SUPPORT_ALL = WINDOW_MODE_SUPPORT_FULLSCREEN |
+                              WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                              WINDOW_MODE_SUPPORT_SPLIT_SECONDARY |
+                              WINDOW_MODE_SUPPORT_FLOATING |
+                              WINDOW_MODE_SUPPORT_PIP
+};
+
 enum class WindowBlurLevel : uint32_t {
     WINDOW_BLUR_OFF = 0,
     WINDOW_BLUR_LOW,

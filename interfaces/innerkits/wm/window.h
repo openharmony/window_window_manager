@@ -215,6 +215,7 @@ public:
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     virtual void SetRequestedOrientation(Orientation) = 0;
     virtual Orientation GetRequestedOrientation() = 0;
+    virtual void SetModeSupportInfo(uint32_t modeSupportInfo) = 0;
 
     virtual bool IsDecorEnable() const = 0;
     virtual WMError Maximize() = 0;

@@ -252,6 +252,11 @@ uint32_t WindowImpl::GetWindowFlags() const
     return property_->GetWindowFlags();
 }
 
+uint32_t WindowImpl::GetModeSupportInfo() const
+{
+    return property_->GetModeSupportInfo();
+}
+
 SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
 {
     auto curProperties = property_->GetSystemBarProperty();
@@ -303,6 +308,11 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
     WLOGFI("[Client] Window %{public}u mode %{public}u", property_->GetWindowId(), static_cast<uint32_t>(mode));
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), mode)) {
+        WLOGFI("window %{public}u do not support window mode: %{public}u",
+               property_->GetWindowId(), static_cast<uint32_t>(mode));
+        return WMError::WM_DO_NOTHING;
     }
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
         UpdateMode(mode);
@@ -1342,6 +1352,22 @@ void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     aceAbilityHandler_ = handler;
+}
+
+void WindowImpl::SetModeSupportInfo(uint32_t modeSupportInfo)
+{
+    property_->SetModeSupportInfo(modeSupportInfo);
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+    if (!WindowHelper::IsWindowModeSupported(modeSupportInfo, GetMode())) {
+        WLOGFI("currunt window mode is not supported, force to transform to appropriate mode. window id:%{public}u",
+               GetWindowId());
+        WindowMode mode = WindowHelper::GetWindowModeFromModeSupportInfo(modeSupportInfo);
+        if (mode != WindowMode::WINDOW_MODE_UNDEFINED) {
+            SetWindowMode(mode);
+        } else {
+            WLOGFE("invalid modeSupportInfo %{public}u", modeSupportInfo);
+        }
+    }
 }
 
 void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)

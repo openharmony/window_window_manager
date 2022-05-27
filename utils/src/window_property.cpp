@@ -310,6 +310,11 @@ void WindowProperty::SetTokenState(bool hasToken)
     tokenState_ = hasToken;
 }
 
+void WindowProperty::SetModeSupportInfo(uint32_t modeSupportInfo)
+{
+    modeSupportInfo_ = modeSupportInfo;
+}
+
 uint32_t WindowProperty::GetWindowId() const
 {
     return windowId_;
@@ -328,6 +333,11 @@ const PointInfo& WindowProperty::GetHitOffset() const
 uint32_t WindowProperty::GetAnimationFlag() const
 {
     return animationFlag_;
+}
+
+uint32_t WindowProperty::GetModeSupportInfo() const
+{
+    return modeSupportInfo_;
 }
 
 bool WindowProperty::GetTokenState() const
@@ -394,7 +404,8 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteBool(tokenState_) &&
         parcel.WriteUint32(callingWindow_) && parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
-        parcel.WriteInt32(pid_) && parcel.WriteInt32(uid_);
+        parcel.WriteInt32(pid_) && parcel.WriteInt32(uid_) &&
+        parcel.WriteUint32(modeSupportInfo_);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -437,6 +448,7 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetKeepScreenOn(parcel.ReadBool());
     property->SetWindowPid(parcel.ReadInt32());
     property->SetWindowUid(parcel.ReadInt32());
+    property->SetModeSupportInfo(parcel.ReadUint32());
     return property;
 }
 
@@ -473,6 +485,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     keepScreenOn_ = property->keepScreenOn_;
     pid_ = property->pid_;
     uid_ = property->uid_;
+    modeSupportInfo_ = property->modeSupportInfo_;
 }
 }
 }

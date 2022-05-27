@@ -63,6 +63,7 @@ public:
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     void SetRequestedOrientation(Orientation orientation);
     void SetShowingDisplays(const std::vector<DisplayId>& displayIdVec);
+    void SetModeSupportInfo(uint32_t modeSupportInfo);
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
     uint32_t GetParentId() const;
@@ -88,6 +89,7 @@ public:
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
     Orientation GetRequestedOrientation() const;
     std::vector<DisplayId> GetShowingDisplays() const;
+    uint32_t GetModeSupportInfo() const;
     void ResetWindowSizeChangeReason();
 
     sptr<WindowNode> parent_;
