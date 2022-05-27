@@ -38,6 +38,8 @@ public:
     void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override;
     void UpdateActiveStatus(bool isActive) override;
     sptr<WindowProperty> GetWindowProperty() override;
+    void NotifyOutsidePressed() override;
+    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 private:
     static inline BrokerDelegator<WindowProxy> delegator_;
 };

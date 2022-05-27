@@ -23,6 +23,7 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
+#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -30,9 +31,22 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowRoot"};
 }
 
-std::map<uint32_t, sptr<WindowNode>> WindowRoot::GetWindowNodeMap()
+uint32_t WindowRoot::GetTotalWindowNum() const
 {
-    return windowNodeMap_;
+    return static_cast<uint32_t>(windowNodeMap_.size());
+}
+
+sptr<WindowNode> WindowRoot::GetWindowForDumpAceHelpInfo() const
+{
+    for (auto& iter : windowNodeMap_) {
+        if (iter.second->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP ||
+            iter.second->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
+            iter.second->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
+            iter.second->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
+            return iter.second;
+        }
+    }
+    return nullptr;
 }
 
 ScreenId WindowRoot::GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay)
@@ -52,12 +66,12 @@ ScreenId WindowRoot::GetScreenGroupId(DisplayId displayId, bool& isRecordedDispl
 sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId displayId)
 {
     bool isRecordedDisplay;
-    ScreenId screenGroupId = GetScreenGroupId(displayId, isRecordedDisplay);
-    auto iter = windowNodeContainerMap_.find(screenGroupId);
+    ScreenId displayGroupId = GetScreenGroupId(displayId, isRecordedDisplay);
+    auto iter = windowNodeContainerMap_.find(displayGroupId);
     if (iter != windowNodeContainerMap_.end()) {
         // if container exist for screenGroup and display is not be recorded, process expand display
         if (!isRecordedDisplay) {
-            ProcessExpandDisplayCreate(displayId, screenGroupId);
+            ProcessExpandDisplayCreate(displayId, displayGroupId);
         }
         return iter->second;
     }
@@ -75,14 +89,14 @@ sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(DisplayId displa
         return nullptr;
     }
 
-    ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
+    ScreenId displayGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
     WLOGFI("create new container for display, width: %{public}d, height: %{public}d, "
-        "screenGroupId:%{public}" PRIu64", displayId:%{public}" PRIu64"", displayInfo->GetWidth(),
-        displayInfo->GetHeight(), screenGroupId, displayId);
-    sptr<WindowNodeContainer> container = new WindowNodeContainer(displayInfo);
-    windowNodeContainerMap_.insert(std::make_pair(screenGroupId, container));
+        "displayGroupId:%{public}" PRIu64", displayId:%{public}" PRIu64"", displayInfo->GetWidth(),
+        displayInfo->GetHeight(), displayGroupId, displayId);
+    sptr<WindowNodeContainer> container = new WindowNodeContainer(displayInfo, displayGroupId);
+    windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
     std::vector<DisplayId> displayVec = { displayId };
-    displayIdMap_.insert(std::make_pair(screenGroupId, displayVec));
+    displayIdMap_.insert(std::make_pair(displayGroupId, displayVec));
     return container;
 }
 
@@ -192,8 +206,14 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
         AddDeathRecipient(node);
     }
     // Register FirstFrame Callback to rs, inform ability to get snapshot
-    auto firstFrameCompleteCallback = [node]() {
-        AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(node->abilityToken_);
+    wptr<WindowNode> weak = node;
+    auto firstFrameCompleteCallback = [weak]() {
+        auto weakNode = weak.promote();
+        if (weakNode == nullptr) {
+            WLOGFE("windowNode is nullptr");
+            return;
+        }
+        AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(weakNode->abilityToken_);
     };
     if (node->surfaceNode_ && WindowHelper::IsMainWindow(node->GetWindowType())) {
         node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
@@ -203,12 +223,23 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
 
 WMError WindowRoot::MinimizeStructuredAppWindowsExceptSelf(sptr<WindowNode>& node)
 {
+    WM_SCOPED_TRACE("root:MinimizeStructuredAppWindowsExceptSelf");
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
         WLOGFE("MinimizeAbility failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
     return container->MinimizeStructuredAppWindowsExceptSelf(node);
+}
+
+bool WindowRoot::IsForbidDockSliceMove(DisplayId displayId) const
+{
+    auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("can't find container");
+        return true;
+    }
+    return container->IsForbidDockSliceMove(displayId);
 }
 
 std::vector<Rect> WindowRoot::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
@@ -254,7 +285,7 @@ void WindowRoot::ToggleShownStateForAllAppWindows()
     }
     std::for_each(containers.begin(), containers.end(),
         [this, isAllAppWindowsEmpty] (sptr<WindowNodeContainer> container) {
-        std::function<bool(uint32_t)> restoreFunc = [this](uint32_t windowId) {
+        auto restoreFunc = [this](uint32_t windowId, WindowMode mode) {
             auto windowNode = GetWindowNode(windowId);
             if (windowNode == nullptr) {
                 return false;
@@ -266,6 +297,10 @@ void WindowRoot::ToggleShownStateForAllAppWindows()
             auto property = windowNode->GetWindowToken()->GetWindowProperty();
             if (property == nullptr) {
                 return false;
+            }
+            if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+                property->SetWindowMode(mode);
             }
             WindowManagerService::GetInstance().AddWindow(property);
             return true;
@@ -297,6 +332,55 @@ WMError WindowRoot::MaxmizeWindow(uint32_t windowId)
     return WMError::WM_OK;
 }
 
+void WindowRoot::DestroyLeakStartingWindow()
+{
+    std::vector<uint32_t> destroyIds;
+    for (auto& iter : windowNodeMap_) {
+        if (iter.second->startingWindowShown_ && !iter.second->GetWindowToken()) {
+            destroyIds.push_back(iter.second->GetWindowId());
+        }
+    }
+    for (auto& id : destroyIds) {
+        WLOGFI("Destroy Window id:%{public}u", id);
+        DestroyWindow(id, false);
+    }
+}
+
+WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode,
+    sptr<WindowNodeContainer>& container)
+{
+    if (WindowHelper::IsSubWindow(node->GetWindowType())) {
+        if (parentNode == nullptr) {
+            WLOGFE("window type is invalid");
+            return WMError::WM_ERROR_INVALID_TYPE;
+        }
+        sptr<WindowNode> parent = nullptr;
+        container->RaiseZOrderForAppWindow(parentNode, parent);
+    }
+    if (node->GetWindowProperty()->GetFocusable()) {
+        container->SetFocusWindow(node->GetWindowId());
+        needCheckFocusWindow = true;
+    }
+    container->SetActiveWindow(node->GetWindowId(), false);
+    NotifyKeyboardSizeChangeInfo(node, container, node->GetWindowRect());
+    for (auto& child : node->children_) {
+        if (child == nullptr || !child->currentVisibility_) {
+            break;
+        }
+        HandleKeepScreenOn(child->GetWindowId(), child->IsKeepScreenOn());
+    }
+    HandleKeepScreenOn(node->GetWindowId(), node->IsKeepScreenOn());
+    WLOGFI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
+        node->GetWindowId(), node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
+        node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
+    if (WindowHelper::IsMainWindow(node->GetWindowType()) &&
+        node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        DisplayManagerServiceInner::GetInstance().
+            SetOrientationFromWindow(node->GetDisplayId(), node->GetRequestedOrientation());
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin)
 {
     if (node == nullptr) {
@@ -309,6 +393,16 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
         WLOGFE("add window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        WindowHelper::IsAppWindow(node->GetWindowType()) && !node->isPlayAnimationShow_) {
+        container->NotifyDockWindowStateChanged(node, false);
+        WMError res = MinimizeStructuredAppWindowsExceptSelf(node);
+        if (res != WMError::WM_OK) {
+            WLOGFE("Minimize other structured window failed");
+            MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
+            return res;
+        }
+    }
     if (fromStartingWin) {
         return container->ShowStartingWindow(node);
     }
@@ -320,38 +414,15 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
 
     auto parentNode = GetWindowNode(parentId);
     WMError res = container->AddWindowNode(node, parentNode);
-    if (res == WMError::WM_OK && WindowHelper::IsSubWindow(node->GetWindowType())) {
-        if (parentNode == nullptr) {
-            WLOGFE("window type is invalid");
-            return WMError::WM_ERROR_INVALID_TYPE;
-        }
-        sptr<WindowNode> parent = nullptr;
-        container->RaiseZOrderForAppWindow(parentNode, parent);
+    if (!WindowHelper::IsSystemWindow(node->GetWindowType())) {
+        DestroyLeakStartingWindow();
     }
-    if (res == WMError::WM_OK && node->GetWindowProperty()->GetFocusable()) {
-        container->SetFocusWindow(node->GetWindowId());
-        needCheckFocusWindow = true;
+    if (res != WMError::WM_OK) {
+        WLOGFE("AddWindowNode failed with ret: %{public}u", static_cast<uint32_t>(res));
+        return res;
     }
-    if (res == WMError::WM_OK) {
-        container->SetActiveWindow(node->GetWindowId(), false);
-        NotifyKeyboardSizeChangeInfo(node, container, node->GetWindowRect());
-        for (auto& child : node->children_) {
-            if (child == nullptr || !child->currentVisibility_) {
-                break;
-            }
-            HandleKeepScreenOn(child->GetWindowId(), child->IsKeepScreenOn());
-        }
-        HandleKeepScreenOn(node->GetWindowId(), node->IsKeepScreenOn());
-    }
-    WLOGFI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
-        node->GetWindowId(), node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
-        node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
-    if (res == WMError::WM_OK && WindowHelper::IsMainWindow(node->GetWindowType()) &&
-        node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        DisplayManagerServiceInner::GetInstance().
-            SetOrientationFromWindow(node->GetDisplayId(), node->GetRequestedOrientation());
-    }
-    return res;
+
+    return PostProcessAddWindowNode(node, parentNode, container);
 }
 
 WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
@@ -555,6 +626,7 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
         windowIdMap_.erase(window->AsObject());
     }
     windowNodeMap_.erase(node->GetWindowId());
+    WLOGFI("destroy window node use_count:%{public}d", node->GetSptrRefCount());
     return WMError::WM_OK;
 }
 
@@ -768,16 +840,15 @@ WMError WindowRoot::RaiseZOrderForAppWindow(sptr<WindowNode>& node)
     return container->RaiseZOrderForAppWindow(node, parentNode);
 }
 
+uint32_t WindowRoot::GetWindowIdByObject(const sptr<IRemoteObject>& remoteObject)
+{
+    auto iter = windowIdMap_.find(remoteObject);
+    return iter == std::end(windowIdMap_) ? INVALID_WINDOW_ID : iter->second;
+}
+
 void WindowRoot::OnRemoteDied(const sptr<IRemoteObject>& remoteObject)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = windowIdMap_.find(remoteObject);
-    if (iter == windowIdMap_.end()) {
-        WLOGFE("window id could not be found");
-        return;
-    }
-    uint32_t windowId = iter->second;
-    callback_(Event::REMOTE_DIED, windowId);
+    callback_(Event::REMOTE_DIED, remoteObject);
 }
 
 WMError WindowRoot::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
@@ -895,24 +966,24 @@ void WindowRoot::FocusFaultDetection() const
     }
 }
 
-void WindowRoot::ProcessExpandDisplayCreate(DisplayId displayId, ScreenId screenGroupId)
+void WindowRoot::ProcessExpandDisplayCreate(DisplayId displayId, ScreenId displayGroupId)
 {
     const sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
         if (displayInfo == nullptr || !CheckDisplayInfo(displayInfo)) {
             WLOGFE("get display failed or get invailed display info, displayId :%{public}" PRIu64 "", displayId);
             return;
         }
-        auto container = windowNodeContainerMap_[screenGroupId];
+        auto container = windowNodeContainerMap_[displayGroupId];
         if (container == nullptr) {
             WLOGFE("window node container is nullptr, displayId :%{public}" PRIu64 "", displayId);
         }
         // add displayId in displayId vector
-        displayIdMap_[screenGroupId].push_back(displayId);
+        displayIdMap_[displayGroupId].push_back(displayId);
 
         WLOGFI("[Display Create] before add new display, displayId: %{public}" PRIu64"", displayId);
 
-        auto displayInfoMap = GetAllDisplayInfos(displayIdMap_[screenGroupId]);
-        container->GetMutiDisplayController()->ProcessDisplayCreate(displayId, displayInfoMap);
+        auto displayRectMap = GetAllDisplayRects(displayIdMap_[displayGroupId]);
+        container->GetMutiDisplayController()->ProcessDisplayCreate(displayId, displayRectMap);
 
         WLOGFI("[Display Create] Container exist, add new display, displayId: %{public}" PRIu64"", displayId);
 }
@@ -928,20 +999,35 @@ std::map<DisplayId, sptr<DisplayInfo>> WindowRoot::GetAllDisplayInfos(const std:
     return displayInfoMap;
 }
 
+std::map<DisplayId, Rect> WindowRoot::GetAllDisplayRects(const std::vector<DisplayId>& displayIdVec)
+{
+    std::map<DisplayId, Rect> displayRectMap;
+    for (auto& displayId : displayIdVec) {
+        auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+        Rect displayRect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
+            displayInfo->GetWidth(), displayInfo->GetHeight() };
+        displayRectMap.insert(std::make_pair(displayId, displayRect));
+
+        WLOGFI("displayId: %{public}" PRIu64", displayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
+            displayId, displayRect.posX_, displayRect.posY_, displayRect.width_, displayRect.height_);
+    }
+    return displayRectMap;
+}
+
 void WindowRoot::ProcessDisplayCreate(DisplayId displayId)
 {
-    ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
-    auto iter = windowNodeContainerMap_.find(screenGroupId);
+    ScreenId displayGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
+    auto iter = windowNodeContainerMap_.find(displayGroupId);
     if (iter == windowNodeContainerMap_.end()) {
         CreateWindowNodeContainer(displayId);
         WLOGFI("[Display Create] Create new container for display, displayId: %{public}" PRIu64"", displayId);
     } else {
-        auto& displayIdVec = displayIdMap_[screenGroupId];
+        auto& displayIdVec = displayIdMap_[displayGroupId];
         if (std::find(displayIdVec.begin(), displayIdVec.end(), displayId) != displayIdVec.end()) {
             WLOGFI("[Display Create] Current display is already exist, displayId: %{public}" PRIu64"", displayId);
             return;
         }
-        ProcessExpandDisplayCreate(displayId, screenGroupId);
+        ProcessExpandDisplayCreate(displayId, displayGroupId);
     }
 }
 
@@ -964,9 +1050,9 @@ void WindowRoot::MoveNotShowingWindowToDefaultDisplay(DisplayId displayId)
 
 void WindowRoot::ProcessDisplayDestroy(DisplayId displayId)
 {
-    ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
-    auto& displayIdVec = displayIdMap_[screenGroupId];
-    auto iter = windowNodeContainerMap_.find(screenGroupId);
+    ScreenId displayGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
+    auto& displayIdVec = displayIdMap_[displayGroupId];
+    auto iter = windowNodeContainerMap_.find(displayGroupId);
     if (iter == windowNodeContainerMap_.end() || std::find(displayIdVec.begin(),
         displayIdVec.end(), displayId) == displayIdVec.end()) {
         WLOGFE("[Display Destroy] could not find display, destroy failed, displayId: %{public}" PRIu64"", displayId);
@@ -986,8 +1072,8 @@ void WindowRoot::ProcessDisplayDestroy(DisplayId displayId)
     WLOGFI("[Display Destroy] displayId: %{public}" PRIu64"", displayId);
 
     std::vector<uint32_t> needDestoryWindows;
-    auto displayInfoMap = GetAllDisplayInfos(displayIdVec);
-    container->GetMutiDisplayController()->ProcessDisplayDestroy(displayId, displayInfoMap, needDestoryWindows);
+    auto displayRectMap = GetAllDisplayRects(displayIdVec);
+    container->GetMutiDisplayController()->ProcessDisplayDestroy(displayId, displayRectMap, needDestoryWindows);
     for (auto id : needDestoryWindows) {
         auto node = GetWindowNode(id);
         if (node != nullptr) {
@@ -1001,9 +1087,9 @@ void WindowRoot::ProcessDisplayDestroy(DisplayId displayId)
 
 void WindowRoot::ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type)
 {
-    ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
-    auto& displayIdVec = displayIdMap_[screenGroupId];
-    auto iter = windowNodeContainerMap_.find(screenGroupId);
+    ScreenId displayGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
+    auto& displayIdVec = displayIdMap_[displayGroupId];
+    auto iter = windowNodeContainerMap_.find(displayGroupId);
     if (iter == windowNodeContainerMap_.end() || std::find(displayIdVec.begin(),
         displayIdVec.end(), displayId) == displayIdVec.end()) {
         WLOGFE("[Display Change] could not find display, change failed, displayId: %{public}" PRIu64"", displayId);
@@ -1016,8 +1102,8 @@ void WindowRoot::ProcessDisplayChange(DisplayId displayId, DisplayStateChangeTyp
         return;
     }
 
-    auto displayInfoMap = GetAllDisplayInfos(displayIdVec);
-    container->GetMutiDisplayController()->ProcessDisplayChange(displayId, displayInfoMap, type);
+    auto displayRectMap = GetAllDisplayRects(displayIdVec);
+    container->GetMutiDisplayController()->ProcessDisplayChange(displayId, displayRectMap, type);
 }
 
 float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const

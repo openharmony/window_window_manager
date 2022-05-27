@@ -176,5 +176,19 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info)
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
+
+void JsWindowListener::OnOutsidePressed()
+{
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            CallJsMethod(OUTSIDE_PRESSED_CB.c_str(), nullptr, 0);
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    WLOGFI("CALLED");
+}
 } // namespace Rosen
 } // namespace OHOS

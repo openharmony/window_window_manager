@@ -196,7 +196,6 @@ void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::
     WLOGFI("end");
 }
 
-// WindowExtensionConnection
 int WindowExtensionConnection::ConnectExtension(const AppExecFwk::ElementName& element,
     const Rect& rect, uint32_t uid, const sptr<IWindowExtensionCallback>& callback) const
 {

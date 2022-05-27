@@ -54,7 +54,7 @@ public:
      * @param displayId the disply of window pair
      * @param appNode the window root of app window
      */
-    WindowPair(const DisplayId& displayId, WindowNodeMaps& windowNodeMaps);
+    WindowPair(const DisplayId& displayId, DisplayGroupWindowTree& displayGroupWindowTree);
 
     /**
      * Deconstructor used to deconstruct.
@@ -153,6 +153,20 @@ public:
      */
     std::vector<sptr<WindowNode>> GetPairedWindows();
 
+    /**
+     * Get whether dock slice is forbidden to move.
+     *
+     * @return whether dock slice is forbidden to move
+     */
+    bool IsForbidDockSliceMove() const;
+
+    /**
+     * Set all app windows are restoring.
+     *
+     * @param ratio Indicates whether all app windows are restoring.
+     */
+    void SetAllAppWindowsRestoring(bool isAllAppWindowsRestoring);
+
 private:
     /**
      * Gets whether the window is related to split window.
@@ -232,7 +246,8 @@ private:
     sptr<WindowNode> secondary_;
     sptr<WindowNode> divider_;
     WindowPairStatus status_ = {WindowPairStatus::STATUS_EMPTY};
-    WindowNodeMaps& windowNodeMaps_;
+    DisplayGroupWindowTree& displayGroupWindowTree_;
+    bool isAllAppWindowsRestoring_ { false };
 };
 } // namespace Rosen
 } // namespace OHOS

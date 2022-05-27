@@ -66,6 +66,9 @@ public:
     void SetAnimationFlag(uint32_t animationFlag);
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     void SetTokenState(bool hasToken);
+    void SetWindowPid(int32_t pid);
+    void SetWindowUid(int32_t uid);
+    void SetModeSupportInfo(uint32_t modeSupportInfo);
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
 
     const std::string& GetWindowName() const;
@@ -96,6 +99,9 @@ public:
     bool GetDecorEnable() const;
     const PointInfo& GetHitOffset() const;
     uint32_t GetAnimationFlag() const;
+    int32_t GetWindowPid() const;
+    int32_t GetWindowUid() const;
+    uint32_t GetModeSupportInfo() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
@@ -128,12 +134,15 @@ private:
     uint32_t parentId_ { 0 };
     PointInfo hitOffset_ { 0, 0 };
     uint32_t animationFlag_ { static_cast<uint32_t>(WindowAnimation::DEFAULT) };
+    uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
     bool isDecorEnable_ { false };
+    int32_t pid_ { INVALID_PID };
+    int32_t uid_ { INVALID_UID };
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
 };
 }

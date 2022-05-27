@@ -26,9 +26,9 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowLayoutPolicy"};
 }
 
-WindowLayoutPolicy::WindowLayoutPolicy(const std::map<DisplayId, Rect>& displayRectMap,
-    WindowNodeMaps& windowNodeMaps, std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap)
-    : displayRectMap_(displayRectMap), windowNodeMaps_(windowNodeMaps), displayInfosMap_(displayInfosMap)
+WindowLayoutPolicy::WindowLayoutPolicy(const sptr<DisplayGroupInfo>& displayGroupInfo,
+    DisplayGroupWindowTree& displayGroupWindowTree)
+    : displayGroupInfo_(displayGroupInfo), displayGroupWindowTree_(displayGroupWindowTree)
 {
 }
 
@@ -50,7 +50,7 @@ void WindowLayoutPolicy::Reorder()
 void WindowLayoutPolicy::LimitWindowToBottomRightCorner(const sptr<WindowNode>& node)
 {
     Rect windowRect = node->GetRequestRect();
-    Rect displayRect = displayRectMap_[node->GetDisplayId()];
+    Rect displayRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
     windowRect.posX_ = std::max(windowRect.posX_, displayRect.posX_);
     windowRect.posY_ = std::max(windowRect.posY_, displayRect.posY_);
     windowRect.width_ = std::min(windowRect.width_, displayRect.width_);
@@ -81,7 +81,7 @@ void WindowLayoutPolicy::UpdateDisplayGroupRect()
 {
     Rect newDisplayGroupRect = { 0, 0, 0, 0 };
     // current mutiDisplay is only support left-right combination, maxNum is two
-    for (auto& elem : displayRectMap_) {
+    for (auto& elem : displayGroupInfo_->GetAllDisplayRects()) {
         newDisplayGroupRect.posX_ = std::min(displayGroupRect_.posX_, elem.second.posX_);
         newDisplayGroupRect.posY_ = std::min(displayGroupRect_.posY_, elem.second.posY_);
         newDisplayGroupRect.width_ += elem.second.width_;
@@ -119,21 +119,21 @@ void WindowLayoutPolicy::UpdateDisplayGroupLimitRect_()
 }
 
 void WindowLayoutPolicy::UpdateRectInDisplayGroup(const sptr<WindowNode>& node,
-                                                  const Rect& srcDisplayRect,
-                                                  const Rect& dstDisplayRect)
+                                                  const Rect& oriDisplayRect,
+                                                  const Rect& newDisplayRect)
 {
     Rect newRect = node->GetRequestRect();
     WLOGFI("before update rect in display group, windowId: %{public}d, rect: [%{public}d, %{public}d, "
         "%{public}d, %{public}d]", node->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
 
-    newRect.posX_ = newRect.posX_ - srcDisplayRect.posX_ + dstDisplayRect.posX_;
-    newRect.posY_ = newRect.posY_ - srcDisplayRect.posY_ + dstDisplayRect.posY_;
+    newRect.posX_ = newRect.posX_ - oriDisplayRect.posX_ + newDisplayRect.posX_;
+    newRect.posY_ = newRect.posY_ - oriDisplayRect.posY_ + newDisplayRect.posY_;
     node->SetRequestRect(newRect);
     WLOGFI("after update rect in display group, windowId: %{public}d, newRect: [%{public}d, %{public}d, "
         "%{public}d, %{public}d]", node->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
 
     for (auto& childNode : node->children_) {
-        UpdateRectInDisplayGroup(childNode, srcDisplayRect, dstDisplayRect);
+        UpdateRectInDisplayGroup(childNode, oriDisplayRect, newDisplayRect);
     }
 }
 
@@ -144,7 +144,7 @@ bool WindowLayoutPolicy::IsMultiDisplay()
 
 void WindowLayoutPolicy::UpdateMultiDisplayFlag()
 {
-    if (displayRectMap_.size() > 1) {
+    if (displayGroupInfo_->GetAllDisplayRects().size() > 1) {
         isMultiDisplay_ = true;
         WLOGFI("current mode is muti-display");
     } else {
@@ -154,20 +154,20 @@ void WindowLayoutPolicy::UpdateMultiDisplayFlag()
 }
 
 void WindowLayoutPolicy::UpdateRectInDisplayGroupForAllNodes(DisplayId displayId,
-                                                             const Rect& srcDisplayRect,
-                                                             const Rect& dstDisplayRect)
+                                                             const Rect& oriDisplayRect,
+                                                             const Rect& newDisplayRect)
 {
-    WLOGFI("displayId: %{public}" PRIu64", srcDisplayRect: [ %{public}d, %{public}d, %{public}d, %{public}d] "
-        "dstDisplayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
-        displayId, srcDisplayRect.posX_, srcDisplayRect.posY_, srcDisplayRect.width_, srcDisplayRect.height_,
-        dstDisplayRect.posX_, dstDisplayRect.posY_, dstDisplayRect.width_, dstDisplayRect.height_);
+    WLOGFI("displayId: %{public}" PRIu64", oriDisplayRect: [ %{public}d, %{public}d, %{public}d, %{public}d] "
+        "newDisplayRect: [ %{public}d, %{public}d, %{public}d, %{public}d]",
+        displayId, oriDisplayRect.posX_, oriDisplayRect.posY_, oriDisplayRect.width_, oriDisplayRect.height_,
+        newDisplayRect.posX_, newDisplayRect.posY_, newDisplayRect.width_, newDisplayRect.height_);
 
-    auto& windowNodeMap = windowNodeMaps_[displayId];
-    for (auto& iter : windowNodeMap) {
+    auto& displayWindowTree = displayGroupWindowTree_[displayId];
+    for (auto& iter : displayWindowTree) {
         auto& nodeVector = *(iter.second);
         for (auto& node : nodeVector) {
             if (!node->isShowingOnMultiDisplays_) {
-                UpdateRectInDisplayGroup(node, srcDisplayRect, dstDisplayRect);
+                UpdateRectInDisplayGroup(node, oriDisplayRect, newDisplayRect);
             }
             if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
                 LimitWindowToBottomRightCorner(node);
@@ -178,12 +178,22 @@ void WindowLayoutPolicy::UpdateRectInDisplayGroupForAllNodes(DisplayId displayId
     }
 }
 
+void WindowLayoutPolicy::UpdateDisplayRectAndDisplayGroupInfo(const std::map<DisplayId, Rect>& displayRectMap)
+{
+    for (auto& elem : displayRectMap) {
+        auto& displayId = elem.first;
+        auto& displayRect = elem.second;
+        displayGroupInfo_->SetDisplayRect(displayId, displayRect);
+    }
+}
+
 void WindowLayoutPolicy::PostProcessWhenDisplayChange()
 {
+    displayGroupInfo_->UpdateLeftAndRightDisplayId();
     UpdateMultiDisplayFlag();
     UpdateDisplayGroupRect();
     Launch();
-    for (auto& elem : displayRectMap_) {
+    for (auto& elem : displayGroupInfo_->GetAllDisplayRects()) {
         LayoutWindowTree(elem.first);
         WLOGFI("LayoutWindowTree, displayId: %{public}" PRIu64", displayRect: [ %{public}d, %{public}d, %{public}d, "
             "%{public}d]", elem.first, elem.second.posX_, elem.second.posY_, elem.second.width_, elem.second.height_);
@@ -192,41 +202,57 @@ void WindowLayoutPolicy::PostProcessWhenDisplayChange()
 
 void WindowLayoutPolicy::ProcessDisplayCreate(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap)
 {
+    const auto& oriDisplayRectMap = displayGroupInfo_->GetAllDisplayRects();
+    // check displayId and displayRectMap size
+    if (oriDisplayRectMap.find(displayId) == oriDisplayRectMap.end() ||
+        displayRectMap.size() != oriDisplayRectMap.size()) {
+        WLOGFE("current display is exited or displayInfo map size is error, displayId: %{public}" PRIu64"", displayId);
+        return;
+    }
     for (auto& elem : displayRectMap) {
-        auto iter = displayRectMap_.find(elem.first);
-        if (iter != displayRectMap_.end()) {
-            UpdateRectInDisplayGroupForAllNodes(elem.first, iter->second, elem.second);
-            iter->second = elem.second;
+        auto iter = oriDisplayRectMap.find(elem.first);
+        if (iter != oriDisplayRectMap.end()) {
+            const auto& oriDisplayRect = iter->second;
+            const auto& newDisplayRect = elem.second;
+            UpdateRectInDisplayGroupForAllNodes(elem.first, oriDisplayRect, newDisplayRect);
         } else {
             if (elem.first != displayId) {
                 WLOGFE("Wrong display, displayId: %{public}" PRIu64"", displayId);
                 return;
             }
-            displayRectMap_.insert(std::make_pair(displayId, elem.second));
         }
     }
-
+    UpdateDisplayRectAndDisplayGroupInfo(displayRectMap);
     PostProcessWhenDisplayChange();
     WLOGFI("Process display create, displayId: %{public}" PRIu64"", displayId);
 }
 
 void WindowLayoutPolicy::ProcessDisplayDestroy(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap)
 {
-    for (auto oriIter = displayRectMap_.begin(); oriIter != displayRectMap_.end();) {
+    const auto& oriDisplayRectMap = displayGroupInfo_->GetAllDisplayRects();
+    // check displayId and displayRectMap size
+    if (oriDisplayRectMap.find(displayId) != oriDisplayRectMap.end() ||
+        displayRectMap.size() != oriDisplayRectMap.size()) {
+        WLOGFE("can not find current display or displayInfo map size is error, displayId: %{public}" PRIu64"",
+               displayId);
+        return;
+    }
+    for (auto oriIter = oriDisplayRectMap.begin(); oriIter != oriDisplayRectMap.end();) {
         auto newIter = displayRectMap.find(oriIter->first);
         if (newIter != displayRectMap.end()) {
-            UpdateRectInDisplayGroupForAllNodes(oriIter->first, oriIter->second, newIter->second);
-            oriIter->second = newIter->second;
-            ++oriIter;
+            const auto& oriDisplayRect = oriIter->second;
+            const auto& newDisplayRect = newIter->second;
+            UpdateRectInDisplayGroupForAllNodes(oriIter->first, oriDisplayRect, newDisplayRect);
         } else {
             if (oriIter->first != displayId) {
                 WLOGFE("Wrong display, displayId: %{public}" PRIu64"", displayId);
                 return;
             }
-            displayRectMap_.erase(oriIter++);
         }
+        ++oriIter;
     }
 
+    UpdateDisplayRectAndDisplayGroupInfo(displayRectMap);
     PostProcessWhenDisplayChange();
     WLOGFI("Process display destroy, displayId: %{public}" PRIu64"", displayId);
 }
@@ -234,14 +260,23 @@ void WindowLayoutPolicy::ProcessDisplayDestroy(DisplayId displayId, const std::m
 void WindowLayoutPolicy::ProcessDisplaySizeChangeOrRotation(DisplayId displayId,
                                                             const std::map<DisplayId, Rect>& displayRectMap)
 {
+    const auto& oriDisplayRectMap = displayGroupInfo_->GetAllDisplayRects();
+    // check displayId and displayRectMap size
+    if (oriDisplayRectMap.find(displayId) == oriDisplayRectMap.end() ||
+        displayRectMap.size() != oriDisplayRectMap.size()) {
+        WLOGFE("can not find current display or displayInfo map size is error, displayId: %{public}" PRIu64"",
+               displayId);
+        return;
+    }
+
     for (auto& elem : displayRectMap) {
-        auto iter = displayRectMap_.find(elem.first);
-        if (iter != displayRectMap_.end()) {
+        auto iter = oriDisplayRectMap.find(elem.first);
+        if (iter != oriDisplayRectMap.end()) {
             UpdateRectInDisplayGroupForAllNodes(elem.first, iter->second, elem.second);
-            iter->second = elem.second;
         }
     }
 
+    UpdateDisplayRectAndDisplayGroupInfo(displayRectMap);
     PostProcessWhenDisplayChange();
     WLOGFI("Process display change, displayId: %{public}" PRIu64"", displayId);
 }
@@ -259,16 +294,16 @@ void WindowLayoutPolicy::LayoutWindowNodesByRootType(const std::vector<sptr<Wind
 
 void WindowLayoutPolicy::LayoutWindowTree(DisplayId displayId)
 {
-    auto& windowNodeMap = windowNodeMaps_[displayId];
-    limitRectMap_[displayId] = displayRectMap_[displayId];
+    auto& displayWindowTree = displayGroupWindowTree_[displayId];
+    limitRectMap_[displayId] = displayGroupInfo_->GetDisplayRect(displayId);
     // ensure that the avoid area windows are traversed first
-    LayoutWindowNodesByRootType(*(windowNodeMap[WindowRootNodeType::ABOVE_WINDOW_NODE]));
-    if (IsFullScreenRecentWindowExist(*(windowNodeMap[WindowRootNodeType::ABOVE_WINDOW_NODE]))) {
+    LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::ABOVE_WINDOW_NODE]));
+    if (IsFullScreenRecentWindowExist(*(displayWindowTree[WindowRootNodeType::ABOVE_WINDOW_NODE]))) {
         WLOGFI("recent window on top, early exit layout tree");
         return;
     }
-    LayoutWindowNodesByRootType(*(windowNodeMap[WindowRootNodeType::APP_WINDOW_NODE]));
-    LayoutWindowNodesByRootType(*(windowNodeMap[WindowRootNodeType::BELOW_WINDOW_NODE]));
+    LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::APP_WINDOW_NODE]));
+    LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::BELOW_WINDOW_NODE]));
 }
 
 void WindowLayoutPolicy::LayoutWindowNode(const sptr<WindowNode>& node)
@@ -295,7 +330,7 @@ void WindowLayoutPolicy::LayoutWindowNode(const sptr<WindowNode>& node)
 
 bool WindowLayoutPolicy::IsVerticalDisplay(DisplayId displayId) const
 {
-    return displayRectMap_[displayId].width_ < displayRectMap_[displayId].height_;
+    return displayGroupInfo_->GetDisplayRect(displayId).width_ < displayGroupInfo_->GetDisplayRect(displayId).height_;
 }
 
 void WindowLayoutPolicy::UpdateClientRectAndResetReason(const sptr<WindowNode>& node,
@@ -395,7 +430,7 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(Rect layoutOutRect, const sptr<Wi
             rect.height_ += (hotZone + hotZone);
         }
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
-        rect = displayRectMap_[node->GetDisplayId()];
+        rect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
     } else if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
         rect.posX_ -= hotZone;
         rect.posY_ -= hotZone;
@@ -434,6 +469,74 @@ void WindowLayoutPolicy::LimitFloatingWindowSize(const sptr<WindowNode>& node,
     }
 }
 
+DockWindowShowState WindowLayoutPolicy::GetDockWindowShowState(DisplayId displayId, Rect& dockWinRect) const
+{
+    auto& displayWindowTree = displayGroupWindowTree_[displayId];
+    auto& nodeVec = *(displayWindowTree[WindowRootNodeType::ABOVE_WINDOW_NODE]);
+    for (auto& node : nodeVec) {
+        if (node->GetWindowType() != WindowType::WINDOW_TYPE_LAUNCHER_DOCK) {
+            continue;
+        }
+
+        dockWinRect = node->GetWindowRect();
+        auto displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+        WLOGFI("begin dockWinRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
+            dockWinRect.posX_, dockWinRect.posY_, dockWinRect.width_, dockWinRect.height_);
+        if (dockWinRect.height_ < dockWinRect.width_) {
+            if (static_cast<uint32_t>(dockWinRect.posY_) + dockWinRect.height_ == displayRect.height_) {
+                return DockWindowShowState::SHOWN_IN_BOTTOM;
+            } else {
+                return DockWindowShowState::NOT_SHOWN;
+            }
+        } else {
+            if (dockWinRect.posX_ == 0) {
+                return DockWindowShowState::SHOWN_IN_LEFT;
+            } else if (static_cast<uint32_t>(dockWinRect.posX_) + dockWinRect.width_ == displayRect.width_) {
+                return DockWindowShowState::SHOWN_IN_RIGHT;
+            } else {
+                return DockWindowShowState::NOT_SHOWN;
+            }
+        }
+    }
+    return DockWindowShowState::NOT_SHOWN;
+}
+
+void WindowLayoutPolicy::LimitMainFloatingWindowPositionWithDrag(const sptr<WindowNode>& node, Rect& winRect) const
+{
+    if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+        float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
+        uint32_t windowTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
+        const Rect lastRect = node->GetWindowRect();
+        // fix rect in case of moving window when dragging
+        winRect = WindowHelper::GetFixedWindowRectByLimitSize(winRect, lastRect,
+            IsVerticalDisplay(node->GetDisplayId()), virtualPixelRatio);
+
+        // if is mutiDisplay, the limit rect should be full limitRect when move or drag
+        Rect limitRect;
+        if (isMultiDisplay_) {
+            limitRect = displayGroupLimitRect_;
+        } else {
+            limitRect = limitRectMap_[node->GetDisplayId()];
+        }
+        winRect = WindowHelper::GetFixedWindowRectByLimitPosition(winRect, lastRect,
+            virtualPixelRatio, limitRect);
+        Rect dockWinRect;
+        DockWindowShowState dockShownState = GetDockWindowShowState(node->GetDisplayId(), dockWinRect);
+        if (dockShownState == DockWindowShowState::SHOWN_IN_BOTTOM) {
+            WLOGFI("dock window show in bottom");
+            winRect.posY_ = std::min(dockWinRect.posY_ - static_cast<int32_t>(windowTitleBarH), winRect.posY_);
+        } else if (dockShownState == DockWindowShowState::SHOWN_IN_LEFT) {
+            WLOGFI("dock window show in left");
+            winRect.posX_ = std::max(static_cast<int32_t>(dockWinRect.width_ + windowTitleBarH - winRect.width_),
+                                     winRect.posX_);
+        } else if (dockShownState == DockWindowShowState::SHOWN_IN_RIGHT) {
+            WLOGFI("dock window show in right");
+            winRect.posX_ = std::min(dockWinRect.posX_ - static_cast<int32_t>(windowTitleBarH),
+                                     winRect.posX_);
+        }
+    }
+}
+
 void WindowLayoutPolicy::LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const
 {
     float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
@@ -449,25 +552,42 @@ void WindowLayoutPolicy::LimitMainFloatingWindowPosition(const sptr<WindowNode>&
 
     // limit position of the main floating window(window which support dragging)
     if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+        Rect dockWinRect;
+        DockWindowShowState dockShownState = GetDockWindowShowState(node->GetDisplayId(), dockWinRect);
         winRect.posY_ = std::max(limitRect.posY_, winRect.posY_);
         winRect.posY_ = std::min(limitRect.posY_ + static_cast<int32_t>(limitRect.height_ - windowTitleBarH),
                                  winRect.posY_);
-
+        if (dockShownState == DockWindowShowState::SHOWN_IN_BOTTOM) {
+            WLOGFI("dock window show in bottom");
+            winRect.posY_ = std::min(dockWinRect.posY_ + static_cast<int32_t>(dockWinRect.height_ - windowTitleBarH),
+                                     winRect.posY_);
+        }
         winRect.posX_ = std::max(limitRect.posX_ + static_cast<int32_t>(windowTitleBarH - winRect.width_),
                                  winRect.posX_);
+        if (dockShownState == DockWindowShowState::SHOWN_IN_LEFT) {
+            WLOGFI("dock window show in left");
+            winRect.posX_ = std::max(static_cast<int32_t>(dockWinRect.width_ + windowTitleBarH - winRect.width_),
+                                     winRect.posX_);
+        }
         winRect.posX_ = std::min(limitRect.posX_ + static_cast<int32_t>(limitRect.width_ - windowTitleBarH),
                                  winRect.posX_);
+        if (dockShownState == DockWindowShowState::SHOWN_IN_RIGHT) {
+            WLOGFI("dock window show in right");
+            winRect.posX_ = std::min(dockWinRect.posX_ - static_cast<int32_t>(windowTitleBarH),
+                                     winRect.posX_);
+        }
     }
 }
 
 AvoidPosType WindowLayoutPolicy::GetAvoidPosType(const Rect& rect, DisplayId displayId) const
 {
-    if (displayInfosMap_.find(displayId) == std::end(displayInfosMap_)) {
+    const auto& displayRectMap = displayGroupInfo_->GetAllDisplayRects();
+    if (displayRectMap.find(displayId) == std::end(displayRectMap)) {
         WLOGFE("GetAvoidPosType fail. Get display fail. displayId: %{public}" PRIu64"", displayId);
         return AvoidPosType::AVOID_POS_UNKNOWN;
     }
-    return WindowHelper::GetAvoidPosType(rect, displayInfosMap_[displayId]->GetWidth(),
-        displayInfosMap_[displayId]->GetHeight());
+    const auto& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+    return WindowHelper::GetAvoidPosType(rect, displayRect.width_, displayRect.height_);
 }
 
 void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect)
@@ -517,14 +637,7 @@ void WindowLayoutPolicy::Reset()
 
 float WindowLayoutPolicy::GetVirtualPixelRatio(DisplayId displayId) const
 {
-    if (displayInfosMap_.find(displayId) == std::end(displayInfosMap_)) {
-        return 1.0; // 1.0 is default vpr
-    }
-    float virtualPixelRatio = displayInfosMap_[displayId]->GetVirtualPixelRatio();
-    if (virtualPixelRatio == 0.0) {
-        WLOGFE("GetVirtualPixel fail. vpr is 0.0. displayId:%{public}" PRIu64", use Default vpr:1.0", displayId);
-        return 1.0;  // Use DefaultVPR 1.0
-    }
+    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
     WLOGFI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", displayId, virtualPixelRatio);
     return virtualPixelRatio;
 }

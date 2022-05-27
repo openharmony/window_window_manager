@@ -94,6 +94,7 @@ public:
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() const override;
     virtual uint32_t GetWindowFlags() const override;
+    uint32_t GetModeSupportInfo() const;
     inline NotifyNativeWinDestroyFunc GetNativeDestroyCallback()
     {
         return notifyNativefunc_;
@@ -163,7 +164,9 @@ public:
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    virtual void RegisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
+    virtual void SetModeSupportInfo(uint32_t modeSupportInfo) override;
     void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason);
     void UpdateMode(WindowMode mode);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
@@ -178,6 +181,7 @@ public:
     void UpdateDisplayId(DisplayId from, DisplayId to);
     void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info);
     void UpdateActiveStatus(bool isActive);
+    void NotifyOutsidePressed();
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
@@ -244,6 +248,10 @@ private:
     {
         CALL_LIFECYCLE_LISTENER(AfterInactive);
     }
+    inline void NotifyForegroundFailed() const
+    {
+        CALL_LIFECYCLE_LISTENER(ForegroundFailed);
+    }
     void DestroyFloatingWindow();
     void DestroySubWindow();
     void SetDefaultOption(); // for api7
@@ -286,6 +294,7 @@ private:
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowTag windowTag_;
     sptr<IAceAbilityHandler> aceAbilityHandler_;
+    sptr<IOutsidePressedListener> outsidePressListener_;
     std::vector<sptr<IWindowLifeCycle>> lifecycleListeners_;
     std::vector<sptr<IWindowChangeListener>> windowChangeListeners_;
     std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;

@@ -20,6 +20,7 @@
 #include <refbase.h>
 #include <set>
 
+#include "display_group_info.h"
 #include "display_info.h"
 #include "window_node.h"
 #include "wm_common.h"
@@ -27,13 +28,19 @@
 
 namespace OHOS {
 namespace Rosen {
-using WindowNodeMaps = std::map<DisplayId,
+using DisplayGroupWindowTree = std::map<DisplayId,
     std::map<WindowRootNodeType, std::unique_ptr<std::vector<sptr<WindowNode>>>>>;
+enum class DockWindowShowState : uint32_t {
+    NOT_SHOWN = 0,
+    SHOWN_IN_BOTTOM = 1,
+    SHOWN_IN_LEFT = 2,
+    SHOWN_IN_RIGHT = 3,
+    SHOWN_IN_TOP = 4,
+};
 class WindowLayoutPolicy : public RefBase {
 public:
     WindowLayoutPolicy() = delete;
-    WindowLayoutPolicy(const std::map<DisplayId, Rect>& displayRectMap, WindowNodeMaps& windowNodeMaps,
-        std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap);
+    WindowLayoutPolicy(const sptr<DisplayGroupInfo>& displayGroupInfo, DisplayGroupWindowTree& displayGroupWindowTree);
     ~WindowLayoutPolicy() = default;
     virtual void Launch();
     virtual void Clean();
@@ -44,6 +51,7 @@ public:
     virtual void RemoveWindowNode(const sptr<WindowNode>& node);
     virtual void UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow = false);
     virtual void UpdateLayoutRect(const sptr<WindowNode>& node) = 0;
+    virtual void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) {};
     float GetVirtualPixelRatio(DisplayId displayId) const;
     void UpdateClientRectAndResetReason(const sptr<WindowNode>& node, const Rect& lastLayoutRect, const Rect& winRect);
     Rect GetDisplayGroupRect() const;
@@ -59,6 +67,7 @@ protected:
     AvoidPosType GetAvoidPosType(const Rect& rect, DisplayId displayId) const;
     void CalcAndSetNodeHotZone(Rect layoutOutRect, const sptr<WindowNode>& node) const;
     void LimitFloatingWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect) const;
+    void LimitMainFloatingWindowPositionWithDrag(const sptr<WindowNode>& node, Rect& winRect) const;
     void LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const;
     void ComputeDecoratedRequestRect(const sptr<WindowNode>& node) const;
     bool IsVerticalDisplay(DisplayId displayId) const;
@@ -66,25 +75,26 @@ protected:
     void LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec);
     void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect);
     void UpdateRectInDisplayGroupForAllNodes(DisplayId displayId,
-                                             const Rect& srcDisplayRect,
-                                             const Rect& dstDisplayRect);
+                                             const Rect& oriDisplayRect,
+                                             const Rect& newDisplayRect);
     void UpdateRectInDisplayGroup(const sptr<WindowNode>& node,
-                                  const Rect& srcDisplayRect,
-                                  const Rect& dstDisplayRect);
+                                  const Rect& oriDisplayRect,
+                                  const Rect& newDisplayRect);
     void LimitWindowToBottomRightCorner(const sptr<WindowNode>& node);
     void UpdateDisplayGroupRect();
     void UpdateDisplayGroupLimitRect_();
     void UpdateMultiDisplayFlag();
     void PostProcessWhenDisplayChange();
+    void UpdateDisplayRectAndDisplayGroupInfo(const std::map<DisplayId, Rect>& displayRectMap);
+    DockWindowShowState GetDockWindowShowState(DisplayId displayId, Rect& dockWinRect) const;
 
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowType::WINDOW_TYPE_NAVIGATION_BAR,
     };
-    mutable std::map<DisplayId, Rect> displayRectMap_;
+    sptr<DisplayGroupInfo> displayGroupInfo_;
     mutable std::map<DisplayId, Rect> limitRectMap_;
-    WindowNodeMaps& windowNodeMaps_;
-    std::map<DisplayId, sptr<DisplayInfo>>& displayInfosMap_;
+    DisplayGroupWindowTree& displayGroupWindowTree_;
     Rect displayGroupRect_;
     Rect displayGroupLimitRect_;
     bool isMultiDisplay_ = false;

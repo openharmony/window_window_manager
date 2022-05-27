@@ -107,6 +107,22 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             reply.WriteParcelable(property.GetRefPtr());
             break;
         }
+        case WindowMessage::TRANS_ID_NOTIFY_OUTSIDE_PRESSED: {
+            NotifyOutsidePressed();
+            break;
+        }
+        case WindowMessage::TRANS_ID_DUMP_INFO: {
+            std::vector<std::string> params;
+            if (!data.ReadStringVector(&params)) {
+                WLOGFE("Fail to read params");
+            }
+            std::vector<std::string> info;
+            DumpInfo(params, info);
+            if (!reply.WriteStringVector(info)) {
+                WLOGFE("Fail to write info");
+            }
+            break;
+        }
         default:
             break;
     }

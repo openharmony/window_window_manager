@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/graphic/graphic/graphic_config.gni")
+import("//foundation/graphic/graphic_2d/graphic_config.gni")
 
 ## Build libwms.so
 config("libwms_config") {
@@ -70,6 +70,7 @@ ohos_shared_library("libwms") {
     "../wm/src/zidl/window_proxy.cpp",
     "src/avoid_area_controller.cpp",
     "src/display_group_controller.cpp",
+    "src/display_group_info.cpp",
     "src/drag_controller.cpp",
     "src/freeze_controller.cpp",
     "src/input_window_monitor.cpp",
@@ -92,6 +93,7 @@ ohos_shared_library("libwms") {
     "src/window_snapshot/snapshot_controller.cpp",
     "src/window_snapshot/snapshot_proxy.cpp",
     "src/window_snapshot/snapshot_stub.cpp",
+    "src/window_task_looper.cpp",
     "src/window_zorder_policy.cpp",
     "src/zidl/window_manager_stub.cpp",
   ]
@@ -102,7 +104,7 @@ ohos_shared_library("libwms") {
     ":window_divider_image",
     ":window_manager_config",
     ":window_starting_image",
-    "//foundation/graphic/graphic/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/dmserver:libdms",
     "//foundation/windowmanager/utils:libwmutil",

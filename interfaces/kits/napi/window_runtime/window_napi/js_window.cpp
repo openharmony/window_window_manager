@@ -299,6 +299,13 @@ NativeValue* JsWindow::Dump(NativeEngine* engine, NativeCallbackInfo* info)
     return (me != nullptr) ? me->OnDump(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::SetForbidSplitMove(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]SetForbidSplitMove");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetForbidSplitMove(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WMError errCode = WMError::WM_OK;
@@ -306,21 +313,23 @@ NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            WMError ret = windowToken_->Show();
+            WMError ret = weakWindow->Show();
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window show failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] show end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
     NativeValue* lastParam = (info.argc == 0) ? nullptr :
@@ -338,22 +347,23 @@ NativeValue* JsWindow::OnDestroy(NativeEngine& engine, NativeCallbackInfo& info)
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            WMError ret = windowToken_->Destroy();
+            WMError ret = weakWindow->Destroy();
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] destroy end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
             if (ret != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window destroy failed"));
                 return;
             }
 
-            windowToken_ = nullptr;
             task.Resolve(engine, engine.CreateUndefined());
         };
 
@@ -372,21 +382,23 @@ NativeValue* JsWindow::OnHide(NativeEngine& engine, NativeCallbackInfo& info)
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            WMError ret = windowToken_->Hide();
+            WMError ret = weakWindow->Hide();
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window hide failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] hide end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
     NativeValue* lastParam = (info.argc == 0) ? nullptr :
@@ -416,21 +428,23 @@ NativeValue* JsWindow::OnMoveTo(NativeEngine& engine, NativeCallbackInfo& info)
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, errCode, x, y](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            WMError ret = windowToken_->MoveTo(x, y);
+            WMError ret = weakWindow->MoveTo(x, y);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window move failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] move end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     // 2: params num; 2: index of callback
     NativeValue* lastParam = (info.argc <= 2) ? nullptr :
@@ -459,21 +473,23 @@ NativeValue* JsWindow::OnResize(NativeEngine& engine, NativeCallbackInfo& info)
         WLOGFE("[NAPI]Failed to convert parameter to height");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, errCode, width, height](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            WMError ret = windowToken_->Resize(width, height);
+            WMError ret = weakWindow->Resize(width, height);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window resize failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] resize end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     // 2: params num; 2: index of callback
     NativeValue* lastParam = (info.argc <= 2) ? nullptr :
@@ -511,21 +527,23 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
         }
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, winType, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            WMError ret = windowToken_->SetWindowType(winType);
+            WMError ret = weakWindow->SetWindowType(winType);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set type failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set type end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -563,14 +581,16 @@ NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo&
         }
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, winMode, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            WMError ret = windowToken_->SetWindowMode(winMode);
+            WMError ret = weakWindow->SetWindowMode(winMode);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
@@ -578,7 +598,7 @@ NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo&
                     CreateJsError(engine, static_cast<int32_t>(ret), "Window set mode failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set type end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
     NativeValue* lastParam = (info.argc == 1) ? nullptr :
@@ -596,14 +616,16 @@ NativeValue* JsWindow::OnGetProperties(NativeEngine& engine, NativeCallbackInfo&
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            auto objValue = CreateJsWindowPropertiesObject(engine, windowToken_);
+            auto objValue = CreateJsWindowPropertiesObject(engine, weakWindow);
             if (objValue != nullptr) {
                 task.Resolve(engine, objValue);
             } else {
@@ -611,7 +633,7 @@ NativeValue* JsWindow::OnGetProperties(NativeEngine& engine, NativeCallbackInfo&
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "Window get properties failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] get properties end, objValue = %{public}p",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), objValue);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), objValue);
         };
 
     NativeValue* lastParam = (info.argc == 0) ? nullptr :
@@ -675,6 +697,23 @@ NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCa
     return engine.CreateUndefined();
 }
 
+static void LoadContentTask(std::weak_ptr<NativeReference> contentStorage, std::string contextUrl,
+    sptr<Window> weakWindow, NativeEngine& engine, AsyncTask& task)
+{
+    NativeValue* nativeStorage = (contentStorage.lock() == nullptr) ? nullptr : contentStorage.lock()->Get();
+    AppExecFwk::Ability* ability = nullptr;
+    GetAPI7Ability(engine, ability);
+    WMError ret = weakWindow->SetUIContent(contextUrl, &engine, nativeStorage, false, ability);
+    if (ret == WMError::WM_OK) {
+        task.Resolve(engine, engine.CreateUndefined());
+    } else {
+        task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window load content failed"));
+    }
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] load content end, ret = %{public}d",
+        weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+    return;
+}
+
 NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WMError errCode = WMError::WM_OK;
@@ -701,26 +740,18 @@ NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& i
         // 2: index of callback
         callBack = (info.argv[2]->TypeOf() == NATIVE_FUNCTION ? info.argv[2] : nullptr);
     }
-    std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
+    std::weak_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, contentStorage, contextUrl, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]Window is nullptr or get invalid param");
                 return;
             }
-            NativeValue* nativeStorage = (contentStorage == nullptr) ? nullptr : contentStorage->Get();
-            AppExecFwk::Ability* ability = nullptr;
-            GetAPI7Ability(engine, ability);
-            WMError ret = windowToken_->SetUIContent(contextUrl, &engine, nativeStorage, false, ability);
-            if (ret == WMError::WM_OK) {
-                task.Resolve(engine, engine.CreateUndefined());
-            } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window load content failed"));
-            }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] load content end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+            LoadContentTask(contentStorage, contextUrl, weakWindow, engine, task);
         };
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
@@ -746,20 +777,22 @@ NativeValue* JsWindow::OnSetFullScreen(NativeEngine& engine, NativeCallbackInfo&
         }
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, isFullScreen, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            WMError ret = windowToken_->SetFullScreen(isFullScreen);
+            WMError ret = weakWindow->SetFullScreen(isFullScreen);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window SetFullScreen failed."));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set full screen end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -787,13 +820,15 @@ NativeValue* JsWindow::OnSetLayoutFullScreen(NativeEngine& engine, NativeCallbac
             isLayoutFullScreen = static_cast<bool>(*nativeVal);
         }
     }
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, isLayoutFullScreen, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            WMError ret = windowToken_->SetLayoutFullScreen(isLayoutFullScreen);
+            WMError ret = weakWindow->SetLayoutFullScreen(isLayoutFullScreen);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
@@ -801,7 +836,7 @@ NativeValue* JsWindow::OnSetLayoutFullScreen(NativeEngine& engine, NativeCallbac
                     static_cast<int32_t>(ret), "Window OnSetLayoutFullScreen failed."));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set layout full screen end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
         (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
@@ -822,16 +857,18 @@ NativeValue* JsWindow::OnSetSystemBarEnable(NativeEngine& engine, NativeCallback
     if (errCode == WMError::WM_OK && !GetSystemBarStatus(systemBarProperties, engine, info, windowToken_)) {
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, systemBarProperties, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            WMError ret = windowToken_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
+            WMError ret = weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
                 systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR));
-            ret = windowToken_->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+            ret = weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
                 systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR));
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
@@ -840,7 +877,7 @@ NativeValue* JsWindow::OnSetSystemBarEnable(NativeEngine& engine, NativeCallback
                     static_cast<int32_t>(ret), "JsWindow::OnSetSystemBarEnable failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set system bar enable end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     NativeValue* lastParam = nullptr;
     if (info.argc > 0 && info.argv[0]->TypeOf() == NATIVE_FUNCTION) {
@@ -874,15 +911,17 @@ NativeValue* JsWindow::OnSetSystemBarProperties(NativeEngine& engine, NativeCall
             }
         }
     }
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, systemBarProperties, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
             }
-            WMError ret = windowToken_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
+            WMError ret = weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR,
                 systemBarProperties.at(WindowType::WINDOW_TYPE_STATUS_BAR));
-            ret = windowToken_->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+            ret = weakWindow->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR,
                 systemBarProperties.at(WindowType::WINDOW_TYPE_NAVIGATION_BAR));
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
@@ -891,7 +930,7 @@ NativeValue* JsWindow::OnSetSystemBarProperties(NativeEngine& engine, NativeCall
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindow::OnSetSystemBarProperties failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set system bar properties end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -920,16 +959,18 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
             avoidAreaType = static_cast<AvoidAreaType>(static_cast<uint32_t>(*nativeMode));
         }
     }
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, errCode, avoidAreaType](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
             // getAvoidRect by avoidAreaType
             AvoidArea avoidArea;
-            WMError ret = windowToken_->GetAvoidAreaByType(avoidAreaType, avoidArea);
+            WMError ret = weakWindow->GetAvoidAreaByType(avoidAreaType, avoidArea);
             if (ret != WMError::WM_OK) {
                 avoidArea = { g_emptyRect, g_emptyRect, g_emptyRect, g_emptyRect }; // left, top, right, bottom
             }
@@ -942,7 +983,7 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "JsWindow::OnGetAvoidArea failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] get avoid area end, ret = %{public}d",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), ret);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
         (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
@@ -959,17 +1000,19 @@ NativeValue* JsWindow::OnIsShowing(NativeEngine& engine, NativeCallbackInfo& inf
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            bool state = windowToken_->GetShowState();
+            bool state = weakWindow->GetShowState();
             task.Resolve(engine, CreateJsValue(engine, state));
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] get show state end, state = %{public}u",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), state);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), state);
         };
 
     NativeValue* lastParam = (info.argc == 0) ? nullptr :
@@ -987,17 +1030,19 @@ NativeValue* JsWindow::OnIsSupportWideGamut(NativeEngine& engine, NativeCallback
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            bool flag = windowToken_->IsSupportWideGamut();
+            bool flag = weakWindow->IsSupportWideGamut();
             task.Resolve(engine, CreateJsValue(engine, flag));
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnIsSupportWideGamut end, ret = %{public}u",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), flag);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), flag);
         };
 
     NativeValue* lastParam = (info.argc == 0) ? nullptr :
@@ -1021,13 +1066,15 @@ NativeValue* JsWindow::OnSetBackgroundColor(NativeEngine& engine, NativeCallback
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, color, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            WMError ret = windowToken_->SetBackgroundColor(color);
+            WMError ret = weakWindow->SetBackgroundColor(color);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
@@ -1035,7 +1082,7 @@ NativeValue* JsWindow::OnSetBackgroundColor(NativeEngine& engine, NativeCallback
                     "Window set background color failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set background color end",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1064,20 +1111,22 @@ NativeValue* JsWindow::OnSetBrightness(NativeEngine& engine, NativeCallbackInfo&
         }
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, brightness, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            WMError ret = windowToken_->SetBrightness(brightness);
+            WMError ret = weakWindow->SetBrightness(brightness);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set brightness failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set brightness end",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1091,7 +1140,7 @@ NativeValue* JsWindow::OnSetBrightness(NativeEngine& engine, NativeCallbackInfo&
 NativeValue* JsWindow::OnSetDimBehind(NativeEngine& engine, NativeCallbackInfo& info)
 {
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [](NativeEngine& engine, AsyncTask& task, int32_t status) {
             task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
         };
 
@@ -1121,20 +1170,22 @@ NativeValue* JsWindow::OnSetFocusable(NativeEngine& engine, NativeCallbackInfo& 
         }
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, focusable, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            WMError ret = windowToken_->SetFocusable(focusable);
+            WMError ret = weakWindow->SetFocusable(focusable);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set focusable failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set focusable end",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1163,13 +1214,15 @@ NativeValue* JsWindow::OnSetKeepScreenOn(NativeEngine& engine, NativeCallbackInf
         }
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, keepScreenOn, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            WMError ret = windowToken_->SetKeepScreenOn(keepScreenOn);
+            WMError ret = weakWindow->SetKeepScreenOn(keepScreenOn);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
@@ -1177,7 +1230,7 @@ NativeValue* JsWindow::OnSetKeepScreenOn(NativeEngine& engine, NativeCallbackInf
                     "Window set keep screen on failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set keep screen on end",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1191,7 +1244,7 @@ NativeValue* JsWindow::OnSetKeepScreenOn(NativeEngine& engine, NativeCallbackInf
 NativeValue* JsWindow::OnSetOutsideTouchable(NativeEngine& engine, NativeCallbackInfo& info)
 {
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [](NativeEngine& engine, AsyncTask& task, int32_t status) {
             task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
         };
 
@@ -1221,16 +1274,18 @@ NativeValue* JsWindow::OnSetPrivacyMode(NativeEngine& engine, NativeCallbackInfo
         }
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, isPrivacyMode, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params"));
                 return;
             }
-            windowToken_->SetPrivacyMode(isPrivacyMode);
+            weakWindow->SetPrivacyMode(isPrivacyMode);
             task.Resolve(engine, engine.CreateUndefined());
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set privacy mode end, mode = %{public}u",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isPrivacyMode);
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), isPrivacyMode);
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1259,20 +1314,22 @@ NativeValue* JsWindow::OnSetTouchable(NativeEngine& engine, NativeCallbackInfo& 
         }
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, touchable, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            WMError ret = windowToken_->SetTouchable(touchable);
+            WMError ret = weakWindow->SetTouchable(touchable);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set touchable failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set touchable end",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1301,20 +1358,22 @@ NativeValue* JsWindow::OnSetTransparent(NativeEngine& engine, NativeCallbackInfo
         }
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, isTransparent, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            WMError ret = windowToken_->SetTransparent(isTransparent);
+            WMError ret = weakWindow->SetTransparent(isTransparent);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window set transparent failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set transparent end",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1343,13 +1402,15 @@ NativeValue* JsWindow::OnSetCallingWindow(NativeEngine& engine, NativeCallbackIn
         }
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, callingWindow, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            WMError ret = windowToken_->SetCallingWindow(callingWindow);
+            WMError ret = weakWindow->SetCallingWindow(callingWindow);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
@@ -1357,7 +1418,7 @@ NativeValue* JsWindow::OnSetCallingWindow(NativeEngine& engine, NativeCallbackIn
                     "Window set calling window failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] set calling window end",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1400,17 +1461,19 @@ NativeValue* JsWindow::OnSetColorSpace(NativeEngine& engine, NativeCallbackInfo&
         }
     }
 
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, colorSpace, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "OnSetColorSpace failed"));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            windowToken_->SetColorSpace(colorSpace);
+            weakWindow->SetColorSpace(colorSpace);
             task.Resolve(engine, engine.CreateUndefined());
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnSetColorSpace end, colorSpace = %{public}u",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1428,17 +1491,19 @@ NativeValue* JsWindow::OnGetColorSpace(NativeEngine& engine, NativeCallbackInfo&
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
+    wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowToken_ == nullptr || errCode != WMError::WM_OK) {
+        [weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            ColorSpace colorSpace = windowToken_->GetColorSpace();
+            ColorSpace colorSpace = weakWindow->GetColorSpace();
             task.Resolve(engine, CreateJsValue(engine, static_cast<uint32_t>(colorSpace)));
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnGetColorSpace end, colorSpace = %{public}u",
-                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
         };
 
     NativeValue* lastParam = (info.argc == 0) ? nullptr :
@@ -1471,6 +1536,54 @@ NativeValue* JsWindow::OnDump(NativeEngine& engine, NativeCallbackInfo& info)
     WLOGFI("[NAPI]Window [%{public}u, %{public}s] dump end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     return dumpInfoValue;
+}
+
+NativeValue* JsWindow::OnSetForbidSplitMove(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool isForbidSplitMove = false;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to isForbidSplitMove");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            isForbidSplitMove = static_cast<bool>(*nativeVal);
+        }
+    }
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, isForbidSplitMove, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            WMError ret;
+            if (isForbidSplitMove) {
+                ret = weakWindow->AddWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
+            } else {
+                ret = weakWindow->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
+            }
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(ret), "Window OnSetForbidSplitMove failed."));
+            }
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set forbid split move end, ret = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+        };
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule(
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
 }
 
 std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
@@ -1533,6 +1646,7 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     BindNativeFunction(engine, *object, "setCallingWindow", JsWindow::SetCallingWindow);
     BindNativeFunction(engine, *object, "disableWindowDecor", JsWindow::DisableWindowDecor);
     BindNativeFunction(engine, *object, "dump", JsWindow::Dump);
+    BindNativeFunction(engine, *object, "setForbidSplitMove", JsWindow::SetForbidSplitMove);
 
     std::shared_ptr<NativeReference> jsWindowRef;
     jsWindowRef.reset(engine.CreateReference(objValue, 1));

@@ -30,10 +30,10 @@ enum class Event : uint32_t {
 };
 
 class WindowRoot : public RefBase {
-using Callback = std::function<void (Event event, uint32_t windowId)>;
+using Callback = std::function<void (Event event, const sptr<IRemoteObject>& remoteObject)>;
 
 public:
-    WindowRoot(std::recursive_mutex& mutex, Callback callback) : mutex_(mutex), callback_(callback) {}
+    explicit WindowRoot(Callback callback) : callback_(callback) {}
     ~WindowRoot() = default;
 
     sptr<WindowNodeContainer> GetOrCreateWindowNodeContainer(DisplayId displayId);
@@ -48,6 +48,7 @@ public:
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);
     WMError UpdateWindowNode(uint32_t windowId, WindowUpdateReason reason);
     bool isVerticalDisplay(sptr<WindowNode>& node) const;
+    bool IsForbidDockSliceMove(DisplayId displayId) const;
 
     WMError RequestFocus(uint32_t windowId);
     WMError RequestActiveWindow(uint32_t windowId);
@@ -80,7 +81,9 @@ public:
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     std::vector<DisplayId> GetAllDisplayIds() const;
-    std::map<uint32_t, sptr<WindowNode>> GetWindowNodeMap();
+    uint32_t GetTotalWindowNum() const;
+    uint32_t GetWindowIdByObject(const sptr<IRemoteObject>& remoteObject);
+    sptr<WindowNode> GetWindowForDumpAceHelpInfo() const;
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
@@ -96,9 +99,11 @@ private:
     ScreenId GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay);
     void ProcessExpandDisplayCreate(DisplayId displayId, ScreenId screenGroupId);
     std::map<DisplayId, sptr<DisplayInfo>> GetAllDisplayInfos(const std::vector<DisplayId>& displayIdVec);
+    std::map<DisplayId, Rect> GetAllDisplayRects(const std::vector<DisplayId>& displayIdVec);
     void MoveNotShowingWindowToDefaultDisplay(DisplayId displayId);
-
-    std::recursive_mutex& mutex_;
+    void DestroyLeakStartingWindow();
+    WMError PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode,
+        sptr<WindowNodeContainer>& container);
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
     std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainerMap_;

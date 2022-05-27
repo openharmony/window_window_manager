@@ -58,6 +58,7 @@ public:
     virtual void AfterBackground() = 0;
     virtual void AfterFocused() = 0;
     virtual void AfterUnfocused() = 0;
+    virtual void ForegroundFailed() {}
     virtual void AfterActive() {}
     virtual void AfterInactive() {}
 };
@@ -117,6 +118,11 @@ class IInputEventListener : virtual public RefBase {
 public:
     virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
     virtual void OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
+};
+
+class IOutsidePressedListener : virtual public RefBase {
+public:
+    virtual void OnOutsidePressed() = 0;
 };
 
 class Window : public RefBase {
@@ -200,6 +206,7 @@ public:
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
+    virtual void RegisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener) = 0;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;
@@ -208,6 +215,7 @@ public:
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     virtual void SetRequestedOrientation(Orientation) = 0;
     virtual Orientation GetRequestedOrientation() = 0;
+    virtual void SetModeSupportInfo(uint32_t modeSupportInfo) = 0;
 
     virtual bool IsDecorEnable() const = 0;
     virtual WMError Maximize() = 0;

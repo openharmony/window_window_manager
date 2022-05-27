@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_INPUT_TRANSFER_STATION
-#define OHOS_INPUT_TRANSFER_STATION
+#ifndef OHOS_INPUT_TRANSFER_STATION_H
+#define OHOS_INPUT_TRANSFER_STATION_H
 
 #include "input_manager.h"
 #include "pointer_event.h"
@@ -53,4 +53,4 @@ public:
 } // namespace OHOS
 
 
-#endif // OHOS_INPUT_TRANSFER_STATION
+#endif // OHOS_INPUT_TRANSFER_STATION_H
