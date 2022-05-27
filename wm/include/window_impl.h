@@ -246,6 +246,10 @@ private:
     {
         CALL_LIFECYCLE_LISTENER(AfterInactive);
     }
+    inline void NotifyForegroundFailed() const
+    {
+        CALL_LIFECYCLE_LISTENER(ForegroundFailed);
+    }
     void DestroyFloatingWindow();
     void DestroySubWindow();
     void SetDefaultOption(); // for api7

@@ -792,7 +792,8 @@ WMError WindowImpl::Show(uint32_t reason)
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
     } else {
-        WLOGFE("show errCode:%{public}d for winId:%{public}u", static_cast<int32_t>(ret), property_->GetWindowId());
+        NotifyForegroundFailed();
+        WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
 }
