@@ -164,6 +164,7 @@ public:
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual void RegisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener) override;
+    virtual void UnregisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason);
     void UpdateMode(WindowMode mode);
@@ -288,7 +289,7 @@ private:
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowTag windowTag_;
     sptr<IAceAbilityHandler> aceAbilityHandler_;
-    sptr<IOutsidePressedListener> outsidePressListener_;
+    std::vector<sptr<IOutsidePressedListener>> outsidePressedListeners_;
     std::vector<sptr<IWindowLifeCycle>> lifecycleListeners_;
     std::vector<sptr<IWindowChangeListener>> windowChangeListeners_;
     std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
