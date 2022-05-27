@@ -18,6 +18,7 @@
 #include <cinttypes>
 #include <map>
 #include "display.h"
+#include "display_info.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -75,12 +76,15 @@ std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId)
 NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
 {
     WLOGFI("JsDisplay::CreateJsDisplay is called");
+    NativeValue* objValue = nullptr;
     std::shared_ptr<NativeReference> jsDisplayObj = FindJsDisplayObject(display->GetId());
     if (jsDisplayObj != nullptr && jsDisplayObj->Get() != nullptr) {
         WLOGFI("[NAPI]FindJsDisplayObject %{public}" PRIu64"", display->GetId());
-        return jsDisplayObj->Get();
+        objValue = jsDisplayObj->Get();
     }
-    NativeValue* objValue = engine.CreateObject();
+    if (objValue == nullptr) {
+        objValue = engine.CreateObject();
+    }
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
         WLOGFE("Failed to convert prop to jsObject");
@@ -88,26 +92,31 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
     }
     std::unique_ptr<JsDisplay> jsDisplay = std::make_unique<JsDisplay>(display);
     object->SetNativePointer(jsDisplay.release(), JsDisplay::Finalizer, nullptr);
-
-    object->SetProperty("id", CreateJsValue(engine, static_cast<uint32_t>(display->GetId())));
-    object->SetProperty("width", CreateJsValue(engine, display->GetWidth()));
-    object->SetProperty("height", CreateJsValue(engine, display->GetHeight()));
-    object->SetProperty("refreshRate", CreateJsValue(engine, display->GetRefreshRate()));
+    auto info = display->GetDisplayInfo();
+    if (info == nullptr) {
+        WLOGFE("Failed to GetDisplayInfo");
+        return engine.CreateUndefined();
+    }
+    object->SetProperty("id", CreateJsValue(engine, static_cast<uint32_t>(info->GetDisplayId())));
+    object->SetProperty("width", CreateJsValue(engine, info->GetWidth()));
+    object->SetProperty("height", CreateJsValue(engine, info->GetHeight()));
+    object->SetProperty("refreshRate", CreateJsValue(engine, info->GetRefreshRate()));
     object->SetProperty("name", engine.CreateUndefined());
     object->SetProperty("alive", engine.CreateUndefined());
     object->SetProperty("state", engine.CreateUndefined());
-    object->SetProperty("rotation", CreateJsValue(engine, display->GetRotation()));
-    object->SetProperty("densityDPI", CreateJsValue(engine, display->GetDpi()));
+    object->SetProperty("rotation", CreateJsValue(engine, info->GetRotation()));
+    object->SetProperty("densityDPI", CreateJsValue(engine, info->GetVirtualPixelRatio() * DOT_PER_INCH));
     object->SetProperty("densityPixels", engine.CreateUndefined());
     object->SetProperty("scaledDensity", engine.CreateUndefined());
     object->SetProperty("xDPI", engine.CreateUndefined());
     object->SetProperty("yDPI", engine.CreateUndefined());
-
-    std::shared_ptr<NativeReference> jsDisplayRef;
-    jsDisplayRef.reset(engine.CreateReference(objValue, 1));
-    DisplayId displayId = display->GetId();
-    std::lock_guard<std::recursive_mutex> lock(g_mutex);
-    g_JsDisplayMap[displayId] = jsDisplayRef;
+    if (jsDisplayObj == nullptr || jsDisplayObj->Get() == nullptr) {
+        std::shared_ptr<NativeReference> jsDisplayRef;
+        jsDisplayRef.reset(engine.CreateReference(objValue, 1));
+        DisplayId displayId = display->GetId();
+        std::lock_guard<std::recursive_mutex> lock(g_mutex);
+        g_JsDisplayMap[displayId] = jsDisplayRef;
+    }
     return objValue;
 }
 }  // namespace Rosen
