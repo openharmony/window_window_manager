@@ -1330,8 +1330,25 @@ void WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaCh
 
 void WindowImpl::RegisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener)
 {
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return;
+    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    outsidePressListener_ = listener;
+    if (std::find(outsidePressedListeners_.begin(), outsidePressedListeners_.end(), listener) !=
+        outsidePressedListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
+    outsidePressedListeners_.emplace_back(listener);
+}
+
+void WindowImpl::UnregisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener)
+{
+    outsidePressedListeners_.erase(std::remove_if(outsidePressedListeners_.begin(),
+        outsidePressedListeners_.end(), [listener](sptr<IOutsidePressedListener> registeredListener) {
+            return registeredListener == listener;
+        }), outsidePressedListeners_.end());
 }
 
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
@@ -1894,14 +1911,13 @@ void WindowImpl::UpdateActiveStatus(bool isActive)
 
 void WindowImpl::NotifyOutsidePressed()
 {
-    sptr<IOutsidePressedListener> outsidePressListener;
+    std::vector<sptr<IOutsidePressedListener>> outsidePressListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
-        outsidePressListener = outsidePressListener_;
+        outsidePressListeners = outsidePressedListeners_;
     }
 
-    if (outsidePressListener != nullptr) {
-        WLOGFI("called");
+    for (auto& outsidePressListener : outsidePressListeners) {
         outsidePressListener->OnOutsidePressed();
     }
 }
