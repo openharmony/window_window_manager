@@ -12,8 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-
-aakits_path = "//foundation/aafwk/standard/frameworks/kits"
+import("//foundation/windowmanager/windowmanager_aafwk.gni")
 
 config("display_config") {
   visibility = [ ":*" ]
@@ -36,9 +35,9 @@ ohos_shared_library("display_napi") {
   configs = [ ":display_config" ]
 
   deps = [
-    "${aakits_path}/ability/native:abilitykit_native",
-    "${aakits_path}/appkit:app_context",
-    "${aakits_path}/appkit:appkit_native",
+    "${aafwk_kits_path}/ability/native:abilitykit_native",
+    "${aafwk_kits_path}/appkit:app_context",
+    "${aafwk_kits_path}/appkit:appkit_native",
     "../common:wm_napi_common",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
