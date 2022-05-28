@@ -32,6 +32,11 @@ public:
         : surfaceNode_(surfaceNode), property_(property), windowToken_(window)
     {
     }
+    WindowNode(const sptr<WindowProperty>& property, const sptr<IWindow>& window,
+        std::shared_ptr<RSSurfaceNode> surfaceNode, int32_t pid, int32_t uid)
+        : surfaceNode_(surfaceNode), property_(property), windowToken_(window), callingPid_(pid), callingUid_(uid)
+    {
+    }
     WindowNode() : property_(new WindowProperty())
     {
     }
@@ -113,6 +118,8 @@ private:
     sptr<WindowProperty> property_ = nullptr;
     sptr<IWindow> windowToken_ = nullptr;
     Rect hotZoneRect_ { 0, 0, 0, 0 };
+    int32_t callingPid_ = { 0 };
+    int32_t callingUid_ = { 0 };
     WindowSizeChangeReason windowSizeChangeReason_ {WindowSizeChangeReason::UNDEFINED};
 };
 } // Rosen

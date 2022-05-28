@@ -302,7 +302,7 @@ void WindowRoot::ToggleShownStateForAllAppWindows()
                 mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
                 property->SetWindowMode(mode);
             }
-            WindowManagerService::GetInstance().AddWindow(property);
+            WindowManagerService::GetInstance().HandleAddWindow(property);
             return true;
         };
         if (isAllAppWindowsEmpty) {

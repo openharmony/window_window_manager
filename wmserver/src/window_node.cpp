@@ -180,12 +180,12 @@ void WindowNode::SetWindowToken(sptr<IWindow> window)
 
 void WindowNode::SetCallingPid(int32_t pid)
 {
-    property_->SetWindowPid(pid);
+    callingPid_ = pid;
 }
 
 void WindowNode::SetCallingUid(int32_t uid)
 {
-    property_->SetWindowPid(uid);
+    callingUid_ = uid;
 }
 
 DisplayId WindowNode::GetDisplayId() const
@@ -275,12 +275,12 @@ const sptr<WindowProperty>& WindowNode::GetWindowProperty() const
 
 int32_t WindowNode::GetCallingPid() const
 {
-    return property_->GetWindowPid();
+    return callingPid_;
 }
 
 int32_t WindowNode::GetCallingUid() const
 {
-    return property_->GetWindowUid();
+    return callingPid_;
 }
 
 const std::unordered_map<WindowType, SystemBarProperty>& WindowNode::GetSystemBarProperty() const
