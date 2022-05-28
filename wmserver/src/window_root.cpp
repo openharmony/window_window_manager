@@ -375,7 +375,9 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
 
     auto parentNode = GetWindowNode(parentId);
     WMError res = container->AddWindowNode(node, parentNode);
-    DestroyLeakStartingWindow();
+    if (!WindowHelper::IsSystemWindow(node->GetWindowType())) {
+        DestroyLeakStartingWindow();
+    }
     if (res != WMError::WM_OK) {
         WLOGFE("AddWindowNode failed with ret: %{public}u", static_cast<uint32_t>(res));
         return res;

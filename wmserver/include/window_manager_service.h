@@ -95,8 +95,6 @@ public:
     void StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
         bool isColdStart, uint32_t bkgColor = 0xffffffff);
     void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
-    void OpenStartingWindow();
-    void CloseStartingWindow();
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;
