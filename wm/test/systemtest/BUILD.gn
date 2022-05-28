@@ -30,6 +30,7 @@ group("systemtest") {
     ":wm_window_move_drag_test",
     ":wm_window_multi_ability_test",
     ":wm_window_occupied_area_change_test",
+    ":wm_window_outside_pressed_test",
     ":wm_window_rotation_test",
     ":wm_window_split_immersive_test",
     ":wm_window_split_test",
@@ -206,6 +207,17 @@ ohos_systemtest("wm_window_occupied_area_change_test") {
 }
 
 ## SystemTest wm_window_occupied_area_change_test }}}
+
+## SystemTest wm_window_outside_pressed_test {{{
+ohos_systemtest("wm_window_outside_pressed_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_outside_pressed_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+}
+
+## SystemTest wm_window_outside_pressed_test }}}
 
 ## Build wm_systemtest_common.a {{{
 config("wm_systemtest_common_public_config") {
