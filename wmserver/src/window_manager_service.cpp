@@ -19,6 +19,7 @@
 
 #include <ability_manager_client.h>
 #include <ipc_skeleton.h>
+#include <parameters.h>
 #include <rs_iwindow_animation_controller.h>
 #include <system_ability_definition.h>
 
@@ -54,6 +55,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     snapshotController_ = new SnapshotController(windowRoot_);
     dragController_ = new DragController(windowRoot_);
     freezeDisplayController_ = new FreezeController();
+    startingOpen_ = system::GetParameter("persist.window.sw.enabled", "1") == "1"; // startingWin default enabled
 }
 
 void WindowManagerService::OnStart()
@@ -257,16 +259,6 @@ void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken
         return;
     }
     return windowController_->CancelStartingWindow(abilityToken);
-}
-
-void WindowManagerService::OpenStartingWindow()
-{
-    startingOpen_ = true;
-}
-
-void WindowManagerService::CloseStartingWindow()
-{
-    startingOpen_ = false;
 }
 
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
