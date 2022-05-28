@@ -41,7 +41,6 @@ public:
     static NativeValue* DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
-    NativeValue* CreateJsSubWindowArrayObject(NativeEngine& engine, std::vector<sptr<Window>> subWinVec);
     NativeValue* OnSetUIContent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetMainWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnEvent(NativeEngine& engine, NativeCallbackInfo& info);
@@ -53,7 +52,7 @@ private:
     NativeValue* OnSetShowOnLockScreen(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnDisableWindowDecor(NativeEngine& engine, NativeCallbackInfo& info);
 
-    std::shared_ptr<Rosen::WindowScene> windowScene_;
+    std::weak_ptr<Rosen::WindowScene> windowScene_;
 };
 }  // namespace Rosen
 }  // namespace OHOS

@@ -43,6 +43,7 @@ void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReaso
 void MinimizeApp::ExecuteMinimizeAll()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    WLOGFI("[Minimize] ExecuteMinimizeAll with size: %{public}zu", needMinimizeAppNodes_.size());
     for (auto& appNodes: needMinimizeAppNodes_) {
         bool isFromUser = IsFromUser(appNodes.first);
         for (auto& node : appNodes.second) {
@@ -51,6 +52,11 @@ void MinimizeApp::ExecuteMinimizeAll()
                 WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u",
                     weakNode->GetWindowId(), appNodes.first);
                 AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(weakNode->abilityToken_, isFromUser);
+            } else if (weakNode != nullptr) {
+                WLOGFI("window is not minimize since id:%{public}u, "
+                    "startingWindowShown_:%{public}d, abilityToken:%{public}d, windowToken:%{public}d",
+                    weakNode->GetWindowId(), weakNode->startingWindowShown_, weakNode->abilityToken_ != nullptr,
+                    weakNode->GetWindowToken() != nullptr);
             }
         }
         appNodes.second.clear();
