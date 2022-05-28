@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 
 #include "ability_context_impl.h"
-#include "foundation/aafwk/standard/frameworks/kits/appkit/native/ability_runtime/context/context.h"
+#include "foundation/ability/ability_runtime/frameworks/kits/appkit/native/ability_runtime/context/context.h"
 #include "static_call.h"
 
 namespace OHOS {
