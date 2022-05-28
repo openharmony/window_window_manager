@@ -84,6 +84,7 @@ public:
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) override;
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
+    WMError HandleAddWindow(sptr<WindowProperty>& property);
 
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;

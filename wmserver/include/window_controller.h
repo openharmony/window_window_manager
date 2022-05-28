@@ -34,7 +34,7 @@ public:
 
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        uint32_t& windowId, sptr<IRemoteObject> token);
+        uint32_t& windowId, sptr<IRemoteObject> token, int32_t pid, int32_t uid);
     WMError AddWindowNode(sptr<WindowProperty>& property);
     WMError RemoveWindowNode(uint32_t windowId);
     WMError NotifyWindowTransition(sptr<WindowTransitionInfo>& fromInfo, sptr<WindowTransitionInfo>& toInfo);
