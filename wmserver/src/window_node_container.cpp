@@ -343,7 +343,6 @@ WMError WindowNodeContainer::DestroyWindowNode(sptr<WindowNode>& node, std::vect
     StartingWindow::ReleaseStartWinSurfaceNode(node);
     node->surfaceNode_ = nullptr;
     windowIds.push_back(node->GetWindowId());
-
     for (auto& child : node->children_) { // destroy sub window if exists
         windowIds.push_back(child->GetWindowId());
         child->parent_ = nullptr;
@@ -438,7 +437,7 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId display
         }
     };
 
-    if (IsWindowAnimationEnabled && !animationPlayed) {
+    if (IsWindowAnimationEnabled && !animationPlayed && !node->isAppCrash_) {
         WLOGFI("add or remove window with animation");
         // default transition duration: 350ms
         static const RSAnimationTimingProtocol timingProtocol(350);
@@ -1060,17 +1059,17 @@ void WindowNodeContainer::OnAvoidAreaChange(const std::vector<Rect>& avoidArea, 
 void WindowNodeContainer::DumpScreenWindowTree()
 {
     WLOGFI("-------- dump window info begin---------");
-    WLOGFI("WindowName DisplayId WinId Type Mode Flag ZOrd Orientation [   x    y    w    h]");
+    WLOGFI("WindowName DisplayId WinId Type Mode Flag ZOrd Orientation abilityToken [   x    y    w    h]");
     uint32_t zOrder = zOrder_;
     WindowNodeOperationFunc func = [&zOrder](sptr<WindowNode> node) {
         Rect rect = node->GetWindowRect();
         const std::string& windowName = node->GetWindowName().size() < WINDOW_NAME_MAX_LENGTH ?
             node->GetWindowName() : node->GetWindowName().substr(0, WINDOW_NAME_MAX_LENGTH);
         WLOGI("DumpScreenWindowTree: %{public}10s %{public}9" PRIu64" %{public}5u %{public}4u %{public}4u %{public}4u "
-            "%{public}4u %{public}11u [%{public}4d %{public}4d %{public}4u %{public}4u]",
+            "%{public}4u %{public}11u %{public}d [%{public}4d %{public}4d %{public}4u %{public}4u]",
             windowName.c_str(), node->GetDisplayId(), node->GetWindowId(), node->GetWindowType(), node->GetWindowMode(),
             node->GetWindowFlags(), --zOrder, static_cast<uint32_t>(node->GetRequestedOrientation()),
-            rect.posX_, rect.posY_, rect.width_, rect.height_);
+            node->abilityToken_ != nullptr, rect.posX_, rect.posY_, rect.width_, rect.height_);
         return false;
     };
     TraverseWindowTree(func, true);
