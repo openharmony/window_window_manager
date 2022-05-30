@@ -481,7 +481,7 @@ void WindowController::StopBootAnimationIfNeed(WindowType type) const
 {
     if (WindowType::WINDOW_TYPE_DESKTOP == type) {
         WLOGFD("stop boot animation");
-        system::SetParameter("bootevent.window.ready", "1");
+        system::SetParameter("persist.window.boot.inited", "1");
     }
 }
 
