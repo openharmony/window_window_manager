@@ -200,14 +200,14 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
         node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
         sysBarWinId_[node->GetWindowType()] = node->GetWindowId();
-        ReSizeSystemBarPropertySizeIfNeed(node);
+        ResizeSystemBarPropertySizeIfNeed(node);
     }
     StopBootAnimationIfNeed(node->GetWindowType());
     MinimizeApp::ExecuteMinimizeAll();
     return WMError::WM_OK;
 }
 
-void WindowController::ReSizeSystemBarPropertySizeIfNeed(sptr<WindowNode> node)
+void WindowController::ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>& node)
 {
     auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(node->GetDisplayId());
     if (displayInfo == nullptr) {
@@ -441,14 +441,21 @@ void WindowController::ProcessSystemBarChange(const sptr<DisplayInfo>& displayIn
     if (statusBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].end()) {
         newRect = statusBarRectIter->second;
     }
-    ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
+    const auto& statusBarNode = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
+    if (statusBarNode->GetDisplayId() == displayId) {
+        ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
+    }
+
     newRect = { 0, displayInfo->GetHeight() - static_cast<int32_t>(height), width, height };
     auto navigationBarRectIter =
         systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].find(displayHeight);
     if (navigationBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].end()) {
         newRect = navigationBarRectIter->second;
     }
-    ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
+    const auto& naviBarNode = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR]);
+    if (naviBarNode->GetDisplayId() == displayId) {
+        ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
+    }
 }
 
 void WindowController::ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type)

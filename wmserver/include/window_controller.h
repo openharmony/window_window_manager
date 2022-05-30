@@ -72,7 +72,7 @@ private:
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
     WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
     WMError SetWindowMode(uint32_t windowId, WindowMode dstMode);
-    void ReSizeSystemBarPropertySizeIfNeed(sptr<WindowNode> node);
+    void ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>& node);
     void HandleTurnScreenOn(const sptr<WindowNode>& node);
     void ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo);
     void NotifyOutsidePressed(const sptr<WindowNode>& node);
@@ -80,7 +80,7 @@ private:
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
     std::atomic<uint32_t> windowId_ { INVALID_WINDOW_ID };
-    // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
+    // Remove 'sysBarWinId_' after SystemUI resize 'systembar', systemBar only exist on default display currently
     std::unordered_map<WindowType, uint32_t> sysBarWinId_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     INVALID_WINDOW_ID },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, INVALID_WINDOW_ID },

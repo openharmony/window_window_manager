@@ -626,8 +626,13 @@ bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation new
     Rotation rotationAfter = screen->CalcRotation(newOrientation);
     if (rotationAfter != screen->rotation_) {
         WLOGI("set orientation. roatiton %{public}u", rotationAfter);
-        if (!rsInterface_.RequestRotation(screenId, static_cast<ScreenRotation>(rotationAfter))) {
-            WLOGE("rotate screen fail. %{public}" PRIu64"", screenId);
+        ScreenId rsScreenId;
+        if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
+            WLOGE("Convert to RsScreenId fail. screenId: %{public}" PRIu64"", screenId);
+            return false;
+        }
+        if (!rsInterface_.RequestRotation(rsScreenId, static_cast<ScreenRotation>(rotationAfter))) {
+            WLOGE("rotate screen fail. rsScreenId: %{public}" PRIu64"", rsScreenId);
             return false;
         }
     } else {
