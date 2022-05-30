@@ -48,6 +48,47 @@ void WmTraceEnd()
     }
 }
 
+void WmAsyncTraceBegin(int32_t taskId, const char* name)
+{
+    if (name == nullptr) {
+        return;
+    }
+    std::string nameStr(name);
+    StartAsyncTrace(HITRACE_TAG_WINDOW_MANAGER, nameStr, taskId);
+}
+
+void WmAsyncTraceEnd(int32_t taskId, const char* name)
+{
+    if (name == nullptr) {
+        return;
+    }
+    std::string nameStr(name);
+    FinishAsyncTrace(HITRACE_TAG_WINDOW_MANAGER, nameStr, taskId);
+}
+
+void WmAsyncTraceWithArgs(bool isBegin, int32_t taskId, const char* format, ...)
+{
+    if (WmTraceEnabled()) {
+        va_list args;
+        va_start(args, format);
+        WmAsyncTraceWithArgv(isBegin, taskId, format, args);
+        va_end(args);
+    }
+}
+
+void WmAsyncTraceWithArgv(bool isBegin, int32_t taskId, const char* format, va_list args)
+{
+    char name[MAX_STRING_SIZE] = { 0 };
+    if (vsnprintf_s(name, sizeof(name), sizeof(name) - 1, format, args) < 0) {
+        return;
+    }
+    if (isBegin) {
+        WmAsyncTraceBegin(taskId, name);
+    } else {
+        WmAsyncTraceEnd(taskId, name);
+    }
+}
+
 bool WmTraceBeginWithArgv(const char* format, va_list args)
 {
     char name[MAX_STRING_SIZE] = { 0 };
