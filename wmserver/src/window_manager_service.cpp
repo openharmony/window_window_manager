@@ -281,27 +281,34 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
         WLOGFE("failed to get window agent");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return wmsTaskLooper_->ScheduleTask([this, &window, &property, &surfaceNode, &windowId, &token]() {
+    int pid = IPCSkeleton::GetCallingPid();
+    int uid = IPCSkeleton::GetCallingUid();
+    return wmsTaskLooper_->ScheduleTask([this, pid, uid, &window, &property, &surfaceNode, &windowId, &token]() {
         WM_SCOPED_TRACE("wms:CreateWindow(%u)", windowId);
-        return windowController_->CreateWindow(window, property, surfaceNode, windowId, token);
+        return windowController_->CreateWindow(window, property, surfaceNode, windowId, token, pid, uid);
     }).get();
 }
 
 WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 {
     return wmsTaskLooper_->ScheduleTask([this, &property]() {
-        Rect rect = property->GetRequestRect();
-        uint32_t windowId = property->GetWindowId();
-        WLOGFI("[WMS] Add: %{public}5d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
-            "%{public}4d %{public}4d]", windowId, property->GetWindowType(), property->GetWindowMode(),
-            property->GetWindowFlags(), rect.posX_, rect.posY_, rect.width_, rect.height_);
-        WM_SCOPED_TRACE("wms:AddWindow(%u)", windowId);
-        WMError res = windowController_->AddWindowNode(property);
-        if (property->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
-            dragController_->StartDrag(windowId);
-        }
-        return res;
+        return HandleAddWindow(property);
     }).get();
+}
+
+WMError WindowManagerService::HandleAddWindow(sptr<WindowProperty>& property)
+{
+    Rect rect = property->GetRequestRect();
+    uint32_t windowId = property->GetWindowId();
+    WLOGFI("[WMS] Add: %{public}5d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
+        "%{public}4d %{public}4d]", windowId, property->GetWindowType(), property->GetWindowMode(),
+        property->GetWindowFlags(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+    WM_SCOPED_TRACE("wms:AddWindow(%u)", windowId);
+    WMError res = windowController_->AddWindowNode(property);
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
+        dragController_->StartDrag(windowId);
+    }
+    return res;
 }
 
 WMError WindowManagerService::RemoveWindow(uint32_t windowId)
@@ -462,10 +469,11 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
 
 WMError WindowManagerService::ToggleShownStateForAllAppWindows()
 {
-    return wmsTaskLooper_->ScheduleTask([this]() {
+    wmsTaskLooper_->PostTask([this]() {
         WM_SCOPED_TRACE("wms:ToggleShownStateForAllAppWindows");
         return windowController_->ToggleShownStateForAllAppWindows();
-    }).get();
+    });
+    return  WMError::WM_OK;
 }
 
 WMError WindowManagerService::MaxmizeWindow(uint32_t windowId)

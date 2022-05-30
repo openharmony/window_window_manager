@@ -66,8 +66,6 @@ public:
     void SetAnimationFlag(uint32_t animationFlag);
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     void SetTokenState(bool hasToken);
-    void SetWindowPid(int32_t pid);
-    void SetWindowUid(int32_t uid);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
 
@@ -99,8 +97,6 @@ public:
     bool GetDecorEnable() const;
     const PointInfo& GetHitOffset() const;
     uint32_t GetAnimationFlag() const;
-    int32_t GetWindowPid() const;
-    int32_t GetWindowUid() const;
     uint32_t GetModeSupportInfo() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
@@ -141,8 +137,6 @@ private:
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
     bool isDecorEnable_ { false };
-    int32_t pid_ { INVALID_PID };
-    int32_t uid_ { INVALID_UID };
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
 };
 }
