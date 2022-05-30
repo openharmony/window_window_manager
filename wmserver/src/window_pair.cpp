@@ -407,7 +407,7 @@ void WindowPair::Insert(sptr<WindowNode>& node)
     }
     // minimize invalid paired window
     if (pairedNode != nullptr && pairedNode->abilityToken_ != nullptr) {
-        MinimizeApp::AddNeedMinimizeApp(pairedNode, MinimizeReason::OTHER_WINDOW);
+        MinimizeApp::AddNeedMinimizeApp(pairedNode, MinimizeReason::SPLIT_REPLACE);
     }
     UpdateWindowPairStatus();
 }
