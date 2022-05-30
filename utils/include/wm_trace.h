@@ -18,6 +18,7 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <stdint.h>
 
 #include "noncopyable.h"
 
@@ -29,8 +30,11 @@
 #endif
 
 #define WM_FUNCTION_TRACE() WM_SCOPED_TRACE(__func__)
-#define WM_SCOPED_TRACE_BEGIN(fmt, ...) WmTraceBeginWithArgs(fmt,  ##__VA_ARGS__)
+#define WM_SCOPED_TRACE_BEGIN(fmt, ...) WmTraceBeginWithArgs(fmt, ##__VA_ARGS__)
 #define WM_SCOPED_TRACE_END() WmTraceEnd()
+
+#define WM_SCOPED_ASYNC_TRACE_BEGIN(taskId, fmt, ...) WmAsyncTraceWithArgs(true, taskId, fmt, ##__VA_ARGS__)
+#define WM_SCOPED_ASYNC_END(taskId, fmt, ...) WmAsyncTraceWithArgs(false, taskId, fmt, ##__VA_ARGS__)
 
 namespace OHOS {
 namespace Rosen {
@@ -39,6 +43,11 @@ void WmTraceBegin(const char* name);
 bool WmTraceBeginWithArgs(const char* format, ...) __attribute__((__format__(printf, 1, 2)));
 bool WmTraceBeginWithArgv(const char* format, va_list args);
 void WmTraceEnd();
+void WmAsyncTraceBegin(int32_t taskId, const char* name);
+void WmAsyncTraceEnd(int32_t taskId, const char* name);
+void WmAsyncTraceWithArgs(bool isBegin, int32_t taskId,
+    const char* format, ...) __attribute__((__format__(printf, 3, 4)));
+void WmAsyncTraceWithArgv(bool isBegin, int32_t taskId, const char* format, va_list args);
 
 class WmScopedTrace final {
 public:
