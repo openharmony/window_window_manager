@@ -30,6 +30,7 @@ enum class MinimizeReason : uint32_t {
     MINIMIZE_ALL,
     LAYOUT_TILE,
     MAX_APP_COUNT,
+    SPLIT_REPLACE,
     OTHER_WINDOW,
 };
 
@@ -48,7 +49,8 @@ private:
     static inline bool IsFromUser(MinimizeReason reason)
     {
         return (reason == MinimizeReason::MINIMIZE_ALL || reason == MinimizeReason::MINIMIZE_BUTTOM ||
-            reason == MinimizeReason::MAX_APP_COUNT || reason == MinimizeReason::LAYOUT_TILE);
+            reason == MinimizeReason::MAX_APP_COUNT || reason == MinimizeReason::LAYOUT_TILE ||
+            reason == MinimizeReason::SPLIT_REPLACE);
     }
 
     static std::map<MinimizeReason, std::vector<wptr<WindowNode>>> needMinimizeAppNodes_;
