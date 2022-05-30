@@ -140,11 +140,11 @@ HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
 }
 
 /**
- * @tc.name: SplitCreen03
+ * @tc.name: SplitScreen03
  * @tc.desc: one primary window and one fullscreen window, test rects
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSplitTest, SplitCreen03, Function | MediumTest | Level3)
+HWTEST_F(WindowSplitTest, SplitScreen03, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "fullscreen.3";
     splitInfo_.name = "primary.3";
@@ -173,11 +173,11 @@ HWTEST_F(WindowSplitTest, SplitCreen03, Function | MediumTest | Level3)
 }
 
 /**
- * @tc.name: SplitCreen04
+ * @tc.name: SplitScreen04
  * @tc.desc: one secondary window and one fullscreen window, test rects
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSplitTest, SplitCreen04, Function | MediumTest | Level3)
+HWTEST_F(WindowSplitTest, SplitScreen04, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "fullscreen.4";
     splitInfo_.name = "secondary.4";

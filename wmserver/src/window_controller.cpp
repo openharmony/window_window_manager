@@ -143,7 +143,8 @@ WMError WindowController::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)
 }
 
 WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
-    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token)
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token,
+    int32_t pid, int32_t uid)
 {
     uint32_t parentId = property->GetParentId();
     if ((parentId != INVALID_WINDOW_ID) && !WindowHelper::IsSubWindow(property->GetWindowType())) {
@@ -152,14 +153,14 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     }
     sptr<WindowNode> node = windowRoot_->FindWindowNodeWithToken(token);
     if (node != nullptr && WindowHelper::IsMainWindow(property->GetWindowType()) && node->startingWindowShown_) {
-        StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode, property);
+        StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode, property, pid, uid);
         windowRoot_->AddDeathRecipient(node);
         return WMError::WM_OK;
     }
     windowId = GenWindowId();
     sptr<WindowProperty> windowProperty = new WindowProperty(property);
     windowProperty->SetWindowId(windowId);
-    node = new WindowNode(windowProperty, window, surfaceNode);
+    node = new WindowNode(windowProperty, window, surfaceNode, pid, uid);
     node->abilityToken_ = token;
     UpdateWindowAnimation(node);
     WLOGFI("createWindow name:%{public}u, windowName:%{public}s",
