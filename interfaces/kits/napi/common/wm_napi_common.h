@@ -66,6 +66,7 @@ void SetErrorInfo(napi_env env, Rosen::WMError wret, std::string errMessage,
 void ProcessPromise(napi_env env, Rosen::WMError wret, napi_deferred deferred,
     napi_value result[], int cout);
 void ProcessCallback(napi_env env, napi_ref ref, napi_value result[], int count);
+bool NAPICall(napi_env env, napi_status status);
 
 template<typename ParamT>
 napi_value AsyncProcess(napi_env env,
@@ -92,14 +93,23 @@ napi_value AsyncProcess(napi_env env,
     };
 
     napi_value resourceName = nullptr;
-    NAPI_CALL(env, napi_create_string_latin1(env, funcname.c_str(), NAPI_AUTO_LENGTH, &resourceName));
+    if (!NAPICall(env, napi_create_string_latin1(env, funcname.c_str(), NAPI_AUTO_LENGTH, &resourceName))) {
+        delete info;
+        return nullptr;
+    }
 
     // decide use promise or callback
     napi_value result = nullptr;
     if (info->ref == nullptr) {
-        NAPI_CALL(env, napi_create_promise(env, &info->deferred, &result));
+        if (!NAPICall(env, napi_create_promise(env, &info->deferred, &result))) {
+            delete info;
+            return nullptr;
+        }
     } else {
-        NAPI_CALL(env, napi_get_undefined(env, &result));
+        if (!NAPICall(env, napi_get_undefined(env, &result))) {
+            delete info;
+            return nullptr;
+        }
     }
 
     auto asyncFunc = [](napi_env env, void *data) {
@@ -126,11 +136,16 @@ napi_value AsyncProcess(napi_env env,
         napi_delete_async_work(env, info->asyncWork);
         delete info;
     };
+    if (!NAPICall(env, napi_create_async_work(env, nullptr, resourceName, asyncFunc,
+        completeFunc, reinterpret_cast<void *>(info), &info->asyncWork))) {
+        delete info;
+        return nullptr;
+    }
+    if (!NAPICall(env, napi_queue_async_work(env, info->asyncWork))) {
+        delete info;
+        return nullptr;
+    }
 
-    NAPI_CALL(env, napi_create_async_work(env, nullptr, resourceName, asyncFunc, completeFunc,
-        reinterpret_cast<void *>(info), &info->asyncWork));
-
-    NAPI_CALL(env, napi_queue_async_work(env, info->asyncWork));
     return result;
 };
 } // namespace OHOS
