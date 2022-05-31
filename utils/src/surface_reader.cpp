@@ -139,6 +139,7 @@ bool SurfaceReader::ProcessBuffer(const sptr<SurfaceBuffer> &buf)
     sptr<PixelMap> pixelMap = new(std::nothrow) PixelMap();
     if (pixelMap == nullptr) {
         WLOGFE("create pixelMap failed");
+        free(data);
         return false;
     }
 
