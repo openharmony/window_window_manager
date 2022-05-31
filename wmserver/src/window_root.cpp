@@ -97,6 +97,11 @@ sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(DisplayId displa
     windowNodeContainerMap_.insert(std::make_pair(displayGroupId, container));
     std::vector<DisplayId> displayVec = { displayId };
     displayIdMap_.insert(std::make_pair(displayGroupId, displayVec));
+    if (container == nullptr) {
+        WLOGFE("create container failed, displayId :%{public}" PRIu64 "", displayId);
+        return nullptr;
+    }
+    container->GetLayoutPolicy()->SetFloatingWindowLimitsConfig(floatingWindowLimitsConfig_);
     return container;
 }
 
@@ -1156,6 +1161,11 @@ WMError WindowRoot::GetModeChangeHotZones(DisplayId displayId,
     }
     container->GetModeChangeHotZones(displayId, hotZones, config);
     return WMError::WM_OK;
+}
+
+void WindowRoot::SetFloatingWindowLimitsConfig(const FloatingWindowLimitsConfig& floatingWindowLimitsConfig)
+{
+    floatingWindowLimitsConfig_ = floatingWindowLimitsConfig;
 }
 } // namespace Rosen
 } // namespace OHOS

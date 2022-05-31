@@ -24,6 +24,7 @@
 #include "class_var_definition.h"
 #include "dm_common.h"
 #include "wm_common.h"
+#include "wm_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -67,6 +68,7 @@ public:
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     void SetTokenState(bool hasToken);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
+    void SetDragType(DragType dragType);
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
 
     const std::string& GetWindowName() const;
@@ -98,6 +100,7 @@ public:
     const PointInfo& GetHitOffset() const;
     uint32_t GetAnimationFlag() const;
     uint32_t GetModeSupportInfo() const;
+    DragType GetDragType() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
@@ -137,6 +140,7 @@ private:
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
     bool isDecorEnable_ { false };
+    DragType dragType_ = DragType::DRAG_UNDEFINED;
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
 };
 }

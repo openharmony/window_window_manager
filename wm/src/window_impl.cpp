@@ -1059,6 +1059,7 @@ WMError WindowImpl::Drag(const Rect& rect)
     Rect requestRect = rect;
     property_->SetRequestRect(requestRect);
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
+    property_->SetDragType(dragType_);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
 
@@ -1636,6 +1637,23 @@ void WindowImpl::EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId
     pointEventStarted_ = false;
 }
 
+void WindowImpl::UpdateDragType()
+{
+    if (!startDragFlag_) {
+        dragType_ = DragType::DRAG_UNDEFINED;
+        return;
+    }
+    if (startPointPosX_ > startRectExceptCorner_.posX_ &&
+        (startPointPosX_ < startRectExceptCorner_.posX_ + static_cast<int32_t>(startRectExceptCorner_.width_))) {
+        dragType_ = DragType::DRAG_HEIGHT;
+    } else if (startPointPosY_ > startRectExceptCorner_.posY_ &&
+        (startPointPosY_ < startRectExceptCorner_.posY_ + static_cast<int32_t>(startRectExceptCorner_.height_))) {
+        dragType_ = DragType::DRAG_WIDTH;
+    } else {
+        dragType_ = DragType::DRAG_CORNER;
+    }
+}
+
 void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId, const Rect& rect)
 {
     if (pointEventStarted_) {
@@ -1683,6 +1701,9 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
         startDragFlag_ = true;
         SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(), true);
     }
+
+    UpdateDragType();
+
     return;
 }
 

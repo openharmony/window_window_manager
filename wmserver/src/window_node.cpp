@@ -188,6 +188,16 @@ void WindowNode::SetCallingUid(int32_t uid)
     callingUid_ = uid;
 }
 
+void WindowNode::SetDragType(DragType dragType)
+{
+    property_->SetDragType(dragType);
+}
+
+DragType WindowNode::GetDragType() const
+{
+    return property_->GetDragType();
+}
+
 DisplayId WindowNode::GetDisplayId() const
 {
     return property_->GetDisplayId();

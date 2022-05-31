@@ -247,20 +247,12 @@ void WindowLayoutPolicyCascade::ApplyWindowRectConstraints(const sptr<WindowNode
 {
     WLOGFI("Before apply constraints winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-    auto reason = node->GetWindowSizeChangeReason();
-    
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) { // if divider, limit position
         LimitMoveBounds(winRect, node->GetDisplayId());
     }
 
-    // if drag or move window, limit size and position
-    if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::MOVE) {
-        LimitMainFloatingWindowPositionWithDrag(node, winRect);
-    } else {
-        // Limit window to the maximum window size if size change is other reason, such as init window rect when show
-        LimitFloatingWindowSize(node, displayGroupInfo_->GetDisplayRect(node->GetDisplayId()), winRect);
-        LimitMainFloatingWindowPosition(node, winRect);
-    }
+    LimitFloatingWindowSize(node, displayGroupInfo_->GetDisplayRect(node->GetDisplayId()), winRect);
+    LimitMainFloatingWindowPosition(node, winRect);
 
     WLOGFI("After apply constraints winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
