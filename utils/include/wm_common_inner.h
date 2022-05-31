@@ -120,8 +120,8 @@ namespace {
     constexpr uint32_t HOTZONE = 20;
     constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 240;
     constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 320;
-    constexpr uint32_t MIN_VERTICAL_SPLIT_HEIGHT = 426;
-    constexpr uint32_t MIN_HORIZONTAL_SPLIT_WIDTH = 426;
+    constexpr uint32_t MIN_VERTICAL_SPLIT_HEIGHT = 240;
+    constexpr uint32_t MIN_HORIZONTAL_SPLIT_WIDTH = 320;
     constexpr uint32_t MAX_FLOATING_SIZE = 2560;
     const std::string WINDOW_MANAGER_CONFIG_XML = "/system/etc/window/resources/window_manager_config.xml";
 }
