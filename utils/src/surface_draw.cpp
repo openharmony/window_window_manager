@@ -78,8 +78,9 @@ void SurfaceDraw::DrawBackgroundColor(std::shared_ptr<RSSurfaceNode> surfaceNode
     if (rsSurface == nullptr) {
         return;
     }
-    canvas->clear(bkgColor);
-    frame->SetDamageRegion(0, 0, width, height);
+    SkPaint bkgPaint;
+    bkgPaint.setColor(bkgColor);
+    canvas->drawRect(SkRect::MakeXYWH(0.0, 0.0, width, height), bkgPaint);
     rsSurface->FlushFrame(frame);
 }
 
