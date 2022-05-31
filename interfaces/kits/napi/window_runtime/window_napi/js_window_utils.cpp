@@ -62,6 +62,19 @@ NativeValue* WindowTypeInit(NativeEngine* engine)
         static_cast<int32_t>(ApiWindowType::TYPE_NAVIGATION_BAR)));
     object->SetProperty("TYPE_FLOAT", CreateJsValue(*engine,
         static_cast<int32_t>(ApiWindowType::TYPE_FLOAT)));
+    object->SetProperty("TYPE_WALLPAPER", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_WALLPAPER)));
+    object->SetProperty("TYPE_DESKTOP", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_DESKTOP)));
+    object->SetProperty("TYPE_LAUNCHER_RECENT", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_LAUNCHER_RECENT)));
+    object->SetProperty("TYPE_LAUNCHER_DOCK", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_LAUNCHER_DOCK)));
+    object->SetProperty("TYPE_VOICE_INTERACTION", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_VOICE_INTERACTION)));
+    object->SetProperty("TYPE_POINTER", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_POINTER)));
+
     return objValue;
 }
 
