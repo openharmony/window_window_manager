@@ -85,10 +85,29 @@ struct ModeChangeHotZonesConfig {
     uint32_t secondaryRange_;
 };
 
+struct FloatingWindowLimitsConfig {
+    bool isFloatingWindowLimitsConfigured_;
+    uint32_t maxWidth_;
+    uint32_t maxHeight_;
+    uint32_t minWidth_;
+    uint32_t minHeight_;
+    float maxRatio_;
+    float minRatio_;
+    FloatingWindowLimitsConfig() : isFloatingWindowLimitsConfigured_(false), maxWidth_(0), maxHeight_(0), minWidth_(0),
+        minHeight_(0), maxRatio_(0.0f), minRatio_(0.0f) {}
+};
+
 struct ModeChangeHotZones {
     Rect fullscreen_;
     Rect primary_;
     Rect secondary_;
+};
+
+enum class DragType : uint32_t {
+    DRAG_UNDEFINED,
+    DRAG_WIDTH,
+    DRAG_HEIGHT,
+    DRAG_CORNER,
 };
 
 namespace {

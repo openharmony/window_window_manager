@@ -31,14 +31,14 @@ public:
     ~DisplayManagerConfig() = default;
 
     static bool LoadConfigXml(const std::string& configFilePath);
-    static const std::map<std::string, std::vector<int>>& GetNumbersConfig();
+    static const std::map<std::string, std::vector<int>>& GetIntNumbersConfig();
     static void DumpConfig();
 
 private:
-    static std::map<std::string, std::vector<int>> numbersConfig_;
+    static std::map<std::string, std::vector<int>> intNumbersConfig_;
 
     static bool IsValidNode(const xmlNode& currNode);
-    static void ReadNumbersConfigInfo(const xmlNodePtr& currNode);
+    static void ReadIntNumbersConfigInfo(const xmlNodePtr& currNode);
 
     static std::vector<std::string> Split(std::string str, std::string pattern);
     static inline bool IsNumber(std::string str);

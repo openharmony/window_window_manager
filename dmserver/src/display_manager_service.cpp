@@ -80,7 +80,7 @@ bool DisplayManagerService::Init()
 
 void DisplayManagerService::ConfigureDisplayManagerService()
 {
-    auto numbersConfig = DisplayManagerConfig::GetNumbersConfig();
+    auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
     if (numbersConfig.count("dpi") != 0) {
         uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["dpi"][0]);
         if (densityDpi == 0) {
