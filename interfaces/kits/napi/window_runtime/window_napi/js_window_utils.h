@@ -38,7 +38,13 @@ enum class ApiWindowType : uint32_t {
     TYPE_VOLUME_OVERLAY,
     TYPE_NAVIGATION_BAR,
     TYPE_FLOAT,
-    TYPE_END = TYPE_FLOAT,
+    TYPE_WALLPAPER,
+    TYPE_DESKTOP,
+    TYPE_LAUNCHER_RECENT,
+    TYPE_LAUNCHER_DOCK,
+    TYPE_VOICE_INTERACTION,
+    TYPE_POINTER,
+    TYPE_END = TYPE_POINTER,
 };
 
 enum class LifeCycleEventType : uint32_t {
@@ -49,26 +55,40 @@ enum class LifeCycleEventType : uint32_t {
 };
 
 const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
-    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      ApiWindowType::TYPE_APP            },
-    { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, ApiWindowType::TYPE_SYSTEM_ALERT   },
-    { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,  ApiWindowType::TYPE_INPUT_METHOD   },
-    { WindowType::WINDOW_TYPE_STATUS_BAR,          ApiWindowType::TYPE_STATUS_BAR     },
-    { WindowType::WINDOW_TYPE_PANEL,               ApiWindowType::TYPE_PANEL          },
-    { WindowType::WINDOW_TYPE_KEYGUARD,            ApiWindowType::TYPE_KEYGUARD       },
-    { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,      ApiWindowType::TYPE_VOLUME_OVERLAY },
-    { WindowType::WINDOW_TYPE_NAVIGATION_BAR,      ApiWindowType::TYPE_NAVIGATION_BAR },
-    { WindowType::WINDOW_TYPE_FLOAT,               ApiWindowType::TYPE_FLOAT          },
+    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      ApiWindowType::TYPE_APP               },
+    { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW, ApiWindowType::TYPE_SYSTEM_ALERT      },
+    { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,  ApiWindowType::TYPE_INPUT_METHOD      },
+    { WindowType::WINDOW_TYPE_STATUS_BAR,          ApiWindowType::TYPE_STATUS_BAR        },
+    { WindowType::WINDOW_TYPE_PANEL,               ApiWindowType::TYPE_PANEL             },
+    { WindowType::WINDOW_TYPE_KEYGUARD,            ApiWindowType::TYPE_KEYGUARD          },
+    { WindowType::WINDOW_TYPE_VOLUME_OVERLAY,      ApiWindowType::TYPE_VOLUME_OVERLAY    },
+    { WindowType::WINDOW_TYPE_NAVIGATION_BAR,      ApiWindowType::TYPE_NAVIGATION_BAR    },
+    { WindowType::WINDOW_TYPE_FLOAT,               ApiWindowType::TYPE_FLOAT             },
+    { WindowType::WINDOW_TYPE_WALLPAPER,           ApiWindowType::TYPE_WALLPAPER         },
+    { WindowType::WINDOW_TYPE_DESKTOP,             ApiWindowType::TYPE_DESKTOP           },
+    { WindowType::WINDOW_TYPE_LAUNCHER_RECENT,     ApiWindowType::TYPE_LAUNCHER_RECENT   },
+    { WindowType::WINDOW_TYPE_LAUNCHER_DOCK,       ApiWindowType::TYPE_LAUNCHER_DOCK     },
+    { WindowType::WINDOW_TYPE_VOICE_INTERACTION,   ApiWindowType::TYPE_VOICE_INTERACTION },
+    { WindowType::WINDOW_TYPE_POINTER,             ApiWindowType::TYPE_POINTER           },
+
 };
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
-    { ApiWindowType::TYPE_APP,             WindowType::WINDOW_TYPE_APP_SUB_WINDOW     },
-    { ApiWindowType::TYPE_SYSTEM_ALERT,    WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW},
-    { ApiWindowType::TYPE_INPUT_METHOD,    WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT },
-    { ApiWindowType::TYPE_STATUS_BAR,      WindowType::WINDOW_TYPE_STATUS_BAR         },
-    { ApiWindowType::TYPE_PANEL,           WindowType::WINDOW_TYPE_PANEL              },
-    { ApiWindowType::TYPE_KEYGUARD,        WindowType::WINDOW_TYPE_KEYGUARD           },
-    { ApiWindowType::TYPE_VOLUME_OVERLAY,  WindowType::WINDOW_TYPE_VOLUME_OVERLAY     },
-    { ApiWindowType::TYPE_NAVIGATION_BAR,  WindowType::WINDOW_TYPE_NAVIGATION_BAR     },
-    { ApiWindowType::TYPE_FLOAT,           WindowType::WINDOW_TYPE_FLOAT              }
+    { ApiWindowType::TYPE_APP,                 WindowType::WINDOW_TYPE_APP_SUB_WINDOW      },
+    { ApiWindowType::TYPE_SYSTEM_ALERT,        WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW },
+    { ApiWindowType::TYPE_INPUT_METHOD,        WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT  },
+    { ApiWindowType::TYPE_STATUS_BAR,          WindowType::WINDOW_TYPE_STATUS_BAR          },
+    { ApiWindowType::TYPE_PANEL,               WindowType::WINDOW_TYPE_PANEL               },
+    { ApiWindowType::TYPE_KEYGUARD,            WindowType::WINDOW_TYPE_KEYGUARD            },
+    { ApiWindowType::TYPE_VOLUME_OVERLAY,      WindowType::WINDOW_TYPE_VOLUME_OVERLAY      },
+    { ApiWindowType::TYPE_NAVIGATION_BAR,      WindowType::WINDOW_TYPE_NAVIGATION_BAR      },
+    { ApiWindowType::TYPE_FLOAT,               WindowType::WINDOW_TYPE_FLOAT               },
+    { ApiWindowType::TYPE_WALLPAPER,           WindowType::WINDOW_TYPE_WALLPAPER           },
+    { ApiWindowType::TYPE_DESKTOP,             WindowType::WINDOW_TYPE_DESKTOP             },
+    { ApiWindowType::TYPE_LAUNCHER_RECENT,     WindowType::WINDOW_TYPE_LAUNCHER_RECENT     },
+    { ApiWindowType::TYPE_LAUNCHER_DOCK,       WindowType::WINDOW_TYPE_LAUNCHER_DOCK       },
+    { ApiWindowType::TYPE_VOICE_INTERACTION,   WindowType::WINDOW_TYPE_VOICE_INTERACTION   },
+    { ApiWindowType::TYPE_POINTER,             WindowType::WINDOW_TYPE_POINTER             },
+
 };
 enum class ApiWindowMode : uint32_t {
     UNDEFINED = 1,
