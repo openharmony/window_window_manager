@@ -143,6 +143,7 @@ private:
     void UpdateRSTreeWhenShowingDisplaysChange(sptr<WindowNode>& node,
                                                const std::vector<DisplayId>& lastShowingDisplays,
                                                const std::vector<DisplayId>& curShowingDisplays);
+    void FillWindowInfo(sptr<WindowInfo>& windowInfo, const sptr<WindowNode>& node) const;
 
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
