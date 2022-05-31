@@ -97,7 +97,8 @@ public:
 
     int32_t wid_;
     Rect windowRect_;
-    bool focused_;
+    bool focused_ { false };
+    bool isDecorEnable_ { false };
     DisplayId displayId_;
     WindowMode mode_;
     WindowType type_;
