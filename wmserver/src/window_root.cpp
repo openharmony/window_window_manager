@@ -334,6 +334,7 @@ WMError WindowRoot::MaxmizeWindow(uint32_t windowId)
 
 void WindowRoot::DestroyLeakStartingWindow()
 {
+    WLOGFI("DestroyLeakStartingWindow is called");
     std::vector<uint32_t> destroyIds;
     for (auto& iter : windowNodeMap_) {
         if (iter.second->startingWindowShown_ && !iter.second->GetWindowToken()) {

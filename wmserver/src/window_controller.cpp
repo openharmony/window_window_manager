@@ -78,13 +78,17 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
 
 void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
-    WLOGFI("begin CancelStartingWindow!");
     auto node = windowRoot_->FindWindowNodeWithToken(abilityToken);
     if (node == nullptr) {
         WLOGFI("cannot find windowNode!");
         return;
     }
+    if (!node->startingWindowShown_) {
+        WLOGFE("CancelStartingWindow failed because client window has shown");
+        return;
+    }
     WLOGFI("CancelStartingWindow with id:%{public}u!", node->GetWindowId());
+    node->isAppCrash_ = true;
     WMError res = windowRoot_->DestroyWindow(node->GetWindowId(), false);
     if (res != WMError::WM_OK) {
         WLOGFE("DestroyWindow failed!");

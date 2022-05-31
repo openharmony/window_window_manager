@@ -119,7 +119,8 @@ NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackI
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         return engine.CreateUndefined();
     }
-    if (windowScene_ == nullptr || windowScene_->GetMainWindow() == nullptr) {
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr || weakScene->GetMainWindow() == nullptr) {
         WLOGFE("[NAPI]WindowScene is null or window is null");
         return engine.CreateUndefined();
     }
@@ -137,20 +138,21 @@ NativeValue* JsWindowStage::OnSetUIContent(NativeEngine& engine, NativeCallbackI
         WLOGFE("[NAPI]Failed to convert parameter to url");
         return engine.CreateUndefined();
     }
-    windowScene_->GetMainWindow()->SetUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
+    weakScene->GetMainWindow()->SetUIContent(contextUrl, &engine, info.argv[CONTENT_STORAGE_ARG]);
     return engine.CreateUndefined();
 }
 
 NativeValue* JsWindowStage::OnGetMainWindow(NativeEngine& engine, NativeCallbackInfo& info)
 {
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowScene_ == nullptr) {
+        [weak = windowScene_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakScene = weak.lock();
+            if (weakScene == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
                 WLOGFE("[NAPI]WindowScene_ is nullptr!");
                 return;
             }
-            auto window = windowScene_->GetMainWindow();
+            auto window = weakScene->GetMainWindow();
             if (window != nullptr) {
                 task.Resolve(engine, OHOS::Rosen::CreateJsWindowObject(engine, window));
                 WLOGFI("[NAPI]Get main window [%{public}u, %{public}s]",
@@ -170,7 +172,8 @@ NativeValue* JsWindowStage::OnGetMainWindow(NativeEngine& engine, NativeCallback
 
 NativeValue* JsWindowStage::OnEvent(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (windowScene_ == nullptr || info.argc < 2) { // 2: minimum param nums
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr || info.argc < 2) { // 2: minimum param nums
         WLOGFE("[NAPI]Window scene is null or argc is invalid: %{public}zu", info.argc);
         return engine.CreateUndefined();
     }
@@ -186,7 +189,7 @@ NativeValue* JsWindowStage::OnEvent(NativeEngine& engine, NativeCallbackInfo& in
         return engine.CreateUndefined();
     }
 
-    auto window = windowScene_->GetMainWindow();
+    auto window = weakScene->GetMainWindow();
     if (window == nullptr) {
         WLOGFE("[NAPI]Get window failed");
         return engine.CreateUndefined();
@@ -200,7 +203,8 @@ NativeValue* JsWindowStage::OnEvent(NativeEngine& engine, NativeCallbackInfo& in
 
 NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (windowScene_ == nullptr) {
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr) {
         WLOGFE("[NAPI]Window scene is null");
         return engine.CreateUndefined();
     }
@@ -217,7 +221,7 @@ NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& i
     }
 
     NativeValue* value = info.argv[1];
-    auto window = windowScene_->GetMainWindow();
+    auto window = weakScene->GetMainWindow();
     if (window == nullptr) {
         WLOGFE("[NAPI]Get window failed");
         return engine.CreateUndefined();
@@ -233,6 +237,21 @@ NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& i
         window->GetWindowId(), window->GetWindowName().c_str(), eventString.c_str(), value);
 
     return engine.CreateUndefined();
+}
+
+static void LoadContentTask(std::weak_ptr<NativeReference> contentStorage, std::string contextUrl,
+    sptr<Window> weakWindow, NativeEngine& engine, AsyncTask& task)
+{
+    NativeValue* nativeStorage = (contentStorage.lock() == nullptr) ? nullptr : contentStorage.lock()->Get();
+    WMError ret = weakWindow->SetUIContent(contextUrl, &engine, nativeStorage, false);
+    if (ret == WMError::WM_OK) {
+        task.Resolve(engine, engine.CreateUndefined());
+    } else {
+        task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window load content failed"));
+    }
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] load content end, ret = %{public}d",
+        weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+    return;
 }
 
 NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info)
@@ -255,30 +274,24 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
     if (value2->TypeOf() == NATIVE_FUNCTION) {
         callBack = value2;
     }
-    std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
+    std::weak_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowScene_ == nullptr || errCode != WMError::WM_OK) {
+        [weak = windowScene_, contentStorage, contextUrl, errCode](
+            NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakScene = weak.lock();
+            if (weakScene == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]Window scene is null or get invalid param");
                 return;
             }
-            auto win = windowScene_->GetMainWindow();
+            auto win = weakScene->GetMainWindow();
             if (win == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
                 WLOGFE("[NAPI]Get window failed");
                 return;
             }
-            NativeValue* nativeStorage = (contentStorage == nullptr) ? nullptr : contentStorage->Get();
-            Rosen::WMError ret = win->SetUIContent(contextUrl, &engine, nativeStorage, false);
-            if (ret != Rosen::WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret)));
-                return;
-            }
-            task.Resolve(engine, engine.CreateUndefined());
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] load content %{public}s, storage %{public}p",
-                win->GetWindowId(), win->GetWindowName().c_str(), contextUrl.c_str(), nativeStorage);
+            LoadContentTask(contentStorage, contextUrl, win, engine, task);
         };
     NativeValue* result = nullptr;
     AsyncTask::Schedule(
@@ -289,13 +302,14 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
 NativeValue* JsWindowStage::OnGetWindowMode(NativeEngine& engine, NativeCallbackInfo& info)
 {
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowScene_ == nullptr) {
+        [weak = windowScene_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakScene = weak.lock();
+            if (weakScene == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
                 WLOGFE("[NAPI]windowScene_ is nullptr");
                 return;
             }
-            auto window = windowScene_->GetMainWindow();
+            auto window = weakScene->GetMainWindow();
             if (window == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(Rosen::WMError::WM_ERROR_NULLPTR),
                     "Get window failed"));
@@ -329,8 +343,9 @@ NativeValue* JsWindowStage::OnCreateSubWindow(NativeEngine& engine, NativeCallba
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowScene_ == nullptr || errCode != WMError::WM_OK) {
+        [weak = windowScene_, windowName, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakScene = weak.lock();
+            if (weakScene == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
                 WLOGFE("[NAPI]Window scene is null or get invalid param");
                 return;
@@ -338,7 +353,7 @@ NativeValue* JsWindowStage::OnCreateSubWindow(NativeEngine& engine, NativeCallba
             sptr<Rosen::WindowOption> windowOption = new Rosen::WindowOption();
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-            auto window = windowScene_->CreateWindow(windowName, windowOption);
+            auto window = weakScene->CreateWindow(windowName, windowOption);
             if (window == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(Rosen::WMError::WM_ERROR_NULLPTR),
                     "Get window failed"));
@@ -355,7 +370,7 @@ NativeValue* JsWindowStage::OnCreateSubWindow(NativeEngine& engine, NativeCallba
     return result;
 }
 
-NativeValue* JsWindowStage::CreateJsSubWindowArrayObject(NativeEngine& engine,
+static NativeValue* CreateJsSubWindowArrayObject(NativeEngine& engine,
     std::vector<sptr<Window>> subWinVec)
 {
     NativeValue* objValue = engine.CreateArray(subWinVec.size());
@@ -374,13 +389,14 @@ NativeValue* JsWindowStage::CreateJsSubWindowArrayObject(NativeEngine& engine,
 NativeValue* JsWindowStage::OnGetSubWindow(NativeEngine& engine, NativeCallbackInfo& info)
 {
     AsyncTask::CompleteCallback complete =
-        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (windowScene_ == nullptr) {
+        [weak = windowScene_](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakScene = weak.lock();
+            if (weakScene == nullptr) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
                 WLOGFE("[NAPI]Window scene is nullptr");
                 return;
             }
-            std::vector<sptr<Window>> subWindowVec = windowScene_->GetSubWindow();
+            std::vector<sptr<Window>> subWindowVec = weakScene->GetSubWindow();
             task.Resolve(engine, CreateJsSubWindowArrayObject(engine, subWindowVec));
             WLOGFI("[NAPI]Get sub windows, size = %{public}zu", subWindowVec.size());
         };
@@ -397,7 +413,8 @@ NativeValue* JsWindowStage::OnSetShowOnLockScreen(NativeEngine& engine, NativeCa
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         return CreateJsValue(engine, static_cast<int32_t>(WMError::WM_ERROR_INVALID_PARAM));
     }
-    if (windowScene_ == nullptr || windowScene_->GetMainWindow() == nullptr) {
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr || weakScene->GetMainWindow() == nullptr) {
         WLOGFE("[NAPI]WindowScene is null or window is null");
         return CreateJsValue(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR));
     }
@@ -411,7 +428,7 @@ NativeValue* JsWindowStage::OnSetShowOnLockScreen(NativeEngine& engine, NativeCa
         showOnLockScreen = static_cast<bool>(*nativeVal);
     }
 
-    auto window = windowScene_->GetMainWindow();
+    auto window = weakScene->GetMainWindow();
     WMError ret;
     if (showOnLockScreen) {
         ret = window->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
@@ -426,12 +443,13 @@ NativeValue* JsWindowStage::OnSetShowOnLockScreen(NativeEngine& engine, NativeCa
 
 NativeValue* JsWindowStage::OnDisableWindowDecor(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (windowScene_ == nullptr || windowScene_->GetMainWindow() == nullptr) {
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr || weakScene->GetMainWindow() == nullptr) {
         WLOGFE("[NAPI]WindowScene is null or window is null");
         return CreateJsValue(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR));
     }
 
-    auto window = windowScene_->GetMainWindow();
+    auto window = weakScene->GetMainWindow();
     window->DisableAppWindowDecor();
     WLOGFI("[NAPI]Window [%{public}u, %{public}s] disable app window decor end",
         window->GetWindowId(), window->GetWindowName().c_str());
