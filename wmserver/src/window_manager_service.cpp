@@ -162,6 +162,7 @@ void WindowManagerServiceHandler::StartingWindow(
 
 void WindowManagerServiceHandler::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
+    WLOGFI("WindowManagerServiceHandler CancelStartingWindow!");
     WindowManagerService::GetInstance().CancelStartingWindow(abilityToken);
 }
 
@@ -261,6 +262,7 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, sptr<
 
 void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
+    WLOGFI("begin CancelStartingWindow!");
     if (!startingOpen_) {
         WLOGFI("startingWindow not open!");
         return;

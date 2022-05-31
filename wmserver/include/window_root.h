@@ -84,6 +84,7 @@ public:
     uint32_t GetTotalWindowNum() const;
     uint32_t GetWindowIdByObject(const sptr<IRemoteObject>& remoteObject);
     sptr<WindowNode> GetWindowForDumpAceHelpInfo() const;
+    void DestroyLeakStartingWindow();
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
@@ -101,7 +102,6 @@ private:
     std::map<DisplayId, sptr<DisplayInfo>> GetAllDisplayInfos(const std::vector<DisplayId>& displayIdVec);
     std::map<DisplayId, Rect> GetAllDisplayRects(const std::vector<DisplayId>& displayIdVec);
     void MoveNotShowingWindowToDefaultDisplay(DisplayId displayId);
-    void DestroyLeakStartingWindow();
     WMError PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode,
         sptr<WindowNodeContainer>& container);
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;

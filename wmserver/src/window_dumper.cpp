@@ -84,7 +84,8 @@ WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
     oss << "-------------------------------------ScreenGroup " << screenGroupId
         << "-------------------------------------"
         << std::endl;
-    oss << "WindowName           DisplayId WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
+    oss << "WindowName           DisplayId WinId Type Mode Flag Orientation startingWindow abilityToken "
+            "[ x    y    w    h    ]"
         << std::endl;
     std::vector<sptr<WindowNode>> windowNodes;
     windowNodeContainer->TraverseContainer(windowNodes);
@@ -106,6 +107,8 @@ WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
             << std::left << std::setw(5) << windowNode->GetWindowFlags()
             << std::left << std::setw(5) << --zOrder
             << std::left << std::setw(12) << static_cast<uint32_t>(windowNode->GetRequestedOrientation())
+            << std::left << std::setw(15) << windowNode->startingWindowShown_
+            << std::left << std::setw(12) << static_cast<uint32_t>(windowNode->abilityToken_ != nullptr)
             << "[ "
             << std::left << std::setw(5) << rect.posX_
             << std::left << std::setw(5) << rect.posY_
@@ -164,7 +167,8 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
         return WMError::WM_ERROR_NULLPTR;
     }
     std::ostringstream oss;
-    oss << "WindowName           DisplayId WinId Type Mode Flag Orientation [ x    y    w    h    ]"
+    oss << "WindowName           DisplayId WinId Type Mode Flag Orientation startingWindow abilityToken"
+            "[ x    y    w    h    ]"
         << std::endl;
     Rect rect = node->GetWindowRect();
     const std::string& windowName = node->GetWindowName().size() <= WINDOW_NAME_MAX_LENGTH ?
@@ -177,6 +181,8 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
         << std::left << std::setw(5) << static_cast<uint32_t>(node->GetWindowMode())
         << std::left << std::setw(5) << node->GetWindowFlags()
         << std::left << std::setw(12) << static_cast<uint32_t>(node->GetRequestedOrientation())
+        << std::left << std::setw(15) << node->startingWindowShown_
+        << std::left << std::setw(12) << static_cast<uint32_t>(node->abilityToken_ != nullptr)
         << "[ "
         << std::left << std::setw(5) << rect.posX_
         << std::left << std::setw(5) << rect.posY_
