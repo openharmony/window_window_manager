@@ -22,6 +22,8 @@
 #include "window_helper.h"
 #include "wm_trace.h"
 
+#include "window_inner_manager.h"
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -37,13 +39,6 @@ WindowPair::~WindowPair()
 {
     WLOGI("~WindowPair");
     Clear();
-}
-
-void WindowPair::SendInnerMessage(InnerWMCmd cmd, DisplayId displayId)
-{
-    WLOGI("Send inner message cmd id: %{public}u display id: %{public}u.", static_cast<uint32_t>(cmd),
-        static_cast<uint32_t>(displayId));
-    SingletonContainer::Get<WindowInnerManager>().SendMessage(cmd, displayId);
 }
 
 void WindowPair::SendBroadcastMsg(sptr<WindowNode>& node)
@@ -171,7 +166,7 @@ void WindowPair::Clear()
     primary_ = nullptr;
     secondary_ = nullptr;
     if (divider_ != nullptr) {
-        SendInnerMessage(InnerWMCmd::INNER_WM_DESTROY_DIVIDER, displayId_);
+        WindowInnerManager::GetInstance().DestroyWindow();
         divider_ = nullptr;
     }
     status_ = WindowPairStatus::STATUS_EMPTY;
@@ -329,7 +324,8 @@ void WindowPair::UpdateWindowPairStatus()
         prevStatus == WindowPairStatus::STATUS_SINGLE_SECONDARY || prevStatus == WindowPairStatus::STATUS_EMPTY) &&
         status_ == WindowPairStatus::STATUS_PAIRING) {
         // create divider
-        SendInnerMessage(InnerWMCmd::INNER_WM_CREATE_DIVIDER, displayId_);
+        WindowInnerManager::GetInstance().CreateWindow("dialog_divider_ui", WindowType::WINDOW_TYPE_DOCK_SLICE,
+            initalDivderRect_);
     } else if ((prevStatus == WindowPairStatus::STATUS_PAIRED_DONE || prevStatus == WindowPairStatus::STATUS_PAIRING) &&
         (status_ != WindowPairStatus::STATUS_PAIRED_DONE && status_ != WindowPairStatus::STATUS_PAIRING)) {
         // clear pair
@@ -451,6 +447,11 @@ void WindowPair::HandleRemoveWindow(sptr<WindowNode>& node)
 void WindowPair::SetAllAppWindowsRestoring(bool isAllAppWindowsRestoring)
 {
     isAllAppWindowsRestoring_ = isAllAppWindowsRestoring;
+}
+
+void WindowPair::SetInitalDividerRect(const Rect& rect)
+{
+    initalDivderRect_ = rect;
 }
 } // namespace Rosen
 } // namespace OHOS

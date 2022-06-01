@@ -38,6 +38,7 @@ private:
 
         // main window
         { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,        0 },
+        { WindowType::WINDOW_TYPE_PLACE_HOLDER,           0 },
 
         // system-specific window
         { WindowType::WINDOW_TYPE_WALLPAPER,            0 },

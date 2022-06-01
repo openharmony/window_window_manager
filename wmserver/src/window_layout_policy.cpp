@@ -931,5 +931,10 @@ void WindowLayoutPolicy::SetFloatingWindowLimitsConfig(const FloatingWindowLimit
 {
     floatingWindowLimitsConfig_ = floatingWindowLimitsConfig;
 }
+
+Rect WindowLayoutPolicy::GetInitalDividerRect(DisplayId displayId) const
+{
+    return IVALID_EMPTY_RECT;
+}
 }
 }
