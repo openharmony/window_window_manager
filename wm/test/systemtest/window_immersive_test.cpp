@@ -250,7 +250,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
     const sptr<Window>& window1 = utils::CreateTestWindow(fullScreenAppinfo_);
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
-    fullScreenAppinfo_.name = "main2";
+    fullScreenAppinfo_.name = "Immer2";
     const sptr<Window>& window2 = utils::CreateTestWindow(fullScreenAppinfo_);
     activeWindows_.push_back(window2);
     SetWindowSystemProps(window2, TEST_PROPS_2);
@@ -275,7 +275,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest03, Function | MediumTest | Level3)
     const sptr<Window>& window1 = utils::CreateTestWindow(fullScreenAppinfo_);
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
-    fullScreenAppinfo_.name = "main2";
+    fullScreenAppinfo_.name = "Immer03";
     fullScreenAppinfo_.needAvoid = true; // no immersive setting
     const sptr<Window>& window2 = utils::CreateTestWindow(fullScreenAppinfo_);
     activeWindows_.push_back(window2);
@@ -283,9 +283,9 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest03, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window1->Show());
     ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
     ASSERT_EQ(WMError::WM_OK, window2->Show());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_2));
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_2));
 }
 
 /**
@@ -300,19 +300,13 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest04, Function | MediumTest | Level3)
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
     ASSERT_EQ(WMError::WM_OK, window1->SetLayoutFullScreen(true));
     ASSERT_EQ(true, window1->IsLayoutFullScreen());
     ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
     ASSERT_EQ(WMError::WM_OK, window1->SetLayoutFullScreen(false));
     ASSERT_EQ(false, window1->IsLayoutFullScreen());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
-    ASSERT_EQ(WMError::WM_OK, window1->SetLayoutFullScreen(true));
-    ASSERT_EQ(true, window1->IsLayoutFullScreen());
     ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
-    ASSERT_EQ(WMError::WM_OK, window1->SetLayoutFullScreen(false));
-    ASSERT_EQ(false, window1->IsLayoutFullScreen());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
     ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
 }
