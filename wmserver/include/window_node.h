@@ -70,6 +70,7 @@ public:
     void SetShowingDisplays(const std::vector<DisplayId>& displayIdVec);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     void SetDragType(DragType dragType);
+    void SetOriginRect(const Rect& rect);
 
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
@@ -98,6 +99,8 @@ public:
     std::vector<DisplayId> GetShowingDisplays() const;
     uint32_t GetModeSupportInfo() const;
     DragType GetDragType() const;
+    bool GetStretchable() const;
+    const Rect& GetOriginRect() const;
     void ResetWindowSizeChangeReason();
 
     sptr<WindowNode> parent_;

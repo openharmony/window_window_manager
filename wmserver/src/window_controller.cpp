@@ -723,6 +723,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
     switch (action) {
         case PropertyChangeAction::ACTION_UPDATE_RECT: {
             node->SetDecoStatus(property->GetDecoStatus());
+            node->SetOriginRect(property->GetOriginRect());
             node->SetDragType(property->GetDragType());
             return ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
         }

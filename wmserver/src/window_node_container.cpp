@@ -1718,6 +1718,9 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
         node->SetWindowSizeChangeReason(WindowSizeChangeReason::RECOVER);
     } else if (dstMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         node->SetWindowSizeChangeReason(WindowSizeChangeReason::MAXIMIZE);
+        if (srcMode == WindowMode::WINDOW_MODE_FLOATING) {
+            node->SetRequestRect(node->GetWindowRect());
+        }
     } else {
         node->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
     }

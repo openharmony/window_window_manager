@@ -193,9 +193,24 @@ void WindowNode::SetDragType(DragType dragType)
     property_->SetDragType(dragType);
 }
 
+void WindowNode::SetOriginRect(const Rect& rect)
+{
+    property_->SetOriginRect(rect);
+}
+
 DragType WindowNode::GetDragType() const
 {
     return property_->GetDragType();
+}
+
+bool WindowNode::GetStretchable() const
+{
+    return property_->GetStretchable();
+}
+
+const Rect& WindowNode::GetOriginRect() const
+{
+    return property_->GetOriginRect();
 }
 
 DisplayId WindowNode::GetDisplayId() const

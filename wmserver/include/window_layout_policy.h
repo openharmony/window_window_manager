@@ -86,6 +86,8 @@ protected:
     void LimitFloatingWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect) const;
     void LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const;
 
+    void UpdateFloatongWindowSizeForStretchableWindow(const sptr<WindowNode>& node,
+        const Rect& displayRect, Rect& winRect) const;
     void UpdateFloatingWindowSizeByCustomizedLimits(const sptr<WindowNode>& node,
         const Rect& displayRect, Rect& winRect) const;
     void UpdateFloatingWindowSizeBySystemLimits(const sptr<WindowNode>& node,
