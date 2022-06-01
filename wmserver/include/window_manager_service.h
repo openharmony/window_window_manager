@@ -109,6 +109,7 @@ private:
     void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
     void ConfigureWindowManagerService();
+    bool CheckCallingPermission(const std::string &permission);
 
     static inline SingletonDelegator<WindowManagerService> delegator;
     sptr<WindowRoot> windowRoot_;
