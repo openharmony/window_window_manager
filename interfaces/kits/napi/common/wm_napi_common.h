@@ -60,7 +60,6 @@ napi_status SetMemberInt32(napi_env env, napi_value result, const char *key, int
 napi_status SetMemberUint32(napi_env env, napi_value result, const char *key, uint32_t value);
 napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key);
 
-bool CheckCallingPermission(const std::string &permission);
 void SetErrorInfo(napi_env env, Rosen::WMError wret, std::string errMessage,
     napi_value result[], int count);
 void ProcessPromise(napi_env env, Rosen::WMError wret, napi_deferred deferred,
