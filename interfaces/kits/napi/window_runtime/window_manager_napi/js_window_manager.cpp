@@ -166,17 +166,7 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
         WLOGFE("[NAPI]Context is nullptr");
         return;
     }
-    if (winType == WindowType::WINDOW_TYPE_FLOAT) {
-        auto abilityContext = Context::ConvertTo<AbilityRuntime::AbilityContext>(context->lock());
-        if (abilityContext != nullptr) {
-            if (!CheckCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
-                task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(WMError::WM_ERROR_INVALID_PERMISSION),
-                    "TYPE_FLOAT CheckCallingPermission failed"));
-                return;
-            }
-        }
-    }
+
     sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
     if (windowOption == nullptr) {
         task.Reject(engine, CreateJsError(engine,

@@ -436,18 +436,6 @@ NativeValue* ChangeAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avo
     return objValue;
 }
 
-bool CheckCallingPermission(std::string permission)
-{
-    WLOGFI("[NAPI]Permission: %{public}s", permission.c_str());
-    if (!permission.empty() &&
-        Security::AccessToken::AccessTokenKit::VerifyAccessToken(IPCSkeleton::GetCallingTokenID(), permission)
-        != AppExecFwk::Constants::PERMISSION_GRANTED) {
-        WLOGFE("[NAPI]Permission %{public}s is not granted", permission.c_str());
-        return false;
-    }
-    return true;
-}
-
 bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability)
 {
     napi_value global;

@@ -23,6 +23,8 @@
 #include <rs_iwindow_animation_controller.h>
 #include <system_ability_definition.h>
 
+#include "accesstoken_kit.h"
+#include "bundle_constants.h"
 #include "dm_common.h"
 #include "display_manager_service_inner.h"
 #include "drag_controller.h"
@@ -297,6 +299,19 @@ void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken
     }).wait();
 }
 
+bool WindowManagerService::CheckCallingPermission(const std::string &permission)
+{
+    WLOGFI("permission:%{public}s", permission.c_str());
+    if (!permission.empty() &&
+        Security::AccessToken::AccessTokenKit::VerifyAccessToken(IPCSkeleton::GetCallingTokenID(), permission)
+        != AppExecFwk::Constants::PERMISSION_GRANTED) {
+        WLOGFE("%{public}s permission not granted.", permission.c_str());
+        return false;
+    }
+    WLOGFI("check end.");
+    return true;
+}
+
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token)
 {
@@ -304,9 +319,14 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
         WLOGFE("window is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if ((!window) || (!window->AsObject())) {
+    if (!window->AsObject()) {
         WLOGFE("failed to get window agent");
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+        if (!CheckCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+            return WMError::WM_ERROR_INVALID_PERMISSION;
+        }
     }
     int pid = IPCSkeleton::GetCallingPid();
     int uid = IPCSkeleton::GetCallingUid();
