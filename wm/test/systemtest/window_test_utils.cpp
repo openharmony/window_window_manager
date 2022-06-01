@@ -21,6 +21,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowTestUtils"};
+    constexpr uint32_t EDGE_INTERVAL = 48;
+    constexpr uint32_t MID_INTERVAL = 24;
 }
 
 Rect WindowTestUtils::displayRect_        = {0, 0, 0, 0};
@@ -199,7 +201,7 @@ Rect WindowTestUtils::GetDecorateRect(const Rect& rect, float virtualPixelRatio)
 void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
 {
     const float barRatio = 0.07;
-    const float appRation = 0.4;
+    const float appRation = 0.6;
     const float spaceRation = 0.125;
     displayRect_ = displayRect;
     limitDisplayRect_ = displayRect;
@@ -217,15 +219,30 @@ void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
     };
 }
 
+uint32_t WindowTestUtils::GetMaxTileWinNum()
+{
+    float virtualPixelRatio = GetVirtualPixelRatio(0);
+    constexpr uint32_t half = 2;
+    uint32_t edgeIntervalVp = static_cast<uint32_t>(EDGE_INTERVAL * half * virtualPixelRatio);
+    uint32_t midIntervalVp = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio);
+    uint32_t minFloatingW = isVerticalDisplay_ ? MIN_VERTICAL_FLOATING_WIDTH : MIN_VERTICAL_FLOATING_HEIGHT;
+    minFloatingW = static_cast<uint32_t>(minFloatingW * virtualPixelRatio);
+    uint32_t drawableW = limitDisplayRect_.width_ - edgeIntervalVp + midIntervalVp;
+    uint32_t maxNum = static_cast<uint32_t>(drawableW / (minFloatingW + midIntervalVp));
+    WLOGFI("maxNum: %{public}d", maxNum);
+    return maxNum;
+}
+
 void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window)
 {
     float virtualPixelRatio = GetVirtualPixelRatio(0);
-    uint32_t edgeInterval = 48 * virtualPixelRatio; // 48 is edge interval
-    uint32_t midInterval = 24 * virtualPixelRatio; // 24 is mid interval
+    uint32_t edgeInterval = EDGE_INTERVAL * virtualPixelRatio; // 48 is edge interval
+    uint32_t midInterval = MID_INTERVAL * virtualPixelRatio; // 24 is mid interval
     constexpr float ratio = DEFAULT_ASPECT_RATIO;
     constexpr int half = 2;
     limitDisplayRect_ = displayRect_;
     UpdateSplitRects(window);
+
     uint32_t w = displayRect_.width_ * ratio;
     uint32_t h = displayRect_.height_ * ratio;
     w = w > limitDisplayRect_.width_ ? limitDisplayRect_.width_ : w;

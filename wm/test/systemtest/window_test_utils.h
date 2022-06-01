@@ -74,6 +74,7 @@ public:
     static Rect GetFloatingLimitedRect(const Rect& rect, float virtualPixelRatio);
     static void InitTileWindowRects(const sptr<Window>& window);
     static float GetVirtualPixelRatio(DisplayId displayId);
+    static uint32_t GetMaxTileWinNum();
 
 private:
     void UpdateLimitDisplayRect(Rect& avoidRect);
