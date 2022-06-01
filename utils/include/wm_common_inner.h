@@ -103,6 +103,11 @@ struct ModeChangeHotZones {
     Rect secondary_;
 };
 
+struct SplitRatioConfig {
+    float exitSplitRatio;
+    std::vector<float> splitRatios;
+};
+
 enum class DragType : uint32_t {
     DRAG_UNDEFINED,
     DRAG_WIDTH,

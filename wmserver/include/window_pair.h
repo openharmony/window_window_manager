@@ -161,6 +161,17 @@ public:
     bool IsForbidDockSliceMove() const;
 
     /**
+     * when dock slice in exit split screen mode area,
+     * exit split screen mode.
+     */
+    void ExitSplitMode();
+
+    /**
+     * whether dock slice in exit split screen mode area
+     */
+    bool IsDockSliceInExitSplitModeArea(const std::vector<int32_t>& exitSplitPoints);
+
+    /**
      * Set all app windows are restoring.
      *
      * @param ratio Indicates whether all app windows are restoring.

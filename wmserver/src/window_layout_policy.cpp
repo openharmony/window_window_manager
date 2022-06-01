@@ -47,6 +47,11 @@ void WindowLayoutPolicy::Reorder()
     WLOGFI("WindowLayoutPolicy::Reorder");
 }
 
+std::vector<int32_t> WindowLayoutPolicy::GetExitSplitPoints(DisplayId displayId) const
+{
+    return {};
+}
+
 void WindowLayoutPolicy::LimitWindowToBottomRightCorner(const sptr<WindowNode>& node)
 {
     Rect windowRect = node->GetRequestRect();
@@ -342,7 +347,8 @@ void WindowLayoutPolicy::UpdateClientRectAndResetReason(const sptr<WindowNode>& 
             "%{public}u", node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, reason);
         node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
     }
-    if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) {
+    if ((reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) &&
+        (node->GetWindowType() != WindowType::WINDOW_TYPE_DOCK_SLICE)) {
         node->ResetWindowSizeChangeReason();
     }
 }
@@ -966,6 +972,11 @@ void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const
 Rect WindowLayoutPolicy::GetDisplayGroupRect() const
 {
     return displayGroupRect_;
+}
+
+void WindowLayoutPolicy::SetSplitRatioConfig(SplitRatioConfig splitRatioConfig)
+{
+    splitRatioConfig_ = splitRatioConfig;
 }
 
 void WindowLayoutPolicy::SetFloatingWindowLimitsConfig(const FloatingWindowLimitsConfig& floatingWindowLimitsConfig)

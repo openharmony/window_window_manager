@@ -53,6 +53,7 @@ public:
     virtual void UpdateLayoutRect(const sptr<WindowNode>& node) = 0;
     virtual void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) {};
     virtual Rect GetInitalDividerRect(DisplayId displayId) const;
+    virtual std::vector<int32_t> GetExitSplitPoints(DisplayId displayId) const;
     float GetVirtualPixelRatio(DisplayId displayId) const;
     void UpdateClientRectAndResetReason(const sptr<WindowNode>& node, const Rect& lastLayoutRect, const Rect& winRect);
     Rect GetDisplayGroupRect() const;
@@ -61,6 +62,7 @@ public:
     void ProcessDisplayDestroy(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void ProcessDisplaySizeChangeOrRotation(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void SetFloatingWindowLimitsConfig(const FloatingWindowLimitsConfig& floatingWindowLimitsConfig);
+    void SetSplitRatioConfig(SplitRatioConfig splitRatioConfig);
 
 protected:
     void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
@@ -111,6 +113,8 @@ protected:
         Rect secondaryLimitRect_;
         Rect dividerRect_;
         Rect firstCascadeRect_;
+        std::vector<int32_t> exitSplitPoints_; // 2 element, first elment < second element
+        std::vector<int32_t> splitRatioPoints_;
     };
     sptr<DisplayGroupInfo> displayGroupInfo_;
     mutable std::map<DisplayId, Rect> limitRectMap_;
@@ -119,6 +123,7 @@ protected:
     Rect displayGroupLimitRect_;
     bool isMultiDisplay_ = false;
     FloatingWindowLimitsConfig floatingWindowLimitsConfig_;
+    SplitRatioConfig splitRatioConfig_;
 };
 }
 }
