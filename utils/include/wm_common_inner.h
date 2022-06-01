@@ -110,6 +110,11 @@ enum class DragType : uint32_t {
     DRAG_CORNER,
 };
 
+enum class TraceTaskId : int32_t {
+    STARTING_WINDOW = 0,
+    REMOTE_ANIMATION,
+};
+
 namespace {
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
     constexpr float DEFAULT_ASPECT_RATIO = 0.66;
