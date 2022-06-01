@@ -616,6 +616,20 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
         WLOGFW("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        DisplayId displayId = node->GetDisplayId();
+        if (windowRoot_->IsDockSliceInExitSplitModeArea(displayId)) {
+            windowRoot_->ExitSplitMode(displayId);
+        } else {
+            auto property = node->GetWindowProperty();
+            node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG_END);
+            property->SetRequestRect(property->GetWindowRect());
+            WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_RECT);
+            if (res == WMError::WM_OK) {
+                FlushWindowInfo(windowId);
+            }
+        }
+    }
     WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_END);
     if (res != WMError::WM_OK) {
         return res;

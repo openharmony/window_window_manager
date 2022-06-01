@@ -192,6 +192,33 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
     }).get();
 }
 
+void WindowManagerService::ConfigFloatWindowLimits()
+{
+    const auto& intNumbersConfig = WindowManagerConfig::GetIntNumbersConfig();
+    const auto& floatNumbersConfig = WindowManagerConfig::GetFloatNumbersConfig();
+
+    FloatingWindowLimitsConfig floatingWindowLimitsConfig;
+    if (intNumbersConfig.count("floatingWindowLimitSize") != 0) {
+        auto numbers = intNumbersConfig.at("floatingWindowLimitSize");
+        if (numbers.size() == 4) { // 4, limitSize
+            floatingWindowLimitsConfig.maxWidth_ = static_cast<uint32_t>(numbers[0]);  // 0 max width
+            floatingWindowLimitsConfig.maxHeight_ = static_cast<uint32_t>(numbers[1]); // 1 max height
+            floatingWindowLimitsConfig.minWidth_ = static_cast<uint32_t>(numbers[2]);  // 2 min width
+            floatingWindowLimitsConfig.minHeight_ = static_cast<uint32_t>(numbers[3]); // 3 min height
+            floatingWindowLimitsConfig.isFloatingWindowLimitsConfigured_ = true;
+        }
+    }
+    if (floatNumbersConfig.count("floatingWindowLimitRatio") != 0) {
+        auto numbers = floatNumbersConfig.at("floatingWindowLimitRatio");
+        if (numbers.size() == 2) { // 2, limitRatio
+            floatingWindowLimitsConfig.maxRatio_ = static_cast<float>(numbers[0]); // 0 max ratio
+            floatingWindowLimitsConfig.minRatio_ = static_cast<float>(numbers[1]); // 1 min ratio
+            floatingWindowLimitsConfig.isFloatingWindowLimitsConfigured_ = true;
+        }
+    }
+    windowRoot_->SetFloatingWindowLimitsConfig(floatingWindowLimitsConfig);
+}
+
 void WindowManagerService::ConfigureWindowManagerService()
 {
     const auto& enableConfig = WindowManagerConfig::GetEnableConfig();
@@ -227,29 +254,18 @@ void WindowManagerService::ConfigureWindowManagerService()
         }
     }
 
-    FloatingWindowLimitsConfig floatingWindowLimitsConfig;
+    ConfigFloatWindowLimits();
 
-    if (intNumbersConfig.count("floatingWindowLimitSize") != 0) {
-        auto numbers = intNumbersConfig.at("floatingWindowLimitSize");
-        if (numbers.size() == 4) { // 4, limitSize
-            floatingWindowLimitsConfig.maxWidth_ = static_cast<uint32_t>(numbers[0]);  // 0 max width
-            floatingWindowLimitsConfig.maxHeight_ = static_cast<uint32_t>(numbers[1]); // 1 max height
-            floatingWindowLimitsConfig.minWidth_ = static_cast<uint32_t>(numbers[2]);  // 2 min width
-            floatingWindowLimitsConfig.minHeight_ = static_cast<uint32_t>(numbers[3]); // 3 min height
-            floatingWindowLimitsConfig.isFloatingWindowLimitsConfigured_ = true;
-        }
+    if (floatNumbersConfig.count("splitRatios") != 0) {
+        windowRoot_->SetSplitRatios(floatNumbersConfig.at("splitRatios"));
     }
 
-    if (floatNumbersConfig.count("floatingWindowLimitRatio") != 0) {
-        auto numbers = floatNumbersConfig.at("floatingWindowLimitRatio");
-        if (numbers.size() == 2) { // 2, limitRatio
-            floatingWindowLimitsConfig.maxRatio_ = static_cast<float>(numbers[0]); // 0 max ratio
-            floatingWindowLimitsConfig.minRatio_ = static_cast<float>(numbers[1]); // 1 min ratio
-            floatingWindowLimitsConfig.isFloatingWindowLimitsConfigured_ = true;
+    if (floatNumbersConfig.count("exitSplitRatio") != 0) {
+        auto numbers = floatNumbersConfig.at("exitSplitRatio");
+        if ((numbers.size() == 1) && numbers[0] > 0 && numbers[0] < 0.5) { // valid range (0, 0.5)
+            windowRoot_->SetExitSplitRatio(numbers[0]);
         }
     }
-
-    windowRoot_->SetFloatingWindowLimitsConfig(floatingWindowLimitsConfig);
 }
 
 void WindowManagerService::OnStop()

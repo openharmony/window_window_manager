@@ -99,6 +99,7 @@ void WindowLayoutPolicyCascade::LayoutWindowNode(const sptr<WindowNode>& node)
             UpdateLimitRect(node, limitRectMap_[displayId]);
             UpdateSplitLimitRect(limitRectMap_[displayId], primaryLimitRect);
             UpdateSplitLimitRect(limitRectMap_[displayId], secondaryLimitRect);
+            UpdateSplitRatioPoints(displayId);
             UpdateDisplayGroupLimitRect_();
             WLOGFI("priLimitRect: %{public}d %{public}d %{public}u %{public}u, " \
                 "secLimitRect: %{public}d %{public}d %{public}u %{public}u", primaryLimitRect.posX_,
@@ -132,6 +133,11 @@ void WindowLayoutPolicyCascade::RemoveWindowNode(const sptr<WindowNode>& node)
     if (node->GetWindowToken()) {
         node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
     }
+}
+
+std::vector<int32_t> WindowLayoutPolicyCascade::GetExitSplitPoints(DisplayId displayId) const
+{
+    return cascadeRectsMap_[displayId].exitSplitPoints_;
 }
 
 void WindowLayoutPolicyCascade::UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow)
@@ -247,10 +253,16 @@ void WindowLayoutPolicyCascade::ApplyWindowRectConstraints(const sptr<WindowNode
 {
     WLOGFI("Before apply constraints winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) { // if divider, limit position
-        LimitMoveBounds(winRect, node->GetDisplayId());
+    auto reason = node->GetWindowSizeChangeReason();
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE &&
+        reason == WindowSizeChangeReason::DRAG_END) {
+        DisplayId displayId = node->GetDisplayId();
+        if (!IsVerticalDisplay(displayId)) {
+            UpdateDockSlicePosition(displayId, winRect.posX_);
+        } else {
+            UpdateDockSlicePosition(displayId, winRect.posY_);
+        }
     }
-
     LimitFloatingWindowSize(node, displayGroupInfo_->GetDisplayRect(node->GetDisplayId()), winRect);
     LimitMainFloatingWindowPosition(node, winRect);
 
@@ -309,6 +321,7 @@ void WindowLayoutPolicyCascade::InitLimitRects(DisplayId displayId)
     limitRectMap_[displayId] = displayGroupInfo_->GetDisplayRect(displayId);
     cascadeRectsMap_[displayId].primaryLimitRect_ = cascadeRectsMap_[displayId].primaryRect_;
     cascadeRectsMap_[displayId].secondaryLimitRect_ = cascadeRectsMap_[displayId].secondaryRect_;
+    UpdateSplitRatioPoints(displayId);
 }
 
 Rect WindowLayoutPolicyCascade::GetLimitRect(const WindowMode mode, DisplayId displayId) const
@@ -331,6 +344,36 @@ Rect WindowLayoutPolicyCascade::GetDisplayRect(const WindowMode mode, DisplayId 
     } else {
         return displayGroupInfo_->GetDisplayRect(displayId);
     }
+}
+
+void WindowLayoutPolicyCascade::UpdateSplitRatioPoints(DisplayId displayId)
+{
+    LayoutRects& cascadeRects = cascadeRectsMap_[displayId];
+    cascadeRects.exitSplitPoints_.clear();
+    cascadeRects.splitRatioPoints_.clear();
+    cascadeRects.exitSplitPoints_.push_back(GetSplitRatioPoint(splitRatioConfig_.exitSplitRatio, displayId));
+    cascadeRects.exitSplitPoints_.push_back(GetSplitRatioPoint(1 - splitRatioConfig_.exitSplitRatio, displayId));
+    for (const auto& ratio : splitRatioConfig_.splitRatios) {
+        cascadeRects.splitRatioPoints_.push_back(GetSplitRatioPoint(ratio, displayId));
+    }
+}
+
+void WindowLayoutPolicyCascade::UpdateDockSlicePosition(DisplayId displayId, int32_t& origin) const
+{
+    const LayoutRects& cascadeRects = cascadeRectsMap_[displayId];
+    if (cascadeRects.splitRatioPoints_.size() == 0) {
+        return;
+    }
+    uint32_t minDiff = std::max(limitRectMap_[displayId].width_, limitRectMap_[displayId].height_);
+    int32_t closestPoint = origin;
+    for (const auto& elem : cascadeRects.splitRatioPoints_) {
+        uint32_t diff = (origin > elem) ? (origin - elem) : (elem - origin);
+        if (diff < minDiff) {
+            closestPoint = elem;
+            minDiff = diff;
+        }
+    }
+    origin = closestPoint;
 }
 
 void WindowLayoutPolicyCascade::UpdateSplitLimitRect(const Rect& limitRect, Rect& limitSplitRect)
@@ -364,20 +407,17 @@ void WindowLayoutPolicyCascade::InitSplitRects(DisplayId displayId)
     SetSplitRect(dividerRect, displayId);
 }
 
-void WindowLayoutPolicyCascade::SetSplitRectByRatio(float ratio, DisplayId displayId)
+int32_t WindowLayoutPolicyCascade::GetSplitRatioPoint(float ratio, DisplayId displayId)
 {
-    auto& dividerRect = cascadeRectsMap_[displayId].dividerRect_;
-    const Rect& limitRect = limitRectMap_[displayId];
+    const auto& dividerRect = cascadeRectsMap_[displayId].dividerRect_;
+    const auto& limitRect = limitRectMap_[displayId];
     if (!IsVerticalDisplay(displayId)) {
-        dividerRect.posX_ = limitRect.posX_ +
+        return limitRect.posX_ +
             static_cast<uint32_t>((limitRect.width_ - dividerRect.width_) * ratio);
     } else {
-        dividerRect.posY_ = limitRect.posY_ +
+        return limitRect.posY_ +
             static_cast<uint32_t>((limitRect.height_ - dividerRect.height_) * ratio);
     }
-    WLOGFI("set dividerRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
-        dividerRect.posX_, dividerRect.posY_, dividerRect.width_, dividerRect.height_);
-    SetSplitRect(dividerRect, displayId);
 }
 
 void WindowLayoutPolicyCascade::SetSplitRect(const Rect& divRect, DisplayId displayId)

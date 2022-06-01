@@ -149,6 +149,49 @@ bool WindowPair::IsForbidDockSliceMove() const
     return true;
 }
 
+bool WindowPair::IsDockSliceInExitSplitModeArea(const std::vector<int32_t>& exitSplitPoints)
+{
+    if (!IsPaired()) {
+        return false;
+    }
+    int32_t dividerOrigin;
+    Rect rect = divider_->GetWindowRect();
+    if (rect.width_ < rect.height_) {
+        dividerOrigin = rect.posX_;
+    } else {
+        dividerOrigin = rect.posY_; // vertical display
+    }
+    if (dividerOrigin < exitSplitPoints[0] || dividerOrigin > exitSplitPoints[1]) {
+        return true;
+    }
+    return false;
+}
+
+void WindowPair::ExitSplitMode()
+{
+    if (!IsPaired()) {
+        return;
+    }
+    Rect dividerRect = divider_->GetWindowRect();
+    sptr<WindowNode> hideWindow, fullScreenWindow;
+    bool isVertical = (dividerRect.height_ < dividerRect.width_) ? true : false;
+    if ((isVertical && (primary_->GetWindowRect().height_ < secondary_->GetWindowRect().height_)) ||
+        (!isVertical && (primary_->GetWindowRect().width_ < secondary_->GetWindowRect().width_))) {
+        hideWindow = primary_;
+        fullScreenWindow = secondary_;
+    } else {
+        hideWindow = secondary_;
+        fullScreenWindow = primary_;
+    }
+    if (WindowHelper::IsWindowModeSupported(fullScreenWindow->GetModeSupportInfo(),
+        WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        fullScreenWindow->GetWindowProperty()->SetLastWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    }
+    MinimizeApp::AddNeedMinimizeApp(hideWindow, MinimizeReason::SPLIT_QUIT);
+    MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::SPLIT_QUIT);
+    WLOGFI("Exit Split Mode, Minimize Window %{public}u", hideWindow->GetWindowId());
+}
+
 void WindowPair::Clear()
 {
     WLOGI("Clear window pair.");
