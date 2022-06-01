@@ -729,14 +729,6 @@ bool WindowNodeContainer::IsAboveSystemBarNode(sptr<WindowNode> node) const
     return false;
 }
 
-bool WindowNodeContainer::IsFullImmersiveNode(sptr<WindowNode> node) const
-{
-    auto mode = node->GetWindowMode();
-    auto flags = node->GetWindowFlags();
-    return mode == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        !(flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-}
-
 bool WindowNodeContainer::IsSplitImmersiveNode(sptr<WindowNode> node) const
 {
     auto type = node->GetWindowType();
@@ -757,7 +749,7 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
             if (IsAboveSystemBarNode(*iter)) {
                 continue;
             }
-            if (IsFullImmersiveNode(*iter)) {
+            if (WindowHelper::IsFullScreenWindow((*iter)->GetWindowMode()) && (*iter)->isSystemBarPropSetted_) {
                 WLOGFI("Top immersive window id: %{public}d. Use full immersive prop", (*iter)->GetWindowId());
                 for (auto it : sysBarPropMap) {
                     sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;

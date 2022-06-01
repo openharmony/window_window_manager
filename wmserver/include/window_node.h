@@ -116,6 +116,7 @@ public:
     bool isPlayAnimationHide_ { false };
     bool startingWindowShown_ { false };
     bool isShowingOnMultiDisplays_ { false };
+    bool isSystemBarPropSetted_ {false};
     std::vector<DisplayId> showingDisplays_;
 
 private:
