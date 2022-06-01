@@ -364,14 +364,12 @@ void DisplayGroupController::ProcessDisplayCreate(DisplayId displayId,
     auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
     displayGroupInfo_->AddDisplayInfo(displayInfo);
 
-    // create new window pair for split window
-    auto windowPair = new WindowPair(displayId, displayGroupWindowTree_);
-    windowPairMap_.insert(std::make_pair(displayId, windowPair));
-
     // modify RSTree and window tree of displayGroup for cross-display nodes
     ProcessCrossNodes(DisplayStateChangeType::CREATE);
     UpdateDisplayGroupWindowTree();
     windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayCreate(displayId, displayRectMap);
+    Rect initialDividerRect = windowNodeContainer_->GetLayoutPolicy()->GetInitalDividerRect(displayId);
+    SetInitalDividerRect(displayId, initialDividerRect);
 }
 
 void DisplayGroupController::ProcessDisplayDestroy(DisplayId displayId,
@@ -439,6 +437,13 @@ sptr<WindowPair> DisplayGroupController::GetWindowPairByDisplayId(DisplayId disp
         return windowPairMap_[displayId];
     }
     return nullptr;
+}
+
+void DisplayGroupController::SetInitalDividerRect(DisplayId displayId, const Rect& rect)
+{
+    if (windowPairMap_.find(displayId) != windowPairMap_.end()) {
+        windowPairMap_[displayId]->SetInitalDividerRect(rect);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

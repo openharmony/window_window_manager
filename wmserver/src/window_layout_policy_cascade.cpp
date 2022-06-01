@@ -30,7 +30,7 @@ WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo
     DisplayGroupWindowTree& displayGroupWindowTree)
     : WindowLayoutPolicy(displayGroupInfo, displayGroupWindowTree)
 {
-    CascadeRects cascadeRects {
+    LayoutRects cascadeRects {
         .primaryRect_        = {0, 0, 0, 0},
         .secondaryRect_      = {0, 0, 0, 0},
         .primaryLimitRect_   = {0, 0, 0, 0},
@@ -183,6 +183,11 @@ void WindowLayoutPolicyCascade::AddWindowNode(const sptr<WindowNode>& node)
             node->SetRequestRect(restoringDividerWindowRects_[displayId]);
         }
         restoringDividerWindowRects_.erase(displayId);
+    } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_PLACE_HOLDER) {
+        Rect placeHolderRect = node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ?
+            cascadeRectsMap_[node->GetDisplayId()].primaryLimitRect_ :
+            cascadeRectsMap_[node->GetDisplayId()].secondaryLimitRect_;
+        node->SetRequestRect(placeHolderRect); // init place holder window
     }
     UpdateWindowNode(node, true); // currently, update and add do the same process
 }
@@ -529,6 +534,14 @@ void WindowLayoutPolicyCascade::SetCascadeRect(const sptr<WindowNode>& node)
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     node->SetRequestRect(rect);
     node->SetDecoStatus(true);
+}
+Rect WindowLayoutPolicyCascade::GetInitalDividerRect(DisplayId displayId) const
+{
+    Rect dividerRect = {0, 0, 0, 0};
+    if (cascadeRectsMap_.find(displayId) != std::end(cascadeRectsMap_)) {
+        dividerRect = cascadeRectsMap_[displayId].dividerRect_;
+    }
+    return dividerRect;
 }
 } // Rosen
 } // OHOS
