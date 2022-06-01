@@ -45,6 +45,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
         WLOGFE("info or AbilityToken is nullptr!");
         return;
     }
+    WM_SCOPED_ASYNC_TRACE_BEGIN(static_cast<int32_t>(TraceTaskId::STARTING_WINDOW), "wms:async:ShowStartingWindow");
     auto node = windowRoot_->FindWindowNodeWithToken(info->GetAbilityToken());
     if (node == nullptr) {
         if (!isColdStart) {
@@ -84,9 +85,11 @@ void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
         return;
     }
     if (!node->startingWindowShown_) {
-        WLOGFE("CancelStartingWindow failed because client window has shown");
+        WLOGFE("CancelStartingWindow failed because client window has shown id:%{public}u", node->GetWindowId());
         return;
     }
+    WM_SCOPED_TRACE("wms:CancelStartingWindow(%u)", node->GetWindowId());
+    WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::STARTING_WINDOW), "wms:async:ShowStartingWindow");
     WLOGFI("CancelStartingWindow with id:%{public}u!", node->GetWindowId());
     node->isAppCrash_ = true;
     WMError res = windowRoot_->DestroyWindow(node->GetWindowId(), false);
@@ -108,6 +111,8 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
     if (!RemoteAnimation::CheckTransition(srcInfo, srcNode, dstInfo, dstNode)) {
         return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
+    WM_SCOPED_ASYNC_TRACE_BEGIN(static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+        "wms:async:ShowRemoteAnimation");
     auto transitionEvent = RemoteAnimation::GetTransitionEvent(srcInfo, dstInfo, srcNode, dstNode);
     switch (transitionEvent) {
         case TransitionEvent::APP_TRANSITION: {

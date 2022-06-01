@@ -21,7 +21,7 @@
 #include "minimize_app.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-
+#include "wm_trace.h"
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -119,6 +119,8 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
     sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
         []() {
             WLOGFI("RSWindowAnimation: on finish transition with minimizeAll!");
+            WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+                "wms:async:ShowRemoteAnimation");
             MinimizeApp::ExecuteMinimizeAll();
         }
     );
@@ -177,6 +179,8 @@ WMError RemoteAnimation::NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcI
         if (srcNode != nullptr && srcNode->abilityToken_ != nullptr) {
             WLOGFI("minimize windowId: %{public}u, name:%{public}s",
                 srcNode->GetWindowId(), srcNode->GetWindowName().c_str());
+            WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+                "wms:async:ShowRemoteAnimation");
             AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(srcNode->abilityToken_, true);
         }
     };
@@ -202,6 +206,8 @@ WMError RemoteAnimation::NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo
         if (srcNode != nullptr && srcNode->abilityToken_ != nullptr) {
             WLOGFI("close windowId: %{public}u, name:%{public}s",
                 srcNode->GetWindowId(), srcNode->GetWindowName().c_str());
+            WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+                "wms:async:ShowRemoteAnimation");
             AAFwk::AbilityManagerClient::GetInstance()->CloseAbility(srcNode->abilityToken_);
         }
     };
