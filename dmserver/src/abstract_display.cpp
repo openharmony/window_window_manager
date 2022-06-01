@@ -26,12 +26,14 @@ namespace {
     constexpr int32_t PHONE_SCREEN_WIDTH = 2160;
 }
 
-AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t refreshRate)
+AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId,
+    ScreenId screenGroupId, sptr<SupportedScreenModes> info)
     : id_(id),
       screenId_(screenId),
-      width_(width),
-      height_(height),
-      refreshRate_(refreshRate)
+      screenGroupId_(screenGroupId),
+      width_(info->width_),
+      height_(info->height_),
+      refreshRate_(info->refreshRate_)
 {
     if (DisplayManagerService::GetCustomVirtualPixelRatio() &&
         fabs(DisplayManagerService::GetCustomVirtualPixelRatio() + 1) > 1e-6) {
@@ -194,6 +196,11 @@ ScreenId AbstractDisplay::GetAbstractScreenId() const
     return screenId_;
 }
 
+ScreenId AbstractDisplay::GetAbstractScreenGroupId() const
+{
+    return screenGroupId_;
+}
+
 sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
 {
     sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
@@ -207,6 +214,7 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->SetDisplayId(id_);
     displayInfo->SetRefreshRate(refreshRate_);
     displayInfo->SetScreenId(screenId_);
+    displayInfo->SetScreenGroupId(screenGroupId_);
     displayInfo->SetVirtualPixelRatio(virtualPixelRatio_);
     displayInfo->SetRotation(rotation_);
     displayInfo->SetOrientation(orientation_);

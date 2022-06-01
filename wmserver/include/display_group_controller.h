@@ -44,12 +44,12 @@ public:
     void InitNewDisplay(DisplayId displayId);
     void UpdateDisplayGroupWindowTree();
     void PreProcessWindowNode(const sptr<WindowNode>& node, WindowUpdateType type);
-    void ProcessDisplayCreate(DisplayId displayId,
+    void ProcessDisplayCreate(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
                               const std::map<DisplayId, Rect>& displayRectMap);
-    void ProcessDisplayDestroy(DisplayId displayId,
+    void ProcessDisplayDestroy(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
                                const std::map<DisplayId, Rect>& displayRectMap,
                                std::vector<uint32_t>& windowIds);
-    void ProcessDisplayChange(DisplayId displayId,
+    void ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
                               const std::map<DisplayId, Rect>& displayRectMap,
                               DisplayStateChangeType type);
     sptr<WindowPair> GetWindowPairByDisplayId(DisplayId displayId);
@@ -63,9 +63,9 @@ private:
     std::vector<sptr<WindowNode>>* GetWindowNodesByDisplayIdAndRootType(DisplayId displayId, WindowRootNodeType type);
     void AddWindowNodeOnWindowTree(sptr<WindowNode>& node, WindowRootNodeType rootType);
     void ProcessNotCrossNodesOnDestroiedDisplay(DisplayId displayId, std::vector<uint32_t>& windowIds);
-    void ProcessDisplaySizeChangeOrRotation(DisplayId displayId,
+    void ProcessDisplaySizeChangeOrRotation(DisplayId defaultDisplayId, DisplayId displayId,
         const std::map<DisplayId, Rect>& displayRectMap, DisplayStateChangeType type);
-    void ProcessCrossNodes(DisplayStateChangeType type);
+    void ProcessCrossNodes(DisplayId defaultDisplayId, DisplayStateChangeType type);
     void MoveCrossNodeToTargetDisplay(const sptr<WindowNode>& node, DisplayId targetDisplayId);
     void MoveNotCrossNodeToDefaultDisplay(const sptr<WindowNode>& node, DisplayId displayId);
     void UpdateWindowShowingDisplays(const sptr<WindowNode>& node, const Rect& requestRect);

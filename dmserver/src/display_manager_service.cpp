@@ -44,10 +44,12 @@ float DisplayManagerService::customVirtualPixelRatio_ = -1.0f;
 
 DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_SERVICE_SA_ID, true),
     abstractDisplayController_(new AbstractDisplayController(mutex_,
-    std::bind(&DisplayManagerService::NotifyDisplayStateChange, this, std::placeholders::_1, std::placeholders::_2))),
+        std::bind(&DisplayManagerService::NotifyDisplayStateChange, this,
+            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4))),
     abstractScreenController_(new AbstractScreenController(mutex_)),
     displayPowerController_(new DisplayPowerController(mutex_,
-    std::bind(&DisplayManagerService::NotifyDisplayStateChange, this, std::placeholders::_1, std::placeholders::_2)))
+        std::bind(&DisplayManagerService::NotifyDisplayStateChange, this,
+            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)))
 {
 }
 
@@ -111,11 +113,13 @@ void DisplayManagerService::RegisterDisplayChangeListener(sptr<IDisplayChangeLis
     WLOGFI("IDisplayChangeListener registered");
 }
 
-void DisplayManagerService::NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type)
+void DisplayManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+    const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
+    DisplayId id = (displayInfo == nullptr) ? DISPLAY_ID_INVALID : displayInfo->GetDisplayId();
     WLOGFI("DisplayId %{public}" PRIu64"", id);
     if (displayChangeListener_ != nullptr) {
-        displayChangeListener_->OnDisplayStateChange(id, type);
+        displayChangeListener_->OnDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
     }
 }
 

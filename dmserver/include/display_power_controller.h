@@ -26,7 +26,8 @@
 namespace OHOS {
 namespace Rosen {
 class DisplayPowerController : public RefBase {
-using DisplayStateChangeListener = std::function<void(DisplayId, DisplayStateChangeType)>;
+using DisplayStateChangeListener = std::function<void(DisplayId, sptr<DisplayInfo>,
+    const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType)>;
 public:
     DisplayPowerController(std::recursive_mutex& mutex, DisplayStateChangeListener listener)
         : mutex_(mutex), displayStateChangeListener_(listener)

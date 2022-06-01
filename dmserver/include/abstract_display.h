@@ -33,7 +33,7 @@ public:
     constexpr static int32_t DEFAULT_HIGHT = 1280;
     constexpr static float DEFAULT_VIRTUAL_PIXEL_RATIO = 1.0;
     constexpr static uint32_t DEFAULT_FRESH_RATE = 60;
-    AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t refreshRate);
+    AbstractDisplay(DisplayId id, ScreenId screenId, ScreenId screenGroupId, sptr<SupportedScreenModes> info);
     WM_DISALLOW_COPY_AND_MOVE(AbstractDisplay);
     ~AbstractDisplay() = default;
     static inline bool IsVertical(Rotation rotation)
@@ -48,6 +48,7 @@ public:
     uint32_t GetRefreshRate() const;
     float GetVirtualPixelRatio() const;
     ScreenId GetAbstractScreenId() const;
+    ScreenId GetAbstractScreenGroupId() const;
     bool BindAbstractScreen(sptr<AbstractScreen> abstractDisplay);
     sptr<DisplayInfo> ConvertToDisplayInfo() const;
     Rotation GetRotation() const;
@@ -69,6 +70,7 @@ public:
 private:
     DisplayId id_ { DISPLAY_ID_INVALID };
     ScreenId screenId_ { SCREEN_ID_INVALID };
+    ScreenId screenGroupId_ { SCREEN_ID_INVALID };
     int32_t offsetX_ { 0 };
     int32_t offsetY_ { 0 };
     int32_t width_ { 0 };
