@@ -31,7 +31,8 @@
 
 namespace OHOS::Rosen {
 class AbstractDisplayController : public RefBase {
-using DisplayStateChangeListener = std::function<void(DisplayId, DisplayStateChangeType)>;
+using DisplayStateChangeListener = std::function<void(DisplayId, sptr<DisplayInfo>,
+    const std::map<DisplayId, sptr<DisplayInfo>>&, DisplayStateChangeType)>;
 public:
     AbstractDisplayController(std::recursive_mutex& mutex, DisplayStateChangeListener);
     ~AbstractDisplayController();
@@ -57,9 +58,13 @@ private:
     void BindAloneScreenLocked(sptr<AbstractScreen> absScreen);
     void AddScreenToMirrorLocked(sptr<AbstractScreen> absScreen);
     void AddScreenToExpandLocked(sptr<AbstractScreen> absScreen);
-    DisplayId ProcessNormalScreenDisconnected(sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup);
-    DisplayId ProcessExpandScreenDisconnected(sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup);
+    std::map<DisplayId, sptr<DisplayInfo>> GetAllDisplayInfoOfGroup(sptr<DisplayInfo> info);
+    DisplayId ProcessNormalScreenDisconnected(
+        sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup, sptr<AbstractDisplay>& absDisplay);
+    DisplayId ProcessExpandScreenDisconnected(
+        sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup, sptr<AbstractDisplay>& absDisplay);
     bool UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info);
+    void displayStateChangeListener(sptr<AbstractDisplay> abstractDisplay, DisplayStateChangeType type);
 
     std::recursive_mutex& mutex_;
     std::atomic<DisplayId> displayCount_ { 0 };

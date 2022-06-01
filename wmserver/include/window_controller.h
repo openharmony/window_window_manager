@@ -45,7 +45,8 @@ public:
     WMError SetAlpha(uint32_t windowId, float alpha);
     std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
-    void NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type);
+    void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     WMError ProcessPointDown(uint32_t windowId, bool isStartDrag);
     WMError ProcessPointUp(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
@@ -67,7 +68,8 @@ private:
     void FlushWindowInfo(uint32_t windowId);
     void FlushWindowInfoWithDisplayId(DisplayId displayId);
     void UpdateWindowAnimation(const sptr<WindowNode>& node);
-    void ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type);
+    void ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     void StopBootAnimationIfNeed(WindowType type) const;
     WMError SetWindowType(uint32_t windowId, WindowType type);
     WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
