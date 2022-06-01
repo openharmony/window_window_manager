@@ -124,7 +124,6 @@ const std::map<ApiWindowMode, WindowMode> JS_TO_NATIVE_WINDOW_MODE_MAP {
     NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine,
         const SystemBarRegionTints& tints);
     NativeValue* ChangeAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avoidArea);
-    bool CheckCallingPermission(std::string permission);
     NativeValue* WindowTypeInit(NativeEngine* engine);
     NativeValue* AvoidAreaTypeInit(NativeEngine* engine);
     NativeValue* WindowModeInit(NativeEngine* engine);
