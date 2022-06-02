@@ -183,11 +183,6 @@ void WindowLayoutPolicyCascade::AddWindowNode(const sptr<WindowNode>& node)
             node->SetRequestRect(restoringDividerWindowRects_[displayId]);
         }
         restoringDividerWindowRects_.erase(displayId);
-    } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_PLACE_HOLDER) {
-        Rect placeHolderRect = node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ?
-            cascadeRectsMap_[node->GetDisplayId()].primaryLimitRect_ :
-            cascadeRectsMap_[node->GetDisplayId()].secondaryLimitRect_;
-        node->SetRequestRect(placeHolderRect); // init place holder window
     }
     UpdateWindowNode(node, true); // currently, update and add do the same process
 }
