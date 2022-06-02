@@ -2009,7 +2009,9 @@ void WindowImpl::SetDefaultOption()
 {
     switch (property_->GetWindowType()) {
         case WindowType::WINDOW_TYPE_STATUS_BAR:
-        case WindowType::WINDOW_TYPE_NAVIGATION_BAR: {
+        case WindowType::WINDOW_TYPE_NAVIGATION_BAR:
+        case WindowType::WINDOW_TYPE_VOLUME_OVERLAY:
+        case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetFocusable(false);
             break;
@@ -2035,28 +2037,15 @@ void WindowImpl::SetDefaultOption()
         }
         case WindowType::WINDOW_TYPE_TOAST:
         case WindowType::WINDOW_TYPE_FLOAT:
+        case WindowType::WINDOW_TYPE_VOICE_INTERACTION:
         case WindowType::WINDOW_TYPE_LAUNCHER_DOCK:
         case WindowType::WINDOW_TYPE_SEARCHING_BAR: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
-        case WindowType::WINDOW_TYPE_VOLUME_OVERLAY: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-            property_->SetFocusable(false);
-            break;
-        }
-        case WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-            property_->SetFocusable(false);
-            break;
-        }
         case WindowType::WINDOW_TYPE_BOOT_ANIMATION:
         case WindowType::WINDOW_TYPE_POINTER: {
             property_->SetFocusable(false);
-            break;
-        }
-        case WindowType::WINDOW_TYPE_VOICE_INTERACTION: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
         default:
