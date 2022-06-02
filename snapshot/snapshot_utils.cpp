@@ -189,6 +189,55 @@ bool SnapShotUtils::WriteToPng(const std::string &fileName, const WriteToPngPara
     return true;
 }
 
+bool SnapShotUtils::WriteToPng(int fd, const WriteToPngParam &param)
+{
+    if (!CheckParamValid(param)) {
+        return false;
+    }
+
+    png_structp pngStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    if (pngStruct == nullptr) {
+        std::cout << "error: png_create_write_struct nullptr!" << std::endl;
+        return false;
+    }
+    png_infop pngInfo = png_create_info_struct(pngStruct);
+    if (pngInfo == nullptr) {
+        std::cout << "error: png_create_info_struct error nullptr!" << std::endl;
+        png_destroy_write_struct(&pngStruct, nullptr);
+        return false;
+    }
+    FILE *fp = fdopen(fd, "wb");
+    if (fp == nullptr) {
+        png_destroy_write_struct(&pngStruct, &pngInfo);
+        return false;
+    }
+    png_init_io(pngStruct, fp);
+
+    // set png header
+    png_set_IHDR(pngStruct, pngInfo,
+        param.width, param.height,
+        param.bitDepth,
+        PNG_COLOR_TYPE_RGBA,
+        PNG_INTERLACE_NONE,
+        PNG_COMPRESSION_TYPE_BASE,
+        PNG_FILTER_TYPE_BASE);
+    png_set_packing(pngStruct); // set packing info
+    png_write_info(pngStruct, pngInfo); // write to header
+
+    for (uint32_t i = 0; i < param.height; i++) {
+        png_write_row(pngStruct, param.data + (i * param.stride));
+    }
+
+    png_write_end(pngStruct, pngInfo);
+
+    // free
+    png_destroy_write_struct(&pngStruct, &pngInfo);
+    if (fclose(fp) != 0) {
+        return false;
+    }
+    return true;
+}
+
 bool SnapShotUtils::WriteToPngWithPixelMap(const std::string &fileName, PixelMap &pixelMap)
 {
     WriteToPngParam param;
@@ -198,6 +247,17 @@ bool SnapShotUtils::WriteToPngWithPixelMap(const std::string &fileName, PixelMap
     param.stride = static_cast<uint32_t>(pixelMap.GetRowBytes());
     param.bitDepth = BITMAP_DEPTH;
     return SnapShotUtils::WriteToPng(fileName, param);
+}
+
+bool SnapShotUtils::WriteToPngWithPixelMap(int fd, Media::PixelMap &pixelMap)
+{
+    WriteToPngParam param;
+    param.width = static_cast<uint32_t>(pixelMap.GetWidth());
+    param.height = static_cast<uint32_t>(pixelMap.GetHeight());
+    param.data = pixelMap.GetPixels();
+    param.stride = static_cast<uint32_t>(pixelMap.GetRowBytes());
+    param.bitDepth = BITMAP_DEPTH;
+    return SnapShotUtils::WriteToPng(fd, param);
 }
 
 static bool ProcessDisplayId(DisplayId &displayId, bool isDisplayIdSet)

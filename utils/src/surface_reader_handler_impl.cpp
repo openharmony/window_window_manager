@@ -48,6 +48,7 @@ void SurfaceReaderHandlerImpl::ResetFlag()
 
 sptr<Media::PixelMap> SurfaceReaderHandlerImpl::GetPixelMap()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     return pixleMap_;
 }
 }
