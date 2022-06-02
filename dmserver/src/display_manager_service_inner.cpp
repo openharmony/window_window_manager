@@ -29,7 +29,12 @@ WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerServiceInner)
 
 DisplayId DisplayManagerServiceInner::GetDefaultDisplayId() const
 {
-    return DisplayManagerService::GetInstance().GetDefaultDisplayId();
+    auto defaultDisplayInfo = DisplayManagerService::GetInstance().GetDefaultDisplayInfo();
+    if (defaultDisplayInfo == nullptr) {
+        WLOGFE("GetDefaultDisplayId, defaultDisplayInfo is nullptr.");
+        return DISPLAY_ID_INVALID;
+    }
+    return defaultDisplayInfo->GetDisplayId();
 }
 
 sptr<DisplayInfo> DisplayManagerServiceInner::GetDisplayById(DisplayId displayId) const
@@ -43,12 +48,7 @@ sptr<DisplayInfo> DisplayManagerServiceInner::GetDisplayById(DisplayId displayId
 
 sptr<DisplayInfo> DisplayManagerServiceInner::GetDefaultDisplay() const
 {
-    DisplayId defaultDisplayId = GetDefaultDisplayId();
-    if (defaultDisplayId == DISPLAY_ID_INVALID) {
-        WLOGFE("Fail to get default displayId");
-        return nullptr;
-    }
-    return DisplayManagerService::GetInstance().GetDisplayInfoById(defaultDisplayId);
+    return DisplayManagerService::GetInstance().GetDefaultDisplayInfo();
 }
 
 std::vector<DisplayId> DisplayManagerServiceInner::GetAllDisplayIds() const
