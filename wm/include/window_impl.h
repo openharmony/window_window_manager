@@ -323,10 +323,9 @@ private:
     Rect startRectExceptFrame_ = { 0, 0, 0, 0 };
     Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
     DragType dragType_ = DragType::DRAG_UNDEFINED;
-    Rect originRect_ = {0, 0, 0, 0};
     bool isAppDecorEnbale_ = true;
     SystemConfig windowSystemConfig_ ;
-    bool isStretchableSet_ = false;
+    bool isOriginRectSet_ = false;
 };
 }
 }

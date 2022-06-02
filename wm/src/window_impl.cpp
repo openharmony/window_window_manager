@@ -651,6 +651,16 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
             property_->SetTokenState(true);
         }
     }
+    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        if (SingletonContainer::Get<WindowAdapter>().GetSystemConfig(windowSystemConfig_) == WMError::WM_OK) {
+            WLOGFE("get system decor enable:%{public}d", windowSystemConfig_.isSystemDecorEnable_);
+            if (windowSystemConfig_.isSystemDecorEnable_) {
+                property_->SetDecorEnable(true);
+            }
+            WLOGFI("get stretchable enable:%{public}d", windowSystemConfig_.isStretchable_);
+            property_->SetStretchable(windowSystemConfig_.isStretchable_);
+        }
+    }
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
         windowId, token);
     if (ret != WMError::WM_OK) {
@@ -658,14 +668,6 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
         return ret;
     }
     property_->SetWindowId(windowId);
-    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        if (SingletonContainer::Get<WindowAdapter>().GetSystemConfig(windowSystemConfig_) == WMError::WM_OK) {
-            WLOGFE("get system decor enable:%{public}d", windowSystemConfig_.isSystemDecorEnable_);
-            if (windowSystemConfig_.isSystemDecorEnable_) {
-                property_->SetDecorEnable(true);
-            }
-        }
-    }
     windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, this)));
     if (parentName != "") { // add to subWindowMap_
         subWindowMap_[property_->GetParentId()].push_back(this);
@@ -1417,32 +1419,23 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         return;
     }
     property_->SetWindowRect(rect);
-
-    // update originRect when window show for the first time.
-    if (!isStretchableSet_) {
-        originRect_ = rect;
-        isStretchableSet_ = true;
+    const Rect& originRect = property_->GetOriginRect();
+    // update originRect when floating window show for the first time.
+    if (!isOriginRectSet_ && GetMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        property_->SetOriginRect(rect);
+        isOriginRectSet_ = true;
     }
-
     Rect rectToAce = rect;
-
     // update rectToAce for stretchable window
     if (windowSystemConfig_.isStretchable_ && GetMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        if (reason == WindowSizeChangeReason::RESIZE ||
-        reason == WindowSizeChangeReason::RECOVER) {
-            originRect_ = rect;
-        } else {
-            rectToAce = originRect_;
-        }
+        rectToAce = originRect;
     }
-
     WLOGFI("sizeChange callback size: %{public}lu", (unsigned long)windowChangeListeners_.size());
     for (auto& listener : windowChangeListeners_) {
         if (listener != nullptr) {
             listener->OnSizeChange(rectToAce, reason);
         }
     }
-
     if (uiContent_ != nullptr) {
         Ace::ViewportConfig config;
         WLOGFI("UpdateViewportConfig Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
@@ -1605,13 +1598,14 @@ void WindowImpl::UpdatePointerEventForStretchableWindow(std::shared_ptr<MMI::Poi
         WLOGFW("Point item is invalid");
         return;
     }
+    const Rect& originRect = property_->GetOriginRect();
     PointInfo originPos =
-        WindowHelper::CalculateOriginPosition(originRect_, GetRect(),
+        WindowHelper::CalculateOriginPosition(originRect, GetRect(),
         { pointerItem.GetGlobalX(), pointerItem.GetGlobalY() });
     pointerItem.SetGlobalX(originPos.x);
     pointerItem.SetGlobalY(originPos.y);
-    pointerItem.SetLocalX(originPos.x - originRect_.posX_);
-    pointerItem.SetLocalY(originPos.y - originRect_.posY_);
+    pointerItem.SetLocalX(originPos.x - originRect.posX_);
+    pointerItem.SetLocalY(originPos.y - originRect.posY_);
     pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), pointerItem);
 }
 

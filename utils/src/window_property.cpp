@@ -170,6 +170,16 @@ void WindowProperty::SetDragType(DragType dragType)
     dragType_ = dragType;
 }
 
+void WindowProperty::SetStretchable(bool stretchable)
+{
+    isStretchable_ = stretchable;
+}
+
+void WindowProperty::SetOriginRect(const Rect& rect)
+{
+    originRect_ = rect;
+}
+
 WindowSizeChangeReason WindowProperty::GetWindowSizeChangeReason() const
 {
     return windowSizeChangeReason_;
@@ -345,6 +355,16 @@ DragType WindowProperty::GetDragType() const
     return dragType_;
 }
 
+const Rect& WindowProperty::GetOriginRect() const
+{
+    return originRect_;
+}
+
+bool WindowProperty::GetStretchable() const
+{
+    return isStretchable_;
+}
+
 bool WindowProperty::MapMarshalling(Parcel& parcel) const
 {
     auto size = sysBarPropMap_.size();
@@ -394,7 +414,10 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteBool(tokenState_) &&
         parcel.WriteUint32(callingWindow_) && parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
-        parcel.WriteUint32(modeSupportInfo_) && parcel.WriteUint32(static_cast<uint32_t>(dragType_));
+        parcel.WriteUint32(modeSupportInfo_) && parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
+        parcel.WriteUint32(originRect_.width_) && parcel.WriteUint32(originRect_.height_) &&
+        parcel.WriteBool(isStretchable_);
+    ;
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -437,6 +460,10 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetKeepScreenOn(parcel.ReadBool());
     property->SetModeSupportInfo(parcel.ReadUint32());
     property->SetDragType(static_cast<DragType>(parcel.ReadUint32()));
+    uint32_t w = parcel.ReadUint32();
+    uint32_t h = parcel.ReadUint32();
+    property->SetOriginRect(Rect { 0, 0, w, h });
+    property->SetStretchable(parcel.ReadBool());
     return property;
 }
 
@@ -473,6 +500,8 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     keepScreenOn_ = property->keepScreenOn_;
     modeSupportInfo_ = property->modeSupportInfo_;
     dragType_ = property->dragType_;
+    originRect_ = property->originRect_;
+    isStretchable_ = property->isStretchable_;
 }
 }
 }
