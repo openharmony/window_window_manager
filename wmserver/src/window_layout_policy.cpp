@@ -570,6 +570,42 @@ FloatingWindowLimitsConfig WindowLayoutPolicy::GetCustomizedLimitsConfig(const R
     return newLimitConfig;
 }
 
+void WindowLayoutPolicy::UpdateFloatongWindowSizeForStretchableWindow(const sptr<WindowNode>& node,
+    const Rect& displayRect, Rect& winRect) const
+{
+    const Rect &originRect = node->GetOriginRect();
+    if (originRect.height_ == 0 || originRect.width_ == 0) {
+        WLOGE("invalid originRect. window id: %{public}u", node->GetWindowId());
+        return;
+    }
+    if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG) {
+        auto dragType = node->GetDragType();
+        if (dragType == DragType::DRAG_HEIGHT) {
+            // if drag height, use height to fix size.
+            winRect.width_ = winRect.height_ * originRect.width_ / originRect.height_;
+        } else if (dragType == DragType::DRAG_CORNER || dragType == DragType::DRAG_WIDTH) {
+            // if drag width or corner, use width to fix size.
+            winRect.height_ = winRect.width_ * originRect.height_ / originRect.width_;
+        }
+    } else if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::RESIZE) {
+        // fix rect when width / height is not correct
+        winRect.width_ = winRect.height_ * originRect.width_ / originRect.height_;
+    }
+    // limit minimum size of window
+    const auto& systemLimits = const_cast<WindowLayoutPolicy*>(this)->
+        GetSystemLimitsConfig(displayRect, GetVirtualPixelRatio(node->GetDisplayId()));
+    float scale = std::min(static_cast<float>(winRect.width_) / systemLimits.minWidth_,
+        static_cast<float>(winRect.height_) / systemLimits.minHeight_);
+    if (scale == 0) {
+        WLOGE("invalid systemLimits");
+        return;
+    }
+    if (scale < 1.0f) {
+        winRect.width_ = static_cast<uint32_t>(static_cast<float>(winRect.width_) / scale);
+        winRect.height_ = static_cast<uint32_t>(static_cast<float>(winRect.height_) / scale);
+    }
+}
+
 void WindowLayoutPolicy::UpdateFloatingWindowSizeByCustomizedLimits(const sptr<WindowNode>& node,
     const Rect& displayRect, Rect& winRect) const
 {
@@ -656,6 +692,11 @@ void WindowLayoutPolicy::LimitFloatingWindowSize(const sptr<WindowNode>& node,
         UpdateFloatingWindowSizeByCustomizedLimits(node, displayRect, winRect);
     } else {
         UpdateFloatingWindowSizeBySystemLimits(node, displayRect, winRect);
+    }
+
+    if (node->GetStretchable() &&
+        WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+        UpdateFloatongWindowSizeForStretchableWindow(node, displayRect, winRect);
     }
 
     // fix size in case of moving window when dragging

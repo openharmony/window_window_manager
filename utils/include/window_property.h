@@ -69,6 +69,8 @@ public:
     void SetTokenState(bool hasToken);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     void SetDragType(DragType dragType);
+    void SetStretchable(bool stretchable);
+    void SetOriginRect(const Rect& rect);
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
 
     const std::string& GetWindowName() const;
@@ -101,6 +103,8 @@ public:
     uint32_t GetAnimationFlag() const;
     uint32_t GetModeSupportInfo() const;
     DragType GetDragType() const;
+    bool GetStretchable() const;
+    const Rect& GetOriginRect() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
@@ -140,6 +144,8 @@ private:
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SystemBarProperty() },
     };
     bool isDecorEnable_ { false };
+    Rect originRect_ = { 0, 0, 0, 0 };
+    bool isStretchable_ {false};
     DragType dragType_ = DragType::DRAG_UNDEFINED;
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
 };
