@@ -121,7 +121,6 @@ ohos_shared_library("libwms") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
-    "access_token:libaccesstoken_sdk",
     "common_event_service:cesfwk_innerkits",
     "display_manager_native:displaymgr",
     "graphic_standard:surface",
