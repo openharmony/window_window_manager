@@ -51,6 +51,19 @@ napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key)
     return napi_ok;
 }
 
+bool CheckCallingPermission(const std::string &permission)
+{
+    WLOGFI("CheckCallingPermission, permission:%{public}s", permission.c_str());
+    if (!permission.empty() &&
+        Security::AccessToken::AccessTokenKit::VerifyAccessToken(IPCSkeleton::GetCallingTokenID(), permission)
+        != AppExecFwk::Constants::PERMISSION_GRANTED) {
+        WLOGFE("%{public}s permission not granted.", permission.c_str());
+        return false;
+    }
+    WLOGFI("CheckCallingPermission end.");
+    return true;
+}
+
 void SetErrorInfo(napi_env env, Rosen::WMError wret, std::string errMessage, napi_value result[], int count)
 {
     if (count != 2 || result == nullptr) { // input param number is 2
