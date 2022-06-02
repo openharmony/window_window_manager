@@ -63,8 +63,8 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     DisplayManagerMessage msgId = static_cast<DisplayManagerMessage>(code);
     switch (msgId) {
         case DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_ID: {
-            DisplayId displayId = GetDefaultDisplayId();
-            reply.WriteUint64(displayId);
+            auto info = GetDefaultDisplayInfo();
+            reply.WriteParcelable(info);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {

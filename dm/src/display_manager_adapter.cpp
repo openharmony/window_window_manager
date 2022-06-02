@@ -36,11 +36,11 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerAdapter)
         } \
     } while (false)
 
-DisplayId DisplayManagerAdapter::GetDefaultDisplayId()
+sptr<DisplayInfo> DisplayManagerAdapter::GetDefaultDisplayInfo()
 {
-    INIT_PROXY_CHECK_RETURN(DISPLAY_ID_INVALID);
+    INIT_PROXY_CHECK_RETURN(nullptr);
 
-    return displayManagerServiceProxy_->GetDefaultDisplayId();
+    return displayManagerServiceProxy_->GetDefaultDisplayInfo();
 }
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfoByScreenId(ScreenId screenId)

@@ -38,6 +38,7 @@ public:
     static inline SingletonDelegator<DisplayManager> delegator;
     bool CheckRectValid(const Media::Rect& rect, int32_t oriHeight, int32_t oriWidth) const;
     bool CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const;
+    sptr<Display> GetDefaultDisplay();
     sptr<Display> GetDisplayById(DisplayId displayId);
     bool RegisterDisplayListener(sptr<IDisplayListener> listener);
     bool UnregisterDisplayListener(sptr<IDisplayListener> listener);
@@ -223,7 +224,26 @@ DisplayManager::~DisplayManager()
 
 DisplayId DisplayManager::GetDefaultDisplayId()
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayId();
+    auto info = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
+    if (info == nullptr) {
+        return DISPLAY_ID_INVALID;
+    }
+    return info->GetDisplayId();
+}
+
+sptr<Display> DisplayManager::Impl::GetDefaultDisplay()
+{
+    auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
+    if (displayInfo == nullptr) {
+        return nullptr;
+    }
+    auto displayId = displayInfo->GetDisplayId();
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!UpdateDisplayInfoLocked(displayInfo)) {
+        displayMap_.erase(displayId);
+        return nullptr;
+    }
+    return displayMap_[displayId];
 }
 
 sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
@@ -338,7 +358,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
 
 sptr<Display> DisplayManager::GetDefaultDisplay()
 {
-    return GetDisplayById(GetDefaultDisplayId());
+    return pImpl_->GetDefaultDisplay();
 }
 
 std::vector<DisplayId> DisplayManager::GetAllDisplayIds()
