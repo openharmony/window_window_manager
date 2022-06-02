@@ -52,7 +52,9 @@ public:
     static std::string GenerateFileName(int offset = 0);
     static bool CheckWidthAndHeightValid(const CmdArgments& cmdArgments);
     static bool WriteToPng(const std::string &fileName, const WriteToPngParam &param);
+    static bool WriteToPng(int fd, const WriteToPngParam &param);
     static bool WriteToPngWithPixelMap(const std::string &fileName, Media::PixelMap &pixelMap);
+    static bool WriteToPngWithPixelMap(int fd, Media::PixelMap &pixelMap);
     static bool ProcessArgs(int argc, char * const argv[], CmdArgments& cmdArgments);
 private:
 };
