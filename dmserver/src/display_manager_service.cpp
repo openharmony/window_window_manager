@@ -51,6 +51,14 @@ DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_S
 {
 }
 
+int DisplayManagerService::Dump(int fd, const std::vector<std::u16string>& args)
+{
+    if (displayDumper_ == nullptr) {
+        displayDumper_ = new DisplayDumper(abstractDisplayController_, abstractScreenController_, mutex_);
+    }
+    return static_cast<int>(displayDumper_->Dump(fd, args));
+}
+
 void DisplayManagerService::OnStart()
 {
     WLOGFI("DisplayManagerService::OnStart start");

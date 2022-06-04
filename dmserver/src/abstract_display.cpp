@@ -149,6 +149,11 @@ Rotation AbstractDisplay::GetRotation() const
     return rotation_;
 }
 
+Orientation AbstractDisplay::GetOrientation() const
+{
+    return orientation_;
+}
+
 void AbstractDisplay::SetFreezeFlag(FreezeFlag freezeFlag)
 {
     freezeFlag_ = freezeFlag;
