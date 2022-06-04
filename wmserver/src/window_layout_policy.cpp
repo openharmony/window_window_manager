@@ -417,6 +417,7 @@ void WindowLayoutPolicy::ComputeDecoratedRequestRect(const sptr<WindowNode>& nod
 
 void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<WindowNode>& node) const
 {
+    // test
     Rect rect = winRect;
     float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
     uint32_t hotZone = static_cast<uint32_t>(HOTZONE * virtualPixelRatio);
