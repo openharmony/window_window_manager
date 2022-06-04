@@ -24,6 +24,7 @@
 #include <ui/rs_display_node.h>
 
 #include "dm_common.h"
+#include "display_dumper.h"
 #include "screen.h"
 #include "abstract_display.h"
 #include "abstract_display_controller.h"
@@ -42,6 +43,7 @@ DECLARE_SYSTEM_ABILITY(DisplayManagerService);
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
 
 public:
+    int Dump(int fd, const std::vector<std::u16string>& args) override;
     void OnStart() override;
     void OnStop() override;
     ScreenId CreateVirtualScreen(VirtualScreenOption option,
@@ -110,6 +112,7 @@ private:
     sptr<AbstractScreenController> abstractScreenController_;
     sptr<DisplayPowerController> displayPowerController_;
     sptr<IDisplayChangeListener> displayChangeListener_;
+    sptr<DisplayDumper> displayDumper_;
     static float customVirtualPixelRatio_;
 };
 } // namespace OHOS::Rosen
