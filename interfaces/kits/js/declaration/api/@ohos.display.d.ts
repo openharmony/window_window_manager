@@ -35,6 +35,12 @@ declare namespace display {
   function getDefaultDisplay(): Promise<Display>;
 
   /**
+   * Obtain the default display.
+   * @devices tv, phone, tablet, wearable
+   */
+  function getDefaultDisplaySync(): Display;
+
+  /**
    * Obtain all displays.
    * @devices tv, phone, tablet, wearable
    * @param callback
