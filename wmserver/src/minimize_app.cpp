@@ -40,6 +40,18 @@ void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReaso
     needMinimizeAppNodes_[reason].emplace_back(weakNode);
 }
 
+std::vector<wptr<WindowNode>> MinimizeApp::GetNeedMinimizeAppNodes()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::vector<wptr<WindowNode>> needMinimizeAppNodes;
+    for (auto& appNodes: needMinimizeAppNodes_) {
+        for (auto& node : appNodes.second) {
+            needMinimizeAppNodes.emplace_back(node);
+        }
+    }
+    return needMinimizeAppNodes;
+}
+
 void MinimizeApp::ExecuteMinimizeAll()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
