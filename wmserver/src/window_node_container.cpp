@@ -275,13 +275,13 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     node->currentVisibility_ = false;
     node->isCovered_ = true;
     std::vector<sptr<WindowVisibilityInfo>> infos = {new WindowVisibilityInfo(node->GetWindowId(),
-        node->GetCallingPid(), node->GetCallingUid(), false)};
+        node->GetCallingPid(), node->GetCallingUid(), false, node->GetWindowType())};
     for (auto& child : node->children_) {
         if (child->currentVisibility_) {
             child->currentVisibility_ = false;
             child->isCovered_ = true;
             infos.emplace_back(new WindowVisibilityInfo(child->GetWindowId(), child->GetCallingPid(),
-                child->GetCallingUid(), false));
+                child->GetCallingUid(), false, child->GetWindowType()));
         }
     }
 
@@ -1673,7 +1673,7 @@ void WindowNodeContainer::UpdateWindowVisibilityInfos(std::vector<sptr<WindowVis
         if (isCovered != node->isCovered_) {
             node->isCovered_ = isCovered;
             infos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
-                node->GetCallingUid(), !isCovered));
+                node->GetCallingUid(), !isCovered, node->GetWindowType()));
             WLOGD("UpdateWindowVisibilityInfos: covered status changed window:%{public}u, covered:%{public}d",
                 node->GetWindowId(), isCovered);
         }
