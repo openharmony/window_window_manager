@@ -1316,10 +1316,15 @@ void WindowNodeContainer::MinimizeOldestAppWindow()
     WLOGFI("no window needs to minimize");
 }
 
-void WindowNodeContainer::ToggleShownStateForAllAppWindows(
+WMError WindowNodeContainer::ToggleShownStateForAllAppWindows(
     std::function<bool(uint32_t, WindowMode)> restoreFunc, bool restore)
 {
     WLOGFI("ToggleShownStateForAllAppWindows");
+    for (auto node : aboveAppWindowNode_->children_) {
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
+            return WMError::WM_DO_NOTHING;
+        }
+    }
     // to do, backup reentry: 1.ToggleShownStateForAllAppWindows fast; 2.this display should reset backupWindowIds_.
     if (!restore && appWindowNode_->children_.empty() && !backupWindowIds_.empty()) {
         backupWindowIds_.clear();
@@ -1359,6 +1364,7 @@ void WindowNodeContainer::ToggleShownStateForAllAppWindows(
     } else {
         WLOGFI("do nothing because shown app windows is empty or backup windows is empty.");
     }
+    return WMError::WM_OK;
 }
 
 void WindowNodeContainer::RestoreAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc)

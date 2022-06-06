@@ -274,7 +274,7 @@ void WindowRoot::MinimizeAllAppWindows(DisplayId displayId)
     return container->MinimizeAllAppWindows(displayId);
 }
 
-void WindowRoot::ToggleShownStateForAllAppWindows()
+WMError WindowRoot::ToggleShownStateForAllAppWindows()
 {
     std::vector<DisplayId> displays = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
     std::vector<sptr<WindowNodeContainer>> containers;
@@ -288,8 +288,9 @@ void WindowRoot::ToggleShownStateForAllAppWindows()
         containers.emplace_back(container);
         isAllAppWindowsEmpty = isAllAppWindowsEmpty && container->IsAppWindowsEmpty();
     }
+    WMError res = WMError::WM_OK;
     std::for_each(containers.begin(), containers.end(),
-        [this, isAllAppWindowsEmpty] (sptr<WindowNodeContainer> container) {
+        [this, isAllAppWindowsEmpty, &res] (sptr<WindowNodeContainer> container) {
         auto restoreFunc = [this](uint32_t windowId, WindowMode mode) {
             auto windowNode = GetWindowNode(windowId);
             if (windowNode == nullptr) {
@@ -310,12 +311,15 @@ void WindowRoot::ToggleShownStateForAllAppWindows()
             WindowManagerService::GetInstance().HandleAddWindow(property);
             return true;
         };
+        WMError tmpRes = WMError::WM_OK;
         if (isAllAppWindowsEmpty) {
-            container->ToggleShownStateForAllAppWindows(restoreFunc, true);
+            tmpRes = container->ToggleShownStateForAllAppWindows(restoreFunc, true);
         } else {
-            container->ToggleShownStateForAllAppWindows(restoreFunc, false);
+            tmpRes = container->ToggleShownStateForAllAppWindows(restoreFunc, false);
         }
+        res = (res == WMError::WM_OK) ? tmpRes : res;
     });
+    return res;
 }
 
 WMError WindowRoot::MaxmizeWindow(uint32_t windowId)

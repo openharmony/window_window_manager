@@ -58,7 +58,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void MinimizeAllAppWindows(DisplayId displayId);
-    void ToggleShownStateForAllAppWindows();
+    WMError ToggleShownStateForAllAppWindows();
     WMError MaxmizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
