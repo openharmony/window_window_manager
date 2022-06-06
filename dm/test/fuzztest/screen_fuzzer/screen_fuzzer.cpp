@@ -53,12 +53,17 @@ bool ScreenFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     size_t startPos = 0;
+    uint32_t originalDensityDpi = static_cast<uint32_t>(display->GetVirtualPixelRatio() * DOT_PER_INCH);
+    uint32_t modifiedDensityDpi = static_cast<uint32_t>(
+        originalDensityDpi + 80 >= 640 ? originalDensityDpi - 80 : originalDensityDpi + 80);
     startPos += GetObject<uint32_t>(modeId, data + startPos, size - startPos);
     startPos += GetObject<Orientation>(orientation, data + startPos, size - startPos);
     screen->SetScreenActiveMode(modeId);
     screen->SetOrientation(orientation);
+    screen->SetDensityDpi(modifiedDensityDpi);
     screen->SetScreenActiveMode(0);
     screen->SetOrientation(Orientation::UNSPECIFIED);
+    screen->SetDensityDpi(originalDensityDpi);
     return true;
 }
 
