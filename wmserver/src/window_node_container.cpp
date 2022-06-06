@@ -61,6 +61,8 @@ WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, S
     layoutPolicy_ = layoutPolicys_[WindowLayoutMode::CASCADE];
     layoutPolicy_->Launch();
 
+    Rect initalDividerRect = layoutPolicys_[WindowLayoutMode::CASCADE]->GetInitalDividerRect(displayId);
+    displayGroupController_->SetInitalDividerRect(displayId, initalDividerRect);
     // init avoidAreaController
     UpdateAvoidAreaFunc func = std::bind(&WindowNodeContainer::OnAvoidAreaChange, this,
         std::placeholders::_1, std::placeholders::_2);

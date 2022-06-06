@@ -35,35 +35,6 @@ config("libwms_config") {
   defines += gpu_defines
 }
 
-ohos_prebuilt_etc("window_divider_image") {
-  source = "//foundation/windowmanager/resources/bg_split_handle.png"
-  part_name = "window_manager"
-  subsystem_name = "window"
-  relative_install_dir = "window/resources"
-}
-
-ohos_prebuilt_etc("window_manager_config") {
-  if (device_name == "rk3568") {
-    source =
-        "//foundation/windowmanager/resources/rk3568/window_manager_config.xml"
-    install_enable = true
-  } else {
-    source =
-        "//foundation/windowmanager/resources/other/window_manager_config.xml"
-    install_enable = false
-  }
-  part_name = "window_manager"
-  subsystem_name = "window"
-  relative_install_dir = "window/resources"
-}
-
-ohos_prebuilt_etc("window_starting_image") {
-  source = "//foundation/windowmanager/resources/starting_window.png"
-  part_name = "window_manager"
-  subsystem_name = "window"
-  relative_install_dir = "window/resources"
-}
-
 ohos_shared_library("libwms") {
   sources = [
     "../wm/src/zidl/window_manager_agent_proxy.cpp",
@@ -101,9 +72,7 @@ ohos_shared_library("libwms") {
   configs = [ ":libwms_config" ]
 
   deps = [
-    ":window_divider_image",
-    ":window_manager_config",
-    ":window_starting_image",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/dmserver:libdms",

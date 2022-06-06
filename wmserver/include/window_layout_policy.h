@@ -52,6 +52,7 @@ public:
     virtual void UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow = false);
     virtual void UpdateLayoutRect(const sptr<WindowNode>& node) = 0;
     virtual void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) {};
+    virtual Rect GetInitalDividerRect(DisplayId displayId) const;
     float GetVirtualPixelRatio(DisplayId displayId) const;
     void UpdateClientRectAndResetReason(const sptr<WindowNode>& node, const Rect& lastLayoutRect, const Rect& winRect);
     Rect GetDisplayGroupRect() const;
@@ -102,6 +103,14 @@ protected:
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowType::WINDOW_TYPE_NAVIGATION_BAR,
+    };
+    struct LayoutRects {
+        Rect primaryRect_;
+        Rect secondaryRect_;
+        Rect primaryLimitRect_;
+        Rect secondaryLimitRect_;
+        Rect dividerRect_;
+        Rect firstCascadeRect_;
     };
     sptr<DisplayGroupInfo> displayGroupInfo_;
     mutable std::map<DisplayId, Rect> limitRectMap_;

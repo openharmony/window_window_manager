@@ -41,6 +41,7 @@ public:
     void UpdateLayoutRect(const sptr<WindowNode>& node) override;
     void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) override;
     void RemoveWindowNode(const sptr<WindowNode>& node) override;
+    Rect GetInitalDividerRect(DisplayId displayId) const override;
 
 private:
     void InitAllRects();
@@ -70,7 +71,7 @@ private:
         Rect dividerRect_;
         Rect firstCascadeRect_;
     };
-    mutable std::map<DisplayId, CascadeRects> cascadeRectsMap_;
+    mutable std::map<DisplayId, LayoutRects> cascadeRectsMap_;
     std::map<DisplayId, Rect> restoringDividerWindowRects_;
 };
 }
