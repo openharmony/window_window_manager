@@ -119,16 +119,16 @@ void DisplayManagerService::NotifyDisplayStateChange(DisplayId id, DisplayStateC
     }
 }
 
-DisplayId DisplayManagerService::GetDefaultDisplayId()
+sptr<DisplayInfo> DisplayManagerService::GetDefaultDisplayInfo()
 {
     ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
-    WLOGFI("GetDefaultDisplayId %{public}" PRIu64"", dmsScreenId);
+    WLOGFI("GetDefaultDisplayInfo %{public}" PRIu64"", dmsScreenId);
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplayByScreen(dmsScreenId);
     if (display == nullptr) {
         WLOGFE("fail to get displayInfo by id: invalid display");
-        return DISPLAY_ID_INVALID;
+        return nullptr;
     }
-    return display->GetId();
+    return display->ConvertToDisplayInfo();
 }
 
 sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)

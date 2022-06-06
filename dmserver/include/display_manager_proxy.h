@@ -31,7 +31,7 @@ public:
         : IRemoteProxy<IDisplayManager>(impl) {};
     ~DisplayManagerProxy() {};
 
-    DisplayId GetDefaultDisplayId() override;
+    sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
 

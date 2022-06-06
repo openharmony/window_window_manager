@@ -136,6 +136,9 @@ NativeValue* CreateJsScreenVectorObject(NativeEngine& engine, std::vector<sptr<S
     }
     size_t i = 0;
     for (auto& screen : screens) {
+        if (screen == nullptr) {
+            continue;
+        }
         array->SetElement(i++, CreateJsScreenObject(engine, screen));
     }
     return arrayValue;
