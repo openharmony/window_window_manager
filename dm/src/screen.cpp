@@ -202,4 +202,9 @@ bool Screen::SetDensityDpi(uint32_t dpi) const
     float density = static_cast<float>(dpi) / 160; // 160 is the coefficient between density and dpi.
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualPixelRatio(GetId(), density);
 }
+
+sptr<ScreenInfo> Screen::GetScreenInfo() const
+{
+    return pImpl_->GetScreenInfo();
+}
 } // namespace OHOS::Rosen

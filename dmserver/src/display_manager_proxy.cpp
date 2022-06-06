@@ -27,30 +27,31 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerProxy"};
 }
 
-DisplayId DisplayManagerProxy::GetDefaultDisplayId()
+sptr<DisplayInfo> DisplayManagerProxy::GetDefaultDisplayInfo()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("GetDefaultDisplayId: remote is nullptr");
-        return DISPLAY_ID_INVALID;
+        WLOGFW("GetDefaultDisplayInfo: remote is nullptr");
+        return nullptr;
     }
 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("GetDefaultDisplayId: WriteInterfaceToken failed");
-        return DISPLAY_ID_INVALID;
+        WLOGFE("GetDefaultDisplayInfo: WriteInterfaceToken failed");
+        return nullptr;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_ID),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("GetDefaultDisplayId: SendRequest failed");
-        return DISPLAY_ID_INVALID;
+        WLOGFW("GetDefaultDisplayInfo: SendRequest failed");
+        return nullptr;
     }
-
-    DisplayId displayId = reply.ReadUint64();
-    WLOGFI("DisplayManagerProxy::GetDefaultDisplayId %" PRIu64"", displayId);
-    return displayId;
+    sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
+    if (info == nullptr) {
+        WLOGFW("DisplayManagerProxy::GetDefaultDisplayInfo SendRequest nullptr.");
+    }
+    return info;
 }
 
 sptr<DisplayInfo> DisplayManagerProxy::GetDisplayInfoById(DisplayId displayId)

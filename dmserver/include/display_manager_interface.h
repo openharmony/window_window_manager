@@ -33,7 +33,7 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IDisplayManager");
 
     enum class DisplayManagerMessage : uint32_t {
-        TRANS_ID_GET_DEFAULT_DISPLAY_ID = 0,
+        TRANS_ID_GET_DEFAULT_DISPLAY_INFO = 0,
         TRANS_ID_GET_DISPLAY_BY_ID,
         TRANS_ID_GET_DISPLAY_BY_SCREEN,
         TRANS_ID_GET_DISPLAY_SNAPSHOT,
@@ -73,7 +73,7 @@ public:
         TRANS_ID_SCREEN_SET_COLOR_TRANSFORM,
     };
 
-    virtual DisplayId GetDefaultDisplayId() = 0;
+    virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) = 0;
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) = 0;
 
