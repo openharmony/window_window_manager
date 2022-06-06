@@ -51,6 +51,7 @@ public:
     bool BindAbstractScreen(sptr<AbstractScreen> abstractDisplay);
     sptr<DisplayInfo> ConvertToDisplayInfo() const;
     Rotation GetRotation() const;
+    Orientation GetOrientation() const;
     FreezeFlag GetFreezeFlag() const;
 
     void SetId(DisplayId displayId);
