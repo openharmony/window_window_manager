@@ -45,6 +45,7 @@ public:
     static void SetMinimizedByOtherConfig(bool isMinimizedByOther);
     static void ClearNodesWithReason(MinimizeReason reason);
     static bool IsNodeNeedMinimize(const sptr<WindowNode>& node);
+    static std::vector<wptr<WindowNode>> GetNeedMinimizeAppNodes();
 private:
     static inline bool IsFromUser(MinimizeReason reason)
     {

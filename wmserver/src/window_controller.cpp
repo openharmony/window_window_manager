@@ -124,11 +124,12 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
         case TransitionEvent::MINIMIZE:
             return RemoteAnimation::NotifyAnimationMinimize(srcInfo, srcNode);
         case TransitionEvent::CLOSE:
-            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode);
+            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::CLOSE);
+        case TransitionEvent::BACK:
+            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::BACK);
         default:
             return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
-    // Minimize Other judge need : isMinimizedByOtherWindow_, self type.mode
     return WMError::WM_OK;
 }
 
@@ -268,13 +269,25 @@ void WindowController::HandleTurnScreenOn(const sptr<WindowNode>& node)
 
 WMError WindowController::RemoveWindowNode(uint32_t windowId)
 {
-    WMError res = windowRoot_->RemoveWindowNode(windowId);
-    if (res != WMError::WM_OK) {
+    auto removeFunc = [this, windowId]() {
+        WMError res = windowRoot_->RemoveWindowNode(windowId);
+        if (res != WMError::WM_OK) {
+            WLOGFE("RemoveWindowNode failed");
+            return res;
+        }
+        windowRoot_->FocusFaultDetection();
+        FlushWindowInfo(windowId);
         return res;
+    };
+    auto windowNode = windowRoot_->GetWindowNode(windowId);
+    if (windowNode && windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
+        if (RemoteAnimation::NotifyAnimationScreenUnlock(removeFunc) == WMError::WM_OK) {
+            WLOGFI("NotifyAnimationScreenUnlock with remote animation");
+            return WMError::WM_OK;
+        }
     }
-    windowRoot_->FocusFaultDetection();
-    FlushWindowInfo(windowId);
-    return res;
+
+    return removeFunc();
 }
 
 WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
@@ -626,7 +639,9 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
 void WindowController::MinimizeAllAppWindows(DisplayId displayId)
 {
     windowRoot_->MinimizeAllAppWindows(displayId);
-    MinimizeApp::ExecuteMinimizeAll();
+    if (RemoteAnimation::NotifyAnimationByHome() != WMError::WM_OK) {
+        MinimizeApp::ExecuteMinimizeAll();
+    }
 }
 
 WMError WindowController::ToggleShownStateForAllAppWindows()
