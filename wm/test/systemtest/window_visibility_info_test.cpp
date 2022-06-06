@@ -80,8 +80,8 @@ void VisibilityChangedListenerImpl::OnWindowVisibilityChanged(
     WLOGFI("size:%{public}zu", windowVisibilityInfo.size());
     windowVisibilityInfos_ = std::move(windowVisibilityInfo);
     for (auto& info : windowVisibilityInfos_) {
-        WLOGFI("windowId:%{public}u, covered:%{public}d, pid:%{public}d, uid:%{public}d", info->windowId_,
-            info->isVisible_, info->pid_, info->uid_);
+        WLOGFI("windowId:%{public}u, covered:%{public}d, pid:%{public}d, uid:%{public}d, windowType:%{public}u",
+            info->windowId_, info->isVisible_, info->pid_, info->uid_, static_cast<uint32_t>(info->windowType_));
     }
     cv_.notify_all();
 }
