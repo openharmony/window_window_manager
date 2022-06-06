@@ -66,7 +66,7 @@ void WindowManagerService::OnStart()
     if (!Init()) {
         return;
     }
-    SingletonContainer::Get<WindowInnerManager>().Init();
+    WindowInnerManager::GetInstance().Start();
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     DisplayManagerServiceInner::GetInstance().RegisterDisplayChangeListener(listener);
     RegisterSnapshotHandler();
@@ -254,7 +254,7 @@ void WindowManagerService::ConfigureWindowManagerService()
 
 void WindowManagerService::OnStop()
 {
-    SingletonContainer::Get<WindowInnerManager>().SendMessage(InnerWMCmd::INNER_WM_DESTROY_THREAD);
+    WindowInnerManager::GetInstance().Stop();
     WLOGFI("ready to stop service.");
 }
 

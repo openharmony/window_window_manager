@@ -59,6 +59,12 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         return;
     }
     if (inputListener_ != nullptr) {
+        // divider window consumes pointer events directly
+        if (window_->GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+            window_->ConsumePointerEvent(pointerEvent);
+            inputListener_->OnInputEvent(pointerEvent);
+            return;
+        }
         int32_t action = pointerEvent->GetPointerAction();
         if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
             action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
