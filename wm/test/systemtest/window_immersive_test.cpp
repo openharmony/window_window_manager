@@ -72,6 +72,8 @@ public:
     void SetWindowSystemProps(const sptr<Window>& window, const SystemBarRegionTints& props);
     bool SystemBarPropsEqualsTo(const SystemBarRegionTints& expect);
     void DumpFailedInfo(const SystemBarRegionTints& expect);
+    void DumpFailedInfo(bool expectStatus, bool expectNav);
+    bool SystemBarEnableState(bool expectStatus, bool expectNav);
     DisplayId displayId_ = 0;
     std::vector<sptr<Window>> activeWindows_;
     static vector<Rect> fullScreenExpecteds_;
@@ -116,6 +118,19 @@ void WindowImmersiveTest::DumpFailedInfo(const SystemBarRegionTints& expect)
     }
 }
 
+void WindowImmersiveTest::DumpFailedInfo(bool expectStatus, bool expectNav)
+{
+    auto act = testSystemBarChangedListener_->tints_;
+    WLOGFI("WindowImmersiveTest Expected:");
+    WLOGFI("expectStatus: %{public}4d, expectNav: %{public}4d", expectStatus, expectNav);
+    WLOGFI("WindowImmersiveTest Act: ");
+    for (auto tint : act) {
+        WLOGFI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
+            static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
+            tint.prop_.backgroundColor_, tint.prop_.contentColor_);
+    }
+}
+
 bool WindowImmersiveTest::SystemBarPropsEqualsTo(const SystemBarRegionTints& expect)
 {
     usleep(WAIT_ASYNC_US);
@@ -139,6 +154,25 @@ bool WindowImmersiveTest::SystemBarPropsEqualsTo(const SystemBarRegionTints& exp
         check = false;
     }
     return true;
+}
+
+bool WindowImmersiveTest::SystemBarEnableState(bool expectStatus, bool expectNav)
+{
+    usleep(WAIT_ASYNC_US);
+    auto act = testSystemBarChangedListener_->tints_;
+    bool check = false;
+    for (auto tint : act) {
+        if ((tint.type_ == WindowType::WINDOW_TYPE_STATUS_BAR && tint.prop_.enable_ == expectStatus)
+            || (tint.type_ == WindowType::WINDOW_TYPE_NAVIGATION_BAR && tint.prop_.enable_ == expectNav)) {
+            check = true;
+        } else {
+            check = false;
+        }
+    }
+    if (!check) {
+        DumpFailedInfo(expectStatus, expectNav);
+    }
+    return check;
 }
 
 void TestSystemBarChangedListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
@@ -199,18 +233,6 @@ void WindowImmersiveTest::SetUp()
 
     WindowManager::GetInstance().RegisterSystemBarChangedListener(testSystemBarChangedListener_);
     activeWindows_.clear();
-    utils::TestWindowInfo backgroundAppinfo = {
-        .name = "background",
-        .rect = utils::customAppRect_,
-        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-        .mode = WindowMode::WINDOW_MODE_FULLSCREEN, // immersive setting
-        .needAvoid = false, // immersive setting
-        .parentLimit = false,
-        .parentName = "",
-    };
-    backgroundWindow_ = utils::CreateTestWindow(backgroundAppinfo);
-    SetWindowSystemProps(backgroundWindow_, TEST_PROPS_DEFAULT);
-    backgroundWindow_->Show();
 }
 
 void WindowImmersiveTest::TearDown()
@@ -220,7 +242,6 @@ void WindowImmersiveTest::TearDown()
         activeWindows_.pop_back();
     }
     WindowManager::GetInstance().UnregisterSystemBarChangedListener(testSystemBarChangedListener_);
-    backgroundWindow_->Destroy();
 }
 
 namespace {
@@ -231,13 +252,13 @@ namespace {
  */
 HWTEST_F(WindowImmersiveTest, ImmersiveTest01, Function | MediumTest | Level3)
 {
+    fullScreenAppinfo_.name = "immer01";
     const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppinfo_);
     activeWindows_.push_back(window);
     SetWindowSystemProps(window, TEST_PROPS_1);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
 }
 
 /**
@@ -250,7 +271,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
     const sptr<Window>& window1 = utils::CreateTestWindow(fullScreenAppinfo_);
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
-    fullScreenAppinfo_.name = "Immer2";
+    fullScreenAppinfo_.name = "Immer02";
     const sptr<Window>& window2 = utils::CreateTestWindow(fullScreenAppinfo_);
     activeWindows_.push_back(window2);
     SetWindowSystemProps(window2, TEST_PROPS_2);
@@ -262,7 +283,6 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest02, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window2->Hide());
     ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
 }
 
 /**
@@ -308,7 +328,6 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest04, Function | MediumTest | Level3)
     ASSERT_EQ(false, window1->IsLayoutFullScreen());
     ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
 }
 
 /**
@@ -321,15 +340,15 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest05, Function | MediumTest | Level3)
     fullScreenAppinfo_.needAvoid = true; // no immersive setting
     const sptr<Window>& window1 = utils::CreateTestWindow(fullScreenAppinfo_);
     activeWindows_.push_back(window1);
+    SetWindowSystemProps(window1, TEST_PROPS_1);
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
     ASSERT_EQ(WMError::WM_OK, window1->SetFullScreen(true));
     ASSERT_EQ(true, window1->IsFullScreen());
+    ASSERT_TRUE(SystemBarEnableState(false, false));
     ASSERT_EQ(WMError::WM_OK, window1->SetFullScreen(false));
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
     ASSERT_EQ(false, window1->IsFullScreen());
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
 }
 
 /**
@@ -347,9 +366,9 @@ HWTEST_F(WindowImmersiveTest, ImmersiveNegativeTest01, Function | MediumTest | L
     activeWindows_.push_back(window);
     SetWindowSystemProps(window, TEST_PROPS_NEGATIVE);
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+    ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_NEGATIVE));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
-    ASSERT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_DEFAULT));
+    ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_NEGATIVE));
 }
 
 /**

@@ -551,7 +551,6 @@ WMError WindowController::SetSystemBarProperty(uint32_t windowId, WindowType typ
         return WMError::WM_ERROR_NULLPTR;
     }
     node->SetSystemBarProperty(type, property);
-    node->isSystemBarPropSetted_ = true;
     WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_OTHER_PROPS);
     if (res != WMError::WM_OK) {
         return res;
