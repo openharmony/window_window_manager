@@ -17,6 +17,7 @@
 #include <ability_manager_client.h>
 #include <parameters.h>
 #include <power_mgr_client.h>
+#include <rs_window_animation_finished_callback.h>
 #include <transaction/rs_transaction.h>
 
 #include "minimize_app.h"
@@ -864,6 +865,25 @@ uint32_t WindowController::GetEmbedNodeId(const std::vector<sptr<WindowNode>>& w
         }
     }
     return 0;
+}
+
+void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowIds, bool isAnimated,
+    sptr<RSIWindowAnimationFinishedCallback>& finishCallback)
+{
+    windowRoot_->MinimizeTargetWindows(windowIds);
+    auto func = []() {
+        MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::GESTURE_ANIMATION);
+    };
+    if (!isAnimated) {
+        func();
+    } else {
+        finishCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(func);
+        if (finishCallback == nullptr) {
+            WLOGFE("New RSIWindowAnimationFinishedCallback failed");
+            func();
+            return;
+        }
+    }
 }
 } // namespace OHOS
 } // namespace Rosen
