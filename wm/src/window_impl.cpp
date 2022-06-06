@@ -1421,13 +1421,13 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
     property_->SetWindowRect(rect);
     const Rect& originRect = property_->GetOriginRect();
     // update originRect when floating window show for the first time.
-    if (!isOriginRectSet_ && GetMode() == WindowMode::WINDOW_MODE_FLOATING) {
+    if (!isOriginRectSet_ && WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
         property_->SetOriginRect(rect);
         isOriginRectSet_ = true;
     }
     Rect rectToAce = rect;
     // update rectToAce for stretchable window
-    if (windowSystemConfig_.isStretchable_ && GetMode() == WindowMode::WINDOW_MODE_FLOATING) {
+    if (windowSystemConfig_.isStretchable_ && WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
         rectToAce = originRect;
     }
     WLOGFI("sizeChange callback size: %{public}lu", (unsigned long)windowChangeListeners_.size());
