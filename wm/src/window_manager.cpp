@@ -33,7 +33,8 @@ namespace {
 bool WindowVisibilityInfo::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteUint32(windowId_) && parcel.WriteInt32(pid_) &&
-           parcel.WriteInt32(uid_) && parcel.WriteBool(isVisible_);
+           parcel.WriteInt32(uid_) && parcel.WriteBool(isVisible_) &&
+           parcel.WriteUint32(static_cast<uint32_t>(windowType_));
 }
 
 WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
@@ -49,6 +50,7 @@ WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
         delete windowVisibilityInfo;
         return nullptr;
     }
+    windowVisibilityInfo->windowType_ = static_cast<WindowType>(parcel.ReadUint32());
     return windowVisibilityInfo;
 }
 
