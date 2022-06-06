@@ -238,6 +238,21 @@ WMError WindowRoot::MinimizeStructuredAppWindowsExceptSelf(sptr<WindowNode>& nod
     return container->MinimizeStructuredAppWindowsExceptSelf(node);
 }
 
+void WindowRoot::MinimizeTargetWindows(std::vector<uint32_t>& windowIds)
+{
+    for (auto& windowId : windowIds) {
+        if (windowNodeMap_.count(windowId) != 0) {
+            auto windowNode = windowNodeMap_[windowId];
+            if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+                MinimizeApp::AddNeedMinimizeApp(windowNode, MinimizeReason::GESTURE_ANIMATION);
+            } else {
+                WLOGFE("Minimize window failed id: %{public}u, type: %{public}u",
+                    windowNode->GetWindowId(), static_cast<uint32_t>(windowNode->GetWindowType()));
+            }
+        }
+    }
+}
+
 bool WindowRoot::IsForbidDockSliceMove(DisplayId displayId) const
 {
     auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);

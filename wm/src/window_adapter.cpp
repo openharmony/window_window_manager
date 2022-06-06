@@ -257,5 +257,13 @@ WMError WindowAdapter::NotifyWindowTransition(sptr<WindowTransitionInfo> from, s
 
     return windowManagerServiceProxy_->NotifyWindowTransition(from, to);
 }
+
+void WindowAdapter::MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
+    sptr<RSIWindowAnimationFinishedCallback>& finishCallback)
+{
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->MinimizeWindowsByLauncher(windowIds, isAnimated, finishCallback);
+    return;
+}
 } // namespace Rosen
 } // namespace OHOS

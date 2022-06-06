@@ -56,7 +56,8 @@ public:
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
     WMError GetSystemConfig(SystemConfig& systemConfig) override;
     WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) override;
-
+    void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
+        sptr<RSIWindowAnimationFinishedCallback>& finishCallback) override;
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
 };

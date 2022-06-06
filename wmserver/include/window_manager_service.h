@@ -97,6 +97,8 @@ public:
     void StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
         bool isColdStart, uint32_t bkgColor = 0xffffffff);
     void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
+    void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
+        sptr<RSIWindowAnimationFinishedCallback>& finishCallback) override;
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;

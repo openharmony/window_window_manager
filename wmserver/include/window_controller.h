@@ -60,6 +60,8 @@ public:
     void StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
         uint32_t bkgColor, bool isColdStart);
     void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
+    void MinimizeWindowsByLauncher(std::vector<uint32_t>& windowIds, bool isAnimated,
+        sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
 private:
     uint32_t GenWindowId();
     void FlushWindowInfo(uint32_t windowId);

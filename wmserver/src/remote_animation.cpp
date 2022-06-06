@@ -236,7 +236,8 @@ sptr<RSWindowAnimationTarget> RemoteAnimation::CreateWindowAnimationTarget(sptr<
     }
     windowAnimationTarget->bundleName_ = info->GetBundleName();
     windowAnimationTarget->abilityName_ = info->GetAbilityName();
-
+    windowAnimationTarget->windowId_ = windowNode->GetWindowId();
+    windowAnimationTarget->displayId_ = windowNode->GetDisplayId();
     if (WindowHelper::IsAppWindow(windowNode->GetWindowType())) {
         windowAnimationTarget->surfaceNode_ = windowNode->leashWinSurfaceNode_;
     } else {
