@@ -634,8 +634,7 @@ WMError WindowController::ToggleShownStateForAllAppWindows()
     if (isScreenLocked_) {
         return WMError::WM_DO_NOTHING;
     }
-    windowRoot_->ToggleShownStateForAllAppWindows();
-    return WMError::WM_OK;
+    return windowRoot_->ToggleShownStateForAllAppWindows();
 }
 
 WMError WindowController::MaxmizeWindow(uint32_t windowId)
