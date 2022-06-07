@@ -159,7 +159,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_PROPERTY: {
-            sptr<WindowProperty> windowProperty = data.ReadStrongParcelable<WindowProperty>();
+            sptr<WindowProperty> windowProperty = new WindowProperty();
+            windowProperty->Read(data);
             PropertyChangeAction action = static_cast<PropertyChangeAction>(data.ReadUint32());
             WMError errCode = UpdateProperty(windowProperty, action);
             reply.WriteInt32(static_cast<int32_t>(errCode));
