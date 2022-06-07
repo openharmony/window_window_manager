@@ -255,7 +255,7 @@ WMError WindowAdapter::NotifyWindowTransition(sptr<WindowTransitionInfo> from, s
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
-    return windowManagerServiceProxy_->NotifyWindowTransition(from, to);
+    return windowManagerServiceProxy_->NotifyWindowTransition(from, to, true);
 }
 } // namespace Rosen
 } // namespace OHOS

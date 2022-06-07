@@ -190,7 +190,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         case WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION: {
             sptr<WindowTransitionInfo> from = data.ReadParcelable<WindowTransitionInfo>();
             sptr<WindowTransitionInfo> to = data.ReadParcelable<WindowTransitionInfo>();
-            WMError errCode = NotifyWindowTransition(from, to);
+            bool isFromClient = data.ReadBool();
+            WMError errCode = NotifyWindowTransition(from, to, isFromClient);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
