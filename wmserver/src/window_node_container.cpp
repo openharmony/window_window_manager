@@ -76,7 +76,7 @@ int WindowNodeContainer::GetWindowCountByType(WindowType windowType)
 {
     int windowNumber = 0;
     auto counter = [&windowNumber, &windowType](sptr<WindowNode>& windowNode) {
-        if (windowNode->GetWindowType() == windowType) ++windowNumber;
+        if (windowNode->GetWindowType() == windowType && !windowNode->startingWindowShown_) ++windowNumber;
     };
     std::for_each(belowAppWindowNode_->children_.begin(), belowAppWindowNode_->children_.end(), counter);
     std::for_each(appWindowNode_->children_.begin(), appWindowNode_->children_.end(), counter);
