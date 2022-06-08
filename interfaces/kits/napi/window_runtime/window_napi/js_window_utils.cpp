@@ -274,7 +274,11 @@ static NativeValue* CreateJsSystemBarRegionTintObject(NativeEngine& engine, cons
         WLOGFE("[NAPI]Failed to convert SystemBarProperty to jsObject");
         return nullptr;
     }
-    object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(tint.type_)));
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(tint.type_) != 0) {
+        object->SetProperty("type", CreateJsValue(engine, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(tint.type_)));
+    } else {
+        object->SetProperty("type", CreateJsValue(engine, tint.type_));
+    }
     object->SetProperty("isEnable", CreateJsValue(engine, tint.prop_.enable_));
     std::string bkgColor = GetHexColor(tint.prop_.backgroundColor_);
     object->SetProperty("backgroundColor", CreateJsValue(engine, bkgColor));
