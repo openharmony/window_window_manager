@@ -588,5 +588,13 @@ WMError WindowManagerService::GetModeChangeHotZones(DisplayId displayId, ModeCha
 
     return windowController_->GetModeChangeHotZones(displayId, hotZones, hotZonesConfig_);
 }
+
+void WindowManagerService::MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
+    sptr<RSIWindowAnimationFinishedCallback>& finishCallback)
+{
+    return wmsTaskLooper_->ScheduleTask([this, windowIds, isAnimated, &finishCallback]() mutable {
+        return windowController_->MinimizeWindowsByLauncher(windowIds, isAnimated, finishCallback);
+    }).get();
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -32,6 +32,7 @@ enum class MinimizeReason : uint32_t {
     MAX_APP_COUNT,
     SPLIT_REPLACE,
     SPLIT_QUIT,
+    GESTURE_ANIMATION,
     OTHER_WINDOW,
 };
 

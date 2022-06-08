@@ -17,6 +17,7 @@
 #define OHOS_WINDOW_MANAGER_INTERFACE_H
 
 #include <iremote_broker.h>
+#include <rs_window_animation_finished_callback.h>
 #include <ui/rs_surface_node.h>
 
 #include "window_property.h"
@@ -58,6 +59,7 @@ public:
         TRANS_ID_GET_SYSTEM_CONFIG,
         TRANS_ID_NOTIFY_WINDOW_TRANSITION,
         TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE,
+        TRANS_ID_GET_ANIMATION_CALLBACK,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -86,6 +88,8 @@ public:
     virtual WMError GetSystemConfig(SystemConfig& systemConfig) = 0;
     virtual WMError NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to) = 0;
     virtual WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) = 0;
+    virtual void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
+        sptr<RSIWindowAnimationFinishedCallback>& finishCallback) = 0;
 };
 }
 }
