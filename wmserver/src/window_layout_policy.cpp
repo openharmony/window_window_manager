@@ -816,7 +816,7 @@ void WindowLayoutPolicy::LimitWindowPositionWhenInitRectOrMove(const sptr<Window
                                  winRect.posY_);
         if (dockShownState == DockWindowShowState::SHOWN_IN_BOTTOM) {
             WLOGFD("dock window show in bottom");
-            winRect.posY_ = std::min(dockWinRect.posY_ + static_cast<int32_t>(dockWinRect.height_ - windowTitleBarH),
+            winRect.posY_ = std::min(dockWinRect.posY_ - static_cast<int32_t>(windowTitleBarH),
                                      winRect.posY_);
         }
         winRect.posX_ = std::max(limitRect.posX_ + static_cast<int32_t>(windowTitleBarH - winRect.width_),
