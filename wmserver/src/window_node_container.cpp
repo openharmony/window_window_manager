@@ -42,6 +42,7 @@ namespace {
     const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
     constexpr uint32_t MAX_BRIGHTNESS = 255;
     constexpr uint32_t SPLIT_WINDOWS_CNT = 2;
+    constexpr uint32_t EXIT_SPLIT_POINTS_NUMBER = 2;
 }
 
 WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, ScreenId displayGroupId)
@@ -1287,6 +1288,30 @@ bool WindowNodeContainer::IsForbidDockSliceMove(DisplayId displayId) const
         return true;
     }
     return false;
+}
+
+bool WindowNodeContainer::IsDockSliceInExitSplitModeArea(DisplayId displayId) const
+{
+    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(displayId);
+    if (windowPair == nullptr) {
+        WLOGFE("window pair is nullptr");
+        return false;
+    }
+    std::vector<int32_t> exitSplitPoints = layoutPolicy_->GetExitSplitPoints(displayId);
+    if (exitSplitPoints.size() != EXIT_SPLIT_POINTS_NUMBER) {
+        return false;
+    }
+    return windowPair->IsDockSliceInExitSplitModeArea(exitSplitPoints);
+}
+
+void WindowNodeContainer::ExitSplitMode(DisplayId displayId)
+{
+    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(displayId);
+    if (windowPair == nullptr) {
+        WLOGFE("window pair is nullptr");
+        return;
+    }
+    windowPair->ExitSplitMode();
 }
 
 void WindowNodeContainer::MinimizeAllAppWindows(DisplayId displayId)

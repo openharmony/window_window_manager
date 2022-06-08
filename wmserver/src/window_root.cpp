@@ -102,6 +102,7 @@ sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(DisplayId displa
         return nullptr;
     }
     container->GetLayoutPolicy()->SetFloatingWindowLimitsConfig(floatingWindowLimitsConfig_);
+    container->GetLayoutPolicy()->SetSplitRatioConfig(splitRatioConfig_);
     return container;
 }
 
@@ -245,6 +246,26 @@ bool WindowRoot::IsForbidDockSliceMove(DisplayId displayId) const
         return true;
     }
     return container->IsForbidDockSliceMove(displayId);
+}
+
+bool WindowRoot::IsDockSliceInExitSplitModeArea(DisplayId displayId) const
+{
+    auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("can't find container");
+        return false;
+    }
+    return container->IsDockSliceInExitSplitModeArea(displayId);
+}
+
+void WindowRoot::ExitSplitMode(DisplayId displayId)
+{
+    auto container = GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("can't find container");
+        return;
+    }
+    container->ExitSplitMode(displayId);
 }
 
 std::vector<Rect> WindowRoot::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
@@ -1153,6 +1174,28 @@ WMError WindowRoot::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& wi
 void WindowRoot::SetMaxAppWindowNumber(int windowNum)
 {
     maxAppWindowNumber_ = windowNum;
+}
+
+void WindowRoot::SetSplitRatios(const std::vector<float>& splitRatioNumbers)
+{
+    auto& splitRatios = splitRatioConfig_.splitRatios;
+    splitRatios.clear();
+    splitRatios = splitRatioNumbers;
+    for (auto iter = splitRatios.begin(); iter != splitRatios.end();) {
+        if (*iter > 0 && *iter < 1) { // valid ratio range (0, 1)
+            iter++;
+        } else {
+            iter = splitRatios.erase(iter);
+        }
+    }
+    std::sort(splitRatios.begin(), splitRatios.end());
+    auto iter = std::unique(splitRatios.begin(), splitRatios.end());
+    splitRatios.erase(iter, splitRatios.end()); // remove duplitcate ratios
+}
+
+void WindowRoot::SetExitSplitRatio(float exitSplitRatio)
+{
+    splitRatioConfig_.exitSplitRatio = exitSplitRatio;
 }
 
 WMError WindowRoot::GetModeChangeHotZones(DisplayId displayId,

@@ -31,6 +31,7 @@ enum class MinimizeReason : uint32_t {
     LAYOUT_TILE,
     MAX_APP_COUNT,
     SPLIT_REPLACE,
+    SPLIT_QUIT,
     OTHER_WINDOW,
 };
 
@@ -50,7 +51,7 @@ private:
     {
         return (reason == MinimizeReason::MINIMIZE_ALL || reason == MinimizeReason::MINIMIZE_BUTTOM ||
             reason == MinimizeReason::MAX_APP_COUNT || reason == MinimizeReason::LAYOUT_TILE ||
-            reason == MinimizeReason::SPLIT_REPLACE);
+            reason == MinimizeReason::SPLIT_REPLACE || reason == MinimizeReason::SPLIT_QUIT);
     }
 
     static std::map<MinimizeReason, std::vector<wptr<WindowNode>>> needMinimizeAppNodes_;
