@@ -206,11 +206,11 @@ HWTEST_F(WindowSplitTest, SplitScreen04, Function | MediumTest | Level3)
 }
 
 /**
- * @tc.name: SplitCreen05
- * @tc.desc: forbid dock slive to move test
+ * @tc.name: SplitScreen05
+ * @tc.desc: forbid dock slice to move test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSplitTest, SplitCreen05, Function | MediumTest | Level3)
+HWTEST_F(WindowSplitTest, SplitScreen05, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "fullscreen.5";
     splitInfo_.name = "primary.5";

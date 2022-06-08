@@ -49,6 +49,8 @@ public:
     WMError UpdateWindowNode(uint32_t windowId, WindowUpdateReason reason);
     bool isVerticalDisplay(sptr<WindowNode>& node) const;
     bool IsForbidDockSliceMove(DisplayId displayId) const;
+    bool IsDockSliceInExitSplitModeArea(DisplayId displayId) const;
+    void ExitSplitMode(DisplayId displayId);
 
     WMError RequestFocus(uint32_t windowId);
     WMError RequestActiveWindow(uint32_t windowId);
@@ -86,6 +88,8 @@ public:
     sptr<WindowNode> GetWindowForDumpAceHelpInfo() const;
     void DestroyLeakStartingWindow();
     void SetFloatingWindowLimitsConfig(const FloatingWindowLimitsConfig& floatingWindowLimitsConfig);
+    void SetSplitRatios(const std::vector<float>& splitRatioNumbers);
+    void SetExitSplitRatio(float exitSplitRatio);
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
@@ -119,6 +123,7 @@ private:
     Callback callback_;
     int maxAppWindowNumber_ = 100;
     FloatingWindowLimitsConfig floatingWindowLimitsConfig_;
+    SplitRatioConfig splitRatioConfig_ = {0.1, {}};
 };
 }
 }
