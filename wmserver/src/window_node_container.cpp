@@ -752,7 +752,8 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
             if (IsAboveSystemBarNode(*iter)) {
                 continue;
             }
-            if (WindowHelper::IsFullScreenWindow((*iter)->GetWindowMode()) && (*iter)->isSystemBarPropSetted_) {
+            if (WindowHelper::IsFullScreenWindow((*iter)->GetWindowMode())
+	        && (*iter)->GetWindowType() != WindowType::WINDOW_TYPE_PANEL) {
                 WLOGFI("Top immersive window id: %{public}d. Use full immersive prop", (*iter)->GetWindowId());
                 for (auto it : sysBarPropMap) {
                     sysBarPropMap[it.first] = (sysBarPropMapNode.find(it.first))->second;
