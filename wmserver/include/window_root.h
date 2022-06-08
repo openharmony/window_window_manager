@@ -100,8 +100,6 @@ private:
     void UpdateBrightnessWithWindowRemoved(uint32_t windowId, const sptr<WindowNodeContainer>& container) const;
     std::string GenAllWindowsLogInfo() const;
     bool CheckDisplayInfo(const sptr<DisplayInfo>& display);
-    void NotifyKeyboardSizeChangeInfo(const sptr<WindowNode>& node,
-        const sptr<WindowNodeContainer>& container, Rect rect);
     ScreenId GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay);
     void ProcessExpandDisplayCreate(DisplayId displayId, ScreenId displayGroupId);
     std::map<DisplayId, sptr<DisplayInfo>> GetAllDisplayInfos(const std::vector<DisplayId>& displayIdVec);
