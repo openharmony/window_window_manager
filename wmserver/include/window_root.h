@@ -90,6 +90,7 @@ public:
     void SetFloatingWindowLimitsConfig(const FloatingWindowLimitsConfig& floatingWindowLimitsConfig);
     void SetSplitRatios(const std::vector<float>& splitRatioNumbers);
     void SetExitSplitRatio(float exitSplitRatio);
+    void MinimizeTargetWindows(std::vector<uint32_t>& windowIds);
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);

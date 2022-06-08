@@ -639,5 +639,50 @@ WMError WindowManagerProxy::GetModeChangeHotZones(DisplayId displayId, ModeChang
     }
     return ret;
 }
+
+void WindowManagerProxy::MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
+    sptr<RSIWindowAnimationFinishedCallback>& finishCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    uint32_t size = static_cast<uint32_t>(windowIds.size());
+    const uint32_t maxWindowNum = 100;
+    if (size > maxWindowNum) {
+        WLOGFE("windowNum cannot exceeds than 100");
+        return;
+    }
+    if (!data.WriteUint32(size)) {
+        WLOGFE("Write windowNum failed");
+        return;
+    }
+    for (auto id : windowIds) {
+        if (!data.WriteUint32(id)) {
+            WLOGFE("Write windowId failed");
+            return;
+        }
+    }
+    if (!data.WriteBool(isAnimated)) {
+        WLOGFE("Write isAnimated failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_ANIMATION_CALLBACK),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("Send request error");
+        return;
+    }
+    ;
+    if (reply.ReadBool()) {
+        sptr<IRemoteObject> finishcallbackObject = reply.ReadRemoteObject();
+        finishCallback = iface_cast<RSIWindowAnimationFinishedCallback>(finishcallbackObject);
+    } else {
+        finishCallback = nullptr;
+    }
+    return;
+}
 } // namespace Rosen
 } // namespace OHOS

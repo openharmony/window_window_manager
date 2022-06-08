@@ -21,9 +21,9 @@
 
 #include "window.h"
 #include "zidl/window_interface.h"
-#include "wm_single_instance.h"
 #include "singleton_delegator.h"
 #include "window_property.h"
+#include "wm_single_instance.h"
 #include "zidl/window_manager_interface.h"
 namespace OHOS {
 namespace Rosen {
@@ -65,6 +65,8 @@ public:
     virtual void ClearWindowAdapter();
 
     virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
+    virtual void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
+        sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();
