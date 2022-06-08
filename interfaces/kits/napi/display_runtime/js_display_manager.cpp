@@ -54,6 +54,12 @@ static NativeValue* GetDefaultDisplay(NativeEngine* engine, NativeCallbackInfo* 
     return (me != nullptr) ? me->OnGetDefaultDisplay(*engine, *info) : nullptr;
 }
 
+static NativeValue* GetDefaultDisplaySync(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
+    return (me != nullptr) ? me->OnGetDefaultDisplaySync(*engine, *info) : nullptr;
+}
+
 static NativeValue* GetAllDisplay(NativeEngine* engine, NativeCallbackInfo* info)
 {
     JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
@@ -108,6 +114,21 @@ NativeValue* OnGetDefaultDisplay(NativeEngine& engine, NativeCallbackInfo& info)
     AsyncTask::Schedule(
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
+}
+
+NativeValue* OnGetDefaultDisplaySync(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsDisplayManager::OnGetDefaultDisplaySync is called");
+    if (info.argc != 0) {
+        WLOGFE("JsDisplayManager::OnGetDefaultDisplaySync params not match");
+        return engine.CreateUndefined();
+    }
+    sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
+    if (display == nullptr) {
+        WLOGFE("JsDisplayManager::OnGetDefaultDisplaySync, display is nullptr.");
+        return engine.CreateUndefined();
+    }
+    return CreateJsDisplayObject(engine, display);
 }
 
 NativeValue* OnGetAllDisplay(NativeEngine& engine, NativeCallbackInfo& info)
@@ -326,6 +347,7 @@ NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetNativePointer(jsDisplayManager.release(), JsDisplayManager::Finalizer, nullptr);
 
     BindNativeFunction(*engine, *object, "getDefaultDisplay", JsDisplayManager::GetDefaultDisplay);
+    BindNativeFunction(*engine, *object, "getDefaultDisplaySync", JsDisplayManager::GetDefaultDisplaySync);
     BindNativeFunction(*engine, *object, "getAllDisplay", JsDisplayManager::GetAllDisplay);
     BindNativeFunction(*engine, *object, "on", JsDisplayManager::RegisterDisplayManagerCallback);
     BindNativeFunction(*engine, *object, "off", JsDisplayManager::UnregisterDisplayManagerCallback);
