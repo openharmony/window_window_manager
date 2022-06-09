@@ -104,7 +104,10 @@ struct ModeChangeHotZones {
 };
 
 struct SplitRatioConfig {
-    float exitSplitRatio;
+    // when divider reaches this position, the top/left window will hide. Valid range: (0, 0.5)
+    float exitSplitStartRatio;
+    // when divider reaches this position, the bottom/right window will hide. Valid range: (0.5, 1)
+    float exitSplitEndRatio;
     std::vector<float> splitRatios;
 };
 

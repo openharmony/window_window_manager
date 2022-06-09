@@ -62,7 +62,7 @@ public:
     void ProcessDisplayDestroy(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void ProcessDisplaySizeChangeOrRotation(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void SetFloatingWindowLimitsConfig(const FloatingWindowLimitsConfig& floatingWindowLimitsConfig);
-    void SetSplitRatioConfig(SplitRatioConfig splitRatioConfig);
+    void SetSplitRatioConfig(const SplitRatioConfig& splitRatioConfig);
 
 protected:
     void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
