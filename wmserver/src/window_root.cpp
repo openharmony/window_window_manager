@@ -119,38 +119,6 @@ bool WindowRoot::CheckDisplayInfo(const sptr<DisplayInfo>& display)
     return true;
 }
 
-void WindowRoot::NotifyKeyboardSizeChangeInfo(const sptr<WindowNode>& node,
-    const sptr<WindowNodeContainer>& container, Rect rect)
-{
-    if (node == nullptr || container == nullptr) {
-        WLOGFE("invalid parameter");
-        return;
-    }
-
-    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-        return;
-    }
-
-    auto callingWindow = GetWindowNode(node->GetCallingWindow());
-    if (callingWindow == nullptr) {
-        WLOGFI("callingWindow: %{public}u does not be set", node->GetCallingWindow());
-        callingWindow = GetWindowNode(container->GetFocusWindow());
-    }
-    if (callingWindow != nullptr && callingWindow->GetWindowToken() != nullptr &&
-        (callingWindow->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN ||
-        callingWindow->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        callingWindow->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
-        WLOGFI("keyboard size change callingWindow: [%{public}s, %{public}u], " \
-            "input rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-            callingWindow->GetWindowName().c_str(), callingWindow->GetWindowId(),
-            rect.posX_, rect.posY_, rect.width_, rect.height_);
-        sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, rect);
-        callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
-        return;
-    }
-    WLOGFE("does not have correct callingWindow for input method window");
-}
-
 sptr<WindowNode> WindowRoot::GetWindowNode(uint32_t windowId) const
 {
     auto iter = windowNodeMap_.find(windowId);
@@ -408,7 +376,7 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
         needCheckFocusWindow = true;
     }
     container->SetActiveWindow(node->GetWindowId(), false);
-    NotifyKeyboardSizeChangeInfo(node, container, node->GetWindowRect());
+
     for (auto& child : node->children_) {
         if (child == nullptr || !child->currentVisibility_) {
             break;
@@ -489,8 +457,6 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
     UpdateBrightnessWithWindowRemoved(windowId, container);
     WMError res = container->RemoveWindowNode(node);
     if (res == WMError::WM_OK) {
-        Rect rect = { 0, 0, 0, 0 };
-        NotifyKeyboardSizeChangeInfo(node, container, rect);
         for (auto& child : node->children_) {
             if (child == nullptr) {
                 break;
@@ -639,10 +605,6 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
                     HandleKeepScreenOn(id, false);
                     DestroyWindowInner(node);
                 }
-            }
-            if (res == WMError::WM_OK) {
-                Rect rect = { 0, 0, 0, 0 };
-                NotifyKeyboardSizeChangeInfo(node, container, rect);
             }
             return res;
         }
