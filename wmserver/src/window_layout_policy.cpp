@@ -974,7 +974,7 @@ Rect WindowLayoutPolicy::GetDisplayGroupRect() const
     return displayGroupRect_;
 }
 
-void WindowLayoutPolicy::SetSplitRatioConfig(SplitRatioConfig splitRatioConfig)
+void WindowLayoutPolicy::SetSplitRatioConfig(const SplitRatioConfig& splitRatioConfig)
 {
     splitRatioConfig_ = splitRatioConfig;
 }
