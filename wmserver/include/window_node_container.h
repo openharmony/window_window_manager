@@ -113,8 +113,10 @@ private:
     void UpdateFocusStatus(uint32_t id, bool focused) const;
     void UpdateActiveStatus(uint32_t id, bool isActive) const;
 
-    void NotifyIfSystemBarTintChanged(DisplayId displayId);
-    void NotifyIfSystemBarRegionChanged(DisplayId displayId);
+    void NotifyIfAvoidAreaChanged(const sptr<WindowNode>& node, const AvoidControlType avoidType) const;
+    void NotifyIfSystemBarTintChanged(DisplayId displayId) const;
+    void NotifyIfSystemBarRegionChanged(DisplayId displayId) const;
+    void NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& node, const AvoidControlType avoidType) const;
     void TraverseAndUpdateWindowState(WindowState state, int32_t topPriority);
     void UpdateWindowTree(sptr<WindowNode>& node);
     void UpdateWindowState(sptr<WindowNode> node, int32_t topPriority, WindowState state);

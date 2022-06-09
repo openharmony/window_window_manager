@@ -178,12 +178,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
 
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
-    if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
-        avoidController_->AvoidControl(node, AvoidControlType::AVOID_NODE_ADD);
-        NotifyIfSystemBarRegionChanged(node->GetDisplayId());
-    } else {
-        NotifyIfSystemBarTintChanged(node->GetDisplayId());
-    }
+    NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
     std::vector<sptr<WindowVisibilityInfo>> infos;
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
@@ -299,12 +294,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     if (HandleRemoveWindow(node) != WMError::WM_OK) {
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
-        avoidController_->AvoidControl(node, AvoidControlType::AVOID_NODE_REMOVE);
-        NotifyIfSystemBarRegionChanged(node->GetDisplayId());
-    } else {
-        NotifyIfSystemBarTintChanged(node->GetDisplayId());
-    }
+    NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_REMOVE);
     if (WindowHelper::IsMainFullScreenWindow(node->GetWindowType(), node->GetWindowMode())) {
         NotifyDockWindowStateChanged(node, true);
     }
@@ -774,7 +764,20 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
     return sysBarPropMap;
 }
 
-void WindowNodeContainer::NotifyIfSystemBarTintChanged(DisplayId displayId)
+void WindowNodeContainer::NotifyIfAvoidAreaChanged(const sptr<WindowNode>& node,
+    const AvoidControlType avoidType) const
+{
+    if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
+        avoidController_->AvoidControl(node, avoidType);
+        NotifyIfSystemBarRegionChanged(node->GetDisplayId());
+    } else {
+        NotifyIfSystemBarTintChanged(node->GetDisplayId());
+    }
+
+    NotifyIfKeyboardRegionChanged(node, avoidType);
+}
+
+void WindowNodeContainer::NotifyIfSystemBarTintChanged(DisplayId displayId) const
 {
     WM_FUNCTION_TRACE();
     auto expectSystemBarProp = GetExpectImmersiveProperty();
@@ -794,7 +797,7 @@ void WindowNodeContainer::NotifyIfSystemBarTintChanged(DisplayId displayId)
     WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId, tints);
 }
 
-void WindowNodeContainer::NotifyIfSystemBarRegionChanged(DisplayId displayId)
+void WindowNodeContainer::NotifyIfSystemBarRegionChanged(DisplayId displayId) const
 {
     WM_FUNCTION_TRACE();
     SystemBarRegionTints tints;
@@ -814,6 +817,50 @@ void WindowNodeContainer::NotifyIfSystemBarRegionChanged(DisplayId displayId)
             static_cast<int32_t>(it.first), newRegion.posX_, newRegion.posY_, newRegion.width_, newRegion.height_);
     }
     WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(displayId, tints);
+}
+
+void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& node,
+    const AvoidControlType avoidType) const
+{
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        WLOGFD("windowType: %{public}u", node->GetWindowType());
+        return;
+    }
+
+    auto callingWindow = FindWindowNodeById(node->GetCallingWindow());
+    if (callingWindow == nullptr) {
+        WLOGFI("callingWindow: %{public}u does not be set", node->GetCallingWindow());
+        callingWindow = FindWindowNodeById(GetFocusWindow());
+    }
+    if (callingWindow == nullptr || callingWindow->GetWindowToken() == nullptr) {
+        WLOGFE("does not have correct callingWindow for input method window");
+        return;
+    }
+    const WindowMode callingWindowMode = callingWindow->GetWindowMode();
+    if (callingWindowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+        callingWindowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        callingWindowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+        callingWindowMode == WindowMode::WINDOW_MODE_FLOATING) {
+        const Rect keyRect = node->GetWindowRect();
+        const Rect callingRect = callingWindow->GetWindowRect();
+        if (!WindowHelper::HasOverlap(callingRect, keyRect)) {
+            WLOGFD("no overlap between two windows");
+            return;
+        }
+        Rect overlapRect = { 0, 0, 0, 0 };
+        if (avoidType == AvoidControlType::AVOID_NODE_ADD || avoidType == AvoidControlType::AVOID_NODE_UPDATE) {
+            overlapRect = WindowHelper::GetOverlap(keyRect, callingRect, callingRect.posX_, callingRect.posY_);
+        }
+
+        WLOGFI("keyboard size change callingWindow: [%{public}s, %{public}u], " \
+            "overlap rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+            callingWindow->GetWindowName().c_str(), callingWindow->GetWindowId(),
+            overlapRect.posX_, overlapRect.posY_, overlapRect.width_, overlapRect.height_);
+        sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
+        callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
+        return;
+    }
+    WLOGFE("does not have correct callingWindowMode for input method window");
 }
 
 void WindowNodeContainer::NotifySystemBarDismiss(sptr<WindowNode>& node)
