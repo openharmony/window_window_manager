@@ -18,6 +18,7 @@
 
 #include "display_test_utils.h"
 #include "pixel_map.h"
+#include "test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -59,6 +60,8 @@ void ScreenshotTest::SetUpTestCase()
     defaultId_ = display->GetId();
     defaultScreen_ = {0, 0, display->GetWidth(), display->GetHeight()};
     defaultImage_ = {display->GetWidth(), display->GetHeight()};
+
+    TestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
 }
 
 void ScreenshotTest::TearDownTestCase()

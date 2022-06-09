@@ -27,9 +27,6 @@ public:
     ~DisplayManagerStub() = default;
     virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
         MessageOption &option) override;
-private:
-    bool CheckCallingPermission(const std::string &permission);
-    bool IsStartByHdcd();
 };
 } // namespace OHOS::Rosen
 

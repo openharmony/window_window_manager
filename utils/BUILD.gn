@@ -35,6 +35,7 @@ ohos_shared_library("libwmutil") {
   sources = [
     "src/agent_death_recipient.cpp",
     "src/display_info.cpp",
+    "src/permission.cpp",
     "src/screen_group_info.cpp",
     "src/screen_info.cpp",
     "src/singleton_container.cpp",
@@ -58,11 +59,13 @@ ohos_shared_library("libwmutil") {
 
   external_deps = [
     "ability_runtime:ability_manager",
+    "access_token:libaccesstoken_sdk",
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "hitrace_native:hitrace_meter",
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
+    "safwk:system_ability_fwk",
     "utils_base:utils",
   ]
 

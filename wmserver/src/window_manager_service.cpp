@@ -36,7 +36,7 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_trace.h"
-
+#include "permission.h"
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -323,10 +323,12 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
     }
     int pid = IPCSkeleton::GetCallingPid();
     int uid = IPCSkeleton::GetCallingUid();
-    return wmsTaskLooper_->ScheduleTask([this, pid, uid, &window, &property, &surfaceNode, &windowId, &token]() {
+    WMError ret = wmsTaskLooper_->ScheduleTask([this, pid, uid, &window, &property, &surfaceNode, &windowId, &token]() {
         WM_SCOPED_TRACE("wms:CreateWindow(%u)", windowId);
         return windowController_->CreateWindow(window, property, surfaceNode, windowId, token, pid, uid);
     }).get();
+    accessTokenIdMaps_[windowId] = IPCSkeleton::GetCallingTokenID();
+    return ret;
 }
 
 WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
@@ -362,6 +364,11 @@ WMError WindowManagerService::RemoveWindow(uint32_t windowId)
 
 WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
+    if (accessTokenIdMaps_[windowId] != IPCSkeleton::GetCallingTokenID()) {
+        WLOGFI("Operation rejected");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    accessTokenIdMaps_.erase(windowId);
     return wmsTaskLooper_->ScheduleTask([this, windowId, onlySelf]() {
         WLOGFI("[WMS] Destroy: %{public}u", windowId);
         WM_SCOPED_TRACE("wms:DestroyWindow(%u)", windowId);
