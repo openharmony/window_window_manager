@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_WM_TEST_ST_WINDOW_TEST_UTILS_H
 #define FRAMEWORKS_WM_TEST_ST_WINDOW_TEST_UTILS_H
 
+#include "pointer_event.h"
 #include "display_manager.h"
 #include "window.h"
 #include "window_layout_policy.h"
@@ -74,6 +75,8 @@ public:
     static Rect GetFloatingLimitedRect(const Rect& rect, float virtualPixelRatio);
     static void InitTileWindowRects(const sptr<Window>& window);
     static float GetVirtualPixelRatio(DisplayId displayId);
+    static std::shared_ptr<MMI::PointerEvent> CreatePointerEvent(int32_t posX, int32_t posY, uint32_t pointerId,
+        int32_t pointerAction);
     static uint32_t GetMaxTileWinNum();
 
 private:
