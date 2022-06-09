@@ -78,7 +78,8 @@ public:
     virtual WMError ToggleShownStateForAllAppWindows() = 0;
     virtual WMError MaxmizeWindow(uint32_t windowId) = 0;
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode) = 0;
-    virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) = 0;
+    virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty,
+        PropertyChangeAction action, uint64_t dirtyState = 0) = 0;
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
