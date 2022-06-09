@@ -187,7 +187,7 @@ void RegisterDisplayListenerWithType(NativeEngine& engine, const std::string& ty
                type.c_str());
         return;
     }
-    displayListener->AddCallback(value);
+    displayListener->AddCallback(type, value);
     jsCbMap_[type][std::move(callbackRef)] = displayListener;
 }
 
@@ -235,7 +235,7 @@ void UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* val
     }
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         if (value->StrictEquals(it->first->Get())) {
-            it->second->RemoveCallback(value);
+            it->second->RemoveCallback(type, value);
             if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
                 sptr<DisplayManager::IDisplayListener> thisListener(it->second);
                 SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);

@@ -24,15 +24,15 @@ namespace {
 inline uint32_t SCREEN_DISCONNECT_TYPE = 0;
 inline uint32_t SCREEN_CONNECT_TYPE = 1;
 
-void JsScreenListener::AddCallback(NativeValue* jsListenerObject)
+void JsScreenListener::AddCallback(const std::string& type, NativeValue* jsListenerObject)
 {
     WLOGFI("JsScreenListener::AddCallback is called");
     std::lock_guard<std::mutex> lock(mtx_);
     std::unique_ptr<NativeReference> callbackRef;
     callbackRef.reset(engine_->CreateReference(jsListenerObject, 1));
-    jsCallBack_.push_back(std::move(callbackRef));
+    jsCallBack_[type].emplace_back(std::move(callbackRef));
     WLOGFI("JsScreenListener::AddCallback success jsCallBack_ size: %{public}u!",
-        static_cast<uint32_t>(jsCallBack_.size()));
+        static_cast<uint32_t>(jsCallBack_[type].size()));
 }
 
 void JsScreenListener::RemoveAllCallback()
@@ -41,18 +41,24 @@ void JsScreenListener::RemoveAllCallback()
     jsCallBack_.clear();
 }
 
-void JsScreenListener::RemoveCallback(NativeValue* jsListenerObject)
+void JsScreenListener::RemoveCallback(const std::string& type, NativeValue* jsListenerObject)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    for (auto iter = jsCallBack_.begin(); iter != jsCallBack_.end();) {
+    auto it = jsCallBack_.find(type);
+    if (it == jsCallBack_.end()) {
+        WLOGE("JsScreenListener::RemoveCallback no callback to remove");
+        return;
+    }
+    auto& listeners = it->second;
+    for (auto iter = listeners.begin(); iter != listeners.end();) {
         if (jsListenerObject->StrictEquals((*iter)->Get())) {
-            jsCallBack_.erase(iter);
+            listeners.erase(iter);
         } else {
             iter++;
         }
     }
     WLOGFI("JsScreenListener::RemoveCallback success jsCallBack_ size: %{public}u!",
-        static_cast<uint32_t>(jsCallBack_.size()));
+        static_cast<uint32_t>(listeners.size()));
 }
 
 void JsScreenListener::CallJsMethod(const std::string& methodName, NativeValue* const* argv, size_t argc)
@@ -66,7 +72,7 @@ void JsScreenListener::CallJsMethod(const std::string& methodName, NativeValue* 
         WLOGFE("engine_ nullptr");
         return;
     }
-    for (auto& callback : jsCallBack_) {
+    for (auto& callback : jsCallBack_[methodName]) {
         NativeValue* method = callback->Get();
         if (method == nullptr) {
             WLOGFE("Failed to get method callback from object");
@@ -82,6 +88,10 @@ void JsScreenListener::OnConnect(ScreenId id)
     WLOGFI("JsScreenListener::OnConnect is called");
     if (jsCallBack_.empty()) {
         WLOGFE("JsScreenListener::OnConnect not register!");
+        return;
+    }
+    if (jsCallBack_.find(EVENT_CONNECT) == jsCallBack_.end()) {
+        WLOGE("JsScreenListener::OnConnect not this event, return");
         return;
     }
 
@@ -106,6 +116,10 @@ void JsScreenListener::OnDisconnect(ScreenId id)
         WLOGFE("JsScreenListener::OnDisconnect not register!");
         return;
     }
+    if (jsCallBack_.find(EVENT_DISCONNECT) == jsCallBack_.end()) {
+        WLOGE("JsScreenListener::OnDisconnect not this event, return");
+        return;
+    }
 
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
@@ -126,6 +140,10 @@ void JsScreenListener::OnChange(ScreenId id)
     WLOGFI("JsScreenListener::OnChange is called");
     if (jsCallBack_.empty()) {
         WLOGFE("JsScreenListener::OnChange not register!");
+        return;
+    }
+    if (jsCallBack_.find(EVENT_CHANGE) == jsCallBack_.end()) {
+        WLOGE("JsScreenListener::OnChange not this event, return");
         return;
     }
 
