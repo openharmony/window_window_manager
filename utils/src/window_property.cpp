@@ -56,7 +56,7 @@ const std::unordered_map<uint64_t, MemberVariable> WindowProperty::dataTypeMap_ 
         (size_t) & (static_cast<WindowProperty*>(nullptr)->originRect_)}},
 };
 
-WindowProperty::WindowProperty(const sptr<WindowProperty> &property)
+WindowProperty::WindowProperty(const sptr<WindowProperty>& property)
 {
     CopyFrom(property);
 }
@@ -564,7 +564,7 @@ void WindowProperty::ReadMemberVariable(Parcel& parcel, const MemberVariable& mv
             break;
         case PrimitiveType::PT_Rect:
             *reinterpret_cast<Rect*>(mvData) = {
-                parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32() };
+                parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
             break;
         case PrimitiveType::PT_SysBarPropMap:
             MapUnmarshalling(parcel, this);
