@@ -1472,7 +1472,14 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
     Rect rectToAce = rect;
     // update rectToAce for stretchable window
     if (windowSystemConfig_.isStretchable_ && WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
-        rectToAce = originRect;
+        if (reason == WindowSizeChangeReason::DRAG ||
+            reason == WindowSizeChangeReason::DRAG_END ||
+            reason == WindowSizeChangeReason::DRAG_START ||
+            reason == WindowSizeChangeReason::RECOVER) {
+            rectToAce = originRect;
+        } else {
+            property_->SetOriginRect(rect);
+        }
     }
     WLOGFI("sizeChange callback size: %{public}lu", (unsigned long)windowChangeListeners_.size());
     for (auto& listener : windowChangeListeners_) {
