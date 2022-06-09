@@ -22,7 +22,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsDisplayListener"};
 }
 
-void JsDisplayListener::AddCallback(NativeValue* jsListenerObject)
+void JsDisplayListener::AddCallback(const std::string& type, NativeValue* jsListenerObject)
 {
     WLOGFI("JsDisplayListener::AddCallback is called");
     std::unique_ptr<NativeReference> callbackRef;
@@ -32,9 +32,9 @@ void JsDisplayListener::AddCallback(NativeValue* jsListenerObject)
     }
     callbackRef.reset(engine_->CreateReference(jsListenerObject, 1));
     std::lock_guard<std::mutex> lock(mtx_);
-    jsCallBack_.push_back(std::move(callbackRef));
+    jsCallBack_[type].emplace_back(std::move(callbackRef));
     WLOGFI("JsDisplayListener::AddCallback success jsCallBack_ size: %{public}u!",
-        static_cast<uint32_t>(jsCallBack_.size()));
+        static_cast<uint32_t>(jsCallBack_[type].size()));
 }
 
 void JsDisplayListener::RemoveAllCallback()
@@ -43,18 +43,24 @@ void JsDisplayListener::RemoveAllCallback()
     jsCallBack_.clear();
 }
 
-void JsDisplayListener::RemoveCallback(NativeValue* jsListenerObject)
+void JsDisplayListener::RemoveCallback(const std::string& type, NativeValue* jsListenerObject)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    for (auto iter = jsCallBack_.begin(); iter != jsCallBack_.end();) {
+    auto it = jsCallBack_.find(type);
+    if (it == jsCallBack_.end()) {
+        WLOGE("JsDisplayListener::RemoveCallback no callback to remove");
+        return;
+    }
+    auto& listeners = it->second;
+    for (auto iter = listeners.begin(); iter != listeners.end();) {
         if (jsListenerObject->StrictEquals((*iter)->Get())) {
-            jsCallBack_.erase(iter);
+            listeners.erase(iter);
         } else {
             iter++;
         }
     }
     WLOGFI("JsDisplayListener::RemoveCallback success jsCallBack_ size: %{public}u!",
-        static_cast<uint32_t>(jsCallBack_.size()));
+        static_cast<uint32_t>(listeners.size()));
 }
 
 void JsDisplayListener::CallJsMethod(const std::string& methodName, NativeValue* const* argv, size_t argc)
@@ -68,7 +74,7 @@ void JsDisplayListener::CallJsMethod(const std::string& methodName, NativeValue*
         WLOGFE("engine_ nullptr");
         return;
     }
-    for (auto& callback : jsCallBack_) {
+    for (auto& callback : jsCallBack_[methodName]) {
         NativeValue* method = callback->Get();
         if (method == nullptr) {
             WLOGFE("Failed to get method callback from object");
@@ -84,6 +90,10 @@ void JsDisplayListener::OnCreate(DisplayId id)
     WLOGFI("JsDisplayListener::OnCreate is called, displayId: %{public}d", static_cast<uint32_t>(id));
     if (jsCallBack_.empty()) {
         WLOGFE("JsDisplayListener::OnCreate not register!");
+        return;
+    }
+    if (jsCallBack_.find(EVENT_ADD) == jsCallBack_.end()) {
+        WLOGE("JsDisplayListener::OnCreate not this event, return");
         return;
     }
 
@@ -108,6 +118,10 @@ void JsDisplayListener::OnDestroy(DisplayId id)
         WLOGFE("JsDisplayListener::OnDestroy not register!");
         return;
     }
+    if (jsCallBack_.find(EVENT_REMOVE) == jsCallBack_.end()) {
+        WLOGE("JsDisplayListener::OnDestroy not this event, return");
+        return;
+    }
 
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [=] (NativeEngine &engine, AsyncTask &task, int32_t status) {
@@ -128,6 +142,10 @@ void JsDisplayListener::OnChange(DisplayId id)
     WLOGFI("JsDisplayListener::OnChange is called, displayId: %{public}d", static_cast<uint32_t>(id));
     if (jsCallBack_.empty()) {
         WLOGFE("JsDisplayListener::OnChange not register!");
+        return;
+    }
+    if (jsCallBack_.find(EVENT_CHANGE) == jsCallBack_.end()) {
+        WLOGE("JsDisplayListener::OnChange not this event, return");
         return;
     }
 
