@@ -17,6 +17,7 @@
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 #include "snapshot_utils.h"
+#include "test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -26,6 +27,7 @@ namespace Rosen {
 using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
 void SnapshotUtilsTest::SetUpTestCase()
 {
+    TestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
 }
 
 void SnapshotUtilsTest::TearDownTestCase()

@@ -114,6 +114,7 @@ private:
     sptr<IDisplayChangeListener> displayChangeListener_;
     sptr<DisplayDumper> displayDumper_;
     static float customVirtualPixelRatio_;
+    std::map<ScreenId, uint32_t> accessTokenIdMaps_;
 };
 } // namespace OHOS::Rosen
 

@@ -18,6 +18,7 @@
 #include "display_test_utils.h"
 #include "future.h"
 #include "screen.h"
+#include "test_utils.h"
 #include "transaction/rs_transaction.h"
 #include "ui/rs_root_node.h"
 #include "ui/rs_ui_director.h"
@@ -120,6 +121,8 @@ void ScreenManagerTest::SetUpTestCase()
     defaultHeight_ = defaultDisplay_->GetHeight();
     defaultOption_.width_ = defaultWidth_;
     defaultOption_.height_ = defaultHeight_;
+
+    TestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
 }
 
 void ScreenManagerTest::TearDownTestCase()
