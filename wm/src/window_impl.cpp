@@ -1489,8 +1489,12 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
         }
         auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
         if (abilityContext != nullptr) {
-            WLOGI("ConsumeKeyEvent ability TerminateSelf");
-            abilityContext->TerminateSelf();
+            WMError ret = NotifyWindowTransition(TransitionReason::BACK);
+            if (ret != WMError::WM_OK) {
+                WLOGFI("[Client] Window %{public}u terminate without remote animation ret:%{public}u",
+                    property_->GetWindowId(), static_cast<uint32_t>(ret));
+                abilityContext->TerminateSelf();
+            }
         } else {
             WLOGI("ConsumeKeyEvent destroy window");
             Destroy();
