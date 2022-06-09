@@ -31,7 +31,8 @@ public:
     MOCK_METHOD1(DestroyWindow, WMError(uint32_t windowId));
     MOCK_METHOD2(SetWindowBackgroundBlur, WMError(uint32_t windowId, WindowBlurLevel level));
     MOCK_METHOD2(SetAlpha, WMError(uint32_t windowId, float alpha));
-    MOCK_METHOD2(UpdateProperty, WMError(sptr<WindowProperty>& windowProperty, PropertyChangeAction action));
+    MOCK_METHOD3(UpdateProperty, WMError(sptr<WindowProperty>& windowProperty,
+        PropertyChangeAction action, uint64_t dirtyState));
     MOCK_METHOD1(MaxmizeWindow, WMError(uint32_t windowId));
 };
 }
