@@ -259,6 +259,70 @@ HWTEST_F(WindowSplitTest, SplitScreen05, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
 }
+
+/**
+ * @tc.name: SplitScreen06
+ * @tc.desc: split ratio test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSplitTest, SplitScreen06, Function | MediumTest | Level3)
+{
+    fullInfo_.name  = "fullscreen.6";
+    splitInfo_.name = "primary.6";
+    splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+
+    const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
+    activeWindows_.push_back(fullWindow);
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    const sptr<Window>& priWindow = utils::CreateTestWindow(splitInfo_);
+    activeWindows_.push_back(priWindow);
+    ASSERT_EQ(WMError::WM_OK, priWindow->Show());
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetMode());
+
+    utils::TestWindowInfo dividerInfo;
+    dividerInfo.name = "divider0";
+    dividerInfo.type = WindowType::WINDOW_TYPE_DOCK_SLICE;
+    dividerInfo.mode = WindowMode::WINDOW_MODE_FLOATING;
+    dividerInfo.focusable_ = false;
+
+    const sptr<Window>& divider = utils::CreateTestWindow(dividerInfo);
+    activeWindows_.push_back(divider);
+    ASSERT_EQ(WMError::WM_OK, divider->Show());
+    sleep(SPLIT_TEST_SLEEP_S);
+    Rect rect = divider->GetRect();
+
+    uint32_t pointerId = 0;
+    int32_t posX, posY;
+    posX = posY = 0;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent =
+        utils::CreatePointerEvent(posX, posY, pointerId, MMI::PointerEvent::POINTER_ACTION_DOWN);
+    divider->ConsumePointerEvent(pointerEvent);
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    posY += 10;
+    pointerEvent = utils::CreatePointerEvent(posX, posY, pointerId, MMI::PointerEvent::POINTER_ACTION_MOVE);
+    divider->ConsumePointerEvent(pointerEvent);
+    sleep(SPLIT_TEST_SLEEP_S);
+    Rect moveRect = divider->GetRect();
+    ASSERT_TRUE(rect.posX_ != moveRect.posX_ || rect.posY_ != moveRect.posY_);
+
+    pointerEvent = utils::CreatePointerEvent(posX, posY, pointerId, MMI::PointerEvent::POINTER_ACTION_UP);
+    divider->ConsumePointerEvent(pointerEvent);
+    sleep(SPLIT_TEST_SLEEP_S);
+    Rect newRect = divider->GetRect();
+    ASSERT_TRUE(rect.posX_ == newRect.posX_ && rect.posY_ == newRect.posY_);
+
+    ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
+    sleep(SPLIT_TEST_SLEEP_S);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
+    sleep(SPLIT_TEST_SLEEP_S);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

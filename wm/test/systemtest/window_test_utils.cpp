@@ -219,6 +219,22 @@ void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
     };
 }
 
+std::shared_ptr<MMI::PointerEvent> WindowTestUtils::CreatePointerEvent(int32_t posX, int32_t posY, uint32_t pointerId,
+    int32_t pointerAction)
+{
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(pointerId);
+    pointerItem.SetGlobalX(posX);
+    pointerItem.SetGlobalY(posY);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->AddPointerItem(pointerItem);
+    pointerEvent->SetPointerId(pointerId);
+    pointerEvent->SetPointerAction(pointerAction);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    return pointerEvent;
+}
+
 uint32_t WindowTestUtils::GetMaxTileWinNum()
 {
     float virtualPixelRatio = GetVirtualPixelRatio(0);
