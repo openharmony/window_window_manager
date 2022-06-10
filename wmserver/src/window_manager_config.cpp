@@ -66,7 +66,7 @@ bool WindowManagerConfig::LoadConfigXml(const std::string& configFilePath)
 
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("floatingWindowLimitRatio")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("splitRatios")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("exitSplitRatio"))) {
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("exitSplitRatios"))) {
             ReadFloatNumbersConfigInfo(curNodePtr);
             continue;
         }

@@ -260,11 +260,8 @@ void WindowManagerService::ConfigureWindowManagerService()
         windowRoot_->SetSplitRatios(floatNumbersConfig.at("splitRatios"));
     }
 
-    if (floatNumbersConfig.count("exitSplitRatio") != 0) {
-        auto numbers = floatNumbersConfig.at("exitSplitRatio");
-        if ((numbers.size() == 1) && numbers[0] > 0 && numbers[0] < 0.5) { // valid range (0, 0.5)
-            windowRoot_->SetExitSplitRatio(numbers[0]);
-        }
+    if (floatNumbersConfig.count("exitSplitRatios") != 0) {
+        windowRoot_->SetExitSplitRatios(floatNumbersConfig.at("exitSplitRatios"));
     }
 }
 
