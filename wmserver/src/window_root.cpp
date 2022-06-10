@@ -1170,9 +1170,17 @@ void WindowRoot::SetSplitRatios(const std::vector<float>& splitRatioNumbers)
     splitRatios.erase(iter, splitRatios.end()); // remove duplitcate ratios
 }
 
-void WindowRoot::SetExitSplitRatio(float exitSplitRatio)
+void WindowRoot::SetExitSplitRatios(const std::vector<float>& exitSplitRatios)
 {
-    splitRatioConfig_.exitSplitRatio = exitSplitRatio;
+    if (exitSplitRatios.size() != 2) {
+        return;
+    }
+    if (exitSplitRatios[0] > 0 && exitSplitRatios[0] < DEFAULT_SPLIT_RATIO) {
+        splitRatioConfig_.exitSplitStartRatio = exitSplitRatios[0];
+    }
+    if (exitSplitRatios[1] > DEFAULT_SPLIT_RATIO && exitSplitRatios[1] < 1) {
+        splitRatioConfig_.exitSplitEndRatio = exitSplitRatios[1];
+    }
 }
 
 WMError WindowRoot::GetModeChangeHotZones(DisplayId displayId,

@@ -351,8 +351,8 @@ void WindowLayoutPolicyCascade::UpdateSplitRatioPoints(DisplayId displayId)
     LayoutRects& cascadeRects = cascadeRectsMap_[displayId];
     cascadeRects.exitSplitPoints_.clear();
     cascadeRects.splitRatioPoints_.clear();
-    cascadeRects.exitSplitPoints_.push_back(GetSplitRatioPoint(splitRatioConfig_.exitSplitRatio, displayId));
-    cascadeRects.exitSplitPoints_.push_back(GetSplitRatioPoint(1 - splitRatioConfig_.exitSplitRatio, displayId));
+    cascadeRects.exitSplitPoints_.push_back(GetSplitRatioPoint(splitRatioConfig_.exitSplitStartRatio, displayId));
+    cascadeRects.exitSplitPoints_.push_back(GetSplitRatioPoint(splitRatioConfig_.exitSplitEndRatio, displayId));
     for (const auto& ratio : splitRatioConfig_.splitRatios) {
         cascadeRects.splitRatioPoints_.push_back(GetSplitRatioPoint(ratio, displayId));
     }

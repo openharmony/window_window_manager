@@ -89,7 +89,7 @@ public:
     void DestroyLeakStartingWindow();
     void SetFloatingWindowLimitsConfig(const FloatingWindowLimitsConfig& floatingWindowLimitsConfig);
     void SetSplitRatios(const std::vector<float>& splitRatioNumbers);
-    void SetExitSplitRatio(float exitSplitRatio);
+    void SetExitSplitRatios(const std::vector<float>& exitSplitRatios);
     void MinimizeTargetWindows(std::vector<uint32_t>& windowIds);
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
@@ -122,7 +122,7 @@ private:
     Callback callback_;
     int maxAppWindowNumber_ = 100;
     FloatingWindowLimitsConfig floatingWindowLimitsConfig_;
-    SplitRatioConfig splitRatioConfig_ = {0.1, {}};
+    SplitRatioConfig splitRatioConfig_ = {0.1, 0.9, {}};
 };
 }
 }
