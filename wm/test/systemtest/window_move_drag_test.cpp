@@ -99,6 +99,7 @@ void WindowMoveDragTest::SetUp()
 void WindowMoveDragTest::TearDown()
 {
     ASSERT_EQ(WMError::WM_OK, window_->Destroy());
+    window_ = nullptr;
     usleep(WAIT_SYANC_MS);
 }
 

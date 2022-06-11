@@ -109,7 +109,6 @@ VirtualScreenOption ScreenManagerTest::defaultOption_ = {
     defaultName_, defaultWidth_, defaultHeight_, defaultDensity_, nullptr, defaultFlags_
 };
 uint32_t ScreenManagerTest::waitCount_ = 0;
-std::shared_ptr<RSNode> rootNode;
 
 void ScreenManagerTest::SetUpTestCase()
 {
@@ -137,7 +136,7 @@ void ScreenManagerTest::TearDown()
 void RootNodeInit(std::shared_ptr<RSUIDirector> rsUiDirector, int width, int height)
 {
     std::cout << "rs app demo Init Rosen Backend!" << std::endl;
-    rootNode = RSRootNode::Create();
+    auto rootNode = RSRootNode::Create();
     rootNode->SetBounds(0, 0, width, height);
     rootNode->SetFrame(0, 0, width, height);
     rootNode->SetBackgroundColor(SK_ColorRED);

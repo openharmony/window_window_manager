@@ -192,6 +192,7 @@ public:
     virtual void OnNewWant(const AAFwk::Want& want) override;
     virtual void SetRequestedOrientation(Orientation) override;
     virtual Orientation GetRequestedOrientation() override;
+    virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) override;
 
     // colorspace, gamut
     virtual bool IsSupportWideGamut() override;
@@ -326,6 +327,8 @@ private:
     bool isAppDecorEnbale_ = true;
     SystemConfig windowSystemConfig_ ;
     bool isOriginRectSet_ = false;
+    bool isWaitingFrame_ = false;
+    bool needRemoveWindowInputChannel_ = false;
 };
 }
 }

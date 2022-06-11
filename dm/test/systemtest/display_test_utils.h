@@ -56,7 +56,7 @@ public:
         DisplayTestUtils &utils_;
     };
     friend class BufferListener;
-    
+
     void OnVsync();
     uint32_t successCount_ = 0;
     uint32_t failCount_ = 0;
