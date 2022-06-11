@@ -81,6 +81,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 
 WindowImpl::~WindowImpl()
 {
+    WLOGFI("windowName: %{public}s, windowId: %{public}d", GetWindowName().c_str(), GetWindowId());
     Destroy();
 }
 
@@ -687,7 +688,8 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     context_ = context;
     sptr<WindowImpl> window(this);
     sptr<IWindow> windowAgent(new WindowAgent(window));
-    uint32_t windowId = 0;
+    static std::atomic<uint32_t> tempWindowId = 0;
+    uint32_t windowId = tempWindowId++; // for test
     sptr<IRemoteObject> token = nullptr;
     if (context_ != nullptr) {
         token = context_->GetToken();
@@ -721,6 +723,7 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
 
     state_ = WindowState::STATE_CREATED;
     InputTransferStation::GetInstance().AddInputWindow(this);
+    needRemoveWindowInputChannel_ = true;
     return ret;
 }
 
@@ -791,7 +794,6 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
     }
 
     WLOGFI("[Client] Window %{public}u Destroy", property_->GetWindowId());
-    InputTransferStation::GetInstance().RemoveInputWindow(property_->GetWindowId());
     WMError ret = WMError::WM_OK;
     if (needNotifyServer) {
         NotifyBeforeDestroy(GetWindowName());
@@ -809,13 +811,18 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
         WLOGFI("Do not need to notify server to destroy window");
     }
 
+    if (needRemoveWindowInputChannel_) {
+        InputTransferStation::GetInstance().RemoveInputWindow(property_->GetWindowId());
+    }
     windowMap_.erase(GetWindowName());
     DestroySubWindow();
     DestroyFloatingWindow();
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
-        VsyncStation::GetInstance().RemoveCallback(VsyncStation::CallbackType::CALLBACK_FRAME, callback_);
+        if (isWaitingFrame_) {
+            VsyncStation::GetInstance().RemoveCallback(VsyncStation::CallbackType::CALLBACK_FRAME, callback_);
+        }
     }
     return ret;
 }
@@ -1864,6 +1871,10 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
 
 void WindowImpl::OnVsync(int64_t timeStamp)
 {
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        isWaitingFrame_ = false;
+    }
     uiContent_->ProcessVsyncEvent(static_cast<uint64_t>(timeStamp));
 }
 
@@ -1875,6 +1886,7 @@ void WindowImpl::RequestFrame()
         return;
     }
     VsyncStation::GetInstance().RequestVsync(VsyncStation::CallbackType::CALLBACK_FRAME, callback_);
+    isWaitingFrame_ = true;
 }
 
 void WindowImpl::UpdateFocusStatus(bool focused)
@@ -2032,6 +2044,11 @@ void WindowImpl::NotifyOutsidePressed()
     for (auto& outsidePressListener : outsidePressListeners) {
         outsidePressListener->OnOutsidePressed();
     }
+}
+
+void WindowImpl::SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel)
+{
+    needRemoveWindowInputChannel_ = needRemoveWindowInputChannel;
 }
 
 Rect WindowImpl::GetSystemAlarmWindowDefaultSize(Rect defaultRect)

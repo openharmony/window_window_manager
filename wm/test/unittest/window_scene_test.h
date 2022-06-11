@@ -28,8 +28,8 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
 
-    static inline sptr<WindowScene> scene_ = nullptr;
-    static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
+    sptr<WindowScene> scene_ = nullptr;
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
 };
 } // namespace ROSEN
 } // namespace OHOS

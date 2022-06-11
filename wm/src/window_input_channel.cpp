@@ -27,6 +27,12 @@ WindowInputChannel::WindowInputChannel(const sptr<Window>& window): window_(wind
     callback_->onCallback = std::bind(&WindowInputChannel::OnVsync, this, std::placeholders::_1);
 }
 
+WindowInputChannel::~WindowInputChannel()
+{
+    WLOGFI("windowName: %{public}s, windowId: %{public}d", window_->GetWindowName().c_str(), window_->GetWindowId());
+    window_->SetNeedRemoveWindowInputChannel(false);
+}
+
 void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (keyEvent == nullptr) {

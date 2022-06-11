@@ -578,7 +578,8 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     auto node = GetWindowNode(windowId);
     if (node == nullptr) {
-        return WMError::WM_ERROR_DESTROYED_OBJECT;
+        WLOGFW("Window mode is destroyed or not created");
+        return WMError::WM_OK;
     }
     WMError res;
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
