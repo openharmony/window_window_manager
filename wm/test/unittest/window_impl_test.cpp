@@ -104,6 +104,9 @@ HWTEST_F(WindowImplTest, CreateWindow04, Function | SmallTest | Level2)
     sptr<WindowImpl> window_other = new WindowImpl(option_other);
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window_other->Create(""));
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window_other->Destroy());
 }
 
 /**
@@ -130,6 +133,7 @@ HWTEST_F(WindowImplTest, CreateWindow05, Function | SmallTest | Level2)
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    ASSERT_EQ(WMError::WM_OK, window2->Destroy());
 }
 
 /**
@@ -177,6 +181,8 @@ HWTEST_F(WindowImplTest, FindWindow01, Function | SmallTest | Level2)
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Create("");
     ASSERT_NE(nullptr, WindowImpl::Find("FindWindow01"));
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**

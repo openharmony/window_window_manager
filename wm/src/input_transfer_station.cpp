@@ -83,14 +83,17 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
 void InputTransferStation::RemoveInputWindow(uint32_t windowId)
 {
     WLOGFI("Remove input window, windowId: %{public}u", windowId);
-    std::lock_guard<std::mutex> lock(mtx_);
-    auto iter = windowInputChannels_.find(windowId);
-    if (iter != windowInputChannels_.end()) {
-        auto inputChannel = iter->second;
-        windowInputChannels_.erase(windowId);
-        if (inputChannel != nullptr) {
-            inputChannel->Destroy();
+    sptr<WindowInputChannel> inputChannel = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        auto iter = windowInputChannels_.find(windowId);
+        if (iter != windowInputChannels_.end()) {
+            inputChannel = iter->second;
+            windowInputChannels_.erase(windowId);
         }
+    }
+    if (inputChannel != nullptr) {
+        inputChannel->Destroy();
     } else {
         WLOGFE("Can not find windowId: %{public}u", windowId);
     }

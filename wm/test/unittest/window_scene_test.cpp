@@ -26,6 +26,14 @@ namespace Rosen {
 using Mocker = SingletonMocker<StaticCall, MockStaticCall>;
 void WindowSceneTest::SetUpTestCase()
 {
+}
+
+void WindowSceneTest::TearDownTestCase()
+{
+}
+
+void WindowSceneTest::SetUp()
+{
     DisplayId displayId = 0;
     sptr<IWindowLifeCycle> listener = nullptr;
     scene_ = new WindowScene();
@@ -36,16 +44,11 @@ void WindowSceneTest::SetUpTestCase()
     ASSERT_EQ(WMError::WM_OK, scene_->Init(displayId, abilityContext_, listener));
 }
 
-void WindowSceneTest::TearDownTestCase()
-{
-}
-
-void WindowSceneTest::SetUp()
-{
-}
-
 void WindowSceneTest::TearDown()
 {
+    scene_->GoDestroy();
+    scene_ = nullptr;
+    abilityContext_ = nullptr;
 }
 
 namespace {
