@@ -468,21 +468,24 @@ void WindowManagerService::OnWindowEvent(Event event, const sptr<IRemoteObject>&
     }
 }
 
-void WindowManagerService::NotifyDisplayStateChange(DisplayId id, DisplayStateChangeType type)
+void WindowManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+    const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
     WM_SCOPED_TRACE("wms:NotifyDisplayStateChange(%u)", type);
+    DisplayId displayId = (displayInfo == nullptr) ? DISPLAY_ID_INVALID : displayInfo->GetDisplayId();
     if (type == DisplayStateChangeType::FREEZE) {
-        freezeDisplayController_->FreezeDisplay(id);
+        freezeDisplayController_->FreezeDisplay(displayId);
     } else if (type == DisplayStateChangeType::UNFREEZE) {
-        freezeDisplayController_->UnfreezeDisplay(id);
+        freezeDisplayController_->UnfreezeDisplay(displayId);
     } else {
-        return windowController_->NotifyDisplayStateChange(id, type);
+        windowController_->NotifyDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
     }
 }
 
-void DisplayChangeListener::OnDisplayStateChange(DisplayId id, DisplayStateChangeType type)
+void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+    const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
-    WindowManagerService::GetInstance().NotifyDisplayStateChange(id, type);
+    WindowManagerService::GetInstance().NotifyDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
 }
 
 void WindowManagerService::ProcessPointDown(uint32_t windowId, bool isStartDrag)
