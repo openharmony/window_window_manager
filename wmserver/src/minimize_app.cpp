@@ -55,9 +55,10 @@ std::vector<wptr<WindowNode>> MinimizeApp::GetNeedMinimizeAppNodes()
 void MinimizeApp::ExecuteMinimizeAll()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WLOGFI("[Minimize] ExecuteMinimizeAll with size: %{public}zu", needMinimizeAppNodes_.size());
     for (auto& appNodes: needMinimizeAppNodes_) {
         bool isFromUser = IsFromUser(appNodes.first);
+        WLOGFI("[Minimize] ExecuteMinimizeAll with size: %{public}zu, reason: %{public}u",
+            appNodes.second.size(), appNodes.first);
         for (auto& node : appNodes.second) {
             auto weakNode = node.promote();
             if (weakNode != nullptr && weakNode->abilityToken_ != nullptr && !weakNode->startingWindowShown_) {
@@ -78,6 +79,7 @@ void MinimizeApp::ExecuteMinimizeAll()
 
 void MinimizeApp::ClearNodesWithReason(MinimizeReason reason)
 {
+    WLOGFI("[Minimize] ClearNodesWithReason reason %{public}u", reason);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
         needMinimizeAppNodes_.at(reason).clear();
