@@ -87,7 +87,8 @@ public:
     virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) = 0;
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) = 0;
     virtual WMError GetSystemConfig(SystemConfig& systemConfig) = 0;
-    virtual WMError NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to) = 0;
+    virtual WMError NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to,
+        bool isFromClient = false) = 0;
     virtual WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) = 0;
     virtual void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback) = 0;
