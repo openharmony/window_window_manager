@@ -571,7 +571,8 @@ WMError WindowManagerProxy::GetSystemConfig(SystemConfig& systemConfig)
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to)
+WMError WindowManagerProxy::NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to,
+    bool isFromClient)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -592,6 +593,10 @@ WMError WindowManagerProxy::NotifyWindowTransition(sptr<WindowTransitionInfo>& f
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
+    if (!data.WriteBool(isFromClient)) {
+        WLOGFE("Failed to write to isFromClient!");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     auto error = Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_WINDOW_TRANSITION),
         data, reply, option);
     if (error != ERR_NONE) {

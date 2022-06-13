@@ -136,7 +136,7 @@ void WindowManagerServiceHandler::NotifyWindowTransition(
 {
     sptr<WindowTransitionInfo> fromInfo = new WindowTransitionInfo(from);
     sptr<WindowTransitionInfo> toInfo = new WindowTransitionInfo(to);
-    WindowManagerService::GetInstance().NotifyWindowTransition(fromInfo, toInfo);
+    WindowManagerService::GetInstance().NotifyWindowTransition(fromInfo, toInfo, false);
 }
 
 int32_t WindowManagerServiceHandler::GetFocusWindow(sptr<IRemoteObject>& abilityToken)
@@ -272,11 +272,20 @@ void WindowManagerService::OnStop()
 }
 
 WMError WindowManagerService::NotifyWindowTransition(
-    sptr<WindowTransitionInfo>& fromInfo, sptr<WindowTransitionInfo>& toInfo)
+    sptr<WindowTransitionInfo>& fromInfo, sptr<WindowTransitionInfo>& toInfo, bool isFromClient)
 {
-    return wmsTaskLooper_->ScheduleTask([this, &fromInfo, &toInfo]() {
-        return windowController_->NotifyWindowTransition(fromInfo, toInfo);
-    }).get();
+    if (!isFromClient) {
+        WLOGFI("NotifyWindowTransition asynchronously.");
+        wmsTaskLooper_->PostTask([this, fromInfo, toInfo]() mutable {
+            return windowController_->NotifyWindowTransition(fromInfo, toInfo);
+        });
+        return WMError::WM_OK;
+    } else {
+        WLOGFI("NotifyWindowTransition synchronously.");
+        return wmsTaskLooper_->ScheduleTask([this, &fromInfo, &toInfo]() {
+            return windowController_->NotifyWindowTransition(fromInfo, toInfo);
+        }).get();
+    }
 }
 
 WMError WindowManagerService::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)
@@ -293,9 +302,9 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, sptr<
         WLOGFI("startingWindow not open!");
         return;
     }
-    return wmsTaskLooper_->ScheduleTask([this, &info, &pixelMap, isColdStart, bkgColor]() {
+    return wmsTaskLooper_->PostTask([this, info, pixelMap, isColdStart, bkgColor]() {
         return windowController_->StartingWindow(info, pixelMap, bkgColor, isColdStart);
-    }).wait();
+    });
 }
 
 void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
@@ -305,9 +314,9 @@ void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken
         WLOGFI("startingWindow not open!");
         return;
     }
-    return wmsTaskLooper_->ScheduleTask([this, &abilityToken]() {
+    return wmsTaskLooper_->PostTask([this, abilityToken]() {
         return windowController_->CancelStartingWindow(abilityToken);
-    }).wait();
+    });
 }
 
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
