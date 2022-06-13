@@ -152,7 +152,7 @@ private:
         DisplayId displayId, bool focused) const;
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const;
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) const;
-    void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type);
+    void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) const;
     void UpdateWindowVisibilityInfo(
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
 };
