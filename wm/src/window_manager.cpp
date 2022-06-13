@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <cinttypes>
 
+#include "event_handler.h"
+#include "event_runner.h"
 #include "marshalling_helper.h"
 #include "window_adapter.h"
 #include "window_manager_agent.h"
@@ -28,6 +30,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManager"};
+    const std::string WINDOW_MANAGER_CALLBACK_THREAD_NAME = "wm_listener";
 }
 
 bool WindowVisibilityInfo::Marshalling(Parcel &parcel) const
@@ -128,18 +131,25 @@ FocusChangeInfo* FocusChangeInfo::Unmarshalling(Parcel &parcel)
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManager)
 
 class WindowManager::Impl {
+using ListenerTaskCallback = std::function<void()>;
+using EventHandler = OHOS::AppExecFwk::EventHandler;
+using EventPriority = OHOS::AppExecFwk::EventQueue::Priority;
 public:
+    void PostTask(ListenerTaskCallback &&callback, EventPriority priority, const std::string name);
+    void InitListenerHandler();
     void NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-        WindowType windowType, DisplayId displayId) const;
+        WindowType windowType, DisplayId displayId);
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
-        WindowType windowType, DisplayId displayId) const;
-    void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo) const;
-    void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo) const;
-    void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints) const;
-    void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) const;
-    void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
+        WindowType windowType, DisplayId displayId);
+    void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo);
+    void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
+    void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints);
+    void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type);
+    void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     static inline SingletonDelegator<WindowManager> delegator_;
 
+    bool isHandlerRunning_ = false;
+    std::shared_ptr<EventHandler> listenertHandler_;
     std::recursive_mutex mutex_;
     std::vector<sptr<IFocusChangedListener>> focusChangedListeners_;
     sptr<WindowManagerAgent> focusChangedListenerAgent_;
@@ -151,27 +161,67 @@ public:
     sptr<WindowManagerAgent> windowVisibilityListenerAgent_;
 };
 
-void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo) const
+void WindowManager::Impl::PostTask(ListenerTaskCallback &&callback, EventPriority priority = EventPriority::LOW,
+    const std::string name = "WINDOW_MANAGER_TASK")
+{
+    if (!isHandlerRunning_) {
+        InitListenerHandler();
+    }
+    if (listenertHandler_ == nullptr) {
+        WLOGFE("listener handler is nullptr");
+        return;
+    }
+    bool ret = listenertHandler_->PostTask([this, callback]() {
+            callback();
+        }, name, 0, priority); // 0 is task delay time
+    if (!ret) {
+        WLOGFE("post listener callback task failed.");
+        return;
+    }
+    return;
+}
+
+void WindowManager::Impl::InitListenerHandler()
+{
+    auto runner = AppExecFwk::EventRunner::Create(WINDOW_MANAGER_CALLBACK_THREAD_NAME);
+    if (runner == nullptr) {
+        WLOGFE("init window manager callback runner failed.");
+        return;
+    }
+    listenertHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    if (listenertHandler_ == nullptr) {
+        WLOGFE("init window manager callback handler failed.");
+        return;
+    }
+    isHandlerRunning_ = true;
+    WLOGFD("init window manager callback runner success.");
+}
+
+void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
     WLOGFI("NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
         focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
         static_cast<uint32_t>(focusChangeInfo->windowType_), focusChangeInfo->abilityToken_.GetRefPtr());
-    for (auto& listener : focusChangedListeners_) {
-        listener->OnFocused(focusChangeInfo);
-    }
+    PostTask([this, focusChangeInfo]() mutable {
+            for (auto& listener : focusChangedListeners_) {
+                listener->OnFocused(focusChangeInfo);
+            }
+        }, EventPriority::LOW, "FocusChangeInfo");
 }
 
-void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo) const
+void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
     WLOGFI("NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
         focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
         static_cast<uint32_t>(focusChangeInfo->windowType_), focusChangeInfo->abilityToken_.GetRefPtr());
-    for (auto& listener : focusChangedListeners_) {
-        listener->OnUnfocused(focusChangeInfo);
-    }
+    PostTask([this, focusChangeInfo]() mutable {
+            for (auto& listener : focusChangedListeners_) {
+                listener->OnUnfocused(focusChangeInfo);
+            }
+        }, EventPriority::LOW, "UnFocusChangeInfo");
 }
 
-void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints) const
+void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     for (auto tint : tints) {
         WLOGFI("type:%{public}d, enable:%{public}d," \
@@ -180,13 +230,15 @@ void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const Syst
             tint.type_, tint.prop_.enable_, tint.prop_.backgroundColor_, tint.prop_.contentColor_,
             tint.region_.posX_, tint.region_.posY_, tint.region_.width_, tint.region_.height_);
     }
-    for (auto& listener : systemBarChangedListeners_) {
-        listener->OnSystemBarPropertyChange(displayId, tints);
-    }
+    PostTask([this, displayId, tints]() mutable {
+            for (auto& listener : systemBarChangedListeners_) {
+                listener->OnSystemBarPropertyChange(displayId, tints);
+            }
+        }, EventPriority::LOW, "SystemBarChangeInfo");
 }
 
 void WindowManager::Impl::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
-    WindowUpdateType type) const
+    WindowUpdateType type)
 {
     if (windowInfo == nullptr) {
         WLOGFE("windowInfo is nullptr");
@@ -201,17 +253,21 @@ void WindowManager::Impl::NotifyAccessibilityWindowInfo(const sptr<Accessibility
         windowInfo->currentWindowInfo_->windowRect_.posY_, windowInfo->currentWindowInfo_->focused_,
         windowInfo->currentWindowInfo_->isDecorEnable_, windowInfo->currentWindowInfo_->displayId_,
         windowInfo->currentWindowInfo_->mode_, windowInfo->currentWindowInfo_->type_);
-    for (auto& listener : windowUpdateListeners_) {
-        listener->OnWindowUpdate(windowInfo, type);
-    }
+    PostTask([this, windowInfo, type]() mutable {
+            for (auto& listener : windowUpdateListeners_) {
+                listener->OnWindowUpdate(windowInfo, type);
+            }
+        }, EventPriority::LOW, "AccessibilityWindowInfo");
 }
 
 void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
-    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const
+    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos)
 {
-    for (auto& listener : windowVisibilityListeners_) {
-        listener->OnWindowVisibilityChanged(windowVisibilityInfos);
-    }
+    PostTask([this, windowVisibilityInfos]() mutable {
+            for (auto& listener : windowVisibilityListeners_) {
+                listener->OnWindowVisibilityChanged(windowVisibilityInfos);
+            }
+        }, EventPriority::LOW, "AccessibilityWindowInfo");
 }
 
 WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>())
@@ -418,6 +474,7 @@ void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChan
         return;
     }
     WLOGFI("window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     if (focused) {
         pImpl_->NotifyFocused(focusChangeInfo);
     } else {
@@ -428,11 +485,12 @@ void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChan
 void WindowManager::UpdateSystemBarRegionTints(DisplayId displayId,
     const SystemBarRegionTints& tints) const
 {
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->NotifySystemBarChanged(displayId, tints);
 }
 
 void WindowManager::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
-    WindowUpdateType type)
+    WindowUpdateType type) const
 {
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->NotifyAccessibilityWindowInfo(windowInfo, type);
