@@ -158,6 +158,7 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
     WLOGI("disconnect screen. id:%{public}" PRIu64"", absScreen->dmsId_);
     sptr<AbstractScreenGroup> screenGroup;
     DisplayId absDisplayId = DISPLAY_ID_INVALID;
+    sptr<AbstractDisplay> abstractDisplay = nullptr;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         screenGroup = absScreen->GetGroup();
@@ -167,9 +168,9 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
         }
         if (screenGroup->combination_ == ScreenCombination::SCREEN_ALONE
             || screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR) {
-            absDisplayId = ProcessNormalScreenDisconnected(absScreen, screenGroup);
+            absDisplayId = ProcessNormalScreenDisconnected(absScreen, screenGroup, abstractDisplay);
         } else if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
-            absDisplayId = ProcessExpandScreenDisconnected(absScreen, screenGroup);
+            absDisplayId = ProcessExpandScreenDisconnected(absScreen, screenGroup, abstractDisplay);
         } else {
             WLOGE("support in future. combination:%{public}u", screenGroup->combination_);
         }
@@ -185,7 +186,8 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
             DisplayManagerAgentController::GetInstance().OnDisplayDestroy(absDisplayId);
         }
     } else if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
-        displayStateChangeListener_(absDisplayId, DisplayStateChangeType::DESTROY);
+        displayStateChangeListener(abstractDisplay, DisplayStateChangeType::DESTROY);
+        
         DisplayManagerAgentController::GetInstance().OnDisplayDestroy(absDisplayId);
         abstractDisplayMap_.erase(absDisplayId);
     } else {
@@ -194,7 +196,7 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
 }
 
 DisplayId AbstractDisplayController::ProcessNormalScreenDisconnected(
-    sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup)
+    sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup, sptr<AbstractDisplay>& absDisplay)
 {
     WLOGI("normal screen disconnect");
     if (absScreen == nullptr || screenGroup == nullptr) {
@@ -210,6 +212,7 @@ DisplayId AbstractDisplayController::ProcessNormalScreenDisconnected(
             WLOGI("normal screen disconnect, displayId: %{public}" PRIu64", screenId: %{public}" PRIu64"",
                 displayId, abstractDisplay->GetAbstractScreenId());
             abstractDisplay->BindAbstractScreen(defaultScreen);
+            absDisplay = abstractDisplay;
             return displayId;
         }
     }
@@ -217,7 +220,7 @@ DisplayId AbstractDisplayController::ProcessNormalScreenDisconnected(
 }
 
 DisplayId AbstractDisplayController::ProcessExpandScreenDisconnected(
-    sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup)
+    sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup, sptr<AbstractDisplay>& absDisplay)
 {
     WLOGI("expand screen disconnect");
     if (absScreen == nullptr || screenGroup == nullptr) {
@@ -230,6 +233,7 @@ DisplayId AbstractDisplayController::ProcessExpandScreenDisconnected(
         if (abstractDisplay->GetAbstractScreenId() == absScreen->dmsId_) {
             WLOGI("expand screen disconnect, displayId: %{public}" PRIu64", screenId: %{public}" PRIu64"",
                 displayId, abstractDisplay->GetAbstractScreenId());
+            absDisplay = abstractDisplay;
             displayId = iter->first;
         } else {
             abstractDisplay->SetOffset(0, 0);
@@ -296,11 +300,10 @@ void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScr
     abstractDisplay->SetOrientation(absScreen->orientation_);
     if (abstractDisplay->RequestRotation(absScreen->rotation_)) {
         // Notify rotation event to WMS
-        displayStateChangeListener_(abstractDisplay->GetId(), DisplayStateChangeType::UPDATE_ROTATION);
+        displayStateChangeListener(abstractDisplay, DisplayStateChangeType::UPDATE_ROTATION);
     }
     // Notify orientation event to DisplayManager
-    sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
-    DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo,
+    DisplayManagerAgentController::GetInstance().OnDisplayChange(abstractDisplay->ConvertToDisplayInfo(),
         DisplayChangeEvent::UPDATE_ORIENTATION);
 }
 
@@ -330,9 +333,10 @@ void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> ab
     WLOGFI("Size of matchedDisplays %{public}zu", matchedDisplays.size());
     for (auto iter = matchedDisplays.begin(); iter != matchedDisplays.end(); ++iter) {
         WLOGFI("Notify display size change. Id %{public}" PRIu64"", iter->first);
-        displayStateChangeListener_(iter->first, DisplayStateChangeType::SIZE_CHANGE);
+        sptr<AbstractDisplay> abstractDisplay = iter->second;
+        displayStateChangeListener(abstractDisplay, DisplayStateChangeType::SIZE_CHANGE);
         DisplayManagerAgentController::GetInstance().OnDisplayChange(
-            iter->second->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+            abstractDisplay->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     }
 }
 
@@ -375,10 +379,9 @@ void AbstractDisplayController::ProcessVirtualPixelRatioChange(sptr<AbstractScre
     }
     abstractDisplay->SetVirtualPixelRatio(absScreen->virtualPixelRatio_);
     // Notify virtual pixel ratio change event to WMS
-    displayStateChangeListener_(abstractDisplay->GetId(), DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE);
+    displayStateChangeListener(abstractDisplay, DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE);
     // Notify virtual pixel ratio change event to DisplayManager
-    sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
-    DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo,
+    DisplayManagerAgentController::GetInstance().OnDisplayChange(abstractDisplay->ConvertToDisplayInfo(),
         DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED);
 }
 
@@ -401,7 +404,7 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
         }
         if (dummyDisplay_ == nullptr) {
             sptr<AbstractDisplay> display = new(std::nothrow) AbstractDisplay(displayCount_.fetch_add(1),
-                realAbsScreen->dmsId_, info->width_, info->height_, info->refreshRate_);
+                realAbsScreen->dmsId_, realAbsScreen->groupDmsId_, info);
             if (display == nullptr) {
                 WLOGFE("create display failed");
                 return;
@@ -411,7 +414,7 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
             WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, display->GetId());
             DisplayManagerAgentController::GetInstance().OnDisplayCreate(display->ConvertToDisplayInfo());
-            displayStateChangeListener_(display->GetId(), DisplayStateChangeType::CREATE);
+            displayStateChangeListener(display, DisplayStateChangeType::CREATE);
         } else {
             WLOGI("bind display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, dummyDisplay_->GetId());
@@ -448,10 +451,10 @@ void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> abs
     }
     WLOGI("bind display to expand. screen:%{public}" PRIu64"", absScreen->dmsId_);
     sptr<SupportedScreenModes> info;
+    ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
+    sptr<AbstractScreen> defaultScreen = abstractScreenController_->GetAbstractScreen(defaultScreenId);
     if (absScreen->type_ == ScreenType::VIRTUAL) {
         WLOGI("screen type is virtual, use default screen info");
-        ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
-        sptr<AbstractScreen> defaultScreen = abstractScreenController_->GetAbstractScreen(defaultScreenId);
         if (defaultScreen == nullptr) {
             WLOGE("bind display error, cannot get defaultScreen.");
             return;
@@ -467,7 +470,7 @@ void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> abs
     }
 
     sptr<AbstractDisplay> display = new AbstractDisplay(displayCount_.fetch_add(1),
-        absScreen->dmsId_, info->width_, info->height_, info->refreshRate_);
+        absScreen->dmsId_, absScreen->groupDmsId_, info);
     Point point = abstractScreenController_->GetAbstractScreenGroup(absScreen->groupDmsId_)->
         GetChildPosition(absScreen->dmsId_);
     display->SetOffset(point.posX_, point.posY_);
@@ -475,7 +478,7 @@ void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> abs
     WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
         absScreen->dmsId_, display->GetId());
     DisplayManagerAgentController::GetInstance().OnDisplayCreate(display->ConvertToDisplayInfo());
-    displayStateChangeListener_(display->GetId(), DisplayStateChangeType::CREATE);
+    displayStateChangeListener(display, DisplayStateChangeType::CREATE);
 }
 
 void AbstractDisplayController::SetFreeze(std::vector<DisplayId> displayIds, bool toFreeze)
@@ -508,10 +511,36 @@ void AbstractDisplayController::SetFreeze(std::vector<DisplayId> displayIds, boo
         }
 
         // Notify freeze event to WMS
-        displayStateChangeListener_(displayId, type);
+        displayStateChangeListener(abstractDisplay, type);
         // Notify freeze event to DisplayManager
-        sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
-        DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo, event);
+        DisplayManagerAgentController::GetInstance().OnDisplayChange(abstractDisplay->ConvertToDisplayInfo(), event);
     }
+}
+
+std::map<DisplayId, sptr<DisplayInfo>> AbstractDisplayController::GetAllDisplayInfoOfGroup(sptr<DisplayInfo> info)
+{
+    ScreenId screenGroupId = info->GetScreenGroupId();
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    for (auto& iter : abstractDisplayMap_) {
+        sptr<AbstractDisplay> display = iter.second;
+        if (display->GetAbstractScreenGroupId() == screenGroupId) {
+            displayInfoMap.insert(std::make_pair(display->GetId(), display->ConvertToDisplayInfo()));
+        }
+    }
+    return displayInfoMap;
+}
+
+void AbstractDisplayController::displayStateChangeListener(
+    sptr<AbstractDisplay> abstractDisplay, DisplayStateChangeType type)
+{
+    ScreenId defaultDisplayId = DISPLAY_ID_INVALID;
+    ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
+    sptr<AbstractDisplay> defaultDisplay = GetAbstractDisplayByScreen(defaultScreenId);
+    if (defaultDisplay != nullptr) {
+        defaultDisplayId = defaultDisplay->GetId();
+    }
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap = GetAllDisplayInfoOfGroup(
+        abstractDisplay->ConvertToDisplayInfo());
+    displayStateChangeListener_(defaultDisplayId, abstractDisplay->ConvertToDisplayInfo(), displayInfoMap, type);
 }
 } // namespace OHOS::Rosen

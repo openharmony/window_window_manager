@@ -37,7 +37,7 @@ public:
     ~WindowRoot() = default;
 
     sptr<WindowNodeContainer> GetOrCreateWindowNodeContainer(DisplayId displayId);
-    sptr<WindowNodeContainer> CreateWindowNodeContainer(DisplayId displayId);
+    sptr<WindowNodeContainer> CreateWindowNodeContainer(sptr<DisplayInfo> displayInfo);
     sptr<WindowNode> GetWindowNode(uint32_t windowId) const;
 
     WMError SaveWindow(const sptr<WindowNode>& node);
@@ -65,9 +65,12 @@ public:
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
-    void ProcessDisplayChange(DisplayId displayId, DisplayStateChangeType type);
-    void ProcessDisplayDestroy(DisplayId displayId);
-    void ProcessDisplayCreate(DisplayId displayId);
+    void ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
+    void ProcessDisplayDestroy(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap);
+    void ProcessDisplayCreate(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap);
 
     void NotifySystemBarTints();
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node);
@@ -102,10 +105,13 @@ private:
     std::string GenAllWindowsLogInfo() const;
     bool CheckDisplayInfo(const sptr<DisplayInfo>& display);
     ScreenId GetScreenGroupId(DisplayId displayId, bool& isRecordedDisplay);
-    void ProcessExpandDisplayCreate(DisplayId displayId, ScreenId displayGroupId);
+    void ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
+        std::map<DisplayId, Rect>& displayRectMap);
     std::map<DisplayId, sptr<DisplayInfo>> GetAllDisplayInfos(const std::vector<DisplayId>& displayIdVec);
-    std::map<DisplayId, Rect> GetAllDisplayRects(const std::vector<DisplayId>& displayIdVec);
-    void MoveNotShowingWindowToDefaultDisplay(DisplayId displayId);
+    std::map<DisplayId, Rect> GetAllDisplayRectsByDMS(sptr<DisplayInfo> displayInfo);
+    std::map<DisplayId, Rect> GetAllDisplayRectsByDisplayInfo(
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap);
+    void MoveNotShowingWindowToDefaultDisplay(DisplayId defaultDisplayId, DisplayId displayId);
     WMError PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode,
         sptr<WindowNodeContainer>& container);
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;

@@ -105,9 +105,9 @@ void DisplayGroupController::UpdateDisplayGroupWindowTree()
     }
 }
 
-void DisplayGroupController::ProcessCrossNodes(DisplayStateChangeType type)
+void DisplayGroupController::ProcessCrossNodes(DisplayId defaultDisplayId, DisplayStateChangeType type)
 {
-    defaultDisplayId_ = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    defaultDisplayId_ = defaultDisplayId;
     for (auto& iter : displayGroupWindowTree_) {
         auto& nodeVec = *(iter.second[WindowRootNodeType::APP_WINDOW_NODE]);
         for (auto& node : nodeVec) {
@@ -120,7 +120,7 @@ void DisplayGroupController::ProcessCrossNodes(DisplayStateChangeType type)
                 if (type == DisplayStateChangeType::SIZE_CHANGE || type == DisplayStateChangeType::UPDATE_ROTATION) {
                     newDisplayId = node->GetDisplayId();
                 } else {
-                    newDisplayId = defaultDisplayId_;
+                    newDisplayId = defaultDisplayId;
                 }
 
                 for (auto& displayId : showingDisplays) {
@@ -351,47 +351,48 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroiedDisplay(DisplayId di
     }
 }
 
-void DisplayGroupController::ProcessDisplayCreate(DisplayId displayId,
+void DisplayGroupController::ProcessDisplayCreate(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
                                                   const std::map<DisplayId, Rect>& displayRectMap)
 {
-    defaultDisplayId_ = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
-    WLOGFI("defaultDisplay, displayId: %{public}" PRIu64"", defaultDisplayId_);
+    defaultDisplayId_ = defaultDisplayId;
+    WLOGFI("defaultDisplay, displayId: %{public}" PRIu64"", defaultDisplayId);
 
+    DisplayId displayId = displayInfo->GetDisplayId();
     windowNodeContainer_->GetAvoidController()->UpdateAvoidNodesMap(displayId, true);
     InitNewDisplay(displayId);
 
     // add displayInfo in displayGroupInfo
-    auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
     displayGroupInfo_->AddDisplayInfo(displayInfo);
 
     // modify RSTree and window tree of displayGroup for cross-display nodes
-    ProcessCrossNodes(DisplayStateChangeType::CREATE);
+    ProcessCrossNodes(defaultDisplayId, DisplayStateChangeType::CREATE);
     UpdateDisplayGroupWindowTree();
     windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayCreate(displayId, displayRectMap);
     Rect initialDividerRect = windowNodeContainer_->GetLayoutPolicy()->GetInitalDividerRect(displayId);
     SetInitalDividerRect(displayId, initialDividerRect);
 }
 
-void DisplayGroupController::ProcessDisplayDestroy(DisplayId displayId,
+void DisplayGroupController::ProcessDisplayDestroy(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
                                                    const std::map<DisplayId, Rect>& displayRectMap,
                                                    std::vector<uint32_t>& windowIds)
 {
+    DisplayId displayId = displayInfo->GetDisplayId();
     windowNodeContainer_->GetAvoidController()->UpdateAvoidNodesMap(displayId, false);
 
     // delete nodes and map element of deleted display
     ProcessNotCrossNodesOnDestroiedDisplay(displayId, windowIds);
     // modify RSTree and window tree of displayGroup for cross-display nodes
-    ProcessCrossNodes(DisplayStateChangeType::DESTROY);
+    ProcessCrossNodes(defaultDisplayId, DisplayStateChangeType::DESTROY);
     UpdateDisplayGroupWindowTree();
     ClearMapOfDestroiedDisplay(displayId);
     windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayDestroy(displayId, displayRectMap);
 }
 
-void DisplayGroupController::ProcessDisplayChange(DisplayId displayId,
+void DisplayGroupController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
                                                   const std::map<DisplayId, Rect>& displayRectMap,
                                                   DisplayStateChangeType type)
 {
-    const sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+    DisplayId displayId = displayInfo->GetDisplayId();
     WLOGFI("display change, displayId: %{public}" PRIu64", type: %{public}d", displayId, type);
     switch (type) {
         case DisplayStateChangeType::UPDATE_ROTATION: {
@@ -399,7 +400,7 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId displayId,
             [[fallthrough]];
         }
         case DisplayStateChangeType::SIZE_CHANGE: {
-            ProcessDisplaySizeChangeOrRotation(displayId, displayRectMap, type);
+            ProcessDisplaySizeChangeOrRotation(defaultDisplayId, displayId, displayRectMap, type);
             break;
         }
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
@@ -413,11 +414,11 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId displayId,
     }
 }
 
-void DisplayGroupController::ProcessDisplaySizeChangeOrRotation(DisplayId displayId,
+void DisplayGroupController::ProcessDisplaySizeChangeOrRotation(DisplayId defaultDisplayId, DisplayId displayId,
     const std::map<DisplayId, Rect>& displayRectMap, DisplayStateChangeType type)
 {
     // modify RSTree and window tree of displayGroup for cross-display nodes
-    ProcessCrossNodes(type);
+    ProcessCrossNodes(defaultDisplayId, type);
     UpdateDisplayGroupWindowTree();
     windowNodeContainer_->GetLayoutPolicy()->ProcessDisplaySizeChangeOrRotation(displayId, displayRectMap);
 }
