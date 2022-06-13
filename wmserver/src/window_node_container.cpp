@@ -260,7 +260,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
         WLOGFE("window node or surface node is nullptr, invalid");
         return WMError::WM_ERROR_DESTROYED_OBJECT;
     }
-
     if (node->parent_ == nullptr) {
         WLOGFW("can't find parent of this node");
     } else {
@@ -280,7 +279,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
                 child->GetCallingUid(), false, child->GetWindowType()));
         }
     }
-
     // Remove node from RSTree
     for (auto& displayId : node->GetShowingDisplays()) {
         UpdateRSTree(node, displayId, false, node->isPlayAnimationHide_);
@@ -291,13 +289,14 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     displayGroupController_->UpdateDisplayGroupWindowTree();
 
     layoutPolicy_->RemoveWindowNode(node);
+    WindowMode lastMode = node->GetWindowMode();
     if (HandleRemoveWindow(node) != WMError::WM_OK) {
         return WMError::WM_ERROR_NULLPTR;
     }
-    NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_REMOVE);
-    if (WindowHelper::IsMainFullScreenWindow(node->GetWindowType(), node->GetWindowMode())) {
+    if (WindowHelper::IsMainNotFloatingWindow(node->GetWindowType(), lastMode)) {
         NotifyDockWindowStateChanged(node, true);
     }
+    NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_REMOVE);
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
