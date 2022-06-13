@@ -15,18 +15,18 @@
 #ifndef OHOS_WINDOW_INPUT_CHANNEL_H
 #define OHOS_WINDOW_INPUT_CHANNEL_H
 
-#include <window.h>
 #include <i_input_event_consumer.h>
 #include <key_event.h>
 #include "refbase.h"
 #include "vsync_station.h"
+#include "window.h"
 
 namespace OHOS {
 namespace Rosen {
-class WindowInputChannel : public RefBase {
+class WindowInputChannel final: public RefBase {
 public:
     explicit WindowInputChannel(const sptr<Window>& window);
-    ~WindowInputChannel() = default;
+    virtual ~WindowInputChannel();
     void HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent);
     void SetInputListener(const std::shared_ptr<MMI::IInputEventConsumer>& listener);

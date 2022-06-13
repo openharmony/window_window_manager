@@ -28,7 +28,7 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    static inline sptr<WindowImpl> window_;
+    sptr<WindowImpl> window_;
 };
 } // namespace ROSEN
 } // namespace OHOS

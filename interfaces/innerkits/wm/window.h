@@ -224,6 +224,7 @@ public:
     virtual WMError Recover() = 0;
     virtual WMError Close() = 0;
     virtual void StartMove() = 0;
+    virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) = 0;
 
     // colorspace, gamut
     virtual bool IsSupportWideGamut() = 0;
