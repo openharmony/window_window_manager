@@ -73,7 +73,7 @@ ohos_shared_library("libwm") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
-    "ace_engine_standard:ace_uicontent",
+    "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "graphic_standard:surface",
