@@ -216,33 +216,27 @@ DMError DisplayDumper::DumpSpecifiedScreenInfo(ScreenId screenId, std::string& d
         WLOGFE("screen is null");
         return DMError::DM_ERROR_NULLPTR;
     }
-    std::ostringstream oss;
-    oss << "ScreenName           Type     IsGroup DmsId RsId                 GroupDmsId           "
-        << "ActiveIdx VPR Rotation Orientation "
-        << "RequestOrientation NodeId               IsMirrored MirrorNodeId"
-        << std::endl;
     const std::string& screenName = screen->name_.size() <= SCREEN_NAME_MAX_LENGTH ?
         screen->name_ : screen->name_.substr(0, SCREEN_NAME_MAX_LENGTH);
     std::string isGroup = screen->isScreenGroup_ ? "true" : "false";
     std::string screenType = TransferTypeToString(screen->type_);
     std::string isMirrored = screen->rSDisplayNodeConfig_.isMirrored ? "true" : "false";
     NodeId nodeId = (screen->rsDisplayNode_ == nullptr) ? SCREEN_ID_INVALID : screen->rsDisplayNode_->GetId();
-    // std::setw is used to set the output width and different width values are set to keep the format aligned.
-    oss << std::left << std::setw(21) << screenName
-        << std::left << std::setw(9) << screenType
-        << std::left << std::setw(8) << isGroup
-        << std::left << std::setw(6) << screen->dmsId_
-        << std::left << std::setw(21) << screen->rsId_
-        << std::left << std::setw(21) << screen->groupDmsId_
-        << std::left << std::setw(10) << screen->activeIdx_
-        << std::left << std::setw(4) << screen->virtualPixelRatio_
-        << std::left << std::setw(9) << static_cast<uint32_t>(screen->rotation_)
-        << std::left << std::setw(12) << static_cast<uint32_t>(screen->orientation_)
-        << std::left << std::setw(19) << static_cast<uint32_t>(screen->screenRequestedOrientation_)
-        << std::left << std::setw(21) << nodeId
-        << std::left << std::setw(11) << isMirrored
-        << std::left << std::setw(13) << screen->rSDisplayNodeConfig_.mirrorNodeId
-        << std::endl;
+    std::ostringstream oss;
+    oss << "ScreenName: " << screenName << std::endl;
+    oss << "Type: " << screenType << std::endl;
+    oss << "IsGroup: " << isGroup << std::endl;
+    oss << "DmsId: " << screen->dmsId_ << std::endl;
+    oss << "RsId: " << screen->rsId_ << std::endl;
+    oss << "GroupDmsId: " << screen->groupDmsId_ << std::endl;
+    oss << "ActiveIdx: " << screen->activeIdx_ << std::endl;
+    oss << "VPR: " << screen->virtualPixelRatio_ << std::endl;
+    oss << "Rotation: " << static_cast<uint32_t>(screen->rotation_) << std::endl;
+    oss << "Orientation: " << static_cast<uint32_t>(screen->orientation_) << std::endl;
+    oss << "RequestOrientation: " << static_cast<uint32_t>(screen->screenRequestedOrientation_) << std::endl;
+    oss << "NodeId: " << nodeId << std::endl;
+    oss << "IsMirrored: " << isMirrored << std::endl;
+    oss << "MirrorNodeId: " << screen->rSDisplayNodeConfig_.mirrorNodeId << std::endl;
     dumpInfo.append(oss.str());
     return DMError::DM_OK;
 }
@@ -277,9 +271,16 @@ DMError DisplayDumper::DumpSpecifiedDisplayInfo(DisplayId displayId, std::string
         return DMError::DM_ERROR_NULLPTR;
     }
     std::ostringstream oss;
-    oss << "DisplayId ScreenId RefreshRate VPR Rotation Orientation FreezeFlag [ x    y    w    h    ]"
-        << std::endl;
-    GetDisplayInfo(display, oss);
+    oss << "DisplayId: " << display->GetId() << std::endl;
+    oss << "ScreenId: " << display->GetAbstractScreenId() << std::endl;
+    oss << "RefreshRate: " << display->GetRefreshRate() << std::endl;
+    oss << "VPR: " << display->GetVirtualPixelRatio() << std::endl;
+    oss << "Rotation: " << static_cast<uint32_t>(display->GetRotation()) << std::endl;
+    oss << "Orientation: " << static_cast<uint32_t>(display->GetOrientation()) << std::endl;
+    oss << "FreezeFlag: " << static_cast<uint32_t>(display->GetFreezeFlag()) << std::endl;
+    oss << "DisplayRect: " << "[ "
+        << display->GetOffsetX() << ", " << display->GetOffsetY() << ", "
+        << display->GetWidth() << ", " << display->GetHeight() << " ]" << std::endl;
     dumpInfo.append(oss.str());
     return DMError::DM_OK;
 }
