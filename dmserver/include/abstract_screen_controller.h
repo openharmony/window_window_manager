@@ -60,6 +60,7 @@ public:
     DMError DestroyVirtualScreen(ScreenId screenId);
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     bool SetOrientation(ScreenId screenId, Orientation orientation, bool isFromWindow);
+    bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
 
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
