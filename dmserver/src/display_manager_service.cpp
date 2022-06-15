@@ -24,6 +24,7 @@
 #include "display_manager_config.h"
 #include "dm_common.h"
 #include "permission.h"
+#include "screen_rotation_controller.h"
 #include "transaction/rs_interfaces.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
@@ -106,6 +107,10 @@ void DisplayManagerService::ConfigureDisplayManagerService()
         }
         float virtualPixelRatio = static_cast<float>(densityDpi) / BASELINE_DENSITY;
         DisplayManagerService::customVirtualPixelRatio_ = virtualPixelRatio;
+    }
+    if (numbersConfig.count("defaultDeviceRotationOffset") != 0) {
+        uint32_t defaultDeviceRotationOffset = static_cast<uint32_t>(numbersConfig["defaultDeviceRotationOffset"][0]);
+        ScreenRotationController::SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset);
     }
 }
 
@@ -203,6 +208,12 @@ bool DisplayManagerService::SetOrientationFromWindow(ScreenId screenId, Orientat
     return abstractScreenController_->SetOrientation(screenId, orientation, true);
 }
 
+bool DisplayManagerService::SetRotationFromWindow(ScreenId screenId, Rotation targetRotation)
+{
+    WM_SCOPED_TRACE("dms:SetRotationFromWindow(%" PRIu64")", screenId);
+    return abstractScreenController_->SetRotation(screenId, targetRotation, true);
+}
+
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId)
 {
     WM_SCOPED_TRACE("dms:GetDisplaySnapshot(%" PRIu64")", displayId);
@@ -280,7 +291,6 @@ DMError DisplayManagerService::SetScreenColorTransform(ScreenId screenId)
 
     return abstractScreenController_->SetScreenColorTransform(screenId);
 }
-
 
 void DisplayManagerService::OnStop()
 {
