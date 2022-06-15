@@ -546,6 +546,7 @@ bool WindowProperty::WriteMemberVariable(Parcel& parcel, const MemberVariable& m
     }
     return true;
 }
+
 void WindowProperty::ReadMemberVariable(Parcel& parcel, const MemberVariable& mv)
 {
     void* mvData = reinterpret_cast<uint8_t*>(this) + mv.offset_;

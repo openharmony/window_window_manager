@@ -75,9 +75,9 @@ WindowNodeContainer::~WindowNodeContainer()
     Destroy();
 }
 
-int WindowNodeContainer::GetWindowCountByType(WindowType windowType)
+uint32_t WindowNodeContainer::GetWindowCountByType(WindowType windowType)
 {
-    int windowNumber = 0;
+    uint32_t windowNumber = 0;
     auto counter = [&windowNumber, &windowType](sptr<WindowNode>& windowNode) {
         if (windowNode->GetWindowType() == windowType && !windowNode->startingWindowShown_) ++windowNumber;
     };

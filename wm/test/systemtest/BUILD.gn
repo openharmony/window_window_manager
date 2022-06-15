@@ -27,6 +27,7 @@ group("systemtest") {
     ":wm_window_immersive_test",
     ":wm_window_input_method_test",
     ":wm_window_layout_test",
+    ":wm_window_mode_support_info_test",
     ":wm_window_move_drag_test",
     ":wm_window_multi_ability_test",
     ":wm_window_occupied_area_change_test",
@@ -218,6 +219,17 @@ ohos_systemtest("wm_window_outside_pressed_test") {
 }
 
 ## SystemTest wm_window_outside_pressed_test }}}
+
+## SystemTest wm_window_mode_support_info_test {{{
+ohos_systemtest("wm_window_mode_support_info_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_mode_support_info_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+}
+
+## SystemTest wm_window_mode_support_info_test }}}
 
 ## Build wm_systemtest_common.a {{{
 config("wm_systemtest_common_public_config") {
