@@ -94,7 +94,7 @@ public:
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() const override;
     virtual uint32_t GetWindowFlags() const override;
-    uint32_t GetModeSupportInfo() const;
+    uint32_t GetModeSupportInfo() const override;
     inline NotifyNativeWinDestroyFunc GetNativeDestroyCallback()
     {
         return notifyNativefunc_;

@@ -431,7 +431,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
     }
     // limit number of main window
     int mainWindowNumber = container->GetWindowCountByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    if (mainWindowNumber >= maxAppWindowNumber_) {
+    if (mainWindowNumber >= maxAppWindowNumber_ && node->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         container->MinimizeOldestAppWindow();
     }
 
