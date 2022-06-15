@@ -121,6 +121,7 @@ enum class DragType : uint32_t {
 enum class TraceTaskId : int32_t {
     STARTING_WINDOW = 0,
     REMOTE_ANIMATION,
+    CONNECT_EXTENSION,
 };
 
 namespace {
