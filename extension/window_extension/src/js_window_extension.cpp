@@ -26,6 +26,8 @@
 #include "window_extension_connection.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "wm_common_inner.h"
+#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -59,6 +61,7 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
     std::shared_ptr<AbilityRuntime::AbilityHandler>& handler,
     const sptr<IRemoteObject>& token)
 {
+    WM_SCOPED_TRACE("WindowExtension Init");
     WindowExtension::Init(record, application, handler, token);
     std::string srcPath;
     GetSrcPath(srcPath);
@@ -140,6 +143,8 @@ void JsWindowExtension::GetSrcPath(std::string& srcPath) const
 
 sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
 {
+    WM_SCOPED_TRACE("WindowExtension Init %s-%s",
+        want.GetElement().GetAbilityName().c_str(), want.GetElement().GetAbilityName().c_str());
     WLOGFI("called.");
     Extension::OnConnect(want);
     NativeEngine& engine = jsRuntime_.GetNativeEngine();
@@ -189,6 +194,8 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
 
 void JsWindowExtension::OnStart(const AAFwk::Want& want)
 {
+    WM_SCOPED_TRACE("WindowExtension OnStart %s-%s",
+        want.GetElement().GetAbilityName().c_str(), want.GetElement().GetAbilityName().c_str());
     Extension::OnStart(want);
 
     AbilityRuntime::ElementName elementName = want.GetElement();
