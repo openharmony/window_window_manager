@@ -21,6 +21,7 @@
 #include "pixel_map.h"
 
 #include "snapshot_utils.h"
+#include "test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -30,6 +31,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenshotCmdTest"};
 }
+
 using utils = DisplayTestUtils;
 class ScreenshotCmdTest : public testing::Test {
 public:
@@ -56,6 +58,8 @@ void ScreenshotCmdTest::SetUpTestCase()
         display->GetHeight(), display->GetRefreshRate());
 
     defaultId_ = display->GetId();
+
+    TestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
 }
 
 void ScreenshotCmdTest::TearDownTestCase()

@@ -19,17 +19,20 @@
 
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
+#include "test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+using utils = TestUtils;
 constexpr int32_t TEST_IMAGE_HEIGHT = 1080;
 constexpr int32_t TEST_IMAGE_WIDTH = 1920;
 using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
 void ScreenshotTest::SetUpTestCase()
 {
+    TestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
 }
 
 void ScreenshotTest::TearDownTestCase()

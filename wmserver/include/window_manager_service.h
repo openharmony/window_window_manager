@@ -118,6 +118,7 @@ private:
     void ConfigFloatWindowLimits();
 
     static inline SingletonDelegator<WindowManagerService> delegator;
+    std::map<uint32_t, uint32_t> accessTokenIdMaps_;
     sptr<WindowRoot> windowRoot_;
     sptr<WindowController> windowController_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
