@@ -16,15 +16,17 @@
 #include "display_manager_service.h"
 
 #include <cinttypes>
+#include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
 
 #include "display_manager_agent_controller.h"
+#include "display_manager_config.h"
+#include "dm_common.h"
+#include "permission.h"
 #include "transaction/rs_interfaces.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
-#include "display_manager_config.h"
-#include "dm_common.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -161,7 +163,7 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
     WM_SCOPED_TRACE("dms:CreateVirtualScreen(%s)", option.name_.c_str());
     ScreenId screenId = abstractScreenController_->CreateVirtualScreen(option, displayManagerAgent);
     CHECK_SCREEN_AND_RETURN(SCREEN_ID_INVALID);
-
+    accessTokenIdMaps_[screenId] = IPCSkeleton::GetCallingTokenID();
     WLOGFI("DumpScreenInfo after Create VirtualScreen");
     abstractScreenController_->DumpScreenInfo();
     return screenId;
@@ -169,6 +171,10 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
 
 DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
 {
+    if (accessTokenIdMaps_[screenId] != IPCSkeleton::GetCallingTokenID()) {
+        return DMError::DM_ERROR_INVALID_CALLING;
+    }
+    accessTokenIdMaps_.erase(screenId);
     WLOGFI("DestroyVirtualScreen::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
 
@@ -200,9 +206,11 @@ bool DisplayManagerService::SetOrientationFromWindow(ScreenId screenId, Orientat
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId)
 {
     WM_SCOPED_TRACE("dms:GetDisplaySnapshot(%" PRIu64")", displayId);
-    std::shared_ptr<Media::PixelMap> screenSnapshot
-        = abstractDisplayController_->GetScreenSnapshot(displayId);
-    return screenSnapshot;
+    if (Permission::CheckCallingPermission("ohos.permission.CAPTURE_SCREEN") ||
+        Permission::IsStartByHdcd()) {
+        return abstractDisplayController_->GetScreenSnapshot(displayId);
+    }
+    return nullptr;
 }
 
 ScreenId DisplayManagerService::GetRSScreenId(DisplayId displayId) const
@@ -302,12 +310,20 @@ bool DisplayManagerService::UnregisterDisplayManagerAgent(const sptr<IDisplayMan
 bool DisplayManagerService::WakeUpBegin(PowerStateChangeReason reason)
 {
     WM_SCOPED_TRACE("dms:WakeUpBegin(%u)", reason);
+    if (!Permission::IsSystemCalling()) {
+        WLOGFI("permission denied!");
+        return false;
+    }
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP,
         EventStatus::BEGIN);
 }
 
 bool DisplayManagerService::WakeUpEnd()
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFI("permission denied!");
+        return false;
+    }
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP,
         EventStatus::END);
 }
@@ -315,6 +331,10 @@ bool DisplayManagerService::WakeUpEnd()
 bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 {
     WM_SCOPED_TRACE("dms:SuspendBegin(%u)", reason);
+    if (!Permission::IsSystemCalling()) {
+        WLOGFI("permission denied!");
+        return false;
+    }
     displayPowerController_->SuspendBegin(reason);
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP,
         EventStatus::BEGIN);
@@ -322,6 +342,10 @@ bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerService::SuspendEnd()
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFI("permission denied!");
+        return false;
+    }
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP,
         EventStatus::END);
 }
@@ -329,6 +353,10 @@ bool DisplayManagerService::SuspendEnd()
 bool DisplayManagerService::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     WLOGFI("SetScreenPowerForAll");
+    if (!Permission::IsSystemCalling()) {
+        WLOGFI("permission denied!");
+        return false;
+    }
     return abstractScreenController_->SetScreenPowerForAll(state, reason);
 }
 
@@ -339,6 +367,10 @@ ScreenPowerState DisplayManagerService::GetScreenPower(ScreenId dmsScreenId)
 
 bool DisplayManagerService::SetDisplayState(DisplayState state)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFI("permission denied!");
+        return false;
+    }
     return displayPowerController_->SetDisplayState(state);
 }
 
