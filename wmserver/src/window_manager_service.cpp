@@ -487,7 +487,9 @@ void WindowManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId, 
     } else if (type == DisplayStateChangeType::UNFREEZE) {
         freezeDisplayController_->UnfreezeDisplay(displayId);
     } else {
-        windowController_->NotifyDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+        wmsTaskLooper_->PostTask([this, defaultDisplayId, displayInfo, displayInfoMap, type]() mutable {
+            windowController_->NotifyDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+        });
     }
 }
 
