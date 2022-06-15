@@ -53,10 +53,17 @@ sptr<Window> WindowExtensionStubImpl::CreateWindow(const Rect& rect,
     return window_;
 }
 
-void WindowExtensionStubImpl::Resize(const Rect& rect)
+void WindowExtensionStubImpl::SetBounds(const Rect& rect)
 {
-    if (window_ != nullptr) {
+    if (window_ == nullptr) {
+        return;
+    }
+    Rect orgRect = window_->GetRect();
+    if (rect.width_ != orgRect.width_ || rect.height_ != orgRect.height_) {
         window_->Resize(rect.width_, rect.height_);
+    }
+    if (rect.posX_ != orgRect.posX_ || rect.posY_ != orgRect.posY_) {
+        window_->MoveTo(orgRect.posX_, orgRect.posY_);
     }
 }
 
