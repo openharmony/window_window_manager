@@ -218,6 +218,8 @@ public:
     virtual Orientation GetRequestedOrientation() = 0;
     virtual void SetModeSupportInfo(uint32_t modeSupportInfo) = 0;
     virtual uint32_t GetModeSupportInfo() const = 0;
+    virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) = 0;
+    virtual void GetRequestedTouchHotAreas(std::vector<Rect>& rects) const = 0;
 
     virtual bool IsDecorEnable() const = 0;
     virtual WMError Maximize() = 0;
