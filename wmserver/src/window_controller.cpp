@@ -32,6 +32,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowController"};
+    constexpr uint32_t TOIUCH_HOT_AREA_MAX_NUM = 10;
 }
 
 uint32_t WindowController::GenWindowId()
@@ -819,6 +820,12 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->SetModeSupportInfo(property->GetModeSupportInfo());
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
+            std::vector<Rect> rects;
+            property->GetTouchHotAreas(rects);
+            return UpdateTouchHotAreas(node, rects);
+            break;
+        }
         default:
             break;
     }
@@ -829,6 +836,33 @@ WMError WindowController::GetModeChangeHotZones(DisplayId displayId,
     ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config)
 {
     return windowRoot_->GetModeChangeHotZones(displayId, hotZones, config);
+}
+
+WMError WindowController::UpdateTouchHotAreas(const sptr<WindowNode>& node, const std::vector<Rect>& rects)
+{
+    std::ostringstream oss;
+    int index = 0;
+    for (const auto& rect : rects) {
+        oss << "[ " << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_ << " ]";
+        index++;
+        if (index < static_cast<int32_t>(rects.size())) {
+            oss <<", ";
+        }
+    }
+    WLOGFI("windowId: %{public}u, rects.size: %{public}d, %{public}s",
+        node->GetWindowId(), static_cast<int32_t>(rects.size()), oss.str().c_str());
+    Rect windowRect = node->GetWindowRect();
+    std::vector<Rect> hotAreas;
+    if (rects.size() > TOIUCH_HOT_AREA_MAX_NUM || !WindowHelper::CalculateTouchHotAreas(windowRect, rects, hotAreas)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    node->GetWindowProperty()->SetTouchHotAreas(rects);
+    if (rects.empty()) {
+        hotAreas.emplace_back(node->GetFullWindowHotArea());
+    }
+    node->SetTouchHotAreas(hotAreas);
+    FlushWindowInfo(node->GetWindowId());
+    return WMError::WM_OK;
 }
 
 void WindowController::NotifyOutsidePressed(const sptr<WindowNode>& node)
@@ -842,7 +876,7 @@ void WindowController::NotifyOutsidePressed(const sptr<WindowNode>& node)
     std::vector<sptr<WindowNode>> windowNodes;
     windowNodeContainer->TraverseContainer(windowNodes);
     uint32_t skipNodeId = GetEmbedNodeId(windowNodes, node);
-    for (auto& windowNode : windowNodes) {
+    for (const auto& windowNode : windowNodes) {
         if (windowNode == nullptr || windowNode->GetWindowToken() == nullptr ||
             windowNode->GetWindowId() == skipNodeId ||
             windowNode->GetWindowId() == node->GetWindowId()) {

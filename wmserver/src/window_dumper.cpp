@@ -179,6 +179,18 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
     oss << "WindowRect: " << "[ "
         << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_
         << " ]" << std::endl;
+    oss << "TouchHotAreas: ";
+    std::vector<Rect> touchHotAreas;
+    node->GetTouchHotAreas(touchHotAreas);
+    int index = 0;
+    for (const auto& rect : touchHotAreas) {
+        oss << "[ " << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_ << " ]";
+        index++;
+        if (index < static_cast<int32_t>(touchHotAreas.size())) {
+            oss <<", ";
+        }
+    }
+    oss << std::endl;
     dumpInfo.append(oss.str());
     if (node->GetWindowToken() != nullptr) {
         std::vector<std::string> resetParams;
