@@ -28,7 +28,7 @@ public:
         DisplayManagerAgentType type));
     MOCK_METHOD2(UnregisterDisplayManagerAgent, bool(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type));
-    MOCK_METHOD0(GetDefaultDisplayId, DisplayId());
+    MOCK_METHOD0(GetDefaultDisplayInfo, sptr<DisplayInfo>());
     MOCK_METHOD1(GetDisplayInfoByScreenId, sptr<DisplayInfo>(ScreenId screenId));
     MOCK_METHOD1(GetDisplaySnapshot, std::shared_ptr<Media::PixelMap>(DisplayId displayId));
 

@@ -92,24 +92,24 @@ HWTEST_F(ScreenshotTest, GetScreenshot_default, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayId()).Times(1).WillOnce(Return(0ULL));
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
 
-    DisplayId displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
+    DisplayManager::GetInstance().GetDefaultDisplayId();
 
     EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_)).Times(1).WillOnce(Return(nullptr));
 
-    ASSERT_EQ(nullptr, DisplayManager::GetInstance().GetScreenshot(displayId));
+    ASSERT_EQ(nullptr, DisplayManager::GetInstance().GetScreenshot(0));
 }
 
 HWTEST_F(ScreenshotTest, GetScreenshot_01, Function | MediumTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    EXPECT_CALL(m->Mock(), GetDefaultDisplayId()).Times(1).WillOnce(Return(0ULL));
-    DisplayId displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
+    DisplayManager::GetInstance().GetDefaultDisplayId();
 
     EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_)).Times(1).WillOnce(Return(CreatePixelMap()));
-    auto screenshot = DisplayManager::GetInstance().GetScreenshot(displayId);
+    auto screenshot = DisplayManager::GetInstance().GetScreenshot(0);
     ASSERT_NE(nullptr, screenshot);
 
     uint32_t width = screenshot->GetWidth();
