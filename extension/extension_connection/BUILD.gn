@@ -43,6 +43,7 @@ ohos_shared_library("libwindow_extension_client") {
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/extension/window_extension:libwindow_extension",
+    "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
   ]
 
