@@ -74,7 +74,7 @@ protected:
     bool IsVerticalDisplay(DisplayId displayId) const;
     bool IsFullScreenRecentWindowExist(const std::vector<sptr<WindowNode>>& nodeVec) const;
     void LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec);
-    void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect);
+    void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect);
     void UpdateRectInDisplayGroupForAllNodes(DisplayId displayId,
         const Rect& oriDisplayRect, const Rect& newDisplayRect);
     void UpdateRectInDisplayGroup(const sptr<WindowNode>& node,
