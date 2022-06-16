@@ -46,7 +46,7 @@ public:
     void DisconnectExtension();
     void Show() const;
     void Hide() const;
-    void Resize(const Rect& rect) const;
+    void SetBounds(const Rect& rect) const;
     void RequestFocus() const;
 private:
     class WindowExtensionClientRecipient
@@ -144,10 +144,10 @@ void WindowExtensionConnection::Impl::RequestFocus() const
     }
 }
 
-void WindowExtensionConnection::Impl::Resize(const Rect& rect) const
+void WindowExtensionConnection::Impl::SetBounds(const Rect& rect) const
 {
     if (proxy_ != nullptr) {
-        proxy_->Resize(rect);
+        proxy_->SetBounds(rect);
     }
 }
 
@@ -224,7 +224,7 @@ void WindowExtensionConnection::RequestFocus() const
 
 void WindowExtensionConnection::SetBounds(const Rect& rect) const
 {
-    pImpl_->Resize(rect);
+    pImpl_->SetBounds(rect);
 }
 
 void WindowExtensionConnection::DisconnectExtension() const

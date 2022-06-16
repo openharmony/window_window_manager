@@ -31,10 +31,10 @@ int WindowExtensionStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     }
     WLOGFI("code is %{public}u", code);
     switch (code) {
-        case TRANS_ID_RESIZE_WINDOW: {
+        case TRANS_ID_SETBOUNDS: {
             Rect rect {data.ReadInt32(), data.ReadInt32(),
                 data.ReadInt32(), data.ReadInt32()};
-            Resize(rect);
+            SetBounds(rect);
             break;
         }
         case TRANS_ID_HIDE_WINDOW: {
