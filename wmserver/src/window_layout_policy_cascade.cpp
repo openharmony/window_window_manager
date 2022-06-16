@@ -313,7 +313,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
     UpdateClientRectAndResetReason(node, lastWinRect, winRect);
     // update node bounds
 
-    UpdateSurfaceBounds(node, winRect);
+    UpdateSurfaceBounds(node, winRect, lastWinRect);
 }
 
 void WindowLayoutPolicyCascade::InitLimitRects(DisplayId displayId)
