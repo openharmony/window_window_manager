@@ -26,7 +26,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowExtensionProxy"};
 }
 
-void WindowExtensionProxy::Resize(const Rect& rect)
+void WindowExtensionProxy::SetBounds(const Rect& rect)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -41,7 +41,7 @@ void WindowExtensionProxy::Resize(const Rect& rect)
         WLOGFE("write rect failed");
         return;
     }
-    if (Remote()->SendRequest(TRANS_ID_RESIZE_WINDOW, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(TRANS_ID_SETBOUNDS, data, reply, option) != ERR_NONE) {
         WLOGFE("send request failed");
         return;
     }

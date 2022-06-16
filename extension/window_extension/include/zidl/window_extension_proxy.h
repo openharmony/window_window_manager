@@ -27,7 +27,7 @@ public:
         : IRemoteProxy<IWindowExtension>(impl) {};
     ~WindowExtensionProxy() {};
 
-    void Resize(const Rect& rect) override;
+    void SetBounds(const Rect& rect) override;
     void Hide() override;
     void Show() override;
     void RequestFocus() override;
