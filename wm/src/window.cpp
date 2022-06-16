@@ -44,6 +44,9 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
         return nullptr;
     }
     option->SetWindowName(windowName);
+    if (context != nullptr) {
+        RSSystemProperties::InitUniRenderEnabled(context->GetBundleName());
+    }
     sptr<WindowImpl> windowImpl = new(std::nothrow) WindowImpl(option);
     if (windowImpl == nullptr) {
         WLOGFE("malloc windowImpl failed");
