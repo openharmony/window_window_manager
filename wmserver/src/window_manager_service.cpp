@@ -240,7 +240,9 @@ void WindowManagerService::ConfigureWindowManagerService()
     if (intNumbersConfig.count("maxAppWindowNumber") != 0) {
         auto numbers = intNumbersConfig.at("maxAppWindowNumber");
         if (numbers.size() == 1) {
-            windowRoot_->SetMaxAppWindowNumber(numbers[0]);
+            if (numbers[0] > 0) {
+                windowRoot_->SetMaxAppWindowNumber(static_cast<uint32_t>(numbers[0]));
+            }
         }
     }
 

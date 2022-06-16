@@ -126,7 +126,7 @@ private:
     sptr<AgentDeathRecipient> windowDeath_ = new AgentDeathRecipient(std::bind(&WindowRoot::OnRemoteDied,
         this, std::placeholders::_1));
     Callback callback_;
-    int maxAppWindowNumber_ = 100;
+    uint32_t maxAppWindowNumber_ = 100;
     FloatingWindowLimitsConfig floatingWindowLimitsConfig_;
     SplitRatioConfig splitRatioConfig_ = {0.1, 0.9, {}};
 };
