@@ -164,6 +164,7 @@ void WindowLayoutPolicyTile::LayoutForegroundNodeQueue(DisplayId displayId)
 {
     for (auto& node : foregroundNodesMap_[displayId]) {
         Rect winRect = node->GetRequestRect();
+        Rect lastRect = node->GetWindowRect();
         node->SetWindowRect(winRect);
         CalcAndSetNodeHotZone(winRect, node);
         if (node->GetWindowToken()) {
@@ -171,7 +172,7 @@ void WindowLayoutPolicyTile::LayoutForegroundNodeQueue(DisplayId displayId)
                 winRect, node->GetDecoStatus(), node->GetWindowSizeChangeReason());
         }
 
-        UpdateSurfaceBounds(node, winRect);
+        UpdateSurfaceBounds(node, winRect, lastRect);
         for (auto& childNode : node->children_) {
             LayoutWindowNode(childNode);
         }
@@ -303,7 +304,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
     node->SetWindowRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
     UpdateClientRectAndResetReason(node, lastRect, winRect);
-    UpdateSurfaceBounds(node, winRect);
+    UpdateSurfaceBounds(node, winRect, lastRect);
 }
 } // Rosen
 } // OHOS
