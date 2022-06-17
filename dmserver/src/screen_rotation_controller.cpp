@@ -28,15 +28,9 @@ namespace {
     constexpr int64_t ORIENTATION_SENSOR_REPORTING_RATE = 200000000; // 200ms
     constexpr long ORIENTATION_SENSOR_CALLBACK_TIME_INTERVAL = 200; // 200ms
     constexpr int VALID_INCLINATION_ANGLE_THRESHOLD_COEFFICIENT = 3;
-    const int ROTATION_0_RANGE_START = 30;
-    const int ROTATION_0_RANGE_END = 330;
-    const int ROTATION_90_RANGE_START = 60;
-    const int ROTATION_90_RANGE_END = 120;
-    const int ROTATION_180_RANGE_START = 150;
-    const int ROTATION_180_RANGE_END = 210;
-    const int ROTATION_270_RANGE_START = 240;
-    const int ROTATION_270_RANGE_END = 300;
 }
+
+enum class ROTATION_DEGREE_RANGE { };
 
 DisplayId ScreenRotationController::defaultDisplayId_ = 0;
 bool ScreenRotationController::isGravitySensorSubscribed_ = false;
@@ -53,7 +47,7 @@ void ScreenRotationController::SubscribeGravitySensor()
         WLOGFE("dms: gravity sensor's already subscribed");
         return;
     }
-    if (strcpy_s(user_.name, sizeof(user_.name), "DisplaySensorController") != EOK) {
+    if (strcpy_s(user_.name, sizeof(user_.name), "ScreenRotationController") != EOK) {
         WLOGFE("dms strcpy_s error");
         return;
     }
@@ -91,8 +85,7 @@ void ScreenRotationController::SetScreenRotationLocked(bool isLocked)
 void ScreenRotationController::SetDefaultDeviceRotationOffset(uint32_t defaultDeviceRotationOffset)
 {
     // Available options for defaultDeviceRotationOffset: {0, 90, 180, 270}
-    if (defaultDeviceRotationOffset < 0 || defaultDeviceRotationOffset > 270 ||
-        defaultDeviceRotationOffset % 90 != 0) {
+    if (defaultDeviceRotationOffset < 0 || defaultDeviceRotationOffset > 270 || defaultDeviceRotationOffset % 90 != 0) {
         return;
     }
     defaultDeviceRotationOffset_ = defaultDeviceRotationOffset;
@@ -105,7 +98,7 @@ void ScreenRotationController::HandleGravitySensorEventCallback(SensorEvent *eve
     }
     if (event->sensorTypeId != SENSOR_TYPE_ID_GRAVITY) {
         WLOGE("dms: Orientation Sensor Callback is not SENSOR_TYPE_ID_GRAVITY");
-        return; 
+        return;
     }
     Orientation orientation = GetDisplayOrientation();
     if (!IsSensorRelatedOrientation(orientation)) {
@@ -116,13 +109,14 @@ void ScreenRotationController::HandleGravitySensorEventCallback(SensorEvent *eve
     int sensorDegree = CalcRotationDegree(gravityData);
     currentDisplayRotation_ = GetCurrentDisplayRotation();
     Rotation currentSensorRotation;
-    if (sensorDegree >= 0 && (sensorDegree <= ROTATION_0_RANGE_START || sensorDegree >= ROTATION_0_RANGE_END)) {
+    // Use ROTATION_0 when degree range is [0, 30]∪[330, 359]
+    if (sensorDegree >= 0 && (sensorDegree <= 30 || sensorDegree >= 330)) {
         currentSensorRotation = Rotation::ROTATION_0;
-    } else if (sensorDegree >= ROTATION_90_RANGE_START && sensorDegree <= ROTATION_90_RANGE_END) {
+    } else if (sensorDegree >= 60 && sensorDegree <= 120) { // Use ROTATION_90 when degree range is [60, 120]
         currentSensorRotation = Rotation::ROTATION_90;
-    } else if (sensorDegree >= ROTATION_180_RANGE_START && sensorDegree <= ROTATION_180_RANGE_END) {
+    } else if (sensorDegree >= 150 && sensorDegree <= 210) { // Use ROTATION_180 when degree range is [150, 210]
         currentSensorRotation = Rotation::ROTATION_180;
-    } else if (sensorDegree >= ROTATION_270_RANGE_START && sensorDegree <= ROTATION_270_RANGE_END) {
+    } else if (sensorDegree >= 240 && sensorDegree <= 300) { // Use ROTATION_270 when degree range is [240, 300]
         currentSensorRotation = Rotation::ROTATION_270;
     } else {
         return;
@@ -148,8 +142,9 @@ int ScreenRotationController::CalcRotationDegree(GravityData* gravityData)
     if ((x * x + y * y) * VALID_INCLINATION_ANGLE_THRESHOLD_COEFFICIENT < z * z) {
         return degree;
     }
-    // arccotx = pi / 2 - arctanx, 90 is used to calculate acot(in degree); degree = rad / pi * 180;
+    // arccotx = pi / 2 - arctanx, 90 is used to calculate acot(in degree); degree = rad / pi * 180
     degree = 90 - static_cast<int>(round(atan2(y, -x) / M_PI * 180));
+    // Normalize the degree to the range of 0~360
     return degree >= 0 ? degree % 360 : degree % 360 + 360;
 }
 
@@ -166,7 +161,7 @@ Orientation ScreenRotationController::GetDisplayOrientation()
 Rotation ScreenRotationController::CalcTargetDisplayRotation(
     Orientation requestedOrientation, Rotation sensorRotation)
 {
-    switch(requestedOrientation) {
+    switch (requestedOrientation) {
         case Orientation::SENSOR: {
             return sensorRotation;
         }
@@ -236,10 +231,11 @@ bool ScreenRotationController::CheckCallbackTimeInterval()
 
 Rotation ScreenRotationController::ConvertToDeviceRotation(Rotation sensorRotation)
 {
-    int32_t bias = defaultDeviceRotationOffset_ / 90;
+    int32_t bias = defaultDeviceRotationOffset_ / 90; // offset(in degree) divided by 90 to get rotation bias
     int32_t deviceRotationValue = static_cast<int32_t>(sensorRotation) - bias;
     while (deviceRotationValue < 0) {
-        deviceRotationValue += 4; // Normalize the values into the range 0~3, corresponding to the four rotations.
+        // +4 is used to normalize the values into the range 0~3, corresponding to the four rotations.
+        deviceRotationValue += 4;
     }
     return static_cast<Rotation>(deviceRotationValue);
 }

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_DISPLAY_SENSOR_CONTROLLER_H
-#define OHOS_ROSEN_DISPLAY_SENSOR_CONTROLLER_H
+#ifndef OHOS_ROSEN_SCREEN_ROTATION_CONTROLLER_H
+#define OHOS_ROSEN_SCREEN_ROTATION_CONTROLLER_H
 
 #include <refbase.h>
 
@@ -26,7 +26,6 @@
 namespace OHOS {
 namespace Rosen {
 class ScreenRotationController : public RefBase {
-
 public:
     ScreenRotationController() = delete;
     ~ScreenRotationController() = default;
@@ -59,4 +58,4 @@ private:
 };
 } // Rosen
 } // OHOS
-#endif // OHOS_ROSEN_DISPLAY_SENSOR_CONTROLLER_H
+#endif // OHOS_ROSEN_SCREEN_ROTATION_CONTROLLER_H
