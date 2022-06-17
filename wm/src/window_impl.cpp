@@ -2165,5 +2165,15 @@ Orientation WindowImpl::GetRequestedOrientation()
 {
     return property_->GetRequestedOrientation();
 }
+
+WMError WindowImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
+{
+    property_->SetTouchHotAreas(rects);
+    return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA);
+}
+void WindowImpl::GetRequestedTouchHotAreas(std::vector<Rect>& rects) const
+{
+    property_->GetTouchHotAreas(rects);
+}
 } // namespace Rosen
 } // namespace OHOS

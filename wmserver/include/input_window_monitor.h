@@ -20,6 +20,7 @@
 #include <input_manager.h>
 #include <refbase.h>
 
+#include "display_info.h"
 #include "window_root.h"
 #include "wm_common.h"
 
@@ -34,16 +35,16 @@ public:
 
 private:
     sptr<WindowRoot> windowRoot_;
-    std::vector<MMI::PhysicalDisplayInfo> physicalDisplays_;
-    std::vector<MMI::LogicalDisplayInfo> logicalDisplays_;
+    MMI::DisplayGroupInfo displayGroupInfo_;
     std::unordered_set<WindowType> windowTypeSkipped_ { WindowType::WINDOW_TYPE_POINTER,
         WindowType::WINDOW_TYPE_DRAGGING_EFFECT, WindowType::WINDOW_TYPE_FREEZE_DISPLAY};
-    const int INVALID_WINDOW_ID = -1;
     void TraverseWindowNodes(const std::vector<sptr<WindowNode>>& windowNodes,
-                              std::vector<MMI::LogicalDisplayInfo>::iterator& iter);
-    void UpdatePhysicalDisplayInfo(const sptr<DisplayInfo>& displayInfo, DisplayId displayId);
-    void UpdateLogicalDisplayInfo(const sptr<DisplayInfo>& displayInfo, DisplayId displayId);
-    void UpdateDisplayDirection(MMI::PhysicalDisplayInfo& physicalDisplayInfo, const sptr<DisplayInfo>& displayInfo);
+                             std::vector<MMI::WindowInfo>& windowsInfo);
+    void UpdateDisplayGroupInfo(const sptr<WindowNodeContainer>& windowNodeContainer,
+                                MMI::DisplayGroupInfo& displayGroupInfo);
+    void UpdateDisplayInfo(const sptr<DisplayInfo>& displayInfo,
+                           std::vector<MMI::DisplayInfo>& displayInfoVector);
+    MMI::Direction GetDisplayDirectionForMmi(Rotation rotation);
 };
 }
 }

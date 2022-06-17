@@ -295,6 +295,29 @@ public:
         return ret;
     }
 
+    static bool CalculateTouchHotAreas(const Rect& windowRect, const std::vector<Rect>& requestRects,
+        std::vector<Rect>& outRects)
+    {
+        for (const auto& rect : requestRects) {
+            if (rect.posX_ < 0 || rect.posY_ < 0 || rect.width_ == 0 || rect.height_ == 0) {
+                return false;
+            }
+            Rect hotArea;
+            if (rect.posX_ >= static_cast<int32_t>(windowRect.width_) ||
+                rect.posY_ >= static_cast<int32_t>(windowRect.height_)) {
+                continue;
+            }
+            hotArea.posX_ = windowRect.posX_ + rect.posX_;
+            hotArea.posY_ = windowRect.posY_ + rect.posY_;
+            hotArea.width_ =
+                std::min(hotArea.posX_ + hotArea.width_, windowRect.posX_ + windowRect.width_) - hotArea.posX_;
+            hotArea.height_ =
+                std::min(hotArea.posY_ + hotArea.height_, windowRect.posY_ + windowRect.height_) - hotArea.posY_;
+            outRects.emplace_back(hotArea);
+        }
+        return true;
+    }
+
 private:
     WindowHelper() = default;
     ~WindowHelper() = default;
