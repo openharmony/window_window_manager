@@ -605,7 +605,7 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
-    NotifyOutsidePressed(node);
+    NotifyTouchOutside(node);
 
     if (isStartDrag) {
         WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
@@ -865,7 +865,7 @@ WMError WindowController::UpdateTouchHotAreas(const sptr<WindowNode>& node, cons
     return WMError::WM_OK;
 }
 
-void WindowController::NotifyOutsidePressed(const sptr<WindowNode>& node)
+void WindowController::NotifyTouchOutside(const sptr<WindowNode>& node)
 {
     auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (windowNodeContainer == nullptr) {
@@ -884,7 +884,7 @@ void WindowController::NotifyOutsidePressed(const sptr<WindowNode>& node)
             continue;
         }
         WLOGFD("notify %{public}s id %{public}d", windowNode->GetWindowName().c_str(), windowNode->GetWindowId());
-        windowNode->GetWindowToken()->NotifyOutsidePressed();
+        windowNode->GetWindowToken()->NotifyTouchOutside();
     }
 }
 
@@ -909,7 +909,7 @@ uint32_t WindowController::GetEmbedNodeId(const std::vector<sptr<WindowNode>>& w
             continue;
         }
         if (nodeRect.IsInsideOf(windowNode->GetWindowRect())) {
-            WLOGI("OutsidePressed window type is component %{public}s windowNode %{public}d",
+            WLOGI("TouchOutside window type is component %{public}s windowNode %{public}d",
                 windowNode->GetWindowName().c_str(), windowNode->GetWindowId());
             return windowNode->GetWindowId();
         }
