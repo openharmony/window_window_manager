@@ -80,6 +80,7 @@ private:
     void HandleTurnScreenOn(const sptr<WindowNode>& node);
     void ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo);
     void NotifyOutsidePressed(const sptr<WindowNode>& node);
+    WMError UpdateTouchHotAreas(const sptr<WindowNode>& node, const std::vector<Rect>& rects);
     uint32_t GetEmbedNodeId(const std::vector<sptr<WindowNode>>& windowNodes, const sptr<WindowNode>& node);
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;

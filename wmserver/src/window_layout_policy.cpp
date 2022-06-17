@@ -443,7 +443,16 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<W
         rect.width_ += (hotZone + hotZone);
         rect.height_ += (hotZone + hotZone);
     }
-    node->SetHotZoneRect(rect);
+    node->SetFullWindowHotArea(rect);
+    std::vector<Rect> requestedHotAreas;
+    node->GetWindowProperty()->GetTouchHotAreas(requestedHotAreas);
+    std::vector<Rect> hotAreas;
+    if (requestedHotAreas.empty()) {
+        hotAreas.emplace_back(rect);
+    } else {
+        (void)WindowHelper::CalculateTouchHotAreas(winRect, requestedHotAreas, hotAreas);
+    }
+    node->SetTouchHotAreas(hotAreas);
 }
 
 void WindowLayoutPolicy::FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect,

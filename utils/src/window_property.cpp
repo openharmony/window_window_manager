@@ -402,6 +402,16 @@ bool WindowProperty::GetStretchable() const
     return isStretchable_;
 }
 
+void WindowProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
+{
+    touchHotAreas_ = rects;
+}
+
+void WindowProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
+{
+    rects = touchHotAreas_;
+}
+
 bool WindowProperty::MapMarshalling(Parcel& parcel) const
 {
     auto size = sysBarPropMap_.size();
@@ -433,6 +443,30 @@ void WindowProperty::MapUnmarshalling(Parcel& parcel, WindowProperty* property)
     }
 }
 
+bool WindowProperty::MarshallingTouchHotAreas(Parcel& parcel) const
+{
+    auto size = touchHotAreas_.size();
+    if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
+        return false;
+    }
+    for (const auto& rect : touchHotAreas_) {
+        if (!(parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+            parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void WindowProperty::UnmarshallingTouchHotAreas(Parcel& parcel, WindowProperty* property)
+{
+    auto size = parcel.ReadUint32();
+    for (uint32_t i = 0; i < size; i++) {
+        property->touchHotAreas_.emplace_back(
+            Rect{ parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() });
+    }
+}
+
 bool WindowProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -453,8 +487,7 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
         parcel.WriteUint32(modeSupportInfo_) && parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
         parcel.WriteUint32(originRect_.width_) && parcel.WriteUint32(originRect_.height_) &&
-        parcel.WriteBool(isStretchable_);
-    ;
+        parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -501,6 +534,7 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     uint32_t h = parcel.ReadUint32();
     property->SetOriginRect(Rect { 0, 0, w, h });
     property->SetStretchable(parcel.ReadBool());
+    UnmarshallingTouchHotAreas(parcel, property);
     return property;
 }
 
@@ -642,6 +676,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     dragType_ = property->dragType_;
     originRect_ = property->originRect_;
     isStretchable_ = property->isStretchable_;
+    touchHotAreas_ = property->touchHotAreas_;
 }
 }
 }

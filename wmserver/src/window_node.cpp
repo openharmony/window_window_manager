@@ -33,9 +33,9 @@ void WindowNode::SetDisplayId(DisplayId displayId)
     property_->SetDisplayId(displayId);
 }
 
-void WindowNode::SetHotZoneRect(const Rect& rect)
+void WindowNode::SetFullWindowHotArea(const Rect& rect)
 {
-    hotZoneRect_ = rect;
+    fullWindowHotArea_ = rect;
 }
 
 void WindowNode::SetWindowRect(const Rect& rect)
@@ -198,6 +198,11 @@ void WindowNode::SetOriginRect(const Rect& rect)
     property_->SetOriginRect(rect);
 }
 
+void WindowNode::SetTouchHotAreas(const std::vector<Rect>& rects)
+{
+    touchHotAreas_ = rects;
+}
+
 DragType WindowNode::GetDragType() const
 {
     return property_->GetDragType();
@@ -233,9 +238,9 @@ uint32_t WindowNode::GetParentId() const
     return property_->GetParentId();
 }
 
-Rect WindowNode::GetHotZoneRect() const
+Rect WindowNode::GetFullWindowHotArea() const
 {
-    return hotZoneRect_;
+    return fullWindowHotArea_;
 }
 
 Rect WindowNode::GetWindowRect() const
@@ -337,6 +342,11 @@ std::vector<DisplayId> WindowNode::GetShowingDisplays() const
 uint32_t WindowNode::GetModeSupportInfo() const
 {
     return property_->GetModeSupportInfo();
+}
+
+void WindowNode::GetTouchHotAreas(std::vector<Rect>& rects) const
+{
+    rects = touchHotAreas_;
 }
 } // namespace Rosen
 } // namespace OHOS
