@@ -43,6 +43,7 @@ ohos_shared_library("libwindow_extension") {
 
   deps = [
     "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
+    "//foundation/ability/ability_runtime/frameworks/kits/appkit:app_context",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/interfaces/kits/napi/window_runtime:window_native_kit",
     "//foundation/windowmanager/utils:libwmutil",
