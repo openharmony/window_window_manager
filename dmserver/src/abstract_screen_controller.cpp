@@ -624,6 +624,25 @@ bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation new
     }
 
     Rotation rotationAfter = screen->CalcRotation(newOrientation);
+    SetRotation(screenId, rotationAfter, false);
+    if (!screen->SetOrientation(newOrientation)) {
+        WLOGE("fail to set rotation, screen %{public}" PRIu64"", screenId);
+        return false;
+    }
+    screen->rotation_ = rotationAfter;
+
+    // Notify rotation event to ScreenManager
+    NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ORIENTATION);
+    // Notify rotation event to AbstractDisplayController
+    if (abstractScreenCallback_ != nullptr) {
+        abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::UPDATE_ORIENTATION);
+    }
+    return true;
+}
+
+bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow)
+{
+    auto screen = GetAbstractScreen(screenId);
     if (rotationAfter != screen->rotation_) {
         WLOGI("set orientation. roatiton %{public}u", rotationAfter);
         ScreenId rsScreenId;
@@ -635,20 +654,17 @@ bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation new
             WLOGE("rotate screen fail. rsScreenId: %{public}" PRIu64"", rsScreenId);
             return false;
         }
+        screen->rotation_ = rotationAfter;
     } else {
         WLOGI("rotation not changed. screen %{public}" PRIu64" rotation %{public}u", screenId, rotationAfter);
     }
-    if (!screen->SetOrientation(newOrientation)) {
-        WLOGE("fail to set orientation, screen %{public}" PRIu64"", screenId);
-        return false;
-    }
-    screen->rotation_ = rotationAfter;
 
-    // Notify rotation event to ScreenManager
-    NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ORIENTATION);
-    // Notify rotation event to AbstractDisplayController
-    if (abstractScreenCallback_ != nullptr) {
-        abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::UPDATE_ORIENTATION);
+    if (isFromWindow) {
+        NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+        // Notify rotation event to AbstractDisplayController
+        if (abstractScreenCallback_ != nullptr) {
+            abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::UPDATE_ROTATION);
+        }
     }
     return true;
 }

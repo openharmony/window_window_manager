@@ -95,6 +95,7 @@ public:
 
 enum class ScreenChangeEvent : uint32_t {
     UPDATE_ORIENTATION,
+    UPDATE_ROTATION,
     CHANGE_MODE,
 };
 
@@ -121,11 +122,16 @@ enum class Orientation : uint32_t {
     SENSOR = 5,
     SENSOR_VERTICAL = 6,
     SENSOR_HORIZONTAL = 7,
-    END = SENSOR_HORIZONTAL,
+    AUTO_ROTATION_RESTRICTED = 8,
+    AUTO_ROTATION_PORTRAIT_RESTRICTED = 9,
+    AUTO_ROTATION_LANDSCAPE_RESTRICTED = 10,
+    LOCKED = 11,
+    END = LOCKED,
 };
 
 enum class DisplayChangeEvent : uint32_t {
     UPDATE_ORIENTATION,
+    UPDATE_ROTATION,
     DISPLAY_SIZE_CHANGED,
     DISPLAY_FREEZED,
     DISPLAY_UNFREEZED,
