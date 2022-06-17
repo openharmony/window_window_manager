@@ -33,11 +33,9 @@ void InputTransferStationTest::TearDownTestCase()
 
 void InputTransferStationTest::SetUp()
 {
-    std::unique_ptr<WindowMocker> m = std::make_unique<WindowMocker>();
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("inputwindow");
     window_ = new WindowImpl(option);
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     window_->Create("");
 }
 
