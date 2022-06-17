@@ -211,7 +211,7 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info)
     AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsWindowListener::OnOutsidePressed()
+void JsWindowListener::OnTouchOutside()
 {
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [self = wptr<JsWindowListener>(this)] (NativeEngine &engine, AsyncTask &task, int32_t status) {
@@ -220,7 +220,7 @@ void JsWindowListener::OnOutsidePressed()
                 WLOGFE("[NAPI]this listener is nullptr");
                 return;
             }
-            thisListener->CallJsMethod(OUTSIDE_PRESSED_CB.c_str(), nullptr, 0);
+            thisListener->CallJsMethod(TOUCH_OUTSIDE_CB.c_str(), nullptr, 0);
         }
     );
 

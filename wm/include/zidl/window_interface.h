@@ -53,7 +53,7 @@ public:
     virtual void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) = 0;
     virtual void UpdateActiveStatus(bool isActive) = 0;
     virtual sptr<WindowProperty> GetWindowProperty() = 0;
-    virtual void NotifyOutsidePressed() = 0;
+    virtual void NotifyTouchOutside() = 0;
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 };
 } // namespace Rosen
