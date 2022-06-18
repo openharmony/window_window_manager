@@ -15,10 +15,13 @@
 
 #include "window_controller.h"
 #include <ability_manager_client.h>
+#include <chrono>
+#include <hisysevent.h>
 #include <parameters.h>
 #include <power_mgr_client.h>
 #include <rs_window_animation_finished_callback.h>
 #include <transaction/rs_transaction.h>
+#include <sstream>
 
 #include "minimize_app.h"
 #include "remote_animation.h"
@@ -512,8 +515,26 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
 void WindowController::StopBootAnimationIfNeed(WindowType type) const
 {
     if (WindowType::WINDOW_TYPE_DESKTOP == type) {
-        WLOGFD("stop boot animation");
+        WLOGFI("stop boot animation");
         system::SetParameter("persist.window.boot.inited", "1");
+        RecordBootAnimationEvent();
+    }
+}
+
+void WindowController::RecordBootAnimationEvent() const
+{
+    uint64_t time = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::steady_clock::now()).
+        time_since_epoch().count();
+    WLOGFI("boot animation done duration(s): %{public}" PRIu64"", static_cast<uint64_t>(time));
+    std::ostringstream os;
+    os << "boot animation done duration(s): " << time <<";";
+    int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_BOOT_ANIMATION_DONE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "MSG", os.str());
+    if (ret != 0) {
+        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
     }
 }
 
