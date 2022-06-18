@@ -21,6 +21,13 @@
 
 namespace OHOS {
 namespace Rosen {
+enum class LifeCycleEvent : uint32_t {
+    CREATE_EVENT,
+    SHOW_EVENT,
+    HIDE_EVENT,
+    DESTROY_EVENT,
+};
+
 enum class WindowState : uint32_t {
     STATE_INITIAL,
     STATE_CREATED,
