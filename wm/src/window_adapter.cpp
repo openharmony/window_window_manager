@@ -245,11 +245,10 @@ WMError WindowAdapter::SetWindowLayoutMode(WindowLayoutMode mode)
     return windowManagerServiceProxy_->SetWindowLayoutMode(mode);
 }
 
-WMError WindowAdapter::UpdateProperty(sptr<WindowProperty>& windowProperty,
-    PropertyChangeAction action, uint64_t dirtyState)
+WMError WindowAdapter::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    return windowManagerServiceProxy_->UpdateProperty(windowProperty, action, dirtyState);
+    return windowManagerServiceProxy_->UpdateProperty(windowProperty, action);
 }
 
 WMError WindowAdapter::NotifyWindowTransition(sptr<WindowTransitionInfo> from, sptr<WindowTransitionInfo> to)
