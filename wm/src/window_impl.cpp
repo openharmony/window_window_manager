@@ -620,51 +620,7 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
 
 WMError WindowImpl::UpdateProperty(PropertyChangeAction action)
 {
-    uint64_t dirtyState = 0;
-    dirtyState |= WindowProperty::WPRS_WindowId;
-    switch (action) {
-        case PropertyChangeAction::ACTION_UPDATE_RECT:
-            dirtyState |= WindowProperty::WPRS_DecoStatus | WindowProperty::WPRS_DragType |
-                        WindowProperty::WPRS_OriginRect | WindowProperty::WPRS_RequestRect |
-                        WindowProperty::WPRS_WindowSizeChangeReason;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_MODE:
-            dirtyState |= WindowProperty::WPRS_Mode;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_FLAGS:
-            dirtyState |= WindowProperty::WPRS_Flags;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS:
-            dirtyState |= WindowProperty::WPRS_SysBarPropMap;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_FOCUSABLE:
-            dirtyState |= WindowProperty::WPRS_Focusable;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_TOUCHABLE:
-            dirtyState |= WindowProperty::WPRS_Touchable;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW:
-            dirtyState |= WindowProperty::WPRS_CallingWindow;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_ORIENTATION:
-            dirtyState |= WindowProperty::WPRS_RequestedOrientation;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
-            dirtyState |= WindowProperty::WPRS_TurnScreenOn;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
-            dirtyState |= WindowProperty::WPRS_KeepScreenOn;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
-            dirtyState |= WindowProperty::WPRS_Brightness;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
-            dirtyState |= WindowProperty::WPRS_ModeSupportInfo;
-            break;
-        default:
-            break;
-    }
-    return SingletonContainer::Get<WindowAdapter>().UpdateProperty(property_, action, dirtyState);
+    return SingletonContainer::Get<WindowAdapter>().UpdateProperty(property_, action);
 }
 
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)

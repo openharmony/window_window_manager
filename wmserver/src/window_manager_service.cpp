@@ -564,8 +564,7 @@ WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
     }).get();
 }
 
-WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty,
-    PropertyChangeAction action, uint64_t dirtyState)
+WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action)
 {
     if (windowProperty == nullptr) {
         WLOGFE("property is invalid");
