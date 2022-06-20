@@ -275,6 +275,8 @@ private:
     WMError Destroy(bool needNotifyServer);
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
+    void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError errCode) const;
+    std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     Rect GetSystemAlarmWindowDefaultSize(Rect defaultRect);
     void HandleModeChangeHotZones(int32_t posX, int32_t posY);
     WMError NotifyWindowTransition(TransitionReason reason);

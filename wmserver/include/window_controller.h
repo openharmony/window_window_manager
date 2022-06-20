@@ -71,6 +71,7 @@ private:
     void ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     void StopBootAnimationIfNeed(WindowType type) const;
+    void RecordBootAnimationEvent() const;
     WMError SetWindowType(uint32_t windowId, WindowType type);
     WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
