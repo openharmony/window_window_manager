@@ -104,7 +104,7 @@ void JsScreenListener::OnConnect(ScreenId id)
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(
+    AsyncTask::Schedule("JsScreenListener::OnConnect", *engine_, std::make_unique<AsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
 
@@ -130,7 +130,7 @@ void JsScreenListener::OnDisconnect(ScreenId id)
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(
+    AsyncTask::Schedule("JsScreenListener::OnDisconnect", *engine_, std::make_unique<AsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
 
@@ -156,7 +156,7 @@ void JsScreenListener::OnChange(ScreenId id)
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(
+    AsyncTask::Schedule("JsScreenListener::OnChange", *engine_, std::make_unique<AsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
 

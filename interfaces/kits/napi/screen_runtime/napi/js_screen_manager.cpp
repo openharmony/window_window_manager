@@ -121,7 +121,7 @@ NativeValue* OnGetAllScreens(NativeEngine& engine, NativeCallbackInfo& info)
         lastParam = info.argv[ARGC_ONE - 1];
     }
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsScreenManager::OnGetAllScreens",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -337,7 +337,7 @@ NativeValue* OnMakeMirror(NativeEngine& engine, NativeCallbackInfo& info)
         lastParam = info.argv[ARGC_THREE - 1];
     }
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsScreenManager::OnMakeMirror",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -385,7 +385,7 @@ NativeValue* OnMakeExpand(NativeEngine& engine, NativeCallbackInfo& info)
         lastParam = info.argv[ARGC_TWO - 1];
     }
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsScreenManager::OnMakeExpand",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -456,7 +456,7 @@ NativeValue* OnCreateVirtualScreen(NativeEngine& engine, NativeCallbackInfo& inf
         lastParam = info.argv[ARGC_TWO - 1];
     }
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsScreenManager::OnCreateVirtualScreen",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -555,7 +555,7 @@ NativeValue* OnDestroyVirtualScreen(NativeEngine& engine, NativeCallbackInfo& in
         lastParam = info.argv[ARGC_TWO - 1];
     }
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsScreenManager::OnDestroyVirtualScreen",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -603,7 +603,7 @@ NativeValue* OnSetVirtualScreenSurface(NativeEngine& engine, NativeCallbackInfo&
         lastParam = info.argv[ARGC_THREE - 1];
     }
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsScreenManager::OnSetVirtualScreenSurface",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
