@@ -1041,10 +1041,7 @@ WMError WindowImpl::SetCallingWindow(uint32_t windowId)
 
 void WindowImpl::RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError errCode) const
 {
-    if (!(errCode == WMError::WM_ERROR_NULLPTR || errCode == WMError::WM_ERROR_INVALID_TYPE ||
-        errCode == WMError::WM_ERROR_INVALID_PARAM || errCode == WMError::WM_ERROR_SAMGR ||
-        errCode == WMError::WM_ERROR_IPC_FAILED)) {
-        WLOGFI("do not record, %{public}u", static_cast<uint32_t>(errCode));
+    if (!(errCode > WMError::WM_ERROR_NEED_REPORT_BASE && errCode < WMError::WM_ERROR_NEED_REPORT_END)) {
         return;
     }
     std::ostringstream oss;
