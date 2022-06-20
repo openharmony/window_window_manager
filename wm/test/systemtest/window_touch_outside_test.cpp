@@ -29,35 +29,35 @@ namespace Rosen {
 using utils = WindowTestUtils;
 const int WAIT_CALLBACK_US = 10000;  // 10000 us
 
-class WindowOutsidePressedTestListener : public IOutsidePressedListener {
+class WindowTouchOutsideTestListener : public ITouchOutsideListener {
 public:
-    void OnOutsidePressed() override
+    void OnTouchOutside() override
     {
-        isOutsidePressed_ = true;
+        isTouchOutside_ = true;
     }
-    bool isOutsidePressed_ { false };
+    bool isTouchOutside_ { false };
 };
 
-class WindowOutsidePressedTest : public testing::Test {
+class WindowTouchOutsideTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
 
-    static sptr<WindowOutsidePressedTestListener> windowlistener1_;
-    static sptr<WindowOutsidePressedTestListener> windowlistener2_;
+    static sptr<WindowTouchOutsideTestListener> windowlistener1_;
+    static sptr<WindowTouchOutsideTestListener> windowlistener2_;
     utils::TestWindowInfo firstWindowInfo_;
     utils::TestWindowInfo secondWindowInfo_;
     utils::TestWindowInfo thirdWindowInfo_;
 };
 
-sptr<WindowOutsidePressedTestListener> WindowOutsidePressedTest::windowlistener1_ =
-    new WindowOutsidePressedTestListener();
-sptr<WindowOutsidePressedTestListener> WindowOutsidePressedTest::windowlistener2_ =
-    new WindowOutsidePressedTestListener();
+sptr<WindowTouchOutsideTestListener> WindowTouchOutsideTest::windowlistener1_ =
+    new WindowTouchOutsideTestListener();
+sptr<WindowTouchOutsideTestListener> WindowTouchOutsideTest::windowlistener2_ =
+    new WindowTouchOutsideTestListener();
 
-void WindowOutsidePressedTest::SetUp()
+void WindowTouchOutsideTest::SetUp()
 {
         firstWindowInfo_ = {
         .name = "firstWindow",
@@ -90,93 +90,93 @@ void WindowOutsidePressedTest::SetUp()
     };
 }
 
-void WindowOutsidePressedTest::TearDown()
+void WindowTouchOutsideTest::TearDown()
 {
-    windowlistener1_->isOutsidePressed_ = false;
-    windowlistener2_->isOutsidePressed_ = false;
+    windowlistener1_->isTouchOutside_ = false;
+    windowlistener2_->isTouchOutside_ = false;
 }
 
-void WindowOutsidePressedTest::SetUpTestCase()
+void WindowTouchOutsideTest::SetUpTestCase()
 {
 }
 
-void WindowOutsidePressedTest::TearDownTestCase()
+void WindowTouchOutsideTest::TearDownTestCase()
 {
 }
 
 namespace {
 /**
- * @tc.name: onIutsidePressed
- * @tc.desc: can't not receive a insidepress event
+ * @tc.name: onTouchIutside
+ * @tc.desc: can't not receive a inside touch event
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOutsidePressedTest, onIutsidePressed, Function | MediumTest | Level3)
+HWTEST_F(WindowTouchOutsideTest, onTouchIutside, Function | MediumTest | Level3)
 {
     const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
-    firstWindow->RegisterOutsidePressedListener(windowlistener1_);
+    firstWindow->RegisterTouchOutsideListener(windowlistener1_);
     firstWindow->Show();
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(firstWindow->GetWindowId());
     usleep(WAIT_CALLBACK_US);
-    ASSERT_TRUE(!windowlistener1_->isOutsidePressed_);
+    ASSERT_TRUE(!windowlistener1_->isTouchOutside_);
     firstWindow->Destroy();
 }
 
 /**
- * @tc.name: onOutsidePressed
- * @tc.desc: received an outside pressed event when window state is show
+ * @tc.name: onTouchOutside
+ * @tc.desc: received an outside touch event when window state is show
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOutsidePressedTest, onOutsidePressed, Function | MediumTest | Level3)
+HWTEST_F(WindowTouchOutsideTest, onTouchOutside, Function | MediumTest | Level3)
 {
     const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
-    firstWindow->RegisterOutsidePressedListener(windowlistener1_);
+    firstWindow->RegisterTouchOutsideListener(windowlistener1_);
     const sptr<Window> &secondWindow = utils::CreateTestWindow(secondWindowInfo_);
     firstWindow->Show();
     secondWindow->Show();
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(secondWindow->GetWindowId());
     usleep(WAIT_CALLBACK_US);
-    ASSERT_TRUE(windowlistener1_->isOutsidePressed_);
+    ASSERT_TRUE(windowlistener1_->isTouchOutside_);
     firstWindow->Destroy();
     secondWindow->Destroy();
 }
 
 /**
- * @tc.name: onOutsidePressedNotShow
- * @tc.desc: If the window is not in the show state, the outpress event cannot be received
+ * @tc.name: onTouchOutsideNotShow
+ * @tc.desc: If the window is not in the show state, the touch outside event cannot be received
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOutsidePressedTest, onOutsidePressedNotShow, Function | MediumTest | Level3)
+HWTEST_F(WindowTouchOutsideTest, onTouchOutsideNotShow, Function | MediumTest | Level3)
 {
     const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
-    firstWindow->RegisterOutsidePressedListener(windowlistener1_);
+    firstWindow->RegisterTouchOutsideListener(windowlistener1_);
     const sptr<Window> &secondWindow = utils::CreateTestWindow(secondWindowInfo_);
     secondWindow->Show();
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(secondWindow->GetWindowId());
     usleep(WAIT_CALLBACK_US);
-    ASSERT_TRUE(!windowlistener1_->isOutsidePressed_);
+    ASSERT_TRUE(!windowlistener1_->isTouchOutside_);
     firstWindow->Destroy();
     secondWindow->Destroy();
 }
 
 /**
- * @tc.name: onOutsidePressedForAllWindow
- * @tc.desc: All windows can receive the outpress event
+ * @tc.name: onTouchOutsideForAllWindow
+ * @tc.desc: All windows can receive the touch outside event
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOutsidePressedTest, onOutsidePressedForAllWindow, Function | MediumTest | Level3)
+HWTEST_F(WindowTouchOutsideTest, onTouchOutsideForAllWindow, Function | MediumTest | Level3)
 {
     const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
-    firstWindow->RegisterOutsidePressedListener(windowlistener1_);
+    firstWindow->RegisterTouchOutsideListener(windowlistener1_);
     const sptr<Window> &secondWindow = utils::CreateTestWindow(secondWindowInfo_);
-    firstWindow->RegisterOutsidePressedListener(windowlistener2_);
+    firstWindow->RegisterTouchOutsideListener(windowlistener2_);
     firstWindow->Show();
     secondWindow->Show();
     const sptr<Window> &thirdWindow = utils::CreateTestWindow(thirdWindowInfo_);
     thirdWindow->Show();
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(thirdWindow->GetWindowId());
     usleep(WAIT_CALLBACK_US);
-    ASSERT_TRUE(windowlistener1_->isOutsidePressed_);
-    ASSERT_TRUE(windowlistener2_->isOutsidePressed_);
+    ASSERT_TRUE(windowlistener1_->isTouchOutside_);
+    ASSERT_TRUE(windowlistener2_->isTouchOutside_);
     firstWindow->Destroy();
     secondWindow->Destroy();
     thirdWindow->Destroy();
