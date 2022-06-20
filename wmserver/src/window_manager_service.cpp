@@ -399,7 +399,6 @@ WMError WindowManagerService::RequestFocus(uint32_t windowId)
 {
     return wmsTaskLooper_->ScheduleTask([this, windowId]() {
         WLOGFI("[WMS] RequestFocus: %{public}u", windowId);
-        WM_SCOPED_TRACE("wms:RequestFocus");
         return windowController_->RequestFocus(windowId);
     }).get();
 }
@@ -407,7 +406,6 @@ WMError WindowManagerService::RequestFocus(uint32_t windowId)
 WMError WindowManagerService::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level)
 {
     return wmsTaskLooper_->ScheduleTask([this, windowId, level]() {
-        WM_SCOPED_TRACE("wms:SetWindowBackgroundBlur");
         return windowController_->SetWindowBackgroundBlur(windowId, level);
     }).get();
 }
@@ -415,7 +413,6 @@ WMError WindowManagerService::SetWindowBackgroundBlur(uint32_t windowId, WindowB
 WMError WindowManagerService::SetAlpha(uint32_t windowId, float alpha)
 {
     return wmsTaskLooper_->ScheduleTask([this, windowId, alpha]() {
-        WM_SCOPED_TRACE("wms:SetAlpha");
         return windowController_->SetAlpha(windowId, alpha);
     }).get();
 }
@@ -529,6 +526,7 @@ void WindowManagerService::ProcessPointUp(uint32_t windowId)
 void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
 {
     return wmsTaskLooper_->PostTask([this, displayId]() {
+        WM_SCOPED_TRACE("wms:MinimizeAllAppWindows(%" PRIu64")", displayId);
         WLOGFI("displayId %{public}" PRIu64"", displayId);
         windowController_->MinimizeAllAppWindows(displayId);
     });
@@ -554,7 +552,6 @@ WMError WindowManagerService::MaxmizeWindow(uint32_t windowId)
 WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
     return wmsTaskLooper_->ScheduleTask([this, &topWinId, mainWinId]() {
-        WM_SCOPED_TRACE("wms:GetTopWindowId(%u)", mainWinId);
         return windowController_->GetTopWindowId(mainWinId, topWinId);
     }).get();
 }

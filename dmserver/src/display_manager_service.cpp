@@ -189,8 +189,6 @@ DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<S
 {
     WLOGFI("SetVirtualScreenSurface::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:SetVirtualScreenSurface(%" PRIu64")", screenId);
     return abstractScreenController_->SetVirtualScreenSurface(screenId, surface);
 }
 
@@ -233,9 +231,6 @@ DMError DisplayManagerService::GetScreenSupportedColorGamuts(ScreenId screenId,
 {
     WLOGFI("GetScreenSupportedColorGamuts::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:GetScreenSupportedColorGamuts(%" PRIu64")", screenId);
-
     return abstractScreenController_->GetScreenSupportedColorGamuts(screenId, colorGamuts);
 }
 
@@ -243,9 +238,6 @@ DMError DisplayManagerService::GetScreenColorGamut(ScreenId screenId, ScreenColo
 {
     WLOGFI("GetScreenColorGamut::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:GetScreenColorGamut(%" PRIu64")", screenId);
-
     return abstractScreenController_->GetScreenColorGamut(screenId, colorGamut);
 }
 
@@ -253,9 +245,6 @@ DMError DisplayManagerService::SetScreenColorGamut(ScreenId screenId, int32_t co
 {
     WLOGFI("SetScreenColorGamut::ScreenId: %{public}" PRIu64 ", colorGamutIdx %{public}d", screenId, colorGamutIdx);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:SetScreenColorGamut(%" PRIu64")", screenId);
-
     return abstractScreenController_->SetScreenColorGamut(screenId, colorGamutIdx);
 }
 
@@ -263,9 +252,6 @@ DMError DisplayManagerService::GetScreenGamutMap(ScreenId screenId, ScreenGamutM
 {
     WLOGFI("GetScreenGamutMap::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:GetScreenGamutMap(%" PRIu64")", screenId);
-
     return abstractScreenController_->GetScreenGamutMap(screenId, gamutMap);
 }
 
@@ -274,9 +260,6 @@ DMError DisplayManagerService::SetScreenGamutMap(ScreenId screenId, ScreenGamutM
     WLOGFI("SetScreenGamutMap::ScreenId: %{public}" PRIu64 ", ScreenGamutMap %{public}u",
         screenId, static_cast<uint32_t>(gamutMap));
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:SetScreenGamutMap(%" PRIu64")", screenId);
-
     return abstractScreenController_->SetScreenGamutMap(screenId, gamutMap);
 }
 
@@ -284,9 +267,6 @@ DMError DisplayManagerService::SetScreenColorTransform(ScreenId screenId)
 {
     WLOGFI("SetScreenColorTransform::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:SetScreenColorTransform(%" PRIu64")", screenId);
-
     return abstractScreenController_->SetScreenColorTransform(screenId);
 }
 

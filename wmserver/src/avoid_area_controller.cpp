@@ -83,7 +83,6 @@ AvoidPosType AvoidAreaController::GetAvoidPosType(const Rect& rect, DisplayId di
 
 WMError AvoidAreaController::AvoidControl(const sptr<WindowNode>& node, AvoidControlType type)
 {
-    WM_FUNCTION_TRACE();
     if (!IsAvoidAreaNode(node)) {
         WLOGFE("AvoidControl check param Failed. Type: %{public}u", type);
         return WMError::WM_ERROR_INVALID_PARAM;
