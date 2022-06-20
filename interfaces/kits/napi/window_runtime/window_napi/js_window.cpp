@@ -349,7 +349,7 @@ NativeValue* JsWindow::OnDestroy(NativeEngine& engine, NativeCallbackInfo& info)
     }
     wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
-        [weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [this, weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr || errCode != WMError::WM_OK) {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
@@ -363,7 +363,7 @@ NativeValue* JsWindow::OnDestroy(NativeEngine& engine, NativeCallbackInfo& info)
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window destroy failed"));
                 return;
             }
-
+            windowToken_ = nullptr; // ensure window dtor when finalizer invalid
             task.Resolve(engine, engine.CreateUndefined());
         };
 
