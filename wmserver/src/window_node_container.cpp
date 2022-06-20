@@ -436,7 +436,9 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId display
         // default transition curve: EASE OUT
         static const Rosen::RSAnimationTimingCurve curve = Rosen::RSAnimationTimingCurve::EASE_OUT;
         // add window with transition animation
+        WM_SCOPED_TRACE_BEGIN("Animate(%u)", node->GetWindowId());
         RSNode::Animate(timingProtocol, curve, updateRSTreeFunc);
+        WM_SCOPED_TRACE_END();
     } else {
         // add or remove window without animation
         WLOGFI("add or remove window without animation");
@@ -696,6 +698,7 @@ void WindowNodeContainer::HandleKeepScreenOn(const sptr<WindowNode>& node, bool 
         return;
     }
     WLOGFI("handle keep screen on: [%{public}s, %{public}d]", node->GetWindowName().c_str(), requireLock);
+    WM_SCOPED_TRACE("container:HandleKeepScreenOn(%s, %d)", node->GetWindowName().c_str(), requireLock);
     ErrCode res;
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
