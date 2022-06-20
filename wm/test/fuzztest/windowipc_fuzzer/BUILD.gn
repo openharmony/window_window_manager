@@ -35,10 +35,15 @@ ohos_fuzztest("WindowIPCFuzzTest") {
   ]
   sources = [ "windowipc_fuzzer.cpp" ]
   deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/animation/window_animation:window_animation",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/wm:libwm",
   ]
-  external_deps = [ "samgr_standard:samgr_proxy" ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "samgr_standard:samgr_proxy",
+  ]
 }
 
 ###############################################################################
