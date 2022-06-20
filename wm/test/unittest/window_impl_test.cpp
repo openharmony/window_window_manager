@@ -1327,6 +1327,50 @@ HWTEST_F(WindowImplTest, DisableAppWindowDecor01, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: SetTouchHotAreas01
+ * @tc.desc: create window with show, test SetTouchHotAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, SetTouchHotAreas01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetTouchHotAreas01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowImpl> window = new WindowImpl(option);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+
+    std::vector<Rect> requestedTouchHotAreas;
+    window->GetRequestedTouchHotAreas(requestedTouchHotAreas);
+    ASSERT_TRUE(requestedTouchHotAreas.empty());
+
+    std::vector<Rect> rects;
+    rects.emplace_back(Rect{ 0, 0, 720, 400 });
+    rects.emplace_back(Rect{ 0, 800, 720, 300 });
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->SetTouchHotAreas(rects));
+    window->GetRequestedTouchHotAreas(requestedTouchHotAreas);
+    ASSERT_EQ(rects.size(), requestedTouchHotAreas.size());
+    for (uint32_t i = 0; i < rects.size(); ++i) {
+        ASSERT_TRUE(rects[i] == requestedTouchHotAreas[i]);
+    }
+
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    rects.clear();
+    ASSERT_EQ(WMError::WM_OK, window->SetTouchHotAreas(rects));
+    window->GetRequestedTouchHotAreas(requestedTouchHotAreas);
+    ASSERT_TRUE(requestedTouchHotAreas.empty());
+
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
