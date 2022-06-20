@@ -25,47 +25,11 @@
 #include "dm_common.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
-#include "serialize_helper.h"
 
 namespace OHOS {
 namespace Rosen {
 class WindowProperty : public Parcelable {
 public:
-    enum WindowPropertyReplicationState : uint64_t {
-        WPRS_WindowName = 1 << 0,
-        WPRS_WindowRect = 1 << 1,
-        WPRS_RequestRect = 1 << 2,
-        WPRS_DecoStatus = 1 << 3,
-        WPRS_Type = 1 << 4,
-        WPRS_Mode = 1 << 5,
-        WPRS_LastMode = 1 << 6,
-        WPRS_Level = 1 << 7,
-        WPRS_Flags = 1 << 8,
-        WPRS_IsFullScreen = 1 << 9,
-        WPRS_Focusable = 1 << 10,
-        WPRS_Touchable = 1 << 11,
-        WPRS_IsPrivacyMode = 1 << 12,
-        WPRS_IsTransparent = 1 << 13,
-        WPRS_Alpha = 1 << 14,
-        WPRS_Brightness = 1 << 15,
-        WPRS_DisplayId = 1 << 16,
-        WPRS_WindowId = 1 << 17,
-        WPRS_ParentId = 1 << 18,
-        WPRS_SysBarPropMap = 1 << 19,
-        WPRS_IsDecorEnable = 1 << 20,
-        WPRS_HitOffset = 1 << 21,
-        WPRS_AnimationFlag = 1 << 22,
-        WPRS_WindowSizeChangeReason = 1 << 23,
-        WPRS_TokenState = 1 << 24,
-        WPRS_CallingWindow = 1 << 25,
-        WPRS_RequestedOrientation = 1 << 26,
-        WPRS_TurnScreenOn = 1 << 27,
-        WPRS_KeepScreenOn = 1 << 28,
-        WPRS_ModeSupportInfo = 1 << 29,
-        WPRS_DragType = 1 << 30,
-        WPRS_OriginRect = static_cast<uint64_t>(1) << 31,
-        WPRS_IsStretchable = static_cast<uint64_t>(1) << 32,
-    };
     WindowProperty() = default;
     WindowProperty(const sptr<WindowProperty>& property);
     ~WindowProperty() = default;
@@ -107,6 +71,7 @@ public:
     void SetDragType(DragType dragType);
     void SetStretchable(bool stretchable);
     void SetOriginRect(const Rect& rect);
+    void SetTouchHotAreas(const std::vector<Rect>& rects);
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
 
     const std::string& GetWindowName() const;
@@ -141,19 +106,18 @@ public:
     DragType GetDragType() const;
     bool GetStretchable() const;
     const Rect& GetOriginRect() const;
+    void GetTouchHotAreas(std::vector<Rect>& rects) const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
 
-    bool Write(Parcel& parcel, uint64_t inDirtyState);
-    void Read(Parcel& parcel);
+    bool Write(Parcel& parcel, PropertyChangeAction action);
+    void Read(Parcel& parcel, PropertyChangeAction action);
 private:
     bool MapMarshalling(Parcel& parcel) const;
     static void MapUnmarshalling(Parcel& parcel, WindowProperty* property);
-
-    bool WriteMemberVariable(Parcel& parcel, const MemberVariable& mv);
-    void ReadMemberVariable(Parcel& parcel, const MemberVariable& mv);
-    static const std::unordered_map<uint64_t, MemberVariable> dataTypeMap_;
+    bool MarshallingTouchHotAreas(Parcel& parcel) const;
+    static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowProperty* property);
 
     std::string windowName_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
@@ -190,6 +154,7 @@ private:
     Rect originRect_ = { 0, 0, 0, 0 };
     bool isStretchable_ {false};
     DragType dragType_ = DragType::DRAG_UNDEFINED;
+    std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
 };
 }

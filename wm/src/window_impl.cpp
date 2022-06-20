@@ -18,6 +18,8 @@
 #include <cmath>
 
 #include <ability_manager_client.h>
+#include <hisysevent.h>
+#include <sstream>
 
 #include "color_parser.h"
 #include "display_manager.h"
@@ -620,51 +622,7 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
 
 WMError WindowImpl::UpdateProperty(PropertyChangeAction action)
 {
-    uint64_t dirtyState = 0;
-    dirtyState |= WindowProperty::WPRS_WindowId;
-    switch (action) {
-        case PropertyChangeAction::ACTION_UPDATE_RECT:
-            dirtyState |= WindowProperty::WPRS_DecoStatus | WindowProperty::WPRS_DragType |
-                        WindowProperty::WPRS_OriginRect | WindowProperty::WPRS_RequestRect |
-                        WindowProperty::WPRS_WindowSizeChangeReason;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_MODE:
-            dirtyState |= WindowProperty::WPRS_Mode;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_FLAGS:
-            dirtyState |= WindowProperty::WPRS_Flags;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS:
-            dirtyState |= WindowProperty::WPRS_SysBarPropMap;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_FOCUSABLE:
-            dirtyState |= WindowProperty::WPRS_Focusable;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_TOUCHABLE:
-            dirtyState |= WindowProperty::WPRS_Touchable;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW:
-            dirtyState |= WindowProperty::WPRS_CallingWindow;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_ORIENTATION:
-            dirtyState |= WindowProperty::WPRS_RequestedOrientation;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
-            dirtyState |= WindowProperty::WPRS_TurnScreenOn;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
-            dirtyState |= WindowProperty::WPRS_KeepScreenOn;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
-            dirtyState |= WindowProperty::WPRS_Brightness;
-            break;
-        case PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
-            dirtyState |= WindowProperty::WPRS_ModeSupportInfo;
-            break;
-        default:
-            break;
-    }
-    return SingletonContainer::Get<WindowAdapter>().UpdateProperty(property_, action, dirtyState);
+    return SingletonContainer::Get<WindowAdapter>().UpdateProperty(property_, action);
 }
 
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
@@ -709,6 +667,7 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     }
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
         windowId, token);
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, ret);
     if (ret != WMError::WM_OK) {
         WLOGFE("create window failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return ret;
@@ -803,6 +762,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
             }
         }
         ret = SingletonContainer::Get<WindowAdapter>().DestroyWindow(property_->GetWindowId());
+        RecordLifeCycleExceptionEvent(LifeCycleEvent::DESTROY_EVENT, ret);
         if (ret != WMError::WM_OK) {
             WLOGFE("destroy window failed with errCode:%{public}d", static_cast<int32_t>(ret));
             return ret;
@@ -863,6 +823,7 @@ WMError WindowImpl::Show(uint32_t reason)
     }
     SetDefaultOption();
     WMError ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
@@ -890,6 +851,7 @@ WMError WindowImpl::Hide(uint32_t reason)
         return WMError::WM_OK;
     }
     WMError ret = SingletonContainer::Get<WindowAdapter>().RemoveWindow(property_->GetWindowId());
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, ret);
     if (ret != WMError::WM_OK) {
         WLOGFE("hide errCode:%{public}d for winId:%{public}u", static_cast<int32_t>(ret), property_->GetWindowId());
         return ret;
@@ -1075,6 +1037,52 @@ WMError WindowImpl::SetCallingWindow(uint32_t windowId)
     }
     property_->SetCallingWindow(windowId);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
+}
+
+void WindowImpl::RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError errCode) const
+{
+    if (!(errCode > WMError::WM_ERROR_NEED_REPORT_BASE && errCode < WMError::WM_ERROR_NEED_REPORT_END)) {
+        return;
+    }
+    std::ostringstream oss;
+    oss << "life cycle is abnormal: " << "window_name: " << name_
+        << ", id:" << GetWindowId() << ", event: " << TransferLifeCycleEventToString(event)
+        << ", errCode: " << static_cast<int32_t>(errCode) << ";";
+    std::string info = oss.str();
+    WLOGFI("window life cycle exception: %{public}s", info.c_str());
+    int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_LIFE_CYCLE_EXCEPTION",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", getpid(),
+        "UID", getuid(),
+        "MSG", info);
+    if (ret != 0) {
+        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+    }
+}
+
+std::string WindowImpl::TransferLifeCycleEventToString(LifeCycleEvent type) const
+{
+    std::string event;
+    switch (type) {
+        case LifeCycleEvent::CREATE_EVENT:
+            event = "CREATE";
+            break;
+        case LifeCycleEvent::SHOW_EVENT:
+            event = "SHOW";
+            break;
+        case LifeCycleEvent::HIDE_EVENT:
+            event = "HIDE";
+            break;
+        case LifeCycleEvent::DESTROY_EVENT:
+            event = "DESTROY";
+            break;
+        default:
+            event = "UNDEFINE";
+            break;
+    }
+    return event;
 }
 
 void WindowImpl::SetPrivacyMode(bool isPrivacyMode)
@@ -1405,27 +1413,27 @@ void WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaCh
         }), occupiedAreaChangeListeners_.end());
 }
 
-void WindowImpl::RegisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener)
+void WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (std::find(outsidePressedListeners_.begin(), outsidePressedListeners_.end(), listener) !=
-        outsidePressedListeners_.end()) {
+    if (std::find(touchOutsideListeners_.begin(), touchOutsideListeners_.end(), listener) !=
+        touchOutsideListeners_.end()) {
         WLOGFE("Listener already registered");
         return;
     }
-    outsidePressedListeners_.emplace_back(listener);
+    touchOutsideListeners_.emplace_back(listener);
 }
 
-void WindowImpl::UnregisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener)
+void WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    outsidePressedListeners_.erase(std::remove_if(outsidePressedListeners_.begin(),
-        outsidePressedListeners_.end(), [listener](sptr<IOutsidePressedListener> registeredListener) {
+    touchOutsideListeners_.erase(std::remove_if(touchOutsideListeners_.begin(),
+        touchOutsideListeners_.end(), [listener](sptr<ITouchOutsideListener> registeredListener) {
             return registeredListener == listener;
-        }), outsidePressedListeners_.end());
+        }), touchOutsideListeners_.end());
 }
 
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
@@ -2032,16 +2040,16 @@ void WindowImpl::UpdateActiveStatus(bool isActive)
     }
 }
 
-void WindowImpl::NotifyOutsidePressed()
+void WindowImpl::NotifyTouchOutside()
 {
-    std::vector<sptr<IOutsidePressedListener>> outsidePressListeners;
+    std::vector<sptr<ITouchOutsideListener>> touchOutsideListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
-        outsidePressListeners = outsidePressedListeners_;
+        touchOutsideListeners = touchOutsideListeners_;
     }
 
-    for (auto& outsidePressListener : outsidePressListeners) {
-        outsidePressListener->OnOutsidePressed();
+    for (auto& touchOutsideListener : touchOutsideListeners) {
+        touchOutsideListener->OnTouchOutside();
     }
 }
 
@@ -2164,6 +2172,16 @@ void WindowImpl::SetRequestedOrientation(Orientation orientation)
 Orientation WindowImpl::GetRequestedOrientation()
 {
     return property_->GetRequestedOrientation();
+}
+
+WMError WindowImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
+{
+    property_->SetTouchHotAreas(rects);
+    return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA);
+}
+void WindowImpl::GetRequestedTouchHotAreas(std::vector<Rect>& rects) const
+{
+    property_->GetTouchHotAreas(rects);
 }
 } // namespace Rosen
 } // namespace OHOS

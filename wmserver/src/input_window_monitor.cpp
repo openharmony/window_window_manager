@@ -15,8 +15,6 @@
 
 #include "input_window_monitor.h"
 
-#include <vector>
-
 #include <ipc_skeleton.h>
 
 #include "display_manager_service_inner.h"
@@ -27,6 +25,13 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InputWindowMonitor"};
+}
+static inline void convertRectsToMmiRects(const std::vector<Rect>& rects, std::vector<MMI::Rect>& mmiRects)
+{
+    for (const auto& rect : rects) {
+        mmiRects.emplace_back(
+            MMI::Rect{ rect.posX_, rect.posY_, static_cast<int32_t>(rect.width_), static_cast<int32_t>(rect.height_) });
+    }
 }
 
 void InputWindowMonitor::UpdateInputWindow(uint32_t windowId)
@@ -63,140 +68,105 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
         return;
     }
 
-    UpdatePhysicalDisplayInfo(displayInfo, displayId);
-    UpdateLogicalDisplayInfo(displayInfo, displayId);
+    UpdateDisplayGroupInfo(container, displayGroupInfo_);
+    UpdateDisplayInfo(displayInfo, displayGroupInfo_.displaysInfo);
     std::vector<sptr<WindowNode>> windowNodes;
     container->TraverseContainer(windowNodes);
-    auto iter = std::find_if(logicalDisplays_.begin(), logicalDisplays_.end(),
-                             [displayId](MMI::LogicalDisplayInfo& logicalDisplay) {
-        return logicalDisplay.id == static_cast<int32_t>(displayId);
-    });
-    if (iter != logicalDisplays_.end()) {
-        TraverseWindowNodes(windowNodes, iter);
-        if (!iter->windowsInfo.empty()) {
-            iter->focusWindowId = static_cast<int32_t>(container->GetFocusWindow());
-        }
-    } else {
-        WLOGFE("There is no display for this window action.");
-        return;
-    }
+    TraverseWindowNodes(windowNodes, displayGroupInfo_.windowsInfo);
     WLOGFI("update display info to IMS, displayId: %{public}" PRIu64"", displayId);
-    MMI::InputManager::GetInstance()->UpdateDisplayInfo(physicalDisplays_, logicalDisplays_);
+    MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo_);
 }
 
-void InputWindowMonitor::UpdatePhysicalDisplayInfo(const sptr<DisplayInfo>& displayInfo, DisplayId displayId)
+void InputWindowMonitor::UpdateDisplayGroupInfo(const sptr<WindowNodeContainer>& windowNodeContainer,
+                                                MMI::DisplayGroupInfo& displayGroupInfo)
 {
-    uint32_t physicalWidth = static_cast<uint32_t>(displayInfo->GetWidth());
-    uint32_t physicalHeight = static_cast<uint32_t>(displayInfo->GetHeight());
+    const Rect&& rect = windowNodeContainer->GetDisplayGroupRect();
+    displayGroupInfo.width = static_cast<int32_t>(rect.width_);
+    displayGroupInfo.height = static_cast<int32_t>(rect.height_);
+    displayGroupInfo.focusWindowId = static_cast<int32_t>(windowNodeContainer->GetFocusWindow());
+    displayGroupInfo.windowsInfo.clear();
+    displayGroupInfo.displaysInfo.clear();
+}
+
+void InputWindowMonitor::UpdateDisplayInfo(const sptr<DisplayInfo>& displayInfo,
+                                           std::vector<MMI::DisplayInfo>& displayInfoVector)
+{
+    uint32_t displayWidth = displayInfo->GetWidth();
+    uint32_t displayHeight = displayInfo->GetHeight();
     if (displayInfo->GetRotation() == Rotation::ROTATION_90 || displayInfo->GetRotation() == Rotation::ROTATION_270) {
-        std::swap(physicalWidth, physicalHeight);
+        std::swap(displayWidth, displayHeight);
     }
-
-    MMI::PhysicalDisplayInfo physicalDisplayInfo = {
-        .id = static_cast<int32_t>(displayId),
-        .leftDisplayId = static_cast<int32_t>(DISPLAY_ID_INVALID),
-        .upDisplayId = static_cast<int32_t>(DISPLAY_ID_INVALID),
-        .topLeftX = 0,
-        .topLeftY = 0,
-        .width = static_cast<int32_t>(physicalWidth),
-        .height = static_cast<int32_t>(physicalHeight),
-        .name = "physical_display0",
-        .seatId = "seat0",
-        .seatName = "default0",
-        .logicWidth = static_cast<int32_t>(physicalWidth),
-        .logicHeight = static_cast<int32_t>(physicalHeight),
+    MMI::DisplayInfo diplay = {
+        .id = static_cast<int32_t>(displayInfo->GetDisplayId()),
+        .x = displayInfo->GetOffsetX(),
+        .y = displayInfo->GetOffsetY(),
+        .width = static_cast<int32_t>(displayWidth),
+        .height = static_cast<int32_t>(displayHeight),
+        .name = (std::stringstream("display ")<<displayInfo->GetDisplayId()).str(),
+        .uniq = "default0",
+        .direction = GetDisplayDirectionForMmi(displayInfo->GetRotation()),
     };
-
-    UpdateDisplayDirection(physicalDisplayInfo, displayInfo);
-    auto physicalDisplayIter = std::find_if(physicalDisplays_.begin(), physicalDisplays_.end(),
-                                            [&physicalDisplayInfo](MMI::PhysicalDisplayInfo& physicalDisplay) {
-        return physicalDisplay.id == physicalDisplayInfo.id;
+    auto displayIter = std::find_if(displayInfoVector.begin(), displayInfoVector.end(),
+        [&diplay](MMI::DisplayInfo& displayInfoTmp) {
+        return displayInfoTmp.id == diplay.id;
     });
-    if (physicalDisplayIter != physicalDisplays_.end()) {
-        *physicalDisplayIter = physicalDisplayInfo;
+    if (displayIter != displayInfoVector.end()) {
+        *displayIter = diplay;
     } else {
-        physicalDisplays_.emplace_back(physicalDisplayInfo);
-    }
-}
-
-void InputWindowMonitor::UpdateLogicalDisplayInfo(const sptr<DisplayInfo>& displayInfo, DisplayId displayId)
-{
-    MMI::LogicalDisplayInfo logicalDisplayInfo = {
-        .id = static_cast<int32_t>(displayId),
-        .topLeftX = displayInfo->GetOffsetX(),
-        .topLeftY = displayInfo->GetOffsetY(),
-        .width = static_cast<int32_t>(displayInfo->GetWidth()),
-        .height = static_cast<int32_t>(displayInfo->GetHeight()),
-        .name = "logical_display0",
-        .seatId = "seat0",
-        .seatName = "default0",
-        .focusWindowId = INVALID_WINDOW_ID,
-        .windowsInfo = {},
-    };
-    auto logicalDisplayIter = std::find_if(logicalDisplays_.begin(), logicalDisplays_.end(),
-                                           [&logicalDisplayInfo](MMI::LogicalDisplayInfo& logicalDisplay) {
-        return logicalDisplay.id == logicalDisplayInfo.id;
-    });
-    if (logicalDisplayIter != logicalDisplays_.end()) {
-        *logicalDisplayIter = logicalDisplayInfo;
-    } else {
-        logicalDisplays_.emplace_back(logicalDisplayInfo);
+        displayInfoVector.emplace_back(diplay);
     }
 }
 
 void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>> &windowNodes,
-                                             std::vector<MMI::LogicalDisplayInfo>::iterator& iter)
+                                             std::vector<MMI::WindowInfo>& windowsInfo)
 {
-    iter->windowsInfo.clear();
-    for (auto& windowNode: windowNodes) {
+    for (const auto& windowNode: windowNodes) {
         if (windowTypeSkipped_.find(windowNode->GetWindowProperty()->GetWindowType()) != windowTypeSkipped_.end()) {
             WLOGFI("window has been skipped. [id: %{public}u, type: %{public}d]", windowNode->GetWindowId(),
                    windowNode->GetWindowProperty()->GetWindowType());
             continue;
         }
-        Rect hotZone = windowNode->GetHotZoneRect();
-
+        std::vector<Rect> touchHotAreas;
+        windowNode->GetTouchHotAreas(touchHotAreas);
+        Rect windowRect = windowNode->GetWindowRect();
         MMI::WindowInfo windowInfo = {
             .id = static_cast<int32_t>(windowNode->GetWindowId()),
             .pid = windowNode->GetCallingPid(),
             .uid = windowNode->GetCallingUid(),
-            .hotZoneTopLeftX = hotZone.posX_,
-            .hotZoneTopLeftY = hotZone.posY_,
-            .hotZoneWidth = static_cast<int32_t>(hotZone.width_),
-            .hotZoneHeight = static_cast<int32_t>(hotZone.height_),
-            .winTopLeftX = windowNode->GetWindowRect().posX_,
-            .winTopLeftY = windowNode->GetWindowRect().posY_,
-            .displayId = static_cast<int32_t>(windowNode->GetDisplayId()),
+            .area = MMI::Rect{ windowRect.posX_, windowRect.posY_,
+                static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) },
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };
+        convertRectsToMmiRects(touchHotAreas, windowInfo.defaultHotAreas);
+        convertRectsToMmiRects(touchHotAreas, windowInfo.pointerHotAreas);
         if (!windowNode->GetWindowProperty()->GetTouchable()) {
             WLOGFI("window is not touchable: %{public}u", windowNode->GetWindowId());
             windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
         }
-        iter->windowsInfo.emplace_back(windowInfo);
+        windowsInfo.emplace_back(windowInfo);
     }
 }
 
-void InputWindowMonitor::UpdateDisplayDirection(MMI::PhysicalDisplayInfo& physicalDisplayInfo,
-    const sptr<DisplayInfo>& displayInfo)
+MMI::Direction InputWindowMonitor::GetDisplayDirectionForMmi(Rotation rotation)
 {
-    Rotation rotation = displayInfo->GetRotation();
+    MMI::Direction direction = MMI::Direction0;
     switch (rotation) {
         case Rotation::ROTATION_0:
-            physicalDisplayInfo.direction = MMI::Direction0;
+            direction = MMI::Direction0;
             break;
         case Rotation::ROTATION_90:
-            physicalDisplayInfo.direction = MMI::Direction90;
+            direction = MMI::Direction90;
             break;
         case Rotation::ROTATION_180:
-            physicalDisplayInfo.direction = MMI::Direction180;
+            direction = MMI::Direction180;
             break;
         case Rotation::ROTATION_270:
-            physicalDisplayInfo.direction = MMI::Direction270;
+            direction = MMI::Direction270;
             break;
         default:
             break;
     }
+    return direction;
 }
 }
 }

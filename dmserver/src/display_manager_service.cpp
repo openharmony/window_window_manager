@@ -24,6 +24,7 @@
 #include "display_manager_config.h"
 #include "dm_common.h"
 #include "permission.h"
+#include "screen_rotation_controller.h"
 #include "transaction/rs_interfaces.h"
 #include "window_manager_hilog.h"
 #include "wm_trace.h"
@@ -107,6 +108,10 @@ void DisplayManagerService::ConfigureDisplayManagerService()
         float virtualPixelRatio = static_cast<float>(densityDpi) / BASELINE_DENSITY;
         DisplayManagerService::customVirtualPixelRatio_ = virtualPixelRatio;
     }
+    if (numbersConfig.count("defaultDeviceRotationOffset") != 0) {
+        uint32_t defaultDeviceRotationOffset = static_cast<uint32_t>(numbersConfig["defaultDeviceRotationOffset"][0]);
+        ScreenRotationController::SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset);
+    }
 }
 
 void DisplayManagerService::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
@@ -164,8 +169,6 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
     ScreenId screenId = abstractScreenController_->CreateVirtualScreen(option, displayManagerAgent);
     CHECK_SCREEN_AND_RETURN(SCREEN_ID_INVALID);
     accessTokenIdMaps_[screenId] = IPCSkeleton::GetCallingTokenID();
-    WLOGFI("DumpScreenInfo after Create VirtualScreen");
-    abstractScreenController_->DumpScreenInfo();
     return screenId;
 }
 
@@ -186,8 +189,6 @@ DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<S
 {
     WLOGFI("SetVirtualScreenSurface::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:SetVirtualScreenSurface(%" PRIu64")", screenId);
     return abstractScreenController_->SetVirtualScreenSurface(screenId, surface);
 }
 
@@ -201,6 +202,12 @@ bool DisplayManagerService::SetOrientationFromWindow(ScreenId screenId, Orientat
 {
     WM_SCOPED_TRACE("dms:SetOrientationFromWindow(%" PRIu64")", screenId);
     return abstractScreenController_->SetOrientation(screenId, orientation, true);
+}
+
+bool DisplayManagerService::SetRotationFromWindow(ScreenId screenId, Rotation targetRotation)
+{
+    WM_SCOPED_TRACE("dms:SetRotationFromWindow(%" PRIu64")", screenId);
+    return abstractScreenController_->SetRotation(screenId, targetRotation, true);
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId)
@@ -224,9 +231,6 @@ DMError DisplayManagerService::GetScreenSupportedColorGamuts(ScreenId screenId,
 {
     WLOGFI("GetScreenSupportedColorGamuts::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:GetScreenSupportedColorGamuts(%" PRIu64")", screenId);
-
     return abstractScreenController_->GetScreenSupportedColorGamuts(screenId, colorGamuts);
 }
 
@@ -234,9 +238,6 @@ DMError DisplayManagerService::GetScreenColorGamut(ScreenId screenId, ScreenColo
 {
     WLOGFI("GetScreenColorGamut::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:GetScreenColorGamut(%" PRIu64")", screenId);
-
     return abstractScreenController_->GetScreenColorGamut(screenId, colorGamut);
 }
 
@@ -244,9 +245,6 @@ DMError DisplayManagerService::SetScreenColorGamut(ScreenId screenId, int32_t co
 {
     WLOGFI("SetScreenColorGamut::ScreenId: %{public}" PRIu64 ", colorGamutIdx %{public}d", screenId, colorGamutIdx);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:SetScreenColorGamut(%" PRIu64")", screenId);
-
     return abstractScreenController_->SetScreenColorGamut(screenId, colorGamutIdx);
 }
 
@@ -254,9 +252,6 @@ DMError DisplayManagerService::GetScreenGamutMap(ScreenId screenId, ScreenGamutM
 {
     WLOGFI("GetScreenGamutMap::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:GetScreenGamutMap(%" PRIu64")", screenId);
-
     return abstractScreenController_->GetScreenGamutMap(screenId, gamutMap);
 }
 
@@ -265,9 +260,6 @@ DMError DisplayManagerService::SetScreenGamutMap(ScreenId screenId, ScreenGamutM
     WLOGFI("SetScreenGamutMap::ScreenId: %{public}" PRIu64 ", ScreenGamutMap %{public}u",
         screenId, static_cast<uint32_t>(gamutMap));
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:SetScreenGamutMap(%" PRIu64")", screenId);
-
     return abstractScreenController_->SetScreenGamutMap(screenId, gamutMap);
 }
 
@@ -275,12 +267,8 @@ DMError DisplayManagerService::SetScreenColorTransform(ScreenId screenId)
 {
     WLOGFI("SetScreenColorTransform::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-
-    WM_SCOPED_TRACE("dms:SetScreenColorTransform(%" PRIu64")", screenId);
-
     return abstractScreenController_->SetScreenColorTransform(screenId);
 }
-
 
 void DisplayManagerService::OnStop()
 {
@@ -432,7 +420,6 @@ ScreenId DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Sc
         WLOGFE("make mirror failed.");
         return SCREEN_ID_INVALID;
     }
-    abstractScreenController_->DumpScreenInfo();
     auto screen = abstractScreenController_->GetAbstractScreen(mainScreenId);
     if (screen == nullptr || abstractScreenController_->GetAbstractScreenGroup(screen->groupDmsId_) == nullptr) {
         WLOGFE("get screen group failed.");
@@ -548,7 +535,6 @@ ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds
         WLOGFE("make expand failed.");
         return SCREEN_ID_INVALID;
     }
-    abstractScreenController_->DumpScreenInfo();
     auto screen = abstractScreenController_->GetAbstractScreen(allExpandScreenIds[0]);
     if (screen == nullptr || abstractScreenController_->GetAbstractScreenGroup(screen->groupDmsId_) == nullptr) {
         WLOGFE("get screen group failed.");

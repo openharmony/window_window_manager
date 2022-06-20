@@ -21,6 +21,13 @@
 
 namespace OHOS {
 namespace Rosen {
+enum class LifeCycleEvent : uint32_t {
+    CREATE_EVENT,
+    SHOW_EVENT,
+    HIDE_EVENT,
+    DESTROY_EVENT,
+};
+
 enum class WindowState : uint32_t {
     STATE_INITIAL,
     STATE_CREATED,
@@ -76,6 +83,7 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_KEEP_SCREEN_ON = 1 << 9,
     ACTION_UPDATE_SET_BRIGHTNESS = 1 << 10,
     ACTION_UPDATE_MODE_SUPPORT_INFO = 1 << 11,
+    ACTION_UPDATE_TOUCH_HOT_AREA = 1 << 12,
 };
 
 struct ModeChangeHotZonesConfig {

@@ -34,7 +34,7 @@ JsWindowRegisterManager::JsWindowRegisterManager()
         {SYSTEM_AVOID_AREA_CHANGE_CB,   &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister   },
         {LIFECYCLE_EVENT_CB,            &JsWindowRegisterManager::ProcessLifeCycleEventRegister    },
         {KEYBOARD_HEIGHT_CHANGE_CB,     &JsWindowRegisterManager::ProcesOccupiedAreaChangeRegister },
-        {OUTSIDE_PRESSED_CB,            &JsWindowRegisterManager::ProcessOutsidePressedRegister    }
+        {TOUCH_OUTSIDE_CB,            &JsWindowRegisterManager::ProcessTouchOutsideRegister    }
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -122,18 +122,18 @@ bool JsWindowRegisterManager::ProcessSystemBarChangeRegister(sptr<JsWindowListen
     return true;
 }
 
-bool JsWindowRegisterManager::ProcessOutsidePressedRegister(sptr<JsWindowListener> listener,
+bool JsWindowRegisterManager::ProcessTouchOutsideRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister)
 {
     WLOGFI("called");
     if (window == nullptr) {
         return false;
     }
-    sptr<IOutsidePressedListener> thisListener(listener);
+    sptr<ITouchOutsideListener> thisListener(listener);
     if (isRegister) {
-        window->RegisterOutsidePressedListener(thisListener);
+        window->RegisterTouchOutsideListener(thisListener);
     } else {
-        window->UnregisterOutsidePressedListener(thisListener);
+        window->UnregisterTouchOutsideListener(thisListener);
     }
     return true;
 }

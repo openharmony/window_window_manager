@@ -51,8 +51,7 @@ public:
     virtual WMError ToggleShownStateForAllAppWindows();
     virtual WMError MaxmizeWindow(uint32_t windowId);
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode);
-    virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty,
-        PropertyChangeAction action, uint64_t dirtyState);
+    virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);
     virtual WMError GetSystemConfig(SystemConfig& systemConfig);
     virtual WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones);
 

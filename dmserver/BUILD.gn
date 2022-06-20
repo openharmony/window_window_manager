@@ -16,6 +16,7 @@ import("//build/ohos.gni")
 ## Build libdms.so
 config("libdms_private_config") {
   include_dirs = [
+    "//base/sensors/sensor/interfaces/native/include",
     "//foundation/windowmanager/dm/include",
     "//foundation/windowmanager/interfaces/innerkits/dm",
   ]
@@ -39,6 +40,7 @@ ohos_shared_library("libdms") {
     "src/display_manager_service_inner.cpp",
     "src/display_manager_stub.cpp",
     "src/display_power_controller.cpp",
+    "src/screen_rotation_controller.cpp",
   ]
 
   configs = [ ":libdms_private_config" ]
@@ -61,6 +63,7 @@ ohos_shared_library("libdms") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
+    "sensor:sensor_interface_native",
     "utils_base:utils",
   ]
 
