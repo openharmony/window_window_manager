@@ -19,43 +19,6 @@
 
 namespace OHOS {
 namespace Rosen {
-const std::unordered_map<uint64_t, MemberVariable> WindowProperty::dataTypeMap_ = {
-    {WPRS_RequestRect, {PrimitiveType::PT_Rect,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->requestRect_)}},
-    {WPRS_DecoStatus, {PrimitiveType::PT_Bool,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->decoStatus_)}},
-    {WPRS_Mode, {PrimitiveType::PT_Uint32,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->mode_)}},
-    {WPRS_Flags, {PrimitiveType::PT_Uint32,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->flags_)}},
-    {WPRS_Focusable, {PrimitiveType::PT_Bool,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->focusable_)}},
-    {WPRS_Touchable, {PrimitiveType::PT_Bool,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->touchable_)}},
-    {WPRS_Brightness, {PrimitiveType::PT_Float,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->brightness_)}},
-    {WPRS_WindowId, {PrimitiveType::PT_Uint32,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->windowId_)}},
-    {WPRS_SysBarPropMap, {PrimitiveType::PT_SysBarPropMap,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->sysBarPropMap_)}},
-    {WPRS_WindowSizeChangeReason, {PrimitiveType::PT_Uint32,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->windowSizeChangeReason_)}},
-    {WPRS_CallingWindow, {PrimitiveType::PT_Uint32,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->callingWindow_)}},
-    {WPRS_RequestedOrientation, {PrimitiveType::PT_Uint32,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->requestedOrientation_)}},
-    {WPRS_TurnScreenOn, {PrimitiveType::PT_Bool,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->turnScreenOn_)}},
-    {WPRS_KeepScreenOn, {PrimitiveType::PT_Bool,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->keepScreenOn_)}},
-    {WPRS_ModeSupportInfo, {PrimitiveType::PT_Uint32,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->modeSupportInfo_)}},
-    {WPRS_DragType, {PrimitiveType::PT_Uint32,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->dragType_)}},
-    {WPRS_OriginRect, {PrimitiveType::PT_Rect,
-        (size_t) & (static_cast<WindowProperty*>(nullptr)->originRect_)}},
-};
-
 WindowProperty::WindowProperty(const sptr<WindowProperty>& property)
 {
     CopyFrom(property);
@@ -538,106 +501,109 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     return property;
 }
 
-bool WindowProperty::WriteMemberVariable(Parcel& parcel, const MemberVariable& mv)
+bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
 {
-    void* mvData = reinterpret_cast<uint8_t*>(this) + mv.offset_;
-    switch (mv.primitiveType_) {
-        case PrimitiveType::PT_Uint32:
-            if (!parcel.WriteUint32(*reinterpret_cast<uint32_t*>(mvData))) {
-                return false;
-            }
+    bool ret = parcel.WriteUint32(static_cast<uint32_t>(windowId_));
+    switch (action) {
+        case PropertyChangeAction::ACTION_UPDATE_RECT:
+            ret &= parcel.WriteBool(decoStatus_) && parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
+                parcel.WriteInt32(originRect_.posX_) && parcel.WriteInt32(originRect_.posY_) &&
+                parcel.WriteUint32(originRect_.width_) && parcel.WriteUint32(originRect_.height_) &&
+                parcel.WriteInt32(requestRect_.posX_) && parcel.WriteInt32(requestRect_.posY_) &&
+                parcel.WriteUint32(requestRect_.width_) && parcel.WriteUint32(requestRect_.height_) &&
+                parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_));
             break;
-        case PrimitiveType::PT_Float:
-            if (!parcel.WriteFloat(*reinterpret_cast<float*>(mvData))) {
-                return false;
-            }
+        case PropertyChangeAction::ACTION_UPDATE_MODE:
+            ret &= parcel.WriteUint32(static_cast<uint32_t>(mode_));
             break;
-        case PrimitiveType::PT_Bool:
-            if (!parcel.WriteBool(*reinterpret_cast<bool*>(mvData))) {
-                return false;
-            }
+        case PropertyChangeAction::ACTION_UPDATE_FLAGS:
+            ret &= parcel.WriteUint32(flags_);
             break;
-        case PrimitiveType::PT_String:
-            if (!parcel.WriteString(*reinterpret_cast<std::string*>(mvData))) {
-                return false;
-            }
+        case PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS:
+            ret &= MapMarshalling(parcel);
             break;
-        case PrimitiveType::PT_Rect:
-            if (!parcel.WriteInt32(reinterpret_cast<Rect*>(mvData)->posX_) ||
-                !parcel.WriteInt32(reinterpret_cast<Rect*>(mvData)->posY_) ||
-                !parcel.WriteUint32(reinterpret_cast<Rect*>(mvData)->width_) ||
-                !parcel.WriteUint32(reinterpret_cast<Rect*>(mvData)->height_)) {
-                return false;
-            }
+        case PropertyChangeAction::ACTION_UPDATE_FOCUSABLE:
+            ret &= parcel.WriteBool(focusable_);
             break;
-        case PrimitiveType::PT_SysBarPropMap:
-            if (!MapMarshalling(parcel)) {
-                return false;
-            }
+        case PropertyChangeAction::ACTION_UPDATE_TOUCHABLE:
+            ret &= parcel.WriteBool(touchable_);
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW:
+            ret &= parcel.WriteUint32(callingWindow_);
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_ORIENTATION:
+            ret &= parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_));
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
+            ret &= parcel.WriteBool(turnScreenOn_);
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
+            ret &= parcel.WriteBool(keepScreenOn_);
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
+            ret &= parcel.WriteFloat(brightness_);
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
+            ret &= parcel.WriteUint32(modeSupportInfo_);
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA:
+            ret &= MarshallingTouchHotAreas(parcel);
             break;
         default:
             break;
     }
-    return true;
+    return ret;
 }
 
-void WindowProperty::ReadMemberVariable(Parcel& parcel, const MemberVariable& mv)
+void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
 {
-    void* mvData = reinterpret_cast<uint8_t*>(this) + mv.offset_;
-    switch (mv.primitiveType_) {
-        case PrimitiveType::PT_Uint32:
-            *reinterpret_cast<uint32_t*>(mvData) = parcel.ReadUint32();
+    SetWindowId(parcel.ReadUint32());
+    switch (action) {
+        case PropertyChangeAction::ACTION_UPDATE_RECT:
+            SetDecoStatus(parcel.ReadBool());
+            SetDragType(static_cast<DragType>(parcel.ReadUint32()));
+            SetOriginRect(Rect { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() });
+            SetRequestRect(Rect { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() });
+            SetWindowSizeChangeReason(static_cast<WindowSizeChangeReason>(parcel.ReadUint32()));
             break;
-        case PrimitiveType::PT_Float:
-            *reinterpret_cast<float*>(mvData) = parcel.ReadFloat();
+        case PropertyChangeAction::ACTION_UPDATE_MODE:
+            SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
             break;
-        case PrimitiveType::PT_Bool:
-            *reinterpret_cast<bool*>(mvData) = parcel.ReadBool();
+        case PropertyChangeAction::ACTION_UPDATE_FLAGS:
+            SetWindowFlags(parcel.ReadUint32());
             break;
-        case PrimitiveType::PT_String:
-            *reinterpret_cast<std::string*>(mvData) = parcel.ReadString();
-            break;
-        case PrimitiveType::PT_Rect:
-            *reinterpret_cast<Rect*>(mvData) = {
-                parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
-            break;
-        case PrimitiveType::PT_SysBarPropMap:
+        case PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS:
             MapUnmarshalling(parcel, this);
             break;
+        case PropertyChangeAction::ACTION_UPDATE_FOCUSABLE:
+            SetFocusable(parcel.ReadBool());
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_TOUCHABLE:
+            SetTouchable(parcel.ReadBool());
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW:
+            SetCallingWindow(parcel.ReadUint32());
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_ORIENTATION:
+            SetRequestedOrientation(static_cast<Orientation>(parcel.ReadUint32()));
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
+            SetTurnScreenOn(parcel.ReadBool());
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
+            SetKeepScreenOn(parcel.ReadBool());
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
+            SetBrightness(parcel.ReadFloat());
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
+            SetModeSupportInfo(parcel.ReadUint32());
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA:
+            UnmarshallingTouchHotAreas(parcel, this);
+            break;
         default:
             break;
-    }
-}
-
-bool WindowProperty::Write(Parcel& parcel, uint64_t inDirtyState)
-{
-    uint64_t dirtyState = inDirtyState;
-    uint64_t replicationState;
-    if (!parcel.WriteUint64(inDirtyState)) {
-        return false;
-    }
-    while (dirtyState) {
-        replicationState = dirtyState & (~dirtyState + 1);
-        if (dataTypeMap_.count(replicationState)) {
-            if (!WriteMemberVariable(parcel, dataTypeMap_.at(replicationState))) {
-                return false;
-            }
-        }
-        dirtyState -= replicationState;
-    }
-    return true;
-}
-
-void WindowProperty::Read(Parcel& parcel)
-{
-    uint64_t dirtyState = parcel.ReadUint64();
-    uint64_t replicationState;
-    while (dirtyState) {
-        replicationState = dirtyState & (~dirtyState + 1);
-        if (dataTypeMap_.count(replicationState)) {
-            ReadMemberVariable(parcel, dataTypeMap_.at(replicationState));
-        }
-        dirtyState -= replicationState;
     }
 }
 

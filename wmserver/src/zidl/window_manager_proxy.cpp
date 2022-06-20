@@ -476,8 +476,7 @@ WMError WindowManagerProxy::SetWindowLayoutMode(WindowLayoutMode mode)
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty,
-    PropertyChangeAction action, uint64_t dirtyState)
+WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -487,13 +486,13 @@ WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty,
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (!windowProperty->Write(data, dirtyState)) {
-        WLOGFE("Write windowProperty failed");
+    if (!data.WriteUint32(static_cast<uint32_t>(action))) {
+        WLOGFE("Write PropertyChangeAction failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteUint32(static_cast<uint32_t>(action))) {
-        WLOGFE("Write PropertyChangeAction failed");
+    if (!windowProperty->Write(data, action)) {
+        WLOGFE("Write windowProperty failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
