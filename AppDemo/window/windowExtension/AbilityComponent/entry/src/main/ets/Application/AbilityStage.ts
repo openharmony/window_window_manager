@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_SERIALIZE_HELPER
-#define OHOS_ROSEN_SERIALIZE_HELPER
+import AbilityStage from "@ohos.application.AbilityStage"
 
-namespace OHOS {
-namespace Rosen {
-enum PrimitiveType {
-    // commom type
-    PT_Uint32,
-    PT_Float,
-    PT_Bool,
-    PT_String,
-    PT_Rect,
-    // custom type
-    PT_SysBarPropMap,
-};
-
-struct MemberVariable {
-    PrimitiveType primitiveType_;
-    size_t offset_;
-};
+export default class MyAbilityStage extends AbilityStage {
+    onCreate() {
+        console.log("[Demo] MyAbilityStage onCreate")
+    }
 }
-}
-#endif // OHOS_ROSEN_SERIALIZE_HELPER

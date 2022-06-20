@@ -247,7 +247,7 @@ sptr<WindowProperty> WindowProxy::GetWindowProperty()
     return reply.ReadParcelable<WindowProperty>();
 }
 
-void WindowProxy::NotifyOutsidePressed()
+void WindowProxy::NotifyTouchOutside()
 {
     MessageParcel data;
     MessageParcel replay;

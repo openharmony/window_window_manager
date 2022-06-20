@@ -65,7 +65,6 @@ std::string SnapShotUtils::GenerateFileName(int offset)
 
 bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
 {
-    WM_SCOPED_TRACE("snapshot:CheckFileNameValid(%s)", fileName.c_str());
     if (fileName.length() <= strlen(VALID_SNAPSHOT_SUFFIX)) {
         std::cout << "error: fileName " << fileName.c_str() << " invalid, file length too short!" << std::endl;
         return false;
@@ -262,7 +261,6 @@ bool SnapShotUtils::WriteToPngWithPixelMap(int fd, Media::PixelMap &pixelMap)
 
 static bool ProcessDisplayId(DisplayId &displayId, bool isDisplayIdSet)
 {
-    WM_SCOPED_TRACE("snapshot:ProcessDisplayId(%" PRIu64")", displayId);
     if (!isDisplayIdSet) {
         displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     } else {

@@ -71,6 +71,7 @@ private:
     void ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     void StopBootAnimationIfNeed(WindowType type) const;
+    void RecordBootAnimationEvent() const;
     WMError SetWindowType(uint32_t windowId, WindowType type);
     WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
@@ -79,7 +80,8 @@ private:
     void ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>& node);
     void HandleTurnScreenOn(const sptr<WindowNode>& node);
     void ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo);
-    void NotifyOutsidePressed(const sptr<WindowNode>& node);
+    WMError UpdateTouchHotAreas(const sptr<WindowNode>& node, const std::vector<Rect>& rects);
+    void NotifyTouchOutside(const sptr<WindowNode>& node);
     uint32_t GetEmbedNodeId(const std::vector<sptr<WindowNode>>& windowNodes, const sptr<WindowNode>& node);
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;

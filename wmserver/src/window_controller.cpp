@@ -15,10 +15,13 @@
 
 #include "window_controller.h"
 #include <ability_manager_client.h>
+#include <chrono>
+#include <hisysevent.h>
 #include <parameters.h>
 #include <power_mgr_client.h>
 #include <rs_window_animation_finished_callback.h>
 #include <transaction/rs_transaction.h>
+#include <sstream>
 
 #include "minimize_app.h"
 #include "remote_animation.h"
@@ -32,6 +35,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowController"};
+    constexpr uint32_t TOIUCH_HOT_AREA_MAX_NUM = 10;
 }
 
 uint32_t WindowController::GenWindowId()
@@ -512,8 +516,26 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
 void WindowController::StopBootAnimationIfNeed(WindowType type) const
 {
     if (WindowType::WINDOW_TYPE_DESKTOP == type) {
-        WLOGFD("stop boot animation");
+        WLOGFI("stop boot animation");
         system::SetParameter("persist.window.boot.inited", "1");
+        RecordBootAnimationEvent();
+    }
+}
+
+void WindowController::RecordBootAnimationEvent() const
+{
+    uint64_t time = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::steady_clock::now()).
+        time_since_epoch().count();
+    WLOGFI("boot animation done duration(s): %{public}" PRIu64"", static_cast<uint64_t>(time));
+    std::ostringstream os;
+    os << "boot animation done duration(s): " << time <<";";
+    int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_BOOT_ANIMATION_DONE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "MSG", os.str());
+    if (ret != 0) {
+        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
     }
 }
 
@@ -604,7 +626,7 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
-    NotifyOutsidePressed(node);
+    NotifyTouchOutside(node);
 
     if (isStartDrag) {
         WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
@@ -819,6 +841,12 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->SetModeSupportInfo(property->GetModeSupportInfo());
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
+            std::vector<Rect> rects;
+            property->GetTouchHotAreas(rects);
+            return UpdateTouchHotAreas(node, rects);
+            break;
+        }
         default:
             break;
     }
@@ -831,7 +859,34 @@ WMError WindowController::GetModeChangeHotZones(DisplayId displayId,
     return windowRoot_->GetModeChangeHotZones(displayId, hotZones, config);
 }
 
-void WindowController::NotifyOutsidePressed(const sptr<WindowNode>& node)
+WMError WindowController::UpdateTouchHotAreas(const sptr<WindowNode>& node, const std::vector<Rect>& rects)
+{
+    std::ostringstream oss;
+    int index = 0;
+    for (const auto& rect : rects) {
+        oss << "[ " << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_ << " ]";
+        index++;
+        if (index < static_cast<int32_t>(rects.size())) {
+            oss <<", ";
+        }
+    }
+    WLOGFI("windowId: %{public}u, rects.size: %{public}d, %{public}s",
+        node->GetWindowId(), static_cast<int32_t>(rects.size()), oss.str().c_str());
+    Rect windowRect = node->GetWindowRect();
+    std::vector<Rect> hotAreas;
+    if (rects.size() > TOIUCH_HOT_AREA_MAX_NUM || !WindowHelper::CalculateTouchHotAreas(windowRect, rects, hotAreas)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    node->GetWindowProperty()->SetTouchHotAreas(rects);
+    if (rects.empty()) {
+        hotAreas.emplace_back(node->GetFullWindowHotArea());
+    }
+    node->SetTouchHotAreas(hotAreas);
+    FlushWindowInfo(node->GetWindowId());
+    return WMError::WM_OK;
+}
+
+void WindowController::NotifyTouchOutside(const sptr<WindowNode>& node)
 {
     auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (windowNodeContainer == nullptr) {
@@ -842,7 +897,7 @@ void WindowController::NotifyOutsidePressed(const sptr<WindowNode>& node)
     std::vector<sptr<WindowNode>> windowNodes;
     windowNodeContainer->TraverseContainer(windowNodes);
     uint32_t skipNodeId = GetEmbedNodeId(windowNodes, node);
-    for (auto& windowNode : windowNodes) {
+    for (const auto& windowNode : windowNodes) {
         if (windowNode == nullptr || windowNode->GetWindowToken() == nullptr ||
             windowNode->GetWindowId() == skipNodeId ||
             windowNode->GetWindowId() == node->GetWindowId()) {
@@ -850,7 +905,7 @@ void WindowController::NotifyOutsidePressed(const sptr<WindowNode>& node)
             continue;
         }
         WLOGFD("notify %{public}s id %{public}d", windowNode->GetWindowName().c_str(), windowNode->GetWindowId());
-        windowNode->GetWindowToken()->NotifyOutsidePressed();
+        windowNode->GetWindowToken()->NotifyTouchOutside();
     }
 }
 
@@ -875,7 +930,7 @@ uint32_t WindowController::GetEmbedNodeId(const std::vector<sptr<WindowNode>>& w
             continue;
         }
         if (nodeRect.IsInsideOf(windowNode->GetWindowRect())) {
-            WLOGI("OutsidePressed window type is component %{public}s windowNode %{public}d",
+            WLOGI("TouchOutside window type is component %{public}s windowNode %{public}d",
                 windowNode->GetWindowName().c_str(), windowNode->GetWindowId());
             return windowNode->GetWindowId();
         }

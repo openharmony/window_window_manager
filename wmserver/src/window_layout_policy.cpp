@@ -355,7 +355,6 @@ void WindowLayoutPolicy::UpdateClientRectAndResetReason(const sptr<WindowNode>& 
 
 void WindowLayoutPolicy::RemoveWindowNode(const sptr<WindowNode>& node)
 {
-    WM_FUNCTION_TRACE();
     auto type = node->GetWindowType();
     // affect other windows, trigger off global layout
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
@@ -371,7 +370,6 @@ void WindowLayoutPolicy::RemoveWindowNode(const sptr<WindowNode>& node)
 
 void WindowLayoutPolicy::UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow)
 {
-    WM_FUNCTION_TRACE();
     auto type = node->GetWindowType();
     // affect other windows, trigger off global layout
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
@@ -443,7 +441,16 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<W
         rect.width_ += (hotZone + hotZone);
         rect.height_ += (hotZone + hotZone);
     }
-    node->SetHotZoneRect(rect);
+    node->SetFullWindowHotArea(rect);
+    std::vector<Rect> requestedHotAreas;
+    node->GetWindowProperty()->GetTouchHotAreas(requestedHotAreas);
+    std::vector<Rect> hotAreas;
+    if (requestedHotAreas.empty()) {
+        hotAreas.emplace_back(rect);
+    } else {
+        (void)WindowHelper::CalculateTouchHotAreas(winRect, requestedHotAreas, hotAreas);
+    }
+    node->SetTouchHotAreas(hotAreas);
 }
 
 void WindowLayoutPolicy::FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect,
