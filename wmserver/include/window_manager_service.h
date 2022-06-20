@@ -84,8 +84,7 @@ public:
     WMError ToggleShownStateForAllAppWindows() override;
     WMError MaxmizeWindow(uint32_t windowId) override;
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
-    WMError UpdateProperty(sptr<WindowProperty>& windowProperty,
-        PropertyChangeAction action, uint64_t dirtyState) override;
+    WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) override;
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
     WMError HandleAddWindow(sptr<WindowProperty>& property);
 
