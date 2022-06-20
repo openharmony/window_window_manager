@@ -18,6 +18,8 @@
 #include <cmath>
 
 #include <ability_manager_client.h>
+#include <hisysevent.h>
+#include <sstream>
 
 #include "color_parser.h"
 #include "display_manager.h"
@@ -665,6 +667,7 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     }
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
         windowId, token);
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, ret);
     if (ret != WMError::WM_OK) {
         WLOGFE("create window failed with errCode:%{public}d", static_cast<int32_t>(ret));
         return ret;
@@ -759,6 +762,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
             }
         }
         ret = SingletonContainer::Get<WindowAdapter>().DestroyWindow(property_->GetWindowId());
+        RecordLifeCycleExceptionEvent(LifeCycleEvent::DESTROY_EVENT, ret);
         if (ret != WMError::WM_OK) {
             WLOGFE("destroy window failed with errCode:%{public}d", static_cast<int32_t>(ret));
             return ret;
@@ -819,6 +823,7 @@ WMError WindowImpl::Show(uint32_t reason)
     }
     SetDefaultOption();
     WMError ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
@@ -846,6 +851,7 @@ WMError WindowImpl::Hide(uint32_t reason)
         return WMError::WM_OK;
     }
     WMError ret = SingletonContainer::Get<WindowAdapter>().RemoveWindow(property_->GetWindowId());
+    RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, ret);
     if (ret != WMError::WM_OK) {
         WLOGFE("hide errCode:%{public}d for winId:%{public}u", static_cast<int32_t>(ret), property_->GetWindowId());
         return ret;
@@ -1031,6 +1037,55 @@ WMError WindowImpl::SetCallingWindow(uint32_t windowId)
     }
     property_->SetCallingWindow(windowId);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW);
+}
+
+void WindowImpl::RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError errCode) const
+{
+    if (!(errCode == WMError::WM_ERROR_NULLPTR || errCode == WMError::WM_ERROR_INVALID_TYPE ||
+        errCode == WMError::WM_ERROR_INVALID_PARAM || errCode == WMError::WM_ERROR_SAMGR ||
+        errCode == WMError::WM_ERROR_IPC_FAILED)) {
+        WLOGFI("do not record, %{public}u", static_cast<uint32_t>(errCode));
+        return;
+    }
+    std::ostringstream oss;
+    oss << "life cycle is abnormal: " << "window_name: " << name_
+        << ", id:" << GetWindowId() << ", event: " << TransferLifeCycleEventToString(event)
+        << ", errCode: " << static_cast<int32_t>(errCode) << ";";
+    std::string info = oss.str();
+    WLOGFI("window life cycle exception: %{public}s", info.c_str());
+    int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_LIFE_CYCLE_EXCEPTION",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", getpid(),
+        "UID", getuid(),
+        "MSG", info);
+    if (ret != 0) {
+        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+    }
+}
+
+std::string WindowImpl::TransferLifeCycleEventToString(LifeCycleEvent type) const
+{
+    std::string event;
+    switch (type) {
+        case LifeCycleEvent::CREATE_EVENT:
+            event = "CREATE";
+            break;
+        case LifeCycleEvent::SHOW_EVENT:
+            event = "SHOW";
+            break;
+        case LifeCycleEvent::HIDE_EVENT:
+            event = "HIDE";
+            break;
+        case LifeCycleEvent::DESTROY_EVENT:
+            event = "DESTROY";
+            break;
+        default:
+            event = "UNDEFINE";
+            break;
+    }
+    return event;
 }
 
 void WindowImpl::SetPrivacyMode(bool isPrivacyMode)

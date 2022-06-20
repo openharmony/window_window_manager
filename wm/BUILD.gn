@@ -79,7 +79,7 @@ ohos_shared_library("libwm") {
     "graphic_standard:surface",
     "graphic_standard:window_animation",
     "hilog_native:libhilog",
-    "hitrace_native:hitrace_meter",
+    "hisysevent_native:libhisysevent",
     "input:libmmi-client",
     "inputmethod_native:inputmethod_client",
     "ipc:ipc_core",
