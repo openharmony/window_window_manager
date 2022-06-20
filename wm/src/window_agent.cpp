@@ -118,14 +118,14 @@ sptr<WindowProperty> WindowAgent::GetWindowProperty()
     return window_->GetWindowProperty();
 }
 
-void WindowAgent::NotifyOutsidePressed()
+void WindowAgent::NotifyTouchOutside()
 {
     if (window_ == nullptr) {
         WLOGFI("window is null");
         return;
     }
     WLOGFI("called");
-    window_->NotifyOutsidePressed();
+    window_->NotifyTouchOutside();
 }
 
 void WindowAgent::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)

@@ -1361,27 +1361,27 @@ void WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaCh
         }), occupiedAreaChangeListeners_.end());
 }
 
-void WindowImpl::RegisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener)
+void WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (std::find(outsidePressedListeners_.begin(), outsidePressedListeners_.end(), listener) !=
-        outsidePressedListeners_.end()) {
+    if (std::find(touchOutsideListeners_.begin(), touchOutsideListeners_.end(), listener) !=
+        touchOutsideListeners_.end()) {
         WLOGFE("Listener already registered");
         return;
     }
-    outsidePressedListeners_.emplace_back(listener);
+    touchOutsideListeners_.emplace_back(listener);
 }
 
-void WindowImpl::UnregisterOutsidePressedListener(const sptr<IOutsidePressedListener>& listener)
+void WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    outsidePressedListeners_.erase(std::remove_if(outsidePressedListeners_.begin(),
-        outsidePressedListeners_.end(), [listener](sptr<IOutsidePressedListener> registeredListener) {
+    touchOutsideListeners_.erase(std::remove_if(touchOutsideListeners_.begin(),
+        touchOutsideListeners_.end(), [listener](sptr<ITouchOutsideListener> registeredListener) {
             return registeredListener == listener;
-        }), outsidePressedListeners_.end());
+        }), touchOutsideListeners_.end());
 }
 
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
@@ -1988,16 +1988,16 @@ void WindowImpl::UpdateActiveStatus(bool isActive)
     }
 }
 
-void WindowImpl::NotifyOutsidePressed()
+void WindowImpl::NotifyTouchOutside()
 {
-    std::vector<sptr<IOutsidePressedListener>> outsidePressListeners;
+    std::vector<sptr<ITouchOutsideListener>> touchOutsideListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
-        outsidePressListeners = outsidePressedListeners_;
+        touchOutsideListeners = touchOutsideListeners_;
     }
 
-    for (auto& outsidePressListener : outsidePressListeners) {
-        outsidePressListener->OnOutsidePressed();
+    for (auto& touchOutsideListener : touchOutsideListeners) {
+        touchOutsideListener->OnTouchOutside();
     }
 }
 
