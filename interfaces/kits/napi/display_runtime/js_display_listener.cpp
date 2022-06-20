@@ -106,7 +106,7 @@ void JsDisplayListener::OnCreate(DisplayId id)
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(
+    AsyncTask::Schedule("JsDisplayListener::OnCreate", *engine_, std::make_unique<AsyncTask>(
         callback, std::move(execute), std::move(complete)));
 }
 
@@ -132,7 +132,7 @@ void JsDisplayListener::OnDestroy(DisplayId id)
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(
+    AsyncTask::Schedule("JsDisplayListener::OnDestroy", *engine_, std::make_unique<AsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
 
@@ -158,7 +158,7 @@ void JsDisplayListener::OnChange(DisplayId id)
 
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule(*engine_, std::make_unique<AsyncTask>(
+    AsyncTask::Schedule("JsDisplayListener::OnChange", *engine_, std::make_unique<AsyncTask>(
             callback, std::move(execute), std::move(complete)));
 }
 } // namespace Rosen

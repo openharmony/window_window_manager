@@ -111,7 +111,7 @@ NativeValue* OnGetDefaultDisplay(NativeEngine& engine, NativeCallbackInfo& info)
         lastParam = info.argv[0];
     }
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsDisplayManager::OnGetDefaultDisplay",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -161,7 +161,7 @@ NativeValue* OnGetAllDisplay(NativeEngine& engine, NativeCallbackInfo& info)
         lastParam = info.argv[0];
     }
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsDisplayManager::OnGetAllDisplay",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
