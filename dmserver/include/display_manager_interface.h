@@ -71,6 +71,8 @@ public:
         TRANS_ID_SCREEN_GET_GAMUT_MAP,
         TRANS_ID_SCREEN_SET_GAMUT_MAP,
         TRANS_ID_SCREEN_SET_COLOR_TRANSFORM,
+        TRANS_ID_IS_SCREEN_ROTATION_LOCKED,
+        TRANS_ID_SET_SCREEN_ROTATION_LOCKED,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -83,6 +85,8 @@ public:
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) = 0;
     virtual bool SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) = 0;
+    virtual DMError SetScreenRotationLocked(bool isLocked) = 0;
+    virtual bool IsScreenRotationLocked() = 0;
 
     // colorspace, gamut
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) = 0;
