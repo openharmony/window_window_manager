@@ -1005,4 +1005,55 @@ bool DisplayManagerProxy::SetVirtualPixelRatio(ScreenId screenId, float virtualP
     }
     return reply.ReadBool();
 }
+
+bool DisplayManagerProxy::IsScreenRotationLocked()
+{
+    bool isLocked;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("IsScreenRotationLocked: remote is nullptr");
+        return false;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("IsScreenRotationLocked: WriteInterfaceToken failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_IS_SCREEN_ROTATION_LOCKED),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("IsScreenRotationLocked: SendRequest failed");
+        return false;
+    }
+    isLocked = reply.ReadBool();
+    return isLocked;
+}
+
+DMError DisplayManagerProxy::SetScreenRotationLocked(bool isLocked)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("SetScreenRotationLocked: remote is null");
+        return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("SetScreenRotationLocked: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteBool(isLocked)) {
+        WLOGFE("SetScreenRotationLocked: write isLocked failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_ROTATION_LOCKED),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SetScreenRotationLocked: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
 } // namespace OHOS::Rosen

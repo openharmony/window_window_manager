@@ -41,6 +41,8 @@ public:
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
     bool SetOrientation(ScreenId screenId, Orientation orientation) override;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
+    bool IsScreenRotationLocked() override;
+    DMError SetScreenRotationLocked(bool isLocked) override;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) override;

@@ -743,6 +743,20 @@ HWTEST_F(ScreenManagerTest, ScreenManager17, Function | MediumTest | Level2)
         ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
     }
 }
+
+/**
+ * @tc.name: ScreenManager18
+ * @tc.desc: Set screen rotation lock, and check whether screen rotation lock is Locked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, ScreenManager18, Function | SmallTest | Level1)
+{
+    bool originalLockStatus = ScreenManager::GetInstance().IsScreenRotationLocked();
+    ScreenManager::GetInstance().SetScreenRotationLocked(!originalLockStatus);
+    bool modifiedLockedStatus = ScreenManager::GetInstance().IsScreenRotationLocked();
+    ScreenManager::GetInstance().SetScreenRotationLocked(originalLockStatus);
+    ASSERT_EQ(!originalLockStatus, modifiedLockedStatus);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
