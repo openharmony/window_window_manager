@@ -956,5 +956,14 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
         }
     }
 }
+
+Orientation WindowController::GetFullScreenWindowRequestedOrientation(DisplayId displayId)
+{
+    sptr<WindowNodeContainer> windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
+    if (windowNodeContainer != nullptr) {
+        return windowNodeContainer->GetFullScreenWindowRequestedOrientation();
+    }
+    return Orientation::UNSPECIFIED;
+}
 } // namespace OHOS
 } // namespace Rosen
