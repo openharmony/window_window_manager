@@ -26,6 +26,7 @@ group("systemtest") {
     ":wm_window_gamut_test",
     ":wm_window_immersive_test",
     ":wm_window_input_method_test",
+    ":wm_window_input_test",
     ":wm_window_layout_test",
     ":wm_window_mode_support_info_test",
     ":wm_window_move_drag_test",
@@ -164,6 +165,17 @@ ohos_systemtest("wm_window_gamut_test") {
 }
 
 ## SystemTest window_gamut_test }}}
+
+## SystemTest wm_window_input_test {{{
+ohos_systemtest("wm_window_input_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_input_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+}
+
+## SystemTest wm_window_input_test }}}
 
 ## SystemTest wm_window_visibility_info_test {{{
 ohos_systemtest("wm_window_visibility_info_test") {
