@@ -131,8 +131,6 @@ private:
     bool TraverseFromTopToBottom(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
     bool TraverseFromBottomToTop(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
     void RecoverScreenDefaultOrientationIfNeed(DisplayId displayId);
-    // cannot determine in case of a window covered by union of several windows or with transparent value
-    void UpdateWindowVisibilityInfos(std::vector<sptr<WindowVisibilityInfo>>& infos);
     void RaiseOrderedWindowToTop(std::vector<sptr<WindowNode>>& orderedNodes,
         std::vector<sptr<WindowNode>>& windowNodes);
     static bool ReadIsWindowAnimationEnabledProperty();
