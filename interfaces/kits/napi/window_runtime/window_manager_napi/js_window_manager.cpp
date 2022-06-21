@@ -166,7 +166,7 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
         WLOGFE("[NAPI]Context is nullptr");
         return;
     }
-    if (winType == WindowType::WINDOW_TYPE_FLOAT) {
+    if (winType == WindowType::WINDOW_TYPE_FLOAT || winType == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
         auto abilityContext = Context::ConvertTo<AbilityRuntime::AbilityContext>(context->lock());
         if (abilityContext != nullptr) {
             if (!CheckCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
@@ -538,7 +538,7 @@ NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, Native
     if (winLayoutMode != WindowLayoutMode::CASCADE && winLayoutMode != WindowLayoutMode::TILE) {
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    
+
     WLOGFI("[NAPI]LayoutMode = %{public}u, err = %{public}d", winLayoutMode, errCode);
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {

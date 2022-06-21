@@ -39,6 +39,11 @@ public:
         return (IsMainWindow(type) || IsSubWindow(type));
     }
 
+    static inline bool IsAppFloatingWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_FLOAT) || (type == WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    }
+
     static inline bool IsBelowSystemWindow(WindowType type)
     {
         return (type >= WindowType::BELOW_APP_SYSTEM_WINDOW_BASE && type < WindowType::BELOW_APP_SYSTEM_WINDOW_END);

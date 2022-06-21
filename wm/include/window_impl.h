@@ -313,6 +313,7 @@ private:
     void UpdatePointerEventForStretchableWindow(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateDragType();
     void InitListenerHandler();
+    bool CheckCameraFloatingWindowMultiCreated(WindowType type);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
