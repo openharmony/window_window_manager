@@ -625,7 +625,7 @@ WMError WindowImpl::SetFullScreen(bool status)
 
 void WindowImpl::MapFloatingWindowToAppIfNeeded()
 {
-    if (GetType() != WindowType::WINDOW_TYPE_FLOAT || context_.get() == nullptr) {
+    if (!WindowHelper::IsAppFloatingWindow(GetType()) || context_.get() == nullptr) {
         return;
     }
 
@@ -634,7 +634,8 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
             context_.get() == win->GetContext().get()) {
             appFloatingWindowMap_[win->GetWindowId()].push_back(this);
-            WLOGFI("Map FloatingWindow %{public}u to AppMainWindow %{public}u", GetWindowId(), win->GetWindowId());
+            WLOGFI("Map FloatingWindow %{public}u to AppMainWindow %{public}u, type is %{public}u",
+                GetWindowId(), win->GetWindowId(), GetType());
             return;
         }
     }
@@ -663,6 +664,12 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
             property_->SetParentId(parentId);
         }
     }
+
+    if (CheckCameraFloatingWindowMultiCreated(property_->GetWindowType())) {
+        WLOGFE("Camera Floating Window already exists.");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     context_ = context;
     sptr<WindowImpl> window(this);
     sptr<IWindow> windowAgent(new WindowAgent(window));
@@ -723,7 +730,8 @@ void WindowImpl::DestroyFloatingWindow()
 
     // Destroy app floating window if exist
     if (appFloatingWindowMap_.count(GetWindowId()) > 0) {
-        for (auto& floatingWindow : appFloatingWindowMap_.at(GetWindowId())) {
+        auto floatingWindows = appFloatingWindowMap_.at(GetWindowId());
+        for (auto& floatingWindow : floatingWindows) {
             if (floatingWindow == nullptr) {
                 continue;
             }
@@ -2243,6 +2251,7 @@ void WindowImpl::SetDefaultOption()
         }
         case WindowType::WINDOW_TYPE_TOAST:
         case WindowType::WINDOW_TYPE_FLOAT:
+        case WindowType::WINDOW_TYPE_FLOAT_CAMERA:
         case WindowType::WINDOW_TYPE_VOICE_INTERACTION:
         case WindowType::WINDOW_TYPE_LAUNCHER_DOCK:
         case WindowType::WINDOW_TYPE_SEARCHING_BAR: {
@@ -2319,6 +2328,20 @@ WMError WindowImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
 void WindowImpl::GetRequestedTouchHotAreas(std::vector<Rect>& rects) const
 {
     property_->GetTouchHotAreas(rects);
+}
+
+bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
+{
+    if (type != WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        return false;
+    }
+
+    for (auto& winPair : windowMap_) {
+        if (winPair.second.second->GetType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace Rosen
 } // namespace OHOS
