@@ -23,9 +23,9 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplaySensorController"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenRotationController"};
     constexpr int64_t ORIENTATION_SENSOR_SAMPING_RATE = 200000000; // 200ms
-    constexpr int64_t ORIENTATION_SENSOR_REPORTING_RATE = 200000000; // 200ms
+    constexpr int64_t ORIENTATION_SENSOR_REPORTING_RATE = 0;
     constexpr long ORIENTATION_SENSOR_CALLBACK_TIME_INTERVAL = 200; // 200ms
     constexpr int VALID_INCLINATION_ANGLE_THRESHOLD_COEFFICIENT = 3;
 }
@@ -200,7 +200,7 @@ Rotation ScreenRotationController::ProcessAutoRotationPortraitOrientation(Rotati
     if (sensorRotation == Rotation::ROTATION_0 || sensorRotation == Rotation::ROTATION_180) {
         return sensorRotation;
     }
-    return currentDisplayRotation_;
+    return Rotation::ROTATION_0;
 }
 
 Rotation ScreenRotationController::ProcessAutoRotationLandscapeOrientation(Rotation sensorRotation)
@@ -208,7 +208,7 @@ Rotation ScreenRotationController::ProcessAutoRotationLandscapeOrientation(Rotat
     if (sensorRotation == Rotation::ROTATION_90 || sensorRotation == Rotation::ROTATION_270) {
         return sensorRotation;
     }
-    return currentDisplayRotation_;
+    return Rotation::ROTATION_90;
 }
 
 void ScreenRotationController::SetScreenRotation(Rotation targetRotation)

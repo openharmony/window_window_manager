@@ -115,6 +115,36 @@ const std::map<ApiWindowMode, WindowMode> JS_TO_NATIVE_WINDOW_MODE_MAP {
     {ApiWindowMode::FLOATING,   WindowMode::WINDOW_MODE_FLOATING        },
 };
 
+enum class ApiOrientation : uint32_t {
+    UNSPECIFIED = 0,
+    PORTRAIT = 1,
+    LANDSCAPE = 2,
+    PORTRAIT_INVERTED = 3,
+    LANDSCAPE_INVERTED = 4,
+    AUTO_ROTATION = 5,
+    AUTO_ROTATION_PORTRAIT = 6,
+    AUTO_ROTATION_LANDSCAPE = 7,
+    AUTO_ROTATION_RESTRICTED = 8,
+    AUTO_ROTATION_PORTRAIT_RESTRICTED = 9,
+    AUTO_ROTATION_LANDSCAPE_RESTRICTED = 10,
+    LOCKED = 11,
+};
+
+const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
+    {ApiOrientation::UNSPECIFIED,                           Orientation::UNSPECIFIED                        },
+    {ApiOrientation::PORTRAIT,                              Orientation::VERTICAL                           },
+    {ApiOrientation::LANDSCAPE,                             Orientation::HORIZONTAL                         },
+    {ApiOrientation::PORTRAIT_INVERTED,                     Orientation::REVERSE_VERTICAL                   },
+    {ApiOrientation::LANDSCAPE_INVERTED,                    Orientation::REVERSE_HORIZONTAL                 },
+    {ApiOrientation::AUTO_ROTATION,                         Orientation::SENSOR                             },
+    {ApiOrientation::AUTO_ROTATION_PORTRAIT,                Orientation::SENSOR_VERTICAL                    },
+    {ApiOrientation::AUTO_ROTATION_LANDSCAPE,               Orientation::SENSOR_HORIZONTAL                  },
+    {ApiOrientation::AUTO_ROTATION_RESTRICTED,              Orientation::AUTO_ROTATION_RESTRICTED           },
+    {ApiOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,     Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED  },
+    {ApiOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,    Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED },
+    {ApiOrientation::LOCKED,                                Orientation::LOCKED                             },
+};
+
     NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect);
     NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window);
     bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,

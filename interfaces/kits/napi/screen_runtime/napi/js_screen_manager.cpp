@@ -629,7 +629,11 @@ NativeValue* OnIsScreenRotationLocked(NativeEngine& engine, NativeCallbackInfo& 
         errCode = DMError::DM_ERROR_INVALID_PARAM;
     }
     AsyncTask::CompleteCallback complete =
-        [this](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (errCode != DMError::DM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
             bool isLocked = SingletonContainer::Get<ScreenManager>().IsScreenRotationLocked();
             task.Resolve(engine, CreateJsValue(engine, isLocked));
         };
