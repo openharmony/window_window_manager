@@ -100,7 +100,7 @@ void ScreenRotationController::HandleGravitySensorEventCallback(SensorEvent *eve
         WLOGE("dms: Orientation Sensor Callback is not SENSOR_TYPE_ID_GRAVITY");
         return;
     }
-    Orientation orientation = GetDisplayOrientation();
+    Orientation orientation = GetRequestedOrientation();
     if (!IsSensorRelatedOrientation(orientation)) {
         return;
     }
@@ -153,9 +153,11 @@ Rotation ScreenRotationController::GetCurrentDisplayRotation()
     return DisplayManagerServiceInner::GetInstance().GetDisplayById(defaultDisplayId_)->GetRotation();
 }
 
-Orientation ScreenRotationController::GetDisplayOrientation()
+Orientation ScreenRotationController::GetRequestedOrientation()
 {
-    return DisplayManagerServiceInner::GetInstance().GetDefaultDisplay()->GetOrientation();
+    Orientation orientation = Orientation::UNSPECIFIED;
+    DisplayManagerServiceInner::GetInstance().GetFullScreenWindowRequestedOrientation(defaultDisplayId_, orientation);
+    return orientation;
 }
 
 Rotation ScreenRotationController::CalcTargetDisplayRotation(
