@@ -52,6 +52,7 @@ private:
         { WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,  106 },
         { WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,   107 },
         { WindowType::WINDOW_TYPE_FLOAT,                108 },
+        { WindowType::WINDOW_TYPE_FLOAT_CAMERA,         108 },
         { WindowType::WINDOW_TYPE_TOAST,                109 },
         { WindowType::WINDOW_TYPE_STATUS_BAR,           110 },
         { WindowType::WINDOW_TYPE_PANEL,                111 },
