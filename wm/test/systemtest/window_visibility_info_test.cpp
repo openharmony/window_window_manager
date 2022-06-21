@@ -36,7 +36,7 @@ namespace {
 }
 
 using utils = WindowTestUtils;
-constexpr int WAIT_ASYNC_MS_TIME_OUT = 1500; // 1500ms
+constexpr int WAIT_ASYNC_MS_TIME_OUT = 2000; // 2000ms
 
 #define CHECK_DISPLAY_POWER_STATE_RETURN()                              \
     do {                                                                \
@@ -326,6 +326,49 @@ end:
     subWindow1->Destroy();
     window2->Destroy();
     subWindow2->Destroy();
+}
+
+/**
+* @tc.name: WindowVisibilityInfoTest04
+* @tc.desc: add two main window and sub windows and test callback
+* @tc.type: FUNC
+*/
+HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest04, Function | MediumTest | Level1)
+{
+    floatAppInfo_.name = "window1";
+    floatAppInfo_.rect = {0, 0, 300, 600};
+    sptr<Window> window1 = utils::CreateTestWindow(floatAppInfo_);
+
+    floatAppInfo_.name = "window2";
+    floatAppInfo_.rect = {0, 0, 300, 300};
+    sptr<Window> window2 = utils::CreateTestWindow(floatAppInfo_);
+
+    floatAppInfo_.name = "window3";
+    floatAppInfo_.rect = {0, 300, 300, 300};
+    sptr<Window> window3 = utils::CreateTestWindow(floatAppInfo_);
+
+    ASSERT_EQ(WMError::WM_OK, window1->Show());
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
+    ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
+
+    ASSERT_EQ(WMError::WM_OK, window2->Show());
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
+    ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
+
+    ASSERT_EQ(WMError::WM_OK, window3->Show());
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
+    ASSERT_EQ(2, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
+
+end:
+    window1->Destroy();
+    window2->Destroy();
+    window3->Destroy();
 }
 }
 } // namespace Rosen

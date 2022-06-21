@@ -46,7 +46,8 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<WindowManagerService>());
 
-WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true)
+WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true),
+    rsInterface_(RSInterfaces::GetInstance())
 {
     windowRoot_ = new WindowRoot(
         std::bind(&WindowManagerService::OnWindowEvent, this, std::placeholders::_1, std::placeholders::_2));
@@ -71,7 +72,51 @@ void WindowManagerService::OnStart()
     DisplayManagerServiceInner::GetInstance().RegisterDisplayChangeListener(listener);
     RegisterSnapshotHandler();
     RegisterWindowManagerServiceHandler();
+    RegisterWindowVisibilityChangeCallback();
     wmsTaskLooper_->Start();
+}
+
+
+void WindowManagerService::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusionData)
+{
+    WLOGFD("NotifyWindowVisibilityChange: enter");
+    std::weak_ptr<RSOcclusionData> weak(occlusionData);
+    return wmsTaskLooper_->ScheduleTask([this, weak]() {
+        auto weakOcclusionData = weak.lock();
+        if (weakOcclusionData == nullptr) {
+            WLOGFE("weak occlusionData is nullptr");
+            return;
+        }
+        windowRoot_->NotifyWindowVisibilityChange(weakOcclusionData);
+    }).wait();
+}
+
+void WindowManagerService::RegisterWindowVisibilityChangeCallback()
+{
+    auto windowVisibilityChangeCb = std::bind(&WindowManagerService::WindowVisibilityChangeCallback, this,
+        std::placeholders::_1);
+    if (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
+        WLOGFW("WindowManagerService::RegisterWindowVisibilityChangeCallback failed, create async thread!");
+        auto fun = [this, windowVisibilityChangeCb]() {
+            WLOGFI("WindowManagerService::RegisterWindowVisibilityChangeCallback async thread enter!");
+            int counter = 0;
+            while (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
+                usleep(10000); // 10000us equals to 10ms
+                counter++;
+                if (counter >= 2000) { // wait for 2000 * 10ms = 20s
+                    WLOGFE("WindowManagerService::RegisterWindowVisibilityChangeCallback timeout!");
+                    return;
+                }
+            }
+            WLOGFI("WindowManagerService::RegisterWindowVisibilityChangeCallback async thread register handler"
+                " successfully!");
+        };
+        std::thread thread(fun);
+        thread.detach();
+        WLOGFI("WindowManagerService::RegisterWindowVisibilityChangeCallback async thread has been detached!");
+    } else {
+        WLOGFI("WindowManagerService::RegisterWindowVisibilityChangeCallback OnStart succeed!");
+    }
 }
 
 void WindowManagerService::RegisterSnapshotHandler()

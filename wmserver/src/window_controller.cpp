@@ -170,6 +170,7 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     if (node != nullptr && WindowHelper::IsMainWindow(property->GetWindowType()) && node->startingWindowShown_) {
         StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode, property, pid, uid);
         windowRoot_->AddDeathRecipient(node);
+        windowRoot_->AddSurfaceNodeIdWindowNodePair(surfaceNode->GetId(), node);
         return WMError::WM_OK;
     }
     windowId = GenWindowId();

@@ -24,6 +24,7 @@
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
 #include "wm_trace.h"
+#include "window_manager_agent_controller.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -181,6 +182,9 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
 
     WLOGFI("save windowId %{public}u", node->GetWindowId());
     windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
+    if (node->surfaceNode_ != nullptr) {
+        surfaceIdWindowNodeMap_.insert(std::make_pair(node->surfaceNode_->GetId(), node));
+    }
     if (node->GetWindowToken()) {
         AddDeathRecipient(node);
     }
@@ -254,6 +258,69 @@ void WindowRoot::ExitSplitMode(DisplayId displayId)
         return;
     }
     container->ExitSplitMode(displayId);
+}
+
+
+void WindowRoot::AddSurfaceNodeIdWindowNodePair(uint64_t surfaceNodeId, sptr<WindowNode> node)
+{
+    surfaceIdWindowNodeMap_.insert(std::make_pair(surfaceNodeId, node));
+}
+
+std::vector<std::pair<uint64_t, bool>> WindowRoot::GetWindowVisibilityChangeInfo(
+    std::shared_ptr<RSOcclusionData> occlusionData)
+{
+    std::vector<std::pair<uint64_t, bool>> visibityChangeInfo;
+    VisibleData& currentVisibleWindow = occlusionData->GetVisibleData();
+    std::sort(currentVisibleWindow.begin(), currentVisibleWindow.end());
+    VisibleData& lastVisibleWindow = lastOcclusionData_->GetVisibleData();
+    uint32_t i, j;
+    i = j = 0;
+    for (; i < lastVisibleWindow.size() && j < currentVisibleWindow.size();) {
+        if (lastVisibleWindow[i] < currentVisibleWindow[j]) {
+            visibityChangeInfo.push_back(std::make_pair(lastVisibleWindow[i], false));
+            i++;
+        } else if (lastVisibleWindow[i] > currentVisibleWindow[j]) {
+            visibityChangeInfo.push_back(std::make_pair(currentVisibleWindow[j], true));
+            j++;
+        } else {
+            i++;
+            j++;
+        }
+    }
+    for (; i < lastVisibleWindow.size(); ++i) {
+        visibityChangeInfo.push_back(std::make_pair(lastVisibleWindow[i], false));
+    }
+    for (; j < currentVisibleWindow.size(); ++j) {
+        visibityChangeInfo.push_back(std::make_pair(currentVisibleWindow[j], true));
+    }
+    lastOcclusionData_ = occlusionData;
+    return visibityChangeInfo;
+}
+
+void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> occlusionData)
+{
+    std::vector<std::pair<uint64_t, bool>> visibityChangeInfo = GetWindowVisibilityChangeInfo(occlusionData);
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    for (const auto& elem : visibityChangeInfo) {
+        uint64_t surfaceId = elem.first;
+        bool isVisible = elem.second;
+        auto iter = surfaceIdWindowNodeMap_.find(surfaceId);
+        if (iter == surfaceIdWindowNodeMap_.end()) {
+            continue;
+        }
+        sptr<WindowNode> node = iter->second;
+        if (node == nullptr) {
+            continue;
+        }
+        node->isVisible_ = isVisible;
+        windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
+            node->GetCallingUid(), isVisible, node->GetWindowType()));
+        WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
+            node->GetWindowId(), isVisible);
+    }
+    if (windowVisibilityInfos.size() != 0) {
+        WindowManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
+    }
 }
 
 std::vector<Rect> WindowRoot::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
@@ -629,6 +696,28 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
     if (node == nullptr) {
         WLOGFE("window has been destroyed");
         return WMError::WM_ERROR_DESTROYED_OBJECT;
+    }
+
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    node->isVisible_ = false;
+    windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
+        node->GetCallingUid(), false, node->GetWindowType()));
+    WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
+        node->GetWindowId(), node->isVisible_);
+    WindowManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
+
+    auto cmpFunc = [node](const std::map<uint64_t, sptr<WindowNode>>::value_type& pair) {
+        if (pair.second == nullptr) {
+            return false;
+        }
+        if (pair.second->GetWindowId() == node->GetWindowId()) {
+            return true;
+        }
+        return false;
+    };
+    auto iter = std::find_if(surfaceIdWindowNodeMap_.begin(), surfaceIdWindowNodeMap_.end(), cmpFunc);
+    if (iter != surfaceIdWindowNodeMap_.end()) {
+        surfaceIdWindowNodeMap_.erase(iter);
     }
 
     sptr<IWindow> window = node->GetWindowToken();
