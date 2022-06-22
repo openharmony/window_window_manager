@@ -83,6 +83,7 @@ ohos_shared_library("window_napi") {
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/wmserver:libwms",
+    "//utils/native/base:utils",
   ]
 
   external_deps = [
