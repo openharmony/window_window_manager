@@ -166,7 +166,7 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
         WLOGFE("[NAPI]Context is nullptr");
         return;
     }
-    if (winType == WindowType::WINDOW_TYPE_FLOAT) {
+    if (winType == WindowType::WINDOW_TYPE_FLOAT || winType == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
         auto abilityContext = Context::ConvertTo<AbilityRuntime::AbilityContext>(context->lock());
         if (abilityContext != nullptr) {
             if (!CheckCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
@@ -269,7 +269,8 @@ NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbac
             }
         };
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(engine, CreateAsyncTaskWithLastParam(engine, callback, nullptr, std::move(complete), &result));
+    AsyncTask::Schedule("JsWindowManager::OnCreateWindow", engine,
+        CreateAsyncTaskWithLastParam(engine, callback, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -314,7 +315,7 @@ NativeValue* JsWindowManager::OnFindWindow(NativeEngine& engine, NativeCallbackI
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
         (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsWindowManager::OnFindWindow",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -351,7 +352,7 @@ NativeValue* JsWindowManager::OnMinimizeAll(NativeEngine& engine, NativeCallback
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
         (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsWindowManager::OnMinimizeAll",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -382,7 +383,7 @@ NativeValue* JsWindowManager::OnToggleShownStateForAllAppWindows(NativeEngine& e
     NativeValue* lastParam = (info.argc <= 0) ? nullptr :
         (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsWindowManager::OnToggleShownStateForAllAppWindows",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -511,7 +512,7 @@ NativeValue* JsWindowManager::OnGetTopWindow(NativeEngine& engine, NativeCallbac
             return GetTopWindowTask(contextPtr, engine, task);
         };
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsWindowManager::OnGetTopWindow",
         engine, CreateAsyncTaskWithLastParam(engine, nativeCallback, nullptr, std::move(complete), &result));
     return result;
 }
@@ -537,7 +538,7 @@ NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, Native
     if (winLayoutMode != WindowLayoutMode::CASCADE && winLayoutMode != WindowLayoutMode::TILE) {
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    
+
     WLOGFI("[NAPI]LayoutMode = %{public}u, err = %{public}d", winLayoutMode, errCode);
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
@@ -557,7 +558,7 @@ NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, Native
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
         (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsWindowManager::OnSetWindowLayoutMode",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }

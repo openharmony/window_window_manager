@@ -1843,7 +1843,6 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
     return WMError::WM_OK;
 }
 
-
 void WindowNodeContainer::GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones,
     const ModeChangeHotZonesConfig& config)
 {
@@ -1868,6 +1867,18 @@ float WindowNodeContainer::GetDisplayVirtualPixelRatio(DisplayId displayId) cons
 sptr<DisplayInfo> WindowNodeContainer::GetDisplayInfo(DisplayId displayId)
 {
     return displayGroupInfo_->GetDisplayInfo(displayId);
+}
+
+Orientation WindowNodeContainer::GetFullScreenWindowRequestedOrientation()
+{
+    std::vector<sptr<WindowNode>> windowNodes;
+    TraverseContainer(windowNodes);
+    for (auto node : windowNodes) {
+        if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            return node->GetRequestedOrientation();
+        }
+    }
+    return Orientation::UNSPECIFIED;
 }
 } // namespace Rosen
 } // namespace OHOS

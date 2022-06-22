@@ -39,6 +39,11 @@ public:
         return (IsMainWindow(type) || IsSubWindow(type));
     }
 
+    static inline bool IsAppFloatingWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_FLOAT) || (type == WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    }
+
     static inline bool IsBelowSystemWindow(WindowType type)
     {
         return (type >= WindowType::BELOW_APP_SYSTEM_WINDOW_BASE && type < WindowType::BELOW_APP_SYSTEM_WINDOW_END);
@@ -310,9 +315,9 @@ public:
             hotArea.posX_ = windowRect.posX_ + rect.posX_;
             hotArea.posY_ = windowRect.posY_ + rect.posY_;
             hotArea.width_ =
-                std::min(hotArea.posX_ + hotArea.width_, windowRect.posX_ + windowRect.width_) - hotArea.posX_;
+                std::min(hotArea.posX_ + rect.width_, windowRect.posX_ + windowRect.width_) - hotArea.posX_;
             hotArea.height_ =
-                std::min(hotArea.posY_ + hotArea.height_, windowRect.posY_ + windowRect.height_) - hotArea.posY_;
+                std::min(hotArea.posY_ + rect.height_, windowRect.posY_ + windowRect.height_) - hotArea.posY_;
             outRects.emplace_back(hotArea);
         }
         return true;

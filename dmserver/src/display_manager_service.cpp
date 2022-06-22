@@ -130,6 +130,13 @@ void DisplayManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId,
     }
 }
 
+void DisplayManagerService::GetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation)
+{
+    if (displayChangeListener_ != nullptr) {
+        displayChangeListener_->OnGetFullScreenWindowRequestedOrientation(displayId, orientation);
+    }
+}
+
 sptr<DisplayInfo> DisplayManagerService::GetDefaultDisplayInfo()
 {
     ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();

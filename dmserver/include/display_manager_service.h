@@ -100,6 +100,7 @@ public:
     bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
     static float GetCustomVirtualPixelRatio();
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
+    void GetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation);
 private:
     DisplayManagerService();
     ~DisplayManagerService() = default;

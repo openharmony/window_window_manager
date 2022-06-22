@@ -37,7 +37,7 @@ public:
 private:
     static void HandleGravitySensorEventCallback(SensorEvent *event);
     static Rotation GetCurrentDisplayRotation();
-    static Orientation GetDisplayOrientation();
+    static Orientation GetRequestedOrientation();
     static int CalcRotationDegree(GravityData* gravityData);
     static Rotation CalcTargetDisplayRotation(Orientation requestedOrientation, Rotation sensorRotation);
     static Rotation ProcessAutoRotationPortraitOrientation(Rotation sensorRotation);

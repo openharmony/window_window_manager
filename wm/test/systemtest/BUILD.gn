@@ -20,12 +20,14 @@ group("systemtest") {
   testonly = true
 
   deps = [
+    ":wm_window_app_floating_window_test",
     ":wm_window_drag_test",
     ":wm_window_effect_test",
     ":wm_window_focus_test",
     ":wm_window_gamut_test",
     ":wm_window_immersive_test",
     ":wm_window_input_method_test",
+    ":wm_window_input_test",
     ":wm_window_layout_test",
     ":wm_window_mode_support_info_test",
     ":wm_window_move_drag_test",
@@ -165,6 +167,17 @@ ohos_systemtest("wm_window_gamut_test") {
 
 ## SystemTest window_gamut_test }}}
 
+## SystemTest wm_window_input_test {{{
+ohos_systemtest("wm_window_input_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_input_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+}
+
+## SystemTest wm_window_input_test }}}
+
 ## SystemTest wm_window_visibility_info_test {{{
 ohos_systemtest("wm_window_visibility_info_test") {
   module_out_path = module_out_path
@@ -231,6 +244,17 @@ ohos_systemtest("wm_window_mode_support_info_test") {
 
 ## SystemTest wm_window_mode_support_info_test }}}
 
+## SystemTest wm_window_app_floating_window_test {{{
+ohos_systemtest("wm_window_app_floating_window_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_app_floating_window_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+}
+
+## SystemTest wm_window_app_floating_window_test }}}
+
 ## Build wm_systemtest_common.a {{{
 config("wm_systemtest_common_public_config") {
   include_dirs = [
@@ -295,6 +319,7 @@ ohos_static_library("wm_systemtest_common") {
     "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
+    "ability_runtime:ability_context_native",
     "bundle_framework:appexecfwk_base",
   ]
 }

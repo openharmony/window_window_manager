@@ -123,7 +123,7 @@ NativeValue* JsVirtualScreenRecorder::OnGetInputSurface(NativeEngine& engine, Na
         lastParam = info.argv[ARGC_ONE - 1];
     }
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsVirtualScreenRecorder::OnGetInputSurface",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -192,7 +192,7 @@ NativeValue* JsVirtualScreenRecorder::OnStart(NativeEngine& engine, NativeCallba
         lastParam = info.argv[ARGC_TWO - 1];
     }
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsVirtualScreenRecorder::OnStart",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -235,7 +235,7 @@ NativeValue* JsVirtualScreenRecorder::OnStop(NativeEngine& engine, NativeCallbac
         lastParam = info.argv[ARGC_ONE - 1];
     }
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsVirtualScreenRecorder::OnStop",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -321,7 +321,7 @@ NativeValue* JsScreenRecorder::OnGetVirtualScreenRecorder(NativeEngine& engine, 
         lastParam = info.argv[ARGC_TWO - 1];
     }
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsScreenRecorder::OnGetVirtualScreenRecorder",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
