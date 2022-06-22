@@ -176,6 +176,11 @@ void StartingWindow::UpdateRSTree(sptr<WindowNode>& node)
                 } else { // to launcher
                     dms.UpdateRSTree(shownDisplayId, node->surfaceNode_, true);
                 }
+                for (auto& child : node->children_) {
+                    if (child->currentVisibility_) {
+                        dms.UpdateRSTree(shownDisplayId, child->surfaceNode_, true);
+                    }
+                }
             }
         }
     };
