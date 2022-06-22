@@ -226,7 +226,7 @@ bool WindowPair::IsSplitRelated(sptr<WindowNode>& node) const
 
 std::vector<sptr<WindowNode>> WindowPair::GetOrderedPair(sptr<WindowNode>& node)
 {
-    WLOGI("Get piared node in Z order");
+    WLOGI("Get paired node in Z order");
     std::vector<sptr<WindowNode>> orderedPair;
     if (node == nullptr || Find(node) == nullptr) {
         return orderedPair;
@@ -368,7 +368,7 @@ void WindowPair::UpdateWindowPairStatus()
         status_ == WindowPairStatus::STATUS_PAIRING) {
         // create divider
         WindowInnerManager::GetInstance().CreateWindow("dialog_divider_ui", WindowType::WINDOW_TYPE_DOCK_SLICE,
-            initalDivderRect_);
+            initalDividerRect_);
     } else if ((prevStatus == WindowPairStatus::STATUS_PAIRED_DONE || prevStatus == WindowPairStatus::STATUS_PAIRING) &&
         (status_ != WindowPairStatus::STATUS_PAIRED_DONE && status_ != WindowPairStatus::STATUS_PAIRING)) {
         // clear pair
@@ -494,7 +494,7 @@ void WindowPair::SetAllAppWindowsRestoring(bool isAllAppWindowsRestoring)
 
 void WindowPair::SetInitalDividerRect(const Rect& rect)
 {
-    initalDivderRect_ = rect;
+    initalDividerRect_ = rect;
 }
 } // namespace Rosen
 } // namespace OHOS

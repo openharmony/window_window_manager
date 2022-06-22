@@ -74,7 +74,7 @@ public:
         return ((IsMainWindow(type)) && (mode != WindowMode::WINDOW_MODE_FLOATING));
     }
 
-    static inline bool IsFloatintWindow(WindowMode mode)
+    static inline bool IsFloatingWindow(WindowMode mode)
     {
         return mode == WindowMode::WINDOW_MODE_FLOATING;
     }

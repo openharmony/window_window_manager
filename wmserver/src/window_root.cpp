@@ -89,7 +89,7 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId d
 sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(sptr<DisplayInfo> displayInfo)
 {
     if (displayInfo == nullptr || !CheckDisplayInfo(displayInfo)) {
-        WLOGFE("get display failed or get invailed display info");
+        WLOGFE("get display failed or get invalid display info");
         return nullptr;
     }
 
@@ -331,7 +331,7 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
     return res;
 }
 
-WMError WindowRoot::MaxmizeWindow(uint32_t windowId)
+WMError WindowRoot::MaximizeWindow(uint32_t windowId)
 {
     auto node = GetWindowNode(windowId);
     if (node == nullptr) {
@@ -988,7 +988,7 @@ void WindowRoot::ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<Dis
     std::map<DisplayId, Rect>& displayRectMap)
 {
     if (displayInfo == nullptr || !CheckDisplayInfo(displayInfo)) {
-        WLOGFE("get display failed or get invailed display info");
+        WLOGFE("get display failed or get invalid display info");
         return;
     }
     DisplayId displayId = displayInfo->GetDisplayId();
@@ -999,7 +999,7 @@ void WindowRoot::ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<Dis
     }
 
     WLOGFI("[Display Create] before add new display, displayId: %{public}" PRIu64"", displayId);
-    container->GetMutiDisplayController()->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayRectMap);
+    container->GetMultiDisplayController()->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayRectMap);
     WLOGFI("[Display Create] Container exist, add new display, displayId: %{public}" PRIu64"", displayId);
 }
 
@@ -1111,20 +1111,20 @@ void WindowRoot::ProcessDisplayDestroy(DisplayId defaultDisplayId, sptr<DisplayI
     }
     WLOGFI("[Display Destroy] displayId: %{public}" PRIu64"", displayId);
 
-    std::vector<uint32_t> needDestoryWindows;
+    std::vector<uint32_t> needDestroyWindows;
     auto displayRectMap = GetAllDisplayRectsByDisplayInfo(displayInfoMap);
     // erase displayId in displayRectMap
     auto displayRectIter = displayRectMap.find(displayId);
     displayRectMap.erase(displayRectIter);
-    container->GetMutiDisplayController()->ProcessDisplayDestroy(
-        defaultDisplayId, displayInfo, displayRectMap, needDestoryWindows);
-    for (auto id : needDestoryWindows) {
+    container->GetMultiDisplayController()->ProcessDisplayDestroy(
+        defaultDisplayId, displayInfo, displayRectMap, needDestroyWindows);
+    for (auto id : needDestroyWindows) {
         auto node = GetWindowNode(id);
         if (node != nullptr) {
             DestroyWindowInner(node);
         }
     }
-    // move window which is not showing on destroied display to default display
+    // move window which is not showing on destroyed display to default display
     MoveNotShowingWindowToDefaultDisplay(defaultDisplayId, displayId);
     WLOGFI("[Display Destroy] displayId: %{public}" PRIu64" ", displayId);
 }
@@ -1153,7 +1153,7 @@ void WindowRoot::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayIn
     }
 
     auto displayRectMap = GetAllDisplayRectsByDisplayInfo(displayInfoMap);
-    container->GetMutiDisplayController()->ProcessDisplayChange(defaultDisplayId, displayInfo, displayRectMap, type);
+    container->GetMultiDisplayController()->ProcessDisplayChange(defaultDisplayId, displayInfo, displayRectMap, type);
 }
 
 float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
@@ -1209,7 +1209,7 @@ void WindowRoot::SetSplitRatios(const std::vector<float>& splitRatioNumbers)
     }
     std::sort(splitRatios.begin(), splitRatios.end());
     auto iter = std::unique(splitRatios.begin(), splitRatios.end());
-    splitRatios.erase(iter, splitRatios.end()); // remove duplitcate ratios
+    splitRatios.erase(iter, splitRatios.end()); // remove duplicate ratios
 }
 
 void WindowRoot::SetExitSplitRatios(const std::vector<float>& exitSplitRatios)

@@ -314,7 +314,7 @@ WMError WindowImpl::SetWindowType(WindowType type)
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         property_->SetWindowType(type);
-        if (isAppDecorEnbale_ && windowSystemConfig_.isSystemDecorEnable_) {
+        if (isAppDecorEnable_ && windowSystemConfig_.isSystemDecorEnable_) {
             property_->SetDecorEnable(WindowHelper::IsMainWindow(property_->GetWindowType()));
         }
         AdjustWindowAnimationFlag();
@@ -442,7 +442,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         WLOGFE("fail to SetUIContent id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!isAppDecorEnbale_ || !windowSystemConfig_.isSystemDecorEnable_) {
+    if (!isAppDecorEnable_ || !windowSystemConfig_.isSystemDecorEnable_) {
         WLOGFI("app set decor enable false");
         property_->SetDecorEnable(false);
     }
@@ -490,7 +490,7 @@ std::string WindowImpl::GetContentInfo()
 ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(ColorGamut ColorGamut)
 {
     for (auto item: colorSpaceConvertMap) {
-        if (item.sufaceColorGamut == ColorGamut) {
+        if (item.surfaceColorGamut == ColorGamut) {
             return item.colorSpace;
         }
     }
@@ -501,7 +501,7 @@ ColorGamut WindowImpl::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
 {
     for (auto item: colorSpaceConvertMap) {
         if (item.colorSpace == colorSpace) {
-            return item.sufaceColorGamut;
+            return item.surfaceColorGamut;
         }
     }
     return ColorGamut::COLOR_GAMUT_SRGB;
@@ -1147,7 +1147,7 @@ void WindowImpl::DisableAppWindowDecor()
         return;
     }
     WLOGFI("disable app window decoration.");
-    isAppDecorEnbale_ = false;
+    isAppDecorEnable_ = false;
 }
 
 bool WindowImpl::IsDecorEnable() const
@@ -1494,7 +1494,7 @@ void WindowImpl::SetModeSupportInfo(uint32_t modeSupportInfo)
     property_->SetModeSupportInfo(modeSupportInfo);
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
     if (!WindowHelper::IsWindowModeSupported(modeSupportInfo, GetMode())) {
-        WLOGFI("currunt window mode is not supported, force to transform to appropriate mode. window id:%{public}u",
+        WLOGFI("current window mode is not supported, force to transform to appropriate mode. window id:%{public}u",
                GetWindowId());
         WindowMode mode = WindowHelper::GetWindowModeFromModeSupportInfo(modeSupportInfo);
         if (mode != WindowMode::WINDOW_MODE_UNDEFINED) {
@@ -1948,7 +1948,7 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
 void WindowImpl::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
 {
     WLOGFI("Window Update AvoidArea, id: %{public}u", property_->GetWindowId());
-    NotifyAviodAreaChange(avoidArea);
+    NotifyAvoidAreaChange(avoidArea);
 }
 
 void WindowImpl::UpdateWindowState(WindowState state)
@@ -2127,7 +2127,7 @@ void WindowImpl::NotifyPointEvent(std::shared_ptr<MMI::PointerEvent>& pointerEve
     });
 }
 
-void WindowImpl::NotifyAviodAreaChange(const std::vector<Rect>& avoidArea)
+void WindowImpl::NotifyAvoidAreaChange(const std::vector<Rect>& avoidArea)
 {
     std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners;
     {
@@ -2215,7 +2215,7 @@ Rect WindowImpl::GetSystemAlarmWindowDefaultSize(Rect defaultRect)
         SYSTEM_ALARM_WINDOW_HEIGHT_RATIO));
 
     rect = { static_cast<int32_t>((width - alarmWidth) / 2), static_cast<int32_t>((height - alarmHeight) / 2),
-                alarmWidth, alarmHeight }; // devided by 2 to middle the window
+                alarmWidth, alarmHeight }; // divided by 2 to middle the window
     return rect;
 }
 

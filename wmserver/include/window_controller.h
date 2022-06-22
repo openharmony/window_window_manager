@@ -51,7 +51,7 @@ public:
     WMError ProcessPointUp(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();
-    WMError MaxmizeWindow(uint32_t windowId);
+    WMError MaximizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
     WMError UpdateProperty(sptr<WindowProperty>& property, PropertyChangeAction action);
     void NotifySystemBarTints();
