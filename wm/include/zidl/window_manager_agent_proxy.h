@@ -31,6 +31,7 @@ public:
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) override;
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) override;
+    void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) override;
 
 private:
     static inline BrokerDelegator<WindowManagerAgentProxy> delegator_;

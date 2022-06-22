@@ -104,6 +104,7 @@ public:
     const Rect& GetOriginRect() const;
     void ResetWindowSizeChangeReason();
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
+    uint32_t GetAccessTokenId() const;
 
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;

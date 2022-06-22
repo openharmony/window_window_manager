@@ -348,5 +348,10 @@ void WindowNode::GetTouchHotAreas(std::vector<Rect>& rects) const
 {
     rects = touchHotAreas_;
 }
+
+uint32_t WindowNode::GetAccessTokenId() const
+{
+    return property_->GetAccessTokenId();
+}
 } // namespace Rosen
 } // namespace OHOS

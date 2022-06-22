@@ -16,10 +16,11 @@
 #include "window_impl.h"
 
 #include <cmath>
+#include <sstream>
 
 #include <ability_manager_client.h>
 #include <hisysevent.h>
-#include <sstream>
+#include "ipc_skeleton.h"
 
 #include "color_parser.h"
 #include "display_manager.h"
@@ -2341,6 +2342,9 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
             return true;
         }
     }
+    uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
+    property_->SetAccessTokenId(accessTokenId);
+    WLOGFI("Create camera float window, accessTokenId = %{public}u", accessTokenId);
     return false;
 }
 } // namespace Rosen

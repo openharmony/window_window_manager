@@ -144,6 +144,32 @@ void WindowManagerAgentProxy::UpdateWindowVisibilityInfo(
         WLOGFE("SendRequest failed");
     }
 }
+
+void WindowManagerAgentProxy::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteUint32(accessTokenId)) {
+        WLOGFE("Write accessTokenId failed");
+        return;
+    }
+
+    if (!data.WriteBool(isShowing)) {
+        WLOGFE("Write is showing status failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_FLOAT),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 
