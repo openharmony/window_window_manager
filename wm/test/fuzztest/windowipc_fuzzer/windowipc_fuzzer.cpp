@@ -126,17 +126,17 @@ void IPCSpecificInterfaceFuzzTest2(sptr<IRemoteObject> proxy, MessageParcel& sen
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_SET_BACKGROUND_BLUR),
         sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_SET_APLPHA),
+    proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_SET_ALPHA),
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE),
         sendData, reply, option);
 
-    proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_MAXMIZE_WINDOW),
+    proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_MAXIMIZE_WINDOW),
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_UPDATE_PROPERTY),
         sendData, reply, option);
     proxy->SendRequest(
-        static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID),
+        static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID),
         sendData, reply, option);
     proxy->SendRequest(
         static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER),

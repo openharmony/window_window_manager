@@ -21,12 +21,12 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SurfaceReaderHandlerImpl"};
 } // namespace
-bool SurfaceReaderHandlerImpl::OnImageAvalible(sptr<Media::PixelMap> pixleMap)
+bool SurfaceReaderHandlerImpl::OnImageAvailable(sptr<Media::PixelMap> pixelMap)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!flag_) {
         flag_ = true;
-        pixleMap_ = pixleMap;
+        pixelMap_ = pixelMap;
         WLOGFI("Get an Image!");
     }
     return true;
@@ -49,7 +49,7 @@ void SurfaceReaderHandlerImpl::ResetFlag()
 sptr<Media::PixelMap> SurfaceReaderHandlerImpl::GetPixelMap()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return pixleMap_;
+    return pixelMap_;
 }
 }
 }

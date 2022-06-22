@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplaySensorController"};
-    constexpr int64_t ORIENTATION_SENSOR_SAMPING_RATE = 200000000; // 200ms
+    constexpr int64_t ORIENTATION_SENSOR_SAMPLING_RATE = 200000000; // 200ms
     constexpr int64_t ORIENTATION_SENSOR_REPORTING_RATE = 200000000; // 200ms
     constexpr long ORIENTATION_SENSOR_CALLBACK_TIME_INTERVAL = 200; // 200ms
     constexpr int VALID_INCLINATION_ANGLE_THRESHOLD_COEFFICIENT = 3;
@@ -54,7 +54,7 @@ void ScreenRotationController::SubscribeGravitySensor()
     user_.userData = nullptr;
     user_.callback = &HandleGravitySensorEventCallback;
     SubscribeSensor(SENSOR_TYPE_ID_GRAVITY, &user_);
-    SetBatch(SENSOR_TYPE_ID_GRAVITY, &user_, ORIENTATION_SENSOR_SAMPING_RATE, ORIENTATION_SENSOR_REPORTING_RATE);
+    SetBatch(SENSOR_TYPE_ID_GRAVITY, &user_, ORIENTATION_SENSOR_SAMPLING_RATE, ORIENTATION_SENSOR_REPORTING_RATE);
     SetMode(SENSOR_TYPE_ID_GRAVITY, &user_, SENSOR_ON_CHANGE);
     ActivateSensor(SENSOR_TYPE_ID_GRAVITY, &user_);
     isGravitySensorSubscribed_ = true;

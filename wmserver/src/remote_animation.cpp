@@ -115,7 +115,7 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
         WLOGFE("RSWindowAnimation: no startingWindow for dst window id:%{public}u!", dstNode->GetWindowId());
         return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
-    WLOGFI("RSWindowAnimation: nofity animation transition with dst currId:%{public}u!", dstNode->GetWindowId());
+    WLOGFI("RSWindowAnimation: notify animation transition with dst currId:%{public}u!", dstNode->GetWindowId());
     sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
         []() {
             WLOGFI("RSWindowAnimation: on finish transition with minimizeAll!");
@@ -173,7 +173,7 @@ WMError RemoteAnimation::NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcI
     if (srcTarget == nullptr) {
         return WMError::WM_ERROR_NO_MEM;
     }
-    WLOGFI("RSWindowAnimation: nofity animation minimize Id:%{public}u!", srcNode->GetWindowId());
+    WLOGFI("RSWindowAnimation: notify animation minimize Id:%{public}u!", srcNode->GetWindowId());
     srcNode->isPlayAnimationHide_ = true;
     wptr<WindowNode> weak = srcNode;
     auto minimizeFunc = [weak]() {
@@ -203,7 +203,7 @@ WMError RemoteAnimation::NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo
     if (srcTarget == nullptr) {
         return WMError::WM_ERROR_NO_MEM;
     }
-    WLOGFI("RSWindowAnimation: nofity animation close id:%{public}u!", srcNode->GetWindowId());
+    WLOGFI("RSWindowAnimation: notify animation close id:%{public}u!", srcNode->GetWindowId());
     srcNode->isPlayAnimationHide_ = true;
     wptr<WindowNode> weak = srcNode;
     auto closeFunc = [weak, event]() {

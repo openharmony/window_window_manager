@@ -366,7 +366,7 @@ ScreenId DisplayManagerService::GetScreenIdByDisplayId(DisplayId displayId) cons
 {
     sptr<AbstractDisplay> abstractDisplay = abstractDisplayController_->GetAbstractDisplay(displayId);
     if (abstractDisplay == nullptr) {
-        WLOGFE("GetScreenIdByDisplayId: GetAbstarctDisplay failed");
+        WLOGFE("GetScreenIdByDisplayId: GetAbstractDisplay failed");
         return SCREEN_ID_INVALID;
     }
     return abstractDisplay->GetAbstractScreenId();

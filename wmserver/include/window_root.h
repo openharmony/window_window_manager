@@ -61,7 +61,7 @@ public:
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();
-    WMError MaxmizeWindow(uint32_t windowId);
+    WMError MaximizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(DisplayId displayId, WindowLayoutMode mode);
 
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
