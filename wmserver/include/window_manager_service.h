@@ -41,6 +41,7 @@ class DisplayChangeListener : public IDisplayChangeListener {
 public:
     virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
+    virtual void OnGetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation) override;
 };
 
 class WindowManagerServiceHandler : public AAFwk::WindowManagerServiceHandlerStub {
@@ -101,6 +102,7 @@ public:
     void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
     void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback) override;
+    void GetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation);
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;
