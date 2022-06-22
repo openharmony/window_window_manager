@@ -16,3 +16,11 @@ aafwk_inner_api_path =
 aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/kits"
 aafwk_path = "//foundation/ability/ability_runtime"
 aafwk_services_path = "//foundation/ability/ability_runtime/services"
+
+declare_args() {
+  suspend_manager_enable = true
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.resourceschedule_suspend_manager)) {
+    suspend_manager_enable = false
+  }
+}
