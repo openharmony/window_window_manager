@@ -147,4 +147,9 @@ bool DisplayManagerServiceInner::SetRotationFromWindow(DisplayId displayId, Rota
     return DisplayManagerService::GetInstance().
         SetRotationFromWindow(displayInfo->GetScreenId(), targetRotation);
 }
+
+void DisplayManagerServiceInner::GetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation)
+{
+    DisplayManagerService::GetInstance().GetFullScreenWindowRequestedOrientation(displayId, orientation);
+}
 } // namespace OHOS::Rosen
