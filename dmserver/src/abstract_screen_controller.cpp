@@ -60,7 +60,7 @@ void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
         auto task = [this] {
             RegisterRsScreenConnectionChangeListener();
         };
-        // posk task after 50 ms.
+        // post task after 50 ms.
         controllerHandler_->PostTask(task, 50, AppExecFwk::EventQueue::Priority::HIGH);
     }
     bool callbackRegister = DisplayManagerAgentController::GetInstance().SetRemoveAgentCallback(
@@ -642,7 +642,7 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
 {
     auto screen = GetAbstractScreen(screenId);
     if (rotationAfter != screen->rotation_) {
-        WLOGI("set orientation. roatiton %{public}u", rotationAfter);
+        WLOGI("set orientation. rotation %{public}u", rotationAfter);
         ScreenId rsScreenId;
         if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
             WLOGE("Convert to RsScreenId fail. screenId: %{public}" PRIu64"", screenId);

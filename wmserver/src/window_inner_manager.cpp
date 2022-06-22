@@ -80,13 +80,13 @@ void WindowInnerManager::Stop()
 void WindowInnerManager::HandleCreateWindow(std::string name, WindowType type, Rect rect)
 {
     auto dialogCallback = [this](int32_t id, const std::string& event, const std::string& params) {
-        if (params == "EVENT_CANCLE_CODE") {
+        if (params == "EVENT_CANCEL_CODE") {
             Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
         }
     };
     Ace::UIServiceMgrClient::GetInstance()->ShowDialog(name, dividerParams_, type,
         rect.posX_, rect.posY_, rect.width_, rect.height_, dialogCallback, &dialogId_);
-    WLOGFI("create inner window id: %{public}d succes", dialogId_);
+    WLOGFI("create inner window id: %{public}d success", dialogId_);
     return;
 }
 

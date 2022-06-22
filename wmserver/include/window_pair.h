@@ -51,7 +51,7 @@ public:
     /**
      * Constructor used to create an empty WindowPair instance.
      *
-     * @param displayId the disply of window pair
+     * @param displayId the display of window pair
      * @param appNode the window root of app window
      */
     WindowPair(const DisplayId& displayId, DisplayGroupWindowTree& displayGroupWindowTree);
@@ -221,7 +221,7 @@ private:
     void DumpPairInfo();
 
     /**
-     * Find pairable window frome window trees.
+     * Find pairable window from window trees.
      *
      * @param node the node waiting to be paired
      * @return window node
@@ -237,7 +237,7 @@ private:
     sptr<WindowNode> GetPairableWindow(sptr<WindowNode>& node);
 
     /**
-     * Send brodcast message of split event.
+     * Send broadcast message of split event.
      *
      * @param node trigger node
      */
@@ -253,7 +253,7 @@ private:
     WindowPairStatus status_ = {WindowPairStatus::STATUS_EMPTY};
     DisplayGroupWindowTree& displayGroupWindowTree_;
     bool isAllAppWindowsRestoring_ { false };
-    Rect initalDivderRect_ {0, 0, 0, 0};
+    Rect initalDividerRect_ {0, 0, 0, 0};
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -301,7 +301,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
     if (!floatingWindow) { // fullscreen window
         winRect = limitRect;
     } else { // floating window
-        if (subWindow && parentLimit) { // subwidow and limited by parent
+        if (subWindow && parentLimit) { // subwindow and limited by parent
             limitRect = node->parent_->GetWindowRect();
             UpdateFloatingLayoutRect(limitRect, winRect);
         }
