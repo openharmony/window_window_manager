@@ -1051,7 +1051,6 @@ NativeValue* JsWindow::OnSetRequestedOrientation(NativeEngine& engine, NativeCal
             }
         }
     }
-
     wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
         [weakToken, requestedOrientation, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
@@ -1070,14 +1069,10 @@ NativeValue* JsWindow::OnSetRequestedOrientation(NativeEngine& engine, NativeCal
                 static_cast<uint32_t>(requestedOrientation));
         };
 
-    NativeValue* lastParam = nullptr;
-    if (info.argc > 0 && info.argv[0]->TypeOf() == NATIVE_FUNCTION) {
-        lastParam = info.argv[0];
-    } else if (info.argc > 1 && info.argv[1]->TypeOf() == NATIVE_FUNCTION) {
-        lastParam = info.argv[1];
-    }
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
     NativeValue* result = nullptr;
-    AsyncTask::Schedule(
+    AsyncTask::Schedule("JsWindow::OnSetRequestedOrientation",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
