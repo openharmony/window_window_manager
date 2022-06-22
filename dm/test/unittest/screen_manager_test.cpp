@@ -51,11 +51,11 @@ void ScreenManagerTest::TearDown()
 
 namespace {
 /**
- * @tc.name: CreateAndDestory01
+ * @tc.name: CreateAndDestroy01
  * @tc.desc: CreateVirtualScreen with invalid option and return invalid screen id
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, CreateAndDestory01, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, CreateAndDestroy01, Function | SmallTest | Level1)
 {
     VirtualScreenOption wrongOption = {defaultName_, defaultWidth_, defaultHeight_,
                                        defaultDensity_, nullptr, defaultFlags_};
@@ -69,11 +69,11 @@ HWTEST_F(ScreenManagerTest, CreateAndDestory01, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: CreateAndDestory02
+ * @tc.name: CreateAndDestroy02
  * @tc.desc: CreateVirtualScreen with valid option and return valid screen id
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, CreateAndDestory02, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, CreateAndDestroy02, Function | SmallTest | Level1)
 {
     ScreenManagerUtils utils;
     ASSERT_TRUE(utils.CreateSurface());

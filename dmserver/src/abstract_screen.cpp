@@ -243,7 +243,7 @@ Rotation AbstractScreen::CalcRotation(Orientation orientation) const
     if (info == nullptr) {
         return Rotation::ROTATION_0;
     }
-    // virtical: phone(Plugin screen); horizontal: pad & external screen
+    // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = info->width_ < info->height_;
     switch (orientation) {
         case Orientation::UNSPECIFIED: {

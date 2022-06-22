@@ -102,7 +102,7 @@ public:
 
     sptr<WindowLayoutPolicy> GetLayoutPolicy() const;
     sptr<AvoidAreaController> GetAvoidController() const;
-    sptr<DisplayGroupController> GetMutiDisplayController() const;
+    sptr<DisplayGroupController> GetMultiDisplayController() const;
     sptr<WindowNode> GetRootNode(WindowRootNodeType type) const;
     void NotifyDockWindowStateChanged(sptr<WindowNode>& node, bool isEnable);
 
@@ -129,7 +129,7 @@ private:
     bool IsSplitImmersiveNode(sptr<WindowNode> node) const;
     bool TraverseFromTopToBottom(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
     bool TraverseFromBottomToTop(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
-    void RcoveryScreenDefaultOrientationIfNeed(DisplayId displayId);
+    void RecoverScreenDefaultOrientationIfNeed(DisplayId displayId);
     // cannot determine in case of a window covered by union of several windows or with transparent value
     void UpdateWindowVisibilityInfos(std::vector<sptr<WindowVisibilityInfo>>& infos);
     void RaiseOrderedWindowToTop(std::vector<sptr<WindowNode>>& orderedNodes,
@@ -159,7 +159,7 @@ private:
     std::map<uint32_t, WindowMode> backupWindowMode_;
     std::map<DisplayId, Rect> backupDividerWindowRect_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
-    std::unordered_map<WindowLayoutMode, sptr<WindowLayoutPolicy>> layoutPolicys_;
+    std::unordered_map<WindowLayoutMode, sptr<WindowLayoutPolicy>> layoutPolicies_;
     WindowLayoutMode layoutMode_ = WindowLayoutMode::CASCADE;
     std::vector<Rect> currentCoveredArea_;
     std::vector<uint32_t> removedIds_;

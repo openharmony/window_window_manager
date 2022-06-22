@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace Rosen {
 enum class MinimizeReason : uint32_t {
-    MINIMIZE_BUTTOM,
+    MINIMIZE_BUTTON,
     MINIMIZE_ALL,
     LAYOUT_TILE,
     MAX_APP_COUNT,
@@ -51,7 +51,7 @@ public:
 private:
     static inline bool IsFromUser(MinimizeReason reason)
     {
-        return (reason == MinimizeReason::MINIMIZE_ALL || reason == MinimizeReason::MINIMIZE_BUTTOM ||
+        return (reason == MinimizeReason::MINIMIZE_ALL || reason == MinimizeReason::MINIMIZE_BUTTON ||
             reason == MinimizeReason::MAX_APP_COUNT || reason == MinimizeReason::LAYOUT_TILE ||
             reason == MinimizeReason::SPLIT_REPLACE || reason == MinimizeReason::SPLIT_QUIT);
     }

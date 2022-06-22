@@ -55,14 +55,14 @@ WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, S
     displayGroupController_->InitNewDisplay(displayId);
 
     // init layout policy
-    layoutPolicys_[WindowLayoutMode::CASCADE] = new WindowLayoutPolicyCascade(displayGroupInfo_,
+    layoutPolicies_[WindowLayoutMode::CASCADE] = new WindowLayoutPolicyCascade(displayGroupInfo_,
         displayGroupController_->displayGroupWindowTree_);
-    layoutPolicys_[WindowLayoutMode::TILE] = new WindowLayoutPolicyTile(displayGroupInfo_,
+    layoutPolicies_[WindowLayoutMode::TILE] = new WindowLayoutPolicyTile(displayGroupInfo_,
         displayGroupController_->displayGroupWindowTree_);
-    layoutPolicy_ = layoutPolicys_[WindowLayoutMode::CASCADE];
+    layoutPolicy_ = layoutPolicies_[WindowLayoutMode::CASCADE];
     layoutPolicy_->Launch();
 
-    Rect initalDividerRect = layoutPolicys_[WindowLayoutMode::CASCADE]->GetInitalDividerRect(displayId);
+    Rect initalDividerRect = layoutPolicies_[WindowLayoutMode::CASCADE]->GetInitalDividerRect(displayId);
     displayGroupController_->SetInitalDividerRect(displayId, initalDividerRect);
     // init avoidAreaController
     UpdateAvoidAreaFunc func = std::bind(&WindowNodeContainer::OnAvoidAreaChange, this,
@@ -300,7 +300,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
-    RcoveryScreenDefaultOrientationIfNeed(node->GetDisplayId());
+    RecoverScreenDefaultOrientationIfNeed(node->GetDisplayId());
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         isScreenLocked_ = false;
     }
@@ -447,7 +447,7 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId display
     return true;
 }
 
-void WindowNodeContainer::RcoveryScreenDefaultOrientationIfNeed(DisplayId displayId)
+void WindowNodeContainer::RecoverScreenDefaultOrientationIfNeed(DisplayId displayId)
 {
     if (displayGroupController_->displayGroupWindowTree_[displayId][WindowRootNodeType::APP_WINDOW_NODE]->empty()) {
         WLOGFI("appWindowNode_ child is empty in display  %{public}" PRIu64"", displayId);
@@ -667,7 +667,7 @@ sptr<AvoidAreaController> WindowNodeContainer::GetAvoidController() const
     return avoidController_;
 }
 
-sptr<DisplayGroupController> WindowNodeContainer::GetMutiDisplayController() const
+sptr<DisplayGroupController> WindowNodeContainer::GetMultiDisplayController() const
 {
     return displayGroupController_;
 }
@@ -923,7 +923,7 @@ void WindowNodeContainer::NotifyDockWindowStateChanged(sptr<WindowNode>& node, b
             if (windowNode->GetWindowId() == node->GetWindowId()) {
                 continue;
             }
-            if (!WindowHelper::IsFloatintWindow(windowNode->GetWindowMode())) {
+            if (!WindowHelper::IsFloatingWindow(windowNode->GetWindowMode())) {
                 return;
             }
         }
@@ -1526,7 +1526,7 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, Displa
         }
         layoutMode_ = dstMode;
         layoutPolicy_->Clean();
-        layoutPolicy_ = layoutPolicys_[dstMode];
+        layoutPolicy_ = layoutPolicies_[dstMode];
         layoutPolicy_->Launch();
         DumpScreenWindowTree();
     } else {
@@ -1817,7 +1817,7 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
     }
     windowPair->UpdateIfSplitRelated(node);
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
-        if (WindowHelper::IsFloatintWindow(node->GetWindowMode())) {
+        if (WindowHelper::IsFloatingWindow(node->GetWindowMode())) {
             NotifyDockWindowStateChanged(node, true);
         } else {
             NotifyDockWindowStateChanged(node, false);

@@ -62,7 +62,7 @@ public:
 private:
     std::vector<sptr<WindowNode>>* GetWindowNodesByDisplayIdAndRootType(DisplayId displayId, WindowRootNodeType type);
     void AddWindowNodeOnWindowTree(sptr<WindowNode>& node, WindowRootNodeType rootType);
-    void ProcessNotCrossNodesOnDestroiedDisplay(DisplayId displayId, std::vector<uint32_t>& windowIds);
+    void ProcessNotCrossNodesOnDestroyedDisplay(DisplayId displayId, std::vector<uint32_t>& windowIds);
     void ProcessDisplaySizeChangeOrRotation(DisplayId defaultDisplayId, DisplayId displayId,
         const std::map<DisplayId, Rect>& displayRectMap, DisplayStateChangeType type);
     void ProcessCrossNodes(DisplayId defaultDisplayId, DisplayStateChangeType type);
@@ -72,7 +72,7 @@ private:
     void UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode>& node,
                                        const std::vector<DisplayId>& curShowingDisplays);
     void UpdateWindowDisplayId(const sptr<WindowNode>& node, DisplayId newDisplayId);
-    void ClearMapOfDestroiedDisplay(DisplayId displayId);
+    void ClearMapOfDestroyedDisplay(DisplayId displayId);
     void ChangeToRectInDisplayGroup(const sptr<WindowNode>& node);
 
     sptr<WindowNodeContainer> windowNodeContainer_;
