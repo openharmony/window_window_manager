@@ -62,6 +62,8 @@ NativeValue* WindowTypeInit(NativeEngine* engine)
         static_cast<int32_t>(ApiWindowType::TYPE_NAVIGATION_BAR)));
     object->SetProperty("TYPE_FLOAT", CreateJsValue(*engine,
         static_cast<int32_t>(ApiWindowType::TYPE_FLOAT)));
+    object->SetProperty("TYPE_FLOAT_CAMERA", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_FLOAT_CAMERA)));
     object->SetProperty("TYPE_WALLPAPER", CreateJsValue(*engine,
         static_cast<int32_t>(ApiWindowType::TYPE_WALLPAPER)));
     object->SetProperty("TYPE_DESKTOP", CreateJsValue(*engine,

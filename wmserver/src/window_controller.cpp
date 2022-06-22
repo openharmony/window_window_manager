@@ -845,7 +845,6 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             std::vector<Rect> rects;
             property->GetTouchHotAreas(rects);
             return UpdateTouchHotAreas(node, rects);
-            break;
         }
         default:
             break;
@@ -870,7 +869,7 @@ WMError WindowController::UpdateTouchHotAreas(const sptr<WindowNode>& node, cons
             oss <<", ";
         }
     }
-    WLOGFI("windowId: %{public}u, rects.size: %{public}d, %{public}s",
+    WLOGFI("windowId: %{public}u, size: %{public}d, rects: %{public}s",
         node->GetWindowId(), static_cast<int32_t>(rects.size()), oss.str().c_str());
     Rect windowRect = node->GetWindowRect();
     std::vector<Rect> hotAreas;
@@ -955,6 +954,15 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
             return;
         }
     }
+}
+
+Orientation WindowController::GetFullScreenWindowRequestedOrientation(DisplayId displayId)
+{
+    sptr<WindowNodeContainer> windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
+    if (windowNodeContainer != nullptr) {
+        return windowNodeContainer->GetFullScreenWindowRequestedOrientation();
+    }
+    return Orientation::UNSPECIFIED;
 }
 } // namespace OHOS
 } // namespace Rosen

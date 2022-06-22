@@ -25,6 +25,7 @@
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
 
+#include "event_handler.h"
 #include "input_transfer_station.h"
 #include "vsync_station.h"
 #include "window.h"
@@ -53,22 +54,24 @@ union ColorParam {
 #endif
     uint32_t value;
 };
-
 class WindowImpl : public Window {
-#define CALL_LIFECYCLE_LISTENER(windowLifecycleCb)              \
-    do {                                                        \
-        for (auto& listener : lifecycleListeners_) {            \
-            if (listener != nullptr) {                          \
-                listener->windowLifecycleCb();                  \
-            }                                                   \
-        }                                                       \
+using ListenerTaskCallback = std::function<void()>;
+using EventHandler = OHOS::AppExecFwk::EventHandler;
+using Priority = OHOS::AppExecFwk::EventQueue::Priority;
+#define CALL_LIFECYCLE_LISTENER(windowLifecycleCb)          \
+    do {                                                    \
+        for (auto& listener : lifecycleListeners_) {        \
+            if (listener != nullptr) {                      \
+                listener->windowLifecycleCb();              \
+            }                                               \
+        }                                                   \
     } while (0)
 
-#define CALL_UI_CONTENT(uiContentCb)                            \
-    do {                                                        \
-        if (uiContent_ != nullptr) {                            \
-            uiContent_->uiContentCb();                          \
-        }                                                       \
+#define CALL_UI_CONTENT(uiContentCb)                        \
+    do {                                                    \
+        if (uiContent_ != nullptr) {                        \
+            uiContent_->uiContentCb();                      \
+        }                                                   \
     } while (0)
 
 public:
@@ -182,6 +185,15 @@ public:
     void UpdateDisplayId(DisplayId from, DisplayId to);
     void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info);
     void UpdateActiveStatus(bool isActive);
+    void NotifyOutsidePressed();
+    void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
+    void NotifyKeyEvent(std::shared_ptr<MMI::KeyEvent> &keyEvent);
+    void NotifyPointEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void NotifyAviodAreaChange(const std::vector<Rect>& avoidArea);
+    void NotifyDisplayMoveChange(DisplayId from, DisplayId to);
+    void NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
+    void NotifyModeChange(WindowMode mode);
+    void NotifyDragEvent(const PointInfo& point, DragEvent event);
     void NotifyTouchOutside();
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
@@ -202,39 +214,51 @@ public:
     virtual ColorSpace GetColorSpace() override;
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    void PostListenerTask(ListenerTaskCallback &&callback, Priority priority = Priority::LOW,
+        const std::string taskName = "");
 private:
-    inline void NotifyAfterForeground() const
+    inline void NotifyAfterForeground()
     {
-        CALL_LIFECYCLE_LISTENER(AfterForeground);
-        CALL_UI_CONTENT(Foreground);
+        PostListenerTask([this]() {
+            CALL_LIFECYCLE_LISTENER(AfterForeground);
+            CALL_UI_CONTENT(Foreground);
+        });
     }
-    inline void NotifyAfterBackground() const
+    inline void NotifyAfterBackground()
     {
-        CALL_LIFECYCLE_LISTENER(AfterBackground);
-        CALL_UI_CONTENT(Background);
+        PostListenerTask([this]() {
+            CALL_LIFECYCLE_LISTENER(AfterBackground);
+            CALL_UI_CONTENT(Background);
+        });
     }
-    inline void NotifyAfterFocused() const
+    inline void NotifyAfterFocused()
     {
-        CALL_LIFECYCLE_LISTENER(AfterFocused);
-        CALL_UI_CONTENT(Focus);
+        PostListenerTask([this]() {
+            CALL_LIFECYCLE_LISTENER(AfterFocused);
+            CALL_UI_CONTENT(Focus);
+        });
     }
-    inline void NotifyAfterUnfocused() const
+    inline void NotifyAfterUnfocused()
     {
-        CALL_LIFECYCLE_LISTENER(AfterUnfocused);
-        CALL_UI_CONTENT(UnFocus);
+        PostListenerTask([this]() {
+            CALL_LIFECYCLE_LISTENER(AfterUnfocused);
+            CALL_UI_CONTENT(UnFocus);
+        });
     }
-    inline void NotifyListenerAfterUnfocused() const
+    inline void NotifyListenerAfterUnfocused()
     {
-        CALL_LIFECYCLE_LISTENER(AfterUnfocused);
+        PostListenerTask([this]() {
+            CALL_LIFECYCLE_LISTENER(AfterUnfocused);
+        });
     }
-    inline void NotifyBeforeDestroy(std::string windowName) const
+    inline void NotifyBeforeDestroy(std::string windowName)
     {
         CALL_UI_CONTENT(Destroy);
         if (notifyNativefunc_) {
             notifyNativefunc_(windowName);
         }
     }
-    inline void NotifyBeforeSubWindowDestroy(sptr<WindowImpl> window) const
+    inline void NotifyBeforeSubWindowDestroy(sptr<WindowImpl> window)
     {
         auto uiContent = window->GetUIContent();
         if (uiContent != nullptr) {
@@ -244,17 +268,23 @@ private:
             window->GetNativeDestroyCallback()(window->GetWindowName());
         }
     }
-    inline void NotifyAfterActive() const
+    inline void NotifyAfterActive()
     {
-        CALL_LIFECYCLE_LISTENER(AfterActive);
+        PostListenerTask([this]() {
+            CALL_LIFECYCLE_LISTENER(AfterActive);
+        });
     }
-    inline void NotifyAfterInactive() const
+    inline void NotifyAfterInactive()
     {
-        CALL_LIFECYCLE_LISTENER(AfterInactive);
+        PostListenerTask([this]() {
+            CALL_LIFECYCLE_LISTENER(AfterInactive);
+        });
     }
-    inline void NotifyForegroundFailed() const
+    inline void NotifyForegroundFailed()
     {
-        CALL_LIFECYCLE_LISTENER(ForegroundFailed);
+        PostListenerTask([this]() {
+            CALL_LIFECYCLE_LISTENER(ForegroundFailed);
+        });
     }
     void DestroyFloatingWindow();
     void DestroySubWindow();
@@ -282,6 +312,8 @@ private:
     WMError NotifyWindowTransition(TransitionReason reason);
     void UpdatePointerEventForStretchableWindow(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateDragType();
+    void InitListenerHandler();
+    bool CheckCameraFloatingWindowMultiCreated(WindowType type);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
@@ -314,6 +346,7 @@ private:
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;
     std::shared_ptr<AbilityRuntime::Context> context_;
+    std::shared_ptr<EventHandler> eventHandler_;
     std::recursive_mutex mutex_;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
@@ -333,7 +366,8 @@ private:
     bool isOriginRectSet_ = false;
     bool isWaitingFrame_ = false;
     bool needRemoveWindowInputChannel_ = false;
+    bool isListenerHandlerRunning_ = false;
 };
-}
-}
+} // namespace Rosen
+} // namespace OHOS
 #endif // OHOS_ROSEN_WINDOW_IMPL_H

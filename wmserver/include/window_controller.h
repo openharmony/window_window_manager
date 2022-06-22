@@ -63,6 +63,7 @@ public:
     void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
     void MinimizeWindowsByLauncher(std::vector<uint32_t>& windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
+    Orientation GetFullScreenWindowRequestedOrientation(DisplayId displayId);
 private:
     uint32_t GenWindowId();
     void FlushWindowInfo(uint32_t windowId);

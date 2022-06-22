@@ -678,7 +678,8 @@ void WindowLayoutPolicy::UpdateFloatingWindowSizeBySystemLimits(const sptr<Windo
         GetSystemLimitsConfig(displayRect, GetVirtualPixelRatio(node->GetDisplayId()));
 
     // limit minimum size of floating (not system type) window
-    if (!WindowHelper::IsSystemWindow(node->GetWindowType())) {
+    if (!WindowHelper::IsSystemWindow(node->GetWindowType()) ||
+        node->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
         winRect.width_ = std::max(systemLimits.minWidth_, winRect.width_);
         winRect.height_ = std::max(systemLimits.minHeight_, winRect.height_);
     }
