@@ -271,7 +271,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
         WLOGFE("window property is nullptr.");
         return;
     }
-    auto decorEnbale = property->GetDecorEnable();
+    auto decorEnable = property->GetDecorEnable();
     bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     bool parentLimit = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
     bool subWindow = WindowHelper::IsSubWindow(type);
@@ -283,7 +283,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
 
     WLOGFI("Id:%{public}u, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
         "deco:%{public}d, type:%{public}u, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-        node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnbale,
+        node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnable,
         static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     if (needAvoid) {
         limitRect = limitRectMap_[node->GetDisplayId()];
@@ -292,7 +292,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
     if (!floatingWindow) { // fullscreen window
         winRect = limitRect;
     } else { // floating window
-        if (subWindow && parentLimit) { // subwidow and limited by parent
+        if (subWindow && parentLimit) { // subwindow and limited by parent
             limitRect = node->parent_->GetWindowRect();
             UpdateFloatingLayoutRect(limitRect, winRect);
         }
