@@ -24,6 +24,7 @@
 #include "display_manager_config.h"
 #include "dm_common.h"
 #include "permission.h"
+#include "parameters.h"
 #include "screen_rotation_controller.h"
 #include "transaction/rs_interfaces.h"
 #include "window_manager_hilog.h"
@@ -52,7 +53,9 @@ DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_S
     abstractScreenController_(new AbstractScreenController(mutex_)),
     displayPowerController_(new DisplayPowerController(mutex_,
         std::bind(&DisplayManagerService::NotifyDisplayStateChange, this,
-            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)))
+            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4))),
+    isAutoRotationOpen_(OHOS::system::GetParameter(
+        "persist.display.ar.enabled", "1") == "1") // autoRotation default enabled
 {
 }
 
@@ -575,5 +578,14 @@ bool DisplayManagerService::IsScreenRotationLocked()
 void DisplayManagerService::SetScreenRotationLocked(bool isLocked)
 {
     ScreenRotationController::SetScreenRotationLocked(isLocked);
+}
+
+void DisplayManagerService::SetGravitySensorSubscriptionEnabled()
+{
+    if (!isAutoRotationOpen_) {
+        WLOGFE("autoRotation is not open");
+        return;
+    }
+    ScreenRotationController::SubscribeGravitySensor();
 }
 } // namespace OHOS::Rosen
