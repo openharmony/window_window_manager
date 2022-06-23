@@ -59,6 +59,7 @@ public:
     bool SetOrientation(ScreenId screenId, Orientation orientation) override;
     bool SetOrientationFromWindow(ScreenId screenId, Orientation orientation);
     bool SetRotationFromWindow(ScreenId screenId, Rotation targetRotation);
+    void SetGravitySensorSubscriptionEnabled();
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
     ScreenId GetRSScreenId(DisplayId displayId) const;
 
@@ -120,6 +121,7 @@ private:
     sptr<DisplayDumper> displayDumper_;
     static float customVirtualPixelRatio_;
     std::map<ScreenId, uint32_t> accessTokenIdMaps_;
+    bool isAutoRotationOpen_;
 };
 } // namespace OHOS::Rosen
 
