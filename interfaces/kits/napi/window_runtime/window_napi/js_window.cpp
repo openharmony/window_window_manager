@@ -271,6 +271,13 @@ NativeValue* JsWindow::SetCallingWindow(NativeEngine* engine, NativeCallbackInfo
     return (me != nullptr) ? me->OnSetCallingWindow(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::SetRequestedOrientation(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]SetRequestedOrientation");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetRequestedOrientation(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGFI("[NAPI]DisableWindowDecor");
@@ -1023,6 +1030,53 @@ NativeValue* JsWindow::OnIsShowing(NativeEngine& engine, NativeCallbackInfo& inf
     return result;
 }
 
+NativeValue* JsWindow::OnSetRequestedOrientation(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    Orientation requestedOrientation = Orientation::UNSPECIFIED;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    } else {
+        NativeNumber* nativeType = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
+        if (nativeType == nullptr) {
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+            WLOGFE("[NAPI]Failed to convert parameter to Orientation");
+        } else {
+            requestedOrientation = JS_TO_NATIVE_ORIENTATION_MAP.at(
+                static_cast<ApiOrientation>(static_cast<uint32_t>(*nativeType)));
+            if (requestedOrientation < Orientation::BEGIN || requestedOrientation > Orientation::END) {
+                WLOGFE("[NAPI]Orientation %{public}u invalid!", static_cast<uint32_t>(requestedOrientation));
+                errCode = WMError::WM_ERROR_INVALID_PARAM;
+            }
+        }
+    }
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, requestedOrientation, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode),
+                    "OnSetRequestedOrientation failed"));
+                WLOGFE("[NAPI]Window is nullptr or get invalid param");
+                return;
+            }
+            weakWindow->SetRequestedOrientation(requestedOrientation);
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnSetRequestedOrientation end, orientation = %{public}u",
+                weakWindow->GetWindowId(),
+                weakWindow->GetWindowName().c_str(),
+                static_cast<uint32_t>(requestedOrientation));
+        };
+
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::OnSetRequestedOrientation",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 NativeValue* JsWindow::OnIsSupportWideGamut(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WMError errCode = WMError::WM_OK;
@@ -1614,6 +1668,17 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     std::unique_ptr<JsWindow> jsWindow = std::make_unique<JsWindow>(window);
     object->SetNativePointer(jsWindow.release(), JsWindow::Finalizer, nullptr);
 
+    BindFunctions(engine, object);
+
+    std::shared_ptr<NativeReference> jsWindowRef;
+    jsWindowRef.reset(engine.CreateReference(objValue, 1));
+    std::lock_guard<std::recursive_mutex> lock(g_mutex);
+    g_jsWindowMap[windowName] = jsWindowRef;
+    return objValue;
+}
+
+void BindFunctions(NativeEngine& engine, NativeObject* object)
+{
     BindNativeFunction(engine, *object, "show", JsWindow::Show);
     BindNativeFunction(engine, *object, "destroy", JsWindow::Destroy);
     BindNativeFunction(engine, *object, "hide", JsWindow::Hide);
@@ -1647,12 +1712,7 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     BindNativeFunction(engine, *object, "disableWindowDecor", JsWindow::DisableWindowDecor);
     BindNativeFunction(engine, *object, "dump", JsWindow::Dump);
     BindNativeFunction(engine, *object, "setForbidSplitMove", JsWindow::SetForbidSplitMove);
-
-    std::shared_ptr<NativeReference> jsWindowRef;
-    jsWindowRef.reset(engine.CreateReference(objValue, 1));
-    std::lock_guard<std::recursive_mutex> lock(g_mutex);
-    g_jsWindowMap[windowName] = jsWindowRef;
-    return objValue;
+    BindNativeFunction(engine, *object, "setRequestedOrientation", JsWindow::SetRequestedOrientation);
 }
 }  // namespace Rosen
 }  // namespace OHOS
