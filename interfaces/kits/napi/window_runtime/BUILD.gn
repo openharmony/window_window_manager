@@ -77,9 +77,9 @@ ohos_shared_library("window_napi") {
   configs = [ ":window_manager_napi_config" ]
   deps = [
     ":window_native_kit",
-    "${aafwk_kits_path}/ability/native:abilitykit_native",
-    "${aafwk_kits_path}/appkit:app_context",
-    "${aafwk_kits_path}/appkit:appkit_native",
+    "${ability_runtime_kits_path}/ability/native:abilitykit_native",
+    "${ability_runtime_kits_path}/appkit:app_context",
+    "${ability_runtime_kits_path}/appkit:appkit_native",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/wmserver:libwms",

@@ -35,9 +35,9 @@ ohos_shared_library("display_napi") {
   configs = [ ":display_config" ]
 
   deps = [
-    "${aafwk_kits_path}/ability/native:abilitykit_native",
-    "${aafwk_kits_path}/appkit:app_context",
-    "${aafwk_kits_path}/appkit:appkit_native",
+    "${ability_runtime_kits_path}/ability/native:abilitykit_native",
+    "${ability_runtime_kits_path}/appkit:app_context",
+    "${ability_runtime_kits_path}/appkit:appkit_native",
     "../common:wm_napi_common",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
