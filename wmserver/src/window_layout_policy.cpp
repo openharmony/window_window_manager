@@ -448,7 +448,9 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<W
     if (requestedHotAreas.empty()) {
         hotAreas.emplace_back(rect);
     } else {
-        (void)WindowHelper::CalculateTouchHotAreas(winRect, requestedHotAreas, hotAreas);
+        if (!WindowHelper::CalculateTouchHotAreas(winRect, requestedHotAreas, hotAreas)) {
+            WLOGFW("some parameters in requestedHotAreas are abnormal");
+        }
     }
     node->SetTouchHotAreas(hotAreas);
 }

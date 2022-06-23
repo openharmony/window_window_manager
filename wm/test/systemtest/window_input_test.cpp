@@ -153,6 +153,14 @@ HWTEST_F(WindowInputTest, SetTouchHotAreas02, Function | MediumTest | Level3)
     rects.emplace_back(Rect{ 0, 0, windowRect.width_ / 2, 0 });
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetTouchHotAreas(rects));
 
+    rects.clear();
+    rects.emplace_back(Rect{ windowRect.width_, 0, windowRect.width_ / 2, windowRect.height_ / 2 });
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetTouchHotAreas(rects));
+
+    rects.clear();
+    rects.emplace_back(Rect{ 0, windowRect.height_, windowRect.width_ / 2, windowRect.height_ / 2 });
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetTouchHotAreas(rects));
+
     std::vector<Rect> requestedTouchHotAreas;
     window->GetRequestedTouchHotAreas(requestedTouchHotAreas);
     ASSERT_TRUE(requestedTouchHotAreas.empty());

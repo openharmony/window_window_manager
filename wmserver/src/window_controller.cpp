@@ -871,15 +871,22 @@ WMError WindowController::UpdateTouchHotAreas(const sptr<WindowNode>& node, cons
     }
     WLOGFI("windowId: %{public}u, size: %{public}d, rects: %{public}s",
         node->GetWindowId(), static_cast<int32_t>(rects.size()), oss.str().c_str());
-    Rect windowRect = node->GetWindowRect();
-    std::vector<Rect> hotAreas;
-    if (rects.size() > TOUCH_HOT_AREA_MAX_NUM || !WindowHelper::CalculateTouchHotAreas(windowRect, rects, hotAreas)) {
+    if (rects.size() > TOUCH_HOT_AREA_MAX_NUM) {
+        WLOGFE("the number of touch hot areas exceeds the maximum");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    node->GetWindowProperty()->SetTouchHotAreas(rects);
+
+    std::vector<Rect> hotAreas;
     if (rects.empty()) {
         hotAreas.emplace_back(node->GetFullWindowHotArea());
+    } else {
+        Rect windowRect = node->GetWindowRect();
+        if (!WindowHelper::CalculateTouchHotAreas(windowRect, rects, hotAreas)) {
+            WLOGFE("the requested touch hot areas are incorrect");
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
     }
+    node->GetWindowProperty()->SetTouchHotAreas(rects);
     node->SetTouchHotAreas(hotAreas);
     FlushWindowInfo(node->GetWindowId());
     return WMError::WM_OK;
