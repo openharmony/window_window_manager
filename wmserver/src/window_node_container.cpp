@@ -992,7 +992,7 @@ void WindowNodeContainer::FillWindowInfo(sptr<WindowInfo>& windowInfo, const spt
     windowInfo->mode_ = node->GetWindowMode();
     windowInfo->type_ = node->GetWindowType();
     auto property = node->GetWindowProperty();
-    if (!property) {
+    if (property != nullptr) {
         windowInfo->isDecorEnable_ = property->GetDecorEnable();
     }
 }
@@ -1016,6 +1016,9 @@ void WindowNodeContainer::NotifyAccessibilityWindowInfo(const sptr<WindowNode>& 
             }
             break;
         case WindowUpdateType::WINDOW_UPDATE_REMOVED:
+            isNeedNotify = true;
+            break;
+        case WindowUpdateType::WINDOW_UPDATE_PROPERTY:
             isNeedNotify = true;
             break;
         default:

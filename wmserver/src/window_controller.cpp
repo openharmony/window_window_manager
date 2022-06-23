@@ -779,18 +779,22 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
     }
     WLOGFI("window: [%{public}s, %{public}u] update property for action: %{public}u", node->GetWindowName().c_str(),
         node->GetWindowId(), static_cast<uint32_t>(action));
+    WMError ret = WMError::WM_OK;
     switch (action) {
         case PropertyChangeAction::ACTION_UPDATE_RECT: {
             node->SetDecoStatus(property->GetDecoStatus());
             node->SetOriginRect(property->GetOriginRect());
             node->SetDragType(property->GetDragType());
-            return ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
+            ret = ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
+            break;
         }
         case PropertyChangeAction::ACTION_UPDATE_MODE: {
-            return SetWindowMode(windowId, property->GetWindowMode());
+            ret = SetWindowMode(windowId, property->GetWindowMode());
+            break;
         }
         case PropertyChangeAction::ACTION_UPDATE_FLAGS: {
-            return SetWindowFlags(windowId, property->GetWindowFlags());
+            ret = SetWindowFlags(windowId, property->GetWindowFlags());
+            break;
         }
         case PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
             auto& props = property->GetSystemBarProperty();
@@ -850,7 +854,20 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         default:
             break;
     }
-    return WMError::WM_OK;
+    if (ret == WMError::WM_OK) {
+        NotifyWindowPropertyChanged(node);
+    }
+    return ret;
+}
+
+void WindowController::NotifyWindowPropertyChanged(const sptr<WindowNode>& node)
+{
+    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (windowNodeContainer == nullptr) {
+        WLOGFE("windowNodeContainer is null");
+        return;
+    }
+    windowNodeContainer->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
 }
 
 WMError WindowController::GetModeChangeHotZones(DisplayId displayId,
