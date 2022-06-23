@@ -25,7 +25,6 @@ group("systemtest") {
     ":wm_window_effect_test",
     ":wm_window_focus_test",
     ":wm_window_gamut_test",
-    ":wm_window_immersive_test",
     ":wm_window_input_method_test",
     ":wm_window_input_test",
     ":wm_window_layout_test",

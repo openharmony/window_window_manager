@@ -38,6 +38,7 @@ public:
     ~WindowRoot() = default;
 
     sptr<WindowNodeContainer> GetOrCreateWindowNodeContainer(DisplayId displayId);
+    sptr<WindowNodeContainer> GetWindowNodeContainer(DisplayId displayId);
     sptr<WindowNodeContainer> CreateWindowNodeContainer(sptr<DisplayInfo> displayInfo);
     sptr<WindowNode> GetWindowNode(uint32_t windowId) const;
 
@@ -58,7 +59,7 @@ public:
     WMError RequestFocus(uint32_t windowId);
     WMError RequestActiveWindow(uint32_t windowId);
     WMError MinimizeStructuredAppWindowsExceptSelf(sptr<WindowNode>& node);
-    std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
+    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
     WMError SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);

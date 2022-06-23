@@ -59,8 +59,8 @@ public:
 
 class TestAvoidAreaChangedListener : public IAvoidAreaChangedListener {
 public:
-    std::vector<Rect> avoidAreas_;
-    void OnAvoidAreaChanged(std::vector<Rect> avoidAreas) override;
+    AvoidArea avoidAreas_;
+    void OnAvoidAreaChanged(const AvoidArea avoidAreas) override;
 };
 
 class WindowImmersiveTest : public testing::Test {
@@ -97,7 +97,7 @@ sptr<TestAvoidAreaChangedListener> WindowImmersiveTest::testAvoidAreaChangedList
 void WindowImmersiveTest::SetWindowSystemProps(const sptr<Window>& window, const SystemBarRegionTints& tints)
 {
     for (auto tint : tints) {
-        window->SetSystemBarProperty(tint.type_, tint.prop_);
+        window->SetSystemBarProperty(tint.type_, tint.propWindowImmersiveTest _);
     }
 }
 
@@ -106,15 +106,16 @@ void WindowImmersiveTest::DumpFailedInfo(const SystemBarRegionTints& expect)
     auto act = testSystemBarChangedListener_->tints_;
     WLOGFI("WindowImmersiveTest Expected:");
     for (auto tint : expect) {
-        WLOGFI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
-            static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
-            tint.prop_.backgroundColor_, tint.prop_.contentColor_);
+         WLOGFI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
+             static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
+             tint.prop_.backgroundColor_, tint.prop_.contentColor_);
     }
     WLOGFI("WindowImmersiveTest Act: ");
+
     for (auto tint : act) {
-        WLOGFI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
-            static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
-            tint.prop_.backgroundColor_, tint.prop_.contentColor_);
+         WLOGFI("WindowType: %{public}4d, Enable: %{public}4d, Color: %{public}x | %{public}x",
+             static_cast<uint32_t>(tint.type_), tint.prop_.enable_,
+             tint.prop_.backgroundColor_, tint.prop_.contentColor_);
     }
 }
 
@@ -188,7 +189,7 @@ void TestSystemBarChangedListener::OnSystemBarPropertyChange(DisplayId displayId
     }
 }
 
-void TestAvoidAreaChangedListener::OnAvoidAreaChanged(std::vector<Rect> avoidAreas)
+void TestAvoidAreaChangedListener::OnAvoidAreaChanged(AvoidArea avoidAreas)
 {
     avoidAreas_ = avoidAreas;
 }
@@ -386,10 +387,10 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, Function | MediumTest | 
     AvoidArea avoidarea;
     WMError ret = win->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea);
     ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.leftRect));
-    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.rightRect));
-    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.topRect));
-    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.bottomRect));
+    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.leftRect_));
+    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.rightRect_));
+    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.topRect_));
+    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.bottomRect_));
     ASSERT_EQ(WMError::WM_OK, win->Hide());
 }
 
@@ -403,19 +404,29 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest02, Function | MediumTest | 
     // Add full screenwindow for call GetAvoidArea, and push_back in activeWindows_
     const sptr<Window>& win = utils::CreateTestWindow(fullScreenAppinfo_);
     activeWindows_.push_back(win);
+    ASSERT_EQ(WMError::WM_OK, win->Show());
+    WLOGFI("win.posY_=%{public}d", win->GetRect().posY_);
 
     // Add a unexist leftAvoid
     avoidBarInfo_.rect = {0, 0, leftAvoidW_, leftAvoidH_};
     const sptr<Window>& left = utils::CreateTestWindow(avoidBarInfo_);
     activeWindows_.push_back(left);
+    WLOGFI("win.posY_=%{public}d", win->GetRect().posY_);
     ASSERT_EQ(WMError::WM_OK, left->Show());
     ASSERT_EQ(WMError::WM_OK, left->Resize(leftAvoidW_, leftAvoidH_));
+
 
     // Test GetAvoidArea
     AvoidArea avoidarea;
     WMError ret = win->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidarea);
+    WLOGFI("ret = [%{public}u, avoidArea: top[%{public}d, %{public}d, %{public}u, %{public}u], left[%{public}d, %{public}d, %{public}u, %{public}u], " \
+        "right[%{public}d, %{public}d, %{public}u, %{public}u], bottom[%{public}d, %{public}d, %{public}u, %{public}u]", ret,
+        avoidarea.topRect_.posX_, avoidarea.topRect_.posY_, avoidarea.topRect_.width_, avoidarea.topRect_.height_,
+        avoidarea.leftRect_.posX_, avoidarea.leftRect_.posY_, avoidarea.leftRect_.width_, avoidarea.leftRect_.height_,
+        avoidarea.rightRect_.posX_, avoidarea.rightRect_.posY_, avoidarea.rightRect_.width_, avoidarea.rightRect_.height_,
+        avoidarea.bottomRect_.posX_, avoidarea.bottomRect_.posY_, avoidarea.bottomRect_.width_, avoidarea.bottomRect_.height_);
     ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_TRUE(utils::RectEqualTo(left, avoidarea.leftRect));
+    ASSERT_TRUE(utils::RectEqualTo(left, avoidarea.leftRect_));
     ASSERT_EQ(WMError::WM_OK, left->Hide());
     ASSERT_EQ(WMError::WM_OK, win->Hide());
 }

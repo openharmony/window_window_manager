@@ -79,9 +79,16 @@ public:
         return mode == WindowMode::WINDOW_MODE_FLOATING;
     }
 
-    static inline bool IsAvoidAreaWindow(WindowType type)
+    static inline bool IsSystemBarWindow(WindowType type)
     {
         return (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    }
+
+    static inline bool IsOverlayWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_STATUS_BAR
+            || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR
+            || type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     }
 
     static inline bool IsFullScreenWindow(WindowMode mode)
@@ -122,11 +129,11 @@ public:
 
     static inline Rect GetOverlap(const Rect& rect1, const Rect& rect2, const int offsetX, const int offsetY)
     {
-        const static Rect noOverlapRect = { 0, 0, 0, 0};
+        const static Rect noOverlapRect = { 0, 0, 0, 0 };
         int32_t x_begin = std::max(rect1.posX_, rect2.posX_);
-        int32_t x_end = std::min(rect1.posX_ + rect1.width_, rect2.posX_ + rect2.width_);
+        int32_t x_end = std::min(rect1.posX_ + rect1.width_ - 1, rect2.posX_ + rect2.width_ - 1);
         int32_t y_begin = std::max(rect1.posY_, rect2.posY_);
-        int32_t y_end = std::min(rect1.posY_ + rect1.height_, rect2.posY_ + rect2.height_);
+        int32_t y_end = std::min(rect1.posY_ + rect1.height_ - 1, rect2.posY_ + rect2.height_ - 1);
         if (y_begin > y_end || x_begin > x_end) {
             return noOverlapRect;
         }

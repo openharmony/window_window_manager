@@ -18,9 +18,12 @@
 
 #include <map>
 #include <set>
+#include <unordered_map>
 #include <vector>
+
 #include <refbase.h>
 
+#include "class_var_definition.h"
 #include "window_node.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
@@ -34,28 +37,35 @@ enum class AvoidControlType : uint32_t {
     AVOID_NODE_UNKNOWN,
 };
 
-using UpdateAvoidAreaFunc = std::function<void (std::vector<Rect>& avoidArea, DisplayId displayId)>;
-
 class AvoidAreaController : public RefBase {
 public:
-    AvoidAreaController(DisplayId displayId, UpdateAvoidAreaFunc callback);
+    AvoidAreaController(uint32_t& focusedWindow) : focusedWindow_(focusedWindow) {};
     ~AvoidAreaController() = default;
 
-    WMError AvoidControl(const sptr<WindowNode>& node, AvoidControlType type);
-
-    bool IsAvoidAreaNode(const sptr<WindowNode>& node) const;
-    std::vector<Rect> GetAvoidArea(DisplayId displayId) const;
-    std::vector<Rect> GetAvoidAreaByType(AvoidAreaType avoidAreaType, DisplayId displayId) const;
-    void UpdateAvoidNodesMap(DisplayId displayId, bool isAdd);
+    void UpdateAvoidAreaListener(sptr<WindowNode>& windowNode, bool isRegisterListener);
+    void ProcessWindowChange(const sptr<WindowNode>& windowNode, AvoidControlType avoidType,
+        const std::function<bool(sptr<WindowNode>)>& checkFunc);
+    AvoidArea GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType) const;
 
 private:
-    std::map<uint32_t, sptr<WindowNode>>* GetAvoidNodesByDisplayId(DisplayId displayId);
-    void UseCallbackNotifyAvoidAreaChanged(std::vector<Rect>& avoidArea, DisplayId displayId) const;
-    void DumpAvoidArea(const std::vector<Rect>& avoidArea) const;
-    AvoidPosType GetAvoidPosType(const Rect& rect, DisplayId displayId) const;
+    void AddOrRemoveOverlayWindowIfNeed(const sptr<WindowNode>& overlayNode, bool isAdding);
+    void AddOrRemoveKeyboard(const sptr<WindowNode>& keyboardNode, bool isAdding);
+    void UpdateOverlayWindowIfNeed(const sptr<WindowNode>& node,
+        const std::function<bool(sptr<WindowNode>)>& checkFunc);
+    AvoidPosType CalculateOverlayRect(const sptr<WindowNode>& node,
+        const sptr<WindowNode>& overlayNode, Rect& overlayRect) const;
+    AvoidPosType GetAvoidPosType(const Rect& windowRect, const Rect& overlayRect) const;
+    void SetAvoidAreaRect(AvoidArea& avoidArea, Rect& rect, AvoidPosType type) const;
+    bool UpdateAvoidAreaIfNeed(const AvoidArea& avoidArea, const sptr<WindowNode>& node, AvoidAreaType avoidAreaType);
+    AvoidArea GetAvoidAreaSystemType(const sptr<WindowNode>& node) const;
+    AvoidArea GetAvoidAreaKeyboardType(const sptr<WindowNode>& node) const;
 
-    std::map<DisplayId, std::unique_ptr<std::map<uint32_t, sptr<WindowNode>>>> avoidNodesMaps_;
-    UpdateAvoidAreaFunc updateAvoidAreaCallBack_;
+    uint32_t& focusedWindow_;
+    std::unordered_map<uint32_t, sptr<WindowNode>> overlayWindowMap_;
+    std::set<sptr<WindowNode>> avoidAreaListenerNodes_;
+    std::map<uint32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
+    DEFINE_VAR_DEFAULT_FUNC_SET(bool, FlagForProcessWindowChange, isForbidProcessingWindowChange, false)
+    uint32_t lastSoftInputKeyboardAreaUpdatedWindowId_ { 0 };
 };
 }
 }

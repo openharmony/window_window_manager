@@ -100,6 +100,10 @@ NativeValue* AvoidAreaTypeInit(NativeEngine* engine)
         static_cast<int32_t>(AvoidAreaType::TYPE_SYSTEM)));
     object->SetProperty("TYPE_CUTOUT", CreateJsValue(*engine,
         static_cast<int32_t>(AvoidAreaType::TYPE_CUTOUT)));
+    object->SetProperty("TYPE_SYSTEM_GESTURE", CreateJsValue(*engine,
+        static_cast<int32_t>(AvoidAreaType::TYPE_SYSTEM_GESTURE)));
+    object->SetProperty("TYPE_KEYBOARD", CreateJsValue(*engine,
+        static_cast<int32_t>(AvoidAreaType::TYPE_KEYBOARD)));
     return objValue;
 }
 
@@ -204,7 +208,7 @@ NativeValue* WindowLayoutModeInit(NativeEngine* engine)
     return objValue;
 }
 
-NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect)
+NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect& rect)
 {
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
@@ -427,18 +431,19 @@ bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
     return true;
 }
 
-NativeValue* ChangeAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avoidArea)
+NativeValue* ConvertAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avoidArea, AvoidAreaType type)
 {
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
-        WLOGFE("[NAPI]Failed to convert rect to jsObject");
-        return engine.CreateUndefined();
+        WLOGFE("[NAPI]Failed to convert avoidArea to jsObject");
+        return nullptr;
     }
-    object->SetProperty("leftRect", GetRectAndConvertToJsValue(engine, avoidArea.leftRect));
-    object->SetProperty("topRect", GetRectAndConvertToJsValue(engine, avoidArea.topRect));
-    object->SetProperty("rightRect", GetRectAndConvertToJsValue(engine, avoidArea.rightRect));
-    object->SetProperty("bottomRect", GetRectAndConvertToJsValue(engine, avoidArea.bottomRect));
+    object->SetProperty("visible", CreateJsValue(engine, type == AvoidAreaType::TYPE_CUTOUT ? false : true));
+    object->SetProperty("leftRect", GetRectAndConvertToJsValue(engine, avoidArea.leftRect_));
+    object->SetProperty("topRect", GetRectAndConvertToJsValue(engine, avoidArea.topRect_));
+    object->SetProperty("rightRect", GetRectAndConvertToJsValue(engine, avoidArea.rightRect_));
+    object->SetProperty("bottomRect", GetRectAndConvertToJsValue(engine, avoidArea.bottomRect_));
     return objValue;
 }
 

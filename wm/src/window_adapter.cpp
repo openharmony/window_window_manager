@@ -99,11 +99,10 @@ WMError WindowAdapter::SetWindowAnimationController(const sptr<RSIWindowAnimatio
     return windowManagerServiceProxy_->SetWindowAnimationController(controller);
 }
 
-WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, std::vector<Rect>& avoidRect)
+WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidArea)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
-    avoidRect = windowManagerServiceProxy_->GetAvoidAreaByType(windowId, type);
+    avoidArea = windowManagerServiceProxy_->GetAvoidAreaByType(windowId, type);
     return WMError::WM_OK;
 }
 
@@ -257,6 +256,13 @@ void WindowAdapter::MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, b
     INIT_PROXY_CHECK_RETURN();
     windowManagerServiceProxy_->MinimizeWindowsByLauncher(windowIds, isAnimated, finishCallback);
     return;
+}
+
+WMError WindowAdapter::UpdateAvoidAreaListener(uint32_t windowId, bool haveListener)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
+    return windowManagerServiceProxy_->UpdateAvoidAreaListener(windowId, haveListener);
 }
 } // namespace Rosen
 } // namespace OHOS

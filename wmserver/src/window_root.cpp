@@ -66,9 +66,22 @@ ScreenId WindowRoot::GetScreenGroupId(DisplayId displayId, bool& isRecordedDispl
 
 sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId displayId)
 {
-    bool isRecordedDisplay;
-    ScreenId displayGroupId = GetScreenGroupId(displayId, isRecordedDisplay);
+    auto container = GetWindowNodeContainer(displayId);
+    if (container != nullptr) {
+        return container;
+    }
+
+    // In case of have no container for default display, create container
+    WLOGFE("Create container for current display, displayId: %{public}" PRIu64 "", displayId);
     sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+    return CreateWindowNodeContainer(displayInfo);
+}
+
+sptr<WindowNodeContainer> WindowRoot::GetWindowNodeContainer(DisplayId displayId)
+{
+    bool isRecordedDisplay;
+    sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
+    ScreenId displayGroupId = GetScreenGroupId(displayId, isRecordedDisplay);
     auto iter = windowNodeContainerMap_.find(displayGroupId);
     if (iter != windowNodeContainerMap_.end()) {
         // if container exist for screenGroup and display is not be recorded, process expand display
@@ -81,10 +94,7 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId d
         }
         return iter->second;
     }
-
-    // In case of have no container for default display, create container
-    WLOGFE("Create container for current display, displayId: %{public}" PRIu64 "", displayId);
-    return CreateWindowNodeContainer(displayInfo);
+    return nullptr;
 }
 
 sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(sptr<DisplayInfo> displayInfo)
@@ -260,7 +270,6 @@ void WindowRoot::ExitSplitMode(DisplayId displayId)
     container->ExitSplitMode(displayId);
 }
 
-
 void WindowRoot::AddSurfaceNodeIdWindowNodePair(uint64_t surfaceNodeId, sptr<WindowNode> node)
 {
     surfaceIdWindowNodeMap_.insert(std::make_pair(surfaceNodeId, node));
@@ -323,21 +332,20 @@ void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> o
     }
 }
 
-std::vector<Rect> WindowRoot::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
+AvoidArea WindowRoot::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
 {
-    std::vector<Rect> avoidArea;
-    auto node = GetWindowNode(windowId);
+    AvoidArea avoidArea;
+    sptr<WindowNode> node = GetWindowNode(windowId);
     if (node == nullptr) {
         WLOGFE("could not find window");
         return avoidArea;
     }
-    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    sptr<WindowNodeContainer> container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
         WLOGFE("add window failed, window container could not be found");
         return avoidArea;
     }
-    avoidArea = container->GetAvoidAreaByType(avoidAreaType, node->GetDisplayId());
-    return avoidArea;
+    return container->GetAvoidAreaByType(node, avoidAreaType);
 }
 
 void WindowRoot::MinimizeAllAppWindows(DisplayId displayId)

@@ -247,7 +247,7 @@ void WindowDumper::ShowIllegalArgsInfo(std::string& dumpInfo, WMError errCode) c
             dumpInfo.append("The arguments are illegal and you can enter '-h' for help.");
             break;
         case WMError::WM_ERROR_NULLPTR:
-            dumpInfo.append("The window is invalid,  you can enter '-a' to get valid window id.");
+            dumpInfo.append("The window is invalid, you can enter '-a' to get valid window id.");
             break;
         default:
             break;

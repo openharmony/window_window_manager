@@ -148,7 +148,7 @@ const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
     {ApiOrientation::LOCKED,                                Orientation::LOCKED                             },
 };
 
-    NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect);
+    NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect& rect);
     NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window);
     bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
         std::map<WindowType, SystemBarProperty>& properties, sptr<Window>& window);
@@ -156,7 +156,7 @@ const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
         NativeEngine& engine, NativeCallbackInfo& info, sptr<Window>& window);
     NativeValue* CreateJsSystemBarRegionTintArrayObject(NativeEngine& engine,
         const SystemBarRegionTints& tints);
-    NativeValue* ChangeAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avoidArea);
+    NativeValue* ConvertAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avoidArea, AvoidAreaType type);
     bool CheckCallingPermission(std::string permission);
     NativeValue* WindowTypeInit(NativeEngine* engine);
     NativeValue* AvoidAreaTypeInit(NativeEngine* engine);
