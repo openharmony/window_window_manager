@@ -48,7 +48,8 @@ const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appFloatingWindowMap_;
-
+static int ctorCnt = 0;
+static int dtorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     property_ = new (std::nothrow) WindowProperty();
@@ -57,7 +58,6 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetWindowType(option->GetWindowType());
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowBackgroundBlur(option->GetWindowBackgroundBlur());
-    property_->SetAlpha(option->GetAlpha());
     property_->SetFullScreen(option->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     property_->SetFocusable(option->GetFocusable());
     property_->SetTouchable(option->GetTouchable());
@@ -81,6 +81,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = property_->GetWindowName();
     surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    WLOGFI("WindowImpl constructor Count: %{public}d name: %{public}s", ++ctorCnt, property_->GetWindowName().c_str());
 }
 
 void WindowImpl::InitListenerHandler()
@@ -104,7 +105,8 @@ WindowImpl::~WindowImpl()
     if (eventHandler_ != nullptr) {
         eventHandler_.reset();
     }
-    WLOGFI("windowName: %{public}s, windowId: %{public}d", GetWindowName().c_str(), GetWindowId());
+    WLOGFI("windowName: %{public}s, windowId: %{public}d, dtorCnt: %{public}d, surfaceNode:%{public}d",
+        GetWindowName().c_str(), GetWindowId(), ++dtorCnt, static_cast<uint32_t>(surfaceNode_.use_count()));
     Destroy();
 }
 
@@ -364,14 +366,29 @@ WMError WindowImpl::SetWindowBackgroundBlur(WindowBlurLevel level)
     return SingletonContainer::Get<WindowAdapter>().SetWindowBackgroundBlur(property_->GetWindowId(), level);
 }
 
-WMError WindowImpl::SetAlpha(float alpha)
+void WindowImpl::SetAlpha(float alpha)
 {
     WLOGFI("[Client] Window %{public}u alpha %{public}f", property_->GetWindowId(), alpha);
     if (!IsWindowValid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return;
     }
     property_->SetAlpha(alpha);
-    return SingletonContainer::Get<WindowAdapter>().SetAlpha(property_->GetWindowId(), alpha);
+    surfaceNode_->SetAlpha(alpha);
+}
+
+void WindowImpl::SetTransform(const Transform& trans)
+{
+    WLOGFI("[Client] Window %{public}u SetTransform", property_->GetWindowId());
+    if (!IsWindowValid()) {
+        return;
+    }
+    property_->SetTransform(trans);
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY);
+}
+
+Transform WindowImpl::GetTransform() const
+{
+    return property_->GetTransform();
 }
 
 WMError WindowImpl::AddWindowFlag(WindowFlag flag)
@@ -833,7 +850,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
     return ret;
 }
 
-WMError WindowImpl::Show(uint32_t reason)
+WMError WindowImpl::Show(uint32_t reason, bool isCustomAnimation)
 {
     WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Show, reason:%{public}u",
         name_.c_str(), property_->GetWindowId(), reason);
@@ -864,6 +881,8 @@ WMError WindowImpl::Show(uint32_t reason)
         return WMError::WM_OK;
     }
     SetDefaultOption();
+    // set true success when transitionController exist; set false when complete transition
+    property_->SetCustomAnimation(isCustomAnimation);
     WMError ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
@@ -876,7 +895,7 @@ WMError WindowImpl::Show(uint32_t reason)
     return ret;
 }
 
-WMError WindowImpl::Hide(uint32_t reason)
+WMError WindowImpl::Hide(uint32_t reason, bool isCustomAnimation)
 {
     WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Hide", name_.c_str(), property_->GetWindowId());
     if (!IsWindowValid()) {
@@ -892,6 +911,7 @@ WMError WindowImpl::Hide(uint32_t reason)
         WLOGFI("window is already hidden id: %{public}u", property_->GetWindowId());
         return WMError::WM_OK;
     }
+    property_->SetCustomAnimation(isCustomAnimation);
     WMError ret = SingletonContainer::Get<WindowAdapter>().RemoveWindow(property_->GetWindowId());
     RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, ret);
     if (ret != WMError::WM_OK) {

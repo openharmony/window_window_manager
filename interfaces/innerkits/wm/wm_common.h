@@ -172,6 +172,25 @@ namespace {
     constexpr int32_t INVALID_UID = -1;
 }
 
+class Transform {
+public:
+    Transform()
+        : pivotX_(0.5f), pivotY_(0.5f), scaleX_(1.f), scaleY_(1.f), rotationX_(0.f), rotationY_(0.f), rotationZ_(0.f),
+          translateX_(0.f), translateY_(0.f), translateZ_(0.f)
+    {}
+    ~Transform() {}
+    float pivotX_;
+    float pivotY_;
+    float scaleX_;
+    float scaleY_;
+    float rotationX_;
+    float rotationY_;
+    float rotationZ_;
+    float translateX_;
+    float translateY_;
+    float translateZ_;
+};
+
 struct SystemBarProperty {
     bool enable_;
     uint32_t backgroundColor_;
