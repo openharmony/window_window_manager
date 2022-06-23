@@ -116,7 +116,7 @@ public:
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() const override;
     virtual uint32_t GetWindowFlags() const override;
-    uint32_t GetModeSupportInfo() const override;
+    uint32_t GetRequestModeSupportInfo() const override;
     inline NotifyNativeWinDestroyFunc GetNativeDestroyCallback()
     {
         return notifyNativefunc_;
@@ -191,9 +191,10 @@ public:
     virtual void RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     virtual void UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
-    virtual void SetModeSupportInfo(uint32_t modeSupportInfo) override;
+    virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) override;
     void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason);
     void UpdateMode(WindowMode mode);
+    void UpdateModeSupportInfo(uint32_t modeSupportInfo);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
     virtual void RequestFrame() override;
@@ -339,7 +340,10 @@ private:
     void UpdateDragType();
     void InitListenerHandler();
     bool CheckCameraFloatingWindowMultiCreated(WindowType type);
-    void SetOrientationFromAbility();
+    void GetConfigurationFromAbilityInfo();
+    void UpdateTitleButtonVisibility();
+    void SetModeSupportInfo(uint32_t modeSupportInfo);
+    uint32_t GetModeSupportInfo() const;
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {

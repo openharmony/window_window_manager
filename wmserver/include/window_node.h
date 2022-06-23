@@ -71,6 +71,7 @@ public:
     void SetDragType(DragType dragType);
     void SetOriginRect(const Rect& rect);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
+    void SetWindowSizeLimits(const WindowSizeLimits& sizeLimits);
 
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
@@ -103,6 +104,7 @@ public:
     void ResetWindowSizeChangeReason();
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     uint32_t GetAccessTokenId() const;
+    WindowSizeLimits GetWindowSizeLimits() const;
 
     bool EnableDefaultAnimation(bool propertyEnabled, bool animationPlayed);
     sptr<WindowNode> parent_;

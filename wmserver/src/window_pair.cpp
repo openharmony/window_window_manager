@@ -183,10 +183,6 @@ void WindowPair::ExitSplitMode()
         hideWindow = secondary_;
         fullScreenWindow = primary_;
     }
-    if (WindowHelper::IsWindowModeSupported(fullScreenWindow->GetModeSupportInfo(),
-        WindowMode::WINDOW_MODE_FULLSCREEN)) {
-        fullScreenWindow->GetWindowProperty()->SetLastWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    }
     MinimizeApp::AddNeedMinimizeApp(hideWindow, MinimizeReason::SPLIT_QUIT);
     MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::SPLIT_QUIT);
     WLOGFI("Exit Split Mode, Minimize Window %{public}u", hideWindow->GetWindowId());
@@ -385,16 +381,14 @@ void WindowPair::SwitchPosition()
     WLOGFI("Switch the pair pos, pri: %{public}u pri-mode: %{public}u, sec: %{public}u sec-mode: %{public}u,",
         primary_->GetWindowId(), primary_->GetWindowMode(), secondary_->GetWindowId(), secondary_->GetWindowMode());
     if (primary_->GetWindowMode() == secondary_->GetWindowMode() &&
-        primary_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-        WindowHelper::IsWindowModeSupported(primary_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
+        primary_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
         primary_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
         if (primary_->GetWindowToken() != nullptr) {
             primary_->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
         }
         std::swap(primary_, secondary_);
     } else if (primary_->GetWindowMode() == secondary_->GetWindowMode() &&
-        primary_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY &&
-        WindowHelper::IsWindowModeSupported(secondary_->GetModeSupportInfo(), WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
+        primary_->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         secondary_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
         if (secondary_->GetWindowToken() != nullptr) {
             secondary_->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);

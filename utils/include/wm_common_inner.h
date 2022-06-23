@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WM_COMMON_INNER_H
 #define OHOS_ROSEN_WM_COMMON_INNER_H
 
+#include <cfloat>
 #include <cinttypes>
 #include "wm_common.h"
 
@@ -94,16 +95,19 @@ struct ModeChangeHotZonesConfig {
     uint32_t secondaryRange_;
 };
 
-struct FloatingWindowLimitsConfig {
-    bool isFloatingWindowLimitsConfigured_;
+struct WindowSizeLimits {
     uint32_t maxWidth_;
     uint32_t maxHeight_;
     uint32_t minWidth_;
     uint32_t minHeight_;
     float maxRatio_;
     float minRatio_;
-    FloatingWindowLimitsConfig() : isFloatingWindowLimitsConfigured_(false), maxWidth_(0), maxHeight_(0), minWidth_(0),
-        minHeight_(0), maxRatio_(0.0f), minRatio_(0.0f) {}
+    WindowSizeLimits() : maxWidth_(UINT32_MAX), maxHeight_(UINT32_MAX), minWidth_(0),
+        minHeight_(0), maxRatio_(FLT_MAX), minRatio_(0.0f) {}
+    WindowSizeLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth,
+        uint32_t minHeight, float maxRatio, float minRatio)
+        : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth),
+        minHeight_(minHeight), maxRatio_(maxRatio), minRatio_(minRatio) {}
 };
 
 struct ModeChangeHotZones {

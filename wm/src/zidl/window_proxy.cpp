@@ -76,6 +76,27 @@ void WindowProxy::UpdateWindowMode(WindowMode mode)
     return;
 }
 
+void WindowProxy::UpdateWindowModeSupportInfo(uint32_t modeSupportInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(modeSupportInfo)) {
+        WLOGFE("Write WindowMode failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_UPDATE_MODE_SUPPORT_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+    return;
+}
+
 void WindowProxy::UpdateFocusStatus(bool focused)
 {
     MessageParcel data;

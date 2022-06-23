@@ -109,6 +109,7 @@ public:
     void UpdateAvoidAreaListener(sptr<WindowNode>& windowNode, bool haveAvoidAreaListener);
     void BeforeProcessWindowAvoidAreaChangeWhenDisplayChange() const;
     void ProcessWindowAvoidAreaChangeWhenDisplayChange() const;
+    WindowLayoutMode GetCurrentLayoutMode() const;
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
@@ -150,6 +151,7 @@ private:
                                                const std::vector<DisplayId>& curShowingDisplays);
     void FillWindowInfo(sptr<WindowInfo>& windowInfo, const sptr<WindowNode>& node) const;
     bool CheckWindowNodeWhetherInWindowTree(const sptr<WindowNode>& node) const;
+    void UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
 
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
