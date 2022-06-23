@@ -304,6 +304,9 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         isScreenLocked_ = false;
     }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
+        DisplayManagerServiceInner::GetInstance().SetGravitySensorSubscriptionEnabled();
+    }
     WLOGFI("RemoveWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
