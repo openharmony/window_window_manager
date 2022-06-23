@@ -33,7 +33,6 @@ public:
     void SetWindowType(WindowType type);
     void SetWindowMode(WindowMode mode);
     void SetWindowBackgroundBlur(WindowBlurLevel level);
-    void SetAlpha(float alpha);
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
     void SetDisplayId(DisplayId displayId);
@@ -58,7 +57,6 @@ public:
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;
     WindowBlurLevel GetWindowBackgroundBlur() const;
-    float GetAlpha() const;
     bool GetFocusable() const;
     bool GetTouchable() const;
     DisplayId GetDisplayId() const;
@@ -75,7 +73,6 @@ private:
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     WindowMode mode_ { WindowMode::WINDOW_MODE_FULLSCREEN };
     WindowBlurLevel level_ { WindowBlurLevel::WINDOW_BLUR_OFF };
-    float alpha_ { 1.0f };
     bool focusable_ { true };
     bool touchable_ { true };
     DisplayId displayId_ { 0 };

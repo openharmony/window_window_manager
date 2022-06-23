@@ -387,6 +387,10 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
 bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId displayId, bool isAdd, bool animationPlayed)
 {
     WM_FUNCTION_TRACE();
+    if (node->GetWindowProperty()->GetCustomAnimation()) {
+        WLOGFI("not need to update RsTree since SystemWindowAnimation is playing");
+        return false;
+    }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
         WLOGFI("WINDOW_TYPE_APP_COMPONENT not need to update RsTree");
         return true;
@@ -413,7 +417,7 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId display
         }
     };
 
-    if (IsWindowAnimationEnabled && !animationPlayed && !node->isAppCrash_) {
+    if (node->EnableDefaultAnimation(IsWindowAnimationEnabled, animationPlayed)) {
         WLOGFI("add or remove window with animation");
         // default transition duration: 350ms
         static const RSAnimationTimingProtocol timingProtocol(350);

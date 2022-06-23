@@ -103,6 +103,11 @@ void WindowProperty::SetAlpha(float alpha)
     alpha_ = alpha;
 }
 
+void WindowProperty::SetTransform(const Transform& trans)
+{
+    trans_ = trans;
+}
+
 void WindowProperty::SetBrightness(float brightness)
 {
     brightness_ = brightness;
@@ -270,6 +275,11 @@ float WindowProperty::GetAlpha() const
     return alpha_;
 }
 
+Transform WindowProperty::GetTransform() const
+{
+    return trans_;
+}
+
 float WindowProperty::GetBrightness() const
 {
     return brightness_;
@@ -407,7 +417,6 @@ bool WindowProperty::MapMarshalling(Parcel& parcel) const
 
 void WindowProperty::MapUnmarshalling(Parcel& parcel, WindowProperty* property)
 {
-    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap;
     uint32_t size = parcel.ReadUint32();
     for (uint32_t i = 0; i < size; i++) {
         WindowType type = static_cast<WindowType>(parcel.ReadUint32());
@@ -440,6 +449,31 @@ void WindowProperty::UnmarshallingTouchHotAreas(Parcel& parcel, WindowProperty* 
     }
 }
 
+bool WindowProperty::MarshallingTransform(Parcel& parcel) const
+{
+    return parcel.WriteFloat(trans_.pivotX_) && parcel.WriteFloat(trans_.pivotY_) &&
+        parcel.WriteFloat(trans_.scaleX_) && parcel.WriteFloat(trans_.scaleY_) &&
+        parcel.WriteFloat(trans_.rotationX_) && parcel.WriteFloat(trans_.rotationY_) &&
+        parcel.WriteFloat(trans_.rotationZ_) && parcel.WriteFloat(trans_.translateX_) &&
+        parcel.WriteFloat(trans_.translateY_) && parcel.WriteFloat(trans_.translateZ_);
+}
+
+void WindowProperty::UnmarshallingTransform(Parcel& parcel, WindowProperty* property)
+{
+    Transform trans;
+    trans.pivotX_ = parcel.ReadFloat();
+    trans.pivotY_ = parcel.ReadFloat();
+    trans.scaleX_ = parcel.ReadFloat();
+    trans.scaleY_ = parcel.ReadFloat();
+    trans.rotationX_ = parcel.ReadFloat();
+    trans.rotationY_ = parcel.ReadFloat();
+    trans.rotationZ_ = parcel.ReadFloat();
+    trans.translateX_ = parcel.ReadFloat();
+    trans.translateY_ = parcel.ReadFloat();
+    trans.translateZ_ = parcel.ReadFloat();
+    property->SetTransform(trans);
+}
+
 bool WindowProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -460,7 +494,8 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
         parcel.WriteUint32(modeSupportInfo_) && parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
         parcel.WriteUint32(originRect_.width_) && parcel.WriteUint32(originRect_.height_) &&
-        parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel) && parcel.WriteUint32(accessTokenId_);
+        parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel) && parcel.WriteUint32(accessTokenId_) &&
+        parcel.WriteBool(isCustomAnimation_) && MarshallingTransform(parcel);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -509,6 +544,8 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetStretchable(parcel.ReadBool());
     UnmarshallingTouchHotAreas(parcel, property);
     property->SetAccessTokenId(parcel.ReadUint32());
+    property->SetCustomAnimation(parcel.ReadBool());
+    UnmarshallingTransform(parcel, property);
     return property;
 }
 
@@ -559,6 +596,9 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
             break;
         case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA:
             ret &= MarshallingTouchHotAreas(parcel);
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY:
+            ret &= MarshallingTransform(parcel);
             break;
         default:
             break;
@@ -613,6 +653,9 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
         case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA:
             UnmarshallingTouchHotAreas(parcel, this);
             break;
+        case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY:
+            UnmarshallingTransform(parcel, this);
+            break;
         default:
             break;
     }
@@ -655,6 +698,8 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     isStretchable_ = property->isStretchable_;
     touchHotAreas_ = property->touchHotAreas_;
     accessTokenId_ = property->accessTokenId_;
+    isCustomAnimation_ = property->isCustomAnimation_;
+    trans_ = property->trans_;
 }
 }
 }

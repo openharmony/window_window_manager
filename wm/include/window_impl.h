@@ -127,13 +127,15 @@ public:
     virtual WMError SetWindowType(WindowType type) override;
     virtual WMError SetWindowMode(WindowMode mode) override;
     virtual WMError SetWindowBackgroundBlur(WindowBlurLevel level) override;
-    virtual WMError SetAlpha(float alpha) override;
+    virtual void SetAlpha(float alpha) override;
+    virtual void SetTransform(const Transform& trans) override;
     virtual WMError AddWindowFlag(WindowFlag flag) override;
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
     virtual WMError SetWindowFlags(uint32_t flags) override;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     virtual WMError SetLayoutFullScreen(bool status) override;
     virtual WMError SetFullScreen(bool status) override;
+    virtual Transform GetTransform() const override;
     inline void SetWindowState(WindowState state)
     {
         state_ = state;
@@ -143,8 +145,8 @@ public:
     WMError Create(const std::string& parentName,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy() override;
-    virtual WMError Show(uint32_t reason = 0) override;
-    virtual WMError Hide(uint32_t reason = 0) override;
+    virtual WMError Show(uint32_t reason = 0, bool isCustomAnimation = false) override;
+    virtual WMError Hide(uint32_t reason = 0, bool isCustomAnimation = false) override;
     virtual WMError MoveTo(int32_t x, int32_t y) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;

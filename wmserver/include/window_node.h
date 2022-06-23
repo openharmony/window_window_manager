@@ -54,7 +54,6 @@ public:
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
     void SetWindowMode(WindowMode mode);
     void SetWindowBackgroundBlur(WindowBlurLevel level);
-    void SetAlpha(float alpha);
     void SetBrightness(float brightness);
     void SetFocusable(bool focusable);
     void SetTouchable(bool touchable);
@@ -85,7 +84,6 @@ public:
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;
     WindowBlurLevel GetWindowBackgroundBlur() const;
-    float GetAlpha() const;
     float GetBrightness() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
@@ -106,6 +104,7 @@ public:
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     uint32_t GetAccessTokenId() const;
 
+    bool EnableDefaultAnimation(bool propertyEnabled, bool animationPlayed);
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;

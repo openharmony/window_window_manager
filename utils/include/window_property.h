@@ -19,8 +19,7 @@
 #include <refbase.h>
 #include <string>
 #include <unordered_map>
-#include "parcel.h"
-
+#include <parcel.h>
 #include "class_var_definition.h"
 #include "dm_common.h"
 #include "wm_common.h"
@@ -74,6 +73,7 @@ public:
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void SetAccessTokenId(uint32_t accessTokenId);
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
+    void SetTransform(const Transform& trans);
 
     const std::string& GetWindowName() const;
     Rect GetRequestRect() const;
@@ -109,7 +109,7 @@ public:
     const Rect& GetOriginRect() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     uint32_t GetAccessTokenId() const;
-
+    Transform GetTransform() const;
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
 
@@ -120,7 +120,8 @@ private:
     static void MapUnmarshalling(Parcel& parcel, WindowProperty* property);
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowProperty* property);
-
+    bool MarshallingTransform(Parcel& parcel) const;
+    static void UnmarshallingTransform(Parcel& parcel, WindowProperty* property);
     std::string windowName_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
@@ -158,7 +159,9 @@ private:
     DragType dragType_ = DragType::DRAG_UNDEFINED;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     uint32_t accessTokenId_ { 0 };
+    Transform trans_;
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, CustomAnimation, isCustomAnimation, false);
 };
 }
 }

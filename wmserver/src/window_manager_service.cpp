@@ -455,13 +455,6 @@ WMError WindowManagerService::SetWindowBackgroundBlur(uint32_t windowId, WindowB
     }).get();
 }
 
-WMError WindowManagerService::SetAlpha(uint32_t windowId, float alpha)
-{
-    return wmsTaskLooper_->ScheduleTask([this, windowId, alpha]() {
-        return windowController_->SetAlpha(windowId, alpha);
-    }).get();
-}
-
 AvoidArea WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
 {
     return wmsTaskLooper_->ScheduleTask([this, windowId, avoidAreaType]() {
@@ -612,6 +605,12 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
     if (windowProperty == nullptr) {
         WLOGFE("property is invalid");
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) {
+        wmsTaskLooper_->PostTask([this, windowProperty, action]() mutable {
+            windowController_->UpdateProperty(windowProperty, action);
+        });
+        return WMError::WM_OK;
     }
     return wmsTaskLooper_->ScheduleTask([this, &windowProperty, action]() {
         WM_SCOPED_TRACE("wms:UpdateProperty");

@@ -50,11 +50,6 @@ void WindowOption::SetWindowBackgroundBlur(WindowBlurLevel level)
     level_ = level;
 }
 
-void WindowOption::SetAlpha(float alpha)
-{
-    alpha_ = alpha;
-}
-
 void WindowOption::SetFocusable(bool isFocusable)
 {
     focusable_ = isFocusable;
@@ -120,11 +115,6 @@ WindowMode WindowOption::GetWindowMode() const
 WindowBlurLevel WindowOption::GetWindowBackgroundBlur() const
 {
     return level_;
-}
-
-float WindowOption::GetAlpha() const
-{
-    return alpha_;
 }
 
 bool WindowOption::GetFocusable() const
