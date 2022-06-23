@@ -55,7 +55,7 @@ public:
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     ScreenPowerState GetScreenPower(ScreenId screenId);
-    DMError SetScreenRotationLocked(bool isLocked);
+    void SetScreenRotationLocked(bool isLocked);
     bool IsScreenRotationLocked();
 private:
     ScreenManager();

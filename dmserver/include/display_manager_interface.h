@@ -85,7 +85,7 @@ public:
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) = 0;
     virtual bool SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) = 0;
-    virtual DMError SetScreenRotationLocked(bool isLocked) = 0;
+    virtual void SetScreenRotationLocked(bool isLocked) = 0;
     virtual bool IsScreenRotationLocked() = 0;
 
     // colorspace, gamut

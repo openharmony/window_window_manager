@@ -672,14 +672,8 @@ NativeValue* OnSetScreenRotationLocked(NativeEngine& engine, NativeCallbackInfo&
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
                 return;
             }
-            DMError ret = SingletonContainer::Get<ScreenManager>().SetScreenRotationLocked(isLocked);
-            if (ret == DMError::DM_OK) {
-                task.Resolve(engine, engine.CreateUndefined());
-            } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret),
-                    "JsScreenManager:SetScreenRotationLocked failed."));
-            }
-            WLOGFI("JsScreenManager::OnSetScreenRotationLocked success, ret = %{public}d", ret);
+            SingletonContainer::Get<ScreenManager>().SetScreenRotationLocked(isLocked);
+            task.Resolve(engine, engine.CreateUndefined());
         };
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
         (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);

@@ -125,11 +125,11 @@ DMError ScreenManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Su
     return displayManagerServiceProxy_->SetVirtualScreenSurface(screenId, surface);
 }
 
-DMError ScreenManagerAdapter::SetScreenRotationLocked(bool isLocked)
+void ScreenManagerAdapter::SetScreenRotationLocked(bool isLocked)
 {
-    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    INIT_PROXY_CHECK_RETURN();
     WLOGFI("DisplayManagerAdapter::SetScreenRotationLocked");
-    return displayManagerServiceProxy_->SetScreenRotationLocked(isLocked);
+    displayManagerServiceProxy_->SetScreenRotationLocked(isLocked);
 }
 
 bool ScreenManagerAdapter::IsScreenRotationLocked()
