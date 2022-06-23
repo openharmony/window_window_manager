@@ -118,6 +118,10 @@ void WindowLayoutPolicyTile::InitTileWindowRects(DisplayId displayId)
 void WindowLayoutPolicyTile::AddWindowNode(const sptr<WindowNode>& node)
 {
     WM_FUNCTION_TRACE();
+
+    // update window size limits when add window
+    UpdateWindowSizeLimits(node);
+
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         DisplayId displayId = node->GetDisplayId();
         ForegroundNodeQueuePushBack(node, displayId);
@@ -206,6 +210,12 @@ void WindowLayoutPolicyTile::ForegroundNodeQueuePushBack(const sptr<WindowNode>&
     if (iter != foregroundNodes.end()) {
         return;
     }
+
+    if (!WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
+        WLOGFD("window don't support tile mode, winId: %{public}d", node->GetWindowId());
+        MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_TILE);
+        return;
+    }
     WLOGFI("add win in tile, displayId: %{public}" PRIu64", winId: %{public}d", displayId, node->GetWindowId());
     while (foregroundNodes.size() >= maxTileWinNumMap_[displayId]) {
         auto removeNode = foregroundNodes.front();
@@ -247,7 +257,8 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows(DisplayId displayI
     auto rectIt = presetRect.begin();
     for (auto node : foregroundNodesMap_[displayId]) {
         auto& rect = (*rectIt);
-        if (WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
+        if (WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) &&
+            WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowSizeLimits())) {
             node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             if (node->GetWindowToken()) {
                 node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -257,6 +268,8 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows(DisplayId displayI
             WLOGFI("set rect for qwin id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
                 node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
             rectIt++;
+        } else {
+            MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_TILE);
         }
     }
 }

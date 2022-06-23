@@ -52,12 +52,13 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
     }
     WM_SCOPED_ASYNC_TRACE_BEGIN(static_cast<int32_t>(TraceTaskId::STARTING_WINDOW), "wms:async:ShowStartingWindow");
     auto node = windowRoot_->FindWindowNodeWithToken(info->GetAbilityToken());
+    auto layoutMode = windowRoot_->GetCurrentLayoutMode(info->GetDisplayId());
     if (node == nullptr) {
         if (!isColdStart) {
             WLOGFE("no windowNode exists but is hot start!");
             return;
         }
-        node = StartingWindow::CreateWindowNode(info, GenWindowId());
+        node = StartingWindow::CreateWindowNode(info, GenWindowId(), layoutMode);
         if (node == nullptr) {
             return;
         }

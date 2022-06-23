@@ -51,7 +51,7 @@ void WindowProperty::SetWindowType(WindowType type)
 
 void WindowProperty::SetWindowMode(WindowMode mode)
 {
-    if (!WindowHelper::IsValidWindowMode(mode)) {
+    if (!WindowHelper::IsValidWindowMode(mode) || !WindowHelper::IsWindowModeSupported(modeSupportInfo_, mode)) {
         return;
     }
     if (!WindowHelper::IsSplitWindowMode(mode_)) {
@@ -62,6 +62,9 @@ void WindowProperty::SetWindowMode(WindowMode mode)
 
 void WindowProperty::SetLastWindowMode(WindowMode mode)
 {
+    if (!WindowHelper::IsWindowModeSupported(modeSupportInfo_, mode)) {
+        return;
+    }
     lastMode_ = mode;
 }
 
@@ -138,6 +141,11 @@ void WindowProperty::SetWindowFlags(uint32_t flags)
     flags_ = flags;
 }
 
+void WindowProperty::SetSizeLimits(const WindowSizeLimits& sizeLimits)
+{
+    sizeLimits_ = sizeLimits;
+}
+
 void WindowProperty::AddWindowFlag(WindowFlag flag)
 {
     flags_ |= static_cast<uint32_t>(flag);
@@ -197,6 +205,9 @@ WindowSizeChangeReason WindowProperty::GetWindowSizeChangeReason() const
 
 void WindowProperty::ResumeLastWindowMode()
 {
+    if (!WindowHelper::IsWindowModeSupported(modeSupportInfo_, lastMode_)) {
+        return;
+    }
     mode_ = lastMode_;
 }
 
@@ -335,6 +346,11 @@ void WindowProperty::SetModeSupportInfo(uint32_t modeSupportInfo)
     modeSupportInfo_ = modeSupportInfo;
 }
 
+void WindowProperty::SetRequestModeSupportInfo(uint32_t requestModeSupportInfo)
+{
+    requestModeSupportInfo_ = requestModeSupportInfo;
+}
+
 uint32_t WindowProperty::GetWindowId() const
 {
     return windowId_;
@@ -360,6 +376,11 @@ uint32_t WindowProperty::GetModeSupportInfo() const
     return modeSupportInfo_;
 }
 
+uint32_t WindowProperty::GetRequestModeSupportInfo() const
+{
+    return requestModeSupportInfo_;
+}
+
 bool WindowProperty::GetTokenState() const
 {
     return tokenState_;
@@ -378,6 +399,11 @@ const Rect& WindowProperty::GetOriginRect() const
 bool WindowProperty::GetStretchable() const
 {
     return isStretchable_;
+}
+
+WindowSizeLimits WindowProperty::GetSizeLimits() const
+{
+    return sizeLimits_;
 }
 
 void WindowProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
@@ -474,6 +500,23 @@ void WindowProperty::UnmarshallingTransform(Parcel& parcel, WindowProperty* prop
     property->SetTransform(trans);
 }
 
+bool WindowProperty::MarshallingWindowSizeLimits(Parcel& parcel) const
+{
+    if (parcel.WriteUint32(sizeLimits_.maxWidth_) && parcel.WriteUint32(sizeLimits_.maxHeight_) &&
+        parcel.WriteUint32(sizeLimits_.minWidth_) && parcel.WriteUint32(sizeLimits_.minHeight_) &&
+        parcel.WriteFloat(sizeLimits_.maxRatio_) && parcel.WriteFloat(sizeLimits_.minRatio_)) {
+        return true;
+    }
+    return false;
+}
+
+void WindowProperty::UnmarshallingWindowSizeLimits(Parcel& parcel, WindowProperty* property)
+{
+    WindowSizeLimits sizeLimits = { parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(),
+                                    parcel.ReadFloat(), parcel.ReadFloat() };
+    property->SetSizeLimits(sizeLimits);
+}
+
 bool WindowProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -492,10 +535,12 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteBool(tokenState_) &&
         parcel.WriteUint32(callingWindow_) && parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
-        parcel.WriteUint32(modeSupportInfo_) && parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
+        parcel.WriteUint32(modeSupportInfo_) && parcel.WriteUint32(requestModeSupportInfo_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
         parcel.WriteUint32(originRect_.width_) && parcel.WriteUint32(originRect_.height_) &&
         parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel) && parcel.WriteUint32(accessTokenId_) &&
-        parcel.WriteBool(isCustomAnimation_) && MarshallingTransform(parcel);
+        parcel.WriteBool(isCustomAnimation_) && MarshallingTransform(parcel) &&
+        MarshallingWindowSizeLimits(parcel);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -537,6 +582,7 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetTurnScreenOn(parcel.ReadBool());
     property->SetKeepScreenOn(parcel.ReadBool());
     property->SetModeSupportInfo(parcel.ReadUint32());
+    property->SetRequestModeSupportInfo(parcel.ReadUint32());
     property->SetDragType(static_cast<DragType>(parcel.ReadUint32()));
     uint32_t w = parcel.ReadUint32();
     uint32_t h = parcel.ReadUint32();
@@ -546,6 +592,7 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetAccessTokenId(parcel.ReadUint32());
     property->SetCustomAnimation(parcel.ReadBool());
     UnmarshallingTransform(parcel, property);
+    UnmarshallingWindowSizeLimits(parcel, property);
     return property;
 }
 
@@ -693,6 +740,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
     modeSupportInfo_ = property->modeSupportInfo_;
+    requestModeSupportInfo_ = property->requestModeSupportInfo_;
     dragType_ = property->dragType_;
     originRect_ = property->originRect_;
     isStretchable_ = property->isStretchable_;
@@ -700,6 +748,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     accessTokenId_ = property->accessTokenId_;
     isCustomAnimation_ = property->isCustomAnimation_;
     trans_ = property->trans_;
+    sizeLimits_ = property->sizeLimits_;
 }
 }
 }

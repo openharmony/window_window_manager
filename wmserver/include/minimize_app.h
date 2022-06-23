@@ -29,6 +29,7 @@ enum class MinimizeReason : uint32_t {
     MINIMIZE_BUTTON,
     MINIMIZE_ALL,
     LAYOUT_TILE,
+    LAYOUT_CASCADE,
     MAX_APP_COUNT,
     SPLIT_REPLACE,
     SPLIT_QUIT,

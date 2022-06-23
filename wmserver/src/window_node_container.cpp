@@ -1562,6 +1562,25 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, Displa
     return WMError::WM_OK;
 }
 
+void WindowNodeContainer::UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up)
+{
+    if (!WindowHelper::IsWindowModeSupported(node->GetWindowProperty()->GetRequestModeSupportInfo(),
+                                             WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
+        WLOGFD("window doesn't support split mode, winId: %{public}d", node->GetWindowId());
+        return;
+    }
+    uint32_t modeSupportInfo;
+    if (up) {
+        modeSupportInfo = node->GetModeSupportInfo() & (~WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
+    } else {
+        modeSupportInfo = node->GetModeSupportInfo() | WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY;
+    }
+    node->SetModeSupportInfo(modeSupportInfo);
+    if (node->GetWindowToken() != nullptr) {
+        node->GetWindowToken()->UpdateWindowModeSupportInfo(modeSupportInfo);
+    }
+}
+
 void WindowNodeContainer::RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const
 {
     if (node->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || !isScreenLocked_) {
@@ -1604,6 +1623,8 @@ void WindowNodeContainer::ReZOrderShowWhenLockedWindows(bool up)
             }
         }
 
+        UpdateModeSupportInfoWhenKeyguardChange(needReZOrderNode, up);
+
         parentNode->children_.insert(position, needReZOrderNode);
         if (up && WindowHelper::IsSplitWindowMode(needReZOrderNode->GetWindowMode())) {
             needReZOrderNode->GetWindowProperty()->ResumeLastWindowMode();
@@ -1617,8 +1638,7 @@ void WindowNodeContainer::ReZOrderShowWhenLockedWindows(bool up)
             }
             windowPair->UpdateIfSplitRelated(needReZOrderNode);
         }
-        WLOGFI("ShowWhenLocked window %{public}u re-zorder when keyguard change %{public}u",
-            needReZOrderNode->GetWindowId(), up);
+        WLOGFI("window %{public}u re-zorder when keyguard change %{public}u", needReZOrderNode->GetWindowId(), up);
     }
 }
 
@@ -1866,6 +1886,11 @@ void WindowNodeContainer::UpdateCameraFloatWindowStatus(const sptr<WindowNode>& 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
         WindowManagerAgentController::GetInstance().UpdateCameraFloatWindowStatus(node->GetAccessTokenId(), isShowing);
     }
+}
+
+WindowLayoutMode WindowNodeContainer::GetCurrentLayoutMode() const
+{
+    return layoutMode_;
 }
 } // namespace Rosen
 } // namespace OHOS

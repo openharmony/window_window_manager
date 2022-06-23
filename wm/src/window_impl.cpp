@@ -278,6 +278,11 @@ uint32_t WindowImpl::GetWindowFlags() const
     return property_->GetWindowFlags();
 }
 
+uint32_t WindowImpl::GetRequestModeSupportInfo() const
+{
+    return property_->GetRequestModeSupportInfo();
+}
+
 uint32_t WindowImpl::GetModeSupportInfo() const
 {
     return property_->GetModeSupportInfo();
@@ -465,9 +470,11 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     } else {
         uiContent->Initialize(this, contentInfo, storage);
     }
-    // make uiContent_ available after Initialize/Restore
+    // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
+
     if (state_ == WindowState::STATE_SHOWN) {
+        UpdateTitleButtonVisibility();
         Ace::ViewportConfig config;
         Rect rect = GetRect();
         config.SetSize(rect.width_, rect.height_);
@@ -578,7 +585,9 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
 WMError WindowImpl::SetLayoutFullScreen(bool status)
 {
     WLOGFI("[Client] Window %{public}u SetLayoutFullScreen: %{public}u", property_->GetWindowId(), status);
-    if (!IsWindowValid()) {
+    if (!IsWindowValid() ||
+        !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        WLOGFE("invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     WMError ret = SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -608,6 +617,11 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
 WMError WindowImpl::SetFullScreen(bool status)
 {
     WLOGFI("[Client] Window %{public}u SetFullScreen: %{public}d", property_->GetWindowId(), status);
+    if (!IsWindowValid() ||
+        !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        WLOGFE("invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     SystemBarProperty statusProperty = GetSystemBarPropertyByType(
         WindowType::WINDOW_TYPE_STATUS_BAR);
     SystemBarProperty naviProperty = GetSystemBarPropertyByType(
@@ -660,6 +674,68 @@ WMError WindowImpl::UpdateProperty(PropertyChangeAction action)
     return SingletonContainer::Get<WindowAdapter>().UpdateProperty(property_, action);
 }
 
+void WindowImpl::GetConfigurationFromAbilityInfo()
+{
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext == nullptr) {
+        WLOGFE("id:%{public}u is not ability Window", property_->GetWindowId());
+        return;
+    }
+    auto abilityInfo = abilityContext->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        WLOGFE("id:%{public}u Ability window get ability info failed", property_->GetWindowId());
+        return;
+    }
+
+    // get support modes configuration
+    uint32_t modeSupportInfo = 0;
+    const auto& supportModes = abilityInfo->windowModes;
+    for (auto& mode : supportModes) {
+        if (static_cast<uint32_t>(mode) == static_cast<uint32_t>(0)) {         // 0 : fullScreen
+            modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
+        } else if (static_cast<uint32_t>(mode) == static_cast<uint32_t>(1)) {  // 1 : split
+            modeSupportInfo |= (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                                WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+        } else if (static_cast<uint32_t>(mode) == static_cast<uint32_t>(2)) {  // 2 : floating
+            modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+        }
+    }
+    if (modeSupportInfo == 0) {
+        WLOGFI("mode config param is 0, set all modes");
+        modeSupportInfo = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    }
+    SetRequestModeSupportInfo(modeSupportInfo);
+
+    // get window size limits configuration
+    WindowSizeLimits sizeLimits;
+    sizeLimits.maxWidth_ = abilityInfo->maxWindowWidth;
+    sizeLimits.maxHeight_ = abilityInfo->maxWindowHeight;
+    sizeLimits.minWidth_ = abilityInfo->minWindowWidth;
+    sizeLimits.minHeight_ = abilityInfo->minWindowHeight;
+    sizeLimits.maxRatio_ = static_cast<float>(abilityInfo->maxWindowRatio);
+    sizeLimits.minRatio_ = static_cast<float>(abilityInfo->minWindowRatio);
+    property_->SetSizeLimits(sizeLimits);
+
+    // get orientation configuration
+    DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(
+        static_cast<uint32_t>(abilityInfo->orientation));
+    if (ABILITY_TO_WMS_ORIENTATION_MAP.count(displayOrientation) == 0) {
+        WLOGFE("id:%{public}u Do not support this Orientation type", property_->GetWindowId());
+        return;
+    }
+    Orientation orientation = ABILITY_TO_WMS_ORIENTATION_MAP.at(displayOrientation);
+    if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
+        WLOGFE("Set orientation from ability failed");
+        return;
+    }
+    property_->SetRequestedOrientation(orientation);
+}
+
+void WindowImpl::UpdateTitleButtonVisibility()
+{
+    WLOGFI("[Client] UpdateTitleButtonVisibility");
+}
+
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGFI("[Client] Window [name:%{public}s] Create", name_.c_str());
@@ -705,7 +781,7 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
             WLOGFI("get stretchable enable:%{public}d", windowSystemConfig_.isStretchable_);
             property_->SetStretchable(windowSystemConfig_.isStretchable_);
         }
-        SetOrientationFromAbility();
+        GetConfigurationFromAbilityInfo();
     }
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
         windowId, token);
@@ -883,6 +959,19 @@ WMError WindowImpl::Show(uint32_t reason, bool isCustomAnimation)
     SetDefaultOption();
     // set true success when transitionController exist; set false when complete transition
     property_->SetCustomAnimation(isCustomAnimation);
+
+    // show failed when current mode is not support or window only supports split mode and can show when locked
+    bool isShowWhenLocked = GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+    if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), GetMode()) ||
+        WindowHelper::IsOnlySupportSplitAndShowWhenLocked(isShowWhenLocked, GetModeSupportInfo())) {
+        WLOGFE("current mode is not be supported, windowId: %{public}u", property_->GetWindowId());
+        NotifyForegroundFailed();
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    // update title button visibility when show
+    UpdateTitleButtonVisibility();
+
     WMError ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
@@ -1216,6 +1305,9 @@ WMError WindowImpl::NotifyWindowTransition(TransitionReason reason)
         return WMError::WM_ERROR_NO_MEM;
     }
     auto abilityInfo = abilityContext->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     fromInfo->SetBundleName(context_->GetBundleName());
     fromInfo->SetAbilityName(abilityInfo->name);
     fromInfo->SetWindowMode(property_->GetWindowMode());
@@ -1225,32 +1317,6 @@ WMError WindowImpl::NotifyWindowTransition(TransitionReason reason)
     fromInfo->SetDisplayId(property_->GetDisplayId());
     fromInfo->SetTransitionReason(reason);
     return SingletonContainer::Get<WindowAdapter>().NotifyWindowTransition(fromInfo, toInfo);
-}
-
-void WindowImpl::SetOrientationFromAbility()
-{
-    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-    if (abilityContext == nullptr) {
-        WLOGFE("id:%{public}d is not ability Window", property_->GetWindowId());
-        return;
-    }
-    auto abilityInfo = abilityContext->GetAbilityInfo();
-    if (abilityInfo == nullptr) {
-        WLOGFE("id:%{public}d Ability window get ability info failed", property_->GetWindowId());
-        return;
-    }
-    DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(
-        static_cast<uint32_t>(abilityInfo->orientation));
-    if (ABILITY_TO_WMS_ORIENTATION_MAP.count(displayOrientation) == 0) {
-        WLOGFE("id:%{public}d Do not support this Orientation type", property_->GetWindowId());
-        return;
-    }
-    Orientation orientation = ABILITY_TO_WMS_ORIENTATION_MAP.at(displayOrientation);
-    if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
-        WLOGFE("Set orientation from ability failed");
-        return;
-    }
-    property_->SetRequestedOrientation(orientation);
 }
 
 WMError WindowImpl::Minimize()
@@ -1546,20 +1612,15 @@ void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
     aceAbilityHandler_ = handler;
 }
 
+void WindowImpl::SetRequestModeSupportInfo(uint32_t modeSupportInfo)
+{
+    property_->SetRequestModeSupportInfo(modeSupportInfo);
+    SetModeSupportInfo(modeSupportInfo);
+}
+
 void WindowImpl::SetModeSupportInfo(uint32_t modeSupportInfo)
 {
     property_->SetModeSupportInfo(modeSupportInfo);
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
-    if (!WindowHelper::IsWindowModeSupported(modeSupportInfo, GetMode())) {
-        WLOGFI("current window mode is not supported, force to transform to appropriate mode. window id:%{public}u",
-               GetWindowId());
-        WindowMode mode = WindowHelper::GetWindowModeFromModeSupportInfo(modeSupportInfo);
-        if (mode != WindowMode::WINDOW_MODE_UNDEFINED) {
-            SetWindowMode(mode);
-        } else {
-            WLOGFE("invalid modeSupportInfo %{public}u", modeSupportInfo);
-        }
-    }
 }
 
 void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
@@ -1579,7 +1640,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         return;
     }
     property_->SetWindowRect(rect);
-    const Rect& originRect = property_->GetOriginRect();
+
     // update originRect when floating window show for the first time.
     if (!isOriginRectSet_ && WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
         property_->SetOriginRect(rect);
@@ -1591,12 +1652,13 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END ||
             reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::RECOVER ||
             reason == WindowSizeChangeReason::MOVE) {
-            rectToAce = originRect;
+            rectToAce = property_->GetOriginRect();
         } else {
             property_->SetOriginRect(rect);
         }
     }
     WLOGFI("sizeChange callback size: %{public}lu", (unsigned long)windowChangeListeners_.size());
+
     NotifySizeChange(rectToAce, reason);
     if (uiContent_ != nullptr) {
         Ace::ViewportConfig config;
@@ -1619,6 +1681,13 @@ void WindowImpl::UpdateMode(WindowMode mode)
         uiContent_->UpdateWindowMode(mode);
         WLOGFI("notify uiContent window mode change end");
     }
+}
+
+void WindowImpl::UpdateModeSupportInfo(uint32_t modeSupportInfo)
+{
+    WLOGI("modeSupportInfo: %{public}u, winId: %{public}u", modeSupportInfo, GetWindowId());
+    SetModeSupportInfo(modeSupportInfo);
+    UpdateTitleButtonVisibility();
 }
 
 void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
