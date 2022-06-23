@@ -56,7 +56,7 @@ public:
     uint32_t ToOverrideBrightness(float brightness);
     void UpdateBrightness(uint32_t id, bool byRemoved);
     void HandleKeepScreenOn(const sptr<WindowNode>& node, bool requireLock);
-    std::vector<Rect> GetAvoidAreaByType(AvoidAreaType avoidAreaType, DisplayId displayId);
+    AvoidArea GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType);
     WMError MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node);
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
     uint64_t GetScreenId(DisplayId displayId) const;
@@ -69,7 +69,6 @@ public:
     void ExitSplitMode(DisplayId displayId);
     Orientation GetFullScreenWindowRequestedOrientation();
 
-    void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas, DisplayId displayId);
     bool isVerticalDisplay(DisplayId displayId) const;
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     sptr<WindowNode> GetNextFocusableWindow(uint32_t windowId) const;
@@ -106,6 +105,9 @@ public:
     sptr<WindowNode> GetRootNode(WindowRootNodeType type) const;
     void NotifyDockWindowStateChanged(sptr<WindowNode>& node, bool isEnable);
     void UpdateCameraFloatWindowStatus(const sptr<WindowNode>& node, bool isShowing);
+    void UpdateAvoidAreaListener(sptr<WindowNode>& windowNode, bool haveAvoidAreaListener);
+    void BeforeProcessWindowAvoidAreaChangeWhenDisplayChange() const;
+    void ProcessWindowAvoidAreaChangeWhenDisplayChange() const;
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
@@ -146,6 +148,7 @@ private:
                                                const std::vector<DisplayId>& lastShowingDisplays,
                                                const std::vector<DisplayId>& curShowingDisplays);
     void FillWindowInfo(sptr<WindowInfo>& windowInfo, const sptr<WindowNode>& node) const;
+    bool CheckWindowNodeWhetherInWindowTree(const sptr<WindowNode>& node) const;
 
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;

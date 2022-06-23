@@ -65,9 +65,7 @@ WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, S
     Rect initalDividerRect = layoutPolicies_[WindowLayoutMode::CASCADE]->GetInitalDividerRect(displayId);
     displayGroupController_->SetInitalDividerRect(displayId, initalDividerRect);
     // init avoidAreaController
-    UpdateAvoidAreaFunc func = std::bind(&WindowNodeContainer::OnAvoidAreaChange, this,
-        std::placeholders::_1, std::placeholders::_2);
-    avoidController_ = new AvoidAreaController(displayId, func);
+    avoidController_ = new AvoidAreaController(focusedWindow_);
 }
 
 WindowNodeContainer::~WindowNodeContainer()
@@ -110,7 +108,7 @@ WMError WindowNodeContainer::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, c
         for (auto& child : node->children_) {
             child->currentVisibility_ = child->requestedVisibility_;
         }
-        if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
+        if (WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
             displayGroupController_->sysBarNodeMaps_[node->GetDisplayId()][node->GetWindowType()] = node;
         }
     }
@@ -226,13 +224,9 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
     if (WindowHelper::IsMainWindow(node->GetWindowType()) && WindowHelper::IsSwitchCascadeReason(reason)) {
         SwitchLayoutPolicy(WindowLayoutMode::CASCADE, node->GetDisplayId());
     }
+    WLOGFI("UpdateWindowNode windowId: %{public}u begin", node->GetWindowId());
     layoutPolicy_->UpdateWindowNode(node);
-    if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
-        avoidController_->AvoidControl(node, AvoidControlType::AVOID_NODE_UPDATE);
-        NotifyIfSystemBarRegionChanged(node->GetDisplayId());
-    } else {
-        NotifyIfSystemBarTintChanged(node->GetDisplayId());
-    }
+    NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_UPDATE);
     DumpScreenWindowTree();
     WLOGFI("UpdateWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
@@ -760,14 +754,35 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
 void WindowNodeContainer::NotifyIfAvoidAreaChanged(const sptr<WindowNode>& node,
     const AvoidControlType avoidType) const
 {
-    if (WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
-        avoidController_->AvoidControl(node, avoidType);
+    auto checkFunc = [this](sptr<WindowNode> node) {
+        return CheckWindowNodeWhetherInWindowTree(node);
+    };
+    avoidController_->ProcessWindowChange(node, avoidType, checkFunc);
+    if (WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
         NotifyIfSystemBarRegionChanged(node->GetDisplayId());
     } else {
         NotifyIfSystemBarTintChanged(node->GetDisplayId());
     }
 
     NotifyIfKeyboardRegionChanged(node, avoidType);
+}
+
+void WindowNodeContainer::BeforeProcessWindowAvoidAreaChangeWhenDisplayChange() const
+{
+    avoidController_->SetFlagForProcessWindowChange(true);
+}
+
+void WindowNodeContainer::ProcessWindowAvoidAreaChangeWhenDisplayChange() const
+{
+    avoidController_->SetFlagForProcessWindowChange(false);
+    auto checkFunc = [this](sptr<WindowNode> node) {
+        return CheckWindowNodeWhetherInWindowTree(node);
+    };
+    WindowNodeOperationFunc func = [avoidController = avoidController_, &checkFunc](sptr<WindowNode> node) {
+        avoidController->ProcessWindowChange(node, AvoidControlType::AVOID_NODE_UPDATE, checkFunc);
+        return false;
+    };
+    TraverseWindowTree(func, true);
 }
 
 void WindowNodeContainer::NotifyIfSystemBarTintChanged(DisplayId displayId) const
@@ -846,9 +861,9 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
         }
 
         WLOGFI("keyboard size change callingWindow: [%{public}s, %{public}u], " \
-            "overlap rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-            callingWindow->GetWindowName().c_str(), callingWindow->GetWindowId(),
-            overlapRect.posX_, overlapRect.posY_, overlapRect.width_, overlapRect.height_);
+        "overlap rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+               callingWindow->GetWindowName().c_str(), callingWindow->GetWindowId(),
+               overlapRect.posX_, overlapRect.posY_, overlapRect.width_, overlapRect.height_);
         sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
         callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
         return;
@@ -902,6 +917,11 @@ void WindowNodeContainer::NotifyDockWindowStateChanged(sptr<WindowNode>& node, b
     SystemBarRegionTints tints;
     tints.push_back(tint);
     WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(node->GetDisplayId(), tints);
+}
+
+void WindowNodeContainer::UpdateAvoidAreaListener(sptr<WindowNode>& windowNode, bool haveAvoidAreaListener)
+{
+    avoidController_->UpdateAvoidAreaListener(windowNode, haveAvoidAreaListener);
 }
 
 bool WindowNodeContainer::IsTopWindow(uint32_t windowId, sptr<WindowNode>& rootNode) const
@@ -1062,19 +1082,26 @@ void WindowNodeContainer::TraverseWindowNode(sptr<WindowNode>& node, std::vector
     }
 }
 
-std::vector<Rect> WindowNodeContainer::GetAvoidAreaByType(AvoidAreaType avoidAreaType, DisplayId displayId)
+AvoidArea WindowNodeContainer::GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType)
 {
-    return avoidController_->GetAvoidAreaByType(avoidAreaType, displayId);
+    if (CheckWindowNodeWhetherInWindowTree(node)) {
+        return avoidController_->GetAvoidAreaByType(node, avoidAreaType);
+    }
+    return {};
 }
 
-void WindowNodeContainer::OnAvoidAreaChange(const std::vector<Rect>& avoidArea, DisplayId displayId)
+bool WindowNodeContainer::CheckWindowNodeWhetherInWindowTree(const sptr<WindowNode>& node) const
 {
-    for (auto& node : appWindowNode_->children_) {
-        if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && node->GetWindowToken() != nullptr) {
-            // notify client
-            node->GetWindowToken()->UpdateAvoidArea(avoidArea);
+    bool isInWindowTree = false;
+    WindowNodeOperationFunc func = [&node, &isInWindowTree](sptr<WindowNode> windowNode) {
+        if (node->GetWindowId() == windowNode->GetWindowId()) {
+            isInWindowTree = true;
+            return true;
         }
-    }
+        return false;
+    };
+    TraverseWindowTree(func, true);
+    return isInWindowTree;
 }
 
 void WindowNodeContainer::DumpScreenWindowTree()

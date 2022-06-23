@@ -979,10 +979,13 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
             AvoidArea avoidArea;
             WMError ret = weakWindow->GetAvoidAreaByType(avoidAreaType, avoidArea);
             if (ret != WMError::WM_OK) {
-                avoidArea = { g_emptyRect, g_emptyRect, g_emptyRect, g_emptyRect }; // left, top, right, bottom
+                avoidArea.topRect_ = g_emptyRect;
+                avoidArea.leftRect_ = g_emptyRect;
+                avoidArea.rightRect_ = g_emptyRect;
+                avoidArea.bottomRect_ = g_emptyRect;
             }
             // native avoidArea -> js avoidArea
-            NativeValue* avoidAreaObj = ChangeAvoidAreaToJsValue(engine, avoidArea);
+            NativeValue* avoidAreaObj = ConvertAvoidAreaToJsValue(engine, avoidArea, avoidAreaType);
             if (avoidAreaObj != nullptr) {
                 task.Resolve(engine, avoidAreaObj);
             } else {
