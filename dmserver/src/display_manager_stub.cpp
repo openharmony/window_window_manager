@@ -320,8 +320,7 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ROTATION_LOCKED: {
             bool isLocked = static_cast<bool>(data.ReadBool());
-            DMError ret = SetScreenRotationLocked(isLocked);
-            reply.WriteInt32(static_cast<int32_t>(ret));
+            SetScreenRotationLocked(isLocked);
             break;
         }
         default:

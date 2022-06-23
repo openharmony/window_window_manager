@@ -572,9 +572,8 @@ bool DisplayManagerService::IsScreenRotationLocked()
     return ScreenRotationController::IsScreenRotationLocked();
 }
 
-DMError DisplayManagerService::SetScreenRotationLocked(bool isLocked)
+void DisplayManagerService::SetScreenRotationLocked(bool isLocked)
 {
     ScreenRotationController::SetScreenRotationLocked(isLocked);
-    return DMError::DM_OK;
 }
 } // namespace OHOS::Rosen

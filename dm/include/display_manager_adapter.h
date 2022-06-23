@@ -89,7 +89,7 @@ public:
     virtual bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
     virtual bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
-    virtual DMError SetScreenRotationLocked(bool isLocked);
+    virtual void SetScreenRotationLocked(bool isLocked);
     virtual bool IsScreenRotationLocked();
 
     // colorspace, gamut

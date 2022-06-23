@@ -202,7 +202,7 @@ Rotation ScreenRotationController::ProcessAutoRotationPortraitOrientation(Rotati
     if (sensorRotation == Rotation::ROTATION_0 || sensorRotation == Rotation::ROTATION_180) {
         return sensorRotation;
     }
-    return Rotation::ROTATION_0;
+    return currentDisplayRotation_;
 }
 
 Rotation ScreenRotationController::ProcessAutoRotationLandscapeOrientation(Rotation sensorRotation)
@@ -210,7 +210,7 @@ Rotation ScreenRotationController::ProcessAutoRotationLandscapeOrientation(Rotat
     if (sensorRotation == Rotation::ROTATION_90 || sensorRotation == Rotation::ROTATION_270) {
         return sensorRotation;
     }
-    return Rotation::ROTATION_90;
+    return currentDisplayRotation_;
 }
 
 void ScreenRotationController::SetScreenRotation(Rotation targetRotation)
