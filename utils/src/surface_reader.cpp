@@ -152,7 +152,7 @@ bool SurfaceReader::ProcessBuffer(const sptr<SurfaceBuffer> &buf)
 
     pixelMap->SetPixelsAddr(data, nullptr, width * height, AllocatorType::HEAP_ALLOC, nullptr);
 
-    handler_->OnImageAvalible(pixelMap);
+    handler_->OnImageAvailable(pixelMap);
     return true;
 }
 }

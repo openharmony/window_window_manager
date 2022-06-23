@@ -46,7 +46,7 @@ void AvoidAreaController::UpdateAvoidNodesMap(DisplayId displayId, bool isAdd)
 bool AvoidAreaController::IsAvoidAreaNode(const sptr<WindowNode>& node) const
 {
     if (node == nullptr) {
-        WLOGFE("IsAvoidAreaNode Failed, node is nullprt");
+        WLOGFE("IsAvoidAreaNode Failed, node is nullptr");
         return false;
     }
 
@@ -96,7 +96,7 @@ WMError AvoidAreaController::AvoidControl(const sptr<WindowNode>& node, AvoidCon
         WLOGFE("WinId:%{public}d is added. AvoidControl Add Failed. Type: %{public}u", windowId, type);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    // do not update or removew a unexist node
+    // do not update or remove a non-exist node
     if (type != AvoidControlType::AVOID_NODE_ADD && iter == avoidNodes->end()) {
         WLOGFE("WinId:%{public}d not exist. AvoidControl Update or Remove Failed. Type: %{public}u", windowId, type);
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -120,7 +120,7 @@ WMError AvoidAreaController::AvoidControl(const sptr<WindowNode>& node, AvoidCon
             return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    // get all Area info and notify windowcontainer
+    // get all Area info and notify window container
     std::vector<Rect> avoidAreas = GetAvoidArea(node->GetDisplayId());
     DumpAvoidArea(avoidAreas);
     UseCallbackNotifyAvoidAreaChanged(avoidAreas, node->GetDisplayId());
