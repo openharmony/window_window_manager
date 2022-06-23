@@ -309,9 +309,9 @@ sptr<RSWindowAnimationTarget> RemoteAnimation::CreateWindowAnimationTarget(sptr<
     }
 
     auto& stagingProperties = windowAnimationTarget->surfaceNode_->GetStagingProperties();
-    auto bounds = stagingProperties.GetBounds();
+    auto rect = windowNode->GetWindowRect();
     // 0, 1, 2, 3: convert bounds to RectF
-    auto boundsRect = RectF(bounds[0], bounds[1], bounds[2], bounds[3]);
+    auto boundsRect = RectF(rect.posX_, rect.posY_, rect.width_, rect.height_);
     windowAnimationTarget->windowBounds_ = RRect(boundsRect, stagingProperties.GetCornerRadius());
     return windowAnimationTarget;
 }
