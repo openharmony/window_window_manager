@@ -50,6 +50,8 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) override;
     DMError DestroyVirtualScreen(ScreenId screenId) override;
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
+    bool IsScreenRotationLocked() override;
+    void SetScreenRotationLocked(bool isLocked) override;
 
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;

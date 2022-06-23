@@ -98,6 +98,18 @@ static NativeValue* SetVirtualScreenSurface(NativeEngine* engine, NativeCallback
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(engine, info);
     return (me != nullptr) ? me->OnSetVirtualScreenSurface(*engine, *info) : nullptr;
 }
+
+static NativeValue* IsScreenRotationLocked(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(engine, info);
+    return (me != nullptr) ? me->OnIsScreenRotationLocked(*engine, *info) : nullptr;
+}
+
+static NativeValue* SetScreenRotationLocked(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(engine, info);
+    return (me != nullptr) ? me->OnSetScreenRotationLocked(*engine, *info) : nullptr;
+}
 private:
 std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsScreenListener>>> jsCbMap_;
 std::mutex mtx_;
@@ -607,6 +619,69 @@ NativeValue* OnSetVirtualScreenSurface(NativeEngine& engine, NativeCallbackInfo&
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
+
+NativeValue* OnIsScreenRotationLocked(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("OnIsScreenRotationLocked is called");
+    DMError errCode = DMError::DM_OK;
+    if (info.argc > 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = DMError::DM_ERROR_INVALID_PARAM;
+    }
+    AsyncTask::CompleteCallback complete =
+        [errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (errCode != DMError::DM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            bool isLocked = SingletonContainer::Get<ScreenManager>().IsScreenRotationLocked();
+            task.Resolve(engine, CreateJsValue(engine, isLocked));
+        };
+    NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_ONE && info.argv[ARGC_ONE - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_ONE - 1];
+    }
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsScreenManager::OnIsScreenRotationLocked",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* OnSetScreenRotationLocked(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsScreenManager::OnSetScreenRotationLocked is called");
+    DMError errCode = DMError::DM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = DMError::DM_ERROR_INVALID_PARAM;
+    }
+    bool isLocked = false;
+    if (errCode == DMError::DM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to isLocked");
+            errCode = DMError::DM_ERROR_INVALID_PARAM;
+        } else {
+            isLocked = static_cast<bool>(*nativeVal);
+        }
+    }
+
+    AsyncTask::CompleteCallback complete =
+        [isLocked, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (errCode != DMError::DM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+                return;
+            }
+            SingletonContainer::Get<ScreenManager>().SetScreenRotationLocked(isLocked);
+            task.Resolve(engine, engine.CreateUndefined());
+        };
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsScreenManager::OnSetScreenRotationLocked",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
 };
 
 NativeValue* JsScreenManagerInit(NativeEngine* engine, NativeValue* exportObj)
@@ -635,6 +710,8 @@ NativeValue* JsScreenManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "createVirtualScreen", JsScreenManager::CreateVirtualScreen);
     BindNativeFunction(*engine, *object, "destroyVirtualScreen", JsScreenManager::DestroyVirtualScreen);
     BindNativeFunction(*engine, *object, "setVirtualScreenSurface", JsScreenManager::SetVirtualScreenSurface);
+    BindNativeFunction(*engine, *object, "setScreenRotationLocked", JsScreenManager::SetScreenRotationLocked);
+    BindNativeFunction(*engine, *object, "isScreenRotationLocked", JsScreenManager::IsScreenRotationLocked);
     return engine->CreateUndefined();
 }
 }  // namespace Rosen

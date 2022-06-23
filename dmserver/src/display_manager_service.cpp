@@ -566,4 +566,14 @@ float DisplayManagerService::GetCustomVirtualPixelRatio()
 {
     return DisplayManagerService::customVirtualPixelRatio_;
 }
+
+bool DisplayManagerService::IsScreenRotationLocked()
+{
+    return ScreenRotationController::IsScreenRotationLocked();
+}
+
+void DisplayManagerService::SetScreenRotationLocked(bool isLocked)
+{
+    ScreenRotationController::SetScreenRotationLocked(isLocked);
+}
 } // namespace OHOS::Rosen
