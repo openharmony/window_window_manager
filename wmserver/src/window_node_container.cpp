@@ -868,44 +868,20 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
     WLOGFE("does not have correct callingWindowMode for input method window");
 }
 
-void WindowNodeContainer::NotifySystemBarDismiss(sptr<WindowNode>& node)
-{
-    WM_FUNCTION_TRACE();
-    if (node == nullptr) {
-        WLOGE("could not find window");
-        return;
-    }
-    SystemBarRegionTints tints;
-    auto& sysBarPropMapNode = node->GetSystemBarProperty();
-    SysBarTintMap& sysBarTintMap = displayGroupController_->sysBarTintMaps_[node->GetDisplayId()];
-    for (auto it : sysBarPropMapNode) {
-        it.second.enable_ = false;
-        node->SetSystemBarProperty(it.first, it.second);
-        WLOGFI("set system bar enable to false, id: %{public}u, type: %{public}d",
-            node->GetWindowId(), static_cast<int32_t>(it.first));
-        if (sysBarTintMap[it.first].prop_.enable_) {
-            sysBarTintMap[it.first].prop_.enable_ = false;
-            tints.emplace_back(sysBarTintMap[it.first]);
-            WLOGFI("notify system bar dismiss, type: %{public}d", static_cast<int32_t>(it.first));
-        }
-    }
-    WindowManagerAgentController::GetInstance().UpdateSystemBarRegionTints(node->GetDisplayId(), tints);
-}
-
 void WindowNodeContainer::NotifySystemBarTints(std::vector<DisplayId> displayIdVec)
 {
     WM_FUNCTION_TRACE();
     if (displayIdVec.size() != displayGroupController_->sysBarTintMaps_.size()) {
-        WLOGE("the number of display is error");
+        WLOGE("[Immersive] the number of display is error");
     }
 
     for (auto displayId : displayIdVec) {
         SystemBarRegionTints tints;
         SysBarTintMap& sysBarTintMap = displayGroupController_->sysBarTintMaps_[displayId];
         for (auto it : sysBarTintMap) {
-            WLOGFI("system bar cur notify, type: %{public}d, " \
-                "visible: %{public}d, color: %{public}x | %{public}x, " \
-                "region: [%{public}d, %{public}d, %{public}d, %{public}d]",
+            WLOGFI("[Immersive] system bar cur notify, T: %{public}d, " \
+                "V: %{public}d, C: %{public}x | %{public}x, " \
+                "R: [%{public}d, %{public}d, %{public}d, %{public}d]",
                 static_cast<int32_t>(it.first),
                 sysBarTintMap[it.first].prop_.enable_,
                 sysBarTintMap[it.first].prop_.backgroundColor_, sysBarTintMap[it.first].prop_.contentColor_,
@@ -920,7 +896,7 @@ void WindowNodeContainer::NotifySystemBarTints(std::vector<DisplayId> displayIdV
 void WindowNodeContainer::NotifyDockWindowStateChanged(sptr<WindowNode>& node, bool isEnable)
 {
     WM_FUNCTION_TRACE();
-    WLOGFI("begin isEnable: %{public}d", isEnable);
+    WLOGFI("[Immersive] begin isEnable: %{public}d", isEnable);
     if (isEnable) {
         for (auto& windowNode : appWindowNode_->children_) {
             if (windowNode->GetWindowId() == node->GetWindowId()) {
