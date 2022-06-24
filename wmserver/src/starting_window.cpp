@@ -42,6 +42,7 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(sptr<WindowTransitionInfo> inf
     property->SetWindowMode(info->GetWindowMode());
     property->SetDisplayId(info->GetDisplayId());
     property->SetWindowType(info->GetWindowType());
+    property->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
     if (info->GetShowFlagWhenLocked()) {
         property->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     }
@@ -97,6 +98,9 @@ void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
         return;
     }
     Rect rect = node->GetWindowRect();
+    if (RemoteAnimation::CheckAnimationController() && node->leashWinSurfaceNode_) {
+        node->leashWinSurfaceNode_->SetBounds(rect.posX_, rect.posY_, -1, -1);
+    }
     if (pixelMap == nullptr) {
         surfaceDraw_.DrawBackgroundColor(node->startingWinSurfaceNode_, rect, bkgColor);
         return;
