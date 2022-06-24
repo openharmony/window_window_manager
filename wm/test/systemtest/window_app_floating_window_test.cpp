@@ -16,7 +16,9 @@
 // gtest
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
+#include "ipc_skeleton.h"
 #include "window.h"
+#include "window_manager.h"
 #include "window_option.h"
 #include "window_scene.h"
 #include "window_test_utils.h"
@@ -27,6 +29,17 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAppFloatingWindowTest"};
+}
+
+class TestCameraFloatWindowChangedListener : public ICameraFloatWindowChangedListener {
+public:
+    uint32_t accessTokenId_ = 0;
+    bool isShowing_ = false;
+    void OnCameraFloatWindowChange(uint32_t accessTokenId, bool isShowing) override;
+};
+
 class WindowAppFloatingWindowTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -36,7 +49,18 @@ public:
 
     static inline float virtualPixelRatio_ = 1.0;
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_ = nullptr;
+    static sptr<TestCameraFloatWindowChangedListener> testCameraFloatWindowChangedListener_;
 };
+
+sptr<TestCameraFloatWindowChangedListener> WindowAppFloatingWindowTest::testCameraFloatWindowChangedListener_ =
+    new TestCameraFloatWindowChangedListener();
+
+void TestCameraFloatWindowChangedListener::OnCameraFloatWindowChange(uint32_t accessTokenId, bool isShowing)
+{
+    WLOGFI("TestCameraFloatWindowChangedListener [%{public}u, %{public}u]", accessTokenId, isShowing);
+    accessTokenId_ = accessTokenId;
+    isShowing_ = isShowing;
+}
 
 void WindowAppFloatingWindowTest::SetUpTestCase()
 {
@@ -307,6 +331,66 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow09, Function | MediumTest
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
+}
+
+/**
+ * @tc.name: AppFloatingWindow10
+ * @tc.desc: Camera AppFloatingWindow multi create
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow10, Function | MediumTest | Level3)
+{
+    sptr<WindowScene> scene = CreateWindowScene();
+    ASSERT_NE(nullptr, scene);
+
+    Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
+    sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
+    ASSERT_NE(nullptr, fltWin);
+
+    sptr<Window> fltWin2 = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
+    ASSERT_EQ(nullptr, fltWin2);
+
+    ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    sptr<Window> fltWin3 = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
+    ASSERT_NE(nullptr, fltWin3);
+
+    ASSERT_EQ(WMError::WM_OK, fltWin3->Destroy());
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
+}
+
+/**
+ * @tc.name: AppFloatingWindow11
+ * @tc.desc: Camera AppFloatingWindow listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow11, Function | MediumTest | Level2)
+{
+    uint32_t tokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
+    WindowManager::GetInstance().RegisterCameraFloatWindowChangedListener(testCameraFloatWindowChangedListener_);
+    sptr<WindowScene> scene = CreateWindowScene();
+    ASSERT_NE(nullptr, scene);
+
+    Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
+    sptr<Window> fltWin = CreateAppFloatingWindow(WindowType::WINDOW_TYPE_FLOAT_CAMERA, fltWindRect);
+    ASSERT_NE(nullptr, fltWin);
+
+    ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
+    ASSERT_EQ(WMError::WM_OK, fltWin->Show());
+
+    usleep(500000); // 500000us = 0.5s
+    ASSERT_EQ(tokenId, testCameraFloatWindowChangedListener_->accessTokenId_);
+    ASSERT_EQ(true, testCameraFloatWindowChangedListener_->isShowing_);
+
+    ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
+
+    usleep(500000); // 500000us = 0.5s
+    ASSERT_EQ(tokenId, testCameraFloatWindowChangedListener_->accessTokenId_);
+    ASSERT_EQ(false, testCameraFloatWindowChangedListener_->isShowing_);
+
+    ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
+    ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
+
+    WindowManager::GetInstance().UnregisterCameraFloatWindowChangedListener(testCameraFloatWindowChangedListener_);
 }
 } // namespace Rosen
 } // namespace OHOS

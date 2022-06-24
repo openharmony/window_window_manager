@@ -106,6 +106,7 @@ public:
     sptr<DisplayGroupController> GetMultiDisplayController() const;
     sptr<WindowNode> GetRootNode(WindowRootNodeType type) const;
     void NotifyDockWindowStateChanged(sptr<WindowNode>& node, bool isEnable);
+    void UpdateCameraFloatWindowStatus(const sptr<WindowNode>& node, bool isShowing);
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;

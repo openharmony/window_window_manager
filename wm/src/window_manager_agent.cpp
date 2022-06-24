@@ -40,5 +40,10 @@ void WindowManagerAgent::UpdateWindowVisibilityInfo(const std::vector<sptr<Windo
 {
     SingletonContainer::Get<WindowManager>().UpdateWindowVisibilityInfo(visibilityInfos);
 }
+
+void WindowManagerAgent::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
+{
+    SingletonContainer::Get<WindowManager>().UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+}
 } // namespace Rosen
 } // namespace OHOS

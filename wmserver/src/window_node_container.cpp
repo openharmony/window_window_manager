@@ -183,7 +183,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
-    WLOGFI("AddWindowNode windowId: %{public}u end", node->GetWindowId());
+    UpdateCameraFloatWindowStatus(node, true);
     if (WindowHelper::IsAppWindow(node->GetWindowType())) {
         backupWindowIds_.clear();
     }
@@ -191,6 +191,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         isScreenLocked_ = true;
     }
+    WLOGFI("AddWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -301,6 +302,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     RecoverScreenDefaultOrientationIfNeed(node->GetDisplayId());
+    UpdateCameraFloatWindowStatus(node, false);
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         isScreenLocked_ = false;
     }
@@ -1882,6 +1884,13 @@ Orientation WindowNodeContainer::GetFullScreenWindowRequestedOrientation()
         }
     }
     return Orientation::UNSPECIFIED;
+}
+
+void WindowNodeContainer::UpdateCameraFloatWindowStatus(const sptr<WindowNode>& node, bool isShowing)
+{
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        WindowManagerAgentController::GetInstance().UpdateCameraFloatWindowStatus(node->GetAccessTokenId(), isShowing);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
