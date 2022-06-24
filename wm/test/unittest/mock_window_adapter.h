@@ -32,7 +32,6 @@ public:
     MOCK_METHOD2(SetWindowBackgroundBlur, WMError(uint32_t windowId, WindowBlurLevel level));
     MOCK_METHOD2(SetAlpha, WMError(uint32_t windowId, float alpha));
     MOCK_METHOD2(UpdateProperty, WMError(sptr<WindowProperty>& windowProperty, PropertyChangeAction action));
-    MOCK_METHOD1(MaximizeWindow, WMError(uint32_t windowId));
 };
 }
 } // namespace OHOS

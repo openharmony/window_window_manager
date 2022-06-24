@@ -148,10 +148,6 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case WindowManagerMessage::TRANS_ID_MAXIMIZE_WINDOW: {
-            MaximizeWindow(data.ReadUint32());
-            break;
-        }
         case WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE: {
             WindowLayoutMode mode = static_cast<WindowLayoutMode>(data.ReadUint32());
             WMError errCode = SetWindowLayoutMode(mode);
