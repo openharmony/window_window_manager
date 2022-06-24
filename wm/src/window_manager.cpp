@@ -481,7 +481,7 @@ void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChan
     if (focused) {
 #ifdef SUSPEND_MANAGER_ENABLE
         SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
-            focusChangeInfo->uid_, "", SuspendManager::THAW_BY_FOCUS_CHANGED);
+            focusChangeInfo->uid_, "", "THAW_BY_FOCUS_CHANGED");
 #endif // SUSPEND_MANAGER_ENABLE
         pImpl_->NotifyFocused(focusChangeInfo);
     } else {
