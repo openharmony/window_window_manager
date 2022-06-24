@@ -31,7 +31,7 @@ public:
     WindowManagerConfig() = delete;
     ~WindowManagerConfig() = default;
 
-    static bool LoadConfigXml(const std::string& configFilePath);
+    static bool LoadConfigXml();
     static const std::map<std::string, bool>& GetEnableConfig();
     static const std::map<std::string, std::vector<int>>& GetIntNumbersConfig();
     static const std::map<std::string, std::vector<float>>& GetFloatNumbersConfig();
@@ -46,6 +46,7 @@ private:
     static void ReadEnableConfigInfo(const xmlNodePtr& currNode);
     static void ReadIntNumbersConfigInfo(const xmlNodePtr& currNode);
     static void ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode);
+    static std::string GetConfigPath(const std::string& configFileName);
 };
 } // namespace Rosen
 } // namespace OHOS
