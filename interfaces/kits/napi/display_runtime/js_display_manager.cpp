@@ -328,6 +328,36 @@ NativeValue* CreateJsDisplayArrayObject(NativeEngine& engine, std::vector<sptr<D
 }
 };
 
+NativeValue* InitDisplayState(NativeEngine* engine)
+{
+    WLOGFI("JsDisplayManager::InitDisplayState called");
+
+    if (engine == nullptr) {
+        WLOGFE("engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("STATE_UNKNOWN", CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_UNKNOWN)));
+    object->SetProperty("STATE_OFF", CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_OFF)));
+    object->SetProperty("STATE_ON", CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_ON)));
+    object->SetProperty("STATE_DOZE",
+        CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_DOZE)));
+    object->SetProperty("STATE_DOZE_SUSPEND",
+        CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_DOZE_SUSPEND)));
+    object->SetProperty("STATE_VR",
+        CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_VR)));
+    object->SetProperty("STATE_ON_SUSPEND",
+        CreateJsValue(*engine, static_cast<int32_t>(DisplayStateMode::STATE_ON_SUSPEND)));
+    return objValue;
+}
+
 NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
 {
     WLOGFI("JsDisplayManagerInit is called");
@@ -345,6 +375,8 @@ NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
 
     std::unique_ptr<JsDisplayManager> jsDisplayManager = std::make_unique<JsDisplayManager>(engine);
     object->SetNativePointer(jsDisplayManager.release(), JsDisplayManager::Finalizer, nullptr);
+
+    object->SetProperty("DisplayState", InitDisplayState(engine));
 
     BindNativeFunction(*engine, *object, "getDefaultDisplay", JsDisplayManager::GetDefaultDisplay);
     BindNativeFunction(*engine, *object, "getDefaultDisplaySync", JsDisplayManager::GetDefaultDisplaySync);
