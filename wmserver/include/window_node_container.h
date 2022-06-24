@@ -81,7 +81,6 @@ public:
     bool IsAppWindowsEmpty() const;
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifySystemBarTints(std::vector<DisplayId> displayIdVec);
-    void NotifySystemBarDismiss(sptr<WindowNode>& node);
     WMError MinimizeAppNodeExceptOptions(MinimizeReason reason, const std::vector<uint32_t> &exceptionalIds = {},
                                          const std::vector<WindowMode> &exceptionalModes = {});
     WMError SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode);

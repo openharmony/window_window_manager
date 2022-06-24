@@ -127,8 +127,22 @@ public:
 
 class Window : public RefBase {
 public:
+    /**
+     * @brief create window, include main_window/sub_window/system_window
+     *
+     * @param windowName window name, identify window instance
+     * @param option window propertion
+     * @param context ability context
+     * @return sptr<Window> If create window success,return window instance;Otherwise, return nullptr
+     */
     static sptr<Window> Create(const std::string& windowName,
         sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
+    /**
+     * @brief find window by windowName
+     *
+     * @param windowName
+     * @return sptr<Window> Return the window instance founded
+     */
     static sptr<Window> Find(const std::string& windowName);
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
