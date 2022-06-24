@@ -34,6 +34,8 @@
 #include "wm_common_inner.h"
 #include "wm_common.h"
 
+using OHOS::AppExecFwk::DisplayOrientation;
+
 namespace OHOS {
 namespace Rosen {
 union ColorParam {
@@ -54,6 +56,23 @@ union ColorParam {
 #endif
     uint32_t value;
 };
+
+const std::map<DisplayOrientation, Orientation> ABILITY_TO_WMS_ORIENTATION_MAP {
+    {DisplayOrientation::UNSPECIFIED,                           Orientation::UNSPECIFIED                        },
+    {DisplayOrientation::LANDSCAPE,                             Orientation::HORIZONTAL                         },
+    {DisplayOrientation::PORTRAIT,                              Orientation::VERTICAL                           },
+    {DisplayOrientation::FOLLOWRECENT,                          Orientation::UNSPECIFIED                        },
+    {DisplayOrientation::LANDSCAPE_INVERTED,                    Orientation::REVERSE_HORIZONTAL                 },
+    {DisplayOrientation::PORTRAIT_INVERTED,                     Orientation::REVERSE_VERTICAL                   },
+    {DisplayOrientation::AUTO_ROTATION,                         Orientation::SENSOR                             },
+    {DisplayOrientation::AUTO_ROTATION_LANDSCAPE,               Orientation::SENSOR_HORIZONTAL                  },
+    {DisplayOrientation::AUTO_ROTATION_PORTRAIT,                Orientation::SENSOR_VERTICAL                    },
+    {DisplayOrientation::AUTO_ROTATION_RESTRICTED,              Orientation::AUTO_ROTATION_RESTRICTED           },
+    {DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,    Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED },
+    {DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,     Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED  },
+    {DisplayOrientation::LOCKED,                                Orientation::LOCKED                             },
+};
+
 class WindowImpl : public Window {
 using ListenerTaskCallback = std::function<void()>;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
@@ -314,6 +333,7 @@ private:
     void UpdateDragType();
     void InitListenerHandler();
     bool CheckCameraFloatingWindowMultiCreated(WindowType type);
+    void SetOrientationFromAbility();
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
