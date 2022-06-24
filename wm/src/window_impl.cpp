@@ -690,6 +690,7 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
             }
             WLOGFI("get stretchable enable:%{public}d", windowSystemConfig_.isStretchable_);
             property_->SetStretchable(windowSystemConfig_.isStretchable_);
+            SetOrientationFromAbility();
         }
     }
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
@@ -1205,6 +1206,23 @@ WMError WindowImpl::NotifyWindowTransition(TransitionReason reason)
     fromInfo->SetDisplayId(property_->GetDisplayId());
     fromInfo->SetTransitionReason(reason);
     return SingletonContainer::Get<WindowAdapter>().NotifyWindowTransition(fromInfo, toInfo);
+}
+
+void WindowImpl::SetOrientationFromAbility()
+{
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext == nullptr) {
+        WLOGFE("id:%{public}d is not ability Window", property_->GetWindowId());
+        return;
+    }
+    auto abilityInfo = abilityContext->GetAbilityInfo();
+    Orientation orientation = ABILITY_TO_WMS_ORIENTATION_MAP.at(static_cast<DisplayOrientation>(
+        static_cast<uint32_t>(abilityInfo->orientation)));
+    if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
+        WLOGFE("Set orientation from ability failed");
+        return;
+    }
+    property_->SetRequestedOrientation(orientation);
 }
 
 WMError WindowImpl::Minimize()
