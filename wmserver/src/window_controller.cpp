@@ -690,17 +690,6 @@ WMError WindowController::ToggleShownStateForAllAppWindows()
     return windowRoot_->ToggleShownStateForAllAppWindows();
 }
 
-WMError WindowController::MaximizeWindow(uint32_t windowId)
-{
-    WMError ret = SetWindowMode(windowId, WindowMode::WINDOW_MODE_FULLSCREEN);
-    if (ret != WMError::WM_OK) {
-        return ret;
-    }
-    ret = windowRoot_->MaximizeWindow(windowId);
-    FlushWindowInfo(windowId);
-    return ret;
-}
-
 WMError WindowController::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
     return windowRoot_->GetTopWindowId(mainWinId, topWinId);

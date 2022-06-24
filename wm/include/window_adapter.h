@@ -49,7 +49,6 @@ public:
     virtual void ProcessPointUp(uint32_t windowId);
     virtual void MinimizeAllAppWindows(DisplayId displayId);
     virtual WMError ToggleShownStateForAllAppWindows();
-    virtual WMError MaximizeWindow(uint32_t windowId);
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode);
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);
     virtual WMError GetSystemConfig(SystemConfig& systemConfig);

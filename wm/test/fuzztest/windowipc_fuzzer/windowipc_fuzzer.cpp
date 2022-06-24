@@ -130,9 +130,6 @@ void IPCSpecificInterfaceFuzzTest2(sptr<IRemoteObject> proxy, MessageParcel& sen
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE),
         sendData, reply, option);
-
-    proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_MAXIMIZE_WINDOW),
-        sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_UPDATE_PROPERTY),
         sendData, reply, option);
     proxy->SendRequest(

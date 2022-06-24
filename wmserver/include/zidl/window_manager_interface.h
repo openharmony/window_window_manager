@@ -52,7 +52,6 @@ public:
         TRANS_ID_SET_BACKGROUND_BLUR,
         TRANS_ID_SET_ALPHA,
         TRANS_ID_UPDATE_LAYOUT_MODE,
-        TRANS_ID_MAXIMIZE_WINDOW,
         TRANS_ID_UPDATE_PROPERTY,
         TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ANIMATION_SET_CONTROLLER,
@@ -76,7 +75,6 @@ public:
     virtual void ProcessPointUp(uint32_t windowId) = 0;
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError ToggleShownStateForAllAppWindows() = 0;
-    virtual WMError MaximizeWindow(uint32_t windowId) = 0;
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode) = 0;
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) = 0;
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
