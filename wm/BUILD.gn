@@ -20,7 +20,7 @@ config("libwm_private_config") {
   include_dirs = [
     "include",
     "../wmserver/include",
-    "${aafwk_kits_path}/ability/ability_runtime/include",
+    "${aafwk_path}/interfaces/kits/native/ability/ability_runtime",
     "${aafwk_inner_api_path}/ability_manager/include",
     "${aafwk_inner_api_path}/app_manager/include/appmgr",
     "//third_party/jsoncpp/include",
