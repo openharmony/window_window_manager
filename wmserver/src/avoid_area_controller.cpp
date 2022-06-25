@@ -75,11 +75,10 @@ void AvoidAreaController::AddOrRemoveOverlayWindowIfNeed(const sptr<WindowNode>&
     uint32_t overlayId = overlayNode->GetWindowId();
     bool isRecorded = (overlayWindowMap_.find(overlayId) != overlayWindowMap_.end());
     if (isAdding == isRecorded) {
-        WLOGE("error occured in overlay. overlayId %{public}u isAdding %{public}d record flag %{public}d",
+        WLOGFE("error occured in overlay. overlayId %{public}u isAdding %{public}d record flag %{public}d",
             overlayId, isAdding, isRecorded);
         return;
     }
-    WLOGFE("overlayId %{public}u isAdding %{public}d record flag %{public}d", overlayId, isAdding, isRecorded);
     if (isAdding) {
         overlayWindowMap_.insert(std::make_pair(overlayId, overlayNode));
     } else {
@@ -102,34 +101,36 @@ void AvoidAreaController::AddOrRemoveKeyboard(const sptr<WindowNode>& keyboardNo
     const uint32_t callingWindowId = keyboardNode->GetCallingWindow();
     sptr<WindowNode> callingWindow = nullptr;
     sptr<WindowNode> focusWindow = nullptr;
-    sptr<WindowNode> lastSoftInputKeyboardAreaUpdatedWindow = nullptr;
+    sptr<WindowNode> lastKeyboardAreaUpdatedWindow = nullptr;
     for (auto window : avoidAreaListenerNodes_) {
-        if (window != nullptr && window->GetWindowToken() != nullptr && window->GetWindowId() == callingWindowId) {
+        if (window == nullptr || window->GetWindowToken() == nullptr) {
+            continue;
+        }
+        if (window->GetWindowId() == callingWindowId) {
             callingWindow = window;
         }
-        if (window != nullptr && window->GetWindowToken() != nullptr && window->GetWindowId() == focusedWindow_) {
+        if (window->GetWindowId() == focusedWindow_) {
             focusWindow = window;
         }
-        if (window != nullptr && window->GetWindowToken() != nullptr &&
-            window->GetWindowId() == lastSoftInputKeyboardAreaUpdatedWindowId_) {
-            lastSoftInputKeyboardAreaUpdatedWindow = window;
+        if (window->GetWindowId() == lastSoftInputKeyboardAreaUpdatedWindowId_) {
+            lastKeyboardAreaUpdatedWindow = window;
         }
     }
     if (callingWindow == nullptr) {
         callingWindow = focusWindow;
     }
-    if (lastSoftInputKeyboardAreaUpdatedWindow != nullptr && lastSoftInputKeyboardAreaUpdatedWindow != callingWindow) {
-        const WindowMode windowMode = lastSoftInputKeyboardAreaUpdatedWindow->GetWindowMode();
+    if (lastKeyboardAreaUpdatedWindow != nullptr && lastKeyboardAreaUpdatedWindow != callingWindow) {
+        const WindowMode windowMode = lastKeyboardAreaUpdatedWindow->GetWindowMode();
         if (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
             windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
             windowMode == WindowMode::WINDOW_MODE_FLOATING) {
-            auto avoidArea = GetAvoidAreaByType(lastSoftInputKeyboardAreaUpdatedWindow, AvoidAreaType::TYPE_KEYBOARD);
-            UpdateAvoidAreaIfNeed(avoidArea, lastSoftInputKeyboardAreaUpdatedWindow, AvoidAreaType::TYPE_KEYBOARD);
+            auto avoidArea = GetAvoidAreaByType(lastKeyboardAreaUpdatedWindow, AvoidAreaType::TYPE_KEYBOARD);
+            UpdateAvoidAreaIfNeed(avoidArea, lastKeyboardAreaUpdatedWindow, AvoidAreaType::TYPE_KEYBOARD);
         }
     }
-    if (callingWindow == nullptr && focusWindow == nullptr) {
-        WLOGFI("callingWindow: %{public}u is nullptr, focusWindow: %{public}u is nullptr.",
+    if (callingWindow == nullptr) {
+        WLOGFE("callingWindow: %{public}u is nullptr, focusWindow: %{public}u is nullptr.",
             callingWindowId, focusedWindow_);
         return;
     }
@@ -168,15 +169,14 @@ void AvoidAreaController::UpdateOverlayWindowIfNeed(const sptr<WindowNode>& node
             WLOGE("window: %{public}u is not in avoidAreaListenerNodes, don't update avoid area.", node->GetWindowId());
             return;
         }
-        AvoidArea systemAvoidArea = GetAvoidAreaByType(node, AvoidAreaType::TYPE_SYSTEM);
-        AvoidArea cutoutAvoidArea = GetAvoidAreaByType(node, AvoidAreaType::TYPE_CUTOUT);
-        AvoidArea gestureAvoidArea = GetAvoidAreaByType(node, AvoidAreaType::TYPE_SYSTEM_GESTURE);
-        AvoidArea keyboardAvoidArea = GetAvoidAreaByType(node, AvoidAreaType::TYPE_KEYBOARD);
-        UpdateAvoidAreaIfNeed(systemAvoidArea, node, AvoidAreaType::TYPE_SYSTEM);
-        UpdateAvoidAreaIfNeed(cutoutAvoidArea, node, AvoidAreaType::TYPE_CUTOUT);
-        UpdateAvoidAreaIfNeed(gestureAvoidArea, node, AvoidAreaType::TYPE_SYSTEM_GESTURE);
-        if (UpdateAvoidAreaIfNeed(keyboardAvoidArea, node, AvoidAreaType::TYPE_KEYBOARD)) {
-            lastSoftInputKeyboardAreaUpdatedWindowId_ = node->GetWindowId();
+        uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
+        uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
+        for (int type = start; type <= end; type++) {
+            AvoidArea systemAvoidArea = GetAvoidAreaByType(node, static_cast<AvoidAreaType>(type));
+            bool res = UpdateAvoidAreaIfNeed(systemAvoidArea, node, static_cast<AvoidAreaType>(type));
+            if (res && type == static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD)) {
+                lastSoftInputKeyboardAreaUpdatedWindowId_ = node->GetWindowId();
+            }
         }
     }
 }
@@ -241,7 +241,7 @@ AvoidPosType AvoidAreaController::GetAvoidPosType(const Rect& windowRect, const 
     return AvoidPosType::AVOID_POS_BOTTOM;
 }
 
-void AvoidAreaController::SetAvoidAreaRect(AvoidArea& avoidArea, Rect& rect, AvoidPosType type) const
+void AvoidAreaController::SetAvoidAreaRect(AvoidArea& avoidArea, const Rect& rect, AvoidPosType type) const
 {
     switch (type) {
         case AvoidPosType::AVOID_POS_TOP : {
@@ -335,10 +335,9 @@ AvoidArea AvoidAreaController::GetAvoidAreaSystemType(const sptr<WindowNode>& no
 
 AvoidArea AvoidAreaController::GetAvoidAreaKeyboardType(const sptr<WindowNode>& node) const
 {
-    AvoidArea avoidArea;
     if (focusedWindow_ != node->GetWindowId()) {
         WLOGFI("focusedWindow: %{public}u is not windowId: %{public}u", focusedWindow_, node->GetWindowId());
-        return avoidArea;
+        return {};
     }
     for (auto& iter : overlayWindowMap_) {
         if (iter.second != nullptr &&
@@ -351,11 +350,12 @@ AvoidArea AvoidAreaController::GetAvoidAreaKeyboardType(const sptr<WindowNode>& 
             }
             Rect avoidAreaRect;
             AvoidPosType avoidPosType = CalculateOverlayRect(node, iter.second, avoidAreaRect);
+            AvoidArea avoidArea;
             SetAvoidAreaRect(avoidArea, avoidAreaRect, avoidPosType);
             return avoidArea;
         }
     }
-    return avoidArea;
+    return {};
 }
 }
 }

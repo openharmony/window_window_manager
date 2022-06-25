@@ -59,7 +59,6 @@ public:
     void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback) override;
     WMError UpdateAvoidAreaListener(uint32_t windowId, bool haveListener) override;
-
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
 };

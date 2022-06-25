@@ -102,8 +102,7 @@ NativeValue* AvoidAreaTypeInit(NativeEngine* engine)
         static_cast<int32_t>(AvoidAreaType::TYPE_CUTOUT)));
     object->SetProperty("TYPE_SYSTEM_GESTURE", CreateJsValue(*engine,
         static_cast<int32_t>(AvoidAreaType::TYPE_SYSTEM_GESTURE)));
-    object->SetProperty("TYPE_KEYBOARD", CreateJsValue(*engine,
-        static_cast<int32_t>(AvoidAreaType::TYPE_KEYBOARD)));
+    object->SetProperty("TYPE_KEYBOARD", CreateJsValue(*engine, static_cast<int32_t>(AvoidAreaType::TYPE_KEYBOARD)));
     return objValue;
 }
 

@@ -30,12 +30,12 @@ JsWindowRegisterManager::JsWindowRegisterManager()
     };
     // white register list for window
     listenerProcess_[CaseType::CASE_WINDOW] = {
-        {WINDOW_SIZE_CHANGE_CB,         &JsWindowRegisterManager::ProcessWindowChangeRegister      },
-        {SYSTEM_AVOID_AREA_CHANGE_CB,   &JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister   },
-        {AVOID_AREA_CHANGE_CB,          &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister   },
-        {LIFECYCLE_EVENT_CB,            &JsWindowRegisterManager::ProcessLifeCycleEventRegister    },
-        {KEYBOARD_HEIGHT_CHANGE_CB,     &JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister },
-        {TOUCH_OUTSIDE_CB,            &JsWindowRegisterManager::ProcessTouchOutsideRegister    }
+        { WINDOW_SIZE_CHANGE_CB,       &JsWindowRegisterManager::ProcessWindowChangeRegister          },
+        { SYSTEM_AVOID_AREA_CHANGE_CB, &JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister },
+        { AVOID_AREA_CHANGE_CB,        &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister       },
+        { LIFECYCLE_EVENT_CB,          &JsWindowRegisterManager::ProcessLifeCycleEventRegister        },
+        { KEYBOARD_HEIGHT_CHANGE_CB,   &JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister    },
+        { TOUCH_OUTSIDE_CB,            &JsWindowRegisterManager::ProcessTouchOutsideRegister          }
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -68,6 +68,10 @@ bool JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister(sptr<JsWindow
 {
     if (window == nullptr) {
         WLOGFE("[NAPI]Window is nullptr");
+        return false;
+    }
+    if (listener == nullptr) {
+        WLOGFE("[NAPI]listener is nullptr");
         return false;
     }
     listener->SetIsDeprecatedInterface(true);

@@ -56,7 +56,7 @@ public:
     uint32_t ToOverrideBrightness(float brightness);
     void UpdateBrightness(uint32_t id, bool byRemoved);
     void HandleKeepScreenOn(const sptr<WindowNode>& node, bool requireLock);
-    AvoidArea GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType);
+    AvoidArea GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType) const;
     WMError MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node);
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
     uint64_t GetScreenId(DisplayId displayId) const;

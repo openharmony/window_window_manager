@@ -261,7 +261,6 @@ void WindowAdapter::MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, b
 WMError WindowAdapter::UpdateAvoidAreaListener(uint32_t windowId, bool haveListener)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
     return windowManagerServiceProxy_->UpdateAvoidAreaListener(windowId, haveListener);
 }
 } // namespace Rosen

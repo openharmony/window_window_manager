@@ -669,7 +669,6 @@ void WindowManagerService::GetFullScreenWindowRequestedOrientation(DisplayId dis
 WMError WindowManagerService::UpdateAvoidAreaListener(uint32_t windowId, bool haveAvoidAreaListener)
 {
     return wmsTaskLooper_->ScheduleTask([this, windowId, haveAvoidAreaListener]() {
-        WM_SCOPED_TRACE("wms:UpdateAvoidAreaListener");
         sptr<WindowNode> node = windowRoot_->GetWindowNode(windowId);
         if (node == nullptr) {
             WLOGFE("get window node failed. win %{public}u", windowId);

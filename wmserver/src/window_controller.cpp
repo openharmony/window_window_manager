@@ -616,7 +616,7 @@ WMError WindowController::SetWindowAnimationController(const sptr<RSIWindowAnima
     return RemoteAnimation::SetWindowAnimationController(controller);
 }
 
-AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
+AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) const
 {
     return windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
 }
