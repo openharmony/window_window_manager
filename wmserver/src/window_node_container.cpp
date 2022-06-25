@@ -872,7 +872,6 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
 
 void WindowNodeContainer::NotifySystemBarTints(std::vector<DisplayId> displayIdVec)
 {
-    WM_FUNCTION_TRACE();
     if (displayIdVec.size() != displayGroupController_->sysBarTintMaps_.size()) {
         WLOGE("[Immersive] the number of display is error");
     }
