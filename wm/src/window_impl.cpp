@@ -1016,6 +1016,8 @@ WMError WindowImpl::SetBackgroundColor(const std::string& color)
     }
     uint32_t colorValue;
     if (ColorParser::Parse(color, colorValue)) {
+        WLOGFI("SetBackgroundColor: window: %{public}s, value: [%{public}s, %{public}u]",
+            name_.c_str(), color.c_str(), colorValue);
         return SetBackgroundColor(colorValue);
     }
     WLOGFE("invalid color string: %{public}s", color.c_str());
