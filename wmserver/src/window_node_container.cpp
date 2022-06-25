@@ -179,8 +179,6 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
     NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
-    std::vector<sptr<WindowVisibilityInfo>> infos;
-    UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     UpdateCameraFloatWindowStatus(node, true);
@@ -269,17 +267,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
 
     node->requestedVisibility_ = false;
     node->currentVisibility_ = false;
-    node->isCovered_ = true;
-    std::vector<sptr<WindowVisibilityInfo>> infos = {new WindowVisibilityInfo(node->GetWindowId(),
-        node->GetCallingPid(), node->GetCallingUid(), false, node->GetWindowType())};
-    for (auto& child : node->children_) {
-        if (child->currentVisibility_) {
-            child->currentVisibility_ = false;
-            child->isCovered_ = true;
-            infos.emplace_back(new WindowVisibilityInfo(child->GetWindowId(), child->GetCallingPid(),
-                child->GetCallingUid(), false, child->GetWindowType()));
-        }
-    }
     // Remove node from RSTree
     for (auto& displayId : node->GetShowingDisplays()) {
         UpdateRSTree(node, displayId, false, node->isPlayAnimationHide_);
@@ -298,7 +285,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
         NotifyDockWindowStateChanged(node, true);
     }
     NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_REMOVE);
-    UpdateWindowVisibilityInfos(infos);
     DumpScreenWindowTree();
     NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     RecoverScreenDefaultOrientationIfNeed(node->GetDisplayId());
@@ -1698,50 +1684,6 @@ bool WindowNodeContainer::TraverseFromBottomToTop(sptr<WindowNode> node, const W
         }
     }
     return false;
-}
-
-void WindowNodeContainer::UpdateWindowVisibilityInfos(std::vector<sptr<WindowVisibilityInfo>>& infos)
-{
-    // clear vector cache completely, swap with empty vector
-    auto emptyVector = std::vector<Rect>();
-    currentCoveredArea_.swap(emptyVector);
-    WindowNodeOperationFunc func = [this, &infos](sptr<WindowNode> node) {
-        if (node == nullptr) {
-            return false;
-        }
-        Rect layoutRect = node->GetWindowRect();
-        const Rect& displayRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
-        int32_t nodeX = std::max(0, layoutRect.posX_);
-        int32_t nodeY = std::max(0, layoutRect.posY_);
-        int32_t nodeXEnd = std::min(displayRect.posX_ + static_cast<int32_t>(displayRect.width_),
-            layoutRect.posX_ + static_cast<int32_t>(layoutRect.width_));
-        int32_t nodeYEnd = std::min(displayRect.posY_ + static_cast<int32_t>(displayRect.height_),
-            layoutRect.posY_ + static_cast<int32_t>(layoutRect.height_));
-
-        Rect rectInDisplay = {nodeX, nodeY,
-                              static_cast<uint32_t>(nodeXEnd - nodeX), static_cast<uint32_t>(nodeYEnd - nodeY)};
-        bool isCovered = false;
-        for (auto& rect : currentCoveredArea_) {
-            if (rectInDisplay.IsInsideOf(rect)) {
-                isCovered = true;
-                WLOGD("UpdateWindowVisibilityInfos: find covered window:%{public}u", node->GetWindowId());
-                break;
-            }
-        }
-        if (!isCovered) {
-            currentCoveredArea_.emplace_back(rectInDisplay);
-        }
-        if (isCovered != node->isCovered_) {
-            node->isCovered_ = isCovered;
-            infos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
-                node->GetCallingUid(), !isCovered, node->GetWindowType()));
-            WLOGD("UpdateWindowVisibilityInfos: covered status changed window:%{public}u, covered:%{public}d",
-                node->GetWindowId(), isCovered);
-        }
-        return false;
-    };
-    TraverseWindowTree(func, true);
-    WindowManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(infos);
 }
 
 float WindowNodeContainer::GetVirtualPixelRatio(DisplayId displayId) const
