@@ -166,6 +166,7 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
     }
     Rect rect = node->GetWindowRect();
     std::string isShown_ = node->startingWindowShown_ ? "true" : "false";
+    std::string isVisible = node->isVisible_ ? "true" : "false";
     std::ostringstream oss;
     oss << "WindowName: " << node->GetWindowName()  << std::endl;
     oss << "DisplayId: " << node->GetDisplayId() << std::endl;
@@ -176,6 +177,7 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
     oss << "Flag: " << node->GetWindowFlags() << std::endl;
     oss << "Orientation: " << static_cast<uint32_t>(node->GetRequestedOrientation()) << std::endl;
     oss << "IsStartingWindow: " << isShown_ << std::endl;
+    oss << "IsVisible: " << isVisible << std::endl;
     oss << "WindowRect: " << "[ "
         << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_
         << " ]" << std::endl;
