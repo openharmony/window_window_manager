@@ -57,8 +57,8 @@ void WindowAgent::UpdateFocusStatus(bool focused)
 
 void WindowAgent::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    if (window_ == nullptr) {
-        WLOGFE("window_ is nullptr");
+    if (window_ == nullptr || avoidArea == nullptr) {
+        WLOGFE("window_ or avoidArea is nullptr.");
         return;
     }
     window_->UpdateAvoidArea(avoidArea, type);

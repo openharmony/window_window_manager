@@ -72,7 +72,7 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId d
     }
 
     // In case of have no container for default display, create container
-    WLOGFE("Create container for current display, displayId: %{public}" PRIu64 "", displayId);
+    WLOGFI("Create container for current display, displayId: %{public}" PRIu64 "", displayId);
     sptr<DisplayInfo> displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
     return CreateWindowNodeContainer(displayInfo);
 }

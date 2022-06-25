@@ -118,10 +118,6 @@ HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Lev
 
     // check is out split Immersive
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
-    Rect curFullScreenRect = fullWindow->GetRect();
-    AvoidArea avoidArea;
-    fullWindow->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidArea);
-    ASSERT_EQ(avoidArea.topRect_.height_, curFullScreenRect.posY_);
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);

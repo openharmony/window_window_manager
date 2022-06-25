@@ -71,7 +71,7 @@ public:
 
 class IAvoidAreaChangedListener : virtual public RefBase {
 public:
-    virtual void OnAvoidAreaChanged(const AvoidArea avoidAreas, AvoidAreaType type) = 0;
+    virtual void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) = 0;
 };
 
 class IWindowDragListener : virtual public RefBase {

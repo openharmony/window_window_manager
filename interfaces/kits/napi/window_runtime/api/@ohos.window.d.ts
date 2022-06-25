@@ -86,7 +86,7 @@ declare namespace window {
     TYPE_SYSTEM_GESTURE,
 
     /**
-     * area for keyboard
+     * area for soft input keyboard
      * @since 9
      */
     TYPE_KEYBOARD

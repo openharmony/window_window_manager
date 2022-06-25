@@ -52,7 +52,7 @@ public:
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnModeChange(WindowMode mode) override;
-    void OnAvoidAreaChanged(const AvoidArea avoidAreas, AvoidAreaType type) override;
+    void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) override;
     void AfterForeground() override;
     void AfterBackground() override;
     void AfterFocused() override;

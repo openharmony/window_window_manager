@@ -295,7 +295,6 @@ WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
     if (ret != WMError::WM_OK) {
         WLOGFE("GetAvoidAreaByType errCode:%{public}d winId:%{public}u Type is :%{public}u.",
             static_cast<int32_t>(ret), property_->GetWindowId(), static_cast<uint32_t>(type));
-        return ret;
     }
     return ret;
 }
@@ -2145,12 +2144,7 @@ void WindowImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAr
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         avoidAreaChangeListeners = avoidAreaChangeListeners_;
     }
-    PostListenerTask([avoidAreaChangeListeners, avoidArea, type]() {
-        AvoidArea outAvoidArea;
-        outAvoidArea.topRect_ = avoidArea->topRect_;
-        outAvoidArea.leftRect_ = avoidArea->leftRect_;
-        outAvoidArea.rightRect_ = avoidArea->rightRect_;
-        outAvoidArea.bottomRect_ = avoidArea->bottomRect_;
+    PostListenerTask([avoidAreaChangeListeners, outAvoidArea = *avoidArea, type]() {
         for (auto& listener : avoidAreaChangeListeners) {
             if (listener != nullptr) {
                 listener->OnAvoidAreaChanged(outAvoidArea, type);

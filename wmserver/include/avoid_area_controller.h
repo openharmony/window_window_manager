@@ -55,7 +55,7 @@ private:
     AvoidPosType CalculateOverlayRect(const sptr<WindowNode>& node,
         const sptr<WindowNode>& overlayNode, Rect& overlayRect) const;
     AvoidPosType GetAvoidPosType(const Rect& windowRect, const Rect& overlayRect) const;
-    void SetAvoidAreaRect(AvoidArea& avoidArea, Rect& rect, AvoidPosType type) const;
+    void SetAvoidAreaRect(AvoidArea& avoidArea, const Rect& rect, AvoidPosType type) const;
     bool UpdateAvoidAreaIfNeed(const AvoidArea& avoidArea, const sptr<WindowNode>& node, AvoidAreaType avoidAreaType);
     AvoidArea GetAvoidAreaSystemType(const sptr<WindowNode>& node) const;
     AvoidArea GetAvoidAreaKeyboardType(const sptr<WindowNode>& node) const;
@@ -64,8 +64,8 @@ private:
     std::unordered_map<uint32_t, sptr<WindowNode>> overlayWindowMap_;
     std::set<sptr<WindowNode>> avoidAreaListenerNodes_;
     std::map<uint32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
-    DEFINE_VAR_DEFAULT_FUNC_SET(bool, FlagForProcessWindowChange, isForbidProcessingWindowChange, false)
     uint32_t lastSoftInputKeyboardAreaUpdatedWindowId_ { 0 };
+    DEFINE_VAR_DEFAULT_FUNC_SET(bool, FlagForProcessWindowChange, isForbidProcessingWindowChange, false)
 };
 }
 }

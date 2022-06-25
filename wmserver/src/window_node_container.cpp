@@ -224,7 +224,6 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
     if (WindowHelper::IsMainWindow(node->GetWindowType()) && WindowHelper::IsSwitchCascadeReason(reason)) {
         SwitchLayoutPolicy(WindowLayoutMode::CASCADE, node->GetDisplayId());
     }
-    WLOGFI("UpdateWindowNode windowId: %{public}u begin", node->GetWindowId());
     layoutPolicy_->UpdateWindowNode(node);
     NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_UPDATE);
     DumpScreenWindowTree();
@@ -862,8 +861,8 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
 
         WLOGFI("keyboard size change callingWindow: [%{public}s, %{public}u], " \
         "overlap rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-               callingWindow->GetWindowName().c_str(), callingWindow->GetWindowId(),
-               overlapRect.posX_, overlapRect.posY_, overlapRect.width_, overlapRect.height_);
+            callingWindow->GetWindowName().c_str(), callingWindow->GetWindowId(),
+            overlapRect.posX_, overlapRect.posY_, overlapRect.width_, overlapRect.height_);
         sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo(OccupiedAreaType::TYPE_INPUT, overlapRect);
         callingWindow->GetWindowToken()->UpdateOccupiedAreaChangeInfo(info);
         return;
@@ -1082,7 +1081,7 @@ void WindowNodeContainer::TraverseWindowNode(sptr<WindowNode>& node, std::vector
     }
 }
 
-AvoidArea WindowNodeContainer::GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType)
+AvoidArea WindowNodeContainer::GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType) const
 {
     if (CheckWindowNodeWhetherInWindowTree(node)) {
         return avoidController_->GetAvoidAreaByType(node, avoidAreaType);
