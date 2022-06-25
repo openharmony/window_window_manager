@@ -34,9 +34,6 @@
 #include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
-namespace {
-    const std::string DISPLAY_MANAGER_CONFIG_XML = "/system/etc/window/resources/display_manager_config.xml";
-}
 class DisplayManagerService : public SystemAbility, public DisplayManagerStub {
 DECLARE_SYSTEM_ABILITY(DisplayManagerService);
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
