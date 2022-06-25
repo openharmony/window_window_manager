@@ -84,7 +84,7 @@ WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
     oss << "-------------------------------------ScreenGroup " << screenGroupId
         << "-------------------------------------"
         << std::endl;
-    oss << "WindowName           DisplayId Pid  WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
+    oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
         << std::endl;
     std::vector<sptr<WindowNode>> windowNodes;
     windowNodeContainer->TraverseContainer(windowNodes);
@@ -100,7 +100,7 @@ WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
         // std::setw is used to set the output width and different width values are set to keep the format aligned.
         oss << std::left << std::setw(21) << windowName
             << std::left << std::setw(10) << windowNode->GetDisplayId()
-            << std::left << std::setw(5) << windowNode->GetCallingPid()
+            << std::left << std::setw(8) << windowNode->GetCallingPid()
             << std::left << std::setw(6) << windowNode->GetWindowId()
             << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowType())
             << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowMode())
