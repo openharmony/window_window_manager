@@ -22,7 +22,6 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowListener"};
 }
 
-constexpr uint32_t AVOID_AREA_NUM = 4;
 JsWindowListener::~JsWindowListener()
 {
     WLOGFI("[NAPI]~JsWindowListener");
@@ -110,37 +109,29 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
         *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsWindowListener::OnAvoidAreaChanged(const std::vector<Rect> avoidAreas)
+void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
 {
     WLOGFI("[NAPI]OnAvoidAreaChanged");
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = wptr<JsWindowListener>(this), avoidAreas, eng = engine_] (NativeEngine &engine,
+        [self = wptr<JsWindowListener>(this), avoidArea, type, eng = engine_] (NativeEngine &engine,
             AsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
                 WLOGFE("[NAPI]this listener or engine is nullptr");
                 return;
             }
-            NativeValue* avoidAreaValue = eng->CreateObject();
-            NativeObject* object = ConvertNativeValueTo<NativeObject>(avoidAreaValue);
-            if (object == nullptr) {
-                WLOGFE("[NAPI]Failed to convert rect to jsObject");
+            NativeValue* avoidAreaValue = ConvertAvoidAreaToJsValue(engine, avoidArea, type);
+            if (avoidAreaValue == nullptr) {
                 return;
             }
-
-            if (static_cast<uint32_t>(avoidAreas.size()) != AVOID_AREA_NUM) {
-                WLOGFE("[NAPI]AvoidAreas size is not 4 (left, top, right, bottom), size is %{public}u",
-                    static_cast<uint32_t>(avoidAreas.size()));
-                return;
+            if (thisListener->isDeprecatedInterface_) {
+                NativeValue* argv[] = { avoidAreaValue };
+                thisListener->CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
+            } else {
+                NativeValue* argv[] = { CreateJsValue(engine, static_cast<uint32_t>(type)), avoidAreaValue };
+                thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
             }
-
-            object->SetProperty("leftRect", GetRectAndConvertToJsValue(*eng, avoidAreas[0]));   // idx 0 : left
-            object->SetProperty("topRect", GetRectAndConvertToJsValue(*eng, avoidAreas[1]));    // idx 1 : top
-            object->SetProperty("rightRect", GetRectAndConvertToJsValue(*eng, avoidAreas[2]));  // idx 2 : right
-            object->SetProperty("bottomRect", GetRectAndConvertToJsValue(*eng, avoidAreas[3])); // idx 3 : bottom
-            NativeValue* argv[] = {avoidAreaValue};
-            thisListener->CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     );
 

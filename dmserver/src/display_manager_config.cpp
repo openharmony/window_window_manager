@@ -76,7 +76,8 @@ bool DisplayManagerConfig::LoadConfigXml(const std::string& configFilePath)
 
         auto nodeName = curNodePtr->name;
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("dpi")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDeviceRotationOffset"))) {
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDeviceRotationOffset")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("cutoutArea"))) {
             ReadIntNumbersConfigInfo(curNodePtr);
             continue;
         }

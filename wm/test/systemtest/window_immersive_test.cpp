@@ -59,8 +59,8 @@ public:
 
 class TestAvoidAreaChangedListener : public IAvoidAreaChangedListener {
 public:
-    std::vector<Rect> avoidAreas_;
-    void OnAvoidAreaChanged(std::vector<Rect> avoidAreas) override;
+    AvoidArea avoidArea_;
+    void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) override;
 };
 
 class WindowImmersiveTest : public testing::Test {
@@ -188,9 +188,9 @@ void TestSystemBarChangedListener::OnSystemBarPropertyChange(DisplayId displayId
     }
 }
 
-void TestAvoidAreaChangedListener::OnAvoidAreaChanged(std::vector<Rect> avoidAreas)
+void TestAvoidAreaChangedListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
 {
-    avoidAreas_ = avoidAreas;
+    avoidArea_ = avoidArea;
 }
 
 void WindowImmersiveTest::SetUpTestCase()
@@ -386,149 +386,11 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, Function | MediumTest | 
     AvoidArea avoidarea;
     WMError ret = win->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea);
     ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.leftRect));
-    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.rightRect));
-    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.topRect));
-    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.bottomRect));
+    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.leftRect_));
+    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.rightRect_));
+    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.topRect_));
+    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidarea.bottomRect_));
     ASSERT_EQ(WMError::WM_OK, win->Hide());
-}
-
-/**
- * @tc.name: GetAvoidAreaByTypeTest02
- * @tc.desc: Add SystemBar left avoid. And Test GetAvoidArea.
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest02, Function | MediumTest | Level3)
-{
-    // Add full screenwindow for call GetAvoidArea, and push_back in activeWindows_
-    const sptr<Window>& win = utils::CreateTestWindow(fullScreenAppinfo_);
-    activeWindows_.push_back(win);
-
-    // Add a unexist leftAvoid
-    avoidBarInfo_.rect = {0, 0, leftAvoidW_, leftAvoidH_};
-    const sptr<Window>& left = utils::CreateTestWindow(avoidBarInfo_);
-    activeWindows_.push_back(left);
-    ASSERT_EQ(WMError::WM_OK, left->Show());
-    ASSERT_EQ(WMError::WM_OK, left->Resize(leftAvoidW_, leftAvoidH_));
-
-    // Test GetAvoidArea
-    AvoidArea avoidarea;
-    WMError ret = win->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidarea);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_TRUE(utils::RectEqualTo(left, avoidarea.leftRect));
-    ASSERT_EQ(WMError::WM_OK, left->Hide());
-    ASSERT_EQ(WMError::WM_OK, win->Hide());
-}
-
-/**
- * @tc.name: GetAvoidAreaByTypeTest03
- * @tc.desc: Add SystemBar top avoid. And Test GetAvoidArea.
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest03, Function | MediumTest | Level3)
-{
-    // Add full screenwindow for call GetAvoidArea, and push_back in activeWindows_
-    const sptr<Window>& win = utils::CreateTestWindow(fullScreenAppinfo_);
-    activeWindows_.push_back(win);
-
-    // Add a unexist topAvoid
-    avoidBarInfo_.name = "TopAvoidTest";
-    avoidBarInfo_.rect = {0, 0, topAvoidW_, topAvoidH_};
-    const sptr<Window>& top = utils::CreateTestWindow(avoidBarInfo_);
-    activeWindows_.push_back(top);
-    ASSERT_EQ(WMError::WM_OK, top->Show());
-    ASSERT_EQ(WMError::WM_OK, top->Resize(topAvoidW_, topAvoidH_));
-
-    // Tesr GetAvoidArea
-    AvoidArea avoidarea;
-    WMError ret = win->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidarea);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_TRUE(utils::RectEqualTo(top, avoidarea.topRect));
-    ASSERT_EQ(WMError::WM_OK, top->Hide());
-    ASSERT_EQ(WMError::WM_OK, win->Hide());
-}
-
-/**
- * @tc.name: OnAvoidAreaChangedTest01
- * @tc.desc: Add unexistavoid and Update this avoid. Test OnAvoidAreaChanged listener
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImmersiveTest, OnAvoidAreaChangedTest01, Function | MediumTest | Level3)
-{
-    // Add full screenwindow for RegisterAvoidAreaChangeListener
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppinfo_);
-    sptr<IAvoidAreaChangedListener> thisListener(testAvoidAreaChangedListener_);
-    window->RegisterAvoidAreaChangeListener(thisListener);
-    activeWindows_.push_back(window);
-    ASSERT_EQ(WMError::WM_OK, window->Show());
-
-    // Add a unexist topAvoid
-    avoidBarInfo_.name = "TopAvoidTest";
-    avoidBarInfo_.rect = {0, 0, topAvoidW_, topAvoidH_};
-    const sptr<Window>& top = utils::CreateTestWindow(avoidBarInfo_);
-    activeWindows_.push_back(top);
-    ASSERT_EQ(WMError::WM_OK, top->Show());
-    ASSERT_EQ(WMError::WM_OK, top->Resize(topAvoidW_, topAvoidH_));
-
-    // Await 100ms and get callback result in listener. Compare current avoidArea
-    usleep(WAIT_ASYNC_US);
-    std::vector<Rect> avoidArea = testAvoidAreaChangedListener_->avoidAreas_;
-    ASSERT_EQ(4u, static_cast<uint32_t>(avoidArea.size()));      // 4: avoidAreaNum(left, top, right, bottom)
-    ASSERT_TRUE(utils::RectEqualToRect(avoidBarInfo_.rect, avoidArea[1]));  // 1: left Rect
-
-    // Update topavoid. Enlarge topAvoidH_
-    uint32_t bigHeight = std::min(static_cast<uint32_t>(utils::displayRect_.height_),
-        static_cast<uint32_t>(utils::displayRect_.width_ * 0.5));  // 0.5 : just use bigger height for update
-    Rect bigTopRect = {0, 0, topAvoidW_, bigHeight};
-    ASSERT_EQ(WMError::WM_OK, top->Resize(topAvoidW_, bigHeight));
-
-    // Await 100ms and get callback result in listener. Compare current avoidArea
-    usleep(WAIT_ASYNC_US);
-    std::vector<Rect> avoidArea2 = testAvoidAreaChangedListener_->avoidAreas_;
-    ASSERT_TRUE(utils::RectEqualToRect(bigTopRect, avoidArea2[1]));
-
-    window->UnregisterAvoidAreaChangeListener(thisListener);
-    ASSERT_EQ(WMError::WM_OK, top->Hide());
-    ASSERT_EQ(WMError::WM_OK, window->Hide());
-}
-
-/**
- * @tc.name: OnAvoidAreaChangedTest02
- * @tc.desc: Add unexistavoid and remove this avoid. Test OnAvoidAreaChanged listener
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImmersiveTest, OnAvoidAreaChangedTest02, Function | MediumTest | Level3)
-{
-    // Add full screenwindow for call UpdateAvoidChange
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppinfo_);
-    sptr<IAvoidAreaChangedListener> thisListener(testAvoidAreaChangedListener_);
-    window->RegisterAvoidAreaChangeListener(thisListener);
-    activeWindows_.push_back(window);
-    ASSERT_EQ(WMError::WM_OK, window->Show());
-
-    // Add a unexist leftAvoid
-    avoidBarInfo_.rect = {0, 0, leftAvoidW_, leftAvoidH_};
-    const sptr<Window>& left = utils::CreateTestWindow(avoidBarInfo_);
-    activeWindows_.push_back(left);
-    ASSERT_EQ(WMError::WM_OK, left->Show());
-    ASSERT_EQ(WMError::WM_OK, left->Resize(leftAvoidW_, leftAvoidH_));
-
-    // Await 100ms and get callback result in listener. Compare current avoidArea
-    usleep(WAIT_ASYNC_US);
-    std::vector<Rect> avoidArea = testAvoidAreaChangedListener_->avoidAreas_;
-    ASSERT_EQ(4u, static_cast<uint32_t>(avoidArea.size()));        // 4: avoidAreaNum(left, top, right, bottom)
-    ASSERT_TRUE(utils::RectEqualToRect(avoidBarInfo_.rect, avoidArea[0]));   // 0: left Rect
-
-    // Remove left avoid.
-    ASSERT_EQ(WMError::WM_OK, left->Hide());
-
-    // Await 100ms and get callback result in listener. Compare current avoidArea
-    usleep(WAIT_ASYNC_US);
-    std::vector<Rect> avoidArea2 = testAvoidAreaChangedListener_->avoidAreas_;
-    ASSERT_TRUE(utils::RectEqualToRect(EMPTY_RECT, avoidArea2[0])); // 0: left Rect
-
-    window->UnregisterAvoidAreaChangeListener(thisListener);
-    ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 
 /**

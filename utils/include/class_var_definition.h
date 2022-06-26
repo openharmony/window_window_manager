@@ -68,6 +68,10 @@ public:                                                                         
     DEFINE_VAR_DEFAULT(type, memberName, defaultValue)                             \
     DEFINE_FUNC_GET(type, funcName, memberName)
 
+#define DEFINE_VAR_DEFAULT_FUNC_SET(type, funcName, memberName, defaultValue)      \
+    DEFINE_VAR_DEFAULT(type, memberName, defaultValue)                             \
+    DEFINE_FUNC_SET(type, funcName, memberName)
+
 #define DEFINE_VAR_FUNC_GET_SET(type, funcName, memberName)                        \
     DEFINE_VAR(type, memberName)                                                   \
     DEFINE_FUNC_GET(type, funcName, memberName)                                    \

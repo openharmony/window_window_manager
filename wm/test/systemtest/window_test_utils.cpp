@@ -359,10 +359,10 @@ void WindowTestUtils::UpdateSplitRects(const sptr<Window>& window)
     if (res != WMError::WM_OK) {
         WLOGFE("Get avoid type failed");
     }
-    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.leftRect);
-    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.topRect);
-    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.rightRect);
-    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.bottomRect);
+    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.leftRect_);
+    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.topRect_);
+    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.rightRect_);
+    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.bottomRect_);
 
     if (isVerticalDisplay_) {
         splitRects_.dividerRect.posY_ = limitDisplayRect_.posY_ +
