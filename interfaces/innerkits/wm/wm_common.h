@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
+#include <parcel.h>
+
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
@@ -199,6 +201,11 @@ struct Rect {
         return !this->operator==(a);
     }
 
+    bool isUninitializedRect() const
+    {
+        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
+    }
+
     bool IsInsideOf(const Rect& a) const
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
@@ -210,6 +217,7 @@ enum class AvoidAreaType : uint32_t {
     TYPE_SYSTEM,           // area of SystemUI
     TYPE_CUTOUT,           // cutout of screen
     TYPE_SYSTEM_GESTURE,   // area for system gesture
+    TYPE_KEYBOARD,         // area for soft input keyboard
 };
 
 enum class OccupiedAreaType : uint32_t {
@@ -226,11 +234,61 @@ enum class WindowAnimation : uint32_t {
     DEFAULT,
 };
 
-struct AvoidArea {
-    Rect leftRect;
-    Rect topRect;
-    Rect rightRect;
-    Rect bottomRect;
+class AvoidArea : public Parcelable {
+public:
+    Rect topRect_ { 0, 0, 0, 0 };
+    Rect leftRect_ { 0, 0, 0, 0 };
+    Rect rightRect_ { 0, 0, 0, 0 };
+    Rect bottomRect_ { 0, 0, 0, 0 };
+
+    bool operator==(const AvoidArea& a) const
+    {
+        return (leftRect_ == a.leftRect_ && topRect_ == a.topRect_ &&
+            rightRect_ == a.rightRect_ && bottomRect_ == a.bottomRect_);
+    }
+
+    bool operator!=(const AvoidArea& a) const
+    {
+        return !this->operator==(a);
+    }
+
+    bool isEmptyAvoidArea() const
+    {
+        return topRect_.isUninitializedRect() && leftRect_.isUninitializedRect() &&
+            rightRect_.isUninitializedRect() && bottomRect_.isUninitializedRect();
+    }
+
+    static inline bool WriteParcel(Parcel& parcel, const Rect& rect)
+    {
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+            parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+    }
+
+    static inline bool ReadParcel(Parcel& parcel, Rect& rect)
+    {
+        return parcel.ReadInt32(rect.posX_) && parcel.ReadInt32(rect.posY_) &&
+            parcel.ReadUint32(rect.width_) && parcel.ReadUint32(rect.height_);
+    }
+
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        return (WriteParcel(parcel, leftRect_) && WriteParcel(parcel, topRect_) &&
+            WriteParcel(parcel, rightRect_) && WriteParcel(parcel, bottomRect_));
+    }
+
+    static AvoidArea* Unmarshalling(Parcel& parcel)
+    {
+        AvoidArea *avoidArea = new(std::nothrow) AvoidArea();
+        if (avoidArea == nullptr) {
+            return nullptr;
+        }
+        if (ReadParcel(parcel, avoidArea->leftRect_) && ReadParcel(parcel, avoidArea->topRect_) &&
+            ReadParcel(parcel, avoidArea->rightRect_) && ReadParcel(parcel, avoidArea->bottomRect_)) {
+            return avoidArea;
+        }
+        delete avoidArea;
+        return nullptr;
+    }
 };
 
 enum class WindowUpdateType : int32_t {

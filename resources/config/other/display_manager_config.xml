@@ -16,4 +16,6 @@
  <Configs>
     <!--Window display dpi, valid range is 80~640, use 0 if no configuration is requeired-->
     <dpi>0</dpi>
+    <!--Cutout area Rect. This is temporary config. To delete when Rs cutout area interface is ready.-->
+    <cutoutArea>10 10 100 20</cutoutArea>
  </Configs>

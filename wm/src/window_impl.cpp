@@ -290,16 +290,12 @@ SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
 WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
     WLOGFI("GetAvoidAreaByType  Search Type: %{public}u", static_cast<uint32_t>(type));
-    std::vector<Rect> avoidAreaVec;
     uint32_t windowId = property_->GetWindowId();
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidAreaVec);
-    if (ret != WMError::WM_OK || avoidAreaVec.size() != 4) {    // 4: the avoid area num (left, top, right, bottom)
-        WLOGFE("GetAvoidAreaByType errCode:%{public}d winId:%{public}u Type is :%{public}u." \
-            "Or avoidArea Size != 4. Current size of avoid area: %{public}u", static_cast<int32_t>(ret),
-            property_->GetWindowId(), static_cast<uint32_t>(type), static_cast<uint32_t>(avoidAreaVec.size()));
-        return ret;
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidArea);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("GetAvoidAreaByType errCode:%{public}d winId:%{public}u Type is :%{public}u.",
+            static_cast<int32_t>(ret), property_->GetWindowId(), static_cast<uint32_t>(type));
     }
-    avoidArea = {avoidAreaVec[0], avoidAreaVec[1], avoidAreaVec[2], avoidAreaVec[3]}; // 0:left 1:top 2:right 3:bottom
     return ret;
 }
 
@@ -1336,25 +1332,36 @@ void WindowImpl::UnregisterWindowChangeListener(sptr<IWindowChangeListener>& lis
 void WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("RegisterAvoidAreaChangeListener failed. AvoidAreaChangeListener is nullptr");
+        WLOGFE("register avoid area listener fail. listener is null");
         return;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (std::find(avoidAreaChangeListeners_.begin(), avoidAreaChangeListeners_.end(), listener) !=
-        avoidAreaChangeListeners_.end()) {
-        WLOGFE("Listener already registered");
-        return;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        if (std::find(avoidAreaChangeListeners_.begin(), avoidAreaChangeListeners_.end(), listener) !=
+            avoidAreaChangeListeners_.end()) {
+            WLOGFE("avoid area listener already registered");
+            return;
+        }
+        avoidAreaChangeListeners_.push_back(listener);
     }
-    avoidAreaChangeListeners_.emplace_back(listener);
+    if (avoidAreaChangeListeners_.size() == 1) {
+        SingletonContainer::Get<WindowAdapter>().UpdateAvoidAreaListener(property_->GetWindowId(), true);
+    }
 }
 
 void WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    avoidAreaChangeListeners_.erase(std::remove_if(avoidAreaChangeListeners_.begin(), avoidAreaChangeListeners_.end(),
-        [listener](sptr<IAvoidAreaChangedListener> registeredListener) {
-            return registeredListener == listener;
-        }), avoidAreaChangeListeners_.end());
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        avoidAreaChangeListeners_.erase(std::remove_if(avoidAreaChangeListeners_.begin(),
+            avoidAreaChangeListeners_.end(),
+            [listener](sptr<IAvoidAreaChangedListener> registeredListener) {
+                return registeredListener == listener;
+            }), avoidAreaChangeListeners_.end());
+    }
+    if (avoidAreaChangeListeners_.empty()) {
+        SingletonContainer::Get<WindowAdapter>().UpdateAvoidAreaListener(property_->GetWindowId(), false);
+    }
 }
 
 void WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
@@ -1948,10 +1955,10 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
     }
 }
 
-void WindowImpl::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
+void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     WLOGFI("Window Update AvoidArea, id: %{public}u", property_->GetWindowId());
-    NotifyAvoidAreaChange(avoidArea);
+    NotifyAvoidAreaChange(avoidArea, type);
 }
 
 void WindowImpl::UpdateWindowState(WindowState state)
@@ -2130,17 +2137,17 @@ void WindowImpl::NotifyPointEvent(std::shared_ptr<MMI::PointerEvent>& pointerEve
     });
 }
 
-void WindowImpl::NotifyAvoidAreaChange(const std::vector<Rect>& avoidArea)
+void WindowImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         avoidAreaChangeListeners = avoidAreaChangeListeners_;
     }
-    PostListenerTask([avoidAreaChangeListeners, avoidArea]() {
+    PostListenerTask([avoidAreaChangeListeners, outAvoidArea = *avoidArea, type]() {
         for (auto& listener : avoidAreaChangeListeners) {
             if (listener != nullptr) {
-                listener->OnAvoidAreaChanged(avoidArea);
+                listener->OnAvoidAreaChanged(outAvoidArea, type);
             }
         }
     });

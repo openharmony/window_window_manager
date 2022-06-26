@@ -121,8 +121,8 @@ HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest01, Function | Me
 
     ASSERT_EQ(testOccupiedAreaChangeListener_->rect_.posX_, window2->GetRect().posX_);
     ASSERT_EQ(testOccupiedAreaChangeListener_->rect_.posY_, window2->GetRect().posY_);
-    ASSERT_EQ(testOccupiedAreaChangeListener_->rect_.width_, window2->GetRect().width_ + 1);
-    ASSERT_EQ(testOccupiedAreaChangeListener_->rect_.height_, window2->GetRect().height_ + 1);
+    ASSERT_EQ(testOccupiedAreaChangeListener_->rect_.width_, window2->GetRect().width_);
+    ASSERT_EQ(testOccupiedAreaChangeListener_->rect_.height_, window2->GetRect().height_);
 }
 
 /**

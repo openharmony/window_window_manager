@@ -46,7 +46,7 @@ public:
     virtual void UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) = 0;
     virtual void UpdateWindowMode(WindowMode mode) = 0;
     virtual void UpdateFocusStatus(bool focused) = 0;
-    virtual void UpdateAvoidArea(const std::vector<Rect>& avoidAreas) = 0;
+    virtual void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) = 0;
     virtual void UpdateWindowState(WindowState state) = 0;
     virtual void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) = 0;
     virtual void UpdateDisplayId(DisplayId from, DisplayId to) = 0;

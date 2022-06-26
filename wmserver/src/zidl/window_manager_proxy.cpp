@@ -213,14 +213,13 @@ WMError WindowManagerProxy::SetAlpha(uint32_t windowId, float alpha)
     return static_cast<WMError>(ret);
 }
 
-std::vector<Rect> WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type)
+AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    const uint32_t maxAvoidNum = 4;
 
-    std::vector<Rect> avoidArea;
+    AvoidArea avoidArea;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
         return avoidArea;
@@ -240,27 +239,11 @@ std::vector<Rect> WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, Avoi
         data, reply, option) != ERR_NONE) {
         return avoidArea;
     }
-
-    uint32_t avoidNum = reply.ReadUint32();
-    if (avoidNum != maxAvoidNum) {
-        WLOGFE("Read len fail. AvoidArea size != 4");
+    sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();
+    if (area == nullptr) {
         return avoidArea;
     }
-    avoidArea.resize(avoidNum);
-    if (avoidArea.size() < avoidNum) {
-        WLOGFE("Fail to resize avoidArea.");
-        return avoidArea;
-    }
-    bool readVectorRes = true;
-    for (uint32_t i = 0; i < avoidNum; ++i) {
-        readVectorRes = reply.ReadInt32(avoidArea[i].posX_) && reply.ReadInt32(avoidArea[i].posY_) &&
-            reply.ReadUint32(avoidArea[i].width_) && reply.ReadUint32(avoidArea[i].height_);
-        if (!readVectorRes) {
-            WLOGFE("Fail to ReadInt32. index:%{public}u, nums:%{public}u", i, avoidNum);
-            return avoidArea;
-        }
-    }
-    return avoidArea;
+    return *area;
 }
 
 void WindowManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -666,6 +649,31 @@ void WindowManagerProxy::MinimizeWindowsByLauncher(std::vector<uint32_t> windowI
         finishCallback = nullptr;
     }
     return;
+}
+
+WMError WindowManagerProxy::UpdateAvoidAreaListener(uint32_t windowId, bool haveListener)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(haveListener)) {
+        WLOGFE("Write avoid area listener failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_AVOIDAREA_LISTENER),
+        data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
 }
 } // namespace Rosen
 } // namespace OHOS

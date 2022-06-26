@@ -462,7 +462,7 @@ WMError WindowManagerService::SetAlpha(uint32_t windowId, float alpha)
     }).get();
 }
 
-std::vector<Rect> WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
+AvoidArea WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
 {
     return wmsTaskLooper_->ScheduleTask([this, windowId, avoidAreaType]() {
         WLOGFI("[WMS] GetAvoidAreaByType: %{public}u, Type: %{public}u", windowId,
@@ -664,6 +664,24 @@ void WindowManagerService::GetFullScreenWindowRequestedOrientation(DisplayId dis
     wmsTaskLooper_->ScheduleTask([this, displayId, &orientation]() mutable {
         orientation = windowController_->GetFullScreenWindowRequestedOrientation(displayId);
     }).wait();
+}
+
+WMError WindowManagerService::UpdateAvoidAreaListener(uint32_t windowId, bool haveAvoidAreaListener)
+{
+    return wmsTaskLooper_->ScheduleTask([this, windowId, haveAvoidAreaListener]() {
+        sptr<WindowNode> node = windowRoot_->GetWindowNode(windowId);
+        if (node == nullptr) {
+            WLOGFE("get window node failed. win %{public}u", windowId);
+            return WMError::WM_DO_NOTHING;
+        }
+        sptr<WindowNodeContainer> container = windowRoot_->GetWindowNodeContainer(node->GetDisplayId());
+        if (container == nullptr) {
+            WLOGFE("get container failed. win %{public}u display %{public}" PRIu64"", windowId, node->GetDisplayId());
+            return WMError::WM_DO_NOTHING;
+        }
+        container->UpdateAvoidAreaListener(node, haveAvoidAreaListener);
+        return WMError::WM_OK;
+    }).get();
 }
 } // namespace Rosen
 } // namespace OHOS

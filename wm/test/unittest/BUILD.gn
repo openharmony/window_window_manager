@@ -19,7 +19,6 @@ group("unittest") {
   testonly = true
 
   deps = [
-    ":avoid_area_controller_test",
     ":wm_input_transfer_station_test",
     ":wm_window_effect_test",
     ":wm_window_impl_test",

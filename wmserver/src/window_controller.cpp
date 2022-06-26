@@ -495,6 +495,10 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
         WLOGFE("get display failed");
         return;
     }
+    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayInfo->GetDisplayId());
+    if (windowNodeContainer != nullptr) {
+        windowNodeContainer->BeforeProcessWindowAvoidAreaChangeWhenDisplayChange();
+    }
     DisplayId displayId = displayInfo->GetDisplayId();
     switch (type) {
         case DisplayStateChangeType::SIZE_CHANGE:
@@ -511,6 +515,9 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
         }
     }
     FlushWindowInfoWithDisplayId(displayId);
+    if (windowNodeContainer != nullptr) {
+        windowNodeContainer->ProcessWindowAvoidAreaChangeWhenDisplayChange();
+    }
     WLOGFI("Finish ProcessDisplayChange");
 }
 
@@ -609,10 +616,9 @@ WMError WindowController::SetWindowAnimationController(const sptr<RSIWindowAnima
     return RemoteAnimation::SetWindowAnimationController(controller);
 }
 
-std::vector<Rect> WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
+AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) const
 {
-    std::vector<Rect> avoidArea = windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
-    return avoidArea;
+    return windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
 }
 
 WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)

@@ -358,7 +358,7 @@ void DisplayGroupController::ProcessDisplayCreate(DisplayId defaultDisplayId, sp
     WLOGFI("defaultDisplay, displayId: %{public}" PRIu64"", defaultDisplayId);
 
     DisplayId displayId = displayInfo->GetDisplayId();
-    windowNodeContainer_->GetAvoidController()->UpdateAvoidNodesMap(displayId, true);
+
     InitNewDisplay(displayId);
 
     // add displayInfo in displayGroupInfo
@@ -377,7 +377,6 @@ void DisplayGroupController::ProcessDisplayDestroy(DisplayId defaultDisplayId, s
                                                    std::vector<uint32_t>& windowIds)
 {
     DisplayId displayId = displayInfo->GetDisplayId();
-    windowNodeContainer_->GetAvoidController()->UpdateAvoidNodesMap(displayId, false);
 
     // delete nodes and map element of deleted display
     ProcessNotCrossNodesOnDestroyedDisplay(displayId, windowIds);
