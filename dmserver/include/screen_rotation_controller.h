@@ -47,6 +47,8 @@ private:
     static int CalcSensorDisplayRotation(int orientationDegree);
     static Rotation ConvertToDeviceRotation(Rotation sensorRotation);
     static bool IsSensorRelatedOrientation(Orientation orientation);
+    static void ProcessRotationWhenSensorDataNotValid(Orientation orientation);
+    static void HandleUnspecifiedOrientation(Orientation orientation);
 
     static DisplayId defaultDisplayId_;
     static bool isGravitySensorSubscribed_;
@@ -55,6 +57,8 @@ private:
     static Rotation currentDisplayRotation_;
     static long lastCallbackTime_;
     static uint32_t defaultDeviceRotationOffset_;
+    static Orientation lastOrientationType_;
+    static Rotation defaultLandscapeDisplayRotation_;
 };
 } // Rosen
 } // OHOS
