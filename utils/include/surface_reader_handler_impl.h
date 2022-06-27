@@ -23,14 +23,14 @@ namespace OHOS {
 namespace Rosen {
 class SurfaceReaderHandlerImpl : public SurfaceReaderHandler {
 public:
-    bool OnImageAvalible(sptr<Media::PixelMap> pixleMap) override;
+    bool OnImageAvailable(sptr<Media::PixelMap> pixelMap) override;
     bool IsImageOk();
     void ResetFlag();
     sptr<Media::PixelMap> GetPixelMap();
 
 private:
     bool flag_ = false;
-    sptr<Media::PixelMap> pixleMap_ = nullptr;
+    sptr<Media::PixelMap> pixelMap_ = nullptr;
     std::recursive_mutex mutex_;
 };
 }

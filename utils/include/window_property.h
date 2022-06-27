@@ -72,6 +72,7 @@ public:
     void SetStretchable(bool stretchable);
     void SetOriginRect(const Rect& rect);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
+    void SetAccessTokenId(uint32_t accessTokenId);
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
 
     const std::string& GetWindowName() const;
@@ -107,6 +108,7 @@ public:
     bool GetStretchable() const;
     const Rect& GetOriginRect() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
+    uint32_t GetAccessTokenId() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
@@ -155,6 +157,7 @@ private:
     bool isStretchable_ {false};
     DragType dragType_ = DragType::DRAG_UNDEFINED;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
+    uint32_t accessTokenId_ { 0 };
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
 };
 }

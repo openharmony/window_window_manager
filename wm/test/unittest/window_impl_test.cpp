@@ -1309,7 +1309,7 @@ HWTEST_F(WindowImplTest, SetTouchable02, Function | SmallTest | Level3)
 
 /**
  * @tc.name: DisableAppWindowDecor01
- * @tc.desc: disbale app window decor
+ * @tc.desc: disable app window decor
  * @tc.type: FUNC
  */
 HWTEST_F(WindowImplTest, DisableAppWindowDecor01, Function | SmallTest | Level3)
@@ -1323,7 +1323,7 @@ HWTEST_F(WindowImplTest, DisableAppWindowDecor01, Function | SmallTest | Level3)
     window->DisableAppWindowDecor();
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_FALSE(window->isAppDecorEnbale_);
+    ASSERT_FALSE(window->isAppDecorEnable_);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

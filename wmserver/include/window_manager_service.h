@@ -23,6 +23,7 @@
 #include <nocopyable.h>
 #include <system_ability.h>
 #include <window_manager_service_handler_stub.h>
+#include <transaction/rs_interfaces.h>
 #include "display_change_listener.h"
 #include "drag_controller.h"
 #include "freeze_controller.h"
@@ -83,7 +84,6 @@ public:
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
     WMError ToggleShownStateForAllAppWindows() override;
-    WMError MaxmizeWindow(uint32_t windowId) override;
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) override;
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
@@ -111,6 +111,8 @@ private:
     bool Init();
     void RegisterSnapshotHandler();
     void RegisterWindowManagerServiceHandler();
+    void RegisterWindowVisibilityChangeCallback();
+    void WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusionData);
     void OnWindowEvent(Event event, const sptr<IRemoteObject>& remoteObject);
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
@@ -131,6 +133,7 @@ private:
     SystemConfig systemConfig_;
     ModeChangeHotZonesConfig hotZonesConfig_ { false, 0, 0, 0 };
     std::unique_ptr<WindowTaskLooper> wmsTaskLooper_;
+    RSInterfaces& rsInterface_;
     bool startingOpen_ = true;
 };
 }

@@ -149,13 +149,6 @@ WMError WindowAdapter::ToggleShownStateForAllAppWindows()
     return windowManagerServiceProxy_->ToggleShownStateForAllAppWindows();
 }
 
-WMError WindowAdapter::MaxmizeWindow(uint32_t windowId)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
-    return windowManagerServiceProxy_->MaxmizeWindow(windowId);
-}
-
 WMError WindowAdapter::GetSystemConfig(SystemConfig& systemConfig)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

@@ -83,6 +83,21 @@ declare namespace screen {
   function setVirtualScreenSurface(screenId:number, surfaceId: string): Promise<void>;
 
   /**
+   * Get screen rotation lock status.
+   * @since 9
+   */
+  function isScreenRotationLocked(callback: AsyncCallback<boolean>): void;
+  function isScreenRotationLocked(): Promise<boolean>;
+    
+  /**
+   * Set screen rotation lock status.
+   * @param isLocked Indicates whether the screen rotation switch is locked.
+   * @since 9
+   */
+  function setScreenRotationLocked(isLocked:boolean, callback: AsyncCallback<void>): void;
+  function setScreenRotationLocked(isLocked:boolean): Promise<void>;
+ 
+  /**
    * the parameter of making expand screen
    * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @since 9

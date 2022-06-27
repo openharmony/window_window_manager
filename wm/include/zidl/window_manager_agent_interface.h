@@ -27,6 +27,7 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR,
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE,
     WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+    WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
 };
 
 class IWindowManagerAgent : public IRemoteBroker {
@@ -38,6 +39,7 @@ public:
         TRANS_ID_UPDATE_SYSTEM_BAR_PROPS,
         TRANS_ID_UPDATE_WINDOW_STATUS,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY,
+        TRANS_ID_UPDATE_CAMERA_FLOAT,
     };
 
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
@@ -45,6 +47,7 @@ public:
     virtual void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
         WindowUpdateType type) = 0;
     virtual void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos) = 0;
+    virtual void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

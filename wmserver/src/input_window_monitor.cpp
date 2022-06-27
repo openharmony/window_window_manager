@@ -96,7 +96,7 @@ void InputWindowMonitor::UpdateDisplayInfo(const sptr<DisplayInfo>& displayInfo,
     if (displayInfo->GetRotation() == Rotation::ROTATION_90 || displayInfo->GetRotation() == Rotation::ROTATION_270) {
         std::swap(displayWidth, displayHeight);
     }
-    MMI::DisplayInfo diplay = {
+    MMI::DisplayInfo display = {
         .id = static_cast<int32_t>(displayInfo->GetDisplayId()),
         .x = displayInfo->GetOffsetX(),
         .y = displayInfo->GetOffsetY(),
@@ -107,13 +107,13 @@ void InputWindowMonitor::UpdateDisplayInfo(const sptr<DisplayInfo>& displayInfo,
         .direction = GetDisplayDirectionForMmi(displayInfo->GetRotation()),
     };
     auto displayIter = std::find_if(displayInfoVector.begin(), displayInfoVector.end(),
-        [&diplay](MMI::DisplayInfo& displayInfoTmp) {
-        return displayInfoTmp.id == diplay.id;
+        [&display](MMI::DisplayInfo& displayInfoTmp) {
+        return displayInfoTmp.id == display.id;
     });
     if (displayIter != displayInfoVector.end()) {
-        *displayIter = diplay;
+        *displayIter = display;
     } else {
-        displayInfoVector.emplace_back(diplay);
+        displayInfoVector.emplace_back(display);
     }
 }
 

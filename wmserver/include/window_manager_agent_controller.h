@@ -35,6 +35,7 @@ public:
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints);
     void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type);
     void UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+    void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
 
 private:
     WindowManagerAgentController() {}

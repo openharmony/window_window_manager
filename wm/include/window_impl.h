@@ -189,7 +189,7 @@ public:
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifyKeyEvent(std::shared_ptr<MMI::KeyEvent> &keyEvent);
     void NotifyPointEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void NotifyAviodAreaChange(const std::vector<Rect>& avoidArea);
+    void NotifyAvoidAreaChange(const std::vector<Rect>& avoidArea);
     void NotifyDisplayMoveChange(DisplayId from, DisplayId to);
     void NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
     void NotifyModeChange(WindowMode mode);
@@ -253,7 +253,11 @@ private:
     }
     inline void NotifyBeforeDestroy(std::string windowName)
     {
-        CALL_UI_CONTENT(Destroy);
+        if (uiContent_ != nullptr) {
+            auto uiContent = std::move(uiContent_);
+            uiContent_ = nullptr;
+            uiContent->Destroy();
+        }
         if (notifyNativefunc_) {
             notifyNativefunc_(windowName);
         }
@@ -318,7 +322,7 @@ private:
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;
-        ColorGamut sufaceColorGamut;
+        ColorGamut surfaceColorGamut;
     };
     static const ColorSpaceConvertMap colorSpaceConvertMap[];
     static ColorSpace GetColorSpaceFromSurfaceGamut(ColorGamut ColorGamut);
@@ -361,7 +365,7 @@ private:
     Rect startRectExceptFrame_ = { 0, 0, 0, 0 };
     Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
     DragType dragType_ = DragType::DRAG_UNDEFINED;
-    bool isAppDecorEnbale_ = true;
+    bool isAppDecorEnable_ = true;
     SystemConfig windowSystemConfig_ ;
     bool isOriginRectSet_ = false;
     bool isWaitingFrame_ = false;

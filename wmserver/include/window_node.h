@@ -104,6 +104,7 @@ public:
     const Rect& GetOriginRect() const;
     void ResetWindowSizeChangeReason();
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
+    uint32_t GetAccessTokenId() const;
 
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;
@@ -115,7 +116,7 @@ public:
     int32_t priority_ { 0 };
     bool requestedVisibility_ { false };
     bool currentVisibility_ { false };
-    bool isCovered_ { true }; // initial value true to ensure notification when this window is shown
+    bool isVisible_ { false };
     bool isAppCrash_ { false };
     bool isPlayAnimationShow_ { false };
     bool isPlayAnimationHide_ { false };

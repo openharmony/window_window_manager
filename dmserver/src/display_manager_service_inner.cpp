@@ -152,4 +152,9 @@ void DisplayManagerServiceInner::GetFullScreenWindowRequestedOrientation(Display
 {
     DisplayManagerService::GetInstance().GetFullScreenWindowRequestedOrientation(displayId, orientation);
 }
+
+void DisplayManagerServiceInner::SetGravitySensorSubscriptionEnabled()
+{
+    DisplayManagerService::GetInstance().SetGravitySensorSubscriptionEnabled();
+}
 } // namespace OHOS::Rosen

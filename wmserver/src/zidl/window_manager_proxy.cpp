@@ -204,7 +204,7 @@ WMError WindowManagerProxy::SetAlpha(uint32_t windowId, float alpha)
         WLOGFE("Write alpha failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_APLPHA),
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_ALPHA),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -432,28 +432,6 @@ WMError WindowManagerProxy::ToggleShownStateForAllAppWindows()
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::MaxmizeWindow(uint32_t windowId)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(windowId)) {
-        WLOGFE("Write windowId failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_MAXMIZE_WINDOW),
-        data, reply, option) != ERR_NONE) {
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WMError>(ret);
-}
-
 WMError WindowManagerProxy::SetWindowLayoutMode(WindowLayoutMode mode)
 {
     MessageParcel data;
@@ -542,7 +520,7 @@ WMError WindowManagerProxy::GetAccessibilityWindowInfo(sptr<AccessibilityWindowI
         WLOGFE("Write windowInfo failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID),
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
