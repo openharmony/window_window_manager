@@ -949,18 +949,18 @@ declare namespace window {
     setTransparent(isTransparent: boolean, callback: AsyncCallback<void>): void;
 
     /**
-     * Set the requested orientation config of a window
+     * Set the preferred orientation config of a window
      * @param orientation the orientation config of a window
      * @since 9
      */
-    setRequestedOrientation(orientation: Orientation): Promise<void>;
+    setPreferredOrientation(orientation: Orientation): Promise<void>;
 
     /**
-     * Set the requested orientation config of a window
+     * Set the preferred orientation config of a window
      * @param orientation the orientation config of a window
      * @since 9
      */
-    setRequestedOrientation(orientation: Orientation, callback: AsyncCallback<void>): void;
+    setPreferredOrientation(orientation: Orientation, callback: AsyncCallback<void>): void;
   
     /**
      * disable window decoration. It must be called before loadContent.
