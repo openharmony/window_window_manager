@@ -23,7 +23,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplaySensorController"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenRotationController"};
     constexpr int64_t ORIENTATION_SENSOR_SAMPLING_RATE = 200000000; // 200ms
     constexpr int64_t ORIENTATION_SENSOR_REPORTING_RATE = 0;
     constexpr long ORIENTATION_SENSOR_CALLBACK_TIME_INTERVAL = 200; // 200ms
@@ -40,6 +40,7 @@ bool ScreenRotationController::isScreenRotationLocked_ = false;
 long ScreenRotationController::lastCallbackTime_ = 0;
 uint32_t ScreenRotationController::defaultDeviceRotationOffset_ = 0;
 Orientation ScreenRotationController::lastOrientationType_ = Orientation::UNSPECIFIED;
+Rotation ScreenRotationController::defaultLandscapeDisplayRotation_ = Rotation::ROTATION_90;
 
 void ScreenRotationController::SubscribeGravitySensor()
 {
@@ -90,6 +91,9 @@ void ScreenRotationController::SetDefaultDeviceRotationOffset(uint32_t defaultDe
         return;
     }
     defaultDeviceRotationOffset_ = defaultDeviceRotationOffset;
+    defaultLandscapeDisplayRotation_ = static_cast<Rotation>(
+        // divided by 90 to get bias, %4 to normalize the values into the range 0~3
+        (static_cast<uint32_t>(Rotation::ROTATION_90) + (defaultDeviceRotationOffset_ / 90)) % 4);
 }
 
 void ScreenRotationController::HandleGravitySensorEventCallback(SensorEvent *event)
@@ -103,7 +107,7 @@ void ScreenRotationController::HandleGravitySensorEventCallback(SensorEvent *eve
     }
     Orientation orientation = GetRequestedOrientation();
     currentDisplayRotation_ = GetCurrentDisplayRotation();
-    PreprocessOrientation(orientation);
+    HandleUnspecifiedOrientation(orientation);
     if (!IsSensorRelatedOrientation(orientation)) {
         return;
     }
@@ -121,9 +125,11 @@ void ScreenRotationController::HandleGravitySensorEventCallback(SensorEvent *eve
     } else if (sensorDegree >= 240 && sensorDegree <= 300) { // Use ROTATION_270 when degree range is [240, 300]
         currentSensorRotation = Rotation::ROTATION_270;
     } else {
+        ProcessRotationWhenSensorDataNotValid(orientation);
         return;
     }
-    if (ConvertToDeviceRotation(currentSensorRotation) == currentDisplayRotation_) {
+    if ((ConvertToDeviceRotation(currentSensorRotation) == currentDisplayRotation_) &&
+        (orientation == Orientation::SENSOR || orientation == Orientation::AUTO_ROTATION_RESTRICTED)) {
         return;
     }
 
@@ -220,7 +226,7 @@ Rotation ScreenRotationController::ProcessAutoRotationLandscapeOrientation(Rotat
         currentDisplayRotation_ == ConvertToDeviceRotation(Rotation::ROTATION_270)) {
         return currentDisplayRotation_;
     }
-    return ConvertToDeviceRotation(Rotation::ROTATION_90);
+    return defaultLandscapeDisplayRotation_;
 }
 
 void ScreenRotationController::SetScreenRotation(Rotation targetRotation)
@@ -261,17 +267,24 @@ bool ScreenRotationController::IsSensorRelatedOrientation(Orientation orientatio
     return true;
 }
 
-void ScreenRotationController::PreprocessOrientation(Orientation orientation)
+void ScreenRotationController::HandleUnspecifiedOrientation(Orientation orientation)
+{
+    if (lastOrientationType_ == orientation) {
+        return;
+    }
+    if (orientation == Orientation::UNSPECIFIED) {
+        SetScreenRotation(Rotation::ROTATION_0);
+        lastOrientationType_ = orientation;
+    }
+}
+
+void ScreenRotationController::ProcessRotationWhenSensorDataNotValid(Orientation orientation)
 {
     if (lastOrientationType_ == orientation) {
         return;
     }
     lastOrientationType_ = orientation;
     switch (orientation) {
-        case Orientation::UNSPECIFIED: {
-            SetScreenRotation(Rotation::ROTATION_0);
-            break;
-        }
         case Orientation::SENSOR_VERTICAL:
         case Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED: {
             if (currentDisplayRotation_ == ConvertToDeviceRotation(Rotation::ROTATION_90) ||
@@ -284,10 +297,7 @@ void ScreenRotationController::PreprocessOrientation(Orientation orientation)
         case Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED: {
             if (currentDisplayRotation_ == ConvertToDeviceRotation(Rotation::ROTATION_0) ||
                     currentDisplayRotation_ == ConvertToDeviceRotation(Rotation::ROTATION_180)) {
-                Rotation baseHorizontalRotation = static_cast<Rotation>(
-                    // divided by 90 to get bias, %4 to normalize the values into the range 0~3
-                    (static_cast<uint32_t>(Rotation::ROTATION_90) + (defaultDeviceRotationOffset_ / 90)) % 4);
-                SetScreenRotation(baseHorizontalRotation);
+                SetScreenRotation(defaultLandscapeDisplayRotation_);
             }
             break;
         }
