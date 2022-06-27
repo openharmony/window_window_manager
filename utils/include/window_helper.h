@@ -74,7 +74,7 @@ public:
         return ((IsMainWindow(type)) && (mode != WindowMode::WINDOW_MODE_FLOATING));
     }
 
-    static inline bool IsFloatintWindow(WindowMode mode)
+    static inline bool IsFloatingWindow(WindowMode mode)
     {
         return mode == WindowMode::WINDOW_MODE_FLOATING;
     }
@@ -303,6 +303,7 @@ public:
     static bool CalculateTouchHotAreas(const Rect& windowRect, const std::vector<Rect>& requestRects,
         std::vector<Rect>& outRects)
     {
+        bool isOk = true;
         for (const auto& rect : requestRects) {
             if (rect.posX_ < 0 || rect.posY_ < 0 || rect.width_ == 0 || rect.height_ == 0) {
                 return false;
@@ -310,6 +311,7 @@ public:
             Rect hotArea;
             if (rect.posX_ >= static_cast<int32_t>(windowRect.width_) ||
                 rect.posY_ >= static_cast<int32_t>(windowRect.height_)) {
+                isOk = false;
                 continue;
             }
             hotArea.posX_ = windowRect.posX_ + rect.posX_;
@@ -320,7 +322,7 @@ public:
                 std::min(hotArea.posY_ + rect.height_, windowRect.posY_ + windowRect.height_) - hotArea.posY_;
             outRects.emplace_back(hotArea);
         }
-        return true;
+        return isOk;
     }
 
 private:

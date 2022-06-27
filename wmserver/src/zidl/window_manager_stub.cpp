@@ -81,7 +81,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case WindowManagerMessage::TRANS_ID_SET_APLPHA: {
+        case WindowManagerMessage::TRANS_ID_SET_ALPHA: {
             uint32_t windowId = data.ReadUint32();
             float alpha = data.ReadFloat();
             WMError errCode = SetAlpha(windowId, alpha);
@@ -148,10 +148,6 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case WindowManagerMessage::TRANS_ID_MAXMIZE_WINDOW: {
-            MaxmizeWindow(data.ReadUint32());
-            break;
-        }
         case WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE: {
             WindowLayoutMode mode = static_cast<WindowLayoutMode>(data.ReadUint32());
             WMError errCode = SetWindowLayoutMode(mode);
@@ -166,7 +162,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case WindowManagerMessage::TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID: {
+        case WindowManagerMessage::TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID: {
             sptr<AccessibilityWindowInfo> windowInfo = data.ReadParcelable<AccessibilityWindowInfo>();
             WMError errCode = GetAccessibilityWindowInfo(windowInfo);
             reply.WriteParcelable(windowInfo);

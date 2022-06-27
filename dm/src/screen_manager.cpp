@@ -435,6 +435,16 @@ ScreenPowerState ScreenManager::GetScreenPower(ScreenId dmsScreenId)
     return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenPower(dmsScreenId);
 }
 
+void ScreenManager::SetScreenRotationLocked(bool isLocked)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().SetScreenRotationLocked(isLocked);
+}
+
+bool ScreenManager::IsScreenRotationLocked()
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().IsScreenRotationLocked();
+}
+
 void ScreenManager::Impl::NotifyScreenConnect(sptr<ScreenInfo> info)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);

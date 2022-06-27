@@ -180,6 +180,11 @@ void WindowProperty::SetOriginRect(const Rect& rect)
     originRect_ = rect;
 }
 
+void WindowProperty::SetAccessTokenId(uint32_t accessTokenId)
+{
+    accessTokenId_ = accessTokenId;
+}
+
 WindowSizeChangeReason WindowProperty::GetWindowSizeChangeReason() const
 {
     return windowSizeChangeReason_;
@@ -375,6 +380,11 @@ void WindowProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
     rects = touchHotAreas_;
 }
 
+uint32_t WindowProperty::GetAccessTokenId() const
+{
+    return accessTokenId_;
+}
+
 bool WindowProperty::MapMarshalling(Parcel& parcel) const
 {
     auto size = sysBarPropMap_.size();
@@ -450,7 +460,7 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
         parcel.WriteUint32(modeSupportInfo_) && parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
         parcel.WriteUint32(originRect_.width_) && parcel.WriteUint32(originRect_.height_) &&
-        parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel);
+        parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel) && parcel.WriteUint32(accessTokenId_);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -498,6 +508,7 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetOriginRect(Rect { 0, 0, w, h });
     property->SetStretchable(parcel.ReadBool());
     UnmarshallingTouchHotAreas(parcel, property);
+    property->SetAccessTokenId(parcel.ReadUint32());
     return property;
 }
 
@@ -643,6 +654,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     originRect_ = property->originRect_;
     isStretchable_ = property->isStretchable_;
     touchHotAreas_ = property->touchHotAreas_;
+    accessTokenId_ = property->accessTokenId_;
 }
 }
 }

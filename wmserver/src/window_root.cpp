@@ -24,6 +24,7 @@
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
 #include "wm_trace.h"
+#include "window_manager_agent_controller.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -89,7 +90,7 @@ sptr<WindowNodeContainer> WindowRoot::GetOrCreateWindowNodeContainer(DisplayId d
 sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(sptr<DisplayInfo> displayInfo)
 {
     if (displayInfo == nullptr || !CheckDisplayInfo(displayInfo)) {
-        WLOGFE("get display failed or get invailed display info");
+        WLOGFE("get display failed or get invalid display info");
         return nullptr;
     }
 
@@ -181,6 +182,9 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
 
     WLOGFI("save windowId %{public}u", node->GetWindowId());
     windowNodeMap_.insert(std::make_pair(node->GetWindowId(), node));
+    if (node->surfaceNode_ != nullptr) {
+        surfaceIdWindowNodeMap_.insert(std::make_pair(node->surfaceNode_->GetId(), node));
+    }
     if (node->GetWindowToken()) {
         AddDeathRecipient(node);
     }
@@ -256,6 +260,69 @@ void WindowRoot::ExitSplitMode(DisplayId displayId)
     container->ExitSplitMode(displayId);
 }
 
+
+void WindowRoot::AddSurfaceNodeIdWindowNodePair(uint64_t surfaceNodeId, sptr<WindowNode> node)
+{
+    surfaceIdWindowNodeMap_.insert(std::make_pair(surfaceNodeId, node));
+}
+
+std::vector<std::pair<uint64_t, bool>> WindowRoot::GetWindowVisibilityChangeInfo(
+    std::shared_ptr<RSOcclusionData> occlusionData)
+{
+    std::vector<std::pair<uint64_t, bool>> visibityChangeInfo;
+    VisibleData& currentVisibleWindow = occlusionData->GetVisibleData();
+    std::sort(currentVisibleWindow.begin(), currentVisibleWindow.end());
+    VisibleData& lastVisibleWindow = lastOcclusionData_->GetVisibleData();
+    uint32_t i, j;
+    i = j = 0;
+    for (; i < lastVisibleWindow.size() && j < currentVisibleWindow.size();) {
+        if (lastVisibleWindow[i] < currentVisibleWindow[j]) {
+            visibityChangeInfo.push_back(std::make_pair(lastVisibleWindow[i], false));
+            i++;
+        } else if (lastVisibleWindow[i] > currentVisibleWindow[j]) {
+            visibityChangeInfo.push_back(std::make_pair(currentVisibleWindow[j], true));
+            j++;
+        } else {
+            i++;
+            j++;
+        }
+    }
+    for (; i < lastVisibleWindow.size(); ++i) {
+        visibityChangeInfo.push_back(std::make_pair(lastVisibleWindow[i], false));
+    }
+    for (; j < currentVisibleWindow.size(); ++j) {
+        visibityChangeInfo.push_back(std::make_pair(currentVisibleWindow[j], true));
+    }
+    lastOcclusionData_ = occlusionData;
+    return visibityChangeInfo;
+}
+
+void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> occlusionData)
+{
+    std::vector<std::pair<uint64_t, bool>> visibityChangeInfo = GetWindowVisibilityChangeInfo(occlusionData);
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    for (const auto& elem : visibityChangeInfo) {
+        uint64_t surfaceId = elem.first;
+        bool isVisible = elem.second;
+        auto iter = surfaceIdWindowNodeMap_.find(surfaceId);
+        if (iter == surfaceIdWindowNodeMap_.end()) {
+            continue;
+        }
+        sptr<WindowNode> node = iter->second;
+        if (node == nullptr) {
+            continue;
+        }
+        node->isVisible_ = isVisible;
+        windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
+            node->GetCallingUid(), isVisible, node->GetWindowType()));
+        WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
+            node->GetWindowId(), isVisible);
+    }
+    if (windowVisibilityInfos.size() != 0) {
+        WindowManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
+    }
+}
+
 std::vector<Rect> WindowRoot::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
 {
     std::vector<Rect> avoidArea;
@@ -329,25 +396,6 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
         res = (res == WMError::WM_OK) ? tmpRes : res;
     });
     return res;
-}
-
-WMError WindowRoot::MaxmizeWindow(uint32_t windowId)
-{
-    auto node = GetWindowNode(windowId);
-    if (node == nullptr) {
-        WLOGFE("could not find window");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
-    if (container == nullptr) {
-        WLOGFE("add window failed, window container could not be found");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    auto property = node->GetWindowProperty();
-    uint32_t flags = property->GetWindowFlags() & (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
-    property->SetWindowFlags(flags);
-    container->NotifySystemBarDismiss(node);
-    return WMError::WM_OK;
 }
 
 void WindowRoot::DestroyLeakStartingWindow()
@@ -629,6 +677,28 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
     if (node == nullptr) {
         WLOGFE("window has been destroyed");
         return WMError::WM_ERROR_DESTROYED_OBJECT;
+    }
+
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    node->isVisible_ = false;
+    windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
+        node->GetCallingUid(), false, node->GetWindowType()));
+    WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
+        node->GetWindowId(), node->isVisible_);
+    WindowManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
+
+    auto cmpFunc = [node](const std::map<uint64_t, sptr<WindowNode>>::value_type& pair) {
+        if (pair.second == nullptr) {
+            return false;
+        }
+        if (pair.second->GetWindowId() == node->GetWindowId()) {
+            return true;
+        }
+        return false;
+    };
+    auto iter = std::find_if(surfaceIdWindowNodeMap_.begin(), surfaceIdWindowNodeMap_.end(), cmpFunc);
+    if (iter != surfaceIdWindowNodeMap_.end()) {
+        surfaceIdWindowNodeMap_.erase(iter);
     }
 
     sptr<IWindow> window = node->GetWindowToken();
@@ -988,7 +1058,7 @@ void WindowRoot::ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<Dis
     std::map<DisplayId, Rect>& displayRectMap)
 {
     if (displayInfo == nullptr || !CheckDisplayInfo(displayInfo)) {
-        WLOGFE("get display failed or get invailed display info");
+        WLOGFE("get display failed or get invalid display info");
         return;
     }
     DisplayId displayId = displayInfo->GetDisplayId();
@@ -999,7 +1069,7 @@ void WindowRoot::ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<Dis
     }
 
     WLOGFI("[Display Create] before add new display, displayId: %{public}" PRIu64"", displayId);
-    container->GetMutiDisplayController()->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayRectMap);
+    container->GetMultiDisplayController()->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayRectMap);
     WLOGFI("[Display Create] Container exist, add new display, displayId: %{public}" PRIu64"", displayId);
 }
 
@@ -1111,20 +1181,20 @@ void WindowRoot::ProcessDisplayDestroy(DisplayId defaultDisplayId, sptr<DisplayI
     }
     WLOGFI("[Display Destroy] displayId: %{public}" PRIu64"", displayId);
 
-    std::vector<uint32_t> needDestoryWindows;
+    std::vector<uint32_t> needDestroyWindows;
     auto displayRectMap = GetAllDisplayRectsByDisplayInfo(displayInfoMap);
     // erase displayId in displayRectMap
     auto displayRectIter = displayRectMap.find(displayId);
     displayRectMap.erase(displayRectIter);
-    container->GetMutiDisplayController()->ProcessDisplayDestroy(
-        defaultDisplayId, displayInfo, displayRectMap, needDestoryWindows);
-    for (auto id : needDestoryWindows) {
+    container->GetMultiDisplayController()->ProcessDisplayDestroy(
+        defaultDisplayId, displayInfo, displayRectMap, needDestroyWindows);
+    for (auto id : needDestroyWindows) {
         auto node = GetWindowNode(id);
         if (node != nullptr) {
             DestroyWindowInner(node);
         }
     }
-    // move window which is not showing on destroied display to default display
+    // move window which is not showing on destroyed display to default display
     MoveNotShowingWindowToDefaultDisplay(defaultDisplayId, displayId);
     WLOGFI("[Display Destroy] displayId: %{public}" PRIu64" ", displayId);
 }
@@ -1153,7 +1223,7 @@ void WindowRoot::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayIn
     }
 
     auto displayRectMap = GetAllDisplayRectsByDisplayInfo(displayInfoMap);
-    container->GetMutiDisplayController()->ProcessDisplayChange(defaultDisplayId, displayInfo, displayRectMap, type);
+    container->GetMultiDisplayController()->ProcessDisplayChange(defaultDisplayId, displayInfo, displayRectMap, type);
 }
 
 float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
@@ -1209,7 +1279,7 @@ void WindowRoot::SetSplitRatios(const std::vector<float>& splitRatioNumbers)
     }
     std::sort(splitRatios.begin(), splitRatios.end());
     auto iter = std::unique(splitRatios.begin(), splitRatios.end());
-    splitRatios.erase(iter, splitRatios.end()); // remove duplitcate ratios
+    splitRatios.erase(iter, splitRatios.end()); // remove duplicate ratios
 }
 
 void WindowRoot::SetExitSplitRatios(const std::vector<float>& exitSplitRatios)
