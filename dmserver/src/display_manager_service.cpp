@@ -84,7 +84,7 @@ bool DisplayManagerService::Init()
         WLOGFW("DisplayManagerService::Init failed");
         return false;
     }
-    if (DisplayManagerConfig::LoadConfigXml(DISPLAY_MANAGER_CONFIG_XML)) {
+    if (DisplayManagerConfig::LoadConfigXml()) {
         DisplayManagerConfig::DumpConfig();
         ConfigureDisplayManagerService();
     }
