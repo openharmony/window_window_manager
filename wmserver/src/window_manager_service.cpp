@@ -174,7 +174,7 @@ bool WindowManagerService::Init()
         WLOGFW("WindowManagerService::Init failed");
         return false;
     }
-    if (WindowManagerConfig::LoadConfigXml(WINDOW_MANAGER_CONFIG_XML)) {
+    if (WindowManagerConfig::LoadConfigXml()) {
         WindowManagerConfig::DumpConfig();
         ConfigureWindowManagerService();
     }
