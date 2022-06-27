@@ -30,7 +30,7 @@ public:
     DisplayManagerConfig() = delete;
     ~DisplayManagerConfig() = default;
 
-    static bool LoadConfigXml(const std::string& configFilePath);
+    static bool LoadConfigXml();
     static const std::map<std::string, std::vector<int>>& GetIntNumbersConfig();
     static void DumpConfig();
 
@@ -39,6 +39,7 @@ private:
 
     static bool IsValidNode(const xmlNode& currNode);
     static void ReadIntNumbersConfigInfo(const xmlNodePtr& currNode);
+    static std::string GetConfigPath(const std::string& configFileName);
 
     static std::vector<std::string> Split(std::string str, std::string pattern);
     static inline bool IsNumber(std::string str);
