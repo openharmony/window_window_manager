@@ -209,7 +209,8 @@ void WindowPair::Clear()
     primary_ = nullptr;
     secondary_ = nullptr;
     if (divider_ != nullptr) {
-        WindowInnerManager::GetInstance().DestroyWindow();
+        // WindowInnerManager::GetInstance().DestroyWindow();
+        WindowInnerManager::GetInstance().DestroyInnerWindow(displayId_, WindowType::WINDOW_TYPE_DOCK_SLICE);
         divider_ = nullptr;
     }
     status_ = WindowPairStatus::STATUS_EMPTY;
@@ -327,15 +328,29 @@ void WindowPair::UpdateIfSplitRelated(sptr<WindowNode>& node)
         WLOGI("Window id: %{public}u is not split related and paired.", node->GetWindowId());
         return;
     }
+    if ((node->GetWindowType() == WindowType::WINDOW_TYPE_PLACE_HOLDER) &&
+        ((primary_ != nullptr && primary_->GetWindowMode() == node->GetWindowMode()) ||
+        (secondary_ != nullptr && secondary_->GetWindowMode() == node->GetWindowMode()))) {
+        // WindowInnerManager::GetInstance().DestroyPlaceHolderWindow();
+        WindowInnerManager::GetInstance().DestroyInnerWindow(displayId_, WindowType::WINDOW_TYPE_PLACE_HOLDER);
+        return;
+    }
     WLOGI("Current status: %{public}u, window id: %{public}u mode: %{public}u",
         status_, node->GetWindowId(), node->GetWindowMode());
     if (status_ == WindowPairStatus::STATUS_EMPTY) {
         Insert(node);
         if (!isAllAppWindowsRestoring_) {
             // find pairable window from trees or send broadcast
-            sptr<WindowNode> pairableNode = GetPairableWindow(node);
-            // insert pairable node
-            Insert(pairableNode);
+            // sptr<WindowNode> pairableNode = GetPairableWindow(node);
+            // // insert pairable node
+            // Insert(pairableNode);
+            WindowMode holderMode = node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ?
+                WindowMode::WINDOW_MODE_SPLIT_SECONDARY : WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+            WindowInnerManager::GetInstance().CreteInnerWindow("place_holder", displayId_,
+                {0, 0, 512, 512},
+                WindowType::WINDOW_TYPE_PLACE_HOLDER, holderMode);
+            // WindowInnerManager::GetInstance().CreatePlaceHolderWindow(holderMode, displayId_);
+            // SendBroadcastMsg(node);
         }
     } else {
         if (Find(node) == nullptr) {
@@ -367,8 +382,10 @@ void WindowPair::UpdateWindowPairStatus()
         prevStatus == WindowPairStatus::STATUS_SINGLE_SECONDARY || prevStatus == WindowPairStatus::STATUS_EMPTY) &&
         status_ == WindowPairStatus::STATUS_PAIRING) {
         // create divider
-        WindowInnerManager::GetInstance().CreateWindow("dialog_divider_ui", WindowType::WINDOW_TYPE_DOCK_SLICE,
-            initalDividerRect_);
+        // WindowInnerManager::GetInstance().CreateWindow("dialog_divider_ui", WindowType::WINDOW_TYPE_DOCK_SLICE,
+        //     initalDividerRect_);
+        WindowInnerManager::GetInstance().CreteInnerWindow("divider", displayId_, initalDividerRect_,
+            WindowType::WINDOW_TYPE_DOCK_SLICE, WindowMode::WINDOW_MODE_FLOATING);
     } else if ((prevStatus == WindowPairStatus::STATUS_PAIRED_DONE || prevStatus == WindowPairStatus::STATUS_PAIRING) &&
         (status_ != WindowPairStatus::STATUS_PAIRED_DONE && status_ != WindowPairStatus::STATUS_PAIRING)) {
         // clear pair

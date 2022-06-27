@@ -20,20 +20,45 @@
 #include "event_handler.h"
 #include "event_runner.h"
 
+#include <ui/rs_surface_node.h>
+#include "draw/canvas.h"
+#include "nocopyable.h"
+#include "pixel_map.h"
+
 #include "wm_common.h"
 #include "wm_single_instance.h"
+#include "window.h"
+#include "inner_window.h"
 
 namespace OHOS {
 namespace Rosen {
+class TouchOutsideListener : public ITouchOutsideListener {
+    virtual void OnTouchOutside();
+};
+class InputListener : public IInputEventListener {
+    virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    virtual void OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+};
+class LifeCycle : public IWindowLifeCycle {
+    virtual void AfterForeground() {};
+    virtual void AfterBackground() {};
+    virtual void AfterFocused() {};
+    virtual void AfterInactive() {};
+    virtual void AfterUnfocused();
+};
 class WindowInnerManager : public RefBase {
+friend class TouchOutsideListener;
+friend class InputListener;
+friend class LifeCycle;
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInnerManager);
 using EventRunner = OHOS::AppExecFwk::EventRunner;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 public:
     void Start();
     void Stop();
-    void CreateWindow(std::string name, WindowType type, Rect rect);
-    void DestroyWindow();
+    void CreteInnerWindow(std::string name, DisplayId displyId, Rect rect,
+        WindowType type, WindowMode mode);
+    void DestroyInnerWindow(DisplayId displyId, WindowType type);
 public:
     enum class InnerWMRunningState {
         STATE_NOT_START,
@@ -44,15 +69,11 @@ public:
 private:
     WindowInnerManager();
     bool Init();
-    void HandleCreateWindow(std::string name, WindowType type, Rect rect);
-    void HandleDestroyWindow();
 
 private:
-    int32_t dialogId_ = -1;
     std::shared_ptr<EventHandler> eventHandler_;
     std::shared_ptr<EventRunner> eventLoop_;
     InnerWMRunningState state_;
-    std::string dividerParams_ = "";
     const std::string INNER_WM_THREAD_NAME = "inner_window_manager";
 };
 } // namespace Rosen

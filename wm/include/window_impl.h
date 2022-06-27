@@ -171,9 +171,9 @@ public:
     virtual WMError RequestFocus() const override;
     virtual void AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) override;
 
-    virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) override;
+    virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
-    virtual void UnregisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) override;
+    virtual void UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     virtual void UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     virtual void UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
@@ -181,8 +181,8 @@ public:
     virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
-    virtual void RegisterInputEventListener(sptr<IInputEventListener>& listener) override;
-    virtual void UnregisterInputEventListener(sptr<IInputEventListener>& listener) override;
+    virtual void RegisterInputEventListener(const sptr<IInputEventListener>& listener) override;
+    virtual void UnregisterInputEventListener(const sptr<IInputEventListener>& listener) override;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;

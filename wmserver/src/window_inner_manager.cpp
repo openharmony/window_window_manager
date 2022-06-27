@@ -15,9 +15,14 @@
 
 #include "window_inner_manager.h"
 
+#include "surface_draw.h"
 #include "ui_service_mgr_client.h"
 #include "window_manager_hilog.h"
-#include "window.h"
+#include "image/bitmap.h"
+#include "image_source.h"
+#include "image_type.h"
+#include "image_utils.h"
+#include "pixel_map.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -77,51 +82,19 @@ void WindowInnerManager::Stop()
     state_ = InnerWMRunningState::STATE_NOT_START;
 }
 
-void WindowInnerManager::HandleCreateWindow(std::string name, WindowType type, Rect rect)
+void WindowInnerManager::CreteInnerWindow(std::string name, DisplayId displyId, Rect rect,
+    WindowType type, WindowMode mode)
 {
-    auto dialogCallback = [this](int32_t id, const std::string& event, const std::string& params) {
-        if (params == "EVENT_CANCEL_CODE") {
-            Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
-        }
-    };
-    Ace::UIServiceMgrClient::GetInstance()->ShowDialog(name, dividerParams_, type,
-        rect.posX_, rect.posY_, rect.width_, rect.height_, dialogCallback, &dialogId_);
-    WLOGFI("create inner window id: %{public}d success", dialogId_);
-    return;
-}
-
-void WindowInnerManager::HandleDestroyWindow()
-{
-    if (dialogId_ == -1) {
-        return;
-    }
-    WLOGFI("destroy inner window id:: %{public}d.", dialogId_);
-    Ace::UIServiceMgrClient::GetInstance()->CancelDialog(dialogId_);
-    dialogId_ = -1;
-    return;
-}
-
-void WindowInnerManager::CreateWindow(std::string name, WindowType type, Rect rect)
-{
-    if (dialogId_ != -1) {
-        return;
-    }
-    eventHandler_->PostTask([this, name, type, rect]() {
-        HandleCreateWindow(name, type, rect);
+    eventHandler_->PostTask([name, displyId, rect, type, mode]() {
+        InnerWindowFactory::GetInstance().CreateInnerWindow(name, displyId, rect, type, mode);
     });
-    return;
 }
 
-void WindowInnerManager::DestroyWindow()
+void WindowInnerManager::DestroyInnerWindow(DisplayId displyId, WindowType type)
 {
-    if (dialogId_ == -1) {
-        WLOGFI("inner window has destroyed.");
-        return;
-    }
-    eventHandler_->PostTask([this]() {
-        HandleDestroyWindow();
+    eventHandler_->PostTask([displyId, type]() {
+        InnerWindowFactory::GetInstance().DestroyInnerWindow(displyId, type);
     });
-    return;
 }
 } // Rosen
 } // OHOS
