@@ -45,6 +45,7 @@ ohos_shared_library("libwmutil") {
     "src/window_property.cpp",
     "src/window_transition_info.cpp",
     "src/wm_trace.cpp",
+    "src/draw_surface.cpp"
   ]
 
   configs = [ ":libwmutil_private_config" ]
@@ -54,6 +55,7 @@ ohos_shared_library("libwmutil") {
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//third_party/flutter/build/skia:ace_skia_ohos",
   ]
 
