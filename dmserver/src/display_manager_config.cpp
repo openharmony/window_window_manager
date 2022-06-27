@@ -14,6 +14,7 @@
  */
 
 #include "display_manager_config.h"
+#include "config_policy_utils.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -51,8 +52,21 @@ bool inline DisplayManagerConfig::IsNumber(std::string str)
     return true;
 }
 
-bool DisplayManagerConfig::LoadConfigXml(const std::string& configFilePath)
+std::string DisplayManagerConfig::GetConfigPath(const std::string& configFileName)
 {
+    char buf[PATH_MAX + 1];
+    char* configPath = GetOneCfgFile(configFileName.c_str(), buf, PATH_MAX + 1);
+    char tmpPath[PATH_MAX + 1] = { 0 };
+    if (!configPath || strlen(configPath) == 0 || strlen(configPath) > PATH_MAX || !realpath(configPath, tmpPath)) {
+        WLOGFI("[DmConfig] can not get customization config file");
+        return "/system/" + configFileName;
+    }
+    return std::string(tmpPath);
+}
+
+bool DisplayManagerConfig::LoadConfigXml()
+{
+    auto configFilePath = GetConfigPath("etc/window/resources/display_manager_config.xml");
     xmlDocPtr docPtr = xmlReadFile(configFilePath.c_str(), nullptr, XML_PARSE_NOBLANKS);
     WLOGFI("[DmConfig] filePath: %{public}s", configFilePath.c_str());
     if (docPtr == nullptr) {
