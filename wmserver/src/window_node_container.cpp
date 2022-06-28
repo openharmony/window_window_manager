@@ -1817,13 +1817,16 @@ sptr<DisplayInfo> WindowNodeContainer::GetDisplayInfo(DisplayId displayId)
     return displayGroupInfo_->GetDisplayInfo(displayId);
 }
 
-Orientation WindowNodeContainer::GetFullScreenWindowRequestedOrientation()
+Orientation WindowNodeContainer::GetWindowPreferredOrientation()
 {
     std::vector<sptr<WindowNode>> windowNodes;
     TraverseContainer(windowNodes);
     for (auto node : windowNodes) {
         if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
             return node->GetRequestedOrientation();
+        }
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+            return Orientation::UNSPECIFIED;
         }
     }
     return Orientation::UNSPECIFIED;
