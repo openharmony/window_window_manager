@@ -109,6 +109,7 @@ void ScreenRotationController::HandleGravitySensorEventCallback(SensorEvent *eve
     currentDisplayRotation_ = GetCurrentDisplayRotation();
     HandleUnspecifiedOrientation(orientation);
     if (!IsSensorRelatedOrientation(orientation)) {
+        lastOrientationType_ = orientation;
         return;
     }
     
@@ -128,6 +129,7 @@ void ScreenRotationController::HandleGravitySensorEventCallback(SensorEvent *eve
         ProcessRotationWhenSensorDataNotValid(orientation);
         return;
     }
+    lastOrientationType_ = orientation;
     if ((ConvertToDeviceRotation(currentSensorRotation) == currentDisplayRotation_) &&
         (orientation == Orientation::SENSOR || orientation == Orientation::AUTO_ROTATION_RESTRICTED)) {
         return;
