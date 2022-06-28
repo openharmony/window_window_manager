@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +29,8 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    utils::TestWindowInfo fullScreenAppInfo_;
-    utils::TestWindowInfo floatingScreenAppInfo_;
+    utils::TestWindowInfo fullAppInfo_1_;
+    utils::TestWindowInfo fullAppInfo_2_;
 private:
     static constexpr uint32_t WAIT_SYANC_US = 100000;
 };
@@ -49,7 +49,7 @@ void WindowModeSupportInfoTest::TearDownTestCase()
 
 void WindowModeSupportInfoTest::SetUp()
 {
-    fullScreenAppInfo_ = {
+    fullAppInfo_1_ = {
             .name = "FullWindow",
             .rect = utils::customAppRect_,
             .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
@@ -58,8 +58,8 @@ void WindowModeSupportInfoTest::SetUp()
             .parentLimit = false,
             .parentName = "",
     };
-    floatingScreenAppInfo_ = {
-            .name = "FloatingWindow",
+    fullAppInfo_2_ = {
+            .name = "FullWindow2",
             .rect = utils::customAppRect_,
             .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
             .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
@@ -81,8 +81,8 @@ namespace {
  */
 HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo01, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
-    
+    const sptr<Window>& window = utils::CreateTestWindow(fullAppInfo_1_);
+
     window->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     ASSERT_EQ(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN, window->GetModeSupportInfo());
     window->Destroy();
@@ -90,12 +90,44 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo01, Function | MediumTe
 
 /**
  * @tc.name: WindowModeSupportInfo02
- * @tc.desc: modeSupportInfo test for single window
+ * @tc.desc: modeSupportInfo test for single window, only support fullScreen mode
  * @tc.type: FUNC
  */
 HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo02, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window = utils::CreateTestWindow(fullAppInfo_1_);
+
+    window->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
+
+    window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
+
+    window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
+
+    window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
+
+    window->Destroy();
+}
+
+/**
+ * @tc.name: WindowModeSupportInfo03
+ * @tc.desc: modeSupportInfo test for single window, support both fullScreen and floating mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo03, Function | MediumTest | Level3)
+{
+    const sptr<Window>& window = utils::CreateTestWindow(fullAppInfo_1_);
 
     window->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
         WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
@@ -127,13 +159,13 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo02, Function | MediumTe
 }
 
 /**
- * @tc.name: WindowModeSupportInfo03
+ * @tc.name: WindowModeSupportInfo04
  * @tc.desc: modeSupportInfo test for single window in case current window mode is not supported.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo03, Function | MediumTest | Level3)
+HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo04, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window = utils::CreateTestWindow(fullAppInfo_1_);
     window->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING |
     WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
     WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
@@ -151,23 +183,15 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo03, Function | MediumTe
 }
 
 /**
- * @tc.name: WindowModeSupportInfo04
+ * @tc.name: WindowModeSupportInfo05
  * @tc.desc: modeSupportInfo test for layout cascade
  * @tc.type: FUNC
  */
-HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo04, Function | MediumTest | Level3)
+HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo05, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window1 = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window1 = utils::CreateTestWindow(fullAppInfo_1_);
     window1->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
-    const sptr<Window>& window2 = utils::CreateTestWindow(utils::TestWindowInfo {
-            .name = "FullWindow2",
-            .rect = utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-            .needAvoid = false,
-            .parentLimit = false,
-            .parentName = "",
-    });
+    const sptr<Window>& window2 = utils::CreateTestWindow(fullAppInfo_2_);
     window2->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
     ASSERT_EQ(WMError::WM_OK, window1->Show());
     ASSERT_EQ(WMError::WM_OK, window2->Show());
@@ -182,13 +206,13 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo04, Function | MediumTe
 }
 
 /**
- * @tc.name: WindowModeSupportInfo05
+ * @tc.name: WindowModeSupportInfo06
  * @tc.desc: modeSupportInfo test for layout tile
  * @tc.type: FUNC
  */
-HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo05, Function | MediumTest | Level3)
+HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo06, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window = utils::CreateTestWindow(fullAppInfo_1_);
     window->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
@@ -202,23 +226,15 @@ HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo05, Function | MediumTe
 }
 
 /**
- * @tc.name: WindowModeSupportInfo06
+ * @tc.name: WindowModeSupportInfo07
  * @tc.desc: modeSupportInfo test for split
  * @tc.type: FUNC
  */
-HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo06, Function | MediumTest | Level3)
+HWTEST_F(WindowModeSupportInfoTest, WindowModeSupportInfo07, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window1 = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window1 = utils::CreateTestWindow(fullAppInfo_1_);
     window1->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
-    const sptr<Window>& window2 = utils::CreateTestWindow(utils::TestWindowInfo {
-            .name = "FullWindow2",
-            .rect = utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-            .needAvoid = false,
-            .parentLimit = false,
-            .parentName = "",
-    });
+    const sptr<Window>& window2 = utils::CreateTestWindow(fullAppInfo_2_);
     window2->SetModeSupportInfo(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     ASSERT_EQ(WMError::WM_OK, window1->Show());
     ASSERT_EQ(WMError::WM_OK, window2->Show());
