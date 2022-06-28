@@ -964,11 +964,11 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
     }
 }
 
-Orientation WindowController::GetFullScreenWindowRequestedOrientation(DisplayId displayId)
+Orientation WindowController::GetWindowPreferredOrientation(DisplayId displayId)
 {
     sptr<WindowNodeContainer> windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
     if (windowNodeContainer != nullptr) {
-        return windowNodeContainer->GetFullScreenWindowRequestedOrientation();
+        return windowNodeContainer->GetWindowPreferredOrientation();
     }
     return Orientation::UNSPECIFIED;
 }

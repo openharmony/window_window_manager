@@ -148,9 +148,9 @@ bool DisplayManagerServiceInner::SetRotationFromWindow(DisplayId displayId, Rota
         SetRotationFromWindow(displayInfo->GetScreenId(), targetRotation);
 }
 
-void DisplayManagerServiceInner::GetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation)
+void DisplayManagerServiceInner::GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation)
 {
-    DisplayManagerService::GetInstance().GetFullScreenWindowRequestedOrientation(displayId, orientation);
+    DisplayManagerService::GetInstance().GetWindowPreferredOrientation(displayId, orientation);
 }
 
 void DisplayManagerServiceInner::SetGravitySensorSubscriptionEnabled()
