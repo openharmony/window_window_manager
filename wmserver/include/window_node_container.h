@@ -76,6 +76,7 @@ public:
     void MinimizeAllAppWindows(DisplayId displayId);
     void MinimizeOldestAppWindow();
     WMError ToggleShownStateForAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc, bool restore);
+    void BackUpAllAppWindows();
     void RestoreAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc);
     bool IsAppWindowsEmpty() const;
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
@@ -158,6 +159,7 @@ private:
     std::vector<uint32_t> backupWindowIds_;
     std::map<uint32_t, WindowMode> backupWindowMode_;
     std::map<DisplayId, Rect> backupDividerWindowRect_;
+    std::map<DisplayId, std::set<WindowMode>> backupDisplaySplitWindowMode_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
     std::unordered_map<WindowLayoutMode, sptr<WindowLayoutPolicy>> layoutPolicys_;
     WindowLayoutMode layoutMode_ = WindowLayoutMode::CASCADE;
