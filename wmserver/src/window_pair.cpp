@@ -331,7 +331,7 @@ void WindowPair::UpdateIfSplitRelated(sptr<WindowNode>& node)
         status_, node->GetWindowId(), node->GetWindowMode());
     if (status_ == WindowPairStatus::STATUS_EMPTY) {
         Insert(node);
-        if (!isAllAppWindowsRestoring_) {
+        if (!isAllSplitAppWindowsRestoring_) {
             // find pairable window from trees or send broadcast
             sptr<WindowNode> pairableNode = GetPairableWindow(node);
             // insert pairable node
@@ -485,11 +485,6 @@ void WindowPair::HandleRemoveWindow(sptr<WindowNode>& node)
         WLOGI("Pairing window id: %{public}u is remove, clear window pair", node->GetWindowId());
         Clear();
     }
-}
-
-void WindowPair::SetAllAppWindowsRestoring(bool isAllAppWindowsRestoring)
-{
-    isAllAppWindowsRestoring_ = isAllAppWindowsRestoring;
 }
 
 void WindowPair::SetInitalDividerRect(const Rect& rect)
