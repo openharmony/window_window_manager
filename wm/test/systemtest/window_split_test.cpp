@@ -281,9 +281,6 @@ HWTEST_F(WindowSplitTest, SplitScreen06, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
-    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetMode());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetMode());
-
     utils::TestWindowInfo dividerInfo;
     dividerInfo.name = "divider0";
     dividerInfo.type = WindowType::WINDOW_TYPE_DOCK_SLICE;
@@ -304,7 +301,11 @@ HWTEST_F(WindowSplitTest, SplitScreen06, Function | MediumTest | Level3)
     divider->ConsumePointerEvent(pointerEvent);
     sleep(SPLIT_TEST_SLEEP_S);
 
-    posY += 10;
+    if (rect.width_ < rect.height_) {
+        posX += 10;
+    } else {
+        posY += 10;
+    }
     pointerEvent = utils::CreatePointerEvent(posX, posY, pointerId, MMI::PointerEvent::POINTER_ACTION_MOVE);
     divider->ConsumePointerEvent(pointerEvent);
     sleep(SPLIT_TEST_SLEEP_S);
