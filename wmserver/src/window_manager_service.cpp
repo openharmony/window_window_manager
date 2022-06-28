@@ -554,9 +554,9 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
     WindowManagerService::GetInstance().NotifyDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
 }
 
-void DisplayChangeListener::OnGetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation)
+void DisplayChangeListener::OnGetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation)
 {
-    WindowManagerService::GetInstance().GetFullScreenWindowRequestedOrientation(displayId, orientation);
+    WindowManagerService::GetInstance().GetWindowPreferredOrientation(displayId, orientation);
 }
 
 void WindowManagerService::ProcessPointDown(uint32_t windowId, bool isStartDrag)
@@ -659,10 +659,10 @@ void WindowManagerService::MinimizeWindowsByLauncher(std::vector<uint32_t> windo
     }).get();
 }
 
-void WindowManagerService::GetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation)
+void WindowManagerService::GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation)
 {
     wmsTaskLooper_->ScheduleTask([this, displayId, &orientation]() mutable {
-        orientation = windowController_->GetFullScreenWindowRequestedOrientation(displayId);
+        orientation = windowController_->GetWindowPreferredOrientation(displayId);
     }).wait();
 }
 
