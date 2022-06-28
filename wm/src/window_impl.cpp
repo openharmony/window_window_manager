@@ -2023,8 +2023,7 @@ void WindowImpl::UpdateWindowState(WindowState state)
                 WLOGFD("MinimizeAbility, id: %{public}u", GetWindowId());
                 AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(abilityContext->GetToken(), true);
             } else {
-                state_ = WindowState::STATE_HIDDEN;
-                NotifyAfterBackground();
+                Hide(static_cast<uint32_t>(WindowStateChangeReason::TOGGLING));
             }
             break;
         }
