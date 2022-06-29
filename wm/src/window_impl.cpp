@@ -728,12 +728,13 @@ void WindowImpl::DestroyFloatingWindow()
 
     // Destroy app floating window if exist
     if (appFloatingWindowMap_.count(GetWindowId()) > 0) {
-        auto floatingWindows = appFloatingWindowMap_.at(GetWindowId());
-        for (auto& floatingWindow : floatingWindows) {
-            if (floatingWindow == nullptr) {
+        auto& floatingWindows = appFloatingWindowMap_.at(GetWindowId());
+        for (auto iter = floatingWindows.begin(); iter != floatingWindows.end(); iter = floatingWindows.begin()) {
+            if ((*iter) == nullptr) {
+                floatingWindows.erase(iter);
                 continue;
             }
-            floatingWindow->Destroy();
+            (*iter)->Destroy();
         }
         appFloatingWindowMap_.erase(GetWindowId());
     }
@@ -755,12 +756,13 @@ void WindowImpl::DestroySubWindow()
     }
 
     if (subWindowMap_.count(GetWindowId()) > 0) { // remove from subWindowMap_ and windowMap_
-        std::vector<sptr<WindowImpl>>& subWindows = subWindowMap_.at(GetWindowId());
-        for (auto& subWindow : subWindows) {
-            if (subWindow == nullptr) {
+        auto& subWindows = subWindowMap_.at(GetWindowId());
+        for (auto iter = subWindows.begin(); iter != subWindows.end(); iter = subWindows.begin()) {
+            if ((*iter) == nullptr) {
+                subWindows.erase(iter);
                 continue;
             }
-            subWindow->Destroy(false);
+            (*iter)->Destroy(false);
         }
         subWindowMap_[GetWindowId()].clear();
         subWindowMap_.erase(GetWindowId());
