@@ -17,8 +17,9 @@
 #define OHOS_WM_INCLUDE_WM_HELPER_H
 
 #include <vector>
-#include <wm_common.h>
-#include <wm_common_inner.h>
+#include "ability_info.h"
+#include "wm_common.h"
+#include "wm_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -178,6 +179,21 @@ public:
                 return WindowMode::WINDOW_MODE_PIP;
             default:
                 return WindowMode::WINDOW_MODE_UNDEFINED;
+        }
+    }
+
+    static void ConvertSupportModesToSupportInfo(uint32_t& modeSupportInfo,
+                                                 const std::vector<AppExecFwk::SupportWindowMode>& supportModes)
+    {
+        for (auto& mode : supportModes) {
+            if (mode == AppExecFwk::SupportWindowMode::FULLSCREEN) {
+                modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
+            } else if (mode == AppExecFwk::SupportWindowMode::SPLIT) {
+                modeSupportInfo |= (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                                    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+            } else if (mode == AppExecFwk::SupportWindowMode::FLOATING) {
+                modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+            }
         }
     }
 
@@ -353,6 +369,15 @@ public:
         uint32_t splitModeInfo = (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                                   WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
         if (isShowWhenLocked && (splitModeInfo == modeSupportInfo)) {
+            return true;
+        }
+        return false;
+    }
+
+    static bool IsInvalidWindowInTileLayoutMode(uint32_t supportModeInfo, WindowLayoutMode layoutMode)
+    {
+        if ((!IsWindowModeSupported(supportModeInfo, WindowMode::WINDOW_MODE_FLOATING)) &&
+            (layoutMode == WindowLayoutMode::TILE)) {
             return true;
         }
         return false;

@@ -312,6 +312,12 @@ private:
             CALL_LIFECYCLE_LISTENER(ForegroundFailed);
         });
     }
+    inline void NotifyForegroundInvalidWindowMode()
+    {
+        PostListenerTask([this]() {
+            CALL_LIFECYCLE_LISTENER(ForegroundInvalidMode);
+        });
+    }
     void DestroyFloatingWindow();
     void DestroySubWindow();
     void SetDefaultOption(); // for api7
