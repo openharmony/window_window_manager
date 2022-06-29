@@ -26,7 +26,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowOccupiedAreaChangeTest"};
 }
 
-using utils = WindowTestUtils;
+using Utils = WindowTestUtils;
 const int WAIT_ASYNC_US = 100000;  // 100000us
 
 class TestOccupiedAreaChangeListener : public IOccupiedAreaChangeListener {
@@ -43,8 +43,8 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     static sptr<TestOccupiedAreaChangeListener> testOccupiedAreaChangeListener_;
-    utils::TestWindowInfo fullScreenAppInfo_;
-    utils::TestWindowInfo imeAppInfo_;
+    Utils::TestWindowInfo fullScreenAppInfo_;
+    Utils::TestWindowInfo imeAppInfo_;
 };
 
 sptr<TestOccupiedAreaChangeListener> WindowOccupiedAreaChangeTest::testOccupiedAreaChangeListener_ =
@@ -65,7 +65,7 @@ void WindowOccupiedAreaChangeTest::SetUpTestCase()
     WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
         display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
-    utils::InitByDisplayRect(displayRect);
+    Utils::InitByDisplayRect(displayRect);
 }
 
 void WindowOccupiedAreaChangeTest::TearDownTestCase()
@@ -76,7 +76,7 @@ void WindowOccupiedAreaChangeTest::SetUp()
 {
     fullScreenAppInfo_ = {
             .name = "FullWindow",
-            .rect = utils::customAppRect_,
+            .rect = Utils::customAppRect_,
             .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
             .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
             .needAvoid = false,
@@ -85,7 +85,7 @@ void WindowOccupiedAreaChangeTest::SetUp()
     };
     imeAppInfo_ = {
             .name = "ImeWindow",
-            .rect = utils::customAppRect_,
+            .rect = Utils::customAppRect_,
             .type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
             .mode = WindowMode::WINDOW_MODE_FLOATING,
     };
@@ -104,13 +104,13 @@ namespace {
 HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest01, Function | MediumTest | Level3)
 {
     fullScreenAppInfo_.name = "KeyboardHeightChangeTest01";
-    const sptr<Window>& window1 = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
     ASSERT_NE(nullptr, window1);
     window1->RegisterOccupiedAreaChangeListener(testOccupiedAreaChangeListener_);
 
     imeAppInfo_.name = "imeWindow1";
     imeAppInfo_.rect = { 10, 200, 300, 400 };
-    const sptr<Window>& window2 = utils::CreateTestWindow(imeAppInfo_);
+    const sptr<Window>& window2 = Utils::CreateTestWindow(imeAppInfo_);
     ASSERT_NE(nullptr, window2);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
@@ -133,13 +133,13 @@ HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest01, Function | Me
 HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest02, Function | MediumTest | Level3)
 {
     fullScreenAppInfo_.name = "KeyboardHeightChangeTest02";
-    const sptr<Window>& window1 = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
     ASSERT_NE(nullptr, window1);
     window1->RegisterOccupiedAreaChangeListener(testOccupiedAreaChangeListener_);
 
     imeAppInfo_.name = "imeWindow2";
     imeAppInfo_.rect = { 10, 200, 300, 400 };
-    const sptr<Window>& window2 = utils::CreateTestWindow(imeAppInfo_);
+    const sptr<Window>& window2 = Utils::CreateTestWindow(imeAppInfo_);
     ASSERT_NE(nullptr, window2);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
@@ -162,13 +162,13 @@ HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest02, Function | Me
 HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest03, Function | MediumTest | Level3)
 {
     fullScreenAppInfo_.name = "KeyboardHeightChangeTest03";
-    const sptr<Window>& window1 = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
     ASSERT_NE(nullptr, window1);
     window1->RegisterOccupiedAreaChangeListener(testOccupiedAreaChangeListener_);
 
     imeAppInfo_.name = "imeWindow3";
     imeAppInfo_.rect = { 10, 200, 300, 400 };
-    const sptr<Window>& window2 = utils::CreateTestWindow(imeAppInfo_);
+    const sptr<Window>& window2 = Utils::CreateTestWindow(imeAppInfo_);
     ASSERT_NE(nullptr, window2);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());

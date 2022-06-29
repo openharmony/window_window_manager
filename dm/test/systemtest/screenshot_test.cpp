@@ -28,7 +28,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenshotTest"};
 }
-using utils = DisplayTestUtils;
+using Utils = DisplayTestUtils;
 class ScreenshotTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -109,7 +109,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid03, Function | MediumTest | Level2)
     ASSERT_NE(nullptr, screenshot);
 
     Media::Size screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
-    ASSERT_TRUE(utils::SizeEqualToDisplay(dm.GetDefaultDisplay(), screenSize));
+    ASSERT_TRUE(Utils::SizeEqualToDisplay(dm.GetDefaultDisplay(), screenSize));
 }
 
 /**
@@ -137,20 +137,20 @@ HWTEST_F(ScreenshotTest, ScreenShotValid05, Function | MediumTest | Level2)
                                                                    defaultImage_, defaultRot_);
     ASSERT_NE(nullptr, screenshot);
     Media::Size screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
-    ASSERT_TRUE(utils::SizeEqual(defaultImage_, screenSize));
+    ASSERT_TRUE(Utils::SizeEqual(defaultImage_, screenSize));
 
     Media::Size halfDefault_ = {defaultImage_.width / 2, defaultImage_.height / 2};
     Media::Rect halfRect = {defaultScreen_.left, defaultScreen_.top, halfDefault_.width, halfDefault_.height};
     screenshot = dm.GetScreenshot(defaultId_, halfRect, defaultImage_, defaultRot_);
     ASSERT_NE(nullptr, screenshot);
     screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
-    ASSERT_TRUE(utils::SizeEqual(defaultImage_, screenSize));
+    ASSERT_TRUE(Utils::SizeEqual(defaultImage_, screenSize));
 
     Media::Size halfSize = {halfDefault_.width, halfDefault_.height};
     screenshot = dm.GetScreenshot(defaultId_, defaultScreen_, halfSize, defaultRot_);
     ASSERT_NE(nullptr, screenshot);
     screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
-    ASSERT_TRUE(utils::SizeEqual(halfSize, screenSize));
+    ASSERT_TRUE(Utils::SizeEqual(halfSize, screenSize));
 }
 
 /**
@@ -165,7 +165,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid06, Function | MediumTest | Level2)
                                                                    defaultImage_, defaultRot_);
     ASSERT_NE(nullptr, screenshot);
     Media::Size screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
-    ASSERT_TRUE(utils::SizeEqualToDisplay(dm.GetDefaultDisplay(), screenSize));
+    ASSERT_TRUE(Utils::SizeEqualToDisplay(dm.GetDefaultDisplay(), screenSize));
 }
 
 /**

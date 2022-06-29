@@ -21,7 +21,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-using utils = WindowTestUtils;
+using Utils = WindowTestUtils;
 constexpr uint32_t MAX_WAIT_COUNT = 100;
 constexpr uint32_t WAIT_DUR = 10 * 1000;
 
@@ -31,7 +31,7 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    utils::TestWindowInfo fullScreenAppInfo_;
+    Utils::TestWindowInfo fullScreenAppInfo_;
 };
 
 void WindowGamutTest::SetUpTestCase()
@@ -46,7 +46,7 @@ void WindowGamutTest::SetUp()
 {
     fullScreenAppInfo_ = {
             .name = "FullWindow",
-            .rect = utils::customAppRect_,
+            .rect = Utils::customAppRect_,
             .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
             .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
             .needAvoid = false,
@@ -67,7 +67,7 @@ namespace {
  */
 HWTEST_F(WindowGamutTest, IsSupportWideGamut01, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppInfo_);
 
     ASSERT_EQ(true, window->IsSupportWideGamut());
 
@@ -81,7 +81,7 @@ HWTEST_F(WindowGamutTest, IsSupportWideGamut01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowGamutTest, GetColorSpace01, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppInfo_);
 
     ASSERT_EQ(ColorSpace::COLOR_SPACE_DEFAULT, window->GetColorSpace());
 
@@ -101,7 +101,7 @@ HWTEST_F(WindowGamutTest, SetColorSpace01, Function | MediumTest | Level3)
         ColorSpace::COLOR_SPACE_WIDE_GAMUT
     };
     ColorSpace colorSpace;
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppInfo_);
 
     ColorSpace colorSpaceBackup = window->GetColorSpace(); // backup origin
 
@@ -130,7 +130,7 @@ HWTEST_F(WindowGamutTest, SetColorSpace01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowGamutTest, SetColorSpace02, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppInfo_);
 
     ColorSpace colorSpaceBackup = window->GetColorSpace();
 

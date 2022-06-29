@@ -23,7 +23,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-using utils = WindowTestUtils;
+using Utils = WindowTestUtils;
 
 class WindowSplitImmersiveTest : public testing::Test {
 public:
@@ -35,8 +35,8 @@ public:
     void HideAndUnregister(const sptr<Window>& fullWindow, const sptr<Window>& priWindow, const sptr<Window>& top);
 
     std::vector<sptr<Window>> activeWindows_;
-    utils::TestWindowInfo fullInfo_;
-    utils::TestWindowInfo splitInfo_;
+    Utils::TestWindowInfo fullInfo_;
+    Utils::TestWindowInfo splitInfo_;
 
 private:
     static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1; // split test sleep time
@@ -54,7 +54,7 @@ void WindowSplitImmersiveTest::SetUp()
 {
     fullInfo_ = {
         .name = "fullscreen.1",
-        .rect = utils::customAppRect_,
+        .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = true,
@@ -64,7 +64,7 @@ void WindowSplitImmersiveTest::SetUp()
 
     splitInfo_ = {
         .name = "primary.1",
-        .rect = utils::customAppRect_,
+        .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = true,
@@ -92,14 +92,14 @@ namespace {
 HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Level3)
 {
     // create fullscreen win and show
-    const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
+    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
     // enter split mode
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
-    const sptr<Window>& priWindow = utils::CreateTestWindow(splitInfo_);
+    const sptr<Window>& priWindow = Utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(priWindow);
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
