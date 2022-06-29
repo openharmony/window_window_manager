@@ -32,7 +32,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenshotCmdTest"};
 }
 
-using utils = DisplayTestUtils;
+using Utils = DisplayTestUtils;
 class ScreenshotCmdTest : public testing::Test {
 public:
     static void SetUpTestCase();

@@ -21,7 +21,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-using utils = WindowTestUtils;
+using Utils = WindowTestUtils;
 class WindowSplitTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -29,8 +29,8 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     std::vector<sptr<Window>> activeWindows_;
-    utils::TestWindowInfo fullInfo_;
-    utils::TestWindowInfo splitInfo_;
+    Utils::TestWindowInfo fullInfo_;
+    Utils::TestWindowInfo splitInfo_;
 
 private:
     static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1; // split test sleep time
@@ -48,7 +48,7 @@ void WindowSplitTest::SetUp()
 {
     fullInfo_ = {
         .name = "",
-        .rect = utils::customAppRect_,
+        .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = true,
@@ -58,7 +58,7 @@ void WindowSplitTest::SetUp()
 
     splitInfo_ = {
         .name = "",
-        .rect = utils::customAppRect_,
+        .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = true,
@@ -89,12 +89,12 @@ HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
     splitInfo_.name = "primary.1";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
 
-    const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
+    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
-    const sptr<Window>& priWindow = utils::CreateTestWindow(splitInfo_);
+    const sptr<Window>& priWindow = Utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(priWindow);
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
@@ -120,11 +120,11 @@ HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
     splitInfo_.name = "secondary.2";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 
-    const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
+    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
-    const sptr<Window>& secWindow = utils::CreateTestWindow(splitInfo_);
+    const sptr<Window>& secWindow = Utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(secWindow);
     ASSERT_EQ(WMError::WM_OK, secWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
@@ -150,21 +150,21 @@ HWTEST_F(WindowSplitTest, SplitScreen03, Function | MediumTest | Level3)
     splitInfo_.name = "primary.3";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
 
-    ASSERT_TRUE(utils::InitSplitRects());
+    ASSERT_TRUE(Utils::InitSplitRects());
 
-    const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
+    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
-    const sptr<Window>& priWindow = utils::CreateTestWindow(splitInfo_);
+    const sptr<Window>& priWindow = Utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(priWindow);
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
-    utils::UpdateSplitRects(fullWindow);
+    Utils::UpdateSplitRects(fullWindow);
 
-    ASSERT_TRUE(utils::RectEqualTo(fullWindow, utils::splitRects_.secondaryRect));
-    ASSERT_TRUE(utils::RectEqualTo(priWindow, utils::splitRects_.primaryRect));
+    ASSERT_TRUE(Utils::RectEqualTo(fullWindow, Utils::splitRects_.secondaryRect));
+    ASSERT_TRUE(Utils::RectEqualTo(priWindow, Utils::splitRects_.primaryRect));
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
@@ -183,21 +183,21 @@ HWTEST_F(WindowSplitTest, SplitScreen04, Function | MediumTest | Level3)
     splitInfo_.name = "secondary.4";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 
-    ASSERT_TRUE(utils::InitSplitRects());
+    ASSERT_TRUE(Utils::InitSplitRects());
 
-    const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
+    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
-    const sptr<Window>& secWindow = utils::CreateTestWindow(splitInfo_);
+    const sptr<Window>& secWindow = Utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(secWindow);
     ASSERT_EQ(WMError::WM_OK, secWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
-    utils::UpdateSplitRects(fullWindow);
+    Utils::UpdateSplitRects(fullWindow);
 
-    ASSERT_TRUE(utils::RectEqualTo(fullWindow, utils::splitRects_.primaryRect));
-    ASSERT_TRUE(utils::RectEqualTo(secWindow, utils::splitRects_.secondaryRect));
+    ASSERT_TRUE(Utils::RectEqualTo(fullWindow, Utils::splitRects_.primaryRect));
+    ASSERT_TRUE(Utils::RectEqualTo(secWindow, Utils::splitRects_.secondaryRect));
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
@@ -216,12 +216,12 @@ HWTEST_F(WindowSplitTest, SplitScreen05, Function | MediumTest | Level3)
     splitInfo_.name = "primary.5";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
 
-    const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
+    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
-    const sptr<Window>& priWindow = utils::CreateTestWindow(splitInfo_);
+    const sptr<Window>& priWindow = Utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(priWindow);
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
@@ -229,13 +229,13 @@ HWTEST_F(WindowSplitTest, SplitScreen05, Function | MediumTest | Level3)
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetMode());
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetMode());
 
-    utils::TestWindowInfo dividerInfo;
+    Utils::TestWindowInfo dividerInfo;
     dividerInfo.name = "divider0";
     dividerInfo.type = WindowType::WINDOW_TYPE_DOCK_SLICE;
     dividerInfo.mode = WindowMode::WINDOW_MODE_FLOATING;
     dividerInfo.focusable_ = false;
 
-    const sptr<Window>& divider = utils::CreateTestWindow(dividerInfo);
+    const sptr<Window>& divider = Utils::CreateTestWindow(dividerInfo);
     activeWindows_.push_back(divider);
     ASSERT_EQ(WMError::WM_OK, divider->Show());
     sleep(SPLIT_TEST_SLEEP_S);
@@ -271,23 +271,23 @@ HWTEST_F(WindowSplitTest, SplitScreen06, Function | MediumTest | Level3)
     splitInfo_.name = "primary.6";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
 
-    const sptr<Window>& fullWindow = utils::CreateTestWindow(fullInfo_);
+    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
-    const sptr<Window>& priWindow = utils::CreateTestWindow(splitInfo_);
+    const sptr<Window>& priWindow = Utils::CreateTestWindow(splitInfo_);
     activeWindows_.push_back(priWindow);
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
-    utils::TestWindowInfo dividerInfo;
+    Utils::TestWindowInfo dividerInfo;
     dividerInfo.name = "divider0";
     dividerInfo.type = WindowType::WINDOW_TYPE_DOCK_SLICE;
     dividerInfo.mode = WindowMode::WINDOW_MODE_FLOATING;
     dividerInfo.focusable_ = false;
 
-    const sptr<Window>& divider = utils::CreateTestWindow(dividerInfo);
+    const sptr<Window>& divider = Utils::CreateTestWindow(dividerInfo);
     activeWindows_.push_back(divider);
     ASSERT_EQ(WMError::WM_OK, divider->Show());
     sleep(SPLIT_TEST_SLEEP_S);
@@ -297,7 +297,7 @@ HWTEST_F(WindowSplitTest, SplitScreen06, Function | MediumTest | Level3)
     int32_t posX, posY;
     posX = posY = 0;
     std::shared_ptr<MMI::PointerEvent> pointerEvent =
-        utils::CreatePointerEvent(posX, posY, pointerId, MMI::PointerEvent::POINTER_ACTION_DOWN);
+        Utils::CreatePointerEvent(posX, posY, pointerId, MMI::PointerEvent::POINTER_ACTION_DOWN);
     divider->ConsumePointerEvent(pointerEvent);
     sleep(SPLIT_TEST_SLEEP_S);
 
@@ -306,13 +306,13 @@ HWTEST_F(WindowSplitTest, SplitScreen06, Function | MediumTest | Level3)
     } else {
         posY += 10;
     }
-    pointerEvent = utils::CreatePointerEvent(posX, posY, pointerId, MMI::PointerEvent::POINTER_ACTION_MOVE);
+    pointerEvent = Utils::CreatePointerEvent(posX, posY, pointerId, MMI::PointerEvent::POINTER_ACTION_MOVE);
     divider->ConsumePointerEvent(pointerEvent);
     sleep(SPLIT_TEST_SLEEP_S);
     Rect moveRect = divider->GetRect();
     ASSERT_TRUE(rect.posX_ != moveRect.posX_ || rect.posY_ != moveRect.posY_);
 
-    pointerEvent = utils::CreatePointerEvent(posX, posY, pointerId, MMI::PointerEvent::POINTER_ACTION_UP);
+    pointerEvent = Utils::CreatePointerEvent(posX, posY, pointerId, MMI::PointerEvent::POINTER_ACTION_UP);
     divider->ConsumePointerEvent(pointerEvent);
     sleep(SPLIT_TEST_SLEEP_S);
     Rect newRect = divider->GetRect();
