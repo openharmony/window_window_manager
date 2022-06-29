@@ -187,32 +187,6 @@ WMError WindowManagerProxy::SetWindowBackgroundBlur(uint32_t windowId, WindowBlu
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::SetAlpha(uint32_t windowId, float alpha)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(windowId)) {
-        WLOGFE("Write windowId failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteFloat(alpha)) {
-        WLOGFE("Write alpha failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_ALPHA),
-        data, reply, option) != ERR_NONE) {
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WMError>(ret);
-}
-
 AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type)
 {
     MessageParcel data;

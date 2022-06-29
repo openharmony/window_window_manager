@@ -43,7 +43,6 @@ public:
     virtual WMError RequestFocus(uint32_t windowId);
     virtual WMError GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidRect);
     virtual WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level);
-    virtual WMError SetAlpha(uint32_t windowId, float alpha);
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     virtual void ProcessPointDown(uint32_t windowId, bool isStartDrag = false);
     virtual void ProcessPointUp(uint32_t windowId);

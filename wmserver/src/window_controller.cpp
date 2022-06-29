@@ -397,21 +397,6 @@ WMError WindowController::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurL
     return WMError::WM_OK;
 }
 
-WMError WindowController::SetAlpha(uint32_t windowId, float dstAlpha)
-{
-    auto node = windowRoot_->GetWindowNode(windowId);
-    if (node == nullptr) {
-        WLOGFE("could not find window");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    WLOGFI("WindowEffect WindowController SetAlpha alpha: %{public}f", dstAlpha);
-    node->SetAlpha(dstAlpha);
-
-    FlushWindowInfo(windowId);
-    return WMError::WM_OK;
-}
-
 void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
@@ -851,6 +836,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             property->GetTouchHotAreas(rects);
             return UpdateTouchHotAreas(node, rects);
         }
+        case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY:
         default:
             break;
     }
