@@ -225,9 +225,13 @@ private:
     {
         CALL_LIFECYCLE_LISTENER(AfterUnfocused);
     }
-    inline void NotifyBeforeDestroy(std::string windowName) const
+    inline void NotifyBeforeDestroy(std::string windowName)
     {
-        CALL_UI_CONTENT(Destroy);
+        if (uiContent_ != nullptr) {
+            auto uiContent = std::move(uiContent_);
+            uiContent_ = nullptr;
+            uiContent->Destroy();
+        }
         if (notifyNativefunc_) {
             notifyNativefunc_(windowName);
         }
