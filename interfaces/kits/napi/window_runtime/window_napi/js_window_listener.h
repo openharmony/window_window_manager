@@ -47,7 +47,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public ITouchOutsideListener {
 public:
     JsWindowListener(NativeEngine* engine, std::shared_ptr<NativeReference> callback)
-        : engine_(engine), jsCallBack_(callback) {}
+        : engine_(engine), jsCallBack_(callback), weakRef_(wptr<JsWindowListener> (this)) {}
     ~JsWindowListener();
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason) override;
@@ -58,12 +58,13 @@ public:
     void AfterFocused() override;
     void AfterUnfocused() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) override;
-    void OnTouchOutside() override;
+    void OnTouchOutside() const override;
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
 private:
     void LifeCycleCallBack(LifeCycleEventType eventType);
     NativeEngine* engine_ = nullptr;
     std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
+    wptr<JsWindowListener> weakRef_  = nullptr;
     DEFINE_VAR_DEFAULT_FUNC_SET(bool, IsDeprecatedInterface, isDeprecatedInterface, false)
 };
 }  // namespace Rosen

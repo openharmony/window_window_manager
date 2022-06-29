@@ -15,6 +15,7 @@
 #include "js_window_listener.h"
 #include "js_runtime_utils.h"
 #include "window_manager_hilog.h"
+
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
@@ -47,7 +48,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason)
     WLOGFI("[NAPI]OnSizeChange, wh[%{public}u, %{public}u], reason = %{public}u", rect.width_, rect.height_, reason);
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = wptr<JsWindowListener>(this), rect, eng = engine_] (NativeEngine &engine,
+        [self = weakRef_, rect, eng = engine_] (NativeEngine &engine,
             AsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
@@ -83,7 +84,7 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
     WLOGFI("[NAPI]OnSystemBarPropertyChange");
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = wptr<JsWindowListener>(this), displayId, tints, eng = engine_] (NativeEngine &engine,
+        [self = weakRef_, displayId, tints, eng = engine_] (NativeEngine &engine,
             AsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
@@ -114,7 +115,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
     WLOGFI("[NAPI]OnAvoidAreaChanged");
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = wptr<JsWindowListener>(this), avoidArea, type, eng = engine_] (NativeEngine &engine,
+        [self = weakRef_, avoidArea, type, eng = engine_] (NativeEngine &engine,
             AsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
@@ -145,7 +146,7 @@ void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
 {
     WLOGFI("[NAPI]LifeCycleCallBack, envent type: %{public}u", eventType);
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [self = wptr<JsWindowListener>(this), eventType, eng = engine_] (NativeEngine &engine,
+        [self = weakRef_, eventType, eng = engine_] (NativeEngine &engine,
             AsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
@@ -189,7 +190,7 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info)
         info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     // js callback should run in js thread
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = wptr<JsWindowListener>(this), info, eng = engine_] (NativeEngine &engine,
+        [self = weakRef_, info, eng = engine_] (NativeEngine &engine,
             AsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr || eng == nullptr) {
@@ -207,10 +208,10 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info)
         *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsWindowListener::OnTouchOutside()
+void JsWindowListener::OnTouchOutside() const
 {
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = wptr<JsWindowListener>(this)] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+        [self = weakRef_] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
                 WLOGFE("[NAPI]this listener is nullptr");
