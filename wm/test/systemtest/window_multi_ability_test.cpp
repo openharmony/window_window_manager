@@ -23,7 +23,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-using utils = WindowTestUtils;
+using Utils = WindowTestUtils;
 class WindowMultiAbilityTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -54,7 +54,7 @@ static void ShowHideWindowSceneCallable(int i)
 {
     unsigned int sleepTimeMs = i * SLEEP_MS;
     usleep(sleepTimeMs);
-    sptr<WindowScene> scene = utils::CreateWindowScene();
+    sptr<WindowScene> scene = Utils::CreateWindowScene();
     const int loop = 10;
     int j = 0;
     for (; j < loop; j++) {
@@ -74,7 +74,7 @@ static void CreateDestroyWindowSceneCallable(int i)
     int j = 0;
     for (; j < loop; j++) {
         usleep(sleepTimeMs);
-        sptr<WindowScene> scene = utils::CreateWindowScene();
+        sptr<WindowScene> scene = Utils::CreateWindowScene();
         usleep(sleepTimeMs);
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
         usleep(sleepTimeMs);
@@ -94,11 +94,11 @@ static void CreateDestroyWindowSceneCallable(int i)
  */
 HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow01, Function | MediumTest | Level2)
 {
-    sptr<WindowScene> scene1 = utils::CreateWindowScene();
-    sptr<WindowScene> scene2 = utils::CreateWindowScene();
-    sptr<WindowScene> scene3 = utils::CreateWindowScene();
-    sptr<WindowScene> scene4 = utils::CreateWindowScene();
-    sptr<WindowScene> scene5 = utils::CreateWindowScene();
+    sptr<WindowScene> scene1 = Utils::CreateWindowScene();
+    sptr<WindowScene> scene2 = Utils::CreateWindowScene();
+    sptr<WindowScene> scene3 = Utils::CreateWindowScene();
+    sptr<WindowScene> scene4 = Utils::CreateWindowScene();
+    sptr<WindowScene> scene5 = Utils::CreateWindowScene();
 
     ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
     ASSERT_EQ(WMError::WM_OK, scene2->GoForeground());
@@ -162,27 +162,27 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow03, Function | MediumTest | L
  */
 HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow04, Function | MediumTest | Level3)
 {
-    sptr<WindowScene> scene1 = utils::CreateWindowScene();
+    sptr<WindowScene> scene1 = Utils::CreateWindowScene();
     ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
     ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
     ASSERT_EQ(WMError::WM_OK, scene1->GoDestroy());
 
-    sptr<WindowScene> scene2 = utils::CreateWindowScene();
+    sptr<WindowScene> scene2 = Utils::CreateWindowScene();
     ASSERT_EQ(WMError::WM_OK, scene2->GoForeground());
     ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
     ASSERT_EQ(WMError::WM_OK, scene2->GoDestroy());
 
-    sptr<WindowScene> scene3 = utils::CreateWindowScene();
+    sptr<WindowScene> scene3 = Utils::CreateWindowScene();
     ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
     ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
     ASSERT_EQ(WMError::WM_OK, scene3->GoDestroy());
 
-    sptr<WindowScene> scene4 = utils::CreateWindowScene();
+    sptr<WindowScene> scene4 = Utils::CreateWindowScene();
     ASSERT_EQ(WMError::WM_OK, scene4->GoForeground());
     ASSERT_EQ(WMError::WM_OK, scene4->GoBackground());
     ASSERT_EQ(WMError::WM_OK, scene4->GoDestroy());
 
-    sptr<WindowScene> scene5 = utils::CreateWindowScene();
+    sptr<WindowScene> scene5 = Utils::CreateWindowScene();
     ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
     ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
     ASSERT_EQ(WMError::WM_OK, scene5->GoDestroy());
@@ -195,19 +195,19 @@ HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow04, Function | MediumTest | L
  */
 HWTEST_F(WindowMultiAbilityTest, MultiAbilityWindow05, Function | MediumTest | Level3)
 {
-    sptr<WindowScene> scene1 = utils::CreateWindowScene();
+    sptr<WindowScene> scene1 = Utils::CreateWindowScene();
     ASSERT_EQ(WMError::WM_OK, scene1->GoForeground());
-    sptr<WindowScene> scene2 = utils::CreateWindowScene();
-    sptr<WindowScene> scene3 = utils::CreateWindowScene();
+    sptr<WindowScene> scene2 = Utils::CreateWindowScene();
+    sptr<WindowScene> scene3 = Utils::CreateWindowScene();
     ASSERT_EQ(WMError::WM_OK, scene3->GoForeground());
     ASSERT_EQ(WMError::WM_OK, scene1->GoBackground());
     ASSERT_EQ(WMError::WM_OK, scene1->GoDestroy());
-    sptr<WindowScene> scene4 = utils::CreateWindowScene();
+    sptr<WindowScene> scene4 = Utils::CreateWindowScene();
     ASSERT_EQ(WMError::WM_OK, scene3->GoBackground());
     ASSERT_EQ(WMError::WM_OK, scene2->GoForeground());
     ASSERT_EQ(WMError::WM_OK, scene4->GoForeground());
     ASSERT_EQ(WMError::WM_OK, scene2->GoBackground());
-    sptr<WindowScene> scene5 = utils::CreateWindowScene();
+    sptr<WindowScene> scene5 = Utils::CreateWindowScene();
     ASSERT_EQ(WMError::WM_OK, scene3->GoDestroy());
     ASSERT_EQ(WMError::WM_OK, scene5->GoForeground());
     ASSERT_EQ(WMError::WM_OK, scene5->GoBackground());
