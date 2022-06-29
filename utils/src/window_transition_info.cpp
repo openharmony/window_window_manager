@@ -26,7 +26,7 @@ WindowTransitionInfo::WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> in
     displayId_ = info->displayId_;
     isShowWhenLocked_ = info->isShowWhenLocked_;
     isRecent_ = info->isRecent_;
-    supportWindowModes_ = { 0, 1, 2 }; // 0:fullScreen 1:split 2:floating
+    supportWindowModes_.assign(info->windowModes_.begin(), info->windowModes_.end());
 }
 
 void WindowTransitionInfo::SetBundleName(std::string name)
@@ -104,12 +104,12 @@ void WindowTransitionInfo::SetShowFlagWhenLocked(bool isShow)
     isShowWhenLocked_ = isShow;
 }
 
-void WindowTransitionInfo::SetWindowSupportModes(const std::vector<uint32_t> supportModes)
+void WindowTransitionInfo::SetWindowSupportModes(const std::vector<AppExecFwk::SupportWindowMode> supportModes)
 {
     supportWindowModes_.assign(supportModes.begin(), supportModes.end());
 }
 
-std::vector<uint32_t> WindowTransitionInfo::GetWindowSupportModes()
+std::vector<AppExecFwk::SupportWindowMode> WindowTransitionInfo::GetWindowSupportModes()
 {
     return supportWindowModes_;
 }
