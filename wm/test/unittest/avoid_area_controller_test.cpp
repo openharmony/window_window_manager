@@ -16,7 +16,8 @@
 #include "avoid_area_controller_test.h"
 #include "avoid_area_controller.h"
 #include "display_manager.h"
-#include "mock_window_adapter.h"
+#include "display_manager_config.h"
+#include "future.h"
 #include "singleton_mocker.h"
 #include "window_node.h"
 
@@ -29,45 +30,101 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AvoidAreaControllerTest"};
 
     const Rect EMPTY_RECT = {0, 0, 0, 0};
-    const uint32_t LEFT = 0;
-    const uint32_t TOP = 1;
-    const uint32_t RIGHT = 2;
-    const uint32_t BOTTOM = 3;
     const float BARRATIO = 0.3;
+    const long TIME_OUT = 1000;
+    const AvoidArea EMPTY_AVOID_AREA = {};
 }
 
-Rect AvoidAreaControllerTest::topAvoidRect_ = EMPTY_RECT;
-Rect AvoidAreaControllerTest::leftAvoidRect_ = EMPTY_RECT;
+sptr<WindowNode> AvoidAreaControllerTest::statusbarWindowNode = nullptr;
+sptr<WindowNode> AvoidAreaControllerTest::navigationBarWindowNode = nullptr;
+sptr<WindowNode> AvoidAreaControllerTest::keyboardWindowNode = nullptr;
+Rect AvoidAreaControllerTest::screenRect;
+Rect AvoidAreaControllerTest::cut_out_rect = { 10, 10, 100, 20 };
 
-static bool RectEqualToRect(const Rect& l, const Rect& r)
-{
-    bool res = ((l.posX_ == r.posX_) && (l.posY_ == r.posY_) && (l.width_ == r.width_) && (l.height_ == r.height_));
-    if (!res) {
-        WLOGFE("      [   x    y    w    h]");
-        WLOGFE("Expect:%{public}4d %{public}4d %{public}4u %{public}4u ", l.posX_, l.posY_, l.width_, l.height_);
-        WLOGFE("Get:   %{public}4d %{public}4d %{public}4u %{public}4u ", r.posX_, r.posY_, r.width_, r.height_);
+class WindowListener : public IWindow {
+public:
+    void UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) override {}
+    void UpdateWindowMode(WindowMode mode) override {}
+    void UpdateFocusStatus(bool focused) override {}
+    void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override
+    {
+        if (type == AvoidAreaType::TYPE_SYSTEM) {
+            statusBarAvoidAreaFuture_.SetValue(*avoidArea);
+        }
+        if (type == AvoidAreaType::TYPE_CUTOUT) {
+            cutoutAvoidAreaFuture_.SetValue(*avoidArea);
+        }
+        if (type == AvoidAreaType::TYPE_KEYBOARD) {
+            keyboardAvoidAreaFuture_.SetValue(*avoidArea);
+        }
     }
-    return res;
-}
+    void UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override {}
+    void UpdateWindowState(WindowState state) override {}
+    void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override {}
+    void UpdateDisplayId(DisplayId from, DisplayId to) override {}
+    void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override {}
+    void UpdateActiveStatus(bool isActive) override {}
+    sptr<WindowProperty> GetWindowProperty() override
+    {
+        return nullptr;
+    }
+    void NotifyTouchOutside() override {}
+    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override {}
+    RunnableFuture<AvoidArea> statusBarAvoidAreaFuture_;
+    RunnableFuture<AvoidArea> keyboardAvoidAreaFuture_;
+    RunnableFuture<AvoidArea> cutoutAvoidAreaFuture_;
 
-void AvoidAreaControllerTest::InitByScreenRect(const Rect& screenRect)
-{
-    topAvoidRect_ = {0, 0, screenRect.width_,
-        std::min(static_cast<uint32_t>(screenRect.height_), static_cast<uint32_t>(screenRect.width_ * BARRATIO))};
-    // make sure leftAvoidRect h > w and w < screen.width. And use a bigger ratio to cover origin topAvoid
-    leftAvoidRect_ = {0, 0,
-        std::min(static_cast<uint32_t>(screenRect.width_), static_cast<uint32_t>(screenRect.height_ * BARRATIO)),
-        screenRect.height_};
-}
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
+};
 
 void AvoidAreaControllerTest::SetUpTestCase()
 {
-    auto display = DisplayManager::GetInstance().GetDisplayById(0);
+    DisplayManagerConfig::LoadConfigXml();
+    auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
+    if (numbersConfig.count("cutoutArea") > 0) {
+        std::vector<int> cutoutArea = numbersConfig["cutoutArea"];
+        // 0, 1, 2, 3 means the index in the vector.
+        cut_out_rect =  { cutoutArea[0], cutoutArea[1], (uint32_t)cutoutArea[2], (uint32_t)cutoutArea[3] };
+    }
+    auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE((display != nullptr));
     WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
         display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
-    Rect screenRect = {0, 0, display->GetWidth(), display->GetHeight()};
-    AvoidAreaControllerTest::InitByScreenRect(screenRect);
+    screenRect = { 0, 0, static_cast<uint32_t>(display->GetWidth()), static_cast<uint32_t>(display->GetHeight()) };
+    auto barHeight = static_cast<uint32_t>(screenRect.height_ * BARRATIO);
+    Rect statusBarRect = { 0, 0, screenRect.width_, barHeight };
+    Rect navigationRect = { 0, static_cast<int32_t>(screenRect.height_ - barHeight), screenRect.width_, barHeight };
+
+    sptr<WindowProperty> statusbarProperty = new WindowProperty();
+    statusbarProperty->SetWindowId(100u);
+    statusbarProperty->SetWindowName("status bar");
+    statusbarProperty->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    statusbarProperty->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    statusbarProperty->SetWindowRect(statusBarRect);
+    sptr<WindowListener> windowListener = new WindowListener();
+    statusbarWindowNode = new WindowNode(statusbarProperty, windowListener, nullptr);
+
+    sptr<WindowProperty> navigationBarProperty = new WindowProperty();
+    navigationBarProperty->SetWindowId(101u);
+    navigationBarProperty->SetWindowName("navigation bar");
+    navigationBarProperty->SetWindowType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    navigationBarProperty->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    navigationBarProperty->SetWindowRect(navigationRect);
+    windowListener = new WindowListener();
+    navigationBarWindowNode = new WindowNode(navigationBarProperty, windowListener, nullptr);
+
+    sptr<WindowProperty> keyboardProperty = new WindowProperty();
+    keyboardProperty->SetWindowId(101u);
+    keyboardProperty->SetWindowName("navigation bar");
+    keyboardProperty->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    keyboardProperty->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    Rect keyboardRect = { 0, static_cast<int32_t>(screenRect.height_ / 2), screenRect.width_, screenRect.height_ / 2 };
+    keyboardProperty->SetWindowRect(keyboardRect);
+    windowListener = new WindowListener();
+    keyboardWindowNode = new WindowNode(keyboardProperty, windowListener, nullptr);
 }
 
 void AvoidAreaControllerTest::TearDownTestCase()
@@ -82,275 +139,324 @@ void AvoidAreaControllerTest::TearDown()
 {
 }
 
+#define CHECK_AVOID_AREA(avoidArea, topRect, leftRect, rightRect, bottomRect) \
+    do {                                                                      \
+        ASSERT_EQ(avoidArea.topRect_, topRect);                               \
+        ASSERT_EQ(avoidArea.bottomRect_, bottomRect);                         \
+        ASSERT_EQ(avoidArea.leftRect_, leftRect);                             \
+        ASSERT_EQ(avoidArea.rightRect_, rightRect);                           \
+    } while (false)
+
+
 namespace {
 /**
- * @tc.name: IsAvoidAreaNode01
- * @tc.desc: Create a APP Window. Test IsAvoidAreaNode
+ * @tc.name: SystemBarAndCutOutAvoidArea01
+ * @tc.desc: Get avoid areas with TYPE_SYSTEM and TYPE_CUTOUT
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, IsAvoidAreaNode01, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea01, Function | SmallTest | Level2)
 {
-    auto avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    sptr<WindowNode> node = new WindowNode();
     sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(100u);
+    property->SetWindowId(110u);
+    property->SetWindowName("test");
     property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    node->SetWindowProperty(property);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    property->SetWindowRect(screenRect);
+    sptr<WindowListener> listener = new WindowListener();
+    sptr<WindowNode> appWindow = new WindowNode(property, listener, nullptr);
+    uint32_t focusedWindow = appWindow->GetWindowId();
+    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(focusedWindow);
+    avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    auto avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_SYSTEM);
+    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(),
+        EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_CUTOUT);
+    CHECK_AVOID_AREA(avoidArea, cut_out_rect, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
 
-    ASSERT_EQ(false, avoidAreaController->IsAvoidAreaNode(node));
+    // set rect
+    Rect statusBarRect = statusbarWindowNode->GetWindowRect();
+    Rect navigationBarRect = navigationBarWindowNode->GetWindowRect();
+    Rect windowRect = { 0, static_cast<int32_t>(statusBarRect.height_), statusBarRect.width_,
+        static_cast<uint32_t>(navigationBarRect.posY_ - statusBarRect.height_) };
+    property->SetWindowRect(windowRect);
+    avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_SYSTEM);
+    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_CUTOUT);
+    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+
+    // restore rect
+    property->SetWindowRect(screenRect);
+    avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_SYSTEM);
+    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(),
+        EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_CUTOUT);
+    CHECK_AVOID_AREA(avoidArea, cut_out_rect, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+
+    avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
+    avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
+    avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_SYSTEM);
+    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
 }
 
 /**
- * @tc.name: IsAvoidAreaNode02
- * @tc.desc: Create a Status Bar Window. Test IsAvoidAreaNode
+ * @tc.name: SystemBarAndCutOutAvoidArea02
+ * @tc.desc: Get avoid areas with listener, TYPE_SYSTEM and TYPE_CUTOUT.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, IsAvoidAreaNode02, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea02, Function | SmallTest | Level2)
 {
-    auto avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    sptr<WindowNode> node = new WindowNode();
     sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node->SetWindowProperty(property);
+    property->SetWindowId(110u);
+    property->SetWindowName("test");
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    property->SetWindowRect(screenRect);
+    sptr<WindowListener> windowListener = new WindowListener();
+    sptr<WindowNode> appWindow = new WindowNode(property, windowListener, nullptr);
+    uint32_t focusedWindow = appWindow->GetWindowId();
+    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(focusedWindow);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    avoidAreaController->UpdateAvoidAreaListener(appWindow, true);
 
-    ASSERT_TRUE(avoidAreaController->IsAvoidAreaNode(node));
+    // add status bar
+    avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    auto avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+
+    // add navigation bar
+    avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT,
+        EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+
+    // update appWindow rect
+    Rect statusBarRect = statusbarWindowNode->GetWindowRect();
+    Rect navigationBarRect = navigationBarWindowNode->GetWindowRect();
+    Rect windowRect = { 0, static_cast<int32_t>(statusBarRect.height_), statusBarRect.width_,
+        static_cast<uint32_t>(navigationBarRect.posY_ - statusBarRect.height_) };
+    property->SetWindowRect(windowRect);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_UPDATE, nullptr);
+    avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    avoidArea = windowListener->cutoutAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->cutoutAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+
+    // restore appWindow rect
+    property->SetWindowRect(screenRect);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_UPDATE, nullptr);
+    avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(),
+        EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    avoidArea = windowListener->cutoutAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->cutoutAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, cut_out_rect, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+
+    avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
+    avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
 }
 
 /**
- * @tc.name: IsAvoidAreaNode03
- * @tc.desc: Create a Dock_Slice Window. Test IsAvoidAreaNode
+ * @tc.name: SystemBarAndCutOutAvoidArea03
+ * @tc.desc: Get avoid areas with listener, TYPE_SYSTEM and TYPE_CUTOUT.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, IsAvoidAreaNode03, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea03, Function | SmallTest | Level2)
 {
-    auto avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    sptr<WindowNode> node = new WindowNode();
     sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowType(WindowType::WINDOW_TYPE_DOCK_SLICE);
-    node->SetWindowProperty(property);
+    property->SetWindowId(110u);
+    property->SetWindowName("test");
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    property->SetWindowRect(screenRect);
+    sptr<WindowListener> windowListener = new WindowListener();
+    sptr<WindowNode> appWindow = new WindowNode(property, windowListener, nullptr);
+    uint32_t focusedWindow = appWindow->GetWindowId();
+    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(focusedWindow);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    avoidAreaController->UpdateAvoidAreaListener(appWindow, true);
 
-    ASSERT_EQ(false, avoidAreaController->IsAvoidAreaNode(node));
+    // add status bar
+    avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    auto avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+
+    // add navigation bar
+    avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT,
+        EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+
+    // remove status bar
+    avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
+    avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    avoidArea = windowListener->cutoutAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->cutoutAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+
+    // remove navigation bar
+    avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
+    avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
 }
 
 /**
- * @tc.name: IsAvoidAreaNode04
- * @tc.desc: Create a Dock_Slice Window. Test IsAvoidAreaNode
+ * @tc.name: SystemBarAvoidArea01
+ * @tc.desc: Get avoid areas with listener, TYPE_SYSTEM.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, IsAvoidAreaNode04, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea01, Function | SmallTest | Level2)
 {
-    auto avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    ASSERT_EQ(false, avoidAreaController->IsAvoidAreaNode(nullptr));
-}
-
-/**
- * @tc.name: AddAvoidAreaNode01
- * @tc.desc: Add a new avoid area Node
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, AddAvoidAreaNode01, Function | SmallTest | Level2)
-{
-    sptr<WindowNode> node = new WindowNode();
-
     sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(100u);
-    property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node->SetWindowProperty(property);
-    node->SetWindowRect(topAvoidRect_);
+    property->SetWindowId(110u);
+    property->SetWindowName("test");
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    property->SetWindowRect(screenRect);
+    sptr<WindowListener> windowListener = new WindowListener();
+    sptr<WindowNode> appWindow = new WindowNode(property, windowListener, nullptr);
+    uint32_t focusedWindow = appWindow->GetWindowId();
+    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(focusedWindow);
+    avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    avoidAreaController->UpdateAvoidAreaListener(appWindow, true);
 
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-    ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_ADD));
+    // update status bar window Rect
+    Rect statusbarWindowNodeRect = statusbarWindowNode->GetWindowRect();
+    statusbarWindowNode->SetWindowRect(EMPTY_RECT);
+    avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_UPDATE,
+        [](sptr<WindowNode> windowNode) { return true; });
+    auto avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+
+    // update navigation bar window Rect
+    Rect navigationBarWindowNodeRect = navigationBarWindowNode->GetWindowRect();
+    navigationBarWindowNode->SetWindowRect(EMPTY_RECT);
+    avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_UPDATE,
+        [](sptr<WindowNode> windowNode) { return true; });
+    avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+
+    // restore status bar window Rect
+    statusbarWindowNode->SetWindowRect(statusbarWindowNodeRect);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_UPDATE, nullptr);
+    avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+
+    // restore navigation bar window Rect
+    navigationBarWindowNode->SetWindowRect(navigationBarWindowNodeRect);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_UPDATE, nullptr);
+    avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT,
+        EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+
+    // remove status bar
+    avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
+    avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+
+    // remove navigation bar
+    avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
+    avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
+    windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
 }
 
 /**
- * @tc.name: AddAvoidAreaNode02
- * @tc.desc: Add a exist avoid area Node
+ * @tc.name: KeyboardAvoidArea01
+ * @tc.desc: Get avoid areas with TYPE_KEYBOARD.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, AddAvoidAreaNode02, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea01, Function | SmallTest | Level2)
 {
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    sptr<WindowNode> node1 = new WindowNode();
-    sptr<WindowProperty> property1 = new WindowProperty();
-    property1->SetWindowId(100u);
-    property1->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    property1->SetWindowRect(topAvoidRect_);
-    node1->SetWindowProperty(property1);
-    node1->SetWindowRect(topAvoidRect_);
-    ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node1, AvoidControlType::AVOID_NODE_ADD));
-
-    sptr<WindowNode> node2 = new WindowNode();
-    sptr<WindowProperty> property2 = new WindowProperty();
-    property2->SetWindowId(100u);
-    property2->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node2->SetWindowProperty(property2);
-    node2->SetWindowRect(topAvoidRect_);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
-        avoidAreaController->AvoidControl(node2, AvoidControlType::AVOID_NODE_ADD));
-}
-
-/**
- * @tc.name: AddAvoidAreaNode03
- * @tc.desc: Add two new avoid area Nodes
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, AddAvoidAreaNode03, Function | SmallTest | Level2)
-{
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    sptr<WindowNode> node1 = new WindowNode();
-    sptr<WindowProperty> property1 = new WindowProperty();
-    property1->SetWindowId(100u);
-    property1->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node1->SetWindowProperty(property1);
-    node1->SetWindowRect(topAvoidRect_);
-    ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node1, AvoidControlType::AVOID_NODE_ADD));
-
-    sptr<WindowNode> node2 = new WindowNode();
-    sptr<WindowProperty> property2 = new WindowProperty();
-    property2->SetWindowId(101u);
-    property2->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node2->SetWindowProperty(property2);
-    node2->SetWindowRect(leftAvoidRect_);
-    ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node2, AvoidControlType::AVOID_NODE_ADD));
-}
-
-/**
- * @tc.name: AddAvoidAreaNode04
- * @tc.desc: Add nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, AddAvoidAreaNode04, Function | SmallTest | Level2)
-{
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
-        avoidAreaController->AvoidControl(nullptr, AvoidControlType::AVOID_NODE_ADD));
-}
-
-/**
- * @tc.name: RemoveAvoidAreaNode01
- * @tc.desc: Add a new avoid area. And Remove this.
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, RemoveAvoidAreaNode01, Function | SmallTest | Level2)
-{
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    sptr<WindowNode> node1 = new WindowNode();
-    sptr<WindowProperty> property1 = new WindowProperty();
-    property1->SetWindowId(100u);
-    property1->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node1->SetWindowProperty(property1);
-    node1->SetWindowRect(leftAvoidRect_);
-    ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node1, AvoidControlType::AVOID_NODE_ADD));
-
-    ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node1, AvoidControlType::AVOID_NODE_REMOVE));
-}
-
-/**
- * @tc.name: RemoveAvoidAreaNode02
- * @tc.desc: Remove a unexist avoid area.
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, RemoveAvoidAreaNode02, Function | SmallTest | Level2)
-{
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    sptr<WindowNode> node = new WindowNode();
     sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(100u);
-    property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node->SetWindowRect(topAvoidRect_);
-    node->SetWindowProperty(property);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
-        avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_REMOVE));
+    property->SetWindowId(110u);
+    property->SetWindowName("test");
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    property->SetWindowRect(screenRect);
+    sptr<WindowListener> listener = new WindowListener();
+    sptr<WindowNode> appWindow = new WindowNode(property, listener, nullptr);
+    uint32_t focusedWindow = 0u;
+    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(focusedWindow);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_ADD, nullptr);
+
+    uint32_t start = static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN);
+    uint32_t end = static_cast<uint32_t>(WindowMode::WINDOW_MODE_FLOATING);
+    for (uint32_t i = start; i <= end; i++) {
+        focusedWindow = 0u;
+        appWindow->SetWindowMode(static_cast<WindowMode>(i));
+        avoidAreaController->ProcessWindowChange(keyboardWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
+        auto avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_KEYBOARD);
+        CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+
+        keyboardWindowNode->SetCallingWindow(appWindow->GetWindowId());
+        avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_KEYBOARD);
+        CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, keyboardWindowNode->GetWindowRect());
+
+        keyboardWindowNode->SetCallingWindow(0);
+        focusedWindow = appWindow->GetWindowId();
+        avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_KEYBOARD);
+        CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, keyboardWindowNode->GetWindowRect());
+
+        avoidAreaController->ProcessWindowChange(keyboardWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
+        avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_KEYBOARD);
+        CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    }
 }
 
 /**
- * @tc.name: RemoveAvoidAreaNode03
- * @tc.desc: Remove nullptr
+ * @tc.name: KeyboardAvoidArea02
+ * @tc.desc: Get avoid areas with listener, TYPE_KEYBOARD.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, RemoveAvoidAreaNode03, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea02, Function | SmallTest | Level2)
 {
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
-        avoidAreaController->AvoidControl(nullptr, AvoidControlType::AVOID_NODE_REMOVE));
-}
-
-/**
- * @tc.name: UpdateAvoidAreaNode01
- * @tc.desc: Add a new avoid area node and update this
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, UpdateAvoidAreaNode01, Function | SmallTest | Level2)
-{
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    sptr<WindowNode> node = new WindowNode();
     sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(100u);
-    property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node->SetWindowProperty(property);
-    node->SetWindowRect(topAvoidRect_);
-    ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_ADD));
-
-    property->SetWindowRect(leftAvoidRect_);
-    ASSERT_EQ(WMError::WM_OK, avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_UPDATE));
-}
-
-/**
- * @tc.name: UpdateAvoidAreaNode02
- * @tc.desc: update a unexist avoid area node
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, UpdateAvoidAreaNode02, Function | SmallTest | Level2)
-{
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-
-    sptr<WindowNode> node = new WindowNode();
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(100u);
-    property->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    node->SetWindowProperty(property);
-    node->SetWindowRect(topAvoidRect_);
-
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
-        avoidAreaController->AvoidControl(node, AvoidControlType::AVOID_NODE_UPDATE));
-}
-
-/**
- * @tc.name: UpdateAvoidAreaNode03
- * @tc.desc: Update nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, UpdateAvoidAreaNode03, Function | SmallTest | Level2)
-{
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
-        avoidAreaController->AvoidControl(nullptr, AvoidControlType::AVOID_NODE_UPDATE));
-}
-
-/**
- * @tc.name: GetAvoidAreaByType01
- * @tc.desc: Search a unexist AvoidAreaType. And GetAvoidAreaByType
- * @tc.type: FUNC
- */
-HWTEST_F(AvoidAreaControllerTest, GetAvoidAreaByType01, Function | SmallTest | Level2)
-{
-    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(0, nullptr);
-    std::vector<Rect> avoidArea = avoidAreaController->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, displayId_);
-
-    ASSERT_EQ(4u, static_cast<uint32_t>(avoidArea.size()));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[LEFT]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[TOP]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[RIGHT]));
-    ASSERT_TRUE(RectEqualToRect(EMPTY_RECT, avoidArea[BOTTOM]));
+    property->SetWindowId(110u);
+    property->SetWindowName("test");
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    property->SetWindowRect(screenRect);
+    sptr<WindowListener> listener = new WindowListener();
+    sptr<WindowNode> appWindow = new WindowNode(property, listener, nullptr);
+    uint32_t focusedWindow = appWindow->GetWindowId();
+    sptr<AvoidAreaController> avoidAreaController = new AvoidAreaController(focusedWindow);
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_ADD, nullptr);
+    avoidAreaController->UpdateAvoidAreaListener(appWindow, true);
+    uint32_t start = static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN);
+    uint32_t end = static_cast<uint32_t>(WindowMode::WINDOW_MODE_FLOATING);
+    for (uint32_t i = start; i <= end; i++) {
+        avoidAreaController->ProcessWindowChange(keyboardWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
+        auto avoidArea = listener->keyboardAvoidAreaFuture_.GetResult(TIME_OUT);
+        listener->keyboardAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+        CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, keyboardWindowNode->GetWindowRect());
+        avoidAreaController->ProcessWindowChange(keyboardWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
+        avoidArea = listener->keyboardAvoidAreaFuture_.GetResult(TIME_OUT);
+        listener->keyboardAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
+        CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    }
+    avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
 }
 }
 } // namespace Rosen
