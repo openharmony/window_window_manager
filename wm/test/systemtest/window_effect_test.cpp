@@ -21,14 +21,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-using utils = WindowTestUtils;
+using Utils = WindowTestUtils;
 class WindowEffectTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    utils::TestWindowInfo fullScreenAppInfo_;
+    Utils::TestWindowInfo fullScreenAppInfo_;
 };
 
 void WindowEffectTest::SetUpTestCase()
@@ -43,7 +43,7 @@ void WindowEffectTest::SetUp()
 {
     fullScreenAppInfo_ = {
             .name = "FullWindow",
-            .rect = utils::customAppRect_,
+            .rect = Utils::customAppRect_,
             .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
             .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
             .needAvoid = false,
@@ -64,7 +64,7 @@ namespace {
  */
 HWTEST_F(WindowEffectTest, WindowEffect01, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppInfo_);
 
     ASSERT_EQ(WMError::WM_OK, window->SetWindowBackgroundBlur(WindowBlurLevel::WINDOW_BLUR_LOW));
     ASSERT_EQ(WindowBlurLevel::WINDOW_BLUR_LOW, window->GetWindowBackgroundBlur());
@@ -78,7 +78,7 @@ HWTEST_F(WindowEffectTest, WindowEffect01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowEffectTest, WindowEffect02, Function | MediumTest | Level3)
 {
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenAppInfo_);
+    const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppInfo_);
 
     ASSERT_EQ(WMError::WM_OK, window->SetAlpha(1.0f));
     ASSERT_EQ(1.0f, window->GetAlpha());

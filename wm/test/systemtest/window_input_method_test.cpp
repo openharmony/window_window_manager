@@ -21,15 +21,15 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-using utils = WindowTestUtils;
+using Utils = WindowTestUtils;
 class WindowInputMethodTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    utils::TestWindowInfo inputMethodWindowInfo_;
-    utils::TestWindowInfo keyGuardWindowInfo_;
+    Utils::TestWindowInfo inputMethodWindowInfo_;
+    Utils::TestWindowInfo keyGuardWindowInfo_;
 };
 
 void WindowInputMethodTest::SetUpTestCase()
@@ -37,7 +37,7 @@ void WindowInputMethodTest::SetUpTestCase()
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
-    utils::InitByDisplayRect(displayRect);
+    Utils::InitByDisplayRect(displayRect);
 }
 
 void WindowInputMethodTest::TearDownTestCase()
@@ -48,7 +48,7 @@ void WindowInputMethodTest::SetUp()
 {
     inputMethodWindowInfo_ = {
         .name = "",
-        .rect = utils::customAppRect_,
+        .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
@@ -57,7 +57,7 @@ void WindowInputMethodTest::SetUp()
     };
     keyGuardWindowInfo_ = {
         .name = "",
-        .rect = utils::customAppRect_,
+        .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_KEYGUARD,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = false,
@@ -79,7 +79,7 @@ namespace {
 HWTEST_F(WindowInputMethodTest, InputMethodWindow01, Function | MediumTest | Level3)
 {
     inputMethodWindowInfo_.name = "input_method.1";
-    const sptr<Window>& window = utils::CreateTestWindow(inputMethodWindowInfo_);
+    const sptr<Window>& window = Utils::CreateTestWindow(inputMethodWindowInfo_);
     ASSERT_EQ(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, window->GetType());
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_EQ(WMError::WM_OK, window->Hide());
@@ -93,7 +93,7 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow01, Function | MediumTest | Lev
 HWTEST_F(WindowInputMethodTest, InputMethodWindow02, Function | MediumTest | Level3)
 {
     keyGuardWindowInfo_.name  = "keyGuard.1";
-    const sptr<Window>& window = utils::CreateTestWindow(keyGuardWindowInfo_);
+    const sptr<Window>& window = Utils::CreateTestWindow(keyGuardWindowInfo_);
     ASSERT_EQ(WindowType::WINDOW_TYPE_KEYGUARD, window->GetType());
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_EQ(WMError::WM_OK, window->Hide());
@@ -108,12 +108,12 @@ HWTEST_F(WindowInputMethodTest, InputMethodWindow03, Function | MediumTest | Lev
 {
     inputMethodWindowInfo_.name = "input_method.2";
     keyGuardWindowInfo_.name  = "keyGuard.2";
-    const sptr<Window>& inputMethodWindow = utils::CreateTestWindow(inputMethodWindowInfo_);
-    const sptr<Window>& keyGuardWindow = utils::CreateTestWindow(keyGuardWindowInfo_);
+    const sptr<Window>& inputMethodWindow = Utils::CreateTestWindow(inputMethodWindowInfo_);
+    const sptr<Window>& keyGuardWindow = Utils::CreateTestWindow(keyGuardWindowInfo_);
     keyGuardWindow->Show();
     inputMethodWindow->Show();
-    ASSERT_TRUE(utils::RectEqualTo(keyGuardWindow, utils::displayRect_));
-    ASSERT_TRUE(utils::RectEqualTo(inputMethodWindow, utils::customAppRect_));
+    ASSERT_TRUE(Utils::RectEqualTo(keyGuardWindow, Utils::displayRect_));
+    ASSERT_TRUE(Utils::RectEqualTo(inputMethodWindow, Utils::customAppRect_));
 }
 } // namespace
 } // namespace Rosen
