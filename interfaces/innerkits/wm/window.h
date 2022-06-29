@@ -122,7 +122,7 @@ public:
 
 class ITouchOutsideListener : virtual public RefBase {
 public:
-    virtual void OnTouchOutside() = 0;
+    virtual void OnTouchOutside() const = 0;
 };
 
 class Window : public RefBase {

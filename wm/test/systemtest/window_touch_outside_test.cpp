@@ -31,11 +31,11 @@ const int WAIT_CALLBACK_US = 10000;  // 10000 us
 
 class WindowTouchOutsideTestListener : public ITouchOutsideListener {
 public:
-    void OnTouchOutside() override
+    void OnTouchOutside() const override
     {
         isTouchOutside_ = true;
     }
-    bool isTouchOutside_ { false };
+    mutable bool isTouchOutside_ { false };
 };
 
 class WindowTouchOutsideTest : public testing::Test {
@@ -106,11 +106,11 @@ void WindowTouchOutsideTest::TearDownTestCase()
 
 namespace {
 /**
- * @tc.name: onTouchIutside
+ * @tc.name: onTouchInside
  * @tc.desc: can't not receive a inside touch event
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTouchOutsideTest, onTouchIutside, Function | MediumTest | Level3)
+HWTEST_F(WindowTouchOutsideTest, onTouchInside, Function | MediumTest | Level3)
 {
     const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterTouchOutsideListener(windowlistener1_);
