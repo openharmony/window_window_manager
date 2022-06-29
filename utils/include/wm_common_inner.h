@@ -84,6 +84,7 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_SET_BRIGHTNESS = 1 << 10,
     ACTION_UPDATE_MODE_SUPPORT_INFO = 1 << 11,
     ACTION_UPDATE_TOUCH_HOT_AREA = 1 << 12,
+    ACTION_UPDATE_TRANSFORM_PROPERTY = 1 << 13,
 };
 
 struct ModeChangeHotZonesConfig {

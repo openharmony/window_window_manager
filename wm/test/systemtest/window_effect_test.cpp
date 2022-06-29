@@ -80,7 +80,7 @@ HWTEST_F(WindowEffectTest, WindowEffect02, Function | MediumTest | Level3)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppInfo_);
 
-    ASSERT_EQ(WMError::WM_OK, window->SetAlpha(1.0f));
+    window->SetAlpha(1.0f);
     ASSERT_EQ(1.0f, window->GetAlpha());
 
     window->Destroy();
