@@ -127,17 +127,19 @@ public:
         return !(r1XEnd < r2.posX_ || r1.posX_ > r2XEnd || r1YEnd < r2.posY_ || r1.posY_ > r2YEnd);
     }
 
-    static inline Rect GetOverlap(const Rect& rect1, const Rect& rect2, const int offsetX, const int offsetY)
+    static Rect GetOverlap(const Rect& rect1, const Rect& rect2, const int offsetX, const int offsetY)
     {
-        const static Rect noOverlapRect = { 0, 0, 0, 0 };
         int32_t x_begin = std::max(rect1.posX_, rect2.posX_);
-        int32_t x_end = std::min(rect1.posX_ + rect1.width_ - 1, rect2.posX_ + rect2.width_ - 1);
+        int32_t x_end = std::min(rect1.posX_ + static_cast<int32_t>(rect1.width_),
+            rect2.posX_ + static_cast<int32_t>(rect2.width_));
         int32_t y_begin = std::max(rect1.posY_, rect2.posY_);
-        int32_t y_end = std::min(rect1.posY_ + rect1.height_ - 1, rect2.posY_ + rect2.height_ - 1);
-        if (y_begin > y_end || x_begin > x_end) {
-            return noOverlapRect;
+        int32_t y_end = std::min(rect1.posY_ + static_cast<int32_t>(rect1.height_),
+            rect2.posY_ + static_cast<int32_t>(rect2.height_));
+        if (y_begin >= y_end || x_begin >= x_end) {
+            return { 0, 0, 0, 0 };
         }
-        return { x_begin - offsetX, y_begin - offsetY, x_end - x_begin + 1, y_end - y_begin + 1 };
+        return { x_begin - offsetX, y_begin - offsetY,
+            static_cast<uint32_t>(x_end - x_begin), static_cast<uint32_t>(y_end - y_begin) };
     }
 
     static bool IsWindowModeSupported(uint32_t modeSupportInfo, WindowMode mode)

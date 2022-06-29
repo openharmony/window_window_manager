@@ -121,10 +121,8 @@ void AvoidAreaController::AddOrRemoveKeyboard(const sptr<WindowNode>& keyboardNo
     }
     if (lastKeyboardAreaUpdatedWindow != nullptr && lastKeyboardAreaUpdatedWindow != callingWindow) {
         const WindowMode windowMode = lastKeyboardAreaUpdatedWindow->GetWindowMode();
-        if (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
-            windowMode == WindowMode::WINDOW_MODE_FLOATING) {
+        if (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY || windowMode == WindowMode::WINDOW_MODE_FLOATING) {
             auto avoidArea = GetAvoidAreaByType(lastKeyboardAreaUpdatedWindow, AvoidAreaType::TYPE_KEYBOARD);
             UpdateAvoidAreaIfNeed(avoidArea, lastKeyboardAreaUpdatedWindow, AvoidAreaType::TYPE_KEYBOARD);
         }
@@ -171,7 +169,7 @@ void AvoidAreaController::UpdateOverlayWindowIfNeed(const sptr<WindowNode>& node
         }
         uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
         uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
-        for (int type = start; type <= end; type++) {
+        for (uint32_t type = start; type <= end; type++) {
             AvoidArea systemAvoidArea = GetAvoidAreaByType(node, static_cast<AvoidAreaType>(type));
             bool res = UpdateAvoidAreaIfNeed(systemAvoidArea, node, static_cast<AvoidAreaType>(type));
             if (res && type == static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD)) {
@@ -292,6 +290,7 @@ AvoidArea AvoidAreaController::GetAvoidAreaByType(const sptr<WindowNode>& node, 
         case AvoidAreaType::TYPE_CUTOUT : {
             auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
             if (numbersConfig.count("cutoutArea") == 0) {
+                WLOGFE("there is no cutout");
                 return {};
             }
             std::vector<int> cutoutArea = numbersConfig["cutoutArea"];
@@ -335,10 +334,6 @@ AvoidArea AvoidAreaController::GetAvoidAreaSystemType(const sptr<WindowNode>& no
 
 AvoidArea AvoidAreaController::GetAvoidAreaKeyboardType(const sptr<WindowNode>& node) const
 {
-    if (focusedWindow_ != node->GetWindowId()) {
-        WLOGFI("focusedWindow: %{public}u is not windowId: %{public}u", focusedWindow_, node->GetWindowId());
-        return {};
-    }
     for (auto& iter : overlayWindowMap_) {
         if (iter.second != nullptr &&
             iter.second->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
@@ -348,7 +343,7 @@ AvoidArea AvoidAreaController::GetAvoidAreaKeyboardType(const sptr<WindowNode>& 
                        node->GetWindowId(), focusedWindow_, callingWindowId);
                 continue;
             }
-            Rect avoidAreaRect;
+            Rect avoidAreaRect { 0, 0, 0, 0 };
             AvoidPosType avoidPosType = CalculateOverlayRect(node, iter.second, avoidAreaRect);
             AvoidArea avoidArea;
             SetAvoidAreaRect(avoidArea, avoidAreaRect, avoidPosType);
