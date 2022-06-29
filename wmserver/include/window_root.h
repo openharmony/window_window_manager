@@ -93,10 +93,10 @@ public:
     uint32_t GetWindowIdByObject(const sptr<IRemoteObject>& remoteObject);
     sptr<WindowNode> GetWindowForDumpAceHelpInfo() const;
     void DestroyLeakStartingWindow();
-    void SetFloatingWindowLimitsConfig(const FloatingWindowLimitsConfig& floatingWindowLimitsConfig);
     void SetSplitRatios(const std::vector<float>& splitRatioNumbers);
     void SetExitSplitRatios(const std::vector<float>& exitSplitRatios);
     void MinimizeTargetWindows(std::vector<uint32_t>& windowIds);
+    WindowLayoutMode GetCurrentLayoutMode(DisplayId displayId);
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
@@ -134,7 +134,6 @@ private:
         this, std::placeholders::_1));
     Callback callback_;
     uint32_t maxAppWindowNumber_ = 100;
-    FloatingWindowLimitsConfig floatingWindowLimitsConfig_;
     SplitRatioConfig splitRatioConfig_ = {0.1, 0.9, {}};
 };
 }

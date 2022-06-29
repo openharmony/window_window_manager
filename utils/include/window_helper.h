@@ -332,6 +332,30 @@ public:
         return isOk;
     }
 
+    static bool IsRectSatisfiedWithSizeLimits(const Rect& rect, const WindowSizeLimits& sizeLimits)
+    {
+        if (rect.height_ == 0) {
+            return false;
+        }
+        auto curRatio = static_cast<float>(rect.width_) / static_cast<float>(rect.height_);
+        if (sizeLimits.minWidth_ <= rect.width_ && rect.width_ <= sizeLimits.maxWidth_ &&
+            sizeLimits.minHeight_ <= rect.height_ && rect.height_ <= sizeLimits.maxHeight_ &&
+            sizeLimits.minRatio_ <= curRatio && curRatio <= sizeLimits.maxRatio_) {
+            return true;
+        }
+        return false;
+    }
+
+    static bool IsOnlySupportSplitAndShowWhenLocked(bool isShowWhenLocked, uint32_t modeSupportInfo)
+    {
+        uint32_t splitModeInfo = (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                                  WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+        if (isShowWhenLocked && (splitModeInfo == modeSupportInfo)) {
+            return true;
+        }
+        return false;
+    }
+
 private:
     WindowHelper() = default;
     ~WindowHelper() = default;

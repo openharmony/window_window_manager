@@ -14,6 +14,8 @@
  */
 
 #include "window_layout_policy_cascade.h"
+
+#include "minimize_app.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
@@ -179,6 +181,10 @@ void WindowLayoutPolicyCascade::AddWindowNode(const sptr<WindowNode>& node)
         WLOGFE("window property is nullptr.");
         return;
     }
+
+    // update window size limits when add window
+    UpdateWindowSizeLimits(node);
+
     if (WindowHelper::IsEmptyRect(property->GetRequestRect())) {
         SetCascadeRect(node);
     }
@@ -466,6 +472,12 @@ void WindowLayoutPolicyCascade::Reorder()
                 WLOGFI("get node failed or not app window.");
                 continue;
             }
+            // if window don't support floating mode, or default rect of cascade is not satisfied with limits
+            if (!WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) ||
+                !WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowSizeLimits())) {
+                MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_CASCADE);
+                continue;
+            }
             if (isFirstReorderedWindow) {
                 isFirstReorderedWindow = false;
             } else {
@@ -473,13 +485,12 @@ void WindowLayoutPolicyCascade::Reorder()
             }
             node->SetRequestRect(rect);
             node->SetDecoStatus(true);
-            if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
-                WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
-                    node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-                    if (node->GetWindowToken()) {
-                        node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-                    }
+            if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+                node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+                if (node->GetWindowToken()) {
+                    node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
                 }
+            }
             WLOGFI("Cascade reorder Id: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
                 node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         }
