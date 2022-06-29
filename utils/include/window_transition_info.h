@@ -52,6 +52,8 @@ public:
     void SetWindowType(WindowType windowType);
     WindowType GetWindowType();
     void SetShowFlagWhenLocked(bool isShow);
+    void SetWindowSupportModes(const std::vector<uint32_t> supportModes);
+    std::vector<uint32_t> GetWindowSupportModes();
     bool GetShowFlagWhenLocked();
     void SetTransitionReason(TransitionReason reason);
     TransitionReason GetTransitionReason();
@@ -68,6 +70,7 @@ private:
     bool isShowWhenLocked_ = false;
     bool isRecent_ = false;
     TransitionReason reason_ = TransitionReason::ABILITY_TRANSITION;
+    std::vector<uint32_t> supportWindowModes_;
 };
 } // Rosen
 } // OHOS

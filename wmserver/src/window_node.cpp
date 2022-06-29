@@ -196,6 +196,16 @@ void WindowNode::SetTouchHotAreas(const std::vector<Rect>& rects)
     touchHotAreas_ = rects;
 }
 
+void WindowNode::SetWindowSizeLimits(const WindowSizeLimits& sizeLimits)
+{
+    property_->SetSizeLimits(sizeLimits);
+}
+
+WindowSizeLimits WindowNode::GetWindowSizeLimits() const
+{
+    return property_->GetSizeLimits();
+}
+
 DragType WindowNode::GetDragType() const
 {
     return property_->GetDragType();

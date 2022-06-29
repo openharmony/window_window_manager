@@ -118,7 +118,6 @@ private:
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
     void ConfigureWindowManagerService();
-    void ConfigFloatWindowLimits();
 
     static inline SingletonDelegator<WindowManagerService> delegator;
     std::map<uint32_t, uint32_t> accessTokenIdMaps_;

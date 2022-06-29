@@ -73,14 +73,12 @@ bool WindowManagerConfig::LoadConfigXml()
             continue;
         }
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("maxAppWindowNumber")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("modeChangeHotZones")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("floatingWindowLimitSize"))) {
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("modeChangeHotZones"))) {
             ReadIntNumbersConfigInfo(curNodePtr);
             continue;
         }
 
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("floatingWindowLimitRatio")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("splitRatios")) ||
+        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("splitRatios")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("exitSplitRatios"))) {
             ReadFloatNumbersConfigInfo(curNodePtr);
             continue;

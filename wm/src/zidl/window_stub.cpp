@@ -45,6 +45,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             UpdateWindowMode(mode);
             break;
         }
+        case WindowMessage::TRANS_ID_UPDATE_MODE_SUPPORT_INFO: {
+            uint32_t modeSupportInfo = data.ReadUint32();
+            UpdateWindowModeSupportInfo(modeSupportInfo);
+            break;
+        }
         case WindowMessage::TRANS_ID_UPDATE_FOCUS_STATUS: {
             bool focused = data.ReadBool();
             UpdateFocusStatus(focused);

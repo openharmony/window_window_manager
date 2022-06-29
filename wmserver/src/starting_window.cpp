@@ -32,12 +32,28 @@ SurfaceDraw StartingWindow::surfaceDraw_;
 static bool g_hasInit = false;
 std::recursive_mutex StartingWindow::mutex_;
 
-sptr<WindowNode> StartingWindow::CreateWindowNode(sptr<WindowTransitionInfo> info, uint32_t winId)
+sptr<WindowNode> StartingWindow::CreateWindowNode(sptr<WindowTransitionInfo> info,
+    uint32_t winId, WindowLayoutMode layoutMode)
 {
     sptr<WindowProperty> property = new(std::nothrow) WindowProperty();
-    if (property == nullptr) {
+    if (property == nullptr || info == nullptr) {
         return nullptr;
     }
+
+    uint32_t modeSupportInfo = 0;
+    for (auto mode : info->GetWindowSupportModes()) {
+        modeSupportInfo |= mode;
+    }
+
+    // if mode isn't be supported or don't support floating mode in tile mode, create starting window failed
+    if ((!WindowHelper::IsWindowModeSupported(modeSupportInfo, info->GetWindowMode())) ||
+        ((!WindowHelper::IsWindowModeSupported(modeSupportInfo, WindowMode::WINDOW_MODE_FLOATING)) &&
+         (layoutMode == WindowLayoutMode::TILE)) ||
+        (WindowHelper::IsOnlySupportSplitAndShowWhenLocked(info->GetShowFlagWhenLocked(), modeSupportInfo))) {
+        WLOGFI("window mode is not be supported or not support floating mode in tile, cancel starting window");
+        return nullptr;
+    }
+
     property->SetRequestRect(info->GetWindowRect());
     property->SetWindowMode(info->GetWindowMode());
     property->SetDisplayId(info->GetDisplayId());
@@ -56,7 +72,6 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(sptr<WindowTransitionInfo> inf
     if (CreateLeashAndStartingSurfaceNode(node) != WMError::WM_OK) {
         return nullptr;
     }
-
     return node;
 }
 
