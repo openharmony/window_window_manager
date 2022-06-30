@@ -29,7 +29,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AvoidAreaControllerTest"};
 
-    const Rect EMPTY_RECT = {0, 0, 0, 0};
+    const Rect EMPTY_RECT = { 0, 0, 0, 0 };
     const float BARRATIO = 0.3;
     const long TIME_OUT = 1000;
     const AvoidArea EMPTY_AVOID_AREA = {};
@@ -39,7 +39,7 @@ sptr<WindowNode> AvoidAreaControllerTest::statusbarWindowNode = nullptr;
 sptr<WindowNode> AvoidAreaControllerTest::navigationBarWindowNode = nullptr;
 sptr<WindowNode> AvoidAreaControllerTest::keyboardWindowNode = nullptr;
 Rect AvoidAreaControllerTest::screenRect;
-Rect AvoidAreaControllerTest::cut_out_rect = { 10, 10, 100, 20 };
+Rect AvoidAreaControllerTest::cut_out_rect = { 0, 0, 0, 0 };
 
 class WindowListener : public IWindow {
 public:
