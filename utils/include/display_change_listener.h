@@ -35,7 +35,7 @@ class IDisplayChangeListener : public RefBase {
 public:
     virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> info,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) = 0;
-    virtual void OnGetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation) = 0;
+    virtual void OnGetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation) = 0;
 };
 }
 }

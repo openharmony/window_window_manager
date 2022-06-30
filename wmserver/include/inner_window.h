@@ -16,83 +16,63 @@
 #ifndef OHOS_ROSEN_INNER_WINDOW_H
 #define OHOS_ROSEN_INNER_WINDOW_H
 
-#include <unordered_map>
-#include <memory>
 #include "window.h"
-#include "window_manager_hilog.h"
+#include "wm_common_inner.h"
 #include "wm_single_instance.h"
 
 namespace OHOS {
 namespace Rosen {
-enum class InnerWindowState : uint32_t {
-    INNER_WINDOW_STATE_NLL,
-    INNER_WINDOW_STATE_CRATED,
-    INNER_WINDOW_STATE_DESTROYED
-};
 class IInnerWindow : virtual public RefBase {
 public:
-    virtual void Create() = 0;
+    virtual void Create(std::string name, DisplayId displyId, Rect rect, WindowMode mode) = 0;
     virtual void Destroy() = 0;
-    InnerWindowState GetState() {
-        return state_;
-    };
-protected:
-    InnerWindowState state_ = InnerWindowState::INNER_WINDOW_STATE_NLL;
 };
 
-class PlaceHolderWindow : public IInnerWindow, public IWindowLifeCycle, public ITouchOutsideListener,
-    public IInputEventListener {
+class PlaceholderWindowListener : public IWindowLifeCycle, public ITouchOutsideListener, public IInputEventListener {
 public:
-    PlaceHolderWindow(std::string name, DisplayId displyId, const Rect& rect, WindowMode mode) : name_(name),
-        displayId_(displyId), rect_(rect), mode_(mode) {};
-    ~PlaceHolderWindow();
-    void Create();
-    void Destroy();
-
-private:
+    // touch outside listener
     virtual void OnTouchOutside();
+    // input event listener
     virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent);
     virtual void OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    // lifecycle listener
+    virtual void AfterUnfocused();
+    // lifecycle do nothing
     virtual void AfterForeground() {};
     virtual void AfterBackground() {};
     virtual void AfterFocused() {};
     virtual void AfterInactive() {};
-    virtual void AfterUnfocused();
-    void UnRegitsterWindowListener();
-    void RegitsterWindowListener();
+};
+
+class PlaceHolderWindow : public IInnerWindow {
+WM_DECLARE_SINGLE_INSTANCE(PlaceHolderWindow);
+public:
+    virtual void Create(std::string name, DisplayId displyId, Rect rect, WindowMode mode);
+    virtual void Destroy();
 
 private:
-    std::string name_;
-    DisplayId displayId_;
-    Rect rect_;
-    WindowMode mode_;
+    void RegitsterWindowListener();
+    void UnRegitsterWindowListener();
+
+private:
     sptr<OHOS::Rosen::Window> window_;
-    std::string contentImgPath_ = "/etc/window/resources/bg_place_holder.png";
+    sptr<PlaceholderWindowListener> listener_;
 };
 
 class DividerWindow : public IInnerWindow {
+WM_DECLARE_SINGLE_INSTANCE_BASE(DividerWindow);
 public:
-    DividerWindow(std::string name, DisplayId displyId, const Rect& rect) : name_(name),
-        displayId_(displyId), rect_(rect) {};
+    virtual void Create(std::string name, DisplayId displayId, const Rect rect, WindowMode mode);
+    virtual void Destroy();
+
+protected:
+    DividerWindow() = default;
     ~DividerWindow();
-    void Create();
-    void Destroy();
 
 private:
-    std::string name_;
     DisplayId displayId_;
-    Rect rect_;
-    int32_t dialogId_ = -1;
-
-};
-
-class InnerWindowFactory : public RefBase {
-WM_DECLARE_SINGLE_INSTANCE(InnerWindowFactory);
-public:
-    WMError CreateInnerWindow(std::string name, DisplayId displyId, Rect rect, WindowType type, WindowMode mode);
-    WMError DestroyInnerWindow(DisplayId displyId, WindowType type);
-private:
-    std::unordered_map<WindowType, std::unique_ptr<IInnerWindow>> innerWindowMap_;
+    std::string params_;
+    int32_t dialogId_ = IVALID_DIALOG_WINDOW_ID;
 };
 } // namespace Rosen
 } // namespace OHOS

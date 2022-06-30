@@ -117,7 +117,6 @@ sptr<WindowNodeContainer> WindowRoot::CreateWindowNodeContainer(sptr<DisplayInfo
         WLOGFE("create container failed, displayId :%{public}" PRIu64 "", displayId);
         return nullptr;
     }
-    container->GetLayoutPolicy()->SetFloatingWindowLimitsConfig(floatingWindowLimitsConfig_);
     container->GetLayoutPolicy()->SetSplitRatioConfig(splitRatioConfig_);
     return container;
 }
@@ -395,12 +394,7 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
             WindowManagerService::GetInstance().HandleAddWindow(property);
             return true;
         };
-        WMError tmpRes = WMError::WM_OK;
-        if (isAllAppWindowsEmpty) {
-            tmpRes = container->ToggleShownStateForAllAppWindows(restoreFunc, true);
-        } else {
-            tmpRes = container->ToggleShownStateForAllAppWindows(restoreFunc, false);
-        }
+        WMError tmpRes = tmpRes = container->ToggleShownStateForAllAppWindows(restoreFunc, isAllAppWindowsEmpty);
         res = (res == WMError::WM_OK) ? tmpRes : res;
     });
     return res;
@@ -486,7 +480,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
         return res;
     }
     // limit number of main window
-    int mainWindowNumber = container->GetWindowCountByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    uint32_t mainWindowNumber = container->GetWindowCountByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     if (mainWindowNumber >= maxAppWindowNumber_ && node->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         container->MinimizeOldestAppWindow();
     }
@@ -1315,9 +1309,14 @@ WMError WindowRoot::GetModeChangeHotZones(DisplayId displayId,
     return WMError::WM_OK;
 }
 
-void WindowRoot::SetFloatingWindowLimitsConfig(const FloatingWindowLimitsConfig& floatingWindowLimitsConfig)
+WindowLayoutMode WindowRoot::GetCurrentLayoutMode(DisplayId displayId)
 {
-    floatingWindowLimitsConfig_ = floatingWindowLimitsConfig;
+    auto container = GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("GetCurrentLayoutMode failed, window container could not be found");
+        return WindowLayoutMode::BASE;
+    }
+    return container->GetCurrentLayoutMode();
 }
 } // namespace Rosen
 } // namespace OHOS

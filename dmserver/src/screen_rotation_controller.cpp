@@ -36,7 +36,7 @@ DisplayId ScreenRotationController::defaultDisplayId_ = 0;
 bool ScreenRotationController::isGravitySensorSubscribed_ = false;
 SensorUser ScreenRotationController::user_;
 Rotation ScreenRotationController::currentDisplayRotation_;
-bool ScreenRotationController::isScreenRotationLocked_ = false;
+bool ScreenRotationController::isScreenRotationLocked_ = true;
 long ScreenRotationController::lastCallbackTime_ = 0;
 uint32_t ScreenRotationController::defaultDeviceRotationOffset_ = 0;
 Orientation ScreenRotationController::lastOrientationType_ = Orientation::UNSPECIFIED;
@@ -55,10 +55,16 @@ void ScreenRotationController::SubscribeGravitySensor()
     }
     user_.userData = nullptr;
     user_.callback = &HandleGravitySensorEventCallback;
-    SubscribeSensor(SENSOR_TYPE_ID_GRAVITY, &user_);
+    if (SubscribeSensor(SENSOR_TYPE_ID_GRAVITY, &user_) != 0) {
+        WLOGFE("Subscribe gravity sensor failed");
+        return;
+    }
     SetBatch(SENSOR_TYPE_ID_GRAVITY, &user_, ORIENTATION_SENSOR_SAMPLING_RATE, ORIENTATION_SENSOR_REPORTING_RATE);
     SetMode(SENSOR_TYPE_ID_GRAVITY, &user_, SENSOR_ON_CHANGE);
-    ActivateSensor(SENSOR_TYPE_ID_GRAVITY, &user_);
+    if (ActivateSensor(SENSOR_TYPE_ID_GRAVITY, &user_) != 0) {
+        WLOGFE("Activate gravity sensor failed");
+        return;
+    }
     isGravitySensorSubscribed_ = true;
 }
 
@@ -109,6 +115,7 @@ void ScreenRotationController::HandleGravitySensorEventCallback(SensorEvent *eve
     currentDisplayRotation_ = GetCurrentDisplayRotation();
     HandleUnspecifiedOrientation(orientation);
     if (!IsSensorRelatedOrientation(orientation)) {
+        lastOrientationType_ = orientation;
         return;
     }
     
@@ -128,6 +135,7 @@ void ScreenRotationController::HandleGravitySensorEventCallback(SensorEvent *eve
         ProcessRotationWhenSensorDataNotValid(orientation);
         return;
     }
+    lastOrientationType_ = orientation;
     if ((ConvertToDeviceRotation(currentSensorRotation) == currentDisplayRotation_) &&
         (orientation == Orientation::SENSOR || orientation == Orientation::AUTO_ROTATION_RESTRICTED)) {
         return;
@@ -164,7 +172,7 @@ Rotation ScreenRotationController::GetCurrentDisplayRotation()
 Orientation ScreenRotationController::GetRequestedOrientation()
 {
     Orientation orientation = Orientation::UNSPECIFIED;
-    DisplayManagerServiceInner::GetInstance().GetFullScreenWindowRequestedOrientation(defaultDisplayId_, orientation);
+    DisplayManagerServiceInner::GetInstance().GetWindowPreferredOrientation(defaultDisplayId_, orientation);
     return orientation;
 }
 
@@ -181,6 +189,7 @@ Rotation ScreenRotationController::CalcTargetDisplayRotation(
         case Orientation::SENSOR_HORIZONTAL: {
             return ProcessAutoRotationLandscapeOrientation(sensorRotation);
         }
+        case Orientation::UNSPECIFIED:
         case Orientation::AUTO_ROTATION_RESTRICTED: {
             if (isScreenRotationLocked_) {
                 return currentDisplayRotation_;
@@ -260,7 +269,7 @@ Rotation ScreenRotationController::ConvertToDeviceRotation(Rotation sensorRotati
 
 bool ScreenRotationController::IsSensorRelatedOrientation(Orientation orientation)
 {
-    if ((orientation >= Orientation::BEGIN && orientation <= Orientation::REVERSE_HORIZONTAL) ||
+    if ((orientation >= Orientation::VERTICAL && orientation <= Orientation::REVERSE_HORIZONTAL) ||
         orientation == Orientation::LOCKED) {
         return false;
     }
@@ -272,7 +281,7 @@ void ScreenRotationController::HandleUnspecifiedOrientation(Orientation orientat
     if (lastOrientationType_ == orientation) {
         return;
     }
-    if (orientation == Orientation::UNSPECIFIED) {
+    if (orientation == Orientation::UNSPECIFIED && isScreenRotationLocked_) {
         SetScreenRotation(Rotation::ROTATION_0);
         lastOrientationType_ = orientation;
     }

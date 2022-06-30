@@ -15,14 +15,9 @@
 
 #include "window_inner_manager.h"
 
-#include "surface_draw.h"
 #include "ui_service_mgr_client.h"
 #include "window_manager_hilog.h"
-#include "image/bitmap.h"
-#include "image_source.h"
-#include "image_type.h"
-#include "image_utils.h"
-#include "pixel_map.h"
+#include "window.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -55,8 +50,9 @@ bool WindowInnerManager::Init()
     return true;
 }
 
-void WindowInnerManager::Start()
+void WindowInnerManager::Start(bool enableRecentholder)
 {
+    isRecentHolderEnable_ = enableRecentholder;
     if (state_ == InnerWMRunningState::STATE_RUNNING) {
         WLOGFI("window inner manager service has already started.");
     }
@@ -82,19 +78,47 @@ void WindowInnerManager::Stop()
     state_ = InnerWMRunningState::STATE_NOT_START;
 }
 
-void WindowInnerManager::CreteInnerWindow(std::string name, DisplayId displyId, Rect rect,
+void WindowInnerManager::CreateInnerWindow(std::string name, DisplayId displayId, Rect rect,
     WindowType type, WindowMode mode)
 {
-    eventHandler_->PostTask([name, displyId, rect, type, mode]() {
-        InnerWindowFactory::GetInstance().CreateInnerWindow(name, displyId, rect, type, mode);
+    eventHandler_->PostTask([this, name, displayId, rect, mode, type]() {
+        switch (type) {
+            case WindowType::WINDOW_TYPE_PLACEHOLDER: {
+                if (isRecentHolderEnable_) {
+                    PlaceHolderWindow::GetInstance().Create(name, displayId, rect, mode);
+                }
+                break;
+            }
+            case WindowType::WINDOW_TYPE_DOCK_SLICE: {
+                DividerWindow::GetInstance().Create(name, displayId, rect, mode);
+                break;
+            }
+            default:
+                break;
+        }
     });
+    return;
 }
 
-void WindowInnerManager::DestroyInnerWindow(DisplayId displyId, WindowType type)
+void WindowInnerManager::DestroyInnerWindow(DisplayId displayId, WindowType type)
 {
-    eventHandler_->PostTask([displyId, type]() {
-        InnerWindowFactory::GetInstance().DestroyInnerWindow(displyId, type);
+    eventHandler_->PostTask([this, type]() {
+        switch (type) {
+            case WindowType::WINDOW_TYPE_PLACEHOLDER: {
+                if (isRecentHolderEnable_) {
+                    PlaceHolderWindow::GetInstance().Destroy();
+                }
+                break;
+            }
+            case WindowType::WINDOW_TYPE_DOCK_SLICE: {
+                DividerWindow::GetInstance().Destroy();
+                break;
+            }
+            default:
+                break;
+        }
     });
+    return;
 }
 } // Rosen
 } // OHOS

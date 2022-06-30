@@ -26,16 +26,16 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-using utils = WindowTestUtils;
+using Utils = WindowTestUtils;
 const int WAIT_CALLBACK_US = 10000;  // 10000 us
 
 class WindowTouchOutsideTestListener : public ITouchOutsideListener {
 public:
-    void OnTouchOutside() override
+    void OnTouchOutside() const override
     {
         isTouchOutside_ = true;
     }
-    bool isTouchOutside_ { false };
+    mutable bool isTouchOutside_ { false };
 };
 
 class WindowTouchOutsideTest : public testing::Test {
@@ -47,9 +47,9 @@ public:
 
     static sptr<WindowTouchOutsideTestListener> windowlistener1_;
     static sptr<WindowTouchOutsideTestListener> windowlistener2_;
-    utils::TestWindowInfo firstWindowInfo_;
-    utils::TestWindowInfo secondWindowInfo_;
-    utils::TestWindowInfo thirdWindowInfo_;
+    Utils::TestWindowInfo firstWindowInfo_;
+    Utils::TestWindowInfo secondWindowInfo_;
+    Utils::TestWindowInfo thirdWindowInfo_;
 };
 
 sptr<WindowTouchOutsideTestListener> WindowTouchOutsideTest::windowlistener1_ =
@@ -106,13 +106,13 @@ void WindowTouchOutsideTest::TearDownTestCase()
 
 namespace {
 /**
- * @tc.name: onTouchIutside
+ * @tc.name: onTouchInside
  * @tc.desc: can't not receive a inside touch event
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTouchOutsideTest, onTouchIutside, Function | MediumTest | Level3)
+HWTEST_F(WindowTouchOutsideTest, onTouchInside, Function | MediumTest | Level3)
 {
-    const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
+    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterTouchOutsideListener(windowlistener1_);
     firstWindow->Show();
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(firstWindow->GetWindowId());
@@ -128,9 +128,9 @@ HWTEST_F(WindowTouchOutsideTest, onTouchIutside, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowTouchOutsideTest, onTouchOutside, Function | MediumTest | Level3)
 {
-    const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
+    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterTouchOutsideListener(windowlistener1_);
-    const sptr<Window> &secondWindow = utils::CreateTestWindow(secondWindowInfo_);
+    const sptr<Window> &secondWindow = Utils::CreateTestWindow(secondWindowInfo_);
     firstWindow->Show();
     secondWindow->Show();
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(secondWindow->GetWindowId());
@@ -147,9 +147,9 @@ HWTEST_F(WindowTouchOutsideTest, onTouchOutside, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowTouchOutsideTest, onTouchOutsideNotShow, Function | MediumTest | Level3)
 {
-    const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
+    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterTouchOutsideListener(windowlistener1_);
-    const sptr<Window> &secondWindow = utils::CreateTestWindow(secondWindowInfo_);
+    const sptr<Window> &secondWindow = Utils::CreateTestWindow(secondWindowInfo_);
     secondWindow->Show();
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(secondWindow->GetWindowId());
     usleep(WAIT_CALLBACK_US);
@@ -165,13 +165,13 @@ HWTEST_F(WindowTouchOutsideTest, onTouchOutsideNotShow, Function | MediumTest | 
  */
 HWTEST_F(WindowTouchOutsideTest, onTouchOutsideForAllWindow, Function | MediumTest | Level3)
 {
-    const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
+    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterTouchOutsideListener(windowlistener1_);
-    const sptr<Window> &secondWindow = utils::CreateTestWindow(secondWindowInfo_);
+    const sptr<Window> &secondWindow = Utils::CreateTestWindow(secondWindowInfo_);
     firstWindow->RegisterTouchOutsideListener(windowlistener2_);
     firstWindow->Show();
     secondWindow->Show();
-    const sptr<Window> &thirdWindow = utils::CreateTestWindow(thirdWindowInfo_);
+    const sptr<Window> &thirdWindow = Utils::CreateTestWindow(thirdWindowInfo_);
     thirdWindow->Show();
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(thirdWindow->GetWindowId());
     usleep(WAIT_CALLBACK_US);

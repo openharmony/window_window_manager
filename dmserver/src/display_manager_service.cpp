@@ -133,10 +133,10 @@ void DisplayManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId,
     }
 }
 
-void DisplayManagerService::GetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation)
+void DisplayManagerService::GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation)
 {
     if (displayChangeListener_ != nullptr) {
-        displayChangeListener_->OnGetFullScreenWindowRequestedOrientation(displayId, orientation);
+        displayChangeListener_->OnGetWindowPreferredOrientation(displayId, orientation);
     }
 }
 

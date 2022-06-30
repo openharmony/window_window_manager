@@ -37,7 +37,6 @@ public:
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override;
     WMError RequestFocus(uint32_t windowId) override;
     WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) override;
-    WMError SetAlpha(uint32_t windowId, float alpha) override;
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void ProcessPointDown(uint32_t windowId, bool isStartDrag) override;

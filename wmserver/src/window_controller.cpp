@@ -52,12 +52,13 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
     }
     WM_SCOPED_ASYNC_TRACE_BEGIN(static_cast<int32_t>(TraceTaskId::STARTING_WINDOW), "wms:async:ShowStartingWindow");
     auto node = windowRoot_->FindWindowNodeWithToken(info->GetAbilityToken());
+    auto layoutMode = windowRoot_->GetCurrentLayoutMode(info->GetDisplayId());
     if (node == nullptr) {
         if (!isColdStart) {
             WLOGFE("no windowNode exists but is hot start!");
             return;
         }
-        node = StartingWindow::CreateWindowNode(info, GenWindowId());
+        node = StartingWindow::CreateWindowNode(info, GenWindowId(), layoutMode);
         if (node == nullptr) {
             return;
         }
@@ -393,21 +394,6 @@ WMError WindowController::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurL
 
     WLOGFI("WindowEffect WindowController SetWindowBackgroundBlur level: %{public}u", dstLevel);
     node->SetWindowBackgroundBlur(dstLevel);
-    FlushWindowInfo(windowId);
-    return WMError::WM_OK;
-}
-
-WMError WindowController::SetAlpha(uint32_t windowId, float dstAlpha)
-{
-    auto node = windowRoot_->GetWindowNode(windowId);
-    if (node == nullptr) {
-        WLOGFE("could not find window");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    WLOGFI("WindowEffect WindowController SetAlpha alpha: %{public}f", dstAlpha);
-    node->SetAlpha(dstAlpha);
-
     FlushWindowInfo(windowId);
     return WMError::WM_OK;
 }
@@ -779,18 +765,22 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
     }
     WLOGFI("window: [%{public}s, %{public}u] update property for action: %{public}u", node->GetWindowName().c_str(),
         node->GetWindowId(), static_cast<uint32_t>(action));
+    WMError ret = WMError::WM_OK;
     switch (action) {
         case PropertyChangeAction::ACTION_UPDATE_RECT: {
             node->SetDecoStatus(property->GetDecoStatus());
             node->SetOriginRect(property->GetOriginRect());
             node->SetDragType(property->GetDragType());
-            return ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
+            ret = ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
+            break;
         }
         case PropertyChangeAction::ACTION_UPDATE_MODE: {
-            return SetWindowMode(windowId, property->GetWindowMode());
+            ret = SetWindowMode(windowId, property->GetWindowMode());
+            break;
         }
         case PropertyChangeAction::ACTION_UPDATE_FLAGS: {
-            return SetWindowFlags(windowId, property->GetWindowFlags());
+            ret = SetWindowFlags(windowId, property->GetWindowFlags());
+            break;
         }
         case PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
             auto& props = property->GetSystemBarProperty();
@@ -847,10 +837,24 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             property->GetTouchHotAreas(rects);
             return UpdateTouchHotAreas(node, rects);
         }
+        case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY:
         default:
             break;
     }
-    return WMError::WM_OK;
+    if (ret == WMError::WM_OK) {
+        NotifyWindowPropertyChanged(node);
+    }
+    return ret;
+}
+
+void WindowController::NotifyWindowPropertyChanged(const sptr<WindowNode>& node)
+{
+    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (windowNodeContainer == nullptr) {
+        WLOGFE("windowNodeContainer is null");
+        return;
+    }
+    windowNodeContainer->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
 }
 
 WMError WindowController::GetModeChangeHotZones(DisplayId displayId,
@@ -964,11 +968,11 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
     }
 }
 
-Orientation WindowController::GetFullScreenWindowRequestedOrientation(DisplayId displayId)
+Orientation WindowController::GetWindowPreferredOrientation(DisplayId displayId)
 {
     sptr<WindowNodeContainer> windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
     if (windowNodeContainer != nullptr) {
-        return windowNodeContainer->GetFullScreenWindowRequestedOrientation();
+        return windowNodeContainer->GetWindowPreferredOrientation();
     }
     return Orientation::UNSPECIFIED;
 }

@@ -46,6 +46,15 @@ void WindowAgent::UpdateWindowMode(WindowMode mode)
     window_->UpdateMode(mode);
 }
 
+void WindowAgent::UpdateWindowModeSupportInfo(uint32_t modeSupportInfo)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->UpdateModeSupportInfo(modeSupportInfo);
+}
+
 void WindowAgent::UpdateFocusStatus(bool focused)
 {
     if (window_ == nullptr) {

@@ -24,14 +24,14 @@ namespace Rosen {
 namespace {
     constexpr uint32_t WAIT_ASYNC_US = 100000;  // 100ms
 }
-using utils = WindowTestUtils;
+using Utils = WindowTestUtils;
 class WindowInputTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    utils::TestWindowInfo fullScreenWindow_;
+    Utils::TestWindowInfo fullScreenWindow_;
 };
 
 void WindowInputTest::SetUpTestCase()
@@ -39,7 +39,7 @@ void WindowInputTest::SetUpTestCase()
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
-    utils::InitByDisplayRect(displayRect);
+    Utils::InitByDisplayRect(displayRect);
 }
 
 void WindowInputTest::TearDownTestCase()
@@ -50,7 +50,7 @@ void WindowInputTest::SetUp()
 {
     fullScreenWindow_ = {
         .name = "FullWindow",
-        .rect = utils::customAppRect_,
+        .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = false,
@@ -72,7 +72,7 @@ namespace {
 HWTEST_F(WindowInputTest, SetTouchHotAreas01, Function | MediumTest | Level3)
 {
     fullScreenWindow_.name = "window_hot_areas.1";
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenWindow_);
+    const sptr<Window>& window = Utils::CreateTestWindow(fullScreenWindow_);
     ASSERT_EQ(WMError::WM_OK, window->Show());
 
     std::vector<Rect> requestedTouchHotAreas;
@@ -121,7 +121,7 @@ HWTEST_F(WindowInputTest, SetTouchHotAreas01, Function | MediumTest | Level3)
 HWTEST_F(WindowInputTest, SetTouchHotAreas02, Function | MediumTest | Level3)
 {
     fullScreenWindow_.name = "window_hot_areas.2";
-    const sptr<Window>& window = utils::CreateTestWindow(fullScreenWindow_);
+    const sptr<Window>& window = Utils::CreateTestWindow(fullScreenWindow_);
     ASSERT_EQ(WMError::WM_OK, window->Show());
 
     usleep(WAIT_ASYNC_US);

@@ -26,7 +26,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-using utils = TestUtils;
+using Utils = TestUtils;
 constexpr int32_t TEST_IMAGE_HEIGHT = 1080;
 constexpr int32_t TEST_IMAGE_WIDTH = 1920;
 using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;

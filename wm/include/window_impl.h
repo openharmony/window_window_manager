@@ -116,7 +116,7 @@ public:
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() const override;
     virtual uint32_t GetWindowFlags() const override;
-    uint32_t GetModeSupportInfo() const override;
+    uint32_t GetRequestModeSupportInfo() const override;
     inline NotifyNativeWinDestroyFunc GetNativeDestroyCallback()
     {
         return notifyNativefunc_;
@@ -127,13 +127,15 @@ public:
     virtual WMError SetWindowType(WindowType type) override;
     virtual WMError SetWindowMode(WindowMode mode) override;
     virtual WMError SetWindowBackgroundBlur(WindowBlurLevel level) override;
-    virtual WMError SetAlpha(float alpha) override;
+    virtual void SetAlpha(float alpha) override;
+    virtual void SetTransform(const Transform& trans) override;
     virtual WMError AddWindowFlag(WindowFlag flag) override;
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
     virtual WMError SetWindowFlags(uint32_t flags) override;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     virtual WMError SetLayoutFullScreen(bool status) override;
     virtual WMError SetFullScreen(bool status) override;
+    virtual Transform GetTransform() const override;
     inline void SetWindowState(WindowState state)
     {
         state_ = state;
@@ -143,8 +145,8 @@ public:
     WMError Create(const std::string& parentName,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy() override;
-    virtual WMError Show(uint32_t reason = 0) override;
-    virtual WMError Hide(uint32_t reason = 0) override;
+    virtual WMError Show(uint32_t reason = 0, bool isCustomAnimation = false) override;
+    virtual WMError Hide(uint32_t reason = 0, bool isCustomAnimation = false) override;
     virtual WMError MoveTo(int32_t x, int32_t y) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
@@ -189,9 +191,10 @@ public:
     virtual void RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     virtual void UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
-    virtual void SetModeSupportInfo(uint32_t modeSupportInfo) override;
+    virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) override;
     void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason);
     void UpdateMode(WindowMode mode);
+    void UpdateModeSupportInfo(uint32_t modeSupportInfo);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
     virtual void RequestFrame() override;
@@ -337,7 +340,10 @@ private:
     void UpdateDragType();
     void InitListenerHandler();
     bool CheckCameraFloatingWindowMultiCreated(WindowType type);
-    void SetOrientationFromAbility();
+    void GetConfigurationFromAbilityInfo();
+    void UpdateTitleButtonVisibility();
+    void SetModeSupportInfo(uint32_t modeSupportInfo);
+    uint32_t GetModeSupportInfo() const;
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {

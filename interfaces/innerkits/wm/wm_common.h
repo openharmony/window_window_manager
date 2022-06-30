@@ -43,7 +43,7 @@ enum class WindowType : uint32_t {
     ABOVE_APP_SYSTEM_WINDOW_BASE = 2100,
     WINDOW_TYPE_APP_LAUNCHING = ABOVE_APP_SYSTEM_WINDOW_BASE,
     WINDOW_TYPE_DOCK_SLICE,
-    WINDOW_TYPE_PLACE_HOLDER,
+    WINDOW_TYPE_PLACEHOLDER,
     WINDOW_TYPE_INCOMING_CALL,
     WINDOW_TYPE_SEARCHING_BAR,
     WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
@@ -173,6 +173,25 @@ namespace {
     constexpr int32_t INVALID_UID = -1;
 }
 
+class Transform {
+public:
+    Transform()
+        : pivotX_(0.5f), pivotY_(0.5f), scaleX_(1.f), scaleY_(1.f), rotationX_(0.f), rotationY_(0.f), rotationZ_(0.f),
+          translateX_(0.f), translateY_(0.f), translateZ_(0.f)
+    {}
+    ~Transform() {}
+    float pivotX_;
+    float pivotY_;
+    float scaleX_;
+    float scaleY_;
+    float rotationX_;
+    float rotationY_;
+    float rotationZ_;
+    float translateX_;
+    float translateY_;
+    float translateZ_;
+};
+
 struct SystemBarProperty {
     bool enable_;
     uint32_t backgroundColor_;
@@ -298,6 +317,7 @@ enum class WindowUpdateType : int32_t {
     WINDOW_UPDATE_FOCUSED,
     WINDOW_UPDATE_BOUNDS,
     WINDOW_UPDATE_ACTIVE,
+    WINDOW_UPDATE_PROPERTY,
 };
 
 struct SystemConfig {

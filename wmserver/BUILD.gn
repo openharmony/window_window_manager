@@ -44,6 +44,7 @@ ohos_shared_library("libwms") {
     "src/display_group_info.cpp",
     "src/drag_controller.cpp",
     "src/freeze_controller.cpp",
+    "src/inner_window.cpp",
     "src/input_window_monitor.cpp",
     "src/minimize_app.cpp",
     "src/remote_animation.cpp",
@@ -67,7 +68,6 @@ ohos_shared_library("libwms") {
     "src/window_task_looper.cpp",
     "src/window_zorder_policy.cpp",
     "src/zidl/window_manager_stub.cpp",
-    "src/inner_window.cpp"
   ]
 
   configs = [ ":libwms_config" ]
