@@ -1394,6 +1394,12 @@ WMError WindowImpl::RequestFocus() const
     return SingletonContainer::Get<WindowAdapter>().RequestFocus(property_->GetWindowId());
 }
 
+void WindowImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    inputEventConsumer_ = inputEventConsumer;
+}
+
 void WindowImpl::AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener)
 {
     InputTransferStation::GetInstance().SetInputListener(GetWindowId(), inputEventListener);
@@ -1692,39 +1698,71 @@ void WindowImpl::UpdateModeSupportInfo(uint32_t modeSupportInfo)
     UpdateTitleButtonVisibility();
 }
 
+void WindowImpl::HandleBackKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    int32_t keyAction = keyEvent->GetKeyAction();
+    if (keyAction != MMI::KeyEvent::KEY_ACTION_UP) {
+        return;
+    }
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
+    }
+    bool isConsumed = false;
+    if (inputEventConsumer != nullptr) {
+        WLOGFI("Transfer back key event to inputEventConsumer");
+        isConsumed = inputEventConsumer->OnInputEvent(keyEvent);
+    } else if (uiContent_ != nullptr) {
+        WLOGFI("Transfer back key event to uiContent");
+        isConsumed = uiContent_->ProcessBackPressed();
+    } else {
+        WLOGFE("There is no back key event consumer");
+    }
+    if (isConsumed || !WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        return;
+    }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext == nullptr) {
+        WLOGFE("abilityContext is null");
+        return;
+    }
+    // TerminateAbility will invoke last ability, CloseAbility will not.
+    bool shouldCloseAbility = WindowHelper::IsFullScreenWindow(property_->GetWindowMode());
+    WMError ret = NotifyWindowTransition(shouldCloseAbility ? TransitionReason::CLOSE : TransitionReason::BACK);
+    if (ret != WMError::WM_OK) {
+        WLOGFI("Window %{public}u is closed without remote animation, ret:%{public}u",
+            property_->GetWindowId(), static_cast<uint32_t>(ret));
+        if (shouldCloseAbility) {
+            abilityContext->CloseAbility();
+        } else {
+            abilityContext->TerminateSelf();
+        }
+    }
+}
+
 void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     NotifyKeyEvent(keyEvent);
-    if (uiContent_ == nullptr) {
-        WLOGE("ConsumeKeyEvent uiContent is nullptr");
-        return;
-    }
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
-    WLOGFI("ConsumeKeyEvent: enter GetKeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
+    WLOGFI("KeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK) {
-        if (keyAction != MMI::KeyEvent::KEY_ACTION_UP) {
-            return;
-        }
-        if (uiContent_->ProcessBackPressed()) {
-            WLOGI("ConsumeKeyEvent keyEvent is consumed");
-            return;
-        }
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-        if (abilityContext != nullptr) {
-            WMError ret = NotifyWindowTransition(TransitionReason::BACK);
-            if (ret != WMError::WM_OK) {
-                WLOGFI("[Client] Window %{public}u terminate without remote animation ret:%{public}u",
-                    property_->GetWindowId(), static_cast<uint32_t>(ret));
-                abilityContext->TerminateSelf();
-            }
-        } else {
-            WLOGI("ConsumeKeyEvent destroy window");
-            Destroy();
-        }
+        HandleBackKeyEvent(keyEvent);
     } else {
-        if (!uiContent_->ProcessKeyEvent(keyEvent)) {
-            WLOGI("ConsumeKeyEvent no consumer window exit");
+        std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            inputEventConsumer = inputEventConsumer_;
+        }
+        if (inputEventConsumer != nullptr) {
+            WLOGFI("Transfer key event to inputEventConsumer");
+            (void)inputEventConsumer->OnInputEvent(keyEvent);
+        } else if (uiContent_ != nullptr) {
+            WLOGFI("Transfer key event to uiContent");
+            (void)uiContent_->ProcessKeyEvent(keyEvent);
+        } else {
+            WLOGFE("There is no key event consumer");
         }
     }
 }
@@ -2021,12 +2059,20 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
         UpdatePointerEventForStretchableWindow(pointerEvent);
     }
     NotifyPointEvent(pointerEvent);
-    if (uiContent_ == nullptr) {
-        WLOGE("ConsumePointerEvent uiContent is nullptr, windowId: %{public}u", GetWindowId());
-        return;
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
     }
-    WLOGFI("Transfer pointer event to ACE");
-    uiContent_->ProcessPointerEvent(pointerEvent);
+    if (inputEventConsumer != nullptr) {
+        WLOGFI("Transfer pointer event to inputEventConsumer");
+        (void)inputEventConsumer->OnInputEvent(pointerEvent);
+    } else if (uiContent_ != nullptr) {
+        WLOGFI("Transfer pointer event to uiContent");
+        (void)uiContent_->ProcessPointerEvent(pointerEvent);
+    } else {
+        WLOGE("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
+    }
 }
 
 void WindowImpl::OnVsync(int64_t timeStamp)
