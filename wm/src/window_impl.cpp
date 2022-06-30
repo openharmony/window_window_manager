@@ -1828,11 +1828,11 @@ void WindowImpl::UpdatePointerEventForStretchableWindow(std::shared_ptr<MMI::Poi
     const Rect& originRect = property_->GetOriginRect();
     PointInfo originPos =
         WindowHelper::CalculateOriginPosition(originRect, GetRect(),
-        { pointerItem.GetGlobalX(), pointerItem.GetGlobalY() });
-    pointerItem.SetGlobalX(originPos.x);
-    pointerItem.SetGlobalY(originPos.y);
-    pointerItem.SetLocalX(originPos.x - originRect.posX_);
-    pointerItem.SetLocalY(originPos.y - originRect.posY_);
+        { pointerItem.GetDisplayX(), pointerItem.GetDisplayY() });
+    pointerItem.SetDisplayX(originPos.x);
+    pointerItem.SetDisplayY(originPos.y);
+    pointerItem.SetWindowX(originPos.x - originRect.posX_);
+    pointerItem.SetWindowY(originPos.y - originRect.posY_);
     pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), pointerItem);
 }
 
@@ -1936,8 +1936,8 @@ void WindowImpl::ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& poin
         WLOGFW("Point item is invalid");
         return;
     }
-    int32_t pointGlobalX = pointerItem.GetGlobalX();
-    int32_t pointGlobalY = pointerItem.GetGlobalY();
+    int32_t pointGlobalX = pointerItem.GetDisplayX();
+    int32_t pointGlobalY = pointerItem.GetDisplayY();
     int32_t action = pointerEvent->GetPointerAction();
     switch (action) {
         // Ready to move or drag
@@ -1997,7 +1997,7 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
                 WLOGFW("Point item is invalid");
                 return;
             }
-            if (!WindowHelper::IsPointInTargetRect(pointerItem.GetGlobalX(), pointerItem.GetGlobalY(), GetRect())) {
+            if (!WindowHelper::IsPointInTargetRect(pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), GetRect())) {
                 NotifyListenerAfterUnfocused();
                 return;
             }
