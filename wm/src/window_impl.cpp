@@ -1633,9 +1633,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->GetWindowId());
         return;
     }
-    float virtualPixelRatio = display->GetVirtualPixelRatio();
-    WLOGFI("winId:%{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], vpr:%{public}f, reason:%{public}u",
-        GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, virtualPixelRatio, reason);
+
     property_->SetDecoStatus(decoStatus);
     if (reason == WindowSizeChangeReason::HIDE) {
         property_->SetRequestRect(rect);
@@ -1648,6 +1646,8 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         property_->SetOriginRect(rect);
         isOriginRectSet_ = true;
     }
+    WLOGFI("winId:%{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u",
+        property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     Rect rectToAce = rect;
     // update rectToAce for stretchable window
     if (windowSystemConfig_.isStretchable_ && WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
@@ -1668,7 +1668,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->GetWindowId(), rectToAce.posX_, rectToAce.posY_, rectToAce.width_, rectToAce.height_);
         config.SetSize(rectToAce.width_, rectToAce.height_);
         config.SetPosition(rectToAce.posX_, rectToAce.posY_);
-        config.SetDensity(virtualPixelRatio);
+        config.SetDensity(display->GetVirtualPixelRatio());
         uiContent_->UpdateViewportConfig(config, reason);
         WLOGFI("notify uiContent window size change end");
     }

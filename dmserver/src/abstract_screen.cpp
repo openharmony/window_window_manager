@@ -37,7 +37,7 @@ AbstractScreen::~AbstractScreen()
 
 sptr<SupportedScreenModes> AbstractScreen::GetActiveScreenMode() const
 {
-    if (activeIdx_ < 0 || activeIdx_ >= modes_.size()) {
+    if (activeIdx_ < 0 || activeIdx_ >= static_cast<int32_t>(modes_.size())) {
         WLOGE("active mode index is wrong: %{public}d", activeIdx_);
         return nullptr;
     }
