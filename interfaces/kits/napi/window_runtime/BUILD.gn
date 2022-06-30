@@ -50,6 +50,7 @@ ohos_shared_library("window_native_kit") {
 
   configs = [ ":window_native_kit_config" ]
   deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
     "//foundation/windowmanager/wmserver:libwms",

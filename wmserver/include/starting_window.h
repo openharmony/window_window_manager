@@ -30,7 +30,8 @@ public:
     StartingWindow() = delete;
     ~StartingWindow() = default;
 
-    static sptr<WindowNode> CreateWindowNode(sptr<WindowTransitionInfo> info, uint32_t winId);
+    static sptr<WindowNode> CreateWindowNode(sptr<WindowTransitionInfo> info,
+        uint32_t winId, WindowLayoutMode layoutMode);
     static void HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,
         uint32_t& windowId, const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowProperty>& property,
         int32_t pid, int32_t uid);
@@ -39,7 +40,6 @@ public:
     static void UpdateRSTree(sptr<WindowNode>& node);
     static void ReleaseStartWinSurfaceNode(sptr<WindowNode>& node);
 private:
-    static SurfaceDraw surfaceDraw_;
     static WMError CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node);
     static std::recursive_mutex mutex_;
 };

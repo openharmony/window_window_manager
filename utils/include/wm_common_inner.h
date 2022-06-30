@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WM_COMMON_INNER_H
 #define OHOS_ROSEN_WM_COMMON_INNER_H
 
+#include <cfloat>
 #include <cinttypes>
 #include "wm_common.h"
 
@@ -84,6 +85,7 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_SET_BRIGHTNESS = 1 << 10,
     ACTION_UPDATE_MODE_SUPPORT_INFO = 1 << 11,
     ACTION_UPDATE_TOUCH_HOT_AREA = 1 << 12,
+    ACTION_UPDATE_TRANSFORM_PROPERTY = 1 << 13,
 };
 
 struct ModeChangeHotZonesConfig {
@@ -93,16 +95,19 @@ struct ModeChangeHotZonesConfig {
     uint32_t secondaryRange_;
 };
 
-struct FloatingWindowLimitsConfig {
-    bool isFloatingWindowLimitsConfigured_;
+struct WindowSizeLimits {
     uint32_t maxWidth_;
     uint32_t maxHeight_;
     uint32_t minWidth_;
     uint32_t minHeight_;
     float maxRatio_;
     float minRatio_;
-    FloatingWindowLimitsConfig() : isFloatingWindowLimitsConfigured_(false), maxWidth_(0), maxHeight_(0), minWidth_(0),
-        minHeight_(0), maxRatio_(0.0f), minRatio_(0.0f) {}
+    WindowSizeLimits() : maxWidth_(UINT32_MAX), maxHeight_(UINT32_MAX), minWidth_(0),
+        minHeight_(0), maxRatio_(FLT_MAX), minRatio_(0.0f) {}
+    WindowSizeLimits(uint32_t maxWidth, uint32_t maxHeight, uint32_t minWidth,
+        uint32_t minHeight, float maxRatio, float minRatio)
+        : maxWidth_(maxWidth), maxHeight_(maxHeight), minWidth_(minWidth),
+        minHeight_(minHeight), maxRatio_(maxRatio), minRatio_(minRatio) {}
 };
 
 struct ModeChangeHotZones {
@@ -135,6 +140,7 @@ enum class TraceTaskId : int32_t {
 namespace {
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
     constexpr float DEFAULT_ASPECT_RATIO = 0.66;
+    constexpr int32_t IVALID_DIALOG_WINDOW_ID = -1;
     constexpr uint32_t DIVIDER_WIDTH = 8;
     constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 37;
     constexpr uint32_t WINDOW_FRAME_WIDTH = 5;
@@ -146,6 +152,7 @@ namespace {
     constexpr uint32_t MIN_HORIZONTAL_SPLIT_WIDTH = 320;
     constexpr uint32_t MAX_FLOATING_SIZE = 2560;
     const Rect INVALID_EMPTY_RECT = {0, 0, 0, 0};
+    const Rect DEFAULT_PLACE_HOLDER_RECT = {0, 0, 512, 512};
 }
 }
 }

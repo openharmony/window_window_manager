@@ -42,7 +42,7 @@ class DisplayChangeListener : public IDisplayChangeListener {
 public:
     virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
-    virtual void OnGetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation) override;
+    virtual void OnGetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation) override;
 };
 
 class WindowManagerServiceHandler : public AAFwk::WindowManagerServiceHandlerStub {
@@ -77,7 +77,6 @@ public:
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override;
     WMError RequestFocus(uint32_t windowId) override;
     WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) override;
-    WMError SetAlpha(uint32_t windowId, float alpha) override;
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) override;
     void ProcessPointDown(uint32_t windowId, bool isStartDrag) override;
     void ProcessPointUp(uint32_t windowId) override;
@@ -103,7 +102,7 @@ public:
     void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
     void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback) override;
-    void GetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation);
+    void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;
@@ -119,7 +118,6 @@ private:
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
     void ConfigureWindowManagerService();
-    void ConfigFloatWindowLimits();
 
     static inline SingletonDelegator<WindowManagerService> delegator;
     std::map<uint32_t, uint32_t> accessTokenIdMaps_;

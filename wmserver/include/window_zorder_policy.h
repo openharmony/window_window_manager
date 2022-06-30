@@ -45,7 +45,7 @@ private:
         { WindowType::WINDOW_TYPE_APP_COMPONENT,        2 },
         { WindowType::WINDOW_TYPE_APP_LAUNCHING,        101 },
         { WindowType::WINDOW_TYPE_DOCK_SLICE,           0 },
-        { WindowType::WINDOW_TYPE_PLACE_HOLDER,         0 },
+        { WindowType::WINDOW_TYPE_PLACEHOLDER,          0 },
         { WindowType::WINDOW_TYPE_LAUNCHER_RECENT,      102 },
         { WindowType::WINDOW_TYPE_LAUNCHER_DOCK,        103 },
         { WindowType::WINDOW_TYPE_INCOMING_CALL,        104 },

@@ -67,7 +67,7 @@ public:
     bool IsForbidDockSliceMove(DisplayId displayId) const;
     bool IsDockSliceInExitSplitModeArea(DisplayId displayId) const;
     void ExitSplitMode(DisplayId displayId);
-    Orientation GetFullScreenWindowRequestedOrientation();
+    Orientation GetWindowPreferredOrientation();
 
     bool isVerticalDisplay(DisplayId displayId) const;
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
@@ -76,6 +76,7 @@ public:
     void MinimizeAllAppWindows(DisplayId displayId);
     void MinimizeOldestAppWindow();
     WMError ToggleShownStateForAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc, bool restore);
+    void BackUpAllAppWindows();
     void RestoreAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc);
     bool IsAppWindowsEmpty() const;
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
@@ -108,6 +109,7 @@ public:
     void UpdateAvoidAreaListener(sptr<WindowNode>& windowNode, bool haveAvoidAreaListener);
     void BeforeProcessWindowAvoidAreaChangeWhenDisplayChange() const;
     void ProcessWindowAvoidAreaChangeWhenDisplayChange() const;
+    WindowLayoutMode GetCurrentLayoutMode() const;
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
@@ -149,6 +151,7 @@ private:
                                                const std::vector<DisplayId>& curShowingDisplays);
     void FillWindowInfo(sptr<WindowInfo>& windowInfo, const sptr<WindowNode>& node) const;
     bool CheckWindowNodeWhetherInWindowTree(const sptr<WindowNode>& node) const;
+    void UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
 
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
@@ -160,6 +163,7 @@ private:
     std::vector<uint32_t> backupWindowIds_;
     std::map<uint32_t, WindowMode> backupWindowMode_;
     std::map<DisplayId, Rect> backupDividerWindowRect_;
+    std::map<DisplayId, std::set<WindowMode>> backupDisplaySplitWindowMode_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
     std::unordered_map<WindowLayoutMode, sptr<WindowLayoutPolicy>> layoutPolicies_;
     WindowLayoutMode layoutMode_ = WindowLayoutMode::CASCADE;

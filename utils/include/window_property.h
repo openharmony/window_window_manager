@@ -19,8 +19,7 @@
 #include <refbase.h>
 #include <string>
 #include <unordered_map>
-#include "parcel.h"
-
+#include <parcel.h>
 #include "class_var_definition.h"
 #include "dm_common.h"
 #include "wm_common.h"
@@ -68,12 +67,15 @@ public:
     void SetWindowSizeChangeReason(WindowSizeChangeReason reason);
     void SetTokenState(bool hasToken);
     void SetModeSupportInfo(uint32_t modeSupportInfo);
+    void SetRequestModeSupportInfo(uint32_t requestModeSupportInfo);
     void SetDragType(DragType dragType);
     void SetStretchable(bool stretchable);
     void SetOriginRect(const Rect& rect);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void SetAccessTokenId(uint32_t accessTokenId);
+    void SetSizeLimits(const WindowSizeLimits& sizeLimits);
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
+    void SetTransform(const Transform& trans);
 
     const std::string& GetWindowName() const;
     Rect GetRequestRect() const;
@@ -104,11 +106,14 @@ public:
     const PointInfo& GetHitOffset() const;
     uint32_t GetAnimationFlag() const;
     uint32_t GetModeSupportInfo() const;
+    uint32_t GetRequestModeSupportInfo() const;
     DragType GetDragType() const;
     bool GetStretchable() const;
     const Rect& GetOriginRect() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     uint32_t GetAccessTokenId() const;
+    Transform GetTransform() const;
+    WindowSizeLimits GetSizeLimits() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
@@ -120,6 +125,10 @@ private:
     static void MapUnmarshalling(Parcel& parcel, WindowProperty* property);
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowProperty* property);
+    bool MarshallingTransform(Parcel& parcel) const;
+    static void UnmarshallingTransform(Parcel& parcel, WindowProperty* property);
+    bool MarshallingWindowSizeLimits(Parcel& parcel) const;
+    static void UnmarshallingWindowSizeLimits(Parcel& parcel, WindowProperty* property);
 
     std::string windowName_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
@@ -146,7 +155,10 @@ private:
     uint32_t parentId_ { 0 };
     PointInfo hitOffset_ { 0, 0 };
     uint32_t animationFlag_ { static_cast<uint32_t>(WindowAnimation::DEFAULT) };
+    // modeSupportInfo_ means supported modes in runtime, which can be changed
     uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
+    // requestModeSupportInfo_ is configured in abilityInfo, usually can't be changed
+    uint32_t requestModeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,     SystemBarProperty() },
@@ -158,7 +170,10 @@ private:
     DragType dragType_ = DragType::DRAG_UNDEFINED;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     uint32_t accessTokenId_ { 0 };
+    Transform trans_;
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, CustomAnimation, isCustomAnimation, false);
+    WindowSizeLimits sizeLimits_;
 };
 }
 }

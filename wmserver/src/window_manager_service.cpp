@@ -67,7 +67,7 @@ void WindowManagerService::OnStart()
     if (!Init()) {
         return;
     }
-    WindowInnerManager::GetInstance().Start();
+    WindowInnerManager::GetInstance().Start(system::GetParameter("persist.window.holder.enable", "0") == "1");
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     DisplayManagerServiceInner::GetInstance().RegisterDisplayChangeListener(listener);
     RegisterSnapshotHandler();
@@ -237,33 +237,6 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
     }).get();
 }
 
-void WindowManagerService::ConfigFloatWindowLimits()
-{
-    const auto& intNumbersConfig = WindowManagerConfig::GetIntNumbersConfig();
-    const auto& floatNumbersConfig = WindowManagerConfig::GetFloatNumbersConfig();
-
-    FloatingWindowLimitsConfig floatingWindowLimitsConfig;
-    if (intNumbersConfig.count("floatingWindowLimitSize") != 0) {
-        auto numbers = intNumbersConfig.at("floatingWindowLimitSize");
-        if (numbers.size() == 4) { // 4, limitSize
-            floatingWindowLimitsConfig.maxWidth_ = static_cast<uint32_t>(numbers[0]);  // 0 max width
-            floatingWindowLimitsConfig.maxHeight_ = static_cast<uint32_t>(numbers[1]); // 1 max height
-            floatingWindowLimitsConfig.minWidth_ = static_cast<uint32_t>(numbers[2]);  // 2 min width
-            floatingWindowLimitsConfig.minHeight_ = static_cast<uint32_t>(numbers[3]); // 3 min height
-            floatingWindowLimitsConfig.isFloatingWindowLimitsConfigured_ = true;
-        }
-    }
-    if (floatNumbersConfig.count("floatingWindowLimitRatio") != 0) {
-        auto numbers = floatNumbersConfig.at("floatingWindowLimitRatio");
-        if (numbers.size() == 2) { // 2, limitRatio
-            floatingWindowLimitsConfig.maxRatio_ = static_cast<float>(numbers[0]); // 0 max ratio
-            floatingWindowLimitsConfig.minRatio_ = static_cast<float>(numbers[1]); // 1 min ratio
-            floatingWindowLimitsConfig.isFloatingWindowLimitsConfigured_ = true;
-        }
-    }
-    windowRoot_->SetFloatingWindowLimitsConfig(floatingWindowLimitsConfig);
-}
-
 void WindowManagerService::ConfigureWindowManagerService()
 {
     const auto& enableConfig = WindowManagerConfig::GetEnableConfig();
@@ -300,8 +273,6 @@ void WindowManagerService::ConfigureWindowManagerService()
             hotZonesConfig_.isModeChangeHotZoneConfigured_ = true;
         }
     }
-
-    ConfigFloatWindowLimits();
 
     if (floatNumbersConfig.count("splitRatios") != 0) {
         windowRoot_->SetSplitRatios(floatNumbersConfig.at("splitRatios"));
@@ -455,13 +426,6 @@ WMError WindowManagerService::SetWindowBackgroundBlur(uint32_t windowId, WindowB
     }).get();
 }
 
-WMError WindowManagerService::SetAlpha(uint32_t windowId, float alpha)
-{
-    return wmsTaskLooper_->ScheduleTask([this, windowId, alpha]() {
-        return windowController_->SetAlpha(windowId, alpha);
-    }).get();
-}
-
 AvoidArea WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
 {
     return wmsTaskLooper_->ScheduleTask([this, windowId, avoidAreaType]() {
@@ -554,9 +518,9 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
     WindowManagerService::GetInstance().NotifyDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
 }
 
-void DisplayChangeListener::OnGetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation)
+void DisplayChangeListener::OnGetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation)
 {
-    WindowManagerService::GetInstance().GetFullScreenWindowRequestedOrientation(displayId, orientation);
+    WindowManagerService::GetInstance().GetWindowPreferredOrientation(displayId, orientation);
 }
 
 void WindowManagerService::ProcessPointDown(uint32_t windowId, bool isStartDrag)
@@ -613,6 +577,12 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         WLOGFE("property is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) {
+        wmsTaskLooper_->PostTask([this, windowProperty, action]() mutable {
+            windowController_->UpdateProperty(windowProperty, action);
+        });
+        return WMError::WM_OK;
+    }
     return wmsTaskLooper_->ScheduleTask([this, &windowProperty, action]() {
         WM_SCOPED_TRACE("wms:UpdateProperty");
         WMError res = windowController_->UpdateProperty(windowProperty, action);
@@ -659,10 +629,10 @@ void WindowManagerService::MinimizeWindowsByLauncher(std::vector<uint32_t> windo
     }).get();
 }
 
-void WindowManagerService::GetFullScreenWindowRequestedOrientation(DisplayId displayId, Orientation &orientation)
+void WindowManagerService::GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation)
 {
     wmsTaskLooper_->ScheduleTask([this, displayId, &orientation]() mutable {
-        orientation = windowController_->GetFullScreenWindowRequestedOrientation(displayId);
+        orientation = windowController_->GetWindowPreferredOrientation(displayId);
     }).wait();
 }
 

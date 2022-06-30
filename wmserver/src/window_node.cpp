@@ -100,13 +100,6 @@ void WindowNode::SetWindowBackgroundBlur(WindowBlurLevel level)
     surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(blurRadiusX, blurRadiusY));
 }
 
-void WindowNode::SetAlpha(float alpha)
-{
-    property_->SetAlpha(alpha);
-    WLOGFI("WindowEffect WinodwNode SetAlpha alpha:%{public}f", alpha);
-    surfaceNode_->SetAlpha(alpha);
-}
-
 void WindowNode::SetBrightness(float brightness)
 {
     property_->SetBrightness(brightness);
@@ -203,6 +196,16 @@ void WindowNode::SetTouchHotAreas(const std::vector<Rect>& rects)
     touchHotAreas_ = rects;
 }
 
+void WindowNode::SetWindowSizeLimits(const WindowSizeLimits& sizeLimits)
+{
+    property_->SetSizeLimits(sizeLimits);
+}
+
+WindowSizeLimits WindowNode::GetWindowSizeLimits() const
+{
+    return property_->GetSizeLimits();
+}
+
 DragType WindowNode::GetDragType() const
 {
     return property_->GetDragType();
@@ -273,9 +276,9 @@ WindowBlurLevel WindowNode::GetWindowBackgroundBlur() const
     return property_->GetWindowBackgroundBlur();
 }
 
-float WindowNode::GetAlpha() const
+bool WindowNode::EnableDefaultAnimation(bool propertyEnabled, bool animationPlayed)
 {
-    return property_->GetAlpha();
+    return (propertyEnabled && (!animationPlayed) && (!property_->GetCustomAnimation()) && (!isAppCrash_));
 }
 
 float WindowNode::GetBrightness() const

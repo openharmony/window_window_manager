@@ -169,7 +169,9 @@ public:
     virtual WMError SetWindowType(WindowType type) = 0;
     virtual WMError SetWindowMode(WindowMode mode) = 0;
     virtual WMError SetWindowBackgroundBlur(WindowBlurLevel level) = 0;
-    virtual WMError SetAlpha(float alpha) = 0;
+    virtual void SetAlpha(float alpha) = 0;
+    virtual void SetTransform(const Transform& trans) = 0;
+    virtual Transform GetTransform() const = 0;
     virtual WMError AddWindowFlag(WindowFlag flag) = 0;
     virtual WMError RemoveWindowFlag(WindowFlag flag) = 0;
     virtual WMError SetWindowFlags(uint32_t flags) = 0;
@@ -178,8 +180,8 @@ public:
     virtual WMError SetLayoutFullScreen(bool status) = 0;
     virtual WMError SetFullScreen(bool status) = 0;
     virtual WMError Destroy() = 0;
-    virtual WMError Show(uint32_t reason = 0) = 0;
-    virtual WMError Hide(uint32_t reason = 0) = 0;
+    virtual WMError Show(uint32_t reason = 0, bool isCustomAnimation = false) = 0;
+    virtual WMError Hide(uint32_t reason = 0, bool isCustomAnimation = false) = 0;
 
     virtual WMError MoveTo(int32_t x, int32_t y) = 0;
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
@@ -230,8 +232,8 @@ public:
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     virtual void SetRequestedOrientation(Orientation) = 0;
     virtual Orientation GetRequestedOrientation() = 0;
-    virtual void SetModeSupportInfo(uint32_t modeSupportInfo) = 0;
-    virtual uint32_t GetModeSupportInfo() const = 0;
+    virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) = 0;
+    virtual uint32_t GetRequestModeSupportInfo() const = 0;
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) = 0;
     virtual void GetRequestedTouchHotAreas(std::vector<Rect>& rects) const = 0;
 

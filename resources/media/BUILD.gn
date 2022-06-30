@@ -26,9 +26,9 @@ ohos_prebuilt_etc("window_place_holder_image") {
   relative_install_dir = "window/resources"
 }
 
-
 group("window_resources_media") {
-  deps = [ ":window_divider_image",
-           ":window_place_holder_image"
-         ]
+  deps = [
+    ":window_divider_image",
+    ":window_place_holder_image",
+  ]
 }

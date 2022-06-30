@@ -25,112 +25,62 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InnerWindow"};
     const std::string IMAGE_PLACE_HOLDER_PNG_PATH = "/etc/window/resources/bg_place_holder.png";
 }
-WM_IMPLEMENT_SINGLE_INSTANCE(InnerWindowFactory)
-WMError InnerWindowFactory::CreateInnerWindow(std::string name, DisplayId displyId, Rect rect,
-    WindowType type, WindowMode mode)
+WM_IMPLEMENT_SINGLE_INSTANCE(PlaceHolderWindow)
+WM_IMPLEMENT_SINGLE_INSTANCE(DividerWindow)
+
+void PlaceholderWindowListener::OnTouchOutside()
 {
-    WLOGFI("createInnerWindow begin type: %{public}u", type);
-    if ((type != WindowType::WINDOW_TYPE_DOCK_SLICE) && (type !=  WindowType::WINDOW_TYPE_PLACE_HOLDER)) {
-        WLOGFE("create inner window failed, current type: %{public}u not surpport.", type);
-        return WMError::WM_ERROR_INVALID_TYPE;
-    }
-    if (innerWindowMap_.find(type) != std::end(innerWindowMap_)) {
-        if (innerWindowMap_[type] != nullptr && innerWindowMap_[type]->GetState() ==
-            InnerWindowState::INNER_WINDOW_STATE_CRATED) {
-            WLOGFW("create inner window failed, current inner window type %{public}u has created.", type);
-            return WMError::WM_ERROR_INVALID_TYPE;
-        }
-        innerWindowMap_.erase(type);
-    }
-    switch (type) {
-        case WindowType::WINDOW_TYPE_DOCK_SLICE : {
-            innerWindowMap_[type] = std::make_unique<DividerWindow>(name, displyId, rect);
-            innerWindowMap_[type]->Create();
-            break;
-        }
-        case WindowType::WINDOW_TYPE_PLACE_HOLDER : {
-            innerWindowMap_[type] = std::make_unique<PlaceHolderWindow>(name, displyId, rect, mode);
-            innerWindowMap_[type]->Create();
-            break;
-        }
-        default :
-            break;
-    }
-    WLOGFI("createInnerWindow end");
-    return WMError::WM_OK;
+    WLOGFD("place holder touch outside");
+    PlaceHolderWindow::GetInstance().Destroy();
 }
 
-WMError InnerWindowFactory::DestroyInnerWindow(DisplayId displyId, WindowType type)
+void PlaceholderWindowListener::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    WLOGFI("destroy inner window type: %{public}u begin.", type);
-    if (innerWindowMap_.find(type) == std::end(innerWindowMap_)) {
-        WLOGFW("current inner window has created");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if (innerWindowMap_[type] != nullptr) {
-        innerWindowMap_[type]->Destroy();
-    }
-    innerWindowMap_.erase(type);
-    WLOGFI("destroy inner window type: %{public}u end.", type);
-    return WMError::WM_OK;
+    WLOGFD("place holder get key event");
+    PlaceHolderWindow::GetInstance().Destroy();
 }
 
-PlaceHolderWindow::~PlaceHolderWindow()
+void PlaceholderWindowListener::OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    Destroy();
+    WLOGFD("place holder get point event");
+    PlaceHolderWindow::GetInstance().Destroy();
 }
 
-void PlaceHolderWindow::OnTouchOutside()
+void PlaceholderWindowListener::AfterUnfocused()
 {
-    Destroy();
+    WLOGFD("place holder after unfocused");
+    PlaceHolderWindow::GetInstance().Destroy();
 }
 
-void PlaceHolderWindow::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+void PlaceHolderWindow::Create(std::string name, DisplayId displyId, Rect rect, WindowMode mode)
 {
-    Destroy();
-}
-
-void PlaceHolderWindow::OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
-{
-    Destroy();
-}
-
-void PlaceHolderWindow::AfterUnfocused()
-{
-    Destroy();
-}
-
-void PlaceHolderWindow::Create()
-{
-    WLOGFI("create inner display id: %{public}" PRIu64"", displayId_);
+    WLOGFD("create inner display id: %{public}" PRIu64"", displyId);
     if (window_ != nullptr) {
         WLOGFW("window has created.");
-        window_->Show();
         return;
     }
-    WLOGFD("create palce holder Window start");
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
     if (option == nullptr) {
         WLOGFE("window option is nullptr.");
         return;
     }
-    option->SetWindowType(WindowType::WINDOW_TYPE_PLACE_HOLDER);
-    option->SetWindowMode(mode_);
     option->SetFocusable(false);
-    option->SetWindowRect(rect_);
-    window_ = Window::Create(name_, option);
+    option->SetWindowMode(mode);
+    option->SetWindowRect(rect);
+    option->SetWindowType(WindowType::WINDOW_TYPE_PLACEHOLDER);
+    window_ = Window::Create(name, option);
     if (window_ == nullptr) {
         WLOGFE("window is nullptr.");
         return;
     }
+    window_->AddWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
     RegitsterWindowListener();
-    if (!OHOS::Rosen::SurfaceDraw::DrawImage(window_->GetSurfaceNode(), rect_.width_, rect_.height_,
+    if (!OHOS::Rosen::SurfaceDraw::DrawImage(window_->GetSurfaceNode(), rect.width_, rect.height_,
         IMAGE_PLACE_HOLDER_PNG_PATH)) {
         WLOGE("draw surface failed");
         return;
     }
     window_->Show();
-    state_ = InnerWindowState::INNER_WINDOW_STATE_CRATED;
     WLOGFD("create palce holder Window end");
 }
 
@@ -140,30 +90,35 @@ void PlaceHolderWindow::RegitsterWindowListener()
         WLOGFE("Window is nullptr, regitster window listener failed.");
         return;
     }
-    window_->RegisterTouchOutsideListener(this);
-    window_->RegisterInputEventListener(this);
-    window_->RegisterLifeCycleListener(this);
+    if (listener_ == nullptr) {
+        listener_ = new (std::nothrow) PlaceholderWindowListener();
+    }
+    window_->RegisterTouchOutsideListener(listener_);
+    window_->RegisterInputEventListener(listener_);
+    window_->RegisterLifeCycleListener(listener_);
 }
 
 void PlaceHolderWindow::UnRegitsterWindowListener()
 {
-    if (window_ == nullptr) {
-        WLOGFE("Window is nullptr, unregitster window listener failed.");
+    if (window_ == nullptr || listener_ == nullptr) {
+        WLOGFE("Window or listener is nullptr, unregitster window listener failed.");
         return;
     }
-    window_->UnregisterTouchOutsideListener(this);
-    window_->UnregisterInputEventListener(this);
-    window_->UnregisterLifeCycleListener(this);
+    window_->UnregisterTouchOutsideListener(listener_);
+    window_->UnregisterInputEventListener(listener_);
+    window_->UnregisterLifeCycleListener(listener_);
 }
 
 void PlaceHolderWindow::Destroy()
 {
-    UnRegitsterWindowListener();
+    WLOGFI("destroy place holder window begin.");
     if (window_ != nullptr) {
+        WLOGFI("destroy place holder window not nullptr.");
+        UnRegitsterWindowListener();
         window_->Destroy();
     }
     window_ = nullptr;
-    state_ = InnerWindowState::INNER_WINDOW_STATE_DESTROYED;
+    WLOGFI("destroy place holder window end.");
 }
 
 DividerWindow::~DividerWindow()
@@ -171,31 +126,26 @@ DividerWindow::~DividerWindow()
     Destroy();
 }
 
-void DividerWindow::Create()
+void DividerWindow::Create(std::string name, DisplayId displayId, const Rect rect, WindowMode mode)
 {
-    WLOGFI("create inner display id: %{public}" PRIu64"", displayId_);
+    displayId_ = displayId;
+    WLOGFD("create inner display id: %{public}" PRIu64"", displayId_);
     auto dialogCallback = [this](int32_t id, const std::string& event, const std::string& params) {
-        if (params == "EVENT_CANCEL_CODE") {
-            Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
-        }
+        WLOGFD("divider dialog window get param: %{public}s", params.c_str());
     };
-    std::string params;
-    Ace::UIServiceMgrClient::GetInstance()->ShowDialog(name_, params, WindowType::WINDOW_TYPE_DOCK_SLICE,
-        rect_.posX_, rect_.posY_, rect_.width_, rect_.height_, dialogCallback, &dialogId_);
-    state_ = InnerWindowState::INNER_WINDOW_STATE_CRATED;
-    WLOGFI("create inner window id: %{public}d success", dialogId_);
+    Ace::UIServiceMgrClient::GetInstance()->ShowDialog(name, params_, WindowType::WINDOW_TYPE_DOCK_SLICE,
+        rect.posX_, rect.posY_, rect.width_, rect.height_, dialogCallback, &dialogId_);
+    WLOGFD("create inner window id: %{public}d success", dialogId_);
 }
 
 void DividerWindow::Destroy()
 {
-    if (dialogId_ == -1) {
-        state_ = InnerWindowState::INNER_WINDOW_STATE_DESTROYED;
+    if (dialogId_ == IVALID_DIALOG_WINDOW_ID) {
         return;
     }
-    WLOGFI("destroy inner window id:: %{public}d.", dialogId_);
+    WLOGFD("destroy inner window id:: %{public}d.", dialogId_);
     Ace::UIServiceMgrClient::GetInstance()->CancelDialog(dialogId_);
-    dialogId_ = -1;
-    state_ = InnerWindowState::INNER_WINDOW_STATE_DESTROYED;
+    dialogId_ = IVALID_DIALOG_WINDOW_ID;
 }
 } // Rosen
 } // OHOS

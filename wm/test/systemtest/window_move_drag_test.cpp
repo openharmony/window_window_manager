@@ -30,7 +30,7 @@ namespace {
     constexpr float DRAG_HOTZONE_RATIO = 0.6;
     constexpr int WAIT_SYANC_MS = 100000;
 }
-using utils = WindowTestUtils;
+using Utils = WindowTestUtils;
 class WindowMoveDragTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -81,7 +81,7 @@ void WindowMoveDragTest::SetUp()
     WLOGFI("GetDefaultDisplay: id %{public}llu, w %{public}d, h %{public}d, fps %{public}u\n",
         (unsigned long long)display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
-    utils::InitByDisplayRect(displayRect);
+    Utils::InitByDisplayRect(displayRect);
 
     virtualPixelRatio_ = WindowTestUtils::GetVirtualPixelRatio(0);
     hotZone_ = static_cast<uint32_t>(HOTZONE * virtualPixelRatio_);
@@ -127,19 +127,19 @@ void WindowMoveDragTest::DoMoveOrDrag(bool isMove, bool isDrag)
     std::shared_ptr<MMI::PointerEvent> pointerEvent =
         CreatePointerEvent(startPointX_, startPointY_, pointerId_, MMI::PointerEvent::POINTER_ACTION_DOWN);
     window_->ConsumePointerEvent(pointerEvent);
-    ASSERT_TRUE(utils::RectEqualToRect(window_->GetRect(), startPointRect_));
+    ASSERT_TRUE(Utils::RectEqualToRect(window_->GetRect(), startPointRect_));
 
     pointerEvent = CreatePointerEvent(pointX_, pointY_, pointerId_, MMI::PointerEvent::POINTER_ACTION_MOVE);
     window_->ConsumePointerEvent(pointerEvent);
     CalExpectRects();
     usleep(WAIT_SYANC_MS);
-    ASSERT_TRUE(utils::RectEqualToRect(window_->GetRect(), expectRect_));
+    ASSERT_TRUE(Utils::RectEqualToRect(window_->GetRect(), expectRect_));
     ASSERT_EQ(isMove, window_->startMoveFlag_);
     ASSERT_EQ(isDrag, window_->startDragFlag_);
 
     pointerEvent = CreatePointerEvent(pointX_, pointY_, pointerId_, MMI::PointerEvent::POINTER_ACTION_UP);
     window_->ConsumePointerEvent(pointerEvent);
-    ASSERT_TRUE(utils::RectEqualToRect(window_->GetRect(), expectRect_));
+    ASSERT_TRUE(Utils::RectEqualToRect(window_->GetRect(), expectRect_));
 }
 
 void WindowMoveDragTest::CalExpectRects()
@@ -180,7 +180,7 @@ void WindowMoveDragTest::CalExpectRects()
             hasStartMove_ = false;
         }
     }
-    bool isVertical = (utils::displayRect_.width_ < utils::displayRect_.height_) ? true : false;
+    bool isVertical = (Utils::displayRect_.width_ < Utils::displayRect_.height_) ? true : false;
     expectRect_ = WindowHelper::GetFixedWindowRectByLimitSize(oriRect, startPointRect_, isVertical, virtualPixelRatio_);
 }
 
