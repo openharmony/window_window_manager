@@ -806,8 +806,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         }
         case PropertyChangeAction::ACTION_UPDATE_ORIENTATION: {
             node->SetRequestedOrientation(property->GetRequestedOrientation());
-            if (WindowHelper::IsMainWindow(node->GetWindowType()) &&
-                node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            if (WindowHelper::IsMainFullScreenWindow(node->GetWindowType(), node->GetWindowMode())) {
                 DisplayManagerServiceInner::GetInstance().
                     SetOrientationFromWindow(node->GetDisplayId(), property->GetRequestedOrientation());
             }
