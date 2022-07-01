@@ -92,9 +92,6 @@ private:
         { WindowType::WINDOW_TYPE_STATUS_BAR,     INVALID_WINDOW_ID },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, INVALID_WINDOW_ID },
     };
-    std::unordered_map<WindowType, std::map<uint32_t, std::map<uint32_t, Rect>>> systemBarRect_;
-    std::unordered_map<DisplayId, sptr<DisplayInfo>> curDisplayInfo_;
-    constexpr static float SYSTEM_BAR_HEIGHT_RATIO = 0.08;
     bool isScreenLocked_ { false };
 };
 } // Rosen
