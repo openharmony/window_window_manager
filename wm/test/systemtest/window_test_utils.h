@@ -58,6 +58,7 @@ public:
     static Rect singleTileRect_;
     static std::vector<Rect> doubleTileRects_;
     static std::vector<Rect> tripleTileRects_;
+    static AvoidArea systemAvoidArea_;
 
     static void InitByDisplayRect(const Rect& screenRect);
     static sptr<Window> CreateTestWindow(const TestWindowInfo& info);
