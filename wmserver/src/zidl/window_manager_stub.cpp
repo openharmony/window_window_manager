@@ -31,13 +31,13 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         WLOGFE("InterfaceToken check failed");
         return -1;
     }
-    WindowManagerMessage msgId = static_cast<WindowManagerMessage>(code);
+    auto msgId = static_cast<WindowManagerMessage>(code);
     switch (msgId) {
         case WindowManagerMessage::TRANS_ID_CREATE_WINDOW: {
             sptr<IRemoteObject> windowObject = data.ReadRemoteObject();
             sptr<IWindow> windowProxy = iface_cast<IWindow>(windowObject);
             sptr<WindowProperty> windowProperty = data.ReadStrongParcelable<WindowProperty>();
-            std::shared_ptr<RSSurfaceNode> surfaceNode(data.ReadParcelable<RSSurfaceNode>());
+            std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
             uint32_t windowId;
             sptr<IRemoteObject> token = nullptr;
             if (windowProperty && windowProperty->GetTokenState()) {
@@ -76,7 +76,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         }
         case WindowManagerMessage::TRANS_ID_SET_BACKGROUND_BLUR: {
             uint32_t windowId = data.ReadUint32();
-            WindowBlurLevel level = static_cast<WindowBlurLevel>(data.ReadUint32());
+            auto level = static_cast<WindowBlurLevel>(data.ReadUint32());
             WMError errCode = SetWindowBackgroundBlur(windowId, level);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
@@ -105,7 +105,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT: {
-            WindowManagerAgentType type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+            auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -113,7 +113,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
-            WindowManagerAgentType type = static_cast<WindowManagerAgentType>(data.ReadUint32());
+            auto type = static_cast<WindowManagerAgentType>(data.ReadUint32());
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -153,7 +153,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_UPDATE_LAYOUT_MODE: {
-            WindowLayoutMode mode = static_cast<WindowLayoutMode>(data.ReadUint32());
+            auto mode = static_cast<WindowLayoutMode>(data.ReadUint32());
             WMError errCode = SetWindowLayoutMode(mode);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
