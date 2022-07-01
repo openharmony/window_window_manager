@@ -63,7 +63,7 @@ public:
     bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
 
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
-    std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
+    const std::shared_ptr<RSDisplayNode>& GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
     void UpdateRSTree(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
     bool MakeMirror(ScreenId, std::vector<ScreenId> screens);
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);

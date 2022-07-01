@@ -42,7 +42,7 @@ bool WindowVisibilityInfo::Marshalling(Parcel &parcel) const
 
 WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
 {
-    WindowVisibilityInfo* windowVisibilityInfo = new (std::nothrow) WindowVisibilityInfo();
+    auto* windowVisibilityInfo = new (std::nothrow) WindowVisibilityInfo();
     if (windowVisibilityInfo == nullptr) {
         WLOGFE("window visibility info is nullptr.");
         return nullptr;
@@ -68,7 +68,7 @@ bool WindowInfo::Marshalling(Parcel &parcel) const
 
 WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
 {
-    WindowInfo* windowInfo = new (std::nothrow) WindowInfo();
+    auto* windowInfo = new (std::nothrow) WindowInfo();
     if (windowInfo == nullptr) {
         WLOGFE("window info is nullptr.");
         return nullptr;
@@ -94,7 +94,7 @@ bool AccessibilityWindowInfo::Marshalling(Parcel &parcel) const
 
 AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel &parcel)
 {
-    AccessibilityWindowInfo* accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
+    auto* accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
     if (accessibilityWindowInfo == nullptr) {
         WLOGFE("accessibility window info is nullptr.");
         return nullptr;
@@ -117,7 +117,7 @@ bool FocusChangeInfo::Marshalling(Parcel &parcel) const
 
 FocusChangeInfo* FocusChangeInfo::Unmarshalling(Parcel &parcel)
 {
-    FocusChangeInfo* focusChangeInfo = new FocusChangeInfo();
+    auto* focusChangeInfo = new FocusChangeInfo();
     bool res = parcel.ReadUint32(focusChangeInfo->windowId_) && parcel.ReadUint64(focusChangeInfo->displayId_) &&
         parcel.ReadInt32(focusChangeInfo->pid_) && parcel.ReadInt32(focusChangeInfo->uid_);
     if (!res) {
@@ -150,7 +150,7 @@ public:
     static inline SingletonDelegator<WindowManager> delegator_;
 
     bool isHandlerRunning_ = false;
-    std::shared_ptr<EventHandler> listenertHandler_;
+    std::shared_ptr<EventHandler> listenerHandler_;
     std::recursive_mutex mutex_;
     std::vector<sptr<IFocusChangedListener>> focusChangedListeners_;
     sptr<WindowManagerAgent> focusChangedListenerAgent_;
@@ -170,11 +170,11 @@ void WindowManager::Impl::PostTask(ListenerTaskCallback &&callback, EventPriorit
     if (!isHandlerRunning_) {
         InitListenerHandler();
     }
-    if (listenertHandler_ == nullptr) {
+    if (listenerHandler_ == nullptr) {
         WLOGFE("listener handler is nullptr");
         return;
     }
-    bool ret = listenertHandler_->PostTask([this, callback]() {
+    bool ret = listenerHandler_->PostTask([this, callback]() {
             callback();
         }, name, 0, priority); // 0 is task delay time
     if (!ret) {
@@ -191,8 +191,8 @@ void WindowManager::Impl::InitListenerHandler()
         WLOGFE("init window manager callback runner failed.");
         return;
     }
-    listenertHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    if (listenertHandler_ == nullptr) {
+    listenerHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    if (listenerHandler_ == nullptr) {
         WLOGFE("init window manager callback handler failed.");
         return;
     }
@@ -287,9 +287,7 @@ WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>())
 {
 }
 
-WindowManager::~WindowManager()
-{
-}
+WindowManager::~WindowManager() = default;
 
 void WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener)
 {

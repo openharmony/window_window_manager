@@ -41,9 +41,7 @@ AbstractScreenController::AbstractScreenController(std::recursive_mutex& mutex)
     controllerHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 }
 
-AbstractScreenController::~AbstractScreenController()
-{
-}
+AbstractScreenController::~AbstractScreenController() = default;
 
 void AbstractScreenController::Init()
 {
@@ -55,8 +53,7 @@ void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
 {
     WLOGFD("RegisterRsScreenConnectionChangeListener");
     auto res = rsInterface_.SetScreenChangeCallback(
-        std::bind(&AbstractScreenController::OnRsScreenConnectionChange,
-        this, std::placeholders::_1, std::placeholders::_2));
+        [this](ScreenId rsScreenId, ScreenEvent screenEvent) { OnRsScreenConnectionChange(rsScreenId, screenEvent); });
     if (res != StatusCode::SUCCESS) {
         auto task = [this] {
             RegisterRsScreenConnectionChangeListener();
@@ -76,8 +73,8 @@ std::vector<ScreenId> AbstractScreenController::GetAllScreenIds() const
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::vector<ScreenId> res;
-    for (auto iter = dmsScreenMap_.begin(); iter != dmsScreenMap_.end(); iter++) {
-        res.emplace_back(iter->first);
+    for (const auto& iter : dmsScreenMap_) {
+        res.emplace_back(iter.first);
     }
     return res;
 }
@@ -133,7 +130,7 @@ std::vector<ScreenId> AbstractScreenController::GetAllExpandOrMirrorScreenIds(
     return screenIds;
 }
 
-std::shared_ptr<RSDisplayNode> AbstractScreenController::GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const
+const std::shared_ptr<RSDisplayNode>& AbstractScreenController::GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const
 {
     sptr<AbstractScreen> screen = GetAbstractScreen(dmsScreenId);
     if (screen == nullptr) {
@@ -175,7 +172,7 @@ sptr<AbstractScreenGroup> AbstractScreenController::GetAbstractScreenGroup(Scree
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = dmsScreenGroupMap_.find(dmsScreenId);
     if (iter == dmsScreenGroupMap_.end()) {
-        WLOGE("didnot find screen:%{public}" PRIu64"", dmsScreenId);
+        WLOGE("did not find screen:%{public}" PRIu64"", dmsScreenId);
         return nullptr;
     }
     return iter->second;
@@ -498,7 +495,7 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
     }
     std::vector<ScreenId> virtualScreenIds;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    std::map<sptr<IRemoteObject>, std::vector<ScreenId>>::iterator agIter = screenAgentMap_.find(displayManagerAgent);
+    auto agIter = screenAgentMap_.find(displayManagerAgent);
     if (agIter == screenAgentMap_.end()) {
         if (!RegisterVirtualScreenAgent(displayManagerAgent)) {
             return SCREEN_ID_INVALID;
@@ -557,7 +554,7 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
         }
     }
 
-    std::map<ScreenId, std::shared_ptr<RSDisplayNode>>::iterator iter = displayNodeMap_.find(rsScreenId);
+    auto iter = displayNodeMap_.find(rsScreenId);
     if (iter == displayNodeMap_.end()) {
         WLOGFI("displayNode is nullptr");
     } else {
@@ -970,7 +967,7 @@ bool AbstractScreenController::OnRemoteDied(const sptr<IRemoteObject>& agent)
     if (agent == nullptr) {
         return false;
     }
-    std::map<sptr<IRemoteObject>, std::vector<ScreenId>>::iterator agentIter = screenAgentMap_.find(agent);
+    auto agentIter = screenAgentMap_.find(agent);
     if (agentIter != screenAgentMap_.end()) {
         while (screenAgentMap_[agent].size() > 0) {
             auto diedId = screenAgentMap_[agent][0];

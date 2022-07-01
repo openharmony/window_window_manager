@@ -277,7 +277,7 @@ void WindowRoot::AddSurfaceNodeIdWindowNodePair(uint64_t surfaceNodeId, sptr<Win
 std::vector<std::pair<uint64_t, bool>> WindowRoot::GetWindowVisibilityChangeInfo(
     std::shared_ptr<RSOcclusionData> occlusionData)
 {
-    std::vector<std::pair<uint64_t, bool>> visibityChangeInfo;
+    std::vector<std::pair<uint64_t, bool>> visibilityChangeInfo;
     VisibleData& currentVisibleWindow = occlusionData->GetVisibleData();
     std::sort(currentVisibleWindow.begin(), currentVisibleWindow.end());
     VisibleData& lastVisibleWindow = lastOcclusionData_->GetVisibleData();
@@ -285,10 +285,10 @@ std::vector<std::pair<uint64_t, bool>> WindowRoot::GetWindowVisibilityChangeInfo
     i = j = 0;
     for (; i < lastVisibleWindow.size() && j < currentVisibleWindow.size();) {
         if (lastVisibleWindow[i] < currentVisibleWindow[j]) {
-            visibityChangeInfo.push_back(std::make_pair(lastVisibleWindow[i], false));
+            visibilityChangeInfo.emplace_back(lastVisibleWindow[i], false);
             i++;
         } else if (lastVisibleWindow[i] > currentVisibleWindow[j]) {
-            visibityChangeInfo.push_back(std::make_pair(currentVisibleWindow[j], true));
+            visibilityChangeInfo.emplace_back(currentVisibleWindow[j], true);
             j++;
         } else {
             i++;
@@ -296,20 +296,20 @@ std::vector<std::pair<uint64_t, bool>> WindowRoot::GetWindowVisibilityChangeInfo
         }
     }
     for (; i < lastVisibleWindow.size(); ++i) {
-        visibityChangeInfo.push_back(std::make_pair(lastVisibleWindow[i], false));
+        visibilityChangeInfo.emplace_back(lastVisibleWindow[i], false);
     }
     for (; j < currentVisibleWindow.size(); ++j) {
-        visibityChangeInfo.push_back(std::make_pair(currentVisibleWindow[j], true));
+        visibilityChangeInfo.emplace_back(currentVisibleWindow[j], true);
     }
     lastOcclusionData_ = occlusionData;
-    return visibityChangeInfo;
+    return visibilityChangeInfo;
 }
 
 void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> occlusionData)
 {
-    std::vector<std::pair<uint64_t, bool>> visibityChangeInfo = GetWindowVisibilityChangeInfo(occlusionData);
+    std::vector<std::pair<uint64_t, bool>> visibilityChangeInfo = GetWindowVisibilityChangeInfo(occlusionData);
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
-    for (const auto& elem : visibityChangeInfo) {
+    for (const auto& elem : visibilityChangeInfo) {
         uint64_t surfaceId = elem.first;
         bool isVisible = elem.second;
         auto iter = surfaceIdWindowNodeMap_.find(surfaceId);
@@ -868,13 +868,13 @@ WMError WindowRoot::RequestActiveWindow(uint32_t windowId)
     return res;
 }
 
-std::shared_ptr<RSSurfaceNode> WindowRoot::GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject> &abilityToken) const
+std::shared_ptr<RSSurfaceNode> WindowRoot::GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const
 {
-    for (auto iter = windowNodeMap_.begin(); iter != windowNodeMap_.end(); iter++) {
-        if (iter->second->abilityToken_ != abilityToken) {
+    for (const auto& iter : windowNodeMap_) {
+        if (iter.second->abilityToken_ != abilityToken) {
             continue;
         }
-        return iter->second->surfaceNode_;
+        return iter.second->surfaceNode_;
     }
     WLOGFE("could not find required abilityToken!");
     return nullptr;
@@ -980,7 +980,7 @@ std::vector<DisplayId> WindowRoot::GetAllDisplayIds() const
     std::vector<DisplayId> displayIds;
     for (auto& it : windowNodeContainerMap_) {
         if (!it.second) {
-            return std::vector<DisplayId>();
+            return {};
         }
         std::vector<DisplayId>& displayIdVec = const_cast<WindowRoot*>(this)->displayIdMap_[it.first];
         for (auto displayId : displayIdVec) {
@@ -1240,19 +1240,19 @@ float WindowRoot::GetVirtualPixelRatio(DisplayId displayId) const
 
 Rect WindowRoot::GetDisplayGroupRect(DisplayId displayId) const
 {
-    Rect fulldisplayRect;
+    Rect fullDisplayRect;
     auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);
     if (container == nullptr) {
         WLOGFE("window container could not be found");
-        return fulldisplayRect;
+        return fullDisplayRect;
     }
     return container->GetDisplayGroupRect();
 }
 
 WMError WindowRoot::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
 {
-    for (auto iter = windowNodeContainerMap_.begin(); iter != windowNodeContainerMap_.end(); ++iter) {
-        auto container = iter->second;
+    for (auto& iter : windowNodeContainerMap_) {
+        auto container = iter.second;
         std::vector<sptr<WindowInfo>> windowList;
         container->GetWindowList(windowList);
         for (auto window : windowList) {
