@@ -47,7 +47,7 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
         WLOGFI("dispatch keyEvent to input method");
         inputMethodHasProcessed = MiscServices::InputMethodController::GetInstance()->dispatchKeyEvent(keyEvent);
     }
-    if (!isKeyboardEvent || !inputMethodHasProcessed) {
+    if (!inputMethodHasProcessed) {
         WLOGFI("dispatch keyEvent to ACE");
         if (inputListener_ != nullptr) {
             inputListener_->OnInputEvent(keyEvent);
