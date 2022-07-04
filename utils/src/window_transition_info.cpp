@@ -26,7 +26,15 @@ WindowTransitionInfo::WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> in
     displayId_ = info->displayId_;
     isShowWhenLocked_ = info->isShowWhenLocked_;
     isRecent_ = info->isRecent_;
-    supportWindowModes_.assign(info->windowModes_.begin(), info->windowModes_.end());
+    if (info->windowModes_.empty()) {
+        supportWindowModes_ = {
+            AppExecFwk::SupportWindowMode::FULLSCREEN,
+            AppExecFwk::SupportWindowMode::SPLIT,
+            AppExecFwk::SupportWindowMode::FLOATING
+        };
+    } else {
+        supportWindowModes_.assign(info->windowModes_.begin(), info->windowModes_.end());
+    }
 }
 
 void WindowTransitionInfo::SetBundleName(std::string name)

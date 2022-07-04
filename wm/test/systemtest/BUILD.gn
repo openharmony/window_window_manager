@@ -34,8 +34,6 @@ group("systemtest") {
     ":wm_window_multi_ability_test",
     ":wm_window_occupied_area_change_test",
     ":wm_window_rotation_test",
-    ":wm_window_split_immersive_test",
-    ":wm_window_split_test",
     ":wm_window_subwindow_test",
     ":wm_window_touch_outside_test",
     ":wm_window_visibility_info_test",
