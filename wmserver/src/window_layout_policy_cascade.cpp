@@ -19,6 +19,7 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 #include "wm_common_inner.h"
 #include "wm_trace.h"
 
@@ -317,9 +318,28 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
     CalcAndSetNodeHotZone(winRect, node);
 
     UpdateClientRectAndResetReason(node, lastWinRect, winRect);
+
     // update node bounds
 
     UpdateSurfaceBounds(node, winRect, lastWinRect);
+}
+
+void WindowLayoutPolicyCascade::UpdateSurfaceBounds(
+    const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
+{
+    switch (node->GetWindowSizeChangeReason()) {
+        case WindowSizeChangeReason::MAXIMIZE:
+        case WindowSizeChangeReason::RECOVER: {
+            const RSAnimationTimingProtocol timingProtocol(400);
+            RSNode::Animate(timingProtocol, RSAnimationTimingCurve::EASE_OUT,
+                [=]() { WindowLayoutPolicy::UpdateSurfaceBounds(node, winRect, preRect); });
+            break;
+        }
+        case WindowSizeChangeReason::ROTATION:
+        case WindowSizeChangeReason::UNDEFINED:
+        default:
+            WindowLayoutPolicy::UpdateSurfaceBounds(node, winRect, preRect);
+    }
 }
 
 void WindowLayoutPolicyCascade::InitLimitRects(DisplayId displayId)
