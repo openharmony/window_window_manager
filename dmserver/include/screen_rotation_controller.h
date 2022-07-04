@@ -81,6 +81,7 @@ private:
     static bool ProcessSwitchToAutoRotation(DeviceRotation rotation);
     static void ProcessSwitchToAutoRotationPortraitRestricted();
     static void ProcessSwitchToAutoRotationLandscapeRestricted();
+    static void ProcessSwitchToSensorUnrelatedOrientation(Orientation orientation);
     static Rotation ProcessAutoRotationPortraitOrientation(DeviceRotation sensorRotationConveted);
     static Rotation ProcessAutoRotationLandscapeOrientation(DeviceRotation sensorRotationConveted);
 
