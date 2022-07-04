@@ -28,8 +28,6 @@ namespace {
     const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
 }
 
-SurfaceDraw StartingWindow::surfaceDraw_;
-static bool g_hasInit = false;
 std::recursive_mutex StartingWindow::mutex_;
 
 bool StartingWindow::NeedCancelStartingWindow(uint32_t modeSupportInfo,
@@ -110,10 +108,6 @@ void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
     if (!isColdStart) {
         return;
     }
-    if (!g_hasInit) {
-        surfaceDraw_.Init();
-        g_hasInit = true;
-    }
     if (node->startingWinSurfaceNode_ == nullptr) {
         WLOGFE("no starting Window SurfaceNode!");
         return;
@@ -123,10 +117,10 @@ void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
         node->leashWinSurfaceNode_->SetBounds(rect.posX_, rect.posY_, -1, -1);
     }
     if (pixelMap == nullptr) {
-        surfaceDraw_.DrawBackgroundColor(node->startingWinSurfaceNode_, rect, bkgColor);
+        SurfaceDraw::DrawColor(node->startingWinSurfaceNode_, rect.width_, rect.height_, bkgColor);
         return;
     }
-    surfaceDraw_.DrawSkImage(node->startingWinSurfaceNode_, rect, pixelMap, bkgColor);
+    SurfaceDraw::DrawImageRect(node->startingWinSurfaceNode_, rect, pixelMap, bkgColor);
 }
 
 void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,

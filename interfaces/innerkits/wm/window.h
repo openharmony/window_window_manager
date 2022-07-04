@@ -217,9 +217,9 @@ public:
     virtual void RequestFrame() = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
 
-    virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) = 0;
+    virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
-    virtual void UnregisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) = 0;
+    virtual void UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
     virtual void UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
     virtual void UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
@@ -227,8 +227,8 @@ public:
     virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
-    virtual void RegisterInputEventListener(sptr<IInputEventListener>& listener) = 0;
-    virtual void UnregisterInputEventListener(sptr<IInputEventListener>& listener) = 0;
+    virtual void RegisterInputEventListener(const sptr<IInputEventListener>& listener) = 0;
+    virtual void UnregisterInputEventListener(const sptr<IInputEventListener>& listener) = 0;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;

@@ -1411,7 +1411,7 @@ void WindowImpl::AddInputEventListener(const std::shared_ptr<MMI::IInputEventCon
     InputTransferStation::GetInstance().SetInputListener(GetWindowId(), inputEventListener);
 }
 
-void WindowImpl::RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener)
+void WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
     if (listener == nullptr) {
         return;
@@ -1438,7 +1438,7 @@ void WindowImpl::RegisterWindowChangeListener(sptr<IWindowChangeListener>& liste
     windowChangeListeners_.emplace_back(listener);
 }
 
-void WindowImpl::UnregisterLifeCycleListener(sptr<IWindowLifeCycle>& listener)
+void WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     lifecycleListeners_.erase(std::remove_if(lifecycleListeners_.begin(), lifecycleListeners_.end(),
@@ -1540,7 +1540,7 @@ void WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& liste
     displayMoveListeners_.erase(iter);
 }
 
-void WindowImpl::RegisterInputEventListener(sptr<IInputEventListener>& listener)
+void WindowImpl::RegisterInputEventListener(const sptr<IInputEventListener>& listener)
 {
     if (listener == nullptr) {
         return;
@@ -1553,7 +1553,7 @@ void WindowImpl::RegisterInputEventListener(sptr<IInputEventListener>& listener)
     inputEventListeners_.emplace_back(listener);
 }
 
-void WindowImpl::UnregisterInputEventListener(sptr<IInputEventListener>& listener)
+void WindowImpl::UnregisterInputEventListener(const sptr<IInputEventListener>& listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(inputEventListeners_.begin(), inputEventListeners_.end(), listener);

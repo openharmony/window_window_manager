@@ -44,6 +44,7 @@ ohos_shared_library("libwms") {
     "src/display_group_info.cpp",
     "src/drag_controller.cpp",
     "src/freeze_controller.cpp",
+    "src/inner_window.cpp",
     "src/input_window_monitor.cpp",
     "src/minimize_app.cpp",
     "src/remote_animation.cpp",
@@ -73,6 +74,7 @@ ohos_shared_library("libwms") {
 
   deps = [
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/dmserver:libdms",

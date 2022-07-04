@@ -20,9 +20,14 @@
 #include "event_handler.h"
 #include "event_runner.h"
 
+#include "inner_window.h"
 #include "wm_common.h"
 #include "wm_single_instance.h"
 
+enum class InnerWMRunningState {
+    STATE_NOT_START,
+    STATE_RUNNING,
+};
 namespace OHOS {
 namespace Rosen {
 class WindowInnerManager : public RefBase {
@@ -30,29 +35,23 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInnerManager);
 using EventRunner = OHOS::AppExecFwk::EventRunner;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 public:
-    void Start();
+    void Start(bool enableRecentholder);
     void Stop();
-    void CreateWindow(std::string name, WindowType type, Rect rect);
-    void DestroyWindow();
-public:
-    enum class InnerWMRunningState {
-        STATE_NOT_START,
-        STATE_RUNNING,
-    };
+    void CreateInnerWindow(std::string name, DisplayId displayId, Rect rect, WindowType type, WindowMode mode);
+    void DestroyInnerWindow(DisplayId displayId, WindowType type);
+
+protected:
+    WindowInnerManager();
     ~WindowInnerManager();
 
 private:
-    WindowInnerManager();
     bool Init();
-    void HandleCreateWindow(std::string name, WindowType type, Rect rect);
-    void HandleDestroyWindow();
 
 private:
-    int32_t dialogId_ = -1;
+    bool isRecentHolderEnable_ = false;
     std::shared_ptr<EventHandler> eventHandler_;
     std::shared_ptr<EventRunner> eventLoop_;
     InnerWMRunningState state_;
-    std::string dividerParams_ = "";
     const std::string INNER_WM_THREAD_NAME = "inner_window_manager";
 };
 } // namespace Rosen

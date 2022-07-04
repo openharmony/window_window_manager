@@ -50,8 +50,9 @@ bool WindowInnerManager::Init()
     return true;
 }
 
-void WindowInnerManager::Start()
+void WindowInnerManager::Start(bool enableRecentholder)
 {
+    isRecentHolderEnable_ = enableRecentholder;
     if (state_ == InnerWMRunningState::STATE_RUNNING) {
         WLOGFI("window inner manager service has already started.");
     }
@@ -77,49 +78,45 @@ void WindowInnerManager::Stop()
     state_ = InnerWMRunningState::STATE_NOT_START;
 }
 
-void WindowInnerManager::HandleCreateWindow(std::string name, WindowType type, Rect rect)
+void WindowInnerManager::CreateInnerWindow(std::string name, DisplayId displayId, Rect rect,
+    WindowType type, WindowMode mode)
 {
-    auto dialogCallback = [this](int32_t id, const std::string& event, const std::string& params) {
-        if (params == "EVENT_CANCEL_CODE") {
-            Ace::UIServiceMgrClient::GetInstance()->CancelDialog(id);
+    eventHandler_->PostTask([this, name, displayId, rect, mode, type]() {
+        switch (type) {
+            case WindowType::WINDOW_TYPE_PLACEHOLDER: {
+                if (isRecentHolderEnable_) {
+                    PlaceHolderWindow::GetInstance().Create(name, displayId, rect, mode);
+                }
+                break;
+            }
+            case WindowType::WINDOW_TYPE_DOCK_SLICE: {
+                DividerWindow::GetInstance().Create(name, displayId, rect, mode);
+                break;
+            }
+            default:
+                break;
         }
-    };
-    Ace::UIServiceMgrClient::GetInstance()->ShowDialog(name, dividerParams_, type,
-        rect.posX_, rect.posY_, rect.width_, rect.height_, dialogCallback, &dialogId_);
-    WLOGFI("create inner window id: %{public}d success", dialogId_);
-    return;
-}
-
-void WindowInnerManager::HandleDestroyWindow()
-{
-    if (dialogId_ == -1) {
-        return;
-    }
-    WLOGFI("destroy inner window id:: %{public}d.", dialogId_);
-    Ace::UIServiceMgrClient::GetInstance()->CancelDialog(dialogId_);
-    dialogId_ = -1;
-    return;
-}
-
-void WindowInnerManager::CreateWindow(std::string name, WindowType type, Rect rect)
-{
-    if (dialogId_ != -1) {
-        return;
-    }
-    eventHandler_->PostTask([this, name, type, rect]() {
-        HandleCreateWindow(name, type, rect);
     });
     return;
 }
 
-void WindowInnerManager::DestroyWindow()
+void WindowInnerManager::DestroyInnerWindow(DisplayId displayId, WindowType type)
 {
-    if (dialogId_ == -1) {
-        WLOGFI("inner window has destroyed.");
-        return;
-    }
-    eventHandler_->PostTask([this]() {
-        HandleDestroyWindow();
+    eventHandler_->PostTask([this, type]() {
+        switch (type) {
+            case WindowType::WINDOW_TYPE_PLACEHOLDER: {
+                if (isRecentHolderEnable_) {
+                    PlaceHolderWindow::GetInstance().Destroy();
+                }
+                break;
+            }
+            case WindowType::WINDOW_TYPE_DOCK_SLICE: {
+                DividerWindow::GetInstance().Destroy();
+                break;
+            }
+            default:
+                break;
+        }
     });
     return;
 }
