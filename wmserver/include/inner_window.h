@@ -31,7 +31,7 @@ public:
 class PlaceholderWindowListener : public IWindowLifeCycle, public ITouchOutsideListener, public IInputEventListener {
 public:
     // touch outside listener
-    virtual void OnTouchOutside();
+    virtual void OnTouchOutside() const;
     // input event listener
     virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent);
     virtual void OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
