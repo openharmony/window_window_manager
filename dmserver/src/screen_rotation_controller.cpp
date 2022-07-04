@@ -125,7 +125,7 @@ void ScreenRotationController::HandleGravitySensorEventCallback(SensorEvent *eve
     }
     Orientation orientation = GetPreferredOrientation();
     if (!IsSensorRelatedOrientation(orientation)) {
-        lastOrientationType_ = orientation;
+        ProcessSwitchToSensorUnrelatedOrientation(orientation);
         return;
     }
 
@@ -477,6 +477,35 @@ bool ScreenRotationController::IsDisplayRotationHorizontal(Rotation rotation)
 bool ScreenRotationController::IsGravitySensorEnabled()
 {
     return isGravitySensorSubscribed_;
+}
+
+void ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(Orientation orientation)
+{
+    if (lastOrientationType_ == orientation) {
+        return;
+    }
+    lastOrientationType_ = orientation;
+    switch (orientation) {
+        case Orientation::VERTICAL: {
+            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT));
+            break;
+        }
+        case Orientation::REVERSE_VERTICAL: {
+            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT_INVERTED));
+            break;
+        }
+        case Orientation::HORIZONTAL: {
+            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE));
+            break;
+        }
+        case Orientation::REVERSE_HORIZONTAL: {
+            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE_INVERTED));
+            break;
+        }
+        default: {
+            return;
+        }
+    }
 }
 } // Rosen
 } // OHOS
