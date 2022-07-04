@@ -621,11 +621,11 @@ bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation new
         WLOGI("skip setting orientation. screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);
         return true;
     }
-    if ((newOrientation >= Orientation::VERTICAL+ && newOrientation <= Orientation::REVERSE_HORIZONTAL) ||
+    if ((newOrientation >= Orientation::VERTICAL && newOrientation <= Orientation::REVERSE_HORIZONTAL) ||
         (newOrientation == Orientation::UNSPECIFIED && !ScreenRotationController::IsGravitySensorEnabled())) {
         Rotation rotationAfter = screen->CalcRotation(newOrientation);
         SetRotation(screenId, rotationAfter, false);
-        screen->rotation_ = rotationAfter;;
+        screen->rotation_ = rotationAfter;
     }
    
     if (!screen->SetOrientation(newOrientation)) {
