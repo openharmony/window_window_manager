@@ -689,21 +689,12 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
 
     // get support modes configuration
     uint32_t modeSupportInfo = 0;
-    const auto& supportModes = abilityInfo->windowModes;
-    for (auto& mode : supportModes) {
-        if (static_cast<uint32_t>(mode) == static_cast<uint32_t>(0)) {         // 0 : fullScreen
-            modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
-        } else if (static_cast<uint32_t>(mode) == static_cast<uint32_t>(1)) {  // 1 : split
-            modeSupportInfo |= (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
-                                WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
-        } else if (static_cast<uint32_t>(mode) == static_cast<uint32_t>(2)) {  // 2 : floating
-            modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
-        }
-    }
+    WindowHelper::ConvertSupportModesToSupportInfo(modeSupportInfo, abilityInfo->windowModes);
     if (modeSupportInfo == 0) {
-        WLOGFI("mode config param is 0, set all modes");
+        WLOGFI("mode config param is 0, all modes is supported");
         modeSupportInfo = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     }
+    WLOGFI("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
     SetRequestModeSupportInfo(modeSupportInfo);
 
     // get window size limits configuration
@@ -734,6 +725,18 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
 void WindowImpl::UpdateTitleButtonVisibility()
 {
     WLOGFI("[Client] UpdateTitleButtonVisibility");
+    if (uiContent_ == nullptr || !isAppDecorEnable_) {
+        return;
+    }
+    auto modeSupportInfo = GetModeSupportInfo();
+    bool hideSplitButton = !(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
+    // not support fullscreen in split and floating mode, or not support float in fullscreen mode
+    bool hideMaximizeButton = (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
+        (GetMode() == WindowMode::WINDOW_MODE_FLOATING || WindowHelper::IsSplitWindowMode(GetMode()))) ||
+        (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
+        GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
+    WLOGFI("[Client] [hideSplit, hideMaximize]: [%{public}d, %{public}d]", hideSplitButton, hideMaximizeButton);
+    uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false);
 }
 
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
@@ -966,9 +969,10 @@ WMError WindowImpl::Show(uint32_t reason, bool isCustomAnimation)
     bool isShowWhenLocked = GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), GetMode()) ||
         WindowHelper::IsOnlySupportSplitAndShowWhenLocked(isShowWhenLocked, GetModeSupportInfo())) {
-        WLOGFE("current mode is not be supported, windowId: %{public}u", property_->GetWindowId());
-        NotifyForegroundFailed();
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        WLOGFE("current mode is not supported, windowId: %{public}u, modeSupportInfo: %{public}u, winMode: %{public}u",
+            property_->GetWindowId(), GetModeSupportInfo(), GetMode());
+        NotifyForegroundInvalidWindowMode();
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE;
     }
 
     // update title button visibility when show
@@ -979,6 +983,8 @@ WMError WindowImpl::Show(uint32_t reason, bool isCustomAnimation)
     if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
+    } else if (ret == WMError::WM_ERROR_INVALID_WINDOW_MODE) {
+        NotifyForegroundInvalidWindowMode();
     } else {
         NotifyForegroundFailed();
         WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
@@ -1684,6 +1690,7 @@ void WindowImpl::UpdateMode(WindowMode mode)
 {
     WLOGI("UpdateMode %{public}u", mode);
     property_->SetWindowMode(mode);
+    UpdateTitleButtonVisibility();
     NotifyModeChange(mode);
     if (uiContent_ != nullptr) {
         uiContent_->UpdateWindowMode(mode);
