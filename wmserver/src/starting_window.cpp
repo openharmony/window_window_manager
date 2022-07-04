@@ -32,7 +32,19 @@ SurfaceDraw StartingWindow::surfaceDraw_;
 static bool g_hasInit = false;
 std::recursive_mutex StartingWindow::mutex_;
 
-sptr<WindowNode> StartingWindow::CreateWindowNode(sptr<WindowTransitionInfo> info,
+bool StartingWindow::NeedCancelStartingWindow(uint32_t modeSupportInfo,
+    WindowLayoutMode layoutMode, const sptr<WindowTransitionInfo>& info)
+{
+    if ((!WindowHelper::IsWindowModeSupported(modeSupportInfo, info->GetWindowMode())) ||
+        (WindowHelper::IsInvalidWindowInTileLayoutMode(modeSupportInfo, layoutMode)) ||
+        (WindowHelper::IsOnlySupportSplitAndShowWhenLocked(info->GetShowFlagWhenLocked(), modeSupportInfo))) {
+        WLOGFI("window mode is not be supported or not support floating mode in tile, cancel starting window");
+        return true;
+    }
+    return false;
+}
+
+sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInfo>& info,
     uint32_t winId, WindowLayoutMode layoutMode)
 {
     sptr<WindowProperty> property = new(std::nothrow) WindowProperty();
@@ -40,16 +52,10 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(sptr<WindowTransitionInfo> inf
         return nullptr;
     }
 
-    uint32_t modeSupportInfo = 0;
-    for (auto mode : info->GetWindowSupportModes()) {
-        modeSupportInfo |= mode;
-    }
-
     // if mode isn't be supported or don't support floating mode in tile mode, create starting window failed
-    if ((!WindowHelper::IsWindowModeSupported(modeSupportInfo, info->GetWindowMode())) ||
-        ((!WindowHelper::IsWindowModeSupported(modeSupportInfo, WindowMode::WINDOW_MODE_FLOATING)) &&
-         (layoutMode == WindowLayoutMode::TILE)) ||
-        (WindowHelper::IsOnlySupportSplitAndShowWhenLocked(info->GetShowFlagWhenLocked(), modeSupportInfo))) {
+    uint32_t modeSupportInfo = 0;
+    WindowHelper::ConvertSupportModesToSupportInfo(modeSupportInfo, info->GetWindowSupportModes());
+    if (NeedCancelStartingWindow(modeSupportInfo, layoutMode, info)) {
         WLOGFI("window mode is not be supported or not support floating mode in tile, cancel starting window");
         return nullptr;
     }

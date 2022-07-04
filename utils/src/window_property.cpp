@@ -502,9 +502,10 @@ void WindowProperty::UnmarshallingTransform(Parcel& parcel, WindowProperty* prop
 
 bool WindowProperty::MarshallingWindowSizeLimits(Parcel& parcel) const
 {
-    if (parcel.WriteUint32(sizeLimits_.maxWidth_) && parcel.WriteUint32(sizeLimits_.maxHeight_) &&
-        parcel.WriteUint32(sizeLimits_.minWidth_) && parcel.WriteUint32(sizeLimits_.minHeight_) &&
-        parcel.WriteFloat(sizeLimits_.maxRatio_) && parcel.WriteFloat(sizeLimits_.minRatio_)) {
+    if (parcel.WriteBool(sizeLimits_.isSizeLimitsUpdated_) && parcel.WriteUint32(sizeLimits_.maxWidth_) &&
+        parcel.WriteUint32(sizeLimits_.maxHeight_) && parcel.WriteUint32(sizeLimits_.minWidth_) &&
+        parcel.WriteUint32(sizeLimits_.minHeight_) && parcel.WriteFloat(sizeLimits_.maxRatio_) &&
+        parcel.WriteFloat(sizeLimits_.minRatio_)) {
         return true;
     }
     return false;
@@ -512,8 +513,8 @@ bool WindowProperty::MarshallingWindowSizeLimits(Parcel& parcel) const
 
 void WindowProperty::UnmarshallingWindowSizeLimits(Parcel& parcel, WindowProperty* property)
 {
-    WindowSizeLimits sizeLimits = { parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(),
-                                    parcel.ReadFloat(), parcel.ReadFloat() };
+    WindowSizeLimits sizeLimits = { parcel.ReadBool(), parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(),
+                                    parcel.ReadUint32(), parcel.ReadFloat(), parcel.ReadFloat() };
     property->SetSizeLimits(sizeLimits);
 }
 

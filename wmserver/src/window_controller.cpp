@@ -197,10 +197,18 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
+
     if (node->currentVisibility_ && !node->startingWindowShown_) {
         WLOGFE("current window is visible, windowId: %{public}u", node->GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
+
+    auto layoutMode = windowRoot_->GetCurrentLayoutMode(property->GetDisplayId());
+    if (WindowHelper::IsInvalidWindowInTileLayoutMode(node->GetModeSupportInfo(), layoutMode)) {
+        WLOGFE("window doesn't support floating mode in tile, windowId: %{public}u", node->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE;
+    }
+
     // using starting window rect if client rect is empty
     if (WindowHelper::IsEmptyRect(property->GetRequestRect()) && node->startingWindowShown_) { // for tile and cascade
         property->SetRequestRect(node->GetRequestRect());

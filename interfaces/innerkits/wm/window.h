@@ -60,6 +60,7 @@ public:
     virtual void AfterFocused() = 0;
     virtual void AfterUnfocused() = 0;
     virtual void ForegroundFailed() {}
+    virtual void ForegroundInvalidMode() {}
     virtual void AfterActive() {}
     virtual void AfterInactive() {}
 };
