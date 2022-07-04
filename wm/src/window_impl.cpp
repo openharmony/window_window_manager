@@ -1713,6 +1713,9 @@ void WindowImpl::HandleBackKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEve
     if (inputEventConsumer != nullptr) {
         WLOGFI("Transfer back key event to inputEventConsumer");
         isConsumed = inputEventConsumer->OnInputEvent(keyEvent);
+    } else if (!inputEventListeners_.empty()) {
+        WLOGFI("inputEventListeners_ is not empty");
+        return;
     } else if (uiContent_ != nullptr) {
         WLOGFI("Transfer back key event to uiContent");
         isConsumed = uiContent_->ProcessBackPressed();
