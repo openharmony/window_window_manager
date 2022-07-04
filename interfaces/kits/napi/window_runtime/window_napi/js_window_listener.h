@@ -58,7 +58,7 @@ public:
     void AfterFocused() override;
     void AfterUnfocused() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) override;
-    void OnTouchOutside() override;
+    void OnTouchOutside() const override;
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
 private:
     void LifeCycleCallBack(LifeCycleEventType eventType);

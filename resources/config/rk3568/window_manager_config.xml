@@ -15,7 +15,7 @@
  -->
  <Configs>
     <!--decor enable is true means app main window show decoration-->
-    <decor enable="true"></decor>
+    <decor enable="false"></decor>
     <!--max number of main window that could be shown on display-->
     <maxAppWindowNumber>100</maxAppWindowNumber>
     <!--minimizeByOther enable is true means fullscreen window will be minmized by other fullscreen window-->

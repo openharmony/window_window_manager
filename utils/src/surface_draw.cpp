@@ -165,7 +165,7 @@ bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, const s
 {
     OHOS::Rosen::Drawing::Bitmap bitmap;
     OHOS::Rosen::Drawing::BitmapFormat format { OHOS::Rosen::Drawing::ColorType::COLORTYPE_RGBA_8888,
-        OHOS::Rosen::Drawing::AlphaType::ALPHATYPE_OPAQUYE };
+        OHOS::Rosen::Drawing::AlphaType::ALPHATYPE_OPAQUE };
     bitmap.Build(width, height, format);
     OHOS::Rosen::Drawing::Canvas canvas;
     canvas.Bind(bitmap);
@@ -185,7 +185,7 @@ bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, uint32_
 {
     OHOS::Rosen::Drawing::Bitmap bitmap;
     OHOS::Rosen::Drawing::BitmapFormat format { OHOS::Rosen::Drawing::ColorType::COLORTYPE_RGBA_8888,
-        OHOS::Rosen::Drawing::AlphaType::ALPHATYPE_OPAQUYE };
+        OHOS::Rosen::Drawing::AlphaType::ALPHATYPE_OPAQUE };
     bitmap.Build(width, height, format);
     OHOS::Rosen::Drawing::Canvas canvas;
     canvas.Bind(bitmap);
@@ -239,7 +239,7 @@ bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, int32_t winWidth, int32_t winHe
 {
     OHOS::Rosen::Drawing::Bitmap bitmap;
     OHOS::Rosen::Drawing::BitmapFormat format { OHOS::Rosen::Drawing::ColorType::COLORTYPE_RGBA_8888,
-        OHOS::Rosen::Drawing::AlphaType::ALPHATYPE_OPAQUYE };
+        OHOS::Rosen::Drawing::AlphaType::ALPHATYPE_OPAQUE };
     bitmap.Build(winWidth, winHeight, format);
     OHOS::Rosen::Drawing::Canvas canvas;
     canvas.Bind(bitmap);

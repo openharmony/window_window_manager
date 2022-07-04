@@ -28,7 +28,7 @@ namespace {
 WM_IMPLEMENT_SINGLE_INSTANCE(PlaceHolderWindow)
 WM_IMPLEMENT_SINGLE_INSTANCE(DividerWindow)
 
-void PlaceholderWindowListener::OnTouchOutside()
+void PlaceholderWindowListener::OnTouchOutside() const
 {
     WLOGFD("place holder touch outside");
     PlaceHolderWindow::GetInstance().Destroy();
