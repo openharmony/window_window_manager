@@ -26,7 +26,6 @@
 
 namespace OHOS {
 namespace Rosen {
-
 enum class SensorRotation: int32_t {
     INVALID = -1,
     ROTATION_0 = 0,
@@ -55,31 +54,40 @@ public:
     static bool IsGravitySensorEnabled();
 private:
     static void HandleGravitySensorEventCallback(SensorEvent *event);
+    static bool CheckCallbackTimeInterval();
     static Rotation GetCurrentDisplayRotation();
     static Orientation GetPreferredOrientation();
+    static void SetScreenRotation(Rotation targetRotation);
     static int CalcRotationDegree(GravityData* gravityData);
     static Rotation CalcTargetDisplayRotation(Orientation requestedOrientation,
         DeviceRotation sensorRotationConverted);
-    static Rotation ProcessAutoRotationPortraitOrientation(DeviceRotation sensorRotationConveted);
-    static Rotation ProcessAutoRotationLandscapeOrientation(DeviceRotation sensorRotationConveted);
-    static void SetScreenRotation(Rotation targetRotation);
-    static bool CheckCallbackTimeInterval();
     static DeviceRotation CalcDeviceRotation(SensorRotation sensorRotation);
-    static bool ProcessOrientationSwitch(Orientation orientation, DeviceRotation deviceRotation);
     static SensorRotation CalcSensorRotation(int sensorDegree);
     static DeviceRotation ConvertSensorToDeviceRotation(SensorRotation sensorRotation);
     static Rotation ConvertDeviceToDisplayRotation(DeviceRotation sensorRotationConverted);
-    static void ProcessRotationMapping();
+
     static bool IsDeviceRotationVertical(DeviceRotation deviceRotation);
     static bool IsDeviceRotationHorizontal(DeviceRotation deviceRotation);
     static bool IsCurrentDisplayVertical();
     static bool IsCurrentDisplayHorizontal();
+    static bool IsDisplayRotationVertical(Rotation rotation);
+    static bool IsDisplayRotationHorizontal(Rotation rotation);
     static bool IsSensorRelatedOrientation(Orientation orientation);
+    
+    static void ProcessRotationMapping();
+    static bool ProcessOrientationSwitch(Orientation orientation, DeviceRotation deviceRotation);
+    static bool ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation);
+    static bool ProcessSwitchToAutoRotationLandscape(DeviceRotation rotation);
+    static bool ProcessSwitchToAutoRotation(DeviceRotation rotation);
+    static void ProcessSwitchToAutoRotationPortraitRestricted();
+    static void ProcessSwitchToAutoRotationLandscapeRestricted();
+    static Rotation ProcessAutoRotationPortraitOrientation(DeviceRotation sensorRotationConveted);
+    static Rotation ProcessAutoRotationLandscapeOrientation(DeviceRotation sensorRotationConveted);
 
     static DisplayId defaultDisplayId_;
     static SensorUser user_;
     static uint32_t defaultDeviceRotationOffset_;
-    static uint32_t defaultDeviceRotation_; // 0 means PORTRAIT, 1 means LANDSCAPE, use 0 in default.
+    static uint32_t defaultDeviceRotation_;
     static std::map<SensorRotation, DeviceRotation> sensorToDeviceRotationMap_;
     static std::map<DeviceRotation, Rotation> deviceToDisplayRotationMap_;
     static long lastCallbackTime_;
