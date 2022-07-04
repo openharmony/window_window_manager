@@ -172,6 +172,7 @@ public:
 
     virtual WMError RequestFocus() const override;
     virtual void AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) override;
+    virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
 
     virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
@@ -312,6 +313,12 @@ private:
             CALL_LIFECYCLE_LISTENER(ForegroundFailed);
         });
     }
+    inline void NotifyForegroundInvalidWindowMode()
+    {
+        PostListenerTask([this]() {
+            CALL_LIFECYCLE_LISTENER(ForegroundInvalidMode);
+        });
+    }
     void DestroyFloatingWindow();
     void DestroySubWindow();
     void SetDefaultOption(); // for api7
@@ -339,6 +346,7 @@ private:
     void UpdatePointerEventForStretchableWindow(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateDragType();
     void InitListenerHandler();
+    void HandleBackKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     bool CheckCameraFloatingWindowMultiCreated(WindowType type);
     void GetConfigurationFromAbilityInfo();
     void UpdateTitleButtonVisibility();
@@ -371,6 +379,7 @@ private:
     std::vector<sptr<IDisplayMoveListener>> displayMoveListeners_;
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners_;
     std::vector<sptr<IInputEventListener>> inputEventListeners_;
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
