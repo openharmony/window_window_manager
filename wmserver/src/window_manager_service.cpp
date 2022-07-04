@@ -67,7 +67,7 @@ void WindowManagerService::OnStart()
     if (!Init()) {
         return;
     }
-    WindowInnerManager::GetInstance().Start();
+    WindowInnerManager::GetInstance().Start(system::GetParameter("persist.window.holder.enable", "0") == "1");
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     DisplayManagerServiceInner::GetInstance().RegisterDisplayChangeListener(listener);
     RegisterSnapshotHandler();

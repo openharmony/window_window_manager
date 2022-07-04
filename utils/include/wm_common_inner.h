@@ -141,6 +141,7 @@ enum class TraceTaskId : int32_t {
 namespace {
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
     constexpr float DEFAULT_ASPECT_RATIO = 0.66;
+    constexpr int32_t IVALID_DIALOG_WINDOW_ID = -1;
     constexpr uint32_t DIVIDER_WIDTH = 8;
     constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 37;
     constexpr uint32_t WINDOW_FRAME_WIDTH = 5;
@@ -152,6 +153,7 @@ namespace {
     constexpr uint32_t MIN_HORIZONTAL_SPLIT_WIDTH = 320;
     constexpr uint32_t MAX_FLOATING_SIZE = 2560;
     const Rect INVALID_EMPTY_RECT = {0, 0, 0, 0};
+    const Rect DEFAULT_PLACE_HOLDER_RECT = {0, 0, 512, 512};
 }
 }
 }

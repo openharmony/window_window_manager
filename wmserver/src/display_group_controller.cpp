@@ -49,7 +49,7 @@ void DisplayGroupController::InitNewDisplay(DisplayId displayId)
     displayGroupWindowTree_.insert(std::make_pair(displayId, std::move(displayWindowTree)));
 
     // window pair for display
-    auto windowPair = new WindowPair(displayId, displayGroupWindowTree_);
+    auto windowPair = new WindowPair(displayId);
     windowPairMap_.insert(std::make_pair(displayId, windowPair));
 }
 
