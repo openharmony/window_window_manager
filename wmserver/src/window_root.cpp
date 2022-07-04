@@ -19,6 +19,7 @@
 #include <display_power_mgr_client.h>
 #include <hisysevent.h>
 #include <transaction/rs_transaction.h>
+
 #include "display_manager_service_inner.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
@@ -1317,6 +1318,19 @@ WindowLayoutMode WindowRoot::GetCurrentLayoutMode(DisplayId displayId)
         return WindowLayoutMode::BASE;
     }
     return container->GetCurrentLayoutMode();
+}
+
+void WindowRoot::RemoveSingleUserWindowNodes()
+{
+    std::vector<DisplayId> displayIds = GetAllDisplayIds();
+    for (auto id : displayIds) {
+        sptr<WindowNodeContainer> container = GetOrCreateWindowNodeContainer(id);
+        if (container == nullptr) {
+            WLOGFI("get container failed %{public}" PRIu64"", id);
+            continue;
+        }
+        container->RemoveSingleUserWindowNodes();
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

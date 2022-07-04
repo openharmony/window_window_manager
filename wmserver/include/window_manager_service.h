@@ -29,6 +29,7 @@
 #include "freeze_controller.h"
 #include "singleton_delegator.h"
 #include "wm_single_instance.h"
+#include "window_common_event.h"
 #include "window_controller.h"
 #include "zidl/window_manager_stub.h"
 #include "window_dumper.h"
@@ -65,6 +66,7 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManagerService);
 public:
     void OnStart() override;
     void OnStop() override;
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     int Dump(int fd, const std::vector<std::u16string>& args) override;
 
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
@@ -103,6 +105,7 @@ public:
     void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback) override;
     void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
+    void OnAccountSwitched() const;
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;
@@ -132,6 +135,7 @@ private:
     SystemConfig systemConfig_;
     ModeChangeHotZonesConfig hotZonesConfig_ { false, 0, 0, 0 };
     std::unique_ptr<WindowTaskLooper> wmsTaskLooper_;
+    std::shared_ptr<WindowCommonEvent> windowCommonEvent_;
     RSInterfaces& rsInterface_;
     bool startingOpen_ = true;
 };

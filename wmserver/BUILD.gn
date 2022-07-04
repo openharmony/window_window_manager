@@ -48,6 +48,7 @@ ohos_shared_library("libwms") {
     "src/minimize_app.cpp",
     "src/remote_animation.cpp",
     "src/starting_window.cpp",
+    "src/window_common_event.cpp",
     "src/window_controller.cpp",
     "src/window_dumper.cpp",
     "src/window_inner_manager.cpp",
