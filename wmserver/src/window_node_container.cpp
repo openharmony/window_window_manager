@@ -850,8 +850,7 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
     const WindowMode callingWindowMode = callingWindow->GetWindowMode();
     if (callingWindowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
         callingWindowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        callingWindowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
-        callingWindowMode == WindowMode::WINDOW_MODE_FLOATING) {
+        callingWindowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         const Rect keyRect = node->GetWindowRect();
         const Rect callingRect = callingWindow->GetWindowRect();
         if (!WindowHelper::HasOverlap(callingRect, keyRect)) {

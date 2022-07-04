@@ -197,10 +197,18 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
+
     if (node->currentVisibility_ && !node->startingWindowShown_) {
         WLOGFE("current window is visible, windowId: %{public}u", node->GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
+
+    auto layoutMode = windowRoot_->GetCurrentLayoutMode(property->GetDisplayId());
+    if (WindowHelper::IsInvalidWindowInTileLayoutMode(node->GetModeSupportInfo(), layoutMode)) {
+        WLOGFE("window doesn't support floating mode in tile, windowId: %{public}u", node->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE;
+    }
+
     // using starting window rect if client rect is empty
     if (WindowHelper::IsEmptyRect(property->GetRequestRect()) && node->startingWindowShown_) { // for tile and cascade
         property->SetRequestRect(node->GetRequestRect());
@@ -237,28 +245,18 @@ void WindowController::ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>&
         WLOGFE("displayInfo is null");
         return;
     }
-    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
-    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
-    Rect targetRect = node->GetWindowRect();
+    auto width = static_cast<uint32_t>(displayInfo->GetWidth());
+    auto height = static_cast<uint32_t>(displayInfo->GetHeight());
+    Rect newRect = node->GetWindowRect();
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
-        auto statusBarRectIter =
-            systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].find(displayHeight);
-        if (statusBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].end()) {
-            targetRect = statusBarRectIter->second;
-        }
+        auto statusBarHeight = newRect.height_;
+        newRect = { 0, 0, width, statusBarHeight };
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
-        auto navigationBarRectIter =
-            systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].find(displayHeight);
-        if (navigationBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].end()) {
-            targetRect = navigationBarRectIter->second;
-        }
+        auto naviBarHeight = newRect.height_;
+        newRect = { 0, static_cast<int32_t>(height - naviBarHeight), width, naviBarHeight };
     }
-    if (curDisplayInfo_.find(displayInfo->GetDisplayId()) == curDisplayInfo_.end()) {
-        curDisplayInfo_[displayInfo->GetDisplayId()] = displayInfo;
-    }
-    Rect propertyRect = node->GetWindowRect();
-    if (propertyRect != targetRect) {
-        ResizeRect(node->GetWindowId(), targetRect, WindowSizeChangeReason::DRAG);
+    if (newRect != node->GetWindowRect()) {
+        ResizeRect(node->GetWindowId(), newRect, WindowSizeChangeReason::DRAG);
     }
 }
 
@@ -437,44 +435,18 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
 void WindowController::ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo)
 {
     DisplayId displayId = displayInfo->GetDisplayId();
-    auto iter = curDisplayInfo_.find(displayId);
-    if (iter != curDisplayInfo_.end()) {
-        auto lastDisplayInfo = iter->second;
-        uint32_t lastDisplayWidth = static_cast<uint32_t>(lastDisplayInfo->GetWidth());
-        uint32_t lastDisplayHeight = static_cast<uint32_t>(lastDisplayInfo->GetHeight());
-        auto statusBarNode = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
-        auto navigationBarNode =
-            windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR]);
-        systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][lastDisplayWidth][lastDisplayHeight]
-            = statusBarNode->GetWindowProperty()->GetWindowRect();
-        systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][lastDisplayWidth][lastDisplayHeight]
-            = navigationBarNode->GetWindowProperty()->GetWindowRect();
-    }
-    curDisplayInfo_[displayId] = displayInfo;
-    // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
-    uint32_t width = static_cast<uint32_t>(displayInfo->GetWidth());
-    uint32_t height = static_cast<uint32_t>(displayInfo->GetHeight() * SYSTEM_BAR_HEIGHT_RATIO);
-    Rect newRect = { 0, 0, width, height };
-    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
-    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
-    auto statusBarRectIter =
-        systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].find(displayHeight);
-    if (statusBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].end()) {
-        newRect = statusBarRectIter->second;
-    }
+    auto width = static_cast<uint32_t>(displayInfo->GetWidth());
+    auto height = static_cast<uint32_t>(displayInfo->GetHeight());
     const auto& statusBarNode = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
-    if (statusBarNode->GetDisplayId() == displayId) {
+    if (statusBarNode != nullptr && statusBarNode->GetDisplayId() == displayId) {
+        auto statusBarHeight = statusBarNode->GetWindowRect().height_;
+        Rect newRect = { 0, 0, width, statusBarHeight };
         ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
     }
-
-    newRect = { 0, displayInfo->GetHeight() - static_cast<int32_t>(height), width, height };
-    auto navigationBarRectIter =
-        systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].find(displayHeight);
-    if (navigationBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].end()) {
-        newRect = navigationBarRectIter->second;
-    }
     const auto& naviBarNode = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR]);
-    if (naviBarNode->GetDisplayId() == displayId) {
+    if (naviBarNode != nullptr && naviBarNode->GetDisplayId() == displayId) {
+        auto naviBarHeight = naviBarNode->GetWindowRect().height_;
+        Rect newRect = { 0, static_cast<int32_t>(height - naviBarHeight), width, naviBarHeight };
         ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
     }
 }
@@ -806,8 +778,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         }
         case PropertyChangeAction::ACTION_UPDATE_ORIENTATION: {
             node->SetRequestedOrientation(property->GetRequestedOrientation());
-            if (WindowHelper::IsMainWindow(node->GetWindowType()) &&
-                node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            if (WindowHelper::IsMainFullScreenWindow(node->GetWindowType(), node->GetWindowMode())) {
                 DisplayManagerServiceInner::GetInstance().
                     SetOrientationFromWindow(node->GetDisplayId(), property->GetRequestedOrientation());
             }

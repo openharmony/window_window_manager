@@ -17,6 +17,7 @@
 #define FRAMEWORKS_WM_TEST_UT_AVOID_AREA_CONTROLLER_TEST_H
 
 #include <gtest/gtest.h>
+#include "window_node.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -28,12 +29,11 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
 
-    static Rect topAvoidRect_;
-    static Rect leftAvoidRect_;
-
-private:
-    static void InitByScreenRect(const Rect& screenRect);
-    DisplayId displayId_ = 0;
+    static sptr<WindowNode> statusbarWindowNode;
+    static sptr<WindowNode> navigationBarWindowNode;
+    static sptr<WindowNode> keyboardWindowNode;
+    static Rect screenRect;
+    static Rect cut_out_rect;
 };
 } // namespace ROSEN
 } // namespace OHOS

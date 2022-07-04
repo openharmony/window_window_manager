@@ -39,6 +39,7 @@ SplitRects WindowTestUtils::splitRects_   = {
 Rect WindowTestUtils::singleTileRect_     = {0, 0, 0, 0};
 std::vector<Rect> WindowTestUtils::doubleTileRects_ = std::vector<Rect>(2);
 std::vector<Rect> WindowTestUtils::tripleTileRects_ = std::vector<Rect>(3);
+AvoidArea WindowTestUtils::systemAvoidArea_ = {};
 
 bool WindowTestUtils::isVerticalDisplay_ = false;
 
@@ -355,10 +356,7 @@ bool WindowTestUtils::InitSplitRects()
 void WindowTestUtils::UpdateSplitRects(const sptr<Window>& window)
 {
     std::unique_ptr<WindowTestUtils> testUtils = std::make_unique<WindowTestUtils>();
-    auto res = window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, testUtils->avoidArea_);
-    if (res != WMError::WM_OK) {
-        WLOGFE("Get avoid type failed");
-    }
+    testUtils->avoidArea_ = systemAvoidArea_;
     testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.leftRect_);
     testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.topRect_);
     testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.rightRect_);

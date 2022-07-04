@@ -536,6 +536,10 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
     const auto& virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
     const auto& systemLimits = GetSystemSizeLimits(displayRect, virtualPixelRatio);
     const auto& customizedLimits = node->GetWindowSizeLimits();
+    if (customizedLimits.isSizeLimitsUpdated_) {
+        WLOGFI("size limits have been updated");
+        return;
+    }
     WindowSizeLimits newLimits = systemLimits;
 
     // configured limits of floating window
@@ -580,6 +584,7 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
     uint32_t newMinHeight = static_cast<uint32_t>(static_cast<float>(newLimits.minWidth_) / newLimits.maxRatio_);
     newLimits.minHeight_ = std::max(newMinHeight, newLimits.minHeight_);
 
+    newLimits.isSizeLimitsUpdated_ = true;
     WLOGFI("maxWidth: %{public}u, maxHeight: %{public}u, minWidth: %{public}u, minHeight: %{public}u, "
         "maxRatio: %{public}f, minRatio: %{public}f", newLimits.maxWidth_, newLimits.maxHeight_,
         newLimits.minWidth_, newLimits.minHeight_, newLimits.maxRatio_, newLimits.minRatio_);

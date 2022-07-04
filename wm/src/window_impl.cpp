@@ -689,21 +689,12 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
 
     // get support modes configuration
     uint32_t modeSupportInfo = 0;
-    const auto& supportModes = abilityInfo->windowModes;
-    for (auto& mode : supportModes) {
-        if (static_cast<uint32_t>(mode) == static_cast<uint32_t>(0)) {         // 0 : fullScreen
-            modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
-        } else if (static_cast<uint32_t>(mode) == static_cast<uint32_t>(1)) {  // 1 : split
-            modeSupportInfo |= (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
-                                WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
-        } else if (static_cast<uint32_t>(mode) == static_cast<uint32_t>(2)) {  // 2 : floating
-            modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
-        }
-    }
+    WindowHelper::ConvertSupportModesToSupportInfo(modeSupportInfo, abilityInfo->windowModes);
     if (modeSupportInfo == 0) {
-        WLOGFI("mode config param is 0, set all modes");
+        WLOGFI("mode config param is 0, all modes is supported");
         modeSupportInfo = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     }
+    WLOGFI("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
     SetRequestModeSupportInfo(modeSupportInfo);
 
     // get window size limits configuration
@@ -734,6 +725,18 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
 void WindowImpl::UpdateTitleButtonVisibility()
 {
     WLOGFI("[Client] UpdateTitleButtonVisibility");
+    if (uiContent_ == nullptr || !isAppDecorEnable_) {
+        return;
+    }
+    auto modeSupportInfo = GetModeSupportInfo();
+    bool hideSplitButton = !(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
+    // not support fullscreen in split and floating mode, or not support float in fullscreen mode
+    bool hideMaximizeButton = (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
+        (GetMode() == WindowMode::WINDOW_MODE_FLOATING || WindowHelper::IsSplitWindowMode(GetMode()))) ||
+        (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
+        GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
+    WLOGFI("[Client] [hideSplit, hideMaximize]: [%{public}d, %{public}d]", hideSplitButton, hideMaximizeButton);
+    uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false);
 }
 
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
@@ -966,9 +969,10 @@ WMError WindowImpl::Show(uint32_t reason, bool isCustomAnimation)
     bool isShowWhenLocked = GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), GetMode()) ||
         WindowHelper::IsOnlySupportSplitAndShowWhenLocked(isShowWhenLocked, GetModeSupportInfo())) {
-        WLOGFE("current mode is not be supported, windowId: %{public}u", property_->GetWindowId());
-        NotifyForegroundFailed();
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        WLOGFE("current mode is not supported, windowId: %{public}u, modeSupportInfo: %{public}u, winMode: %{public}u",
+            property_->GetWindowId(), GetModeSupportInfo(), GetMode());
+        NotifyForegroundInvalidWindowMode();
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE;
     }
 
     // update title button visibility when show
@@ -979,6 +983,8 @@ WMError WindowImpl::Show(uint32_t reason, bool isCustomAnimation)
     if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
+    } else if (ret == WMError::WM_ERROR_INVALID_WINDOW_MODE) {
+        NotifyForegroundInvalidWindowMode();
     } else {
         NotifyForegroundFailed();
         WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
@@ -1394,6 +1400,12 @@ WMError WindowImpl::RequestFocus() const
     return SingletonContainer::Get<WindowAdapter>().RequestFocus(property_->GetWindowId());
 }
 
+void WindowImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    inputEventConsumer_ = inputEventConsumer;
+}
+
 void WindowImpl::AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener)
 {
     InputTransferStation::GetInstance().SetInputListener(GetWindowId(), inputEventListener);
@@ -1633,9 +1645,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->GetWindowId());
         return;
     }
-    float virtualPixelRatio = display->GetVirtualPixelRatio();
-    WLOGFI("winId:%{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], vpr:%{public}f, reason:%{public}u",
-        GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, virtualPixelRatio, reason);
+
     property_->SetDecoStatus(decoStatus);
     if (reason == WindowSizeChangeReason::HIDE) {
         property_->SetRequestRect(rect);
@@ -1648,6 +1658,8 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         property_->SetOriginRect(rect);
         isOriginRectSet_ = true;
     }
+    WLOGFI("winId:%{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u",
+        property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     Rect rectToAce = rect;
     // update rectToAce for stretchable window
     if (windowSystemConfig_.isStretchable_ && WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
@@ -1668,7 +1680,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->GetWindowId(), rectToAce.posX_, rectToAce.posY_, rectToAce.width_, rectToAce.height_);
         config.SetSize(rectToAce.width_, rectToAce.height_);
         config.SetPosition(rectToAce.posX_, rectToAce.posY_);
-        config.SetDensity(virtualPixelRatio);
+        config.SetDensity(display->GetVirtualPixelRatio());
         uiContent_->UpdateViewportConfig(config, reason);
         WLOGFI("notify uiContent window size change end");
     }
@@ -1678,6 +1690,7 @@ void WindowImpl::UpdateMode(WindowMode mode)
 {
     WLOGI("UpdateMode %{public}u", mode);
     property_->SetWindowMode(mode);
+    UpdateTitleButtonVisibility();
     NotifyModeChange(mode);
     if (uiContent_ != nullptr) {
         uiContent_->UpdateWindowMode(mode);
@@ -1692,39 +1705,71 @@ void WindowImpl::UpdateModeSupportInfo(uint32_t modeSupportInfo)
     UpdateTitleButtonVisibility();
 }
 
+void WindowImpl::HandleBackKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    int32_t keyAction = keyEvent->GetKeyAction();
+    if (keyAction != MMI::KeyEvent::KEY_ACTION_UP) {
+        return;
+    }
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
+    }
+    bool isConsumed = false;
+    if (inputEventConsumer != nullptr) {
+        WLOGFI("Transfer back key event to inputEventConsumer");
+        isConsumed = inputEventConsumer->OnInputEvent(keyEvent);
+    } else if (uiContent_ != nullptr) {
+        WLOGFI("Transfer back key event to uiContent");
+        isConsumed = uiContent_->ProcessBackPressed();
+    } else {
+        WLOGFE("There is no back key event consumer");
+    }
+    if (isConsumed || !WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        return;
+    }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext == nullptr) {
+        WLOGFE("abilityContext is null");
+        return;
+    }
+    // TerminateAbility will invoke last ability, CloseAbility will not.
+    bool shouldCloseAbility = WindowHelper::IsFullScreenWindow(property_->GetWindowMode());
+    WMError ret = NotifyWindowTransition(shouldCloseAbility ? TransitionReason::CLOSE : TransitionReason::BACK);
+    if (ret != WMError::WM_OK) {
+        WLOGFI("Window %{public}u is closed without remote animation, ret:%{public}u",
+            property_->GetWindowId(), static_cast<uint32_t>(ret));
+        if (shouldCloseAbility) {
+            abilityContext->CloseAbility();
+        } else {
+            abilityContext->TerminateSelf();
+        }
+    }
+}
+
 void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     NotifyKeyEvent(keyEvent);
-    if (uiContent_ == nullptr) {
-        WLOGE("ConsumeKeyEvent uiContent is nullptr");
-        return;
-    }
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
-    WLOGFI("ConsumeKeyEvent: enter GetKeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
+    WLOGFI("KeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK) {
-        if (keyAction != MMI::KeyEvent::KEY_ACTION_UP) {
-            return;
-        }
-        if (uiContent_->ProcessBackPressed()) {
-            WLOGI("ConsumeKeyEvent keyEvent is consumed");
-            return;
-        }
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-        if (abilityContext != nullptr) {
-            WMError ret = NotifyWindowTransition(TransitionReason::BACK);
-            if (ret != WMError::WM_OK) {
-                WLOGFI("[Client] Window %{public}u terminate without remote animation ret:%{public}u",
-                    property_->GetWindowId(), static_cast<uint32_t>(ret));
-                abilityContext->TerminateSelf();
-            }
-        } else {
-            WLOGI("ConsumeKeyEvent destroy window");
-            Destroy();
-        }
+        HandleBackKeyEvent(keyEvent);
     } else {
-        if (!uiContent_->ProcessKeyEvent(keyEvent)) {
-            WLOGI("ConsumeKeyEvent no consumer window exit");
+        std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            inputEventConsumer = inputEventConsumer_;
+        }
+        if (inputEventConsumer != nullptr) {
+            WLOGFI("Transfer key event to inputEventConsumer");
+            (void)inputEventConsumer->OnInputEvent(keyEvent);
+        } else if (uiContent_ != nullptr) {
+            WLOGFI("Transfer key event to uiContent");
+            (void)uiContent_->ProcessKeyEvent(keyEvent);
+        } else {
+            WLOGFE("There is no key event consumer");
         }
     }
 }
@@ -2021,12 +2066,20 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
         UpdatePointerEventForStretchableWindow(pointerEvent);
     }
     NotifyPointEvent(pointerEvent);
-    if (uiContent_ == nullptr) {
-        WLOGE("ConsumePointerEvent uiContent is nullptr, windowId: %{public}u", GetWindowId());
-        return;
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
     }
-    WLOGFI("Transfer pointer event to ACE");
-    uiContent_->ProcessPointerEvent(pointerEvent);
+    if (inputEventConsumer != nullptr) {
+        WLOGFI("Transfer pointer event to inputEventConsumer");
+        (void)inputEventConsumer->OnInputEvent(pointerEvent);
+    } else if (uiContent_ != nullptr) {
+        WLOGFI("Transfer pointer event to uiContent");
+        (void)uiContent_->ProcessPointerEvent(pointerEvent);
+    } else {
+        WLOGE("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
+    }
 }
 
 void WindowImpl::OnVsync(int64_t timeStamp)

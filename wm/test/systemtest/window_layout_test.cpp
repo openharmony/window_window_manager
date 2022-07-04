@@ -35,6 +35,7 @@ public:
     static inline float virtualPixelRatio_ = 0.0;
 private:
     static constexpr uint32_t WAIT_SYANC_US = 100000;
+    static void InitAvoidArea();
 };
 
 vector<Rect> WindowLayoutTest::fullScreenExpecteds_;
@@ -70,6 +71,26 @@ void WindowLayoutTest::SetUpTestCase()
         Utils::displayRect_.height_ - Utils::naviBarRect_.height_,
     };
     fullScreenExpecteds_.push_back(expected);
+    InitAvoidArea();
+}
+
+void WindowLayoutTest::InitAvoidArea()
+{
+    Utils::TestWindowInfo info = {
+        .name = "avoidArea",
+        .rect = {0, 0, 0, 0},
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .parentName = "",
+    };
+    const sptr<Window>& window = Utils::CreateTestWindow(info);
+    window->Show();
+    window->SetLayoutFullScreen(true);
+    window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, WindowTestUtils::systemAvoidArea_);
+    window->Hide();
+    window->Destroy();
 }
 
 void WindowLayoutTest::TearDownTestCase()
@@ -112,6 +133,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
         .parentName = "",
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
+    ASSERT_EQ(true, window != nullptr);
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window);
     ASSERT_EQ(WMError::WM_OK, window->Show());

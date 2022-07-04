@@ -81,7 +81,7 @@ DMError ScreenRecorder::Start(std::vector<int> fds)
 void ScreenRecorder::Record()
 {
     WLOGFE("Record");
-    if (stop_ || fileIndex_ >= fds_.size()) {
+    if (stop_ || fileIndex_ >= static_cast<int>(fds_.size())) {
         isStarting_ = false;
         return;
     }

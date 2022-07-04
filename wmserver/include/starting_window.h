@@ -30,7 +30,7 @@ public:
     StartingWindow() = delete;
     ~StartingWindow() = default;
 
-    static sptr<WindowNode> CreateWindowNode(sptr<WindowTransitionInfo> info,
+    static sptr<WindowNode> CreateWindowNode(const sptr<WindowTransitionInfo>& info,
         uint32_t winId, WindowLayoutMode layoutMode);
     static void HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,
         uint32_t& windowId, const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowProperty>& property,
@@ -39,8 +39,12 @@ public:
         bool isColdStart);
     static void UpdateRSTree(sptr<WindowNode>& node);
     static void ReleaseStartWinSurfaceNode(sptr<WindowNode>& node);
+
 private:
     static WMError CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node);
+    static bool NeedCancelStartingWindow(uint32_t modeSupportInfo,
+        WindowLayoutMode layoutMode, const sptr<WindowTransitionInfo>& info);
+    static SurfaceDraw surfaceDraw_;
     static std::recursive_mutex mutex_;
 };
 } // Rosen

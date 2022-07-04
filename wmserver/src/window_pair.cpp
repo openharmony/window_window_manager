@@ -192,15 +192,27 @@ void WindowPair::Clear()
 {
     WLOGI("Clear window pair.");
     DumpPairInfo();
+    auto splitModeInfo = (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                          WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
     if (primary_ != nullptr && primary_->GetWindowProperty() != nullptr &&
         primary_->GetWindowToken() != nullptr) {
-        primary_->GetWindowProperty()->ResumeLastWindowMode();
-        primary_->GetWindowToken()->UpdateWindowMode(primary_->GetWindowMode());
+        if (primary_->GetModeSupportInfo() == splitModeInfo) {
+            MinimizeApp::AddNeedMinimizeApp(primary_, MinimizeReason::SPLIT_QUIT);
+            MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::SPLIT_QUIT);
+        } else {
+            primary_->GetWindowProperty()->ResumeLastWindowMode();
+            primary_->GetWindowToken()->UpdateWindowMode(primary_->GetWindowMode());
+        }
     }
     if (secondary_ != nullptr && secondary_->GetWindowProperty() != nullptr &&
         secondary_->GetWindowToken() != nullptr) {
-        secondary_->GetWindowProperty()->ResumeLastWindowMode();
-        secondary_->GetWindowToken()->UpdateWindowMode(secondary_->GetWindowMode());
+        if (secondary_->GetModeSupportInfo() == splitModeInfo) {
+            MinimizeApp::AddNeedMinimizeApp(secondary_, MinimizeReason::SPLIT_QUIT);
+            MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::SPLIT_QUIT);
+        } else {
+            secondary_->GetWindowProperty()->ResumeLastWindowMode();
+            secondary_->GetWindowToken()->UpdateWindowMode(secondary_->GetWindowMode());
+        }
     }
     primary_ = nullptr;
     secondary_ = nullptr;

@@ -28,6 +28,7 @@ namespace OHOS::MMI {
     struct IInputEventConsumer;
     class PointerEvent;
     class KeyEvent;
+    class AxisEvent;
 }
 namespace OHOS::AppExecFwk {
     class Configuration;
@@ -59,6 +60,7 @@ public:
     virtual void AfterFocused() = 0;
     virtual void AfterUnfocused() = 0;
     virtual void ForegroundFailed() {}
+    virtual void ForegroundInvalidMode() {}
     virtual void AfterActive() {}
     virtual void AfterInactive() {}
 };
@@ -118,6 +120,13 @@ class IInputEventListener : virtual public RefBase {
 public:
     virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
     virtual void OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
+};
+
+class IInputEventConsumer {
+public:
+    virtual bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const = 0;
+    virtual bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const = 0;
+    virtual bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const = 0;
 };
 
 class ITouchOutsideListener : virtual public RefBase {
@@ -201,6 +210,7 @@ public:
 
     virtual WMError RequestFocus() const = 0;
     // AddInputEventListener is for api 7
+    virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) = 0;
     virtual void AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) = 0;
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) = 0;
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
