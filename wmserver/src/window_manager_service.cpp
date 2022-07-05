@@ -15,21 +15,21 @@
 
 #include "window_manager_service.h"
 
-#include <cinttypes>
-
 #include <ability_manager_client.h>
+#include <cinttypes>
 #include <ipc_skeleton.h>
 #include <parameters.h>
 #include <rs_iwindow_animation_controller.h>
 #include <system_ability_definition.h>
 
-#include "dm_common.h"
 #include "display_manager_service_inner.h"
+#include "dm_common.h"
 #include "drag_controller.h"
-#include "remote_animation.h"
 #include "minimize_app.h"
-#include "ui/rs_ui_director.h"
+#include "permission.h"
+#include "remote_animation.h"
 #include "singleton_container.h"
+#include "ui/rs_ui_director.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_agent_controller.h"
@@ -37,7 +37,6 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_trace.h"
-#include "permission.h"
 namespace OHOS {
 namespace Rosen {
 namespace {

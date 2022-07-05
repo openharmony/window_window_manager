@@ -19,8 +19,6 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
-#include "wm_common_inner.h"
 #include "wm_trace.h"
 
 namespace OHOS {
