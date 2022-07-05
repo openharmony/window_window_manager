@@ -52,6 +52,7 @@ public:
     static void SetScreenRotationLocked(bool isLocked);
     static void SetDefaultDeviceRotationOffset(uint32_t defaultDeviceRotationOffset);
     static bool IsGravitySensorEnabled();
+    static void ProcessOrientationSwitch(Orientation orientation);
 private:
     static void HandleGravitySensorEventCallback(SensorEvent *event);
     static bool CheckCallbackTimeInterval();
@@ -75,12 +76,12 @@ private:
     static bool IsSensorRelatedOrientation(Orientation orientation);
     
     static void ProcessRotationMapping();
-    static bool ProcessOrientationSwitch(Orientation orientation, DeviceRotation deviceRotation);
-    static bool ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation);
-    static bool ProcessSwitchToAutoRotationLandscape(DeviceRotation rotation);
-    static bool ProcessSwitchToAutoRotation(DeviceRotation rotation);
+    static void ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation);
+    static void ProcessSwitchToAutoRotationLandscape(DeviceRotation rotation);
+    static void ProcessSwitchToAutoRotation(DeviceRotation rotation);
     static void ProcessSwitchToAutoRotationPortraitRestricted();
     static void ProcessSwitchToAutoRotationLandscapeRestricted();
+    static void ProcessSwitchToSensorRelatedOrientation(Orientation orientation, DeviceRotation deviceRotation);
     static void ProcessSwitchToSensorUnrelatedOrientation(Orientation orientation);
     static Rotation ProcessAutoRotationPortraitOrientation(DeviceRotation sensorRotationConveted);
     static Rotation ProcessAutoRotationLandscapeOrientation(DeviceRotation sensorRotationConveted);
@@ -98,6 +99,7 @@ private:
     static Rotation rotationLockedRotation_;
     static bool isGravitySensorSubscribed_;
     static bool isScreenRotationLocked_;
+    static DeviceRotation lastSensorRotationConverted_;
 };
 } // Rosen
 } // OHOS
