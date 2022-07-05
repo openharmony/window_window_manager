@@ -42,7 +42,7 @@ ohos_shared_library("libwindow_extension") {
   configs = [ ":libwindow_extension_private_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_path}/frameworks/native/appkit:app_context",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/interfaces/kits/napi/window_runtime:window_native_kit",
