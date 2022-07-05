@@ -515,7 +515,7 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
                 (*iter)->GetWindowId() != node->GetWindowId()) {
                 auto property = (*iter)->GetWindowProperty();
                 if (property != nullptr) {
-                    cascadeRect = property->GetRequestRect();
+                    cascadeRect = property->GetWindowRect();
                 }
                 WLOGFI("Get current cascadeRect: %{public}u [%{public}d, %{public}d, %{public}u, %{public}u]",
                     (*iter)->GetWindowId(), cascadeRect.posX_, cascadeRect.posY_,
