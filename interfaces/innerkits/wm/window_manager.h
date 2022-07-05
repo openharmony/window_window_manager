@@ -151,7 +151,7 @@ public:
 
 private:
     WindowManager();
-    ~WindowManager();
+    ~WindowManager() = default;
     class Impl;
     std::unique_ptr<Impl> pImpl_;
 

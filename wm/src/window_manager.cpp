@@ -42,7 +42,7 @@ bool WindowVisibilityInfo::Marshalling(Parcel &parcel) const
 
 WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
 {
-    auto* windowVisibilityInfo = new (std::nothrow) WindowVisibilityInfo();
+    auto windowVisibilityInfo = new (std::nothrow) WindowVisibilityInfo();
     if (windowVisibilityInfo == nullptr) {
         WLOGFE("window visibility info is nullptr.");
         return nullptr;
@@ -68,7 +68,7 @@ bool WindowInfo::Marshalling(Parcel &parcel) const
 
 WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
 {
-    auto* windowInfo = new (std::nothrow) WindowInfo();
+    auto windowInfo = new (std::nothrow) WindowInfo();
     if (windowInfo == nullptr) {
         WLOGFE("window info is nullptr.");
         return nullptr;
@@ -94,7 +94,7 @@ bool AccessibilityWindowInfo::Marshalling(Parcel &parcel) const
 
 AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel &parcel)
 {
-    auto* accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
+    auto accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
     if (accessibilityWindowInfo == nullptr) {
         WLOGFE("accessibility window info is nullptr.");
         return nullptr;
@@ -117,7 +117,7 @@ bool FocusChangeInfo::Marshalling(Parcel &parcel) const
 
 FocusChangeInfo* FocusChangeInfo::Unmarshalling(Parcel &parcel)
 {
-    auto* focusChangeInfo = new FocusChangeInfo();
+    auto focusChangeInfo = new FocusChangeInfo();
     bool res = parcel.ReadUint32(focusChangeInfo->windowId_) && parcel.ReadUint64(focusChangeInfo->displayId_) &&
         parcel.ReadInt32(focusChangeInfo->pid_) && parcel.ReadInt32(focusChangeInfo->uid_);
     if (!res) {
@@ -283,11 +283,7 @@ void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, 
         }, EventPriority::LOW, "CameraFloatWindowStatus");
 }
 
-WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>())
-{
-}
-
-WindowManager::~WindowManager() = default;
+WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>()) {}
 
 void WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener)
 {
