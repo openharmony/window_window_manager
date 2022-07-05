@@ -59,7 +59,10 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     }
 
     property->SetRequestRect(info->GetWindowRect());
-    property->SetWindowMode(info->GetWindowMode());
+    if (WindowHelper::IsValidWindowMode(info->GetWindowMode())) {
+        property->SetWindowMode(info->GetWindowMode());
+    }
+
     property->SetDisplayId(info->GetDisplayId());
     property->SetWindowType(info->GetWindowType());
     property->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
