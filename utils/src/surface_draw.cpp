@@ -32,7 +32,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SurfaceDraw"};
 } // namespace
 
-bool SurfaceDraw::DrawImage(std::shared_ptr<OHOS::Rosen::RSSurfaceNode> surfaceNode, int32_t bufferWidth,
+bool SurfaceDraw::DrawImage(std::shared_ptr<RSSurfaceNode> surfaceNode, int32_t bufferWidth,
     int32_t bufferHeight, const std::string& imagePath)
 {
     sptr<OHOS::Surface> layer = GetLayer(surfaceNode);
@@ -63,7 +63,38 @@ bool SurfaceDraw::DrawImage(std::shared_ptr<OHOS::Rosen::RSSurfaceNode> surfaceN
     return true;
 }
 
-bool SurfaceDraw::DrawColor(std::shared_ptr<OHOS::Rosen::RSSurfaceNode> surfaceNode, int32_t bufferWidth,
+bool SurfaceDraw::DrawImage(std::shared_ptr<RSSurfaceNode> surfaceNode, int32_t bufferWidth,
+    int32_t bufferHeight, std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    sptr<OHOS::Surface> layer = GetLayer(surfaceNode);
+    if (layer == nullptr) {
+        WLOGFE("layer is nullptr");
+        return false;
+    }
+    sptr<OHOS::SurfaceBuffer> buffer = GetSurfaceBuffer(layer, bufferWidth, bufferHeight);
+    if (buffer == nullptr || buffer->GetVirAddr() == nullptr) {
+        return false;
+    }
+    auto addr = static_cast<uint8_t *>(buffer->GetVirAddr());
+    if (!DoDraw(addr, buffer->GetWidth(), buffer->GetHeight(), pixelMap)) {
+        WLOGE("draw window pixel failed");
+        return false;
+    }
+    OHOS::BufferFlushConfig flushConfig = {
+        .damage = {
+            .w = buffer->GetWidth(),
+            .h = buffer->GetHeight(),
+        },
+    };
+    OHOS::SurfaceError ret = layer->FlushBuffer(buffer, -1, flushConfig);
+    if (ret != OHOS::SurfaceError::SURFACE_ERROR_OK) {
+        WLOGFE("draw pointer FlushBuffer ret:%{public}s", SurfaceErrorStr(ret).c_str());
+        return false;
+    }
+    return true;
+}
+
+bool SurfaceDraw::DrawColor(std::shared_ptr<RSSurfaceNode> surfaceNode, int32_t bufferWidth,
     int32_t bufferHeight, uint32_t color)
 {
     sptr<OHOS::Surface> layer = GetLayer(surfaceNode);
@@ -94,7 +125,7 @@ bool SurfaceDraw::DrawColor(std::shared_ptr<OHOS::Rosen::RSSurfaceNode> surfaceN
     return true;
 }
 
-sptr<OHOS::Surface> SurfaceDraw::GetLayer(std::shared_ptr<OHOS::Rosen::RSSurfaceNode> surfaceNode)
+sptr<OHOS::Surface> SurfaceDraw::GetLayer(std::shared_ptr<RSSurfaceNode> surfaceNode)
 {
     if (surfaceNode == nullptr) {
         return nullptr;
@@ -145,17 +176,17 @@ std::unique_ptr<OHOS::Media::PixelMap> SurfaceDraw::DecodeImageToPixelMap(const 
     return pixelMap;
 }
 
-void SurfaceDraw::DrawPixelmap(OHOS::Rosen::Drawing::Canvas &canvas, const std::string& imagePath)
+void SurfaceDraw::DrawPixelmap(Drawing::Canvas &canvas, const std::string& imagePath)
 {
     std::unique_ptr<OHOS::Media::PixelMap> pixelmap = DecodeImageToPixelMap(imagePath);
     if (pixelmap == nullptr) {
         WLOGFE("drawing pixel map is nullptr");
         return;
     }
-    OHOS::Rosen::Drawing::Pen pen;
+    Drawing::Pen pen;
     pen.SetAntiAlias(true);
-    pen.SetColor(OHOS::Rosen::Drawing::Color::COLOR_BLUE);
-    OHOS::Rosen::Drawing::scalar penWidth = 1;
+    pen.SetColor(Drawing::Color::COLOR_BLUE);
+    Drawing::scalar penWidth = 1;
     pen.SetWidth(penWidth);
     canvas.AttachPen(pen);
     canvas.DrawBitmap(*pixelmap, 0, 0);
@@ -163,14 +194,45 @@ void SurfaceDraw::DrawPixelmap(OHOS::Rosen::Drawing::Canvas &canvas, const std::
 
 bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, const std::string& imagePath)
 {
-    OHOS::Rosen::Drawing::Bitmap bitmap;
-    OHOS::Rosen::Drawing::BitmapFormat format { OHOS::Rosen::Drawing::ColorType::COLORTYPE_RGBA_8888,
-        OHOS::Rosen::Drawing::AlphaType::ALPHATYPE_OPAQUE };
+    Drawing::Bitmap bitmap;
+    Drawing::BitmapFormat format { Drawing::ColorType::COLORTYPE_RGBA_8888,
+        Drawing::AlphaType::ALPHATYPE_OPAQUE };
     bitmap.Build(width, height, format);
-    OHOS::Rosen::Drawing::Canvas canvas;
+    Drawing::Canvas canvas;
     canvas.Bind(bitmap);
-    canvas.Clear(OHOS::Rosen::Drawing::Color::COLOR_TRANSPARENT);
+    canvas.Clear(Drawing::Color::COLOR_TRANSPARENT);
     DrawPixelmap(canvas, imagePath);
+    static constexpr uint32_t stride = 4;
+    uint32_t addrSize = width * height * stride;
+    errno_t ret = memcpy_s(addr, addrSize, bitmap.GetPixels(), addrSize);
+    if (ret != EOK) {
+        WLOGFE("draw failed");
+        return false;
+    }
+    return true;
+}
+
+bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    Drawing::Bitmap bitmap;
+    Drawing::Canvas canvas;
+    Drawing::BitmapFormat format { Drawing::ColorType::COLORTYPE_RGBA_8888, Drawing::AlphaType::ALPHATYPE_OPAQUE };
+    bitmap.Build(width, height, format);
+    canvas.Bind(bitmap);
+    canvas.Clear(Drawing::Color::COLOR_TRANSPARENT);
+
+    Drawing::Image image;
+    Drawing::Bitmap imageBitmap;
+    Drawing::SamplingOptions sampling = Drawing::SamplingOptions(Drawing::FilterMode::NEAREST,
+    Drawing::MipmapMode::NEAREST);
+    imageBitmap.Build(pixelMap->GetWidth(), pixelMap->GetHeight(), format);
+    imageBitmap.SetPixels(const_cast<uint8_t*>(pixelMap->GetPixels()));
+    image.BuildFromBitmap(imageBitmap);
+
+    Drawing::Rect dst(0, 0, width, height);
+    Drawing::Rect src(0, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
+    canvas.DrawImageRect(image, src, dst, sampling);
+
     static constexpr uint32_t stride = 4;
     uint32_t addrSize = width * height * stride;
     errno_t ret = memcpy_s(addr, addrSize, bitmap.GetPixels(), addrSize);
@@ -183,11 +245,11 @@ bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, const s
 
 bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, uint32_t color)
 {
-    OHOS::Rosen::Drawing::Bitmap bitmap;
-    OHOS::Rosen::Drawing::BitmapFormat format { OHOS::Rosen::Drawing::ColorType::COLORTYPE_RGBA_8888,
-        OHOS::Rosen::Drawing::AlphaType::ALPHATYPE_OPAQUE };
+    Drawing::Bitmap bitmap;
+    Drawing::BitmapFormat format { Drawing::ColorType::COLORTYPE_RGBA_8888,
+        Drawing::AlphaType::ALPHATYPE_OPAQUE };
     bitmap.Build(width, height, format);
-    OHOS::Rosen::Drawing::Canvas canvas;
+    Drawing::Canvas canvas;
     canvas.Bind(bitmap);
     canvas.Clear(color);
 
@@ -237,11 +299,11 @@ bool SurfaceDraw::DrawImageRect(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect
 bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, int32_t winWidth, int32_t winHeight,
     sptr<Media::PixelMap> pixelMap, uint32_t color)
 {
-    OHOS::Rosen::Drawing::Bitmap bitmap;
-    OHOS::Rosen::Drawing::BitmapFormat format { OHOS::Rosen::Drawing::ColorType::COLORTYPE_RGBA_8888,
-        OHOS::Rosen::Drawing::AlphaType::ALPHATYPE_OPAQUE };
+    Drawing::Bitmap bitmap;
+    Drawing::BitmapFormat format { Drawing::ColorType::COLORTYPE_RGBA_8888,
+        Drawing::AlphaType::ALPHATYPE_OPAQUE };
     bitmap.Build(winWidth, winHeight, format);
-    OHOS::Rosen::Drawing::Canvas canvas;
+    Drawing::Canvas canvas;
     canvas.Bind(bitmap);
     canvas.Clear(color);
     if (pixelMap == nullptr) {
@@ -251,7 +313,7 @@ bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, int32_t winWidth, int32_t winHe
     uint32_t iconHeight = pixelMap->GetHeight();
     uint32_t iconWidth = pixelMap->GetWidth();
     Drawing::Image image;
-    OHOS::Rosen::Drawing::Bitmap iconBitmap;
+    Drawing::Bitmap iconBitmap;
     iconBitmap.Build(iconWidth, iconHeight, format);
     iconBitmap.SetPixels(const_cast<uint8_t*>(pixelMap->GetPixels()));
     image.BuildFromBitmap(iconBitmap);

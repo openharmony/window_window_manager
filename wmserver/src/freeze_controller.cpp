@@ -17,11 +17,9 @@
 
 #include <securec.h>
 
-#include <include/codec/SkCodec.h>
-#include <include/core/SkCanvas.h>
-#include <include/core/SkImage.h>
-
 #include "display_manager_service_inner.h"
+#include "pixel_map.h"
+#include "surface_draw.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
 #include "wm_common.h"
@@ -44,39 +42,13 @@ bool FreezeController::FreezeDisplay(DisplayId displayId)
         WLOGFE("Show window failed");
         return false;
     }
-
-#ifdef ACE_ENABLE_GL
-    if (renderContext_ == nullptr) {
-        renderContext_ = std::make_unique<RenderContext>();
-        renderContext_->InitializeEglContext();
-    }
-#endif
-
-    std::shared_ptr<RSSurfaceNode> surfaceNode = window->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        WLOGFE("RSSurfaceNode is null");
-        return false;
-    }
-    Rect winRect = window->GetRect();
-    WLOGFI("freeze window rect, x : %{public}d, y : %{public}d, width: %{public}u, height: %{public}u",
-        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-
-    std::shared_ptr<RSSurface> rsSurface = RSSurfaceExtractor::ExtractRSSurface(surfaceNode);
-    if (rsSurface == nullptr) {
-        WLOGFE("RSSurface is null");
-        return false;
-    }
-
-#ifdef ACE_ENABLE_GL
-    rsSurface->SetRenderContext(renderContext_.get());
-#endif
-
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManagerServiceInner::GetInstance().GetDisplaySnapshot(displayId);
     if (pixelMap == nullptr) {
         WLOGE("freeze display fail, pixel map is null. display %{public}" PRIu64"", displayId);
         return false;
     }
-    return DrawSkImage(rsSurface, winRect.width_, winRect.height_, pixelMap);
+    return SurfaceDraw::DrawImage(window->GetSurfaceNode(), window->GetRect().width_,
+        window->GetRect().height_, pixelMap);
 }
 
 bool FreezeController::UnfreezeDisplay(DisplayId displayId)
@@ -113,59 +85,5 @@ sptr<Window> FreezeController::CreateCoverWindow(DisplayId displayId)
     coverWindowMap_[displayId] = window;
     return window;
 }
-
-bool FreezeController::DrawSkImage(std::shared_ptr<RSSurface>& rsSurface,
-    uint32_t width, uint32_t height, std::shared_ptr<Media::PixelMap> pixelmap)
-{
-    // Get canvas
-    WLOGFD("start to draw bitmap");
-    std::unique_ptr<RSSurfaceFrame> frame = rsSurface->RequestFrame(width, height);
-    if (frame == nullptr) {
-        WLOGFE("fail to request frame");
-        return false;
-    }
-    auto canvas = frame->GetCanvas();
-    if (canvas == nullptr) {
-        WLOGFE("fail to get canvas");
-        return false;
-    }
-    canvas->clear(SK_ColorTRANSPARENT);
-
-    // Create SkPixmap from PixelMap
-    auto imageInfo = MakeSkImageInfoFromPixelMap(pixelmap);
-    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelmap->GetPixels()), pixelmap->GetRowBytes());
-
-    // Create SkImage from SkPixmap
-    sk_sp<SkImage> skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
-    if (!skImage) {
-        WLOGFE("sk image is null");
-        return false;
-    }
-
-    SkPaint paint;
-    sk_sp<SkColorSpace> colorSpace = skImage->refColorSpace();
-#ifdef USE_SYSTEM_SKIA
-    paint.setColor4f(paint.getColor4f(), colorSpace.get());
-#else
-    paint.setColor(paint.getColor4f(), colorSpace.get());
-#endif
-    auto skSrcRect = SkRect::MakeXYWH(0, 0, pixelmap->GetWidth(), pixelmap->GetHeight());
-    auto skDstRect = SkRect::MakeXYWH(0, 0, width, height);
-    canvas->drawImageRect(skImage, skSrcRect, skDstRect, &paint);
-    frame->SetDamageRegion(0, 0, width, height);
-    if (!rsSurface->FlushFrame(frame)) {
-        WLOGFE("fail to flush frame");
-        return false;
-    }
-    return true;
-}
-
-SkImageInfo FreezeController::MakeSkImageInfoFromPixelMap(std::shared_ptr<Media::PixelMap>& pixmap)
-{
-    SkColorType colorType = kN32_SkColorType;
-    SkAlphaType alphaType = SkAlphaType::kOpaque_SkAlphaType;
-    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-    return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), colorType, alphaType, colorSpace);
-}
-}
-}
+} // Rosen
+} // OHOS

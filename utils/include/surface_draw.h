@@ -31,20 +31,23 @@ class SurfaceDraw {
 public:
     SurfaceDraw() = default;
     ~SurfaceDraw() = default;
-    static bool DrawColor(std::shared_ptr<OHOS::Rosen::RSSurfaceNode> surfaceNode, int32_t bufferWidth,
+    static bool DrawColor(std::shared_ptr<RSSurfaceNode> surfaceNode, int32_t bufferWidth,
         int32_t bufferHeight, uint32_t color);
-    static bool DrawImage(std::shared_ptr<OHOS::Rosen::RSSurfaceNode> surfaceNode, int32_t bufferWidth,
+    static bool DrawImage(std::shared_ptr<RSSurfaceNode> surfaceNode, int32_t bufferWidth,
         int32_t bufferHeight, const std::string& imagePath);
-    static bool DrawImageRect(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect winRect,
-        sptr<Media::PixelMap> pixelMap, uint32_t bkgColor);
+    static bool DrawImage(std::shared_ptr<RSSurfaceNode> surfaceNode, int32_t bufferWidth,
+        int32_t bufferHeight, std::shared_ptr<Media::PixelMap> pixelMap);
+    static bool DrawImageRect(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect winRect, sptr<Media::PixelMap> pixelMap,
+        uint32_t bkgColor);
 
 private:
     static bool DoDraw(uint8_t *addr, uint32_t width, uint32_t height, const std::string& imagePath);
     static bool DoDraw(uint8_t *addr, uint32_t width, uint32_t height, uint32_t color);
-    static sptr<OHOS::Surface> GetLayer(std::shared_ptr<OHOS::Rosen::RSSurfaceNode> surfaceNode);
-    static sptr<OHOS::SurfaceBuffer> GetSurfaceBuffer(sptr<OHOS::Surface> layer,
-        int32_t bufferWidth, int32_t bufferHeight);
-    static void DrawPixelmap(OHOS::Rosen::Drawing::Canvas &canvas, const std::string& imagePath);
+    static bool DoDraw(uint8_t *addr, uint32_t width, uint32_t height, std::shared_ptr<Media::PixelMap> pixelMap);
+    static sptr<OHOS::Surface> GetLayer(std::shared_ptr<RSSurfaceNode> surfaceNode);
+    static sptr<OHOS::SurfaceBuffer> GetSurfaceBuffer(sptr<OHOS::Surface> layer, int32_t bufferWidth,
+        int32_t bufferHeight);
+    static void DrawPixelmap(Drawing::Canvas &canvas, const std::string& imagePath);
     static std::unique_ptr<OHOS::Media::PixelMap> DecodeImageToPixelMap(const std::string &imagePath);
     static bool DoDrawImageRect(uint8_t *addr, int32_t winWidth, int32_t winHeight, sptr<Media::PixelMap> pixelMap,
         uint32_t color);
