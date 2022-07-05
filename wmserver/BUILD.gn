@@ -12,9 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/graphic/graphic_2d/graphic_config.gni")
-
-## Build libwms.so
 config("libwms_config") {
   visibility = [ ":*" ]
 
@@ -29,10 +26,6 @@ config("libwms_config") {
     "//foundation/windowmanager/dm/include",
     "//foundation/windowmanager/dmserver/include",
   ]
-  defines = []
-
-  # Get gpu defines
-  defines += gpu_defines
 }
 
 ohos_shared_library("libwms") {
@@ -80,7 +73,6 @@ ohos_shared_library("libwms") {
     "//foundation/windowmanager/dmserver:libdms",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
-    "//third_party/flutter/build/skia:ace_skia_ohos",
     "//third_party/libxml2:xml2",
   ]
 
