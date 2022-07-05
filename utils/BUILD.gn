@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/graphic/graphic_2d/graphic_config.gni")
 config("libwmutil_private_config") {
   include_dirs = [
     "include",
@@ -20,10 +19,6 @@ config("libwmutil_private_config") {
     "../interfaces/innerkits/dm",
     "../interfaces/innerkits/wm",
   ]
-  defines = []
-
-  # Get gpu defines
-  defines += gpu_defines
 }
 
 config("libwmutil_public_config") {
@@ -55,7 +50,6 @@ ohos_shared_library("libwmutil") {
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//third_party/flutter/build/skia:ace_skia_ohos",
   ]
 
   external_deps = [

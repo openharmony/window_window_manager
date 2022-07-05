@@ -17,14 +17,7 @@
 #define OHOS_ROSEN_FREEZE_CONTROLLER_H
 
 #include <refbase.h>
-
-#include <include/core/SkBitmap.h>
-#include <pixel_map.h>
-#ifdef ACE_ENABLE_GL
-#include <render_context/render_context.h>
-#endif
-#include <transaction/rs_transaction.h>
-#include <ui/rs_surface_extractor.h>
+#include <map>
 
 #include "display.h"
 #include "window.h"
@@ -33,7 +26,7 @@ namespace OHOS {
 namespace Rosen {
 class FreezeController : public RefBase {
 public:
-    FreezeController() {};
+    FreezeController() = default;
     ~FreezeController() = default;
 
     bool FreezeDisplay(DisplayId displayId);
@@ -41,14 +34,7 @@ public:
 
 private:
     sptr<Window> CreateCoverWindow(DisplayId displayId);
-    SkImageInfo MakeSkImageInfoFromPixelMap(std::shared_ptr<Media::PixelMap>& pixmap);
-    bool DrawSkImage(std::shared_ptr<RSSurface>& rsSurface,
-        uint32_t width, uint32_t height, std::shared_ptr<Media::PixelMap> pixelMap);
-
     std::map<DisplayId, sptr<Window>> coverWindowMap_;
-#ifdef ACE_ENABLE_GL
-    std::unique_ptr<RenderContext> renderContext_;
-#endif
 };
 }
 }
