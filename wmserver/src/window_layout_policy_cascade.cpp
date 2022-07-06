@@ -15,11 +15,12 @@
 
 #include "window_layout_policy_cascade.h"
 
+#include <hitrace_meter.h>
+
 #include "minimize_app.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
-#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -121,7 +122,7 @@ void WindowLayoutPolicyCascade::LayoutWindowTree(DisplayId displayId)
 
 void WindowLayoutPolicyCascade::RemoveWindowNode(const sptr<WindowNode>& node)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     auto type = node->GetWindowType();
     // affect other windows, trigger off global layout
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
@@ -143,7 +144,7 @@ std::vector<int32_t> WindowLayoutPolicyCascade::GetExitSplitPoints(DisplayId dis
 
 void WindowLayoutPolicyCascade::UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     auto type = node->GetWindowType();
     const DisplayId& displayId = node->GetDisplayId();
     // affect other windows, trigger off global layout
@@ -174,7 +175,7 @@ void WindowLayoutPolicyCascade::UpdateWindowNode(const sptr<WindowNode>& node, b
 
 void WindowLayoutPolicyCascade::AddWindowNode(const sptr<WindowNode>& node)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     auto property = node->GetWindowProperty();
     if (property == nullptr) {
         WLOGFE("window property is nullptr.");

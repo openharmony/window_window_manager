@@ -17,6 +17,7 @@
 
 #include <ability_manager_client.h>
 #include <cinttypes>
+#include <hitrace_meter.h>
 #include <ipc_skeleton.h>
 #include <parameters.h>
 #include <rs_iwindow_animation_controller.h>
@@ -36,7 +37,7 @@
 #include "window_manager_config.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#include "wm_trace.h"
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -375,7 +376,7 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
     int pid = IPCSkeleton::GetCallingPid();
     int uid = IPCSkeleton::GetCallingUid();
     WMError ret = wmsTaskLooper_->ScheduleTask([this, pid, uid, &window, &property, &surfaceNode, &windowId, &token]() {
-        WM_SCOPED_TRACE("wms:CreateWindow(%u)", windowId);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:CreateWindow(%u)", windowId);
         return windowController_->CreateWindow(window, property, surfaceNode, windowId, token, pid, uid);
     }).get();
     accessTokenIdMaps_[windowId] = IPCSkeleton::GetCallingTokenID();
@@ -400,7 +401,7 @@ WMError WindowManagerService::HandleAddWindow(sptr<WindowProperty>& property)
     WLOGFI("[WMS] Add: %{public}5d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
         "%{public}4d %{public}4d]", windowId, property->GetWindowType(), property->GetWindowMode(),
         property->GetWindowFlags(), rect.posX_, rect.posY_, rect.width_, rect.height_);
-    WM_SCOPED_TRACE("wms:AddWindow(%u)", windowId);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:AddWindow(%u)", windowId);
     WMError res = windowController_->AddWindowNode(property);
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
         dragController_->StartDrag(windowId);
@@ -412,7 +413,7 @@ WMError WindowManagerService::RemoveWindow(uint32_t windowId)
 {
     return wmsTaskLooper_->ScheduleTask([this, windowId]() {
         WLOGFI("[WMS] Remove: %{public}u", windowId);
-        WM_SCOPED_TRACE("wms:RemoveWindow(%u)", windowId);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:RemoveWindow(%u)", windowId);
         return windowController_->RemoveWindowNode(windowId);
     }).get();
 }
@@ -426,7 +427,7 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
     accessTokenIdMaps_.erase(windowId);
     return wmsTaskLooper_->ScheduleTask([this, windowId, onlySelf]() {
         WLOGFI("[WMS] Destroy: %{public}u", windowId);
-        WM_SCOPED_TRACE("wms:DestroyWindow(%u)", windowId);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DestroyWindow(%u)", windowId);
         auto node = windowRoot_->GetWindowNode(windowId);
         if (node != nullptr && node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
             dragController_->FinishDrag(windowId);
@@ -523,7 +524,7 @@ void WindowManagerService::OnWindowEvent(Event event, const sptr<IRemoteObject>&
 void WindowManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
-    WM_SCOPED_TRACE("wms:NotifyDisplayStateChange(%u)", type);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:NotifyDisplayStateChange(%u)", type);
     DisplayId displayId = (displayInfo == nullptr) ? DISPLAY_ID_INVALID : displayInfo->GetDisplayId();
     if (type == DisplayStateChangeType::FREEZE) {
         freezeDisplayController_->FreezeDisplay(displayId);
@@ -564,7 +565,7 @@ void WindowManagerService::ProcessPointUp(uint32_t windowId)
 void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
 {
     return wmsTaskLooper_->PostTask([this, displayId]() {
-        WM_SCOPED_TRACE("wms:MinimizeAllAppWindows(%" PRIu64")", displayId);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:MinimizeAllAppWindows(%" PRIu64")", displayId);
         WLOGFI("displayId %{public}" PRIu64"", displayId);
         windowController_->MinimizeAllAppWindows(displayId);
     });
@@ -573,7 +574,7 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
 WMError WindowManagerService::ToggleShownStateForAllAppWindows()
 {
     wmsTaskLooper_->PostTask([this]() {
-        WM_SCOPED_TRACE("wms:ToggleShownStateForAllAppWindows");
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:ToggleShownStateForAllAppWindows");
         return windowController_->ToggleShownStateForAllAppWindows();
     });
     return  WMError::WM_OK;
@@ -590,7 +591,7 @@ WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
 {
     return wmsTaskLooper_->ScheduleTask([this, mode]() {
         WLOGFI("layoutMode: %{public}u", mode);
-        WM_SCOPED_TRACE("wms:SetWindowLayoutMode");
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:SetWindowLayoutMode");
         return windowController_->SetWindowLayoutMode(mode);
     }).get();
 }
@@ -608,7 +609,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         return WMError::WM_OK;
     }
     return wmsTaskLooper_->ScheduleTask([this, &windowProperty, action]() {
-        WM_SCOPED_TRACE("wms:UpdateProperty");
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
         WMError res = windowController_->UpdateProperty(windowProperty, action);
         if (action == PropertyChangeAction::ACTION_UPDATE_RECT && res == WMError::WM_OK &&
             windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {

@@ -58,6 +58,7 @@ ohos_shared_library("libwindow_extension") {
     "ability_runtime:runtime",
     "graphic_graphic_2d:surface",
     "hilog_native:libhilog",
+    "hitrace_native:hitrace_meter",
     "input:libmmi-client",
     "utils_base:utils",
   ]

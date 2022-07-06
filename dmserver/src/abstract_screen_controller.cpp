@@ -16,6 +16,7 @@
 #include "abstract_screen_controller.h"
 
 #include <cinttypes>
+#include <hitrace_meter.h>
 #include <screen_manager/rs_screen_mode_info.h>
 #include <screen_manager/screen_types.h>
 #include <surface.h>
@@ -26,7 +27,6 @@
 #include "event_runner.h"
 #include "screen_rotation_controller.h"
 #include "window_manager_hilog.h"
-#include "wm_trace.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -756,7 +756,7 @@ bool AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t m
 
 void AbstractScreenController::ProcessScreenModeChanged(ScreenId dmsScreenId)
 {
-    WM_SCOPED_TRACE("dms:ProcessScreenModeChanged(%" PRIu64")", dmsScreenId);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:ProcessScreenModeChanged(%" PRIu64")", dmsScreenId);
     sptr<AbstractScreen> absScreen = nullptr;
     sptr<AbstractScreenCallback> absScreenCallback = nullptr;
     {

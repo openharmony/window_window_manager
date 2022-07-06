@@ -19,6 +19,7 @@
 #include <cinttypes>
 #include <ctime>
 #include <display_power_mgr_client.h>
+#include <hitrace_meter.h>
 #include <power_mgr_client.h>
 
 #include "common_event_manager.h"
@@ -32,7 +33,6 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
-#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -361,7 +361,7 @@ void WindowNodeContainer::UpdateSizeChangeReason(sptr<WindowNode>& node, WindowS
 
 void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     node->priority_ = zorderPolicy_->GetWindowPriority(node->GetWindowType());
     RaiseInputMethodWindowPriorityIfNeeded(node);
     RaiseShowWhenLockedWindowIfNeeded(node);
@@ -386,7 +386,7 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
 
 bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId displayId, bool isAdd, bool animationPlayed)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     if (node->GetWindowProperty()->GetCustomAnimation()) {
         WLOGFI("not need to update RsTree since SystemWindowAnimation is playing");
         return false;
@@ -424,9 +424,9 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId display
         // default transition curve: EASE OUT
         static const Rosen::RSAnimationTimingCurve curve = Rosen::RSAnimationTimingCurve::EASE_OUT;
         // add window with transition animation
-        WM_SCOPED_TRACE_BEGIN("Animate(%u)", node->GetWindowId());
+        StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
         RSNode::Animate(timingProtocol, curve, updateRSTreeFunc);
-        WM_SCOPED_TRACE_END();
+        FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
     } else {
         // add or remove window without animation
         WLOGFI("add or remove window without animation");
@@ -686,7 +686,8 @@ void WindowNodeContainer::HandleKeepScreenOn(const sptr<WindowNode>& node, bool 
         return;
     }
     WLOGFI("handle keep screen on: [%{public}s, %{public}d]", node->GetWindowName().c_str(), requireLock);
-    WM_SCOPED_TRACE("container:HandleKeepScreenOn(%s, %d)", node->GetWindowName().c_str(), requireLock);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "container:HandleKeepScreenOn(%s, %d)",
+        node->GetWindowName().c_str(), requireLock);
     ErrCode res;
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
@@ -790,7 +791,7 @@ void WindowNodeContainer::ProcessWindowAvoidAreaChangeWhenDisplayChange() const
 
 void WindowNodeContainer::NotifyIfSystemBarTintChanged(DisplayId displayId) const
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     auto expectSystemBarProp = GetExpectImmersiveProperty();
     SystemBarRegionTints tints;
     SysBarTintMap& sysBarTintMap = displayGroupController_->sysBarTintMaps_[displayId];
@@ -810,7 +811,7 @@ void WindowNodeContainer::NotifyIfSystemBarTintChanged(DisplayId displayId) cons
 
 void WindowNodeContainer::NotifyIfSystemBarRegionChanged(DisplayId displayId) const
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     SystemBarRegionTints tints;
     SysBarTintMap& sysBarTintMap = displayGroupController_->sysBarTintMaps_[displayId];
     SysBarNodeMap& sysBarNodeMap = displayGroupController_->sysBarNodeMaps_[displayId];
@@ -899,7 +900,7 @@ void WindowNodeContainer::NotifySystemBarTints(std::vector<DisplayId> displayIdV
 
 void WindowNodeContainer::NotifyDockWindowStateChanged(sptr<WindowNode>& node, bool isEnable)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     WLOGFI("[Immersive] begin isEnable: %{public}d", isEnable);
     if (isEnable) {
         for (auto& windowNode : appWindowNode_->children_) {
