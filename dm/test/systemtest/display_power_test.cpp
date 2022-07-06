@@ -410,19 +410,6 @@ HWTEST_F(DisplayPowerTest, set_screen_brightness_001, Function | MediumTest | Le
 }
 
 /**
-* @tc.name: set_screen_brightness_002
-* @tc.desc: Call SetScreenBrightness with an invalid value and check the GetScreenBrightness return value
-* @tc.type: FUNC
-*/
-HWTEST_F(DisplayPowerTest, set_screen_brightness_002, Function | MediumTest | Level2)
-{
-    bool ret = DisplayManager::GetInstance().SetScreenBrightness(defaultId_, invalidBrightnessLevel_);
-    ASSERT_EQ(true, ret);
-    uint32_t level = DisplayManager::GetInstance().GetScreenBrightness(defaultId_);
-    ASSERT_NE(level, invalidBrightnessLevel_);
-}
-
-/**
 * @tc.name: window_life_cycle_001
 * @tc.desc: Add a window and then call SuspendEnd and check window state; Notify unlock and check window state
 * @tc.type: FUNC

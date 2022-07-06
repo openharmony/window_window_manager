@@ -515,7 +515,8 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
                 (*iter)->GetWindowId() != node->GetWindowId()) {
                 auto property = (*iter)->GetWindowProperty();
                 if (property != nullptr) {
-                    cascadeRect = property->GetWindowRect();
+                    cascadeRect = ((*iter)->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ?
+                        property->GetWindowRect() : property->GetRequestRect());
                 }
                 WLOGFI("Get current cascadeRect: %{public}u [%{public}d, %{public}d, %{public}u, %{public}u]",
                     (*iter)->GetWindowId(), cascadeRect.posX_, cascadeRect.posY_,
