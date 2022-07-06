@@ -43,6 +43,7 @@ Rotation ScreenRotationController::rotationLockedRotation_;
 uint32_t ScreenRotationController::defaultDeviceRotation_ = 0;
 std::map<SensorRotation, DeviceRotation> ScreenRotationController::sensorToDeviceRotationMap_;
 std::map<DeviceRotation, Rotation> ScreenRotationController::deviceToDisplayRotationMap_;
+DeviceRotation ScreenRotationController::lastSensorRotationConverted_ = DeviceRotation::INVALID;
 
 void ScreenRotationController::SubscribeGravitySensor()
 {
@@ -124,16 +125,13 @@ void ScreenRotationController::HandleGravitySensorEventCallback(SensorEvent *eve
         return;
     }
     Orientation orientation = GetPreferredOrientation();
-    if (!IsSensorRelatedOrientation(orientation)) {
-        lastOrientationType_ = orientation;
-        return;
-    }
 
     currentDisplayRotation_ = GetCurrentDisplayRotation();
     GravityData* gravityData = reinterpret_cast<GravityData*>(event->data);
     int sensorDegree = CalcRotationDegree(gravityData);
     DeviceRotation sensorRotationConverted = ConvertSensorToDeviceRotation(CalcSensorRotation(sensorDegree));
-    if (!ProcessOrientationSwitch(orientation, sensorRotationConverted)) {
+    lastSensorRotationConverted_ = sensorRotationConverted;
+    if (!IsSensorRelatedOrientation(orientation)) {
         return;
     }
     if (sensorRotationConverted == DeviceRotation::INVALID) {
@@ -163,14 +161,23 @@ int ScreenRotationController::CalcRotationDegree(GravityData* gravityData)
 
 Rotation ScreenRotationController::GetCurrentDisplayRotation()
 {
-    return DisplayManagerServiceInner::GetInstance().GetDisplayById(defaultDisplayId_)->GetRotation();
+    sptr<DisplayInfo> defaultDisplayInfo = DisplayManagerServiceInner::GetInstance().GetDefaultDisplay();
+    if (defaultDisplayInfo == nullptr) {
+        WLOGFE("Cannot get default display info");
+        return defaultDeviceRotation_ == 0 ? ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT) :
+            ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE);
+    }
+    return defaultDisplayInfo->GetRotation();
 }
 
 Orientation ScreenRotationController::GetPreferredOrientation()
 {
-    Orientation orientation = Orientation::UNSPECIFIED;
-    DisplayManagerServiceInner::GetInstance().GetWindowPreferredOrientation(defaultDisplayId_, orientation);
-    return orientation;
+    sptr<ScreenInfo> screenInfo = DisplayManagerServiceInner::GetInstance().GetScreenInfoByDisplayId(defaultDisplayId_);
+    if (screenInfo == nullptr) {
+        WLOGFE("Cannot get default screen info");
+        return Orientation::UNSPECIFIED;
+    }
+    return screenInfo->GetOrientation();
 }
 
 Rotation ScreenRotationController::CalcTargetDisplayRotation(
@@ -281,10 +288,11 @@ bool ScreenRotationController::IsSensorRelatedOrientation(Orientation orientatio
     return true;
 }
 
-bool ScreenRotationController::ProcessOrientationSwitch(Orientation orientation, DeviceRotation sensorRotationConverted)
+void ScreenRotationController::ProcessSwitchToSensorRelatedOrientation(
+    Orientation orientation, DeviceRotation sensorRotationConverted)
 {
     if (lastOrientationType_ == orientation) {
-        return true;
+        return;
     }
     lastOrientationType_ = orientation;
     switch (orientation) {
@@ -292,70 +300,70 @@ bool ScreenRotationController::ProcessOrientationSwitch(Orientation orientation,
         case Orientation::AUTO_ROTATION_RESTRICTED: {
             if (isScreenRotationLocked_) {
                 SetScreenRotation(rotationLockedRotation_);
-                return false;
+                return;
             }
             [[fallthrough]];
         }
         case Orientation::SENSOR: {
-            return ProcessSwitchToAutoRotation(sensorRotationConverted);
+            ProcessSwitchToAutoRotation(sensorRotationConverted);
+            return;
         }
         case Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED: {
             if (isScreenRotationLocked_) {
                 ProcessSwitchToAutoRotationPortraitRestricted();
-                return false;
+                return;
             }
             [[fallthrough]];
         }
         case Orientation::SENSOR_VERTICAL: {
-            return ProcessSwitchToAutoRotationPortrait(sensorRotationConverted);
+            ProcessSwitchToAutoRotationPortrait(sensorRotationConverted);
+            return;
         }
         case Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED: {
             if (isScreenRotationLocked_) {
                 ProcessSwitchToAutoRotationLandscapeRestricted();
-                return false;
+                return;
             }
             [[fallthrough]];
         }
         case Orientation::SENSOR_HORIZONTAL: {
-            return ProcessSwitchToAutoRotationLandscape(sensorRotationConverted);
+            ProcessSwitchToAutoRotationLandscape(sensorRotationConverted);
+            return;
         }
         default: {
-            return true;
+            return;
         }
     }
 }
 
-bool ScreenRotationController::ProcessSwitchToAutoRotation(DeviceRotation rotation)
+void ScreenRotationController::ProcessSwitchToAutoRotation(DeviceRotation rotation)
 {
     if (rotation != DeviceRotation::INVALID) {
-        return true;
+        return;
     }
     SetScreenRotation(lastSensorDecidedRotation_);
-    return false;
 }
 
-bool ScreenRotationController::ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation)
+void ScreenRotationController::ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation)
 {
     if (IsCurrentDisplayVertical()) {
-        return true;
+        return;
     }
     if (IsDeviceRotationVertical(rotation)) {
-        return true;
+        return;
     }
     SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT));
-    return false;
 }
 
-bool ScreenRotationController::ProcessSwitchToAutoRotationLandscape(DeviceRotation rotation)
+void ScreenRotationController::ProcessSwitchToAutoRotationLandscape(DeviceRotation rotation)
 {
     if (IsCurrentDisplayHorizontal()) {
-        return true;
+        return;
     }
     if (IsDeviceRotationHorizontal(rotation)) {
-        return true;
+        return;
     }
     SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE));
-    return false;
 }
 
 void ScreenRotationController::ProcessSwitchToAutoRotationPortraitRestricted()
@@ -454,12 +462,12 @@ bool ScreenRotationController::IsDeviceRotationHorizontal(DeviceRotation deviceR
 
 bool ScreenRotationController::IsCurrentDisplayVertical()
 {
-    return IsDisplayRotationVertical(currentDisplayRotation_);
+    return IsDisplayRotationVertical(GetCurrentDisplayRotation());
 }
 
 bool ScreenRotationController::IsCurrentDisplayHorizontal()
 {
-    return IsDisplayRotationHorizontal(currentDisplayRotation_);
+    return IsDisplayRotationHorizontal(GetCurrentDisplayRotation());
 }
 
 bool ScreenRotationController::IsDisplayRotationVertical(Rotation rotation)
@@ -477,6 +485,44 @@ bool ScreenRotationController::IsDisplayRotationHorizontal(Rotation rotation)
 bool ScreenRotationController::IsGravitySensorEnabled()
 {
     return isGravitySensorSubscribed_;
+}
+
+void ScreenRotationController::ProcessSwitchToSensorUnrelatedOrientation(Orientation orientation)
+{
+    if (lastOrientationType_ == orientation) {
+        return;
+    }
+    lastOrientationType_ = orientation;
+    switch (orientation) {
+        case Orientation::VERTICAL: {
+            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT));
+            break;
+        }
+        case Orientation::REVERSE_VERTICAL: {
+            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT_INVERTED));
+            break;
+        }
+        case Orientation::HORIZONTAL: {
+            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE));
+            break;
+        }
+        case Orientation::REVERSE_HORIZONTAL: {
+            SetScreenRotation(ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE_INVERTED));
+            break;
+        }
+        default: {
+            return;
+        }
+    }
+}
+
+void ScreenRotationController::ProcessOrientationSwitch(Orientation orientation)
+{
+    if (!IsSensorRelatedOrientation(orientation)) {
+        ProcessSwitchToSensorUnrelatedOrientation(orientation);
+    } else {
+        ProcessSwitchToSensorRelatedOrientation(orientation, lastSensorRotationConverted_);
+    }
 }
 } // Rosen
 } // OHOS
