@@ -39,7 +39,6 @@ ohos_shared_library("libwmutil") {
     "src/surface_reader_handler_impl.cpp",
     "src/window_property.cpp",
     "src/window_transition_info.cpp",
-    "src/wm_trace.cpp",
   ]
 
   configs = [ ":libwmutil_private_config" ]
@@ -57,7 +56,6 @@ ohos_shared_library("libwmutil") {
     "access_token:libaccesstoken_sdk",
     "graphic_graphic_2d:surface",
     "hilog_native:libhilog",
-    "hitrace_native:hitrace_meter",
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
     "safwk:system_ability_fwk",

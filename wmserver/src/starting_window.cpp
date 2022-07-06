@@ -16,11 +16,12 @@
 #include "starting_window.h"
 #include <ability_manager_client.h>
 #include <display_manager_service_inner.h>
+#include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
 #include "remote_animation.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#include "wm_trace.h"
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -107,7 +108,7 @@ void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
     sptr<Media::PixelMap> pixelMap, uint32_t bkgColor, bool isColdStart)
 {
     // using snapshot to support hot start since node destroy when hide
-    WM_SCOPED_TRACE("wms:DrawStartingWindow(%u)", node->GetWindowId());
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DrawStartingWindow(%u)", node->GetWindowId());
     if (!isColdStart) {
         return;
     }
@@ -143,7 +144,8 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
     wptr<WindowNode> weak = node;
     auto firstFrameCompleteCallback = [weak]() {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
-        WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::STARTING_WINDOW), "wms:async:ShowStartingWindow");
+        FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
+            "wms:async:ShowStartingWindow");
         auto weakNode = weak.promote();
         if (weakNode == nullptr || weakNode->leashWinSurfaceNode_ == nullptr) {
             WLOGFE("windowNode or leashWinSurfaceNode_ is nullptr");

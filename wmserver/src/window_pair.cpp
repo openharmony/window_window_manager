@@ -20,7 +20,6 @@
 #include "minimize_app.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
-#include "wm_trace.h"
 
 #include "window_inner_manager.h"
 

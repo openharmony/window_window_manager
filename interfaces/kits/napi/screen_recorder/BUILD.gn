@@ -52,6 +52,7 @@ ohos_shared_library("screenrecorder_napi") {
     "ability_base:want",
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
+    "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "napi:ace_napi",
   ]

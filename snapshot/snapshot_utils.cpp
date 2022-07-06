@@ -16,11 +16,11 @@
 #include "snapshot_utils.h"
 
 #include <cstdio>
+#include <hitrace_meter.h>
 #include <sys/time.h>
 #include <getopt.h>
 #include <securec.h>
 #include <png.h>
-#include "wm_trace.h"
 
 using namespace OHOS::Media;
 using namespace OHOS::Rosen;
@@ -142,7 +142,7 @@ bool SnapShotUtils::WriteToPng(const std::string &fileName, const WriteToPngPara
         return false;
     }
 
-    WM_SCOPED_TRACE("snapshot:WriteToPng(%s)", fileName.c_str());
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "snapshot:WriteToPng(%s)", fileName.c_str());
 
     png_structp pngStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if (pngStruct == nullptr) {

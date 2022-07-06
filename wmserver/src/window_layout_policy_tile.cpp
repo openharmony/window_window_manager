@@ -15,11 +15,12 @@
 
 #include "window_layout_policy_tile.h"
 #include <ability_manager_client.h>
+#include <hitrace_meter.h>
+
 #include "minimize_app.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
-#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -117,7 +118,7 @@ void WindowLayoutPolicyTile::InitTileWindowRects(DisplayId displayId)
 
 void WindowLayoutPolicyTile::AddWindowNode(const sptr<WindowNode>& node)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
 
     // update window size limits when add window
     UpdateWindowSizeLimits(node);
@@ -134,7 +135,7 @@ void WindowLayoutPolicyTile::AddWindowNode(const sptr<WindowNode>& node)
 
 void WindowLayoutPolicyTile::UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     WindowLayoutPolicy::UpdateWindowNode(node);
     if (avoidTypes_.find(node->GetWindowType()) != avoidTypes_.end()) {
         DisplayId displayId = node->GetDisplayId();
@@ -146,7 +147,7 @@ void WindowLayoutPolicyTile::UpdateWindowNode(const sptr<WindowNode>& node, bool
 
 void WindowLayoutPolicyTile::RemoveWindowNode(const sptr<WindowNode>& node)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     WLOGFI("RemoveWindowNode %{public}u in tile", node->GetWindowId());
     auto type = node->GetWindowType();
     auto displayId = node->GetDisplayId();
