@@ -25,7 +25,7 @@
           "inputmethod_native",
           "sensor",
           "ability_base",
-          "graphic_graphic_2d",
+          "graphic_standard",
           "hisysevent_native",
           "ability_runtime",
           "napi",
