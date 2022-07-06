@@ -205,7 +205,12 @@ WindowSizeChangeReason WindowProperty::GetWindowSizeChangeReason() const
 
 void WindowProperty::ResumeLastWindowMode()
 {
+    // if lastMode isn't supported, get supported mode from supportModeInfo
     if (!WindowHelper::IsWindowModeSupported(modeSupportInfo_, lastMode_)) {
+        auto mode = WindowHelper::GetWindowModeFromModeSupportInfo(modeSupportInfo_);
+        if (!WindowHelper::IsSplitWindowMode(mode)) {
+            mode_ = mode;
+        }
         return;
     }
     mode_ = lastMode_;
