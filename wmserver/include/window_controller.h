@@ -78,6 +78,8 @@ private:
     WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
     WMError SetWindowMode(uint32_t windowId, WindowMode dstMode);
     void ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>& node);
+    void ResizeSoftInputCallingWindowIfNeed(const sptr<WindowNode>& node);
+    void RestoreCallingWindowSizeIfNeed();
     void HandleTurnScreenOn(const sptr<WindowNode>& node);
     void ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo);
     WMError UpdateTouchHotAreas(const sptr<WindowNode>& node, const std::vector<Rect>& rects);
@@ -93,6 +95,8 @@ private:
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, INVALID_WINDOW_ID },
     };
     bool isScreenLocked_ { false };
+    Rect callingWindowRestoringRect_ { 0, 0, 0, 0 };
+    uint32_t callingWindowId_ = 0u;
 };
 } // Rosen
 } // OHOS

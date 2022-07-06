@@ -1399,7 +1399,7 @@ WMError WindowNodeContainer::ToggleShownStateForAllAppWindows(
         if (node->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
             recentWindowNode = node;
             if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-                return WMError::WM_OK;
+                return WMError::WM_DO_NOTHING;
             }
         }
     }
