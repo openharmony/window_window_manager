@@ -237,9 +237,65 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         sysBarWinId_[node->GetWindowType()] = node->GetWindowId();
         ResizeSystemBarPropertySizeIfNeed(node);
     }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        ResizeSoftInputCallingWindowIfNeed(node);
+    }
     StopBootAnimationIfNeed(node->GetWindowType());
     MinimizeApp::ExecuteMinimizeAll();
     return WMError::WM_OK;
+}
+
+void WindowController::ResizeSoftInputCallingWindowIfNeed(const sptr<WindowNode>& node)
+{
+    auto callingWindowId = node->GetCallingWindow();
+    auto callingWindow = windowRoot_->GetWindowNode(callingWindowId);
+    if (callingWindow == nullptr) {
+        auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+        if (windowNodeContainer == nullptr) {
+            WLOGFE("windowNodeContainer is null, displayId:%{public}" PRIu64"", node->GetDisplayId());
+            return;
+        }
+        callingWindowId = windowNodeContainer->GetFocusWindow();
+        callingWindow = windowRoot_->GetWindowNode(callingWindowId);
+    }
+    if (callingWindow == nullptr || !callingWindow->currentVisibility_ ||
+        callingWindow->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        WLOGFE("callingWindow is null or invisible or not float window, callingWindowId:%{public}u", callingWindowId);
+        return;
+    }
+    Rect softInputWindowRect = node->GetWindowRect();
+    Rect callingWindowRect = callingWindow->GetWindowRect();
+    Rect rect = WindowHelper::GetOverlap(softInputWindowRect, callingWindowRect, 0, 0);
+    if (WindowHelper::IsEmptyRect(rect)) {
+        WLOGFE("there is no overlap");
+        return;
+    }
+    Rect requestedRect = callingWindowRect;
+    requestedRect.posY_ = softInputWindowRect.posY_ - static_cast<int32_t>(requestedRect.height_);
+    Rect statusBarWindowRect = { 0, 0, 0, 0 };
+    auto statusbarWindow = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
+    if (statusbarWindow != nullptr && statusbarWindow->parent_ != nullptr) {
+        statusBarWindowRect = statusbarWindow->GetWindowRect();
+    }
+    int32_t posY = std::max(requestedRect.posY_, static_cast<int32_t>(statusBarWindowRect.height_));
+    if (posY != requestedRect.posY_) {
+        requestedRect.height_ = softInputWindowRect.posY_ - posY;
+        requestedRect.posY_ = posY;
+    }
+    callingWindowRestoringRect_ = callingWindowRect;
+    callingWindowId_ = callingWindow->GetWindowId();
+    ResizeRect(callingWindowId_, requestedRect, WindowSizeChangeReason::DRAG);
+}
+
+void WindowController::RestoreCallingWindowSizeIfNeed()
+{
+    auto callingWindow = windowRoot_->GetWindowNode(callingWindowId_);
+    if (!WindowHelper::IsEmptyRect(callingWindowRestoringRect_) && callingWindow != nullptr &&
+        callingWindow->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        ResizeRect(callingWindowId_, callingWindowRestoringRect_, WindowSizeChangeReason::DRAG);
+    }
+    callingWindowRestoringRect_ = { 0, 0, 0, 0 };
+    callingWindowId_ = 0u;
 }
 
 void WindowController::ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>& node)
@@ -294,14 +350,20 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
         return res;
     };
     auto windowNode = windowRoot_->GetWindowNode(windowId);
+    WMError res = WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     if (windowNode && windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         if (RemoteAnimation::NotifyAnimationScreenUnlock(removeFunc) == WMError::WM_OK) {
             WLOGFI("NotifyAnimationScreenUnlock with remote animation");
-            return WMError::WM_OK;
+            res = WMError::WM_OK;
         }
     }
-
-    return removeFunc();
+    if (res != WMError::WM_OK) {
+        res = removeFunc();
+    }
+    if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        RestoreCallingWindowSizeIfNeed();
+    }
+    return res;
 }
 
 WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
@@ -748,6 +810,17 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->SetOriginRect(property->GetOriginRect());
             node->SetDragType(property->GetDragType());
             ret = ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
+            if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && ret == WMError::WM_OK &&
+                callingWindowId_ != 0u && !WindowHelper::IsEmptyRect(callingWindowRestoringRect_)) {
+                if (property->GetWindowSizeChangeReason() != WindowSizeChangeReason::MOVE) {
+                    callingWindowId_ = 0u;
+                    callingWindowRestoringRect_ = { 0, 0, 0, 0 };
+                } else {
+                    auto windowRect = node->GetWindowRect();
+                    callingWindowRestoringRect_.posX_ = windowRect.posX_;
+                    callingWindowRestoringRect_.posY_ = windowRect.posY_;
+                }
+            }
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_MODE: {
