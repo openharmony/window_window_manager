@@ -18,12 +18,12 @@
 #include <cinttypes>
 #include <display_power_mgr_client.h>
 #include <hisysevent.h>
+#include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
 #include "display_manager_service_inner.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
-#include "wm_trace.h"
 #include "window_manager_agent_controller.h"
 
 namespace OHOS {
@@ -215,7 +215,7 @@ WMError WindowRoot::SaveWindow(const sptr<WindowNode>& node)
 
 WMError WindowRoot::MinimizeStructuredAppWindowsExceptSelf(sptr<WindowNode>& node)
 {
-    WM_SCOPED_TRACE("root:MinimizeStructuredAppWindowsExceptSelf");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "root:MinimizeStructuredAppWindowsExceptSelf");
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
         WLOGFE("MinimizeAbility failed, window container could not be found");

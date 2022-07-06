@@ -17,6 +17,7 @@
 #include <ability_manager_client.h>
 #include <chrono>
 #include <hisysevent.h>
+#include <hitrace_meter.h>
 #include <parameters.h>
 #include <power_mgr_client.h>
 #include <rs_window_animation_finished_callback.h>
@@ -29,7 +30,6 @@
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "wm_common.h"
-#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -50,7 +50,8 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
         WLOGFE("info or AbilityToken is nullptr!");
         return;
     }
-    WM_SCOPED_ASYNC_TRACE_BEGIN(static_cast<int32_t>(TraceTaskId::STARTING_WINDOW), "wms:async:ShowStartingWindow");
+    StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
+        "wms:async:ShowStartingWindow");
     auto node = windowRoot_->FindWindowNodeWithToken(info->GetAbilityToken());
     auto layoutMode = windowRoot_->GetCurrentLayoutMode(info->GetDisplayId());
     if (node == nullptr) {
@@ -101,8 +102,9 @@ void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
         WLOGFE("CancelStartingWindow failed because client window has shown id:%{public}u", node->GetWindowId());
         return;
     }
-    WM_SCOPED_TRACE("wms:CancelStartingWindow(%u)", node->GetWindowId());
-    WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::STARTING_WINDOW), "wms:async:ShowStartingWindow");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:CancelStartingWindow(%u)", node->GetWindowId());
+    FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
+        "wms:async:ShowStartingWindow");
     WLOGFI("CancelStartingWindow with id:%{public}u!", node->GetWindowId());
     node->isAppCrash_ = true;
     WMError res = windowRoot_->DestroyWindow(node->GetWindowId(), false);
@@ -124,7 +126,7 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
     if (!RemoteAnimation::CheckTransition(srcInfo, srcNode, dstInfo, dstNode)) {
         return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
-    WM_SCOPED_ASYNC_TRACE_BEGIN(static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+    StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
         "wms:async:ShowRemoteAnimation");
     auto transitionEvent = RemoteAnimation::GetTransitionEvent(srcInfo, dstInfo, srcNode, dstNode);
     switch (transitionEvent) {
@@ -369,7 +371,7 @@ WMError WindowController::RequestFocus(uint32_t windowId)
 
 WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
         WLOGFE("could not find window");

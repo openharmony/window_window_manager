@@ -16,6 +16,7 @@
 #include "display_manager_service.h"
 
 #include <cinttypes>
+#include <hitrace_meter.h>
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
@@ -28,7 +29,6 @@
 #include "screen_rotation_controller.h"
 #include "transaction/rs_interfaces.h"
 #include "window_manager_hilog.h"
-#include "wm_trace.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -175,7 +175,7 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreen(ScreenId screenI
 ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
     const sptr<IRemoteObject>& displayManagerAgent)
 {
-    WM_SCOPED_TRACE("dms:CreateVirtualScreen(%s)", option.name_.c_str());
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:CreateVirtualScreen(%s)", option.name_.c_str());
     ScreenId screenId = abstractScreenController_->CreateVirtualScreen(option, displayManagerAgent);
     CHECK_SCREEN_AND_RETURN(SCREEN_ID_INVALID);
     accessTokenIdMaps_[screenId] = IPCSkeleton::GetCallingTokenID();
@@ -191,7 +191,7 @@ DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
     WLOGFI("DestroyVirtualScreen::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
 
-    WM_SCOPED_TRACE("dms:DestroyVirtualScreen(%" PRIu64")", screenId);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:DestroyVirtualScreen(%" PRIu64")", screenId);
     return abstractScreenController_->DestroyVirtualScreen(screenId);
 }
 
@@ -204,25 +204,25 @@ DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<S
 
 bool DisplayManagerService::SetOrientation(ScreenId screenId, Orientation orientation)
 {
-    WM_SCOPED_TRACE("dms:SetOrientation(%" PRIu64")", screenId);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetOrientation(%" PRIu64")", screenId);
     return abstractScreenController_->SetOrientation(screenId, orientation, false);
 }
 
 bool DisplayManagerService::SetOrientationFromWindow(ScreenId screenId, Orientation orientation)
 {
-    WM_SCOPED_TRACE("dms:SetOrientationFromWindow(%" PRIu64")", screenId);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetOrientationFromWindow(%" PRIu64")", screenId);
     return abstractScreenController_->SetOrientation(screenId, orientation, true);
 }
 
 bool DisplayManagerService::SetRotationFromWindow(ScreenId screenId, Rotation targetRotation)
 {
-    WM_SCOPED_TRACE("dms:SetRotationFromWindow(%" PRIu64")", screenId);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetRotationFromWindow(%" PRIu64")", screenId);
     return abstractScreenController_->SetRotation(screenId, targetRotation, true);
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId)
 {
-    WM_SCOPED_TRACE("dms:GetDisplaySnapshot(%" PRIu64")", displayId);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:GetDisplaySnapshot(%" PRIu64")", displayId);
     if (Permission::CheckCallingPermission("ohos.permission.CAPTURE_SCREEN") ||
         Permission::IsStartByHdcd()) {
         return abstractDisplayController_->GetScreenSnapshot(displayId);
@@ -307,7 +307,7 @@ bool DisplayManagerService::UnregisterDisplayManagerAgent(const sptr<IDisplayMan
 
 bool DisplayManagerService::WakeUpBegin(PowerStateChangeReason reason)
 {
-    WM_SCOPED_TRACE("dms:WakeUpBegin(%u)", reason);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:WakeUpBegin(%u)", reason);
     if (!Permission::IsSystemCalling()) {
         WLOGFI("permission denied!");
         return false;
@@ -328,7 +328,7 @@ bool DisplayManagerService::WakeUpEnd()
 
 bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 {
-    WM_SCOPED_TRACE("dms:SuspendBegin(%u)", reason);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SuspendBegin(%u)", reason);
     if (!Permission::IsSystemCalling()) {
         WLOGFI("permission denied!");
         return false;
@@ -425,7 +425,7 @@ ScreenId DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<Sc
         return SCREEN_ID_INVALID;
     }
     abstractScreenController_->SetShotScreen(mainScreenId, shotScreenIds);
-    WM_SCOPED_TRACE("dms:MakeMirror");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeMirror");
     if (!allMirrorScreenIds.empty() && !abstractScreenController_->MakeMirror(mainScreenId, allMirrorScreenIds)) {
         WLOGFE("make mirror failed.");
         return SCREEN_ID_INVALID;
@@ -540,7 +540,7 @@ ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds
         startPoints.erase(startPointIter);
     }
     abstractScreenController_->SetShotScreen(defaultScreenId, shotScreenIds);
-    WM_SCOPED_TRACE("dms:MakeExpand");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeExpand");
     if (!allExpandScreenIds.empty() && !abstractScreenController_->MakeExpand(allExpandScreenIds, startPoints)) {
         WLOGFE("make expand failed.");
         return SCREEN_ID_INVALID;
@@ -555,13 +555,14 @@ ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds
 
 bool DisplayManagerService::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
-    WM_SCOPED_TRACE("dms:SetScreenActiveMode(%" PRIu64", %u)", screenId, modeId);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetScreenActiveMode(%" PRIu64", %u)", screenId, modeId);
     return abstractScreenController_->SetScreenActiveMode(screenId, modeId);
 }
 
 bool DisplayManagerService::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
 {
-    WM_SCOPED_TRACE("dms:SetVirtualPixelRatio(%" PRIu64", %f)", screenId, virtualPixelRatio);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetVirtualPixelRatio(%" PRIu64", %f)", screenId,
+        virtualPixelRatio);
     return abstractScreenController_->SetVirtualPixelRatio(screenId, virtualPixelRatio);
 }
 
