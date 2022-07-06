@@ -35,8 +35,8 @@ void WindowExtensionClientProxy::OnWindowReady(const std::shared_ptr<RSSurfaceNo
         WLOGFE("write token failed");
         return;
     }
-    
-    if ((!data.WriteParcelable(surfaceNode.get()))) {
+
+    if ((!surfaceNode->Marshalling(data))) {
         WLOGFE("write surfaceNode failed");
         return;
     }

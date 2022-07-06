@@ -46,7 +46,7 @@ WMError WindowManagerProxy::CreateWindow(sptr<IWindow>& window, sptr<WindowPrope
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteParcelable(surfaceNode.get())) {
+    if (!surfaceNode->Marshalling(data)) {
         WLOGFE("Write windowProperty failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
@@ -537,7 +537,7 @@ WMError WindowManagerProxy::NotifyWindowTransition(sptr<WindowTransitionInfo>& f
         WLOGFE("Send request error: %{public}d", static_cast<uint32_t>(error));
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    WMError ret = static_cast<WMError>(reply.ReadInt32());
+    auto ret = static_cast<WMError>(reply.ReadInt32());
     return ret;
 }
 
@@ -560,7 +560,7 @@ WMError WindowManagerProxy::GetModeChangeHotZones(DisplayId displayId, ModeChang
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    WMError ret = static_cast<WMError>(reply.ReadInt32());
+    auto ret = static_cast<WMError>(reply.ReadInt32());
     if (ret == WMError::WM_OK) {
         hotZones.fullscreen_.posX_ = reply.ReadInt32();
         hotZones.fullscreen_.posY_ = reply.ReadInt32();
@@ -590,7 +590,7 @@ void WindowManagerProxy::MinimizeWindowsByLauncher(std::vector<uint32_t> windowI
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-    uint32_t size = static_cast<uint32_t>(windowIds.size());
+    auto size = static_cast<uint32_t>(windowIds.size());
     const uint32_t maxWindowNum = 100;
     if (size > maxWindowNum) {
         WLOGFE("windowNum cannot exceeds than 100");
@@ -617,8 +617,8 @@ void WindowManagerProxy::MinimizeWindowsByLauncher(std::vector<uint32_t> windowI
     }
     ;
     if (reply.ReadBool()) {
-        sptr<IRemoteObject> finishcallbackObject = reply.ReadRemoteObject();
-        finishCallback = iface_cast<RSIWindowAnimationFinishedCallback>(finishcallbackObject);
+        sptr<IRemoteObject> finishCallbackObject = reply.ReadRemoteObject();
+        finishCallback = iface_cast<RSIWindowAnimationFinishedCallback>(finishCallbackObject);
     } else {
         finishCallback = nullptr;
     }

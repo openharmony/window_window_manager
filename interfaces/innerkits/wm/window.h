@@ -236,7 +236,7 @@ public:
     virtual void UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
-        NativeValue* storage, bool isdistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;
+        NativeValue* storage, bool isDistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;
     virtual std::string GetContentInfo() = 0;
     virtual Ace::UIContent* GetUIContent() const = 0;
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
