@@ -1891,5 +1891,24 @@ WindowLayoutMode WindowNodeContainer::GetCurrentLayoutMode() const
 {
     return layoutMode_;
 }
+
+void WindowNodeContainer::RemoveSingleUserWindowNodes()
+{
+    std::vector<sptr<WindowNode>> windowNodes;
+    TraverseContainer(windowNodes);
+    for (auto& windowNode : windowNodes) {
+        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP ||
+            windowNode->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
+            windowNode->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
+            windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD ||
+            windowNode->GetWindowType() == WindowType::WINDOW_TYPE_POINTER) {
+            continue;
+        }
+        WLOGFI("remove window %{public}s, windowId %{public}d",
+            windowNode->GetWindowName().c_str(), windowNode->GetWindowId());
+        windowNode->GetWindowProperty()->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
+        RemoveWindowNode(windowNode);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

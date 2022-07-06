@@ -110,6 +110,7 @@ public:
     void BeforeProcessWindowAvoidAreaChangeWhenDisplayChange() const;
     void ProcessWindowAvoidAreaChangeWhenDisplayChange() const;
     WindowLayoutMode GetCurrentLayoutMode() const;
+    void RemoveSingleUserWindowNodes();
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;

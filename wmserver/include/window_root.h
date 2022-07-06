@@ -97,6 +97,7 @@ public:
     void SetExitSplitRatios(const std::vector<float>& exitSplitRatios);
     void MinimizeTargetWindows(std::vector<uint32_t>& windowIds);
     WindowLayoutMode GetCurrentLayoutMode(DisplayId displayId);
+    void RemoveSingleUserWindowNodes();
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);

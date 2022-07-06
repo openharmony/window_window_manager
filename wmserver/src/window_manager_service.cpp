@@ -57,6 +57,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     dragController_ = new DragController(windowRoot_);
     windowDumper_ = new WindowDumper(windowRoot_);
     freezeDisplayController_ = new FreezeController();
+    windowCommonEvent_ = std::make_shared<WindowCommonEvent>();
     wmsTaskLooper_ = std::make_unique<WindowTaskLooper>();
     startingOpen_ = system::GetParameter("persist.window.sw.enabled", "1") == "1"; // startingWin default enabled
 
@@ -79,8 +80,25 @@ void WindowManagerService::OnStart()
     RegisterWindowManagerServiceHandler();
     RegisterWindowVisibilityChangeCallback();
     wmsTaskLooper_->Start();
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 }
 
+
+void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+{
+    WLOGFI(" %{public}d", systemAbilityId);
+    if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
+        windowCommonEvent_->SubscriberEvent();
+    }
+}
+
+void WindowManagerService::OnAccountSwitched() const
+{
+    wmsTaskLooper_->PostTask([this]() {
+        windowRoot_->RemoveSingleUserWindowNodes();
+    });
+    WLOGFI("called");
+}
 
 void WindowManagerService::WindowVisibilityChangeCallback(std::shared_ptr<RSOcclusionData> occlusionData)
 {
@@ -290,6 +308,7 @@ void WindowManagerService::ConfigureWindowManagerService()
 
 void WindowManagerService::OnStop()
 {
+    windowCommonEvent_->UnSubscriberEvent();
     WindowInnerManager::GetInstance().Stop();
     WLOGFI("ready to stop service.");
 }
