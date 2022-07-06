@@ -376,6 +376,37 @@ int32_t GetExpandOptionFromJs(NativeEngine& engine, NativeObject* optionObject, 
 }
 };
 
+NativeValue* InitScreenOrientation(NativeEngine* engine)
+{
+    WLOGFI("JsScreenManager::InitScreenOrientation called");
+
+    if (engine == nullptr) {
+        WLOGFE("engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("UNSPECIFIED", CreateJsValue(*engine, static_cast<int32_t>(Orientation::UNSPECIFIED)));
+    object->SetProperty("VERTICAL", CreateJsValue(*engine, static_cast<int32_t>(Orientation::VERTICAL)));
+    object->SetProperty("HORIZONTAL", CreateJsValue(*engine, static_cast<int32_t>(Orientation::HORIZONTAL)));
+    object->SetProperty("REVERSE_VERTICAL",
+                        CreateJsValue(*engine, static_cast<int32_t>(Orientation::REVERSE_VERTICAL)));
+    object->SetProperty("REVERSE_HORIZONTAL",
+                        CreateJsValue(*engine, static_cast<int32_t>(Orientation::REVERSE_HORIZONTAL)));
+    object->SetProperty("SENSOR", CreateJsValue(*engine, static_cast<int32_t>(Orientation::SENSOR)));
+    object->SetProperty("SENSOR_VERTICAL",
+                        CreateJsValue(*engine, static_cast<int32_t>(Orientation::SENSOR_VERTICAL)));
+    object->SetProperty("SENSOR_HORIZONTAL",
+                        CreateJsValue(*engine, static_cast<int32_t>(Orientation::SENSOR_HORIZONTAL)));
+    return objValue;
+}
+
 NativeValue* JsScreenManagerInit(NativeEngine* engine, NativeValue* exportObj)
 {
     WLOGFI("JsScreenManagerInit is called");
@@ -390,6 +421,8 @@ NativeValue* JsScreenManagerInit(NativeEngine* engine, NativeValue* exportObj)
         WLOGFE("JsScreenManagerInit object is nullptr");
         return nullptr;
     }
+
+    object->SetProperty("Orientation", InitScreenOrientation(engine));
 
     std::unique_ptr<JsScreenManager> jsScreenManager = std::make_unique<JsScreenManager>(engine);
     object->SetNativePointer(jsScreenManager.release(), JsScreenManager::Finalizer, nullptr);

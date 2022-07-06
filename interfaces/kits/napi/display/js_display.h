@@ -32,6 +32,15 @@ public:
 private:
     sptr<Display> display_ = nullptr;
 };
+enum class DisplayStateMode : uint32_t {
+    STATE_UNKNOWN = 0,
+    STATE_OFF,
+    STATE_ON,
+    STATE_DOZE,
+    STATE_DOZE_SUSPEND,
+    STATE_VR,
+    STATE_ON_SUSPEND
+};
 }  // namespace Rosen
 }  // namespace OHOS
 #endif
