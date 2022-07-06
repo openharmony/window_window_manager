@@ -17,11 +17,12 @@
 
 #include <ability_manager_client.h>
 #include <common/rs_rect.h>
+#include <hitrace_meter.h>
 #include <rs_window_animation_finished_callback.h>
 #include "minimize_app.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#include "wm_trace.h"
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -120,7 +121,7 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
         []() {
             WLOGFI("RSWindowAnimation: on finish transition with minimizeAll!");
             MinimizeApp::ExecuteMinimizeAll();
-            WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+            FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
                 "wms:async:ShowRemoteAnimation");
         }
     );
@@ -181,7 +182,7 @@ WMError RemoteAnimation::NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcI
         if (weakNode != nullptr && weakNode->abilityToken_ != nullptr) {
             WLOGFI("minimize windowId: %{public}u, name:%{public}s",
                 weakNode->GetWindowId(), weakNode->GetWindowName().c_str());
-            WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+            FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
                 "wms:async:ShowRemoteAnimation");
             AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(weakNode->abilityToken_, true);
         }
@@ -218,7 +219,8 @@ WMError RemoteAnimation::NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo
                     weakNode->GetWindowId(), weakNode->GetWindowName().c_str());
                 AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(weakNode->abilityToken_, -1);
             }
-            WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION), "wms:async:ShowRemoteAnimation");
+            FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+                "wms:async:ShowRemoteAnimation");
         }
     };
     sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
@@ -252,7 +254,8 @@ WMError RemoteAnimation::NotifyAnimationByHome()
     auto func = []() {
         WLOGFI("NotifyAnimationByHome in animation callback");
         MinimizeApp::ExecuteMinimizeAll();
-        WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION), "wms:async:ShowRemoteAnimation");
+        FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+            "wms:async:ShowRemoteAnimation");
     };
     sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
         func);

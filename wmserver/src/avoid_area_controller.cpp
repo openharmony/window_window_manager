@@ -14,10 +14,12 @@
  */
 
 #include "avoid_area_controller.h"
+
+#include <hitrace_meter.h>
+
 #include "display_manager_config.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -70,7 +72,7 @@ void AvoidAreaController::AddOrRemoveOverlayWindowIfNeed(const sptr<WindowNode>&
         WLOGFE("IsOverlayWindow Failed.");
         return;
     }
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
 
     uint32_t overlayId = overlayNode->GetWindowId();
     bool isRecorded = (overlayWindowMap_.find(overlayId) != overlayWindowMap_.end());
@@ -150,7 +152,7 @@ void AvoidAreaController::AddOrRemoveKeyboard(const sptr<WindowNode>& keyboardNo
 void AvoidAreaController::UpdateOverlayWindowIfNeed(const sptr<WindowNode>& node,
     const std::function<bool(sptr<WindowNode>)>& checkFunc)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     if (WindowHelper::IsOverlayWindow(node->GetWindowType())) {
         AvoidAreaType type = WindowHelper::IsSystemBarWindow(node->GetWindowType()) ?
             AvoidAreaType::TYPE_SYSTEM : AvoidAreaType::TYPE_KEYBOARD;

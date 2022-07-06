@@ -15,6 +15,7 @@
 
 #include "js_window_extension.h"
 
+#include <hitrace_meter.h>
 #include <napi_common_want.h>
 #include <native_engine/native_reference.h>
 #include <native_engine/native_value.h>
@@ -27,7 +28,6 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
-#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -61,7 +61,7 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
     std::shared_ptr<AbilityRuntime::AbilityHandler>& handler,
     const sptr<IRemoteObject>& token)
 {
-    WM_SCOPED_TRACE("WindowExtension Init");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowExtension Init");
     WindowExtension::Init(record, application, handler, token);
     std::string srcPath;
     GetSrcPath(srcPath);
@@ -143,7 +143,7 @@ void JsWindowExtension::GetSrcPath(std::string& srcPath) const
 
 sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
 {
-    WM_SCOPED_TRACE("WindowExtension Init %s-%s",
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowExtension OnConnect %s-%s",
         want.GetElement().GetAbilityName().c_str(), want.GetElement().GetAbilityName().c_str());
     WLOGFI("called.");
     Extension::OnConnect(want);
@@ -194,7 +194,7 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
 
 void JsWindowExtension::OnStart(const AAFwk::Want& want)
 {
-    WM_SCOPED_TRACE("WindowExtension OnStart %s-%s",
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowExtension OnStart %s-%s",
         want.GetElement().GetAbilityName().c_str(), want.GetElement().GetAbilityName().c_str());
     Extension::OnStart(want);
 

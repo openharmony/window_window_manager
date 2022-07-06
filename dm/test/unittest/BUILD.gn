@@ -60,6 +60,8 @@ ohos_unittest("dm_snapshot_utils_test") {
   ]
 
   deps = [ ":dm_unittest_common" ]
+
+  external_deps = [ "hitrace_native:hitrace_meter" ]
 }
 
 ## UnitTest dm_snapshot_utils_test }}}

@@ -14,9 +14,11 @@
  */
 
 #include "snapshot_controller.h"
+
+#include <hitrace_meter.h>
+
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -46,7 +48,7 @@ WMError SnapshotController::TakeSnapshot(const std::shared_ptr<RSSurfaceNode>& s
 
 int32_t SnapshotController::GetSnapshot(const sptr<IRemoteObject> &token, Snapshot& snapshot)
 {
-    WM_SCOPED_TRACE("wms:GetSnapshot");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:GetSnapshot");
     if (token == nullptr) {
         WLOGFE("Get ailityToken failed!");
         return static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);

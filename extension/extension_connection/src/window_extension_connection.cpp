@@ -18,6 +18,7 @@
 #include <ability_connect_callback_stub.h>
 #include <ability_manager_client.h>
 #include <element_name.h>
+#include <hitrace_meter.h>
 #include <iremote_object.h>
 
 #include "window_extension_proxy.h"
@@ -25,7 +26,6 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
-#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -106,7 +106,7 @@ int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementN
 {
     AAFwk::Want want;
     want.SetElement(element);
-    WM_SCOPED_ASYNC_TRACE_BEGIN(static_cast<int32_t>(TraceTaskId::CONNECT_EXTENSION),
+    StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::CONNECT_EXTENSION),
         "WindowExtension %s-%s", element.GetBundleName().c_str(), element.GetAbilityName().c_str());
     want.SetParam(RECT_FORM_KEY_POS_X, rect.posX_);
     want.SetParam(RECT_FORM_KEY_POS_Y, rect.posY_);
@@ -189,7 +189,7 @@ void WindowExtensionConnection::Impl::OnAbilityConnectDone(const AppExecFwk::Ele
         WLOGFI("GetExtensionWindow");
     }
     WLOGFI("call end");
-    WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::CONNECT_EXTENSION),
+    FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::CONNECT_EXTENSION),
         "WindowExtension %s-%s", element.GetBundleName().c_str(), element.GetAbilityName().c_str());
 }
 
