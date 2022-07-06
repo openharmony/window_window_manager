@@ -56,6 +56,7 @@ public:
     virtual void CancelStartingWindow(sptr<IRemoteObject> abilityToken) override;
 };
 
+class RSUIDirector;
 class WindowManagerService : public SystemAbility, public WindowManagerStub {
 friend class DisplayChangeListener;
 friend class WindowManagerServiceHandler;
@@ -134,7 +135,8 @@ private:
     std::unique_ptr<WindowTaskLooper> wmsTaskLooper_;
     RSInterfaces& rsInterface_;
     bool startingOpen_ = true;
+    std::shared_ptr<RSUIDirector> rsUiDirector_;
 };
-}
-}
+} // namespace Rosen
+} // namespace OHOS
 #endif // OHOS_WINDOW_MANAGER_SERVICE_H

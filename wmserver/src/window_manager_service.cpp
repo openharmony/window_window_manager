@@ -15,20 +15,21 @@
 
 #include "window_manager_service.h"
 
-#include <cinttypes>
-
 #include <ability_manager_client.h>
+#include <cinttypes>
 #include <ipc_skeleton.h>
 #include <parameters.h>
 #include <rs_iwindow_animation_controller.h>
 #include <system_ability_definition.h>
 
-#include "dm_common.h"
 #include "display_manager_service_inner.h"
+#include "dm_common.h"
 #include "drag_controller.h"
-#include "remote_animation.h"
 #include "minimize_app.h"
+#include "permission.h"
+#include "remote_animation.h"
 #include "singleton_container.h"
+#include "ui/rs_ui_director.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_agent_controller.h"
@@ -36,7 +37,6 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_trace.h"
-#include "permission.h"
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -50,7 +50,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     rsInterface_(RSInterfaces::GetInstance())
 {
     windowRoot_ = new WindowRoot(
-        std::bind(&WindowManagerService::OnWindowEvent, this, std::placeholders::_1, std::placeholders::_2));
+        [this](Event event, const sptr<IRemoteObject>& remoteObject) { OnWindowEvent(event, remoteObject); });
     inputWindowMonitor_ = new InputWindowMonitor(windowRoot_);
     windowController_ = new WindowController(windowRoot_, inputWindowMonitor_);
     snapshotController_ = new SnapshotController(windowRoot_);
@@ -59,6 +59,11 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     freezeDisplayController_ = new FreezeController();
     wmsTaskLooper_ = std::make_unique<WindowTaskLooper>();
     startingOpen_ = system::GetParameter("persist.window.sw.enabled", "1") == "1"; // startingWin default enabled
+
+    // init RSUIDirector, it will handle animation callback
+    rsUiDirector_ = RSUIDirector::Create();
+    rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task) { wmsTaskLooper_->PostTask(task); });
+    rsUiDirector_->Init(false);
 }
 
 void WindowManagerService::OnStart()
