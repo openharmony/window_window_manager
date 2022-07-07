@@ -20,7 +20,7 @@ group("napi_packages") {
     "screen_recorder:screenrecorder_napi",
     "screen_runtime:screen_napi",
     "screenshot:screenshot",
-    "window_extension:windowextension_napi",
+    "window_extension_ability:windowextensionability_napi",
     "window_extension_context:windowextensioncontext_napi",
     "window_runtime:window_napi",
     "window_runtime:window_native_kit",
