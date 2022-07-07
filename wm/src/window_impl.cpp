@@ -1705,12 +1705,8 @@ void WindowImpl::UpdateModeSupportInfo(uint32_t modeSupportInfo)
     UpdateTitleButtonVisibility();
 }
 
-void WindowImpl::HandleBackKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    int32_t keyAction = keyEvent->GetKeyAction();
-    if (keyAction != MMI::KeyEvent::KEY_ACTION_UP) {
-        return;
-    }
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -1730,6 +1726,7 @@ void WindowImpl::HandleBackKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEve
         WLOGFE("There is no back key event consumer");
     }
     if (isConsumed || !WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        WLOGFI("Back key event is consumed or it is not a main window");
         return;
     }
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
@@ -1738,17 +1735,17 @@ void WindowImpl::HandleBackKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEve
         return;
     }
     // TerminateAbility will invoke last ability, CloseAbility will not.
-    bool shouldCloseAbility = WindowHelper::IsFullScreenWindow(property_->GetWindowMode());
-    WMError ret = NotifyWindowTransition(shouldCloseAbility ? TransitionReason::CLOSE : TransitionReason::BACK);
+    bool shouldTerminateAbility = WindowHelper::IsFullScreenWindow(property_->GetWindowMode());
+    WMError ret = NotifyWindowTransition(shouldTerminateAbility ? TransitionReason::BACK : TransitionReason::CLOSE);
     if (ret != WMError::WM_OK) {
-        WLOGFI("Window %{public}u is closed without remote animation, ret:%{public}u",
-            property_->GetWindowId(), static_cast<uint32_t>(ret));
-        if (shouldCloseAbility) {
-            abilityContext->CloseAbility();
-        } else {
+        if (shouldTerminateAbility) {
             abilityContext->TerminateSelf();
+        } else {
+            abilityContext->CloseAbility();
         }
     }
+    WLOGFI("Window %{public}u will be closed, WindowTransition ret: %{public}u, shouldTerminateAbility: %{public}u",
+        property_->GetWindowId(), static_cast<uint32_t>(ret), static_cast<uint32_t>(shouldTerminateAbility));
 }
 
 void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -1757,8 +1754,8 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
     WLOGFI("KeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
-    if (keyCode == MMI::KeyEvent::KEYCODE_BACK) {
-        HandleBackKeyEvent(keyEvent);
+    if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
+        HandleBackKeyPressedEvent(keyEvent);
     } else {
         std::shared_ptr<IInputEventConsumer> inputEventConsumer;
         {

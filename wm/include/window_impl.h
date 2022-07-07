@@ -346,7 +346,7 @@ private:
     void UpdatePointerEventForStretchableWindow(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateDragType();
     void InitListenerHandler();
-    void HandleBackKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    void HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     bool CheckCameraFloatingWindowMultiCreated(WindowType type);
     void GetConfigurationFromAbilityInfo();
     void UpdateTitleButtonVisibility();
