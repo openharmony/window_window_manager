@@ -145,7 +145,6 @@ ohos_static_library("dm_systemtest_common") {
     "//foundation/windowmanager/dmserver:libdms",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wmserver:libwms",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",

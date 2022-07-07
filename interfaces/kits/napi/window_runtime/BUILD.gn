@@ -53,7 +53,6 @@ ohos_shared_library("window_native_kit") {
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wmserver:libwms",
   ]
 
   external_deps = [
@@ -83,7 +82,6 @@ ohos_shared_library("window_napi") {
     "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wmserver:libwms",
     "//utils/native/base:utils",
   ]
 
@@ -111,13 +109,13 @@ ohos_shared_library("windowstage_kit") {
     ":window_native_kit",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wmserver:libwms",
   ]
 
   external_deps = [
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
     "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
     "napi:ace_napi",
     "utils_base:utils",
   ]
