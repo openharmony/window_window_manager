@@ -162,6 +162,7 @@ const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
     NativeValue* AvoidAreaTypeInit(NativeEngine* engine);
     NativeValue* WindowModeInit(NativeEngine* engine);
     NativeValue* ColorSpaceInit(NativeEngine* engine);
+    NativeValue* OrientationInit(NativeEngine* engine);
     NativeValue* WindowStageEventTypeInit(NativeEngine* engine);
     NativeValue* WindowLayoutModeInit(NativeEngine* engine);
     bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability);
