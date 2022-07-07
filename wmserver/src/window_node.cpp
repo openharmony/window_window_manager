@@ -278,7 +278,8 @@ WindowBlurLevel WindowNode::GetWindowBackgroundBlur() const
 
 bool WindowNode::EnableDefaultAnimation(bool propertyEnabled, bool animationPlayed)
 {
-    return (propertyEnabled && (!animationPlayed) && (!property_->GetCustomAnimation()) && (!isAppCrash_));
+    bool defaultAnimation = property_->GetAnimationFlag() == (static_cast<uint32_t>(WindowAnimation::DEFAULT));
+    return (propertyEnabled && (!animationPlayed) && (defaultAnimation) && (!isAppCrash_));
 }
 
 float WindowNode::GetBrightness() const

@@ -387,9 +387,10 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
 bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId displayId, bool isAdd, bool animationPlayed)
 {
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
-    if (node->GetWindowProperty()->GetCustomAnimation()) {
-        WLOGFI("not need to update RsTree since SystemWindowAnimation is playing");
-        return false;
+    uint32_t animationFlag = node->GetWindowProperty()->GetAnimationFlag();
+    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        WLOGFI("not need to update RsTree since SystemWindow CustomAnimation is playing");
+        return true;
     }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
         WLOGFI("WINDOW_TYPE_APP_COMPONENT not need to update RsTree");

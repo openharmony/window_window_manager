@@ -649,5 +649,30 @@ WMError WindowManagerProxy::UpdateAvoidAreaListener(uint32_t windowId, bool have
     }
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+WMError WindowManagerProxy::UpdateRsTree(uint32_t windowId, bool isAdd)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isAdd)) {
+        WLOGFE("Write avoid area listener failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UPDATE_RS_TREE),
+        data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
 } // namespace Rosen
 } // namespace OHOS
