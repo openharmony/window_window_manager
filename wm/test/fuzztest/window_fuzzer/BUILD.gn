@@ -34,9 +34,10 @@ ohos_fuzztest("WindowFuzzTest") {
   sources = [ "window_fuzzer.cpp" ]
   deps = [
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wmserver:libwms",
     "//utils/native/base:utils",
   ]
+
+  external_deps = [ "ipc:ipc_core" ]
 }
 
 ###############################################################################
