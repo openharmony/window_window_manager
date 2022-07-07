@@ -72,6 +72,8 @@ public:
     void SetOriginRect(const Rect& rect);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void SetWindowSizeLimits(const WindowSizeLimits& sizeLimits);
+    void ComputeTransform();
+    void SetTransform(const Transform& trans);
 
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;

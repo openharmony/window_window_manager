@@ -528,7 +528,7 @@ bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability)
     return true;
 }
 
-bool ParseJsDoubleValue(NativeObject* jsObject, NativeEngine& engine, const std::string& name, double data)
+bool ParseJsDoubleValue(NativeObject* jsObject, NativeEngine& engine, const std::string& name, double& data)
 {
     NativeValue* value = jsObject->GetProperty(name.c_str());
     if (value->TypeOf() != NATIVE_UNDEFINED) {

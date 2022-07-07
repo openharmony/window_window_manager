@@ -201,6 +201,16 @@ void WindowNode::SetWindowSizeLimits(const WindowSizeLimits& sizeLimits)
     property_->SetSizeLimits(sizeLimits);
 }
 
+void WindowNode::ComputeTransform()
+{
+    property_->ComputeTransform();
+}
+
+void WindowNode::SetTransform(const Transform& trans)
+{
+    property_->SetTransform(trans);
+}
+
 WindowSizeLimits WindowNode::GetWindowSizeLimits() const
 {
     return property_->GetSizeLimits();
