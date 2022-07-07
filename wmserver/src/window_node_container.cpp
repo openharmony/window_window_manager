@@ -1902,7 +1902,8 @@ void WindowNodeContainer::RemoveSingleUserWindowNodes()
             windowNode->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
             windowNode->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
             windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD ||
-            windowNode->GetWindowType() == WindowType::WINDOW_TYPE_POINTER) {
+            windowNode->GetWindowType() == WindowType::WINDOW_TYPE_POINTER ||
+            windowNode->GetWindowType() == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
             continue;
         }
         WLOGFI("remove window %{public}s, windowId %{public}d",
