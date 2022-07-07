@@ -39,9 +39,10 @@ ohos_fuzztest("WindowSceneFuzzTest") {
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/dm:libdm",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wmserver:libwms",
     "//utils/native/base:utils",
   ]
+
+  external_deps = [ "ipc:ipc_core" ]
 }
 
 ###############################################################################

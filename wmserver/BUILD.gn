@@ -73,12 +73,6 @@ ohos_shared_library("libwms") {
     "//foundation/windowmanager/dmserver:libdms",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
-    "//third_party/libxml2:xml2",
-  ]
-
-  public_deps = [
-    # IMS libdms need delete it
-    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
   ]
 
   external_deps = [

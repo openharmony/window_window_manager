@@ -130,7 +130,6 @@ ohos_static_library("dm_unittest_common") {
     "//foundation/windowmanager/snapshot:snapshot_display",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wmserver:libwms",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
     "//third_party/libpng:libpng",  # png
