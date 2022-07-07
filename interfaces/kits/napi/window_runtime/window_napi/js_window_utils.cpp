@@ -158,6 +158,49 @@ NativeValue* ColorSpaceInit(NativeEngine* engine)
     return objValue;
 }
 
+NativeValue* OrientationInit(NativeEngine* engine)
+{
+    WLOGFI("[NAPI]OrientationInit");
+
+    if (engine == nullptr) {
+        WLOGFE("[NAPI]Engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("[NAPI]Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("UNSPECIFIED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::UNSPECIFIED)));
+    object->SetProperty("PORTRAIT", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::VERTICAL)));
+    object->SetProperty("LANDSCAPE", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::HORIZONTAL)));
+    object->SetProperty("PORTRAIT_INVERTED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::REVERSE_VERTICAL)));
+    object->SetProperty("LANDSCAPE_INVERTED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::REVERSE_HORIZONTAL)));
+    object->SetProperty("AUTO_ROTATION", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::SENSOR)));
+    object->SetProperty("AUTO_ROTATION_PORTRAIT", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::SENSOR_VERTICAL)));
+    object->SetProperty("AUTO_ROTATION_LANDSCAPE", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::SENSOR_HORIZONTAL)));
+    object->SetProperty("AUTO_ROTATION_RESTRICTED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::AUTO_ROTATION_RESTRICTED)));
+    object->SetProperty("AUTO_ROTATION_PORTRAIT_RESTRICTED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED)));
+    object->SetProperty("AUTO_ROTATION_LANDSCAPE_RESTRICTED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED)));
+    object->SetProperty("LOCKED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::LOCKED)));
+    return objValue;
+}
+
 NativeValue* WindowStageEventTypeInit(NativeEngine* engine)
 {
     WLOGFI("[NAPI]WindowStageEventTypeInit");
