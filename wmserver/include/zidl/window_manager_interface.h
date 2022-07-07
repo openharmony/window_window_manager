@@ -60,6 +60,7 @@ public:
         TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE,
         TRANS_ID_GET_ANIMATION_CALLBACK,
         TRANS_ID_UPDATE_AVOIDAREA_LISTENER,
+        TRANS_ID_UPDATE_RS_TREE,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -90,6 +91,7 @@ public:
     virtual void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback) = 0;
     virtual WMError UpdateAvoidAreaListener(uint32_t windowId, bool haveListener) = 0;
+    virtual WMError UpdateRsTree(uint32_t windowId, bool isAdd) = 0;
 };
 }
 }

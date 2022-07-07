@@ -228,6 +228,13 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case WindowManagerMessage::TRANS_ID_UPDATE_RS_TREE: {
+            uint32_t windowId = data.ReadUint32();
+            bool isAdd = data.ReadBool();
+            WMError errCode = UpdateRsTree(windowId, isAdd);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
