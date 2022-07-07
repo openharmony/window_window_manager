@@ -55,6 +55,7 @@ enum class WindowUpdateReason : uint32_t {
     UPDATE_TYPE,
     NEED_SWITCH_CASCADE_END,
     UPDATE_OTHER_PROPS,
+    UPDATE_TRANSFORM,
 };
 
 enum class AvoidPosType : uint32_t {

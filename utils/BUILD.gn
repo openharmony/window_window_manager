@@ -39,6 +39,7 @@ ohos_shared_library("libwmutil") {
     "src/surface_reader_handler_impl.cpp",
     "src/window_property.cpp",
     "src/window_transition_info.cpp",
+    "src/wm_math.cpp",
   ]
 
   configs = [ ":libwmutil_private_config" ]

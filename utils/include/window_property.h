@@ -24,6 +24,7 @@
 #include "dm_common.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
+#include "wm_math.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -76,6 +77,7 @@ public:
     void SetSizeLimits(const WindowSizeLimits& sizeLimits);
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
     void SetTransform(const Transform& trans);
+    void ComputeTransform();
 
     const std::string& GetWindowName() const;
     Rect GetRequestRect() const;
@@ -114,6 +116,7 @@ public:
     uint32_t GetAccessTokenId() const;
     Transform GetTransform() const;
     WindowSizeLimits GetSizeLimits() const;
+    const TransformHelper::Matrix4& GetTransformMat() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
@@ -170,8 +173,13 @@ private:
     DragType dragType_ = DragType::DRAG_UNDEFINED;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
     uint32_t accessTokenId_ { 0 };
+    // Transform info
     Transform trans_;
+    bool recomputeTransformMat_ { false };
+    TransformHelper::Matrix4 transformMat_ = TransformHelper::Matrix4::Identity;
+
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
+    DEFINE_VAR_FUNC_GET_SET(TransformHelper::Plane, Plane, windowPlane);
     WindowSizeLimits sizeLimits_;
 };
 }
