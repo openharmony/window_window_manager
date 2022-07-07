@@ -586,6 +586,7 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetProperty("ColorSpace", ColorSpaceInit(engine));
     object->SetProperty("WindowStageEventType", WindowStageEventTypeInit(engine));
     object->SetProperty("WindowLayoutMode", WindowLayoutModeInit(engine));
+    object->SetProperty("Orientation", OrientationInit(engine));
     BindNativeFunction(*engine, *object, "create", JsWindowManager::CreateWindow);
     BindNativeFunction(*engine, *object, "find", JsWindowManager::FindWindow);
     BindNativeFunction(*engine, *object, "on", JsWindowManager::RegisterWindowManagerCallback);
