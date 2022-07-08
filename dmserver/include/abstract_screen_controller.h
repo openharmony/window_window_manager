@@ -25,6 +25,7 @@
 #include <transaction/rs_interfaces.h>
 
 #include "abstract_screen.h"
+#include "agent_death_recipient.h"
 #include "display_manager_agent_controller.h"
 #include "dm_common.h"
 #include "screen.h"
@@ -85,7 +86,6 @@ private:
     void RegisterRsScreenConnectionChangeListener();
     void OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
-    bool RegisterVirtualScreenAgent(const sptr<IRemoteObject>& displayManagerAgent);
     void ProcessScreenConnected(ScreenId rsScreenId);
     sptr<AbstractScreen> InitAndGetScreen(ScreenId rsScreenId);
     void ProcessScreenDisconnected(ScreenId rsScreenId);
@@ -133,6 +133,7 @@ private:
     std::map<ScreenId, sptr<AbstractScreenGroup>> dmsScreenGroupMap_;
     std::map<ScreenId, std::shared_ptr<RSDisplayNode>> displayNodeMap_;
     std::map<sptr<IRemoteObject>, std::vector<ScreenId>> screenAgentMap_;
+    sptr<AgentDeathRecipient> deathRecipient_ { nullptr };
     sptr<AbstractScreenCallback> abstractScreenCallback_;
     std::shared_ptr<AppExecFwk::EventHandler> controllerHandler_;
     std::atomic<ScreenId> defaultRsScreenId_ {SCREEN_ID_INVALID };
