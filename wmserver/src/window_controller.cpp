@@ -891,6 +891,12 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             UpdateWindowAnimation(node);
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY: {
+            node->SetTransform(property->GetTransform());
+            node->SetWindowSizeChangeReason(WindowSizeChangeReason::TRANSFORM);
+            ret = UpdateTransform(windowId);
+            break;
+        }
         default:
             break;
     }
@@ -947,6 +953,16 @@ WMError WindowController::UpdateTouchHotAreas(const sptr<WindowNode>& node, cons
     node->GetWindowProperty()->SetTouchHotAreas(rects);
     node->SetTouchHotAreas(hotAreas);
     FlushWindowInfo(node->GetWindowId());
+    return WMError::WM_OK;
+}
+
+WMError WindowController::UpdateTransform(uint32_t windowId)
+{
+    WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_TRANSFORM);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
+    FlushWindowInfo(windowId);
     return WMError::WM_OK;
 }
 

@@ -422,23 +422,30 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<W
 {
     Rect rect = winRect;
     float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
-    uint32_t hotZone = static_cast<uint32_t>(HOTZONE * virtualPixelRatio);
+    TransformHelper::Vector2 hotZoneScale(1, 1);
+    if (node->GetWindowProperty()->GetTransform() != Transform::Identity()) {
+        node->ComputeTransform();
+        hotZoneScale = WindowHelper::CalculateHotZoneScale(node->GetWindowProperty()->GetTransformMat(),
+            node->GetWindowProperty()->GetPlane());
+    }
+    uint32_t hotZoneX = static_cast<uint32_t>(HOTZONE * virtualPixelRatio / hotZoneScale.x_);
+    uint32_t hotZoneY = static_cast<uint32_t>(HOTZONE * virtualPixelRatio / hotZoneScale.y_);
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         if (rect.width_ < rect.height_) {
-            rect.posX_ -= hotZone;
-            rect.width_ += (hotZone + hotZone);
+            rect.posX_ -= hotZoneX;
+            rect.width_ += (hotZoneX + hotZoneX);
         } else {
-            rect.posY_ -= hotZone;
-            rect.height_ += (hotZone + hotZone);
+            rect.posY_ -= hotZoneY;
+            rect.height_ += (hotZoneY + hotZoneY);
         }
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
         rect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
     } else if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
-        rect.posX_ -= hotZone;
-        rect.posY_ -= hotZone;
-        rect.width_ += (hotZone + hotZone);
-        rect.height_ += (hotZone + hotZone);
+        rect.posX_ -= hotZoneX;
+        rect.posY_ -= hotZoneY;
+        rect.width_ += (hotZoneX + hotZoneX);
+        rect.height_ += (hotZoneY + hotZoneY);
     }
     node->SetFullWindowHotArea(rect);
     std::vector<Rect> requestedHotAreas;
@@ -938,7 +945,8 @@ bool WindowLayoutPolicy::IsFullScreenRecentWindowExist(const std::vector<sptr<Wi
 
 void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
 {
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT ||
+        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::TRANSFORM) {
         WLOGFI("not need to update bounds");
         return;
     }

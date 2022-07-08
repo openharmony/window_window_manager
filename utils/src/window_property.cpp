@@ -31,6 +31,7 @@ void WindowProperty::SetWindowName(const std::string& name)
 
 void WindowProperty::SetWindowRect(const struct Rect& rect)
 {
+    recomputeTransformMat_ = true;
     windowRect_ = rect;
 }
 
@@ -108,7 +109,28 @@ void WindowProperty::SetAlpha(float alpha)
 
 void WindowProperty::SetTransform(const Transform& trans)
 {
+    recomputeTransformMat_ = true;
     trans_ = trans;
+}
+
+void WindowProperty::ComputeTransform()
+{
+    if (recomputeTransformMat_ && (trans_ != Transform::Identity())) {
+        // Update transform matrix
+        transformMat_ = WindowHelper::ComputeRectTransformMat4(trans_, windowRect_);
+        // Update window plane
+        TransformHelper::Vector3 a = TransformHelper::Transform(
+            TransformHelper::Vector3 { static_cast<float>(windowRect_.posX_),
+            static_cast<float>(windowRect_.posY_), 0 }, transformMat_);
+        TransformHelper::Vector3 b = TransformHelper::Transform(
+            TransformHelper::Vector3 { static_cast<float>(windowRect_.posX_ + windowRect_.width_),
+            static_cast<float>(windowRect_.posY_), 0 }, transformMat_);
+        TransformHelper::Vector3 c = TransformHelper::Transform(
+            TransformHelper::Vector3 { static_cast<float>(windowRect_.posX_),
+            static_cast<float>(windowRect_.posY_+ windowRect_.height_), 0 }, transformMat_);
+        windowPlane_ = TransformHelper::Plane(a, b, c);
+        recomputeTransformMat_ = false;
+    }
 }
 
 void WindowProperty::SetBrightness(float brightness)
@@ -409,6 +431,11 @@ bool WindowProperty::GetStretchable() const
 WindowSizeLimits WindowProperty::GetSizeLimits() const
 {
     return sizeLimits_;
+}
+
+const TransformHelper::Matrix4& WindowProperty::GetTransformMat() const
+{
+    return transformMat_;
 }
 
 void WindowProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
