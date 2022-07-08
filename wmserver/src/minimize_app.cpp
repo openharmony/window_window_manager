@@ -86,6 +86,21 @@ void MinimizeApp::ClearNodesWithReason(MinimizeReason reason)
     }
 }
 
+sptr<WindowNode> MinimizeApp::GetRecoverdNodeFromMinimizeList()
+{
+    WLOGFI("[Minimize] RevertMinimizedNodeForTile");
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (needMinimizeAppNodes_.find(MinimizeReason::LAYOUT_TILE) != needMinimizeAppNodes_.end()) {
+        auto& tileNodesForMinimize = needMinimizeAppNodes_.at(MinimizeReason::LAYOUT_TILE);
+        if (!tileNodesForMinimize.empty()) {
+            auto recoverNode = tileNodesForMinimize.back().promote();
+            tileNodesForMinimize.pop_back();
+            return recoverNode;
+        }
+    }
+    return nullptr;
+}
+
 bool MinimizeApp::IsNodeNeedMinimize(const sptr<WindowNode>& node)
 {
     if (node == nullptr) {

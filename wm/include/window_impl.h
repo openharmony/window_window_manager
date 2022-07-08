@@ -372,6 +372,8 @@ private:
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     uint32_t GetModeSupportInfo() const;
     WMError PreProcessShow(uint32_t reason, bool withAnimation);
+    bool NeedToStopShowing();
+
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;

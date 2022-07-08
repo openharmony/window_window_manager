@@ -451,6 +451,24 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
     return WMError::WM_OK;
 }
 
+bool WindowRoot::NeedToStopAddingNode(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container)
+{
+    if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
+        return false;
+    }
+    // intercept the node which doesn't support floating mode at tile mode
+    if (WindowHelper::IsInvalidWindowInTileLayoutMode(node->GetModeSupportInfo(), container->GetCurrentLayoutMode())) {
+        WLOGFE("window doesn't support floating mode in tile, windowId: %{public}u", node->GetWindowId());
+        return true;
+    }
+    // intercept the node that the tile rect can't be applied to
+    WMError res = container->IsTileRectSatisfiedWithSizeLimits(node);
+    if (res != WMError::WM_OK) {
+        return true;
+    }
+    return false;
+}
+
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin)
 {
     if (node == nullptr) {
@@ -463,6 +481,11 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
         WLOGFE("add window failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
+
+    if (NeedToStopAddingNode(node, container)) { // true means stop adding
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
+    }
+
     if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
         WindowHelper::IsAppWindow(node->GetWindowType()) && !node->isPlayAnimationShow_) {
         container->NotifyDockWindowStateChanged(node, false);
@@ -1308,16 +1331,6 @@ WMError WindowRoot::GetModeChangeHotZones(DisplayId displayId,
     }
     container->GetModeChangeHotZones(displayId, hotZones, config);
     return WMError::WM_OK;
-}
-
-WindowLayoutMode WindowRoot::GetCurrentLayoutMode(DisplayId displayId)
-{
-    auto container = GetOrCreateWindowNodeContainer(displayId);
-    if (container == nullptr) {
-        WLOGFE("GetCurrentLayoutMode failed, window container could not be found");
-        return WindowLayoutMode::BASE;
-    }
-    return container->GetCurrentLayoutMode();
 }
 
 void WindowRoot::RemoveSingleUserWindowNodes()

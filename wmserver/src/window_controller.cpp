@@ -53,13 +53,12 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
     StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
         "wms:async:ShowStartingWindow");
     auto node = windowRoot_->FindWindowNodeWithToken(info->GetAbilityToken());
-    auto layoutMode = windowRoot_->GetCurrentLayoutMode(info->GetDisplayId());
     if (node == nullptr) {
         if (!isColdStart) {
             WLOGFE("no windowNode exists but is hot start!");
             return;
         }
-        node = StartingWindow::CreateWindowNode(info, GenWindowId(), layoutMode);
+        node = StartingWindow::CreateWindowNode(info, GenWindowId());
         if (node == nullptr) {
             return;
         }
@@ -74,7 +73,6 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
             WLOGFE("windowNode exists but is cold start!");
             return;
         }
-
         if (WindowHelper::IsValidWindowMode(info->GetWindowMode()) &&
             (node->GetWindowMode() != info->GetWindowMode())) {
             WLOGFW("set starting window mode. starting mode is: %{public}u, window mode is:%{public}u.",
@@ -82,6 +80,12 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
             node->SetWindowMode(info->GetWindowMode());
         }
     }
+
+    if (StartingWindow::NeedToStopStartingWindow(node->GetWindowMode(), node->GetModeSupportInfo(), info)) {
+        WLOGFE("need to cancel starting window");
+        return;
+    }
+
     if (windowRoot_->AddWindowNode(0, node, true) != WMError::WM_OK) {
         return;
     }
@@ -205,12 +209,6 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     if (node->currentVisibility_ && !node->startingWindowShown_) {
         WLOGFE("current window is visible, windowId: %{public}u", node->GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
-    }
-
-    auto layoutMode = windowRoot_->GetCurrentLayoutMode(property->GetDisplayId());
-    if (WindowHelper::IsInvalidWindowInTileLayoutMode(node->GetModeSupportInfo(), layoutMode)) {
-        WLOGFE("window doesn't support floating mode in tile, windowId: %{public}u", node->GetWindowId());
-        return WMError::WM_ERROR_INVALID_WINDOW_MODE;
     }
 
     // using starting window rect if client rect is empty

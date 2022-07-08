@@ -530,9 +530,9 @@ WindowSizeLimits WindowLayoutPolicy::GetSystemSizeLimits(const Rect& displayRect
     if (displayRect.width_ > displayRect.height_) {
         std::swap(systemLimits.minWidth_, systemLimits.minHeight_);
     }
-    WLOGFI("maxWidth: %{public}u, maxHeight: %{public}u, minWidth: %{public}u, minHeight: %{public}u "
-        "maxRatio: %{public}f, minRatio: %{public}f", systemLimits.maxWidth_, systemLimits.maxHeight_,
-        systemLimits.minWidth_, systemLimits.minHeight_, systemLimits.maxRatio_, systemLimits.minRatio_);
+    WLOGFI("[System SizeLimits] [maxWidth: %{public}u, minWidth: %{public}u, maxHeight: %{public}u, "
+        "minHeight: %{public}u]", systemLimits.maxWidth_, systemLimits.minWidth_,
+        systemLimits.maxHeight_, systemLimits.minHeight_);
     return systemLimits;
 }
 
@@ -543,7 +543,10 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
     const auto& systemLimits = GetSystemSizeLimits(displayRect, virtualPixelRatio);
     const auto& customizedLimits = node->GetWindowSizeLimits();
     if (customizedLimits.isSizeLimitsUpdated_) {
-        WLOGFI("size limits have been updated");
+        WLOGFI("[SizeLimits Updated] winId: %{public}u, Width: [max:%{public}u, min:%{public}u], Height: "
+            "[max:%{public}u, min:%{public}u], Ratio: [max:%{public}f, min:%{public}f]", node->GetWindowId(),
+            customizedLimits.maxWidth_, customizedLimits.minWidth_, customizedLimits.maxHeight_,
+            customizedLimits.minHeight_, customizedLimits.maxRatio_, customizedLimits.minRatio_);
         return;
     }
     WindowSizeLimits newLimits = systemLimits;
@@ -553,8 +556,6 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
     uint32_t configuredMaxHeight = static_cast<uint32_t>(customizedLimits.maxHeight_ * virtualPixelRatio);
     uint32_t configuredMinWidth = static_cast<uint32_t>(customizedLimits.minWidth_ * virtualPixelRatio);
     uint32_t configuredMinHeight = static_cast<uint32_t>(customizedLimits.minHeight_ * virtualPixelRatio);
-    float configuerdMaxRatio = customizedLimits.maxRatio_;
-    float configuerdMinRatio = customizedLimits.minRatio_;
 
     // calculate new limit size
     if (systemLimits.minWidth_ <= configuredMaxWidth && configuredMaxWidth <= systemLimits.maxWidth_) {
@@ -573,11 +574,11 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
     // calculate new limit ratio
     newLimits.maxRatio_ = static_cast<float>(newLimits.maxWidth_) / static_cast<float>(newLimits.minHeight_);
     newLimits.minRatio_ = static_cast<float>(newLimits.minWidth_) / static_cast<float>(newLimits.maxHeight_);
-    if (newLimits.minRatio_ <= configuerdMaxRatio && configuerdMaxRatio <= newLimits.maxRatio_) {
-        newLimits.maxRatio_ = configuerdMaxRatio;
+    if (newLimits.minRatio_ <= customizedLimits.maxRatio_ && customizedLimits.maxRatio_ <= newLimits.maxRatio_) {
+        newLimits.maxRatio_ = customizedLimits.maxRatio_;
     }
-    if (newLimits.minRatio_ <= configuerdMinRatio && configuerdMinRatio <= newLimits.maxRatio_) {
-        newLimits.minRatio_ = configuerdMinRatio;
+    if (newLimits.minRatio_ <= customizedLimits.minRatio_ && customizedLimits.minRatio_ <= newLimits.maxRatio_) {
+        newLimits.minRatio_ = customizedLimits.minRatio_;
     }
 
     // recalculate limit size by new ratio
@@ -591,9 +592,9 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
     newLimits.minHeight_ = std::max(newMinHeight, newLimits.minHeight_);
 
     newLimits.isSizeLimitsUpdated_ = true;
-    WLOGFI("maxWidth: %{public}u, maxHeight: %{public}u, minWidth: %{public}u, minHeight: %{public}u, "
-        "maxRatio: %{public}f, minRatio: %{public}f", newLimits.maxWidth_, newLimits.maxHeight_,
-        newLimits.minWidth_, newLimits.minHeight_, newLimits.maxRatio_, newLimits.minRatio_);
+    WLOGFI("[Update SizeLimits] winId: %{public}u, Width: [max:%{public}u, min:%{public}u], Height: [max:%{public}u, "
+        "min:%{public}u], Ratio: [max:%{public}f, min:%{public}f]", node->GetWindowId(), newLimits.maxWidth_,
+        newLimits.minWidth_, newLimits.maxHeight_, newLimits.minHeight_, newLimits.maxRatio_, newLimits.minRatio_);
     node->SetWindowSizeLimits(newLimits);
 }
 
@@ -979,6 +980,11 @@ void WindowLayoutPolicy::SetSplitRatioConfig(const SplitRatioConfig& splitRatioC
 Rect WindowLayoutPolicy::GetInitalDividerRect(DisplayId displayId) const
 {
     return INVALID_EMPTY_RECT;
+}
+
+bool WindowLayoutPolicy::IsTileRectSatisfiedWithSizeLimits(const sptr<WindowNode>& node)
+{
+    return true;
 }
 }
 }
