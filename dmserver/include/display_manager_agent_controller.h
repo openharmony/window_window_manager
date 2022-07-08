@@ -25,13 +25,11 @@ namespace OHOS {
 namespace Rosen {
 class DisplayManagerAgentController {
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerAgentController)
-using VirtualScreenDestroyCallback = std::function<bool(const sptr<IRemoteObject>)>;
 public:
     bool RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
     bool UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
-    bool SetRemoveAgentCallback(const VirtualScreenDestroyCallback& callback, DisplayManagerAgentType type);
 
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
     bool NotifyDisplayStateChanged(DisplayId id, DisplayState state);

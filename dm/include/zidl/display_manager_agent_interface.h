@@ -28,7 +28,6 @@ enum class DisplayManagerAgentType : uint32_t {
     DISPLAY_STATE_LISTENER,
     SCREEN_EVENT_LISTENER,
     DISPLAY_EVENT_LISTENER,
-    VIRTUAL_SCREEN_DIED_LISTENER,
 };
 
 class IDisplayManagerAgent : public IRemoteBroker {
