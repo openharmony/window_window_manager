@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
+#include <parcel.h>
+
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
@@ -59,6 +61,8 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_BOOT_ANIMATION,
     WINDOW_TYPE_FREEZE_DISPLAY,
     WINDOW_TYPE_VOICE_INTERACTION,
+    WINDOW_TYPE_FLOAT_CAMERA,
+    WINDOW_TYPE_PLACEHOLDER,
     ABOVE_APP_SYSTEM_WINDOW_END,
     SYSTEM_WINDOW_END = ABOVE_APP_SYSTEM_WINDOW_END,
 };
@@ -99,6 +103,7 @@ enum class WMError : int32_t {
     WM_ERROR_DESTROYED_OBJECT,
     WM_ERROR_DEATH_RECIPIENT,
     WM_ERROR_INVALID_WINDOW,
+    WM_ERROR_INVALID_WINDOW_MODE,
     WM_ERROR_INVALID_OPERATION,
     WM_ERROR_INVALID_PERMISSION,
     WM_ERROR_NO_REMOTE_ANIMATION,
@@ -131,6 +136,7 @@ enum class WindowSizeChangeReason : uint32_t {
     RESIZE,
     MOVE,
     HIDE,
+    TRANSFORM,
 };
 
 enum class WindowLayoutMode : uint32_t {
@@ -169,6 +175,45 @@ namespace {
     constexpr int32_t INVALID_UID = -1;
 }
 
+class Transform {
+public:
+    Transform()
+        : pivotX_(0.5f), pivotY_(0.5f), scaleX_(1.f), scaleY_(1.f), rotationX_(0.f), rotationY_(0.f), rotationZ_(0.f),
+          translateX_(0.f), translateY_(0.f), translateZ_(0.f)
+    {}
+    ~Transform() {}
+
+    bool operator!=(const Transform& right) const
+    {
+        return (pivotX_ - right.pivotX_) || (pivotY_ - right.pivotY_) || (scaleX_ - right.scaleX_) ||
+            (scaleY_ - right.scaleY_) || (rotationX_ - right.rotationX_) || (rotationY_ - right.rotationY_) ||
+            (rotationZ_ - right.rotationZ_) || (translateX_ - right.translateX_) ||
+            (translateY_ - right.translateY_) || (translateZ_ - right.translateZ_);
+    }
+
+    bool operator==(const Transform& right) const
+    {
+        return !(*this != right);
+    }
+
+    float pivotX_;
+    float pivotY_;
+    float scaleX_;
+    float scaleY_;
+    float rotationX_;
+    float rotationY_;
+    float rotationZ_;
+    float translateX_;
+    float translateY_;
+    float translateZ_;
+
+    static const Transform& Identity()
+    {
+        static Transform I;
+        return I;
+    }
+};
+
 struct SystemBarProperty {
     bool enable_;
     uint32_t backgroundColor_;
@@ -198,6 +243,11 @@ struct Rect {
         return !this->operator==(a);
     }
 
+    bool isUninitializedRect() const
+    {
+        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
+    }
+
     bool IsInsideOf(const Rect& a) const
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
@@ -209,6 +259,7 @@ enum class AvoidAreaType : uint32_t {
     TYPE_SYSTEM,           // area of SystemUI
     TYPE_CUTOUT,           // cutout of screen
     TYPE_SYSTEM_GESTURE,   // area for system gesture
+    TYPE_KEYBOARD,         // area for soft input keyboard
 };
 
 enum class OccupiedAreaType : uint32_t {
@@ -223,13 +274,64 @@ enum class ColorSpace : uint32_t {
 enum class WindowAnimation : uint32_t {
     NONE,
     DEFAULT,
+    CUSTOM,
 };
 
-struct AvoidArea {
-    Rect leftRect;
-    Rect topRect;
-    Rect rightRect;
-    Rect bottomRect;
+class AvoidArea : public Parcelable {
+public:
+    Rect topRect_ { 0, 0, 0, 0 };
+    Rect leftRect_ { 0, 0, 0, 0 };
+    Rect rightRect_ { 0, 0, 0, 0 };
+    Rect bottomRect_ { 0, 0, 0, 0 };
+
+    bool operator==(const AvoidArea& a) const
+    {
+        return (leftRect_ == a.leftRect_ && topRect_ == a.topRect_ &&
+            rightRect_ == a.rightRect_ && bottomRect_ == a.bottomRect_);
+    }
+
+    bool operator!=(const AvoidArea& a) const
+    {
+        return !this->operator==(a);
+    }
+
+    bool isEmptyAvoidArea() const
+    {
+        return topRect_.isUninitializedRect() && leftRect_.isUninitializedRect() &&
+            rightRect_.isUninitializedRect() && bottomRect_.isUninitializedRect();
+    }
+
+    static inline bool WriteParcel(Parcel& parcel, const Rect& rect)
+    {
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+            parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+    }
+
+    static inline bool ReadParcel(Parcel& parcel, Rect& rect)
+    {
+        return parcel.ReadInt32(rect.posX_) && parcel.ReadInt32(rect.posY_) &&
+            parcel.ReadUint32(rect.width_) && parcel.ReadUint32(rect.height_);
+    }
+
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        return (WriteParcel(parcel, leftRect_) && WriteParcel(parcel, topRect_) &&
+            WriteParcel(parcel, rightRect_) && WriteParcel(parcel, bottomRect_));
+    }
+
+    static AvoidArea* Unmarshalling(Parcel& parcel)
+    {
+        AvoidArea *avoidArea = new(std::nothrow) AvoidArea();
+        if (avoidArea == nullptr) {
+            return nullptr;
+        }
+        if (ReadParcel(parcel, avoidArea->leftRect_) && ReadParcel(parcel, avoidArea->topRect_) &&
+            ReadParcel(parcel, avoidArea->rightRect_) && ReadParcel(parcel, avoidArea->bottomRect_)) {
+            return avoidArea;
+        }
+        delete avoidArea;
+        return nullptr;
+    }
 };
 
 enum class WindowUpdateType : int32_t {
@@ -238,6 +340,7 @@ enum class WindowUpdateType : int32_t {
     WINDOW_UPDATE_FOCUSED,
     WINDOW_UPDATE_BOUNDS,
     WINDOW_UPDATE_ACTIVE,
+    WINDOW_UPDATE_PROPERTY,
 };
 
 struct SystemConfig {

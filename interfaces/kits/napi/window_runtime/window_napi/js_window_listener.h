@@ -18,6 +18,8 @@
 
 #include <map>
 #include <mutex>
+
+#include "class_var_definition.h"
 #include "js_window_utils.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
@@ -31,6 +33,7 @@ namespace Rosen {
 const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
 const std::string SYSTEM_BAR_TINT_CHANGE_CB = "systemBarTintChange";
 const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
+const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
@@ -44,23 +47,25 @@ class JsWindowListener : public IWindowChangeListener,
                          public ITouchOutsideListener {
 public:
     JsWindowListener(NativeEngine* engine, std::shared_ptr<NativeReference> callback)
-        : engine_(engine), jsCallBack_(callback) {}
+        : engine_(engine), jsCallBack_(callback), weakRef_(wptr<JsWindowListener> (this)) {}
     ~JsWindowListener();
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnModeChange(WindowMode mode) override;
-    void OnAvoidAreaChanged(std::vector<Rect> avoidAreas) override;
+    void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) override;
     void AfterForeground() override;
     void AfterBackground() override;
     void AfterFocused() override;
     void AfterUnfocused() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) override;
-    void OnTouchOutside() override;
+    void OnTouchOutside() const override;
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
 private:
     void LifeCycleCallBack(LifeCycleEventType eventType);
     NativeEngine* engine_ = nullptr;
     std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
+    wptr<JsWindowListener> weakRef_  = nullptr;
+    DEFINE_VAR_DEFAULT_FUNC_SET(bool, IsDeprecatedInterface, isDeprecatedInterface, false)
 };
 }  // namespace Rosen
 }  // namespace OHOS

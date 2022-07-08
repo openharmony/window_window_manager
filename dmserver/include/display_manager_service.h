@@ -35,9 +35,6 @@
 #include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
-namespace {
-    const std::string DISPLAY_MANAGER_CONFIG_XML = "/system/etc/window/resources/display_manager_config.xml";
-}
 class DisplayManagerService : public SystemAbility, public DisplayManagerStub {
 DECLARE_SYSTEM_ABILITY(DisplayManagerService);
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManagerService);
@@ -50,6 +47,8 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) override;
     DMError DestroyVirtualScreen(ScreenId screenId) override;
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
+    bool IsScreenRotationLocked() override;
+    void SetScreenRotationLocked(bool isLocked) override;
 
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
@@ -57,6 +56,7 @@ public:
     bool SetOrientation(ScreenId screenId, Orientation orientation) override;
     bool SetOrientationFromWindow(ScreenId screenId, Orientation orientation);
     bool SetRotationFromWindow(ScreenId screenId, Rotation targetRotation);
+    void SetGravitySensorSubscriptionEnabled();
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
     ScreenId GetRSScreenId(DisplayId displayId) const;
 
@@ -98,6 +98,7 @@ public:
     bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
     static float GetCustomVirtualPixelRatio();
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
+    void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
 private:
     DisplayManagerService();
     ~DisplayManagerService() = default;
@@ -117,6 +118,7 @@ private:
     sptr<DisplayDumper> displayDumper_;
     static float customVirtualPixelRatio_;
     std::map<ScreenId, uint32_t> accessTokenIdMaps_;
+    bool isAutoRotationOpen_;
 };
 } // namespace OHOS::Rosen
 

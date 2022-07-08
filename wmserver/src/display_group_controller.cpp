@@ -49,7 +49,7 @@ void DisplayGroupController::InitNewDisplay(DisplayId displayId)
     displayGroupWindowTree_.insert(std::make_pair(displayId, std::move(displayWindowTree)));
 
     // window pair for display
-    auto windowPair = new WindowPair(displayId, displayGroupWindowTree_);
+    auto windowPair = new WindowPair(displayId);
     windowPairMap_.insert(std::make_pair(displayId, windowPair));
 }
 
@@ -174,7 +174,7 @@ void DisplayGroupController::UpdateWindowShowingDisplays(const sptr<WindowNode>&
 void DisplayGroupController::UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode>& node,
                                                            const std::vector<DisplayId>& curShowingDisplays)
 {
-    // current mutiDisplay is only support left-right combination, maxNum is two
+    // current multi-display is only support left-right combination, maxNum is two
     DisplayId newDisplayId = node->GetDisplayId();
     if (curShowingDisplays.size() == 1) {
         newDisplayId = *(curShowingDisplays.begin());
@@ -232,7 +232,7 @@ void DisplayGroupController::PreProcessWindowNode(const sptr<WindowNode>& node, 
                 PreProcessWindowNode(childNode, type);
             }
         }
-        WLOGFI("Current mode is not muti-display");
+        WLOGFI("Current mode is not multi-display");
         return;
     }
 
@@ -314,7 +314,7 @@ void DisplayGroupController::MoveNotCrossNodeToDefaultDisplay(const sptr<WindowN
     }
 }
 
-void DisplayGroupController::ProcessNotCrossNodesOnDestroiedDisplay(DisplayId displayId,
+void DisplayGroupController::ProcessNotCrossNodesOnDestroyedDisplay(DisplayId displayId,
                                                                     std::vector<uint32_t>& windowIds)
 {
     if (displayId == defaultDisplayId_) {
@@ -333,11 +333,11 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroiedDisplay(DisplayId di
             if (node->GetDisplayId() != displayId || node->isShowingOnMultiDisplays_) {
                 continue;
             }
-            // destroy status and navigati
+            // destroy status and navigation bar
             if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
                 node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
                 windowNodeContainer_->DestroyWindowNode(node, windowIds);
-                WLOGFI("destroy status or navigationbar on destroied display, windowId: %{public}d",
+                WLOGFI("destroy status or navigation bar on destroyed display, windowId: %{public}d",
                     node->GetWindowId());
                 continue;
             }
@@ -358,7 +358,7 @@ void DisplayGroupController::ProcessDisplayCreate(DisplayId defaultDisplayId, sp
     WLOGFI("defaultDisplay, displayId: %{public}" PRIu64"", defaultDisplayId);
 
     DisplayId displayId = displayInfo->GetDisplayId();
-    windowNodeContainer_->GetAvoidController()->UpdateAvoidNodesMap(displayId, true);
+
     InitNewDisplay(displayId);
 
     // add displayInfo in displayGroupInfo
@@ -377,14 +377,13 @@ void DisplayGroupController::ProcessDisplayDestroy(DisplayId defaultDisplayId, s
                                                    std::vector<uint32_t>& windowIds)
 {
     DisplayId displayId = displayInfo->GetDisplayId();
-    windowNodeContainer_->GetAvoidController()->UpdateAvoidNodesMap(displayId, false);
 
     // delete nodes and map element of deleted display
-    ProcessNotCrossNodesOnDestroiedDisplay(displayId, windowIds);
+    ProcessNotCrossNodesOnDestroyedDisplay(displayId, windowIds);
     // modify RSTree and window tree of displayGroup for cross-display nodes
     ProcessCrossNodes(defaultDisplayId, DisplayStateChangeType::DESTROY);
     UpdateDisplayGroupWindowTree();
-    ClearMapOfDestroiedDisplay(displayId);
+    ClearMapOfDestroyedDisplay(displayId);
     windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayDestroy(displayId, displayRectMap);
 }
 
@@ -423,7 +422,7 @@ void DisplayGroupController::ProcessDisplaySizeChangeOrRotation(DisplayId defaul
     windowNodeContainer_->GetLayoutPolicy()->ProcessDisplaySizeChangeOrRotation(displayId, displayRectMap);
 }
 
-void DisplayGroupController::ClearMapOfDestroiedDisplay(DisplayId displayId)
+void DisplayGroupController::ClearMapOfDestroyedDisplay(DisplayId displayId)
 {
     sysBarTintMaps_.erase(displayId);
     sysBarNodeMaps_.erase(displayId);

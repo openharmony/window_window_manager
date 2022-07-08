@@ -74,5 +74,13 @@ void WindowManagerAgentController::UpdateWindowVisibilityInfo(
         agent->UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
 }
+
+void WindowManagerAgentController::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
+{
+    for (auto& agent : wmAgentContainer_.GetAgentsByType(
+        WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT)) {
+        agent->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

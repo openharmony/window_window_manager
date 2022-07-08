@@ -100,13 +100,6 @@ void WindowNode::SetWindowBackgroundBlur(WindowBlurLevel level)
     surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(blurRadiusX, blurRadiusY));
 }
 
-void WindowNode::SetAlpha(float alpha)
-{
-    property_->SetAlpha(alpha);
-    WLOGFI("WindowEffect WinodwNode SetAlpha alpha:%{public}f", alpha);
-    surfaceNode_->SetAlpha(alpha);
-}
-
 void WindowNode::SetBrightness(float brightness)
 {
     property_->SetBrightness(brightness);
@@ -203,6 +196,26 @@ void WindowNode::SetTouchHotAreas(const std::vector<Rect>& rects)
     touchHotAreas_ = rects;
 }
 
+void WindowNode::SetWindowSizeLimits(const WindowSizeLimits& sizeLimits)
+{
+    property_->SetSizeLimits(sizeLimits);
+}
+
+void WindowNode::ComputeTransform()
+{
+    property_->ComputeTransform();
+}
+
+void WindowNode::SetTransform(const Transform& trans)
+{
+    property_->SetTransform(trans);
+}
+
+WindowSizeLimits WindowNode::GetWindowSizeLimits() const
+{
+    return property_->GetSizeLimits();
+}
+
 DragType WindowNode::GetDragType() const
 {
     return property_->GetDragType();
@@ -273,9 +286,10 @@ WindowBlurLevel WindowNode::GetWindowBackgroundBlur() const
     return property_->GetWindowBackgroundBlur();
 }
 
-float WindowNode::GetAlpha() const
+bool WindowNode::EnableDefaultAnimation(bool propertyEnabled, bool animationPlayed)
 {
-    return property_->GetAlpha();
+    bool defaultAnimation = property_->GetAnimationFlag() == (static_cast<uint32_t>(WindowAnimation::DEFAULT));
+    return (propertyEnabled && (!animationPlayed) && (defaultAnimation) && (!isAppCrash_));
 }
 
 float WindowNode::GetBrightness() const
@@ -347,6 +361,11 @@ uint32_t WindowNode::GetModeSupportInfo() const
 void WindowNode::GetTouchHotAreas(std::vector<Rect>& rects) const
 {
     rects = touchHotAreas_;
+}
+
+uint32_t WindowNode::GetAccessTokenId() const
+{
+    return property_->GetAccessTokenId();
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -30,8 +30,9 @@ public:
 
     void UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) override;
     void UpdateWindowMode(WindowMode mode) override;
+    void UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override;
     void UpdateFocusStatus(bool focused) override;
-    void UpdateAvoidArea(const std::vector<Rect>& avoidAreas) override;
+    void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void UpdateWindowState(WindowState state) override;
     void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override;
     void UpdateDisplayId(DisplayId from, DisplayId to) override;

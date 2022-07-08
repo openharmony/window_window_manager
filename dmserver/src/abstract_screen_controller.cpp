@@ -16,6 +16,7 @@
 #include "abstract_screen_controller.h"
 
 #include <cinttypes>
+#include <hitrace_meter.h>
 #include <screen_manager/rs_screen_mode_info.h>
 #include <screen_manager/screen_types.h>
 #include <surface.h>
@@ -24,8 +25,8 @@
 #include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
 #include "event_runner.h"
+#include "screen_rotation_controller.h"
 #include "window_manager_hilog.h"
-#include "wm_trace.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -40,9 +41,7 @@ AbstractScreenController::AbstractScreenController(std::recursive_mutex& mutex)
     controllerHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 }
 
-AbstractScreenController::~AbstractScreenController()
-{
-}
+AbstractScreenController::~AbstractScreenController() = default;
 
 void AbstractScreenController::Init()
 {
@@ -54,13 +53,12 @@ void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
 {
     WLOGFD("RegisterRsScreenConnectionChangeListener");
     auto res = rsInterface_.SetScreenChangeCallback(
-        std::bind(&AbstractScreenController::OnRsScreenConnectionChange,
-        this, std::placeholders::_1, std::placeholders::_2));
+        [this](ScreenId rsScreenId, ScreenEvent screenEvent) { OnRsScreenConnectionChange(rsScreenId, screenEvent); });
     if (res != StatusCode::SUCCESS) {
         auto task = [this] {
             RegisterRsScreenConnectionChangeListener();
         };
-        // posk task after 50 ms.
+        // post task after 50 ms.
         controllerHandler_->PostTask(task, 50, AppExecFwk::EventQueue::Priority::HIGH);
     }
     bool callbackRegister = DisplayManagerAgentController::GetInstance().SetRemoveAgentCallback(
@@ -75,8 +73,8 @@ std::vector<ScreenId> AbstractScreenController::GetAllScreenIds() const
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::vector<ScreenId> res;
-    for (auto iter = dmsScreenMap_.begin(); iter != dmsScreenMap_.end(); iter++) {
-        res.emplace_back(iter->first);
+    for (const auto& iter : dmsScreenMap_) {
+        res.emplace_back(iter.first);
     }
     return res;
 }
@@ -132,7 +130,7 @@ std::vector<ScreenId> AbstractScreenController::GetAllExpandOrMirrorScreenIds(
     return screenIds;
 }
 
-std::shared_ptr<RSDisplayNode> AbstractScreenController::GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const
+const std::shared_ptr<RSDisplayNode>& AbstractScreenController::GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const
 {
     sptr<AbstractScreen> screen = GetAbstractScreen(dmsScreenId);
     if (screen == nullptr) {
@@ -174,7 +172,7 @@ sptr<AbstractScreenGroup> AbstractScreenController::GetAbstractScreenGroup(Scree
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = dmsScreenGroupMap_.find(dmsScreenId);
     if (iter == dmsScreenGroupMap_.end()) {
-        WLOGE("didnot find screen:%{public}" PRIu64"", dmsScreenId);
+        WLOGE("did not find screen:%{public}" PRIu64"", dmsScreenId);
         return nullptr;
     }
     return iter->second;
@@ -497,7 +495,7 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
     }
     std::vector<ScreenId> virtualScreenIds;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    std::map<sptr<IRemoteObject>, std::vector<ScreenId>>::iterator agIter = screenAgentMap_.find(displayManagerAgent);
+    auto agIter = screenAgentMap_.find(displayManagerAgent);
     if (agIter == screenAgentMap_.end()) {
         if (!RegisterVirtualScreenAgent(displayManagerAgent)) {
             return SCREEN_ID_INVALID;
@@ -556,7 +554,7 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
         }
     }
 
-    std::map<ScreenId, std::shared_ptr<RSDisplayNode>>::iterator iter = displayNodeMap_.find(rsScreenId);
+    auto iter = displayNodeMap_.find(rsScreenId);
     if (iter == displayNodeMap_.end()) {
         WLOGFI("displayNode is nullptr");
     } else {
@@ -610,24 +608,22 @@ bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation new
         return false;
     }
     if (isFromWindow) {
-        if (newOrientation == Orientation::UNSPECIFIED) {
-            newOrientation = screen->screenRequestedOrientation_;
-        }
+        ScreenRotationController::ProcessOrientationSwitch(newOrientation);
     } else {
         screen->screenRequestedOrientation_ = newOrientation;
+        Rotation rotationAfter = screen->CalcRotation(newOrientation);
+        SetRotation(screenId, rotationAfter, false);
+        screen->rotation_ = rotationAfter;
     }
     if (screen->orientation_ == newOrientation) {
         WLOGI("skip setting orientation. screen %{public}" PRIu64" orientation %{public}u", screenId, newOrientation);
         return true;
     }
-
-    Rotation rotationAfter = screen->CalcRotation(newOrientation);
-    SetRotation(screenId, rotationAfter, false);
+   
     if (!screen->SetOrientation(newOrientation)) {
         WLOGE("fail to set rotation, screen %{public}" PRIu64"", screenId);
         return false;
     }
-    screen->rotation_ = rotationAfter;
 
     // Notify rotation event to ScreenManager
     NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ORIENTATION);
@@ -642,7 +638,7 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
 {
     auto screen = GetAbstractScreen(screenId);
     if (rotationAfter != screen->rotation_) {
-        WLOGI("set orientation. roatiton %{public}u", rotationAfter);
+        WLOGI("set orientation. rotation %{public}u", rotationAfter);
         ScreenId rsScreenId;
         if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
             WLOGE("Convert to RsScreenId fail. screenId: %{public}" PRIu64"", screenId);
@@ -760,7 +756,7 @@ bool AbstractScreenController::SetScreenActiveMode(ScreenId screenId, uint32_t m
 
 void AbstractScreenController::ProcessScreenModeChanged(ScreenId dmsScreenId)
 {
-    WM_SCOPED_TRACE("dms:ProcessScreenModeChanged(%" PRIu64")", dmsScreenId);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:ProcessScreenModeChanged(%" PRIu64")", dmsScreenId);
     sptr<AbstractScreen> absScreen = nullptr;
     sptr<AbstractScreenCallback> absScreenCallback = nullptr;
     {
@@ -966,7 +962,7 @@ bool AbstractScreenController::OnRemoteDied(const sptr<IRemoteObject>& agent)
     if (agent == nullptr) {
         return false;
     }
-    std::map<sptr<IRemoteObject>, std::vector<ScreenId>>::iterator agentIter = screenAgentMap_.find(agent);
+    auto agentIter = screenAgentMap_.find(agent);
     if (agentIter != screenAgentMap_.end()) {
         while (screenAgentMap_[agent].size() > 0) {
             auto diedId = screenAgentMap_[agent][0];

@@ -46,6 +46,15 @@ void WindowAgent::UpdateWindowMode(WindowMode mode)
     window_->UpdateMode(mode);
 }
 
+void WindowAgent::UpdateWindowModeSupportInfo(uint32_t modeSupportInfo)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->UpdateModeSupportInfo(modeSupportInfo);
+}
+
 void WindowAgent::UpdateFocusStatus(bool focused)
 {
     if (window_ == nullptr) {
@@ -55,13 +64,13 @@ void WindowAgent::UpdateFocusStatus(bool focused)
     window_->UpdateFocusStatus(focused);
 }
 
-void WindowAgent::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
+void WindowAgent::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    if (window_ == nullptr) {
-        WLOGFE("window_ is nullptr");
+    if (window_ == nullptr || avoidArea == nullptr) {
+        WLOGFE("window_ or avoidArea is nullptr.");
         return;
     }
-    window_->UpdateAvoidArea(avoidArea);
+    window_->UpdateAvoidArea(avoidArea, type);
 }
 
 void WindowAgent::UpdateWindowState(WindowState state)

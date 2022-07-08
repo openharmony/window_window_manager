@@ -23,7 +23,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-using utils = WindowTestUtils;
+using Utils = WindowTestUtils;
 const int WAIT_CALLBACK_US = 100000;  // 100000 us
 
 class TestDragListener : public IWindowDragListener {
@@ -49,9 +49,9 @@ public:
 
     static sptr<TestDragListener> firstWindowDragListener_;
     static sptr<TestDragListener> secondWindowDragListener_;
-    utils::TestWindowInfo dragWindowInfo_;
-    utils::TestWindowInfo firstWindowInfo_;
-    utils::TestWindowInfo secondWindowInfo_;
+    Utils::TestWindowInfo dragWindowInfo_;
+    Utils::TestWindowInfo firstWindowInfo_;
+    Utils::TestWindowInfo secondWindowInfo_;
 };
 
 sptr<TestDragListener> WindowDragTest::firstWindowDragListener_ =
@@ -77,7 +77,7 @@ void WindowDragTest::SetUp()
 
     firstWindowInfo_ = {
         .name = "firstWindow",
-        .rect = utils::customAppRect_,
+        .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = false,
@@ -87,7 +87,7 @@ void WindowDragTest::SetUp()
 
     secondWindowInfo_ = {
         .name = "secondWindow",
-        .rect = utils::customAppRect_,
+        .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
@@ -105,12 +105,12 @@ namespace {
  * @tc.type: FUNC
  */
 HWTEST_F(WindowDragTest, DragIn, Function | MediumTest | Level3) {
-    const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
+    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
     firstWindow->SetTurnScreenOn(true);
     firstWindow->Show();
 
-    const sptr<Window> &dragWindow = utils::CreateTestWindow(dragWindowInfo_);
+    const sptr<Window> &dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
     dragWindow->Show();
     dragWindow->MoveTo(300, 300);
     usleep(WAIT_CALLBACK_US);
@@ -129,12 +129,12 @@ HWTEST_F(WindowDragTest, DragIn, Function | MediumTest | Level3) {
  * @tc.type: FUNC
  */
 HWTEST_F(WindowDragTest, DragMove, Function | MediumTest | Level3) {
-    const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
+    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
     firstWindow->SetTurnScreenOn(true);
     firstWindow->Show();
 
-    const sptr<Window> &dragWindow = utils::CreateTestWindow(dragWindowInfo_);
+    const sptr<Window> &dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
     dragWindow->Show();
     dragWindow->MoveTo(300, 300);
     usleep(WAIT_CALLBACK_US);
@@ -159,17 +159,17 @@ HWTEST_F(WindowDragTest, DragMove, Function | MediumTest | Level3) {
  * @tc.type: FUNC
  */
 HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
-    const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
+    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
     firstWindow->SetTurnScreenOn(true);
     firstWindow->Show();
 
     secondWindowInfo_.rect = {500, 500, 500, 500};
-    const sptr<Window> &secondWindow = utils::CreateTestWindow(secondWindowInfo_);
+    const sptr<Window> &secondWindow = Utils::CreateTestWindow(secondWindowInfo_);
     secondWindow->RegisterDragListener(secondWindowDragListener_);
     secondWindow->Show();
 
-    const sptr<Window> &dragWindow = utils::CreateTestWindow(dragWindowInfo_);
+    const sptr<Window> &dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
     dragWindow->Show();
     dragWindow->MoveTo(300, 300);
     usleep(WAIT_CALLBACK_US);
@@ -203,12 +203,12 @@ HWTEST_F(WindowDragTest, DragOut, Function | MediumTest | Level3) {
  * @tc.type: FUNC
  */
 HWTEST_F(WindowDragTest, DragEnd, Function | MediumTest | Level3) {
-    const sptr<Window> &firstWindow = utils::CreateTestWindow(firstWindowInfo_);
+    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
     firstWindow->SetTurnScreenOn(true);
     firstWindow->Show();
 
-    const sptr<Window> &dragWindow = utils::CreateTestWindow(dragWindowInfo_);
+    const sptr<Window> &dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
     dragWindow->Show();
     dragWindow->MoveTo(199, 199);
     usleep(WAIT_CALLBACK_US);

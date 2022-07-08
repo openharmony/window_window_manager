@@ -425,56 +425,6 @@ HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
 }
 
-/**
- * @tc.name: ScreenManager09
- * @tc.desc: Create a virtual screen as expansion of default screen, create windowNode on virtual screen,
- *           and destroy virtual screen
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
-{
-    DisplayTestUtils utils;
-    ASSERT_TRUE(utils.CreateSurface());
-    defaultOption_.surface_ = utils.psurface_;
-    defaultOption_.isForShot_ = false;
-    CHECK_TEST_INIT_SCREEN_STATE
-    ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
-    CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN
-    CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
-    sleep(TEST_SLEEP_S);
-    std::vector<ExpandOption> options = {{defaultScreenId_, 0, 0}, {virtualScreenId, defaultWidth_, 0}};
-    ScreenId expansionId = ScreenManager::GetInstance().MakeExpand(options);
-    CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::ADD_TO_GROUP,
-        virtualScreenId, group, screenGroupChangeListener);
-    CheckScreenStateInGroup(true, group, groupId, virtualScreen, virtualScreenId);
-    sleep(TEST_SLEEP_S);
-    ASSERT_NE(SCREEN_ID_INVALID, expansionId);
-    DisplayId virtualDisplayId = DisplayManager::GetInstance().GetDisplayByScreen(virtualScreenId)->GetId();
-    ASSERT_NE(DISPLAY_ID_INVALID, virtualDisplayId);
-    sptr<Window> window = CreateWindowByDisplayId(virtualDisplayId);
-    ASSERT_NE(nullptr, window);
-    sleep(TEST_SLEEP_S);
-    auto surfaceNode = window->GetSurfaceNode();
-    auto rsUiDirector = RSUIDirector::Create();
-    rsUiDirector->Init();
-    RSTransaction::FlushImplicitTransaction();
-    sleep(TEST_SLEEP_S);
-    rsUiDirector->SetRSSurfaceNode(surfaceNode);
-    RootNodeInit(rsUiDirector, 200, 400);
-    rsUiDirector->SendMessages();
-    sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId));
-    CHECK_SCREEN_STATE_AFTER_DESTROY_VIRTUAL_SCREEN
-    CheckScreenGroupState(ScreenCombination::SCREEN_EXPAND, ScreenGroupChangeEvent::REMOVE_FROM_GROUP,
-        virtualScreenId, group, screenGroupChangeListener);
-    CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
-    ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
-    ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
-    sleep(TEST_SLEEP_S);
-    window->Show();
-    sleep(TEST_SLEEP_S_LONG);
-    window->Destroy();
-}
 
 /**
  * @tc.name: ScreenManager10
@@ -742,6 +692,20 @@ HWTEST_F(ScreenManagerTest, ScreenManager17, Function | MediumTest | Level2)
         ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
         ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
     }
+}
+
+/**
+ * @tc.name: ScreenManager18
+ * @tc.desc: Set screen rotation lock, and check whether screen rotation lock is Locked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, ScreenManager18, Function | SmallTest | Level1)
+{
+    bool originalLockStatus = ScreenManager::GetInstance().IsScreenRotationLocked();
+    ScreenManager::GetInstance().SetScreenRotationLocked(!originalLockStatus);
+    bool modifiedLockedStatus = ScreenManager::GetInstance().IsScreenRotationLocked();
+    ScreenManager::GetInstance().SetScreenRotationLocked(originalLockStatus);
+    ASSERT_EQ(!originalLockStatus, modifiedLockedStatus);
 }
 }
 } // namespace Rosen

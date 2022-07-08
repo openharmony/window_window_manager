@@ -41,20 +41,18 @@ public:
     virtual WMError RemoveWindow(uint32_t windowId);
     virtual WMError DestroyWindow(uint32_t windowId);
     virtual WMError RequestFocus(uint32_t windowId);
-    virtual WMError GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, std::vector<Rect>& avoidRect);
+    virtual WMError GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidRect);
     virtual WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level);
-    virtual WMError SetAlpha(uint32_t windowId, float alpha);
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     virtual void ProcessPointDown(uint32_t windowId, bool isStartDrag = false);
     virtual void ProcessPointUp(uint32_t windowId);
     virtual void MinimizeAllAppWindows(DisplayId displayId);
     virtual WMError ToggleShownStateForAllAppWindows();
-    virtual WMError MaxmizeWindow(uint32_t windowId);
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode);
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action);
     virtual WMError GetSystemConfig(SystemConfig& systemConfig);
     virtual WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones);
-
+    virtual WMError UpdateRsTree(uint32_t windowId, bool isAdd);
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -62,6 +60,7 @@ public:
 
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
     virtual WMError NotifyWindowTransition(sptr<WindowTransitionInfo> from, sptr<WindowTransitionInfo> to);
+    virtual WMError UpdateAvoidAreaListener(uint32_t windowId, bool haveListener);
     virtual void ClearWindowAdapter();
 
     virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);

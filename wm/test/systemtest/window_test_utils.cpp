@@ -39,6 +39,7 @@ SplitRects WindowTestUtils::splitRects_   = {
 Rect WindowTestUtils::singleTileRect_     = {0, 0, 0, 0};
 std::vector<Rect> WindowTestUtils::doubleTileRects_ = std::vector<Rect>(2);
 std::vector<Rect> WindowTestUtils::tripleTileRects_ = std::vector<Rect>(3);
+AvoidArea WindowTestUtils::systemAvoidArea_ = {};
 
 bool WindowTestUtils::isVerticalDisplay_ = false;
 
@@ -224,8 +225,8 @@ std::shared_ptr<MMI::PointerEvent> WindowTestUtils::CreatePointerEvent(int32_t p
 {
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(pointerId);
-    pointerItem.SetGlobalX(posX);
-    pointerItem.SetGlobalY(posY);
+    pointerItem.SetDisplayX(posX);
+    pointerItem.SetDisplayY(posY);
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->AddPointerItem(pointerItem);
@@ -355,14 +356,11 @@ bool WindowTestUtils::InitSplitRects()
 void WindowTestUtils::UpdateSplitRects(const sptr<Window>& window)
 {
     std::unique_ptr<WindowTestUtils> testUtils = std::make_unique<WindowTestUtils>();
-    auto res = window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, testUtils->avoidArea_);
-    if (res != WMError::WM_OK) {
-        WLOGFE("Get avoid type failed");
-    }
-    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.leftRect);
-    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.topRect);
-    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.rightRect);
-    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.bottomRect);
+    testUtils->avoidArea_ = systemAvoidArea_;
+    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.leftRect_);
+    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.topRect_);
+    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.rightRect_);
+    testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.bottomRect_);
 
     if (isVerticalDisplay_) {
         splitRects_.dividerRect.posY_ = limitDisplayRect_.posY_ +

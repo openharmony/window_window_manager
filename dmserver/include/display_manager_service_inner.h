@@ -45,6 +45,8 @@ public:
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     bool SetOrientationFromWindow(DisplayId displayId, Orientation orientation);
     bool SetRotationFromWindow(DisplayId displayId, Rotation targetRotation);
+    void SetGravitySensorSubscriptionEnabled();
+    void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
 };
 } // namespace OHOS::Rosen
 

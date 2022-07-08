@@ -15,11 +15,12 @@
 
 #include "window_layout_policy_tile.h"
 #include <ability_manager_client.h>
+#include <hitrace_meter.h>
+
 #include "minimize_app.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
-#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -117,7 +118,11 @@ void WindowLayoutPolicyTile::InitTileWindowRects(DisplayId displayId)
 
 void WindowLayoutPolicyTile::AddWindowNode(const sptr<WindowNode>& node)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
+
+    // update window size limits when add window
+    UpdateWindowSizeLimits(node);
+
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         DisplayId displayId = node->GetDisplayId();
         ForegroundNodeQueuePushBack(node, displayId);
@@ -130,7 +135,7 @@ void WindowLayoutPolicyTile::AddWindowNode(const sptr<WindowNode>& node)
 
 void WindowLayoutPolicyTile::UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     WindowLayoutPolicy::UpdateWindowNode(node);
     if (avoidTypes_.find(node->GetWindowType()) != avoidTypes_.end()) {
         DisplayId displayId = node->GetDisplayId();
@@ -142,7 +147,7 @@ void WindowLayoutPolicyTile::UpdateWindowNode(const sptr<WindowNode>& node, bool
 
 void WindowLayoutPolicyTile::RemoveWindowNode(const sptr<WindowNode>& node)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     WLOGFI("RemoveWindowNode %{public}u in tile", node->GetWindowId());
     auto type = node->GetWindowType();
     auto displayId = node->GetDisplayId();
@@ -206,6 +211,12 @@ void WindowLayoutPolicyTile::ForegroundNodeQueuePushBack(const sptr<WindowNode>&
     if (iter != foregroundNodes.end()) {
         return;
     }
+
+    if (!WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
+        WLOGFD("window don't support tile mode, winId: %{public}d", node->GetWindowId());
+        MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_TILE);
+        return;
+    }
     WLOGFI("add win in tile, displayId: %{public}" PRIu64", winId: %{public}d", displayId, node->GetWindowId());
     while (foregroundNodes.size() >= maxTileWinNumMap_[displayId]) {
         auto removeNode = foregroundNodes.front();
@@ -247,7 +258,8 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows(DisplayId displayI
     auto rectIt = presetRect.begin();
     for (auto node : foregroundNodesMap_[displayId]) {
         auto& rect = (*rectIt);
-        if (WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
+        if (WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) &&
+            WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowSizeLimits())) {
             node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             if (node->GetWindowToken()) {
                 node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -257,6 +269,8 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows(DisplayId displayI
             WLOGFI("set rect for qwin id: %{public}d [%{public}d %{public}d %{public}d %{public}d]",
                 node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
             rectIt++;
+        } else {
+            MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_TILE);
         }
     }
 }
@@ -271,7 +285,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
         WLOGFE("window property is nullptr.");
         return;
     }
-    auto decorEnbale = property->GetDecorEnable();
+    auto decorEnable = property->GetDecorEnable();
     bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     bool parentLimit = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
     bool subWindow = WindowHelper::IsSubWindow(type);
@@ -283,7 +297,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
 
     WLOGFI("Id:%{public}u, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
         "deco:%{public}d, type:%{public}u, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-        node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnbale,
+        node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, decorEnable,
         static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     if (needAvoid) {
         limitRect = limitRectMap_[node->GetDisplayId()];
@@ -292,7 +306,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
     if (!floatingWindow) { // fullscreen window
         winRect = limitRect;
     } else { // floating window
-        if (subWindow && parentLimit) { // subwidow and limited by parent
+        if (subWindow && parentLimit) { // subwindow and limited by parent
             limitRect = node->parent_->GetWindowRect();
             UpdateFloatingLayoutRect(limitRect, winRect);
         }

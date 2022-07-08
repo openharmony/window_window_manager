@@ -57,26 +57,10 @@ HWTEST_F(WindowEffectTest, WindowEffect01, Function | SmallTest | Level2)
 
 /**
  * @tc.name: WindowEffect02
- * @tc.desc: windowOption: set window alpha/ get window alpha
- * @tc.type: FUNC
- */
-HWTEST_F(WindowEffectTest, WindowEffect02, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = new WindowOption();
-    option->SetAlpha(0.0f);
-    ASSERT_EQ(0.0f, option->GetAlpha());
-    option->SetAlpha(0.5f);
-    ASSERT_EQ(0.5f, option->GetAlpha());
-    option->SetAlpha(1.0f);
-    ASSERT_EQ(1.0f, option->GetAlpha());
-}
-
-/**
- * @tc.name: WindowEffect03
  * @tc.desc: WindowImp: Create window with no default option, get and check Property
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect03, Function | SmallTest | Level2)
+HWTEST_F(WindowEffectTest, WindowEffect02, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
@@ -92,20 +76,18 @@ HWTEST_F(WindowEffectTest, WindowEffect03, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: WindowEffect04
+ * @tc.name: WindowEffect03
  * @tc.desc: Create window with no default option, get and check Property
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect04, Function | SmallTest | Level2)
+HWTEST_F(WindowEffectTest, WindowEffect03, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
-    option->SetAlpha(0.1f);
-
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
-
+    window->SetAlpha(0.1f);
     ASSERT_EQ(0.1f, window->GetAlpha());
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -113,11 +95,11 @@ HWTEST_F(WindowEffectTest, WindowEffect04, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: WindowEffect05
+ * @tc.name: WindowEffect04
  * @tc.desc: set window effect parameters throw window, and check parameters.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect05, Function | SmallTest | Level2)
+HWTEST_F(WindowEffectTest, WindowEffect04, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
@@ -135,32 +117,11 @@ HWTEST_F(WindowEffectTest, WindowEffect05, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: WindowEffect06
- * @tc.desc: set window effect parameters throw window, and check parameters.
- * @tc.type: FUNC
- */
-HWTEST_F(WindowEffectTest, WindowEffect06, Function | SmallTest | Level2)
-{
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    sptr<WindowOption> option = new WindowOption();
-    sptr<WindowImpl> window = new WindowImpl(option);
-
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
-    EXPECT_CALL(m->Mock(), SetAlpha(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->SetAlpha(0.1f));
-    ASSERT_EQ(0.1f, window->GetAlpha());
-
-    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Destroy();
-}
-
-/**
- * @tc.name: WindowEffect07
+ * @tc.name: WindowEffect05
  * @tc.desc: WindowImp: Create window with default option, get and check Property
  * @tc.type: FUNC
  */
-HWTEST_F(WindowEffectTest, WindowEffect07, Function | SmallTest | Level2)
+HWTEST_F(WindowEffectTest, WindowEffect05, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();

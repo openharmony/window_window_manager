@@ -42,8 +42,8 @@ ohos_shared_library("libwindow_extension") {
   configs = [ ":libwindow_extension_private_config" ]
 
   deps = [
-    "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
-    "//foundation/ability/ability_runtime/frameworks/kits/appkit:app_context",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_path}/frameworks/native/appkit:app_context",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/windowmanager/interfaces/kits/napi/window_runtime:window_native_kit",
     "//foundation/windowmanager/utils:libwmutil",
@@ -56,8 +56,9 @@ ohos_shared_library("libwindow_extension") {
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
     "ability_runtime:runtime",
-    "graphic_standard:surface",
+    "graphic_graphic_2d:surface",
     "hilog_native:libhilog",
+    "hitrace_native:hitrace_meter",
     "input:libmmi-client",
     "utils_base:utils",
   ]
@@ -71,7 +72,7 @@ config("window_extension_module_private_config") {
 
   include_dirs = [
     "include",
-    "${aafwk_kits_path}/ability/ability_runtime/include",
+    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
   ]
 }
 

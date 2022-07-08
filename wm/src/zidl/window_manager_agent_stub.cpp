@@ -84,6 +84,12 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateWindowVisibilityInfo(infos);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_FLOAT: {
+            uint32_t accessTokenId = data.ReadUint32();
+            bool isShowing = data.ReadBool();
+            UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+            break;
+        }
         default:
             break;
     }

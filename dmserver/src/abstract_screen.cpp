@@ -37,7 +37,7 @@ AbstractScreen::~AbstractScreen()
 
 sptr<SupportedScreenModes> AbstractScreen::GetActiveScreenMode() const
 {
-    if (activeIdx_ < 0 || activeIdx_ >= modes_.size()) {
+    if (activeIdx_ < 0 || activeIdx_ >= static_cast<int32_t>(modes_.size())) {
         WLOGE("active mode index is wrong: %{public}d", activeIdx_);
         return nullptr;
     }
@@ -243,7 +243,7 @@ Rotation AbstractScreen::CalcRotation(Orientation orientation) const
     if (info == nullptr) {
         return Rotation::ROTATION_0;
     }
-    // virtical: phone(Plugin screen); horizontal: pad & external screen
+    // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = info->width_ < info->height_;
     switch (orientation) {
         case Orientation::UNSPECIFIED: {

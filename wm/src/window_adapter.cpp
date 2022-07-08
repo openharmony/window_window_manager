@@ -99,11 +99,10 @@ WMError WindowAdapter::SetWindowAnimationController(const sptr<RSIWindowAnimatio
     return windowManagerServiceProxy_->SetWindowAnimationController(controller);
 }
 
-WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, std::vector<Rect>& avoidRect)
+WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidArea)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
-    avoidRect = windowManagerServiceProxy_->GetAvoidAreaByType(windowId, type);
+    avoidArea = windowManagerServiceProxy_->GetAvoidAreaByType(windowId, type);
     return WMError::WM_OK;
 }
 
@@ -112,13 +111,6 @@ WMError WindowAdapter::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLeve
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
     return windowManagerServiceProxy_->SetWindowBackgroundBlur(windowId, level);
-}
-
-WMError WindowAdapter::SetAlpha(uint32_t windowId, float alpha)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
-    return windowManagerServiceProxy_->SetAlpha(windowId, alpha);
 }
 
 void WindowAdapter::ProcessPointDown(uint32_t windowId, bool isStartDrag)
@@ -147,13 +139,6 @@ WMError WindowAdapter::ToggleShownStateForAllAppWindows()
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
     return windowManagerServiceProxy_->ToggleShownStateForAllAppWindows();
-}
-
-WMError WindowAdapter::MaxmizeWindow(uint32_t windowId)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
-    return windowManagerServiceProxy_->MaxmizeWindow(windowId);
 }
 
 WMError WindowAdapter::GetSystemConfig(SystemConfig& systemConfig)
@@ -264,6 +249,18 @@ void WindowAdapter::MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, b
     INIT_PROXY_CHECK_RETURN();
     windowManagerServiceProxy_->MinimizeWindowsByLauncher(windowIds, isAnimated, finishCallback);
     return;
+}
+
+WMError WindowAdapter::UpdateAvoidAreaListener(uint32_t windowId, bool haveListener)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->UpdateAvoidAreaListener(windowId, haveListener);
+}
+
+WMError WindowAdapter::UpdateRsTree(uint32_t windowId, bool isAdd)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->UpdateRsTree(windowId, isAdd);
 }
 } // namespace Rosen
 } // namespace OHOS

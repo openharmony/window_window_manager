@@ -16,10 +16,11 @@
 #include "window_impl.h"
 
 #include <cmath>
+#include <sstream>
 
 #include <ability_manager_client.h>
 #include <hisysevent.h>
-#include <sstream>
+#include "ipc_skeleton.h"
 
 #include "color_parser.h"
 #include "display_manager.h"
@@ -47,7 +48,8 @@ const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appFloatingWindowMap_;
-
+static int constructorCnt = 0;
+static int deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     property_ = new (std::nothrow) WindowProperty();
@@ -56,7 +58,6 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetWindowType(option->GetWindowType());
     property_->SetWindowMode(option->GetWindowMode());
     property_->SetWindowBackgroundBlur(option->GetWindowBackgroundBlur());
-    property_->SetAlpha(option->GetAlpha());
     property_->SetFullScreen(option->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     property_->SetFocusable(option->GetFocusable());
     property_->SetTouchable(option->GetTouchable());
@@ -80,6 +81,8 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = property_->GetWindowName();
     surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    WLOGFI("WindowImpl constructorCnt: %{public}d name: %{public}s",
+        ++constructorCnt, property_->GetWindowName().c_str());
 }
 
 void WindowImpl::InitListenerHandler()
@@ -103,7 +106,8 @@ WindowImpl::~WindowImpl()
     if (eventHandler_ != nullptr) {
         eventHandler_.reset();
     }
-    WLOGFI("windowName: %{public}s, windowId: %{public}d", GetWindowName().c_str(), GetWindowId());
+    WLOGFI("windowName: %{public}s, windowId: %{public}d, deConstructorCnt: %{public}d, surfaceNode:%{public}d",
+        GetWindowName().c_str(), GetWindowId(), ++deConstructorCnt, static_cast<uint32_t>(surfaceNode_.use_count()));
     Destroy();
 }
 
@@ -275,6 +279,11 @@ uint32_t WindowImpl::GetWindowFlags() const
     return property_->GetWindowFlags();
 }
 
+uint32_t WindowImpl::GetRequestModeSupportInfo() const
+{
+    return property_->GetRequestModeSupportInfo();
+}
+
 uint32_t WindowImpl::GetModeSupportInfo() const
 {
     return property_->GetModeSupportInfo();
@@ -289,16 +298,12 @@ SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
 WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
     WLOGFI("GetAvoidAreaByType  Search Type: %{public}u", static_cast<uint32_t>(type));
-    std::vector<Rect> avoidAreaVec;
     uint32_t windowId = property_->GetWindowId();
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidAreaVec);
-    if (ret != WMError::WM_OK || avoidAreaVec.size() != 4) {    // 4: the avoid area num (left, top, right, bottom)
-        WLOGFE("GetAvoidAreaByType errCode:%{public}d winId:%{public}u Type is :%{public}u." \
-            "Or avoidArea Size != 4. Current size of avoid area: %{public}u", static_cast<int32_t>(ret),
-            property_->GetWindowId(), static_cast<uint32_t>(type), static_cast<uint32_t>(avoidAreaVec.size()));
-        return ret;
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidArea);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("GetAvoidAreaByType errCode:%{public}d winId:%{public}u Type is :%{public}u.",
+            static_cast<int32_t>(ret), property_->GetWindowId(), static_cast<uint32_t>(type));
     }
-    avoidArea = {avoidAreaVec[0], avoidAreaVec[1], avoidAreaVec[2], avoidAreaVec[3]}; // 0:left 1:top 2:right 3:bottom
     return ret;
 }
 
@@ -314,7 +319,7 @@ WMError WindowImpl::SetWindowType(WindowType type)
             return WMError::WM_ERROR_INVALID_PARAM;
         }
         property_->SetWindowType(type);
-        if (isAppDecorEnbale_ && windowSystemConfig_.isSystemDecorEnable_) {
+        if (isAppDecorEnable_ && windowSystemConfig_.isSystemDecorEnable_) {
             property_->SetDecorEnable(WindowHelper::IsMainWindow(property_->GetWindowType()));
         }
         AdjustWindowAnimationFlag();
@@ -367,14 +372,29 @@ WMError WindowImpl::SetWindowBackgroundBlur(WindowBlurLevel level)
     return SingletonContainer::Get<WindowAdapter>().SetWindowBackgroundBlur(property_->GetWindowId(), level);
 }
 
-WMError WindowImpl::SetAlpha(float alpha)
+void WindowImpl::SetAlpha(float alpha)
 {
     WLOGFI("[Client] Window %{public}u alpha %{public}f", property_->GetWindowId(), alpha);
     if (!IsWindowValid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return;
     }
     property_->SetAlpha(alpha);
-    return SingletonContainer::Get<WindowAdapter>().SetAlpha(property_->GetWindowId(), alpha);
+    surfaceNode_->SetAlpha(alpha);
+}
+
+void WindowImpl::SetTransform(const Transform& trans)
+{
+    WLOGFI("[Client] Window %{public}u SetTransform", property_->GetWindowId());
+    if (!IsWindowValid()) {
+        return;
+    }
+    property_->SetTransform(trans);
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY);
+}
+
+Transform WindowImpl::GetTransform() const
+{
+    return property_->GetTransform();
 }
 
 WMError WindowImpl::AddWindowFlag(WindowFlag flag)
@@ -442,7 +462,7 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
         WLOGFE("fail to SetUIContent id: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!isAppDecorEnbale_ || !windowSystemConfig_.isSystemDecorEnable_) {
+    if (!isAppDecorEnable_ || !windowSystemConfig_.isSystemDecorEnable_) {
         WLOGFI("app set decor enable false");
         property_->SetDecorEnable(false);
     }
@@ -451,9 +471,11 @@ WMError WindowImpl::SetUIContent(const std::string& contentInfo,
     } else {
         uiContent->Initialize(this, contentInfo, storage);
     }
-    // make uiContent_ available after Initialize/Restore
+    // make uiContent available after Initialize/Restore
     uiContent_ = std::move(uiContent);
+
     if (state_ == WindowState::STATE_SHOWN) {
+        UpdateTitleButtonVisibility();
         Ace::ViewportConfig config;
         Rect rect = GetRect();
         config.SetSize(rect.width_, rect.height_);
@@ -490,7 +512,7 @@ std::string WindowImpl::GetContentInfo()
 ColorSpace WindowImpl::GetColorSpaceFromSurfaceGamut(ColorGamut ColorGamut)
 {
     for (auto item: colorSpaceConvertMap) {
-        if (item.sufaceColorGamut == ColorGamut) {
+        if (item.surfaceColorGamut == ColorGamut) {
             return item.colorSpace;
         }
     }
@@ -501,7 +523,7 @@ ColorGamut WindowImpl::GetSurfaceGamutFromColorSpace(ColorSpace colorSpace)
 {
     for (auto item: colorSpaceConvertMap) {
         if (item.colorSpace == colorSpace) {
-            return item.sufaceColorGamut;
+            return item.surfaceColorGamut;
         }
     }
     return ColorGamut::COLOR_GAMUT_SRGB;
@@ -564,7 +586,9 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
 WMError WindowImpl::SetLayoutFullScreen(bool status)
 {
     WLOGFI("[Client] Window %{public}u SetLayoutFullScreen: %{public}u", property_->GetWindowId(), status);
-    if (!IsWindowValid()) {
+    if (!IsWindowValid() ||
+        !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        WLOGFE("invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     WMError ret = SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -594,6 +618,11 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
 WMError WindowImpl::SetFullScreen(bool status)
 {
     WLOGFI("[Client] Window %{public}u SetFullScreen: %{public}d", property_->GetWindowId(), status);
+    if (!IsWindowValid() ||
+        !WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        WLOGFE("invalid window or fullscreen mode is not be supported, winId:%{public}u", property_->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     SystemBarProperty statusProperty = GetSystemBarPropertyByType(
         WindowType::WINDOW_TYPE_STATUS_BAR);
     SystemBarProperty naviProperty = GetSystemBarPropertyByType(
@@ -625,7 +654,7 @@ WMError WindowImpl::SetFullScreen(bool status)
 
 void WindowImpl::MapFloatingWindowToAppIfNeeded()
 {
-    if (GetType() != WindowType::WINDOW_TYPE_FLOAT || context_.get() == nullptr) {
+    if (!WindowHelper::IsAppFloatingWindow(GetType()) || context_.get() == nullptr) {
         return;
     }
 
@@ -634,7 +663,8 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
             context_.get() == win->GetContext().get()) {
             appFloatingWindowMap_[win->GetWindowId()].push_back(this);
-            WLOGFI("Map FloatingWindow %{public}u to AppMainWindow %{public}u", GetWindowId(), win->GetWindowId());
+            WLOGFI("Map FloatingWindow %{public}u to AppMainWindow %{public}u, type is %{public}u",
+                GetWindowId(), win->GetWindowId(), GetType());
             return;
         }
     }
@@ -643,6 +673,71 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
 WMError WindowImpl::UpdateProperty(PropertyChangeAction action)
 {
     return SingletonContainer::Get<WindowAdapter>().UpdateProperty(property_, action);
+}
+
+void WindowImpl::GetConfigurationFromAbilityInfo()
+{
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext == nullptr) {
+        WLOGFE("id:%{public}u is not ability Window", property_->GetWindowId());
+        return;
+    }
+    auto abilityInfo = abilityContext->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        WLOGFE("id:%{public}u Ability window get ability info failed", property_->GetWindowId());
+        return;
+    }
+
+    // get support modes configuration
+    uint32_t modeSupportInfo = 0;
+    WindowHelper::ConvertSupportModesToSupportInfo(modeSupportInfo, abilityInfo->windowModes);
+    if (modeSupportInfo == 0) {
+        WLOGFI("mode config param is 0, all modes is supported");
+        modeSupportInfo = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    }
+    WLOGFI("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
+    SetRequestModeSupportInfo(modeSupportInfo);
+
+    // get window size limits configuration
+    WindowSizeLimits sizeLimits;
+    sizeLimits.maxWidth_ = abilityInfo->maxWindowWidth;
+    sizeLimits.maxHeight_ = abilityInfo->maxWindowHeight;
+    sizeLimits.minWidth_ = abilityInfo->minWindowWidth;
+    sizeLimits.minHeight_ = abilityInfo->minWindowHeight;
+    sizeLimits.maxRatio_ = static_cast<float>(abilityInfo->maxWindowRatio);
+    sizeLimits.minRatio_ = static_cast<float>(abilityInfo->minWindowRatio);
+    property_->SetSizeLimits(sizeLimits);
+
+    // get orientation configuration
+    DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(
+        static_cast<uint32_t>(abilityInfo->orientation));
+    if (ABILITY_TO_WMS_ORIENTATION_MAP.count(displayOrientation) == 0) {
+        WLOGFE("id:%{public}u Do not support this Orientation type", property_->GetWindowId());
+        return;
+    }
+    Orientation orientation = ABILITY_TO_WMS_ORIENTATION_MAP.at(displayOrientation);
+    if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
+        WLOGFE("Set orientation from ability failed");
+        return;
+    }
+    property_->SetRequestedOrientation(orientation);
+}
+
+void WindowImpl::UpdateTitleButtonVisibility()
+{
+    WLOGFI("[Client] UpdateTitleButtonVisibility");
+    if (uiContent_ == nullptr || !isAppDecorEnable_) {
+        return;
+    }
+    auto modeSupportInfo = GetModeSupportInfo();
+    bool hideSplitButton = !(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
+    // not support fullscreen in split and floating mode, or not support float in fullscreen mode
+    bool hideMaximizeButton = (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
+        (GetMode() == WindowMode::WINDOW_MODE_FLOATING || WindowHelper::IsSplitWindowMode(GetMode()))) ||
+        (!(modeSupportInfo & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
+        GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
+    WLOGFI("[Client] [hideSplit, hideMaximize]: [%{public}d, %{public}d]", hideSplitButton, hideMaximizeButton);
+    uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false);
 }
 
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
@@ -663,6 +758,12 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
             property_->SetParentId(parentId);
         }
     }
+
+    if (CheckCameraFloatingWindowMultiCreated(property_->GetWindowType())) {
+        WLOGFE("Camera Floating Window already exists.");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     context_ = context;
     sptr<WindowImpl> window(this);
     sptr<IWindow> windowAgent(new WindowAgent(window));
@@ -684,6 +785,7 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
             WLOGFI("get stretchable enable:%{public}d", windowSystemConfig_.isStretchable_);
             property_->SetStretchable(windowSystemConfig_.isStretchable_);
         }
+        GetConfigurationFromAbilityInfo();
     }
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
         windowId, token);
@@ -723,11 +825,13 @@ void WindowImpl::DestroyFloatingWindow()
 
     // Destroy app floating window if exist
     if (appFloatingWindowMap_.count(GetWindowId()) > 0) {
-        for (auto& floatingWindow : appFloatingWindowMap_.at(GetWindowId())) {
-            if (floatingWindow == nullptr) {
+        auto& floatingWindows = appFloatingWindowMap_.at(GetWindowId());
+        for (auto iter = floatingWindows.begin(); iter != floatingWindows.end(); iter = floatingWindows.begin()) {
+            if ((*iter) == nullptr) {
+                floatingWindows.erase(iter);
                 continue;
             }
-            floatingWindow->Destroy();
+            (*iter)->Destroy();
         }
         appFloatingWindowMap_.erase(GetWindowId());
     }
@@ -749,12 +853,13 @@ void WindowImpl::DestroySubWindow()
     }
 
     if (subWindowMap_.count(GetWindowId()) > 0) { // remove from subWindowMap_ and windowMap_
-        std::vector<sptr<WindowImpl>>& subWindows = subWindowMap_.at(GetWindowId());
-        for (auto& subWindow : subWindows) {
-            if (subWindow == nullptr) {
+        auto& subWindows = subWindowMap_.at(GetWindowId());
+        for (auto iter = subWindows.begin(); iter != subWindows.end(); iter = subWindows.begin()) {
+            if ((*iter) == nullptr) {
+                subWindows.erase(iter);
                 continue;
             }
-            subWindow->Destroy(false);
+            (*iter)->Destroy(false);
         }
         subWindowMap_[GetWindowId()].clear();
         subWindowMap_.erase(GetWindowId());
@@ -827,14 +932,34 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
     return ret;
 }
 
-WMError WindowImpl::Show(uint32_t reason)
+WMError WindowImpl::UpdateSurfaceNodeAfterCustomAnimation(bool isAdd)
 {
-    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Show, reason:%{public}u",
-        name_.c_str(), property_->GetWindowId(), reason);
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] UpdateRsTree, isAdd:%{public}u",
+        name_.c_str(), property_->GetWindowId(), isAdd);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (!WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+        WLOGFE("only system window can set");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    AdjustWindowAnimationFlag(false); // false means update rs tree with default option
+    // need time out check
+    WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("UpdateProperty failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        return ret;
+    }
+    ret = SingletonContainer::Get<WindowAdapter>().UpdateRsTree(property_->GetWindowId(), isAdd);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("UpdateRsTree failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        return ret;
+    }
+    return WMError::WM_OK;
+}
 
+WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
+{
     WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
     if (stateChangeReason == WindowStateChangeReason::KEYGUARD ||
         stateChangeReason == WindowStateChangeReason::TOGGLING) {
@@ -858,11 +983,46 @@ WMError WindowImpl::Show(uint32_t reason)
         return WMError::WM_OK;
     }
     SetDefaultOption();
-    WMError ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
+    AdjustWindowAnimationFlag(withAnimation);
+    // show failed when current mode is not support or window only supports split mode and can show when locked
+    bool isShowWhenLocked = GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+    if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), GetMode()) ||
+        WindowHelper::IsOnlySupportSplitAndShowWhenLocked(isShowWhenLocked, GetModeSupportInfo())) {
+        WLOGFE("current mode is not supported, windowId: %{public}u, modeSupportInfo: %{public}u, winMode: %{public}u",
+            property_->GetWindowId(), GetModeSupportInfo(), GetMode());
+        NotifyForegroundInvalidWindowMode();
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE;
+    }
+    // update title button visibility when show
+    UpdateTitleButtonVisibility();
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
+{
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Show, reason:%{public}u, withAnimation:%{public}d",
+        name_.c_str(), property_->GetWindowId(), reason, withAnimation);
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    WMError ret = PreProcessShow(reason, withAnimation);
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+
+    ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
+        uint32_t animationFlag = property_->GetAnimationFlag();
+        if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+            // CustomAnimation is enabled when animationTranistionController_ exists
+            animationTranistionController_->AnimationForShown();
+        }
+    } else if (ret == WMError::WM_ERROR_INVALID_WINDOW_MODE) {
+        NotifyForegroundInvalidWindowMode();
     } else {
         NotifyForegroundFailed();
         WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
@@ -870,9 +1030,10 @@ WMError WindowImpl::Show(uint32_t reason)
     return ret;
 }
 
-WMError WindowImpl::Hide(uint32_t reason)
+WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
 {
-    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Hide", name_.c_str(), property_->GetWindowId());
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Hide, reason:%{public}u, withAnimation:%{public}d",
+        name_.c_str(), property_->GetWindowId(), reason, withAnimation);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -886,7 +1047,17 @@ WMError WindowImpl::Hide(uint32_t reason)
         WLOGFI("window is already hidden id: %{public}u", property_->GetWindowId());
         return WMError::WM_OK;
     }
-    WMError ret = SingletonContainer::Get<WindowAdapter>().RemoveWindow(property_->GetWindowId());
+    WMError ret = WMError::WM_OK;
+    if (WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+        AdjustWindowAnimationFlag(withAnimation);
+        // when show(true) with default, hide() with None, to adjust animationFlag to disabled default animation
+        WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("UpdateProperty failed with errCode:%{public}d", static_cast<int32_t>(ret));
+            return ret;
+        }
+    }
+    ret = SingletonContainer::Get<WindowAdapter>().RemoveWindow(property_->GetWindowId());
     RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, ret);
     if (ret != WMError::WM_OK) {
         WLOGFE("hide errCode:%{public}d for winId:%{public}u", static_cast<int32_t>(ret), property_->GetWindowId());
@@ -894,6 +1065,10 @@ WMError WindowImpl::Hide(uint32_t reason)
     }
     state_ = WindowState::STATE_HIDDEN;
     NotifyAfterBackground();
+    uint32_t animationFlag = property_->GetAnimationFlag();
+    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        animationTranistionController_->AnimationForHidden();
+    }
     return ret;
 }
 
@@ -1007,6 +1182,8 @@ WMError WindowImpl::SetBackgroundColor(const std::string& color)
     }
     uint32_t colorValue;
     if (ColorParser::Parse(color, colorValue)) {
+        WLOGFI("SetBackgroundColor: window: %{public}s, value: [%{public}s, %{public}u]",
+            name_.c_str(), color.c_str(), colorValue);
         return SetBackgroundColor(colorValue);
     }
     WLOGFE("invalid color string: %{public}s", color.c_str());
@@ -1139,7 +1316,7 @@ void WindowImpl::DisableAppWindowDecor()
         return;
     }
     WLOGFI("disable app window decoration.");
-    isAppDecorEnbale_ = false;
+    isAppDecorEnable_ = false;
 }
 
 bool WindowImpl::IsDecorEnable() const
@@ -1188,6 +1365,9 @@ WMError WindowImpl::NotifyWindowTransition(TransitionReason reason)
         return WMError::WM_ERROR_NO_MEM;
     }
     auto abilityInfo = abilityContext->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     fromInfo->SetBundleName(context_->GetBundleName());
     fromInfo->SetAbilityName(abilityInfo->name);
     fromInfo->SetWindowMode(property_->GetWindowMode());
@@ -1272,12 +1452,18 @@ WMError WindowImpl::RequestFocus() const
     return SingletonContainer::Get<WindowAdapter>().RequestFocus(property_->GetWindowId());
 }
 
+void WindowImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    inputEventConsumer_ = inputEventConsumer;
+}
+
 void WindowImpl::AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener)
 {
     InputTransferStation::GetInstance().SetInputListener(GetWindowId(), inputEventListener);
 }
 
-void WindowImpl::RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener)
+void WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
     if (listener == nullptr) {
         return;
@@ -1304,7 +1490,7 @@ void WindowImpl::RegisterWindowChangeListener(sptr<IWindowChangeListener>& liste
     windowChangeListeners_.emplace_back(listener);
 }
 
-void WindowImpl::UnregisterLifeCycleListener(sptr<IWindowLifeCycle>& listener)
+void WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     lifecycleListeners_.erase(std::remove_if(lifecycleListeners_.begin(), lifecycleListeners_.end(),
@@ -1325,25 +1511,36 @@ void WindowImpl::UnregisterWindowChangeListener(sptr<IWindowChangeListener>& lis
 void WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("RegisterAvoidAreaChangeListener failed. AvoidAreaChangeListener is nullptr");
+        WLOGFE("register avoid area listener fail. listener is null");
         return;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (std::find(avoidAreaChangeListeners_.begin(), avoidAreaChangeListeners_.end(), listener) !=
-        avoidAreaChangeListeners_.end()) {
-        WLOGFE("Listener already registered");
-        return;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        if (std::find(avoidAreaChangeListeners_.begin(), avoidAreaChangeListeners_.end(), listener) !=
+            avoidAreaChangeListeners_.end()) {
+            WLOGFE("avoid area listener already registered");
+            return;
+        }
+        avoidAreaChangeListeners_.push_back(listener);
     }
-    avoidAreaChangeListeners_.emplace_back(listener);
+    if (avoidAreaChangeListeners_.size() == 1) {
+        SingletonContainer::Get<WindowAdapter>().UpdateAvoidAreaListener(property_->GetWindowId(), true);
+    }
 }
 
 void WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    avoidAreaChangeListeners_.erase(std::remove_if(avoidAreaChangeListeners_.begin(), avoidAreaChangeListeners_.end(),
-        [listener](sptr<IAvoidAreaChangedListener> registeredListener) {
-            return registeredListener == listener;
-        }), avoidAreaChangeListeners_.end());
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        avoidAreaChangeListeners_.erase(std::remove_if(avoidAreaChangeListeners_.begin(),
+            avoidAreaChangeListeners_.end(),
+            [listener](sptr<IAvoidAreaChangedListener> registeredListener) {
+                return registeredListener == listener;
+            }), avoidAreaChangeListeners_.end());
+    }
+    if (avoidAreaChangeListeners_.empty()) {
+        SingletonContainer::Get<WindowAdapter>().UpdateAvoidAreaListener(property_->GetWindowId(), false);
+    }
 }
 
 void WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
@@ -1395,7 +1592,7 @@ void WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& liste
     displayMoveListeners_.erase(iter);
 }
 
-void WindowImpl::RegisterInputEventListener(sptr<IInputEventListener>& listener)
+void WindowImpl::RegisterInputEventListener(const sptr<IInputEventListener>& listener)
 {
     if (listener == nullptr) {
         return;
@@ -1408,7 +1605,7 @@ void WindowImpl::RegisterInputEventListener(sptr<IInputEventListener>& listener)
     inputEventListeners_.emplace_back(listener);
 }
 
-void WindowImpl::UnregisterInputEventListener(sptr<IInputEventListener>& listener)
+void WindowImpl::UnregisterInputEventListener(const sptr<IInputEventListener>& listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(inputEventListeners_.begin(), inputEventListeners_.end(), listener);
@@ -1472,6 +1669,15 @@ void WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener
         }), touchOutsideListeners_.end());
 }
 
+void WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return;
+    }
+    animationTranistionController_ = listener;
+}
+
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
 {
     if (handler == nullptr) {
@@ -1481,20 +1687,15 @@ void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
     aceAbilityHandler_ = handler;
 }
 
+void WindowImpl::SetRequestModeSupportInfo(uint32_t modeSupportInfo)
+{
+    property_->SetRequestModeSupportInfo(modeSupportInfo);
+    SetModeSupportInfo(modeSupportInfo);
+}
+
 void WindowImpl::SetModeSupportInfo(uint32_t modeSupportInfo)
 {
     property_->SetModeSupportInfo(modeSupportInfo);
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
-    if (!WindowHelper::IsWindowModeSupported(modeSupportInfo, GetMode())) {
-        WLOGFI("currunt window mode is not supported, force to transform to appropriate mode. window id:%{public}u",
-               GetWindowId());
-        WindowMode mode = WindowHelper::GetWindowModeFromModeSupportInfo(modeSupportInfo);
-        if (mode != WindowMode::WINDOW_MODE_UNDEFINED) {
-            SetWindowMode(mode);
-        } else {
-            WLOGFE("invalid modeSupportInfo %{public}u", modeSupportInfo);
-        }
-    }
 }
 
 void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
@@ -1505,33 +1706,34 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->GetWindowId());
         return;
     }
-    float virtualPixelRatio = display->GetVirtualPixelRatio();
-    WLOGFI("winId:%{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], vpr:%{public}f, reason:%{public}u",
-        GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, virtualPixelRatio, reason);
+
     property_->SetDecoStatus(decoStatus);
     if (reason == WindowSizeChangeReason::HIDE) {
         property_->SetRequestRect(rect);
         return;
     }
     property_->SetWindowRect(rect);
-    const Rect& originRect = property_->GetOriginRect();
+
     // update originRect when floating window show for the first time.
     if (!isOriginRectSet_ && WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
         property_->SetOriginRect(rect);
         isOriginRectSet_ = true;
     }
+    WLOGFI("winId:%{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u",
+        property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     Rect rectToAce = rect;
     // update rectToAce for stretchable window
     if (windowSystemConfig_.isStretchable_ && WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
         if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END ||
             reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::RECOVER ||
             reason == WindowSizeChangeReason::MOVE) {
-            rectToAce = originRect;
+            rectToAce = property_->GetOriginRect();
         } else {
             property_->SetOriginRect(rect);
         }
     }
     WLOGFI("sizeChange callback size: %{public}lu", (unsigned long)windowChangeListeners_.size());
+
     NotifySizeChange(rectToAce, reason);
     if (uiContent_ != nullptr) {
         Ace::ViewportConfig config;
@@ -1539,7 +1741,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->GetWindowId(), rectToAce.posX_, rectToAce.posY_, rectToAce.width_, rectToAce.height_);
         config.SetSize(rectToAce.width_, rectToAce.height_);
         config.SetPosition(rectToAce.posX_, rectToAce.posY_);
-        config.SetDensity(virtualPixelRatio);
+        config.SetDensity(display->GetVirtualPixelRatio());
         uiContent_->UpdateViewportConfig(config, reason);
         WLOGFI("notify uiContent window size change end");
     }
@@ -1549,6 +1751,7 @@ void WindowImpl::UpdateMode(WindowMode mode)
 {
     WLOGI("UpdateMode %{public}u", mode);
     property_->SetWindowMode(mode);
+    UpdateTitleButtonVisibility();
     NotifyModeChange(mode);
     if (uiContent_ != nullptr) {
         uiContent_->UpdateWindowMode(mode);
@@ -1556,39 +1759,78 @@ void WindowImpl::UpdateMode(WindowMode mode)
     }
 }
 
+void WindowImpl::UpdateModeSupportInfo(uint32_t modeSupportInfo)
+{
+    WLOGI("modeSupportInfo: %{public}u, winId: %{public}u", modeSupportInfo, GetWindowId());
+    SetModeSupportInfo(modeSupportInfo);
+    UpdateTitleButtonVisibility();
+}
+
+void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
+    }
+    bool isConsumed = false;
+    if (inputEventConsumer != nullptr) {
+        WLOGFI("Transfer back key event to inputEventConsumer");
+        isConsumed = inputEventConsumer->OnInputEvent(keyEvent);
+    } else if (!inputEventListeners_.empty()) {
+        WLOGFI("inputEventListeners_ is not empty");
+        return;
+    } else if (uiContent_ != nullptr) {
+        WLOGFI("Transfer back key event to uiContent");
+        isConsumed = uiContent_->ProcessBackPressed();
+    } else {
+        WLOGFE("There is no back key event consumer");
+    }
+    if (isConsumed || !WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        WLOGFI("Back key event is consumed or it is not a main window");
+        return;
+    }
+    auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+    if (abilityContext == nullptr) {
+        WLOGFE("abilityContext is null");
+        return;
+    }
+    // TerminateAbility will invoke last ability, CloseAbility will not.
+    bool shouldTerminateAbility = WindowHelper::IsFullScreenWindow(property_->GetWindowMode());
+    WMError ret = NotifyWindowTransition(shouldTerminateAbility ? TransitionReason::BACK : TransitionReason::CLOSE);
+    if (ret != WMError::WM_OK) {
+        if (shouldTerminateAbility) {
+            abilityContext->TerminateSelf();
+        } else {
+            abilityContext->CloseAbility();
+        }
+    }
+    WLOGFI("Window %{public}u will be closed, WindowTransition ret: %{public}u, shouldTerminateAbility: %{public}u",
+        property_->GetWindowId(), static_cast<uint32_t>(ret), static_cast<uint32_t>(shouldTerminateAbility));
+}
+
 void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     NotifyKeyEvent(keyEvent);
-    if (uiContent_ == nullptr) {
-        WLOGE("ConsumeKeyEvent uiContent is nullptr");
-        return;
-    }
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
-    WLOGFI("ConsumeKeyEvent: enter GetKeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
-    if (keyCode == MMI::KeyEvent::KEYCODE_BACK) {
-        if (keyAction != MMI::KeyEvent::KEY_ACTION_UP) {
-            return;
-        }
-        if (uiContent_->ProcessBackPressed()) {
-            WLOGI("ConsumeKeyEvent keyEvent is consumed");
-            return;
-        }
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
-        if (abilityContext != nullptr) {
-            WMError ret = NotifyWindowTransition(TransitionReason::BACK);
-            if (ret != WMError::WM_OK) {
-                WLOGFI("[Client] Window %{public}u terminate without remote animation ret:%{public}u",
-                    property_->GetWindowId(), static_cast<uint32_t>(ret));
-                abilityContext->TerminateSelf();
-            }
-        } else {
-            WLOGI("ConsumeKeyEvent destroy window");
-            Destroy();
-        }
+    WLOGFI("KeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
+    if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
+        HandleBackKeyPressedEvent(keyEvent);
     } else {
-        if (!uiContent_->ProcessKeyEvent(keyEvent)) {
-            WLOGI("ConsumeKeyEvent no consumer window exit");
+        std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            inputEventConsumer = inputEventConsumer_;
+        }
+        if (inputEventConsumer != nullptr) {
+            WLOGFI("Transfer key event to inputEventConsumer");
+            (void)inputEventConsumer->OnInputEvent(keyEvent);
+        } else if (uiContent_ != nullptr) {
+            WLOGFI("Transfer key event to uiContent");
+            (void)uiContent_->ProcessKeyEvent(keyEvent);
+        } else {
+            WLOGFE("There is no key event consumer");
         }
     }
 }
@@ -1682,6 +1924,28 @@ void WindowImpl::HandleModeChangeHotZones(int32_t posX, int32_t posY)
     }
 }
 
+void WindowImpl::UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    property_->ComputeTransform();
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        WLOGFW("Point item is invalid");
+        return;
+    }
+    Rect winRect = GetRect();
+    PointInfo originPos =
+        WindowHelper::CalculateOriginPosition(property_->GetTransformMat(), property_->GetPlane(),
+        { pointerItem.GetDisplayX(), pointerItem.GetDisplayY() });
+    WLOGI("Pointer event has been updated,window id:%{public}u, before->now:"
+        "[%{public}d,%{public}d]->[%{public}d,%{public}d]",
+        property_->GetWindowId(), pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), originPos.x, originPos.y);
+    pointerItem.SetDisplayX(originPos.x);
+    pointerItem.SetDisplayY(originPos.y);
+    pointerItem.SetWindowX(originPos.x - winRect.posX_);
+    pointerItem.SetWindowY(originPos.y - winRect.posY_);
+    pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), pointerItem);
+}
+
 void WindowImpl::UpdatePointerEventForStretchableWindow(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     MMI::PointerEvent::PointerItem pointerItem;
@@ -1692,11 +1956,11 @@ void WindowImpl::UpdatePointerEventForStretchableWindow(std::shared_ptr<MMI::Poi
     const Rect& originRect = property_->GetOriginRect();
     PointInfo originPos =
         WindowHelper::CalculateOriginPosition(originRect, GetRect(),
-        { pointerItem.GetGlobalX(), pointerItem.GetGlobalY() });
-    pointerItem.SetGlobalX(originPos.x);
-    pointerItem.SetGlobalY(originPos.y);
-    pointerItem.SetLocalX(originPos.x - originRect.posX_);
-    pointerItem.SetLocalY(originPos.y - originRect.posY_);
+        { pointerItem.GetDisplayX(), pointerItem.GetDisplayY() });
+    pointerItem.SetDisplayX(originPos.x);
+    pointerItem.SetDisplayY(originPos.y);
+    pointerItem.SetWindowX(originPos.x - originRect.posX_);
+    pointerItem.SetWindowY(originPos.y - originRect.posY_);
     pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), pointerItem);
 }
 
@@ -1744,6 +2008,12 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
     if (pointEventStarted_) {
         return;
     }
+    TransformHelper::Vector2 hotZoneScale(1, 1);
+    if (property_->GetTransform() != Transform::Identity()) {
+        property_->ComputeTransform();
+        hotZoneScale = WindowHelper::CalculateHotZoneScale(property_->GetTransformMat(),
+            property_->GetPlane());
+    }
     startPointRect_ = rect;
     startPointPosX_ = globalX;
     startPointPosY_ = globalY;
@@ -1760,22 +2030,24 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
     float virtualPixelRatio = display->GetVirtualPixelRatio();
 
     startRectExceptFrame_.posX_ = startPointRect_.posX_ +
-        static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
+        static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio / hotZoneScale.x_);
     startRectExceptFrame_.posY_ = startPointRect_.posY_ +
-        static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
+        static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio / hotZoneScale.y_);
     startRectExceptFrame_.width_ = startPointRect_.width_ -
-        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio);
+        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio / hotZoneScale.x_);
     startRectExceptFrame_.height_ = startPointRect_.height_ -
-        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio);
+        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio / hotZoneScale.y_);
 
     startRectExceptCorner_.posX_ = startPointRect_.posX_ +
-        static_cast<int32_t>(WINDOW_FRAME_CORNER_WIDTH * virtualPixelRatio);
+        static_cast<int32_t>(WINDOW_FRAME_CORNER_WIDTH * virtualPixelRatio / hotZoneScale.x_);
     startRectExceptCorner_.posY_ = startPointRect_.posY_ +
-        static_cast<int32_t>(WINDOW_FRAME_CORNER_WIDTH * virtualPixelRatio);
+        static_cast<int32_t>(WINDOW_FRAME_CORNER_WIDTH * virtualPixelRatio / hotZoneScale.y_);
     startRectExceptCorner_.width_ = startPointRect_.width_ -
-        static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) * virtualPixelRatio);
+        static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) *
+        virtualPixelRatio / hotZoneScale.x_);
     startRectExceptCorner_.height_ = startPointRect_.height_ -
-        static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) * virtualPixelRatio);
+        static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) *
+        virtualPixelRatio / hotZoneScale.y_);
 
     if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         startMoveFlag_ = true;
@@ -1800,8 +2072,8 @@ void WindowImpl::ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& poin
         WLOGFW("Point item is invalid");
         return;
     }
-    int32_t pointGlobalX = pointerItem.GetGlobalX();
-    int32_t pointGlobalY = pointerItem.GetGlobalY();
+    int32_t pointGlobalX = pointerItem.GetDisplayX();
+    int32_t pointGlobalY = pointerItem.GetDisplayY();
     int32_t action = pointerEvent->GetPointerAction();
     switch (action) {
         // Ready to move or drag
@@ -1841,16 +2113,30 @@ bool WindowImpl::IsPointerEventConsumed()
     return startDragFlag_ || startMoveFlag_;
 }
 
-void WindowImpl::AdjustWindowAnimationFlag()
+void WindowImpl::AdjustWindowAnimationFlag(bool withAnimation)
 {
+    // when show/hide with animation
+    // use custom animation when transitionController exists; else use default animation
     WindowType winType = property_->GetWindowType();
-    if (!WindowHelper::IsAppWindow(winType)) {
+    bool isAppWindow = WindowHelper::IsAppWindow(winType);
+    if (withAnimation && !isAppWindow && animationTranistionController_) {
+        // use custom animation
+        property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+    } else if (isAppWindow || (withAnimation && !animationTranistionController_)) {
+        // use default animation
+        property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
+    } else {
+        // with no animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
     }
 }
 
 void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    // If windowRect transformed, transform event back to its origin position
+    if (property_->GetTransform() != Transform::Identity()) {
+        UpdatePointerEvent(pointerEvent);
+    }
     int32_t action = pointerEvent->GetPointerAction();
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         WLOGI("WMS process point down, window: [name:%{public}s, id:%{public}u], action: %{public}d",
@@ -1861,7 +2147,7 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
                 WLOGFW("Point item is invalid");
                 return;
             }
-            if (!WindowHelper::IsPointInTargetRect(pointerItem.GetGlobalX(), pointerItem.GetGlobalY(), GetRect())) {
+            if (!WindowHelper::IsPointInTargetRect(pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), GetRect())) {
                 NotifyListenerAfterUnfocused();
                 return;
             }
@@ -1885,12 +2171,20 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
         UpdatePointerEventForStretchableWindow(pointerEvent);
     }
     NotifyPointEvent(pointerEvent);
-    if (uiContent_ == nullptr) {
-        WLOGE("ConsumePointerEvent uiContent is nullptr, windowId: %{public}u", GetWindowId());
-        return;
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        inputEventConsumer = inputEventConsumer_;
     }
-    WLOGFI("Transfer pointer event to ACE");
-    uiContent_->ProcessPointerEvent(pointerEvent);
+    if (inputEventConsumer != nullptr) {
+        WLOGFI("Transfer pointer event to inputEventConsumer");
+        (void)inputEventConsumer->OnInputEvent(pointerEvent);
+    } else if (uiContent_ != nullptr) {
+        WLOGFI("Transfer pointer event to uiContent");
+        (void)uiContent_->ProcessPointerEvent(pointerEvent);
+    } else {
+        WLOGE("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
+    }
 }
 
 void WindowImpl::OnVsync(int64_t timeStamp)
@@ -1937,10 +2231,10 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
     }
 }
 
-void WindowImpl::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
+void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     WLOGFI("Window Update AvoidArea, id: %{public}u", property_->GetWindowId());
-    NotifyAviodAreaChange(avoidArea);
+    NotifyAvoidAreaChange(avoidArea, type);
 }
 
 void WindowImpl::UpdateWindowState(WindowState state)
@@ -1978,8 +2272,7 @@ void WindowImpl::UpdateWindowState(WindowState state)
                 WLOGFD("MinimizeAbility, id: %{public}u", GetWindowId());
                 AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(abilityContext->GetToken(), true);
             } else {
-                state_ = WindowState::STATE_HIDDEN;
-                NotifyAfterBackground();
+                Hide(static_cast<uint32_t>(WindowStateChangeReason::TOGGLING));
             }
             break;
         }
@@ -2119,17 +2412,17 @@ void WindowImpl::NotifyPointEvent(std::shared_ptr<MMI::PointerEvent>& pointerEve
     });
 }
 
-void WindowImpl::NotifyAviodAreaChange(const std::vector<Rect>& avoidArea)
+void WindowImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     std::vector<sptr<IAvoidAreaChangedListener>> avoidAreaChangeListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         avoidAreaChangeListeners = avoidAreaChangeListeners_;
     }
-    PostListenerTask([avoidAreaChangeListeners, avoidArea]() {
+    PostListenerTask([avoidAreaChangeListeners, outAvoidArea = *avoidArea, type]() {
         for (auto& listener : avoidAreaChangeListeners) {
             if (listener != nullptr) {
-                listener->OnAvoidAreaChanged(avoidArea);
+                listener->OnAvoidAreaChanged(outAvoidArea, type);
             }
         }
     });
@@ -2207,7 +2500,7 @@ Rect WindowImpl::GetSystemAlarmWindowDefaultSize(Rect defaultRect)
         SYSTEM_ALARM_WINDOW_HEIGHT_RATIO));
 
     rect = { static_cast<int32_t>((width - alarmWidth) / 2), static_cast<int32_t>((height - alarmHeight) / 2),
-                alarmWidth, alarmHeight }; // devided by 2 to middle the window
+                alarmWidth, alarmHeight }; // divided by 2 to middle the window
     return rect;
 }
 
@@ -2243,6 +2536,7 @@ void WindowImpl::SetDefaultOption()
         }
         case WindowType::WINDOW_TYPE_TOAST:
         case WindowType::WINDOW_TYPE_FLOAT:
+        case WindowType::WINDOW_TYPE_FLOAT_CAMERA:
         case WindowType::WINDOW_TYPE_VOICE_INTERACTION:
         case WindowType::WINDOW_TYPE_LAUNCHER_DOCK:
         case WindowType::WINDOW_TYPE_SEARCHING_BAR: {
@@ -2319,6 +2613,23 @@ WMError WindowImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
 void WindowImpl::GetRequestedTouchHotAreas(std::vector<Rect>& rects) const
 {
     property_->GetTouchHotAreas(rects);
+}
+
+bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
+{
+    if (type != WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        return false;
+    }
+
+    for (auto& winPair : windowMap_) {
+        if (winPair.second.second->GetType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+            return true;
+        }
+    }
+    uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
+    property_->SetAccessTokenId(accessTokenId);
+    WLOGFI("Create camera float window, accessTokenId = %{public}u", accessTokenId);
+    return false;
 }
 } // namespace Rosen
 } // namespace OHOS

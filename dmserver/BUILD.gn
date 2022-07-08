@@ -57,7 +57,8 @@ ohos_shared_library("libdms") {
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
-    "graphic_standard:surface",
+    "config_policy:configpolicy_util",
+    "graphic_graphic_2d:surface",
     "hilog_native:libhilog",
     "hitrace_native:hitrace_meter",
     "ipc:ipc_core",
@@ -68,9 +69,9 @@ ohos_shared_library("libdms") {
   ]
 
   if (is_standard_system) {
-    external_deps += [ "startup_l2:syspara" ]
+    external_deps += [ "init:libbegetutil" ]
   } else {
-    external_deps += [ "startup:syspara" ]
+    external_deps += [ "init_lite:libbegetutil" ]
   }
 
   part_name = "window_manager"

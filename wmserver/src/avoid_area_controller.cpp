@@ -14,10 +14,12 @@
  */
 
 #include "avoid_area_controller.h"
-#include "display_manager_service_inner.h"
+
+#include <hitrace_meter.h>
+
+#include "display_manager_config.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -25,154 +27,331 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AvoidAreaController"};
 }
 
-const int32_t AVOID_NUM = 4;
-
-AvoidAreaController::AvoidAreaController(DisplayId displayId, UpdateAvoidAreaFunc callback)
+void AvoidAreaController::UpdateAvoidAreaListener(sptr<WindowNode>& windowNode, bool isRegisterListener)
 {
-    UpdateAvoidNodesMap(displayId, true);
-    updateAvoidAreaCallBack_ = callback;
-}
-
-void AvoidAreaController::UpdateAvoidNodesMap(DisplayId displayId, bool isAdd)
-{
-    if (isAdd) {
-        auto avoidNodesMapPtr = std::make_unique<std::map<uint32_t, sptr<WindowNode>>>();
-        avoidNodesMaps_.insert(std::make_pair(displayId, std::move(avoidNodesMapPtr)));
+    WLOGFE("haveAvoidAreaListener %{public}d", isRegisterListener);
+    if (windowNode == nullptr) {
+        WLOGFE("windowNode is nullptr.");
+        return;
+    }
+    if (isRegisterListener) {
+        avoidAreaListenerNodes_.insert(windowNode);
     } else {
-        avoidNodesMaps_.erase(displayId);
+        lastUpdatedAvoidArea_.erase(windowNode->GetWindowId());
+        avoidAreaListenerNodes_.erase(windowNode);
     }
 }
 
-bool AvoidAreaController::IsAvoidAreaNode(const sptr<WindowNode>& node) const
+void AvoidAreaController::ProcessWindowChange(const sptr<WindowNode>& windowNode, AvoidControlType avoidType,
+    const std::function<bool(sptr<WindowNode>)>& checkFunc)
 {
-    if (node == nullptr) {
-        WLOGFE("IsAvoidAreaNode Failed, node is nullprt");
-        return false;
+    if (isForbidProcessingWindowChange_) {
+        WLOGFI("do not process window change.");
+        return;
     }
-
-    if (!WindowHelper::IsAvoidAreaWindow(node->GetWindowType())) {
-        WLOGFE("IsAvoidAreaNode Failed, node type is not avoid type");
-        return false;
+    if (windowNode == nullptr || windowNode->GetWindowToken() == nullptr) {
+        WLOGFE("invalid WindowNode.");
+        return;
     }
-
-    return true;
-}
-
-std::map<uint32_t, sptr<WindowNode>>* AvoidAreaController::GetAvoidNodesByDisplayId(
-    DisplayId displayId)
-{
-    if ((const_cast<AvoidAreaController*>(this)->avoidNodesMaps_).find(displayId) !=
-        (const_cast<AvoidAreaController*>(this)->avoidNodesMaps_).end()) {
-        return (const_cast<AvoidAreaController*>(this)->avoidNodesMaps_)[displayId].get();
-    }
-    return nullptr;
-}
-
-AvoidPosType AvoidAreaController::GetAvoidPosType(const Rect& rect, DisplayId displayId) const
-{
-    auto display = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId);
-    if (display == nullptr) {
-        WLOGFE("GetAvoidPosType fail. Get display fail. displayId:%{public}" PRIu64"", displayId);
-        return AvoidPosType::AVOID_POS_UNKNOWN;
-    }
-    uint32_t displayWidth = static_cast<uint32_t>(display->GetWidth());
-    uint32_t displayHeight = static_cast<uint32_t>(display->GetHeight());
-
-    return WindowHelper::GetAvoidPosType(rect, displayWidth, displayHeight);
-}
-
-WMError AvoidAreaController::AvoidControl(const sptr<WindowNode>& node, AvoidControlType type)
-{
-    if (!IsAvoidAreaNode(node)) {
-        WLOGFE("AvoidControl check param Failed. Type: %{public}u", type);
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-
-    auto avoidNodes = GetAvoidNodesByDisplayId(node->GetDisplayId());
-    uint32_t windowId = node->GetWindowId();
-    auto iter = avoidNodes->find(windowId);
-    // do not add a exist node(the same id)
-    if (type == AvoidControlType::AVOID_NODE_ADD && iter != avoidNodes->end()) {
-        WLOGFE("WinId:%{public}d is added. AvoidControl Add Failed. Type: %{public}u", windowId, type);
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    // do not update or removew a unexist node
-    if (type != AvoidControlType::AVOID_NODE_ADD && iter == avoidNodes->end()) {
-        WLOGFE("WinId:%{public}d not exist. AvoidControl Update or Remove Failed. Type: %{public}u", windowId, type);
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-
-    switch (type) {
+    switch (avoidType) {
         case AvoidControlType::AVOID_NODE_ADD:
-            (*avoidNodes)[windowId] = node;
-            WLOGFI("WinId:%{public}d add. And the windowType is %{public}d", windowId, node->GetWindowType());
+        case AvoidControlType::AVOID_NODE_REMOVE:
+            AddOrRemoveOverlayWindowIfNeed(windowNode, avoidType == AvoidControlType::AVOID_NODE_ADD);
             break;
         case AvoidControlType::AVOID_NODE_UPDATE:
-            (*avoidNodes)[windowId] = node;
-            WLOGFI("WinId:%{public}d update. And the windowType is %{public}d", windowId, node->GetWindowType());
-            break;
-        case AvoidControlType::AVOID_NODE_REMOVE:
-            avoidNodes->erase(iter);
-            WLOGFI("WinId:%{public}d remove. And the windowType is %{public}d", windowId, node->GetWindowType());
+            UpdateOverlayWindowIfNeed(windowNode, checkFunc);
             break;
         default:
-            WLOGFE("invalid AvoidControlType: %{public}u", type);
-            return WMError::WM_ERROR_INVALID_PARAM;
+            break;
     }
-
-    // get all Area info and notify windowcontainer
-    std::vector<Rect> avoidAreas = GetAvoidArea(node->GetDisplayId());
-    DumpAvoidArea(avoidAreas);
-    UseCallbackNotifyAvoidAreaChanged(avoidAreas, node->GetDisplayId());
-    return WMError::WM_OK;
 }
 
-std::vector<Rect> AvoidAreaController::GetAvoidArea(DisplayId displayId) const
+void AvoidAreaController::AddOrRemoveOverlayWindowIfNeed(const sptr<WindowNode>& overlayNode, bool isAdding)
 {
-    auto avoidNodesPtr = const_cast<AvoidAreaController*>(this)->GetAvoidNodesByDisplayId(displayId);
-    std::vector<Rect> avoidArea(AVOID_NUM, {0, 0, 0, 0});  // avoid area  left, top, right, bottom
-    for (auto iter = avoidNodesPtr->begin(); iter != avoidNodesPtr->end(); ++iter) {
-        Rect curRect = iter->second->GetWindowRect();
-        auto curPos = GetAvoidPosType(curRect, iter->second->GetDisplayId());
-        if (curPos == AvoidPosType::AVOID_POS_UNKNOWN) {
-            WLOGFE("GetAvoidArea AVOID_POS_UNKNOWN Rect: x : %{public}d, y:  %{public}d, w: %{public}u h: %{public}u",
-                static_cast<uint32_t>(curRect.posX_), static_cast<uint32_t>(curRect.posY_),
-                static_cast<uint32_t>(curRect.width_), static_cast<uint32_t>(curRect.height_));
+    if (!WindowHelper::IsOverlayWindow(overlayNode->GetWindowType())) {
+        WLOGFE("IsOverlayWindow Failed.");
+        return;
+    }
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
+
+    uint32_t overlayId = overlayNode->GetWindowId();
+    bool isRecorded = (overlayWindowMap_.find(overlayId) != overlayWindowMap_.end());
+    if (isAdding == isRecorded) {
+        WLOGFE("error occured in overlay. overlayId %{public}u isAdding %{public}d record flag %{public}d",
+            overlayId, isAdding, isRecorded);
+        return;
+    }
+    if (isAdding) {
+        overlayWindowMap_.insert(std::make_pair(overlayId, overlayNode));
+    } else {
+        overlayWindowMap_.erase(overlayId);
+    }
+
+    if (overlayNode->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        AddOrRemoveKeyboard(overlayNode, isAdding);
+        return;
+    }
+
+    for (auto& node : avoidAreaListenerNodes_) {
+        AvoidArea systemAvoidArea = GetAvoidAreaByType(node, AvoidAreaType::TYPE_SYSTEM);
+        UpdateAvoidAreaIfNeed(systemAvoidArea, node, AvoidAreaType::TYPE_SYSTEM);
+    }
+}
+
+void AvoidAreaController::AddOrRemoveKeyboard(const sptr<WindowNode>& keyboardNode, bool isAdding)
+{
+    const uint32_t callingWindowId = keyboardNode->GetCallingWindow();
+    sptr<WindowNode> callingWindow = nullptr;
+    sptr<WindowNode> focusWindow = nullptr;
+    sptr<WindowNode> lastKeyboardAreaUpdatedWindow = nullptr;
+    for (auto window : avoidAreaListenerNodes_) {
+        if (window == nullptr || window->GetWindowToken() == nullptr) {
             continue;
         }
-        avoidArea[static_cast<uint32_t>(curPos)] = curRect;
+        if (window->GetWindowId() == callingWindowId) {
+            callingWindow = window;
+        }
+        if (window->GetWindowId() == focusedWindow_) {
+            focusWindow = window;
+        }
+        if (window->GetWindowId() == lastSoftInputKeyboardAreaUpdatedWindowId_) {
+            lastKeyboardAreaUpdatedWindow = window;
+        }
     }
-    return avoidArea;
+    if (callingWindow == nullptr) {
+        callingWindow = focusWindow;
+    }
+    if (lastKeyboardAreaUpdatedWindow != nullptr && lastKeyboardAreaUpdatedWindow != callingWindow) {
+        const WindowMode windowMode = lastKeyboardAreaUpdatedWindow->GetWindowMode();
+        if (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            auto avoidArea = GetAvoidAreaByType(lastKeyboardAreaUpdatedWindow, AvoidAreaType::TYPE_KEYBOARD);
+            UpdateAvoidAreaIfNeed(avoidArea, lastKeyboardAreaUpdatedWindow, AvoidAreaType::TYPE_KEYBOARD);
+        }
+    }
+    if (callingWindow == nullptr) {
+        WLOGFE("callingWindow: %{public}u is nullptr, focusWindow: %{public}u is nullptr.",
+            callingWindowId, focusedWindow_);
+        return;
+    }
+    const WindowMode callingWindowMode = callingWindow->GetWindowMode();
+    if (callingWindowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+        callingWindowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        callingWindowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        auto avoidArea = GetAvoidAreaByType(callingWindow, AvoidAreaType::TYPE_KEYBOARD);
+        bool res = UpdateAvoidAreaIfNeed(avoidArea, callingWindow, AvoidAreaType::TYPE_KEYBOARD);
+        if (res) {
+            lastSoftInputKeyboardAreaUpdatedWindowId_ = callingWindow->GetWindowId();
+        }
+        return;
+    }
+    WLOGFE("does not have correct callingWindowMode for input method window");
 }
 
-std::vector<Rect> AvoidAreaController::GetAvoidAreaByType(AvoidAreaType avoidAreaType, DisplayId displayId) const
+void AvoidAreaController::UpdateOverlayWindowIfNeed(const sptr<WindowNode>& node,
+    const std::function<bool(sptr<WindowNode>)>& checkFunc)
 {
-    if (avoidAreaType != AvoidAreaType::TYPE_SYSTEM) {
-        WLOGFE("GetAvoidAreaByType. Support Type is AvoidAreaType::TYPE_SYSTEM. But current type is %{public}u",
-            static_cast<uint32_t>(avoidAreaType));
-        std::vector<Rect> avoidArea(AVOID_NUM, {0, 0, 0, 0});
-        return avoidArea;
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
+    if (WindowHelper::IsOverlayWindow(node->GetWindowType())) {
+        AvoidAreaType type = WindowHelper::IsSystemBarWindow(node->GetWindowType()) ?
+            AvoidAreaType::TYPE_SYSTEM : AvoidAreaType::TYPE_KEYBOARD;
+        for (auto& appNode : avoidAreaListenerNodes_) {
+            if (checkFunc != nullptr && checkFunc(appNode)) {
+                bool res = UpdateAvoidAreaIfNeed(GetAvoidAreaByType(appNode, type), appNode, type);
+                if (type == AvoidAreaType::TYPE_KEYBOARD && res) {
+                    lastSoftInputKeyboardAreaUpdatedWindowId_ = appNode->GetWindowId();
+                }
+            }
+        }
+    } else {
+        if (avoidAreaListenerNodes_.find(node) == avoidAreaListenerNodes_.end()) {
+            WLOGE("window: %{public}u is not in avoidAreaListenerNodes, don't update avoid area.", node->GetWindowId());
+            return;
+        }
+        uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
+        uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
+        for (uint32_t type = start; type <= end; type++) {
+            AvoidArea systemAvoidArea = GetAvoidAreaByType(node, static_cast<AvoidAreaType>(type));
+            bool res = UpdateAvoidAreaIfNeed(systemAvoidArea, node, static_cast<AvoidAreaType>(type));
+            if (res && type == static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD)) {
+                lastSoftInputKeyboardAreaUpdatedWindowId_ = node->GetWindowId();
+            }
+        }
     }
-    WLOGFI("AvoidAreaController::GetAvoidAreaByType Success");
-    return GetAvoidArea(displayId);
 }
 
-void AvoidAreaController::UseCallbackNotifyAvoidAreaChanged(std::vector<Rect>& avoidArea, DisplayId displayId) const
+bool AvoidAreaController::UpdateAvoidAreaIfNeed(const AvoidArea& avoidArea, const sptr<WindowNode>& node,
+    AvoidAreaType avoidAreaType)
 {
-    if (updateAvoidAreaCallBack_) {
-        updateAvoidAreaCallBack_(avoidArea, displayId);
+    auto iter = lastUpdatedAvoidArea_.find(node->GetWindowId());
+    bool needUpdate = true;
+    if (iter != lastUpdatedAvoidArea_.end()) {
+        auto avoidAreaIter = iter->second.find(avoidAreaType);
+        if (avoidAreaIter != iter->second.end()) {
+            needUpdate = avoidAreaIter->second != avoidArea;
+        } else {
+            if (avoidArea.isEmptyAvoidArea()) {
+                needUpdate = false;
+            }
+        }
+    } else {
+        if (avoidArea.isEmptyAvoidArea()) {
+            needUpdate = false;
+        }
+    }
+    if (needUpdate) {
+        lastUpdatedAvoidArea_[node->GetWindowId()][avoidAreaType] = avoidArea;
+        node->GetWindowToken()->UpdateAvoidArea(new AvoidArea(avoidArea), avoidAreaType);
+    }
+    return needUpdate;
+}
+
+AvoidPosType AvoidAreaController::CalculateOverlayRect(const sptr<WindowNode>& node,
+    const sptr<WindowNode>& overlayNode, Rect& overlayRect) const
+{
+    if (node->GetWindowId() == overlayNode->GetWindowId()) {
+        WLOGE("overlay not support self. windowId %{public}u", node->GetWindowId());
+        return AvoidPosType::AVOID_POS_UNKNOWN;
+    }
+    const Rect rect = node->GetWindowRect();
+    overlayRect = WindowHelper::GetOverlap(overlayNode->GetWindowRect(), rect, rect.posX_, rect.posY_);
+    return  GetAvoidPosType(rect, overlayRect);
+}
+
+AvoidPosType AvoidAreaController::GetAvoidPosType(const Rect& windowRect, const Rect& overlayRect) const
+{
+    if (windowRect.width_ == 0 || windowRect.height_ == 0) {
+        return AvoidPosType::AVOID_POS_UNKNOWN;
+    }
+    uint32_t centerX = overlayRect.posX_ + (overlayRect.width_ >> 1);
+    uint32_t centerY = overlayRect.posY_ + (overlayRect.height_ >> 1);
+    float res1 = float(centerY) - float(windowRect.height_) / float(windowRect.width_) * float(centerX);
+    float res2 = float(centerY) + float(windowRect.height_) / float(windowRect.width_)  * float(centerX)
+        - float(windowRect.height_);
+    if (res1 < 0) {
+        if (res2 < 0) {
+            return AvoidPosType::AVOID_POS_TOP;
+        }
+        return AvoidPosType::AVOID_POS_RIGHT;
+    }
+    if (res2 < 0) {
+        return AvoidPosType::AVOID_POS_LEFT;
+    }
+    return AvoidPosType::AVOID_POS_BOTTOM;
+}
+
+void AvoidAreaController::SetAvoidAreaRect(AvoidArea& avoidArea, const Rect& rect, AvoidPosType type) const
+{
+    switch (type) {
+        case AvoidPosType::AVOID_POS_TOP : {
+            avoidArea.topRect_ = rect;
+            break;
+        }
+        case AvoidPosType::AVOID_POS_LEFT : {
+            avoidArea.leftRect_ = rect;
+            break;
+        }
+        case AvoidPosType::AVOID_POS_RIGHT : {
+            avoidArea.rightRect_ = rect;
+            break;
+        }
+        case AvoidPosType::AVOID_POS_BOTTOM : {
+            avoidArea.bottomRect_ = rect;
+            break;
+        }
+        default : {
+            WLOGFI("default type: %{public}u", type);
+        }
     }
 }
 
-void AvoidAreaController::DumpAvoidArea(const std::vector<Rect>& avoidArea) const
+AvoidArea AvoidAreaController::GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType) const
 {
-    WLOGFI("----------------- AvoidArea Begin-----------------");
-    WLOGFI("  No [   x    y    w    h]");
-    for (uint32_t i = 0; i < avoidArea.size(); i++) {
-        WLOGFI("%{public}4u [%{public}4d %{public}4d %{public}4u %{public}4u]", i,
-            avoidArea[i].posX_, avoidArea[i].posY_, avoidArea[i].width_, avoidArea[i].height_);
+    WLOGFI("avoidAreaType: %{public}u", avoidAreaType);
+    if (node == nullptr) {
+        WLOGFE("invalid WindowNode.");
+        return {};
     }
-    WLOGFI("----------------- AvoidArea End-----------------");
+    WindowMode windowMode = node->GetWindowMode();
+    if (avoidAreaType != AvoidAreaType::TYPE_KEYBOARD &&
+        windowMode != WindowMode::WINDOW_MODE_FULLSCREEN &&
+        windowMode != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
+        windowMode != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        WLOGFI("avoidAreaType: %{public}u, windowMode: %{public}u, return default avoid area.",
+            avoidAreaType, windowMode);
+        return {};
+    }
+    switch (avoidAreaType) {
+        case AvoidAreaType::TYPE_SYSTEM : {
+            return GetAvoidAreaSystemType(node);
+        }
+        case AvoidAreaType::TYPE_KEYBOARD : {
+            return GetAvoidAreaKeyboardType(node);
+        }
+        case AvoidAreaType::TYPE_CUTOUT : {
+            auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
+            if (numbersConfig.count("cutoutArea") == 0) {
+                WLOGFE("there is no cutout");
+                return {};
+            }
+            std::vector<int> cutoutArea = numbersConfig["cutoutArea"];
+            // 0, 1, 2, 3 means the index in the vector.
+            Rect cutoutAreaRect { cutoutArea[0], cutoutArea[1], (uint32_t)cutoutArea[2], (uint32_t)cutoutArea[3] };
+            auto rect = node->GetWindowRect();
+            Rect overlayRect = WindowHelper::GetOverlap(cutoutAreaRect, rect, rect.posX_, rect.posY_);
+            auto type = GetAvoidPosType(rect, overlayRect);
+            AvoidArea avoidArea;
+            SetAvoidAreaRect(avoidArea, overlayRect, type);
+            return avoidArea;
+        }
+        default : {
+            WLOGFI("cannot find avoidAreaType: %{public}u", avoidAreaType);
+            return {};
+        }
+    }
+}
+
+AvoidArea AvoidAreaController::GetAvoidAreaSystemType(const sptr<WindowNode>& node) const
+{
+    AvoidArea systemAvoidArea;
+    Rect statusBarAvoidArea;
+    AvoidPosType statusBarAvoidPosType = AvoidPosType::AVOID_POS_UNKNOWN;
+    Rect navigationBarAvoidArea;
+    AvoidPosType navigationBarAvoidPosType = AvoidPosType::AVOID_POS_UNKNOWN;
+    for (auto& iter : overlayWindowMap_) {
+        if (iter.second != nullptr) {
+            if (iter.second->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
+                statusBarAvoidPosType = CalculateOverlayRect(node, iter.second, statusBarAvoidArea);
+            }
+            if (iter.second->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+                navigationBarAvoidPosType = CalculateOverlayRect(node, iter.second, navigationBarAvoidArea);
+            }
+        }
+    }
+    SetAvoidAreaRect(systemAvoidArea, statusBarAvoidArea, statusBarAvoidPosType);
+    SetAvoidAreaRect(systemAvoidArea, navigationBarAvoidArea, navigationBarAvoidPosType);
+    return systemAvoidArea;
+}
+
+AvoidArea AvoidAreaController::GetAvoidAreaKeyboardType(const sptr<WindowNode>& node) const
+{
+    for (auto& iter : overlayWindowMap_) {
+        if (iter.second != nullptr &&
+            iter.second->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            const uint32_t callingWindowId = iter.second->GetCallingWindow();
+            if (callingWindowId != node->GetWindowId() && focusedWindow_ != node->GetWindowId()) {
+                WLOGFI("windowId: %{public}u is not focusedWindow: %{public}u or callingWindow: %{public}u",
+                       node->GetWindowId(), focusedWindow_, callingWindowId);
+                continue;
+            }
+            Rect avoidAreaRect { 0, 0, 0, 0 };
+            AvoidPosType avoidPosType = CalculateOverlayRect(node, iter.second, avoidAreaRect);
+            AvoidArea avoidArea;
+            SetAvoidAreaRect(avoidArea, avoidAreaRect, avoidPosType);
+            return avoidArea;
+        }
+    }
+    return {};
 }
 }
 }

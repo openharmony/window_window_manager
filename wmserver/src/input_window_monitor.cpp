@@ -19,6 +19,7 @@
 
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
+#include "window_helper.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -96,7 +97,7 @@ void InputWindowMonitor::UpdateDisplayInfo(const sptr<DisplayInfo>& displayInfo,
     if (displayInfo->GetRotation() == Rotation::ROTATION_90 || displayInfo->GetRotation() == Rotation::ROTATION_270) {
         std::swap(displayWidth, displayHeight);
     }
-    MMI::DisplayInfo diplay = {
+    MMI::DisplayInfo display = {
         .id = static_cast<int32_t>(displayInfo->GetDisplayId()),
         .x = displayInfo->GetOffsetX(),
         .y = displayInfo->GetOffsetY(),
@@ -107,13 +108,13 @@ void InputWindowMonitor::UpdateDisplayInfo(const sptr<DisplayInfo>& displayInfo,
         .direction = GetDisplayDirectionForMmi(displayInfo->GetRotation()),
     };
     auto displayIter = std::find_if(displayInfoVector.begin(), displayInfoVector.end(),
-        [&diplay](MMI::DisplayInfo& displayInfoTmp) {
-        return displayInfoTmp.id == diplay.id;
+        [&display](MMI::DisplayInfo& displayInfoTmp) {
+        return displayInfoTmp.id == display.id;
     });
     if (displayIter != displayInfoVector.end()) {
-        *displayIter = diplay;
+        *displayIter = display;
     } else {
-        displayInfoVector.emplace_back(diplay);
+        displayInfoVector.emplace_back(display);
     }
 }
 
@@ -128,13 +129,24 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
         }
         std::vector<Rect> touchHotAreas;
         windowNode->GetTouchHotAreas(touchHotAreas);
-        Rect windowRect = windowNode->GetWindowRect();
+        Rect areaRect = windowNode->GetWindowRect();
+        if (windowNode->GetWindowProperty()->GetTransform() != Transform::Identity()) {
+            windowNode->ComputeTransform();
+            for (Rect& rect : touchHotAreas) {
+                rect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), rect);
+            }
+            WLOGFI("area rect befoe tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
+                areaRect.posX_, areaRect.posY_, areaRect.width_, areaRect.height_);
+            areaRect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), areaRect);
+            WLOGFI("area rect after tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
+                areaRect.posX_, areaRect.posY_, areaRect.width_, areaRect.height_);
+        }
         MMI::WindowInfo windowInfo = {
             .id = static_cast<int32_t>(windowNode->GetWindowId()),
             .pid = windowNode->GetCallingPid(),
             .uid = windowNode->GetCallingUid(),
-            .area = MMI::Rect{ windowRect.posX_, windowRect.posY_,
-                static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) },
+            .area = MMI::Rect { areaRect.posX_, areaRect.posY_,
+                static_cast<int32_t>(areaRect.width_), static_cast<int32_t>(areaRect.height_) },
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };
         convertRectsToMmiRects(touchHotAreas, windowInfo.defaultHotAreas);

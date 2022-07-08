@@ -125,6 +125,20 @@ DMError ScreenManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Su
     return displayManagerServiceProxy_->SetVirtualScreenSurface(screenId, surface);
 }
 
+void ScreenManagerAdapter::SetScreenRotationLocked(bool isLocked)
+{
+    INIT_PROXY_CHECK_RETURN();
+    WLOGFI("DisplayManagerAdapter::SetScreenRotationLocked");
+    displayManagerServiceProxy_->SetScreenRotationLocked(isLocked);
+}
+
+bool ScreenManagerAdapter::IsScreenRotationLocked()
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    WLOGFI("DisplayManagerAdapter::IsScreenRotationLocked");
+    return displayManagerServiceProxy_->IsScreenRotationLocked();
+}
+
 bool ScreenManagerAdapter::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     INIT_PROXY_CHECK_RETURN(false);

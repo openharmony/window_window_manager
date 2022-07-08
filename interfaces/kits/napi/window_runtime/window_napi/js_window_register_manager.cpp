@@ -30,11 +30,12 @@ JsWindowRegisterManager::JsWindowRegisterManager()
     };
     // white register list for window
     listenerProcess_[CaseType::CASE_WINDOW] = {
-        {WINDOW_SIZE_CHANGE_CB,         &JsWindowRegisterManager::ProcessWindowChangeRegister      },
-        {SYSTEM_AVOID_AREA_CHANGE_CB,   &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister   },
-        {LIFECYCLE_EVENT_CB,            &JsWindowRegisterManager::ProcessLifeCycleEventRegister    },
-        {KEYBOARD_HEIGHT_CHANGE_CB,     &JsWindowRegisterManager::ProcesOccupiedAreaChangeRegister },
-        {TOUCH_OUTSIDE_CB,            &JsWindowRegisterManager::ProcessTouchOutsideRegister    }
+        { WINDOW_SIZE_CHANGE_CB,       &JsWindowRegisterManager::ProcessWindowChangeRegister          },
+        { SYSTEM_AVOID_AREA_CHANGE_CB, &JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister },
+        { AVOID_AREA_CHANGE_CB,        &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister       },
+        { LIFECYCLE_EVENT_CB,          &JsWindowRegisterManager::ProcessLifeCycleEventRegister        },
+        { KEYBOARD_HEIGHT_CHANGE_CB,   &JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister    },
+        { TOUCH_OUTSIDE_CB,            &JsWindowRegisterManager::ProcessTouchOutsideRegister          }
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -58,6 +59,27 @@ bool JsWindowRegisterManager::ProcessWindowChangeRegister(sptr<JsWindowListener>
         window->RegisterWindowChangeListener(thisListener);
     } else {
         window->UnregisterWindowChangeListener(thisListener);
+    }
+    return true;
+}
+
+bool JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        WLOGFE("[NAPI]Window is nullptr");
+        return false;
+    }
+    if (listener == nullptr) {
+        WLOGFE("[NAPI]listener is nullptr");
+        return false;
+    }
+    listener->SetIsDeprecatedInterface(true);
+    sptr<IAvoidAreaChangedListener> thisListener(listener);
+    if (isRegister) {
+        window->RegisterAvoidAreaChangeListener(thisListener);
+    } else {
+        window->UnregisterAvoidAreaChangeListener(thisListener);
     }
     return true;
 }
@@ -94,7 +116,7 @@ bool JsWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<JsWindowListene
     return true;
 }
 
-bool JsWindowRegisterManager::ProcesOccupiedAreaChangeRegister(sptr<JsWindowListener> listener,
+bool JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister)
 {
     if (window == nullptr) {

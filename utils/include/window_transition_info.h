@@ -17,6 +17,8 @@
 #define OHOS_ROSEN_WINDOW_TRANSITION_INFO_H
 #include <iremote_object.h>
 #include <string>
+
+#include "ability_info.h"
 #include "window_info.h"
 #include "wm_common.h"
 
@@ -52,6 +54,8 @@ public:
     void SetWindowType(WindowType windowType);
     WindowType GetWindowType();
     void SetShowFlagWhenLocked(bool isShow);
+    void SetWindowSupportModes(const std::vector<AppExecFwk::SupportWindowMode> supportModes);
+    std::vector<AppExecFwk::SupportWindowMode> GetWindowSupportModes();
     bool GetShowFlagWhenLocked();
     void SetTransitionReason(TransitionReason reason);
     TransitionReason GetTransitionReason();
@@ -68,6 +72,7 @@ private:
     bool isShowWhenLocked_ = false;
     bool isRecent_ = false;
     TransitionReason reason_ = TransitionReason::ABILITY_TRANSITION;
+    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
 };
 } // Rosen
 } // OHOS

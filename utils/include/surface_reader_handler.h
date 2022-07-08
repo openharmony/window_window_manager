@@ -26,7 +26,7 @@ public:
     virtual ~SurfaceReaderHandler() noexcept
     {
     }
-    virtual bool OnImageAvalible(sptr<Media::PixelMap> pixleMap) = 0;
+    virtual bool OnImageAvailable(sptr<Media::PixelMap> pixelMap) = 0;
 };
 }
 }

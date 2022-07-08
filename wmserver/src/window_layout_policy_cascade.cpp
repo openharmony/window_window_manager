@@ -14,11 +14,13 @@
  */
 
 #include "window_layout_policy_cascade.h"
+
+#include <hitrace_meter.h>
+
+#include "minimize_app.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
-#include "wm_common_inner.h"
-#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -120,7 +122,7 @@ void WindowLayoutPolicyCascade::LayoutWindowTree(DisplayId displayId)
 
 void WindowLayoutPolicyCascade::RemoveWindowNode(const sptr<WindowNode>& node)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     auto type = node->GetWindowType();
     // affect other windows, trigger off global layout
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
@@ -142,7 +144,7 @@ std::vector<int32_t> WindowLayoutPolicyCascade::GetExitSplitPoints(DisplayId dis
 
 void WindowLayoutPolicyCascade::UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     auto type = node->GetWindowType();
     const DisplayId& displayId = node->GetDisplayId();
     // affect other windows, trigger off global layout
@@ -173,12 +175,16 @@ void WindowLayoutPolicyCascade::UpdateWindowNode(const sptr<WindowNode>& node, b
 
 void WindowLayoutPolicyCascade::AddWindowNode(const sptr<WindowNode>& node)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     auto property = node->GetWindowProperty();
     if (property == nullptr) {
         WLOGFE("window property is nullptr.");
         return;
     }
+
+    // update window size limits when add window
+    UpdateWindowSizeLimits(node);
+
     if (WindowHelper::IsEmptyRect(property->GetRequestRect())) {
         SetCascadeRect(node);
     }
@@ -301,7 +307,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
     if (!floatingWindow) { // fullscreen window
         winRect = limitRect;
     } else { // floating window
-        if (subWindow && parentLimit) { // subwidow and limited by parent
+        if (subWindow && parentLimit) { // subwindow and limited by parent
             limitRect = node->parent_->GetWindowRect();
             UpdateFloatingLayoutRect(limitRect, winRect);
         }
@@ -311,9 +317,28 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
     CalcAndSetNodeHotZone(winRect, node);
 
     UpdateClientRectAndResetReason(node, lastWinRect, winRect);
+
     // update node bounds
 
     UpdateSurfaceBounds(node, winRect, lastWinRect);
+}
+
+void WindowLayoutPolicyCascade::UpdateSurfaceBounds(
+    const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
+{
+    switch (node->GetWindowSizeChangeReason()) {
+        case WindowSizeChangeReason::MAXIMIZE:
+        case WindowSizeChangeReason::RECOVER: {
+            const RSAnimationTimingProtocol timingProtocol(400);
+            RSNode::Animate(timingProtocol, RSAnimationTimingCurve::EASE_OUT,
+                [=]() { WindowLayoutPolicy::UpdateSurfaceBounds(node, winRect, preRect); });
+            break;
+        }
+        case WindowSizeChangeReason::ROTATION:
+        case WindowSizeChangeReason::UNDEFINED:
+        default:
+            WindowLayoutPolicy::UpdateSurfaceBounds(node, winRect, preRect);
+    }
 }
 
 void WindowLayoutPolicyCascade::InitLimitRects(DisplayId displayId)
@@ -466,6 +491,12 @@ void WindowLayoutPolicyCascade::Reorder()
                 WLOGFI("get node failed or not app window.");
                 continue;
             }
+            // if window don't support floating mode, or default rect of cascade is not satisfied with limits
+            if (!WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) ||
+                !WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowSizeLimits())) {
+                MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_CASCADE);
+                continue;
+            }
             if (isFirstReorderedWindow) {
                 isFirstReorderedWindow = false;
             } else {
@@ -473,13 +504,12 @@ void WindowLayoutPolicyCascade::Reorder()
             }
             node->SetRequestRect(rect);
             node->SetDecoStatus(true);
-            if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
-                WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING)) {
-                    node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-                    if (node->GetWindowToken()) {
-                        node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-                    }
+            if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+                node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+                if (node->GetWindowToken()) {
+                    node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
                 }
+            }
             WLOGFI("Cascade reorder Id: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
                 node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         }
@@ -504,7 +534,8 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
                 (*iter)->GetWindowId() != node->GetWindowId()) {
                 auto property = (*iter)->GetWindowProperty();
                 if (property != nullptr) {
-                    cascadeRect = property->GetRequestRect();
+                    cascadeRect = ((*iter)->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ?
+                        property->GetWindowRect() : property->GetRequestRect());
                 }
                 WLOGFI("Get current cascadeRect: %{public}u [%{public}d, %{public}d, %{public}u, %{public}u]",
                     (*iter)->GetWindowId(), cascadeRect.posX_, cascadeRect.posY_,

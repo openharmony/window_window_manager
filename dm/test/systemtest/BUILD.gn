@@ -83,6 +83,8 @@ ohos_systemtest("dm_screenshot_cmd_test") {
   ]
 
   deps = [ ":dm_systemtest_common" ]
+
+  external_deps = [ "hitrace_native:hitrace_meter" ]
 }
 
 ## SystemTest dm_screenshot_cmd_test }}}
@@ -143,7 +145,6 @@ ohos_static_library("dm_systemtest_common") {
     "//foundation/windowmanager/dmserver:libdms",
     "//foundation/windowmanager/utils:libwmutil",
     "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wmserver:libwms",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",

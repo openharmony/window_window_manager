@@ -15,9 +15,8 @@
  */
  -->
 
-<div class="container" style="background-color: {{ backgroundColor }}"
-     ontouchend="onTouchEnd" ontouchstart="onTouching">
-    <button class="divider-button" onclick="onExchange" ondoubleclick="onExchangeDoubleClick"
+<div class="container" style="background-color: {{ backgroundColor }}">
+    <button class="divider-button" ondoubleclick="onExchangeDoubleClick"
             click-effect="spring-small">
     </button>
 </div>
