@@ -19,6 +19,7 @@
 
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
+#include "window_helper.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -128,13 +129,24 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
         }
         std::vector<Rect> touchHotAreas;
         windowNode->GetTouchHotAreas(touchHotAreas);
-        Rect windowRect = windowNode->GetWindowRect();
+        Rect areaRect = windowNode->GetWindowRect();
+        if (windowNode->GetWindowProperty()->GetTransform() != Transform::Identity()) {
+            windowNode->ComputeTransform();
+            for (Rect& rect : touchHotAreas) {
+                rect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), rect);
+            }
+            WLOGFI("area rect befoe tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
+                areaRect.posX_, areaRect.posY_, areaRect.width_, areaRect.height_);
+            areaRect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), areaRect);
+            WLOGFI("area rect after tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
+                areaRect.posX_, areaRect.posY_, areaRect.width_, areaRect.height_);
+        }
         MMI::WindowInfo windowInfo = {
             .id = static_cast<int32_t>(windowNode->GetWindowId()),
             .pid = windowNode->GetCallingPid(),
             .uid = windowNode->GetCallingUid(),
-            .area = MMI::Rect{ windowRect.posX_, windowRect.posY_,
-                static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) },
+            .area = MMI::Rect { areaRect.posX_, areaRect.posY_,
+                static_cast<int32_t>(areaRect.width_), static_cast<int32_t>(areaRect.height_) },
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };
         convertRectsToMmiRects(touchHotAreas, windowInfo.defaultHotAreas);

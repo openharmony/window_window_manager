@@ -136,6 +136,7 @@ enum class WindowSizeChangeReason : uint32_t {
     RESIZE,
     MOVE,
     HIDE,
+    TRANSFORM,
 };
 
 enum class WindowLayoutMode : uint32_t {
@@ -181,6 +182,20 @@ public:
           translateX_(0.f), translateY_(0.f), translateZ_(0.f)
     {}
     ~Transform() {}
+
+    bool operator!=(const Transform& right) const
+    {
+        return (pivotX_ - right.pivotX_) || (pivotY_ - right.pivotY_) || (scaleX_ - right.scaleX_) ||
+            (scaleY_ - right.scaleY_) || (rotationX_ - right.rotationX_) || (rotationY_ - right.rotationY_) ||
+            (rotationZ_ - right.rotationZ_) || (translateX_ - right.translateX_) ||
+            (translateY_ - right.translateY_) || (translateZ_ - right.translateZ_);
+    }
+
+    bool operator==(const Transform& right) const
+    {
+        return !(*this != right);
+    }
+
     float pivotX_;
     float pivotY_;
     float scaleX_;
@@ -191,6 +206,12 @@ public:
     float translateX_;
     float translateY_;
     float translateZ_;
+
+    static const Transform& Identity()
+    {
+        static Transform I;
+        return I;
+    }
 };
 
 struct SystemBarProperty {

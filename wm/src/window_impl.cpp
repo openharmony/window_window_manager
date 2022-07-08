@@ -1924,6 +1924,28 @@ void WindowImpl::HandleModeChangeHotZones(int32_t posX, int32_t posY)
     }
 }
 
+void WindowImpl::UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    property_->ComputeTransform();
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        WLOGFW("Point item is invalid");
+        return;
+    }
+    Rect winRect = GetRect();
+    PointInfo originPos =
+        WindowHelper::CalculateOriginPosition(property_->GetTransformMat(), property_->GetPlane(),
+        { pointerItem.GetDisplayX(), pointerItem.GetDisplayY() });
+    WLOGI("Pointer event has been updated,window id:%{public}u, before->now:"
+        "[%{public}d,%{public}d]->[%{public}d,%{public}d]",
+        property_->GetWindowId(), pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), originPos.x, originPos.y);
+    pointerItem.SetDisplayX(originPos.x);
+    pointerItem.SetDisplayY(originPos.y);
+    pointerItem.SetWindowX(originPos.x - winRect.posX_);
+    pointerItem.SetWindowY(originPos.y - winRect.posY_);
+    pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), pointerItem);
+}
+
 void WindowImpl::UpdatePointerEventForStretchableWindow(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     MMI::PointerEvent::PointerItem pointerItem;
@@ -1986,6 +2008,12 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
     if (pointEventStarted_) {
         return;
     }
+    TransformHelper::Vector2 hotZoneScale(1, 1);
+    if (property_->GetTransform() != Transform::Identity()) {
+        property_->ComputeTransform();
+        hotZoneScale = WindowHelper::CalculateHotZoneScale(property_->GetTransformMat(),
+            property_->GetPlane());
+    }
     startPointRect_ = rect;
     startPointPosX_ = globalX;
     startPointPosY_ = globalY;
@@ -2002,22 +2030,24 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
     float virtualPixelRatio = display->GetVirtualPixelRatio();
 
     startRectExceptFrame_.posX_ = startPointRect_.posX_ +
-        static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
+        static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio / hotZoneScale.x_);
     startRectExceptFrame_.posY_ = startPointRect_.posY_ +
-        static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
+        static_cast<int32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio / hotZoneScale.y_);
     startRectExceptFrame_.width_ = startPointRect_.width_ -
-        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio);
+        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio / hotZoneScale.x_);
     startRectExceptFrame_.height_ = startPointRect_.height_ -
-        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio);
+        static_cast<uint32_t>((WINDOW_FRAME_WIDTH + WINDOW_FRAME_WIDTH) * virtualPixelRatio / hotZoneScale.y_);
 
     startRectExceptCorner_.posX_ = startPointRect_.posX_ +
-        static_cast<int32_t>(WINDOW_FRAME_CORNER_WIDTH * virtualPixelRatio);
+        static_cast<int32_t>(WINDOW_FRAME_CORNER_WIDTH * virtualPixelRatio / hotZoneScale.x_);
     startRectExceptCorner_.posY_ = startPointRect_.posY_ +
-        static_cast<int32_t>(WINDOW_FRAME_CORNER_WIDTH * virtualPixelRatio);
+        static_cast<int32_t>(WINDOW_FRAME_CORNER_WIDTH * virtualPixelRatio / hotZoneScale.y_);
     startRectExceptCorner_.width_ = startPointRect_.width_ -
-        static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) * virtualPixelRatio);
+        static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) *
+        virtualPixelRatio / hotZoneScale.x_);
     startRectExceptCorner_.height_ = startPointRect_.height_ -
-        static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) * virtualPixelRatio);
+        static_cast<uint32_t>((WINDOW_FRAME_CORNER_WIDTH + WINDOW_FRAME_CORNER_WIDTH) *
+        virtualPixelRatio / hotZoneScale.y_);
 
     if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         startMoveFlag_ = true;
@@ -2103,6 +2133,10 @@ void WindowImpl::AdjustWindowAnimationFlag(bool withAnimation)
 
 void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    // If windowRect transformed, transform event back to its origin position
+    if (property_->GetTransform() != Transform::Identity()) {
+        UpdatePointerEvent(pointerEvent);
+    }
     int32_t action = pointerEvent->GetPointerAction();
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         WLOGI("WMS process point down, window: [name:%{public}s, id:%{public}u], action: %{public}d",
