@@ -277,6 +277,9 @@ public:
 
     static inline bool IsNumber(std::string str)
     {
+        if (str.size() == 0) {
+            return false;
+        }
         for (int32_t i = 0; i < static_cast<int32_t>(str.size()); i++) {
             if (str.at(i) < '0' || str.at(i) > '9') {
                 return false;
@@ -287,6 +290,9 @@ public:
 
     static inline bool IsFloatingNumber(std::string str)
     {
+        if (str.size() == 0) {
+            return false;
+        }
         for (int32_t i = 0; i < static_cast<int32_t>(str.size()); i++) {
             if ((str.at(i) < '0' || str.at(i) > '9') &&
                 (str.at(i) != '.' || std::count(str.begin(), str.end(), '.') > 1)) {

@@ -123,6 +123,10 @@ void WindowManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
 
     std::vector<int> numbersVec;
     std::string numbersStr = reinterpret_cast<const char*>(context);
+    if (numbersStr.size() == 0) {
+        xmlFree(context);
+        return;
+    }
     auto numbers = WindowHelper::Split(numbersStr, " ");
     for (auto& num : numbers) {
         if (!WindowHelper::IsNumber(num)) {
@@ -149,6 +153,10 @@ void WindowManagerConfig::ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode)
 
     std::vector<float> numbersVec;
     std::string numbersStr = reinterpret_cast<const char*>(context);
+    if (numbersStr.size() == 0) {
+        xmlFree(context);
+        return;
+    }
     auto numbers = WindowHelper::Split(numbersStr, " ");
     for (auto& num : numbers) {
         if (!WindowHelper::IsFloatingNumber(num)) {
