@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_PAIR_H
 
 #include <refbase.h>
+#include "class_var_definition.h"
 #include "window_inner_manager.h"
 #include "window_node.h"
 #include "window_layout_policy.h"
@@ -51,10 +52,9 @@ public:
     /**
      * Constructor used to create an empty WindowPair instance.
      *
-     * @param displayId the disply of window pair
-     * @param appNode the window root of app window
+     * @param displayId the display of window pair
      */
-    WindowPair(const DisplayId& displayId, DisplayGroupWindowTree& displayGroupWindowTree);
+    explicit WindowPair(const DisplayId& displayId);
 
     /**
      * Deconstructor used to deconstruct.
@@ -171,13 +171,6 @@ public:
      */
     bool IsDockSliceInExitSplitModeArea(const std::vector<int32_t>& exitSplitPoints);
 
-    /**
-     * Set all app windows are restoring.
-     *
-     * @param ratio Indicates whether all app windows are restoring.
-     */
-    void SetAllAppWindowsRestoring(bool isAllAppWindowsRestoring);
-
     void SetInitalDividerRect(const Rect& rect);
 
 private:
@@ -221,23 +214,7 @@ private:
     void DumpPairInfo();
 
     /**
-     * Find pairable window frome window trees.
-     *
-     * @param node the node waiting to be paired
-     * @return window node
-     */
-    sptr<WindowNode> FindPairableWindow(sptr<WindowNode>& node);
-
-    /**
-     * Get pairable node from trees or send split broadcast.
-     *
-     * @param node the node waiting to be paired
-     * @return pairable node
-     */
-    sptr<WindowNode> GetPairableWindow(sptr<WindowNode>& node);
-
-    /**
-     * Send brodcast message of split event.
+     * Send broadcast message of split event.
      *
      * @param node trigger node
      */
@@ -246,14 +223,12 @@ private:
 private:
     float ratio_ = DEFAULT_SPLIT_RATIO;
     DisplayId displayId_;
-    sptr<WindowNode> appWindowNode_;
     sptr<WindowNode> primary_;
     sptr<WindowNode> secondary_;
     sptr<WindowNode> divider_;
     WindowPairStatus status_ = {WindowPairStatus::STATUS_EMPTY};
-    DisplayGroupWindowTree& displayGroupWindowTree_;
-    bool isAllAppWindowsRestoring_ { false };
-    Rect initalDivderRect_ {0, 0, 0, 0};
+    Rect initalDividerRect_ {0, 0, 0, 0};
+    DEFINE_VAR_DEFAULT_FUNC_SET(bool, AllSplitAppWindowsRestoring, isAllSplitAppWindowsRestoring, false)
 };
 } // namespace Rosen
 } // namespace OHOS

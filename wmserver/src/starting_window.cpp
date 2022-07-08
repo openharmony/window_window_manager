@@ -16,11 +16,12 @@
 #include "starting_window.h"
 #include <ability_manager_client.h>
 #include <display_manager_service_inner.h>
+#include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
 #include "remote_animation.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#include "wm_trace.h"
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -28,20 +29,44 @@ namespace {
     const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
 }
 
-SurfaceDraw StartingWindow::surfaceDraw_;
-static bool g_hasInit = false;
 std::recursive_mutex StartingWindow::mutex_;
 
-sptr<WindowNode> StartingWindow::CreateWindowNode(sptr<WindowTransitionInfo> info, uint32_t winId)
+bool StartingWindow::NeedCancelStartingWindow(uint32_t modeSupportInfo,
+    WindowLayoutMode layoutMode, const sptr<WindowTransitionInfo>& info)
+{
+    if ((!WindowHelper::IsWindowModeSupported(modeSupportInfo, info->GetWindowMode())) ||
+        (WindowHelper::IsInvalidWindowInTileLayoutMode(modeSupportInfo, layoutMode)) ||
+        (WindowHelper::IsOnlySupportSplitAndShowWhenLocked(info->GetShowFlagWhenLocked(), modeSupportInfo))) {
+        WLOGFI("window mode is not be supported or not support floating mode in tile, cancel starting window");
+        return true;
+    }
+    return false;
+}
+
+sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInfo>& info,
+    uint32_t winId, WindowLayoutMode layoutMode)
 {
     sptr<WindowProperty> property = new(std::nothrow) WindowProperty();
-    if (property == nullptr) {
+    if (property == nullptr || info == nullptr) {
         return nullptr;
     }
+
+    // if mode isn't be supported or don't support floating mode in tile mode, create starting window failed
+    uint32_t modeSupportInfo = 0;
+    WindowHelper::ConvertSupportModesToSupportInfo(modeSupportInfo, info->GetWindowSupportModes());
+    if (NeedCancelStartingWindow(modeSupportInfo, layoutMode, info)) {
+        WLOGFI("window mode is not be supported or not support floating mode in tile, cancel starting window");
+        return nullptr;
+    }
+
     property->SetRequestRect(info->GetWindowRect());
-    property->SetWindowMode(info->GetWindowMode());
+    if (WindowHelper::IsValidWindowMode(info->GetWindowMode())) {
+        property->SetWindowMode(info->GetWindowMode());
+    }
+
     property->SetDisplayId(info->GetDisplayId());
     property->SetWindowType(info->GetWindowType());
+    property->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
     if (info->GetShowFlagWhenLocked()) {
         property->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     }
@@ -55,7 +80,6 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(sptr<WindowTransitionInfo> inf
     if (CreateLeashAndStartingSurfaceNode(node) != WMError::WM_OK) {
         return nullptr;
     }
-
     return node;
 }
 
@@ -84,24 +108,23 @@ void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
     sptr<Media::PixelMap> pixelMap, uint32_t bkgColor, bool isColdStart)
 {
     // using snapshot to support hot start since node destroy when hide
-    WM_SCOPED_TRACE("wms:DrawStartingWindow(%u)", node->GetWindowId());
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DrawStartingWindow(%u)", node->GetWindowId());
     if (!isColdStart) {
         return;
-    }
-    if (!g_hasInit) {
-        surfaceDraw_.Init();
-        g_hasInit = true;
     }
     if (node->startingWinSurfaceNode_ == nullptr) {
         WLOGFE("no starting Window SurfaceNode!");
         return;
     }
     Rect rect = node->GetWindowRect();
+    if (RemoteAnimation::CheckAnimationController() && node->leashWinSurfaceNode_) {
+        node->leashWinSurfaceNode_->SetBounds(rect.posX_, rect.posY_, -1, -1);
+    }
     if (pixelMap == nullptr) {
-        surfaceDraw_.DrawBackgroundColor(node->startingWinSurfaceNode_, rect, bkgColor);
+        SurfaceDraw::DrawColor(node->startingWinSurfaceNode_, rect.width_, rect.height_, bkgColor);
         return;
     }
-    surfaceDraw_.DrawSkImage(node->startingWinSurfaceNode_, rect, pixelMap, bkgColor);
+    SurfaceDraw::DrawImageRect(node->startingWinSurfaceNode_, rect, pixelMap, bkgColor);
 }
 
 void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,
@@ -121,7 +144,8 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
     wptr<WindowNode> weak = node;
     auto firstFrameCompleteCallback = [weak]() {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
-        WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::STARTING_WINDOW), "wms:async:ShowStartingWindow");
+        FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
+            "wms:async:ShowStartingWindow");
         auto weakNode = weak.promote();
         if (weakNode == nullptr || weakNode->leashWinSurfaceNode_ == nullptr) {
             WLOGFE("windowNode or leashWinSurfaceNode_ is nullptr");
@@ -175,6 +199,11 @@ void StartingWindow::UpdateRSTree(sptr<WindowNode>& node)
                     dms.UpdateRSTree(shownDisplayId, node->leashWinSurfaceNode_, true);
                 } else { // to launcher
                     dms.UpdateRSTree(shownDisplayId, node->surfaceNode_, true);
+                }
+                for (auto& child : node->children_) {
+                    if (child->currentVisibility_) {
+                        dms.UpdateRSTree(shownDisplayId, child->surfaceNode_, true);
+                    }
                 }
             }
         }

@@ -62,6 +62,8 @@ NativeValue* WindowTypeInit(NativeEngine* engine)
         static_cast<int32_t>(ApiWindowType::TYPE_NAVIGATION_BAR)));
     object->SetProperty("TYPE_FLOAT", CreateJsValue(*engine,
         static_cast<int32_t>(ApiWindowType::TYPE_FLOAT)));
+    object->SetProperty("TYPE_FLOAT_CAMERA", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_FLOAT_CAMERA)));
     object->SetProperty("TYPE_WALLPAPER", CreateJsValue(*engine,
         static_cast<int32_t>(ApiWindowType::TYPE_WALLPAPER)));
     object->SetProperty("TYPE_DESKTOP", CreateJsValue(*engine,
@@ -98,6 +100,9 @@ NativeValue* AvoidAreaTypeInit(NativeEngine* engine)
         static_cast<int32_t>(AvoidAreaType::TYPE_SYSTEM)));
     object->SetProperty("TYPE_CUTOUT", CreateJsValue(*engine,
         static_cast<int32_t>(AvoidAreaType::TYPE_CUTOUT)));
+    object->SetProperty("TYPE_SYSTEM_GESTURE", CreateJsValue(*engine,
+        static_cast<int32_t>(AvoidAreaType::TYPE_SYSTEM_GESTURE)));
+    object->SetProperty("TYPE_KEYBOARD", CreateJsValue(*engine, static_cast<int32_t>(AvoidAreaType::TYPE_KEYBOARD)));
     return objValue;
 }
 
@@ -153,6 +158,49 @@ NativeValue* ColorSpaceInit(NativeEngine* engine)
     return objValue;
 }
 
+NativeValue* OrientationInit(NativeEngine* engine)
+{
+    WLOGFI("[NAPI]OrientationInit");
+
+    if (engine == nullptr) {
+        WLOGFE("[NAPI]Engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("[NAPI]Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("UNSPECIFIED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::UNSPECIFIED)));
+    object->SetProperty("PORTRAIT", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::VERTICAL)));
+    object->SetProperty("LANDSCAPE", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::HORIZONTAL)));
+    object->SetProperty("PORTRAIT_INVERTED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::REVERSE_VERTICAL)));
+    object->SetProperty("LANDSCAPE_INVERTED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::REVERSE_HORIZONTAL)));
+    object->SetProperty("AUTO_ROTATION", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::SENSOR)));
+    object->SetProperty("AUTO_ROTATION_PORTRAIT", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::SENSOR_VERTICAL)));
+    object->SetProperty("AUTO_ROTATION_LANDSCAPE", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::SENSOR_HORIZONTAL)));
+    object->SetProperty("AUTO_ROTATION_RESTRICTED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::AUTO_ROTATION_RESTRICTED)));
+    object->SetProperty("AUTO_ROTATION_PORTRAIT_RESTRICTED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED)));
+    object->SetProperty("AUTO_ROTATION_LANDSCAPE_RESTRICTED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED)));
+    object->SetProperty("LOCKED", CreateJsValue(*engine,
+        static_cast<int32_t>(Orientation::LOCKED)));
+    return objValue;
+}
+
 NativeValue* WindowStageEventTypeInit(NativeEngine* engine)
 {
     WLOGFI("[NAPI]WindowStageEventTypeInit");
@@ -202,7 +250,7 @@ NativeValue* WindowLayoutModeInit(NativeEngine* engine)
     return objValue;
 }
 
-NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect rect)
+NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect& rect)
 {
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
@@ -425,18 +473,19 @@ bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
     return true;
 }
 
-NativeValue* ChangeAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avoidArea)
+NativeValue* ConvertAvoidAreaToJsValue(NativeEngine& engine, const AvoidArea& avoidArea, AvoidAreaType type)
 {
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
-        WLOGFE("[NAPI]Failed to convert rect to jsObject");
-        return engine.CreateUndefined();
+        WLOGFE("[NAPI]Failed to convert avoidArea to jsObject");
+        return nullptr;
     }
-    object->SetProperty("leftRect", GetRectAndConvertToJsValue(engine, avoidArea.leftRect));
-    object->SetProperty("topRect", GetRectAndConvertToJsValue(engine, avoidArea.topRect));
-    object->SetProperty("rightRect", GetRectAndConvertToJsValue(engine, avoidArea.rightRect));
-    object->SetProperty("bottomRect", GetRectAndConvertToJsValue(engine, avoidArea.bottomRect));
+    object->SetProperty("visible", CreateJsValue(engine, type == AvoidAreaType::TYPE_CUTOUT ? false : true));
+    object->SetProperty("leftRect", GetRectAndConvertToJsValue(engine, avoidArea.leftRect_));
+    object->SetProperty("topRect", GetRectAndConvertToJsValue(engine, avoidArea.topRect_));
+    object->SetProperty("rightRect", GetRectAndConvertToJsValue(engine, avoidArea.rightRect_));
+    object->SetProperty("bottomRect", GetRectAndConvertToJsValue(engine, avoidArea.bottomRect_));
     return objValue;
 }
 
@@ -475,6 +524,21 @@ bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability)
         return false;
     } else {
         WLOGFI("[NAPI]Get ability");
+    }
+    return true;
+}
+
+bool ParseJsDoubleValue(NativeObject* jsObject, NativeEngine& engine, const std::string& name, double& data)
+{
+    NativeValue* value = jsObject->GetProperty(name.c_str());
+    if (value->TypeOf() != NATIVE_UNDEFINED) {
+        if (!ConvertFromJsValue(engine, value, data)) {
+            WLOGFE("[NAPI]Failed to convert parameter to scale %{public}s", name.c_str());
+            return false;
+        }
+    } else {
+        WLOGFI("[NAPI]no property with: %{public}s", name.c_str());
+        return false;
     }
     return true;
 }

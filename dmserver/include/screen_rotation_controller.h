@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_SCREEN_ROTATION_CONTROLLER_H
 #define OHOS_ROSEN_SCREEN_ROTATION_CONTROLLER_H
 
+#include <map>
 #include <refbase.h>
 
 #include "sensor_agent.h"
@@ -25,6 +26,22 @@
 
 namespace OHOS {
 namespace Rosen {
+enum class SensorRotation: int32_t {
+    INVALID = -1,
+    ROTATION_0 = 0,
+    ROTATION_90,
+    ROTATION_180,
+    ROTATION_270,
+};
+
+enum class DeviceRotation: int32_t {
+    INVALID = -1,
+    ROTATION_PORTRAIT = 0,
+    ROTATION_LANDSCAPE,
+    ROTATION_PORTRAIT_INVERTED,
+    ROTATION_LANDSCAPE_INVERTED,
+};
+
 class ScreenRotationController : public RefBase {
 public:
     ScreenRotationController() = delete;
@@ -34,27 +51,55 @@ public:
     static bool IsScreenRotationLocked();
     static void SetScreenRotationLocked(bool isLocked);
     static void SetDefaultDeviceRotationOffset(uint32_t defaultDeviceRotationOffset);
+    static bool IsGravitySensorEnabled();
+    static void ProcessOrientationSwitch(Orientation orientation);
 private:
     static void HandleGravitySensorEventCallback(SensorEvent *event);
-    static Rotation GetCurrentDisplayRotation();
-    static Orientation GetDisplayOrientation();
-    static int CalcRotationDegree(GravityData* gravityData);
-    static Rotation CalcTargetDisplayRotation(Orientation requestedOrientation, Rotation sensorRotation);
-    static Rotation ProcessAutoRotationPortraitOrientation(Rotation sensorRotation);
-    static Rotation ProcessAutoRotationLandscapeOrientation(Rotation sensorRotation);
-    static void SetScreenRotation(Rotation targetRotation);
     static bool CheckCallbackTimeInterval();
-    static int CalcSensorDisplayRotation(int orientationDegree);
-    static Rotation ConvertToDeviceRotation(Rotation sensorRotation);
+    static Rotation GetCurrentDisplayRotation();
+    static Orientation GetPreferredOrientation();
+    static void SetScreenRotation(Rotation targetRotation);
+    static int CalcRotationDegree(GravityData* gravityData);
+    static Rotation CalcTargetDisplayRotation(Orientation requestedOrientation,
+        DeviceRotation sensorRotationConverted);
+    static DeviceRotation CalcDeviceRotation(SensorRotation sensorRotation);
+    static SensorRotation CalcSensorRotation(int sensorDegree);
+    static DeviceRotation ConvertSensorToDeviceRotation(SensorRotation sensorRotation);
+    static Rotation ConvertDeviceToDisplayRotation(DeviceRotation sensorRotationConverted);
+
+    static bool IsDeviceRotationVertical(DeviceRotation deviceRotation);
+    static bool IsDeviceRotationHorizontal(DeviceRotation deviceRotation);
+    static bool IsCurrentDisplayVertical();
+    static bool IsCurrentDisplayHorizontal();
+    static bool IsDisplayRotationVertical(Rotation rotation);
+    static bool IsDisplayRotationHorizontal(Rotation rotation);
     static bool IsSensorRelatedOrientation(Orientation orientation);
+    
+    static void ProcessRotationMapping();
+    static void ProcessSwitchToAutoRotationPortrait(DeviceRotation rotation);
+    static void ProcessSwitchToAutoRotationLandscape(DeviceRotation rotation);
+    static void ProcessSwitchToAutoRotation(DeviceRotation rotation);
+    static void ProcessSwitchToAutoRotationPortraitRestricted();
+    static void ProcessSwitchToAutoRotationLandscapeRestricted();
+    static void ProcessSwitchToSensorRelatedOrientation(Orientation orientation, DeviceRotation deviceRotation);
+    static void ProcessSwitchToSensorUnrelatedOrientation(Orientation orientation);
+    static Rotation ProcessAutoRotationPortraitOrientation(DeviceRotation sensorRotationConveted);
+    static Rotation ProcessAutoRotationLandscapeOrientation(DeviceRotation sensorRotationConveted);
 
     static DisplayId defaultDisplayId_;
+    static SensorUser user_;
+    static uint32_t defaultDeviceRotationOffset_;
+    static uint32_t defaultDeviceRotation_;
+    static std::map<SensorRotation, DeviceRotation> sensorToDeviceRotationMap_;
+    static std::map<DeviceRotation, Rotation> deviceToDisplayRotationMap_;
+    static long lastCallbackTime_;
+    static Orientation lastOrientationType_;
+    static Rotation currentDisplayRotation_;
+    static Rotation lastSensorDecidedRotation_;
+    static Rotation rotationLockedRotation_;
     static bool isGravitySensorSubscribed_;
     static bool isScreenRotationLocked_;
-    static SensorUser user_;
-    static Rotation currentDisplayRotation_;
-    static long lastCallbackTime_;
-    static uint32_t defaultDeviceRotationOffset_;
+    static DeviceRotation lastSensorRotationConverted_;
 };
 } // Rosen
 } // OHOS

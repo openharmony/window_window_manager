@@ -34,6 +34,8 @@
 #include "wm_common_inner.h"
 #include "wm_common.h"
 
+using OHOS::AppExecFwk::DisplayOrientation;
+
 namespace OHOS {
 namespace Rosen {
 union ColorParam {
@@ -54,6 +56,23 @@ union ColorParam {
 #endif
     uint32_t value;
 };
+
+const std::map<DisplayOrientation, Orientation> ABILITY_TO_WMS_ORIENTATION_MAP {
+    {DisplayOrientation::UNSPECIFIED,                           Orientation::UNSPECIFIED                        },
+    {DisplayOrientation::LANDSCAPE,                             Orientation::HORIZONTAL                         },
+    {DisplayOrientation::PORTRAIT,                              Orientation::VERTICAL                           },
+    {DisplayOrientation::FOLLOWRECENT,                          Orientation::UNSPECIFIED                        },
+    {DisplayOrientation::LANDSCAPE_INVERTED,                    Orientation::REVERSE_HORIZONTAL                 },
+    {DisplayOrientation::PORTRAIT_INVERTED,                     Orientation::REVERSE_VERTICAL                   },
+    {DisplayOrientation::AUTO_ROTATION,                         Orientation::SENSOR                             },
+    {DisplayOrientation::AUTO_ROTATION_LANDSCAPE,               Orientation::SENSOR_HORIZONTAL                  },
+    {DisplayOrientation::AUTO_ROTATION_PORTRAIT,                Orientation::SENSOR_VERTICAL                    },
+    {DisplayOrientation::AUTO_ROTATION_RESTRICTED,              Orientation::AUTO_ROTATION_RESTRICTED           },
+    {DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,    Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED },
+    {DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,     Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED  },
+    {DisplayOrientation::LOCKED,                                Orientation::LOCKED                             },
+};
+
 class WindowImpl : public Window {
 using ListenerTaskCallback = std::function<void()>;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
@@ -97,7 +116,7 @@ public:
     virtual const std::string& GetWindowName() const override;
     virtual uint32_t GetWindowId() const override;
     virtual uint32_t GetWindowFlags() const override;
-    uint32_t GetModeSupportInfo() const override;
+    uint32_t GetRequestModeSupportInfo() const override;
     inline NotifyNativeWinDestroyFunc GetNativeDestroyCallback()
     {
         return notifyNativefunc_;
@@ -108,13 +127,16 @@ public:
     virtual WMError SetWindowType(WindowType type) override;
     virtual WMError SetWindowMode(WindowMode mode) override;
     virtual WMError SetWindowBackgroundBlur(WindowBlurLevel level) override;
-    virtual WMError SetAlpha(float alpha) override;
+    virtual void SetAlpha(float alpha) override;
+    virtual void SetTransform(const Transform& trans) override;
     virtual WMError AddWindowFlag(WindowFlag flag) override;
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
     virtual WMError SetWindowFlags(uint32_t flags) override;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     virtual WMError SetLayoutFullScreen(bool status) override;
     virtual WMError SetFullScreen(bool status) override;
+    virtual Transform GetTransform() const override;
+    virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) override;
     inline void SetWindowState(WindowState state)
     {
         state_ = state;
@@ -124,8 +146,8 @@ public:
     WMError Create(const std::string& parentName,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy() override;
-    virtual WMError Show(uint32_t reason = 0) override;
-    virtual WMError Hide(uint32_t reason = 0) override;
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
+    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false) override;
     virtual WMError MoveTo(int32_t x, int32_t y) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
@@ -151,10 +173,11 @@ public:
 
     virtual WMError RequestFocus() const override;
     virtual void AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) override;
+    virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
 
-    virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) override;
+    virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
-    virtual void UnregisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) override;
+    virtual void UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     virtual void UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     virtual void UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
@@ -162,23 +185,25 @@ public:
     virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
-    virtual void RegisterInputEventListener(sptr<IInputEventListener>& listener) override;
-    virtual void UnregisterInputEventListener(sptr<IInputEventListener>& listener) override;
+    virtual void RegisterInputEventListener(const sptr<IInputEventListener>& listener) override;
+    virtual void UnregisterInputEventListener(const sptr<IInputEventListener>& listener) override;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual void RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     virtual void UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
+    virtual void RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
-    virtual void SetModeSupportInfo(uint32_t modeSupportInfo) override;
+    virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) override;
     void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason);
     void UpdateMode(WindowMode mode);
+    void UpdateModeSupportInfo(uint32_t modeSupportInfo);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
     virtual void RequestFrame() override;
     void UpdateFocusStatus(bool focused);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
-    void UpdateAvoidArea(const std::vector<Rect>& avoidAreas);
+    void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void UpdateWindowState(WindowState state);
     sptr<WindowProperty> GetWindowProperty();
     void UpdateDragEvent(const PointInfo& point, DragEvent event);
@@ -189,7 +214,7 @@ public:
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifyKeyEvent(std::shared_ptr<MMI::KeyEvent> &keyEvent);
     void NotifyPointEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void NotifyAviodAreaChange(const std::vector<Rect>& avoidArea);
+    void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void NotifyDisplayMoveChange(DisplayId from, DisplayId to);
     void NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
     void NotifyModeChange(WindowMode mode);
@@ -253,7 +278,11 @@ private:
     }
     inline void NotifyBeforeDestroy(std::string windowName)
     {
-        CALL_UI_CONTENT(Destroy);
+        if (uiContent_ != nullptr) {
+            auto uiContent = std::move(uiContent_);
+            uiContent_ = nullptr;
+            uiContent->Destroy();
+        }
         if (notifyNativefunc_) {
             notifyNativefunc_(windowName);
         }
@@ -286,6 +315,12 @@ private:
             CALL_LIFECYCLE_LISTENER(ForegroundFailed);
         });
     }
+    inline void NotifyForegroundInvalidWindowMode()
+    {
+        PostListenerTask([this]() {
+            CALL_LIFECYCLE_LISTENER(ForegroundInvalidMode);
+        });
+    }
     void DestroyFloatingWindow();
     void DestroySubWindow();
     void SetDefaultOption(); // for api7
@@ -299,7 +334,7 @@ private:
     void ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId, const Rect& rect);
     void EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId);
     bool IsPointerEventConsumed();
-    void AdjustWindowAnimationFlag();
+    void AdjustWindowAnimationFlag(bool withAnimation = false);
     void MapFloatingWindowToAppIfNeeded();
     WMError UpdateProperty(PropertyChangeAction action);
     WMError Destroy(bool needNotifyServer);
@@ -310,14 +345,21 @@ private:
     Rect GetSystemAlarmWindowDefaultSize(Rect defaultRect);
     void HandleModeChangeHotZones(int32_t posX, int32_t posY);
     WMError NotifyWindowTransition(TransitionReason reason);
+    void UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdatePointerEventForStretchableWindow(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateDragType();
     void InitListenerHandler();
-
+    void HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    bool CheckCameraFloatingWindowMultiCreated(WindowType type);
+    void GetConfigurationFromAbilityInfo();
+    void UpdateTitleButtonVisibility();
+    void SetModeSupportInfo(uint32_t modeSupportInfo);
+    uint32_t GetModeSupportInfo() const;
+    WMError PreProcessShow(uint32_t reason, bool withAnimation);
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;
-        ColorGamut sufaceColorGamut;
+        ColorGamut surfaceColorGamut;
     };
     static const ColorSpaceConvertMap colorSpaceConvertMap[];
     static ColorSpace GetColorSpaceFromSurfaceGamut(ColorGamut ColorGamut);
@@ -340,6 +382,8 @@ private:
     std::vector<sptr<IDisplayMoveListener>> displayMoveListeners_;
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners_;
     std::vector<sptr<IInputEventListener>> inputEventListeners_;
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
+    sptr<IAnimationTransitionController> animationTranistionController_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
@@ -360,7 +404,7 @@ private:
     Rect startRectExceptFrame_ = { 0, 0, 0, 0 };
     Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
     DragType dragType_ = DragType::DRAG_UNDEFINED;
-    bool isAppDecorEnbale_ = true;
+    bool isAppDecorEnable_ = true;
     SystemConfig windowSystemConfig_ ;
     bool isOriginRectSet_ = false;
     bool isWaitingFrame_ = false;

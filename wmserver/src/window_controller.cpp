@@ -17,6 +17,7 @@
 #include <ability_manager_client.h>
 #include <chrono>
 #include <hisysevent.h>
+#include <hitrace_meter.h>
 #include <parameters.h>
 #include <power_mgr_client.h>
 #include <rs_window_animation_finished_callback.h>
@@ -29,13 +30,12 @@
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "wm_common.h"
-#include "wm_trace.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowController"};
-    constexpr uint32_t TOIUCH_HOT_AREA_MAX_NUM = 10;
+    constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 10;
 }
 
 uint32_t WindowController::GenWindowId()
@@ -50,14 +50,16 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
         WLOGFE("info or AbilityToken is nullptr!");
         return;
     }
-    WM_SCOPED_ASYNC_TRACE_BEGIN(static_cast<int32_t>(TraceTaskId::STARTING_WINDOW), "wms:async:ShowStartingWindow");
+    StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
+        "wms:async:ShowStartingWindow");
     auto node = windowRoot_->FindWindowNodeWithToken(info->GetAbilityToken());
+    auto layoutMode = windowRoot_->GetCurrentLayoutMode(info->GetDisplayId());
     if (node == nullptr) {
         if (!isColdStart) {
             WLOGFE("no windowNode exists but is hot start!");
             return;
         }
-        node = StartingWindow::CreateWindowNode(info, GenWindowId());
+        node = StartingWindow::CreateWindowNode(info, GenWindowId(), layoutMode);
         if (node == nullptr) {
             return;
         }
@@ -71,6 +73,13 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
         if (isColdStart) {
             WLOGFE("windowNode exists but is cold start!");
             return;
+        }
+
+        if (WindowHelper::IsValidWindowMode(info->GetWindowMode()) &&
+            (node->GetWindowMode() != info->GetWindowMode())) {
+            WLOGFW("set starting window mode. starting mode is: %{public}u, window mode is:%{public}u.",
+                node->GetWindowMode(), info->GetWindowMode());
+            node->SetWindowMode(info->GetWindowMode());
         }
     }
     if (windowRoot_->AddWindowNode(0, node, true) != WMError::WM_OK) {
@@ -93,8 +102,9 @@ void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
         WLOGFE("CancelStartingWindow failed because client window has shown id:%{public}u", node->GetWindowId());
         return;
     }
-    WM_SCOPED_TRACE("wms:CancelStartingWindow(%u)", node->GetWindowId());
-    WM_SCOPED_ASYNC_END(static_cast<int32_t>(TraceTaskId::STARTING_WINDOW), "wms:async:ShowStartingWindow");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:CancelStartingWindow(%u)", node->GetWindowId());
+    FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::STARTING_WINDOW),
+        "wms:async:ShowStartingWindow");
     WLOGFI("CancelStartingWindow with id:%{public}u!", node->GetWindowId());
     node->isAppCrash_ = true;
     WMError res = windowRoot_->DestroyWindow(node->GetWindowId(), false);
@@ -116,7 +126,7 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
     if (!RemoteAnimation::CheckTransition(srcInfo, srcNode, dstInfo, dstNode)) {
         return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
-    WM_SCOPED_ASYNC_TRACE_BEGIN(static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+    StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
         "wms:async:ShowRemoteAnimation");
     auto transitionEvent = RemoteAnimation::GetTransitionEvent(srcInfo, dstInfo, srcNode, dstNode);
     switch (transitionEvent) {
@@ -170,6 +180,7 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     if (node != nullptr && WindowHelper::IsMainWindow(property->GetWindowType()) && node->startingWindowShown_) {
         StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode, property, pid, uid);
         windowRoot_->AddDeathRecipient(node);
+        windowRoot_->AddSurfaceNodeIdWindowNodePair(surfaceNode->GetId(), node);
         return WMError::WM_OK;
     }
     windowId = GenWindowId();
@@ -190,10 +201,18 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
+
     if (node->currentVisibility_ && !node->startingWindowShown_) {
         WLOGFE("current window is visible, windowId: %{public}u", node->GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
+
+    auto layoutMode = windowRoot_->GetCurrentLayoutMode(property->GetDisplayId());
+    if (WindowHelper::IsInvalidWindowInTileLayoutMode(node->GetModeSupportInfo(), layoutMode)) {
+        WLOGFE("window doesn't support floating mode in tile, windowId: %{public}u", node->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE;
+    }
+
     // using starting window rect if client rect is empty
     if (WindowHelper::IsEmptyRect(property->GetRequestRect()) && node->startingWindowShown_) { // for tile and cascade
         property->SetRequestRect(node->GetRequestRect());
@@ -204,6 +223,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
 
     // Need 'check permission'
     // Need 'adjust property'
+    UpdateWindowAnimation(node);
     WMError res = windowRoot_->AddWindowNode(property->GetParentId(), node);
     if (res != WMError::WM_OK) {
         MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
@@ -218,9 +238,65 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         sysBarWinId_[node->GetWindowType()] = node->GetWindowId();
         ResizeSystemBarPropertySizeIfNeed(node);
     }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        ResizeSoftInputCallingWindowIfNeed(node);
+    }
     StopBootAnimationIfNeed(node->GetWindowType());
     MinimizeApp::ExecuteMinimizeAll();
     return WMError::WM_OK;
+}
+
+void WindowController::ResizeSoftInputCallingWindowIfNeed(const sptr<WindowNode>& node)
+{
+    auto callingWindowId = node->GetCallingWindow();
+    auto callingWindow = windowRoot_->GetWindowNode(callingWindowId);
+    if (callingWindow == nullptr) {
+        auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+        if (windowNodeContainer == nullptr) {
+            WLOGFE("windowNodeContainer is null, displayId:%{public}" PRIu64"", node->GetDisplayId());
+            return;
+        }
+        callingWindowId = windowNodeContainer->GetFocusWindow();
+        callingWindow = windowRoot_->GetWindowNode(callingWindowId);
+    }
+    if (callingWindow == nullptr || !callingWindow->currentVisibility_ ||
+        callingWindow->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        WLOGFE("callingWindow is null or invisible or not float window, callingWindowId:%{public}u", callingWindowId);
+        return;
+    }
+    Rect softInputWindowRect = node->GetWindowRect();
+    Rect callingWindowRect = callingWindow->GetWindowRect();
+    Rect rect = WindowHelper::GetOverlap(softInputWindowRect, callingWindowRect, 0, 0);
+    if (WindowHelper::IsEmptyRect(rect)) {
+        WLOGFE("there is no overlap");
+        return;
+    }
+    Rect requestedRect = callingWindowRect;
+    requestedRect.posY_ = softInputWindowRect.posY_ - static_cast<int32_t>(requestedRect.height_);
+    Rect statusBarWindowRect = { 0, 0, 0, 0 };
+    auto statusbarWindow = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
+    if (statusbarWindow != nullptr && statusbarWindow->parent_ != nullptr) {
+        statusBarWindowRect = statusbarWindow->GetWindowRect();
+    }
+    int32_t posY = std::max(requestedRect.posY_, static_cast<int32_t>(statusBarWindowRect.height_));
+    if (posY != requestedRect.posY_) {
+        requestedRect.height_ = softInputWindowRect.posY_ - posY;
+        requestedRect.posY_ = posY;
+    }
+    callingWindowRestoringRect_ = callingWindowRect;
+    callingWindowId_ = callingWindow->GetWindowId();
+    ResizeRect(callingWindowId_, requestedRect, WindowSizeChangeReason::DRAG);
+}
+
+void WindowController::RestoreCallingWindowSizeIfNeed()
+{
+    auto callingWindow = windowRoot_->GetWindowNode(callingWindowId_);
+    if (!WindowHelper::IsEmptyRect(callingWindowRestoringRect_) && callingWindow != nullptr &&
+        callingWindow->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        ResizeRect(callingWindowId_, callingWindowRestoringRect_, WindowSizeChangeReason::DRAG);
+    }
+    callingWindowRestoringRect_ = { 0, 0, 0, 0 };
+    callingWindowId_ = 0u;
 }
 
 void WindowController::ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>& node)
@@ -230,28 +306,18 @@ void WindowController::ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>&
         WLOGFE("displayInfo is null");
         return;
     }
-    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
-    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
-    Rect targetRect = node->GetWindowRect();
+    auto width = static_cast<uint32_t>(displayInfo->GetWidth());
+    auto height = static_cast<uint32_t>(displayInfo->GetHeight());
+    Rect newRect = node->GetWindowRect();
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
-        auto statusBarRectIter =
-            systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].find(displayHeight);
-        if (statusBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].end()) {
-            targetRect = statusBarRectIter->second;
-        }
+        auto statusBarHeight = newRect.height_;
+        newRect = { 0, 0, width, statusBarHeight };
     } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
-        auto navigationBarRectIter =
-            systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].find(displayHeight);
-        if (navigationBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].end()) {
-            targetRect = navigationBarRectIter->second;
-        }
+        auto naviBarHeight = newRect.height_;
+        newRect = { 0, static_cast<int32_t>(height - naviBarHeight), width, naviBarHeight };
     }
-    if (curDisplayInfo_.find(displayInfo->GetDisplayId()) == curDisplayInfo_.end()) {
-        curDisplayInfo_[displayInfo->GetDisplayId()] = displayInfo;
-    }
-    Rect propertyRect = node->GetWindowRect();
-    if (propertyRect != targetRect) {
-        ResizeRect(node->GetWindowId(), targetRect, WindowSizeChangeReason::DRAG);
+    if (newRect != node->GetWindowRect()) {
+        ResizeRect(node->GetWindowId(), newRect, WindowSizeChangeReason::DRAG);
     }
 }
 
@@ -285,14 +351,20 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
         return res;
     };
     auto windowNode = windowRoot_->GetWindowNode(windowId);
+    WMError res = WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     if (windowNode && windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         if (RemoteAnimation::NotifyAnimationScreenUnlock(removeFunc) == WMError::WM_OK) {
             WLOGFI("NotifyAnimationScreenUnlock with remote animation");
-            return WMError::WM_OK;
+            res = WMError::WM_OK;
         }
     }
-
-    return removeFunc();
+    if (res != WMError::WM_OK) {
+        res = removeFunc();
+    }
+    if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        RestoreCallingWindowSizeIfNeed();
+    }
+    return res;
 }
 
 WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
@@ -362,7 +434,7 @@ WMError WindowController::RequestFocus(uint32_t windowId)
 
 WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
 {
-    WM_FUNCTION_TRACE();
+    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
         WLOGFE("could not find window");
@@ -387,21 +459,6 @@ WMError WindowController::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurL
 
     WLOGFI("WindowEffect WindowController SetWindowBackgroundBlur level: %{public}u", dstLevel);
     node->SetWindowBackgroundBlur(dstLevel);
-    FlushWindowInfo(windowId);
-    return WMError::WM_OK;
-}
-
-WMError WindowController::SetAlpha(uint32_t windowId, float dstAlpha)
-{
-    auto node = windowRoot_->GetWindowNode(windowId);
-    if (node == nullptr) {
-        WLOGFE("could not find window");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    WLOGFI("WindowEffect WindowController SetAlpha alpha: %{public}f", dstAlpha);
-    node->SetAlpha(dstAlpha);
-
     FlushWindowInfo(windowId);
     return WMError::WM_OK;
 }
@@ -445,44 +502,18 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
 void WindowController::ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo)
 {
     DisplayId displayId = displayInfo->GetDisplayId();
-    auto iter = curDisplayInfo_.find(displayId);
-    if (iter != curDisplayInfo_.end()) {
-        auto lastDisplayInfo = iter->second;
-        uint32_t lastDisplayWidth = static_cast<uint32_t>(lastDisplayInfo->GetWidth());
-        uint32_t lastDisplayHeight = static_cast<uint32_t>(lastDisplayInfo->GetHeight());
-        auto statusBarNode = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
-        auto navigationBarNode =
-            windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR]);
-        systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][lastDisplayWidth][lastDisplayHeight]
-            = statusBarNode->GetWindowProperty()->GetWindowRect();
-        systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][lastDisplayWidth][lastDisplayHeight]
-            = navigationBarNode->GetWindowProperty()->GetWindowRect();
-    }
-    curDisplayInfo_[displayId] = displayInfo;
-    // Remove 'sysBarWinId_' after SystemUI resize 'systembar'
-    uint32_t width = static_cast<uint32_t>(displayInfo->GetWidth());
-    uint32_t height = static_cast<uint32_t>(displayInfo->GetHeight() * SYSTEM_BAR_HEIGHT_RATIO);
-    Rect newRect = { 0, 0, width, height };
-    uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
-    uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
-    auto statusBarRectIter =
-        systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].find(displayHeight);
-    if (statusBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_STATUS_BAR][displayWidth].end()) {
-        newRect = statusBarRectIter->second;
-    }
+    auto width = static_cast<uint32_t>(displayInfo->GetWidth());
+    auto height = static_cast<uint32_t>(displayInfo->GetHeight());
     const auto& statusBarNode = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR]);
-    if (statusBarNode->GetDisplayId() == displayId) {
+    if (statusBarNode != nullptr && statusBarNode->GetDisplayId() == displayId) {
+        auto statusBarHeight = statusBarNode->GetWindowRect().height_;
+        Rect newRect = { 0, 0, width, statusBarHeight };
         ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
     }
-
-    newRect = { 0, displayInfo->GetHeight() - static_cast<int32_t>(height), width, height };
-    auto navigationBarRectIter =
-        systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].find(displayHeight);
-    if (navigationBarRectIter != systemBarRect_[WindowType::WINDOW_TYPE_NAVIGATION_BAR][displayWidth].end()) {
-        newRect = navigationBarRectIter->second;
-    }
     const auto& naviBarNode = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR]);
-    if (naviBarNode->GetDisplayId() == displayId) {
+    if (naviBarNode != nullptr && naviBarNode->GetDisplayId() == displayId) {
+        auto naviBarHeight = naviBarNode->GetWindowRect().height_;
+        Rect newRect = { 0, static_cast<int32_t>(height - naviBarHeight), width, naviBarHeight };
         ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
     }
 }
@@ -493,6 +524,10 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     if (displayInfo == nullptr) {
         WLOGFE("get display failed");
         return;
+    }
+    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayInfo->GetDisplayId());
+    if (windowNodeContainer != nullptr) {
+        windowNodeContainer->BeforeProcessWindowAvoidAreaChangeWhenDisplayChange();
     }
     DisplayId displayId = displayInfo->GetDisplayId();
     switch (type) {
@@ -510,6 +545,9 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
         }
     }
     FlushWindowInfoWithDisplayId(displayId);
+    if (windowNodeContainer != nullptr) {
+        windowNodeContainer->ProcessWindowAvoidAreaChangeWhenDisplayChange();
+    }
     WLOGFI("Finish ProcessDisplayChange");
 }
 
@@ -608,10 +646,9 @@ WMError WindowController::SetWindowAnimationController(const sptr<RSIWindowAnima
     return RemoteAnimation::SetWindowAnimationController(controller);
 }
 
-std::vector<Rect> WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
+AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) const
 {
-    std::vector<Rect> avoidArea = windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
-    return avoidArea;
+    return windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
 }
 
 WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
@@ -622,7 +659,7 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
         return WMError::WM_ERROR_NULLPTR;
     }
     if (!node->currentVisibility_) {
-        WLOGFE("this window is not visibile and not in window tree, windowId: %{public}u", windowId);
+        WLOGFE("this window is not visible and not in window tree, windowId: %{public}u", windowId);
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
@@ -688,17 +725,6 @@ WMError WindowController::ToggleShownStateForAllAppWindows()
         return WMError::WM_DO_NOTHING;
     }
     return windowRoot_->ToggleShownStateForAllAppWindows();
-}
-
-WMError WindowController::MaxmizeWindow(uint32_t windowId)
-{
-    WMError ret = SetWindowMode(windowId, WindowMode::WINDOW_MODE_FULLSCREEN);
-    if (ret != WMError::WM_OK) {
-        return ret;
-    }
-    ret = windowRoot_->MaxmizeWindow(windowId);
-    FlushWindowInfo(windowId);
-    return ret;
 }
 
 WMError WindowController::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
@@ -778,18 +804,33 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
     }
     WLOGFI("window: [%{public}s, %{public}u] update property for action: %{public}u", node->GetWindowName().c_str(),
         node->GetWindowId(), static_cast<uint32_t>(action));
+    WMError ret = WMError::WM_OK;
     switch (action) {
         case PropertyChangeAction::ACTION_UPDATE_RECT: {
             node->SetDecoStatus(property->GetDecoStatus());
             node->SetOriginRect(property->GetOriginRect());
             node->SetDragType(property->GetDragType());
-            return ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
+            ret = ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
+            if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && ret == WMError::WM_OK &&
+                callingWindowId_ != 0u && !WindowHelper::IsEmptyRect(callingWindowRestoringRect_)) {
+                if (property->GetWindowSizeChangeReason() != WindowSizeChangeReason::MOVE) {
+                    callingWindowId_ = 0u;
+                    callingWindowRestoringRect_ = { 0, 0, 0, 0 };
+                } else {
+                    auto windowRect = node->GetWindowRect();
+                    callingWindowRestoringRect_.posX_ = windowRect.posX_;
+                    callingWindowRestoringRect_.posY_ = windowRect.posY_;
+                }
+            }
+            break;
         }
         case PropertyChangeAction::ACTION_UPDATE_MODE: {
-            return SetWindowMode(windowId, property->GetWindowMode());
+            ret = SetWindowMode(windowId, property->GetWindowMode());
+            break;
         }
         case PropertyChangeAction::ACTION_UPDATE_FLAGS: {
-            return SetWindowFlags(windowId, property->GetWindowFlags());
+            ret = SetWindowFlags(windowId, property->GetWindowFlags());
+            break;
         }
         case PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS: {
             auto& props = property->GetSystemBarProperty();
@@ -815,8 +856,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         }
         case PropertyChangeAction::ACTION_UPDATE_ORIENTATION: {
             node->SetRequestedOrientation(property->GetRequestedOrientation());
-            if (WindowHelper::IsMainWindow(node->GetWindowType()) &&
-                node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            if (WindowHelper::IsMainFullScreenWindow(node->GetWindowType(), node->GetWindowMode())) {
                 DisplayManagerServiceInner::GetInstance().
                     SetOrientationFromWindow(node->GetDisplayId(), property->GetRequestedOrientation());
             }
@@ -846,10 +886,34 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             property->GetTouchHotAreas(rects);
             return UpdateTouchHotAreas(node, rects);
         }
+        case PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG: {
+            node->GetWindowProperty()->SetAnimationFlag(property->GetAnimationFlag());
+            UpdateWindowAnimation(node);
+            break;
+        }
+        case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY: {
+            node->SetTransform(property->GetTransform());
+            node->SetWindowSizeChangeReason(WindowSizeChangeReason::TRANSFORM);
+            ret = UpdateTransform(windowId);
+            break;
+        }
         default:
             break;
     }
-    return WMError::WM_OK;
+    if (ret == WMError::WM_OK) {
+        NotifyWindowPropertyChanged(node);
+    }
+    return ret;
+}
+
+void WindowController::NotifyWindowPropertyChanged(const sptr<WindowNode>& node)
+{
+    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (windowNodeContainer == nullptr) {
+        WLOGFE("windowNodeContainer is null");
+        return;
+    }
+    windowNodeContainer->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
 }
 
 WMError WindowController::GetModeChangeHotZones(DisplayId displayId,
@@ -871,17 +935,34 @@ WMError WindowController::UpdateTouchHotAreas(const sptr<WindowNode>& node, cons
     }
     WLOGFI("windowId: %{public}u, size: %{public}d, rects: %{public}s",
         node->GetWindowId(), static_cast<int32_t>(rects.size()), oss.str().c_str());
-    Rect windowRect = node->GetWindowRect();
-    std::vector<Rect> hotAreas;
-    if (rects.size() > TOIUCH_HOT_AREA_MAX_NUM || !WindowHelper::CalculateTouchHotAreas(windowRect, rects, hotAreas)) {
+    if (rects.size() > TOUCH_HOT_AREA_MAX_NUM) {
+        WLOGFE("the number of touch hot areas exceeds the maximum");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    node->GetWindowProperty()->SetTouchHotAreas(rects);
+
+    std::vector<Rect> hotAreas;
     if (rects.empty()) {
         hotAreas.emplace_back(node->GetFullWindowHotArea());
+    } else {
+        Rect windowRect = node->GetWindowRect();
+        if (!WindowHelper::CalculateTouchHotAreas(windowRect, rects, hotAreas)) {
+            WLOGFE("the requested touch hot areas are incorrect");
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
     }
+    node->GetWindowProperty()->SetTouchHotAreas(rects);
     node->SetTouchHotAreas(hotAreas);
     FlushWindowInfo(node->GetWindowId());
+    return WMError::WM_OK;
+}
+
+WMError WindowController::UpdateTransform(uint32_t windowId)
+{
+    WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_TRANSFORM);
+    if (res != WMError::WM_OK) {
+        return res;
+    }
+    FlushWindowInfo(windowId);
     return WMError::WM_OK;
 }
 
@@ -954,6 +1035,15 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
             return;
         }
     }
+}
+
+Orientation WindowController::GetWindowPreferredOrientation(DisplayId displayId)
+{
+    sptr<WindowNodeContainer> windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
+    if (windowNodeContainer != nullptr) {
+        return windowNodeContainer->GetWindowPreferredOrientation();
+    }
+    return Orientation::UNSPECIFIED;
 }
 } // namespace OHOS
 } // namespace Rosen

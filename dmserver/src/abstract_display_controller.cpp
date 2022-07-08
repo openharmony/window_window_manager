@@ -16,13 +16,13 @@
 #include "abstract_display_controller.h"
 
 #include <cinttypes>
+#include <hitrace_meter.h>
 #include <surface.h>
 
 #include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
 #include "screen_group.h"
 #include "window_manager_hilog.h"
-#include "wm_trace.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -108,7 +108,7 @@ std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(Di
 {
     sptr<AbstractDisplay> abstractDisplay = GetAbstractDisplay(displayId);
     if (abstractDisplay == nullptr) {
-        WLOGFE("GetScreenSnapshot: GetAbstarctDisplay failed");
+        WLOGFE("GetScreenSnapshot: GetAbstractDisplay failed");
         return nullptr;
     }
     ScreenId dmsScreenId = abstractDisplay->GetAbstractScreenId();
@@ -357,7 +357,7 @@ void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScr
 
 void AbstractDisplayController::ProcessDisplaySizeChange(sptr<AbstractScreen> absScreen)
 {
-    WM_SCOPED_TRACE("dms:ProcessDisplaySizeChange(%" PRIu64")", absScreen->dmsId_);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:ProcessDisplaySizeChange(%" PRIu64")", absScreen->dmsId_);
     sptr<SupportedScreenModes> info = absScreen->GetActiveScreenMode();
     if (info == nullptr) {
         WLOGE("cannot get active screen info.");
@@ -531,13 +531,13 @@ void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> abs
 
 void AbstractDisplayController::SetFreeze(std::vector<DisplayId> displayIds, bool toFreeze)
 {
-    WM_SCOPED_TRACE("dms:SetAllFreeze");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetAllFreeze");
     DisplayStateChangeType type = toFreeze ? DisplayStateChangeType::FREEZE : DisplayStateChangeType::UNFREEZE;
     DisplayChangeEvent event
         = toFreeze ? DisplayChangeEvent::DISPLAY_FREEZED : DisplayChangeEvent::DISPLAY_UNFREEZED;
     for (DisplayId displayId : displayIds) {
         sptr<AbstractDisplay> abstractDisplay;
-        WM_SCOPED_TRACE("dms:SetFreeze(%" PRIu64")", displayId);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetFreeze(%" PRIu64")", displayId);
         {
             WLOGI("setfreeze display %{public}" PRIu64"", displayId);
             std::lock_guard<std::recursive_mutex> lock(mutex_);

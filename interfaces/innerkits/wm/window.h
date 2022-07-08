@@ -28,6 +28,7 @@ namespace OHOS::MMI {
     struct IInputEventConsumer;
     class PointerEvent;
     class KeyEvent;
+    class AxisEvent;
 }
 namespace OHOS::AppExecFwk {
     class Configuration;
@@ -59,6 +60,7 @@ public:
     virtual void AfterFocused() = 0;
     virtual void AfterUnfocused() = 0;
     virtual void ForegroundFailed() {}
+    virtual void ForegroundInvalidMode() {}
     virtual void AfterActive() {}
     virtual void AfterInactive() {}
 };
@@ -71,7 +73,7 @@ public:
 
 class IAvoidAreaChangedListener : virtual public RefBase {
 public:
-    virtual void OnAvoidAreaChanged(std::vector<Rect> avoidAreas) = 0;
+    virtual void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) = 0;
 };
 
 class IWindowDragListener : virtual public RefBase {
@@ -120,15 +122,42 @@ public:
     virtual void OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
 };
 
+class IInputEventConsumer {
+public:
+    virtual bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const = 0;
+    virtual bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const = 0;
+    virtual bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const = 0;
+};
+
 class ITouchOutsideListener : virtual public RefBase {
 public:
-    virtual void OnTouchOutside() = 0;
+    virtual void OnTouchOutside() const = 0;
+};
+
+class IAnimationTransitionController : virtual public RefBase {
+public:
+    virtual void AnimationForShown() = 0;
+    virtual void AnimationForHidden() = 0;
 };
 
 class Window : public RefBase {
 public:
+    /**
+     * @brief create window, include main_window/sub_window/system_window
+     *
+     * @param windowName window name, identify window instance
+     * @param option window propertion
+     * @param context ability context
+     * @return sptr<Window> If create window success,return window instance;Otherwise, return nullptr
+     */
     static sptr<Window> Create(const std::string& windowName,
         sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
+    /**
+     * @brief find window by windowName
+     *
+     * @param windowName
+     * @return sptr<Window> Return the window instance founded
+     */
     static sptr<Window> Find(const std::string& windowName);
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
@@ -155,7 +184,9 @@ public:
     virtual WMError SetWindowType(WindowType type) = 0;
     virtual WMError SetWindowMode(WindowMode mode) = 0;
     virtual WMError SetWindowBackgroundBlur(WindowBlurLevel level) = 0;
-    virtual WMError SetAlpha(float alpha) = 0;
+    virtual void SetAlpha(float alpha) = 0;
+    virtual void SetTransform(const Transform& trans) = 0;
+    virtual Transform GetTransform() const = 0;
     virtual WMError AddWindowFlag(WindowFlag flag) = 0;
     virtual WMError RemoveWindowFlag(WindowFlag flag) = 0;
     virtual WMError SetWindowFlags(uint32_t flags) = 0;
@@ -164,8 +195,8 @@ public:
     virtual WMError SetLayoutFullScreen(bool status) = 0;
     virtual WMError SetFullScreen(bool status) = 0;
     virtual WMError Destroy() = 0;
-    virtual WMError Show(uint32_t reason = 0) = 0;
-    virtual WMError Hide(uint32_t reason = 0) = 0;
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) = 0;
+    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false) = 0;
 
     virtual WMError MoveTo(int32_t x, int32_t y) = 0;
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
@@ -184,16 +215,18 @@ public:
     virtual void DisableAppWindowDecor() = 0;
 
     virtual WMError RequestFocus() const = 0;
+    virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;
     // AddInputEventListener is for api 7
+    virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) = 0;
     virtual void AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) = 0;
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) = 0;
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
     virtual void RequestFrame() = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
 
-    virtual void RegisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) = 0;
+    virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
-    virtual void UnregisterLifeCycleListener(sptr<IWindowLifeCycle>& listener) = 0;
+    virtual void UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
     virtual void UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
     virtual void UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
@@ -201,23 +234,24 @@ public:
     virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
-    virtual void RegisterInputEventListener(sptr<IInputEventListener>& listener) = 0;
-    virtual void UnregisterInputEventListener(sptr<IInputEventListener>& listener) = 0;
+    virtual void RegisterInputEventListener(const sptr<IInputEventListener>& listener) = 0;
+    virtual void UnregisterInputEventListener(const sptr<IInputEventListener>& listener) = 0;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual void RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
     virtual void UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
+    virtual void RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) = 0;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
-        NativeValue* storage, bool isdistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;
+        NativeValue* storage, bool isDistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;
     virtual std::string GetContentInfo() = 0;
     virtual Ace::UIContent* GetUIContent() const = 0;
     virtual void OnNewWant(const AAFwk::Want& want) = 0;
     virtual void SetRequestedOrientation(Orientation) = 0;
     virtual Orientation GetRequestedOrientation() = 0;
-    virtual void SetModeSupportInfo(uint32_t modeSupportInfo) = 0;
-    virtual uint32_t GetModeSupportInfo() const = 0;
+    virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) = 0;
+    virtual uint32_t GetRequestModeSupportInfo() const = 0;
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) = 0;
     virtual void GetRequestedTouchHotAreas(std::vector<Rect>& rects) const = 0;
 

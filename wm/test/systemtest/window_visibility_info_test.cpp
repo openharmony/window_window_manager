@@ -35,8 +35,8 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowVisibilityInfoTest"};
 }
 
-using utils = WindowTestUtils;
-constexpr int WAIT_ASYNC_MS_TIME_OUT = 1500; // 1500ms
+using Utils = WindowTestUtils;
+constexpr int WAIT_ASYNC_MS_TIME_OUT = 2000; // 2000ms
 
 #define CHECK_DISPLAY_POWER_STATE_RETURN()                              \
     do {                                                                \
@@ -110,9 +110,9 @@ public:
     }
 
     static void WaitForCallback();
-    utils::TestWindowInfo fullScreenAppInfo_;
-    utils::TestWindowInfo floatAppInfo_;
-    utils::TestWindowInfo subAppInfo_;
+    Utils::TestWindowInfo fullScreenAppInfo_;
+    Utils::TestWindowInfo floatAppInfo_;
+    Utils::TestWindowInfo subAppInfo_;
 };
 
 void WindowVisibilityInfoTest::SetUpTestCase()
@@ -123,7 +123,7 @@ void WindowVisibilityInfoTest::SetUpTestCase()
         display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0,
                         static_cast<uint32_t>(display->GetWidth()), static_cast<uint32_t>(display->GetHeight())};
-    utils::InitByDisplayRect(displayRect);
+    Utils::InitByDisplayRect(displayRect);
     WindowManager::GetInstance().RegisterVisibilityChangedListener(visibilityChangedListener_);
     DisplayManager::GetInstance().RegisterDisplayPowerEventListener(displayPowerEventListener_);
 }
@@ -138,7 +138,7 @@ void WindowVisibilityInfoTest::SetUp()
 {
     fullScreenAppInfo_ = {
         .name = "FullWindow",
-        .rect = utils::customAppRect_,
+        .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = false,
@@ -147,7 +147,7 @@ void WindowVisibilityInfoTest::SetUp()
     };
     floatAppInfo_ = {
         .name = "ParentWindow",
-        .rect = utils::customAppRect_,
+        .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
@@ -156,7 +156,7 @@ void WindowVisibilityInfoTest::SetUp()
     };
     subAppInfo_ = {
         .name = "SubWindow",
-        .rect = utils::customAppRect_,
+        .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
@@ -189,12 +189,12 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, Function | Medium
 {
     floatAppInfo_.name = "window1";
     floatAppInfo_.rect = {250, 150, 300, 500};
-    sptr<Window> window1 = utils::CreateTestWindow(floatAppInfo_);
+    sptr<Window> window1 = Utils::CreateTestWindow(floatAppInfo_);
 
     subAppInfo_.name = "subWindow1";
     subAppInfo_.rect = {400, 200, 100, 100};
     subAppInfo_.parentName = window1->GetWindowName();
-    sptr<Window> subWindow1 = utils::CreateTestWindow(subAppInfo_);
+    sptr<Window> subWindow1 = Utils::CreateTestWindow(subAppInfo_);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
     WaitForCallback();
@@ -251,10 +251,10 @@ end:
 HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest02, Function | MediumTest | Level1)
 {
     fullScreenAppInfo_.name = "window1";
-    sptr<Window> window1 = utils::CreateTestWindow(fullScreenAppInfo_);
+    sptr<Window> window1 = Utils::CreateTestWindow(fullScreenAppInfo_);
 
     fullScreenAppInfo_.name = "window2";
-    sptr<Window> window2 = utils::CreateTestWindow(fullScreenAppInfo_);
+    sptr<Window> window2 = Utils::CreateTestWindow(fullScreenAppInfo_);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());
     WaitForCallback();
@@ -282,20 +282,20 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest03, Function | Medium
 {
     floatAppInfo_.name = "window1";
     floatAppInfo_.rect = {0, 0, 300, 600};
-    sptr<Window> window1 = utils::CreateTestWindow(floatAppInfo_);
+    sptr<Window> window1 = Utils::CreateTestWindow(floatAppInfo_);
 
     subAppInfo_.name = "subWindow1";
     subAppInfo_.rect = {400, 200, 100, 100};
     subAppInfo_.parentName = window1->GetWindowName();
-    sptr<Window> subWindow1 = utils::CreateTestWindow(subAppInfo_);
+    sptr<Window> subWindow1 = Utils::CreateTestWindow(subAppInfo_);
 
     floatAppInfo_.name = "window2";
-    sptr<Window> window2 = utils::CreateTestWindow(floatAppInfo_);
+    sptr<Window> window2 = Utils::CreateTestWindow(floatAppInfo_);
 
     subAppInfo_.name = "subWindow2";
     subAppInfo_.type = WindowType::WINDOW_TYPE_MEDIA;
     subAppInfo_.parentName = window2->GetWindowName();
-    sptr<Window> subWindow2 = utils::CreateTestWindow(subAppInfo_);
+    sptr<Window> subWindow2 = Utils::CreateTestWindow(subAppInfo_);
 
     ASSERT_EQ(WMError::WM_OK, window2->Show());
     WaitForCallback();
@@ -326,6 +326,49 @@ end:
     subWindow1->Destroy();
     window2->Destroy();
     subWindow2->Destroy();
+}
+
+/**
+* @tc.name: WindowVisibilityInfoTest04
+* @tc.desc: add two main window and sub windows and test callback
+* @tc.type: FUNC
+*/
+HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest04, Function | MediumTest | Level1)
+{
+    floatAppInfo_.name = "window1";
+    floatAppInfo_.rect = {0, 0, 300, 600};
+    sptr<Window> window1 = Utils::CreateTestWindow(floatAppInfo_);
+
+    floatAppInfo_.name = "window2";
+    floatAppInfo_.rect = {0, 0, 300, 300};
+    sptr<Window> window2 = Utils::CreateTestWindow(floatAppInfo_);
+
+    floatAppInfo_.name = "window3";
+    floatAppInfo_.rect = {0, 300, 300, 300};
+    sptr<Window> window3 = Utils::CreateTestWindow(floatAppInfo_);
+
+    ASSERT_EQ(WMError::WM_OK, window1->Show());
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
+    ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
+
+    ASSERT_EQ(WMError::WM_OK, window2->Show());
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
+    ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
+
+    ASSERT_EQ(WMError::WM_OK, window3->Show());
+    WaitForCallback();
+    CHECK_DISPLAY_POWER_STATE_RETURN();
+    ASSERT_EQ(2, visibilityChangedListener_->windowVisibilityInfos_.size());
+    ResetCallbackCalledFLag();
+
+end:
+    window1->Destroy();
+    window2->Destroy();
+    window3->Destroy();
 }
 }
 } // namespace Rosen

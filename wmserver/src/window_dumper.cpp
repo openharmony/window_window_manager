@@ -84,7 +84,7 @@ WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
     oss << "-------------------------------------ScreenGroup " << screenGroupId
         << "-------------------------------------"
         << std::endl;
-    oss << "WindowName           DisplayId Pid  WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
+    oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
         << std::endl;
     std::vector<sptr<WindowNode>> windowNodes;
     windowNodeContainer->TraverseContainer(windowNodes);
@@ -100,7 +100,7 @@ WMError WindowDumper::DumpScreenGroupWindowInfo(ScreenId screenGroupId,
         // std::setw is used to set the output width and different width values are set to keep the format aligned.
         oss << std::left << std::setw(21) << windowName
             << std::left << std::setw(10) << windowNode->GetDisplayId()
-            << std::left << std::setw(5) << windowNode->GetCallingPid()
+            << std::left << std::setw(8) << windowNode->GetCallingPid()
             << std::left << std::setw(6) << windowNode->GetWindowId()
             << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowType())
             << std::left << std::setw(5) << static_cast<uint32_t>(windowNode->GetWindowMode())
@@ -166,6 +166,7 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
     }
     Rect rect = node->GetWindowRect();
     std::string isShown_ = node->startingWindowShown_ ? "true" : "false";
+    std::string isVisible = node->isVisible_ ? "true" : "false";
     std::ostringstream oss;
     oss << "WindowName: " << node->GetWindowName()  << std::endl;
     oss << "DisplayId: " << node->GetDisplayId() << std::endl;
@@ -176,6 +177,7 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
     oss << "Flag: " << node->GetWindowFlags() << std::endl;
     oss << "Orientation: " << static_cast<uint32_t>(node->GetRequestedOrientation()) << std::endl;
     oss << "IsStartingWindow: " << isShown_ << std::endl;
+    oss << "IsVisible: " << isVisible << std::endl;
     oss << "WindowRect: " << "[ "
         << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_
         << " ]" << std::endl;
@@ -245,7 +247,7 @@ void WindowDumper::ShowIllegalArgsInfo(std::string& dumpInfo, WMError errCode) c
             dumpInfo.append("The arguments are illegal and you can enter '-h' for help.");
             break;
         case WMError::WM_ERROR_NULLPTR:
-            dumpInfo.append("The window is invalid,  you can enter '-a' to get valid window id.");
+            dumpInfo.append("The window is invalid, you can enter '-a' to get valid window id.");
             break;
         default:
             break;

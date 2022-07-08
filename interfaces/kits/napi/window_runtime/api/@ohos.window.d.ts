@@ -83,8 +83,90 @@ declare namespace window {
     /**
      * area for system gesture
      */
-    TYPE_SYSTEM_GESTURE
+    TYPE_SYSTEM_GESTURE,
+
+    /**
+     * area for soft input keyboard
+     * @since 9
+     */
+    TYPE_KEYBOARD
   }
+
+  /**
+   * Describes the scale Transition Options of window
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
+   * @systemapi
+   */
+  declare interface ScaleOptions {
+    /**
+     * The scale param of x direction. Default is 1.f
+     */
+    x?: number;
+    /**
+     * The scale param of y direction. Default is 1.f
+     */
+    y?: number;
+    /**
+     * The scale param of pivot point of x. Default is 0.5f, Interval is 0.f - 1.f
+     */
+    pivotX?: number;
+    /**
+     * The scale param of pivot point of y. Default is 0.5f, Interval is 0.f - 1.f
+     */
+    pivotY?: number;
+  }
+
+  /**
+   * Describes the rotate Transition Options of window
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
+   * @systemapi
+   */
+  declare interface RotateOptions {
+    /**
+     * The rotate degree of x direction. Default value is 0.f
+     */
+    x?: number;
+    /**
+     * The rotate degree of y direction. Default value is 0.f
+     */
+    y?: number;
+    /**
+     * The rotate degree of z direction. Default value is 0.f
+     */
+    z?: number;
+    /**
+     * The param of pivot point of x. Default is 0.5f, Interval is 0.f - 1.f
+     */
+    pivotX?: number;
+    /**
+     * The param of pivot point of y. Default is 0.5f, Interval is 0.f - 1.f
+     */
+    pivotY?: number;
+  }
+
+  /**
+   * Describes the translate Transition Options of window
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
+   * @systemapi
+   */
+  declare interface TranslateOptions {
+    /**
+    * The translate pixel param of x direction. Default is 0.f
+    */
+    x?: number;
+    /**
+     * The translate pixel param of y direction. Default is 0.f
+     */
+    y?: number;
+    /**
+     * The translate pixel param of z direction. Default is 0.f
+     */
+    z?: number;
+  }
+
   /**
    * Describes the window mode of an application
    * @systemapi Hide this for inner system use.
@@ -375,6 +457,12 @@ declare namespace window {
    * @since 7
    */
   interface AvoidArea {
+    /**
+     * Whether avoidArea is visible on screen
+     * @since 9
+     */
+    visible: boolean;
+
     /**
      * Rectangle on the left of the screen
      */
@@ -743,6 +831,7 @@ declare namespace window {
      * @param type: 'systemAvoidAreaChange'
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
+     * @deprecated since 9, please use on_avoidAreaChange instead.
      */
     on(type: 'systemAvoidAreaChange', callback: Callback<AvoidArea>): void;
 
@@ -751,8 +840,25 @@ declare namespace window {
      * @param type: 'systemAvoidAreaChange'
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
+     * @deprecated since 9, please use off_avoidAreaChange instead.
      */
     off(type: 'systemAvoidAreaChange', callback?: Callback<AvoidArea>): void;
+
+    /**
+     * register the callback of avoidAreaChange
+     * @param type: 'avoidAreaChange'
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    on(type: 'avoidAreaChange', callback: Callback<{ type: AvoidAreaType, area: AvoidArea }>): void;
+
+    /**
+     * unregister the callback of avoidAreaChange
+     * @param type: 'avoidAreaChange'
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    off(type: 'avoidAreaChange', callback?: Callback<{ type: AvoidAreaType, area: AvoidArea }>): void;
 
     /**
      * Whether the window supports thr wide gamut setting.
@@ -919,6 +1025,20 @@ declare namespace window {
     setTransparent(isTransparent: boolean, callback: AsyncCallback<void>): void;
 
     /**
+     * Set the preferred orientation config of a window
+     * @param orientation the orientation config of a window
+     * @since 9
+     */
+    setPreferredOrientation(orientation: Orientation): Promise<void>;
+
+    /**
+     * Set the preferred orientation config of a window
+     * @param orientation the orientation config of a window
+     * @since 9
+     */
+    setPreferredOrientation(orientation: Orientation, callback: AsyncCallback<void>): void;
+
+    /**
      * disable window decoration. It must be called before loadContent.
      * @systemapi
      * @since 9
@@ -941,7 +1061,7 @@ declare namespace window {
      * @systemapi
      * @since 9
      */
-     setForbidSplitMove(isForbidSplitMove: boolean, callback: AsyncCallback<void>): void;
+    setForbidSplitMove(isForbidSplitMove: boolean, callback: AsyncCallback<void>): void;
 
     /**
      * set the flag of the window is forbidden to move in split screen mode
@@ -950,7 +1070,35 @@ declare namespace window {
      * @systemapi
      * @since 9
      */
-     setForbidSplitMove(isForbidSplitMove: boolean): Promise<void>;
+    setForbidSplitMove(isForbidSplitMove: boolean): Promise<void>;
+    /**
+    * Sets opacity of window
+    * @param opacity Interval is 0.f-1.f.
+    * @systemapi
+    * @since 9
+    */
+    setOpacitySync(opacity: number): void;
+    /**
+    * Sets scale options of window.
+    * @param scaleOptions scale param of window.
+    * @systemapi
+    * @since 9
+    */
+    setScaleSync(scaleOptions: ScaleOptions): void;
+    /**
+    * Sets rotate options of window.
+    * @param rotateOptions rotate param of window.
+    * @systemapi
+    * @since 9
+    */
+    setRotateSync(rotateOptions: RotateOptions): void;
+    /**
+    * Sets whether is transparent or not.
+    * @param translateOptions translate param of window.
+    * @systemapi
+    * @since 9
+    */
+    setTranslateSync(translateOptions: TranslateOptions): void;
   }
 
   enum WindowStageEventType {
@@ -1042,6 +1190,26 @@ declare namespace window {
      * @since 8
      */
     off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void;
+  }
+
+  /**
+   * screen orientation
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
+   */
+  enum Orientation {
+    UNSPECIFIED = 0,
+    PORTRAIT = 1,
+    LANDSCAPE = 2,
+    PORTRAIT_INVERTED = 3,
+    LANDSCAPE_INVERTED = 4,
+    AUTO_ROTATION = 5,
+    AUTO_ROTATION_PORTRAIT = 6,
+    AUTO_ROTATION_LANDSCAPE = 7,
+    AUTO_ROTATION_RESTRICTED = 8,
+    AUTO_ROTATION_PORTRAIT_RESTRICTED = 9,
+    AUTO_ROTATION_LANDSCAPE_RESTRICTED = 10,
+    LOCKED = 11,
   }
 }
 

@@ -50,16 +50,17 @@ public:
         TRANS_ID_MINIMIZE_ALL_APP_WINDOWS,
         TRANS_ID_TOGGLE_SHOWN_STATE_FOR_ALL_APP_WINDOWS,
         TRANS_ID_SET_BACKGROUND_BLUR,
-        TRANS_ID_SET_APLPHA,
+        TRANS_ID_SET_ALPHA,
         TRANS_ID_UPDATE_LAYOUT_MODE,
-        TRANS_ID_MAXMIZE_WINDOW,
         TRANS_ID_UPDATE_PROPERTY,
-        TRANS_ID_GET_ACCCESSIBILITY_WIDDOW_INFO_ID,
+        TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ANIMATION_SET_CONTROLLER,
         TRANS_ID_GET_SYSTEM_CONFIG,
         TRANS_ID_NOTIFY_WINDOW_TRANSITION,
         TRANS_ID_GET_FULLSCREEN_AND_SPLIT_HOT_ZONE,
         TRANS_ID_GET_ANIMATION_CALLBACK,
+        TRANS_ID_UPDATE_AVOIDAREA_LISTENER,
+        TRANS_ID_UPDATE_RS_TREE,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -69,14 +70,12 @@ public:
     virtual WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) = 0;
     virtual WMError RequestFocus(uint32_t windowId) = 0;
     virtual WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) = 0;
-    virtual WMError SetAlpha(uint32_t windowId, float alpha) = 0;
-    virtual std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
+    virtual AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
     virtual void ProcessPointDown(uint32_t windowId, bool isStartDrag) = 0;
     virtual void ProcessPointUp(uint32_t windowId) = 0;
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError ToggleShownStateForAllAppWindows() = 0;
-    virtual WMError MaxmizeWindow(uint32_t windowId) = 0;
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode) = 0;
     virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) = 0;
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -91,6 +90,8 @@ public:
     virtual WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) = 0;
     virtual void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback) = 0;
+    virtual WMError UpdateAvoidAreaListener(uint32_t windowId, bool haveListener) = 0;
+    virtual WMError UpdateRsTree(uint32_t windowId, bool isAdd) = 0;
 };
 }
 }

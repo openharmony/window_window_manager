@@ -45,7 +45,7 @@ bool WindowVisibilityInfo::Marshalling(Parcel &parcel) const
 
 WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
 {
-    WindowVisibilityInfo* windowVisibilityInfo = new (std::nothrow) WindowVisibilityInfo();
+    auto windowVisibilityInfo = new (std::nothrow) WindowVisibilityInfo();
     if (windowVisibilityInfo == nullptr) {
         WLOGFE("window visibility info is nullptr.");
         return nullptr;
@@ -71,7 +71,7 @@ bool WindowInfo::Marshalling(Parcel &parcel) const
 
 WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
 {
-    WindowInfo* windowInfo = new (std::nothrow) WindowInfo();
+    auto windowInfo = new (std::nothrow) WindowInfo();
     if (windowInfo == nullptr) {
         WLOGFE("window info is nullptr.");
         return nullptr;
@@ -97,7 +97,7 @@ bool AccessibilityWindowInfo::Marshalling(Parcel &parcel) const
 
 AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel &parcel)
 {
-    AccessibilityWindowInfo* accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
+    auto accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
     if (accessibilityWindowInfo == nullptr) {
         WLOGFE("accessibility window info is nullptr.");
         return nullptr;
@@ -120,7 +120,7 @@ bool FocusChangeInfo::Marshalling(Parcel &parcel) const
 
 FocusChangeInfo* FocusChangeInfo::Unmarshalling(Parcel &parcel)
 {
-    FocusChangeInfo* focusChangeInfo = new FocusChangeInfo();
+    auto focusChangeInfo = new FocusChangeInfo();
     bool res = parcel.ReadUint32(focusChangeInfo->windowId_) && parcel.ReadUint64(focusChangeInfo->displayId_) &&
         parcel.ReadInt32(focusChangeInfo->pid_) && parcel.ReadInt32(focusChangeInfo->uid_);
     if (!res) {
@@ -149,10 +149,11 @@ public:
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints);
     void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type);
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
+    void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     static inline SingletonDelegator<WindowManager> delegator_;
 
     bool isHandlerRunning_ = false;
-    std::shared_ptr<EventHandler> listenertHandler_;
+    std::shared_ptr<EventHandler> listenerHandler_;
     std::recursive_mutex mutex_;
     std::vector<sptr<IFocusChangedListener>> focusChangedListeners_;
     sptr<WindowManagerAgent> focusChangedListenerAgent_;
@@ -162,6 +163,8 @@ public:
     sptr<WindowManagerAgent> windowUpdateListenerAgent_;
     std::vector<sptr<IVisibilityChangedListener>> windowVisibilityListeners_;
     sptr<WindowManagerAgent> windowVisibilityListenerAgent_;
+    std::vector<sptr<ICameraFloatWindowChangedListener>> cameraFloatWindowChangedListeners_;
+    sptr<WindowManagerAgent> cameraFloatWindowChangedListenerAgent_;
 };
 
 void WindowManager::Impl::PostTask(ListenerTaskCallback &&callback, EventPriority priority = EventPriority::LOW,
@@ -170,11 +173,11 @@ void WindowManager::Impl::PostTask(ListenerTaskCallback &&callback, EventPriorit
     if (!isHandlerRunning_) {
         InitListenerHandler();
     }
-    if (listenertHandler_ == nullptr) {
+    if (listenerHandler_ == nullptr) {
         WLOGFE("listener handler is nullptr");
         return;
     }
-    bool ret = listenertHandler_->PostTask([this, callback]() {
+    bool ret = listenerHandler_->PostTask([this, callback]() {
             callback();
         }, name, 0, priority); // 0 is task delay time
     if (!ret) {
@@ -191,8 +194,8 @@ void WindowManager::Impl::InitListenerHandler()
         WLOGFE("init window manager callback runner failed.");
         return;
     }
-    listenertHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    if (listenertHandler_ == nullptr) {
+    listenerHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    if (listenerHandler_ == nullptr) {
         WLOGFE("init window manager callback handler failed.");
         return;
     }
@@ -273,13 +276,17 @@ void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
         }, EventPriority::LOW, "AccessibilityWindowInfo");
 }
 
-WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>())
+void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
+    WLOGFI("Camera float window, accessTokenId = %{public}u, isShowing = %{public}u", accessTokenId, isShowing);
+    PostTask([this, accessTokenId, isShowing]() mutable {
+            for (auto& listener : cameraFloatWindowChangedListeners_) {
+                listener->OnCameraFloatWindowChange(accessTokenId, isShowing);
+            }
+        }, EventPriority::LOW, "CameraFloatWindowStatus");
 }
 
-WindowManager::~WindowManager()
-{
-}
+WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>()) {}
 
 void WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener)
 {
@@ -470,6 +477,53 @@ void WindowManager::UnregisterVisibilityChangedListener(const sptr<IVisibilityCh
     }
 }
 
+void WindowManager::RegisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->cameraFloatWindowChangedListeners_.begin(),
+        pImpl_->cameraFloatWindowChangedListeners_.end(), listener);
+    if (iter != pImpl_->cameraFloatWindowChangedListeners_.end()) {
+        WLOGFI("Listener is already registered.");
+        return;
+    }
+    pImpl_->cameraFloatWindowChangedListeners_.push_back(listener);
+    if (pImpl_->cameraFloatWindowChangedListenerAgent_ == nullptr) {
+        pImpl_->cameraFloatWindowChangedListenerAgent_ = new WindowManagerAgent();
+        SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
+            pImpl_->cameraFloatWindowChangedListenerAgent_);
+    }
+}
+
+void WindowManager::UnregisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->cameraFloatWindowChangedListeners_.begin(),
+        pImpl_->cameraFloatWindowChangedListeners_.end(), listener);
+    if (iter == pImpl_->cameraFloatWindowChangedListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return;
+    }
+    pImpl_->cameraFloatWindowChangedListeners_.erase(iter);
+    if (pImpl_->cameraFloatWindowChangedListeners_.empty() &&
+        pImpl_->cameraFloatWindowChangedListenerAgent_ != nullptr) {
+        SingletonContainer::Get<WindowAdapter>().UnregisterWindowManagerAgent(
+            WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
+            pImpl_->cameraFloatWindowChangedListenerAgent_);
+        pImpl_->cameraFloatWindowChangedListenerAgent_ = nullptr;
+    }
+}
+
 void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const
 {
     if (focusChangeInfo == nullptr) {
@@ -517,6 +571,12 @@ WMError WindowManager::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>&
         WLOGFE("get window info failed");
     }
     return ret;
+}
+
+void WindowManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const
+{
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    pImpl_->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
 }
 } // namespace Rosen
 } // namespace OHOS

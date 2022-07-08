@@ -125,6 +125,11 @@ public:
     virtual void OnWindowUpdate(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) = 0;
 };
 
+class ICameraFloatWindowChangedListener : virtual public RefBase {
+public:
+    virtual void OnCameraFloatWindowChange(uint32_t accessTokenId, bool isShowing) = 0;
+};
+
 class WindowManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManager);
 friend class WindowManagerAgent;
@@ -137,6 +142,8 @@ public:
     void UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
     void RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
     void UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
+    void RegisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
+    void UnregisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
@@ -144,7 +151,7 @@ public:
 
 private:
     WindowManager();
-    ~WindowManager();
+    ~WindowManager() = default;
     class Impl;
     std::unique_ptr<Impl> pImpl_;
 
@@ -155,6 +162,7 @@ private:
     void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) const;
     void UpdateWindowVisibilityInfo(
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
+    void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const;
 };
 } // namespace Rosen
 } // namespace OHOS

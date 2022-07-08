@@ -31,6 +31,7 @@ void WindowProperty::SetWindowName(const std::string& name)
 
 void WindowProperty::SetWindowRect(const struct Rect& rect)
 {
+    recomputeTransformMat_ = true;
     windowRect_ = rect;
 }
 
@@ -51,7 +52,7 @@ void WindowProperty::SetWindowType(WindowType type)
 
 void WindowProperty::SetWindowMode(WindowMode mode)
 {
-    if (!WindowHelper::IsValidWindowMode(mode)) {
+    if (!WindowHelper::IsValidWindowMode(mode) || !WindowHelper::IsWindowModeSupported(modeSupportInfo_, mode)) {
         return;
     }
     if (!WindowHelper::IsSplitWindowMode(mode_)) {
@@ -62,6 +63,9 @@ void WindowProperty::SetWindowMode(WindowMode mode)
 
 void WindowProperty::SetLastWindowMode(WindowMode mode)
 {
+    if (!WindowHelper::IsWindowModeSupported(modeSupportInfo_, mode)) {
+        return;
+    }
     lastMode_ = mode;
 }
 
@@ -103,6 +107,32 @@ void WindowProperty::SetAlpha(float alpha)
     alpha_ = alpha;
 }
 
+void WindowProperty::SetTransform(const Transform& trans)
+{
+    recomputeTransformMat_ = true;
+    trans_ = trans;
+}
+
+void WindowProperty::ComputeTransform()
+{
+    if (recomputeTransformMat_ && (trans_ != Transform::Identity())) {
+        // Update transform matrix
+        transformMat_ = WindowHelper::ComputeRectTransformMat4(trans_, windowRect_);
+        // Update window plane
+        TransformHelper::Vector3 a = TransformHelper::Transform(
+            TransformHelper::Vector3 { static_cast<float>(windowRect_.posX_),
+            static_cast<float>(windowRect_.posY_), 0 }, transformMat_);
+        TransformHelper::Vector3 b = TransformHelper::Transform(
+            TransformHelper::Vector3 { static_cast<float>(windowRect_.posX_ + windowRect_.width_),
+            static_cast<float>(windowRect_.posY_), 0 }, transformMat_);
+        TransformHelper::Vector3 c = TransformHelper::Transform(
+            TransformHelper::Vector3 { static_cast<float>(windowRect_.posX_),
+            static_cast<float>(windowRect_.posY_+ windowRect_.height_), 0 }, transformMat_);
+        windowPlane_ = TransformHelper::Plane(a, b, c);
+        recomputeTransformMat_ = false;
+    }
+}
+
 void WindowProperty::SetBrightness(float brightness)
 {
     brightness_ = brightness;
@@ -131,6 +161,11 @@ void WindowProperty::SetDisplayId(DisplayId displayId)
 void WindowProperty::SetWindowFlags(uint32_t flags)
 {
     flags_ = flags;
+}
+
+void WindowProperty::SetSizeLimits(const WindowSizeLimits& sizeLimits)
+{
+    sizeLimits_ = sizeLimits;
 }
 
 void WindowProperty::AddWindowFlag(WindowFlag flag)
@@ -180,6 +215,11 @@ void WindowProperty::SetOriginRect(const Rect& rect)
     originRect_ = rect;
 }
 
+void WindowProperty::SetAccessTokenId(uint32_t accessTokenId)
+{
+    accessTokenId_ = accessTokenId;
+}
+
 WindowSizeChangeReason WindowProperty::GetWindowSizeChangeReason() const
 {
     return windowSizeChangeReason_;
@@ -187,6 +227,14 @@ WindowSizeChangeReason WindowProperty::GetWindowSizeChangeReason() const
 
 void WindowProperty::ResumeLastWindowMode()
 {
+    // if lastMode isn't supported, get supported mode from supportModeInfo
+    if (!WindowHelper::IsWindowModeSupported(modeSupportInfo_, lastMode_)) {
+        auto mode = WindowHelper::GetWindowModeFromModeSupportInfo(modeSupportInfo_);
+        if (!WindowHelper::IsSplitWindowMode(mode)) {
+            mode_ = mode;
+        }
+        return;
+    }
     mode_ = lastMode_;
 }
 
@@ -265,6 +313,11 @@ float WindowProperty::GetAlpha() const
     return alpha_;
 }
 
+Transform WindowProperty::GetTransform() const
+{
+    return trans_;
+}
+
 float WindowProperty::GetBrightness() const
 {
     return brightness_;
@@ -320,6 +373,11 @@ void WindowProperty::SetModeSupportInfo(uint32_t modeSupportInfo)
     modeSupportInfo_ = modeSupportInfo;
 }
 
+void WindowProperty::SetRequestModeSupportInfo(uint32_t requestModeSupportInfo)
+{
+    requestModeSupportInfo_ = requestModeSupportInfo;
+}
+
 uint32_t WindowProperty::GetWindowId() const
 {
     return windowId_;
@@ -345,6 +403,11 @@ uint32_t WindowProperty::GetModeSupportInfo() const
     return modeSupportInfo_;
 }
 
+uint32_t WindowProperty::GetRequestModeSupportInfo() const
+{
+    return requestModeSupportInfo_;
+}
+
 bool WindowProperty::GetTokenState() const
 {
     return tokenState_;
@@ -365,6 +428,16 @@ bool WindowProperty::GetStretchable() const
     return isStretchable_;
 }
 
+WindowSizeLimits WindowProperty::GetSizeLimits() const
+{
+    return sizeLimits_;
+}
+
+const TransformHelper::Matrix4& WindowProperty::GetTransformMat() const
+{
+    return transformMat_;
+}
+
 void WindowProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 {
     touchHotAreas_ = rects;
@@ -373,6 +446,11 @@ void WindowProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 void WindowProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
 {
     rects = touchHotAreas_;
+}
+
+uint32_t WindowProperty::GetAccessTokenId() const
+{
+    return accessTokenId_;
 }
 
 bool WindowProperty::MapMarshalling(Parcel& parcel) const
@@ -397,7 +475,6 @@ bool WindowProperty::MapMarshalling(Parcel& parcel) const
 
 void WindowProperty::MapUnmarshalling(Parcel& parcel, WindowProperty* property)
 {
-    std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap;
     uint32_t size = parcel.ReadUint32();
     for (uint32_t i = 0; i < size; i++) {
         WindowType type = static_cast<WindowType>(parcel.ReadUint32());
@@ -430,6 +507,49 @@ void WindowProperty::UnmarshallingTouchHotAreas(Parcel& parcel, WindowProperty* 
     }
 }
 
+bool WindowProperty::MarshallingTransform(Parcel& parcel) const
+{
+    return parcel.WriteFloat(trans_.pivotX_) && parcel.WriteFloat(trans_.pivotY_) &&
+        parcel.WriteFloat(trans_.scaleX_) && parcel.WriteFloat(trans_.scaleY_) &&
+        parcel.WriteFloat(trans_.rotationX_) && parcel.WriteFloat(trans_.rotationY_) &&
+        parcel.WriteFloat(trans_.rotationZ_) && parcel.WriteFloat(trans_.translateX_) &&
+        parcel.WriteFloat(trans_.translateY_) && parcel.WriteFloat(trans_.translateZ_);
+}
+
+void WindowProperty::UnmarshallingTransform(Parcel& parcel, WindowProperty* property)
+{
+    Transform trans;
+    trans.pivotX_ = parcel.ReadFloat();
+    trans.pivotY_ = parcel.ReadFloat();
+    trans.scaleX_ = parcel.ReadFloat();
+    trans.scaleY_ = parcel.ReadFloat();
+    trans.rotationX_ = parcel.ReadFloat();
+    trans.rotationY_ = parcel.ReadFloat();
+    trans.rotationZ_ = parcel.ReadFloat();
+    trans.translateX_ = parcel.ReadFloat();
+    trans.translateY_ = parcel.ReadFloat();
+    trans.translateZ_ = parcel.ReadFloat();
+    property->SetTransform(trans);
+}
+
+bool WindowProperty::MarshallingWindowSizeLimits(Parcel& parcel) const
+{
+    if (parcel.WriteBool(sizeLimits_.isSizeLimitsUpdated_) && parcel.WriteUint32(sizeLimits_.maxWidth_) &&
+        parcel.WriteUint32(sizeLimits_.maxHeight_) && parcel.WriteUint32(sizeLimits_.minWidth_) &&
+        parcel.WriteUint32(sizeLimits_.minHeight_) && parcel.WriteFloat(sizeLimits_.maxRatio_) &&
+        parcel.WriteFloat(sizeLimits_.minRatio_)) {
+        return true;
+    }
+    return false;
+}
+
+void WindowProperty::UnmarshallingWindowSizeLimits(Parcel& parcel, WindowProperty* property)
+{
+    WindowSizeLimits sizeLimits = { parcel.ReadBool(), parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(),
+                                    parcel.ReadUint32(), parcel.ReadFloat(), parcel.ReadFloat() };
+    property->SetSizeLimits(sizeLimits);
+}
+
 bool WindowProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -448,9 +568,11 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_)) && parcel.WriteBool(tokenState_) &&
         parcel.WriteUint32(callingWindow_) && parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_)) &&
         parcel.WriteBool(turnScreenOn_) && parcel.WriteBool(keepScreenOn_) &&
-        parcel.WriteUint32(modeSupportInfo_) && parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
+        parcel.WriteUint32(modeSupportInfo_) && parcel.WriteUint32(requestModeSupportInfo_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
         parcel.WriteUint32(originRect_.width_) && parcel.WriteUint32(originRect_.height_) &&
-        parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel);
+        parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel) && parcel.WriteUint32(accessTokenId_) &&
+        MarshallingTransform(parcel) && MarshallingWindowSizeLimits(parcel);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -492,12 +614,16 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetTurnScreenOn(parcel.ReadBool());
     property->SetKeepScreenOn(parcel.ReadBool());
     property->SetModeSupportInfo(parcel.ReadUint32());
+    property->SetRequestModeSupportInfo(parcel.ReadUint32());
     property->SetDragType(static_cast<DragType>(parcel.ReadUint32()));
     uint32_t w = parcel.ReadUint32();
     uint32_t h = parcel.ReadUint32();
     property->SetOriginRect(Rect { 0, 0, w, h });
     property->SetStretchable(parcel.ReadBool());
     UnmarshallingTouchHotAreas(parcel, property);
+    property->SetAccessTokenId(parcel.ReadUint32());
+    UnmarshallingTransform(parcel, property);
+    UnmarshallingWindowSizeLimits(parcel, property);
     return property;
 }
 
@@ -548,6 +674,12 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
             break;
         case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA:
             ret &= MarshallingTouchHotAreas(parcel);
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY:
+            ret &= MarshallingTransform(parcel);
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG:
+            ret &= parcel.WriteUint32(animationFlag_);
             break;
         default:
             break;
@@ -602,6 +734,13 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
         case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA:
             UnmarshallingTouchHotAreas(parcel, this);
             break;
+        case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY:
+            UnmarshallingTransform(parcel, this);
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG: {
+            SetAnimationFlag(parcel.ReadUint32());
+            break;
+        }
         default:
             break;
     }
@@ -639,10 +778,14 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     turnScreenOn_ = property->turnScreenOn_;
     keepScreenOn_ = property->keepScreenOn_;
     modeSupportInfo_ = property->modeSupportInfo_;
+    requestModeSupportInfo_ = property->requestModeSupportInfo_;
     dragType_ = property->dragType_;
     originRect_ = property->originRect_;
     isStretchable_ = property->isStretchable_;
     touchHotAreas_ = property->touchHotAreas_;
+    accessTokenId_ = property->accessTokenId_;
+    trans_ = property->trans_;
+    sizeLimits_ = property->sizeLimits_;
 }
 }
 }

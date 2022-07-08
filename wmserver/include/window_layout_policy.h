@@ -61,7 +61,6 @@ public:
     void ProcessDisplayCreate(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void ProcessDisplayDestroy(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void ProcessDisplaySizeChangeOrRotation(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
-    void SetFloatingWindowLimitsConfig(const FloatingWindowLimitsConfig& floatingWindowLimitsConfig);
     void SetSplitRatioConfig(const SplitRatioConfig& splitRatioConfig);
 
 protected:
@@ -74,7 +73,7 @@ protected:
     bool IsVerticalDisplay(DisplayId displayId) const;
     bool IsFullScreenRecentWindowExist(const std::vector<sptr<WindowNode>>& nodeVec) const;
     void LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec);
-    void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect);
+    virtual void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect);
     void UpdateRectInDisplayGroupForAllNodes(DisplayId displayId,
         const Rect& oriDisplayRect, const Rect& newDisplayRect);
     void UpdateRectInDisplayGroup(const sptr<WindowNode>& node,
@@ -89,18 +88,17 @@ protected:
     void LimitFloatingWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect) const;
     void LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const;
 
-    void UpdateFloatongWindowSizeForStretchableWindow(const sptr<WindowNode>& node,
+    void UpdateFloatingWindowSizeForStretchableWindow(const sptr<WindowNode>& node,
         const Rect& displayRect, Rect& winRect) const;
-    void UpdateFloatingWindowSizeByCustomizedLimits(const sptr<WindowNode>& node,
+    void UpdateFloatingWindowSizeBySizeLimits(const sptr<WindowNode>& node,
         const Rect& displayRect, Rect& winRect) const;
     void UpdateFloatingWindowSizeBySystemLimits(const sptr<WindowNode>& node,
         const Rect& displayRect, Rect& winRect) const;
     void LimitWindowPositionWhenInitRectOrMove(const sptr<WindowNode>& node, Rect& winRect) const;
     void LimitWindowPositionWhenDrag(const sptr<WindowNode>& node, Rect& winRect) const;
-    void FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect,
-        const FloatingWindowLimitsConfig& limitConfig);
-    FloatingWindowLimitsConfig GetCustomizedLimitsConfig(const Rect& displayRect, float virtualPixelRatio);
-    FloatingWindowLimitsConfig GetSystemLimitsConfig(const Rect& displayRect, float virtualPixelRatio);
+    void FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect);
+    void UpdateWindowSizeLimits(const sptr<WindowNode>& node);
+    WindowSizeLimits GetSystemSizeLimits(const Rect& displayRect, float virtualPixelRatio);
 
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
@@ -113,7 +111,7 @@ protected:
         Rect secondaryLimitRect_;
         Rect dividerRect_;
         Rect firstCascadeRect_;
-        std::vector<int32_t> exitSplitPoints_; // 2 element, first elment < second element
+        std::vector<int32_t> exitSplitPoints_; // 2 element, first element < second element
         std::vector<int32_t> splitRatioPoints_;
     };
     sptr<DisplayGroupInfo> displayGroupInfo_;
@@ -122,7 +120,6 @@ protected:
     Rect displayGroupRect_;
     Rect displayGroupLimitRect_;
     bool isMultiDisplay_ = false;
-    FloatingWindowLimitsConfig floatingWindowLimitsConfig_;
     SplitRatioConfig splitRatioConfig_;
 };
 }

@@ -43,7 +43,7 @@ public:
     WMError RequestFocus(uint32_t windowId);
     WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level);
     WMError SetAlpha(uint32_t windowId, float alpha);
-    std::vector<Rect> GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
+    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
@@ -51,7 +51,6 @@ public:
     WMError ProcessPointUp(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();
-    WMError MaxmizeWindow(uint32_t windowId);
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
     WMError UpdateProperty(sptr<WindowProperty>& property, PropertyChangeAction action);
     void NotifySystemBarTints();
@@ -63,6 +62,7 @@ public:
     void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
     void MinimizeWindowsByLauncher(std::vector<uint32_t>& windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
+    Orientation GetWindowPreferredOrientation(DisplayId displayId);
 private:
     uint32_t GenWindowId();
     void FlushWindowInfo(uint32_t windowId);
@@ -78,11 +78,15 @@ private:
     WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
     WMError SetWindowMode(uint32_t windowId, WindowMode dstMode);
     void ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>& node);
+    void ResizeSoftInputCallingWindowIfNeed(const sptr<WindowNode>& node);
+    void RestoreCallingWindowSizeIfNeed();
     void HandleTurnScreenOn(const sptr<WindowNode>& node);
     void ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo);
     WMError UpdateTouchHotAreas(const sptr<WindowNode>& node, const std::vector<Rect>& rects);
+    WMError UpdateTransform(uint32_t windowId);
     void NotifyTouchOutside(const sptr<WindowNode>& node);
     uint32_t GetEmbedNodeId(const std::vector<sptr<WindowNode>>& windowNodes, const sptr<WindowNode>& node);
+    void NotifyWindowPropertyChanged(const sptr<WindowNode>& node);
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
     std::atomic<uint32_t> windowId_ { INVALID_WINDOW_ID };
@@ -91,10 +95,9 @@ private:
         { WindowType::WINDOW_TYPE_STATUS_BAR,     INVALID_WINDOW_ID },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, INVALID_WINDOW_ID },
     };
-    std::unordered_map<WindowType, std::map<uint32_t, std::map<uint32_t, Rect>>> systemBarRect_;
-    std::unordered_map<DisplayId, sptr<DisplayInfo>> curDisplayInfo_;
-    constexpr static float SYSTEM_BAR_HEIGHT_RATIO = 0.08;
     bool isScreenLocked_ { false };
+    Rect callingWindowRestoringRect_ { 0, 0, 0, 0 };
+    uint32_t callingWindowId_ = 0u;
 };
 } // Rosen
 } // OHOS

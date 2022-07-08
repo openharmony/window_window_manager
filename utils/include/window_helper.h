@@ -17,8 +17,10 @@
 #define OHOS_WM_INCLUDE_WM_HELPER_H
 
 #include <vector>
-#include <wm_common.h>
-#include <wm_common_inner.h>
+#include "ability_info.h"
+#include "wm_common.h"
+#include "wm_common_inner.h"
+#include "wm_math.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -37,6 +39,11 @@ public:
     static inline bool IsAppWindow(WindowType type)
     {
         return (IsMainWindow(type) || IsSubWindow(type));
+    }
+
+    static inline bool IsAppFloatingWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_FLOAT) || (type == WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     }
 
     static inline bool IsBelowSystemWindow(WindowType type)
@@ -69,14 +76,21 @@ public:
         return ((IsMainWindow(type)) && (mode != WindowMode::WINDOW_MODE_FLOATING));
     }
 
-    static inline bool IsFloatintWindow(WindowMode mode)
+    static inline bool IsFloatingWindow(WindowMode mode)
     {
         return mode == WindowMode::WINDOW_MODE_FLOATING;
     }
 
-    static inline bool IsAvoidAreaWindow(WindowType type)
+    static inline bool IsSystemBarWindow(WindowType type)
     {
         return (type == WindowType::WINDOW_TYPE_STATUS_BAR || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR);
+    }
+
+    static inline bool IsOverlayWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_STATUS_BAR
+            || type == WindowType::WINDOW_TYPE_NAVIGATION_BAR
+            || type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     }
 
     static inline bool IsFullScreenWindow(WindowMode mode)
@@ -115,17 +129,19 @@ public:
         return !(r1XEnd < r2.posX_ || r1.posX_ > r2XEnd || r1YEnd < r2.posY_ || r1.posY_ > r2YEnd);
     }
 
-    static inline Rect GetOverlap(const Rect& rect1, const Rect& rect2, const int offsetX, const int offsetY)
+    static Rect GetOverlap(const Rect& rect1, const Rect& rect2, const int offsetX, const int offsetY)
     {
-        const static Rect noOverlapRect = { 0, 0, 0, 0};
         int32_t x_begin = std::max(rect1.posX_, rect2.posX_);
-        int32_t x_end = std::min(rect1.posX_ + rect1.width_, rect2.posX_ + rect2.width_);
+        int32_t x_end = std::min(rect1.posX_ + static_cast<int32_t>(rect1.width_),
+            rect2.posX_ + static_cast<int32_t>(rect2.width_));
         int32_t y_begin = std::max(rect1.posY_, rect2.posY_);
-        int32_t y_end = std::min(rect1.posY_ + rect1.height_, rect2.posY_ + rect2.height_);
-        if (y_begin > y_end || x_begin > x_end) {
-            return noOverlapRect;
+        int32_t y_end = std::min(rect1.posY_ + static_cast<int32_t>(rect1.height_),
+            rect2.posY_ + static_cast<int32_t>(rect2.height_));
+        if (y_begin >= y_end || x_begin >= x_end) {
+            return { 0, 0, 0, 0 };
         }
-        return { x_begin - offsetX, y_begin - offsetY, x_end - x_begin + 1, y_end - y_begin + 1 };
+        return { x_begin - offsetX, y_begin - offsetY,
+            static_cast<uint32_t>(x_end - x_begin), static_cast<uint32_t>(y_end - y_begin) };
     }
 
     static bool IsWindowModeSupported(uint32_t modeSupportInfo, WindowMode mode)
@@ -164,6 +180,21 @@ public:
                 return WindowMode::WINDOW_MODE_PIP;
             default:
                 return WindowMode::WINDOW_MODE_UNDEFINED;
+        }
+    }
+
+    static void ConvertSupportModesToSupportInfo(uint32_t& modeSupportInfo,
+                                                 const std::vector<AppExecFwk::SupportWindowMode>& supportModes)
+    {
+        for (auto& mode : supportModes) {
+            if (mode == AppExecFwk::SupportWindowMode::FULLSCREEN) {
+                modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
+            } else if (mode == AppExecFwk::SupportWindowMode::SPLIT) {
+                modeSupportInfo |= (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                                    WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+            } else if (mode == AppExecFwk::SupportWindowMode::FLOATING) {
+                modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+            }
         }
     }
 
@@ -295,9 +326,99 @@ public:
         return ret;
     }
 
+    // Transform a point at screen to its oringin position in 3D world and project to xy plane
+    // A screen point only has x and y component, so we need a plane to calculate its z component.
+    //                                                                | -- -- -- 0 |
+    //                                                                | -- -- -- 0 |
+    // There is no need to unify w component since the matrix is like | -- -- -- 0 |
+    //                                                                | -- -- -- 1 |
+    static PointInfo CalculateOriginPosition(const TransformHelper::Matrix4& transformMat,
+        const TransformHelper::Plane& plane, const PointInfo& pointPos)
+    {
+        TransformHelper::Matrix4 invertMat = transformMat;
+        invertMat.Invert();
+        TransformHelper::Vector3 pointAtPlane;
+        pointAtPlane.x_ = static_cast<float>(pointPos.x);
+        pointAtPlane.y_ = static_cast<float>(pointPos.y);
+        pointAtPlane.z_ = plane.ComponentZ(pointAtPlane.x_, pointAtPlane.y_);
+        TransformHelper::Vector3 originPos = TransformHelper::Transform(pointAtPlane, invertMat);
+        return PointInfo { static_cast<uint32_t>(originPos.x_), static_cast<uint32_t>(originPos.y_) };
+    }
+
+    static TransformHelper::Matrix4 ComputeRectTransformMat4(const Transform& transform, const Rect& rect)
+    {
+        TransformHelper::Vector3 pivotPos = {
+            rect.posX_ + transform.pivotX_ * rect.width_, rect.posY_ + transform.pivotY_ * rect.height_, 0 };
+        // move pivot point to (0,0,0)
+        TransformHelper::Matrix4 ret = TransformHelper::CreateTranslation(-pivotPos);
+        // set scale
+        if ((transform.scaleX_ - 1) || (transform.scaleY_ - 1)) {
+            ret *= TransformHelper::CreateScale(transform.scaleX_, transform.scaleY_, 1.0f);
+        }
+        // set rotation
+        if (transform.rotationX_) {
+            ret *= TransformHelper::CreateRotationX(MathHelper::ToRadians(transform.rotationX_));
+        }
+        if (transform.rotationY_) {
+            ret *= TransformHelper::CreateRotationY(MathHelper::ToRadians(transform.rotationY_));
+        }
+        if (transform.rotationZ_) {
+            ret *= TransformHelper::CreateRotationZ(MathHelper::ToRadians(transform.rotationZ_));
+        }
+        // set translation
+        if (transform.translateX_ || transform.translateY_ || transform.translateZ_) {
+            ret *= TransformHelper::CreateTranslation(TransformHelper::Vector3(transform.translateX_,
+                transform.translateY_, transform.translateZ_));
+        }
+        // move pivot point to old position
+        ret *= TransformHelper::CreateTranslation(pivotPos);
+        return ret;
+    }
+
+    // Transform rect by matrix and get the circumscribed rect
+    static Rect TransformRect(const TransformHelper::Matrix4& transformMat, const Rect& rect)
+    {
+        TransformHelper::Vector3 a = TransformHelper::Transform(
+            TransformHelper::Vector3(rect.posX_, rect.posY_, 0), transformMat);
+        TransformHelper::Vector3 b = TransformHelper::Transform(
+            TransformHelper::Vector3(rect.posX_ + rect.width_, rect.posY_, 0), transformMat);
+        TransformHelper::Vector3 c = TransformHelper::Transform(
+            TransformHelper::Vector3(rect.posX_, rect.posY_ + rect.height_, 0), transformMat);
+        TransformHelper::Vector3 d = b + c - a;
+        // Return smallest rect involve transformed rect(abcd)
+        int32_t xmin = MathHelper::Min(a.x_, b.x_, c.x_, d.x_);
+        int32_t ymin = MathHelper::Min(a.y_, b.y_, c.y_, d.y_);
+        int32_t xmax = MathHelper::Max(a.x_, b.x_, c.x_, d.x_);
+        int32_t ymax = MathHelper::Max(a.y_, b.y_, c.y_, d.y_);
+        uint32_t w = xmax - xmin;
+        uint32_t h = ymax - ymin;
+        return Rect { xmin, ymin, w, h };
+    }
+
+    static TransformHelper::Vector2 CalculateHotZoneScale(const TransformHelper::Matrix4& transformMat,
+        const TransformHelper::Plane& plane)
+    {
+        TransformHelper::Vector2 hotZoneScale;
+        TransformHelper::Vector3 a = TransformHelper::Transform(TransformHelper::Vector3(0, 0, 0),
+            transformMat);
+        TransformHelper::Vector3 b = TransformHelper::Transform(TransformHelper::Vector3(1, 0, 0),
+            transformMat);
+        TransformHelper::Vector3 c = TransformHelper::Transform(TransformHelper::Vector3(0, 1, 0),
+            transformMat);
+        TransformHelper::Vector3 scale = transformMat.GetScale();
+        hotZoneScale.x_ = scale.x_ * plane.ParallelDistanceGrad(a, c);
+        hotZoneScale.y_ = scale.y_ * plane.ParallelDistanceGrad(a, b);
+        if (std::isnan(hotZoneScale.x_) || std::isnan(hotZoneScale.y_)) {
+            return TransformHelper::Vector2(1, 1);
+        } else {
+            return hotZoneScale;
+        }
+    }
+
     static bool CalculateTouchHotAreas(const Rect& windowRect, const std::vector<Rect>& requestRects,
         std::vector<Rect>& outRects)
     {
+        bool isOk = true;
         for (const auto& rect : requestRects) {
             if (rect.posX_ < 0 || rect.posY_ < 0 || rect.width_ == 0 || rect.height_ == 0) {
                 return false;
@@ -305,6 +426,7 @@ public:
             Rect hotArea;
             if (rect.posX_ >= static_cast<int32_t>(windowRect.width_) ||
                 rect.posY_ >= static_cast<int32_t>(windowRect.height_)) {
+                isOk = false;
                 continue;
             }
             hotArea.posX_ = windowRect.posX_ + rect.posX_;
@@ -315,7 +437,40 @@ public:
                 std::min(hotArea.posY_ + rect.height_, windowRect.posY_ + windowRect.height_) - hotArea.posY_;
             outRects.emplace_back(hotArea);
         }
-        return true;
+        return isOk;
+    }
+
+    static bool IsRectSatisfiedWithSizeLimits(const Rect& rect, const WindowSizeLimits& sizeLimits)
+    {
+        if (rect.height_ == 0) {
+            return false;
+        }
+        auto curRatio = static_cast<float>(rect.width_) / static_cast<float>(rect.height_);
+        if (sizeLimits.minWidth_ <= rect.width_ && rect.width_ <= sizeLimits.maxWidth_ &&
+            sizeLimits.minHeight_ <= rect.height_ && rect.height_ <= sizeLimits.maxHeight_ &&
+            sizeLimits.minRatio_ <= curRatio && curRatio <= sizeLimits.maxRatio_) {
+            return true;
+        }
+        return false;
+    }
+
+    static bool IsOnlySupportSplitAndShowWhenLocked(bool isShowWhenLocked, uint32_t modeSupportInfo)
+    {
+        uint32_t splitModeInfo = (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                                  WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+        if (isShowWhenLocked && (splitModeInfo == modeSupportInfo)) {
+            return true;
+        }
+        return false;
+    }
+
+    static bool IsInvalidWindowInTileLayoutMode(uint32_t supportModeInfo, WindowLayoutMode layoutMode)
+    {
+        if ((!IsWindowModeSupported(supportModeInfo, WindowMode::WINDOW_MODE_FLOATING)) &&
+            (layoutMode == WindowLayoutMode::TILE)) {
+            return true;
+        }
+        return false;
     }
 
 private:

@@ -76,6 +76,27 @@ void WindowProxy::UpdateWindowMode(WindowMode mode)
     return;
 }
 
+void WindowProxy::UpdateWindowModeSupportInfo(uint32_t modeSupportInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(modeSupportInfo)) {
+        WLOGFE("Write WindowMode failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_UPDATE_MODE_SUPPORT_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+    return;
+}
+
 void WindowProxy::UpdateFocusStatus(bool focused)
 {
     MessageParcel data;
@@ -97,7 +118,7 @@ void WindowProxy::UpdateFocusStatus(bool focused)
     return;
 }
 
-void WindowProxy::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
+void WindowProxy::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -106,21 +127,14 @@ void WindowProxy::UpdateAvoidArea(const std::vector<Rect>& avoidArea)
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-
-    uint32_t len = static_cast<uint32_t>(avoidArea.size());
-    if (!data.WriteUint32(len)) {
-        WLOGFE("Write UpdateAvoidArea Vector Size failed");
+    if (!data.WriteStrongParcelable(avoidArea)) {
+        WLOGFE("Write WindowRect failed");
         return;
     }
-
-    for (auto avoid : avoidArea) {
-        if (!(data.WriteInt32(avoid.posX_) && data.WriteInt32(avoid.posY_) &&
-            data.WriteUint32(avoid.width_) && data.WriteUint32(avoid.height_))) {
-            WLOGFE("Write WindowRect failed");
-            return;
-        }
+    if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+        WLOGFE("Write AvoidAreaType failed");
+        return;
     }
-
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_UPDATE_AVOID_AREA),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");

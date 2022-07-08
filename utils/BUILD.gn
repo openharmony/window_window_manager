@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/graphic/graphic_2d/graphic_config.gni")
 config("libwmutil_private_config") {
   include_dirs = [
     "include",
@@ -20,10 +19,6 @@ config("libwmutil_private_config") {
     "../interfaces/innerkits/dm",
     "../interfaces/innerkits/wm",
   ]
-  defines = []
-
-  # Get gpu defines
-  defines += gpu_defines
 }
 
 config("libwmutil_public_config") {
@@ -44,7 +39,7 @@ ohos_shared_library("libwmutil") {
     "src/surface_reader_handler_impl.cpp",
     "src/window_property.cpp",
     "src/window_transition_info.cpp",
-    "src/wm_trace.cpp",
+    "src/wm_math.cpp",
   ]
 
   configs = [ ":libwmutil_private_config" ]
@@ -52,17 +47,16 @@ ohos_shared_library("libwmutil") {
   public_configs = [ ":libwmutil_public_config" ]
 
   deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//third_party/flutter/build/skia:ace_skia_ohos",
   ]
 
   external_deps = [
     "ability_runtime:ability_manager",
     "access_token:libaccesstoken_sdk",
-    "graphic_standard:surface",
+    "graphic_graphic_2d:surface",
     "hilog_native:libhilog",
-    "hitrace_native:hitrace_meter",
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
     "safwk:system_ability_fwk",

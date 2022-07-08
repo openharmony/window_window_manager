@@ -56,7 +56,7 @@ public:
     uint32_t ToOverrideBrightness(float brightness);
     void UpdateBrightness(uint32_t id, bool byRemoved);
     void HandleKeepScreenOn(const sptr<WindowNode>& node, bool requireLock);
-    std::vector<Rect> GetAvoidAreaByType(AvoidAreaType avoidAreaType, DisplayId displayId);
+    AvoidArea GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType) const;
     WMError MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node);
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
     uint64_t GetScreenId(DisplayId displayId) const;
@@ -67,8 +67,8 @@ public:
     bool IsForbidDockSliceMove(DisplayId displayId) const;
     bool IsDockSliceInExitSplitModeArea(DisplayId displayId) const;
     void ExitSplitMode(DisplayId displayId);
+    Orientation GetWindowPreferredOrientation();
 
-    void OnAvoidAreaChange(const std::vector<Rect>& avoidAreas, DisplayId displayId);
     bool isVerticalDisplay(DisplayId displayId) const;
     WMError RaiseZOrderForAppWindow(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
     sptr<WindowNode> GetNextFocusableWindow(uint32_t windowId) const;
@@ -76,11 +76,11 @@ public:
     void MinimizeAllAppWindows(DisplayId displayId);
     void MinimizeOldestAppWindow();
     WMError ToggleShownStateForAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc, bool restore);
+    void BackUpAllAppWindows();
     void RestoreAllAppWindows(std::function<bool(uint32_t, WindowMode)> restoreFunc);
     bool IsAppWindowsEmpty() const;
     void ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason);
     void NotifySystemBarTints(std::vector<DisplayId> displayIdVec);
-    void NotifySystemBarDismiss(sptr<WindowNode>& node);
     WMError MinimizeAppNodeExceptOptions(MinimizeReason reason, const std::vector<uint32_t> &exceptionalIds = {},
                                          const std::vector<WindowMode> &exceptionalModes = {});
     WMError SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode);
@@ -102,9 +102,15 @@ public:
 
     sptr<WindowLayoutPolicy> GetLayoutPolicy() const;
     sptr<AvoidAreaController> GetAvoidController() const;
-    sptr<DisplayGroupController> GetMutiDisplayController() const;
+    sptr<DisplayGroupController> GetMultiDisplayController() const;
     sptr<WindowNode> GetRootNode(WindowRootNodeType type) const;
     void NotifyDockWindowStateChanged(sptr<WindowNode>& node, bool isEnable);
+    void UpdateCameraFloatWindowStatus(const sptr<WindowNode>& node, bool isShowing);
+    void UpdateAvoidAreaListener(sptr<WindowNode>& windowNode, bool haveAvoidAreaListener);
+    void BeforeProcessWindowAvoidAreaChangeWhenDisplayChange() const;
+    void ProcessWindowAvoidAreaChangeWhenDisplayChange() const;
+    WindowLayoutMode GetCurrentLayoutMode() const;
+    void RemoveSingleUserWindowNodes();
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
@@ -129,9 +135,7 @@ private:
     bool IsSplitImmersiveNode(sptr<WindowNode> node) const;
     bool TraverseFromTopToBottom(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
     bool TraverseFromBottomToTop(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
-    void RcoveryScreenDefaultOrientationIfNeed(DisplayId displayId);
-    // cannot determine in case of a window covered by union of several windows or with transparent value
-    void UpdateWindowVisibilityInfos(std::vector<sptr<WindowVisibilityInfo>>& infos);
+    void RecoverScreenDefaultOrientationIfNeed(DisplayId displayId);
     void RaiseOrderedWindowToTop(std::vector<sptr<WindowNode>>& orderedNodes,
         std::vector<sptr<WindowNode>>& windowNodes);
     static bool ReadIsWindowAnimationEnabledProperty();
@@ -147,6 +151,8 @@ private:
                                                const std::vector<DisplayId>& lastShowingDisplays,
                                                const std::vector<DisplayId>& curShowingDisplays);
     void FillWindowInfo(sptr<WindowInfo>& windowInfo, const sptr<WindowNode>& node) const;
+    bool CheckWindowNodeWhetherInWindowTree(const sptr<WindowNode>& node) const;
+    void UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
 
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
@@ -158,8 +164,9 @@ private:
     std::vector<uint32_t> backupWindowIds_;
     std::map<uint32_t, WindowMode> backupWindowMode_;
     std::map<DisplayId, Rect> backupDividerWindowRect_;
+    std::map<DisplayId, std::set<WindowMode>> backupDisplaySplitWindowMode_;
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
-    std::unordered_map<WindowLayoutMode, sptr<WindowLayoutPolicy>> layoutPolicys_;
+    std::unordered_map<WindowLayoutMode, sptr<WindowLayoutPolicy>> layoutPolicies_;
     WindowLayoutMode layoutMode_ = WindowLayoutMode::CASCADE;
     std::vector<Rect> currentCoveredArea_;
     std::vector<uint32_t> removedIds_;
