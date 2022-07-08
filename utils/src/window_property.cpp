@@ -545,8 +545,7 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
         parcel.WriteUint32(originRect_.width_) && parcel.WriteUint32(originRect_.height_) &&
         parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel) && parcel.WriteUint32(accessTokenId_) &&
-        parcel.WriteBool(isCustomAnimation_) && MarshallingTransform(parcel) &&
-        MarshallingWindowSizeLimits(parcel);
+        MarshallingTransform(parcel) && MarshallingWindowSizeLimits(parcel);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -596,7 +595,6 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetStretchable(parcel.ReadBool());
     UnmarshallingTouchHotAreas(parcel, property);
     property->SetAccessTokenId(parcel.ReadUint32());
-    property->SetCustomAnimation(parcel.ReadBool());
     UnmarshallingTransform(parcel, property);
     UnmarshallingWindowSizeLimits(parcel, property);
     return property;
@@ -652,6 +650,9 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
             break;
         case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY:
             ret &= MarshallingTransform(parcel);
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG:
+            ret &= parcel.WriteUint32(animationFlag_);
             break;
         default:
             break;
@@ -709,6 +710,10 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
         case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY:
             UnmarshallingTransform(parcel, this);
             break;
+        case PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG: {
+            SetAnimationFlag(parcel.ReadUint32());
+            break;
+        }
         default:
             break;
     }
@@ -752,7 +757,6 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     isStretchable_ = property->isStretchable_;
     touchHotAreas_ = property->touchHotAreas_;
     accessTokenId_ = property->accessTokenId_;
-    isCustomAnimation_ = property->isCustomAnimation_;
     trans_ = property->trans_;
     sizeLimits_ = property->sizeLimits_;
 }

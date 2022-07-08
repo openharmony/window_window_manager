@@ -134,6 +134,12 @@ public:
     virtual void OnTouchOutside() const = 0;
 };
 
+class IAnimationTransitionController : virtual public RefBase {
+public:
+    virtual void AnimationForShown() = 0;
+    virtual void AnimationForHidden() = 0;
+};
+
 class Window : public RefBase {
 public:
     /**
@@ -189,8 +195,8 @@ public:
     virtual WMError SetLayoutFullScreen(bool status) = 0;
     virtual WMError SetFullScreen(bool status) = 0;
     virtual WMError Destroy() = 0;
-    virtual WMError Show(uint32_t reason = 0, bool isCustomAnimation = false) = 0;
-    virtual WMError Hide(uint32_t reason = 0, bool isCustomAnimation = false) = 0;
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) = 0;
+    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false) = 0;
 
     virtual WMError MoveTo(int32_t x, int32_t y) = 0;
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
@@ -209,6 +215,7 @@ public:
     virtual void DisableAppWindowDecor() = 0;
 
     virtual WMError RequestFocus() const = 0;
+    virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;
     // AddInputEventListener is for api 7
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) = 0;
     virtual void AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) = 0;
@@ -234,6 +241,7 @@ public:
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual void RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
     virtual void UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
+    virtual void RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) = 0;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isDistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;

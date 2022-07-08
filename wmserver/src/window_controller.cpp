@@ -223,6 +223,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
 
     // Need 'check permission'
     // Need 'adjust property'
+    UpdateWindowAnimation(node);
     WMError res = windowRoot_->AddWindowNode(property->GetParentId(), node);
     if (res != WMError::WM_OK) {
         MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
@@ -885,7 +886,11 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             property->GetTouchHotAreas(rects);
             return UpdateTouchHotAreas(node, rects);
         }
-        case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY:
+        case PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG: {
+            node->GetWindowProperty()->SetAnimationFlag(property->GetAnimationFlag());
+            UpdateWindowAnimation(node);
+            break;
+        }
         default:
             break;
     }

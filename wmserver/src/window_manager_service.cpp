@@ -678,5 +678,12 @@ WMError WindowManagerService::UpdateAvoidAreaListener(uint32_t windowId, bool ha
         return WMError::WM_OK;
     }).get();
 }
+
+WMError WindowManagerService::UpdateRsTree(uint32_t windowId, bool isAdd)
+{
+    return wmsTaskLooper_->ScheduleTask([this, windowId, isAdd]() {
+        return windowRoot_->UpdateRsTree(windowId, isAdd);
+    }).get();
+}
 } // namespace Rosen
 } // namespace OHOS

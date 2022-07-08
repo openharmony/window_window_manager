@@ -172,7 +172,6 @@ private:
     uint32_t accessTokenId_ { 0 };
     Transform trans_;
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
-    DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, CustomAnimation, isCustomAnimation, false);
     WindowSizeLimits sizeLimits_;
 };
 }
