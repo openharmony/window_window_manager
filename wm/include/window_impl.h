@@ -136,6 +136,7 @@ public:
     virtual WMError SetLayoutFullScreen(bool status) override;
     virtual WMError SetFullScreen(bool status) override;
     virtual Transform GetTransform() const override;
+    virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) override;
     inline void SetWindowState(WindowState state)
     {
         state_ = state;
@@ -145,8 +146,8 @@ public:
     WMError Create(const std::string& parentName,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy() override;
-    virtual WMError Show(uint32_t reason = 0, bool isCustomAnimation = false) override;
-    virtual WMError Hide(uint32_t reason = 0, bool isCustomAnimation = false) override;
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
+    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false) override;
     virtual WMError MoveTo(int32_t x, int32_t y) override;
     virtual WMError Resize(uint32_t width, uint32_t height) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
@@ -191,6 +192,7 @@ public:
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual void RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     virtual void UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
+    virtual void RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) override;
     void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason);
@@ -332,7 +334,7 @@ private:
     void ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId, const Rect& rect);
     void EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId);
     bool IsPointerEventConsumed();
-    void AdjustWindowAnimationFlag();
+    void AdjustWindowAnimationFlag(bool withAnimation = false);
     void MapFloatingWindowToAppIfNeeded();
     WMError UpdateProperty(PropertyChangeAction action);
     WMError Destroy(bool needNotifyServer);
@@ -352,7 +354,7 @@ private:
     void UpdateTitleButtonVisibility();
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     uint32_t GetModeSupportInfo() const;
-
+    WMError PreProcessShow(uint32_t reason, bool withAnimation);
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
         ColorSpace colorSpace;
@@ -380,6 +382,7 @@ private:
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners_;
     std::vector<sptr<IInputEventListener>> inputEventListeners_;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
+    sptr<IAnimationTransitionController> animationTranistionController_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;

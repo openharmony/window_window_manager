@@ -48,8 +48,8 @@ const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appFloatingWindowMap_;
-static int ctorCnt = 0;
-static int dtorCnt = 0;
+static int constructorCnt = 0;
+static int deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
     property_ = new (std::nothrow) WindowProperty();
@@ -81,7 +81,8 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = property_->GetWindowName();
     surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
-    WLOGFI("WindowImpl constructor Count: %{public}d name: %{public}s", ++ctorCnt, property_->GetWindowName().c_str());
+    WLOGFI("WindowImpl constructorCnt: %{public}d name: %{public}s",
+        ++constructorCnt, property_->GetWindowName().c_str());
 }
 
 void WindowImpl::InitListenerHandler()
@@ -105,8 +106,8 @@ WindowImpl::~WindowImpl()
     if (eventHandler_ != nullptr) {
         eventHandler_.reset();
     }
-    WLOGFI("windowName: %{public}s, windowId: %{public}d, dtorCnt: %{public}d, surfaceNode:%{public}d",
-        GetWindowName().c_str(), GetWindowId(), ++dtorCnt, static_cast<uint32_t>(surfaceNode_.use_count()));
+    WLOGFI("windowName: %{public}s, windowId: %{public}d, deConstructorCnt: %{public}d, surfaceNode:%{public}d",
+        GetWindowName().c_str(), GetWindowId(), ++deConstructorCnt, static_cast<uint32_t>(surfaceNode_.use_count()));
     Destroy();
 }
 
@@ -931,14 +932,34 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
     return ret;
 }
 
-WMError WindowImpl::Show(uint32_t reason, bool isCustomAnimation)
+WMError WindowImpl::UpdateSurfaceNodeAfterCustomAnimation(bool isAdd)
 {
-    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Show, reason:%{public}u",
-        name_.c_str(), property_->GetWindowId(), reason);
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] UpdateRsTree, isAdd:%{public}u",
+        name_.c_str(), property_->GetWindowId(), isAdd);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (!WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+        WLOGFE("only system window can set");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    AdjustWindowAnimationFlag(false); // false means update rs tree with default option
+    // need time out check
+    WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("UpdateProperty failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        return ret;
+    }
+    ret = SingletonContainer::Get<WindowAdapter>().UpdateRsTree(property_->GetWindowId(), isAdd);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("UpdateRsTree failed with errCode:%{public}d", static_cast<int32_t>(ret));
+        return ret;
+    }
+    return WMError::WM_OK;
+}
 
+WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
+{
     WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
     if (stateChangeReason == WindowStateChangeReason::KEYGUARD ||
         stateChangeReason == WindowStateChangeReason::TOGGLING) {
@@ -962,9 +983,7 @@ WMError WindowImpl::Show(uint32_t reason, bool isCustomAnimation)
         return WMError::WM_OK;
     }
     SetDefaultOption();
-    // set true success when transitionController exist; set false when complete transition
-    property_->SetCustomAnimation(isCustomAnimation);
-
+    AdjustWindowAnimationFlag(withAnimation);
     // show failed when current mode is not support or window only supports split mode and can show when locked
     bool isShowWhenLocked = GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), GetMode()) ||
@@ -974,15 +993,34 @@ WMError WindowImpl::Show(uint32_t reason, bool isCustomAnimation)
         NotifyForegroundInvalidWindowMode();
         return WMError::WM_ERROR_INVALID_WINDOW_MODE;
     }
-
     // update title button visibility when show
     UpdateTitleButtonVisibility();
+    return WMError::WM_OK;
+}
 
-    WMError ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
+WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
+{
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Show, reason:%{public}u, withAnimation:%{public}d",
+        name_.c_str(), property_->GetWindowId(), reason, withAnimation);
+    if (!IsWindowValid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    WMError ret = PreProcessShow(reason, withAnimation);
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
+
+    ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
+        uint32_t animationFlag = property_->GetAnimationFlag();
+        if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+            // CustomAnimation is enabled when animationTranistionController_ exists
+            animationTranistionController_->AnimationForShown();
+        }
     } else if (ret == WMError::WM_ERROR_INVALID_WINDOW_MODE) {
         NotifyForegroundInvalidWindowMode();
     } else {
@@ -992,9 +1030,10 @@ WMError WindowImpl::Show(uint32_t reason, bool isCustomAnimation)
     return ret;
 }
 
-WMError WindowImpl::Hide(uint32_t reason, bool isCustomAnimation)
+WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
 {
-    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Hide", name_.c_str(), property_->GetWindowId());
+    WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] Hide, reason:%{public}u, withAnimation:%{public}d",
+        name_.c_str(), property_->GetWindowId(), reason, withAnimation);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1008,8 +1047,17 @@ WMError WindowImpl::Hide(uint32_t reason, bool isCustomAnimation)
         WLOGFI("window is already hidden id: %{public}u", property_->GetWindowId());
         return WMError::WM_OK;
     }
-    property_->SetCustomAnimation(isCustomAnimation);
-    WMError ret = SingletonContainer::Get<WindowAdapter>().RemoveWindow(property_->GetWindowId());
+    WMError ret = WMError::WM_OK;
+    if (WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+        AdjustWindowAnimationFlag(withAnimation);
+        // when show(true) with default, hide() with None, to adjust animationFlag to disabled default animation
+        WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+        if (ret != WMError::WM_OK) {
+            WLOGFE("UpdateProperty failed with errCode:%{public}d", static_cast<int32_t>(ret));
+            return ret;
+        }
+    }
+    ret = SingletonContainer::Get<WindowAdapter>().RemoveWindow(property_->GetWindowId());
     RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, ret);
     if (ret != WMError::WM_OK) {
         WLOGFE("hide errCode:%{public}d for winId:%{public}u", static_cast<int32_t>(ret), property_->GetWindowId());
@@ -1017,6 +1065,10 @@ WMError WindowImpl::Hide(uint32_t reason, bool isCustomAnimation)
     }
     state_ = WindowState::STATE_HIDDEN;
     NotifyAfterBackground();
+    uint32_t animationFlag = property_->GetAnimationFlag();
+    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        animationTranistionController_->AnimationForHidden();
+    }
     return ret;
 }
 
@@ -1617,6 +1669,15 @@ void WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener
         }), touchOutsideListeners_.end());
 }
 
+void WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return;
+    }
+    animationTranistionController_ = listener;
+}
+
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
 {
     if (handler == nullptr) {
@@ -2022,10 +2083,20 @@ bool WindowImpl::IsPointerEventConsumed()
     return startDragFlag_ || startMoveFlag_;
 }
 
-void WindowImpl::AdjustWindowAnimationFlag()
+void WindowImpl::AdjustWindowAnimationFlag(bool withAnimation)
 {
+    // when show/hide with animation
+    // use custom animation when transitionController exists; else use default animation
     WindowType winType = property_->GetWindowType();
-    if (!WindowHelper::IsAppWindow(winType)) {
+    bool isAppWindow = WindowHelper::IsAppWindow(winType);
+    if (withAnimation && !isAppWindow && animationTranistionController_) {
+        // use custom animation
+        property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
+    } else if (isAppWindow || (withAnimation && !animationTranistionController_)) {
+        // use default animation
+        property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
+    } else {
+        // with no animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
     }
 }

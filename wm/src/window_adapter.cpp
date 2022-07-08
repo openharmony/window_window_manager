@@ -256,5 +256,11 @@ WMError WindowAdapter::UpdateAvoidAreaListener(uint32_t windowId, bool haveListe
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     return windowManagerServiceProxy_->UpdateAvoidAreaListener(windowId, haveListener);
 }
+
+WMError WindowAdapter::UpdateRsTree(uint32_t windowId, bool isAdd)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->UpdateRsTree(windowId, isAdd);
+}
 } // namespace Rosen
 } // namespace OHOS

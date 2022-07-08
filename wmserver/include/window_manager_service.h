@@ -107,6 +107,7 @@ public:
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback) override;
     void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
     void OnAccountSwitched() const;
+    WMError UpdateRsTree(uint32_t windowId, bool isAdd) override;
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;

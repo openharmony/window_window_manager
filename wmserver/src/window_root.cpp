@@ -1332,5 +1332,24 @@ void WindowRoot::RemoveSingleUserWindowNodes()
         container->RemoveSingleUserWindowNodes();
     }
 }
+
+WMError WindowRoot::UpdateRsTree(uint32_t windowId, bool isAdd)
+{
+    sptr<WindowNode> node = GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("window container could not be found");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    for (auto& displayId : node->GetShowingDisplays()) {
+        container->UpdateRSTree(node, displayId, isAdd);
+    }
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
