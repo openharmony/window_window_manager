@@ -121,6 +121,7 @@ WMError WindowNodeContainer::ShowStartingWindow(sptr<WindowNode>& node)
         WLOGFE("current window is visible, windowId: %{public}u", node->GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
+
     WMError res = AddWindowNodeOnWindowTree(node, nullptr);
     if (res != WMError::WM_OK) {
         return res;
@@ -139,9 +140,19 @@ WMError WindowNodeContainer::ShowStartingWindow(sptr<WindowNode>& node)
     displayGroupController_->PreProcessWindowNode(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     StartingWindow::UpdateRSTree(node);
     AssignZOrder();
-
     layoutPolicy_->AddWindowNode(node);
     WLOGFI("ShowStartingWindow windowId: %{public}u end", node->GetWindowId());
+    return WMError::WM_OK;
+}
+
+WMError WindowNodeContainer::IsTileRectSatisfiedWithSizeLimits(sptr<WindowNode>& node)
+{
+    if (layoutMode_ == WindowLayoutMode::TILE &&
+        !layoutPolicy_->IsTileRectSatisfiedWithSizeLimits(node)) {
+        WLOGFE("layoutMode is tile, default rect is not satisfied with size limits of window, windowId: %{public}u",
+            node->GetWindowId());
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
+    }
     return WMError::WM_OK;
 }
 

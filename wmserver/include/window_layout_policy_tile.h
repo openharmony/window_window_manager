@@ -38,6 +38,7 @@ public:
     void UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow = false) override;
     void RemoveWindowNode(const sptr<WindowNode>& node) override;
     void UpdateLayoutRect(const sptr<WindowNode>& node) override;
+    bool IsTileRectSatisfiedWithSizeLimits(const sptr<WindowNode>& node) override;
 
 private:
     std::map<DisplayId, uint32_t> maxTileWinNumMap_;

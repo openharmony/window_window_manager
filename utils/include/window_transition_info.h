@@ -21,6 +21,7 @@
 #include "ability_info.h"
 #include "window_info.h"
 #include "wm_common.h"
+#include "wm_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -61,6 +62,8 @@ public:
     TransitionReason GetTransitionReason();
     void SetIsRecent(bool isRecent);
     bool GetIsRecent() const;
+    WindowSizeLimits GetWindowSizeLimits() const;
+
 private:
     std::string bundleName_;
     std::string abilityName_;
@@ -73,6 +76,7 @@ private:
     bool isRecent_ = false;
     TransitionReason reason_ = TransitionReason::ABILITY_TRANSITION;
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
+    WindowSizeLimits sizeLimits_;
 };
 } // Rosen
 } // OHOS

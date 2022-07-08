@@ -30,8 +30,7 @@ public:
     StartingWindow() = delete;
     ~StartingWindow() = default;
 
-    static sptr<WindowNode> CreateWindowNode(const sptr<WindowTransitionInfo>& info,
-        uint32_t winId, WindowLayoutMode layoutMode);
+    static sptr<WindowNode> CreateWindowNode(const sptr<WindowTransitionInfo>& info, uint32_t winId);
     static void HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,
         uint32_t& windowId, const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowProperty>& property,
         int32_t pid, int32_t uid);
@@ -39,11 +38,11 @@ public:
         bool isColdStart);
     static void UpdateRSTree(sptr<WindowNode>& node);
     static void ReleaseStartWinSurfaceNode(sptr<WindowNode>& node);
+    static bool NeedToStopStartingWindow(WindowMode winMode, uint32_t modeSupportInfo,
+        const sptr<WindowTransitionInfo>& info);
 
 private:
     static WMError CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node);
-    static bool NeedCancelStartingWindow(uint32_t modeSupportInfo,
-        WindowLayoutMode layoutMode, const sptr<WindowTransitionInfo>& info);
     static SurfaceDraw surfaceDraw_;
     static std::recursive_mutex mutex_;
 };

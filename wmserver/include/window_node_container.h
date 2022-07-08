@@ -111,6 +111,7 @@ public:
     void ProcessWindowAvoidAreaChangeWhenDisplayChange() const;
     WindowLayoutMode GetCurrentLayoutMode() const;
     void RemoveSingleUserWindowNodes();
+    WMError IsTileRectSatisfiedWithSizeLimits(sptr<WindowNode>& node);
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
