@@ -19,9 +19,9 @@ ohos_shared_library("screenshot") {
 
   deps = [
     "../common:wm_napi_common",
-    "//foundation/windowmanager/dm:libdm",
-    "//foundation/windowmanager/utils:libwmutil",
-    "//foundation/windowmanager/wm:libwm",
+    "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/utils:libwmutil",
+    "//foundation/window/window_manager/wm:libwm",
   ]
 
   external_deps = [
