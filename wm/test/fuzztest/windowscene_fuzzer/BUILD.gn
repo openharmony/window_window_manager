@@ -19,12 +19,12 @@ module_output_path = "window_manager/wm"
 ##############################fuzztest##########################################
 ohos_fuzztest("WindowSceneFuzzTest") {
   fuzz_config_file =
-      "//foundation/windowmanager/wm/test/fuzztest/windowscene_fuzzer"
+      "//foundation/window/window_manager/wm/test/fuzztest/windowscene_fuzzer"
   module_out_path = module_output_path
   include_dirs = [
-    "//foundation/windowmanager/wmserver/include",
-    "//foundation/windowmanager/interfaces/innerkits/dm",
-    "//foundation/windowmanager/interfaces/innerkits/wm",
+    "//foundation/window/window_manager/wmserver/include",
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
     "//utils/native/base/include",
   ]
@@ -37,8 +37,8 @@ ohos_fuzztest("WindowSceneFuzzTest") {
   sources = [ "windowscene_fuzzer.cpp" ]
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/windowmanager/dm:libdm",
-    "//foundation/windowmanager/wm:libwm",
+    "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/wm:libwm",
     "//utils/native/base:utils",
   ]
 

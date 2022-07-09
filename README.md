@@ -27,7 +27,7 @@ The Window Manager subsystem provides basic capabilities of window and display m
 ## Directory Structure
 
 ```text
-foundation/windowmanager/
+foundation/window/window_manager/
 ├── dm                      # Stores Display Manager Client implementation code
 ├── dmserver                # Stores Display Manager Server implementation code
 ├── interfaces              # Stores external APIs

@@ -19,12 +19,12 @@ config("libwms_config") {
     "include",
     "include/window_snapshot",
     "//utils/system/safwk/native/include",
-    "//foundation/windowmanager/interfaces/innerkits/wm",
-    "//foundation/windowmanager/interfaces/innerkits/dm",
-    "//foundation/windowmanager/wm/include",
-    "//foundation/windowmanager/utils/include",
-    "//foundation/windowmanager/dm/include",
-    "//foundation/windowmanager/dmserver/include",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "//foundation/window/window_manager/wm/include",
+    "//foundation/window/window_manager/utils/include",
+    "//foundation/window/window_manager/dm/include",
+    "//foundation/window/window_manager/dmserver/include",
   ]
 }
 
@@ -70,10 +70,10 @@ ohos_shared_library("libwms") {
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/windowmanager/dm:libdm",
-    "//foundation/windowmanager/dmserver:libdms",
-    "//foundation/windowmanager/utils:libwmutil",
-    "//foundation/windowmanager/wm:libwm",
+    "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/dmserver:libdms",
+    "//foundation/window/window_manager/utils:libwmutil",
+    "//foundation/window/window_manager/wm:libwm",
   ]
 
   external_deps = [

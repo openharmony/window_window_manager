@@ -22,9 +22,9 @@ group("systemtest") {
 
 config("we_systemtest_common_public_config") {
   include_dirs = [
-    "//foundation/windowmanager/extension/extension_connection/include",
-    "//foundation/windowmanager/interfaces/innerkits/extension",
-    "//foundation/windowmanager/interfaces/innerkits/wm",
+    "//foundation/window/window_manager/extension/extension_connection/include",
+    "//foundation/window/window_manager/interfaces/innerkits/extension",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//third_party/googletest/googlemock/include",
   ]
 
@@ -45,7 +45,7 @@ ohos_systemtest("window_extension_connection_test") {
   public_configs = [ ":we_systemtest_common_public_config" ]
 
   public_deps = [
-    "//foundation/windowmanager/extension/extension_connection:libwindow_extension_client",
+    "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
