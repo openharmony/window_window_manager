@@ -42,6 +42,7 @@ config("window_native_kit_config") {
 
 ohos_shared_library("window_native_kit") {
   sources = [
+    "window_napi/js_transition_controller.cpp",
     "window_napi/js_window.cpp",
     "window_napi/js_window_listener.cpp",
     "window_napi/js_window_register_manager.cpp",

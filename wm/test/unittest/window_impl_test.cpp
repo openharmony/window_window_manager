@@ -755,10 +755,10 @@ HWTEST_F(WindowImplTest, Minimize01, Function | SmallTest | Level3)
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
-    ASSERT_TRUE(window->GetShowState());
+    ASSERT_TRUE((window->GetWindowState() == WindowState::STATE_SHOWN));
     EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Minimize();
-    ASSERT_FALSE(window->GetShowState());
+    ASSERT_FALSE((window->GetWindowState() == WindowState::STATE_SHOWN));
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -780,9 +780,9 @@ HWTEST_F(WindowImplTest, Minimize02, Function | SmallTest | Level3)
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->Show();
-    ASSERT_TRUE(window->GetShowState());
+    ASSERT_TRUE((window->GetWindowState() == WindowState::STATE_SHOWN));
     window->Minimize();
-    ASSERT_TRUE(window->GetShowState());
+    ASSERT_TRUE((window->GetWindowState() == WindowState::STATE_SHOWN));
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -868,7 +868,7 @@ HWTEST_F(WindowImplTest, MoveTo01, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetMode());
-    ASSERT_FALSE(window->GetShowState());
+    ASSERT_FALSE((window->GetWindowState() == WindowState::STATE_SHOWN));
     const float moveRatio = 0.5;
     Rect newRect = {winRect.posX_ * moveRatio, winRect.posY_ * moveRatio, winRect.width_, winRect.height_};
     window->MoveTo(newRect.posX_, newRect.posY_);
@@ -895,7 +895,7 @@ HWTEST_F(WindowImplTest, Resize01, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
     ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetMode());
-    ASSERT_FALSE(window->GetShowState());
+    ASSERT_FALSE((window->GetWindowState() == WindowState::STATE_SHOWN));
     const float resizeRatio = 0.5;
     Rect newRect = {winRect.posX_, winRect.posY_, winRect.width_ * resizeRatio, winRect.height_ * resizeRatio};
     window->Resize(newRect.width_, newRect.height_);
