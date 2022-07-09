@@ -659,7 +659,7 @@ WMError WindowManagerService::GetAccessibilityWindowInfo(sptr<AccessibilityWindo
         return WMError::WM_ERROR_NULLPTR;
     }
     return PostSyncTask([this, &windowInfo]() {
-        return windowRoot_->GetAccessibilityWindowInfo(windowInfo);
+        return windowController_->GetAccessibilityWindowInfo(windowInfo);
     });
 }
 

@@ -62,7 +62,6 @@ public:
     uint64_t GetScreenId(DisplayId displayId) const;
     Rect GetDisplayRect(DisplayId displayId) const;
     std::unordered_map<WindowType, SystemBarProperty> GetExpectImmersiveProperty() const;
-    void NotifyAccessibilityWindowInfo(const sptr<WindowNode>& windowId, WindowUpdateType type) const;
     uint32_t GetWindowCountByType(WindowType windowType);
     bool IsForbidDockSliceMove(DisplayId displayId) const;
     bool IsDockSliceInExitSplitModeArea(DisplayId displayId) const;

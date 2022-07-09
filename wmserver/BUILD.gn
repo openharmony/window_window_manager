@@ -32,6 +32,7 @@ ohos_shared_library("libwms") {
   sources = [
     "../wm/src/zidl/window_manager_agent_proxy.cpp",
     "../wm/src/zidl/window_proxy.cpp",
+    "src/accessibility_connection.cpp",
     "src/avoid_area_controller.cpp",
     "src/display_group_controller.cpp",
     "src/display_group_info.cpp",
