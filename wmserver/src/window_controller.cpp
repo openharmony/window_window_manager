@@ -240,6 +240,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     windowRoot_->FocusFaultDetection();
     FlushWindowInfo(property->GetWindowId());
     HandleTurnScreenOn(node);
+    accessibilityConnection_->NotifyAccessibilityInfo(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
         node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
@@ -348,7 +349,12 @@ void WindowController::HandleTurnScreenOn(const sptr<WindowNode>& node)
 
 WMError WindowController::RemoveWindowNode(uint32_t windowId)
 {
-    auto removeFunc = [this, windowId]() {
+    auto windowNode = windowRoot_->GetWindowNode(windowId);
+    if (windowNode == nullptr) {
+        WLOGFE("windowNode is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto removeFunc = [this, windowId, windowNode]() {
         WMError res = windowRoot_->RemoveWindowNode(windowId);
         if (res != WMError::WM_OK) {
             WLOGFE("RemoveWindowNode failed");
@@ -356,13 +362,9 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
         }
         windowRoot_->FocusFaultDetection();
         FlushWindowInfo(windowId);
+        accessibilityConnection_->NotifyAccessibilityInfo(windowNode, WindowUpdateType::WINDOW_UPDATE_REMOVED);
         return res;
     };
-    auto windowNode = windowRoot_->GetWindowNode(windowId);
-    if (windowNode == nullptr) {
-        WLOGFE("windowNode is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
     WMError res = WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         if (RemoteAnimation::NotifyAnimationScreenUnlock(removeFunc) == WMError::WM_OK) {
@@ -392,6 +394,7 @@ WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
     }
     windowRoot_->FocusFaultDetection();
     FlushWindowInfoWithDisplayId(displayId);
+    accessibilityConnection_->NotifyAccessibilityInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     return res;
 }
 
@@ -441,7 +444,10 @@ WMError WindowController::RequestFocus(uint32_t windowId)
     if (windowRoot_ == nullptr) {
         return WMError::WM_ERROR_NULLPTR;
     }
-    return windowRoot_->RequestFocus(windowId);
+    WMError res = windowRoot_->RequestFocus(windowId);
+    accessibilityConnection_->NotifyAccessibilityInfo(windowRoot_->GetWindowNode(windowId),
+        WindowUpdateType::WINDOW_UPDATE_FOCUSED);
+    return res;
 }
 
 WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
@@ -688,6 +694,8 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
     windowRoot_->RequestActiveWindow(windowId);
     if (zOrderRes == WMError::WM_OK || focusRes == WMError::WM_OK) {
         FlushWindowInfo(windowId);
+        accessibilityConnection_->NotifyAccessibilityInfo(windowRoot_->GetWindowNode(windowId),
+            WindowUpdateType::WINDOW_UPDATE_FOCUSED);
         WLOGFI("ProcessPointDown end");
         return WMError::WM_OK;
     }
@@ -896,7 +904,8 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
             std::vector<Rect> rects;
             property->GetTouchHotAreas(rects);
-            return UpdateTouchHotAreas(node, rects);
+            UpdateTouchHotAreas(node, rects);
+            break;
         }
         case PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG: {
             node->GetWindowProperty()->SetAnimationFlag(property->GetAnimationFlag());
@@ -912,19 +921,15 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             break;
     }
     if (ret == WMError::WM_OK) {
-        NotifyWindowPropertyChanged(node);
+        accessibilityConnection_->NotifyAccessibilityInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     }
     return ret;
 }
 
-void WindowController::NotifyWindowPropertyChanged(const sptr<WindowNode>& node)
+WMError WindowController::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const
 {
-    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
-    if (windowNodeContainer == nullptr) {
-        WLOGFE("windowNodeContainer is null");
-        return;
-    }
-    windowNodeContainer->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+    accessibilityConnection_->GetAccessibilityWindowInfo(windowInfo);
+    return WMError::WM_OK;
 }
 
 WMError WindowController::GetModeChangeHotZones(DisplayId displayId,
