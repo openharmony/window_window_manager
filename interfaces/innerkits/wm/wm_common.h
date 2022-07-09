@@ -96,6 +96,17 @@ enum class WindowBlurLevel : uint32_t {
     WINDOW_BLUR_HIGH
 };
 
+enum class WindowState : uint32_t {
+    STATE_INITIAL,
+    STATE_CREATED,
+    STATE_SHOWN,
+    STATE_HIDDEN,
+    STATE_FROZEN,
+    STATE_DESTROYED,
+    STATE_BOTTOM = STATE_DESTROYED,
+    STATE_UNFROZEN,
+};
+
 enum class WMError : int32_t {
     WM_OK = 0,
     WM_DO_NOTHING,
