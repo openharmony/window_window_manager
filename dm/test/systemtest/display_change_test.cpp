@@ -27,7 +27,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DisplayChangeTest"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayChangeTest"};
     constexpr uint32_t MAX_TIME_WAITING_FOR_CALLBACK = 20;
     constexpr uint32_t SLEEP_TIME_IN_US = 10000; // 10ms
     constexpr uint32_t SPLIT_TEST_SLEEP_S = 2;

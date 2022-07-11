@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsDisplay"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplay"};
 }
 
 static thread_local std::map<DisplayId, std::shared_ptr<NativeReference>> g_JsDisplayMap;
