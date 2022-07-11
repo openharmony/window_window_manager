@@ -277,6 +277,22 @@ void WindowProxy::NotifyTouchOutside()
     }
 }
 
+void WindowProxy::NotifyScreenshot()
+{
+    MessageParcel data;
+    MessageParcel replay;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_NOTIFY_SCREEN_SHOT),
+        data, replay, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 void WindowProxy::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     MessageParcel data;

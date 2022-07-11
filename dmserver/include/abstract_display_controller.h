@@ -26,7 +26,6 @@
 #include "screen.h"
 #include "abstract_display.h"
 #include "display_change_listener.h"
-#include "transaction/rs_interfaces.h"
 #include "future.h"
 
 namespace OHOS::Rosen {
@@ -76,36 +75,6 @@ private:
     sptr<AbstractScreenController::AbstractScreenCallback> abstractScreenCallback_;
     OHOS::Rosen::RSInterfaces& rsInterface_;
     DisplayStateChangeListener displayStateChangeListener_;
-
-    class ScreenshotCallback : public SurfaceCaptureCallback, public Future<std::shared_ptr<Media::PixelMap>> {
-    public:
-        ScreenshotCallback() = default;
-        ~ScreenshotCallback() {};
-        void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelmap) override
-        {
-            FutureCall(pixelmap);
-        }
-
-    protected:
-        void Call(std::shared_ptr<Media::PixelMap> pixelmap) override
-        {
-            if (!flag_) {
-                flag_ = true;
-                pixelMap_ = pixelmap;
-            }
-        }
-        bool IsReady() override
-        {
-            return flag_;
-        }
-        std::shared_ptr<Media::PixelMap> FetchResult() override
-        {
-            return pixelMap_;
-        }
-    private:
-        bool flag_ = false;
-        std::shared_ptr<Media::PixelMap> pixelMap_ = nullptr;
-    };
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_CONTROLLER_H

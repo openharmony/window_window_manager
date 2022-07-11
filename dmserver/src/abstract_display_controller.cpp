@@ -22,6 +22,7 @@
 #include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
 #include "screen_group.h"
+#include "surface_capture_future.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -113,10 +114,11 @@ std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(Di
     }
     ScreenId dmsScreenId = abstractDisplay->GetAbstractScreenId();
     std::shared_ptr<RSDisplayNode> displayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(dmsScreenId);
+
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    std::shared_ptr<ScreenshotCallback> callback = std::make_shared<ScreenshotCallback>();
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     rsInterface_.TakeSurfaceCapture(displayNode, callback);
-    std::shared_ptr<Media::PixelMap> screenshot = callback->GetResult(2000); // wait for 2000ms
+    std::shared_ptr<Media::PixelMap> screenshot = callback->GetResult(2000); // wait for <= 2000ms
     if (screenshot == nullptr) {
         WLOGFE("Failed to get pixelmap from RS, return nullptr!");
     }

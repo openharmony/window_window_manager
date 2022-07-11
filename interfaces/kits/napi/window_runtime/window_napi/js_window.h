@@ -70,6 +70,7 @@ public:
     static NativeValue* GetColorSpace(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* Dump(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetForbidSplitMove(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* Snapshot(NativeEngine* engine, NativeCallbackInfo* info);
 
     // animation config
     static NativeValue* SetOpacitySync(NativeEngine* engine, NativeCallbackInfo* info);
@@ -120,6 +121,7 @@ private:
     NativeValue* OnDisableWindowDecor(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnDump(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetForbidSplitMove(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSnapshot(NativeEngine& engine, NativeCallbackInfo& info);
 
     // animation Config
     NativeValue* OnSetOpacitySync(NativeEngine& engine, NativeCallbackInfo& info);

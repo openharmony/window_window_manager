@@ -36,8 +36,10 @@ ohos_fuzztest("WindowFuzzTest") {
     "//foundation/windowmanager/wm:libwm",
     "//utils/native/base:utils",
   ]
-
-  external_deps = [ "ipc:ipc_core" ]
+  external_deps = [
+    "ipc:ipc_core",
+    "multimedia_image_standard:image",
+  ]
 }
 
 ###############################################################################

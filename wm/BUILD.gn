@@ -83,6 +83,7 @@ ohos_shared_library("libwm") {
     "input:libmmi-client",
     "inputmethod_native:inputmethod_client",
     "ipc:ipc_core",
+    "multimedia_image_standard:image",
     "multimedia_image_standard:image_native",
     "napi:ace_napi",
 

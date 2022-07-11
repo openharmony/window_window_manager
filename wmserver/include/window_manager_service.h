@@ -44,6 +44,7 @@ public:
     virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
     virtual void OnGetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation) override;
+    virtual void OnScreenshot(DisplayId displayId) override;
 };
 
 class WindowManagerServiceHandler : public AAFwk::WindowManagerServiceHandlerStub {
@@ -108,6 +109,7 @@ public:
     void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
     void OnAccountSwitched() const;
     WMError UpdateRsTree(uint32_t windowId, bool isAdd) override;
+    void OnScreenshot(DisplayId displayId);
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;
