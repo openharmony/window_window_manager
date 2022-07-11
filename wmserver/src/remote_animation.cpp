@@ -264,6 +264,7 @@ WMError RemoteAnimation::NotifyAnimationByHome()
         return WMError::WM_ERROR_NO_MEM;
     }
     // need use OnMinimizeWindows with controller
+    windowAnimationController_->OnMinimizeAllWindow(animationTargets, finishedCallback);
     return WMError::WM_OK;
 }
 
