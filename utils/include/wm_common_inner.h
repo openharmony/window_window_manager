@@ -29,17 +29,6 @@ enum class LifeCycleEvent : uint32_t {
     DESTROY_EVENT,
 };
 
-enum class WindowState : uint32_t {
-    STATE_INITIAL,
-    STATE_CREATED,
-    STATE_SHOWN,
-    STATE_HIDDEN,
-    STATE_FROZEN,
-    STATE_DESTROYED,
-    STATE_BOTTOM = STATE_DESTROYED,
-    STATE_UNFROZEN,
-};
-
 enum class WindowStateChangeReason : uint32_t {
     NORMAL,
     KEYGUARD,

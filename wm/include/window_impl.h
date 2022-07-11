@@ -108,7 +108,7 @@ public:
     virtual WindowMode GetMode() const override;
     virtual WindowBlurLevel GetWindowBackgroundBlur() const override;
     virtual float GetAlpha() const override;
-    virtual bool GetShowState() const override;
+    virtual WindowState GetWindowState() const override;
     virtual WMError SetFocusable(bool isFocusable) override;
     virtual bool GetFocusable() const override;
     virtual WMError SetTouchable(bool isTouchable) override;

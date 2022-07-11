@@ -225,9 +225,9 @@ float WindowImpl::GetAlpha() const
     return property_->GetAlpha();
 }
 
-bool WindowImpl::GetShowState() const
+WindowState WindowImpl::GetWindowState() const
 {
-    return state_ == WindowState::STATE_SHOWN;
+    return state_;
 }
 
 WMError WindowImpl::SetFocusable(bool isFocusable)
@@ -960,27 +960,9 @@ WMError WindowImpl::UpdateSurfaceNodeAfterCustomAnimation(bool isAdd)
 
 WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
 {
-    WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
-    if (stateChangeReason == WindowStateChangeReason::KEYGUARD ||
-        stateChangeReason == WindowStateChangeReason::TOGGLING) {
-        state_ = WindowState::STATE_SHOWN;
-        NotifyAfterForeground();
-        return WMError::WM_OK;
-    }
     if (state_ == WindowState::STATE_FROZEN) {
         WLOGFE("window is frozen, can not be shown, windowId: %{public}u", property_->GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
-    }
-    if (state_ == WindowState::STATE_SHOWN) {
-        if (property_->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
-            WLOGFI("desktop window [id:%{public}u] is shown, minimize all app windows", property_->GetWindowId());
-            SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
-        } else {
-            WLOGFI("window is already shown id: %{public}u, raise to top", property_->GetWindowId());
-            SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
-        }
-        CALL_LIFECYCLE_LISTENER(AfterForeground);
-        return WMError::WM_OK;
     }
     SetDefaultOption();
     AdjustWindowAnimationFlag(withAnimation);
@@ -1005,7 +987,24 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
+    WindowStateChangeReason stateChangeReason = static_cast<WindowStateChangeReason>(reason);
+    if (stateChangeReason == WindowStateChangeReason::KEYGUARD ||
+        stateChangeReason == WindowStateChangeReason::TOGGLING) {
+        state_ = WindowState::STATE_SHOWN;
+        NotifyAfterForeground();
+        return WMError::WM_OK;
+    }
+    if (state_ == WindowState::STATE_SHOWN) {
+        if (property_->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+            WLOGFI("desktop window [id:%{public}u] is shown, minimize all app windows", property_->GetWindowId());
+            SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
+        } else {
+            WLOGFI("window is already shown id: %{public}u, raise to top", property_->GetWindowId());
+            SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
+        }
+        CALL_LIFECYCLE_LISTENER(AfterForeground);
+        return WMError::WM_OK;
+    }
     WMError ret = PreProcessShow(reason, withAnimation);
     if (ret != WMError::WM_OK) {
         return ret;

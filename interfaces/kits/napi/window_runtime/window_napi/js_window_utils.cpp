@@ -533,7 +533,7 @@ bool ParseJsDoubleValue(NativeObject* jsObject, NativeEngine& engine, const std:
     NativeValue* value = jsObject->GetProperty(name.c_str());
     if (value->TypeOf() != NATIVE_UNDEFINED) {
         if (!ConvertFromJsValue(engine, value, data)) {
-            WLOGFE("[NAPI]Failed to convert parameter to scale %{public}s", name.c_str());
+            WLOGFE("[NAPI]Failed to convert parameter to data: %{public}s", name.c_str());
             return false;
         }
     } else {

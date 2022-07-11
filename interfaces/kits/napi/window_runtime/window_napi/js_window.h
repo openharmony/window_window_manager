@@ -34,8 +34,10 @@ public:
     ~JsWindow();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* Show(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* ShowWithAnimation(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* Destroy(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* Hide(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* HideWithAnimation(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* MoveTo(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* Resize(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetWindowType(NativeEngine* engine, NativeCallbackInfo* info);
@@ -74,14 +76,17 @@ public:
     static NativeValue* SetScaleSync(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetRotateSync(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetTranslateSync(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* GetTransitionControllerSync(NativeEngine* engine, NativeCallbackInfo* info);
 private:
     std::string GetWindowName();
     bool ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
     bool ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
     bool ParseTranslateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
     NativeValue* OnShow(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnShowWithAnimation(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnDestroy(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnHide(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnHideWithAnimation(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnMoveTo(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnResize(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetWindowType(NativeEngine& engine, NativeCallbackInfo& info);
@@ -121,8 +126,12 @@ private:
     NativeValue* OnSetScaleSync(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetRotateSync(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetTranslateSync(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnGetTransitionControllerSync(NativeEngine& engine, NativeCallbackInfo& info);
+    void CreateTransitionController(NativeEngine& engine);
+
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
+    std::shared_ptr<NativeReference> jsTransControllerObj_ = nullptr;
 };
 }  // namespace Rosen
 }  // namespace OHOS

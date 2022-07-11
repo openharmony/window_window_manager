@@ -153,8 +153,8 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow02, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
-    ASSERT_EQ(false, scene->GetMainWindow()->GetShowState());
-    ASSERT_EQ(true, fltWin->GetShowState());
+    ASSERT_EQ(false, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
+    ASSERT_EQ(true, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
@@ -179,8 +179,8 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow03, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
-    ASSERT_EQ(false, fltWin->GetShowState());
-    ASSERT_EQ(true, scene->GetMainWindow()->GetShowState());
+    ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
+    ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
@@ -206,7 +206,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, Function | MediumTest
 
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
     ASSERT_EQ(nullptr, scene->GetMainWindow());
-    ASSERT_EQ(false, fltWin->GetShowState());
+    ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
 }
 
@@ -252,8 +252,8 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow06, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
-    ASSERT_EQ(false, scene->GetMainWindow()->GetShowState());
-    ASSERT_EQ(true, fltWin->GetShowState());
+    ASSERT_EQ(false, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
+    ASSERT_EQ(true, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
@@ -278,8 +278,8 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow07, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Hide());
-    ASSERT_EQ(false, fltWin->GetShowState());
-    ASSERT_EQ(true, scene->GetMainWindow()->GetShowState());
+    ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
+    ASSERT_EQ(true, scene->GetMainWindow()->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, scene->GoBackground());
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
@@ -305,7 +305,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow08, Function | MediumTest
 
     ASSERT_EQ(WMError::WM_OK, scene->GoDestroy());
     ASSERT_EQ(nullptr, scene->GetMainWindow());
-    ASSERT_EQ(false, fltWin->GetShowState());
+    ASSERT_EQ(false, fltWin->GetWindowState() == WindowState::STATE_SHOWN);
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());
 }
 
