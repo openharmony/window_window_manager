@@ -17,11 +17,12 @@
 #define OHOS_WM_INCLUDE_FUTURE_H
 
 #include "hilog/log.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 template<class T>
 class Future {
-    constexpr static HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "Future"};
+    constexpr static HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Future"};
 public:
     T GetResult(long timeOut)
     {

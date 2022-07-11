@@ -466,7 +466,8 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
         } else {
             WLOGI("bind display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, dummyDisplay_->GetId());
-            bool updateFlag = dummyDisplay_->GetHeight() == info->height_ && dummyDisplay_->GetWidth() == info->width_;
+            bool updateFlag = static_cast<uint32_t>(dummyDisplay_->GetHeight()) == info->height_
+                    && static_cast<uint32_t>(dummyDisplay_->GetWidth()) == info->width_;
             dummyDisplay_->BindAbstractScreen(abstractScreenController_->GetAbstractScreen(realAbsScreen->dmsId_));
             if (updateFlag) {
                 DisplayManagerAgentController::GetInstance().OnDisplayCreate(dummyDisplay_->ConvertToDisplayInfo());
