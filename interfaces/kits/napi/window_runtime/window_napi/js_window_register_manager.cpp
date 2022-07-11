@@ -35,7 +35,8 @@ JsWindowRegisterManager::JsWindowRegisterManager()
         { AVOID_AREA_CHANGE_CB,        &JsWindowRegisterManager::ProcessAvoidAreaChangeRegister       },
         { LIFECYCLE_EVENT_CB,          &JsWindowRegisterManager::ProcessLifeCycleEventRegister        },
         { KEYBOARD_HEIGHT_CHANGE_CB,   &JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister    },
-        { TOUCH_OUTSIDE_CB,            &JsWindowRegisterManager::ProcessTouchOutsideRegister          }
+        { TOUCH_OUTSIDE_CB,            &JsWindowRegisterManager::ProcessTouchOutsideRegister          },
+        { SCREENSHOT_EVENT_CB,         &JsWindowRegisterManager::ProcessScreenshotRegister            }
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -156,6 +157,23 @@ bool JsWindowRegisterManager::ProcessTouchOutsideRegister(sptr<JsWindowListener>
         window->RegisterTouchOutsideListener(thisListener);
     } else {
         window->UnregisterTouchOutsideListener(thisListener);
+    }
+    return true;
+}
+
+bool JsWindowRegisterManager::ProcessScreenshotRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    WLOGFI("called");
+    if (window == nullptr) {
+        WLOGFE("%{public}sregister screenshot listener failed. window is null", isRegister? "" : "un");
+        return false;
+    }
+    sptr<IScreenshotListener> thisListener(listener);
+    if (isRegister) {
+        window->RegisterScreenshotListener(thisListener);
+    } else {
+        window->UnregisterScreenshotListener(thisListener);
     }
     return true;
 }

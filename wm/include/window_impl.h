@@ -193,6 +193,8 @@ public:
     virtual void RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     virtual void UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     virtual void RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) override;
+    virtual void RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
+    virtual void UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) override;
     void UpdateRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason);
@@ -220,6 +222,7 @@ public:
     void NotifyModeChange(WindowMode mode);
     void NotifyDragEvent(const PointInfo& point, DragEvent event);
     void NotifyTouchOutside();
+    void NotifyScreenshot();
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
@@ -239,6 +242,7 @@ public:
     virtual ColorSpace GetColorSpace() override;
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     void PostListenerTask(ListenerTaskCallback &&callback, Priority priority = Priority::LOW,
         const std::string taskName = "");
 private:
@@ -374,6 +378,7 @@ private:
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowTag windowTag_;
     sptr<IAceAbilityHandler> aceAbilityHandler_;
+    std::vector<sptr<IScreenshotListener>> screenshotListeners_;
     std::vector<sptr<ITouchOutsideListener>> touchOutsideListeners_;
     std::vector<sptr<IWindowLifeCycle>> lifecycleListeners_;
     std::vector<sptr<IWindowChangeListener>> windowChangeListeners_;

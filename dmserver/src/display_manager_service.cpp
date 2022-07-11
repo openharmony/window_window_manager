@@ -140,6 +140,13 @@ void DisplayManagerService::GetWindowPreferredOrientation(DisplayId displayId, O
     }
 }
 
+void DisplayManagerService::NotifyScreenshot(DisplayId displayId)
+{
+    if (displayChangeListener_ != nullptr) {
+        displayChangeListener_->OnScreenshot(displayId);
+    }
+}
+
 sptr<DisplayInfo> DisplayManagerService::GetDefaultDisplayInfo()
 {
     ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
@@ -225,7 +232,11 @@ std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(Displ
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:GetDisplaySnapshot(%" PRIu64")", displayId);
     if (Permission::CheckCallingPermission("ohos.permission.CAPTURE_SCREEN") ||
         Permission::IsStartByHdcd()) {
-        return abstractDisplayController_->GetScreenSnapshot(displayId);
+        auto res = abstractDisplayController_->GetScreenSnapshot(displayId);
+        if (res != nullptr) {
+            NotifyScreenshot(displayId);
+        }
+        return res;
     }
     return nullptr;
 }

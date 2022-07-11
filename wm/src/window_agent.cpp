@@ -137,6 +137,16 @@ void WindowAgent::NotifyTouchOutside()
     window_->NotifyTouchOutside();
 }
 
+void WindowAgent::NotifyScreenshot()
+{
+    if (window_ == nullptr) {
+        WLOGFE("notify screenshot failed: window is null.");
+        return;
+    }
+    WLOGFI("called");
+    window_->NotifyScreenshot();
+}
+
 void WindowAgent::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     if (window_ == nullptr) {

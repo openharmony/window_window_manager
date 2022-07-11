@@ -15,6 +15,8 @@
 import { AsyncCallback, Callback } from './basic' ;
 import { Context } from  './app/context';
 import { ContenStorage } from './@internal/component/ets/stateManagement'
+import image from './@ohos.multimedia.image';
+
 /**
  * Window manager.
  * @syscap SystemCapability.WindowManager.WindowManager.Core
@@ -889,6 +891,22 @@ declare namespace window {
     off(type: 'avoidAreaChange', callback?: Callback<{ type: AvoidAreaType, area: AvoidArea }>): void;
 
     /**
+     * register the callback of screenshotEvent, only the focused window called back
+     * @param type: 'screenshotEvent'
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    on(type: 'screenshotEvent', callback: Callback<void>): void;
+
+    /**
+     * unregister the callback of screenshotEvent
+     * @param type: 'screenshotEvent'
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    off(type: 'screenshotEvent', callback?: Callback<void>): void;
+
+    /**
      * Whether the window supports thr wide gamut setting.
      * @since 8
      */
@@ -1133,6 +1151,20 @@ declare namespace window {
      * @since 9
      */
     getTransitionControllerSync(): TransitionController;
+
+    /**
+     * Obtains snapshot of window
+     * @syscap SystemCapability.WindowManager.WindowManager.Cor
+     * @since 9
+     */
+    snapshot(callback: AsyncCallback<image.PixelMap>): void;
+
+    /**
+      * Obtains snapshot of window
+      * @syscap SystemCapability.WindowManager.WindowManager.Co
+      * @since 9
+      */
+    snapshot(): Promise<image.PixelMap>;
   }
   /**
    * Transition Context

@@ -548,6 +548,11 @@ void DisplayChangeListener::OnGetWindowPreferredOrientation(DisplayId displayId,
     WindowManagerService::GetInstance().GetWindowPreferredOrientation(displayId, orientation);
 }
 
+void DisplayChangeListener::OnScreenshot(DisplayId displayId)
+{
+    WindowManagerService::GetInstance().OnScreenshot(displayId);
+}
+
 void WindowManagerService::ProcessPointDown(uint32_t windowId, bool isStartDrag)
 {
     return wmsTaskLooper_->PostTask([this, windowId, isStartDrag]() {
@@ -684,6 +689,13 @@ WMError WindowManagerService::UpdateRsTree(uint32_t windowId, bool isAdd)
     return wmsTaskLooper_->ScheduleTask([this, windowId, isAdd]() {
         return windowRoot_->UpdateRsTree(windowId, isAdd);
     }).get();
+}
+
+void WindowManagerService::OnScreenshot(DisplayId displayId)
+{
+    wmsTaskLooper_->PostTask([this, displayId]() {
+        windowController_->OnScreenshot(displayId);
+    });
 }
 } // namespace Rosen
 } // namespace OHOS
