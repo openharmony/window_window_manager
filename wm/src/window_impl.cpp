@@ -1002,7 +1002,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
             WLOGFI("window is already shown id: %{public}u, raise to top", property_->GetWindowId());
             SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
         }
-        CALL_LIFECYCLE_LISTENER(AfterForeground);
+        NotifyAfterUnfocused(false);
         return WMError::WM_OK;
     }
     WMError ret = PreProcessShow(reason, withAnimation);
@@ -2147,7 +2147,7 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
                 return;
             }
             if (!WindowHelper::IsPointInTargetRect(pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), GetRect())) {
-                NotifyListenerAfterUnfocused();
+                NotifyAfterUnfocused(false);
                 return;
             }
         }
