@@ -351,8 +351,12 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
         return res;
     };
     auto windowNode = windowRoot_->GetWindowNode(windowId);
+    if (windowNode == nullptr) {
+        WLOGFE("windowNode is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     WMError res = WMError::WM_ERROR_NO_REMOTE_ANIMATION;
-    if (windowNode && windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
+    if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         if (RemoteAnimation::NotifyAnimationScreenUnlock(removeFunc) == WMError::WM_OK) {
             WLOGFI("NotifyAnimationScreenUnlock with remote animation");
             res = WMError::WM_OK;
