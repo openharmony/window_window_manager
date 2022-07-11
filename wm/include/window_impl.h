@@ -77,20 +77,20 @@ class WindowImpl : public Window {
 using ListenerTaskCallback = std::function<void()>;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 using Priority = OHOS::AppExecFwk::EventQueue::Priority;
-#define CALL_LIFECYCLE_LISTENER(windowLifecycleCb)          \
-    do {                                                    \
-        for (auto& listener : lifecycleListeners_) {        \
-            if (listener != nullptr) {                      \
-                listener->windowLifecycleCb();              \
-            }                                               \
-        }                                                   \
+#define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
+    do {                                                      \
+        for (auto& listener : (listeners)) {                  \
+            if (listener != nullptr) {                        \
+                listener->windowLifecycleCb();                \
+            }                                                 \
+        }                                                     \
     } while (0)
 
-#define CALL_UI_CONTENT(uiContentCb)                        \
-    do {                                                    \
-        if (uiContent_ != nullptr) {                        \
-            uiContent_->uiContentCb();                      \
-        }                                                   \
+#define CALL_UI_CONTENT(uiContentCb)                          \
+    do {                                                      \
+        if (uiContent_ != nullptr) {                          \
+            uiContent_->uiContentCb();                        \
+        }                                                     \
     } while (0)
 
 public:
@@ -240,38 +240,50 @@ public:
     void PostListenerTask(ListenerTaskCallback &&callback, Priority priority = Priority::LOW,
         const std::string taskName = "");
 private:
-    inline void NotifyAfterForeground()
+    inline std::vector<sptr<IWindowLifeCycle>> GetLifecycleListeners()
     {
-        PostListenerTask([this]() {
-            CALL_LIFECYCLE_LISTENER(AfterForeground);
-            CALL_UI_CONTENT(Foreground);
+        std::vector<sptr<IWindowLifeCycle>> lifecycleListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
+            lifecycleListeners = lifecycleListeners_;
+        }
+        return lifecycleListeners;
+    }
+    inline void NotifyAfterForeground(bool needNotifyUiContent = true)
+    {
+        auto lifecycleListeners = GetLifecycleListeners();
+        PostListenerTask([this, lifecycleListeners, needNotifyUiContent]() {
+            CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
+            if (needNotifyUiContent) {
+                CALL_UI_CONTENT(Foreground);
+            }
         });
     }
     inline void NotifyAfterBackground()
     {
-        PostListenerTask([this]() {
-            CALL_LIFECYCLE_LISTENER(AfterBackground);
+        auto lifecycleListeners = GetLifecycleListeners();
+        PostListenerTask([this, lifecycleListeners]() {
+            CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
             CALL_UI_CONTENT(Background);
         });
     }
     inline void NotifyAfterFocused()
     {
-        PostListenerTask([this]() {
-            CALL_LIFECYCLE_LISTENER(AfterFocused);
+        auto lifecycleListeners = GetLifecycleListeners();
+        PostListenerTask([this, lifecycleListeners]() {
+            CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
             CALL_UI_CONTENT(Focus);
         });
     }
-    inline void NotifyAfterUnfocused()
+    inline void NotifyAfterUnfocused(bool needNotifyUiContent = true)
     {
-        PostListenerTask([this]() {
-            CALL_LIFECYCLE_LISTENER(AfterUnfocused);
-            CALL_UI_CONTENT(UnFocus);
-        });
-    }
-    inline void NotifyListenerAfterUnfocused()
-    {
-        PostListenerTask([this]() {
-            CALL_LIFECYCLE_LISTENER(AfterUnfocused);
+        auto lifecycleListeners = GetLifecycleListeners();
+        // use needNotifyUinContent to separate ui content callbacks
+        PostListenerTask([this, lifecycleListeners, needNotifyUiContent]() {
+            CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
+            if (needNotifyUiContent) {
+                CALL_UI_CONTENT(UnFocus);
+            }
         });
     }
     inline void NotifyBeforeDestroy(std::string windowName)
@@ -297,26 +309,30 @@ private:
     }
     inline void NotifyAfterActive()
     {
-        PostListenerTask([this]() {
-            CALL_LIFECYCLE_LISTENER(AfterActive);
+        auto lifecycleListeners = GetLifecycleListeners();
+        PostListenerTask([lifecycleListeners]() {
+            CALL_LIFECYCLE_LISTENER(AfterActive, lifecycleListeners);
         });
     }
     inline void NotifyAfterInactive()
     {
-        PostListenerTask([this]() {
-            CALL_LIFECYCLE_LISTENER(AfterInactive);
+        auto lifecycleListeners = GetLifecycleListeners();
+        PostListenerTask([lifecycleListeners]() {
+            CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners);
         });
     }
     inline void NotifyForegroundFailed()
     {
-        PostListenerTask([this]() {
-            CALL_LIFECYCLE_LISTENER(ForegroundFailed);
+        auto lifecycleListeners = GetLifecycleListeners();
+        PostListenerTask([lifecycleListeners]() {
+            CALL_LIFECYCLE_LISTENER(ForegroundFailed, lifecycleListeners);
         });
     }
     inline void NotifyForegroundInvalidWindowMode()
     {
-        PostListenerTask([this]() {
-            CALL_LIFECYCLE_LISTENER(ForegroundInvalidMode);
+        auto lifecycleListeners = GetLifecycleListeners();
+        PostListenerTask([lifecycleListeners]() {
+            CALL_LIFECYCLE_LISTENER(ForegroundInvalidMode, lifecycleListeners);
         });
     }
     void DestroyFloatingWindow();
