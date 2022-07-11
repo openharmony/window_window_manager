@@ -105,6 +105,7 @@ private:
     bool Init();
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
+    void NotifyScreenshot(DisplayId displayId);
     ScreenId GetScreenIdByDisplayId(DisplayId displayId) const;
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByDisplayId(DisplayId displayId) const;
     void ConfigureDisplayManagerService();

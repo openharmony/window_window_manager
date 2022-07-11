@@ -63,6 +63,7 @@ public:
     void MinimizeWindowsByLauncher(std::vector<uint32_t>& windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
     Orientation GetWindowPreferredOrientation(DisplayId displayId);
+    void OnScreenshot(DisplayId displayId);
 private:
     uint32_t GenWindowId();
     void FlushWindowInfo(uint32_t windowId);
@@ -87,6 +88,8 @@ private:
     void NotifyTouchOutside(const sptr<WindowNode>& node);
     uint32_t GetEmbedNodeId(const std::vector<sptr<WindowNode>>& windowNodes, const sptr<WindowNode>& node);
     void NotifyWindowPropertyChanged(const sptr<WindowNode>& node);
+    WMError GetFocusWindowNode(DisplayId displayId, sptr<WindowNode>& windowNode);
+
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
     std::atomic<uint32_t> windowId_ { INVALID_WINDOW_ID };

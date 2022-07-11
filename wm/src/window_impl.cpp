@@ -20,11 +20,13 @@
 
 #include <ability_manager_client.h>
 #include <hisysevent.h>
-#include "ipc_skeleton.h"
+#include <ipc_skeleton.h>
+#include <transaction/rs_interfaces.h>
 
 #include "color_parser.h"
 #include "display_manager.h"
 #include "singleton_container.h"
+#include "surface_capture_future.h"
 #include "window_adapter.h"
 #include "window_agent.h"
 #include "window_helper.h"
@@ -41,8 +43,8 @@ namespace {
 }
 
 const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
-    { ColorSpace::COLOR_SPACE_DEFAULT, COLOR_GAMUT_SRGB },
-    { ColorSpace::COLOR_SPACE_WIDE_GAMUT, COLOR_GAMUT_DCI_P3 },
+    { ColorSpace::COLOR_SPACE_DEFAULT, ColorGamut::COLOR_GAMUT_SRGB },
+    { ColorSpace::COLOR_SPACE_WIDE_GAMUT, ColorGamut::COLOR_GAMUT_DCI_P3 },
 };
 
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
@@ -544,6 +546,20 @@ ColorSpace WindowImpl::GetColorSpace()
 {
     auto surfaceGamut = surfaceNode_->GetColorSpace();
     return GetColorSpaceFromSurfaceGamut(surfaceGamut);
+}
+
+std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
+{
+    WLOGFI("WMS-Clinet Snapshot");
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(2000); // wait for <= 2000ms
+    if (pixelMap != nullptr) {
+        WLOGFI("WMS-Clinet Save WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+    } else {
+        WLOGFE("Failed to get pixelmap, return nullptr!");
+    }
+    return pixelMap;
 }
 
 void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
@@ -1662,6 +1678,7 @@ void WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>&
 
 void WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     touchOutsideListeners_.erase(std::remove_if(touchOutsideListeners_.begin(),
         touchOutsideListeners_.end(), [listener](sptr<ITouchOutsideListener> registeredListener) {
             return registeredListener == listener;
@@ -1675,6 +1692,30 @@ void WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTran
         return;
     }
     animationTranistionController_ = listener;
+}
+
+void WindowImpl::RegisterScreenshotListener(const sptr<IScreenshotListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(screenshotListeners_.begin(), screenshotListeners_.end(), listener) !=
+        screenshotListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
+    screenshotListeners_.emplace_back(listener);
+}
+
+void WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    screenshotListeners_.erase(std::remove_if(screenshotListeners_.begin(),
+        screenshotListeners_.end(), [listener](sptr<IScreenshotListener> registeredListener) {
+            return registeredListener == listener;
+        }), screenshotListeners_.end());
 }
 
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
@@ -2345,6 +2386,22 @@ void WindowImpl::UpdateActiveStatus(bool isActive)
     } else {
         NotifyAfterInactive();
     }
+}
+
+void WindowImpl::NotifyScreenshot()
+{
+    std::vector<sptr<IScreenshotListener>> screenshotListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        screenshotListeners = screenshotListeners_;
+    }
+    PostListenerTask([screenshotListeners]() {
+        for (auto& screenshotListener : screenshotListeners) {
+            if (screenshotListener != nullptr) {
+                screenshotListener->OnScreenshot();
+            }
+        }
+    });
 }
 
 void WindowImpl::NotifyTouchOutside()

@@ -22,6 +22,9 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
+#include "pixel_map.h"
+#include "pixel_map_napi.h"
+
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
@@ -1726,6 +1729,13 @@ NativeValue* JsWindow::OnDump(NativeEngine& engine, NativeCallbackInfo& info)
     return dumpInfoValue;
 }
 
+NativeValue* JsWindow::Snapshot(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]Snapshot");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSnapshot(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::OnSetForbidSplitMove(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WMError errCode = WMError::WM_OK;
@@ -1769,7 +1779,50 @@ NativeValue* JsWindow::OnSetForbidSplitMove(NativeEngine& engine, NativeCallback
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
         (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsWindow::OnDump",
+    AsyncTask::Schedule("JsWindow::OnSetForbidSplitMove",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnSnapshot(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (info.argc > 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
+                WLOGFE("[NAPI]window is nullptr or get invalid param");
+                return;
+            }
+
+            std::shared_ptr<Media::PixelMap> pixelMap = weakWindow->Snapshot();
+            if (pixelMap == nullptr) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+                WLOGFE("[NAPI]window snapshot get pixelmap is null");
+                return;
+            }
+
+            auto nativePixelMap = reinterpret_cast<NativeValue*>(
+                Media::PixelMapNapi::CreatePixelMap(reinterpret_cast<napi_env>(&engine), pixelMap));
+            if (nativePixelMap == nullptr) {
+                WLOGFE("[NAPI]window snapshot get nativePixelMap is null");
+            }
+            task.Resolve(engine, nativePixelMap);
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnSnapshot, WxH=%{public}dx%{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
+                pixelMap->GetWidth(), pixelMap->GetHeight());
+        };
+
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::OnSnapshot",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -2098,6 +2151,7 @@ void BindFunctions(NativeEngine& engine, NativeObject* object)
     BindNativeFunction(engine, *object, "setRotateSync", JsWindow::SetRotateSync);
     BindNativeFunction(engine, *object, "setTranslateSync", JsWindow::SetTranslateSync);
     BindNativeFunction(engine, *object, "getTransitionControllerSync", JsWindow::GetTransitionControllerSync);
+    BindNativeFunction(engine, *object, "snapshot", JsWindow::Snapshot);
 }
 }  // namespace Rosen
 }  // namespace OHOS

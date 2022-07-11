@@ -18,6 +18,7 @@
 
 #include <refbase.h>
 #include <parcel.h>
+#include <pixel_map.h>
 
 #include "wm_common.h"
 #include "window_option.h"
@@ -140,6 +141,11 @@ public:
     virtual void AnimationForHidden() = 0;
 };
 
+class IScreenshotListener : virtual public RefBase {
+public:
+    virtual void OnScreenshot() = 0;
+};
+
 class Window : public RefBase {
 public:
     /**
@@ -242,6 +248,8 @@ public:
     virtual void RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
     virtual void UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) = 0;
     virtual void RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) = 0;
+    virtual void RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
+    virtual void UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isDistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;
@@ -269,6 +277,7 @@ public:
     virtual ColorSpace GetColorSpace() = 0;
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+    virtual std::shared_ptr<Media::PixelMap> Snapshot() = 0;
 };
 }
 }
