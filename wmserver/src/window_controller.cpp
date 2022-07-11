@@ -148,23 +148,33 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
     return WMError::WM_OK;
 }
 
-WMError WindowController::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)
+WMError WindowController::GetFocusWindowNode(DisplayId displayId, sptr<WindowNode>& windowNode)
 {
-    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
     auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
     if (windowNodeContainer == nullptr) {
         WLOGFE("windowNodeContainer is null, displayId: %{public}" PRIu64"", displayId);
         return WMError::WM_ERROR_NULLPTR;
     }
     uint32_t focusWindowId = windowNodeContainer->GetFocusWindow();
-    auto windowNode = windowRoot_->GetWindowNode(focusWindowId);
-    if (windowNode == nullptr || !windowNode->currentVisibility_) {
+    WLOGFI("focusWindowId: %{public}u", focusWindowId);
+    auto thisWindowNode = windowRoot_->GetWindowNode(focusWindowId);
+    if (thisWindowNode == nullptr || !thisWindowNode->currentVisibility_) {
         WLOGFE("focusWindowNode is null or invisible, focusWindowId: %{public}u", focusWindowId);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    abilityToken = windowNode->abilityToken_;
-    WLOGFI("focusWindowId: %{public}u", focusWindowId);
+    windowNode = thisWindowNode;
     return WMError::WM_OK;
+}
+
+WMError WindowController::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)
+{
+    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    sptr<WindowNode> windowNode;
+    WMError res = GetFocusWindowNode(displayId, windowNode);
+    if (res == WMError::WM_OK) {
+        abilityToken = windowNode->abilityToken_;
+    }
+    return res;
 }
 
 WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
@@ -1048,6 +1058,21 @@ Orientation WindowController::GetWindowPreferredOrientation(DisplayId displayId)
         return windowNodeContainer->GetWindowPreferredOrientation();
     }
     return Orientation::UNSPECIFIED;
+}
+
+void WindowController::OnScreenshot(DisplayId displayId)
+{
+    sptr<WindowNode> windowNode;
+    WMError res = GetFocusWindowNode(displayId, windowNode);
+    if (res != WMError::WM_OK) {
+        return;
+    }
+    auto windowToken = windowNode->GetWindowToken();
+    if (windowToken == nullptr) {
+        WLOGFE("notify screenshot failed: window token is null.");
+        return;
+    }
+    windowToken->NotifyScreenshot();
 }
 } // namespace OHOS
 } // namespace Rosen

@@ -17,6 +17,7 @@
 
 #include <hitrace_meter.h>
 
+#include "surface_capture_future.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 
@@ -33,11 +34,9 @@ void SnapshotController::Init(sptr<WindowRoot>& root)
 
 WMError SnapshotController::TakeSnapshot(const std::shared_ptr<RSSurfaceNode>& surfaceNode, Snapshot& snapshot)
 {
-    std::shared_ptr<GetSurfaceCapture> callback = std::make_shared<GetSurfaceCapture>();
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     rsInterface_.TakeSurfaceCapture(surfaceNode, callback, scaleW, scaleH);
-
-    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(2000); // wait for 2000ms
-
+    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(2000); // wait for <= 2000ms
     if (pixelMap == nullptr) {
         WLOGFE("Failed to get pixelmap, return nullptr!");
         return WMError::WM_ERROR_NULLPTR;

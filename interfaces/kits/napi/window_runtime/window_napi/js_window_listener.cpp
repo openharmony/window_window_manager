@@ -210,6 +210,7 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info)
 
 void JsWindowListener::OnTouchOutside() const
 {
+    WLOGFI("CALLED");
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
         [self = weakRef_] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
@@ -225,7 +226,26 @@ void JsWindowListener::OnTouchOutside() const
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsWindowListener::OnOutsidePressed",
         *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsWindowListener::OnScreenshot()
+{
     WLOGFI("CALLED");
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [self = wptr<JsWindowListener>(this)] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            auto thisListener = self.promote();
+            if (thisListener == nullptr) {
+                WLOGFE("[NAPI]this listener is nullptr");
+                return;
+            }
+            thisListener->CallJsMethod(SCREENSHOT_EVENT_CB.c_str(), nullptr, 0);
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsWindowListener::OnScreenshot",
+        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 } // namespace Rosen
 } // namespace OHOS
