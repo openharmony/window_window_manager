@@ -632,7 +632,7 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
     bool ret = parcel.WriteUint32(static_cast<uint32_t>(windowId_));
     switch (action) {
         case PropertyChangeAction::ACTION_UPDATE_RECT:
-            ret &= parcel.WriteBool(decoStatus_) && parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
+            ret = ret && parcel.WriteBool(decoStatus_) && parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
                 parcel.WriteInt32(originRect_.posX_) && parcel.WriteInt32(originRect_.posY_) &&
                 parcel.WriteUint32(originRect_.width_) && parcel.WriteUint32(originRect_.height_) &&
                 parcel.WriteInt32(requestRect_.posX_) && parcel.WriteInt32(requestRect_.posY_) &&
@@ -640,46 +640,46 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
                 parcel.WriteUint32(static_cast<uint32_t>(windowSizeChangeReason_));
             break;
         case PropertyChangeAction::ACTION_UPDATE_MODE:
-            ret &= parcel.WriteUint32(static_cast<uint32_t>(mode_));
+            ret = ret && parcel.WriteUint32(static_cast<uint32_t>(mode_));
             break;
         case PropertyChangeAction::ACTION_UPDATE_FLAGS:
-            ret &= parcel.WriteUint32(flags_);
+            ret = ret && parcel.WriteUint32(flags_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_OTHER_PROPS:
-            ret &= MapMarshalling(parcel);
+            ret = ret && MapMarshalling(parcel);
             break;
         case PropertyChangeAction::ACTION_UPDATE_FOCUSABLE:
-            ret &= parcel.WriteBool(focusable_);
+            ret = ret && parcel.WriteBool(focusable_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_TOUCHABLE:
-            ret &= parcel.WriteBool(touchable_);
+            ret = ret && parcel.WriteBool(touchable_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW:
-            ret &= parcel.WriteUint32(callingWindow_);
+            ret = ret && parcel.WriteUint32(callingWindow_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_ORIENTATION:
-            ret &= parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_));
+            ret = ret && parcel.WriteUint32(static_cast<uint32_t>(requestedOrientation_));
             break;
         case PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON:
-            ret &= parcel.WriteBool(turnScreenOn_);
+            ret = ret && parcel.WriteBool(turnScreenOn_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON:
-            ret &= parcel.WriteBool(keepScreenOn_);
+            ret = ret && parcel.WriteBool(keepScreenOn_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_SET_BRIGHTNESS:
-            ret &= parcel.WriteFloat(brightness_);
+            ret = ret && parcel.WriteFloat(brightness_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO:
-            ret &= parcel.WriteUint32(modeSupportInfo_);
+            ret = ret && parcel.WriteUint32(modeSupportInfo_);
             break;
         case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA:
-            ret &= MarshallingTouchHotAreas(parcel);
+            ret = ret && MarshallingTouchHotAreas(parcel);
             break;
         case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY:
-            ret &= MarshallingTransform(parcel);
+            ret = ret && MarshallingTransform(parcel);
             break;
         case PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG:
-            ret &= parcel.WriteUint32(animationFlag_);
+            ret = ret && parcel.WriteUint32(animationFlag_);
             break;
         default:
             break;

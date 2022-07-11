@@ -335,8 +335,9 @@ static NativeValue* CreateJsSystemBarRegionTintObject(NativeEngine& engine, cons
     Rect rect = tint.region_;
     object->SetProperty("region", GetRectAndConvertToJsValue(engine, rect));
 
-    WLOGFI("[NAPI]Type %{public}u [%{public}u %{public}s %{public}s] [%{public}d %{public}d %{public}u %{public}u]",
-        tint.type_, tint.prop_.enable_, bkgColor.c_str(), contentColor.c_str(),
+    WLOGFI("[NAPI]Type %{public}u [%{public}u %{public}s %{public}s]",
+        tint.type_, tint.prop_.enable_, bkgColor.c_str(), contentColor.c_str());
+    WLOGFI("[NAPI]Region [%{public}d %{public}d %{public}u %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     return objValue;
 }
