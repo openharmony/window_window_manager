@@ -168,6 +168,8 @@ void WindowManager::Impl::PostTask(ListenerTaskCallback &&callback, EventPriorit
     const std::string name = "WINDOW_MANAGER_TASK")
 {
     if (!isHandlerRunning_) {
+        // Ensure that the callback thread is not used when it is initialized
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         InitListenerHandler();
     }
     if (listenerHandler_ == nullptr) {
@@ -205,8 +207,13 @@ void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChange
     WLOGFI("NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
         focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
         static_cast<uint32_t>(focusChangeInfo->windowType_), focusChangeInfo->abilityToken_.GetRefPtr());
-    PostTask([this, focusChangeInfo]() mutable {
-            for (auto& listener : focusChangedListeners_) {
+    std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        focusChangeListeners = focusChangedListeners_;
+    }
+    PostTask([this, focusChangeInfo, focusChangeListeners]() mutable {
+            for (auto& listener : focusChangeListeners) {
                 listener->OnFocused(focusChangeInfo);
             }
         }, EventPriority::LOW, "FocusChangeInfo");
@@ -217,8 +224,13 @@ void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChan
     WLOGFI("NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
         focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
         static_cast<uint32_t>(focusChangeInfo->windowType_), focusChangeInfo->abilityToken_.GetRefPtr());
-    PostTask([this, focusChangeInfo]() mutable {
-            for (auto& listener : focusChangedListeners_) {
+    std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        focusChangeListeners = focusChangedListeners_;
+    }
+    PostTask([this, focusChangeInfo, focusChangeListeners]() mutable {
+            for (auto& listener : focusChangeListeners) {
                 listener->OnUnfocused(focusChangeInfo);
             }
         }, EventPriority::LOW, "UnFocusChangeInfo");
@@ -233,8 +245,13 @@ void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const Syst
             tint.type_, tint.prop_.enable_, tint.prop_.backgroundColor_, tint.prop_.contentColor_,
             tint.region_.posX_, tint.region_.posY_, tint.region_.width_, tint.region_.height_);
     }
-    PostTask([this, displayId, tints]() mutable {
-            for (auto& listener : systemBarChangedListeners_) {
+    std::vector<sptr<ISystemBarChangedListener>> systemBarChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        systemBarChangeListeners = systemBarChangedListeners_;
+    }
+    PostTask([this, displayId, tints, systemBarChangeListeners]() mutable {
+            for (auto& listener : systemBarChangeListeners) {
                 listener->OnSystemBarPropertyChange(displayId, tints);
             }
         }, EventPriority::LOW, "SystemBarChangeInfo");
@@ -256,8 +273,13 @@ void WindowManager::Impl::NotifyAccessibilityWindowInfo(const sptr<Accessibility
         windowInfo->currentWindowInfo_->windowRect_.posY_, windowInfo->currentWindowInfo_->focused_,
         windowInfo->currentWindowInfo_->isDecorEnable_, windowInfo->currentWindowInfo_->displayId_,
         windowInfo->currentWindowInfo_->mode_, windowInfo->currentWindowInfo_->type_);
-    PostTask([this, windowInfo, type]() mutable {
-            for (auto& listener : windowUpdateListeners_) {
+    std::vector<sptr<IWindowUpdateListener>> windowUpdateListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        windowUpdateListeners = windowUpdateListeners_;
+    }
+    PostTask([this, windowInfo, type, windowUpdateListeners]() mutable {
+            for (auto& listener : windowUpdateListeners) {
                 listener->OnWindowUpdate(windowInfo, type);
             }
         }, EventPriority::LOW, "AccessibilityWindowInfo");
@@ -266,8 +288,13 @@ void WindowManager::Impl::NotifyAccessibilityWindowInfo(const sptr<Accessibility
 void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos)
 {
-    PostTask([this, windowVisibilityInfos]() mutable {
-            for (auto& listener : windowVisibilityListeners_) {
+    std::vector<sptr<IVisibilityChangedListener>> visibilityChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        visibilityChangeListeners = windowVisibilityListeners_;
+    }
+    PostTask([this, windowVisibilityInfos, visibilityChangeListeners]() mutable {
+            for (auto& listener : visibilityChangeListeners) {
                 listener->OnWindowVisibilityChanged(windowVisibilityInfos);
             }
         }, EventPriority::LOW, "AccessibilityWindowInfo");
@@ -276,8 +303,13 @@ void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
 void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
     WLOGFI("Camera float window, accessTokenId = %{public}u, isShowing = %{public}u", accessTokenId, isShowing);
-    PostTask([this, accessTokenId, isShowing]() mutable {
-            for (auto& listener : cameraFloatWindowChangedListeners_) {
+    std::vector<sptr<ICameraFloatWindowChangedListener>> cameraFloatWindowChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        cameraFloatWindowChangeListeners = cameraFloatWindowChangedListeners_;
+    }
+    PostTask([this, accessTokenId, isShowing, cameraFloatWindowChangeListeners]() mutable {
+            for (auto& listener : cameraFloatWindowChangeListeners) {
                 listener->OnCameraFloatWindowChange(accessTokenId, isShowing);
             }
         }, EventPriority::LOW, "CameraFloatWindowStatus");
@@ -528,7 +560,6 @@ void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChan
         return;
     }
     WLOGFI("window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     if (focused) {
         pImpl_->NotifyFocused(focusChangeInfo);
     } else {
@@ -539,21 +570,18 @@ void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChan
 void WindowManager::UpdateSystemBarRegionTints(DisplayId displayId,
     const SystemBarRegionTints& tints) const
 {
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->NotifySystemBarChanged(displayId, tints);
 }
 
 void WindowManager::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
     WindowUpdateType type) const
 {
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->NotifyAccessibilityWindowInfo(windowInfo, type);
 }
 
 void WindowManager::UpdateWindowVisibilityInfo(
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const
 {
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
 }
 
@@ -568,7 +596,6 @@ WMError WindowManager::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>&
 
 void WindowManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const
 {
-    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
 }
 } // namespace Rosen
