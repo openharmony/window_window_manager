@@ -26,7 +26,7 @@ using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsScreen"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreen"};
 }
 
 static thread_local std::map<ScreenId, std::shared_ptr<NativeReference>> g_JsScreenMap;
