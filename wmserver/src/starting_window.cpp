@@ -39,7 +39,9 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(sptr<WindowTransitionInfo> inf
         return nullptr;
     }
     property->SetRequestRect(info->GetWindowRect());
-    property->SetWindowMode(info->GetWindowMode());
+    if (WindowHelper::IsValidWindowMode(info->GetWindowMode())) {
+        property->SetWindowMode(info->GetWindowMode());
+    }
     property->SetDisplayId(info->GetDisplayId());
     property->SetWindowType(info->GetWindowType());
     if (info->GetShowFlagWhenLocked()) {

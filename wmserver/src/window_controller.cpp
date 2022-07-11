@@ -68,6 +68,12 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
             WLOGFE("windowNode exists but is cold start!");
             return;
         }
+        if (WindowHelper::IsValidWindowMode(info->GetWindowMode()) &&
+            (node->GetWindowMode() != info->GetWindowMode())) {
+            WLOGFW("set starting window mode. starting mode is: %{public}u, window mode is:%{public}u.",
+                node->GetWindowMode(), info->GetWindowMode());
+            node->SetWindowMode(info->GetWindowMode());
+        }
     }
     if (windowRoot_->AddWindowNode(0, node, true) != WMError::WM_OK) {
         return;
