@@ -173,7 +173,7 @@ public:
     virtual const std::string& GetWindowName() const = 0;
     virtual uint32_t GetWindowId() const = 0;
     virtual uint32_t GetWindowFlags() const = 0;
-    virtual bool GetShowState() const = 0;
+    virtual WindowState GetWindowState() const = 0;
     virtual WMError SetFocusable(bool isFocusable) = 0;
     virtual bool GetFocusable() const = 0;
     virtual WMError SetTouchable(bool isTouchable) = 0;

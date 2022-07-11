@@ -37,6 +37,7 @@ JsWindowStage::JsWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowSc
 JsWindowStage::~JsWindowStage()
 {
 }
+
 void JsWindowStage::Finalizer(NativeEngine* engine, void* data, void* hint)
 {
     WLOGFI("[NAPI]Finalizer");

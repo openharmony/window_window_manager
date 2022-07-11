@@ -654,7 +654,7 @@ WMError WindowManagerProxy::UpdateRsTree(uint32_t windowId, bool isAdd)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");

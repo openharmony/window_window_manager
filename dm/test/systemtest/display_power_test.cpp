@@ -422,11 +422,11 @@ HWTEST_F(DisplayPowerTest, window_life_cycle_001, Function | MediumTest | Level2
 
     DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
     usleep(SLEEP_TIME_IN_US);
-    ASSERT_EQ(false, window->GetShowState());
+    ASSERT_EQ(false, window->GetWindowState() == WindowState::STATE_SHOWN);
 
     DisplayManager::GetInstance().NotifyDisplayEvent(DisplayEvent::UNLOCK);
     usleep(SLEEP_TIME_IN_US);
-    ASSERT_EQ(true, window->GetShowState());
+    ASSERT_EQ(true, window->GetWindowState() == WindowState::STATE_SHOWN);
 
     window->Destroy();
 }
