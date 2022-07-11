@@ -396,8 +396,8 @@ public:
         int32_t ymin = MathHelper::Min(a.y_, b.y_, c.y_, d.y_);
         int32_t xmax = MathHelper::Max(a.x_, b.x_, c.x_, d.x_);
         int32_t ymax = MathHelper::Max(a.y_, b.y_, c.y_, d.y_);
-        uint32_t w = xmax - xmin;
-        uint32_t h = ymax - ymin;
+        uint32_t w = static_cast<uint32_t>(xmax - xmin);
+        uint32_t h = static_cast<uint32_t>(ymax - ymin);
         return Rect { xmin, ymin, w, h };
     }
 
@@ -437,10 +437,10 @@ public:
             }
             hotArea.posX_ = windowRect.posX_ + rect.posX_;
             hotArea.posY_ = windowRect.posY_ + rect.posY_;
-            hotArea.width_ =
-                std::min(hotArea.posX_ + rect.width_, windowRect.posX_ + windowRect.width_) - hotArea.posX_;
-            hotArea.height_ =
-                std::min(hotArea.posY_ + rect.height_, windowRect.posY_ + windowRect.height_) - hotArea.posY_;
+            hotArea.width_ = static_cast<uint32_t>(std::min(hotArea.posX_ + rect.width_,
+                windowRect.posX_ + windowRect.width_) - hotArea.posX_);
+            hotArea.height_ = static_cast<uint32_t>(std::min(hotArea.posY_ + rect.height_,
+                windowRect.posY_ + windowRect.height_) - hotArea.posY_);
             outRects.emplace_back(hotArea);
         }
         return isOk;
