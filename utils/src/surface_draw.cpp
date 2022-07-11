@@ -30,6 +30,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SurfaceDraw"};
+    constexpr uint32_t IMAGE_BYTES_STRIDE = 4;
 } // namespace
 
 bool SurfaceDraw::DrawImage(std::shared_ptr<RSSurfaceNode> surfaceNode, int32_t bufferWidth,
@@ -202,8 +203,7 @@ bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, const s
     canvas.Bind(bitmap);
     canvas.Clear(Drawing::Color::COLOR_TRANSPARENT);
     DrawPixelmap(canvas, imagePath);
-    static constexpr uint32_t stride = 4;
-    uint32_t addrSize = width * height * stride;
+    uint32_t addrSize = width * height * IMAGE_BYTES_STRIDE;
     errno_t ret = memcpy_s(addr, addrSize, bitmap.GetPixels(), addrSize);
     if (ret != EOK) {
         WLOGFE("draw failed");
@@ -224,7 +224,7 @@ bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, std::sh
     Drawing::Image image;
     Drawing::Bitmap imageBitmap;
     Drawing::SamplingOptions sampling = Drawing::SamplingOptions(Drawing::FilterMode::NEAREST,
-    Drawing::MipmapMode::NEAREST);
+        Drawing::MipmapMode::NEAREST);
     imageBitmap.Build(pixelMap->GetWidth(), pixelMap->GetHeight(), format);
     imageBitmap.SetPixels(const_cast<uint8_t*>(pixelMap->GetPixels()));
     image.BuildFromBitmap(imageBitmap);
@@ -233,8 +233,7 @@ bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, std::sh
     Drawing::Rect src(0, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
     canvas.DrawImageRect(image, src, dst, sampling);
 
-    static constexpr uint32_t stride = 4;
-    uint32_t addrSize = width * height * stride;
+    uint32_t addrSize = width * height * IMAGE_BYTES_STRIDE;
     errno_t ret = memcpy_s(addr, addrSize, bitmap.GetPixels(), addrSize);
     if (ret != EOK) {
         WLOGFE("draw failed");
@@ -253,8 +252,7 @@ bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, uint32_
     canvas.Bind(bitmap);
     canvas.Clear(color);
 
-    static constexpr uint32_t stride = 4;
-    uint32_t addrSize = width * height * stride;
+    uint32_t addrSize = width * height * IMAGE_BYTES_STRIDE;
     errno_t ret = memcpy_s(addr, addrSize, bitmap.GetPixels(), addrSize);
     if (ret != EOK) {
         WLOGFE("draw failed");
@@ -299,6 +297,24 @@ bool SurfaceDraw::DrawImageRect(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect
 bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, int32_t winWidth, int32_t winHeight,
     sptr<Media::PixelMap> pixelMap, uint32_t color)
 {
+    if (pixelMap == nullptr) {
+        WLOGFE("drawing pixel map failed, because pixel map is nullptr.");
+        return false;
+    }
+    if (pixelMap->GetHeight() <= 0 || pixelMap->GetWidth() <= 0 || winWidth <= 0 || winHeight <= 0) {
+        WLOGFE("drawing pixel map failed, because width or height is invalid.");
+        return false;
+    }
+    float xAxis = static_cast<float>(winWidth) / pixelMap->GetWidth();
+    float yAxis = static_cast<float>(winHeight) / pixelMap->GetHeight();
+    float axis = std::min(xAxis, yAxis);
+    if (axis < 1.0) {
+        // scale when the size of the pixel map is larger than the window
+        // use axis to scale equally
+        pixelMap->scale(axis, axis);
+    }
+    int left = (winWidth - pixelMap->GetWidth()) / 2; // 2 is the left and right boundaries of the window
+    int top = (winHeight - pixelMap->GetHeight()) / 2; // 2 is the top and bottom boundaries of the window
     Drawing::Bitmap bitmap;
     Drawing::BitmapFormat format { Drawing::ColorType::COLORTYPE_RGBA_8888,
         Drawing::AlphaType::ALPHATYPE_OPAQUE };
@@ -306,29 +322,9 @@ bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, int32_t winWidth, int32_t winHe
     Drawing::Canvas canvas;
     canvas.Bind(bitmap);
     canvas.Clear(color);
-    if (pixelMap == nullptr) {
-        WLOGFE("drawing pixel map is nullptr");
-        return false;
-    }
-    uint32_t iconHeight = pixelMap->GetHeight();
-    uint32_t iconWidth = pixelMap->GetWidth();
-    Drawing::Image image;
-    Drawing::Bitmap iconBitmap;
-    iconBitmap.Build(iconWidth, iconHeight, format);
-    iconBitmap.SetPixels(const_cast<uint8_t*>(pixelMap->GetPixels()));
-    image.BuildFromBitmap(iconBitmap);
-    Drawing::SamplingOptions sampling = Drawing::SamplingOptions(Drawing::FilterMode::NEAREST,
-        Drawing::MipmapMode::NEAREST);
+    canvas.DrawBitmap(*pixelMap, left, top);
 
-    int realHeight = std::min(winHeight, pixelMap->GetHeight()); // need to scale
-    int realWidth = std::min(winWidth, pixelMap->GetWidth());
-    int pointX = (winWidth - realWidth) / 2; // 2 is mid point
-    int pointY = (winHeight - realHeight) / 2; // 2 is mid point
-    Drawing::Rect dst(pointX, pointY, pointX + realWidth, pointY + realHeight);
-    canvas.DrawImageRect(image, dst, sampling);
-
-    uint32_t stride = 4;
-    uint32_t addrSize = winWidth * winHeight * stride;
+    uint32_t addrSize = winWidth * winHeight * IMAGE_BYTES_STRIDE;
     errno_t ret = memcpy_s(addr, addrSize, bitmap.GetPixels(), addrSize);
     if (ret != EOK) {
         WLOGFE("draw failed");
