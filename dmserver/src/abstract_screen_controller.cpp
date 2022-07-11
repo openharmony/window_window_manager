@@ -134,12 +134,13 @@ std::vector<ScreenId> AbstractScreenController::GetAllExpandOrMirrorScreenIds(
 
 std::shared_ptr<RSDisplayNode> AbstractScreenController::GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const
 {
+    static std::shared_ptr<RSDisplayNode> notFound = nullptr;
     sptr<AbstractScreen> screen = GetAbstractScreen(dmsScreenId);
     if (screen == nullptr) {
-        return nullptr;
+        return notFound;
     }
     if (screen->rsDisplayNode_ == nullptr) {
-        return nullptr;
+        return notFound;
     }
     WLOGI("GetRSDisplayNodeByScreenId: screen: %{public}" PRIu64", nodeId: %{public}" PRIu64" ",
         screen->dmsId_, screen->rsDisplayNode_->GetId());
