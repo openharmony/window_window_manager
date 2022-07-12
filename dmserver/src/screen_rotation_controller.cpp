@@ -52,11 +52,11 @@ void ScreenRotationController::SubscribeGravitySensor()
         WLOGFE("dms: gravity sensor's already subscribed");
         return;
     }
+    Init();
     if (strcpy_s(user_.name, sizeof(user_.name), "ScreenRotationController") != EOK) {
         WLOGFE("dms strcpy_s error");
         return;
     }
-    ProcessRotationMapping();
     user_.userData = nullptr;
     user_.callback = &HandleGravitySensorEventCallback;
     if (SubscribeSensor(SENSOR_TYPE_ID_GRAVITY, &user_) != 0) {
@@ -69,9 +69,6 @@ void ScreenRotationController::SubscribeGravitySensor()
         WLOGFE("dms: Activate gravity sensor failed");
         return;
     }
-    currentDisplayRotation_ = GetCurrentDisplayRotation();
-    lastSensorDecidedRotation_ = currentDisplayRotation_;
-    rotationLockedRotation_ = currentDisplayRotation_;
     isGravitySensorSubscribed_ = true;
 }
 
@@ -91,6 +88,14 @@ void ScreenRotationController::UnsubscribeGravitySensor()
         return;
     }
     isGravitySensorSubscribed_ = false;
+}
+
+void ScreenRotationController::Init()
+{
+    ProcessRotationMapping();
+    currentDisplayRotation_ = GetCurrentDisplayRotation();
+    lastSensorDecidedRotation_ = currentDisplayRotation_;
+    rotationLockedRotation_ = currentDisplayRotation_;
 }
 
 bool ScreenRotationController::IsScreenRotationLocked()
