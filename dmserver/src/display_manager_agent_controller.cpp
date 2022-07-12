@@ -175,11 +175,5 @@ void DisplayManagerAgentController::OnDisplayChange(
         agent->OnDisplayChange(displayInfo, displayChangeEvent);
     }
 }
-
-bool DisplayManagerAgentController::SetRemoveAgentCallback(const VirtualScreenDestroyCallback& callback,
-    DisplayManagerAgentType type)
-{
-    return dmAgentContainer_.SetRemoveAgentCallback(callback, type);
-}
 }
 }
