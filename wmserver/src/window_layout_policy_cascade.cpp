@@ -315,12 +315,9 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
     ApplyWindowRectConstraints(node, winRect);
     node->SetWindowRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
-
-    UpdateClientRectAndResetReason(node, lastWinRect, winRect);
-
-    // update node bounds
-
+    // update node bounds before reset reason
     UpdateSurfaceBounds(node, winRect, lastWinRect);
+    UpdateClientRectAndResetReason(node, lastWinRect, winRect);
 }
 
 void WindowLayoutPolicyCascade::UpdateSurfaceBounds(

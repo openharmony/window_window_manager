@@ -196,7 +196,6 @@ void WindowLayoutPolicyTile::LayoutForegroundNodeQueue(DisplayId displayId)
             node->GetWindowToken()->UpdateWindowRect(
                 winRect, node->GetDecoStatus(), node->GetWindowSizeChangeReason());
         }
-
         UpdateSurfaceBounds(node, winRect, lastRect);
         for (auto& childNode : node->children_) {
             LayoutWindowNode(childNode);
@@ -360,8 +359,9 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
 
     node->SetWindowRect(winRect);
     CalcAndSetNodeHotZone(winRect, node);
-    UpdateClientRectAndResetReason(node, lastRect, winRect);
+    // update Node Bounds before reset Reason
     UpdateSurfaceBounds(node, winRect, lastRect);
+    UpdateClientRectAndResetReason(node, lastRect, winRect);
 }
 } // Rosen
 } // OHOS
