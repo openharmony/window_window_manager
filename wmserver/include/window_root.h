@@ -96,7 +96,6 @@ public:
     void SetSplitRatios(const std::vector<float>& splitRatioNumbers);
     void SetExitSplitRatios(const std::vector<float>& exitSplitRatios);
     void MinimizeTargetWindows(std::vector<uint32_t>& windowIds);
-    WindowLayoutMode GetCurrentLayoutMode(DisplayId displayId);
     void RemoveSingleUserWindowNodes();
     WMError UpdateRsTree(uint32_t windowId, bool isAdd);
 private:
@@ -121,6 +120,8 @@ private:
         sptr<WindowNodeContainer>& container);
     std::vector<std::pair<uint64_t, bool>> GetWindowVisibilityChangeInfo(
         std::shared_ptr<RSOcclusionData> occlusionData);
+    bool NeedToStopAddingNode(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container);
+
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
     std::map<uint64_t, sptr<WindowNode>> surfaceIdWindowNodeMap_;

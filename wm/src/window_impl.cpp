@@ -708,7 +708,7 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
     uint32_t modeSupportInfo = 0;
     WindowHelper::ConvertSupportModesToSupportInfo(modeSupportInfo, abilityInfo->windowModes);
     if (modeSupportInfo == 0) {
-        WLOGFI("mode config param is 0, all modes is supported");
+        WLOGFD("mode config param is 0, all modes is supported");
         modeSupportInfo = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     }
     WLOGFI("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
@@ -948,6 +948,22 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
     return ret;
 }
 
+bool WindowImpl::NeedToStopShowing()
+{
+    if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
+        return false;
+    }
+    // show failed when current mode is not support or window only supports split mode and can show when locked
+    bool isShowWhenLocked = GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+    if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), GetMode()) ||
+        WindowHelper::IsOnlySupportSplitAndShowWhenLocked(isShowWhenLocked, GetModeSupportInfo())) {
+        WLOGFE("current mode is not supported, windowId: %{public}u, modeSupportInfo: %{public}u, winMode: %{public}u",
+            property_->GetWindowId(), GetModeSupportInfo(), GetMode());
+        return true;
+    }
+    return false;
+}
+
 WMError WindowImpl::UpdateSurfaceNodeAfterCustomAnimation(bool isAdd)
 {
     WLOGFI("[Client] Window [name:%{public}s, id:%{public}u] UpdateRsTree, isAdd:%{public}u",
@@ -982,15 +998,12 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
     }
     SetDefaultOption();
     AdjustWindowAnimationFlag(withAnimation);
-    // show failed when current mode is not support or window only supports split mode and can show when locked
-    bool isShowWhenLocked = GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
-    if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), GetMode()) ||
-        WindowHelper::IsOnlySupportSplitAndShowWhenLocked(isShowWhenLocked, GetModeSupportInfo())) {
-        WLOGFE("current mode is not supported, windowId: %{public}u, modeSupportInfo: %{public}u, winMode: %{public}u",
-            property_->GetWindowId(), GetModeSupportInfo(), GetMode());
+
+    if (NeedToStopShowing()) { // true means stop showing
         NotifyForegroundInvalidWindowMode();
-        return WMError::WM_ERROR_INVALID_WINDOW_MODE;
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
+
     // update title button visibility when show
     UpdateTitleButtonVisibility();
     return WMError::WM_OK;
@@ -1036,7 +1049,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
             // CustomAnimation is enabled when animationTranistionController_ exists
             animationTranistionController_->AnimationForShown();
         }
-    } else if (ret == WMError::WM_ERROR_INVALID_WINDOW_MODE) {
+    } else if (ret == WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE) {
         NotifyForegroundInvalidWindowMode();
     } else {
         NotifyForegroundFailed();

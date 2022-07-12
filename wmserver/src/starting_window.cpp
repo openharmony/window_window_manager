@@ -31,31 +31,25 @@ namespace {
 
 std::recursive_mutex StartingWindow::mutex_;
 
-bool StartingWindow::NeedCancelStartingWindow(uint32_t modeSupportInfo,
-    WindowLayoutMode layoutMode, const sptr<WindowTransitionInfo>& info)
+bool StartingWindow::NeedToStopStartingWindow(WindowMode winMode, uint32_t modeSupportInfo,
+    const sptr<WindowTransitionInfo>& info)
 {
-    if ((!WindowHelper::IsWindowModeSupported(modeSupportInfo, info->GetWindowMode())) ||
-        (WindowHelper::IsInvalidWindowInTileLayoutMode(modeSupportInfo, layoutMode)) ||
+    if (!WindowHelper::IsMainWindow(info->GetWindowType())) {
+        return false;
+    }
+
+    if ((!WindowHelper::IsWindowModeSupported(modeSupportInfo, winMode)) ||
         (WindowHelper::IsOnlySupportSplitAndShowWhenLocked(info->GetShowFlagWhenLocked(), modeSupportInfo))) {
-        WLOGFI("window mode is not be supported or not support floating mode in tile, cancel starting window");
+        WLOGFE("window mode is not be supported or not support floating mode in tile, cancel starting window");
         return true;
     }
     return false;
 }
 
-sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInfo>& info,
-    uint32_t winId, WindowLayoutMode layoutMode)
+sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInfo>& info, uint32_t winId)
 {
     sptr<WindowProperty> property = new(std::nothrow) WindowProperty();
     if (property == nullptr || info == nullptr) {
-        return nullptr;
-    }
-
-    // if mode isn't be supported or don't support floating mode in tile mode, create starting window failed
-    uint32_t modeSupportInfo = 0;
-    WindowHelper::ConvertSupportModesToSupportInfo(modeSupportInfo, info->GetWindowSupportModes());
-    if (NeedCancelStartingWindow(modeSupportInfo, layoutMode, info)) {
-        WLOGFI("window mode is not be supported or not support floating mode in tile, cancel starting window");
         return nullptr;
     }
 
@@ -76,6 +70,11 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
         return nullptr;
     }
     node->abilityToken_ = info->GetAbilityToken();
+    node->SetWindowSizeLimits(info->GetWindowSizeLimits());
+
+    uint32_t modeSupportInfo = 0;
+    WindowHelper::ConvertSupportModesToSupportInfo(modeSupportInfo, info->GetWindowSupportModes());
+    node->SetModeSupportInfo(modeSupportInfo);
 
     if (CreateLeashAndStartingSurfaceNode(node) != WMError::WM_OK) {
         return nullptr;
