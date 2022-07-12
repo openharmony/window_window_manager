@@ -35,6 +35,13 @@ WindowTransitionInfo::WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> in
     } else {
         supportWindowModes_.assign(info->windowModes_.begin(), info->windowModes_.end());
     }
+
+    sizeLimits_.maxRatio_ = static_cast<float>(info->maxWindowRatio_);
+    sizeLimits_.minRatio_ = static_cast<float>(info->minWindowRatio_);
+    sizeLimits_.maxWidth_ = info->maxWindowWidth_;
+    sizeLimits_.minWidth_ = info->minWindowWidth_;
+    sizeLimits_.maxHeight_ = info->maxWindowHeight_;
+    sizeLimits_.minHeight_ = info->minWindowHeight_;
 }
 
 void WindowTransitionInfo::SetBundleName(std::string name)
@@ -122,6 +129,11 @@ std::vector<AppExecFwk::SupportWindowMode> WindowTransitionInfo::GetWindowSuppor
     return supportWindowModes_;
 }
 
+WindowSizeLimits WindowTransitionInfo::GetWindowSizeLimits() const
+{
+    return sizeLimits_;
+}
+
 bool WindowTransitionInfo::GetShowFlagWhenLocked()
 {
     return isShowWhenLocked_;
@@ -191,6 +203,7 @@ bool WindowTransitionInfo::Marshalling(Parcel& parcel) const
     if (!parcel.WriteUint32(static_cast<uint32_t>(reason_))) {
         return false;
     }
+
     return true;
 }
 
