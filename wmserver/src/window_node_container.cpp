@@ -24,6 +24,7 @@
 
 #include "common_event_manager.h"
 #include "dm_common.h"
+#include "remote_animation.h"
 #include "starting_window.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
@@ -257,6 +258,21 @@ void WindowNodeContainer::RemoveWindowNodeFromWindowTree(sptr<WindowNode>& node)
     node->parent_ = nullptr;
 }
 
+void WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node)
+{
+    if (!node->isPlayAnimationHide_) {
+        bool isAnimationPlayed = false;
+        if (RemoteAnimation::CheckAnimationController() && WindowHelper::IsMainWindow(node->GetWindowType())) {
+            isAnimationPlayed = true;
+        }
+        for (auto& displayId : node->GetShowingDisplays()) {
+            UpdateRSTree(node, displayId, false, isAnimationPlayed);
+        }
+    } else {
+        node->isPlayAnimationHide_ = false;
+    }
+}
+
 WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
 {
     if (node == nullptr) {
@@ -272,9 +288,9 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     node->requestedVisibility_ = false;
     node->currentVisibility_ = false;
     // Remove node from RSTree
-    for (auto& displayId : node->GetShowingDisplays()) {
-        UpdateRSTree(node, displayId, false, node->isPlayAnimationHide_);
-    }
+    // When RemoteAnimation exists, Remove node from RSTree after animation
+    RemoveNodeFromRSTree(node);
+
     auto emptyVec = std::vector<DisplayId>();
     node->showingDisplays_.swap(emptyVec);
 
