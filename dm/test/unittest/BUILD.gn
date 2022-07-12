@@ -55,7 +55,7 @@ ohos_unittest("dm_snapshot_utils_test") {
   module_out_path = module_out_path
 
   sources = [
-    "//foundation/windowmanager/snapshot/snapshot_utils.cpp",
+    "//foundation/window/window_manager/snapshot/snapshot_utils.cpp",
     "snapshot_utils_test.cpp",
   ]
 
@@ -102,12 +102,12 @@ ohos_unittest("dm_screen_test") {
 ## Build dm_unittest_common.a {{{
 config("dm_unittest_common_public_config") {
   include_dirs = [
-    "//foundation/windowmanager/dm/include",
-    "//foundation/windowmanager/dmserver/include",
-    "//foundation/windowmanager/snapshot",
-    "//foundation/windowmanager/interfaces/innerkits/dm",
-    "//foundation/windowmanager/dm/test/utils/",
-    "//foundation/windowmanager/utils/include",
+    "//foundation/window/window_manager/dm/include",
+    "//foundation/window/window_manager/dmserver/include",
+    "//foundation/window/window_manager/snapshot",
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "//foundation/window/window_manager/dm/test/utils/",
+    "//foundation/window/window_manager/utils/include",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client",  # RSSurface
   ]
 }
@@ -127,11 +127,11 @@ ohos_static_library("dm_unittest_common") {
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",  # PixelMap
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/windowmanager/dm:libdm",
-    "//foundation/windowmanager/dmserver:libdms",
-    "//foundation/windowmanager/snapshot:snapshot_display",
-    "//foundation/windowmanager/utils:libwmutil",
-    "//foundation/windowmanager/wm:libwm",
+    "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/dmserver:libdms",
+    "//foundation/window/window_manager/snapshot:snapshot_display",
+    "//foundation/window/window_manager/utils:libwmutil",
+    "//foundation/window/window_manager/wm:libwm",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
     "//third_party/libpng:libpng",  # png

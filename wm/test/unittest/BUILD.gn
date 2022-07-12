@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/windowmanager/windowmanager_aafwk.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 module_out_path = "window_manager/wm"
 
 group("unittest") {
@@ -133,11 +133,11 @@ ohos_unittest("wms_window_snapshot_test") {
 ## Build wm_unittest_common.a {{{
 config("wm_unittest_common_public_config") {
   include_dirs = [
-    "//foundation/windowmanager/wm/include",
-    "//foundation/windowmanager/wmserver/include",
-    "//foundation/windowmanager/wmserver/include/window_snapshot",
-    "//foundation/windowmanager/interfaces/innerkits/wm",
-    "//foundation/windowmanager/utils/include",
+    "//foundation/window/window_manager/wm/include",
+    "//foundation/window/window_manager/wmserver/include",
+    "//foundation/window/window_manager/wmserver/include/window_snapshot",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "//foundation/window/window_manager/utils/include",
     "//utils/native/base/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
@@ -181,11 +181,11 @@ ohos_static_library("wm_unittest_common") {
     "//foundation/graphic/graphic_2d/rosen/modules/animation/window_animation:window_animation",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/windowmanager/dm:libdm",
-    "//foundation/windowmanager/dmserver:libdms",
-    "//foundation/windowmanager/utils:libwmutil",
-    "//foundation/windowmanager/wm:libwm",
-    "//foundation/windowmanager/wmserver:libwms",
+    "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/dmserver:libdms",
+    "//foundation/window/window_manager/utils:libwmutil",
+    "//foundation/window/window_manager/wm:libwm",
+    "//foundation/window/window_manager/wmserver:libwms",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
