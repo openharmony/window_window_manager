@@ -113,7 +113,7 @@ int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementN
     want.SetParam(RECT_FORM_KEY_WIDTH, static_cast<int>(rect.width_));
     want.SetParam(RECT_FORM_KEY_HEIGHT, static_cast<int>(rect.height_));
      // 100 default userId
-    auto ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, nullptr, 100);
+    auto ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, nullptr, uid);
     if (ret == ERR_OK) {
         componentCallback_ = callback;
     }

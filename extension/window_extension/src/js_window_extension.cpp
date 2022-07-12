@@ -189,6 +189,12 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
     std::unique_ptr<AbilityRuntime::AsyncTask::ExecuteCallback> execute = nullptr;
     AbilityRuntime::AsyncTask::Schedule("JsWindowExtension::OnDisconnect", engine,
         std::make_unique<AbilityRuntime::AsyncTask>(callback, std::move(execute), std::move(complete)));
+
+    auto window = stub_ != nullptr ? stub_->GetWindow() : nullptr;
+    if (window != nullptr) {
+        window->Destroy();
+        WLOGFI("Destroy window.");
+    }
     WLOGFI("called.");
 }
 
