@@ -25,7 +25,6 @@
 class NativeValue;
 class NativeEngine;
 namespace OHOS::MMI {
-    struct IInputEventConsumer;
     class PointerEvent;
     class KeyEvent;
     class AxisEvent;
@@ -116,14 +115,10 @@ public:
     virtual uint32_t GetBackgroundColor() = 0;
 };
 
-class IInputEventListener : virtual public RefBase {
-public:
-    virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
-    virtual void OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
-};
-
 class IInputEventConsumer {
 public:
+    IInputEventConsumer() = default;
+    virtual ~IInputEventConsumer() = default;
     virtual bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const = 0;
     virtual bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const = 0;
     virtual bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const = 0;
@@ -216,9 +211,7 @@ public:
 
     virtual WMError RequestFocus() const = 0;
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;
-    // AddInputEventListener is for api 7
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) = 0;
-    virtual void AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) = 0;
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) = 0;
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
     virtual void RequestFrame() = 0;
@@ -234,8 +227,6 @@ public:
     virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) = 0;
-    virtual void RegisterInputEventListener(const sptr<IInputEventListener>& listener) = 0;
-    virtual void UnregisterInputEventListener(const sptr<IInputEventListener>& listener) = 0;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) = 0;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) = 0;
