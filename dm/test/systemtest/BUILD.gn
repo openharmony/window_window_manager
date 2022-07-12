@@ -75,10 +75,10 @@ ohos_systemtest("dm_screenshot_test") {
 ohos_systemtest("dm_screenshot_cmd_test") {
   module_out_path = module_out_path
 
-  include_dirs = [ "//foundation/windowmanager/snapshot" ]
+  include_dirs = [ "//foundation/window/window_manager/snapshot" ]
 
   sources = [
-    "//foundation/windowmanager/snapshot/snapshot_utils.cpp",
+    "//foundation/window/window_manager/snapshot/snapshot_utils.cpp",
     "screenshot_cmd_test.cpp",
   ]
 
@@ -114,12 +114,12 @@ ohos_systemtest("dm_screen_gamut_test") {
 ## Build dm_systemtest_common.a {{{
 config("dm_systemtest_common_public_config") {
   include_dirs = [
-    "//foundation/windowmanager/dm/include",
-    "//foundation/windowmanager/dmserver/include",
-    "//foundation/windowmanager/interfaces/innerkits/dm",
-    "//foundation/windowmanager/interfaces/innerkits/wm",
-    "//foundation/windowmanager/dm/test/utils/",
-    "//foundation/windowmanager/utils/include",
+    "//foundation/window/window_manager/dm/include",
+    "//foundation/window/window_manager/dmserver/include",
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "//foundation/window/window_manager/dm/test/utils/",
+    "//foundation/window/window_manager/utils/include",
 
     # RSSurface
     "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
@@ -141,10 +141,10 @@ ohos_static_library("dm_systemtest_common") {
   public_deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-    "//foundation/windowmanager/dm:libdm",
-    "//foundation/windowmanager/dmserver:libdms",
-    "//foundation/windowmanager/utils:libwmutil",
-    "//foundation/windowmanager/wm:libwm",
+    "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/dmserver:libdms",
+    "//foundation/window/window_manager/utils:libwmutil",
+    "//foundation/window/window_manager/wm:libwm",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",

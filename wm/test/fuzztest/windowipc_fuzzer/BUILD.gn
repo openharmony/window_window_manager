@@ -19,13 +19,13 @@ module_output_path = "window_manager/wm"
 ##############################fuzztest##########################################
 ohos_fuzztest("WindowIPCFuzzTest") {
   fuzz_config_file =
-      "//foundation/windowmanager/wm/test/fuzztest/windowipc_fuzzer"
+      "//foundation/window/window_manager/wm/test/fuzztest/windowipc_fuzzer"
   module_out_path = module_output_path
   include_dirs = [
-    "//foundation/windowmanager/interfaces/innerkits/wm",
-    "//foundation/windowmanager/interfaces/innerkits/dm",
-    "//foundation/windowmanager/wmserver/include",
-    "//foundation/windowmanager/wm/include",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "//foundation/window/window_manager/wmserver/include",
+    "//foundation/window/window_manager/wm/include",
   ]
   cflags = [
     "-g",
@@ -37,7 +37,7 @@ ohos_fuzztest("WindowIPCFuzzTest") {
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/animation/window_animation:window_animation",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/windowmanager/wm:libwm",
+    "//foundation/window/window_manager/wm:libwm",
   ]
 
   external_deps = [

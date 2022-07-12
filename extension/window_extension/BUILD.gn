@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/windowmanager/windowmanager_aafwk.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
 config("libwindow_extension_private_config") {
   visibility = [ ":*" ]
@@ -45,9 +45,9 @@ ohos_shared_library("libwindow_extension") {
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_path}/frameworks/native/appkit:app_context",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/windowmanager/interfaces/kits/napi/window_runtime:window_native_kit",
-    "//foundation/windowmanager/utils:libwmutil",
-    "//foundation/windowmanager/wm:libwm",
+    "//foundation/window/window_manager/interfaces/kits/napi/window_runtime:window_native_kit",
+    "//foundation/window/window_manager/utils:libwmutil",
+    "//foundation/window/window_manager/wm:libwm",
   ]
 
   external_deps = [
@@ -82,8 +82,8 @@ ohos_shared_library("window_extension_module") {
   configs = [ ":window_extension_module_private_config" ]
 
   deps = [
-    "//foundation/windowmanager/extension/window_extension:libwindow_extension",
-    "//foundation/windowmanager/wm:libwm",
+    "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
+    "//foundation/window/window_manager/wm:libwm",
   ]
 
   external_deps = [

@@ -13,24 +13,24 @@
 
 import("//ark/ts2abc/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
-import("//foundation/windowmanager/windowmanager_aafwk.gni")
+import("//foundation/window/window_manager/windowmanager_aafwk.gni")
 
 config("screen_runtime_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
-    "//foundation/windowmanager/interfaces/kits/napi/screen_recorder/api",
-    "//foundation/windowmanager/interfaces/kits/napi/screen_recorder/napi",
-    "//foundation/windowmanager/interfaces/innerkits/wm",
-    "//foundation/windowmanager/wm/include",
-    "//foundation/windowmanager/utils/include",
-    "//foundation/windowmanager/snapshot",
+    "//foundation/window/window_manager/interfaces/kits/napi/screen_recorder/api",
+    "//foundation/window/window_manager/interfaces/kits/napi/screen_recorder/napi",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "//foundation/window/window_manager/wm/include",
+    "//foundation/window/window_manager/utils/include",
+    "//foundation/window/window_manager/snapshot",
   ]
 }
 
 ohos_shared_library("screenrecorder_napi") {
   sources = [
-    "//foundation/windowmanager/snapshot/snapshot_utils.cpp",
+    "//foundation/window/window_manager/snapshot/snapshot_utils.cpp",
     "napi/js_screen_recorder.cpp",
     "napi/screen_recorder.cpp",
     "napi/screen_recorder_module.cpp",
@@ -42,9 +42,9 @@ ohos_shared_library("screenrecorder_napi") {
     "${ability_runtime_path}/frameworks/native/appkit:app_context",
     "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/windowmanager/dm:libdm",
-    "//foundation/windowmanager/dmserver:libdms",
-    "//foundation/windowmanager/utils:libwmutil",
+    "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/dmserver:libdms",
+    "//foundation/window/window_manager/utils:libwmutil",
     "//third_party/libpng:libpng",  # png
   ]
 

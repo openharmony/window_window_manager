@@ -32,7 +32,7 @@
 
 ## 目录
 ```
-foundation/windowmanager/
+foundation/window/window_manager/
 ├── dm                      # Dislplay Manager Client实现代码
 ├── dmserver                # Dislplay Manager Service实现代码
 ├── interfaces              # 对外接口存放目录
@@ -52,7 +52,7 @@ foundation/windowmanager/
 
 ## 接口说明
 
-- [Window](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-window.md)  
+- [Window](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-window.md)
 - [Display](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-display.md)
 
 ## 相关仓

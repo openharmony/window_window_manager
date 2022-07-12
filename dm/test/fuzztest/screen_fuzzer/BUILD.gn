@@ -18,10 +18,11 @@ module_output_path = "window_manager/dm"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ScreenFuzzTest") {
-  fuzz_config_file = "//foundation/windowmanager/dm/test/fuzztest/screen_fuzzer"
+  fuzz_config_file =
+      "//foundation/window/window_manager/dm/test/fuzztest/screen_fuzzer"
   module_out_path = module_output_path
   include_dirs = [
-    "//foundation/windowmanager/interfaces/innerkits/dm",
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
     "//utils/native/base/include",
     "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
   ]
@@ -34,7 +35,7 @@ ohos_fuzztest("ScreenFuzzTest") {
   sources = [ "screen_fuzzer.cpp" ]
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/windowmanager/dm:libdm",
+    "//foundation/window/window_manager/dm:libdm",
     "//utils/native/base:utils",
   ]
 }

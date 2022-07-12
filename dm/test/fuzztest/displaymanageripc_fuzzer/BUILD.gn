@@ -18,13 +18,12 @@ module_output_path = "window_manager/dm"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("DisplayManagerIPCFuzzTest") {
-  fuzz_config_file =
-      "//foundation/windowmanager/dm/test/fuzztest/displaymanageripc_fuzzer"
+  fuzz_config_file = "//foundation/window/window_manager/dm/test/fuzztest/displaymanageripc_fuzzer"
   module_out_path = module_output_path
   include_dirs = [
-    "//foundation/windowmanager/interfaces/innerkits/dm",
-    "//foundation/windowmanager/dmserver/include",
-    "//foundation/windowmanager/dm/include",
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "//foundation/window/window_manager/dmserver/include",
+    "//foundation/window/window_manager/dm/include",
   ]
   cflags = [
     "-g",
@@ -35,7 +34,7 @@ ohos_fuzztest("DisplayManagerIPCFuzzTest") {
   sources = [ "displaymanageripc_fuzzer.cpp" ]
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/windowmanager/dm:libdm",
+    "//foundation/window/window_manager/dm:libdm",
   ]
   external_deps = [ "samgr_standard:samgr_proxy" ]
 }

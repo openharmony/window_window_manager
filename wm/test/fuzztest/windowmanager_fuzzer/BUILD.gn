@@ -19,11 +19,11 @@ module_output_path = "window_manager/wm"
 ##############################fuzztest##########################################
 ohos_fuzztest("WindowManagerFuzzTest") {
   fuzz_config_file =
-      "//foundation/windowmanager/wm/test/fuzztest/windowmanager_fuzzer"
+      "//foundation/window/window_manager/wm/test/fuzztest/windowmanager_fuzzer"
   module_out_path = module_output_path
   include_dirs = [
-    "//foundation/windowmanager/wmserver/include",
-    "//foundation/windowmanager/interfaces/innerkits/wm",
+    "//foundation/window/window_manager/wmserver/include",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//utils/native/base/include",
   ]
   cflags = [
@@ -34,7 +34,7 @@ ohos_fuzztest("WindowManagerFuzzTest") {
   ]
   sources = [ "windowmanager_fuzzer.cpp" ]
   deps = [
-    "//foundation/windowmanager/wm:libwm",
+    "//foundation/window/window_manager/wm:libwm",
     "//utils/native/base:utils",
   ]
 
