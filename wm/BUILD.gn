@@ -44,6 +44,7 @@ ohos_shared_library("libwm") {
     "src/static_call.cpp",
     "src/vsync_station.cpp",
     "src/window.cpp",
+    "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
     "src/window_agent.cpp",
     "src/window_impl.cpp",

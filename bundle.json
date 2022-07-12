@@ -78,6 +78,7 @@
             "header": {
               "header_files": [
                 "window.h",
+                "window_accessibility_controller.h",
                 "window_manager.h",
                 "window_option.h",
                 "window_scene.h",
