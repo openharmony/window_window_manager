@@ -596,6 +596,7 @@ void DisplayManagerService::SetGravitySensorSubscriptionEnabled()
 {
     if (!isAutoRotationOpen_) {
         WLOGFE("autoRotation is not open");
+        ScreenRotationController::Init();
         return;
     }
     ScreenRotationController::SubscribeGravitySensor();
