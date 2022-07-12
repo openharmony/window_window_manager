@@ -101,13 +101,13 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
     object->SetProperty("width", CreateJsValue(engine, info->GetWidth()));
     object->SetProperty("height", CreateJsValue(engine, info->GetHeight()));
     object->SetProperty("refreshRate", CreateJsValue(engine, info->GetRefreshRate()));
-    object->SetProperty("name", engine.CreateUndefined());
+    object->SetProperty("name", CreateJsValue(engine, info->GetName()));
     object->SetProperty("alive", engine.CreateUndefined());
     object->SetProperty("state", engine.CreateUndefined());
     object->SetProperty("rotation", CreateJsValue(engine, info->GetRotation()));
     object->SetProperty("densityDPI", CreateJsValue(engine, info->GetVirtualPixelRatio() * DOT_PER_INCH));
-    object->SetProperty("densityPixels", engine.CreateUndefined());
-    object->SetProperty("scaledDensity", engine.CreateUndefined());
+    object->SetProperty("densityPixels", CreateJsValue(engine, info->GetVirtualPixelRatio()));
+    object->SetProperty("scaledDensity", CreateJsValue(engine, info->GetVirtualPixelRatio()));
     object->SetProperty("xDPI", engine.CreateUndefined());
     object->SetProperty("yDPI", engine.CreateUndefined());
     if (jsDisplayObj == nullptr || jsDisplayObj->Get() == nullptr) {
