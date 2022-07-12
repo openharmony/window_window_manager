@@ -61,12 +61,6 @@ void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
         // post task after 50 ms.
         controllerHandler_->PostTask(task, 50, AppExecFwk::EventQueue::Priority::HIGH);
     }
-    bool callbackRegister = DisplayManagerAgentController::GetInstance().SetRemoveAgentCallback(
-        std::bind(&AbstractScreenController::OnRemoteDied, this, std::placeholders::_1),
-        DisplayManagerAgentType::VIRTUAL_SCREEN_DIED_LISTENER);
-    if (!callbackRegister) {
-        WLOGFE("virtualScreen callback registered failed");
-    }
 }
 
 std::vector<ScreenId> AbstractScreenController::GetAllScreenIds() const
@@ -477,13 +471,6 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsSuccedentScreenLocked(s
     return screenGroup;
 }
 
-bool AbstractScreenController::RegisterVirtualScreenAgent(const sptr<IRemoteObject>& displayManagerAgent)
-{
-    return DisplayManagerAgentController::GetInstance().RegisterDisplayManagerAgent(
-        iface_cast<IDisplayManagerAgent>(displayManagerAgent),
-        DisplayManagerAgentType::VIRTUAL_SCREEN_DIED_LISTENER);
-}
-
 ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption option,
     const sptr<IRemoteObject>& displayManagerAgent)
 {
@@ -493,16 +480,7 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
     if (rsId == SCREEN_ID_INVALID) {
         return SCREEN_ID_INVALID;
     }
-    std::vector<ScreenId> virtualScreenIds;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto agIter = screenAgentMap_.find(displayManagerAgent);
-    if (agIter == screenAgentMap_.end()) {
-        if (!RegisterVirtualScreenAgent(displayManagerAgent)) {
-            return SCREEN_ID_INVALID;
-        }
-    } else {
-        virtualScreenIds = screenAgentMap_[displayManagerAgent];
-    }
     ScreenId dmsScreenId = SCREEN_ID_INVALID;
     if (!screenIdManager_.ConvertToDmsScreenId(rsId, dmsScreenId)) {
         dmsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsId);
@@ -511,6 +489,7 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
         if (absScreen == nullptr || info == nullptr) {
             WLOGFI("new AbstractScreen or SupportedScreenModes failed");
             screenIdManager_.DeleteScreenId(dmsScreenId);
+            rsInterface_.RemoveVirtualScreen(rsId);
             return SCREEN_ID_INVALID;
         }
         info->width_ = option.width_;
@@ -524,11 +503,18 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
         absScreen->type_ = ScreenType::VIRTUAL;
         dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));
         NotifyScreenConnected(absScreen->ConvertToScreenInfo());
+        if (deathRecipient_ == nullptr) {
+            deathRecipient_ = new AgentDeathRecipient(
+                std::bind(&AbstractScreenController::OnRemoteDied, this, std::placeholders::_1));
+        }
+        auto agIter = screenAgentMap_.find(displayManagerAgent);
+        if (agIter == screenAgentMap_.end()) {
+            displayManagerAgent->AddDeathRecipient(deathRecipient_);
+        }
+        screenAgentMap_[displayManagerAgent].emplace_back(dmsScreenId);
     } else {
         WLOGFI("id: %{public}" PRIu64" appears in screenIdManager_. ", rsId);
     }
-    virtualScreenIds.emplace_back(dmsScreenId);
-    screenAgentMap_[displayManagerAgent] = virtualScreenIds;
     return dmsScreenId;
 }
 
@@ -550,6 +536,10 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
             }
         }
         if (agentFound) {
+            if (agentIter.first != nullptr && agentIter.second.empty()) {
+                agentIter.first->RemoveDeathRecipient(deathRecipient_);
+                screenAgentMap_.erase(agentIter.first);
+            }
             break;
         }
     }
@@ -967,6 +957,7 @@ bool AbstractScreenController::OnRemoteDied(const sptr<IRemoteObject>& agent)
     if (agent == nullptr) {
         return false;
     }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto agentIter = screenAgentMap_.find(agent);
     if (agentIter != screenAgentMap_.end()) {
         while (screenAgentMap_[agent].size() > 0) {

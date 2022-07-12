@@ -21,25 +21,22 @@
 #include <set>
 #include "agent_death_recipient.h"
 #include "window_manager_hilog.h"
-#include "zidl/display_manager_agent_interface.h"
 
 namespace OHOS {
 namespace Rosen {
 template <typename T1, typename T2>
 class ClientAgentContainer {
-using DestroyCallback = std::function<bool(const sptr<IRemoteObject>)>;
 public:
     ClientAgentContainer();
     virtual ~ClientAgentContainer() = default;
 
     bool RegisterAgent(const sptr<T1>& agent, T2 type);
     bool UnregisterAgent(const sptr<T1>& agent, T2 type);
-    bool SetRemoveAgentCallback(const DestroyCallback& callback, T2 type);
     std::set<sptr<T1>> GetAgentsByType(T2 type);
 
 private:
     void RemoveAgent(const sptr<IRemoteObject>& remoteObject);
-    sptr<T1> UnregisterAgentLocked(std::set<sptr<T1>>& agents, const sptr<IRemoteObject>& agent);
+    bool UnregisterAgentLocked(std::set<sptr<T1>>& agents, const sptr<IRemoteObject>& agent);
 
     static constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "ClientAgentContainer"};
 
@@ -56,7 +53,6 @@ private:
 
     std::recursive_mutex mutex_;
     std::map<T2, std::set<sptr<T1>>> agentMap_;
-    std::map<T2, DestroyCallback> callbackMap_;
     sptr<AgentDeathRecipient> deathRecipient_;
 };
 
@@ -89,20 +85,9 @@ bool ClientAgentContainer<T1, T2>::UnregisterAgent(const sptr<T1>& agent, T2 typ
         return false;
     }
     auto& agents = agentMap_.at(type);
-    WLOGFI("UnregisterAgent: agent: %{public}p in ClientAgentContainer", agent->AsObject().GetRefPtr());
-    auto ret = UnregisterAgentLocked(agents, agent->AsObject());
-    if (ret != nullptr) {
-        agent->AsObject()->RemoveDeathRecipient(deathRecipient_);
-    }
-    return true;
-}
-
-template<typename T1, typename T2>
-bool ClientAgentContainer<T1, T2>::SetRemoveAgentCallback(const DestroyCallback& callback, T2 type)
-{
-    callbackMap_[type] = callback;
-    WLOG_I("ClientAgentContainer callback registered type:%{public}u", type);
-    return true;
+    bool ret = UnregisterAgentLocked(agents, agent->AsObject());
+    agent->AsObject()->RemoveDeathRecipient(deathRecipient_);
+    return ret;
 }
 
 template<typename T1, typename T2>
@@ -117,17 +102,17 @@ std::set<sptr<T1>> ClientAgentContainer<T1, T2>::GetAgentsByType(T2 type)
 }
 
 template<typename T1, typename T2>
-sptr<T1> ClientAgentContainer<T1, T2>::UnregisterAgentLocked(std::set<sptr<T1>>& agents,
+bool ClientAgentContainer<T1, T2>::UnregisterAgentLocked(std::set<sptr<T1>>& agents,
     const sptr<IRemoteObject>& agent)
 {
     auto iter = std::find_if(agents.begin(), agents.end(), finder_t(agent));
     if (iter == agents.end()) {
         WLOGFW("could not find this agent");
-        return nullptr;
+        return false;
     }
-    auto res = *iter;
     agents.erase(iter);
-    return res;
+    WLOGFI("agent unregistered");
+    return true;
 }
 
 template<typename T1, typename T2>
@@ -135,14 +120,8 @@ void ClientAgentContainer<T1, T2>::RemoveAgent(const sptr<IRemoteObject>& remote
 {
     WLOGFI("RemoveAgent");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    DestroyCallback removeAgentCallback = nullptr;
     for (auto& elem : agentMap_) {
-        auto agent = UnregisterAgentLocked(elem.second, remoteObject);
-        if (agent != nullptr) {
-            if (callbackMap_[elem.first] != nullptr) {
-                removeAgentCallback = callbackMap_[elem.first];
-                removeAgentCallback(remoteObject);
-            }
+        if (UnregisterAgentLocked(elem.second, remoteObject)) {
             break;
         }
     }
