@@ -22,7 +22,6 @@
 #include <event_handler.h>
 
 #include "window_root.h"
-#include "window_task_looper.h"
 
 namespace OHOS {
 namespace Rosen {

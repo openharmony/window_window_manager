@@ -21,6 +21,8 @@
 #include "event_handler.h"
 #include "event_runner.h"
 #include "marshalling_helper.h"
+#include "xcollie/watchdog.h"
+
 #include "window_adapter.h"
 #include "window_manager_agent.h"
 #include "window_manager_hilog.h"
@@ -199,6 +201,11 @@ void WindowManager::Impl::InitListenerHandler()
         return;
     }
     isHandlerRunning_ = true;
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WINDOW_MANAGER_CALLBACK_THREAD_NAME,
+        listenerHandler_, WMS_WATCHDOG_CHECK_INTERVAL);
+    if (ret != 0) {
+        WLOGFE("Add watchdog thread failed");
+    }
     WLOGFD("init window manager callback runner success.");
 }
 

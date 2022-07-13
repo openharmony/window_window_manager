@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <map>
+#include "event_handler.h"
 
 #include <input_window_monitor.h>
 #include <nocopyable.h>
@@ -35,7 +36,6 @@
 #include "zidl/window_manager_stub.h"
 #include "window_dumper.h"
 #include "window_root.h"
-#include "window_task_looper.h"
 #include "snapshot_controller.h"
 
 namespace OHOS {
@@ -67,6 +67,7 @@ DECLARE_SYSTEM_ABILITY(WindowManagerService);
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManagerService);
 
 public:
+    using Task = std::function<void()>;
     void OnStart() override;
     void OnStop() override;
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
@@ -110,7 +111,7 @@ public:
     void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
     WMError UpdateRsTree(uint32_t windowId, bool isAdd) override;
     void OnScreenshot(DisplayId displayId);
-    void OnAccountSwitched(int accountId) const;
+    void OnAccountSwitched(int accountId);
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;
@@ -126,6 +127,18 @@ private:
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
     void ConfigureWindowManagerService();
+    void PostAsyncTask(Task task);
+    void PostVoidSyncTask(Task task);
+    template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
+    Return PostSyncTask(SyncTask&& task)
+    {
+        Return ret;
+        std::function<void()> syncTask([&ret, &task]() {ret = task();});
+        if (handler_) {
+            handler_->PostSyncTask(syncTask, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        }
+        return ret;
+    }
 
     static inline SingletonDelegator<WindowManagerService> delegator;
     AtomicMap<uint32_t, uint32_t> accessTokenIdMaps_;
@@ -139,8 +152,9 @@ private:
     sptr<WindowDumper> windowDumper_;
     SystemConfig systemConfig_;
     ModeChangeHotZonesConfig hotZonesConfig_ { false, 0, 0, 0 };
-    std::unique_ptr<WindowTaskLooper> wmsTaskLooper_;
     std::shared_ptr<WindowCommonEvent> windowCommonEvent_;
+    std::shared_ptr<AppExecFwk::EventRunner> runner_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     RSInterfaces& rsInterface_;
     bool startingOpen_ = true;
     std::shared_ptr<RSUIDirector> rsUiDirector_;

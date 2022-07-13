@@ -15,6 +15,8 @@
 
 #include "window_manager_service.h"
 
+#include <thread>
+
 #include <ability_manager_client.h>
 #include <cinttypes>
 #include <hitrace_meter.h>
@@ -22,6 +24,7 @@
 #include <parameters.h>
 #include <rs_iwindow_animation_controller.h>
 #include <system_ability_definition.h>
+#include "xcollie/watchdog.h"
 
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
@@ -42,6 +45,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerService"};
+    const std::string WMS_NAME = "WindowManagerSevice";
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
@@ -59,12 +63,17 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     windowDumper_ = new WindowDumper(windowRoot_);
     freezeDisplayController_ = new FreezeController();
     windowCommonEvent_ = std::make_shared<WindowCommonEvent>();
-    wmsTaskLooper_ = std::make_unique<WindowTaskLooper>();
     startingOpen_ = system::GetParameter("persist.window.sw.enabled", "1") == "1"; // startingWin default enabled
+    runner_ = AppExecFwk::EventRunner::Create(WMS_NAME);
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(runner_);
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WMS_NAME, handler_, WMS_WATCHDOG_CHECK_INTERVAL);
+    if (ret != 0) {
+        WLOGFE("Add watchdog thread failed");
+    }
 
     // init RSUIDirector, it will handle animation callback
     rsUiDirector_ = RSUIDirector::Create();
-    rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task) { wmsTaskLooper_->PostTask(task); });
+    rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task) { PostAsyncTask(task); });
     rsUiDirector_->Init(false);
 }
 
@@ -80,8 +89,27 @@ void WindowManagerService::OnStart()
     RegisterSnapshotHandler();
     RegisterWindowManagerServiceHandler();
     RegisterWindowVisibilityChangeCallback();
-    wmsTaskLooper_->Start();
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+}
+
+void WindowManagerService::PostAsyncTask(Task task)
+{
+    if (handler_) {
+        bool ret = handler_->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        if (!ret) {
+            WLOGFE("EventHandler PostTask Failed");
+        }
+    }
+}
+
+void WindowManagerService::PostVoidSyncTask(Task task)
+{
+    if (handler_) {
+        bool ret = handler_->PostSyncTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        if (!ret) {
+            WLOGFE("EventHandler PostVoidSyncTask Failed");
+        }
+    }
 }
 
 
@@ -93,9 +121,9 @@ void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std
     }
 }
 
-void WindowManagerService::OnAccountSwitched(int accountId) const
+void WindowManagerService::OnAccountSwitched(int accountId)
 {
-    wmsTaskLooper_->PostTask([this, accountId]() {
+    PostAsyncTask([this, accountId]() {
         windowRoot_->RemoveSingleUserWindowNodes(accountId);
     });
     WLOGFI("called");
@@ -105,14 +133,14 @@ void WindowManagerService::WindowVisibilityChangeCallback(std::shared_ptr<RSOccl
 {
     WLOGFD("NotifyWindowVisibilityChange: enter");
     std::weak_ptr<RSOcclusionData> weak(occlusionData);
-    return wmsTaskLooper_->ScheduleTask([this, weak]() {
+    PostVoidSyncTask([this, weak]() {
         auto weakOcclusionData = weak.lock();
         if (weakOcclusionData == nullptr) {
             WLOGFE("weak occlusionData is nullptr");
             return;
         }
         windowRoot_->NotifyWindowVisibilityChange(weakOcclusionData);
-    }).wait();
+    });
 }
 
 void WindowManagerService::RegisterWindowVisibilityChangeCallback()
@@ -256,9 +284,10 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
     if (windowDumper_ == nullptr) {
         windowDumper_ = new WindowDumper(windowRoot_);
     }
-    return wmsTaskLooper_->ScheduleTask([this, fd, &args]() {
+
+    return PostSyncTask([this, fd, &args]() {
         return static_cast<int>(windowDumper_->Dump(fd, args));
-    }).get();
+    });
 }
 
 void WindowManagerService::ConfigureWindowManagerService()
@@ -319,23 +348,23 @@ WMError WindowManagerService::NotifyWindowTransition(
 {
     if (!isFromClient) {
         WLOGFI("NotifyWindowTransition asynchronously.");
-        wmsTaskLooper_->PostTask([this, fromInfo, toInfo]() mutable {
+        PostAsyncTask([this, fromInfo, toInfo]() mutable {
             return windowController_->NotifyWindowTransition(fromInfo, toInfo);
         });
         return WMError::WM_OK;
     } else {
         WLOGFI("NotifyWindowTransition synchronously.");
-        return wmsTaskLooper_->ScheduleTask([this, &fromInfo, &toInfo]() {
+        return PostSyncTask([this, &fromInfo, &toInfo]() {
             return windowController_->NotifyWindowTransition(fromInfo, toInfo);
-        }).get();
+        });
     }
 }
 
 WMError WindowManagerService::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)
 {
-    return wmsTaskLooper_->ScheduleTask([this, &abilityToken]() {
+    return PostSyncTask([this, &abilityToken]() {
         return windowController_->GetFocusWindowInfo(abilityToken);
-    }).get();
+    });
 }
 
 void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
@@ -345,8 +374,8 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, sptr<
         WLOGFI("startingWindow not open!");
         return;
     }
-    return wmsTaskLooper_->PostTask([this, info, pixelMap, isColdStart, bkgColor]() {
-        return windowController_->StartingWindow(info, pixelMap, bkgColor, isColdStart);
+    PostAsyncTask([this, info, pixelMap, isColdStart, bkgColor]() {
+        windowController_->StartingWindow(info, pixelMap, bkgColor, isColdStart);
     });
 }
 
@@ -357,8 +386,8 @@ void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken
         WLOGFI("startingWindow not open!");
         return;
     }
-    return wmsTaskLooper_->PostTask([this, abilityToken]() {
-        return windowController_->CancelStartingWindow(abilityToken);
+    PostAsyncTask([this, abilityToken]() {
+        windowController_->CancelStartingWindow(abilityToken);
     });
 }
 
@@ -375,19 +404,19 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
     }
     int pid = IPCSkeleton::GetCallingPid();
     int uid = IPCSkeleton::GetCallingUid();
-    WMError ret = wmsTaskLooper_->ScheduleTask([this, pid, uid, &window, &property, &surfaceNode, &windowId, &token]() {
+    WMError ret = PostSyncTask([this, pid, uid, &window, &property, &surfaceNode, &windowId, &token]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:CreateWindow(%u)", windowId);
         return windowController_->CreateWindow(window, property, surfaceNode, windowId, token, pid, uid);
-    }).get();
+    });
     accessTokenIdMaps_.insert(std::pair(windowId, IPCSkeleton::GetCallingTokenID()));
     return ret;
 }
 
 WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 {
-    return wmsTaskLooper_->ScheduleTask([this, &property]() {
+    return PostSyncTask([this, &property]() {
         return HandleAddWindow(property);
-    }).get();
+    });
 }
 
 WMError WindowManagerService::HandleAddWindow(sptr<WindowProperty>& property)
@@ -411,11 +440,11 @@ WMError WindowManagerService::HandleAddWindow(sptr<WindowProperty>& property)
 
 WMError WindowManagerService::RemoveWindow(uint32_t windowId)
 {
-    return wmsTaskLooper_->ScheduleTask([this, windowId]() {
+    return PostSyncTask([this, windowId]() {
         WLOGFI("[WMS] Remove: %{public}u", windowId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:RemoveWindow(%u)", windowId);
         return windowController_->RemoveWindowNode(windowId);
-    }).get();
+    });
 }
 
 WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
@@ -424,7 +453,7 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
         WLOGFI("Operation rejected");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    return wmsTaskLooper_->ScheduleTask([this, windowId, onlySelf]() {
+    return PostSyncTask([this, windowId, onlySelf]() {
         WLOGFI("[WMS] Destroy: %{public}u", windowId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DestroyWindow(%u)", windowId);
         auto node = windowRoot_->GetWindowNode(windowId);
@@ -432,31 +461,31 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
             dragController_->FinishDrag(windowId);
         }
         return windowController_->DestroyWindow(windowId, onlySelf);
-    }).get();
+    });
 }
 
 WMError WindowManagerService::RequestFocus(uint32_t windowId)
 {
-    return wmsTaskLooper_->ScheduleTask([this, windowId]() {
+    return PostSyncTask([this, windowId]() {
         WLOGFI("[WMS] RequestFocus: %{public}u", windowId);
         return windowController_->RequestFocus(windowId);
-    }).get();
+    });
 }
 
 WMError WindowManagerService::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level)
 {
-    return wmsTaskLooper_->ScheduleTask([this, windowId, level]() {
+    return PostSyncTask([this, windowId, level]() {
         return windowController_->SetWindowBackgroundBlur(windowId, level);
-    }).get();
+    });
 }
 
 AvoidArea WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
 {
-    return wmsTaskLooper_->ScheduleTask([this, windowId, avoidAreaType]() {
+    return PostSyncTask([this, windowId, avoidAreaType]() {
         WLOGFI("[WMS] GetAvoidAreaByType: %{public}u, Type: %{public}u", windowId,
             static_cast<uint32_t>(avoidAreaType));
         return windowController_->GetAvoidAreaByType(windowId, avoidAreaType);
-    }).get();
+    });
 }
 
 void WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -466,12 +495,12 @@ void WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType typ
         WLOGFE("windowManagerAgent is null");
         return;
     }
-    return wmsTaskLooper_->ScheduleTask([this, &windowManagerAgent, type]() {
+    PostVoidSyncTask([this, &windowManagerAgent, type]() {
         WindowManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
         if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR) { // if system bar, notify once
             windowController_->NotifySystemBarTints();
         }
-    }).wait();
+    });
 }
 
 void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -481,9 +510,9 @@ void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType t
         WLOGFE("windowManagerAgent is null");
         return;
     }
-    return wmsTaskLooper_->ScheduleTask([this, &windowManagerAgent, type]() {
+    PostVoidSyncTask([this, &windowManagerAgent, type]() {
         WindowManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
-    }).wait();
+    });
 }
 
 WMError WindowManagerService::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
@@ -495,28 +524,28 @@ WMError WindowManagerService::SetWindowAnimationController(const sptr<RSIWindowA
 
     sptr<AgentDeathRecipient> deathRecipient = new AgentDeathRecipient(
         [this](sptr<IRemoteObject>& remoteObject) {
-            wmsTaskLooper_->ScheduleTask([&remoteObject]() {
+            PostVoidSyncTask([&remoteObject]() {
                 RemoteAnimation::OnRemoteDie(remoteObject);
-            }).wait();
+            });
         }
     );
     controller->AsObject()->AddDeathRecipient(deathRecipient);
-    return wmsTaskLooper_->ScheduleTask([this, &controller]() {
+    return PostSyncTask([this, &controller]() {
         return windowController_->SetWindowAnimationController(controller);
-    }).get();
+    });
 }
 
 void WindowManagerService::OnWindowEvent(Event event, const sptr<IRemoteObject>& remoteObject)
 {
     if (event == Event::REMOTE_DIED) {
-        return wmsTaskLooper_->ScheduleTask([this, &remoteObject, event]() {
+        PostVoidSyncTask([this, &remoteObject, event]() {
             uint32_t windowId = windowRoot_->GetWindowIdByObject(remoteObject);
             auto node = windowRoot_->GetWindowNode(windowId);
             if (node != nullptr && node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
                 dragController_->FinishDrag(windowId);
             }
             windowController_->DestroyWindow(windowId, true);
-        }).wait();
+        });
     }
 }
 
@@ -530,7 +559,7 @@ void WindowManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId, 
     } else if (type == DisplayStateChangeType::UNFREEZE) {
         freezeDisplayController_->UnfreezeDisplay(displayId);
     } else {
-        wmsTaskLooper_->PostTask([this, defaultDisplayId, displayInfo, displayInfoMap, type]() mutable {
+        PostAsyncTask([this, defaultDisplayId, displayInfo, displayInfoMap, type]() mutable {
             windowController_->NotifyDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
         });
     }
@@ -554,21 +583,21 @@ void DisplayChangeListener::OnScreenshot(DisplayId displayId)
 
 void WindowManagerService::ProcessPointDown(uint32_t windowId, bool isStartDrag)
 {
-    return wmsTaskLooper_->PostTask([this, windowId, isStartDrag]() {
+    PostAsyncTask([this, windowId, isStartDrag]() {
         windowController_->ProcessPointDown(windowId, isStartDrag);
     });
 }
 
 void WindowManagerService::ProcessPointUp(uint32_t windowId)
 {
-    return wmsTaskLooper_->PostTask([this, windowId]() {
+    PostAsyncTask([this, windowId]() {
         windowController_->ProcessPointUp(windowId);
     });
 }
 
 void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
 {
-    return wmsTaskLooper_->PostTask([this, displayId]() {
+    PostAsyncTask([this, displayId]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:MinimizeAllAppWindows(%" PRIu64")", displayId);
         WLOGFI("displayId %{public}" PRIu64"", displayId);
         windowController_->MinimizeAllAppWindows(displayId);
@@ -577,7 +606,7 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
 
 WMError WindowManagerService::ToggleShownStateForAllAppWindows()
 {
-    wmsTaskLooper_->PostTask([this]() {
+    PostAsyncTask([this]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:ToggleShownStateForAllAppWindows");
         return windowController_->ToggleShownStateForAllAppWindows();
     });
@@ -586,18 +615,18 @@ WMError WindowManagerService::ToggleShownStateForAllAppWindows()
 
 WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 {
-    return wmsTaskLooper_->ScheduleTask([this, &topWinId, mainWinId]() {
+    return PostSyncTask([this, &topWinId, mainWinId]() {
         return windowController_->GetTopWindowId(mainWinId, topWinId);
-    }).get();
+    });
 }
 
 WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
 {
-    return wmsTaskLooper_->ScheduleTask([this, mode]() {
+    return PostSyncTask([this, mode]() {
         WLOGFI("layoutMode: %{public}u", mode);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:SetWindowLayoutMode");
         return windowController_->SetWindowLayoutMode(mode);
-    }).get();
+    });
 }
 
 WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action)
@@ -607,12 +636,12 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         return WMError::WM_ERROR_NULLPTR;
     }
     if (action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) {
-        wmsTaskLooper_->PostTask([this, windowProperty, action]() mutable {
+        PostAsyncTask([this, windowProperty, action]() mutable {
             windowController_->UpdateProperty(windowProperty, action);
         });
         return WMError::WM_OK;
     }
-    return wmsTaskLooper_->ScheduleTask([this, &windowProperty, action]() {
+    return PostSyncTask([this, &windowProperty, action]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
         WMError res = windowController_->UpdateProperty(windowProperty, action);
         if (action == PropertyChangeAction::ACTION_UPDATE_RECT && res == WMError::WM_OK &&
@@ -620,7 +649,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
             dragController_->UpdateDragInfo(windowProperty->GetWindowId());
         }
         return res;
-    }).get();
+    });
 }
 
 WMError WindowManagerService::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
@@ -629,9 +658,9 @@ WMError WindowManagerService::GetAccessibilityWindowInfo(sptr<AccessibilityWindo
         WLOGFE("windowInfo is invalid");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return wmsTaskLooper_->ScheduleTask([this, &windowInfo]() {
+    return PostSyncTask([this, &windowInfo]() {
         return windowRoot_->GetAccessibilityWindowInfo(windowInfo);
-    }).get();
+    });
 }
 
 WMError WindowManagerService::GetSystemConfig(SystemConfig& systemConfig)
@@ -653,21 +682,21 @@ WMError WindowManagerService::GetModeChangeHotZones(DisplayId displayId, ModeCha
 void WindowManagerService::MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
     sptr<RSIWindowAnimationFinishedCallback>& finishCallback)
 {
-    return wmsTaskLooper_->ScheduleTask([this, windowIds, isAnimated, &finishCallback]() mutable {
-        return windowController_->MinimizeWindowsByLauncher(windowIds, isAnimated, finishCallback);
-    }).get();
+    PostVoidSyncTask([this, windowIds, isAnimated, &finishCallback]() mutable {
+        windowController_->MinimizeWindowsByLauncher(windowIds, isAnimated, finishCallback);
+    });
 }
 
 void WindowManagerService::GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation)
 {
-    wmsTaskLooper_->ScheduleTask([this, displayId, &orientation]() mutable {
+    PostVoidSyncTask([this, displayId, &orientation]() mutable {
         orientation = windowController_->GetWindowPreferredOrientation(displayId);
-    }).wait();
+    });
 }
 
 WMError WindowManagerService::UpdateAvoidAreaListener(uint32_t windowId, bool haveAvoidAreaListener)
 {
-    return wmsTaskLooper_->ScheduleTask([this, windowId, haveAvoidAreaListener]() {
+    return PostSyncTask([this, windowId, haveAvoidAreaListener]() {
         sptr<WindowNode> node = windowRoot_->GetWindowNode(windowId);
         if (node == nullptr) {
             WLOGFE("get window node failed. win %{public}u", windowId);
@@ -680,19 +709,19 @@ WMError WindowManagerService::UpdateAvoidAreaListener(uint32_t windowId, bool ha
         }
         container->UpdateAvoidAreaListener(node, haveAvoidAreaListener);
         return WMError::WM_OK;
-    }).get();
+    });
 }
 
 WMError WindowManagerService::UpdateRsTree(uint32_t windowId, bool isAdd)
 {
-    return wmsTaskLooper_->ScheduleTask([this, windowId, isAdd]() {
+    return PostSyncTask([this, windowId, isAdd]() {
         return windowRoot_->UpdateRsTree(windowId, isAdd);
-    }).get();
+    });
 }
 
 void WindowManagerService::OnScreenshot(DisplayId displayId)
 {
-    wmsTaskLooper_->PostTask([this, displayId]() {
+    PostAsyncTask([this, displayId]() {
         windowController_->OnScreenshot(displayId);
     });
 }
