@@ -1333,7 +1333,7 @@ WMError WindowRoot::GetModeChangeHotZones(DisplayId displayId,
     return WMError::WM_OK;
 }
 
-void WindowRoot::RemoveSingleUserWindowNodes()
+void WindowRoot::RemoveSingleUserWindowNodes(int accountId)
 {
     std::vector<DisplayId> displayIds = GetAllDisplayIds();
     for (auto id : displayIds) {
@@ -1342,7 +1342,7 @@ void WindowRoot::RemoveSingleUserWindowNodes()
             WLOGFI("get container failed %{public}" PRIu64"", id);
             continue;
         }
-        container->RemoveSingleUserWindowNodes();
+        container->RemoveSingleUserWindowNodes(accountId);
     }
 }
 
