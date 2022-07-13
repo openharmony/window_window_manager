@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_PAIR_H
 
 #include <refbase.h>
+#include "class_var_definition.h"
 #include "window_inner_manager.h"
 #include "window_node.h"
 #include "window_layout_policy.h"
@@ -171,13 +172,6 @@ public:
      */
     bool IsDockSliceInExitSplitModeArea(const std::vector<int32_t>& exitSplitPoints);
 
-    /**
-     * Set all app windows are restoring.
-     *
-     * @param ratio Indicates whether all app windows are restoring.
-     */
-    void SetAllAppWindowsRestoring(bool isAllAppWindowsRestoring);
-
     void SetInitalDividerRect(const Rect& rect);
 
 private:
@@ -252,8 +246,8 @@ private:
     sptr<WindowNode> divider_;
     WindowPairStatus status_ = {WindowPairStatus::STATUS_EMPTY};
     DisplayGroupWindowTree& displayGroupWindowTree_;
-    bool isAllAppWindowsRestoring_ { false };
     Rect initalDivderRect_ {0, 0, 0, 0};
+    DEFINE_VAR_DEFAULT_FUNC_SET(bool, AllSplitAppWindowsRestoring, isAllSplitAppWindowsRestoring, false)
 };
 } // namespace Rosen
 } // namespace OHOS
