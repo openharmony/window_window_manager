@@ -16,8 +16,8 @@
 #include "zidl/window_stub.h"
 #include <vector>
 #include "ipc_skeleton.h"
+#include "pointer_event.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -118,6 +118,14 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
                 WLOGFE("Fail to write info");
             }
             break;
+        }
+        case WindowMessage::TRANS_ID_NOTIFY_CLIENT_POINT_UP: {
+            auto pointerEvent = MMI::PointerEvent::Create();
+            if (!pointerEvent->ReadFromParcel(data)) {
+                WLOGFE("Read Pointer Event failed");
+                return -1;
+            }
+            NotifyWindowClientPointUp(pointerEvent);
         }
         default:
             break;

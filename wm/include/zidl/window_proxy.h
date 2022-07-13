@@ -43,6 +43,7 @@ public:
     void NotifyScreenshot() override;
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     void NotifyDestroy(void) override;
+    void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 private:
     static inline BrokerDelegator<WindowProxy> delegator_;
 };
