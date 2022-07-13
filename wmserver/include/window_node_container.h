@@ -110,7 +110,7 @@ public:
     void BeforeProcessWindowAvoidAreaChangeWhenDisplayChange() const;
     void ProcessWindowAvoidAreaChangeWhenDisplayChange() const;
     WindowLayoutMode GetCurrentLayoutMode() const;
-    void RemoveSingleUserWindowNodes();
+    void RemoveSingleUserWindowNodes(int accountId);
     WMError IsTileRectSatisfiedWithSizeLimits(sptr<WindowNode>& node);
 
 private:

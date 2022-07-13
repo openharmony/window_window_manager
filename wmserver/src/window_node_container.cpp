@@ -43,6 +43,8 @@ namespace {
     constexpr uint32_t MAX_BRIGHTNESS = 255;
     constexpr uint32_t SPLIT_WINDOWS_CNT = 2;
     constexpr uint32_t EXIT_SPLIT_POINTS_NUMBER = 2;
+    constexpr int UID_TRANSFROM_DIVISOR = 20000;
+    constexpr int UID_MIN = 100;
 }
 
 WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, ScreenId displayGroupId)
@@ -1898,21 +1900,20 @@ WindowLayoutMode WindowNodeContainer::GetCurrentLayoutMode() const
     return layoutMode_;
 }
 
-void WindowNodeContainer::RemoveSingleUserWindowNodes()
+void WindowNodeContainer::RemoveSingleUserWindowNodes(int accountId)
 {
     std::vector<sptr<WindowNode>> windowNodes;
     TraverseContainer(windowNodes);
+    WLOGFI("%{public}d", accountId);
     for (auto& windowNode : windowNodes) {
-        if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP ||
-            windowNode->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
-            windowNode->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR ||
-            windowNode->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD ||
-            windowNode->GetWindowType() == WindowType::WINDOW_TYPE_POINTER ||
-            windowNode->GetWindowType() == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
+        int windowAccountId = windowNode->GetCallingUid() / UID_TRANSFROM_DIVISOR;
+        if (windowAccountId < UID_MIN || windowAccountId == accountId) {
+            WLOGFI("skiped window %{public}s, windowId %{public}d uid %{public}d",
+                windowNode->GetWindowName().c_str(), windowNode->GetWindowId(), windowNode->GetCallingUid());
             continue;
         }
-        WLOGFI("remove window %{public}s, windowId %{public}d",
-            windowNode->GetWindowName().c_str(), windowNode->GetWindowId());
+        WLOGFI("remove window %{public}s, windowId %{public}d uid %{public}d",
+            windowNode->GetWindowName().c_str(), windowNode->GetWindowId(), windowNode->GetCallingUid());
         windowNode->GetWindowProperty()->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
         RemoveWindowNode(windowNode);
     }
