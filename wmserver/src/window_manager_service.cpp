@@ -93,10 +93,10 @@ void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std
     }
 }
 
-void WindowManagerService::OnAccountSwitched() const
+void WindowManagerService::OnAccountSwitched(int accountId) const
 {
-    wmsTaskLooper_->PostTask([this]() {
-        windowRoot_->RemoveSingleUserWindowNodes();
+    wmsTaskLooper_->PostTask([this, accountId]() {
+        windowRoot_->RemoveSingleUserWindowNodes(accountId);
     });
     WLOGFI("called");
 }
