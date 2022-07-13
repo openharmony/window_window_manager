@@ -76,6 +76,7 @@ ohos_shared_library("libwm") {
     "bundle_framework:appexecfwk_core",
     "graphic_standard:surface",
     "graphic_standard:window_animation",
+    "hicollie_native:libhicollie",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
     "input:libmmi-client",
