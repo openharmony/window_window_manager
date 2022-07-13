@@ -947,14 +947,17 @@ bool WindowLayoutPolicy::IsFullScreenRecentWindowExist(const std::vector<sptr<Wi
     return false;
 }
 
-void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect)
+void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
 {
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
         WLOGFI("not need to update bounds");
         return;
     }
     if (node->leashWinSurfaceNode_) {
-        node->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+        if (winRect != preRect) {
+            // avoid animation change suddenly when client coming
+            node->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+        }
         if (node->startingWinSurfaceNode_) {
             node->startingWinSurfaceNode_->SetBounds(0, 0, winRect.width_, winRect.height_);
         }
