@@ -90,7 +90,8 @@ void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
 
 void WindowCommonEvent::HandleAccountSwitched(const EventFwk::CommonEventData& data) const
 {
-    WindowManagerService::GetInstance().OnAccountSwitched();
+    int accountId = data.GetCode();
+    WindowManagerService::GetInstance().OnAccountSwitched(accountId);
 }
 } // Rosen
 } // OHOS

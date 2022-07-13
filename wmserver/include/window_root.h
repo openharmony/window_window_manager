@@ -96,8 +96,8 @@ public:
     void SetSplitRatios(const std::vector<float>& splitRatioNumbers);
     void SetExitSplitRatios(const std::vector<float>& exitSplitRatios);
     void MinimizeTargetWindows(std::vector<uint32_t>& windowIds);
-    void RemoveSingleUserWindowNodes();
     WMError UpdateRsTree(uint32_t windowId, bool isAdd);
+    void RemoveSingleUserWindowNodes(int accountId);
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);

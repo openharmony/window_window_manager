@@ -108,9 +108,9 @@ public:
     void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback) override;
     void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
-    void OnAccountSwitched() const;
     WMError UpdateRsTree(uint32_t windowId, bool isAdd) override;
     void OnScreenshot(DisplayId displayId);
+    void OnAccountSwitched(int accountId) const;
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;
