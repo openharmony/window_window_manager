@@ -18,7 +18,6 @@
 
 #include <refbase.h>
 #include "class_var_definition.h"
-#include "window_inner_manager.h"
 #include "window_node.h"
 #include "window_layout_policy.h"
 #include "wm_common_inner.h"

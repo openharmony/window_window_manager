@@ -17,17 +17,20 @@
 #include <vector>
 
 #include "display.h"
+#include "vsync_station.h"
+#include "wm_common.h"
 #include "window_helper.h"
+#include "window_inner_manager.h"
 #include "window_manager_hilog.h"
+#include "window_manager_service.h"
 #include "window_node.h"
 #include "window_node_container.h"
 #include "window_property.h"
-#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "DragController"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DragController"};
 }
 
 void DragController::UpdateDragInfo(uint32_t windowId)
@@ -136,6 +139,285 @@ bool DragController::GetHitPoint(uint32_t windowId, PointInfo& point)
     point.x = property->GetWindowRect().posX_ + property->GetHitOffset().x;
     point.y = property->GetWindowRect().posY_ + property->GetHitOffset().y;
     return true;
+}
+
+void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
+{
+    if (keyEvent == nullptr) {
+        WLOGFE("KeyEvent is nullptr");
+        return;
+    }
+    uint32_t windowId = static_cast<uint32_t>(keyEvent->GetAgentWindowId());
+    WLOGFD("[WMS] Receive keyEvent, windowId: %{public}u", windowId);
+    keyEvent->MarkProcessed();
+}
+
+void InputEventListener::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const
+{
+    if (axisEvent == nullptr) {
+        WLOGFE("AxisEvent is nullptr");
+        return;
+    };
+    WLOGFD("[WMS] Receive axisEvent, windowId: %{public}u", axisEvent->GetAgentWindowId());
+    axisEvent->MarkProcessed();
+}
+
+void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+{
+    if (pointerEvent == nullptr) {
+        WLOGFE("PointerEvent is nullptr");
+        return;
+    }
+    uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
+    WLOGFD("[WMS] Receive pointerEvent, windowId: %{public}u", windowId);
+
+    WindowInnerManager::GetInstance().ConsumePointerEvent(pointerEvent);
+}
+
+bool MoveDragController::Init()
+{
+    // create handler for input event
+    inputEventHandler_ = std::make_shared<AppExecFwk::EventHandler>(
+        AppExecFwk::EventRunner::Create(INNER_WM_INPUT_THREAD_NAME));
+    if (inputEventHandler_ == nullptr) {
+        return false;
+    }
+    inputListener_ = std::make_shared<InputEventListener>(InputEventListener());
+    MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(inputListener_, inputEventHandler_);
+    VsyncStation::GetInstance().SetIsMainHandlerAvailable(false);
+    return true;
+}
+
+void MoveDragController::Stop()
+{
+    if (inputEventHandler_ != nullptr) {
+        inputEventHandler_.reset();
+    }
+}
+
+void MoveDragController::HandleReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+    sptr<MoveDragProperty>& moveDragProperty)
+{
+    SetActiveWindowId(windowId);
+    SetWindowProperty(windowProperty);
+    SetDragProperty(moveDragProperty);
+}
+
+void MoveDragController::HandleEndUpMovingOrDragging(uint32_t windowId)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    if (activeWindowId_ != windowId) {
+        WLOGFE("end up moving or dragging failed, windowId: %{public}u", windowId);
+        return;
+    }
+    ResetMoveOrDragState();
+}
+
+void MoveDragController::HandleWindowRemovedOrDestroyed(uint32_t windowId)
+{
+    if (GetMoveDragProperty() == nullptr) {
+        return;
+    }
+    if (!(GetMoveDragProperty()->startMoveFlag_ || GetMoveDragProperty()->startDragFlag_)) {
+        return;
+    }
+    VsyncStation::GetInstance().RemoveCallback(CallbackType::CALLBACK_INPUT, vsyncCallback_);
+    ResetMoveOrDragState();
+}
+
+void MoveDragController::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (pointerEvent == nullptr) {
+        WLOGFE("pointerEvent is nullptr or is handling pointer event");
+        return;
+    }
+    if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        std::shared_ptr<MMI::PointerEvent> tempPointerEvent;
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+            tempPointerEvent = moveEvent_;
+            moveEvent_ = pointerEvent;
+            VsyncStation::GetInstance().RequestVsync(CallbackType::CALLBACK_INPUT, vsyncCallback_);
+        }
+        if (tempPointerEvent != nullptr) {
+            tempPointerEvent->MarkProcessed();
+        }
+    } else {
+        WLOGFI("[WMS] Dispatch non-move event, action: %{public}d", pointerEvent->GetPointerAction());
+        HandlePointerEvent(pointerEvent);
+        pointerEvent->MarkProcessed();
+    }
+}
+
+void MoveDragController::OnReceiveVsync(int64_t timeStamp)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        pointerEvent = moveEvent_;
+        moveEvent_ = nullptr;
+    }
+    if (pointerEvent == nullptr) {
+        WLOGFE("moveEvent is nullptr");
+        return;
+    }
+    WLOGFD("[OnReceiveVsync] receive move event, action: %{public}d", pointerEvent->GetPointerAction());
+    HandlePointerEvent(pointerEvent);
+    pointerEvent->MarkProcessed();
+}
+
+Rect MoveDragController::GetHotZoneRect()
+{
+    Rect hotZoneRect;
+    const auto& startRectExceptCorner =  moveDragProperty_->startRectExceptCorner_;
+    const auto& startRectExceptFrame =  moveDragProperty_->startRectExceptFrame_;
+    if ((moveDragProperty_->startPointPosX_ > startRectExceptCorner.posX_ &&
+        (moveDragProperty_->startPointPosX_ < startRectExceptCorner.posX_ +
+         static_cast<int32_t>(startRectExceptCorner.width_))) &&
+        (moveDragProperty_->startPointPosY_ > startRectExceptCorner.posY_ &&
+        (moveDragProperty_->startPointPosY_ < startRectExceptCorner.posY_ +
+        static_cast<int32_t>(startRectExceptCorner.height_)))) {
+        hotZoneRect = startRectExceptFrame; // drag type: left/right/top/bottom
+    } else {
+        hotZoneRect = startRectExceptCorner; // drag type: left_top/right_top/left_bottom/right_bottom
+    }
+    return hotZoneRect;
+}
+
+void MoveDragController::HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId)
+{
+    if (moveDragProperty_ == nullptr) {
+        return;
+    }
+    if (!moveDragProperty_->startDragFlag_ || (pointId != moveDragProperty_->startPointerId_)) {
+        return;
+    }
+    const auto& startPointPosX = moveDragProperty_->startPointPosX_;
+    const auto& startPointPosY = moveDragProperty_->startPointPosY_;
+    const auto& startPointRect = moveDragProperty_->startPointRect_;
+    Rect newRect = startPointRect;
+    Rect hotZoneRect = GetHotZoneRect();
+    int32_t diffX = posX - startPointPosX;
+    int32_t diffY = posY - startPointPosY;
+
+    if (startPointPosX <= hotZoneRect.posX_) {
+        if (diffX > static_cast<int32_t>(startPointRect.width_)) {
+            diffX = static_cast<int32_t>(startPointRect.width_);
+        }
+        newRect.posX_ += diffX;
+        newRect.width_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.width_) - diffX);
+    } else if (startPointPosX >= hotZoneRect.posX_ + static_cast<int32_t>(hotZoneRect.width_)) {
+        if (diffX < 0 && (-diffX > static_cast<int32_t>(startPointRect.width_))) {
+            diffX = -(static_cast<int32_t>(startPointRect.width_));
+        }
+        newRect.width_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.width_) + diffX);
+    }
+    if (startPointPosY <= hotZoneRect.posY_) {
+        if (diffY > static_cast<int32_t>(startPointRect.height_)) {
+            diffY = static_cast<int32_t>(startPointRect.height_);
+        }
+        newRect.posY_ += diffY;
+        newRect.height_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.height_) - diffY);
+    } else if (startPointPosY >= hotZoneRect.posY_ + static_cast<int32_t>(hotZoneRect.height_)) {
+        if (diffY < 0 && (-diffY > static_cast<int32_t>(startPointRect.height_))) {
+            diffY = -(static_cast<int32_t>(startPointRect.height_));
+        }
+        newRect.height_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.height_) + diffY);
+    }
+    WLOGFI("[WMS] HandleDragEvent, id: %{public}u, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        windowProperty_->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
+    windowProperty_->SetRequestRect(newRect);
+    windowProperty_->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
+    windowProperty_->SetDragType(moveDragProperty_->dragType_);
+    WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT);
+}
+
+void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId)
+{
+    if (moveDragProperty_ == nullptr) {
+        return;
+    }
+    if (!moveDragProperty_->startMoveFlag_ || (pointId != moveDragProperty_->startPointerId_)) {
+        return;
+    }
+    int32_t targetX = moveDragProperty_->startPointRect_.posX_ + (posX - moveDragProperty_->startPointPosX_);
+    int32_t targetY = moveDragProperty_->startPointRect_.posY_ + (posY - moveDragProperty_->startPointPosY_);
+
+    const Rect& oriRect = windowProperty_->GetRequestRect();
+    Rect newRect = { targetX, targetY, oriRect.width_, oriRect.height_ };
+    WLOGFI("[WMS] HandleMoveEvent, id: %{public}u, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        windowProperty_->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
+    windowProperty_->SetRequestRect(newRect);
+    windowProperty_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
+    WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT);
+}
+
+void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    MMI::PointerEvent::PointerItem pointerItem;
+    int32_t pointId = pointerEvent->GetPointerId();
+    if (!pointerEvent->GetPointerItem(pointId, pointerItem)) {
+        WLOGFE("Point item is invalid");
+        return;
+    }
+
+    int32_t pointPosX = pointerItem.GetDisplayX();
+    int32_t pointPosY = pointerItem.GetDisplayY();
+    int32_t action = pointerEvent->GetPointerAction();
+    switch (action) {
+        // ready to move or drag
+        case MMI::PointerEvent::POINTER_ACTION_MOVE: {
+            HandleMoveEvent(pointPosX, pointPosY, pointId);
+            HandleDragEvent(pointPosX, pointPosY, pointId);
+            break;
+        }
+        // End move or drag
+        case MMI::PointerEvent::POINTER_ACTION_UP:
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+        case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
+            WindowManagerService::GetInstance().NotifyWindowClientPointUp(activeWindowId_, pointerEvent);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void MoveDragController::SetDragProperty(const sptr<MoveDragProperty>& moveDragProperty)
+{
+    moveDragProperty_->CopyFrom(moveDragProperty);
+}
+
+void MoveDragController::SetWindowProperty(const sptr<WindowProperty>& windowProperty)
+{
+    windowProperty_->CopyFrom(windowProperty);
+}
+
+const sptr<MoveDragProperty>& MoveDragController::GetMoveDragProperty() const
+{
+    return moveDragProperty_;
+}
+
+const sptr<WindowProperty>& MoveDragController::GetWindowProperty() const
+{
+    return windowProperty_;
+}
+
+void MoveDragController::ResetMoveOrDragState()
+{
+    activeWindowId_ = INVALID_WINDOW_ID;
+    auto moveDragProperty = new MoveDragProperty();
+    SetDragProperty(moveDragProperty);
+}
+
+void MoveDragController::SetActiveWindowId(uint32_t activeWindowId)
+{
+    activeWindowId_ = activeWindowId;
+}
+
+uint32_t MoveDragController::GetActiveWindowId() const
+{
+    return activeWindowId_;
 }
 }
 }

@@ -139,9 +139,15 @@ void WindowNode::SetWindowToken(sptr<IWindow> window)
     windowToken_ = window;
 }
 
+void WindowNode::SetInputEventCallingPid(int32_t pid)
+{
+    inputCallingPid_ = pid;
+}
+
 void WindowNode::SetCallingPid(int32_t pid)
 {
     callingPid_ = pid;
+    SetInputEventCallingPid(pid);
 }
 
 void WindowNode::SetCallingUid(int32_t uid)
@@ -288,6 +294,11 @@ uint32_t WindowNode::GetWindowFlags() const
 const sptr<WindowProperty>& WindowNode::GetWindowProperty() const
 {
     return property_;
+}
+
+int32_t WindowNode::GetInputEventCallingPid() const
+{
+    return inputCallingPid_;
 }
 
 int32_t WindowNode::GetCallingPid() const

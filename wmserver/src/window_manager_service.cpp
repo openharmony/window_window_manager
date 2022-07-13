@@ -559,6 +559,11 @@ WMError WindowManagerService::RemoveWindow(uint32_t windowId)
     return PostSyncTask([this, windowId]() {
         WLOGFI("[WMS] Remove: %{public}u", windowId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:RemoveWindow(%u)", windowId);
+        WindowInnerManager::GetInstance().NotifyWindowRemovedOrDestroyed(windowId);
+        WMError res = windowController_->RecoverInputEventToClient(windowId);
+        if (res != WMError::WM_OK) {
+            return res;
+        }
         return windowController_->RemoveWindowNode(windowId);
     });
 }
@@ -572,6 +577,7 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
     return PostSyncTask([this, windowId, onlySelf]() {
         WLOGFI("[WMS] Destroy: %{public}u", windowId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DestroyWindow(%u)", windowId);
+        WindowInnerManager::GetInstance().NotifyWindowRemovedOrDestroyed(windowId);
         auto node = windowRoot_->GetWindowNode(windowId);
         if (node != nullptr && node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
             dragController_->FinishDrag(windowId);
@@ -690,17 +696,42 @@ void DisplayChangeListener::OnScreenshot(DisplayId displayId)
     WindowManagerService::GetInstance().OnScreenshot(displayId);
 }
 
-void WindowManagerService::ProcessPointDown(uint32_t windowId, bool isStartDrag)
+void WindowManagerService::ProcessPointDown(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+    sptr<MoveDragProperty>& moveDragProperty)
 {
-    PostAsyncTask([this, windowId, isStartDrag]() {
-        windowController_->ProcessPointDown(windowId, isStartDrag);
+    if (windowProperty == nullptr || moveDragProperty == nullptr) {
+        WLOGFE("windowProperty or moveDragProperty is invalid");
+        return;
+    }
+
+    PostAsyncTask([this, windowId, windowProperty, moveDragProperty]() mutable {
+        if (moveDragProperty->startDragFlag_ || moveDragProperty->startMoveFlag_) {
+            bool res = WindowInnerManager::GetInstance().NotifyWindowReadyToMoveOrDrag(windowId,
+                windowProperty, moveDragProperty);
+            if (!res) {
+                WLOGFE("invalid operation");
+                return;
+            }
+            windowController_->InterceptInputEventToServer(windowId);
+        }
+        windowController_->ProcessPointDown(windowId, moveDragProperty);
     });
 }
 
 void WindowManagerService::ProcessPointUp(uint32_t windowId)
 {
     PostAsyncTask([this, windowId]() {
+        WindowInnerManager::GetInstance().NotifyWindowEndUpMovingOrDragging(windowId);
+        windowController_->RecoverInputEventToClient(windowId);
         windowController_->ProcessPointUp(windowId);
+    });
+}
+
+void WindowManagerService::NotifyWindowClientPointUp(uint32_t windowId,
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    PostAsyncTask([this, windowId, pointerEvent]() mutable {
+        windowController_->NotifyWindowClientPointUp(windowId, pointerEvent);
     });
 }
 
@@ -719,7 +750,7 @@ WMError WindowManagerService::ToggleShownStateForAllAppWindows()
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:ToggleShownStateForAllAppWindows");
         return windowController_->ToggleShownStateForAllAppWindows();
     });
-    return  WMError::WM_OK;
+    return WMError::WM_OK;
 }
 
 WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
@@ -741,7 +772,7 @@ WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
 WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action)
 {
     if (windowProperty == nullptr) {
-        WLOGFE("property is invalid");
+        WLOGFE("windowProperty is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     if (action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) {
@@ -750,15 +781,15 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         });
         return WMError::WM_OK;
     }
-    return PostSyncTask([this, &windowProperty, action]() {
+    PostAsyncTask([this, windowProperty, action]() mutable {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
         WMError res = windowController_->UpdateProperty(windowProperty, action);
         if (action == PropertyChangeAction::ACTION_UPDATE_RECT && res == WMError::WM_OK &&
             windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
             dragController_->UpdateDragInfo(windowProperty->GetWindowId());
         }
-        return res;
     });
+    return WMError::WM_OK;
 }
 
 WMError WindowManagerService::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)

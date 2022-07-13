@@ -82,7 +82,7 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
             pointerEventTemp = moveEvent_;
             moveEvent_ = pointerEvent;
             if (isAvailable_) {
-                VsyncStation::GetInstance().RequestVsync(VsyncStation::CallbackType::CALLBACK_INPUT, callback_);
+                VsyncStation::GetInstance().RequestVsync(CallbackType::CALLBACK_INPUT, callback_);
             } else {
                 WLOGFE("WindowInputChannel is not available");
                 pointerEvent->MarkProcessed();
@@ -123,7 +123,7 @@ void WindowInputChannel::Destroy()
     std::lock_guard<std::mutex> lock(mtx_);
     WLOGFI("Destroy WindowInputChannel, windowId:%{public}u", window_->GetWindowId());
     isAvailable_ = false;
-    VsyncStation::GetInstance().RemoveCallback(VsyncStation::CallbackType::CALLBACK_INPUT, callback_);
+    VsyncStation::GetInstance().RemoveCallback(CallbackType::CALLBACK_INPUT, callback_);
     if (moveEvent_ != nullptr) {
         moveEvent_->MarkProcessed();
         moveEvent_ = nullptr;
