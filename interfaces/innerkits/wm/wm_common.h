@@ -284,6 +284,7 @@ enum class ColorSpace : uint32_t {
 enum class WindowAnimation : uint32_t {
     NONE,
     DEFAULT,
+    INPUTE,
     CUSTOM,
 };
 

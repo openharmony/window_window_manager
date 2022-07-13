@@ -2162,6 +2162,8 @@ void WindowImpl::AdjustWindowAnimationFlag(bool withAnimation)
     } else if (isAppWindow || (withAnimation && !animationTranistionController_)) {
         // use default animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
+    } else if (winType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::INPUTE));
     } else {
         // with no animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));

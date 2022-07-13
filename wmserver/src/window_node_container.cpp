@@ -48,6 +48,7 @@ namespace {
     constexpr int UID_TRANSFROM_DIVISOR = 20000;
     constexpr int UID_MIN = 100;
 }
+AnimationConfig WindowNodeContainer::animationConfig_;
 
 WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, ScreenId displayGroupId)
 {
@@ -132,7 +133,7 @@ WMError WindowNodeContainer::ShowStartingWindow(sptr<WindowNode>& node)
     }
     UpdateWindowTree(node);
     displayGroupController_->PreProcessWindowNode(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
-    StartingWindow::UpdateRSTree(node);
+    StartingWindow::UpdateRSTree(node, animationConfig_);
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
     WLOGFI("ShowStartingWindow windowId: %{public}u end", node->GetWindowId());
@@ -148,6 +149,11 @@ WMError WindowNodeContainer::IsTileRectSatisfiedWithSizeLimits(sptr<WindowNode>&
         return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
     return WMError::WM_OK;
+}
+
+AnimationConfig& WindowNodeContainer::GetAnimationConfigRef()
+{
+    return animationConfig_;
 }
 
 WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
@@ -401,8 +407,7 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
 bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId displayId, bool isAdd, bool animationPlayed)
 {
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
-    uint32_t animationFlag = node->GetWindowProperty()->GetAnimationFlag();
-    if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+    if (node->GetWindowProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
         WLOGFI("not need to update RsTree since SystemWindow CustomAnimation is playing");
         return true;
     }
@@ -435,19 +440,18 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId display
             }
         }
     };
-
     if (node->EnableDefaultAnimation(IsWindowAnimationEnabled, animationPlayed)) {
         WLOGFI("add or remove window with animation");
-        // default transition duration: 350ms
-        static const RSAnimationTimingProtocol timingProtocol(350);
-        // default transition curve: EASE OUT
-        static const Rosen::RSAnimationTimingCurve curve = Rosen::RSAnimationTimingCurve::EASE_OUT;
-        // add window with transition animation
         StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
-        RSNode::Animate(timingProtocol, curve, updateRSTreeFunc);
+        RSNode::Animate(animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
+            animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc);
         FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
+    } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && IsWindowAnimationEnabled &&
+        !animationPlayed) { // add or remove keyboard with animation
+        auto timingProtocol = isAdd ? animationConfig_.keyboardAnimationConfig_.durationIn_ :
+            animationConfig_.keyboardAnimationConfig_.durationOut_;
+        RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
     } else {
-        // add or remove window without animation
         WLOGFI("add or remove window without animation");
         updateRSTreeFunc();
     }

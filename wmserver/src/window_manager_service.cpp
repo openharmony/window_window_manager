@@ -37,7 +37,6 @@
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_agent_controller.h"
-#include "window_manager_config.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 
@@ -272,7 +271,7 @@ bool WindowManagerService::Init()
         return false;
     }
     if (WindowManagerConfig::LoadConfigXml()) {
-        WindowManagerConfig::DumpConfig();
+        WindowManagerConfig::DumpConfig(WindowManagerConfig::GetConfig());
         ConfigureWindowManagerService();
     }
     WLOGFI("WindowManagerService::Init success");
@@ -292,33 +291,35 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 
 void WindowManagerService::ConfigureWindowManagerService()
 {
-    const auto& enableConfig = WindowManagerConfig::GetEnableConfig();
-    const auto& intNumbersConfig = WindowManagerConfig::GetIntNumbersConfig();
-    const auto& floatNumbersConfig = WindowManagerConfig::GetFloatNumbersConfig();
-
-    if (enableConfig.count("decor") != 0) {
-        systemConfig_.isSystemDecorEnable_ = enableConfig.at("decor");
+    const auto& config = WindowManagerConfig::GetConfig();
+    if (config.count("decor") != 0 && config.at("decor").property_) {
+        if (config.at("decor").property_->count("enable")) {
+            systemConfig_.isSystemDecorEnable_ =
+                config.at("decor").property_->at("enable").boolValue_;
+        }
     }
-
-    if (enableConfig.count("minimizeByOther") != 0) {
-        MinimizeApp::SetMinimizedByOtherConfig(enableConfig.at("minimizeByOther"));
+    if (config.count("minimizeByOther") != 0 && config.at("minimizeByOther").property_) {
+        if (config.at("minimizeByOther").property_->count("enable")) {
+            MinimizeApp::SetMinimizedByOtherConfig(
+                config.at("minimizeByOther").property_->at("enable").boolValue_);
+        }
     }
-
-    if (enableConfig.count("stretchable") != 0) {
-        systemConfig_.isStretchable_ = enableConfig.at("stretchable");
+    if (config.count("stretchable") != 0 && config.at("stretchable").property_) {
+        if (config.at("stretchable").property_->count("enable")) {
+            systemConfig_.isStretchable_ =
+                config.at("stretchable").property_->at("enable").boolValue_;
+        }
     }
-
-    if (intNumbersConfig.count("maxAppWindowNumber") != 0) {
-        auto numbers = intNumbersConfig.at("maxAppWindowNumber");
+    if (config.count("maxAppWindowNumber") != 0 && config.at("maxAppWindowNumber").IsInts()) {
+        auto numbers = *config.at("maxAppWindowNumber").intsValue_;
         if (numbers.size() == 1) {
             if (numbers[0] > 0) {
                 windowRoot_->SetMaxAppWindowNumber(static_cast<uint32_t>(numbers[0]));
             }
         }
     }
-
-    if (intNumbersConfig.count("modeChangeHotZones") != 0) {
-        auto numbers = intNumbersConfig.at("modeChangeHotZones");
+    if (config.count("modeChangeHotZones") != 0 && config.at("modeChangeHotZones").IsInts()) {
+        auto numbers = *config.at("modeChangeHotZones").intsValue_;
         if (numbers.size() == 3) { // 3 hot zones
             hotZonesConfig_.fullscreenRange_ = static_cast<uint32_t>(numbers[0]); // 0 fullscreen
             hotZonesConfig_.primaryRange_ = static_cast<uint32_t>(numbers[1]);    // 1 primary
@@ -326,14 +327,132 @@ void WindowManagerService::ConfigureWindowManagerService()
             hotZonesConfig_.isModeChangeHotZoneConfigured_ = true;
         }
     }
-
-    if (floatNumbersConfig.count("splitRatios") != 0) {
-        windowRoot_->SetSplitRatios(floatNumbersConfig.at("splitRatios"));
+    if (config.count("splitRatios") != 0 && config.at("splitRatios").IsFloats()) {
+        windowRoot_->SetSplitRatios(*config.at("splitRatios").floatsValue_);
     }
-
-    if (floatNumbersConfig.count("exitSplitRatios") != 0) {
-        windowRoot_->SetExitSplitRatios(floatNumbersConfig.at("exitSplitRatios"));
+    if (config.count("exitSplitRatios") != 0 && config.at("exitSplitRatios").IsFloats()) {
+        windowRoot_->SetExitSplitRatios(*config.at("exitSplitRatios").floatsValue_);
     }
+    if (config.count("windowAnimation") && config.at("windowAnimation").IsMap()) {
+        const auto& animeMap = *config.at("windowAnimation").mapValue_;
+        ConfigWindowAnimation(animeMap);
+    }
+    if (config.count("keyboardAnimation") && config.at("keyboardAnimation").IsMap()) {
+        const auto& animeMap = *config.at("keyboardAnimation").mapValue_;
+        ConfigKeyboardAnimation(animeMap);
+    }
+}
+
+void WindowManagerService::ConfigWindowAnimation(const std::map<std::string, WindowManagerConfig::ConfigItem>& animeMap)
+{
+    auto& windowAnimationConfig = WindowNodeContainer::GetAnimationConfigRef().windowAnimationConfig_;
+    if (animeMap.count("timing") && animeMap.at("timing").IsMap()) {
+        const auto& timingMap = *animeMap.at("timing").mapValue_;
+        if (timingMap.count("duration") && timingMap.at("duration").IsInts()) {
+            auto numbers = *timingMap.at("duration").intsValue_;
+            if (numbers.size() == 1) { // duration
+                windowAnimationConfig.animationTiming_.timingProtocol_ =
+                    RSAnimationTimingProtocol(numbers[0]);
+            }
+        }
+        windowAnimationConfig.animationTiming_.timingCurve_ = CreateCurve(timingMap);
+    }
+    if (animeMap.count("scale") && animeMap.at("scale").IsFloats()) {
+        auto numbers = *animeMap.at("scale").floatsValue_;
+        if (numbers.size() == 1) { // 1 xy scale
+            windowAnimationConfig.scale_.x_ =
+            windowAnimationConfig.scale_.y_ = numbers[0]; // 0 xy scale
+        } else if (numbers.size() == 2) { // 2 x,y sclae
+            windowAnimationConfig.scale_.x_ = numbers[0]; // 0 x scale
+            windowAnimationConfig.scale_.y_ = numbers[1]; // 1 y scale
+        } else if (numbers.size() == 3) { // 3 x,y,z scale
+            windowAnimationConfig.scale_ = Vector3f(&numbers[0]);
+        }
+    }
+    if (animeMap.count("rotation") && animeMap.at("rotation").IsFloats()) {
+        auto numbers = *animeMap.at("rotation").floatsValue_;
+        if (numbers.size() == 4) { // 4 (axix,angle)
+            windowAnimationConfig.rotation_ = Vector4f(&numbers[0]);
+        }
+    }
+    if (animeMap.count("translate") && animeMap.at("translate").IsFloats()) {
+        auto numbers = *animeMap.at("translate").floatsValue_;
+        if (numbers.size() == 2) { // 2 translate xy
+            windowAnimationConfig.translate_.x_ = numbers[0]; // 0 translate x
+            windowAnimationConfig.translate_.y_ = numbers[1]; // 1 translate y
+        } else if (numbers.size() == 3) { // 3 translate xyz
+            windowAnimationConfig.translate_.x_ = numbers[0]; // 0 translate x
+            windowAnimationConfig.translate_.y_ = numbers[1]; // 1 translate y
+            windowAnimationConfig.translate_.z_ = numbers[2]; // 2 translate z
+        }
+    }
+    if (animeMap.count("opacity") && animeMap.at("opacity").IsFloats()) {
+        auto numbers = *animeMap.at("opacity").floatsValue_;
+        if (numbers.size() == 1) {
+            windowAnimationConfig.opacity_ = numbers[0]; // 0 opacity
+        }
+    }
+}
+
+void WindowManagerService::ConfigKeyboardAnimation(const std::map<std::string,
+    WindowManagerConfig::ConfigItem>& animeMap)
+{
+    auto& animationConfig = WindowNodeContainer::GetAnimationConfigRef();
+    if (animeMap.count("timing") && animeMap.at("timing").IsMap()) {
+        const auto& timingMap = *animeMap.at("timing").mapValue_;
+        if (timingMap.count("durationIn") && timingMap.at("durationIn").IsInts()) {
+            auto numbers = *timingMap.at("durationIn").intsValue_;
+            if (numbers.size() == 1) { // duration
+                animationConfig.keyboardAnimationConfig_.durationIn_ =
+                    RSAnimationTimingProtocol(numbers[0]);
+            }
+        }
+        if (timingMap.count("durationOut") && timingMap.at("durationOut").IsInts()) {
+            auto numbers = *timingMap.at("durationOut").intsValue_;
+            if (numbers.size() == 1) { // duration
+                animationConfig.keyboardAnimationConfig_.durationOut_ =
+                    RSAnimationTimingProtocol(numbers[0]);
+            }
+        }
+        animationConfig.keyboardAnimationConfig_.curve_ = CreateCurve(timingMap);
+    }
+}
+
+RSAnimationTimingCurve WindowManagerService::CreateCurve(
+    const std::map<std::string, WindowManagerConfig::ConfigItem>& timingMap)
+{
+    if (timingMap.count("curve") && timingMap.at("curve").property_) {
+        auto curveProp = *timingMap.at("curve").property_;
+        std::string name;
+        if (curveProp.count("name") && curveProp.at("name").IsString()) {
+                name = curveProp.at("name").stringValue_;
+        }
+        if (name == "easeOut") {
+            return RSAnimationTimingCurve::EASE_OUT;
+        } else if (name == "ease") {
+            return RSAnimationTimingCurve::EASE;
+        } else if (name == "easeIn") {
+            return RSAnimationTimingCurve::EASE_IN;
+        } else if (name == "easeInOut") {
+            return RSAnimationTimingCurve::EASE_IN_OUT;
+        } else if (name == "default") {
+            return RSAnimationTimingCurve::DEFAULT;
+        } else if (name == "linear") {
+            return RSAnimationTimingCurve::LINEAR;
+        } else if (name == "spring") {
+            return RSAnimationTimingCurve::SPRING;
+        } else if (name == "interactiveSpring") {
+            return RSAnimationTimingCurve::INTERACTIVE_SPRING;
+        } else if (name == "cubic" && timingMap.at("curve").IsFloats() &&
+            timingMap.at("curve").floatsValue_->size() == 4) { // 4 curve parameter
+            auto numbers = *timingMap.at("curve").floatsValue_;
+            return RSAnimationTimingCurve::CreateCubicCurve(numbers[0], // 0 ctrlX1
+                numbers[1], // 1 ctrlY1
+                numbers[2], // 2 ctrlX2
+                numbers[3]); // 3 ctrlY2
+        }
+    }
+    return RSAnimationTimingCurve::EASE_OUT;
 }
 
 void WindowManagerService::OnStop()

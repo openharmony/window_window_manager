@@ -18,6 +18,7 @@
 
 #include <refbase.h>
 #include "pixel_map.h"
+#include "animation_config.h"
 #include "surface_draw.h"
 #include "wm_common.h"
 #include "window_node.h"
@@ -36,7 +37,7 @@ public:
         int32_t pid, int32_t uid);
     static void DrawStartingWindow(sptr<WindowNode>& node, sptr<Media::PixelMap> pixelMap, uint32_t bkgColor,
         bool isColdStart);
-    static void UpdateRSTree(sptr<WindowNode>& node);
+    static void UpdateRSTree(sptr<WindowNode>& node, const AnimationConfig& animationConfig);
     static void ReleaseStartWinSurfaceNode(sptr<WindowNode>& node);
     static bool NeedToStopStartingWindow(WindowMode winMode, uint32_t modeSupportInfo,
         const sptr<WindowTransitionInfo>& info);

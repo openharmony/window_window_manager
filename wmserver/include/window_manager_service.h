@@ -35,6 +35,7 @@
 #include "window_controller.h"
 #include "zidl/window_manager_stub.h"
 #include "window_dumper.h"
+#include "window_manager_config.h"
 #include "window_root.h"
 #include "snapshot_controller.h"
 
@@ -139,6 +140,9 @@ private:
         }
         return ret;
     }
+    void ConfigWindowAnimation(const std::map<std::string, WindowManagerConfig::ConfigItem>& animeMap);
+    void ConfigKeyboardAnimation(const std::map<std::string, WindowManagerConfig::ConfigItem>& animeMap);
+    RSAnimationTimingCurve CreateCurve(const std::map<std::string, WindowManagerConfig::ConfigItem>& timingMap);
 
     static inline SingletonDelegator<WindowManagerService> delegator;
     AtomicMap<uint32_t, uint32_t> accessTokenIdMaps_;

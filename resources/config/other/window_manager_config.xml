@@ -22,4 +22,15 @@
     <exitSplitRatios>0.1 0.9</exitSplitRatios>
     <!--split screen ratios config-->
     <splitRatios>0.5 0.33 0.67</splitRatios>
+    <!--window animation config-->
+    <windowAnimation>
+        <scale>0.7 0.7</scale>
+    </windowAnimation>
+    <keyboardAnimation>
+        <timing>
+            <durationIn>500</durationIn>
+            <durationOut>300</durationOut>
+            <curve name="cubic">0.2 0.0 0.2 1.0</curve>
+        </timing>
+    </keyboardAnimation>
  </Configs>
