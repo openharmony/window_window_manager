@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  -->
- <Configs>
+<Configs>
     <!--decor enable is true means app main window show decoration-->
     <decor enable="false"></decor>
     <!--max number of main window that could be shown on display-->
@@ -28,4 +28,41 @@
     <exitSplitRatios>0.1 0.9</exitSplitRatios>
     <!--split screen ratios config-->
     <splitRatios>0.5 0.33 0.67</splitRatios>
- </Configs>
+    <!--window animation config-->
+    <windowAnimation>
+        <timing>
+            <!--duration of animation when add/remove window, unit is ms-->
+            <duration>350</duration>
+            <!--timing curve of animation, config it as below:-->
+            <!--name="ease"-->
+            <!--name="easeIn"-->
+            <!--name="easeOut"-->
+            <!--name="easeInOut"-->
+            <!--name="default"-->
+            <!--name="linear"-->
+            <!--name="spring"-->
+            <!--name="interactiveSpring"-->
+            <!--name="cubic" value=<float float float float>-->
+            <curve name="easeOut"></curve>
+        </timing>
+        <!--scaleX and scaleY of animation start state-->
+        <scale>0.7 0.7</scale>
+        <!--rotation of animation start state, 4 numbers is axis and angle-->
+        <rotation>0 0 1 0</rotation>
+        <!--translateX and translateY of animation start state-->
+        <translate>0 0</translate>
+        <!--opacity of animation start state-->
+        <opacity>0</opacity>
+    </windowAnimation>
+    <!--keyboard animation config-->
+    <keyboardAnimation>
+        <timing>
+            <!--duration of animation when add keyboard, unit is ms-->
+            <durationIn>500</durationIn>
+            <!--duration of animation when remove keyboard, unit is ms-->
+            <durationOut>300</durationOut>
+            <!--friction curve-->
+            <curve name="cubic">0.2 0.0 0.2 1.0</curve>
+        </timing>
+    </keyboardAnimation>
+</Configs>

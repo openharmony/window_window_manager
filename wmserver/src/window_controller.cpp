@@ -772,26 +772,30 @@ void WindowController::UpdateWindowAnimation(const sptr<WindowNode>& node)
         WLOGFE("windowNode or surfaceNode is nullptr");
         return;
     }
+    const auto& windowAnimationConfig = WindowNodeContainer::GetAnimationConfigRef().windowAnimationConfig_;
 
     uint32_t animationFlag = node->GetWindowProperty()->GetAnimationFlag();
     uint32_t windowId = node->GetWindowProperty()->GetWindowId();
     WLOGFI("windowId: %{public}u, animationFlag: %{public}u", windowId, animationFlag);
+    std::shared_ptr<const RSTransitionEffect> effect = nullptr;
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::DEFAULT)) {
-        // set default transition effect for window: scale from 1.0 to 0.7, fade from 1.0 to 0.0
-        static const auto effect = RSTransitionEffect::Create()->Scale(Vector3f(0.7f, 0.7f, 0.0f))->Opacity(0.0f);
-        if (node->leashWinSurfaceNode_) {
-            node->leashWinSurfaceNode_->SetTransitionEffect(effect);
+        effect = RSTransitionEffect::Create()
+            ->Scale(windowAnimationConfig.scale_)
+            ->Rotate(windowAnimationConfig.rotation_)
+            ->Translate(windowAnimationConfig.translate_)
+            ->Opacity(windowAnimationConfig.opacity_);
+    } else if (animationFlag == static_cast<uint32_t>(WindowAnimation::INPUTE)) {
+        float translateY = static_cast<float>(node->GetWindowRect().height_);
+        if (!node->GetWindowRect().height_) {
+            translateY = static_cast<float>(node->GetRequestRect().height_);
         }
-        if (node->surfaceNode_) {
-            node->surfaceNode_->SetTransitionEffect(effect);
-        }
-    } else {
-        if (node->leashWinSurfaceNode_) {
-            node->leashWinSurfaceNode_->SetTransitionEffect(nullptr);
-        }
-        if (node->surfaceNode_) {
-            node->surfaceNode_->SetTransitionEffect(nullptr);
-        }
+        effect = RSTransitionEffect::Create()->Translate(Vector3f(0, translateY, 0))->Opacity(0.0f);
+    };
+    if (node->leashWinSurfaceNode_) {
+        node->leashWinSurfaceNode_->SetTransitionEffect(effect);
+    }
+    if (node->surfaceNode_) {
+        node->surfaceNode_->SetTransitionEffect(effect);
     }
 }
 
