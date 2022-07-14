@@ -17,10 +17,11 @@
 #define SURFACE_READER_HANDLER_IMPL_H
 
 #include <mutex>
+#include "pixel_map.h"
+#include "refbase.h"
 #include "surface_reader_handler.h"
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 class SurfaceReaderHandlerImpl : public SurfaceReaderHandler {
 public:
     bool OnImageAvailable(sptr<Media::PixelMap> pixelMap) override;
@@ -33,7 +34,6 @@ private:
     sptr<Media::PixelMap> pixelMap_ = nullptr;
     std::recursive_mutex mutex_;
 };
-}
-}
+} // namespace OHOS::Rosen
 
 #endif // SURFACE_READER_HANDLER_IMPL_H

@@ -14,9 +14,9 @@
  */
 
 #include "screen_manager_utils.h"
+#include "window_manager_hilog.h"
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManagerUtils"};
 }
@@ -37,5 +37,4 @@ bool ScreenManagerUtils::CreateSurface()
     }
     return true;
 }
-} // namespace ROSEN
-} // namespace OHOS
+} // namespace OHOS::Rosen

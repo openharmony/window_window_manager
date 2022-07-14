@@ -12,18 +12,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "native_screenshot_module.h"
+
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
+
 #include "display_manager.h"
-#include "display_property.h"
+#include "image_type.h"
+#include "cinttypes"
+#include "iosfwd"
+#include "js_native_api.h"
+#include "js_native_api_types.h"
+#include "napi/native_api.h"
+#include "napi/native_common.h"
+#include "new"
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
+#include "type_traits"
+#include "window_manager_hilog.h"
+#include "wm_common.h"
 #include "wm_napi_common.h"
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 namespace save {
 struct Option {
     Media::Rect rect;
@@ -252,8 +264,7 @@ napi_value ScreenshotModuleInit(napi_env env, napi_value exports)
         exports, sizeof(properties) / sizeof(properties[0]), properties));
     return exports;
 }
-} // namespace Rosen
-} // namespace OHOS
+} // namespace OHOS::Rosen
 
 extern "C" __attribute__((constructor)) void RegisterModule(void)
 {

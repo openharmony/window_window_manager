@@ -12,10 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "display.h"
+
+#include <cstdint>
+#include <string>
+
+#include "class_var_definition.h"
 #include "display_info.h"
 #include "display_manager_adapter.h"
+#include "dm_common.h"
+#include "iosfwd"
+#include "new"
+#include "refbase.h"
+#include "screen_manager/screen_types.h"
+#include "singleton_container.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {

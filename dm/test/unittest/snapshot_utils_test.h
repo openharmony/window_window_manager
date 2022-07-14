@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 #include "display.h"
+#include "display_manager.h"
 
 namespace OHOS {
 namespace Rosen {

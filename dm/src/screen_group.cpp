@@ -15,9 +15,17 @@
 
 #include "screen_group.h"
 
+#include <vector>
+
+#include "class_var_definition.h"
 #include "display_manager_adapter.h"
+#include "dm_common.h"
+#include "new"
+#include "refbase.h"
 #include "screen.h"
 #include "screen_group_info.h"
+#include "screen_info.h"
+#include "singleton_container.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
