@@ -1392,13 +1392,10 @@ WMError WindowNodeContainer::ToggleShownStateForAllAppWindows(
     std::function<bool(uint32_t, WindowMode)> restoreFunc, bool restore)
 {
     WLOGFI("ToggleShownStateForAllAppWindows");
-    sptr<WindowNode> recentWindowNode = nullptr;
     for (auto node : aboveAppWindowNode_->children_) {
-        if (node->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
-            recentWindowNode = node;
-            if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-                return WMError::WM_DO_NOTHING;
-            }
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT &&
+            node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && restore) {
+            return WMError::WM_DO_NOTHING;
         }
     }
     // to do, backup reentry: 1.ToggleShownStateForAllAppWindows fast; 2.this display should reset backupWindowIds_.
@@ -1410,10 +1407,6 @@ WMError WindowNodeContainer::ToggleShownStateForAllAppWindows(
     }
     if (!restore && !appWindowNode_->children_.empty() && backupWindowIds_.empty()) {
         WLOGFI("backup");
-        if (recentWindowNode != nullptr && recentWindowNode->GetWindowToken() != nullptr) {
-            WLOGFI("hide recent");
-            recentWindowNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_HIDDEN);
-        }
         BackUpAllAppWindows();
     } else if (restore && !backupWindowIds_.empty()) {
         WLOGFI("restore");
