@@ -92,6 +92,7 @@ namespace {
 HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Level3)
 {
     // create fullscreen win and show
+    fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
@@ -111,13 +112,6 @@ HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Lev
     ASSERT_EQ(0, immersivePriRect.posX_);
     ASSERT_EQ(0, immersivePriRect.posY_);
     sleep(SPLIT_TEST_SLEEP_S);
-
-    // Exit split Mode.
-    ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
-    sleep(SPLIT_TEST_SLEEP_S);
-
-    // check is out split Immersive
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);

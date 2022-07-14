@@ -50,7 +50,7 @@ void WindowSplitTest::SetUp()
         .name = "",
         .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
         .needAvoid = true,
         .parentLimit = false,
         .parentName = "",
@@ -80,12 +80,13 @@ void WindowSplitTest::TearDown()
 namespace {
 /**
  * @tc.name: SplitWindow01
- * @tc.desc: one primary window and one fullscreen window, test mode change
+ * @tc.desc: first create a secondary window, then create a primary window, test mode change
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "fullscreen.1";
+    fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
     splitInfo_.name = "primary.1";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
 
@@ -111,12 +112,13 @@ HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
 
 /**
  * @tc.name: SplitWindow02
- * @tc.desc: one secondary window and one fullscreen window, test mode change
+ * @tc.desc: first create a primary window, then create a secondary window, test mode change
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "fullscreen.2";
+    fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
     splitInfo_.name = "secondary.2";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 
@@ -141,12 +143,13 @@ HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
 
 /**
  * @tc.name: SplitScreen03
- * @tc.desc: one primary window and one fullscreen window, test rects
+ * @tc.desc: first create a secondary window, then create a primary window, test rects
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSplitTest, SplitScreen03, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "fullscreen.3";
+    fullInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
     splitInfo_.name = "primary.3";
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
 
@@ -174,7 +177,7 @@ HWTEST_F(WindowSplitTest, SplitScreen03, Function | MediumTest | Level3)
 
 /**
  * @tc.name: SplitScreen04
- * @tc.desc: one secondary window and one fullscreen window, test rects
+ * @tc.desc: first create a primary window, then create a secondary window, test rects
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSplitTest, SplitScreen04, Function | MediumTest | Level3)
@@ -214,7 +217,7 @@ HWTEST_F(WindowSplitTest, SplitScreen05, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "fullscreen.5";
     splitInfo_.name = "primary.5";
-    splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
@@ -226,8 +229,8 @@ HWTEST_F(WindowSplitTest, SplitScreen05, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, priWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
 
-    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetMode());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, priWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, fullWindow->GetMode());
 
     Utils::TestWindowInfo dividerInfo;
     dividerInfo.name = "divider0";
@@ -255,7 +258,6 @@ HWTEST_F(WindowSplitTest, SplitScreen05, Function | MediumTest | Level3)
 
     ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
 }
@@ -269,7 +271,7 @@ HWTEST_F(WindowSplitTest, SplitScreen06, Function | MediumTest | Level3)
 {
     fullInfo_.name  = "fullscreen.6";
     splitInfo_.name = "primary.6";
-    splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     activeWindows_.push_back(fullWindow);
@@ -320,7 +322,6 @@ HWTEST_F(WindowSplitTest, SplitScreen06, Function | MediumTest | Level3)
 
     ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
 }
