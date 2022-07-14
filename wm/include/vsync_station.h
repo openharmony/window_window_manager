@@ -35,11 +35,16 @@ class VsyncStation {
 WM_DECLARE_SINGLE_INSTANCE_BASE(VsyncStation);
 public:
     ~VsyncStation() = default;
-    void RequestVsync(CallbackType type, const std::shared_ptr<VsyncCallback>& vsyncCallback);
-    void RemoveCallback(CallbackType type, const std::shared_ptr<VsyncCallback>& vsyncCallback);
+    void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
+    void RemoveCallback();
     void SetIsMainHandlerAvailable(bool available)
     {
         isMainHandlerAvailable_ = available;
+    }
+
+    void SetVsyncEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& eventHandler)
+    {
+        vsyncHandler_ = eventHandler;
     }
 
 private:
@@ -47,22 +52,21 @@ private:
     static void OnVsync(int64_t nanoTimestamp, void* client);
     void VsyncCallbackInner(int64_t nanoTimestamp);
     void OnVsyncTimeOut();
-    AppExecFwk::EventHandler::Callback vsyncTimeoutCallback_ = std::bind(&VsyncStation::OnVsyncTimeOut, this);
-    const std::string VSYNC_THREAD_ID = "vsync_thread";
-    std::shared_ptr<AppExecFwk::EventHandler> vsyncHandler_ = nullptr;
+
     std::mutex mtx_;
-    bool hasRequestedVsync_ = false;
-    bool isMainHandlerAvailable_ = false;
     uint32_t vsyncCount_ = 0;
-    std::map<CallbackType, std::unordered_set<std::shared_ptr<VsyncCallback>>> vsyncCallbacks_ = {
-        {CallbackType::CALLBACK_INPUT, {}},
-        {CallbackType::CALLBACK_FRAME, {}},
-    };
+    bool hasRequestedVsync_ = false;
+    bool hasInitVsyncReceiver_ = false;
+    bool isMainHandlerAvailable_ = true;
+    const std::string VSYNC_THREAD_ID = "vsync_thread";
+    std::shared_ptr<OHOS::Rosen::VSyncReceiver> receiver_ = nullptr;
+    std::unordered_set<std::shared_ptr<VsyncCallback>> vsyncCallbacks_;
     VSyncReceiver::FrameCallback frameCallback_ = {
         .userData_ = this,
         .callback_ = OnVsync,
     };
-    std::shared_ptr<OHOS::Rosen::VSyncReceiver> receiver_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> vsyncHandler_ = nullptr;
+    AppExecFwk::EventHandler::Callback vsyncTimeoutCallback_ = std::bind(&VsyncStation::OnVsyncTimeOut, this);
 };
 } // namespace Rosen
 } // namespace OHOS
