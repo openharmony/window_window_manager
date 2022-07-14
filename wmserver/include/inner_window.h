@@ -28,13 +28,10 @@ public:
     virtual void Destroy() = 0;
 };
 
-class PlaceholderWindowListener : public IWindowLifeCycle, public ITouchOutsideListener, public IInputEventListener {
+class PlaceholderWindowListener : public IWindowLifeCycle, public ITouchOutsideListener {
 public:
     // touch outside listener
     virtual void OnTouchOutside() const;
-    // input event listener
-    virtual void OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent);
-    virtual void OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     // lifecycle listener
     virtual void AfterUnfocused();
     // lifecycle do nothing
@@ -44,6 +41,14 @@ public:
     virtual void AfterInactive() {};
 };
 
+class PlaceholderInputEventConsumer : public IInputEventConsumer {
+public:
+    ~PlaceholderInputEventConsumer() override = default;
+    virtual bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const override;
+    virtual bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
+    virtual bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const override;
+};
+
 class PlaceHolderWindow : public IInnerWindow {
 WM_DECLARE_SINGLE_INSTANCE(PlaceHolderWindow);
 public:
@@ -51,12 +56,14 @@ public:
     virtual void Destroy();
 
 private:
-    void RegitsterWindowListener();
-    void UnRegitsterWindowListener();
+    void RegisterWindowListener();
+    void UnRegisterWindowListener();
+    void SetInputEventConsumer();
 
 private:
     sptr<OHOS::Rosen::Window> window_;
-    sptr<PlaceholderWindowListener> listener_;
+    sptr<PlaceholderWindowListener> windowListener_;
+    std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
 };
 
 class DividerWindow : public IInnerWindow {

@@ -1486,11 +1486,6 @@ void WindowImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer
     inputEventConsumer_ = inputEventConsumer;
 }
 
-void WindowImpl::AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener)
-{
-    InputTransferStation::GetInstance().SetInputListener(GetWindowId(), inputEventListener);
-}
-
 void WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
     if (listener == nullptr) {
@@ -1618,30 +1613,6 @@ void WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& liste
         return;
     }
     displayMoveListeners_.erase(iter);
-}
-
-void WindowImpl::RegisterInputEventListener(const sptr<IInputEventListener>& listener)
-{
-    if (listener == nullptr) {
-        return;
-    }
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (std::find(inputEventListeners_.begin(), inputEventListeners_.end(), listener) != inputEventListeners_.end()) {
-        WLOGFE("Listener already registered");
-        return;
-    }
-    inputEventListeners_.emplace_back(listener);
-}
-
-void WindowImpl::UnregisterInputEventListener(const sptr<IInputEventListener>& listener)
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = std::find(inputEventListeners_.begin(), inputEventListeners_.end(), listener);
-    if (iter == inputEventListeners_.end()) {
-        WLOGFE("could not find the listener");
-        return;
-    }
-    inputEventListeners_.erase(iter);
 }
 
 void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
@@ -1830,9 +1801,6 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
     if (inputEventConsumer != nullptr) {
         WLOGFI("Transfer back key event to inputEventConsumer");
         isConsumed = inputEventConsumer->OnInputEvent(keyEvent);
-    } else if (!inputEventListeners_.empty()) {
-        WLOGFI("inputEventListeners_ is not empty");
-        return;
     } else if (uiContent_ != nullptr) {
         WLOGFI("Transfer back key event to uiContent");
         isConsumed = uiContent_->ProcessBackPressed();
@@ -1864,7 +1832,6 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
 
 void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    NotifyKeyEvent(keyEvent);
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
     WLOGFI("KeyCode: %{public}d, action: %{public}d", keyCode, keyAction);
@@ -2223,7 +2190,6 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
         WLOGFI("update pointer event for stretchable window");
         UpdatePointerEventForStretchableWindow(pointerEvent);
     }
-    NotifyPointEvent(pointerEvent);
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -2444,38 +2410,6 @@ void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
         for (auto& listener : windowChangeListeners) {
             if (listener != nullptr) {
                 listener->OnSizeChange(rect, reason);
-            }
-        }
-    });
-}
-
-void WindowImpl::NotifyKeyEvent(std::shared_ptr<MMI::KeyEvent> &keyEvent)
-{
-    std::vector<sptr<IInputEventListener>> inputEventListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        inputEventListeners = inputEventListeners_;
-    }
-    PostListenerTask([this, inputEventListeners, keyEvent]() mutable {
-        for (auto& listener : inputEventListeners) {
-            if (listener != nullptr) {
-                listener->OnKeyEvent(keyEvent);
-            }
-        }
-    });
-}
-
-void WindowImpl::NotifyPointEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
-{
-    std::vector<sptr<IInputEventListener>> inputEventListeners;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        inputEventListeners = inputEventListeners_;
-    }
-    PostListenerTask([this, inputEventListeners, pointerEvent]() mutable {
-        for (auto& listener : inputEventListeners) {
-            if (listener != nullptr) {
-                listener->OnPointerInputEvent(pointerEvent);
             }
         }
     });
