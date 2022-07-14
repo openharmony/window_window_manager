@@ -12,14 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "zidl/display_manager_agent_stub.h"
-#include "ipc_skeleton.h"
-#include "marshalling_helper.h"
-#include "window_manager_hilog.h"
 
-namespace OHOS {
-namespace Rosen {
+#include <string>
+#include <vector>
+
+#include "display_info.h"
+#include "dm_common.h"
+#include "marshalling_helper.h"
+#include "screen_info.h"
+#include "screen_manager/screen_types.h"
+#include "window_manager_hilog.h"
+#include "zidl/display_manager_agent_interface.h"
+
+namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerAgentStub"};
 }
@@ -112,5 +118,4 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
     }
     return 0;
 }
-} // namespace Rosen
-} // namespace OHOS
+} // namespace OHOS::Rosen

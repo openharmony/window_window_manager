@@ -16,20 +16,18 @@
 #ifndef FRAMEWORKS_DM_TEST_UT_SCREEN_MANAGER_UTILS_H
 #define FRAMEWORKS_DM_TEST_UT_SCREEN_MANAGER_UTILS_H
 
-#include <securec.h>
+#include <cstdint>
 
 #include "display.h"
 #include "display_manager.h"
-#include "dm_common.h"
+#include "iosfwd"
+#include "refbase.h"
 #include "screen.h"
 #include "screen_manager.h"
-#include "window_manager_hilog.h"
-#include "unique_fd.h"
-#include "core/ui/rs_surface_node.h"
-#include "core/ui/rs_display_node.h"
+#include "string"
+#include "surface.h"
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 class ScreenManagerUtils {
 public:
     bool CreateSurface();
@@ -40,7 +38,6 @@ public:
     const float defaultDensity_ = 2.0;
     const int32_t defaultFlags_ = 0;
 };
-} // namespace Rosen
-} // namespace OHOS
+} // namespace OHOS::Rosen
 
 #endif // FRAMEWORKS_DM_TEST_UT_SCREEN_MANAGER_UTILS_H

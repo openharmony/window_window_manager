@@ -12,20 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "test_utils.h"
 
 #include <accesstoken_kit.h>
-#include <nativetoken_kit.h>
 #include <token_setproc.h>
+#include "access_token.h"
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 void TestUtils::InjectTokenInfoByHapName(int userID, const std::string& bundleName, int instIndex)
 {
     Security::AccessToken::AccessTokenID tokenId =
         Security::AccessToken::AccessTokenKit::GetHapTokenID(userID, bundleName, instIndex);
     SetSelfTokenID(tokenId);
 }
-} // Rosen
-} // OHOS
+} // namespace OHOS::Rosen

@@ -16,11 +16,10 @@
 #ifndef OHOS_ROSEN_WM_MATH_H
 #define OHOS_ROSEN_WM_MATH_H
 
-#include <limits>
 #include <cmath>
+#include <limits>
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 namespace MathHelper {
 constexpr float PI = 3.14159265f;
 constexpr float INF = std::numeric_limits<float>::infinity();
@@ -217,6 +216,5 @@ Vector2 Transform(const Vector2& vec, const Matrix3& mat);
 // Transform a Vector3 in 3D world by matrix4
 Vector3 Transform(const Vector3& vec, const Matrix4& mat);
 } // namespace TransformHelper
-} // namespace OHOS
-} // namespace Rosen
+} // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WM_MATH_H
