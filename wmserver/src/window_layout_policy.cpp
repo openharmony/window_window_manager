@@ -346,8 +346,7 @@ void WindowLayoutPolicy::UpdateClientRectAndResetReason(const sptr<WindowNode>& 
             "%{public}u", node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, reason);
         node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
     }
-    if ((reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::DRAG_END) &&
-        (node->GetWindowType() != WindowType::WINDOW_TYPE_DOCK_SLICE)) {
+    if ((reason != WindowSizeChangeReason::MOVE) && (node->GetWindowType() != WindowType::WINDOW_TYPE_DOCK_SLICE)) {
         node->ResetWindowSizeChangeReason();
     }
 }
@@ -947,7 +946,7 @@ bool WindowLayoutPolicy::IsFullScreenRecentWindowExist(const std::vector<sptr<Wi
 void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
 {
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT ||
-        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::TRANSFORM) {
+        node->GetWindowProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
         WLOGFI("not need to update bounds");
         return;
     }
