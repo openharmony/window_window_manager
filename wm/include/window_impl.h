@@ -172,7 +172,6 @@ public:
     virtual void StartMove() override;
 
     virtual WMError RequestFocus() const override;
-    virtual void AddInputEventListener(const std::shared_ptr<MMI::IInputEventConsumer>& inputEventListener) override;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
 
     virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
@@ -185,8 +184,6 @@ public:
     virtual void UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
     virtual void RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
     virtual void UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
-    virtual void RegisterInputEventListener(const sptr<IInputEventListener>& listener) override;
-    virtual void UnregisterInputEventListener(const sptr<IInputEventListener>& listener) override;
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     virtual void RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     virtual void UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
@@ -212,15 +209,6 @@ public:
     void UpdateDisplayId(DisplayId from, DisplayId to);
     void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info);
     void UpdateActiveStatus(bool isActive);
-    void NotifyOutsidePressed();
-    void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
-    void NotifyKeyEvent(std::shared_ptr<MMI::KeyEvent> &keyEvent);
-    void NotifyPointEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
-    void NotifyDisplayMoveChange(DisplayId from, DisplayId to);
-    void NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
-    void NotifyModeChange(WindowMode mode);
-    void NotifyDragEvent(const PointInfo& point, DragEvent event);
     void NotifyTouchOutside();
     void NotifyScreenshot();
 
@@ -341,6 +329,12 @@ private:
             CALL_LIFECYCLE_LISTENER(ForegroundInvalidMode, lifecycleListeners);
         });
     }
+    void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
+    void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    void NotifyDisplayMoveChange(DisplayId from, DisplayId to);
+    void NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
+    void NotifyModeChange(WindowMode mode);
+    void NotifyDragEvent(const PointInfo& point, DragEvent event);
     void DestroyFloatingWindow();
     void DestroySubWindow();
     void SetDefaultOption(); // for api7
@@ -404,7 +398,6 @@ private:
     std::vector<sptr<IWindowDragListener>> windowDragListeners_;
     std::vector<sptr<IDisplayMoveListener>> displayMoveListeners_;
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners_;
-    std::vector<sptr<IInputEventListener>> inputEventListeners_;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
     sptr<IAnimationTransitionController> animationTranistionController_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
