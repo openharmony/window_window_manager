@@ -18,7 +18,7 @@
 namespace OHOS::Rosen {
 bool DisplayInfo::Marshalling(Parcel &parcel) const
 {
-    return parcel.WriteUint64(id_) && parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
+    return parcel.WriteString(name_) && parcel.WriteUint64(id_) && parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteInt32(width_) && parcel.WriteInt32(height_) &&
         parcel.WriteUint32(refreshRate_) && parcel.WriteUint64(screenId_) &&
         parcel.WriteFloat(virtualPixelRatio_) && parcel.WriteFloat(xDpi_) && parcel.WriteFloat(yDpi_) &&
@@ -36,7 +36,8 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
     uint32_t type = (uint32_t)DisplayType::DEFAULT;
     uint32_t rotation;
     uint32_t orientation;
-    bool res = parcel.ReadUint64(displayInfo->id_) && parcel.ReadUint32(type) &&
+    bool res = parcel.ReadString(displayInfo->name_) &&
+        parcel.ReadUint64(displayInfo->id_) && parcel.ReadUint32(type) &&
         parcel.ReadInt32(displayInfo->width_) && parcel.ReadInt32(displayInfo->height_) &&
         parcel.ReadUint32(displayInfo->refreshRate_) && parcel.ReadUint64(displayInfo->screenId_) &&
         parcel.ReadFloat(displayInfo->virtualPixelRatio_) &&
