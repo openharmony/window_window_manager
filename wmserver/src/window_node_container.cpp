@@ -21,6 +21,7 @@
 #include <display_power_mgr_client.h>
 #include <hitrace_meter.h>
 #include <power_mgr_client.h>
+#include "transaction/rs_transaction.h"
 
 #include "common_event_manager.h"
 #include "dm_common.h"
@@ -1178,6 +1179,7 @@ void WindowNodeContainer::TraverseAndUpdateWindowState(WindowState state, int32_
     for (auto& node : rootNodes) {
         UpdateWindowState(node, topPriority, state);
     }
+    RSTransaction::FlushImplicitTransaction();
 }
 
 void WindowNodeContainer::UpdateWindowState(sptr<WindowNode> node, int32_t topPriority, WindowState state)
@@ -1192,6 +1194,10 @@ void WindowNodeContainer::UpdateWindowState(sptr<WindowNode> node, int32_t topPr
                 node->GetWindowToken()->UpdateWindowState(state);
             }
             HandleKeepScreenOn(node, state);
+            auto surfaceNode = node->surfaceNode_;
+            if (surfaceNode) {
+                surfaceNode->SetVisible(state == WindowState::STATE_FROZEN ? false : true);
+            }
         }
     }
     for (auto& childNode : node->children_) {
