@@ -165,13 +165,41 @@ public:
      * @return sptr<Window> Return the window instance founded
      */
     static sptr<Window> Find(const std::string& windowName);
+    /**
+     * @brief Get the final show window by context. Its implemented in api8
+     *
+     * @param context Indicates the context on which the window depends
+     * @return sptr<Window>
+     */
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
+    /**
+     * @brief Get the final show window by id. Its implemented in api8
+     *
+     * @param mainWinId main window id?
+     * @return sptr<Window>
+     */
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
+    /**
+     * @brief Get the all sub windows by parent
+     *
+     * @param parentId parent window id
+     * @return std::vector<sptr<Window>>
+     */
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parentId);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
+    /**
+     * @brief Get the window show rect
+     *
+     * @return Rect window rect
+     */
     virtual Rect GetRect() const = 0;
     virtual Rect GetRequestRect() const = 0;
+    /**
+     * @brief Get the window type
+     *
+     * @return WindowType window type
+     */
     virtual WindowType GetType() const = 0;
     virtual WindowMode GetMode() const = 0;
     virtual WindowBlurLevel GetWindowBackgroundBlur() const = 0;
@@ -185,9 +213,33 @@ public:
     virtual WMError SetTouchable(bool isTouchable) = 0;
     virtual bool GetTouchable() const = 0;
     virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) const = 0;
+    /**
+     * @brief judge this window is full screen.
+     *
+     * @return true If SetFullScreen(true) is called , return true.
+     * @return false default return false
+     */
     virtual bool IsFullScreen() const = 0;
+    /**
+     * @brief judge window layout is full screen
+     *
+     * @return true this window layout is full screen
+     * @return false this window layout is not full screen
+     */
     virtual bool IsLayoutFullScreen() const = 0;
+    /**
+     * @brief Set the Window Type
+     *
+     * @param type window type
+     * @return WMError
+     */
     virtual WMError SetWindowType(WindowType type) = 0;
+    /**
+     * @brief Set the Window Mode
+     *
+     * @param mode window mode
+     * @return WMError
+     */
     virtual WMError SetWindowMode(WindowMode mode) = 0;
     virtual WMError SetWindowBackgroundBlur(WindowBlurLevel level) = 0;
     virtual void SetAlpha(float alpha) = 0;
@@ -196,16 +248,66 @@ public:
     virtual WMError AddWindowFlag(WindowFlag flag) = 0;
     virtual WMError RemoveWindowFlag(WindowFlag flag) = 0;
     virtual WMError SetWindowFlags(uint32_t flags) = 0;
+    /**
+     * @brief Set the System Bar(include status bar and nav bar) Property
+     *
+     * @param type WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_BAR
+     * @param property system bar prop,include content color, background color
+     * @return WMError
+     */
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) = 0;
+    /**
+     * @brief Get the Avoid Area By Type object
+     *
+     * @param type avoid area type.@see reference
+     * @param avoidArea
+     * @return WMError
+     */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) = 0;
+    /**
+     * @brief Set this window layout full screen, with hide status bar and nav bar above on this window
+     *
+     * @param status
+     * @return WMError
+     */
     virtual WMError SetLayoutFullScreen(bool status) = 0;
+    /**
+     * @brief Set this window full screen, with hide status bar and nav bar
+     *
+     * @param status if true, hide status bar and nav bar; Otherwise, show status bar and nav bar
+     * @return WMError
+     */
     virtual WMError SetFullScreen(bool status) = 0;
+    /**
+     * @brief destroy window
+     *
+     * @return WMError
+     */
     virtual WMError Destroy() = 0;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) = 0;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false) = 0;
-
+    /**
+     * @brief move the window to (x, y)
+     *
+     * @param x
+     * @param y
+     * @return WMError
+     */
     virtual WMError MoveTo(int32_t x, int32_t y) = 0;
+    /**
+     * @brief resize the window instance (w,h)
+     *
+     * @param width
+     * @param height
+     * @return WMError
+     */
     virtual WMError Resize(uint32_t width, uint32_t height) = 0;
+    /**
+     * @brief Set the screen always on
+     *
+     * @param keepScreenOn
+     * @return WMError
+     */
     virtual WMError SetKeepScreenOn(bool keepScreenOn) = 0;
     virtual bool IsKeepScreenOn() const = 0;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) = 0;
@@ -218,7 +320,6 @@ public:
     virtual WMError SetCallingWindow(uint32_t windowId) = 0;
     virtual void SetPrivacyMode(bool isPrivacyMode) = 0;
     virtual bool IsPrivacyMode() const = 0;
-    virtual void DisableAppWindowDecor() = 0;
 
     virtual WMError RequestFocus() const = 0;
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;
@@ -229,7 +330,11 @@ public:
     virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
     virtual void RequestFrame() = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
-
+    /**
+     * @brief register window lifecycle listener.
+     *
+     * @param listener
+     */
     virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
     virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
     virtual void UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
@@ -251,6 +356,16 @@ public:
     virtual void RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
     virtual void UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
+    /**
+     * @brief set window ui content
+     *
+     * @param contentInfo content info path
+     * @param engine
+     * @param storage
+     * @param isDistributed
+     * @param ability
+     * @return WMError
+     */
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isDistributed = false, AppExecFwk::Ability* ability = nullptr) = 0;
     virtual std::string GetContentInfo() = 0;
@@ -263,11 +378,45 @@ public:
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) = 0;
     virtual void GetRequestedTouchHotAreas(std::vector<Rect>& rects) const = 0;
 
+    /**
+     * @brief disable main window decoration. It must be callled before loadContent.
+     *
+     */
+    virtual void DisableAppWindowDecor() = 0;
+    /**
+     * @brief return window decoration is enabled. It is called by ACE
+     *
+     * @return true means window decoration is enabled. Otherwise disabled
+     */
     virtual bool IsDecorEnable() const = 0;
+    /**
+     * @brief maximize the main window. It is called by ACE when maximize button is clicked.
+     *
+     * @return WMError
+     */
     virtual WMError Maximize() = 0;
+    /**
+     * @brief minimize the main window. It is called by ACE when minimize button is clicked.
+     *
+     * @return WMError
+     */
     virtual WMError Minimize() = 0;
+    /**
+     * @brief recovery the main window. It is called by ACE when recovery button is clicked.
+     *
+     * @return WMError
+     */
     virtual WMError Recover() = 0;
+    /**
+     * @brief close the main window. It is called by ACE when close button is clicked.
+     *
+     * @return WMError
+     */
     virtual WMError Close() = 0;
+    /**
+     * @brief start move main window. It is called by ACE when title is moved.
+     *
+     */
     virtual void StartMove() = 0;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) = 0;
 
@@ -277,6 +426,11 @@ public:
     virtual ColorSpace GetColorSpace() = 0;
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+    /**
+     * @brief window snapshot
+     *
+     * @return std::shared_ptr<Media::PixelMap> snapshot pixel
+     */
     virtual std::shared_ptr<Media::PixelMap> Snapshot() = 0;
 };
 }
