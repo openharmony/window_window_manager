@@ -603,15 +603,18 @@ NativeValue* JsWindow::OnResize(NativeEngine& engine, NativeCallbackInfo& info)
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    uint32_t width = 0;
+    int32_t width = 0;
     if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[0], width)) {
         WLOGFE("[NAPI]Failed to convert parameter to width");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-
-    uint32_t height = 0;
+    int32_t height = 0;
     if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[1], height)) {
         WLOGFE("[NAPI]Failed to convert parameter to height");
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (width <= 0 || height <= 0) {
+        WLOGFE("[NAPI]width or height should greater than 0!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     wptr<Window> weakToken(windowToken_);
@@ -623,7 +626,7 @@ NativeValue* JsWindow::OnResize(NativeEngine& engine, NativeCallbackInfo& info)
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
-            WMError ret = weakWindow->Resize(width, height);
+            WMError ret = weakWindow->Resize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
