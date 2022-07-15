@@ -143,6 +143,8 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
         auto srcTarget = CreateWindowAnimationTarget(srcInfo, srcNode);
         // to avoid normal animation
         srcNode->isPlayAnimationHide_ = true;
+        // update snapshot before animation
+        AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(srcNode->abilityToken_);
         windowRoot->RemoveWindowNode(srcNode->GetWindowId());
         WLOGFI("RSWindowAnimation: app transition from id:%{public}u to id:%{public}u!",
             srcNode->GetWindowId(), dstNode->GetWindowId());
@@ -178,6 +180,8 @@ WMError RemoteAnimation::NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcI
     }
     WLOGFI("RSWindowAnimation: notify animation minimize Id:%{public}u!", srcNode->GetWindowId());
     srcNode->isPlayAnimationHide_ = true;
+    // update snapshot before animation
+    AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(srcNode->abilityToken_);
     windowRoot->RemoveWindowNode(srcNode->GetWindowId());
     wptr<WindowNode> weak = srcNode;
     auto minimizeFunc = [weak]() {
@@ -209,6 +213,8 @@ WMError RemoteAnimation::NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo
     }
     WLOGFI("RSWindowAnimation: notify animation close id:%{public}u!", srcNode->GetWindowId());
     srcNode->isPlayAnimationHide_ = true;
+    // update snapshot before animation
+    AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(srcNode->abilityToken_);
     windowRoot->RemoveWindowNode(srcNode->GetWindowId());
     wptr<WindowNode> weak = srcNode;
     auto closeFunc = [weak, event]() {
@@ -254,6 +260,8 @@ WMError RemoteAnimation::NotifyAnimationByHome(sptr<WindowRoot>& windowRoot)
             continue;
         }
         srcNode->isPlayAnimationHide_ = true;
+        // update snapshot before animation
+        AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(srcNode->abilityToken_);
         windowRoot->RemoveWindowNode(srcNode->GetWindowId());
         animationTargets.emplace_back(srcTarget);
     }
