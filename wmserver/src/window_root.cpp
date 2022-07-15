@@ -419,6 +419,10 @@ void WindowRoot::DestroyLeakStartingWindow()
 WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode,
     sptr<WindowNodeContainer>& container)
 {
+    if (!node->currentVisibility_) {
+        WLOGFI("window is isVisible, do not need process");
+        return WMError::WM_DO_NOTHING;
+    }
     if (WindowHelper::IsSubWindow(node->GetWindowType())) {
         if (parentNode == nullptr) {
             WLOGFE("window type is invalid");
@@ -880,7 +884,7 @@ WMError WindowRoot::RequestActiveWindow(uint32_t windowId)
         WLOGFE("window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto res =  container->SetActiveWindow(windowId, false);
+    auto res = container->SetActiveWindow(windowId, false);
     WLOGFI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
         windowId, node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
         node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
