@@ -33,7 +33,6 @@ friend class InputEventListener;
 public:
     void AddInputWindow(const sptr<Window>& window);
     void RemoveInputWindow(uint32_t windowId);
-    void SetInputListener(uint32_t windowId, const std::shared_ptr<MMI::IInputEventConsumer>& listener);
 
 private:
     sptr<WindowInputChannel> GetInputChannel(uint32_t windowId);

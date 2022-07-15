@@ -71,18 +71,6 @@ HWTEST_F(WindowInputChannelTest, HandleKeyEvent, Function | SmallTest | Level2)
     window_->ConsumeKeyEvent(keyEvent);
     inputChannel->HandleKeyEvent(keyEvent);
 }
-
-/**
- * @tc.name: SetInputListener
- * @tc.desc: set input listener when create window
- * @tc.type: FUNC
- */
-HWTEST_F(WindowInputChannelTest, SetInputListener, Function | SmallTest | Level2)
-{
-    sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window_);
-    std::shared_ptr<MMI::IInputEventConsumer> listener = std::make_shared<InputEventListener>(InputEventListener());
-    inputChannel->SetInputListener(listener);
-}
 }
 } // namespace Rosen
 } // namespace OHOS
