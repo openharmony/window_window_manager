@@ -43,7 +43,7 @@
           "samgr_standard",
           "input",
           "safwk",
-          "display_manager_native",
+          "display_manager",
           "config_policy",
           "ace_engine",
           "multimedia_image_standard"
