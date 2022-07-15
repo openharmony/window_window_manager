@@ -99,18 +99,6 @@ void InputTransferStation::RemoveInputWindow(uint32_t windowId)
     }
 }
 
-void InputTransferStation::SetInputListener(
-    uint32_t windowId, const std::shared_ptr<MMI::IInputEventConsumer>& listener)
-{
-    WLOGFI("windowId: %{public}u", windowId);
-    auto channel = GetInputChannel(windowId);
-    if (channel == nullptr) {
-        WLOGFE("WindowInputChannel is nullptr, windowId: %{public}u", windowId);
-        return;
-    }
-    channel->SetInputListener(listener);
-}
-
 sptr<WindowInputChannel> InputTransferStation::GetInputChannel(uint32_t windowId)
 {
     std::lock_guard<std::mutex> lock(mtx_);
