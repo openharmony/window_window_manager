@@ -431,6 +431,10 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId display
         WLOGFI("UpdateRSTree windowId: %{public}d, displayId: %{public}" PRIu64", isAdd: %{public}d",
             node->GetWindowId(), displayId, isAdd);
         if (isAdd) {
+            if (!node->currentVisibility_) {
+                WLOGFI("window: %{public}d is invisible, do not need update RS tree", node->GetWindowId());
+                return;
+            }
             auto& surfaceNode = node->leashWinSurfaceNode_ != nullptr ? node->leashWinSurfaceNode_ : node->surfaceNode_;
             dms.UpdateRSTree(displayId, surfaceNode, true);
             for (auto& child : node->children_) {
@@ -1299,7 +1303,7 @@ sptr<WindowNode> WindowNodeContainer::GetNextFocusableWindow(uint32_t windowId) 
     bool previousFocusedWindowFound = false;
     WindowNodeOperationFunc func = [windowId, &nextFocusableWindow, &previousFocusedWindowFound](
         sptr<WindowNode> node) {
-        if (previousFocusedWindowFound && node->GetWindowProperty()->GetFocusable()) {
+        if (previousFocusedWindowFound && node->GetWindowProperty()->GetFocusable() && node->currentVisibility_) {
             nextFocusableWindow = node;
             return true;
         }
@@ -1344,7 +1348,8 @@ sptr<WindowNode> WindowNodeContainer::GetNextActiveWindow(uint32_t windowId) con
         }
         int index = std::distance(windowNodes.begin(), iter);
         for (size_t i = static_cast<size_t>(index) + 1; i < windowNodes.size(); i++) {
-            if (windowNodes[i]->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+            if (windowNodes[i]->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE
+                || !windowNodes[i]->currentVisibility_) {
                 continue;
             }
             return windowNodes[i];
