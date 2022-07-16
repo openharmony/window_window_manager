@@ -24,6 +24,7 @@
 #include "abstract_display.h"
 #include "display_change_listener.h"
 #include "wm_single_instance.h"
+#include "window_info_queried_listener.h"
 #include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
@@ -47,6 +48,7 @@ public:
     bool SetRotationFromWindow(DisplayId displayId, Rotation targetRotation);
     void SetGravitySensorSubscriptionEnabled();
     void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
+    void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
 };
 } // namespace OHOS::Rosen
 
