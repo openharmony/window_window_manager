@@ -74,13 +74,6 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case WindowManagerMessage::TRANS_ID_SET_BACKGROUND_BLUR: {
-            uint32_t windowId = data.ReadUint32();
-            auto level = static_cast<WindowBlurLevel>(data.ReadUint32());
-            WMError errCode = SetWindowBackgroundBlur(windowId, level);
-            reply.WriteInt32(static_cast<int32_t>(errCode));
-            break;
-        }
         case WindowManagerMessage::TRANS_ID_GET_AVOID_AREA: {
             uint32_t windowId = data.ReadUint32();
             auto avoidAreaType = static_cast<AvoidAreaType>(data.ReadUint32());

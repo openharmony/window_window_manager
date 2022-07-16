@@ -74,9 +74,6 @@ size_t InitWindowOption1(WindowOption &windowOption, const uint8_t *data, size_t
     uint32_t mode;
     startPos += GetObject<uint32_t>(mode, data + startPos, size - startPos);
     windowOption.SetWindowMode(static_cast<WindowMode>(mode));
-    uint32_t level;
-    startPos += GetObject<uint32_t>(level, data + startPos, size - startPos);
-    windowOption.SetWindowBackgroundBlur(static_cast<WindowBlurLevel>(level));
     bool focusable;
     startPos += GetObject<bool>(focusable, data + startPos, size - startPos);
     windowOption.SetFocusable(focusable);

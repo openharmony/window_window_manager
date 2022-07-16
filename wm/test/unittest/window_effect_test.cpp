@@ -39,37 +39,45 @@ void WindowEffectTest::TearDown()
 namespace {
 /**
  * @tc.name: WindowEffect01
- * @tc.desc: windowOption: set window background blur / get window background blur
+ * @tc.desc: set window corner radius
  * @tc.type: FUNC
  */
 HWTEST_F(WindowEffectTest, WindowEffect01, Function | SmallTest | Level2)
 {
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
-    option->SetWindowBackgroundBlur(WindowBlurLevel::WINDOW_BLUR_LOW);
-    ASSERT_EQ(WindowBlurLevel::WINDOW_BLUR_LOW, option->GetWindowBackgroundBlur());
-    option->SetWindowBackgroundBlur(WindowBlurLevel::WINDOW_BLUR_MEDIUM);
-    ASSERT_EQ(WindowBlurLevel::WINDOW_BLUR_MEDIUM, option->GetWindowBackgroundBlur());
-    option->SetWindowBackgroundBlur(WindowBlurLevel::WINDOW_BLUR_HIGH);
-    ASSERT_EQ(WindowBlurLevel::WINDOW_BLUR_HIGH, option->GetWindowBackgroundBlur());
-    option->SetWindowBackgroundBlur(WindowBlurLevel::WINDOW_BLUR_OFF);
-    ASSERT_EQ(WindowBlurLevel::WINDOW_BLUR_OFF, option->GetWindowBackgroundBlur());
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(nullptr, window);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+
+    ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(0.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(16.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(1000.0));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetCornerRadius(-1.0));
+
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
  * @tc.name: WindowEffect02
- * @tc.desc: WindowImp: Create window with no default option, get and check Property
+ * @tc.desc: set window shadow radius
  * @tc.type: FUNC
  */
 HWTEST_F(WindowEffectTest, WindowEffect02, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
-    option->SetWindowBackgroundBlur(WindowBlurLevel::WINDOW_BLUR_LOW);
     sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(nullptr, window);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
 
-    ASSERT_EQ(WindowBlurLevel::WINDOW_BLUR_LOW, window->GetWindowBackgroundBlur());
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(0.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(16.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(1000.0));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowRadius(-1.0));
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -77,7 +85,7 @@ HWTEST_F(WindowEffectTest, WindowEffect02, Function | SmallTest | Level2)
 
 /**
  * @tc.name: WindowEffect03
- * @tc.desc: Create window with no default option, get and check Property
+ * @tc.desc: set window shadow color
  * @tc.type: FUNC
  */
 HWTEST_F(WindowEffectTest, WindowEffect03, Function | SmallTest | Level2)
@@ -85,10 +93,21 @@ HWTEST_F(WindowEffectTest, WindowEffect03, Function | SmallTest | Level2)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(nullptr, window);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
-    window->SetAlpha(0.1f);
-    ASSERT_EQ(0.1f, window->GetAlpha());
+
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#FF22EE44"));
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#22EE44"));
+    ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#ff22ee44"));
+
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("ff22ee44"));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("22ee44"));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("#ppEE44"));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("#eepp44"));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("#ffeePP44"));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("#ff22ee4422"));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetShadowColor("#ff"));
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -96,7 +115,7 @@ HWTEST_F(WindowEffectTest, WindowEffect03, Function | SmallTest | Level2)
 
 /**
  * @tc.name: WindowEffect04
- * @tc.desc: set window effect parameters throw window, and check parameters.
+ * @tc.desc: set window shadow offset
  * @tc.type: FUNC
  */
 HWTEST_F(WindowEffectTest, WindowEffect04, Function | SmallTest | Level2)
@@ -104,21 +123,27 @@ HWTEST_F(WindowEffectTest, WindowEffect04, Function | SmallTest | Level2)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowImpl> window = new WindowImpl(option);
-
+    ASSERT_NE(nullptr, window);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
 
-    EXPECT_CALL(m->Mock(), SetWindowBackgroundBlur(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->SetWindowBackgroundBlur(WindowBlurLevel::WINDOW_BLUR_LOW));
-    ASSERT_EQ(WindowBlurLevel::WINDOW_BLUR_LOW, window->GetWindowBackgroundBlur());
+    window->SetShadowOffsetX(0.0);
+    window->SetShadowOffsetX(16.0);
+    window->SetShadowOffsetX(1000.0);
+    window->SetShadowOffsetX(-1.0);
+
+    window->SetShadowOffsetY(0.0);
+    window->SetShadowOffsetY(16.0);
+    window->SetShadowOffsetY(1000.0);
+    window->SetShadowOffsetY(-1.0);
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Destroy();
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
  * @tc.name: WindowEffect05
- * @tc.desc: WindowImp: Create window with default option, get and check Property
+ * @tc.desc: set window blur radius
  * @tc.type: FUNC
  */
 HWTEST_F(WindowEffectTest, WindowEffect05, Function | SmallTest | Level2)
@@ -126,11 +151,63 @@ HWTEST_F(WindowEffectTest, WindowEffect05, Function | SmallTest | Level2)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = new WindowOption();
     sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(nullptr, window);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(""));
 
-    ASSERT_EQ(WindowBlurLevel::WINDOW_BLUR_OFF, window->GetWindowBackgroundBlur());
-    ASSERT_EQ(1.0f, window->GetAlpha());
+    ASSERT_EQ(WMError::WM_OK, window->SetBlur(0.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetBlur(16.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetBlur(1000.0));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBlur(-1.0));
+
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: WindowEffect06
+ * @tc.desc: set window backdrop blur radius
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEffectTest, WindowEffect06, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(nullptr, window);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+
+    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(0.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(16.0));
+    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(1000.0));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlur(-1.0));
+
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: WindowEffect07
+ * @tc.desc: set window backdrop blur style
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowEffectTest, WindowEffect07, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(nullptr, window);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+
+    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
+    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THIN));
+    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_REGULAR));
+    ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THICK));
+
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(-1)));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->SetBackdropBlurStyle(static_cast<WindowBlurStyle>(5)));
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());

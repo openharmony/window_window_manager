@@ -68,38 +68,6 @@ void WindowNode::SetWindowMode(WindowMode mode)
     property_->SetWindowMode(mode);
 }
 
-void WindowNode::SetWindowBackgroundBlur(WindowBlurLevel level)
-{
-    float blurRadiusX;
-    float blurRadiusY;
-    const float OFF_BLUR_RADIUS = 0.0f;
-    const float LOW_BLUR_RADIUS = 3.0f;
-    const float MEDIUM_BLUR_RADIUS = 11.0f;
-    const float HIGH_BLUR_RADIUS = 19.0f;
-
-    switch (level) {
-        case WindowBlurLevel::WINDOW_BLUR_LOW:
-            blurRadiusX = LOW_BLUR_RADIUS;
-            blurRadiusY = LOW_BLUR_RADIUS;
-            break;
-        case WindowBlurLevel::WINDOW_BLUR_MEDIUM:
-            blurRadiusX = MEDIUM_BLUR_RADIUS;
-            blurRadiusY = MEDIUM_BLUR_RADIUS;
-            break;
-        case WindowBlurLevel::WINDOW_BLUR_HIGH:
-            blurRadiusX = HIGH_BLUR_RADIUS;
-            blurRadiusY = HIGH_BLUR_RADIUS;
-            break;
-        default:
-            blurRadiusX = OFF_BLUR_RADIUS;
-            blurRadiusY = OFF_BLUR_RADIUS;
-            break;
-    }
-    property_->SetWindowBackgroundBlur(level);
-    WLOGFI("WindowEffect WindowNode Setblur X:%{public}f  Y:%{public}f!", blurRadiusX, blurRadiusY);
-    surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(blurRadiusX, blurRadiusY));
-}
-
 void WindowNode::SetBrightness(float brightness)
 {
     property_->SetBrightness(brightness);
@@ -279,11 +247,6 @@ WindowType WindowNode::GetWindowType() const
 WindowMode WindowNode::GetWindowMode() const
 {
     return property_->GetWindowMode();
-}
-
-WindowBlurLevel WindowNode::GetWindowBackgroundBlur() const
-{
-    return property_->GetWindowBackgroundBlur();
 }
 
 bool WindowNode::EnableDefaultAnimation(bool propertyEnabled, bool animationPlayed)

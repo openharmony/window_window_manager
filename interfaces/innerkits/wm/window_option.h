@@ -32,7 +32,6 @@ public:
     void SetWindowRect(const struct Rect& rect);
     void SetWindowType(WindowType type);
     void SetWindowMode(WindowMode mode);
-    void SetWindowBackgroundBlur(WindowBlurLevel level);
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
     void SetDisplayId(DisplayId displayId);
@@ -56,7 +55,6 @@ public:
     Rect GetWindowRect() const;
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;
-    WindowBlurLevel GetWindowBackgroundBlur() const;
     bool GetFocusable() const;
     bool GetTouchable() const;
     DisplayId GetDisplayId() const;
@@ -72,7 +70,6 @@ private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     WindowMode mode_ { WindowMode::WINDOW_MODE_FULLSCREEN };
-    WindowBlurLevel level_ { WindowBlurLevel::WINDOW_BLUR_OFF };
     bool focusable_ { true };
     bool touchable_ { true };
     DisplayId displayId_ { 0 };
