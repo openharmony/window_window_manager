@@ -168,6 +168,7 @@ const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
     NativeValue* OrientationInit(NativeEngine* engine);
     NativeValue* WindowStageEventTypeInit(NativeEngine* engine);
     NativeValue* WindowLayoutModeInit(NativeEngine* engine);
+    NativeValue* BlurStyleInit(NativeEngine* engine);
     bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability);
     bool ParseJsDoubleValue(NativeObject* jsObject, NativeEngine& engine, const std::string& name, double& data);
     template<class T>

@@ -70,7 +70,6 @@ public:
     virtual WMError RemoveWindow(uint32_t windowId) = 0;
     virtual WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) = 0;
     virtual WMError RequestFocus(uint32_t windowId) = 0;
-    virtual WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level) = 0;
     virtual AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
     virtual void ProcessPointDown(uint32_t windowId, bool isStartDrag) = 0;

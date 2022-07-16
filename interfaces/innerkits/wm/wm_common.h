@@ -90,11 +90,11 @@ enum WindowModeSupport : uint32_t {
                               WINDOW_MODE_SUPPORT_PIP
 };
 
-enum class WindowBlurLevel : uint32_t {
+enum class WindowBlurStyle : uint32_t {
     WINDOW_BLUR_OFF = 0,
-    WINDOW_BLUR_LOW,
-    WINDOW_BLUR_MEDIUM,
-    WINDOW_BLUR_HIGH
+    WINDOW_BLUR_THIN,
+    WINDOW_BLUR_REGULAR,
+    WINDOW_BLUR_THICK
 };
 
 enum class WindowState : uint32_t {

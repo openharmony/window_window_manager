@@ -252,6 +252,32 @@ NativeValue* WindowLayoutModeInit(NativeEngine* engine)
     return objValue;
 }
 
+NativeValue* BlurStyleInit(NativeEngine* engine)
+{
+    WLOGFI("[NAPI]BlurStyleInit");
+    if (engine == nullptr) {
+        WLOGFE("[NAPI]Engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("[NAPI]Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("OFF", CreateJsValue(*engine,
+        static_cast<int32_t>(WindowBlurStyle::WINDOW_BLUR_OFF)));
+    object->SetProperty("THIN", CreateJsValue(*engine,
+        static_cast<int32_t>(WindowBlurStyle::WINDOW_BLUR_THIN)));
+    object->SetProperty("REGULAR", CreateJsValue(*engine,
+        static_cast<int32_t>(WindowBlurStyle::WINDOW_BLUR_REGULAR)));
+    object->SetProperty("THICK", CreateJsValue(*engine,
+        static_cast<int32_t>(WindowBlurStyle::WINDOW_BLUR_THICK)));
+    return objValue;
+}
+
 NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect& rect)
 {
     NativeValue* objValue = engine.CreateObject();

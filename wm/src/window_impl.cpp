@@ -61,7 +61,6 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetRequestRect(option->GetWindowRect());
     property_->SetWindowType(option->GetWindowType());
     property_->SetWindowMode(option->GetWindowMode());
-    property_->SetWindowBackgroundBlur(option->GetWindowBackgroundBlur());
     property_->SetFullScreen(option->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     property_->SetFocusable(option->GetFocusable());
     property_->SetTouchable(option->GetTouchable());
@@ -224,11 +223,6 @@ WindowMode WindowImpl::GetMode() const
     return property_->GetWindowMode();
 }
 
-WindowBlurLevel WindowImpl::GetWindowBackgroundBlur() const
-{
-    return property_->GetWindowBackgroundBlur();
-}
-
 float WindowImpl::GetAlpha() const
 {
     return property_->GetAlpha();
@@ -369,16 +363,6 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     return WMError::WM_OK;
-}
-
-WMError WindowImpl::SetWindowBackgroundBlur(WindowBlurLevel level)
-{
-    WLOGFI("[Client] Window %{public}u blurlevel %{public}u", property_->GetWindowId(), static_cast<uint32_t>(level));
-    if (!IsWindowValid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    property_->SetWindowBackgroundBlur(level);
-    return SingletonContainer::Get<WindowAdapter>().SetWindowBackgroundBlur(property_->GetWindowId(), level);
 }
 
 void WindowImpl::SetAlpha(float alpha)
@@ -2788,6 +2772,91 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
     property_->SetAccessTokenId(accessTokenId);
     WLOGFI("Create camera float window, accessTokenId = %{public}u", accessTokenId);
     return false;
+}
+
+WMError WindowImpl::SetCornerRadius(float cornerRadius)
+{
+    WLOGFI("[Client] Window %{public}s set corner radius %{public}f", name_.c_str(), cornerRadius);
+    if (WindowHelper::LessNotEqual(cornerRadius, 0.0)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    surfaceNode_->SetCornerRadius(cornerRadius);
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::SetShadowRadius(float radius)
+{
+    WLOGFI("[Client] Window %{public}s set shadow radius %{public}f", name_.c_str(), radius);
+    if (WindowHelper::LessNotEqual(radius, 0.0)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    surfaceNode_->SetShadowRadius(radius);
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::SetShadowColor(std::string color)
+{
+    WLOGFI("[Client] Window %{public}s set shadow color %{public}s", name_.c_str(), color.c_str());
+    uint32_t colorValue;
+    if (!ColorParser::Parse(color, colorValue)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    surfaceNode_->SetShadowColor(colorValue);
+    return WMError::WM_OK;
+}
+
+void WindowImpl::SetShadowOffsetX(float offsetX)
+{
+    WLOGFI("[Client] Window %{public}s set shadow offsetX %{public}f", name_.c_str(), offsetX);
+    surfaceNode_->SetShadowOffsetX(offsetX);
+}
+
+void WindowImpl::SetShadowOffsetY(float offsetY)
+{
+    WLOGFI("[Client] Window %{public}s set shadow offsetY %{public}f", name_.c_str(), offsetY);
+    surfaceNode_->SetShadowOffsetY(offsetY);
+}
+
+WMError WindowImpl::SetBlur(float radius)
+{
+    WLOGFI("[Client] Window %{public}s set blur radius %{public}f", name_.c_str(), radius);
+    if (WindowHelper::LessNotEqual(radius, 0.0)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    surfaceNode_->SetFilter(RSFilter::CreateBlurFilter(radius, radius));
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::SetBackdropBlur(float radius)
+{
+    WLOGFI("[Client] Window %{public}s set backdrop blur radius %{public}f", name_.c_str(), radius);
+    if (WindowHelper::LessNotEqual(radius, 0.0)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(radius, radius));
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
+{
+    WLOGFI("[Client] Window %{public}s set backdrop blur style %{public}u", name_.c_str(), blurStyle);
+    if (blurStyle < WindowBlurStyle::WINDOW_BLUR_OFF || blurStyle > WindowBlurStyle::WINDOW_BLUR_THICK) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    if (blurStyle == WindowBlurStyle::WINDOW_BLUR_OFF) {
+        surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(0.0, 0.0));
+    } else {
+        auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
+        if (display == nullptr) {
+            WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
+                property_->GetWindowId());
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+        surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle),
+                                                                         display->GetVirtualPixelRatio()));
+    }
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

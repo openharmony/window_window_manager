@@ -106,13 +106,6 @@ WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type,
     return WMError::WM_OK;
 }
 
-WMError WindowAdapter::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-
-    return windowManagerServiceProxy_->SetWindowBackgroundBlur(windowId, level);
-}
-
 void WindowAdapter::ProcessPointDown(uint32_t windowId, bool isStartDrag)
 {
     INIT_PROXY_CHECK_RETURN();

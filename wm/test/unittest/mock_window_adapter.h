@@ -29,7 +29,6 @@ public:
     MOCK_METHOD1(RemoveWindow, WMError(uint32_t windowId));
     MOCK_METHOD0(ClearWindowAdapter, void());
     MOCK_METHOD1(DestroyWindow, WMError(uint32_t windowId));
-    MOCK_METHOD2(SetWindowBackgroundBlur, WMError(uint32_t windowId, WindowBlurLevel level));
     MOCK_METHOD2(UpdateProperty, WMError(sptr<WindowProperty>& windowProperty, PropertyChangeAction action));
 };
 }
