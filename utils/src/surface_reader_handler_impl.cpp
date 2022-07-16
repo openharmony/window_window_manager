@@ -12,12 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "surface_reader_handler_impl.h"
 #include "window_manager_hilog.h"
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SurfaceReaderHandlerImpl"};
 } // namespace
@@ -51,5 +49,4 @@ sptr<Media::PixelMap> SurfaceReaderHandlerImpl::GetPixelMap()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return pixelMap_;
 }
-}
-}
+} // namespace OHOS::Rosen

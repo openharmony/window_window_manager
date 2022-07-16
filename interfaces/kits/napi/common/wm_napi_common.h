@@ -16,19 +16,16 @@
 #ifndef INTERFACES_KITS_NAPI_GRAPHIC_COMMON_COMMON_H
 #define INTERFACES_KITS_NAPI_GRAPHIC_COMMON_COMMON_H
 
-#include <cstring>
+#include <cstdint>
+#include <node_api.h>
+#include <node_api_types.h>
 #include <memory>
 #include <string>
 
-#include <hilog/log.h>
-#include <napi/native_api.h>
-#include <napi/native_common.h>
-#include <napi/native_node_api.h>
-
 #include "js_native_api.h"
 #include "js_native_api_types.h"
-#include "wm_common.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, OHOS::Rosen::HILOG_DOMAIN_WINDOW,
                                                 "NapiWindowManagerCommonLayer" };

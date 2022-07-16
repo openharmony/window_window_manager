@@ -16,11 +16,14 @@
 #ifndef OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H
 #define OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H
 
+
+#include <cstdint>
 #include <iremote_stub.h>
+#include <message_option.h>
+#include <message_parcel.h>
 #include "display_manager_agent_interface.h"
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 class DisplayManagerAgentStub : public IRemoteStub<IDisplayManagerAgent> {
 public:
     DisplayManagerAgentStub() = default;
@@ -29,6 +32,5 @@ public:
     virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
         MessageOption& option) override;
 };
-} // namespace Rosen
-} // namespace OHOS
+} // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H

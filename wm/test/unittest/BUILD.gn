@@ -149,8 +149,6 @@ config("wm_unittest_common_public_config") {
     "//base/global/resource_management/interfaces/inner_api/include",
     "//third_party/node/deps/icu-small/source/common",
     "${ability_runtime_inner_api_path}/ability_manager/include",
-    "//third_party/jsoncpp/include",
-    "//third_party/json/include",
 
     # abilityContext end
   ]

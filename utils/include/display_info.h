@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_DMSERVER_DISPLAY_INFO_H
 #define FOUNDATION_DMSERVER_DISPLAY_INFO_H
 
+#include <cstdint>
 #include <parcel.h>
 
 #include "class_var_definition.h"
 #include "display.h"
 #include "dm_common.h"
+#include "noncopyable.h"
 
 namespace OHOS::Rosen {
 class DisplayInfo : public Parcelable {

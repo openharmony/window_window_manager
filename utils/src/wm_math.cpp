@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 #include "wm_math.h"
-#include <memory>
+#include <cstdlib>
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 namespace TransformHelper {
 const Matrix3 Matrix3::Identity = { {
     { 1, 0, 0 },
@@ -315,5 +314,4 @@ Vector3 Transform(const Vector3& vec, const Matrix4& mat)
     return retVal;
 }
 } // namespace TransformHelper
-} // namespace Rosen
-} // namespace OHOS
+} // namespace OHOS::Rosen

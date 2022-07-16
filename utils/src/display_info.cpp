@@ -15,6 +15,10 @@
 
 #include "display_info.h"
 
+#include <new>
+#include <parcel.h>
+
+
 namespace OHOS::Rosen {
 bool DisplayInfo::Marshalling(Parcel &parcel) const
 {

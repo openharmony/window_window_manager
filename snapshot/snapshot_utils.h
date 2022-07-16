@@ -17,11 +17,10 @@
 #define SNAPSHOT_UTILS_H
 
 #include <cstdint>
-#include <iostream>
-#include <string>
 #include <pixel_map.h>
+#include <string>
 
-#include "display_manager.h"
+#include "dm_common.h"
 
 namespace OHOS {
 struct WriteToPngParam {
