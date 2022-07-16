@@ -17,14 +17,13 @@
 #define INTERFACES_KITS_NAPI_GRAPHIC_COMMON_COMMON_H
 
 #include <cstdint>
+#include <node_api.h>
+#include <node_api_types.h>
 #include <memory>
 #include <string>
 
-#include "iosfwd"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
-#include "node_api.h"
-#include "node_api_types.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 

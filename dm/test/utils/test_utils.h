@@ -16,7 +16,7 @@
 #ifndef TEST_UTILS_H
 #define TEST_UTILS_H
 
-#include "iosfwd"
+#include <string>
 
 namespace OHOS::Rosen {
 class TestUtils {
