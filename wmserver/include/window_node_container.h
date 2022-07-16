@@ -110,8 +110,8 @@ public:
     WindowLayoutMode GetCurrentLayoutMode() const;
     void RemoveSingleUserWindowNodes(int accountId);
     WMError IsTileRectSatisfiedWithSizeLimits(sptr<WindowNode>& node);
+    bool HasPrivateWindow();
     static AnimationConfig& GetAnimationConfigRef();
-
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;

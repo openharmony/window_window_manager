@@ -78,6 +78,12 @@ static NativeValue* UnregisterDisplayManagerCallback(NativeEngine* engine, Nativ
     return (me != nullptr) ? me->OnUnregisterDisplayManagerCallback(*engine, *info) : nullptr;
 }
 
+static NativeValue* HasPrivateWindow(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
+    return (me != nullptr) ? me->OnHasPrivateWindow(*engine, *info) : nullptr;
+}
+
 private:
 std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsDisplayListener>>> jsCbMap_;
 std::mutex mtx_;
@@ -308,6 +314,29 @@ NativeValue* OnUnregisterDisplayManagerCallback(NativeEngine& engine, NativeCall
     return engine.CreateUndefined();
 }
 
+NativeValue* OnHasPrivateWindow(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    bool hasPrivateWindow = false;
+    if (info.argc != 1) {
+        return engine.CreateUndefined();
+    }
+    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
+    if (!ConvertFromJsValue(engine, info.argv[0], displayId)) {
+        WLOGFE("[NAPI]Failed to convert parameter to displayId");
+        return engine.CreateUndefined();
+    }
+    if (displayId < 0) {
+        return engine.CreateUndefined();
+    }
+    DMError errCode = SingletonContainer::Get<DisplayManager>().HasPrivateWindow(displayId, hasPrivateWindow);
+    WLOGFI("[NAPI]Display id = %{public}" PRIu64", hasPrivateWindow = %{public}u err = %{public}d",
+        static_cast<uint64_t>(displayId), hasPrivateWindow, errCode);
+    if (errCode != DMError::DM_OK) {
+        return engine.CreateUndefined();
+    }
+    return engine.CreateBoolean(hasPrivateWindow);
+}
+
 NativeValue* CreateJsDisplayArrayObject(NativeEngine& engine, std::vector<sptr<Display>>& displays)
 {
     WLOGFI("JsDisplayManager::CreateJsDisplayArrayObject is called");
@@ -381,6 +410,7 @@ NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "getDefaultDisplay", JsDisplayManager::GetDefaultDisplay);
     BindNativeFunction(*engine, *object, "getDefaultDisplaySync", JsDisplayManager::GetDefaultDisplaySync);
     BindNativeFunction(*engine, *object, "getAllDisplay", JsDisplayManager::GetAllDisplay);
+    BindNativeFunction(*engine, *object, "hasPrivateWindow", JsDisplayManager::HasPrivateWindow);
     BindNativeFunction(*engine, *object, "on", JsDisplayManager::RegisterDisplayManagerCallback);
     BindNativeFunction(*engine, *object, "off", JsDisplayManager::UnregisterDisplayManagerCallback);
     return engine->CreateUndefined();

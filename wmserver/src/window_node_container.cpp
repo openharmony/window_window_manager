@@ -1345,6 +1345,19 @@ void WindowNodeContainer::MinimizeAllAppWindows(DisplayId displayId)
     return;
 }
 
+bool WindowNodeContainer::HasPrivateWindow()
+{
+    std::vector<sptr<WindowNode>> windowNodes;
+    TraverseContainer(windowNodes);
+    for (const auto& node : windowNodes) {
+        if (node->isVisible_ && node->GetWindowProperty()->GetPrivacyMode()) {
+            WLOGFI("window name %{public}s", node->GetWindowName().c_str());
+            return true;
+        }
+    }
+    return false;
+}
+
 void WindowNodeContainer::MinimizeOldestAppWindow()
 {
     for (auto& appNode : appWindowNode_->children_) {

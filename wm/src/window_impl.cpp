@@ -1392,11 +1392,17 @@ void WindowImpl::SetPrivacyMode(bool isPrivacyMode)
 {
     property_->SetPrivacyMode(isPrivacyMode);
     surfaceNode_->SetSecurityLayer(isPrivacyMode);
+    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
 }
 
 bool WindowImpl::IsPrivacyMode() const
 {
     return property_->GetPrivacyMode();
+}
+
+void WindowImpl::SetSnapshotSkip(bool isSkip)
+{
+    surfaceNode_->SetSecurityLayer(isSkip);
 }
 
 void WindowImpl::DisableAppWindowDecor()

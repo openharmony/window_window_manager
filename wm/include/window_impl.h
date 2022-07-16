@@ -164,6 +164,7 @@ public:
     virtual bool IsPrivacyMode() const override;
     virtual void DisableAppWindowDecor() override;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
+    virtual void SetSnapshotSkip(bool isSkip) override;
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;
