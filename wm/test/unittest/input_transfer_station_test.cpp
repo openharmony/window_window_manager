@@ -67,18 +67,6 @@ HWTEST_F(InputTransferStationTest, RemoveInputWindow, Function | SmallTest | Lev
 {
     InputTransferStation::GetInstance().RemoveInputWindow(window_->GetWindowId());
 }
-
-/**
- * @tc.name: SetInputListener
- * @tc.desc: set input listener for inner window
- * @tc.type: FUNC
- */
-HWTEST_F(InputTransferStationTest, SetInputListener, Function | SmallTest | Level2)
-{
-    uint32_t windowId = 1;
-    std::shared_ptr<MMI::IInputEventConsumer> listener = std::make_shared<InputEventListener>(InputEventListener());
-    InputTransferStation::GetInstance().SetInputListener(windowId, listener);
-}
 }
 } // namespace Rosen
 } // namespace OHOS

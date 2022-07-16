@@ -29,7 +29,6 @@ public:
     virtual ~WindowInputChannel();
     void HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent);
-    void SetInputListener(const std::shared_ptr<MMI::IInputEventConsumer>& listener);
     void Destroy();
 private:
     void OnVsync(int64_t timeStamp);
@@ -41,7 +40,6 @@ private:
     std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
         std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
     static const int32_t MAX_INPUT_NUM = 100;
-    std::shared_ptr<MMI::IInputEventConsumer> inputListener_;
 };
 }
 }
