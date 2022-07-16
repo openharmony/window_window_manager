@@ -721,6 +721,28 @@ std::vector<DisplayId> DisplayManagerProxy::GetAllDisplayIds()
     return allDisplayIds;
 }
 
+DMError DisplayManagerProxy::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint64(displayId)) {
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    if (Remote()->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_HAS_PRIVATE_WINDOW),
+        data, reply, option) != ERR_NONE) {
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    hasPrivateWindow = reply.ReadBool();
+    return ret;
+}
+
 void DisplayManagerProxy::NotifyDisplayEvent(DisplayEvent event)
 {
     MessageParcel data;

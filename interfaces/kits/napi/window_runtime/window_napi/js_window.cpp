@@ -302,6 +302,13 @@ NativeValue* JsWindow::SetPreferredOrientation(NativeEngine* engine, NativeCallb
     return (me != nullptr) ? me->OnSetPreferredOrientation(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::SetSnapshotSkip(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("NAPI");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetSnapshotSkip(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGFI("[NAPI]DisableWindowDecor");
@@ -1830,6 +1837,51 @@ NativeValue* JsWindow::OnSnapshot(NativeEngine& engine, NativeCallbackInfo& info
     return result;
 }
 
+NativeValue* JsWindow::OnSetSnapshotSkip(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (info.argc < 1 || info.argc > 2) { // 2 is maximum params num
+        WLOGFE("[NAPI] inbalid param");
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool isSkip = false;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        } else {
+            isSkip = static_cast<bool>(*nativeVal);
+        }
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, isSkip, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params"));
+                return;
+            }
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "Invalidate params"));
+                return;
+            }
+
+            weakWindow->SetSnapshotSkip(isSkip);
+            task.Resolve(engine, engine.CreateUndefined());
+            WLOGFI("NAPI [%{public}u, %{public}s] set snapshotSkip end",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+        };
+
+    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
+        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::OnSetSnapshotSkip",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 NativeValue* JsWindow::OnSetOpacitySync(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (info.argc != 1 || windowToken_ == nullptr) {
@@ -2145,6 +2197,7 @@ void BindFunctions(NativeEngine& engine, NativeObject* object)
     BindNativeFunction(engine, *object, "setTouchable", JsWindow::SetTouchable);
     BindNativeFunction(engine, *object, "setTransparent", JsWindow::SetTransparent);
     BindNativeFunction(engine, *object, "setCallingWindow", JsWindow::SetCallingWindow);
+    BindNativeFunction(engine, *object, "setSnapshotSkip", JsWindow::SetSnapshotSkip);
     BindNativeFunction(engine, *object, "disableWindowDecor", JsWindow::DisableWindowDecor);
     BindNativeFunction(engine, *object, "dump", JsWindow::Dump);
     BindNativeFunction(engine, *object, "setForbidSplitMove", JsWindow::SetForbidSplitMove);

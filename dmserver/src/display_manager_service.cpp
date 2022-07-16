@@ -123,6 +123,20 @@ void DisplayManagerService::RegisterDisplayChangeListener(sptr<IDisplayChangeLis
     WLOGFI("IDisplayChangeListener registered");
 }
 
+void DisplayManagerService::RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener)
+{
+    windowInfoQueriedListener_ = listener;
+}
+
+DMError DisplayManagerService::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
+{
+    if (windowInfoQueriedListener_ != nullptr) {
+        windowInfoQueriedListener_->HasPrivateWindow(displayId, hasPrivateWindow);
+        return DMError::DM_OK;
+    }
+    return DMError::DM_ERROR_NULLPTR;
+}
+
 void DisplayManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {

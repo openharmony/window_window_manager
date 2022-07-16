@@ -315,6 +315,7 @@ public:
     virtual WMError SetCallingWindow(uint32_t windowId) = 0;
     virtual void SetPrivacyMode(bool isPrivacyMode) = 0;
     virtual bool IsPrivacyMode() const = 0;
+    virtual void SetSnapshotSkip(bool isSkip) = 0;
 
     virtual WMError RequestFocus() const = 0;
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;

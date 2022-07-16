@@ -40,6 +40,7 @@ public:
     bool CheckSizeValid(const Media::Size& size, int32_t oriHeight, int32_t oriWidth) const;
     sptr<Display> GetDefaultDisplay();
     sptr<Display> GetDisplayById(DisplayId displayId);
+    DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     bool RegisterDisplayListener(sptr<IDisplayListener> listener);
     bool UnregisterDisplayListener(sptr<IDisplayListener> listener);
     bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
@@ -379,6 +380,16 @@ std::vector<sptr<Display>> DisplayManager::GetAllDisplays()
         }
     }
     return res;
+}
+
+DMError DisplayManager::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
+{
+    return pImpl_->HasPrivateWindow(displayId, hasPrivateWindow);
+}
+
+DMError DisplayManager::Impl::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().HasPrivateWindow(displayId, hasPrivateWindow);
 }
 
 bool DisplayManager::Impl::RegisterDisplayListener(sptr<IDisplayListener> listener)
