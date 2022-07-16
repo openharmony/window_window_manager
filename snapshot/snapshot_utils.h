@@ -21,7 +21,6 @@
 #include <string>
 
 #include "dm_common.h"
-#include "iosfwd"
 
 namespace OHOS {
 struct WriteToPngParam {

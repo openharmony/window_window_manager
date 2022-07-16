@@ -16,24 +16,23 @@
 #include "snapshot_utils.h"
 
 #include <cerrno>
+#include <climits>
 #include <cstdio>
+#include <cstdlib>
 #include <ctime>
 #include <getopt.h>
 #include <hitrace_meter.h>
+#include <image_type.h>
+#include <iostream>
+#include <ostream>
+#include <pixel_map.h>
 #include <png.h>
 #include <securec.h>
 #include <string>
 #include <sys/time.h>
-#include <vector>
 
 #include "display_manager.h"
-#include "image_type.h"
-#include "iostream"
-#include "climits"
-#include "ostream"
-#include "pixel_map.h"
-#include "cstdio"
-#include "cstdlib"
+
 
 using namespace OHOS::Media;
 using namespace OHOS::Rosen;

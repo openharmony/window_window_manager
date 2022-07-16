@@ -14,16 +14,13 @@
  */
 #include "zidl/display_manager_agent_stub.h"
 
-#include <string>
 #include <vector>
 
 #include "display_info.h"
 #include "dm_common.h"
 #include "marshalling_helper.h"
 #include "screen_info.h"
-#include "screen_manager/screen_types.h"
 #include "window_manager_hilog.h"
-#include "zidl/display_manager_agent_interface.h"
 
 namespace OHOS::Rosen {
 namespace {

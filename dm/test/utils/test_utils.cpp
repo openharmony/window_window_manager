@@ -14,9 +14,9 @@
  */
 #include "test_utils.h"
 
+#include <access_token.h>
 #include <accesstoken_kit.h>
 #include <token_setproc.h>
-#include "access_token.h"
 
 namespace OHOS::Rosen {
 void TestUtils::InjectTokenInfoByHapName(int userID, const std::string& bundleName, int instIndex)

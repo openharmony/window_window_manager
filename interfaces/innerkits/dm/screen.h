@@ -16,11 +16,10 @@
 #ifndef FOUNDATION_DM_SCREEN_H
 #define FOUNDATION_DM_SCREEN_H
 
-#include <string>
-#include <vector>
-
-#include <surface.h>
 #include <screen_manager/screen_types.h>
+#include <string>
+#include <surface.h>
+#include <vector>
 
 #include "dm_common.h"
 #include "noncopyable.h"

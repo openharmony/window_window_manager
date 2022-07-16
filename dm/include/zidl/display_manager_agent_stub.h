@@ -16,12 +16,12 @@
 #ifndef OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H
 #define OHOS_ROSEN_DISPLAY_MANAGER_AGENT_STUB_H
 
-#include <iremote_stub.h>
+
 #include <cstdint>
+#include <iremote_stub.h>
+#include <message_option.h>
+#include <message_parcel.h>
 #include "display_manager_agent_interface.h"
-#include "message_option.h"
-#include "message_parcel.h"
-#include "refbase.h"
 
 namespace OHOS::Rosen {
 class DisplayManagerAgentStub : public IRemoteStub<IDisplayManagerAgent> {

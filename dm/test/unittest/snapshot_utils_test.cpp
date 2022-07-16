@@ -14,6 +14,8 @@
  */
 
 #include "snapshot_utils_test.h"
+
+#include "display_manager.h"
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 #include "snapshot_utils.h"

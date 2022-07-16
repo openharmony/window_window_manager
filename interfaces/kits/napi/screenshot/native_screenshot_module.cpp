@@ -14,23 +14,22 @@
  */
 #include "native_screenshot_module.h"
 
+#include <cinttypes>
 #include <cstddef>
 #include <cstdint>
+#include <image_type.h>
+#include <iosfwd>
+#include <js_native_api.h>
+#include <js_native_api_types.h>
 #include <memory>
+#include <napi/native_api.h>
+#include <napi/native_common.h>
 #include <string>
+#include <type_traits>
 
 #include "display_manager.h"
-#include "image_type.h"
-#include "cinttypes"
-#include "iosfwd"
-#include "js_native_api.h"
-#include "js_native_api_types.h"
-#include "napi/native_api.h"
-#include "napi/native_common.h"
-#include "new"
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
-#include "type_traits"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_napi_common.h"

@@ -17,8 +17,8 @@
 #define SURFACE_READER_HANDLER_IMPL_H
 
 #include <mutex>
-#include "pixel_map.h"
-#include "refbase.h"
+#include <pixel_map.h>
+#include <refbase.h>
 #include "surface_reader_handler.h"
 
 namespace OHOS::Rosen {

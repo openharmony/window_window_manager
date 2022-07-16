@@ -14,19 +14,17 @@
  */
 #include "display_manager_config.h"
 
+#include <climits>
 #include <cstdint>
-#include <functional>
+#include <cstdlib>
+#include <libxml/globals.h>
+#include <libxml/xmlstring.h>
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "config_policy_utils.h"
-#include "libxml/globals.h"
-#include "libxml/parser.h"
-#include "libxml/xmlstring.h"
-#include "climits"
-#include "cstdlib"
-#include "utility"
 #include "window_manager_hilog.h"
 
 

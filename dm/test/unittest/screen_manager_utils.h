@@ -17,15 +17,14 @@
 #define FRAMEWORKS_DM_TEST_UT_SCREEN_MANAGER_UTILS_H
 
 #include <cstdint>
+#include <refbase.h>
+#include <string>
+#include <surface.h>
 
 #include "display.h"
 #include "display_manager.h"
-#include "iosfwd"
-#include "refbase.h"
 #include "screen.h"
 #include "screen_manager.h"
-#include "string"
-#include "surface.h"
 
 namespace OHOS::Rosen {
 class ScreenManagerUtils {

@@ -17,9 +17,10 @@
 #define OHOS_ROSEN_DISPLAY_MANAGER_CONFIG_H
 
 #include <map>
-#include <vector>
 #include <refbase.h>
-#include "iosfwd"
+#include <string>
+#include <vector>
+
 #include "libxml/parser.h"
 
 namespace OHOS::Rosen {
