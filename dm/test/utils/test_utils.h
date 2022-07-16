@@ -18,12 +18,10 @@
 
 #include <string>
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 class TestUtils {
 public:
     static void InjectTokenInfoByHapName(int userID, const std::string& bundleName, int instIndex);
 };
-} // Rosen
-} // OHOS
+} // namespace OHOS::Rosen
 #endif // TEST_UTILS_H

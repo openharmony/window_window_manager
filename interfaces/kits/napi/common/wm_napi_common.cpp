@@ -18,8 +18,6 @@
 #include <securec.h>
 #include <string>
 
-#include <hilog/log.h>
-
 #include "accesstoken_kit.h"
 #include "bundle_constants.h"
 #include "ipc_skeleton.h"

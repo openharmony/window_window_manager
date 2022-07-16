@@ -14,7 +14,14 @@
  */
 
 #include <cstdio>
+#include <image_type.h>
+#include <iosfwd>
+#include <iostream>
+#include <memory>
+#include <ostream>
+#include <refbase.h>
 
+#include "display_manager.h"
 #include "snapshot_utils.h"
 
 using namespace OHOS;

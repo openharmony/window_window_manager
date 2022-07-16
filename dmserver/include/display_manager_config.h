@@ -17,12 +17,11 @@
 #define OHOS_ROSEN_DISPLAY_MANAGER_CONFIG_H
 
 #include <map>
+#include <refbase.h>
 #include <string>
 #include <vector>
 
-#include <refbase.h>
 #include "libxml/parser.h"
-#include "libxml/tree.h"
 
 namespace OHOS::Rosen {
 class DisplayManagerConfig : public RefBase {

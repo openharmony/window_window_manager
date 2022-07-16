@@ -15,8 +15,14 @@
 
 #include "screen.h"
 
+#include <cstdint>
+#include <new>
+#include <refbase.h>
+
+#include "class_var_definition.h"
 #include "display_manager_adapter.h"
 #include "screen_info.h"
+#include "singleton_container.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {

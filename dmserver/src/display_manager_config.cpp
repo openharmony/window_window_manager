@@ -12,13 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "display_manager_config.h"
+
+#include <climits>
+#include <cstdint>
+#include <cstdlib>
+#include <libxml/globals.h>
+#include <libxml/xmlstring.h>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "config_policy_utils.h"
 #include "window_manager_hilog.h"
 
-namespace OHOS {
-namespace Rosen {
+
+namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerConfig"};
 }
@@ -147,5 +157,4 @@ void DisplayManagerConfig::DumpConfig()
         }
     }
 }
-} // namespace Rosen
-} // namespace OHOS
+} // namespace OHOS::Rosen
