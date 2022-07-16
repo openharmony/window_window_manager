@@ -681,6 +681,9 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
         case PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG:
             ret = ret && parcel.WriteUint32(animationFlag_);
             break;
+        case PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
+            ret = ret && parcel.WriteBool(isPrivacyMode_);
+            break;
         default:
             break;
     }
@@ -741,6 +744,9 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
             SetAnimationFlag(parcel.ReadUint32());
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE:
+            SetPrivacyMode(parcel.ReadBool());
+            break;
         default:
             break;
     }

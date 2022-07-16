@@ -73,11 +73,13 @@ public:
         TRANS_ID_SCREEN_SET_COLOR_TRANSFORM,
         TRANS_ID_IS_SCREEN_ROTATION_LOCKED,
         TRANS_ID_SET_SCREEN_ROTATION_LOCKED,
+        TRANS_ID_HAS_PRIVATE_WINDOW,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) = 0;
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) = 0;
+    virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) = 0;
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
