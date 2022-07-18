@@ -129,17 +129,7 @@ WMError WindowNodeContainer::ShowStartingWindow(sptr<WindowNode>& node)
     if (res != WMError::WM_OK) {
         return res;
     }
-    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(node->GetDisplayId());
-    if (windowPair == nullptr) {
-        WLOGFE("Window pair is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
     UpdateWindowTree(node);
-    windowPair->UpdateIfSplitRelated(node);
-    if (node->IsSplitMode() || node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        RaiseSplitRelatedWindowToTop(node);
-    }
-
     displayGroupController_->PreProcessWindowNode(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     StartingWindow::UpdateRSTree(node);
     AssignZOrder();
@@ -166,17 +156,7 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
         if (res != WMError::WM_OK) {
             return res;
         }
-        auto windowPair = displayGroupController_->GetWindowPairByDisplayId(node->GetDisplayId());
-        if (windowPair == nullptr) {
-            WLOGFE("Window pair is nullptr");
-            return WMError::WM_ERROR_NULLPTR;
-        }
         UpdateWindowTree(node);
-        windowPair->UpdateIfSplitRelated(node);
-        if (node->IsSplitMode()) {
-            RaiseSplitRelatedWindowToTop(node);
-        }
-
         displayGroupController_->PreProcessWindowNode(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
         // add node on RSTree
         for (auto& displayId : node->GetShowingDisplays()) {
@@ -187,7 +167,16 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
         node->startingWindowShown_ = false;
         ReZOrderShowWhenLockedWindowIfNeeded(node);
     }
-
+    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(node->GetDisplayId());
+    if (windowPair == nullptr) {
+        WLOGFE("Window pair is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    windowPair->UpdateIfSplitRelated(node);
+    if (node->IsSplitMode()) {
+        // raise the z-order of window pair
+        RaiseSplitRelatedWindowToTop(node);
+    }
     AssignZOrder();
     layoutPolicy_->AddWindowNode(node);
     NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
