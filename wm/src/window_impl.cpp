@@ -2165,10 +2165,12 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
             MMI::PointerEvent::PointerItem pointerItem;
             if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
                 WLOGFW("Point item is invalid");
+                pointerEvent->MarkProcessed();
                 return;
             }
             if (!WindowHelper::IsPointInTargetRect(pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), GetRect())) {
                 NotifyAfterUnfocused(false);
+                pointerEvent->MarkProcessed();
                 return;
             }
         }
@@ -2184,6 +2186,7 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
     }
 
     if (IsPointerEventConsumed()) {
+        pointerEvent->MarkProcessed();
         return;
     }
     if (windowSystemConfig_.isStretchable_ && GetMode() == WindowMode::WINDOW_MODE_FLOATING) {
