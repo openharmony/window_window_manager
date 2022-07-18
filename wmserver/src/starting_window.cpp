@@ -44,6 +44,7 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(sptr<WindowTransitionInfo> inf
     }
     property->SetDisplayId(info->GetDisplayId());
     property->SetWindowType(info->GetWindowType());
+    property->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
     if (info->GetShowFlagWhenLocked()) {
         property->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     }
@@ -87,18 +88,21 @@ void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
 {
     // using snapshot to support hot start since node destroy when hide
     WM_SCOPED_TRACE("wms:DrawStartingWindow(%u)", node->GetWindowId());
-    if (!isColdStart) {
-        return;
-    }
     if (!g_hasInit) {
         surfaceDraw_.Init();
         g_hasInit = true;
+    }
+    Rect rect = node->GetWindowRect();
+    if (RemoteAnimation::CheckAnimationController() && node->leashWinSurfaceNode_) {
+        node->leashWinSurfaceNode_->SetBounds(rect.posX_, rect.posY_, -1, -1);
+    }
+    if (!isColdStart) {
+        return;
     }
     if (node->startingWinSurfaceNode_ == nullptr) {
         WLOGFE("no starting Window SurfaceNode!");
         return;
     }
-    Rect rect = node->GetWindowRect();
     if (pixelMap == nullptr) {
         surfaceDraw_.DrawBackgroundColor(node->startingWinSurfaceNode_, rect, bkgColor);
         return;
@@ -177,6 +181,11 @@ void StartingWindow::UpdateRSTree(sptr<WindowNode>& node)
                     dms.UpdateRSTree(shownDisplayId, node->leashWinSurfaceNode_, true);
                 } else { // to launcher
                     dms.UpdateRSTree(shownDisplayId, node->surfaceNode_, true);
+                }
+                for (auto& child : node->children_) {
+                    if (child->currentVisibility_) {
+                        dms.UpdateRSTree(shownDisplayId, child->surfaceNode_, true);
+                    }
                 }
             }
         }
