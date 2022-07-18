@@ -32,7 +32,7 @@ int WindowExtensionClientStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
     WLOGFI(" code is %{public}d", code);
     switch (code) {
         case TRANS_ID_ON_WINDOW_READY: {
-            std::shared_ptr<RSSurfaceNode> surfaceNode(data.ReadParcelable<RSSurfaceNode>());
+            std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
             OnWindowReady(surfaceNode);
             break;
         }
