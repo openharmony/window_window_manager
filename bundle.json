@@ -36,7 +36,7 @@
           "bundle_framework",
           "hiviewdfx_hilog_native",
           "ipc",
-          "power_manager_native",
+          "power_manager",
           "utils_base",
           "hitrace_native",
           "resource_management",
