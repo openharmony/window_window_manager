@@ -51,7 +51,6 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
         WLOGFI("dispatch keyEvent to ACE");
         window_->ConsumeKeyEvent(keyEvent);
     }
-    keyEvent->MarkProcessed();
 }
 
 void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -71,6 +70,7 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
             } else {
                 WLOGFE("WindowInputChannel is not available");
                 pointerEvent->MarkProcessed();
+                moveEvent_ = nullptr;
             }
         }
         WLOGFI("Receive move event, windowId: %{public}u, action: %{public}d",
@@ -82,7 +82,6 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         WLOGFI("Dispatch non-move event, windowId: %{public}u, action: %{public}d",
             window_->GetWindowId(), pointerEvent->GetPointerAction());
         window_->ConsumePointerEvent(pointerEvent);
-        pointerEvent->MarkProcessed();
     }
 }
 
@@ -101,7 +100,6 @@ void WindowInputChannel::OnVsync(int64_t timeStamp)
     WLOGFI("Dispatch move event, windowId: %{public}u, action: %{public}d",
         window_->GetWindowId(), pointerEvent->GetPointerAction());
     window_->ConsumePointerEvent(pointerEvent);
-    pointerEvent->MarkProcessed();
 }
 
 void WindowInputChannel::Destroy()
