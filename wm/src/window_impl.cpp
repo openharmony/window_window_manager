@@ -1044,11 +1044,6 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
     if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
-        uint32_t animationFlag = property_->GetAnimationFlag();
-        if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-            // CustomAnimation is enabled when animationTranistionController_ exists
-            animationTranistionController_->AnimationForShown();
-        }
     } else if (ret == WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE) {
         NotifyForegroundInvalidWindowMode();
     } else {
@@ -1705,6 +1700,22 @@ void WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTran
         return;
     }
     animationTranistionController_ = listener;
+    wptr<WindowProperty> propertyToken(property_);
+    wptr<IAnimationTransitionController> animationTransitionControllerToken(animationTranistionController_);
+    if (uiContent_) {
+        uiContent_->SetNextFrameLayoutCallback([propertyToken, animationTransitionControllerToken]() {
+            auto property = propertyToken.promote();
+            auto animationTransitionController = animationTransitionControllerToken.promote();
+            if (!property || !animationTransitionController) {
+                return;
+            }
+            uint32_t animationFlag = property->GetAnimationFlag();
+            if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+                // CustomAnimation is enabled when animationTranistionController_ exists
+                animationTransitionController->AnimationForShown();
+            }
+        });
+    }
 }
 
 void WindowImpl::RegisterScreenshotListener(const sptr<IScreenshotListener>& listener)
