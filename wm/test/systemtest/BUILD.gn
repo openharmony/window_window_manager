@@ -21,6 +21,7 @@ group("systemtest") {
 
   deps = [
     ":wm_window_app_floating_window_test",
+    ":wm_window_dialogwindow_test",
     ":wm_window_drag_test",
     ":wm_window_effect_test",
     ":wm_window_focus_test",
@@ -87,6 +88,19 @@ ohos_systemtest("wm_window_subwindow_test") {
 }
 
 ## SystemTest wm_window_subwindow_test }}}
+
+## SystemTest wm_window_dialogwindow_test {{{
+ohos_systemtest("wm_window_dialogwindow_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_dialogwindow_test.cpp" ]
+
+  deps = [ ":wm_systemtest_common" ]
+
+  external_deps = [ "bundle_framework:appexecfwk_base" ]
+}
+
+## SystemTest wm_window_dialogwindow_test }}}
 
 ## SystemTest wm_window_immersive_test {{{
 ohos_systemtest("wm_window_immersive_test") {

@@ -725,5 +725,12 @@ void WindowManagerService::OnScreenshot(DisplayId displayId)
         windowController_->OnScreenshot(displayId);
     });
 }
+
+WMError WindowManagerService::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken)
+{
+    return PostSyncTask([this, &windowId, targetToken]() {
+        return windowController_->BindDialogTarget(windowId, targetToken);
+    });
+}
 } // namespace Rosen
 } // namespace OHOS

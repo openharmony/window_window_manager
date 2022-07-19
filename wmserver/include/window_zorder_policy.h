@@ -43,6 +43,7 @@ private:
         { WindowType::WINDOW_TYPE_WALLPAPER,            0 },
         { WindowType::WINDOW_TYPE_DESKTOP,              1 },
         { WindowType::WINDOW_TYPE_APP_COMPONENT,        2 },
+        { WindowType::WINDOW_TYPE_DIALOG,               2 },
         { WindowType::WINDOW_TYPE_APP_LAUNCHING,        101 },
         { WindowType::WINDOW_TYPE_DOCK_SLICE,           0 },
         { WindowType::WINDOW_TYPE_PLACEHOLDER,          0 },

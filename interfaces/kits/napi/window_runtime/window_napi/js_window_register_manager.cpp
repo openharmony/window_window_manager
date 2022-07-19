@@ -36,7 +36,9 @@ JsWindowRegisterManager::JsWindowRegisterManager()
         { LIFECYCLE_EVENT_CB,          &JsWindowRegisterManager::ProcessLifeCycleEventRegister        },
         { KEYBOARD_HEIGHT_CHANGE_CB,   &JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister    },
         { TOUCH_OUTSIDE_CB,            &JsWindowRegisterManager::ProcessTouchOutsideRegister          },
-        { SCREENSHOT_EVENT_CB,         &JsWindowRegisterManager::ProcessScreenshotRegister            }
+        { SCREENSHOT_EVENT_CB,         &JsWindowRegisterManager::ProcessScreenshotRegister            },
+        { DIALOG_TARGET_TOUCH_CB,      &JsWindowRegisterManager::ProcessDialogTargetTouchRegister     },
+        { DIALOG_DEATH_RECIPIENT_CB,   &JsWindowRegisterManager::ProcessDialogDeathRecipientRegister  },
     };
     // white register list for window stage
     listenerProcess_[CaseType::CASE_STAGE] = {
@@ -174,6 +176,36 @@ bool JsWindowRegisterManager::ProcessScreenshotRegister(sptr<JsWindowListener> l
         window->RegisterScreenshotListener(thisListener);
     } else {
         window->UnregisterScreenshotListener(thisListener);
+    }
+    return true;
+}
+
+bool JsWindowRegisterManager::ProcessDialogTargetTouchRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        return false;
+    }
+    sptr<IDialogTargetTouchListener> thisListener(listener);
+    if (isRegister) {
+        window->RegisterDialogTargetTouchListener(thisListener);
+    } else {
+        window->UnregisterDialogTargetTouchListener(thisListener);
+    }
+    return true;
+}
+
+bool JsWindowRegisterManager::ProcessDialogDeathRecipientRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        return false;
+    }
+    sptr<IDialogDeathRecipientListener> thisListener(listener);
+    if (isRegister) {
+        window->RegisterDialogDeathRecipientListener(thisListener);
+    } else {
+        window->UnregisterDialogDeathRecipientListener(thisListener);
     }
     return true;
 }

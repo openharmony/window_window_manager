@@ -262,5 +262,11 @@ WMError WindowAdapter::UpdateRsTree(uint32_t windowId, bool isAdd)
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     return windowManagerServiceProxy_->UpdateRsTree(windowId, isAdd);
 }
+
+WMError WindowAdapter::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    return windowManagerServiceProxy_->BindDialogTarget(windowId, targetToken);
+}
 } // namespace Rosen
 } // namespace OHOS

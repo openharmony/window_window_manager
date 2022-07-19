@@ -47,6 +47,8 @@ private:
     bool ProcessSystemBarChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
     bool ProcessTouchOutsideRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
     bool ProcessScreenshotRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
+    bool ProcessDialogTargetTouchRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
+    bool ProcessDialogDeathRecipientRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister);
     using Func_t = bool(JsWindowRegisterManager::*)(sptr<JsWindowListener>, sptr<Window> window, bool);
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;

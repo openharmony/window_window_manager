@@ -67,6 +67,7 @@ public:
     Orientation GetWindowPreferredOrientation(DisplayId displayId);
     void OnScreenshot(DisplayId displayId);
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const;
+    WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken);
 
 private:
     uint32_t GenWindowId();

@@ -514,6 +514,12 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
     }
 
     auto parentNode = GetWindowNode(parentId);
+
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        sptr<WindowNode> callerNode = FindDialogCallerNode(node->GetWindowType(), node->dialogTargetToken_);
+        parentNode = (callerNode != nullptr) ? callerNode : nullptr;
+    }
+
     WMError res = container->AddWindowNode(node, parentNode);
     if (!WindowHelper::IsSystemWindow(node->GetWindowType())) {
         DestroyLeakStartingWindow();
@@ -664,6 +670,7 @@ WMError WindowRoot::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
 WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     auto node = GetWindowNode(windowId);
+    auto token = node->abilityToken_;
     if (node == nullptr) {
         WLOGFW("Window mode is destroyed or not created");
         return WMError::WM_OK;
@@ -692,6 +699,10 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
                 if (node != nullptr) {
                     HandleKeepScreenOn(id, false);
                     DestroyWindowInner(node);
+                }
+                if ((node != nullptr) && (node->abilityToken_ != token) &&
+                    (node->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
+                    node->GetWindowToken()->NotifyDestroy();
                 }
             }
             return res;
@@ -1354,6 +1365,51 @@ WMError WindowRoot::UpdateRsTree(uint32_t windowId, bool isAdd)
     }
     RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
+}
+
+sptr<WindowNode> WindowRoot::FindDialogCallerNode(WindowType type, sptr<IRemoteObject> token)
+{
+    if (type != WindowType::WINDOW_TYPE_DIALOG) {
+        return nullptr;
+    }
+
+    auto iter = std::find_if(windowNodeMap_.begin(), windowNodeMap_.end(),
+        [token](const std::map<uint32_t, sptr<WindowNode>>::value_type& pair) {
+            if (WindowHelper::IsMainWindow(pair.second->GetWindowType())) {
+                return pair.second->abilityToken_ == token;
+            }
+            return false;
+        });
+    if (iter == windowNodeMap_.end()) {
+        WLOGFI("cannot find windowNode");
+        return nullptr;
+    }
+    return iter->second;
+}
+
+bool WindowRoot::CheckMultiDialogWindows(WindowType type, sptr<IRemoteObject> token)
+{
+    if (type != WindowType::WINDOW_TYPE_DIALOG) {
+        return false;
+    }
+
+    sptr<WindowNode> newCaller, oriCaller;
+
+    newCaller = FindDialogCallerNode(type, token);
+    if (newCaller == nullptr) {
+        return false;
+    }
+
+    for (auto& iter : windowNodeMap_) {
+        if (iter.second->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+            oriCaller = FindDialogCallerNode(iter.second->GetWindowType(), iter.second->dialogTargetToken_);
+            if (oriCaller == newCaller) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 } // namespace Rosen
 } // namespace OHOS
