@@ -447,8 +447,7 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
     WLOGFI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
         node->GetWindowId(), node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
         node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
-    if (WindowHelper::IsMainWindow(node->GetWindowType()) &&
-        node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (WindowHelper::IsRotatableWindow(node->GetWindowType(), node->GetWindowMode())) {
         DisplayManagerServiceInner::GetInstance().
             SetOrientationFromWindow(node->GetDisplayId(), node->GetRequestedOrientation());
     }
@@ -540,7 +539,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
     }
     container->DropShowWhenLockedWindowIfNeeded(node);
     UpdateFocusWindowWithWindowRemoved(node, container);
-    UpdateActiveWindowWithWindowRemoved(node, container);
+    auto nextOrientationWindow = UpdateActiveWindowWithWindowRemoved(node, container);
     UpdateBrightnessWithWindowRemoved(windowId, container);
     WMError res = container->RemoveWindowNode(node);
     if (res == WMError::WM_OK) {
@@ -551,6 +550,14 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
             HandleKeepScreenOn(child->GetWindowId(), false);
         }
         HandleKeepScreenOn(windowId, false);
+    }
+    while (nextOrientationWindow != nullptr && !WindowHelper::IsMainWindow(nextOrientationWindow->GetWindowType())) {
+        nextOrientationWindow = nextOrientationWindow->parent_;
+    }
+    if (nextOrientationWindow != nullptr && WindowHelper::IsRotatableWindow(
+        nextOrientationWindow->GetWindowType(), nextOrientationWindow->GetWindowMode())) {
+        DisplayManagerServiceInner::GetInstance().SetOrientationFromWindow(nextOrientationWindow->GetDisplayId(),
+            nextOrientationWindow->GetRequestedOrientation());
     }
     return res;
 }
@@ -658,7 +665,12 @@ WMError WindowRoot::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
         WLOGFE("set window mode failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return container->SetWindowMode(node, dstMode);
+    auto res = container->SetWindowMode(node, dstMode);
+    if (WindowHelper::IsRotatableWindow(node->GetWindowType(), node->GetWindowMode())) {
+        DisplayManagerServiceInner::GetInstance().
+            SetOrientationFromWindow(node->GetDisplayId(), node->GetRequestedOrientation());
+    }
+    return res;
 }
 
 WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
@@ -790,12 +802,12 @@ void WindowRoot::UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node
     }
 }
 
-void WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& node,
+sptr<WindowNode> WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& node,
     const sptr<WindowNodeContainer>& container) const
 {
     if (node == nullptr || container == nullptr) {
         WLOGFE("window is invalid");
-        return;
+        return nullptr;
     }
     uint32_t windowId = node->GetWindowId();
     uint32_t activeWindowId = container->GetActiveWindow();
@@ -807,7 +819,7 @@ void WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& nod
                                          return node->GetWindowId() == activeWindowId;
                                      });
             if (iter == node->children_.end()) {
-                return;
+                return nullptr;
             }
         }
         if (!node->children_.empty()) {
@@ -818,7 +830,7 @@ void WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& nod
         }
     } else {
         if (windowId != activeWindowId) {
-            return;
+            return nullptr;
         }
     }
     auto nextActiveWindow = container->GetNextActiveWindow(windowId);
@@ -826,6 +838,7 @@ void WindowRoot::UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& nod
         WLOGFI("adjust active window, next active window id: %{public}u", nextActiveWindow->GetWindowId());
         container->SetActiveWindow(nextActiveWindow->GetWindowId(), true);
     }
+    return nextActiveWindow;
 }
 
 void WindowRoot::UpdateBrightnessWithWindowRemoved(uint32_t windowId, const sptr<WindowNodeContainer>& container) const
@@ -888,8 +901,8 @@ WMError WindowRoot::RequestActiveWindow(uint32_t windowId)
     WLOGFI("windowId:%{public}u, name:%{public}s, orientation:%{public}u, type:%{public}u, isMainWindow:%{public}d",
         windowId, node->GetWindowName().c_str(), static_cast<uint32_t>(node->GetRequestedOrientation()),
         node->GetWindowType(), WindowHelper::IsMainWindow(node->GetWindowType()));
-    if (res == WMError::WM_OK && WindowHelper::IsMainWindow(node->GetWindowType()) &&
-        node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (res == WMError::WM_OK &&
+        WindowHelper::IsRotatableWindow(node->GetWindowType(), node->GetWindowMode())) {
         DisplayManagerServiceInner::GetInstance().
             SetOrientationFromWindow(node->GetDisplayId(), node->GetRequestedOrientation());
     }
