@@ -247,5 +247,43 @@ void JsWindowListener::OnScreenshot()
     AsyncTask::Schedule("JsWindowListener::OnScreenshot",
         *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
+
+void JsWindowListener::OnDialogTargetTouch()
+{
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [self = wptr<JsWindowListener>(this)] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            auto thisListener = self.promote();
+            if (thisListener == nullptr) {
+                WLOGFE("[NAPI]this listener is nullptr");
+                return;
+            }
+            thisListener->CallJsMethod(DIALOG_TARGET_TOUCH_CB.c_str(), nullptr, 0);
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsWindowListener::OnDialogTargetTouch",
+        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
+
+void JsWindowListener::OnDialogDeathRecipient()
+{
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
+        [self = wptr<JsWindowListener>(this)] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            auto thisListener = self.promote();
+            if (thisListener == nullptr) {
+                WLOGFE("[NAPI]this listener is nullptr");
+                return;
+            }
+            thisListener->CallJsMethod(DIALOG_DEATH_RECIPIENT_CB.c_str(), nullptr, 0);
+        }
+    );
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JsWindowListener::OnDialogDeathRecipient",
+        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+}
 } // namespace Rosen
 } // namespace OHOS

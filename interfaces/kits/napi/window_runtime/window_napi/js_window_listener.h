@@ -39,6 +39,8 @@ const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
 const std::string TOUCH_OUTSIDE_CB = "touchOutside";
 const std::string SCREENSHOT_EVENT_CB = "screenshotEvent";
+const std::string DIALOG_TARGET_TOUCH_CB = "dialogTargetTouch";
+const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -46,7 +48,9 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWindowLifeCycle,
                          public IOccupiedAreaChangeListener,
                          public ITouchOutsideListener,
-                         public IScreenshotListener {
+                         public IScreenshotListener,
+                         public IDialogTargetTouchListener,
+                         public IDialogDeathRecipientListener {
 public:
     JsWindowListener(NativeEngine* engine, std::shared_ptr<NativeReference> callback)
         : engine_(engine), jsCallBack_(callback), weakRef_(wptr<JsWindowListener> (this)) {}
@@ -62,6 +66,8 @@ public:
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) override;
     void OnTouchOutside() const override;
     void OnScreenshot() override;
+    void OnDialogTargetTouch() override;
+    void OnDialogDeathRecipient() override;
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
 private:
     void LifeCycleCallBack(LifeCycleEventType eventType);

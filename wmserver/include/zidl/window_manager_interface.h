@@ -61,6 +61,7 @@ public:
         TRANS_ID_GET_ANIMATION_CALLBACK,
         TRANS_ID_UPDATE_AVOIDAREA_LISTENER,
         TRANS_ID_UPDATE_RS_TREE,
+        TRANS_ID_BIND_DIALOG_TARGET,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -92,6 +93,7 @@ public:
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback) = 0;
     virtual WMError UpdateAvoidAreaListener(uint32_t windowId, bool haveListener) = 0;
     virtual WMError UpdateRsTree(uint32_t windowId, bool isAdd) = 0;
+    virtual WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken) = 0;
 };
 }
 }

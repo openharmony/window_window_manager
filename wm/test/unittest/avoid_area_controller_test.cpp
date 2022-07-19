@@ -70,6 +70,7 @@ public:
     }
     void NotifyTouchOutside() override {}
     void NotifyScreenshot() override {}
+    void NotifyDestroy(void) override {}
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override {}
     RunnableFuture<AvoidArea> statusBarAvoidAreaFuture_;
     RunnableFuture<AvoidArea> keyboardAvoidAreaFuture_;

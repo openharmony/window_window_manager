@@ -114,6 +114,7 @@ public:
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_ = nullptr;
     std::shared_ptr<RSSurfaceNode> startingWinSurfaceNode_ = nullptr;
+    sptr<IRemoteObject> dialogTargetToken_ = nullptr;
     sptr<IRemoteObject> abilityToken_ = nullptr;
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
     int32_t priority_ { 0 };

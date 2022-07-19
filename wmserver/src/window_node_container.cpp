@@ -483,7 +483,8 @@ const std::vector<uint32_t>& WindowNodeContainer::Destroy()
 sptr<WindowNode> WindowNodeContainer::FindRoot(WindowType type) const
 {
     if (WindowHelper::IsAppWindow(type) || type == WindowType::WINDOW_TYPE_DOCK_SLICE ||
-        type == WindowType::WINDOW_TYPE_APP_COMPONENT || type == WindowType::WINDOW_TYPE_PLACEHOLDER) {
+        type == WindowType::WINDOW_TYPE_APP_COMPONENT || type == WindowType::WINDOW_TYPE_PLACEHOLDER ||
+        type == WindowType::WINDOW_TYPE_DIALOG) {
         return appWindowNode_;
     }
     if (WindowHelper::IsBelowSystemWindow(type)) {

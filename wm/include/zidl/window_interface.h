@@ -59,6 +59,7 @@ public:
     virtual void NotifyTouchOutside() = 0;
     virtual void NotifyScreenshot() = 0;
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+    virtual void NotifyDestroy(void) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
