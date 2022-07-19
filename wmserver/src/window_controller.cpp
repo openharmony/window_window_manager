@@ -474,6 +474,10 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
         WLOGFW("could not find window");
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (!node->currentVisibility_) {
+        WLOGFE("this window is not visibile and not in window tree, windowId: %{public}u", windowId);
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
 
     if (isStartDrag) {
         WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
