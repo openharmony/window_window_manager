@@ -15,8 +15,7 @@
 
 #include "window_accessibility_controller.h"
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowAccessibilityController)
 WindowAccessibilityController::WindowAccessibilityController()
 {
@@ -33,5 +32,4 @@ void WindowAccessibilityController::SetAnchorOffset(int32_t deltaX, int32_t delt
 void WindowAccessibilityController::OffWindowZoom()
 {
 }
-} // namespace Rosen
-} // namespace OHOS
+} // namespace OHOS::Rosen

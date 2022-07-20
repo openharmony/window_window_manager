@@ -19,8 +19,7 @@
 #include <cstdint>
 #include "wm_single_instance.h"
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 class WindowAccessibilityController {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowAccessibilityController);
 public:
@@ -31,6 +30,5 @@ private:
     WindowAccessibilityController();
     ~WindowAccessibilityController() = default;
 };
-} // namespace Rosen
-} // namespace OHOS
+} // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_ACCESSIBILITY_CONTROLLER_H
