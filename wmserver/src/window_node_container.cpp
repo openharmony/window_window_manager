@@ -182,7 +182,6 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     layoutPolicy_->AddWindowNode(node);
     NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_ADD);
     DumpScreenWindowTree();
-    NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     UpdateCameraFloatWindowStatus(node, true);
     if (WindowHelper::IsAppWindow(node->GetWindowType())) {
         backupWindowIds_.clear();
@@ -295,7 +294,6 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node)
     }
     NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_REMOVE);
     DumpScreenWindowTree();
-    NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     RecoverScreenDefaultOrientationIfNeed(node->GetDisplayId());
     UpdateCameraFloatWindowStatus(node, false);
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
@@ -612,8 +610,6 @@ WMError WindowNodeContainer::SetFocusWindow(uint32_t windowId)
     }
     UpdateFocusStatus(focusedWindow_, false);
     focusedWindow_ = windowId;
-    sptr<WindowNode> node = FindWindowNodeById(windowId);
-    NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
     UpdateFocusStatus(focusedWindow_, true);
     return WMError::WM_OK;
 }
@@ -1001,78 +997,6 @@ void WindowNodeContainer::RaiseWindowToTop(uint32_t windowId, std::vector<sptr<W
         windowNodes.erase(iter);
         UpdateWindowTree(node);
         WLOGFI("raise window to top %{public}u", node->GetWindowId());
-    }
-}
-
-void WindowNodeContainer::FillWindowInfo(sptr<WindowInfo>& windowInfo, const sptr<WindowNode>& node) const
-{
-    if (windowInfo == nullptr) {
-        WLOGFE("windowInfo is null");
-        return;
-    }
-    windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
-    windowInfo->windowRect_ = node->GetWindowRect();
-    windowInfo->focused_ = node->GetWindowId() == focusedWindow_;
-    windowInfo->displayId_ = node->GetDisplayId();
-    windowInfo->mode_ = node->GetWindowMode();
-    windowInfo->type_ = node->GetWindowType();
-    auto property = node->GetWindowProperty();
-    if (property != nullptr) {
-        windowInfo->isDecorEnable_ = property->GetDecorEnable();
-    }
-}
-
-void WindowNodeContainer::NotifyAccessibilityWindowInfo(const sptr<WindowNode>& node, WindowUpdateType type) const
-{
-    if (node == nullptr) {
-        WLOGFE("window node is null");
-        return;
-    }
-    bool isNeedNotify = false;
-    switch (type) {
-        case WindowUpdateType::WINDOW_UPDATE_ADDED:
-            if (node->currentVisibility_) {
-                isNeedNotify = true;
-            }
-            break;
-        case WindowUpdateType::WINDOW_UPDATE_FOCUSED:
-            if (node->GetWindowId() == focusedWindow_) {
-                isNeedNotify = true;
-            }
-            break;
-        case WindowUpdateType::WINDOW_UPDATE_REMOVED:
-            isNeedNotify = true;
-            break;
-        case WindowUpdateType::WINDOW_UPDATE_PROPERTY:
-            isNeedNotify = true;
-            break;
-        default:
-            break;
-    }
-    if (isNeedNotify) {
-        std::vector<sptr<WindowInfo>> windowList;
-        GetWindowList(windowList);
-        sptr<WindowInfo> windowInfo = new (std::nothrow) WindowInfo();
-        sptr<AccessibilityWindowInfo> accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
-        if (windowInfo != nullptr && accessibilityWindowInfo != nullptr) {
-            FillWindowInfo(windowInfo, node);
-            accessibilityWindowInfo->currentWindowInfo_ = windowInfo;
-            accessibilityWindowInfo->windowList_ = windowList;
-            WindowManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(accessibilityWindowInfo, type);
-        }
-    }
-}
-
-void WindowNodeContainer::GetWindowList(std::vector<sptr<WindowInfo>>& windowList) const
-{
-    std::vector<sptr<WindowNode>> windowNodes;
-    TraverseContainer(windowNodes);
-    for (auto node : windowNodes) {
-        sptr<WindowInfo> windowInfo = new (std::nothrow) WindowInfo();
-        if (windowInfo != nullptr) {
-            FillWindowInfo(windowInfo, node);
-            windowList.emplace_back(windowInfo);
-        }
     }
 }
 

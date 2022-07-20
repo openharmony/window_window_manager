@@ -84,7 +84,6 @@ public:
     void SetBrightness(uint32_t windowId, float brightness);
     void HandleKeepScreenOn(uint32_t windowId, bool requireLock);
     void UpdateFocusableProperty(uint32_t windowId);
-    WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
     void SetMaxAppWindowNumber(int windowNum);
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);

@@ -271,15 +271,15 @@ void WindowManager::Impl::NotifyAccessibilityWindowInfo(const sptr<Accessibility
         WLOGFE("windowInfo is nullptr");
         return;
     }
-    WLOGFI("NotifyAccessibilityWindowInfo: wid[%{public}d], width[%{public}d]," \
+    WLOGFI("NotifyAccessibilityWindowInfo: wid[%{public}u], width[%{public}d]," \
         "height[%{public}d], positionX[%{public}d], positionY[%{public}d]," \
         "isFocused[%{public}d], isDecorEnable[%{public}d], displayId[%{public}" PRIu64"]," \
-        "mode[%{public}d], type[%{public}d]",
+        "mode[%{public}u], type[%{public}u, updateType[%{public}d]",
         windowInfo->currentWindowInfo_->wid_, windowInfo->currentWindowInfo_->windowRect_.width_,
         windowInfo->currentWindowInfo_->windowRect_.height_, windowInfo->currentWindowInfo_->windowRect_.posX_,
         windowInfo->currentWindowInfo_->windowRect_.posY_, windowInfo->currentWindowInfo_->focused_,
         windowInfo->currentWindowInfo_->isDecorEnable_, windowInfo->currentWindowInfo_->displayId_,
-        windowInfo->currentWindowInfo_->mode_, windowInfo->currentWindowInfo_->type_);
+        windowInfo->currentWindowInfo_->mode_, windowInfo->currentWindowInfo_->type_, type);
     std::vector<sptr<IWindowUpdateListener>> windowUpdateListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);

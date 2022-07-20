@@ -420,7 +420,7 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
     sptr<WindowNodeContainer>& container)
 {
     if (!node->currentVisibility_) {
-        WLOGFI("window is isVisible, do not need process");
+        WLOGFI("window is invisible, do not need process");
         return WMError::WM_DO_NOTHING;
     }
     if (WindowHelper::IsSubWindow(node->GetWindowType())) {
@@ -1275,19 +1275,6 @@ Rect WindowRoot::GetDisplayGroupRect(DisplayId displayId) const
         return fullDisplayRect;
     }
     return container->GetDisplayGroupRect();
-}
-
-WMError WindowRoot::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
-{
-    for (auto& iter : windowNodeContainerMap_) {
-        auto container = iter.second;
-        std::vector<sptr<WindowInfo>> windowList;
-        container->GetWindowList(windowList);
-        for (auto window : windowList) {
-            windowInfo->windowList_.emplace_back(window);
-        }
-    }
-    return WMError::WM_OK;
 }
 
 void WindowRoot::SetMaxAppWindowNumber(int windowNum)
