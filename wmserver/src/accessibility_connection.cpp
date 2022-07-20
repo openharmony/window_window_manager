@@ -20,8 +20,7 @@
 #include "window_manager_agent_controller.h"
 #include "window_manager_hilog.h"
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AccessibilityConnection"};
 }
@@ -56,8 +55,6 @@ void AccessibilityConnection::NotifyAccessibilityInfo(const sptr<WindowNode>& no
                 NotifyAccessibilityWindowInfo(container, node, type);
             }
             break;
-        case WindowUpdateType::WINDOW_UPDATE_FOCUSED:
-            break;
         case WindowUpdateType::WINDOW_UPDATE_REMOVED:
             NotifyAccessibilityWindowInfo(container, node, type);
             break;
@@ -80,14 +77,12 @@ void AccessibilityConnection::NotifyAccessibilityInfo(const sptr<WindowNode>& no
 void AccessibilityConnection::NotifyAccessibilityWindowInfo(const sptr<WindowNodeContainer>& container,
     const sptr<WindowNode>& node, WindowUpdateType type) const
 {
-    std::vector<sptr<WindowInfo>> windowList;
-    GetWindowList(container, windowList);
     sptr<WindowInfo> windowInfo = new (std::nothrow) WindowInfo();
     sptr<AccessibilityWindowInfo> accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
     if (windowInfo != nullptr && accessibilityWindowInfo != nullptr) {
-        FillWindowInfo(container, windowInfo, node);
+        FillWindowInfo(node, container->GetFocusWindow(), windowInfo);
         accessibilityWindowInfo->currentWindowInfo_ = windowInfo;
-        accessibilityWindowInfo->windowList_ = windowList;
+        GetWindowList(container, accessibilityWindowInfo->windowList_);
         WindowManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(accessibilityWindowInfo, type);
     }
 }
@@ -97,21 +92,21 @@ void AccessibilityConnection::GetWindowList(const sptr<WindowNodeContainer>& con
 {
     std::vector<sptr<WindowNode>> nodes;
     container->TraverseContainer(nodes);
-    for (auto node : nodes) {
+    for (auto& node : nodes) {
         sptr<WindowInfo> windowInfo = new (std::nothrow) WindowInfo();
         if (windowInfo != nullptr) {
-            FillWindowInfo(container, windowInfo, node);
+            FillWindowInfo(node, container->GetFocusWindow(), windowInfo);
             windowList.emplace_back(windowInfo);
         }
     }
 }
 
-void AccessibilityConnection::FillWindowInfo(const sptr<WindowNodeContainer>& container,
-    sptr<WindowInfo>& windowInfo, const sptr<WindowNode>& node) const
+void AccessibilityConnection::FillWindowInfo(const sptr<WindowNode>& node, uint32_t focusedWindow,
+    sptr<WindowInfo>& windowInfo) const
 {
     windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
     windowInfo->windowRect_ = node->GetWindowRect();
-    windowInfo->focused_ = node->GetWindowId() == container->GetFocusWindow();
+    windowInfo->focused_ = node->GetWindowId() == focusedWindow;
     windowInfo->displayId_ = node->GetDisplayId();
     windowInfo->mode_ = node->GetWindowMode();
     windowInfo->type_ = node->GetWindowType();
@@ -127,19 +122,11 @@ void AccessibilityConnection::GetAccessibilityWindowInfo(sptr<AccessibilityWindo
     std::vector<DisplayId> displayIds = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
     for (DisplayId displayId : displayIds) {
         ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
-        auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
-        if (windowNodeContainers.count(screenGroupId) == 0 && windowNodeContainer != nullptr) {
-            windowNodeContainers.insert(std::make_pair(screenGroupId, windowNodeContainer));
+        auto container = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
+        if (windowNodeContainers.count(screenGroupId) == 0 && container != nullptr) {
+            windowNodeContainers.insert(std::make_pair(screenGroupId, container));
+            GetWindowList(container, windowInfo->windowList_);
         }
     }
-    for (auto iter : windowNodeContainers) {
-        auto container = iter.second;
-        std::vector<sptr<WindowInfo>> windowList;
-        GetWindowList(container, windowList);
-        for (auto window : windowList) {
-            windowInfo->windowList_.emplace_back(window);
-        }
-    }
-}
 }
 }

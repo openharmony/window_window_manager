@@ -420,7 +420,7 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
     sptr<WindowNodeContainer>& container)
 {
     if (!node->currentVisibility_) {
-        WLOGFI("window is inVisible, do not need process");
+        WLOGFI("window is invisible, do not need process");
         return WMError::WM_DO_NOTHING;
     }
     if (WindowHelper::IsSubWindow(node->GetWindowType())) {

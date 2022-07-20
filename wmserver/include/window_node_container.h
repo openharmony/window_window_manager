@@ -89,7 +89,6 @@ public:
     Rect GetDisplayGroupRect() const;
     void TraverseWindowTree(const WindowNodeOperationFunc& func, bool isFromTopToBottom = true) const;
     void UpdateSizeChangeReason(sptr<WindowNode>& node, WindowSizeChangeReason reason);
-    void GetWindowList(std::vector<sptr<WindowInfo>>& windowList) const;
     void DropShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);
 
     void SetMinimizedByOther(bool isMinimizedByOther);
@@ -150,7 +149,6 @@ private:
     void UpdateRSTreeWhenShowingDisplaysChange(sptr<WindowNode>& node,
                                                const std::vector<DisplayId>& lastShowingDisplays,
                                                const std::vector<DisplayId>& curShowingDisplays);
-    void FillWindowInfo(sptr<WindowInfo>& windowInfo, const sptr<WindowNode>& node) const;
     bool CheckWindowNodeWhetherInWindowTree(const sptr<WindowNode>& node) const;
     void UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
 

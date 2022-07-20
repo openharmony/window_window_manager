@@ -25,8 +25,7 @@
 #include "window_node_container.h"
 #include "wm_common.h"
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 class AccessibilityConnection : public RefBase {
 public:
     explicit AccessibilityConnection(sptr<WindowRoot>& root) : windowRoot_(root) {}
@@ -40,9 +39,7 @@ private:
     void NotifyAccessibilityWindowInfo(const sptr<WindowNodeContainer>& container, const sptr<WindowNode>& node,
         WindowUpdateType type) const;
     void GetWindowList(const sptr<WindowNodeContainer>& container, std::vector<sptr<WindowInfo>>& windowList) const;
-    void FillWindowInfo(const sptr<WindowNodeContainer>& container, sptr<WindowInfo>& windowInfo,
-        const sptr<WindowNode>& node) const;
+    void FillWindowInfo(const sptr<WindowNode>& node, uint32_t focusedWindow, sptr<WindowInfo>& windowInfo) const;
 };
-}
 }
 #endif // OHOS_ROSEN_ACCESSIBILITY_CONTROLLER_H
