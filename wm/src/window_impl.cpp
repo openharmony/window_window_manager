@@ -22,6 +22,7 @@
 #include <hisysevent.h>
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
+#include "xcollie/watchdog.h"
 
 #include "color_parser.h"
 #include "display_manager.h"
@@ -100,6 +101,11 @@ void WindowImpl::InitListenerHandler()
         return;
     }
     isListenerHandlerRunning_ = true;
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WM_CALLBACK_THREAD_NAME,
+        eventHandler_, WMS_WATCHDOG_CHECK_INTERVAL);
+    if (ret != 0) {
+        WLOGFE("Add watchdog thread failed");
+    }
     WLOGFD("init window callback runner success.");
 }
 
