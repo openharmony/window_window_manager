@@ -43,7 +43,6 @@ ohos_shared_library("screenrecorder_napi") {
     "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/dm:libdm",
-    "//foundation/window/window_manager/dmserver:libdms",
     "//foundation/window/window_manager/utils:libwmutil",
     "//third_party/libpng:libpng",  # png
   ]
