@@ -55,22 +55,28 @@
         ]
       },
       "build": {
-        "sub_component": [
-          "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
-          "//foundation/window/window_manager/sa_profile:wms_sa_profile",
-          "//foundation/window/window_manager/dm:libdm",
-          "//foundation/window/window_manager/dmserver:libdms",
-          "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
-          "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
-          "//foundation/window/window_manager/extension/window_extension:window_extension_module",
-          "//foundation/window/window_manager/wm:libwm",
-          "//foundation/window/window_manager/wmserver:libwms",
-          "//foundation/window/window_manager/utils:libwmutil",
-          "//foundation/window/window_manager/snapshot:snapshot_display",
-          "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi:windowstage",
-          "//foundation/window/window_manager/interfaces/kits/napi:napi_packages",
-          "//foundation/window/window_manager/resources:window_resources"
-        ],
+        "group_type": {
+          "base_group": [
+            "//foundation/window/window_manager/snapshot:snapshot_display",
+            "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi:windowstage",
+            "//foundation/window/window_manager/interfaces/kits/napi:napi_packages",
+            "//foundation/window/window_manager/resources:window_resources"
+          ],
+          "fwk_group": [
+            "//foundation/window/window_manager/interfaces/kits/js/declaration:window",
+            "//foundation/window/window_manager/dm:libdm",
+            "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",
+            "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
+            "//foundation/window/window_manager/extension/window_extension:window_extension_module",
+            "//foundation/window/window_manager/wm:libwm",
+            "//foundation/window/window_manager/utils:libwmutil"
+          ],
+          "service_group": [
+            "//foundation/window/window_manager/sa_profile:wms_sa_profile",
+            "//foundation/window/window_manager/dmserver:libdms",
+            "//foundation/window/window_manager/wmserver:libwms"
+          ]
+        },
         "inner_kits": [
           {
             "type": "so",
