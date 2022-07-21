@@ -22,7 +22,6 @@ group("systemtest") {
     ":dm_display_change_test",
     ":dm_display_minimal_test",
     ":dm_display_power_test",
-    ":dm_screen_gamut_test",
     ":dm_screen_manager_test",
     ":dm_screenshot_cmd_test",
     ":dm_screenshot_test",
