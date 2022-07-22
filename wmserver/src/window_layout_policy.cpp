@@ -961,7 +961,7 @@ bool WindowLayoutPolicy::IsFullScreenRecentWindowExist(const std::vector<sptr<Wi
     return false;
 }
 
-void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
+static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
 {
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT ||
         node->GetWindowSizeChangeReason() == WindowSizeChangeReason::TRANSFORM) {
@@ -970,7 +970,8 @@ void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const
     }
     // if start dragging, set resize gravity for surface node
     if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG_START ||
-        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG) {
+        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG ||
+        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::ROTATION) {
         if (node->surfaceNode_) {
             node->surfaceNode_->SetFrameGravity(Gravity::RESIZE);
         }
@@ -992,6 +993,45 @@ void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const
         }
     } else if (node->surfaceNode_) {
         node->surfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+    }
+}
+
+void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
+{
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT ||
+        node->GetWindowProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        WLOGFI("not need to update bounds");
+        return;
+    }
+    wptr<WindowNode> weakNode = node;
+    auto SetBoundsFunc = [weakNode, winRect, preRect]() {
+        auto winNode = weakNode.promote();
+        if (winNode == nullptr) {
+            WLOGFI("winNode is nullptr");
+            return;
+        }
+        SetBounds(winNode, winRect, preRect);
+    };
+
+    switch (node->GetWindowSizeChangeReason()) {
+        case WindowSizeChangeReason::MAXIMIZE:
+            [[fallthrough]];
+        case WindowSizeChangeReason::RECOVER: {
+            const RSAnimationTimingProtocol timingProtocol(400); // animation time
+            RSNode::Animate(timingProtocol, RSAnimationTimingCurve::EASE_OUT, SetBoundsFunc);
+            break;
+        }
+        case WindowSizeChangeReason::ROTATION: {
+            const RSAnimationTimingProtocol timingProtocol(600); // animation time
+            const RSAnimationTimingCurve curve_ = RSAnimationTimingCurve::CreateCubicCurve(
+                0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
+            RSNode::Animate(timingProtocol, curve_, SetBoundsFunc);
+            break;
+        }
+        case WindowSizeChangeReason::UNDEFINED:
+            [[fallthrough]];
+        default:
+            SetBoundsFunc();
     }
 }
 

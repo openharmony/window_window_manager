@@ -334,7 +334,7 @@ void WindowController::ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>&
         newRect = { 0, static_cast<int32_t>(height - naviBarHeight), width, naviBarHeight };
     }
     if (newRect != node->GetWindowRect()) {
-        ResizeRect(node->GetWindowId(), newRect, WindowSizeChangeReason::DRAG);
+        ResizeRect(node->GetWindowId(), newRect, WindowSizeChangeReason::ROTATION);
     }
 }
 
@@ -435,7 +435,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
         }
     } else if (reason == WindowSizeChangeReason::RESIZE) {
         newRect = { lastRect.posX_, lastRect.posY_, rect.width_, rect.height_ };
-    } else if (reason == WindowSizeChangeReason::DRAG) {
+    } else if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::ROTATION) {
         newRect = rect;
     }
     property->SetRequestRect(newRect);
@@ -520,13 +520,13 @@ void WindowController::ProcessSystemBarChange(const sptr<DisplayInfo>& displayIn
     if (statusBarNode != nullptr && statusBarNode->GetDisplayId() == displayId) {
         auto statusBarHeight = statusBarNode->GetWindowRect().height_;
         Rect newRect = { 0, 0, width, statusBarHeight };
-        ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
+        ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::ROTATION);
     }
     const auto& naviBarNode = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR]);
     if (naviBarNode != nullptr && naviBarNode->GetDisplayId() == displayId) {
         auto naviBarHeight = naviBarNode->GetWindowRect().height_;
         Rect newRect = { 0, static_cast<int32_t>(height - naviBarHeight), width, naviBarHeight };
-        ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
+        ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::ROTATION);
     }
 }
 

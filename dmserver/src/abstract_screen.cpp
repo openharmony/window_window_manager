@@ -92,6 +92,16 @@ void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& start
     rSDisplayNodeConfig_ = config;
     WLOGFI("SetDisplayOffset: posX:%{public}d, posY:%{public}d", startPoint.posX_, startPoint.posY_);
     rsDisplayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
+    uint32_t width = 0;
+    uint32_t height = 0;
+    sptr<SupportedScreenModes> abstractScreenModes = GetActiveScreenMode();
+    if (abstractScreenModes != nullptr) {
+        height = abstractScreenModes->height_;
+        width = abstractScreenModes->width_;
+    }
+    // If setDisplayOffset is not valid for SetFrame/SetBounds
+    rsDisplayNode_->SetFrame(0, 0, width, height);
+    rsDisplayNode_->SetBounds(0, 0, width, height);
     auto transactionProxy = RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
         transactionProxy->FlushImplicitTransaction();

@@ -83,6 +83,11 @@ public:
     DMError SetScreenColorTransform(ScreenId screenId);
 
 private:
+    static inline bool IsVertical(Rotation rotation)
+    {
+        return (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
+    }
+    void SetScreenRotateAnimation(sptr<AbstractScreen>& screen, ScreenId screenId, Rotation rotationAfter);
     void RegisterRsScreenConnectionChangeListener();
     void OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);

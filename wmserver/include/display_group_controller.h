@@ -74,7 +74,7 @@ private:
     void UpdateWindowDisplayId(const sptr<WindowNode>& node, DisplayId newDisplayId);
     void ClearMapOfDestroyedDisplay(DisplayId displayId);
     void ChangeToRectInDisplayGroup(const sptr<WindowNode>& node);
-
+    void UpdateNodeSizeChangeReasonWithRotation(DisplayId displayId);
     sptr<WindowNodeContainer> windowNodeContainer_;
     sptr<DisplayGroupInfo> displayGroupInfo_;
     std::map<DisplayId, sptr<WindowPair>> windowPairMap_;
