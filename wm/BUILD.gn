@@ -94,9 +94,9 @@ ohos_shared_library("libwm") {
   ]
 
   defines = []
-  if (suspend_manager_enable) {
-    external_deps += [ "suspend_manager:suspend_manager_client" ]
-    defines += [ "SUSPEND_MANAGER_ENABLE" ]
+  if (efficiency_manager_enable) {
+    external_deps += [ "efficiency_manager:suspend_manager_client" ]
+    defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
   }
 
   part_name = "window_manager"

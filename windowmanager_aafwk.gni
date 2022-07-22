@@ -18,9 +18,9 @@ ability_runtime_services_path = "${ability_runtime_path}/services"
 ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi"
 
 declare_args() {
-  suspend_manager_enable = true
+  efficiency_manager_enable = true
   if (defined(global_parts_info) &&
-      !defined(global_parts_info.resourceschedule_suspend_manager)) {
-    suspend_manager_enable = false
+      !defined(global_parts_info.resourceschedule_efficiency_manager)) {
+    efficiency_manager_enable = false
   }
 }
