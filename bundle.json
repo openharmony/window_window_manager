@@ -22,7 +22,7 @@
       ],
       "deps": {
         "components": [
-          "inputmethod_native",
+          "imf",
           "sensor",
           "ability_base",
           "graphic_standard",
