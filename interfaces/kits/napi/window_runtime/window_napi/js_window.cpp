@@ -426,15 +426,19 @@ NativeValue* JsWindow::OnResize(NativeEngine& engine, NativeCallbackInfo& info)
         WLOGFE("JsWindow windowToken_ is nullptr or params not match");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    uint32_t width = 0;
+    int32_t width = 0;
     if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[0], width)) {
         WLOGFE("Failed to convert parameter to width");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    uint32_t height = 0;
+    int32_t height = 0;
     if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[1], height)) {
         WLOGFE("Failed to convert parameter to height");
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (width <= 0 || height <= 0) {
+        WLOGFE("[NAPI]width or height should greater than 0!");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     AsyncTask::CompleteCallback complete =
@@ -444,7 +448,7 @@ NativeValue* JsWindow::OnResize(NativeEngine& engine, NativeCallbackInfo& info)
                 WLOGFE("JsWindow windowToken_ is nullptr or invalid param");
                 return;
             }
-            WMError ret = windowToken_->Resize(width, height);
+            WMError ret = windowToken_->Resize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
