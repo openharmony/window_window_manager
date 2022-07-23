@@ -268,6 +268,13 @@ NativeValue* JsWindow::SetKeepScreenOn(NativeEngine* engine, NativeCallbackInfo*
     return (me != nullptr) ? me->OnSetKeepScreenOn(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::SetWakeUpScreen(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]SetWakeUpScreen");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnSetWakeUpScreen(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::SetOutsideTouchable(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGFI("[NAPI]SetOutsideTouchable");
@@ -1543,6 +1550,30 @@ NativeValue* JsWindow::OnSetKeepScreenOn(NativeEngine& engine, NativeCallbackInf
     return result;
 }
 
+NativeValue* JsWindow::OnSetWakeUpScreen(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (info.argc != 1 || windowToken_ == nullptr) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        return engine.CreateUndefined();
+    }
+    bool wakeUp = false;
+    if (errCode == WMError::WM_OK) {
+        NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
+        if (nativeVal == nullptr) {
+            WLOGFE("[NAPI]Failed to convert parameter to keepScreenOn");
+            return engine.CreateUndefined();
+        } else {
+            wakeUp = static_cast<bool>(*nativeVal);
+        }
+    }
+
+    windowToken_->SetTurnScreenOn(wakeUp);
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] set wake up screen %{public}d end",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), wakeUp);
+    return engine.CreateUndefined();
+}
+
 NativeValue* JsWindow::OnSetOutsideTouchable(NativeEngine& engine, NativeCallbackInfo& info)
 {
     AsyncTask::CompleteCallback complete =
@@ -2450,6 +2481,7 @@ void BindFunctions(NativeEngine& engine, NativeObject* object)
     BindNativeFunction(engine, *object, "setDimBehind", JsWindow::SetDimBehind);
     BindNativeFunction(engine, *object, "setFocusable", JsWindow::SetFocusable);
     BindNativeFunction(engine, *object, "setKeepScreenOn", JsWindow::SetKeepScreenOn);
+    BindNativeFunction(engine, *object, "setWakeUpScreen", JsWindow::SetWakeUpScreen);
     BindNativeFunction(engine, *object, "setOutsideTouchable", JsWindow::SetOutsideTouchable);
     BindNativeFunction(engine, *object, "setPrivacyMode", JsWindow::SetPrivacyMode);
     BindNativeFunction(engine, *object, "setTouchable", JsWindow::SetTouchable);
