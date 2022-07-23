@@ -325,7 +325,7 @@ void WindowProxy::NotifyDestroy(void)
         return;
     }
 
-    if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_NOTIFY_OUTSIDE_PRESSED),
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_NOTIFY_DESTROY),
         data, replay, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
