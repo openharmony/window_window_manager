@@ -24,6 +24,7 @@
 #include "window_option.h"
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
+#include "napi_remote_object.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -167,6 +168,13 @@ NativeValue* JsWindow::UnregisterWindowCallback(NativeEngine* engine, NativeCall
     WLOGFI("[NAPI]UnregisterWindowCallback");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
     return (me != nullptr) ? me->OnUnregisterWindowCallback(*engine, *info) : nullptr;
+}
+
+NativeValue* JsWindow::BindDialogTarget(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]BindDialogTarget");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnBindDialogTarget(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::LoadContent(NativeEngine* engine, NativeCallbackInfo* info)
@@ -839,6 +847,64 @@ NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCa
     WLOGFI("[NAPI]Unregister end, window [%{public}u, %{public}s], type = %{public}s, callback = %{public}p",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str(), value);
     return engine.CreateUndefined();
+}
+
+NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WMError errCode = WMError::WM_OK;
+    if (windowToken_ == nullptr || info.argc < 2 || info.argc > 3) { // 2 3: invalid params nums
+        WLOGFE("[NAPI]Window is nullptr or argc is invalid: %{public}zu", info.argc);
+        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    NativeValue* value = nullptr;
+    sptr<IRemoteObject> token = nullptr;
+    if ((info.argc == 2) || (info.argc == 3)) { // 2 3: params nums
+        token = NAPI_ohos_rpc_getNativeRemoteObject(
+            reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[0]));
+        if (token == nullptr) {
+            WLOGFE("[NAPI]Callback(info->argv[0]) transfer to remoteObject fail");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        }
+
+        value = info.argv[1];
+        if (!value->IsCallable()) {
+            WLOGFE("[NAPI]Callback(info->argv[1]) is not callable");
+            errCode = WMError::WM_ERROR_INVALID_PARAM;
+        }
+    }
+
+    if (errCode == WMError::WM_OK) {
+        registerManager_->RegisterListener(windowToken_, "dialogDeathRecipient", CaseType::CASE_WINDOW, engine, value);
+    }
+
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, errCode, token](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
+                WLOGFE("[NAPI]window is nullptr or get invalid param");
+                return;
+            }
+
+            WMError ret = weakWindow->BindDialogTarget(token);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Bind Dialog Target failed"));
+            }
+
+            WLOGFI("[NAPI]BindDialogTarget end, window [%{public}u, %{public}s]",
+                weakToken->GetWindowId(), weakToken->GetWindowName().c_str());
+        };
+
+    NativeValue* result = nullptr;
+    NativeValue* lastParam = (info.argc == 2) ? nullptr :
+        (info.argv[2]->TypeOf() == NATIVE_FUNCTION ? info.argv[2] : nullptr);
+    AsyncTask::Schedule("JsWindow::OnBindDialogTarget",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
 }
 
 static void LoadContentTask(std::weak_ptr<NativeReference> contentStorage, std::string contextUrl,
@@ -2125,6 +2191,7 @@ void BindFunctions(NativeEngine& engine, NativeObject* object)
     BindNativeFunction(engine, *object, "getProperties", JsWindow::GetProperties);
     BindNativeFunction(engine, *object, "on", JsWindow::RegisterWindowCallback);
     BindNativeFunction(engine, *object, "off", JsWindow::UnregisterWindowCallback);
+    BindNativeFunction(engine, *object, "bindDialogTarget", JsWindow::BindDialogTarget);
     BindNativeFunction(engine, *object, "loadContent", JsWindow::LoadContent);
     BindNativeFunction(engine, *object, "setFullScreen", JsWindow::SetFullScreen);
     BindNativeFunction(engine, *object, "setLayoutFullScreen", JsWindow::SetLayoutFullScreen);

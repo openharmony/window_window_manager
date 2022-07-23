@@ -664,5 +664,33 @@ WMError WindowManagerProxy::UpdateRsTree(uint32_t windowId, bool isAdd)
     }
     return static_cast<WMError>(reply.ReadInt32());
 }
+
+WMError WindowManagerProxy::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (targetToken != nullptr) {
+        if (!data.WriteRemoteObject(targetToken)) {
+            WLOGFE("Write targetToken failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_BIND_DIALOG_TARGET),
+        data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
 } // namespace Rosen
 } // namespace OHOS

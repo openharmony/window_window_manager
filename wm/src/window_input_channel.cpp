@@ -41,6 +41,13 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
     }
     WLOGFI("Receive key event, windowId: %{public}u, keyCode: %{public}d",
         window_->GetWindowId(), keyEvent->GetKeyCode());
+    if (window_->GetType() == WindowType::WINDOW_TYPE_DIALOG) {
+        if (keyEvent->GetAgentWindowId() != keyEvent->GetTargetWindowId()) {
+            window_->NotifyTouchDialogTarget();
+            keyEvent->MarkProcessed();
+            return;
+        }
+    }
     bool isKeyboardEvent = IsKeyboardEvent(keyEvent);
     bool inputMethodHasProcessed = false;
     if (isKeyboardEvent) {
@@ -57,6 +64,15 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
 {
     if (pointerEvent == nullptr) {
         WLOGFE("pointerEvent is nullptr");
+        return;
+    }
+    if ((window_->GetType() == WindowType::WINDOW_TYPE_DIALOG) &&
+        (pointerEvent->GetAgentWindowId() != pointerEvent->GetTargetWindowId())) {
+        if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP ||
+            pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+            window_->NotifyTouchDialogTarget();
+        }
+        pointerEvent->MarkProcessed();
         return;
     }
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_MOVE) {

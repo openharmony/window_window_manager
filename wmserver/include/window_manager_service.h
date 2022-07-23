@@ -113,6 +113,8 @@ public:
     WMError UpdateRsTree(uint32_t windowId, bool isAdd) override;
     void OnScreenshot(DisplayId displayId);
     void OnAccountSwitched(int accountId);
+    void OnAccountSwitched(int accountId) const;
+    WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken) override;
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;

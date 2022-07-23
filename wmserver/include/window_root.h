@@ -97,6 +97,9 @@ public:
     void MinimizeTargetWindows(std::vector<uint32_t>& windowIds);
     WMError UpdateRsTree(uint32_t windowId, bool isAdd);
     void RemoveSingleUserWindowNodes(int accountId);
+    sptr<WindowNode> FindDialogCallerNode(WindowType type, sptr<IRemoteObject> token);
+    bool CheckMultiDialogWindows(WindowType type, sptr<IRemoteObject> token);
+
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);

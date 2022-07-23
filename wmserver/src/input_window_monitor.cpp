@@ -16,6 +16,7 @@
 #include "input_window_monitor.h"
 
 #include <ipc_skeleton.h>
+#include <ability_manager_client.h>
 
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
@@ -121,10 +122,17 @@ void InputWindowMonitor::UpdateDisplayInfo(const sptr<DisplayInfo>& displayInfo,
 void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>> &windowNodes,
                                              std::vector<MMI::WindowInfo>& windowsInfo)
 {
+    std::map<uint32_t, sptr<WindowNode>> dialogWindowMap;
     for (const auto& windowNode: windowNodes) {
-        if (windowTypeSkipped_.find(windowNode->GetWindowProperty()->GetWindowType()) != windowTypeSkipped_.end()) {
-            WLOGFI("window has been skipped. [id: %{public}u, type: %{public}d]", windowNode->GetWindowId(),
-                   windowNode->GetWindowProperty()->GetWindowType());
+        sptr<WindowNode> callerNode =
+            windowRoot_->FindDialogCallerNode(windowNode->GetWindowType(), windowNode->dialogTargetToken_);
+        if (callerNode != nullptr) {
+            dialogWindowMap.insert(std::make_pair(callerNode->GetWindowId(), windowNode));
+        }
+    }
+    for (const auto& windowNode: windowNodes) {
+        if (windowTypeSkipped_.find(windowNode->GetWindowType()) != windowTypeSkipped_.end()) {
+            WLOGFI("skip node[id:%{public}u, type:%{public}d]", windowNode->GetWindowId(), windowNode->GetWindowType());
             continue;
         }
         std::vector<Rect> touchHotAreas;
@@ -149,6 +157,13 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
                 static_cast<int32_t>(areaRect.width_), static_cast<int32_t>(areaRect.height_) },
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };
+        auto iter = (windowNode->GetParentId() == INVALID_WINDOW_ID) ?
+            dialogWindowMap.find(windowNode->GetWindowId()) : dialogWindowMap.find(windowNode->GetParentId());
+        if (iter != dialogWindowMap.end()) {
+            windowInfo.pid = iter->second->GetCallingPid();
+            windowInfo.uid = iter->second->GetCallingUid();
+            windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetWindowId());
+        }
         convertRectsToMmiRects(touchHotAreas, windowInfo.defaultHotAreas);
         convertRectsToMmiRects(touchHotAreas, windowInfo.pointerHotAreas);
         if (!windowNode->GetWindowProperty()->GetTouchable()) {

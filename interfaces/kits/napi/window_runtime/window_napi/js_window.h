@@ -45,6 +45,7 @@ public:
     static NativeValue* GetProperties(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RegisterWindowCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* UnregisterWindowCallback(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* BindDialogTarget(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* LoadContent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetFullScreen(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetLayoutFullScreen(NativeEngine* engine, NativeCallbackInfo* info);
@@ -95,6 +96,7 @@ private:
     NativeValue* OnGetProperties(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRegisterWindowCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnUnregisterWindowCallback(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnBindDialogTarget(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetFullScreen(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetLayoutFullScreen(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetSystemBarEnable(NativeEngine& engine, NativeCallbackInfo& info);

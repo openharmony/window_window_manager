@@ -59,6 +59,7 @@ public:
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback) override;
     WMError UpdateAvoidAreaListener(uint32_t windowId, bool haveListener) override;
     WMError UpdateRsTree(uint32_t windowId, bool isAdd) override;
+    WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken) override;
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
 };
