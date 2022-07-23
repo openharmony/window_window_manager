@@ -950,6 +950,17 @@ void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const
         WLOGFI("not need to update bounds");
         return;
     }
+    // if start dragging, set resize gravity for surface node
+    if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG_START ||
+        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG) {
+        if (node->surfaceNode_) {
+            node->surfaceNode_->SetFrameGravity(Gravity::RESIZE);
+        }
+    } else {
+        if (node->surfaceNode_) {
+            node->surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
+        }
+    }
     if (node->leashWinSurfaceNode_) {
         if (winRect != preRect) {
             // avoid animation change suddenly when client coming
