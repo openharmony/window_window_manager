@@ -19,6 +19,7 @@
 #include <refbase.h>
 #include <parcel.h>
 #include <pixel_map.h>
+#include <iremote_object.h>
 
 #include "wm_common.h"
 #include "window_option.h"
@@ -139,6 +140,16 @@ public:
 class IScreenshotListener : virtual public RefBase {
 public:
     virtual void OnScreenshot() = 0;
+};
+
+class IDialogTargetTouchListener : virtual public RefBase {
+public:
+    virtual void OnDialogTargetTouch() = 0;
+};
+
+class IDialogDeathRecipientListener : virtual public RefBase {
+public:
+    virtual void OnDialogDeathRecipient() = 0;
 };
 
 class Window : public RefBase {
@@ -315,6 +326,7 @@ public:
     virtual WMError SetCallingWindow(uint32_t windowId) = 0;
     virtual void SetPrivacyMode(bool isPrivacyMode) = 0;
     virtual bool IsPrivacyMode() const = 0;
+    virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) = 0;
 
     virtual WMError RequestFocus() const = 0;
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;
@@ -346,6 +358,11 @@ public:
     virtual void RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener) = 0;
     virtual void RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
     virtual void UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) = 0;
+    virtual void RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
+    virtual void UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) = 0;
+    virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) = 0;
+    virtual void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) = 0;
+    virtual void NotifyTouchDialogTarget() = 0;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) = 0;
     /**
      * @brief set window ui content

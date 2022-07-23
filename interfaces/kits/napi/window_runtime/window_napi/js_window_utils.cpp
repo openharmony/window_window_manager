@@ -74,6 +74,8 @@ NativeValue* WindowTypeInit(NativeEngine* engine)
         static_cast<int32_t>(ApiWindowType::TYPE_LAUNCHER_DOCK)));
     object->SetProperty("TYPE_VOICE_INTERACTION", CreateJsValue(*engine,
         static_cast<int32_t>(ApiWindowType::TYPE_VOICE_INTERACTION)));
+    object->SetProperty("TYPE_DIALOG", CreateJsValue(*engine,
+        static_cast<int32_t>(ApiWindowType::TYPE_DIALOG)));
     object->SetProperty("TYPE_POINTER", CreateJsValue(*engine,
         static_cast<int32_t>(ApiWindowType::TYPE_POINTER)));
 

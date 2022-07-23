@@ -51,6 +51,7 @@ const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::subWindowMap_;
 std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appFloatingWindowMap_;
+std::map<uint32_t, std::vector<sptr<WindowImpl>>> WindowImpl::appDialogWindowMap_;
 static int constructorCnt = 0;
 static int deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
@@ -692,6 +693,23 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
     }
 }
 
+void WindowImpl::MapDialogWindowToAppIfNeeded()
+{
+    if (GetType() != WindowType::WINDOW_TYPE_DIALOG) {
+        return;
+    }
+
+    for (auto& winPair : windowMap_) {
+        auto win = winPair.second.second;
+        if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+            context_.get() == win->GetContext().get()) {
+            appDialogWindowMap_[win->GetWindowId()].push_back(this);
+            WLOGFI("Map DialogWindow %{public}u to AppMainWindow %{public}u", GetWindowId(), win->GetWindowId());
+            return;
+        }
+    }
+}
+
 WMError WindowImpl::UpdateProperty(PropertyChangeAction action)
 {
     return SingletonContainer::Get<WindowAdapter>().UpdateProperty(property_, action);
@@ -824,10 +842,52 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
 
     MapFloatingWindowToAppIfNeeded();
 
+    MapDialogWindowToAppIfNeeded();
+
     state_ = WindowState::STATE_CREATED;
     InputTransferStation::GetInstance().AddInputWindow(this);
     needRemoveWindowInputChannel_ = true;
     return ret;
+}
+
+WMError WindowImpl::BindDialogTarget(sptr<IRemoteObject> targetToken)
+{
+    uint32_t windowId = property_->GetWindowId();
+    WMError ret = SingletonContainer::Get<WindowAdapter>().BindDialogTarget(windowId, targetToken);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("bind window failed with errCode:%{public}d", static_cast<int32_t>(ret));
+    }
+
+    return ret;
+}
+
+void WindowImpl::DestroyDialogWindow()
+{
+    // remove from appDialogWindowMap_
+    for (auto& dialogWindows: appDialogWindowMap_) {
+        for (auto iter = dialogWindows.second.begin(); iter != dialogWindows.second.end(); ++iter) {
+            if ((*iter) == nullptr) {
+                continue;
+            }
+            if ((*iter)->GetWindowId() == GetWindowId()) {
+                dialogWindows.second.erase(iter);
+                break;
+            }
+        }
+    }
+
+    // Destroy app dialog window if exist
+    if (appDialogWindowMap_.count(GetWindowId()) > 0) {
+        auto& dialogWindows = appDialogWindowMap_.at(GetWindowId());
+        for (auto iter = dialogWindows.begin(); iter != dialogWindows.end(); iter = dialogWindows.begin()) {
+            if ((*iter) == nullptr) {
+                dialogWindows.erase(iter);
+                continue;
+            }
+            (*iter)->Destroy(false);
+        }
+        appDialogWindowMap_.erase(GetWindowId());
+    }
 }
 
 void WindowImpl::DestroyFloatingWindow()
@@ -944,6 +1004,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
     windowMap_.erase(GetWindowName());
     DestroySubWindow();
     DestroyFloatingWindow();
+    DestroyDialogWindow();
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         state_ = WindowState::STATE_DESTROYED;
@@ -1719,6 +1780,46 @@ void WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>& l
         }), screenshotListeners_.end());
 }
 
+void WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (std::find(dialogTargetTouchListeners_.begin(), dialogTargetTouchListeners_.end(), listener) !=
+        dialogTargetTouchListeners_.end()) {
+        WLOGFE("Listener already registered");
+        return;
+    }
+    dialogTargetTouchListeners_.emplace_back(listener);
+}
+
+void WindowImpl::UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    dialogTargetTouchListeners_.erase(std::remove_if(dialogTargetTouchListeners_.begin(),
+        dialogTargetTouchListeners_.end(), [listener](sptr<IDialogTargetTouchListener> registeredListener) {
+            return registeredListener == listener;
+        }), dialogTargetTouchListeners_.end());
+}
+
+void WindowImpl::RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    dialogDeathRecipientListener_ = listener;
+}
+
+void WindowImpl::UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    dialogDeathRecipientListener_ = nullptr;
+}
+
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
 {
     if (handler == nullptr) {
@@ -2421,6 +2522,37 @@ void WindowImpl::NotifyTouchOutside()
     });
 }
 
+void WindowImpl::NotifyTouchDialogTarget()
+{
+    std::vector<sptr<IDialogTargetTouchListener>> dialogTargetTouchListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        dialogTargetTouchListeners = dialogTargetTouchListeners_;
+    }
+    PostListenerTask([dialogTargetTouchListeners]() {
+        for (auto& dialogTargetTouchListener : dialogTargetTouchListeners) {
+            if (dialogTargetTouchListener != nullptr) {
+                dialogTargetTouchListener->OnDialogTargetTouch();
+            }
+        }
+    });
+}
+
+void WindowImpl::NotifyDestroy()
+{
+    Destroy(false);
+    sptr<IDialogDeathRecipientListener> dialogDeathRecipientListener;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        dialogDeathRecipientListener = dialogDeathRecipientListener_;
+    }
+    PostListenerTask([dialogDeathRecipientListener]() {
+        if (dialogDeathRecipientListener != nullptr) {
+            dialogDeathRecipientListener->OnDialogDeathRecipient();
+        }
+    });
+}
+
 void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
 {
     std::vector<sptr<IWindowChangeListener>> windowChangeListeners;
@@ -2564,7 +2696,8 @@ void WindowImpl::SetDefaultOption()
         case WindowType::WINDOW_TYPE_FLOAT_CAMERA:
         case WindowType::WINDOW_TYPE_VOICE_INTERACTION:
         case WindowType::WINDOW_TYPE_LAUNCHER_DOCK:
-        case WindowType::WINDOW_TYPE_SEARCHING_BAR: {
+        case WindowType::WINDOW_TYPE_SEARCHING_BAR:
+        case WindowType::WINDOW_TYPE_DIALOG: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }

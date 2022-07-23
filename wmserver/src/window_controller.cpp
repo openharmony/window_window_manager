@@ -190,6 +190,11 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
         WLOGFE("create window failed, type is error");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
+
+    if (windowRoot_->CheckMultiDialogWindows(property->GetWindowType(), token)) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     sptr<WindowNode> node = windowRoot_->FindWindowNodeWithToken(token);
     if (node != nullptr && WindowHelper::IsMainWindow(property->GetWindowType()) && node->startingWindowShown_) {
         StartingWindow::HandleClientWindowCreate(node, window, windowId, surfaceNode, property, pid, uid);
@@ -197,11 +202,13 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
         windowRoot_->AddSurfaceNodeIdWindowNodePair(surfaceNode->GetId(), node);
         return WMError::WM_OK;
     }
+
     windowId = GenWindowId();
     sptr<WindowProperty> windowProperty = new WindowProperty(property);
     windowProperty->SetWindowId(windowId);
     node = new WindowNode(windowProperty, window, surfaceNode, pid, uid);
     node->abilityToken_ = token;
+    node->dialogTargetToken_ = token;
     UpdateWindowAnimation(node);
     WLOGFI("createWindow name:%{public}u, windowName:%{public}s",
         windowId, node->GetWindowName().c_str());
@@ -1079,6 +1086,20 @@ void WindowController::OnScreenshot(DisplayId displayId)
         return;
     }
     windowToken->NotifyScreenshot();
+}
+
+WMError WindowController::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (windowRoot_->CheckMultiDialogWindows(node->GetWindowType(), targetToken)) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    node->dialogTargetToken_ = targetToken;
+    return WMError::WM_OK;
 }
 } // namespace OHOS
 } // namespace Rosen
