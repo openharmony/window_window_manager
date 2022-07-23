@@ -179,7 +179,7 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
     RSTransaction::FlushImplicitTransaction();
 }
 
-void StartingWindow::UpdateRSTree(sptr<WindowNode>& node)
+void StartingWindow::UpdateRSTree(sptr<WindowNode>& node, const AnimationConfig& animationConfig)
 {
     auto updateRSTreeFunc = [&]() {
         auto& dms = DisplayManagerServiceInner::GetInstance();
@@ -208,13 +208,15 @@ void StartingWindow::UpdateRSTree(sptr<WindowNode>& node)
         }
     };
     static const bool IsWindowAnimationEnabled = access(DISABLE_WINDOW_ANIMATION_PATH, F_OK) == 0 ? false : true;
-    if (IsWindowAnimationEnabled && !RemoteAnimation::CheckAnimationController()) {
-        // default transition duration: 350ms
-        static const RSAnimationTimingProtocol timingProtocol(350);
-        // default transition curve: EASE OUT
-        static const Rosen::RSAnimationTimingCurve curve = Rosen::RSAnimationTimingCurve::EASE_OUT;
-        // add window with transition animation
-        RSNode::Animate(timingProtocol, curve, updateRSTreeFunc);
+    if ((IsWindowAnimationEnabled && !RemoteAnimation::CheckAnimationController())) {
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            // keyboard animation
+            RSNode::Animate(animationConfig.keyboardAnimationConfig_.durationIn_,
+                animationConfig.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
+        } else { // window animation
+            RSNode::Animate(animationConfig.windowAnimationConfig_.animationTiming_.timingProtocol_,
+                animationConfig.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc);
+        }
     } else {
         // add or remove window without animation
         updateRSTreeFunc();

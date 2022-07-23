@@ -24,10 +24,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerConfig"};
 }
 
-std::map<std::string, bool> WindowManagerConfig::enableConfig_;
-std::map<std::string, std::vector<int>> WindowManagerConfig::intNumbersConfig_;
-std::map<std::string, std::vector<float>> WindowManagerConfig::floatNumbersConfig_;
-
+std::map<std::string, WindowManagerConfig::ConfigItem> WindowManagerConfig::config_;
 
 std::string WindowManagerConfig::GetConfigPath(const std::string& configFileName)
 {
@@ -39,6 +36,55 @@ std::string WindowManagerConfig::GetConfigPath(const std::string& configFileName
         return "/system/" + configFileName;
     }
     return std::string(tmpPath);
+}
+
+void WindowManagerConfig::ReadConfig(const xmlNodePtr& rootPtr, std::map<std::string, ConfigItem>& mapValue)
+{
+    for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
+        if (!IsValidNode(*curNodePtr)) {
+            WLOGFE("[WmConfig]: invalid node!");
+            continue;
+        }
+        auto nodeName = curNodePtr->name;
+        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("maxAppWindowNumber")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("modeChangeHotZones")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("duration")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("durationIn")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("durationOut"))) {
+            std::vector<int> v;
+            ReadIntNumbersConfigInfo(curNodePtr, v);
+            mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
+            continue;
+        }
+        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("windowAnimation")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("keyboardAnimation")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("timing"))) {
+            std::map<std::string, ConfigItem> v;
+            ReadConfig(curNodePtr, v);
+            mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
+            continue;
+        }
+        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curve")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("splitRatios")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("exitSplitRatios")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("scale")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("rotation")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("translate")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("opacity")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("decor")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("minimizeByOther")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("stretchable"))) {
+            std::map<std::string, ConfigItem> p;
+            ReadProperty(curNodePtr, p);
+            if (p.size() > 0) {
+                mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetProperty(p);
+            }
+            std::vector<float> v;
+            ReadFloatNumbersConfigInfo(curNodePtr, v);
+            mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
+            continue;
+        }
+    }
 }
 
 bool WindowManagerConfig::LoadConfigXml()
@@ -59,31 +105,8 @@ bool WindowManagerConfig::LoadConfigXml()
         return false;
     }
 
-    for (xmlNodePtr curNodePtr = rootPtr->xmlChildrenNode; curNodePtr != nullptr; curNodePtr = curNodePtr->next) {
-        if (!IsValidNode(*curNodePtr)) {
-            WLOGFE("[WmConfig]: invalid node!");
-            continue;
-        }
+    ReadConfig(rootPtr, config_);
 
-        auto nodeName = curNodePtr->name;
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("decor")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("minimizeByOther")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("stretchable"))) {
-            ReadEnableConfigInfo(curNodePtr);
-            continue;
-        }
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("maxAppWindowNumber")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("modeChangeHotZones"))) {
-            ReadIntNumbersConfigInfo(curNodePtr);
-            continue;
-        }
-
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("splitRatios")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("exitSplitRatios"))) {
-            ReadFloatNumbersConfigInfo(curNodePtr);
-            continue;
-        }
-    }
     xmlFreeDoc(docPtr);
     return true;
 }
@@ -96,24 +119,30 @@ bool WindowManagerConfig::IsValidNode(const xmlNode& currNode)
     return true;
 }
 
-void WindowManagerConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
+void WindowManagerConfig::ReadProperty(const xmlNodePtr& currNode,
+    std::map<std::string, ConfigItem>& property)
 {
-    xmlChar* enable = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("enable"));
-    if (enable == nullptr) {
-        WLOGFE("[WmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
-        return;
+    ConfigItem item;
+    xmlChar* prop = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("enable"));
+    if (prop != nullptr) {
+        if (!xmlStrcmp(prop, reinterpret_cast<const xmlChar*>("true"))) {
+            item.SetValue(true);
+        } else if (!xmlStrcmp(prop, reinterpret_cast<const xmlChar*>("false"))) {
+            item.SetValue(false);
+        }
+        property["enable"] = item;
+        xmlFree(prop);
     }
 
-    std::string nodeName = reinterpret_cast<const char *>(currNode->name);
-    if (!xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("true"))) {
-        enableConfig_[nodeName] = true;
-    } else if (!xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("false"))) {
-        enableConfig_[nodeName] = false;
+    prop = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("name"));
+    if (prop != nullptr) {
+        item.SetValue(std::string(reinterpret_cast<const char*>(prop)));
+        property["name"] = item;
+        xmlFree(prop);
     }
-    xmlFree(enable);
 }
 
-void WindowManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
+void WindowManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode, std::vector<int>& intsValue)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
@@ -121,7 +150,6 @@ void WindowManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
         return;
     }
 
-    std::vector<int> numbersVec;
     std::string numbersStr = reinterpret_cast<const char*>(context);
     if (numbersStr.size() == 0) {
         xmlFree(context);
@@ -134,24 +162,19 @@ void WindowManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
             xmlFree(context);
             return;
         }
-
-        numbersVec.emplace_back(std::stoi(num));
+        intsValue.push_back(std::stoi(num));
     }
-
-    std::string nodeName = reinterpret_cast<const char *>(currNode->name);
-    intNumbersConfig_[nodeName] = numbersVec;
     xmlFree(context);
 }
 
-void WindowManagerConfig::ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode)
+void WindowManagerConfig::ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode,
+    std::vector<float>& floatsValue)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
         WLOGFE("[WmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
         return;
     }
-
-    std::vector<float> numbersVec;
     std::string numbersStr = reinterpret_cast<const char*>(context);
     if (numbersStr.size() == 0) {
         xmlFree(context);
@@ -164,46 +187,60 @@ void WindowManagerConfig::ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode)
             xmlFree(context);
             return;
         }
-        numbersVec.emplace_back(std::stof(num));
+        floatsValue.push_back(std::stof(num));
     }
-
-    std::string nodeName = reinterpret_cast<const char *>(currNode->name);
-    floatNumbersConfig_[nodeName] = numbersVec;
     xmlFree(context);
 }
 
-const std::map<std::string, bool>& WindowManagerConfig::GetEnableConfig()
+void WindowManagerConfig::DumpConfig(const std::map<std::string, ConfigItem>& config)
 {
-    return enableConfig_;
-}
-
-const std::map<std::string, std::vector<int>>& WindowManagerConfig::GetIntNumbersConfig()
-{
-    return intNumbersConfig_;
-}
-
-const std::map<std::string, std::vector<float>>& WindowManagerConfig::GetFloatNumbersConfig()
-{
-    return floatNumbersConfig_;
-}
-
-void WindowManagerConfig::DumpConfig()
-{
-    for (auto& enable : enableConfig_) {
-        WLOGFI("[WmConfig] Enable: %{public}s %{public}u", enable.first.c_str(), enable.second);
-    }
-
-    for (auto& numbers : intNumbersConfig_) {
-        WLOGFI("[WmConfig] Int numbers: %{public}s %{public}zu", numbers.first.c_str(), numbers.second.size());
-        for (auto& num : numbers.second) {
-            WLOGFI("[WmConfig] Num: %{public}d", num);
+    for (auto& conf : config) {
+        WLOGFI("[WmConfig] %{public}s", conf.first.c_str());
+        std::map<std::string, ConfigItem> propMap;
+        if (conf.second.property_) {
+            propMap = *conf.second.property_;
         }
-    }
-
-    for (auto& numbers : floatNumbersConfig_) {
-        WLOGFI("[WmConfig] Float numbers: %{public}s %{public}zu", numbers.first.c_str(), numbers.second.size());
-        for (auto& num : numbers.second) {
-            WLOGFI("[WmConfig] Num: %{public}f", num);
+        for (auto prop : propMap) {
+            switch (prop.second.type_) {
+                case ValueType::BOOL:
+                    WLOGFI("[WmConfig] Prop: %{public}s %{public}u", prop.first.c_str(), prop.second.boolValue_);
+                    break;
+                case ValueType::STRING:
+                    WLOGFI("[WmConfig] Prop: %{public}s %{public}s", prop.first.c_str(),
+                        prop.second.stringValue_.c_str());
+                    break;
+                default:
+                    break;
+            }
+        }
+        switch (conf.second.type_) {
+            case ValueType::MAP:
+                if (conf.second.mapValue_) {
+                    DumpConfig(*conf.second.mapValue_);
+                }
+                break;
+            case ValueType::BOOL:
+                WLOGFI("[WmConfig] %{public}u", conf.second.boolValue_);
+                break;
+            case ValueType::STRING:
+                WLOGFI("[WmConfig] %{public}s", conf.second.stringValue_.c_str());
+                break;
+            case ValueType::INTS:
+                if (conf.second.intsValue_) {
+                    for (auto& num : *conf.second.intsValue_) {
+                        WLOGFI("[WmConfig] Num: %{public}d", num);
+                    }
+                }
+                break;
+            case ValueType::FLOATS:
+                if (conf.second.floatsValue_) {
+                    for (auto& num : *conf.second.floatsValue_) {
+                        WLOGFI("[WmConfig] Num: %{public}f", num);
+                    }
+                }
+                break;
+            default:
+                break;
         }
     }
 }

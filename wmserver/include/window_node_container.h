@@ -16,7 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_NODE_CONTAINER_H
 #define OHOS_ROSEN_WINDOW_NODE_CONTAINER_H
 
-#include <ui/rs_display_node.h>
+#include "animation_config.h"
 #include "avoid_area_controller.h"
 #include "display_info.h"
 #include "minimize_app.h"
@@ -110,6 +110,7 @@ public:
     WindowLayoutMode GetCurrentLayoutMode() const;
     void RemoveSingleUserWindowNodes(int accountId);
     WMError IsTileRectSatisfiedWithSizeLimits(sptr<WindowNode>& node);
+    static AnimationConfig& GetAnimationConfigRef();
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
@@ -168,6 +169,7 @@ private:
     WindowLayoutMode layoutMode_ = WindowLayoutMode::CASCADE;
     std::vector<Rect> currentCoveredArea_;
     std::vector<uint32_t> removedIds_;
+    static AnimationConfig animationConfig_;
 
     sptr<WindowNode> belowAppWindowNode_ = new WindowNode();
     sptr<WindowNode> appWindowNode_ = new WindowNode();
