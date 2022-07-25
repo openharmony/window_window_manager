@@ -130,6 +130,12 @@ void DisplayManagerService::RegisterWindowInfoQueriedListener(const sptr<IWindow
 
 DMError DisplayManagerService::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
 {
+    std::vector<DisplayId> displayIds = GetAllDisplayIds();
+    auto iter = std::find(displayIds.begin(), displayIds.end(), displayId);
+    if (iter == displayIds.end()) {
+        WLOGFE("invalid displayId");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
     if (windowInfoQueriedListener_ != nullptr) {
         windowInfoQueriedListener_->HasPrivateWindow(displayId, hasPrivateWindow);
         return DMError::DM_OK;
