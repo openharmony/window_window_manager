@@ -102,8 +102,7 @@ void WindowImpl::InitListenerHandler()
         return;
     }
     isListenerHandlerRunning_ = true;
-    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WM_CALLBACK_THREAD_NAME,
-        eventHandler_, WMS_WATCHDOG_CHECK_INTERVAL);
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WM_CALLBACK_THREAD_NAME, eventHandler_);
     if (ret != 0) {
         WLOGFE("Add watchdog thread failed");
     }
