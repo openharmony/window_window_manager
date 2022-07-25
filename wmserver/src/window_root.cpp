@@ -383,7 +383,6 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
             if (!windowNode->GetWindowToken()) {
                 return false;
             }
-            windowNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_SHOWN);
             auto property = windowNode->GetWindowToken()->GetWindowProperty();
             if (property == nullptr) {
                 return false;
@@ -392,7 +391,8 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
                 mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
                 property->SetWindowMode(mode);
             }
-            WindowManagerService::GetInstance().HandleAddWindow(property);
+            windowNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_SHOWN);
+            WindowManagerService::GetInstance().AddWindow(property);
             return true;
         };
         WMError tmpRes = tmpRes = container->ToggleShownStateForAllAppWindows(restoreFunc, isAllAppWindowsEmpty);
