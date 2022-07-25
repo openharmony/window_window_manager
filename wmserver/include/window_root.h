@@ -100,7 +100,6 @@ public:
     sptr<WindowNode> FindDialogCallerNode(WindowType type, sptr<IRemoteObject> token);
     bool CheckMultiDialogWindows(WindowType type, sptr<IRemoteObject> token);
     bool HasPrivateWindow(DisplayId displayId);
-
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
