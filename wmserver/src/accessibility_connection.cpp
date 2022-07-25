@@ -27,9 +27,13 @@ namespace {
 
 void AccessibilityConnection::NotifyAccessibilityInfo(const sptr<WindowNode>& node, WindowUpdateType type)
 {
+    if (node == nullptr) {
+        WLOGFE("window node is null");
+        return;
+    }
     auto container = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
-    if (node == nullptr || container == nullptr) {
-        WLOGFE("window node or container is null");
+    if (container == nullptr) {
+        WLOGFE("container is null");
         return;
     }
     bool focusChange = false;
