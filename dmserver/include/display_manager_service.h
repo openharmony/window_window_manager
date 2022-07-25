@@ -34,6 +34,7 @@
 #include "display_manager_stub.h"
 #include "display_power_controller.h"
 #include "singleton_delegator.h"
+#include "window_info_queried_listener.h"
 
 namespace OHOS::Rosen {
 class DisplayManagerService : public SystemAbility, public DisplayManagerStub {
@@ -60,7 +61,7 @@ public:
     void SetGravitySensorSubscriptionEnabled();
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
     ScreenId GetRSScreenId(DisplayId displayId) const;
-
+    DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) override;
     DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut) override;
@@ -100,6 +101,7 @@ public:
     static float GetCustomVirtualPixelRatio();
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
+    void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
 private:
     DisplayManagerService();
     ~DisplayManagerService() = default;
@@ -117,6 +119,7 @@ private:
     sptr<AbstractScreenController> abstractScreenController_;
     sptr<DisplayPowerController> displayPowerController_;
     sptr<IDisplayChangeListener> displayChangeListener_;
+    sptr<IWindowInfoQueriedListener> windowInfoQueriedListener_;
     sptr<DisplayDumper> displayDumper_;
     static float customVirtualPixelRatio_;
     AtomicMap<ScreenId, uint32_t> accessTokenIdMaps_;

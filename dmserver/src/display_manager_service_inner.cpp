@@ -56,6 +56,11 @@ std::vector<DisplayId> DisplayManagerServiceInner::GetAllDisplayIds() const
     return DisplayManagerService::GetInstance().GetAllDisplayIds();
 }
 
+void DisplayManagerServiceInner::RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener)
+{
+    DisplayManagerService::GetInstance().RegisterWindowInfoQueriedListener(listener);
+}
+
 std::vector<sptr<DisplayInfo>> DisplayManagerServiceInner::GetAllDisplays() const
 {
     std::vector<sptr<DisplayInfo>> res;
