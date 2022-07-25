@@ -43,6 +43,7 @@ public:
         TRANS_ID_NOTIFY_OUTSIDE_PRESSED,
         TRANS_ID_NOTIFY_SCREEN_SHOT,
         TRANS_ID_DUMP_INFO,
+        TRANS_ID_NOTIFY_DESTROY,
     };
 
     virtual void UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) = 0;

@@ -103,6 +103,10 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             NotifyScreenshot();
             break;
         }
+        case WindowMessage::TRANS_ID_NOTIFY_DESTROY: {
+            NotifyDestroy();
+            break;
+        }
         case WindowMessage::TRANS_ID_DUMP_INFO: {
             std::vector<std::string> params;
             if (!data.ReadStringVector(&params)) {
