@@ -93,7 +93,6 @@ public:
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) override;
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
-    WMError HandleAddWindow(sptr<WindowProperty>& property);
 
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
@@ -113,7 +112,6 @@ public:
     WMError UpdateRsTree(uint32_t windowId, bool isAdd) override;
     void OnScreenshot(DisplayId displayId);
     void OnAccountSwitched(int accountId);
-    void OnAccountSwitched(int accountId) const;
     WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken) override;
 protected:
     WindowManagerService();
