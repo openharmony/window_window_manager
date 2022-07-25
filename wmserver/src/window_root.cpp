@@ -1290,6 +1290,12 @@ Rect WindowRoot::GetDisplayGroupRect(DisplayId displayId) const
     return container->GetDisplayGroupRect();
 }
 
+bool WindowRoot::HasPrivateWindow(DisplayId displayId)
+{
+    auto container = GetWindowNodeContainer(displayId);
+    return container != nullptr ? container->HasPrivateWindow() : false;
+}
+
 void WindowRoot::SetMaxAppWindowNumber(int windowNum)
 {
     maxAppWindowNumber_ = windowNum;

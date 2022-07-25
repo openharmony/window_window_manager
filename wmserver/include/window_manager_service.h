@@ -48,6 +48,11 @@ public:
     virtual void OnScreenshot(DisplayId displayId) override;
 };
 
+class WindowInfoQueriedListener : public IWindowInfoQueriedListener {
+public:
+    virtual void HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
+};
+
 class WindowManagerServiceHandler : public AAFwk::WindowManagerServiceHandlerStub {
 public:
     virtual void NotifyWindowTransition(
@@ -112,6 +117,7 @@ public:
     WMError UpdateRsTree(uint32_t windowId, bool isAdd) override;
     void OnScreenshot(DisplayId displayId);
     void OnAccountSwitched(int accountId);
+    void HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;

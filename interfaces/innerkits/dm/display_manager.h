@@ -41,6 +41,7 @@ public:
     sptr<Display> GetDisplayById(DisplayId displayId);
     sptr<Display> GetDisplayByScreen(ScreenId screenId);
     std::vector<DisplayId> GetAllDisplayIds();
+    DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     bool RegisterDisplayListener(sptr<IDisplayListener> listener);
     bool UnregisterDisplayListener(sptr<IDisplayListener> listener);
 
