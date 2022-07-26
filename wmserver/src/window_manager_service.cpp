@@ -586,13 +586,6 @@ WMError WindowManagerService::RequestFocus(uint32_t windowId)
     });
 }
 
-WMError WindowManagerService::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level)
-{
-    return PostSyncTask([this, windowId, level]() {
-        return windowController_->SetWindowBackgroundBlur(windowId, level);
-    });
-}
-
 AvoidArea WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType)
 {
     return PostSyncTask([this, windowId, avoidAreaType]() {

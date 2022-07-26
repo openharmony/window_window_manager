@@ -69,14 +69,6 @@ void WindowProperty::SetLastWindowMode(WindowMode mode)
     lastMode_ = mode;
 }
 
-void WindowProperty::SetWindowBackgroundBlur(WindowBlurLevel level)
-{
-    if (!WindowHelper::IsValidWindowBlurLevel(level)) {
-        return;
-    }
-    level_ = level;
-}
-
 void WindowProperty::SetFullScreen(bool isFullScreen)
 {
     isFullScreen_ = isFullScreen;
@@ -271,11 +263,6 @@ WindowMode WindowProperty::GetWindowMode() const
 WindowMode WindowProperty::GetLastWindowMode() const
 {
     return lastMode_;
-}
-
-WindowBlurLevel WindowProperty::GetWindowBackgroundBlur() const
-{
-    return level_;
 }
 
 bool WindowProperty::GetFullScreen() const
@@ -559,7 +546,7 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(requestRect_.height_) && parcel.WriteBool(decoStatus_) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(lastMode_)) &&
-        parcel.WriteUint32(static_cast<uint32_t>(level_)) && parcel.WriteUint32(flags_) &&
+        parcel.WriteUint32(flags_) &&
         parcel.WriteBool(isFullScreen_) && parcel.WriteBool(focusable_) && parcel.WriteBool(touchable_) &&
         parcel.WriteBool(isPrivacyMode_) && parcel.WriteBool(isTransparent_) && parcel.WriteFloat(alpha_) &&
         parcel.WriteFloat(brightness_) && parcel.WriteUint64(displayId_) && parcel.WriteUint32(windowId_) &&
@@ -590,7 +577,6 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowType(static_cast<WindowType>(parcel.ReadUint32()));
     property->SetWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
     property->SetLastWindowMode(static_cast<WindowMode>(parcel.ReadUint32()));
-    property->SetWindowBackgroundBlur(static_cast<WindowBlurLevel>(parcel.ReadUint32()));
     property->SetWindowFlags(parcel.ReadUint32());
     property->SetFullScreen(parcel.ReadBool());
     property->SetFocusable(parcel.ReadBool());
@@ -754,7 +740,6 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     decoStatus_ = property->decoStatus_;
     type_ = property->type_;
     mode_ = property->mode_;
-    level_ = property->level_;
     lastMode_ = property->lastMode_;
     flags_ = property->flags_;
     isFullScreen_ = property->isFullScreen_;

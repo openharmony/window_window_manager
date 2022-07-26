@@ -106,7 +106,6 @@ public:
     virtual Rect GetRequestRect() const override;
     virtual WindowType GetType() const override;
     virtual WindowMode GetMode() const override;
-    virtual WindowBlurLevel GetWindowBackgroundBlur() const override;
     virtual float GetAlpha() const override;
     virtual WindowState GetWindowState() const override;
     virtual WMError SetFocusable(bool isFocusable) override;
@@ -126,7 +125,6 @@ public:
     virtual bool IsLayoutFullScreen() const override;
     virtual WMError SetWindowType(WindowType type) override;
     virtual WMError SetWindowMode(WindowMode mode) override;
-    virtual WMError SetWindowBackgroundBlur(WindowBlurLevel level) override;
     virtual void SetAlpha(float alpha) override;
     virtual void SetTransform(const Transform& trans) override;
     virtual WMError AddWindowFlag(WindowFlag flag) override;
@@ -164,6 +162,16 @@ public:
     virtual bool IsPrivacyMode() const override;
     virtual void DisableAppWindowDecor() override;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
+
+    // window effect
+    virtual WMError SetCornerRadius(float cornerRadius) override;
+    virtual WMError SetShadowRadius(float radius) override;
+    virtual WMError SetShadowColor(std::string color) override;
+    virtual void SetShadowOffsetX(float offsetX) override;
+    virtual void SetShadowOffsetY(float offsetY) override;
+    virtual WMError SetBlur(float radius) override;
+    virtual WMError SetBackdropBlur(float radius) override;
+    virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
 
     virtual bool IsDecorEnable() const override;
     virtual WMError Maximize() override;

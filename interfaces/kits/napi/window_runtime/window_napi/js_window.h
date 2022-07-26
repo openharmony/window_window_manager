@@ -79,6 +79,13 @@ public:
     static NativeValue* SetRotateSync(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetTranslateSync(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetTransitionControllerSync(NativeEngine* engine, NativeCallbackInfo* info);
+
+    // window effect
+    static NativeValue* SetCornerRadius(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetShadow(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetBlur(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetBackdropBlur(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetBackdropBlurStyle(NativeEngine* engine, NativeCallbackInfo* info);
 private:
     std::string GetWindowName();
     bool ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
@@ -132,6 +139,13 @@ private:
     NativeValue* OnSetTranslateSync(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetTransitionControllerSync(NativeEngine& engine, NativeCallbackInfo& info);
     void CreateTransitionController(NativeEngine& engine);
+
+    // window effect
+    NativeValue* OnSetCornerRadius(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetShadow(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetBlur(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetBackdropBlur(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetBackdropBlurStyle(NativeEngine& engine, NativeCallbackInfo& info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;

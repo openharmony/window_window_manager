@@ -208,7 +208,6 @@ public:
      */
     virtual WindowType GetType() const = 0;
     virtual WindowMode GetMode() const = 0;
-    virtual WindowBlurLevel GetWindowBackgroundBlur() const = 0;
     virtual float GetAlpha() const = 0;
     virtual const std::string& GetWindowName() const = 0;
     virtual uint32_t GetWindowId() const = 0;
@@ -247,7 +246,6 @@ public:
      * @return WMError
      */
     virtual WMError SetWindowMode(WindowMode mode) = 0;
-    virtual WMError SetWindowBackgroundBlur(WindowBlurLevel level) = 0;
     virtual void SetAlpha(float alpha) = 0;
     virtual void SetTransform(const Transform& trans) = 0;
     virtual Transform GetTransform() const = 0;
@@ -327,6 +325,16 @@ public:
     virtual void SetPrivacyMode(bool isPrivacyMode) = 0;
     virtual bool IsPrivacyMode() const = 0;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) = 0;
+
+    // window effect
+    virtual WMError SetCornerRadius(float cornerRadius) = 0;
+    virtual WMError SetShadowRadius(float radius) = 0;
+    virtual WMError SetShadowColor(std::string color) = 0;
+    virtual void SetShadowOffsetX(float offsetX) = 0;
+    virtual void SetShadowOffsetY(float offsetY) = 0;
+    virtual WMError SetBlur(float radius) = 0;
+    virtual WMError SetBackdropBlur(float radius) = 0;
+    virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) = 0;
 
     virtual WMError RequestFocus() const = 0;
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;
