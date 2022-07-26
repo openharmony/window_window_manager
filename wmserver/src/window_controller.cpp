@@ -925,6 +925,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         }
         case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY: {
             node->SetTransform(property->GetTransform());
+            node->SetWindowSizeChangeReason(WindowSizeChangeReason::TRANSFORM);
             ret = UpdateTransform(windowId);
             break;
         }

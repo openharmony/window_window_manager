@@ -946,7 +946,7 @@ bool WindowLayoutPolicy::IsFullScreenRecentWindowExist(const std::vector<sptr<Wi
 void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
 {
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT ||
-        node->GetWindowProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
+        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::TRANSFORM) {
         WLOGFI("not need to update bounds");
         return;
     }
