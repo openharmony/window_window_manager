@@ -57,7 +57,6 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
         [this](Event event, const sptr<IRemoteObject>& remoteObject) { OnWindowEvent(event, remoteObject); });
     inputWindowMonitor_ = new InputWindowMonitor(windowRoot_);
     windowController_ = new WindowController(windowRoot_, inputWindowMonitor_);
-    snapshotController_ = new SnapshotController(windowRoot_);
     dragController_ = new DragController(windowRoot_);
     windowDumper_ = new WindowDumper(windowRoot_);
     freezeDisplayController_ = new FreezeController();
@@ -65,6 +64,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     startingOpen_ = system::GetParameter("persist.window.sw.enabled", "1") == "1"; // startingWin default enabled
     runner_ = AppExecFwk::EventRunner::Create(WMS_NAME);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(runner_);
+    snapshotController_ = new SnapshotController(windowRoot_, handler_);
     int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WMS_NAME, handler_);
     if (ret != 0) {
         WLOGFE("Add watchdog thread failed");
@@ -173,7 +173,7 @@ void WindowManagerService::RegisterWindowVisibilityChangeCallback()
 void WindowManagerService::RegisterSnapshotHandler()
 {
     if (snapshotController_ == nullptr) {
-        snapshotController_ = new SnapshotController(windowRoot_);
+        snapshotController_ = new SnapshotController(windowRoot_, handler_);
     }
     if (AAFwk::AbilityManagerClient::GetInstance()->RegisterSnapshotHandler(snapshotController_) != ERR_OK) {
         WLOGFW("WindowManagerService::RegisterSnapshotHandler failed, create async thread!");
