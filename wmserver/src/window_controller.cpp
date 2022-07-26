@@ -474,20 +474,6 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
     return WMError::WM_OK;
 }
 
-WMError WindowController::SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel dstLevel)
-{
-    auto node = windowRoot_->GetWindowNode(windowId);
-    if (node == nullptr) {
-        WLOGFE("could not find window");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    WLOGFI("WindowEffect WindowController SetWindowBackgroundBlur level: %{public}u", dstLevel);
-    node->SetWindowBackgroundBlur(dstLevel);
-    FlushWindowInfo(windowId);
-    return WMError::WM_OK;
-}
-
 void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {

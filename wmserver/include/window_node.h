@@ -53,7 +53,6 @@ public:
     void SetWindowProperty(const sptr<WindowProperty>& property);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
     void SetWindowMode(WindowMode mode);
-    void SetWindowBackgroundBlur(WindowBlurLevel level);
     void SetBrightness(float brightness);
     void SetFocusable(bool focusable);
     void SetTouchable(bool touchable);
@@ -86,7 +85,6 @@ public:
     Rect GetRequestRect() const;
     WindowType GetWindowType() const;
     WindowMode GetWindowMode() const;
-    WindowBlurLevel GetWindowBackgroundBlur() const;
     float GetBrightness() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;

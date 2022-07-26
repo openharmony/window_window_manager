@@ -43,7 +43,6 @@ public:
     WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);
     WMError RequestFocus(uint32_t windowId);
-    WMError SetWindowBackgroundBlur(uint32_t windowId, WindowBlurLevel level);
     WMError SetAlpha(uint32_t windowId, float alpha);
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
