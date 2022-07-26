@@ -65,7 +65,7 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     startingOpen_ = system::GetParameter("persist.window.sw.enabled", "1") == "1"; // startingWin default enabled
     runner_ = AppExecFwk::EventRunner::Create(WMS_NAME);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(runner_);
-    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WMS_NAME, handler_, WMS_WATCHDOG_CHECK_INTERVAL);
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WMS_NAME, handler_);
     if (ret != 0) {
         WLOGFE("Add watchdog thread failed");
     }
