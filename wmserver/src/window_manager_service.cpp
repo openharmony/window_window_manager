@@ -534,27 +534,22 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
 WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 {
     return PostSyncTask([this, &property]() {
-        return HandleAddWindow(property);
+        if (property == nullptr) {
+            WLOGFE("property is nullptr");
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        Rect rect = property->GetRequestRect();
+        uint32_t windowId = property->GetWindowId();
+        WLOGFI("[WMS] Add: %{public}5d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
+            "%{public}4d %{public}4d]", windowId, property->GetWindowType(), property->GetWindowMode(),
+            property->GetWindowFlags(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:AddWindow(%u)", windowId);
+        WMError res = windowController_->AddWindowNode(property);
+        if (property->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
+            dragController_->StartDrag(windowId);
+        }
+        return res;
     });
-}
-
-WMError WindowManagerService::HandleAddWindow(sptr<WindowProperty>& property)
-{
-    if (property == nullptr) {
-        WLOGFE("property is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    Rect rect = property->GetRequestRect();
-    uint32_t windowId = property->GetWindowId();
-    WLOGFI("[WMS] Add: %{public}5d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
-        "%{public}4d %{public}4d]", windowId, property->GetWindowType(), property->GetWindowMode(),
-        property->GetWindowFlags(), rect.posX_, rect.posY_, rect.width_, rect.height_);
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:AddWindow(%u)", windowId);
-    WMError res = windowController_->AddWindowNode(property);
-    if (property->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
-        dragController_->StartDrag(windowId);
-    }
-    return res;
 }
 
 WMError WindowManagerService::RemoveWindow(uint32_t windowId)
