@@ -20,9 +20,12 @@
 #include <pixel_map.h>
 #include <string>
 
+#include "display_manager.h"
 #include "dm_common.h"
 
 namespace OHOS {
+constexpr int BPP = 4;
+
 struct WriteToPngParam {
     uint32_t width;
     uint32_t height;
@@ -49,13 +52,16 @@ public:
     static void PrintUsage(const std::string &cmdLine);
     static bool CheckFileNameValid(const std::string &fileName);
     static std::string GenerateFileName(int offset = 0);
-    static bool CheckWidthAndHeightValid(const CmdArgments& cmdArgments);
+    static bool CheckWidthAndHeightValid(int32_t w, int32_t h);
     static bool WriteToPng(const std::string &fileName, const WriteToPngParam &param);
     static bool WriteToPng(int fd, const WriteToPngParam &param);
     static bool WriteToPngWithPixelMap(const std::string &fileName, Media::PixelMap &pixelMap);
     static bool WriteToPngWithPixelMap(int fd, Media::PixelMap &pixelMap);
     static bool ProcessArgs(int argc, char * const argv[], CmdArgments& cmdArgments);
+    static bool CheckWHValid(int32_t param);
+    static bool CheckParamValid(const WriteToPngParam &param);
 private:
+    static bool ProcessDisplayId(Rosen::DisplayId &displayId, bool isDisplayIdSet);
 };
 }
 

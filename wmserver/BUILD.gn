@@ -105,3 +105,8 @@ ohos_shared_library("libwms") {
   part_name = "window_manager"
   subsystem_name = "window"
 }
+
+group("test") {
+  testonly = true
+  deps = [ "test:test" ]
+}

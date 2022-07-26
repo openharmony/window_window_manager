@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,11 @@
 #include <cstdlib>
 #include <gtest/gtest.h>
 
-#include "display_test_utils.h"
 #include "pixel_map.h"
 
 #include "snapshot_utils.h"
 #include "test_utils.h"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,11 +29,10 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenshotCmdTest"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SnapshotDisplayTest"};
 }
 
-using Utils = DisplayTestUtils;
-class ScreenshotCmdTest : public testing::Test {
+class SnapshotDisplayTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -45,9 +44,9 @@ public:
     const int testTimeCount_ = 2;
 };
 
-DisplayId ScreenshotCmdTest::defaultId_ = DISPLAY_ID_INVALID;
+DisplayId SnapshotDisplayTest::defaultId_ = DISPLAY_ID_INVALID;
 
-void ScreenshotCmdTest::SetUpTestCase()
+void SnapshotDisplayTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
@@ -62,15 +61,15 @@ void ScreenshotCmdTest::SetUpTestCase()
     TestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
 }
 
-void ScreenshotCmdTest::TearDownTestCase()
+void SnapshotDisplayTest::TearDownTestCase()
 {
 }
 
-void ScreenshotCmdTest::SetUp()
+void SnapshotDisplayTest::SetUp()
 {
 }
 
-void ScreenshotCmdTest::TearDown()
+void SnapshotDisplayTest::TearDown()
 {
 }
 
@@ -86,13 +85,27 @@ bool CheckFileExist(const std::string& fPath)
     return false;
 }
 
+bool TakeScreenshotBySpecifiedParam(std::string exec, std::string imgPath, std::string extraParam)
+{
+    if (CheckFileExist(imgPath)) {
+        remove(imgPath.c_str());
+    }
+    const std::string cmd = exec + " -f " + imgPath +  " " + extraParam;
+    (void)system(cmd.c_str());
+    bool isExist = CheckFileExist(imgPath);
+    if (isExist) {
+        remove(imgPath.c_str());
+    }
+    return isExist;
+}
+
 namespace {
 /**
  * @tc.name: ScreenShotCmdValid
  * @tc.desc: Call screenshot default cmd and check if it saves image in default path
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotCmdTest, ScreenShotCmdValid01, Function | MediumTest | Level2)
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid01, Function | MediumTest | Level2)
 {
     std::string imgPath[testTimeCount_];
     int i;
@@ -121,7 +134,7 @@ HWTEST_F(ScreenshotCmdTest, ScreenShotCmdValid01, Function | MediumTest | Level2
  * @tc.desc: Call screenshot with default displayID and default path
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotCmdTest, ScreenShotCmdValid02, Function | MediumTest | Level2)
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid02, Function | MediumTest | Level2)
 {
     std::string imgPath[testTimeCount_];
     int i;
@@ -151,19 +164,71 @@ HWTEST_F(ScreenshotCmdTest, ScreenShotCmdValid02, Function | MediumTest | Level2
  * @tc.desc: Call screenshot with default displayID and custom path
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenshotCmdTest, ScreenShotCmdValid03, Function | MediumTest | Level2)
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid03, Function | MediumTest | Level2)
 {
     const std::string imgPath = "/data/snapshot_display_test.png";
-    if (CheckFileExist(imgPath)) {
-        remove(imgPath.c_str());
-    }
-    const std::string cmd = defaultCmd_ + " -i " + std::to_string(defaultId_) + " -f " + imgPath;
-    (void)system(cmd.c_str());
-    bool isExist = CheckFileExist(imgPath);
-    if (isExist) {
-        remove(imgPath.c_str());
-    }
-    ASSERT_EQ(true, isExist);
+    std::string extraParam = "-i " + std::to_string(defaultId_);
+    ASSERT_EQ(true, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
+}
+
+/**
+ * @tc.name: ScreenShotCmdValid
+ * @tc.desc: Call screenshot with valid width/height
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid04, Function | MediumTest | Level2)
+{
+    const std::string imgPath = "/data/snapshot_display_test.png";
+    std::string extraParam = "-i " + std::to_string(defaultId_) + " -w 100 -h 100";
+    ASSERT_EQ(true, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
+}
+
+/**
+ * @tc.name: ScreenShotCmdValid
+ * @tc.desc: Call screenshot with valid width
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid05, Function | MediumTest | Level2)
+{
+    const std::string imgPath = "/data/snapshot_display_test.png";
+    std::string extraParam = "-i " + std::to_string(defaultId_) + " -w 100";
+    ASSERT_EQ(true, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
+}
+
+/**
+ * @tc.name: ScreenShotCmdValid
+ * @tc.desc: Call screenshot with valid height
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid06, Function | MediumTest | Level2)
+{
+    const std::string imgPath = "/data/snapshot_display_test.png";
+    std::string extraParam = "-i " + std::to_string(defaultId_) + " -h 100";
+    ASSERT_EQ(true, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
+}
+
+/**
+ * @tc.name: ScreenShotCmdValid
+ * @tc.desc: Call screenshot with invalid width/height
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid07, Function | MediumTest | Level2)
+{
+    const std::string imgPath = "/data/snapshot_display_test.png";
+    std::string extraParam = "-i " + std::to_string(defaultId_) + " -w 10000 -h 10000";
+    ASSERT_EQ(false, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
+}
+
+/**
+ * @tc.name: ScreenShotCmdValid
+ * @tc.desc: Call screenshot with -m
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotDisplayTest, ScreenShotCmdValid08, Function | MediumTest | Level2)
+{
+    const std::string imgPath = "/data/snapshot_display_test.png";
+    std::string extraParam = "-i " + std::to_string(defaultId_) + " -m";
+    ASSERT_EQ(false, TakeScreenshotBySpecifiedParam(defaultCmd_, imgPath, extraParam));
 }
 } // namespace
 } // namespace Rosen

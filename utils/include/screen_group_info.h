@@ -25,17 +25,17 @@ namespace OHOS::Rosen {
 class ScreenGroupInfo : public ScreenInfo {
 friend class AbstractScreenGroup;
 public:
+    ScreenGroupInfo() = default;
     ~ScreenGroupInfo() = default;
     WM_DISALLOW_COPY_AND_MOVE(ScreenGroupInfo);
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static ScreenGroupInfo* Unmarshalling(Parcel& parcel);
 
-    DEFINE_VAR_FUNC_GET(std::vector<ScreenId>, Children, children);
-    DEFINE_VAR_FUNC_GET(std::vector<Point>, Position, position);
+    DEFINE_VAR_FUNC_GET_SET(std::vector<ScreenId>, Children, children);
+    DEFINE_VAR_FUNC_GET_SET(std::vector<Point>, Position, position);
     DEFINE_VAR_DEFAULT_FUNC_GET(ScreenCombination, Combination, combination, ScreenCombination::SCREEN_ALONE);
 private:
-    ScreenGroupInfo() = default;
     bool InnerUnmarshalling(Parcel& parcel);
 };
 } // namespace OHOS::Rosen

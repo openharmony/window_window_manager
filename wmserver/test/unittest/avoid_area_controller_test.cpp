@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#include "avoid_area_controller_test.h"
+#include <gtest/gtest.h>
+
 #include "avoid_area_controller.h"
 #include "display_manager.h"
 #include "display_manager_config.h"
 #include "future.h"
-#include "singleton_mocker.h"
 #include "window_node.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -34,6 +35,20 @@ namespace {
     const long TIME_OUT = 1000;
     const AvoidArea EMPTY_AVOID_AREA = {};
 }
+
+class AvoidAreaControllerTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    virtual void SetUp() override;
+    virtual void TearDown() override;
+
+    static sptr<WindowNode> statusbarWindowNode;
+    static sptr<WindowNode> navigationBarWindowNode;
+    static sptr<WindowNode> keyboardWindowNode;
+    static Rect screenRect;
+    static Rect cut_out_rect;
+};
 
 sptr<WindowNode> AvoidAreaControllerTest::statusbarWindowNode = nullptr;
 sptr<WindowNode> AvoidAreaControllerTest::navigationBarWindowNode = nullptr;
@@ -141,14 +156,23 @@ void AvoidAreaControllerTest::TearDown()
 {
 }
 
-#define CHECK_AVOID_AREA(avoidArea, topRect, leftRect, rightRect, bottomRect) \
-    do {                                                                      \
-        ASSERT_EQ(avoidArea.topRect_, topRect);                               \
-        ASSERT_EQ(avoidArea.bottomRect_, bottomRect);                         \
-        ASSERT_EQ(avoidArea.leftRect_, leftRect);                             \
-        ASSERT_EQ(avoidArea.rightRect_, rightRect);                           \
-    } while (false)
+bool CheckSameArea(AvoidArea avoidArea, Rect t, Rect l, Rect r, Rect b)
+{
+    return avoidArea.topRect_ == t && avoidArea.bottomRect_ == b
+        && avoidArea.leftRect_ == l && avoidArea.rightRect_ == r;
+}
 
+sptr<WindowProperty> createWindowProperty(uint32_t windowId, const std::string& windowName,
+    WindowType type, WindowMode mode, const Rect& screenRect)
+{
+    sptr<WindowProperty> property = new WindowProperty();
+    property->SetWindowId(windowId);
+    property->SetWindowName(windowName);
+    property->SetWindowType(type);
+    property->SetWindowMode(mode);
+    property->SetWindowRect(screenRect);
+    return property;
+}
 
 namespace {
 /**
@@ -158,12 +182,8 @@ namespace {
  */
 HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea01, Function | SmallTest | Level2)
 {
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(110u);
-    property->SetWindowName("test");
-    property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    property->SetWindowRect(screenRect);
+    sptr<WindowProperty> property = createWindowProperty(110u, "test",
+        WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
     sptr<WindowListener> listener = new WindowListener();
     sptr<WindowNode> appWindow = new WindowNode(property, listener, nullptr);
     uint32_t focusedWindow = appWindow->GetWindowId();
@@ -172,10 +192,10 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea01, Function | Smal
     avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
     avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_ADD, nullptr);
     auto avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_SYSTEM);
-    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(),
-        EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    ASSERT_EQ(true, CheckSameArea(avoidArea, statusbarWindowNode->GetWindowRect(),
+        EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect()));
     avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_CUTOUT);
-    CHECK_AVOID_AREA(avoidArea, cut_out_rect, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, cut_out_rect, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     // set rect
     Rect statusBarRect = statusbarWindowNode->GetWindowRect();
@@ -184,23 +204,23 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea01, Function | Smal
         static_cast<uint32_t>(navigationBarRect.posY_ - statusBarRect.height_) };
     property->SetWindowRect(windowRect);
     avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_SYSTEM);
-    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
     avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_CUTOUT);
-    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     // restore rect
     property->SetWindowRect(screenRect);
     avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_SYSTEM);
-    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(),
-        EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    ASSERT_EQ(true, CheckSameArea(avoidArea, statusbarWindowNode->GetWindowRect(),
+        EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect()));
     avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_CUTOUT);
-    CHECK_AVOID_AREA(avoidArea, cut_out_rect, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, cut_out_rect, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
     avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
     avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
     avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_SYSTEM);
-    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 }
 
 /**
@@ -210,12 +230,8 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea01, Function | Smal
  */
 HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea02, Function | SmallTest | Level2)
 {
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(110u);
-    property->SetWindowName("test");
-    property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    property->SetWindowRect(screenRect);
+    sptr<WindowProperty> property = createWindowProperty(110u, "test",
+        WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
     sptr<WindowListener> windowListener = new WindowListener();
     sptr<WindowNode> appWindow = new WindowNode(property, windowListener, nullptr);
     uint32_t focusedWindow = appWindow->GetWindowId();
@@ -227,14 +243,15 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea02, Function | Smal
     avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
     auto avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, statusbarWindowNode->GetWindowRect(),
+        EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     // add navigation bar
     avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
     avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT,
-        EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    ASSERT_EQ(true, CheckSameArea(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT,
+        EMPTY_RECT, navigationBarWindowNode->GetWindowRect()));
 
     // update appWindow rect
     Rect statusBarRect = statusbarWindowNode->GetWindowRect();
@@ -245,21 +262,21 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea02, Function | Smal
     avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_UPDATE, nullptr);
     avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
     avoidArea = windowListener->cutoutAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->cutoutAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     // restore appWindow rect
     property->SetWindowRect(screenRect);
     avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_UPDATE, nullptr);
     avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(),
-        EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    ASSERT_EQ(true, CheckSameArea(avoidArea, statusbarWindowNode->GetWindowRect(),
+        EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect()));
     avoidArea = windowListener->cutoutAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->cutoutAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, cut_out_rect, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, cut_out_rect, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
     avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
@@ -273,12 +290,8 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea02, Function | Smal
  */
 HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea03, Function | SmallTest | Level2)
 {
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(110u);
-    property->SetWindowName("test");
-    property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    property->SetWindowRect(screenRect);
+    sptr<WindowProperty> property = createWindowProperty(110u, "test",
+        WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
     sptr<WindowListener> windowListener = new WindowListener();
     sptr<WindowNode> appWindow = new WindowNode(property, windowListener, nullptr);
     uint32_t focusedWindow = appWindow->GetWindowId();
@@ -290,29 +303,31 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea03, Function | Smal
     avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
     auto avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT,
+        EMPTY_RECT, EMPTY_RECT));
 
     // add navigation bar
     avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
     avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT,
-        EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    ASSERT_EQ(true, CheckSameArea(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT,
+        EMPTY_RECT, navigationBarWindowNode->GetWindowRect()));
 
     // remove status bar
     avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
     avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT,
+        navigationBarWindowNode->GetWindowRect()));
     avoidArea = windowListener->cutoutAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->cutoutAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     // remove navigation bar
     avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
     avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
     avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
 }
 
@@ -323,12 +338,8 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea03, Function | Smal
  */
 HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea01, Function | SmallTest | Level2)
 {
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(110u);
-    property->SetWindowName("test");
-    property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    property->SetWindowRect(screenRect);
+    sptr<WindowProperty> property = createWindowProperty(110u, "test",
+        WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
     sptr<WindowListener> windowListener = new WindowListener();
     sptr<WindowNode> appWindow = new WindowNode(property, windowListener, nullptr);
     uint32_t focusedWindow = appWindow->GetWindowId();
@@ -345,7 +356,8 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea01, Function | SmallTest | L
         [](sptr<WindowNode> windowNode) { return true; });
     auto avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT,
+        navigationBarWindowNode->GetWindowRect()));
 
     // update navigation bar window Rect
     Rect navigationBarWindowNodeRect = navigationBarWindowNode->GetWindowRect();
@@ -354,34 +366,36 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea01, Function | SmallTest | L
         [](sptr<WindowNode> windowNode) { return true; });
     avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     // restore status bar window Rect
     statusbarWindowNode->SetWindowRect(statusbarWindowNodeRect);
     avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_UPDATE, nullptr);
     avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT,
+        EMPTY_RECT, EMPTY_RECT));
 
     // restore navigation bar window Rect
     navigationBarWindowNode->SetWindowRect(navigationBarWindowNodeRect);
     avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_UPDATE, nullptr);
     avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT,
-        EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    ASSERT_EQ(true, CheckSameArea(avoidArea, statusbarWindowNode->GetWindowRect(), EMPTY_RECT,
+        EMPTY_RECT, navigationBarWindowNode->GetWindowRect()));
 
     // remove status bar
     avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
     avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect());
+    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT,
+        navigationBarWindowNode->GetWindowRect()));
 
     // remove navigation bar
     avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
     avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 }
 
 /**
@@ -391,12 +405,8 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea01, Function | SmallTest | L
  */
 HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea01, Function | SmallTest | Level2)
 {
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(110u);
-    property->SetWindowName("test");
-    property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    property->SetWindowRect(screenRect);
+    sptr<WindowProperty> property = createWindowProperty(110u, "test",
+        WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
     sptr<WindowListener> listener = new WindowListener();
     sptr<WindowNode> appWindow = new WindowNode(property, listener, nullptr);
     uint32_t focusedWindow = 0u;
@@ -410,20 +420,22 @@ HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea01, Function | SmallTest | Le
         appWindow->SetWindowMode(static_cast<WindowMode>(i));
         avoidAreaController->ProcessWindowChange(keyboardWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
         auto avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_KEYBOARD);
-        CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+        ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
         keyboardWindowNode->SetCallingWindow(appWindow->GetWindowId());
         avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_KEYBOARD);
-        CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, keyboardWindowNode->GetWindowRect());
+        ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT,
+            keyboardWindowNode->GetWindowRect()));
 
         keyboardWindowNode->SetCallingWindow(0);
         focusedWindow = appWindow->GetWindowId();
         avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_KEYBOARD);
-        CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, keyboardWindowNode->GetWindowRect());
+        ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT,
+            keyboardWindowNode->GetWindowRect()));
 
         avoidAreaController->ProcessWindowChange(keyboardWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
         avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_KEYBOARD);
-        CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+        ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
     }
 }
 
@@ -434,12 +446,8 @@ HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea01, Function | SmallTest | Le
  */
 HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea02, Function | SmallTest | Level2)
 {
-    sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowId(110u);
-    property->SetWindowName("test");
-    property->SetWindowType(WindowType::APP_WINDOW_BASE);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    property->SetWindowRect(screenRect);
+    sptr<WindowProperty> property = createWindowProperty(110u, "test",
+        WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
     sptr<WindowListener> listener = new WindowListener();
     sptr<WindowNode> appWindow = new WindowNode(property, listener, nullptr);
     uint32_t focusedWindow = appWindow->GetWindowId();
@@ -452,11 +460,12 @@ HWTEST_F(AvoidAreaControllerTest, KeyboardAvoidArea02, Function | SmallTest | Le
         avoidAreaController->ProcessWindowChange(keyboardWindowNode, AvoidControlType::AVOID_NODE_ADD, nullptr);
         auto avoidArea = listener->keyboardAvoidAreaFuture_.GetResult(TIME_OUT);
         listener->keyboardAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-        CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, keyboardWindowNode->GetWindowRect());
+        ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT,
+            keyboardWindowNode->GetWindowRect()));
         avoidAreaController->ProcessWindowChange(keyboardWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
         avoidArea = listener->keyboardAvoidAreaFuture_.GetResult(TIME_OUT);
         listener->keyboardAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-        CHECK_AVOID_AREA(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT);
+        ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
     }
     avoidAreaController->ProcessWindowChange(appWindow, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
 }
