@@ -99,7 +99,8 @@ protected:
     void LimitWindowPositionWhenDrag(const sptr<WindowNode>& node, Rect& winRect) const;
     void FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect);
     void UpdateWindowSizeLimits(const sptr<WindowNode>& node);
-    WindowSizeLimits GetSystemSizeLimits(const Rect& displayRect, float virtualPixelRatio);
+    WindowSizeLimits GetSystemSizeLimits(const sptr<WindowNode>& node,
+        const Rect& displayRect, float virtualPixelRatio);
 
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,

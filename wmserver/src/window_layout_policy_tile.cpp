@@ -128,7 +128,6 @@ bool WindowLayoutPolicyTile::IsTileRectSatisfiedWithSizeLimits(const sptr<Window
         return false;
     }
 
-    // update window size limits
     UpdateWindowSizeLimits(node);
 
     // find if node already exits in foreground nodes map
@@ -150,15 +149,12 @@ bool WindowLayoutPolicyTile::IsTileRectSatisfiedWithSizeLimits(const sptr<Window
     }
     WLOGFI("id %{public}u, tileRect: [%{public}d %{public}d %{public}u %{public}u]",
         node->GetWindowId(), tileRect.posX_, tileRect.posY_, tileRect.width_, tileRect.height_);
-    return WindowHelper::IsRectSatisfiedWithSizeLimits(tileRect, node->GetWindowSizeLimits());
+    return WindowHelper::IsRectSatisfiedWithSizeLimits(tileRect, node->GetWindowUpdatedSizeLimits());
 }
 
 void WindowLayoutPolicyTile::AddWindowNode(const sptr<WindowNode>& node)
 {
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
-
-    // update window size limits when add window
-    UpdateWindowSizeLimits(node);
 
     if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         DisplayId displayId = node->GetDisplayId();
@@ -298,7 +294,7 @@ void WindowLayoutPolicyTile::AssignNodePropertyForTileWindows(DisplayId displayI
     for (auto node : foregroundNodes) {
         auto& rect = (*rectIt);
         if (WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) &&
-            WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowSizeLimits())) {
+            WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowUpdatedSizeLimits())) {
             node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             if (node->GetWindowToken()) {
                 node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -344,6 +340,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
         WLOGFE("window property is nullptr.");
         return;
     }
+    UpdateWindowSizeLimits(node);
     auto decorEnable = property->GetDecorEnable();
     bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     bool parentLimit = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));

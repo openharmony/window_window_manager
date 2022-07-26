@@ -169,6 +169,11 @@ void WindowNode::SetWindowSizeLimits(const WindowSizeLimits& sizeLimits)
     property_->SetSizeLimits(sizeLimits);
 }
 
+void WindowNode::SetWindowUpdatedSizeLimits(const WindowSizeLimits& sizeLimits)
+{
+    property_->SetUpdatedSizeLimits(sizeLimits);
+}
+
 void WindowNode::ComputeTransform()
 {
     property_->ComputeTransform();
@@ -182,6 +187,11 @@ void WindowNode::SetTransform(const Transform& trans)
 WindowSizeLimits WindowNode::GetWindowSizeLimits() const
 {
     return property_->GetSizeLimits();
+}
+
+WindowSizeLimits WindowNode::GetWindowUpdatedSizeLimits() const
+{
+    return property_->GetUpdatedSizeLimits();
 }
 
 DragType WindowNode::GetDragType() const

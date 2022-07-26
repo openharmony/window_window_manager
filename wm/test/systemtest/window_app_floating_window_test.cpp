@@ -48,6 +48,7 @@ public:
     virtual void TearDown() override;
 
     static inline float virtualPixelRatio_ = 1.0;
+    static inline Rect displayRect_ {0, 0, 0, 0};
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_ = nullptr;
     static sptr<TestCameraFloatWindowChangedListener> testCameraFloatWindowChangedListener_;
 };
@@ -66,8 +67,9 @@ void WindowAppFloatingWindowTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
-    WindowTestUtils::InitByDisplayRect(displayRect);
+    displayRect_.width_ = display->GetWidth();
+    displayRect_.height_ = display->GetHeight();
+    WindowTestUtils::InitByDisplayRect(displayRect_);
     virtualPixelRatio_ = WindowTestUtils::GetVirtualPixelRatio(0);
 }
 
@@ -326,7 +328,23 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow09, Function | MediumTest
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
-    Rect exceptRect = WindowTestUtils::GetFloatingLimitedRect(fltWindRect, virtualPixelRatio_);
+    Rect exceptRect = {10, 20, 0, 0};
+    uint32_t smallWidth = displayRect_.height_ <= displayRect_.width_ ? displayRect_.height_ : displayRect_.width_;
+    float hwRatio = static_cast<float>(displayRect_.height_) / static_cast<float>(displayRect_.width_);
+    if (smallWidth <= static_cast<uint32_t>(600 * virtualPixelRatio_)) { // sw <= 600dp
+        if (displayRect_.width_ <= displayRect_.height_) {
+            exceptRect.width_= static_cast<uint32_t>(smallWidth * 0.3);
+        } else {
+            exceptRect.width_ = static_cast<uint32_t>(smallWidth * 0.5);
+        }
+    } else {
+        if (displayRect_.width_ <= displayRect_.height_) {
+            exceptRect.width_ = static_cast<uint32_t>(smallWidth * 0.12);
+        } else {
+            exceptRect.width_ = static_cast<uint32_t>(smallWidth * 0.3);
+        }
+    }
+    exceptRect.height_ = static_cast<uint32_t>(exceptRect.width_ * hwRatio);
     ASSERT_TRUE(WindowTestUtils::RectEqualTo(fltWin, exceptRect));
 
     ASSERT_EQ(WMError::WM_OK, fltWin->Destroy());

@@ -74,6 +74,7 @@ public:
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void SetAccessTokenId(uint32_t accessTokenId);
     void SetSizeLimits(const WindowSizeLimits& sizeLimits);
+    void SetUpdatedSizeLimits(const WindowSizeLimits& sizeLimits);
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
     void SetTransform(const Transform& trans);
     void ComputeTransform();
@@ -114,6 +115,7 @@ public:
     uint32_t GetAccessTokenId() const;
     Transform GetTransform() const;
     WindowSizeLimits GetSizeLimits() const;
+    WindowSizeLimits GetUpdatedSizeLimits() const;
     const TransformHelper::Matrix4& GetTransformMat() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
@@ -178,6 +180,7 @@ private:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
     DEFINE_VAR_FUNC_GET_SET(TransformHelper::Plane, Plane, windowPlane);
     WindowSizeLimits sizeLimits_;
+    WindowSizeLimits updatedSizeLimits_;
 };
 }
 }
