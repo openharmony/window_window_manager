@@ -65,6 +65,7 @@ public:
     static NativeValue* SetCallingWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetPreferredOrientation(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetSnapshotSkip(NativeEngine* engine, NativeCallbackInfo* info);
     // colorspace, gamut
     static NativeValue* IsSupportWideGamut(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetColorSpace(NativeEngine* engine, NativeCallbackInfo* info);
@@ -131,6 +132,7 @@ private:
     NativeValue* OnDump(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetForbidSplitMove(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSnapshot(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetSnapshotSkip(NativeEngine& engine, NativeCallbackInfo& info);
 
     // animation Config
     NativeValue* OnSetOpacitySync(NativeEngine& engine, NativeCallbackInfo& info);
