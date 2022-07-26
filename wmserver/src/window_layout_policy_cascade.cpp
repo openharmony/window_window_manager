@@ -182,9 +182,6 @@ void WindowLayoutPolicyCascade::AddWindowNode(const sptr<WindowNode>& node)
         return;
     }
 
-    // update window size limits when add window
-    UpdateWindowSizeLimits(node);
-
     if (WindowHelper::IsEmptyRect(property->GetRequestRect())) {
         SetCascadeRect(node);
     }
@@ -295,7 +292,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
         WLOGFE("window property is nullptr.");
         return;
     }
-
+    UpdateWindowSizeLimits(node);
     bool needAvoid = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     bool parentLimit = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
     bool subWindow = WindowHelper::IsSubWindow(type);
@@ -500,7 +497,7 @@ void WindowLayoutPolicyCascade::Reorder()
             }
             // if window don't support floating mode, or default rect of cascade is not satisfied with limits
             if (!WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) ||
-                !WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowSizeLimits())) {
+                !WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowUpdatedSizeLimits())) {
                 MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_CASCADE);
                 continue;
             }
