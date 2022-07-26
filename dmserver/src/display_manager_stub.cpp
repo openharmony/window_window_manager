@@ -323,6 +323,14 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             SetScreenRotationLocked(isLocked);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_HAS_PRIVATE_WINDOW: {
+            DisplayId id = static_cast<DisplayId>(data.ReadUint64());
+            bool hasPrivateWindow = false;
+            DMError ret = HasPrivateWindow(id, hasPrivateWindow);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            reply.WriteBool(hasPrivateWindow);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

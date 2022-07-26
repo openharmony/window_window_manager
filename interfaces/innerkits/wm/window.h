@@ -325,6 +325,7 @@ public:
     virtual void SetPrivacyMode(bool isPrivacyMode) = 0;
     virtual bool IsPrivacyMode() const = 0;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) = 0;
+    virtual void SetSnapshotSkip(bool isSkip) = 0;
 
     // window effect
     virtual WMError SetCornerRadius(float cornerRadius) = 0;

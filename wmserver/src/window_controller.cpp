@@ -915,6 +915,10 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             ret = UpdateTransform(windowId);
             break;
         }
+        case PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE: {
+            node->GetWindowProperty()->SetPrivacyMode(property->GetPrivacyMode());
+            break;
+        }
         default:
             break;
     }
