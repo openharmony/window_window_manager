@@ -682,12 +682,12 @@ WMError WindowRoot::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
 WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     auto node = GetWindowNode(windowId);
-    auto token = node->abilityToken_;
     if (node == nullptr) {
         WLOGFW("Window mode is destroyed or not created");
         return WMError::WM_OK;
     }
     WMError res;
+    auto token = node->abilityToken_;
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container != nullptr) {
         UpdateFocusWindowWithWindowRemoved(node, container);
@@ -712,7 +712,8 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
                     HandleKeepScreenOn(id, false);
                     DestroyWindowInner(node);
                 }
-                if ((node != nullptr) && (node->abilityToken_ != token) &&
+                if ((node != nullptr) && (node->GetWindowToken() != nullptr) &&
+                    (node->abilityToken_ != token) &&
                     (node->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
                     node->GetWindowToken()->NotifyDestroy();
                 }
