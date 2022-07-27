@@ -15,7 +15,11 @@
 #ifndef OHOS_ROSEN_ANIMATION_CONFIG_H
 #define OHOS_ROSEN_ANIMATION_CONFIG_H
 
-#include <ui/rs_display_node.h>
+#include "animation/rs_animation_timing_curve.h"
+#include "animation/rs_animation_timing_protocol.h"
+#include "common/rs_vector3.h"
+#include "common/rs_vector4.h"
+
 namespace OHOS {
 namespace Rosen {
 struct AnimationConfig {
@@ -35,6 +39,6 @@ struct AnimationConfig {
         RSAnimationTimingProtocol durationOut_ = 300;
     } keyboardAnimationConfig_;
 };
-} // Rosen
-} // OHOS
+} // namespace Rosen
+} // namespace OHOS
 #endif // OHOS_ROSEN_ANIMATION_CONFIG_H

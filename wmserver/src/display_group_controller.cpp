@@ -93,8 +93,7 @@ void DisplayGroupController::UpdateDisplayGroupWindowTree()
         WindowRootNodeType::APP_WINDOW_NODE,
         WindowRootNodeType::BELOW_WINDOW_NODE
     };
-    for (size_t index = 0; index < rootNodeType.size(); ++index) {
-        auto rootType = rootNodeType[index];
+    for (auto& rootType : rootNodeType) {
         auto rootNode = windowNodeContainer_->GetRootNode(rootType);
         if (rootNode == nullptr) {
             WLOGFE("rootNode is nullptr, %{public}d", rootType);
@@ -327,8 +326,8 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroyedDisplay(DisplayId di
         WindowRootNodeType::APP_WINDOW_NODE,
         WindowRootNodeType::BELOW_WINDOW_NODE
     };
-    for (size_t index = 0; index < rootNodeType.size(); ++index) {
-        auto& nodesVec = *(displayGroupWindowTree_[displayId][rootNodeType[index]]);
+    for (auto& type : rootNodeType) {
+        auto& nodesVec = *(displayGroupWindowTree_[displayId][type]);
         for (auto& node : nodesVec) {
             if (node->GetDisplayId() != displayId || node->isShowingOnMultiDisplays_) {
                 continue;
@@ -387,17 +386,17 @@ void DisplayGroupController::ProcessDisplayDestroy(DisplayId defaultDisplayId, s
     windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayDestroy(displayId, displayRectMap);
 }
 
-void DisplayGroupController::UpdateNodeSizeChangeReasonWithRotation(DisplayId displayId) {
+void DisplayGroupController::UpdateNodeSizeChangeReasonWithRotation(DisplayId displayId)
+{
     std::vector<WindowRootNodeType> rootNodeType = {
         WindowRootNodeType::ABOVE_WINDOW_NODE,
         WindowRootNodeType::APP_WINDOW_NODE,
         WindowRootNodeType::BELOW_WINDOW_NODE
     };
-    for (size_t index = 0; index < rootNodeType.size(); ++index) {
-        auto rootType = rootNodeType[index];
+    for (auto& rootType : rootNodeType) {
         std::vector<sptr<WindowNode>>* rootNodeVectorPtr = GetWindowNodesByDisplayIdAndRootType(displayId, rootType);
         if (rootNodeVectorPtr == nullptr) {
-            WLOGFE("rootNodeVectorPtr is nullptr, %{public}d, displayId: %{public}zu", rootType, displayId);
+            WLOGFE("rootNodeVectorPtr is nullptr, %{public}d, displayId: %{public}" PRIu64, rootType, displayId);
             return;
         }
         for (auto& node : (*rootNodeVectorPtr)) {

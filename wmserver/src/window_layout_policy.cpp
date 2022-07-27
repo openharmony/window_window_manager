@@ -968,7 +968,7 @@ static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const R
         WLOGFI("not need to update bounds");
         return;
     }
-    // if start dragging, set resize gravity for surface node
+    // set surface node gravity based on WindowSizeChangeReason
     if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG_START ||
         node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG ||
         node->GetWindowSizeChangeReason() == WindowSizeChangeReason::ROTATION) {
