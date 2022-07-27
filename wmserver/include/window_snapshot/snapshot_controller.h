@@ -18,6 +18,8 @@
 
 #include <snapshot.h>
 #include <transaction/rs_interfaces.h>
+
+#include "event_handler.h"
 #include "future.h"
 #include "snapshot_stub.h"
 #include "window_root.h"
@@ -27,22 +29,23 @@ namespace OHOS {
 namespace Rosen {
 class SnapshotController : public SnapshotStub {
 public:
-    explicit SnapshotController(sptr<WindowRoot>& root) : windowRoot_(root),
-        rsInterface_(RSInterfaces::GetInstance()) {};
-    SnapshotController() : windowRoot_(nullptr), rsInterface_(RSInterfaces::GetInstance()) {};
+    SnapshotController(sptr<WindowRoot>& root, std::shared_ptr<AppExecFwk::EventHandler>& handler) : windowRoot_(root),
+        handler_(handler), rsInterface_(RSInterfaces::GetInstance()) {};
+    SnapshotController() : windowRoot_(nullptr), handler_(nullptr), rsInterface_(RSInterfaces::GetInstance()) {};
     ~SnapshotController() = default;
     void Init(sptr<WindowRoot>& root);
-
     int32_t GetSnapshot(const sptr<IRemoteObject> &token, AAFwk::Snapshot& snapshot) override;
+
+private:
+    WMError TakeSnapshot(const std::shared_ptr<RSSurfaceNode>& surfaceNode, AAFwk::Snapshot& snapshot);
 
 private:
     float scaleW = 0.5f; // width scaling ratio(0.5)
     float scaleH = 0.5f; // height scaling ratio(0.5)
     sptr<WindowRoot> windowRoot_;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_;
     RSInterfaces& rsInterface_;
-
-    WMError TakeSnapshot(const std::shared_ptr<RSSurfaceNode>& surfaceNode, AAFwk::Snapshot& snapshot);
 };
-}
-}
+} // Rosen
+} // OHOS
 #endif // OHOS_ROSEN_SNAPSHOT_CONTROLLER_H

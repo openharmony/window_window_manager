@@ -49,12 +49,26 @@ int32_t SnapshotController::GetSnapshot(const sptr<IRemoteObject> &token, Snapsh
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:GetSnapshot");
     if (token == nullptr) {
-        WLOGFE("Get ailityToken failed!");
+        WLOGFE("Get snapshot failed, because token is null.");
         return static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
     }
-    std::shared_ptr<RSSurfaceNode> surfaceNode = windowRoot_->GetSurfaceNodeByAbilityToken(token);
+    if (handler_ == nullptr) {
+        WLOGFE("Get snapshot failed, because handler is null.");
+        return static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+    }
+    std::shared_ptr<RSSurfaceNode> surfaceNode;
+    auto task = [this, &surfaceNode, token] () {
+        if (windowRoot_ == nullptr || token == nullptr) {
+            surfaceNode = nullptr;
+            WLOGFE("Get snapshot failed, because windowRoot is null.");
+            return;
+        }
+        surfaceNode = windowRoot_->GetSurfaceNodeByAbilityToken(token);
+    };
+    // post sync task to wms main handler
+    handler_->PostSyncTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     if (surfaceNode == nullptr) {
-        WLOGFE("Get surfaceNode failed!");
+        WLOGFE("Get surfaceNode failed, because surfaceNode is null");
         return static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
     }
     return static_cast<int32_t>(TakeSnapshot(surfaceNode, snapshot));
