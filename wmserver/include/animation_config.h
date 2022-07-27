@@ -25,12 +25,12 @@ struct AnimationConfig {
             RSAnimationTimingCurve timingCurve_ = RSAnimationTimingCurve::EASE_OUT;
         } animationTiming_;
         float opacity_ = 0;
-        Vector3f scale_ { 1, 1, 1 };
+        Vector3f scale_ { 0.7f, 0.7f, 1.0f };
         Vector3f translate_ { 0, 0, 0 };
         Vector4f rotation_ { 0, 0, 1, 0 };
     } windowAnimationConfig_;
     struct KeyboardAnimationConfig {
-        RSAnimationTimingCurve curve_ = RSAnimationTimingCurve::EASE_OUT;
+        RSAnimationTimingCurve curve_ = RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f);
         RSAnimationTimingProtocol durationIn_ = 500;
         RSAnimationTimingProtocol durationOut_ = 300;
     } keyboardAnimationConfig_;
