@@ -144,6 +144,16 @@ sptr<WindowNode> WindowRoot::GetWindowNode(uint32_t windowId) const
     return iter->second;
 }
 
+void WindowRoot::GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vector<sptr<WindowNode>>& windowNodes) const
+{
+    for (const auto& it : windowNodeMap_) {
+        if (it.second && screenGroupId == DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(
+            it.second->GetDisplayId()) && !it.second->currentVisibility_) {
+            windowNodes.push_back(it.second);
+        }
+    }
+}
+
 sptr<WindowNode> WindowRoot::FindWindowNodeWithToken(const sptr<IRemoteObject>& token) const
 {
     if (token == nullptr) {
@@ -1308,7 +1318,7 @@ bool WindowRoot::HasPrivateWindow(DisplayId displayId)
     return container != nullptr ? container->HasPrivateWindow() : false;
 }
 
-void WindowRoot::SetMaxAppWindowNumber(int windowNum)
+void WindowRoot::SetMaxAppWindowNumber(uint32_t windowNum)
 {
     maxAppWindowNumber_ = windowNum;
 }
