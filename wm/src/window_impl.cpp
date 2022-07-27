@@ -2316,7 +2316,8 @@ void WindowImpl::ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointer
         WLOGFI("Transfer pointer event to uiContent");
         (void)uiContent_->ProcessPointerEvent(pointerEvent);
     } else {
-        WLOGE("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
+        WLOGW("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
+        pointerEvent->MarkProcessed();
     }
 }
 
