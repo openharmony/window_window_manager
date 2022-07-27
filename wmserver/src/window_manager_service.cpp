@@ -44,7 +44,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerService"};
-    const std::string WMS_NAME = "WindowManagerSevice";
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
@@ -62,10 +61,10 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     freezeDisplayController_ = new FreezeController();
     windowCommonEvent_ = std::make_shared<WindowCommonEvent>();
     startingOpen_ = system::GetParameter("persist.window.sw.enabled", "1") == "1"; // startingWin default enabled
-    runner_ = AppExecFwk::EventRunner::Create(WMS_NAME);
+    runner_ = AppExecFwk::EventRunner::Create(name_);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(runner_);
     snapshotController_ = new SnapshotController(windowRoot_, handler_);
-    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WMS_NAME, handler_);
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(name_, handler_);
     if (ret != 0) {
         WLOGFE("Add watchdog thread failed");
     }

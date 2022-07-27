@@ -123,6 +123,7 @@ protected:
     virtual ~WindowManagerService() = default;
 
 private:
+    std::string name_ = "WindowManagerService";
     bool Init();
     void RegisterSnapshotHandler();
     void RegisterWindowManagerServiceHandler();
