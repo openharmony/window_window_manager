@@ -513,8 +513,8 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
         dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));
         NotifyScreenConnected(absScreen->ConvertToScreenInfo());
         if (deathRecipient_ == nullptr) {
-            deathRecipient_ = new AgentDeathRecipient(
-                std::bind(&AbstractScreenController::OnRemoteDied, this, std::placeholders::_1));
+            deathRecipient_ =
+                new AgentDeathRecipient([this](const sptr<IRemoteObject>& agent) { OnRemoteDied(agent); });
         }
         auto agIter = screenAgentMap_.find(displayManagerAgent);
         if (agIter == screenAgentMap_.end()) {
@@ -667,6 +667,7 @@ void AbstractScreenController::SetScreenRotateAnimation(
         }
         displayNode->SetRotation(-90.0f * static_cast<uint32_t>(rotationAfter)); // 90.f is base degree
         displayNode->SetFrame(x, y, w, h);
+        displayNode->SetBounds(x, y, w, h);
     });
 }
 
@@ -674,7 +675,7 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
 {
     auto screen = GetAbstractScreen(screenId);
     if (screen == nullptr) {
-        WLOGFE("SetRotation error, cannot get screen with screenId: %{public}zu", screenId);
+        WLOGFE("SetRotation error, cannot get screen with screenId: %{public}" PRIu64, screenId);
         return false;
     }
     if (rotationAfter != screen->rotation_) {
@@ -1216,7 +1217,7 @@ ScreenPowerState AbstractScreenController::GetScreenPower(ScreenId dmsScreenId) 
         WLOGFE("cannot find screen %{public}" PRIu64"", dmsScreenId);
         return ScreenPowerState::INVALID_STATE;
     }
-    ScreenPowerState state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(rsId));
+    auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(rsId));
     WLOGFI("GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, rsId);
     return state;
 }
