@@ -286,6 +286,74 @@ HWTEST_F(WindowOptionTest, SetGetSystemBarProperty03, Function | SmallTest | Lev
     sptr<WindowOption> option = new WindowOption();
     ASSERT_EQ(SYS_BAR_PROPS_DEFAULT, option->GetSystemBarProperty());
 }
+
+/**
+ * @tc.name: HitOffset
+ * @tc.desc: HitOffset setter/getter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, HitOffset, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetHitOffset(1, 1);
+    PointInfo point = {1, 1};
+    ASSERT_EQ(point.x, option->GetHitOffset().x);
+    ASSERT_EQ(point.y, option->GetHitOffset().y);
+}
+
+/**
+ * @tc.name: KeepScreenOn
+ * @tc.desc: KeepScreenOn setter/getter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, KeepScreenOn, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetKeepScreenOn(true);
+    ASSERT_EQ(true, option->IsKeepScreenOn());
+    option->SetKeepScreenOn(false);
+    ASSERT_EQ(false, option->IsKeepScreenOn());
+}
+
+/**
+ * @tc.name: TurnScreenOn
+ * @tc.desc: TurnScreenOn setter/getter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, TurnScreenOn, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetTurnScreenOn(true);
+    ASSERT_EQ(true, option->IsTurnScreenOn());
+    option->SetTurnScreenOn(false);
+    ASSERT_EQ(false, option->IsTurnScreenOn());
+}
+
+/**
+ * @tc.name: Brightness
+ * @tc.desc: Brightness setter/getter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, Brightness, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetBrightness(MINIMUM_BRIGHTNESS);
+    ASSERT_EQ(MINIMUM_BRIGHTNESS, option->GetBrightness());
+    option->SetBrightness(MAXIMUM_BRIGHTNESS);
+    ASSERT_EQ(MAXIMUM_BRIGHTNESS, option->GetBrightness());
+}
+
+/**
+ * @tc.name: CallingWindow
+ * @tc.desc: CallingWindow setter/getter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, CallingWindow, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetCallingWindow(1);
+    ASSERT_EQ(1, option->GetCallingWindow());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

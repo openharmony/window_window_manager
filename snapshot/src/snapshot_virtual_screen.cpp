@@ -66,6 +66,10 @@ int main(int argc, char *argv[])
     ScreenManager::GetInstance().MakeMirror(mainId, mirrorIds);
     int fileIndex = 1;
     auto startTime = time(nullptr);
+    if (startTime < 0) {
+        std::cout << "startTime error!" << std::endl;
+        return 0;
+    }
     while (time(nullptr) - startTime < MAX_SNAPSHOT_COUNT) {
         int waitCount = 0;
         while (!surfaceReaderHandler->IsImageOk()) {

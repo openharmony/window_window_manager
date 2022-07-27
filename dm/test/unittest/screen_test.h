@@ -30,6 +30,7 @@ public:
 
     static sptr<Display> defaultDisplay_;
     static ScreenId defaultScreenId_;
+    static sptr<Screen> screen_;
 };
 } // namespace Rosen
 } // namespace OHOS
