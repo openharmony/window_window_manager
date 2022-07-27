@@ -69,5 +69,5 @@ ohos_shared_library("libwmutil") {
 
 group("test") {
   testonly = true
-  deps = []
+  deps = [ "test:test" ]
 }
