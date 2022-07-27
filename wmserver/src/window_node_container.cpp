@@ -612,6 +612,7 @@ void WindowNodeContainer::AssignZOrder()
 
         if (node->surfaceNode_ != nullptr) {
             node->surfaceNode_->SetPositionZ(zOrder_);
+            node->zOrder_ = zOrder_;
         }
 
         if (node->startingWinSurfaceNode_ != nullptr) {

@@ -16,6 +16,8 @@
 #include "zidl/window_manager_stub.h"
 #include <ipc_skeleton.h>
 #include <rs_iwindow_animation_controller.h>
+
+#include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -147,9 +149,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             break;
         }
         case WindowManagerMessage::TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID: {
-            sptr<AccessibilityWindowInfo> windowInfo = data.ReadParcelable<AccessibilityWindowInfo>();
-            WMError errCode = GetAccessibilityWindowInfo(windowInfo);
-            reply.WriteParcelable(windowInfo);
+            std::vector<sptr<AccessibilityWindowInfo>> infos;
+            WMError errCode = GetAccessibilityWindowInfo(infos);
+            if (!MarshallingHelper::MarshallingVectorParcelableObj<AccessibilityWindowInfo>(reply, infos)) {
+                WLOGFE("Write accessibility window infos failed");
+                return -1;
+            }
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
