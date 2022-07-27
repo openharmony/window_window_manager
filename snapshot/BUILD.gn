@@ -16,26 +16,21 @@ import("//build/ohos.gni")
 ## Build snapshot {{{
 config("snapshot_config") {
   visibility = [ ":*" ]
+  include_dirs = [ "include" ]
 }
 
 ohos_executable("snapshot_display") {
   install_enable = true
-  sources = [
-    "snapshot_display.cpp",
-    "snapshot_utils.cpp",
-  ]
+  sources = [ "src/snapshot_display.cpp" ]
 
   configs = [ ":snapshot_config" ]
 
   deps = [
-    "//foundation/window/window_manager/dm:libdm",
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
-    "//third_party/libpng:libpng",  # png
+    ":libsnapshot_util",
+    "../dm:libdm",
   ]
 
   external_deps = [
-    "hitrace_native:hitrace_meter",
     "multimedia_image_standard:image_native",
     "utils_base:utils",
   ]
@@ -46,19 +41,29 @@ ohos_executable("snapshot_display") {
 
 ohos_executable("snapshot_virtual_screen") {
   install_enable = false
-  sources = [
-    "snapshot_utils.cpp",
-    "snapshot_virtual_screen.cpp",
-  ]
+  sources = [ "src/snapshot_virtual_screen.cpp" ]
 
   configs = [ ":snapshot_config" ]
 
   deps = [
+    ":libsnapshot_util",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_shared_library("libsnapshot_util") {
+  sources = [ "src/snapshot_utils.cpp" ]
+
+  configs = [ ":snapshot_config" ]
+
+  deps = [
     "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
-    "//third_party/libpng:libpng",  # png
+    "//third_party/libpng:libpng",
   ]
 
   external_deps = [
@@ -75,4 +80,5 @@ ohos_executable("snapshot_virtual_screen") {
 
 group("test") {
   testonly = true
+  deps = [ "test:test" ]
 }

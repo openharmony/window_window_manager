@@ -30,26 +30,26 @@ enum class ScreenType : uint32_t {
 class ScreenInfo : public Parcelable {
 friend class AbstractScreen;
 public:
+    ScreenInfo() = default;
     ~ScreenInfo() = default;
     WM_DISALLOW_COPY_AND_MOVE(ScreenInfo);
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static ScreenInfo* Unmarshalling(Parcel& parcel);
 
-    DEFINE_VAR_DEFAULT_FUNC_GET(std::string, Name, name, "");
-    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, ScreenId, id, SCREEN_ID_INVALID);
-    DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, VirtualWidth, virtualWidth, 0);
-    DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, VirtualHeight, virtualHeight, 0);
-    DEFINE_VAR_DEFAULT_FUNC_GET(float, VirtualPixelRatio, virtualPixelRatio, 1.0f);
-    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenId, ParentId, parent, SCREEN_ID_INVALID);
-    DEFINE_VAR_DEFAULT_FUNC_GET(bool, IsScreenGroup, isScreenGroup, false);
-    DEFINE_VAR_DEFAULT_FUNC_GET(Rotation, Rotation, rotation, Rotation::ROTATION_0);
-    DEFINE_VAR_DEFAULT_FUNC_GET(Orientation, Orientation, orientation, Orientation::UNSPECIFIED);
-    DEFINE_VAR_DEFAULT_FUNC_GET(ScreenType, Type, type, ScreenType::UNDEFINE);
-    DEFINE_VAR_DEFAULT_FUNC_GET(uint32_t, ModeId, modeId, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(std::string, Name, name, "");
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenId, ScreenId, id, SCREEN_ID_INVALID);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, VirtualWidth, virtualWidth, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, VirtualHeight, virtualHeight, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, VirtualPixelRatio, virtualPixelRatio, 1.0f);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenId, ParentId, parent, SCREEN_ID_INVALID);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, IsScreenGroup, isScreenGroup, false);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(Rotation, Rotation, rotation, Rotation::ROTATION_0);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, Orientation, orientation, Orientation::UNSPECIFIED);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenType, Type, type, ScreenType::UNDEFINE);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, ModeId, modeId, 0);
     DEFINE_VAR_FUNC_GET(std::vector<sptr<SupportedScreenModes>>, Modes, modes);
 protected:
-    ScreenInfo() = default;
     bool InnerUnmarshalling(Parcel& parcel);
 };
 } // namespace OHOS::Rosen

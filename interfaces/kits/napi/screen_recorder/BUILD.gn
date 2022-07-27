@@ -24,13 +24,12 @@ config("screen_runtime_config") {
     "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//foundation/window/window_manager/wm/include",
     "//foundation/window/window_manager/utils/include",
-    "//foundation/window/window_manager/snapshot",
+    "//foundation/window/window_manager/snapshot/include",
   ]
 }
 
 ohos_shared_library("screenrecorder_napi") {
   sources = [
-    "//foundation/window/window_manager/snapshot/snapshot_utils.cpp",
     "napi/js_screen_recorder.cpp",
     "napi/screen_recorder.cpp",
     "napi/screen_recorder_module.cpp",
@@ -43,6 +42,7 @@ ohos_shared_library("screenrecorder_napi") {
     "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/snapshot:libsnapshot_util",
     "//foundation/window/window_manager/utils:libwmutil",
     "//third_party/libpng:libpng",  # png
   ]

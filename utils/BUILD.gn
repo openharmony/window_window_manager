@@ -66,3 +66,8 @@ ohos_shared_library("libwmutil") {
   part_name = "window_manager"
   subsystem_name = "window"
 }
+
+group("test") {
+  testonly = true
+  deps = []
+}

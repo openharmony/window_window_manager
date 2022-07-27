@@ -26,15 +26,19 @@ using Mocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
 
 sptr<Display> ScreenTest::defaultDisplay_ = nullptr;
 ScreenId ScreenTest::defaultScreenId_ = SCREEN_ID_INVALID;
+sptr<Screen> ScreenTest::screen_ = nullptr;
 
 void ScreenTest::SetUpTestCase()
 {
     defaultDisplay_ = DisplayManager::GetInstance().GetDefaultDisplay();
     defaultScreenId_ = static_cast<ScreenId>(defaultDisplay_->GetId());
+    screen_ = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
 }
 
 void ScreenTest::TearDownTestCase()
 {
+    defaultDisplay_ = nullptr;
+    screen_ = nullptr;
 }
 
 void ScreenTest::SetUp()
@@ -47,18 +51,35 @@ void ScreenTest::TearDown()
 
 namespace {
 /**
+ * @tc.name: GetBasicProperty01
+ * @tc.desc: Basic property getter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenTest, GetBasicProperty01, Function | SmallTest | Level1)
+{
+    ASSERT_GT(screen_->GetName().size(), 0);
+    ASSERT_GT(screen_->GetWidth(), 0);
+    ASSERT_GT(screen_->GetHeight(), 0);
+    ASSERT_GT(screen_->GetVirtualWidth(), 0);
+    ASSERT_GT(screen_->GetVirtualHeight(), 0);
+    ASSERT_GT(screen_->GetVirtualPixelRatio(), 0);
+    ASSERT_EQ(screen_->GetRotation(), Rotation::ROTATION_0);
+    ASSERT_EQ(screen_->IsReal(), true);
+    ASSERT_NE(screen_->GetScreenInfo(), nullptr);
+}
+
+/**
  * @tc.name: SetScreenActiveMode01
  * @tc.desc: SetScreenActiveMode with valid modeId and return success
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenTest, SetScreenActiveMode01, Function | SmallTest | Level1)
 {
-    auto screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
-    auto supportedModes = screen->GetSupportedModes();
+    auto supportedModes = screen_->GetSupportedModes();
     ASSERT_GT(supportedModes.size(), 0);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetScreenActiveMode(_, _)).Times(1).WillOnce(Return(true));
-    bool res = screen->SetScreenActiveMode(supportedModes.size() - 1);
+    bool res = screen_->SetScreenActiveMode(supportedModes.size() - 1);
     ASSERT_EQ(true, res);
 }
 
@@ -69,12 +90,11 @@ HWTEST_F(ScreenTest, SetScreenActiveMode01, Function | SmallTest | Level1)
  */
 HWTEST_F(ScreenTest, SetScreenActiveMode02, Function | SmallTest | Level1)
 {
-    auto screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
-    auto supportedModes = screen->GetSupportedModes();
+    auto supportedModes = screen_->GetSupportedModes();
     ASSERT_GT(supportedModes.size(), 0);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetScreenActiveMode(_, _)).Times(1).WillOnce(Return(false));
-    bool res = screen->SetScreenActiveMode(supportedModes.size() - 1);
+    bool res = screen_->SetScreenActiveMode(supportedModes.size() - 1);
     ASSERT_EQ(false, res);
 }
 
@@ -85,11 +105,10 @@ HWTEST_F(ScreenTest, SetScreenActiveMode02, Function | SmallTest | Level1)
  */
 HWTEST_F(ScreenTest, GetScreenSupportedColorGamuts01, Function | SmallTest | Level2)
 {
-    auto screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetScreenSupportedColorGamuts(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     std::vector<ScreenColorGamut> colorGamuts;
-    auto res = screen->GetScreenSupportedColorGamuts(colorGamuts);
+    auto res = screen_->GetScreenSupportedColorGamuts(colorGamuts);
     ASSERT_EQ(DMError::DM_OK, res);
 }
 
@@ -100,11 +119,10 @@ HWTEST_F(ScreenTest, GetScreenSupportedColorGamuts01, Function | SmallTest | Lev
  */
 HWTEST_F(ScreenTest, GetScreenColorGamut01, Function | SmallTest | Level2)
 {
-    auto screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetScreenColorGamut(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     ScreenColorGamut colorGamut = ScreenColorGamut::COLOR_GAMUT_SRGB;
-    auto res = screen->GetScreenColorGamut(colorGamut);
+    auto res = screen_->GetScreenColorGamut(colorGamut);
     ASSERT_EQ(DMError::DM_OK, res);
 }
 
@@ -115,11 +133,10 @@ HWTEST_F(ScreenTest, GetScreenColorGamut01, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenTest, SetScreenColorGamut01, Function | SmallTest | Level2)
 {
-    auto screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetScreenColorGamut(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     ScreenColorGamut colorGamut = ScreenColorGamut::COLOR_GAMUT_SRGB;
-    auto res = screen->SetScreenColorGamut(colorGamut);
+    auto res = screen_->SetScreenColorGamut(colorGamut);
     ASSERT_EQ(DMError::DM_OK, res);
 }
 
@@ -130,11 +147,10 @@ HWTEST_F(ScreenTest, SetScreenColorGamut01, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenTest, GetScreenGamutMap01, Function | SmallTest | Level2)
 {
-    auto screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), GetScreenGamutMap(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     ScreenGamutMap gamutMap = ScreenGamutMap::GAMUT_MAP_CONSTANT;
-    auto res = screen->GetScreenGamutMap(gamutMap);
+    auto res = screen_->GetScreenGamutMap(gamutMap);
     ASSERT_EQ(DMError::DM_OK, res);
 }
 
@@ -145,11 +161,10 @@ HWTEST_F(ScreenTest, GetScreenGamutMap01, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenTest, SetScreenGamutMap01, Function | SmallTest | Level2)
 {
-    auto screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetScreenGamutMap(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     ScreenGamutMap gamutMap = ScreenGamutMap::GAMUT_MAP_CONSTANT;
-    auto res = screen->SetScreenGamutMap(gamutMap);
+    auto res = screen_->SetScreenGamutMap(gamutMap);
     ASSERT_EQ(DMError::DM_OK, res);
 }
 
@@ -160,10 +175,9 @@ HWTEST_F(ScreenTest, SetScreenGamutMap01, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenTest, SetScreenColorTransform01, Function | SmallTest | Level2)
 {
-    auto screen = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), SetScreenColorTransform(_)).Times(1).WillOnce(Return(DMError::DM_OK));
-    auto res = screen->SetScreenColorTransform();
+    auto res = screen_->SetScreenColorTransform();
     ASSERT_EQ(DMError::DM_OK, res);
 }
 }

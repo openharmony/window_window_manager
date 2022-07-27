@@ -31,15 +31,10 @@
 #include <string>
 #include <sys/time.h>
 
-#include "display_manager.h"
-
-
-using namespace OHOS::Media;
 using namespace OHOS::Rosen;
 
 namespace OHOS {
 constexpr int BITMAP_DEPTH = 8;
-constexpr int BPP = 4;
 constexpr int MAX_TIME_STR_LEN = 40;
 constexpr int YEAR_SINCE = 1900;
 
@@ -112,28 +107,19 @@ bool SnapShotUtils::CheckFileNameValid(const std::string &fileName)
     return false;
 }
 
-static bool CheckWHValid(int32_t param)
+bool SnapShotUtils::CheckWHValid(int32_t param)
 {
-    if ((param <= 0) || (param > DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT)) {
-        return false;
-    }
-    return true;
+    return (param > 0) && (param <= DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT);
 }
 
-bool SnapShotUtils::CheckWidthAndHeightValid(const CmdArgments& cmdArgments)
+bool SnapShotUtils::CheckWidthAndHeightValid(int32_t w, int32_t h)
 {
-    if (!CheckWHValid(cmdArgments.width) || !CheckWHValid(cmdArgments.height)) {
-        return false;
-    }
-    return true;
+    return CheckWHValid(w) && CheckWHValid(h);
 }
 
-static bool CheckParamValid(const WriteToPngParam &param)
+bool SnapShotUtils::CheckParamValid(const WriteToPngParam &param)
 {
-    if (param.width > DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT) {
-        return false;
-    }
-    if (param.height > DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT) {
+    if (!CheckWidthAndHeightValid(param.width, param.height)) {
         return false;
     }
     if (param.stride < BPP * param.width) {
@@ -249,7 +235,7 @@ bool SnapShotUtils::WriteToPng(int fd, const WriteToPngParam &param)
     return true;
 }
 
-bool SnapShotUtils::WriteToPngWithPixelMap(const std::string &fileName, PixelMap &pixelMap)
+bool SnapShotUtils::WriteToPngWithPixelMap(const std::string &fileName, Media::PixelMap &pixelMap)
 {
     WriteToPngParam param;
     param.width = static_cast<uint32_t>(pixelMap.GetWidth());
@@ -271,7 +257,7 @@ bool SnapShotUtils::WriteToPngWithPixelMap(int fd, Media::PixelMap &pixelMap)
     return SnapShotUtils::WriteToPng(fd, param);
 }
 
-static bool ProcessDisplayId(DisplayId &displayId, bool isDisplayIdSet)
+bool SnapShotUtils::ProcessDisplayId(Rosen::DisplayId &displayId, bool isDisplayIdSet)
 {
     if (!isDisplayIdSet) {
         displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
