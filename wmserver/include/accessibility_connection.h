@@ -30,16 +30,20 @@ class AccessibilityConnection : public RefBase {
 public:
     explicit AccessibilityConnection(sptr<WindowRoot>& root) : windowRoot_(root) {}
     ~AccessibilityConnection() = default;
-    void NotifyAccessibilityInfo(const sptr<WindowNode>& node, WindowUpdateType type);
-    void GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const;
+    void NotifyAccessibilityWindowInfo(const sptr<WindowNode>& node, WindowUpdateType type);
+    void NotifyAccessibilityWindowInfo(DisplayId displayId, const std::vector<sptr<WindowNode>>& nodes,
+        WindowUpdateType type);
+    void NotifyAccessibilityWindowInfo(DisplayId displayId, WindowUpdateType type);
+    void GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
 
 private:
     sptr<WindowRoot> windowRoot_;
     std::map<sptr<WindowNodeContainer>, uint32_t> focusedWindowMap_;
-    void NotifyAccessibilityWindowInfo(const sptr<WindowNodeContainer>& container, const sptr<WindowNode>& node,
+    void NotifyAccessibilityWindowInfo(const std::vector<sptr<WindowNode>>& nodes, uint32_t focusedWindow,
         WindowUpdateType type) const;
-    void GetWindowList(const sptr<WindowNodeContainer>& container, std::vector<sptr<WindowInfo>>& windowList) const;
-    void FillWindowInfo(const sptr<WindowNode>& node, uint32_t focusedWindow, sptr<WindowInfo>& windowInfo) const;
+    void FillAccessibilityWindowInfo(const std::vector<sptr<WindowNode>>& nodes, uint32_t focusedWindow,
+        std::vector<sptr<AccessibilityWindowInfo>>& windowInfo) const;
+    void UpdateFocusChangeEvent(const sptr<WindowNodeContainer>& container);
 };
 }
 #endif // OHOS_ROSEN_ACCESSIBILITY_CONTROLLER_H

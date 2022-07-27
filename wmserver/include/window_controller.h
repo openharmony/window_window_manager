@@ -67,7 +67,7 @@ public:
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
     Orientation GetWindowPreferredOrientation(DisplayId displayId);
     void OnScreenshot(DisplayId displayId);
-    WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const;
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
     WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken);
     WMError InterceptInputEventToServer(uint32_t windowId);
     WMError RecoverInputEventToClient(uint32_t windowId);

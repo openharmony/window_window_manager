@@ -88,23 +88,6 @@ public:
     virtual void OnWindowVisibilityChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo) = 0;
 };
 
-class WindowInfo : public Parcelable {
-public:
-    WindowInfo() = default;
-    ~WindowInfo() = default;
-
-    virtual bool Marshalling(Parcel& parcel) const override;
-    static WindowInfo* Unmarshalling(Parcel& parcel);
-
-    int32_t wid_;
-    Rect windowRect_;
-    bool focused_ { false };
-    bool isDecorEnable_ { false };
-    DisplayId displayId_;
-    WindowMode mode_;
-    WindowType type_;
-};
-
 class AccessibilityWindowInfo : public Parcelable {
 public:
     AccessibilityWindowInfo() = default;
@@ -113,16 +96,19 @@ public:
     virtual bool Marshalling(Parcel& parcel) const override;
     static AccessibilityWindowInfo* Unmarshalling(Parcel& parcel);
 
-    sptr<WindowInfo> currentWindowInfo_;
-    std::vector<sptr<WindowInfo>> windowList_;
-
-private:
-    bool VectorMarshalling(Parcel& parcel) const;
-    static void VectorUnmarshalling(Parcel& parcel, AccessibilityWindowInfo* windowInfo);
+    int32_t wid_;
+    Rect windowRect_;
+    bool focused_ { false };
+    bool isDecorEnable_ { false };
+    DisplayId displayId_;
+    uint32_t layer_;
+    WindowMode mode_;
+    WindowType type_;
 };
+
 class IWindowUpdateListener : virtual public RefBase {
 public:
-    virtual void OnWindowUpdate(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) = 0;
+    virtual void OnWindowUpdate(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type) = 0;
 };
 
 class ICameraFloatWindowChangedListener : virtual public RefBase {
@@ -147,7 +133,7 @@ public:
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
-    WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const;
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
 
 private:
     WindowManager();
@@ -159,7 +145,8 @@ private:
         DisplayId displayId, bool focused) const;
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const;
     void UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints) const;
-    void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) const;
+    void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
+        WindowUpdateType type) const;
     void UpdateWindowVisibilityInfo(
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos) const;
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const;

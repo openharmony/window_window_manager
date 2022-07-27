@@ -65,7 +65,7 @@ public:
     virtual WMError UpdateAvoidAreaListener(uint32_t windowId, bool haveListener);
     virtual void ClearWindowAdapter();
 
-    virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo);
+    virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     virtual void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
 private:
