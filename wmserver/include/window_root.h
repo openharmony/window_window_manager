@@ -41,6 +41,7 @@ public:
     sptr<WindowNodeContainer> GetWindowNodeContainer(DisplayId displayId);
     sptr<WindowNodeContainer> CreateWindowNodeContainer(sptr<DisplayInfo> displayInfo);
     sptr<WindowNode> GetWindowNode(uint32_t windowId) const;
+    void GetBackgroundNodesByScreenId(ScreenId screenGroupId, std::vector<sptr<WindowNode>>& windowNodes) const;
 
     WMError SaveWindow(const sptr<WindowNode>& node);
     void AddDeathRecipient(sptr<WindowNode> node);
@@ -84,7 +85,7 @@ public:
     void SetBrightness(uint32_t windowId, float brightness);
     void HandleKeepScreenOn(uint32_t windowId, bool requireLock);
     void UpdateFocusableProperty(uint32_t windowId);
-    void SetMaxAppWindowNumber(int windowNum);
+    void SetMaxAppWindowNumber(uint32_t windowNum);
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     std::vector<DisplayId> GetAllDisplayIds() const;
@@ -100,6 +101,7 @@ public:
     sptr<WindowNode> FindDialogCallerNode(WindowType type, sptr<IRemoteObject> token);
     bool CheckMultiDialogWindows(WindowType type, sptr<IRemoteObject> token);
     bool HasPrivateWindow(DisplayId displayId);
+
 private:
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
