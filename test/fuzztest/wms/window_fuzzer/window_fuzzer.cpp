@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "marshalling_helper.h"
 #include "window.h"
 #include "window_manager.h"
 
@@ -49,7 +50,7 @@ public:
 
 class WindowUpdateListener : public IWindowUpdateListener {
 public:
-    virtual void OnWindowUpdate(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) override
+    virtual void OnWindowUpdate(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type) override
     {
     }
 };

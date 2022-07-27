@@ -25,13 +25,110 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AccessibilityConnection"};
 }
 
-void AccessibilityConnection::NotifyAccessibilityInfo(const sptr<WindowNode>& node, WindowUpdateType type)
+void AccessibilityConnection::NotifyAccessibilityWindowInfo(const sptr<WindowNode>& node, WindowUpdateType type)
 {
     if (node == nullptr) {
         WLOGFE("window node is null");
         return;
     }
     auto container = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (container == nullptr) {
+        WLOGFE("container is null");
+        return;
+    }
+    std::vector<sptr<WindowNode>> nodes;
+    nodes.emplace_back(node);
+    UpdateFocusChangeEvent(container);
+    NotifyAccessibilityWindowInfo(nodes, container->GetFocusWindow(), type);
+}
+
+void AccessibilityConnection::NotifyAccessibilityWindowInfo(DisplayId displayId,
+    const std::vector<sptr<WindowNode>>& nodes, WindowUpdateType type)
+{
+    if (nodes.empty()) {
+        WLOGFE("nodes is empty");
+        return;
+    }
+    auto container = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("container is null");
+        return;
+    }
+    UpdateFocusChangeEvent(container);
+    NotifyAccessibilityWindowInfo(nodes, container->GetFocusWindow(), type);
+}
+
+void AccessibilityConnection::NotifyAccessibilityWindowInfo(DisplayId displayId, WindowUpdateType type)
+{
+    auto container = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("container is null");
+        return;
+    }
+    std::vector<sptr<WindowNode>> nodes;
+    container->TraverseContainer(nodes);
+    UpdateFocusChangeEvent(container);
+    NotifyAccessibilityWindowInfo(nodes, container->GetFocusWindow(), type);
+}
+
+void AccessibilityConnection::NotifyAccessibilityWindowInfo(const std::vector<sptr<WindowNode>>& nodes,
+    uint32_t focusedWindow, WindowUpdateType type) const
+{
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    FillAccessibilityWindowInfo(nodes, focusedWindow, infos);
+    if (infos.empty()) {
+        WLOGFE("infos is empty");
+        return;
+    }
+    WindowManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(infos, type);
+}
+
+void AccessibilityConnection::FillAccessibilityWindowInfo(const std::vector<sptr<WindowNode>>& nodes,
+    uint32_t focusedWindow, std::vector<sptr<AccessibilityWindowInfo>>& infos) const
+{
+    for (auto& node : nodes) {
+        sptr<AccessibilityWindowInfo> info = new (std::nothrow) AccessibilityWindowInfo();
+        if (info == nullptr) {
+            WLOGFE("new accessibilityWindowInfo is null");
+            return;
+        }
+        if (node == nullptr) {
+            WLOGFW("node is null");
+            break;
+        }
+        info->wid_ = static_cast<int32_t>(node->GetWindowId());
+        info->windowRect_ = node->GetWindowRect();
+        info->focused_ = node->GetWindowId() == focusedWindow;
+        info->displayId_ = node->GetDisplayId();
+        info->layer_ = node->zOrder_;
+        info->mode_ = node->GetWindowMode();
+        info->type_ = node->GetWindowType();
+        auto property = node->GetWindowProperty();
+        if (property != nullptr) {
+            info->isDecorEnable_ = property->GetDecorEnable();
+        }
+        infos.emplace_back(info);
+    }
+}
+
+void AccessibilityConnection::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const
+{
+    std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainers;
+    std::vector<DisplayId> displayIds = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
+    for (DisplayId displayId : displayIds) {
+        ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
+        auto container = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
+        if (windowNodeContainers.count(screenGroupId) == 0 && container != nullptr) {
+            windowNodeContainers.insert(std::make_pair(screenGroupId, container));
+            std::vector<sptr<WindowNode>> nodes;
+            container->TraverseContainer(nodes);
+            FillAccessibilityWindowInfo(nodes, container->GetFocusWindow(), infos);
+        }
+    }
+}
+
+void AccessibilityConnection::UpdateFocusChangeEvent(const sptr<WindowNodeContainer>& container)
+{
     if (container == nullptr) {
         WLOGFE("container is null");
         return;
@@ -50,87 +147,16 @@ void AccessibilityConnection::NotifyAccessibilityInfo(const sptr<WindowNode>& no
             iter->second = focusWindowId;
         }
     }
-    WLOGFI("notify accessibility window info: [%{public}u %{public}u %{public}d %{public}d]",
-        node->GetWindowId(), focusWindowId, focusChange, static_cast<int32_t>(type));
-    // need handle focus change
-    switch (type) {
-        case WindowUpdateType::WINDOW_UPDATE_ADDED:
-            if (node->currentVisibility_) {
-                NotifyAccessibilityWindowInfo(container, node, type);
-            }
-            break;
-        case WindowUpdateType::WINDOW_UPDATE_REMOVED:
-            NotifyAccessibilityWindowInfo(container, node, type);
-            break;
-        case WindowUpdateType::WINDOW_UPDATE_PROPERTY:
-            NotifyAccessibilityWindowInfo(container, node, type);
-            break;
-        default:
-            break;
-    }
     if (focusChange) {
         auto focusWindowNode = windowRoot_->GetWindowNode(focusWindowId);
         if (focusWindowNode == nullptr) {
             WLOGFE("could not find window");
             return;
         }
-        NotifyAccessibilityWindowInfo(container, focusWindowNode, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
-    }
-}
-
-void AccessibilityConnection::NotifyAccessibilityWindowInfo(const sptr<WindowNodeContainer>& container,
-    const sptr<WindowNode>& node, WindowUpdateType type) const
-{
-    sptr<WindowInfo> windowInfo = new (std::nothrow) WindowInfo();
-    sptr<AccessibilityWindowInfo> accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
-    if (windowInfo != nullptr && accessibilityWindowInfo != nullptr) {
-        FillWindowInfo(node, container->GetFocusWindow(), windowInfo);
-        accessibilityWindowInfo->currentWindowInfo_ = windowInfo;
-        GetWindowList(container, accessibilityWindowInfo->windowList_);
-        WindowManagerAgentController::GetInstance().NotifyAccessibilityWindowInfo(accessibilityWindowInfo, type);
-    }
-}
-
-void AccessibilityConnection::GetWindowList(const sptr<WindowNodeContainer>& container,
-    std::vector<sptr<WindowInfo>>& windowList) const
-{
-    std::vector<sptr<WindowNode>> nodes;
-    container->TraverseContainer(nodes);
-    for (auto& node : nodes) {
-        sptr<WindowInfo> windowInfo = new (std::nothrow) WindowInfo();
-        if (windowInfo != nullptr) {
-            FillWindowInfo(node, container->GetFocusWindow(), windowInfo);
-            windowList.emplace_back(windowInfo);
-        }
-    }
-}
-
-void AccessibilityConnection::FillWindowInfo(const sptr<WindowNode>& node, uint32_t focusedWindow,
-    sptr<WindowInfo>& windowInfo) const
-{
-    windowInfo->wid_ = static_cast<int32_t>(node->GetWindowId());
-    windowInfo->windowRect_ = node->GetWindowRect();
-    windowInfo->focused_ = node->GetWindowId() == focusedWindow;
-    windowInfo->displayId_ = node->GetDisplayId();
-    windowInfo->mode_ = node->GetWindowMode();
-    windowInfo->type_ = node->GetWindowType();
-    auto property = node->GetWindowProperty();
-    if (property != nullptr) {
-        windowInfo->isDecorEnable_ = property->GetDecorEnable();
-    }
-}
-
-void AccessibilityConnection::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const
-{
-    std::map<ScreenId, sptr<WindowNodeContainer>> windowNodeContainers;
-    std::vector<DisplayId> displayIds = DisplayManagerServiceInner::GetInstance().GetAllDisplayIds();
-    for (DisplayId displayId : displayIds) {
-        ScreenId screenGroupId = DisplayManagerServiceInner::GetInstance().GetScreenGroupIdByDisplayId(displayId);
-        auto container = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
-        if (windowNodeContainers.count(screenGroupId) == 0 && container != nullptr) {
-            windowNodeContainers.insert(std::make_pair(screenGroupId, container));
-            GetWindowList(container, windowInfo->windowList_);
-        }
+        std::vector<sptr<WindowNode>> focusNodes;
+        focusNodes.emplace_back(focusWindowNode);
+        WLOGFI("notify accessibility window info: focus change, focusWindowId: %{public}u", focusWindowId);
+        NotifyAccessibilityWindowInfo(focusNodes, focusWindowId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
     }
 }
 }
