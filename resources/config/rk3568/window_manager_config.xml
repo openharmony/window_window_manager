@@ -65,4 +65,6 @@
             <curve name="cubic">0.2 0.0 0.2 1.0</curve>
         </timing>
     </keyboardAnimation>
+    <!--enable/disable remote animation-->
+    <remoteAnimation enable="true"></remoteAnimation>
 </Configs>
