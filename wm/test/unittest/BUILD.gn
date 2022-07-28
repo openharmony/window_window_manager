@@ -30,7 +30,6 @@ group("unittest") {
   ]
 }
 
-## UnitTest wm_window_impl_test {{{
 ohos_unittest("wm_window_impl_test") {
   module_out_path = module_out_path
 
@@ -39,9 +38,6 @@ ohos_unittest("wm_window_impl_test") {
   deps = [ ":wm_unittest_common" ]
 }
 
-## UnitTest wm_window_impl_test }}}
-
-## UnitTest wm_window_effect_test {{{
 ohos_unittest("wm_window_effect_test") {
   module_out_path = module_out_path
 
@@ -50,9 +46,6 @@ ohos_unittest("wm_window_effect_test") {
   deps = [ ":wm_unittest_common" ]
 }
 
-## UnitTest wm_window_effect_test }}}
-
-## UnitTest wm_input_transfer_station_test {{{
 ohos_unittest("wm_input_transfer_station_test") {
   module_out_path = module_out_path
 
@@ -61,9 +54,6 @@ ohos_unittest("wm_input_transfer_station_test") {
   deps = [ ":wm_unittest_common" ]
 }
 
-## UnitTest wm_input_transfer_station_test }}}
-
-## UnitTest wm_window_input_channel_test {{{
 ohos_unittest("wm_window_input_channel_test") {
   module_out_path = module_out_path
 
@@ -72,9 +62,6 @@ ohos_unittest("wm_window_input_channel_test") {
   deps = [ ":wm_unittest_common" ]
 }
 
-## UnitTest wm_window_input_channel_test }}}
-
-## UnitTest wm_window_option_test {{{
 ohos_unittest("wm_window_option_test") {
   module_out_path = module_out_path
 
@@ -83,9 +70,6 @@ ohos_unittest("wm_window_option_test") {
   deps = [ ":wm_unittest_common" ]
 }
 
-## UnitTest wm_window_option_test }}}
-
-## UnitTest wm_window_scene_test {{{
 ohos_unittest("wm_window_scene_test") {
   module_out_path = module_out_path
 
@@ -94,9 +78,6 @@ ohos_unittest("wm_window_scene_test") {
   deps = [ ":wm_unittest_common" ]
 }
 
-## UnitTest wm_window_scene_test }}}
-
-## UnitTest wm_window_test {{{
 ohos_unittest("wm_window_test") {
   module_out_path = module_out_path
 
@@ -105,9 +86,6 @@ ohos_unittest("wm_window_test") {
   deps = [ ":wm_unittest_common" ]
 }
 
-## UnitTest wm_window_test }}}
-
-## UnitTest wms_window_snapshot_test {{{
 ohos_unittest("wms_window_snapshot_test") {
   module_out_path = module_out_path
 
@@ -115,8 +93,6 @@ ohos_unittest("wms_window_snapshot_test") {
 
   deps = [ ":wm_unittest_common" ]
 }
-
-## UnitTest wm_window_impl_test }}}
 
 ## Build wm_unittest_common.a {{{
 config("wm_unittest_common_public_config") {

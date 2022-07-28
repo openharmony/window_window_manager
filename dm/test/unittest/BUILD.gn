@@ -27,7 +27,6 @@ group("unittest") {
   ]
 }
 
-## UnitTest dm_display_change_unit_test {{{
 ohos_unittest("dm_display_change_unit_test") {
   module_out_path = module_out_path
 
@@ -36,9 +35,6 @@ ohos_unittest("dm_display_change_unit_test") {
   deps = [ ":dm_unittest_common" ]
 }
 
-## UnitTest dm_display_change_unit_test }}}
-
-## UnitTest dm_display_power_unit_test {{{
 ohos_unittest("dm_display_power_unit_test") {
   module_out_path = module_out_path
 
@@ -47,9 +43,6 @@ ohos_unittest("dm_display_power_unit_test") {
   deps = [ ":dm_unittest_common" ]
 }
 
-## UnitTest dm_snapshot_utils_test }}}
-
-## UnitTest dm_screenshot_test {{{
 ohos_unittest("dm_screenshot_test") {
   module_out_path = module_out_path
 
@@ -58,9 +51,6 @@ ohos_unittest("dm_screenshot_test") {
   deps = [ ":dm_unittest_common" ]
 }
 
-## UnitTest dm_screenshot_test }}}
-
-## UnitTest dm_screen_manager_test {{{
 ohos_unittest("dm_screen_manager_test") {
   module_out_path = module_out_path
 
@@ -69,9 +59,6 @@ ohos_unittest("dm_screen_manager_test") {
   deps = [ ":dm_unittest_common" ]
 }
 
-## UnitTest dm_screen_manager_test }}}
-
-## UnitTest dm_screen_test {{{
 ohos_unittest("dm_screen_test") {
   module_out_path = module_out_path
 
@@ -80,8 +67,6 @@ ohos_unittest("dm_screen_test") {
   deps = [ ":dm_unittest_common" ]
 }
 
-## UnitTest dm_screen_test }}}
-
 ## Build dm_unittest_common.a {{{
 config("dm_unittest_common_public_config") {
   include_dirs = [
@@ -89,7 +74,7 @@ config("dm_unittest_common_public_config") {
     "//foundation/window/window_manager/dmserver/include",
     "//foundation/window/window_manager/snapshot",
     "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//foundation/window/window_manager/dm/test/utils/",
+    "//foundation/window/window_manager/test/common/utils/include",
     "//foundation/window/window_manager/utils/include",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client",  # RSSurface
   ]
@@ -101,10 +86,7 @@ ohos_static_library("dm_unittest_common") {
 
   public_configs = [ ":dm_unittest_common_public_config" ]
 
-  sources = [
-    "../utils/test_utils.cpp",
-    "screen_manager_utils.cpp",
-  ]
+  sources = [ "screen_manager_utils.cpp" ]
 
   public_deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
@@ -113,6 +95,7 @@ ohos_static_library("dm_unittest_common") {
     "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/dmserver:libdms",
     "//foundation/window/window_manager/snapshot:snapshot_display",
+    "//foundation/window/window_manager/test/common/utils:libtestutil",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
     "//third_party/googletest:gmock",

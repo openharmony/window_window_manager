@@ -20,7 +20,7 @@
 #include "pixel_map.h"
 
 #include "snapshot_utils.h"
-#include "test_utils.h"
+#include "common_test_utils.h"
 #include "window_manager_hilog.h"
 
 using namespace testing;
@@ -58,7 +58,7 @@ void SnapshotDisplayTest::SetUpTestCase()
 
     defaultId_ = display->GetId();
 
-    TestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
+    CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
 }
 
 void SnapshotDisplayTest::TearDownTestCase()
