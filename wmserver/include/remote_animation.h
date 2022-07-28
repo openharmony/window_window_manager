@@ -56,6 +56,7 @@ public:
     static bool CheckAnimationController();
     static WMError NotifyAnimationByHome(sptr<WindowRoot>& windowRoot);
     static WMError NotifyAnimationScreenUnlock(std::function<void(void)> callback);
+    static bool isRemoteAnimationEnable_;
 private:
     static sptr<RSWindowAnimationTarget> CreateWindowAnimationTarget(sptr<WindowTransitionInfo> info,
         const sptr<WindowNode>& windowNode);

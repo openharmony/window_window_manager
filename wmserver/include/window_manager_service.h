@@ -146,6 +146,7 @@ private:
         }
         return ret;
     }
+    void ConfigHotZones(const std::vector<int>& hotZones);
     void ConfigWindowAnimation(const std::map<std::string, WindowManagerConfig::ConfigItem>& animeMap);
     void ConfigKeyboardAnimation(const std::map<std::string, WindowManagerConfig::ConfigItem>& animeMap);
     RSAnimationTimingCurve CreateCurve(const std::map<std::string, WindowManagerConfig::ConfigItem>& timingMap);

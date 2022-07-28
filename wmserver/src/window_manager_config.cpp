@@ -73,7 +73,8 @@ void WindowManagerConfig::ReadConfig(const xmlNodePtr& rootPtr, std::map<std::st
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("opacity")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("decor")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("minimizeByOther")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("stretchable"))) {
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("stretchable")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("remoteAnimation"))) {
             std::map<std::string, ConfigItem> p;
             ReadProperty(curNodePtr, p);
             if (p.size() > 0) {
@@ -122,22 +123,19 @@ bool WindowManagerConfig::IsValidNode(const xmlNode& currNode)
 void WindowManagerConfig::ReadProperty(const xmlNodePtr& currNode,
     std::map<std::string, ConfigItem>& property)
 {
-    ConfigItem item;
     xmlChar* prop = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("enable"));
     if (prop != nullptr) {
         if (!xmlStrcmp(prop, reinterpret_cast<const xmlChar*>("true"))) {
-            item.SetValue(true);
+            property["enable"].SetValue(true);
         } else if (!xmlStrcmp(prop, reinterpret_cast<const xmlChar*>("false"))) {
-            item.SetValue(false);
+            property["enable"].SetValue(false);
         }
-        property["enable"] = item;
         xmlFree(prop);
     }
 
     prop = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("name"));
     if (prop != nullptr) {
-        item.SetValue(std::string(reinterpret_cast<const char*>(prop)));
-        property["name"] = item;
+        property["name"].SetValue(std::string(reinterpret_cast<const char*>(prop)));
         xmlFree(prop);
     }
 }
