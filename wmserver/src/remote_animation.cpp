@@ -28,6 +28,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "RemoteAnimation"};
 }
+bool RemoteAnimation::isRemoteAnimationEnable_ = true;
 
 sptr<RSIWindowAnimationController> RemoteAnimation::windowAnimationController_ = nullptr;
 std::map<TransitionReason, TransitionEvent> eventMap_ = {
@@ -39,6 +40,10 @@ std::map<TransitionReason, TransitionEvent> eventMap_ = {
 WMError RemoteAnimation::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
 {
     WLOGFI("RSWindowAnimation: set window animation controller!");
+    if (!isRemoteAnimationEnable_) {
+        WLOGE("RSWindowAnimation: failed to set window animation controller, remote animation is not enabled");
+        return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
+    }
     if (controller == nullptr) {
         WLOGFE("RSWindowAnimation: failed to set window animation controller, controller is null!");
         return WMError::WM_ERROR_NULLPTR;
