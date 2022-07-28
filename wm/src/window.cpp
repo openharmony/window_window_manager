@@ -79,6 +79,11 @@ std::vector<sptr<Window>> Window::GetSubWindow(uint32_t parentId)
     return WindowImpl::GetSubWindow(parentId);
 }
 
+void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    return WindowImpl::UpdateConfigurationForAll(configuration);
+}
+
 bool OccupiedAreaChangeInfo::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&

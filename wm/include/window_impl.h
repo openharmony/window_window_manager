@@ -101,6 +101,7 @@ public:
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parantId);
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     virtual Rect GetRect() const override;
     virtual Rect GetRequestRect() const override;
