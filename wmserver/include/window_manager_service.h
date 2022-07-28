@@ -89,6 +89,7 @@ public:
         PropertyChangeAction action, uint64_t dirtyState) override;
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
     WMError HandleAddWindow(sptr<WindowProperty>& property);
+    WMError HandleRemoveWindow(uint32_t windowId);
 
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
