@@ -71,6 +71,7 @@ public:
     void SetOriginRect(const Rect& rect);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
     void SetWindowSizeLimits(const WindowSizeLimits& sizeLimits);
+    void SetWindowUpdatedSizeLimits(const WindowSizeLimits& sizeLimits);
     void ComputeTransform();
     void SetTransform(const Transform& trans);
 
@@ -105,6 +106,7 @@ public:
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     uint32_t GetAccessTokenId() const;
     WindowSizeLimits GetWindowSizeLimits() const;
+    WindowSizeLimits GetWindowUpdatedSizeLimits() const;
 
     bool EnableDefaultAnimation(bool propertyEnabled, bool animationPlayed);
     sptr<WindowNode> parent_;

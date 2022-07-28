@@ -160,6 +160,11 @@ void WindowProperty::SetSizeLimits(const WindowSizeLimits& sizeLimits)
     sizeLimits_ = sizeLimits;
 }
 
+void WindowProperty::SetUpdatedSizeLimits(const WindowSizeLimits& sizeLimits)
+{
+    updatedSizeLimits_ = sizeLimits;
+}
+
 void WindowProperty::AddWindowFlag(WindowFlag flag)
 {
     flags_ |= static_cast<uint32_t>(flag);
@@ -420,6 +425,11 @@ WindowSizeLimits WindowProperty::GetSizeLimits() const
     return sizeLimits_;
 }
 
+WindowSizeLimits WindowProperty::GetUpdatedSizeLimits() const
+{
+    return updatedSizeLimits_;
+}
+
 const TransformHelper::Matrix4& WindowProperty::GetTransformMat() const
 {
     return transformMat_;
@@ -521,7 +531,7 @@ void WindowProperty::UnmarshallingTransform(Parcel& parcel, WindowProperty* prop
 
 bool WindowProperty::MarshallingWindowSizeLimits(Parcel& parcel) const
 {
-    if (parcel.WriteBool(sizeLimits_.isSizeLimitsUpdated_) && parcel.WriteUint32(sizeLimits_.maxWidth_) &&
+    if (parcel.WriteUint32(sizeLimits_.maxWidth_) &&
         parcel.WriteUint32(sizeLimits_.maxHeight_) && parcel.WriteUint32(sizeLimits_.minWidth_) &&
         parcel.WriteUint32(sizeLimits_.minHeight_) && parcel.WriteFloat(sizeLimits_.maxRatio_) &&
         parcel.WriteFloat(sizeLimits_.minRatio_)) {
@@ -532,7 +542,7 @@ bool WindowProperty::MarshallingWindowSizeLimits(Parcel& parcel) const
 
 void WindowProperty::UnmarshallingWindowSizeLimits(Parcel& parcel, WindowProperty* property)
 {
-    WindowSizeLimits sizeLimits = { parcel.ReadBool(), parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(),
+    WindowSizeLimits sizeLimits = { parcel.ReadUint32(), parcel.ReadUint32(), parcel.ReadUint32(),
                                     parcel.ReadUint32(), parcel.ReadFloat(), parcel.ReadFloat() };
     property->SetSizeLimits(sizeLimits);
 }
