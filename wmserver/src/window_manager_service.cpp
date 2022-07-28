@@ -312,6 +312,12 @@ void WindowManagerService::ConfigureWindowManagerService()
                 config.at("stretchable").property_->at("enable").boolValue_;
         }
     }
+    if (config.count("remoteAnimation") != 0 && config.at("remoteAnimation").property_) {
+        if (config.at("remoteAnimation").property_->count("enable")) {
+            RemoteAnimation::isRemoteAnimationEnable_ =
+                config.at("remoteAnimation").property_->at("enable").boolValue_;
+        }
+    }
     if (config.count("maxAppWindowNumber") != 0 && config.at("maxAppWindowNumber").IsInts()) {
         auto numbers = *config.at("maxAppWindowNumber").intsValue_;
         if (numbers.size() == 1) {
@@ -321,13 +327,7 @@ void WindowManagerService::ConfigureWindowManagerService()
         }
     }
     if (config.count("modeChangeHotZones") != 0 && config.at("modeChangeHotZones").IsInts()) {
-        auto numbers = *config.at("modeChangeHotZones").intsValue_;
-        if (numbers.size() == 3) { // 3 hot zones
-            hotZonesConfig_.fullscreenRange_ = static_cast<uint32_t>(numbers[0]); // 0 fullscreen
-            hotZonesConfig_.primaryRange_ = static_cast<uint32_t>(numbers[1]);    // 1 primary
-            hotZonesConfig_.secondaryRange_ = static_cast<uint32_t>(numbers[2]);  // 2 secondary
-            hotZonesConfig_.isModeChangeHotZoneConfigured_ = true;
-        }
+        ConfigHotZones(*config.at("modeChangeHotZones").intsValue_);
     }
     if (config.count("splitRatios") != 0 && config.at("splitRatios").IsFloats()) {
         windowRoot_->SetSplitRatios(*config.at("splitRatios").floatsValue_);
@@ -336,12 +336,20 @@ void WindowManagerService::ConfigureWindowManagerService()
         windowRoot_->SetExitSplitRatios(*config.at("exitSplitRatios").floatsValue_);
     }
     if (config.count("windowAnimation") && config.at("windowAnimation").IsMap()) {
-        const auto& animeMap = *config.at("windowAnimation").mapValue_;
-        ConfigWindowAnimation(animeMap);
+        ConfigWindowAnimation(*config.at("windowAnimation").mapValue_);
     }
     if (config.count("keyboardAnimation") && config.at("keyboardAnimation").IsMap()) {
-        const auto& animeMap = *config.at("keyboardAnimation").mapValue_;
-        ConfigKeyboardAnimation(animeMap);
+        ConfigKeyboardAnimation(*config.at("keyboardAnimation").mapValue_);
+    }
+}
+
+void WindowManagerService::ConfigHotZones(const std::vector<int>& numbers)
+{
+    if (numbers.size() == 3) { // 3 hot zones
+        hotZonesConfig_.fullscreenRange_ = static_cast<uint32_t>(numbers[0]); // 0 fullscreen
+        hotZonesConfig_.primaryRange_ = static_cast<uint32_t>(numbers[1]);    // 1 primary
+        hotZonesConfig_.secondaryRange_ = static_cast<uint32_t>(numbers[2]);  // 2 secondary
+        hotZonesConfig_.isModeChangeHotZoneConfigured_ = true;
     }
 }
 
