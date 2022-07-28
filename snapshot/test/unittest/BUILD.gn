@@ -43,11 +43,11 @@ ohos_unittest("snapshot_display_test") {
 ## Build utils_unittest_common.a {{{
 config("utils_unittest_common_public_config") {
   include_dirs = [
-    "//foundation/window/window_manager/dm/test/utils",
     "//foundation/window/window_manager/dmserver/include",
     "//foundation/window/window_manager/interfaces/innerkits/dm",
     "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//foundation/window/window_manager/snapshot/include",
+    "//foundation/window/window_manager/test/common/utils/include",
     "//foundation/window/window_manager/utils/include",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
   ]
@@ -57,9 +57,6 @@ ohos_static_library("utils_unittest_common") {
   visibility = [ ":*" ]
   testonly = true
 
-  sources =
-      [ "//foundation/window/window_manager/dm/test/utils/test_utils.cpp" ]
-
   public_configs = [ ":utils_unittest_common_public_config" ]
 
   public_deps = [
@@ -68,6 +65,7 @@ ohos_static_library("utils_unittest_common") {
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/snapshot:libsnapshot_util",
+    "//foundation/window/window_manager/test/common/utils:libtestutil",
     "//foundation/window/window_manager/utils:libwmutil",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",

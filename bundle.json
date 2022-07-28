@@ -123,11 +123,11 @@
         "test": [
           "//foundation/window/window_manager/dm:test",
           "//foundation/window/window_manager/dmserver:test",
-          "//foundation/window/window_manager/extension:test",
           "//foundation/window/window_manager/snapshot:test",
           "//foundation/window/window_manager/utils:test",
           "//foundation/window/window_manager/wm:test",
-          "//foundation/window/window_manager/wmserver:test"
+          "//foundation/window/window_manager/wmserver:test",
+          "//foundation/window/window_manager/test:test"
         ]
       }
     }
