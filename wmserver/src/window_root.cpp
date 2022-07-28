@@ -707,6 +707,11 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
         if (onlySelf) {
             for (auto& child : node->children_) {
                 child->parent_ = nullptr;
+                if ((child != nullptr) && (child->GetWindowToken() != nullptr) &&
+                    (child->abilityToken_ != token) &&
+                    (child->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
+                    child->GetWindowToken()->NotifyDestroy();
+                }
             }
             res = container->RemoveWindowNode(node);
             if (res != WMError::WM_OK) {
@@ -976,6 +981,18 @@ WMError WindowRoot::RaiseZOrderForAppWindow(sptr<WindowNode>& node)
             return WMError::WM_ERROR_NULLPTR;
         }
         container->RaiseSplitRelatedWindowToTop(node);
+        return WMError::WM_OK;
+    }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+        auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
+        if (container == nullptr) {
+            WLOGFW("window container could not be found");
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        sptr<WindowNode> parentNode = FindDialogCallerNode(node->GetWindowType(), node->dialogTargetToken_);
+        if (parentNode != nullptr) {
+            container->RaiseZOrderForAppWindow(node, parentNode);
+        }
         return WMError::WM_OK;
     }
 
