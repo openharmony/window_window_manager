@@ -15,6 +15,7 @@
 
 #include "zidl/window_proxy.h"
 #include <ipc_types.h>
+#include "pointer_event.h"
 #include "message_option.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -264,7 +265,7 @@ sptr<WindowProperty> WindowProxy::GetWindowProperty()
 void WindowProxy::NotifyTouchOutside()
 {
     MessageParcel data;
-    MessageParcel replay;
+    MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
@@ -272,7 +273,7 @@ void WindowProxy::NotifyTouchOutside()
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_NOTIFY_OUTSIDE_PRESSED),
-        data, replay, option) != ERR_NONE) {
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
@@ -280,7 +281,7 @@ void WindowProxy::NotifyTouchOutside()
 void WindowProxy::NotifyScreenshot()
 {
     MessageParcel data;
-    MessageParcel replay;
+    MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
@@ -288,7 +289,7 @@ void WindowProxy::NotifyScreenshot()
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_NOTIFY_SCREEN_SHOT),
-        data, replay, option) != ERR_NONE) {
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }
@@ -327,6 +328,25 @@ void WindowProxy::NotifyDestroy(void)
 
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_NOTIFY_DESTROY),
         data, replay, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void WindowProxy::NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!pointerEvent->WriteToParcel(data)) {
+        WLOGFE("Failed to write point event");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_NOTIFY_CLIENT_POINT_UP),
+        data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }

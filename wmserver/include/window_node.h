@@ -36,6 +36,7 @@ public:
         std::shared_ptr<RSSurfaceNode> surfaceNode, int32_t pid, int32_t uid)
         : surfaceNode_(surfaceNode), property_(property), windowToken_(window), callingPid_(pid), callingUid_(uid)
     {
+        inputCallingPid_ = pid;
     }
     WindowNode() : property_(new WindowProperty())
     {
@@ -59,6 +60,7 @@ public:
     void SetTurnScreenOn(bool turnScreenOn);
     void SetKeepScreenOn(bool keepScreenOn);
     void SetCallingWindow(uint32_t windowId);
+    void SetInputEventCallingPid(int32_t pid);
     void SetCallingPid(int32_t pid);
     void SetCallingUid(int32_t uid);
     void SetWindowToken(sptr<IWindow> window);
@@ -91,6 +93,7 @@ public:
     bool IsKeepScreenOn() const;
     uint32_t GetWindowFlags() const;
     const sptr<WindowProperty>& GetWindowProperty() const;
+    int32_t GetInputEventCallingPid() const;
     int32_t GetCallingPid() const;
     int32_t GetCallingUid() const;
     const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
@@ -134,6 +137,7 @@ private:
     Rect fullWindowHotArea_ { 0, 0, 0, 0 };
     std::vector<Rect> touchHotAreas_; // coordinates relative to display.
     int32_t callingPid_ = { 0 };
+    int32_t inputCallingPid_ = { 0 };
     int32_t callingUid_ = { 0 };
     WindowSizeChangeReason windowSizeChangeReason_ {WindowSizeChangeReason::UNDEFINED};
 };

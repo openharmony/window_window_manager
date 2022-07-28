@@ -212,8 +212,7 @@ public:
     void UpdateMode(WindowMode mode);
     void UpdateModeSupportInfo(uint32_t modeSupportInfo);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
-    virtual void ConsumePointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
-    virtual void RequestFrame() override;
+    virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
     void UpdateFocusStatus(bool focused);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
@@ -249,6 +248,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     void PostListenerTask(ListenerTaskCallback &&callback, Priority priority = Priority::LOW,
         const std::string taskName = "");
+
 private:
     inline std::vector<sptr<IWindowLifeCycle>> GetLifecycleListeners()
     {
@@ -356,14 +356,14 @@ private:
     void DestroySubWindow();
     void SetDefaultOption(); // for api7
     bool IsWindowValid() const;
-    void OnVsync(int64_t timeStamp);
     static sptr<Window> FindTopWindow(uint32_t topWinId);
     WMError Drag(const Rect& rect);
-    void ConsumeMoveOrDragEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId);
-    void HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId);
+    void ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId, const Rect& rect);
     void EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId);
+    void HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId);
+    void HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId);
+    void ResetMoveOrDragState();
     bool IsPointerEventConsumed();
     void AdjustWindowAnimationFlag(bool withAnimation = false);
     void MapFloatingWindowToAppIfNeeded();
@@ -377,8 +377,8 @@ private:
     Rect GetSystemAlarmWindowDefaultSize(Rect defaultRect);
     void HandleModeChangeHotZones(int32_t posX, int32_t posY);
     WMError NotifyWindowTransition(TransitionReason reason);
-    void UpdatePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void UpdatePointerEventForStretchableWindow(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void UpdatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void UpdatePointerEventForStretchableWindow(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateDragType();
     void InitListenerHandler();
     void HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -389,6 +389,7 @@ private:
     uint32_t GetModeSupportInfo() const;
     WMError PreProcessShow(uint32_t reason, bool withAnimation);
     bool NeedToStopShowing();
+    void CalculateStartRectExceptHotZone(float virtualPixelRatio, const TransformHelper::Vector2& hotZoneScale);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
@@ -399,8 +400,6 @@ private:
     static ColorSpace GetColorSpaceFromSurfaceGamut(ColorGamut ColorGamut);
     static ColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
 
-    std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
-        std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
     static std::map<std::string, std::pair<uint32_t, sptr<Window>>> windowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> subWindowMap_;
     static std::map<uint32_t, std::vector<sptr<WindowImpl>>> appFloatingWindowMap_;
@@ -431,20 +430,10 @@ private:
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
 
-    int32_t startPointPosX_ = 0;
-    int32_t startPointPosY_ = 0;
-    int32_t startPointerId_ = 0;
-    bool startDragFlag_ = false;
-    bool startMoveFlag_ = false;
-    bool pointEventStarted_ = false;
-    Rect startPointRect_ = { 0, 0, 0, 0 };
-    Rect startRectExceptFrame_ = { 0, 0, 0, 0 };
-    Rect startRectExceptCorner_ = { 0, 0, 0, 0 };
-    DragType dragType_ = DragType::DRAG_UNDEFINED;
+    sptr<MoveDragProperty> moveDragProperty_;
     bool isAppDecorEnable_ = true;
     SystemConfig windowSystemConfig_ ;
     bool isOriginRectSet_ = false;
-    bool isWaitingFrame_ = false;
     bool needRemoveWindowInputChannel_ = false;
     bool isListenerHandlerRunning_ = false;
 };

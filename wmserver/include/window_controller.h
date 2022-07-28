@@ -48,7 +48,7 @@ public:
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
-    WMError ProcessPointDown(uint32_t windowId, bool isStartDrag);
+    WMError ProcessPointDown(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty);
     WMError ProcessPointUp(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();
@@ -67,6 +67,9 @@ public:
     void OnScreenshot(DisplayId displayId);
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const;
     WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken);
+    WMError InterceptInputEventToServer(uint32_t windowId);
+    WMError RecoverInputEventToClient(uint32_t windowId);
+    WMError NotifyWindowClientPointUp(uint32_t windowId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
 private:
     uint32_t GenWindowId();

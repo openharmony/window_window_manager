@@ -44,6 +44,7 @@ public:
         TRANS_ID_NOTIFY_SCREEN_SHOT,
         TRANS_ID_DUMP_INFO,
         TRANS_ID_NOTIFY_DESTROY,
+        TRANS_ID_NOTIFY_CLIENT_POINT_UP,
     };
 
     virtual void UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) = 0;
@@ -61,6 +62,7 @@ public:
     virtual void NotifyScreenshot() = 0;
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
     virtual void NotifyDestroy(void) = 0;
+    virtual void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

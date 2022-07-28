@@ -38,6 +38,7 @@ WindowInnerManager::~WindowInnerManager()
 
 bool WindowInnerManager::Init()
 {
+    // create handler for inner command at server
     eventLoop_ = AppExecFwk::EventRunner::Create(INNER_WM_THREAD_NAME);
     if (eventLoop_ == nullptr) {
         return false;
@@ -46,6 +47,13 @@ bool WindowInnerManager::Init()
     if (eventHandler_ == nullptr) {
         return false;
     }
+
+    moveDragController_ = new MoveDragController();
+    if (!moveDragController_->Init()) {
+        WLOGFE("Init window drag controller failed");
+        return false;
+    }
+
     WLOGFI("init window inner manager service success.");
     return true;
 }
@@ -62,6 +70,8 @@ void WindowInnerManager::Start(bool enableRecentholder)
     }
     state_ = InnerWMRunningState::STATE_RUNNING;
     eventLoop_->Run();
+
+    pid_ = getpid();
     WLOGFI("window inner manager service start success.");
 }
 
@@ -75,6 +85,7 @@ void WindowInnerManager::Stop()
     if (eventHandler_ != nullptr) {
         eventHandler_.reset();
     }
+    moveDragController_->Stop();
     state_ = InnerWMRunningState::STATE_NOT_START;
 }
 
@@ -141,6 +152,53 @@ void WindowInnerManager::UpdateInnerWindow(DisplayId displayId, WindowType type,
         }
     });
     return;
+}
+
+pid_t WindowInnerManager::GetPid()
+{
+    return pid_;
+}
+
+bool WindowInnerManager::NotifyWindowReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+    sptr<MoveDragProperty>& moveDragProperty)
+{
+    if (moveDragController_->GetActiveWindowId() != INVALID_WINDOW_ID) {
+        WLOGFW("Is already in dragging or moving state, invalid operation");
+        return false;
+    }
+    moveDragController_->HandleReadyToMoveOrDrag(windowId, windowProperty, moveDragProperty);
+    WLOGFI("NotifyWindowReadyToMoveOrDrag, windowId: %{public}u", windowId);
+    return true;
+}
+
+void WindowInnerManager::NotifyWindowEndUpMovingOrDragging(uint32_t windowId)
+{
+    if (moveDragController_->GetActiveWindowId() != windowId) {
+        return;
+    }
+    moveDragController_->HandleEndUpMovingOrDragging(windowId);
+    WLOGFI("NotifyWindowEndUpMovingOrDragging, windowId: %{public}u", windowId);
+}
+
+void WindowInnerManager::NotifyWindowRemovedOrDestroyed(uint32_t windowId)
+{
+    if (moveDragController_->GetActiveWindowId() != windowId) {
+        return;
+    }
+    moveDragController_->HandleWindowRemovedOrDestroyed(windowId);
+    WLOGFI("NotifyWindowRemovedOrDestroyed, windowId: %{public}u", windowId);
+}
+
+void WindowInnerManager::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
+    if (moveDragController_->GetActiveWindowId() != windowId ||
+        moveDragController_->GetActiveWindowId() == INVALID_WINDOW_ID) {
+        WLOGFE("active winId or inputEvent winId is invalid, windowId: %{public}u, activeWinId: %{public}u",
+            windowId, moveDragController_->GetActiveWindowId());
+        return;
+    }
+    moveDragController_->ConsumePointerEvent(pointerEvent);
 }
 } // Rosen
 } // OHOS

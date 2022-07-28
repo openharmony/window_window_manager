@@ -72,7 +72,8 @@ public:
     virtual WMError RequestFocus(uint32_t windowId) = 0;
     virtual AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
-    virtual void ProcessPointDown(uint32_t windowId, bool isStartDrag) = 0;
+    virtual void ProcessPointDown(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+        sptr<MoveDragProperty>& moveDragProperty) = 0;
     virtual void ProcessPointUp(uint32_t windowId) = 0;
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError ToggleShownStateForAllAppWindows() = 0;

@@ -55,11 +55,15 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
         WLOGFE("PointerEvent is nullptr");
         return;
     }
+    // If handling input event at server, client will receive pointEvent that the winId is -1, intercept log error
+    uint32_t invalidId = static_cast<uint32_t>(-1);
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
-    WLOGFI("Receive pointerEvent, windowId: %{public}u", windowId);
+    WLOGFD("Receive pointerEvent, windowId: %{public}u", windowId);
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
-        WLOGFE("WindowInputChannel is nullptr");
+        if (windowId != invalidId) {
+            WLOGFE("WindowInputChannel is nullptr");
+        }
         return;
     }
     channel->HandlePointerEvent(pointerEvent);
@@ -104,7 +108,6 @@ sptr<WindowInputChannel> InputTransferStation::GetInputChannel(uint32_t windowId
     std::lock_guard<std::mutex> lock(mtx_);
     auto iter = windowInputChannels_.find(windowId);
     if (iter == windowInputChannels_.end()) {
-        WLOGFE("Can not find channel according to windowId: %{public}u", windowId);
         return nullptr;
     }
     return iter->second;
