@@ -17,7 +17,7 @@
 #include "display.h"
 #include "display_manager.h"
 #include "snapshot_utils.h"
-#include "test_utils.h"
+#include "common_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,7 +36,7 @@ public:
 
 void SnapshotUtilsTest::SetUpTestCase()
 {
-    TestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
+    CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
 }
 
 void SnapshotUtilsTest::TearDownTestCase()
