@@ -164,5 +164,14 @@ void WindowAgent::NotifyDestroy(void)
     }
     window_->NotifyDestroy();
 }
+
+void WindowAgent::NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->ConsumePointerEvent(pointerEvent);
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -360,6 +360,16 @@ struct SystemConfig {
     bool isSystemDecorEnable_ = true;
     bool isStretchable_ = false;
 };
+
+enum class CallbackType {
+    CALLBACK_INPUT = 0,
+    CALLBACK_FRAME = 1,
+};
+
+using OnCallback = std::function<void(int64_t)>;
+struct VsyncCallback {
+    OnCallback onCallback;
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H

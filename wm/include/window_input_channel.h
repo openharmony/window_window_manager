@@ -37,8 +37,7 @@ private:
     std::mutex mtx_;
     sptr<Window> window_;
     bool isAvailable_;
-    std::shared_ptr<VsyncStation::VsyncCallback> callback_ =
-        std::make_shared<VsyncStation::VsyncCallback>(VsyncStation::VsyncCallback());
+    std::shared_ptr<VsyncCallback> callback_ = std::make_shared<VsyncCallback>(VsyncCallback());
     static const int32_t MAX_INPUT_NUM = 100;
 };
 }

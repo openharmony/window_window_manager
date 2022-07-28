@@ -151,12 +151,13 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
         }
         MMI::WindowInfo windowInfo = {
             .id = static_cast<int32_t>(windowNode->GetWindowId()),
-            .pid = windowNode->GetCallingPid(),
+            .pid = windowNode->GetInputEventCallingPid(),
             .uid = windowNode->GetCallingUid(),
             .area = MMI::Rect { areaRect.posX_, areaRect.posY_,
                 static_cast<int32_t>(areaRect.width_), static_cast<int32_t>(areaRect.height_) },
             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
         };
+
         auto iter = (windowNode->GetParentId() == INVALID_WINDOW_ID) ?
             dialogWindowMap.find(windowNode->GetWindowId()) : dialogWindowMap.find(windowNode->GetParentId());
         if (iter != dialogWindowMap.end()) {

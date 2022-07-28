@@ -106,13 +106,13 @@ WMError WindowAdapter::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type,
     return WMError::WM_OK;
 }
 
-void WindowAdapter::ProcessPointDown(uint32_t windowId, bool isStartDrag)
+void WindowAdapter::ProcessPointDown(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+    sptr<MoveDragProperty>& moveDragProperty)
 {
     INIT_PROXY_CHECK_RETURN();
 
-    return windowManagerServiceProxy_->ProcessPointDown(windowId, isStartDrag);
+    return windowManagerServiceProxy_->ProcessPointDown(windowId, windowProperty, moveDragProperty);
 }
-
 void WindowAdapter::ProcessPointUp(uint32_t windowId)
 {
     INIT_PROXY_CHECK_RETURN();

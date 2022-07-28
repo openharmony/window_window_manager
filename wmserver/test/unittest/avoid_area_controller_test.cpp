@@ -87,6 +87,7 @@ public:
     void NotifyScreenshot() override {}
     void NotifyDestroy(void) override {}
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override {}
+    void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override {}
     RunnableFuture<AvoidArea> statusBarAvoidAreaFuture_;
     RunnableFuture<AvoidArea> keyboardAvoidAreaFuture_;
     RunnableFuture<AvoidArea> cutoutAvoidAreaFuture_;

@@ -27,6 +27,7 @@
 #include "minimize_app.h"
 #include "remote_animation.h"
 #include "starting_window.h"
+#include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "wm_common.h"
@@ -662,7 +663,7 @@ AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType 
     return windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
 }
 
-WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
+WMError WindowController::ProcessPointDown(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
@@ -676,7 +677,9 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, bool isStartDrag)
 
     NotifyTouchOutside(node);
 
-    if (isStartDrag) {
+    // if start dragging or start moving dock_slice, need to update size change reason
+    if ((moveDragProperty->startMoveFlag_ && node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) ||
+        moveDragProperty->startDragFlag_) {
         WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
         return res;
     }
@@ -720,6 +723,51 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
     WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_END);
     if (res != WMError::WM_OK) {
         return res;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowController::InterceptInputEventToServer(uint32_t windowId)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFW("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto inputPidInServer = WindowInnerManager::GetInstance().GetPid();
+    WLOGFI("InterceptInputEventToServer, windowId: %{public}u, inputPid: %{public}u", windowId, inputPidInServer);
+    node->SetInputEventCallingPid(static_cast<int32_t>(inputPidInServer));
+    FlushWindowInfo(windowId);
+    return WMError::WM_OK;
+}
+
+WMError WindowController::RecoverInputEventToClient(uint32_t windowId)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFW("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (node->GetInputEventCallingPid() == node->GetCallingPid()) {
+        WLOGFD("There is no need to recover input event to client");
+        return WMError::WM_OK;
+    }
+    node->SetInputEventCallingPid(node->GetCallingPid());
+    FlushWindowInfo(windowId);
+    return WMError::WM_OK;
+}
+
+WMError WindowController::NotifyWindowClientPointUp(uint32_t windowId,
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFW("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (node->GetWindowToken() != nullptr) {
+        WLOGFI("notify client when receive point_up event, windowId: %{public}u", windowId);
+        node->GetWindowToken()->NotifyWindowClientPointUp(pointerEvent);
     }
     return WMError::WM_OK;
 }

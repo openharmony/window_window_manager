@@ -89,7 +89,8 @@ public:
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override;
     WMError RequestFocus(uint32_t windowId) override;
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) override;
-    void ProcessPointDown(uint32_t windowId, bool isStartDrag) override;
+    void ProcessPointDown(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+        sptr<MoveDragProperty>& moveDragProperty) override;
     void ProcessPointUp(uint32_t windowId) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
@@ -118,6 +119,8 @@ public:
     void OnAccountSwitched(int accountId);
     WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken) override;
     void HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
+    void NotifyWindowClientPointUp(uint32_t windowId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;

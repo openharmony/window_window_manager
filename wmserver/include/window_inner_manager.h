@@ -20,6 +20,7 @@
 #include "event_handler.h"
 #include "event_runner.h"
 
+#include "drag_controller.h"
 #include "inner_window.h"
 #include "wm_common.h"
 #include "wm_single_instance.h"
@@ -30,16 +31,24 @@ enum class InnerWMRunningState {
 };
 namespace OHOS {
 namespace Rosen {
-class WindowInnerManager : public RefBase {
-WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInnerManager);
 using EventRunner = OHOS::AppExecFwk::EventRunner;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
+
+class WindowInnerManager : public RefBase {
+WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInnerManager);
 public:
     void Start(bool enableRecentholder);
     void Stop();
     void CreateInnerWindow(std::string name, DisplayId displayId, Rect rect, WindowType type, WindowMode mode);
     void DestroyInnerWindow(DisplayId displayId, WindowType type);
     void UpdateInnerWindow(DisplayId displayId, WindowType type, uint32_t width, uint32_t height);
+
+    void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    bool NotifyWindowReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+        sptr<MoveDragProperty>& moveDragProperty);
+    void NotifyWindowEndUpMovingOrDragging(uint32_t windowId);
+    void NotifyWindowRemovedOrDestroyed(uint32_t windowId);
+    pid_t GetPid();
 
 protected:
     WindowInnerManager();
@@ -48,8 +57,10 @@ protected:
 private:
     bool Init();
 
-private:
+    pid_t pid_;
     bool isRecentHolderEnable_ = false;
+    sptr<MoveDragController> moveDragController_;
+    // event handle for inner window
     std::shared_ptr<EventHandler> eventHandler_;
     std::shared_ptr<EventRunner> eventLoop_;
     InnerWMRunningState state_;
