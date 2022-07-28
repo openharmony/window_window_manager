@@ -66,8 +66,8 @@ public:
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) override;
     void OnTouchOutside() const override;
     void OnScreenshot() override;
-    void OnDialogTargetTouch() override;
-    void OnDialogDeathRecipient() override;
+    void OnDialogTargetTouch() const override;
+    void OnDialogDeathRecipient() const override;
     void CallJsMethod(const char* methodName, NativeValue* const* argv = nullptr, size_t argc = 0);
 private:
     void LifeCycleCallBack(LifeCycleEventType eventType);

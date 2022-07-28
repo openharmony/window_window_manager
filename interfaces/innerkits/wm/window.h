@@ -144,12 +144,12 @@ public:
 
 class IDialogTargetTouchListener : virtual public RefBase {
 public:
-    virtual void OnDialogTargetTouch() = 0;
+    virtual void OnDialogTargetTouch() const = 0;
 };
 
 class IDialogDeathRecipientListener : virtual public RefBase {
 public:
-    virtual void OnDialogDeathRecipient() = 0;
+    virtual void OnDialogDeathRecipient() const = 0;
 };
 
 class Window : public RefBase {
