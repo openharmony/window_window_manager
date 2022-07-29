@@ -17,6 +17,10 @@ import("//build/ohos.gni")
 ohos_shared_library("screenshot") {
   sources = [ "native_screenshot_module.cpp" ]
 
+  configs = [
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
+
   deps = [
     "../common:wm_napi_common",
     "//foundation/window/window_manager/dm:libdm",

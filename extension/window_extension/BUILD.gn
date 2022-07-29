@@ -39,7 +39,10 @@ ohos_shared_library("libwindow_extension") {
     "src/zidl/window_extension_stub.cpp",
   ]
 
-  configs = [ ":libwindow_extension_private_config" ]
+  configs = [
+    ":libwindow_extension_private_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   deps = [
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
@@ -79,7 +82,10 @@ config("window_extension_module_private_config") {
 ohos_shared_library("window_extension_module") {
   sources = [ "src/window_extension_module_loader.cpp" ]
 
-  configs = [ ":window_extension_module_private_config" ]
+  configs = [
+    ":window_extension_module_private_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   deps = [
     "//foundation/window/window_manager/extension/window_extension:libwindow_extension",

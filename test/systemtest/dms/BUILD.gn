@@ -97,7 +97,10 @@ ohos_static_library("dms_systemtest_common") {
 
   sources = [ "display_test_utils.cpp" ]
 
-  public_configs = [ ":dms_systemtest_common_public_config" ]
+  public_configs = [
+    ":dms_systemtest_common_public_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",

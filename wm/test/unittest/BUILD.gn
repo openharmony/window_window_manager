@@ -130,7 +130,10 @@ ohos_static_library("wm_unittest_common") {
   visibility = [ ":*" ]
   testonly = true
 
-  public_configs = [ ":wm_unittest_common_public_config" ]
+  public_configs = [
+    ":wm_unittest_common_public_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_deps = [
     "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
