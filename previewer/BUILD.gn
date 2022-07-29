@@ -1,0 +1,39 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+ohos_shared_library("previewer_shared") {
+  libs = []
+  sources = [ "src/window.cpp" ]
+  include_dirs = [ "src/" ]
+  cflags = [ "-std=c++17" ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_copy("copy_previewer_library") {
+  if (host_os == "mac") {
+    suffix = ".dylib"
+  } else {
+    suffix = ".dll"
+  }
+  shared_library_path = get_label_info(":previewer_shared", "root_out_dir") +
+                        "/window/window_manager/libpreviewer_shared" + suffix
+  deps = [ ":previewer_shared" ]
+  sources = [ shared_library_path ]
+  outputs =
+      [ target_out_dir + "/previewer/common/bin/libpreviewer_shared" + suffix ]
+  module_source_dir = target_out_dir + "/previewer/common/bin/"
+  module_install_name = ""
+}
