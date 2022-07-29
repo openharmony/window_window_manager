@@ -43,7 +43,10 @@ ohos_shared_library("libdms") {
     "src/screen_rotation_controller.cpp",
   ]
 
-  configs = [ ":libdms_private_config" ]
+  configs = [
+    ":libdms_private_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_configs = [ ":libdms_public_config" ]
 

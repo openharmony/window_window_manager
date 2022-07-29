@@ -40,7 +40,10 @@ ohos_shared_library("libdm") {
     "src/zidl/display_manager_agent_stub.cpp",
   ]
 
-  configs = [ ":libdm_private_config" ]
+  configs = [
+    ":libdm_private_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_configs = [ ":libdm_public_config" ]
 

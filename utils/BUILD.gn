@@ -42,7 +42,10 @@ ohos_shared_library("libwmutil") {
     "src/wm_math.cpp",
   ]
 
-  configs = [ ":libwmutil_private_config" ]
+  configs = [
+    ":libwmutil_private_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_configs = [ ":libwmutil_public_config" ]
 

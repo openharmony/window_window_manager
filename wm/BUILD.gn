@@ -55,7 +55,10 @@ ohos_shared_library("libwm") {
     "src/zidl/window_stub.cpp",
   ]
 
-  configs = [ ":libwm_private_config" ]
+  configs = [
+    ":libwm_private_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_configs = [ ":libwm_public_config" ]
 

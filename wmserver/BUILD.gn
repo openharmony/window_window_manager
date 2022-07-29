@@ -64,7 +64,10 @@ ohos_shared_library("libwms") {
     "src/zidl/window_manager_stub.cpp",
   ]
 
-  configs = [ ":libwms_config" ]
+  configs = [
+    ":libwms_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   deps = [
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
