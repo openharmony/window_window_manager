@@ -23,6 +23,7 @@
 #include "drag_controller.h"
 #include "inner_window.h"
 #include "wm_common.h"
+#include "window_node.h"
 #include "wm_single_instance.h"
 
 enum class InnerWMRunningState {
@@ -31,9 +32,10 @@ enum class InnerWMRunningState {
 };
 namespace OHOS {
 namespace Rosen {
+using InnerTask = std::function<void()>;
 using EventRunner = OHOS::AppExecFwk::EventRunner;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
-
+using EventPriority = OHOS::AppExecFwk::EventQueue::Priority;
 class WindowInnerManager : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInnerManager);
 public:
@@ -42,6 +44,11 @@ public:
     void CreateInnerWindow(std::string name, DisplayId displayId, Rect rect, WindowType type, WindowMode mode);
     void DestroyInnerWindow(DisplayId displayId, WindowType type);
     void UpdateInnerWindow(DisplayId displayId, WindowType type, uint32_t width, uint32_t height);
+    void PostTask(InnerTask &&callback, std::string name = "WindowInnerManagerTask",
+        EventPriority priority = EventPriority::LOW);
+
+    // asynchronously calls the functions of AbilityManager
+    void MinimizeAbility(const wptr<WindowNode> &node, bool isFromUser);
 
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool NotifyWindowReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
