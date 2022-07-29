@@ -56,6 +56,7 @@ ohos_static_library("dmserver_unittest_common") {
   sources = [ "screen_manager_utils.cpp" ]
 
   public_deps = [
+    "//commonlibrary/c_utils/base:utils",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimedia/image_standard/interfaces/innerkits:image_native",  # PixelMap
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
@@ -68,7 +69,6 @@ ohos_static_library("dmserver_unittest_common") {
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
     "//third_party/libpng:libpng",  # png
-    "//utils/native/base:utils",
   ]
 
   external_deps = [

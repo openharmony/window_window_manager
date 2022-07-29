@@ -64,12 +64,12 @@ ohos_shared_library("window_native_kit") {
     "ability_runtime:runtime",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "ipc_js:rpc",
     "multimedia_image_standard:image",
     "napi:ace_napi",
-    "utils_base:utils",
   ]
 
   part_name = "window_manager"
@@ -94,7 +94,6 @@ ohos_shared_library("window_napi") {
     "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -102,6 +101,7 @@ ohos_shared_library("window_napi") {
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "napi:ace_napi",
   ]
@@ -130,10 +130,10 @@ ohos_shared_library("windowstage_kit") {
   external_deps = [
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
-    "utils_base:utils",
   ]
 
   part_name = "window_manager"
