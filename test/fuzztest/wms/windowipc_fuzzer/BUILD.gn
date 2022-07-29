@@ -27,12 +27,12 @@ ohos_fuzztest("WindowIPCFuzzTest") {
     "//foundation/window/window_manager/wmserver/include",
     "//foundation/window/window_manager/wm/include",
   ]
-  cflags = [
-    "-g",
-    "-O0",
-    "-Wno-unused-variable",
-    "-fno-omit-frame-pointer",
+
+  configs = [
+    "//foundation/window/window_manager/test/fuzztest:configs_cc_ld",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
   ]
+
   sources = [ "windowipc_fuzzer.cpp" ]
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/animation/window_animation:window_animation",

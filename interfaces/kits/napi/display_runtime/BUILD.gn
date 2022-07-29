@@ -32,7 +32,10 @@ ohos_shared_library("display_napi") {
     "js_display_module.cpp",
   ]
 
-  configs = [ ":display_config" ]
+  configs = [
+    ":display_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   deps = [
     "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",

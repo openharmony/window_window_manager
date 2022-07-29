@@ -25,12 +25,12 @@ ohos_fuzztest("WindowManagerFuzzTest") {
     "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//utils/native/base/include",
   ]
-  cflags = [
-    "-g",
-    "-O0",
-    "-Wno-unused-variable",
-    "-fno-omit-frame-pointer",
+
+  configs = [
+    "//foundation/window/window_manager/test/fuzztest:configs_cc_ld",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
   ]
+
   sources = [ "windowmanager_fuzzer.cpp" ]
   deps = [
     "//foundation/window/window_manager/wm:libwm",

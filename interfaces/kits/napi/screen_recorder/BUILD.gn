@@ -35,7 +35,11 @@ ohos_shared_library("screenrecorder_napi") {
     "napi/screen_recorder_module.cpp",
   ]
 
-  configs = [ ":screen_runtime_config" ]
+  configs = [
+    ":screen_runtime_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
+
   deps = [
     "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
     "${ability_runtime_path}/frameworks/native/appkit:app_context",

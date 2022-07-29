@@ -42,7 +42,11 @@ ohos_systemtest("window_extension_connection_test") {
   module_out_path = module_out_path
 
   sources = [ "extension_connection_test.cpp" ]
-  public_configs = [ ":we_systemtest_common_public_config" ]
+
+  public_configs = [
+    ":we_systemtest_common_public_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_deps = [
     "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client",

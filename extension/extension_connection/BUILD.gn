@@ -36,9 +36,12 @@ ohos_shared_library("libwindow_extension_client") {
     "src/zidl/window_extension_client_stub.cpp",
   ]
 
-  public_configs = [ ":libextension_connection_public_config" ]
+  configs = [
+    ":libwindow_extension_client_private_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
-  configs = [ ":libwindow_extension_client_private_config" ]
+  public_configs = [ ":libextension_connection_public_config" ]
 
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
