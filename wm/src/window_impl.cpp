@@ -198,6 +198,14 @@ std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
     return std::vector<sptr<Window>>(subWindowMap_[parentId].begin(), subWindowMap_[parentId].end());
 }
 
+void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    for (auto& winPair : windowMap_) {
+        auto window = winPair.second.second;
+        window->UpdateConfiguration(configuration);
+    }
+}
+
 std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
 {
     return surfaceNode_;

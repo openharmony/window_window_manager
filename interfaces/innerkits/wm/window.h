@@ -192,6 +192,13 @@ public:
      * @return std::vector<sptr<Window>>
      */
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parentId);
+
+    /**
+     * @brief Update configuration for all windows
+     *
+     * @param configuration configuration for app
+     */
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
     /**
