@@ -95,6 +95,7 @@ void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
     Rect rect = node->GetWindowRect();
     if (RemoteAnimation::CheckAnimationController() && node->leashWinSurfaceNode_) {
         node->leashWinSurfaceNode_->SetBounds(rect.posX_, rect.posY_, -1, -1);
+        node->leashWinSurfaceNode_->ResetContextAlpha();
     }
     if (!isColdStart) {
         return;
