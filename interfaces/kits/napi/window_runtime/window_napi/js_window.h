@@ -58,6 +58,7 @@ public:
     static NativeValue* SetDimBehind(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetFocusable(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetKeepScreenOn(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetWakeUpScreen(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetOutsideTouchable(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetPrivacyMode(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetTouchable(NativeEngine* engine, NativeCallbackInfo* info);
@@ -123,6 +124,7 @@ private:
     NativeValue* OnSetDimBehind(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetFocusable(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetKeepScreenOn(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetWakeUpScreen(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetOutsideTouchable(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetPrivacyMode(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetTouchable(NativeEngine& engine, NativeCallbackInfo& info);
