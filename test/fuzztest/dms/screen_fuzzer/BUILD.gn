@@ -23,7 +23,7 @@ ohos_fuzztest("ScreenFuzzTest") {
   module_out_path = module_output_path
   include_dirs = [
     "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
   ]
 
@@ -36,8 +36,8 @@ ohos_fuzztest("ScreenFuzzTest") {
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/dm:libdm",
-    "//utils/native/base:utils",
   ]
+  external_deps = [ "c_utils:utils" ]
 }
 
 ###############################################################################

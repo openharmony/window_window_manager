@@ -34,8 +34,8 @@ ohos_executable("snapshot_display") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "multimedia_image_standard:image_native",
-    "utils_base:utils",
   ]
 
   part_name = "window_manager"
@@ -76,9 +76,9 @@ ohos_shared_library("libsnapshot_util") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "hitrace_native:hitrace_meter",
     "multimedia_image_standard:image_native",
-    "utils_base:utils",
   ]
 
   part_name = "window_manager"

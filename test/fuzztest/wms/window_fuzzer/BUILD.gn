@@ -24,7 +24,7 @@ ohos_fuzztest("WindowFuzzTest") {
   include_dirs = [
     "//foundation/window/window_manager/wmserver/include",
     "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
 
   configs = [
@@ -33,11 +33,9 @@ ohos_fuzztest("WindowFuzzTest") {
   ]
 
   sources = [ "window_fuzzer.cpp" ]
-  deps = [
-    "//foundation/window/window_manager/wm:libwm",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "//foundation/window/window_manager/wm:libwm" ]
   external_deps = [
+    "c_utils:utils",
     "ipc:ipc_core",
     "multimedia_image_standard:image",
   ]
