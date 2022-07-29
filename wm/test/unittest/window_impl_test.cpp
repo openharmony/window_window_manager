@@ -851,60 +851,6 @@ HWTEST_F(WindowImplTest, GetColorSpace01, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: MoveTo01
- * @tc.desc: create window but not show, move window, test rect
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImplTest, MoveTo01, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = new WindowOption();
-    option->SetWindowName("MoveTo01");
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    Rect winRect = {10, 20, 30u, 40u}; // set window rect: 10, 20, 30, 40
-    option->SetWindowRect(winRect);
-    sptr<WindowImpl> window = new WindowImpl(option);
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetMode());
-    ASSERT_FALSE((window->GetWindowState() == WindowState::STATE_SHOWN));
-    const float moveRatio = 0.5;
-    Rect newRect = {winRect.posX_ * moveRatio, winRect.posY_ * moveRatio, winRect.width_, winRect.height_};
-    window->MoveTo(newRect.posX_, newRect.posY_);
-    ASSERT_EQ(newRect, window->GetRequestRect());
-    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
-/**
- * @tc.name: Resize01
- * @tc.desc: create window but not show, resize window, test rect
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImplTest, Resize01, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = new WindowOption();
-    option->SetWindowName("Resize01");
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    Rect winRect = {10, 20, 30u, 40u}; // set window rect: 10, 20, 30, 40
-    option->SetWindowRect(winRect);
-    sptr<WindowImpl> window = new WindowImpl(option);
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetMode());
-    ASSERT_FALSE((window->GetWindowState() == WindowState::STATE_SHOWN));
-    const float resizeRatio = 0.5;
-    Rect newRect = {winRect.posX_, winRect.posY_, winRect.width_ * resizeRatio, winRect.height_ * resizeRatio};
-    window->Resize(newRect.width_, newRect.height_);
-    ASSERT_EQ(newRect, window->GetRequestRect());
-    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
-/**
  * @tc.name: StartMove01
  * @tc.desc: start move main fullscreen window, test startMoveFlag
  * @tc.type: FUNC
