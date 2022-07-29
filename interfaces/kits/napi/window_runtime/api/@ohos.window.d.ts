@@ -1162,14 +1162,14 @@ declare namespace window {
      * @systemapi
      * @since 9
      */
-    setOpacitySync(opacity: number): void;
+    opacity(opacity: number): void;
     /**
      * Sets scale options of window.
      * @param scaleOptions scale param of window.
      * @systemapi
      * @since 9
      */
-    setScaleSync(scaleOptions: ScaleOptions): void;
+    scale(scaleOptions: ScaleOptions): void;
     /**
      * Sets rotate options of window.
      * @param rotateOptions rotate param of window.

@@ -352,39 +352,39 @@ NativeValue* JsWindow::SetForbidSplitMove(NativeEngine* engine, NativeCallbackIn
     return (me != nullptr) ? me->OnSetForbidSplitMove(*engine, *info) : nullptr;
 }
 
-NativeValue* JsWindow::SetOpacitySync(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue* JsWindow::Opacity(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetOpacitySync");
+    WLOGFI("[NAPI]Opacity");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
-    return (me != nullptr) ? me->OnSetOpacitySync(*engine, *info) : nullptr;
+    return (me != nullptr) ? me->OnOpacity(*engine, *info) : nullptr;
 }
 
-NativeValue* JsWindow::SetScaleSync(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue* JsWindow::Scale(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetScaleSync");
+    WLOGFI("[NAPI]Scale");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
-    return (me != nullptr) ? me->OnSetScaleSync(*engine, *info) : nullptr;
+    return (me != nullptr) ? me->OnScale(*engine, *info) : nullptr;
 }
 
-NativeValue* JsWindow::SetRotateSync(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue* JsWindow::Rotate(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetRotateSync");
+    WLOGFI("[NAPI]Rotate");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
-    return (me != nullptr) ? me->OnSetRotateSync(*engine, *info) : nullptr;
+    return (me != nullptr) ? me->OnRotate(*engine, *info) : nullptr;
 }
 
-NativeValue* JsWindow::SetTranslateSync(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue* JsWindow::Translate(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetTranslateSync");
+    WLOGFI("[NAPI]Translate");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
-    return (me != nullptr) ? me->OnSetTranslateSync(*engine, *info) : nullptr;
+    return (me != nullptr) ? me->OnTranslate(*engine, *info) : nullptr;
 }
 
-NativeValue* JsWindow::GetTransitionControllerSync(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue* JsWindow::GetTransitionController(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]GetTransitionControllerSync");
+    WLOGFI("[NAPI]GetTransitionController");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
-    return (me != nullptr) ? me->OnGetTransitionControllerSync(*engine, *info) : nullptr;
+    return (me != nullptr) ? me->OnGetTransitionController(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindow::SetCornerRadius(NativeEngine* engine, NativeCallbackInfo* info)
@@ -1983,14 +1983,14 @@ NativeValue* JsWindow::OnSetSnapshotSkip(NativeEngine& engine, NativeCallbackInf
     return result;
 }
 
-NativeValue* JsWindow::OnSetOpacitySync(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsWindow::OnOpacity(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (info.argc != 1 || windowToken_ == nullptr) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("[NAPI]SetOpacitySync is not allowed since window is not system window");
+        WLOGFE("[NAPI]Opacity is not allowed since window is not system window");
         return engine.CreateUndefined();
     }
     NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
@@ -2000,7 +2000,7 @@ NativeValue* JsWindow::OnSetOpacitySync(NativeEngine& engine, NativeCallbackInfo
     }
     float alpha = static_cast<double>(*nativeVal);
     windowToken_->SetAlpha(alpha);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetOpacitySync end, alpha = %{public}f",
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] Opacity end, alpha = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), alpha);
     return engine.CreateUndefined();
 }
@@ -2032,14 +2032,14 @@ bool JsWindow::ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Tr
     return true;
 }
 
-NativeValue* JsWindow::OnSetScaleSync(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsWindow::OnScale(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (info.argc != 1 || windowToken_ == nullptr) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("[NAPI]SetScaleSync is not allowed since window is not system window");
+        WLOGFE("[NAPI]Scale is not allowed since window is not system window");
         return engine.CreateUndefined();
     }
     NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
@@ -2052,7 +2052,7 @@ NativeValue* JsWindow::OnSetScaleSync(NativeEngine& engine, NativeCallbackInfo& 
         return engine.CreateUndefined();
     }
     windowToken_->SetTransform(trans);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetScaleSync end",
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] Scale end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     WLOGFI("[NAPI]scaleX = %{public}f, scaleY = %{public}f, pivotX = %{public}f pivotY = %{public}f",
         trans.scaleX_, trans.scaleY_, trans.pivotX_, trans.pivotY_);
@@ -2097,14 +2097,14 @@ bool JsWindow::ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, T
     return true;
 }
 
-NativeValue* JsWindow::OnSetRotateSync(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsWindow::OnRotate(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (info.argc != 1 || windowToken_ == nullptr) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("[NAPI]SetRotateSync is not allowed since window is not system window");
+        WLOGFE("[NAPI]Rotate is not allowed since window is not system window");
         return engine.CreateUndefined();
     }
     NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
@@ -2118,7 +2118,7 @@ NativeValue* JsWindow::OnSetRotateSync(NativeEngine& engine, NativeCallbackInfo&
         return engine.CreateUndefined();
     }
     windowToken_->SetTransform(trans);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetRotateSync end",
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] Rotate end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     WLOGFI("[NAPI]rotateX = %{public}f, rotateY = %{public}f," \
         "rotateZ = %{public}f pivotX = %{public}f pivotY = %{public}f",
@@ -2149,14 +2149,14 @@ bool JsWindow::ParseTranslateOption(NativeEngine& engine, NativeObject* jsObject
     return true;
 }
 
-NativeValue* JsWindow::OnSetTranslateSync(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsWindow::OnTranslate(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (info.argc != 1 || windowToken_ == nullptr) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("[NAPI]SetTranslateSync is not allowed since window is not system window");
+        WLOGFE("[NAPI]Translate is not allowed since window is not system window");
         return engine.CreateUndefined();
     }
     NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
@@ -2169,7 +2169,7 @@ NativeValue* JsWindow::OnSetTranslateSync(NativeEngine& engine, NativeCallbackIn
         return engine.CreateUndefined();
     }
     windowToken_->SetTransform(trans);
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetRotateSync end," \
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] Translate end," \
         "translateX = %{public}f, translateY = %{public}f, translateZ = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(),
         trans.translateX_, trans.translateY_, trans.translateZ_);
@@ -2211,14 +2211,14 @@ void JsWindow::CreateTransitionController(NativeEngine& engine)
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
 }
 
-NativeValue* JsWindow::OnGetTransitionControllerSync(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsWindow::OnGetTransitionController(NativeEngine& engine, NativeCallbackInfo& info)
 {
     if (windowToken_ == nullptr || info.argc > 0) {
         WLOGFE("[NAPI]windowToken_ is nullptr or params %{public}zu not match", info.argc);
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("[NAPI]OnCreateTransitionControllerSync is not allowed since window is not system window");
+        WLOGFE("[NAPI]OnGetTransitionController is not allowed since window is not system window");
         return engine.CreateUndefined();
     }
     if (jsTransControllerObj_ == nullptr || jsTransControllerObj_->Get() == nullptr) {
@@ -2460,11 +2460,11 @@ void BindFunctions(NativeEngine& engine, NativeObject* object)
     BindNativeFunction(engine, *object, "dump", JsWindow::Dump);
     BindNativeFunction(engine, *object, "setForbidSplitMove", JsWindow::SetForbidSplitMove);
     BindNativeFunction(engine, *object, "setPreferredOrientation", JsWindow::SetPreferredOrientation);
-    BindNativeFunction(engine, *object, "setOpacitySync", JsWindow::SetOpacitySync);
-    BindNativeFunction(engine, *object, "setScaleSync", JsWindow::SetScaleSync);
-    BindNativeFunction(engine, *object, "setRotateSync", JsWindow::SetRotateSync);
-    BindNativeFunction(engine, *object, "setTranslateSync", JsWindow::SetTranslateSync);
-    BindNativeFunction(engine, *object, "getTransitionControllerSync", JsWindow::GetTransitionControllerSync);
+    BindNativeFunction(engine, *object, "opacity", JsWindow::Opacity);
+    BindNativeFunction(engine, *object, "scale", JsWindow::Scale);
+    BindNativeFunction(engine, *object, "rotate", JsWindow::Rotate);
+    BindNativeFunction(engine, *object, "translate", JsWindow::Translate);
+    BindNativeFunction(engine, *object, "getTransitionController", JsWindow::GetTransitionController);
     BindNativeFunction(engine, *object, "snapshot", JsWindow::Snapshot);
     BindNativeFunction(engine, *object, "setCornerRadius", JsWindow::SetCornerRadius);
     BindNativeFunction(engine, *object, "setShadow", JsWindow::SetShadow);
