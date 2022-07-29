@@ -224,8 +224,19 @@ public:
     static bool IsPointInTargetRect(int32_t pointPosX, int32_t pointPosY, const Rect& targetRect)
     {
         if ((pointPosX > targetRect.posX_) &&
-            (pointPosX < (targetRect.posX_ + static_cast<int32_t>(targetRect.width_))) &&
+            (pointPosX < (targetRect.posX_ + static_cast<int32_t>(targetRect.width_)) - 1) &&
             (pointPosY > targetRect.posY_) &&
+            (pointPosY < (targetRect.posY_ + static_cast<int32_t>(targetRect.height_)) - 1)) {
+            return true;
+        }
+        return false;
+    }
+
+    static bool IsPointInTargetRectWithBound(int32_t pointPosX, int32_t pointPosY, const Rect& targetRect)
+    {
+        if ((pointPosX >= targetRect.posX_) &&
+            (pointPosX < (targetRect.posX_ + static_cast<int32_t>(targetRect.width_))) &&
+            (pointPosY >= targetRect.posY_) &&
             (pointPosY < (targetRect.posY_ + static_cast<int32_t>(targetRect.height_)))) {
             return true;
         }
@@ -235,9 +246,9 @@ public:
     static bool IsPointInWindowExceptCorner(int32_t pointPosX, int32_t pointPosY, const Rect& rectExceptCorner)
     {
         if ((pointPosX > rectExceptCorner.posX_ &&
-            pointPosX < (rectExceptCorner.posX_ + static_cast<int32_t>(rectExceptCorner.width_))) ||
+            pointPosX < (rectExceptCorner.posX_ + static_cast<int32_t>(rectExceptCorner.width_)) - 1) ||
             (pointPosY > rectExceptCorner.posY_ &&
-            pointPosY < (rectExceptCorner.posY_ + static_cast<int32_t>(rectExceptCorner.height_)))) {
+            pointPosY < (rectExceptCorner.posY_ + static_cast<int32_t>(rectExceptCorner.height_)) - 1)) {
             return true;
         }
         return false;
