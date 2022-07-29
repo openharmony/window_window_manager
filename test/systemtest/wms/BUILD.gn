@@ -246,7 +246,10 @@ ohos_static_library("wms_systemtest_common") {
 
   sources = [ "window_test_utils.cpp" ]
 
-  public_configs = [ ":wms_systemtest_common_public_config" ]
+  public_configs = [
+    ":wms_systemtest_common_public_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_deps = [
     "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
