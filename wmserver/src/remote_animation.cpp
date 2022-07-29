@@ -21,6 +21,7 @@
 #include <rs_window_animation_finished_callback.h>
 #include "minimize_app.h"
 #include "window_helper.h"
+#include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -190,14 +191,9 @@ WMError RemoteAnimation::NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcI
     windowRoot->RemoveWindowNode(srcNode->GetWindowId());
     wptr<WindowNode> weak = srcNode;
     auto minimizeFunc = [weak]() {
-        auto weakNode = weak.promote();
-        if (weakNode != nullptr && weakNode->abilityToken_ != nullptr) {
-            WLOGFI("minimize windowId: %{public}u, name:%{public}s",
-                weakNode->GetWindowId(), weakNode->GetWindowName().c_str());
-            FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
-                "wms:async:ShowRemoteAnimation");
-            AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(weakNode->abilityToken_, true);
-        }
+        FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+            "wms:async:ShowRemoteAnimation");
+        WindowInnerManager::GetInstance().MinimizeAbility(weak, true);
     };
     sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
         minimizeFunc);
