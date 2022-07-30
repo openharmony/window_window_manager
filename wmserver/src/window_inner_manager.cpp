@@ -203,7 +203,7 @@ pid_t WindowInnerManager::GetPid()
     return pid_;
 }
 
-bool WindowInnerManager::NotifyWindowReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+bool WindowInnerManager::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
     sptr<MoveDragProperty>& moveDragProperty)
 {
     if (moveDragController_->GetActiveWindowId() != INVALID_WINDOW_ID) {
@@ -211,7 +211,7 @@ bool WindowInnerManager::NotifyWindowReadyToMoveOrDrag(uint32_t windowId, sptr<W
         return false;
     }
     moveDragController_->HandleReadyToMoveOrDrag(windowId, windowProperty, moveDragProperty);
-    WLOGFI("NotifyWindowReadyToMoveOrDrag, windowId: %{public}u", windowId);
+    WLOGFI("NotifyServerReadyToMoveOrDrag, windowId: %{public}u", windowId);
     return true;
 }
 

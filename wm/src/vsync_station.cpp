@@ -56,10 +56,6 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
             return;
         }
         hasRequestedVsync_ = true;
-        vsyncCount_++;
-        if (vsyncCount_ & 0x01) { // write log every 2 vsync
-            WLOGFD("Request next vsync.");
-        }
         vsyncHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
         vsyncHandler_->PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_TASK, VSYNC_TIME_OUT_MILLISECONDS);
     }
@@ -82,9 +78,6 @@ void VsyncStation::VsyncCallbackInner(int64_t timestamp)
         vsyncCallbacks = vsyncCallbacks_;
         vsyncCallbacks_.clear();
         vsyncHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
-        if (vsyncCount_ & 0x01) { // write log every 2 vsync
-            WLOGFD("[WM] On vsync callback.");
-        }
     }
     for (const auto& callback: vsyncCallbacks) {
         callback->onCallback(timestamp);
