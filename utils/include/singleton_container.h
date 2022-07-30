@@ -43,6 +43,9 @@ public:
         std::string nameT = __PRETTY_FUNCTION__;
         nameT = nameT.substr(nameT.find("T = "));
         nameT = nameT.substr(sizeof("T ="), nameT.length() - sizeof("T = "));
+        if (SingletonContainer::GetInstance().GetSingleton(nameT) == nullptr) {
+            return T::GetInstance();
+        }
         return *(reinterpret_cast<T*>(SingletonContainer::GetInstance().GetSingleton(nameT)));
     }
 
