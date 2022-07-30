@@ -455,6 +455,14 @@ public:
      * @return std::shared_ptr<Media::PixelMap> snapshot pixel
      */
     virtual std::shared_ptr<Media::PixelMap> Snapshot() = 0;
+
+    /**
+     * @brief Handle and notify memory level.
+     *
+     * @param level memory level
+     * @return the error code of window
+     */
+    virtual WMError NotifyMemoryLevel(int32_t level) const = 0;
 };
 }
 }

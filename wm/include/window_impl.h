@@ -249,6 +249,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     void PostListenerTask(ListenerTaskCallback &&callback, Priority priority = Priority::LOW,
         const std::string taskName = "");
+    virtual WMError NotifyMemoryLevel(int32_t level) const override;
 
 private:
     inline std::vector<sptr<IWindowLifeCycle>> GetLifecycleListeners()
