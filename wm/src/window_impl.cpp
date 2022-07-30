@@ -2060,11 +2060,11 @@ void WindowImpl::HandleModeChangeHotZones(int32_t posX, int32_t posY)
         WLOGFI("[HotZone] Secondary [%{public}d, %{public}d, %{public}u, %{public}u]", hotZones.secondary_.posX_,
             hotZones.secondary_.posY_, hotZones.secondary_.width_, hotZones.secondary_.height_);
 
-        if (WindowHelper::IsPointInTargetRect(posX, posY, hotZones.fullscreen_)) {
+        if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.fullscreen_)) {
             SetFullScreen(true);
-        } else if (WindowHelper::IsPointInTargetRect(posX, posY, hotZones.primary_)) {
+        } else if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.primary_)) {
             SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-        } else if (WindowHelper::IsPointInTargetRect(posX, posY, hotZones.secondary_)) {
+        } else if (WindowHelper::IsPointInTargetRectWithBound(posX, posY, hotZones.secondary_)) {
             SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
         }
     }
