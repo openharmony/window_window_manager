@@ -513,8 +513,8 @@ ScreenId AbstractScreenController::CreateVirtualScreen(VirtualScreenOption optio
         dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));
         NotifyScreenConnected(absScreen->ConvertToScreenInfo());
         if (deathRecipient_ == nullptr) {
-            deathRecipient_ = new AgentDeathRecipient(
-                std::bind(&AbstractScreenController::OnRemoteDied, this, std::placeholders::_1));
+            deathRecipient_ =
+                new AgentDeathRecipient([this](const sptr<IRemoteObject>& agent) { OnRemoteDied(agent); });
         }
         auto agIter = screenAgentMap_.find(displayManagerAgent);
         if (agIter == screenAgentMap_.end()) {
@@ -638,9 +638,46 @@ bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation new
     return true;
 }
 
+void AbstractScreenController::SetScreenRotateAnimation(
+    sptr<AbstractScreen>& screen, ScreenId screenId, Rotation rotationAfter)
+{
+    sptr<SupportedScreenModes> abstractScreenModes = screen->GetActiveScreenMode();
+    float w = 0;
+    float h = 0;
+    float x = 0;
+    float y = 0;
+    if (abstractScreenModes != nullptr) {
+        h = abstractScreenModes->height_;
+        w = abstractScreenModes->width_;
+    }
+    if (!IsVertical(rotationAfter)) {
+        std::swap(w, h);
+        x = (h - w) / 2; // 2: used to calculate offset to center display node
+        y = (w - h) / 2; // 2: used to calculate offset to center display node
+    }
+    std::weak_ptr<RSDisplayNode> weakNode = GetRSDisplayNodeByScreenId(screenId);
+    static const RSAnimationTimingProtocol timingProtocol(600); // animation time
+    static const RSAnimationTimingCurve curve_ =
+        RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
+    RSNode::Animate(timingProtocol, curve_, [weakNode, x, y, w, h, rotationAfter]() {
+        auto displayNode = weakNode.lock();
+        if (displayNode == nullptr) {
+            WLOGFE("SetScreenRotateAnimation error, cannot get DisplayNode");
+            return;
+        }
+        displayNode->SetRotation(-90.0f * static_cast<uint32_t>(rotationAfter)); // 90.f is base degree
+        displayNode->SetFrame(x, y, w, h);
+        displayNode->SetBounds(x, y, w, h);
+    });
+}
+
 bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow)
 {
     auto screen = GetAbstractScreen(screenId);
+    if (screen == nullptr) {
+        WLOGFE("SetRotation error, cannot get screen with screenId: %{public}" PRIu64, screenId);
+        return false;
+    }
     if (rotationAfter != screen->rotation_) {
         WLOGI("set orientation. rotation %{public}u", rotationAfter);
         ScreenId rsScreenId;
@@ -648,10 +685,7 @@ bool AbstractScreenController::SetRotation(ScreenId screenId, Rotation rotationA
             WLOGE("Convert to RsScreenId fail. screenId: %{public}" PRIu64"", screenId);
             return false;
         }
-        if (!rsInterface_.RequestRotation(rsScreenId, static_cast<ScreenRotation>(rotationAfter))) {
-            WLOGE("rotate screen fail. rsScreenId: %{public}" PRIu64"", rsScreenId);
-            return false;
-        }
+        SetScreenRotateAnimation(screen, screenId, rotationAfter);
         screen->rotation_ = rotationAfter;
     } else {
         WLOGI("rotation not changed. screen %{public}" PRIu64" rotation %{public}u", screenId, rotationAfter);
@@ -1183,7 +1217,7 @@ ScreenPowerState AbstractScreenController::GetScreenPower(ScreenId dmsScreenId) 
         WLOGFE("cannot find screen %{public}" PRIu64"", dmsScreenId);
         return ScreenPowerState::INVALID_STATE;
     }
-    ScreenPowerState state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(rsId));
+    auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(rsId));
     WLOGFI("GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, rsId);
     return state;
 }
