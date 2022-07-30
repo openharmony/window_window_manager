@@ -711,7 +711,7 @@ void DisplayChangeListener::OnScreenshot(DisplayId displayId)
     WindowManagerService::GetInstance().OnScreenshot(displayId);
 }
 
-void WindowManagerService::ProcessPointDown(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+void WindowManagerService::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
     sptr<MoveDragProperty>& moveDragProperty)
 {
     if (windowProperty == nullptr || moveDragProperty == nullptr) {
@@ -721,7 +721,7 @@ void WindowManagerService::ProcessPointDown(uint32_t windowId, sptr<WindowProper
 
     PostAsyncTask([this, windowId, windowProperty, moveDragProperty]() mutable {
         if (moveDragProperty->startDragFlag_ || moveDragProperty->startMoveFlag_) {
-            bool res = WindowInnerManager::GetInstance().NotifyWindowReadyToMoveOrDrag(windowId,
+            bool res = WindowInnerManager::GetInstance().NotifyServerReadyToMoveOrDrag(windowId,
                 windowProperty, moveDragProperty);
             if (!res) {
                 WLOGFE("invalid operation");
@@ -729,7 +729,14 @@ void WindowManagerService::ProcessPointDown(uint32_t windowId, sptr<WindowProper
             }
             windowController_->InterceptInputEventToServer(windowId);
         }
-        windowController_->ProcessPointDown(windowId, moveDragProperty);
+        windowController_->NotifyServerReadyToMoveOrDrag(windowId, moveDragProperty);
+    });
+}
+
+void WindowManagerService::ProcessPointDown(uint32_t windowId)
+{
+    PostAsyncTask([this, windowId]() {
+        windowController_->ProcessPointDown(windowId);
     });
 }
 
