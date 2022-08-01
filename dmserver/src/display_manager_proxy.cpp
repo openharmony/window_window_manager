@@ -721,6 +721,33 @@ std::vector<DisplayId> DisplayManagerProxy::GetAllDisplayIds()
     return allDisplayIds;
 }
 
+sptr<CutoutInfo> DisplayManagerProxy::GetCutoutInfo(DisplayId displayId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("GetCutoutInfo: remote is null");
+        return nullptr;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("GetCutoutInfo: GetCutoutInfo failed");
+        return nullptr;
+    }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("GetCutoutInfo: write displayId failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("GetCutoutInfo: GetCutoutInfo failed");
+        return nullptr;
+    }
+    sptr<CutoutInfo> info = reply.ReadParcelable<CutoutInfo>();
+    return info;
+}
+
 DMError DisplayManagerProxy::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
 {
     MessageParcel data;

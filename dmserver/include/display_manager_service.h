@@ -31,6 +31,7 @@
 #include "abstract_display_controller.h"
 #include "abstract_screen_controller.h"
 #include "display_change_listener.h"
+#include "display_cutout_controller.h"
 #include "display_manager_stub.h"
 #include "display_power_controller.h"
 #include "singleton_delegator.h"
@@ -55,6 +56,7 @@ public:
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
+    sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     bool SetOrientation(ScreenId screenId, Orientation orientation) override;
     bool SetOrientationFromWindow(ScreenId screenId, Orientation orientation);
     bool SetRotationFromWindow(ScreenId screenId, Rotation targetRotation);
@@ -118,6 +120,7 @@ private:
     sptr<AbstractDisplayController> abstractDisplayController_;
     sptr<AbstractScreenController> abstractScreenController_;
     sptr<DisplayPowerController> displayPowerController_;
+    sptr<DisplayCutoutController> displayCutoutController_;
     sptr<IDisplayChangeListener> displayChangeListener_;
     sptr<IWindowInfoQueriedListener> windowInfoQueriedListener_;
     sptr<DisplayDumper> displayDumper_;
