@@ -18,20 +18,27 @@
 #include "js_runtime_utils.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
+#include "cutout_info.h"
 #include "display.h"
 
 namespace OHOS {
 namespace Rosen {
 std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId);
 NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& Display);
+NativeValue* CreateJsCutoutInfoObject(NativeEngine& engine, sptr<CutoutInfo> cutoutInfo);
+NativeValue* CreateJsRectObject(NativeEngine& engine, Rect rect);
+NativeValue* CreateJsWaterfallDisplayAreaRectsObject(NativeEngine& engine,
+    WaterfallDisplayAreaRects waterfallDisplayAreaRects);
+NativeValue* CreateJsBoundingRectsArrayObject(NativeEngine& engine, std::vector<Rect> boundingRects);
 class JsDisplay final {
 public:
     explicit JsDisplay(const sptr<Display>& Display);
     ~JsDisplay();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
-
+    static NativeValue* GetCutoutInfo(NativeEngine* engine, NativeCallbackInfo* info);
 private:
     sptr<Display> display_ = nullptr;
+    NativeValue* OnGetCutoutInfo(NativeEngine& engine, NativeCallbackInfo& info);
 };
 enum class DisplayStateMode : uint32_t {
     STATE_UNKNOWN = 0,

@@ -54,6 +54,7 @@ DisplayManagerService::DisplayManagerService() : SystemAbility(DISPLAY_MANAGER_S
     displayPowerController_(new DisplayPowerController(mutex_,
         std::bind(&DisplayManagerService::NotifyDisplayStateChange, this,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4))),
+    displayCutoutController_(new DisplayCutoutController()),
     isAutoRotationOpen_(OHOS::system::GetParameter(
         "persist.display.ar.enabled", "1") == "1") // autoRotation default enabled
 {
@@ -97,6 +98,8 @@ bool DisplayManagerService::Init()
 void DisplayManagerService::ConfigureDisplayManagerService()
 {
     auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
+    auto enableConfig = DisplayManagerConfig::GetEnableConfig();
+    auto stringConfig = DisplayManagerConfig::GetStringConfig();
     if (numbersConfig.count("dpi") != 0) {
         uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["dpi"][0]);
         if (densityDpi == 0) {
@@ -114,6 +117,18 @@ void DisplayManagerService::ConfigureDisplayManagerService()
     if (numbersConfig.count("defaultDeviceRotationOffset") != 0) {
         uint32_t defaultDeviceRotationOffset = static_cast<uint32_t>(numbersConfig["defaultDeviceRotationOffset"][0]);
         ScreenRotationController::SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset);
+    }
+    if (enableConfig.count("isWaterfallDisplay") != 0) {
+        displayCutoutController_->SetIsWaterfallDisplay(
+            static_cast<bool>(enableConfig["isWaterfallDisplay"]));
+    }
+    if (numbersConfig.count("curvedScreenBoundary") != 0) {
+        displayCutoutController_->SetCurvedScreenBoundary(
+            static_cast<std::vector<int>>(numbersConfig["curvedScreenBoundary"]));
+    }
+    if (stringConfig.count("defaultDisplayCutoutPath") != 0) {
+        displayCutoutController_->SetBuiltInDisplayCutoutSvgPath(
+            static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]));
     }
 }
 
@@ -624,5 +639,10 @@ void DisplayManagerService::SetGravitySensorSubscriptionEnabled()
         return;
     }
     ScreenRotationController::SubscribeGravitySensor();
+}
+
+sptr<CutoutInfo> DisplayManagerService::GetCutoutInfo(DisplayId displayId)
+{
+    return displayCutoutController_->GetCutoutInfo(displayId);
 }
 } // namespace OHOS::Rosen

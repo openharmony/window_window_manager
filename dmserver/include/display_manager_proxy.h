@@ -66,6 +66,7 @@ public:
     bool SetDisplayState(DisplayState state) override;
     std::vector<DisplayId> GetAllDisplayIds() override;
     DisplayState GetDisplayState(DisplayId displayId) override;
+    sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
     bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) override;
     ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId) override;

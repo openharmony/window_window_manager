@@ -68,6 +68,7 @@ public:
     virtual void NotifyDisplayEvent(DisplayEvent event);
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze);
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
+    virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
 };

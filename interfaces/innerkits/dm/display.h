@@ -22,6 +22,7 @@
 
 namespace OHOS::Rosen {
 class DisplayInfo;
+class CutoutInfo;
 
 enum class DisplayType : uint32_t {
     DEFAULT = 0,
@@ -46,6 +47,7 @@ public:
     Rotation GetRotation() const;
     Orientation GetOrientation() const;
     sptr<DisplayInfo> GetDisplayInfo() const;
+    sptr<CutoutInfo> GetCutoutInfo() const;
 protected:
     // No more methods or variables can be defined here.
     Display(const std::string& name, sptr<DisplayInfo> info);
