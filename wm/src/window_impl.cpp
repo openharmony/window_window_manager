@@ -2803,5 +2803,16 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
     }
     return WMError::WM_OK;
 }
+
+WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
+{
+    if (uiContent_ == nullptr) {
+        WLOGFE("[Client] Window %{public}s notify memory level failed, because uicontent is null.", name_.c_str());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    // notify memory level
+    uiContent_->NotifyMemoryLevel(level);
+    return WMError::WM_OK;
+}
 } // namespace Rosen
 } // namespace OHOS
