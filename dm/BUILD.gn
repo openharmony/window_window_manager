@@ -59,7 +59,7 @@ ohos_shared_library("libdm") {
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   part_name = "window_manager"

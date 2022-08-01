@@ -40,7 +40,7 @@
           "utils_base",
           "hitrace_native",
           "resource_management",
-          "samgr_standard",
+          "samgr",
           "input",
           "safwk",
           "display_manager",
