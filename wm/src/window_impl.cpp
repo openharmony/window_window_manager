@@ -1088,7 +1088,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
             SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(),
                 property_, moveDragProperty_);
         }
-        NotifyAfterUnfocused(false);
+        NotifyAfterForeground(false);
         return WMError::WM_OK;
     }
     WMError ret = PreProcessShow(reason, withAnimation);
