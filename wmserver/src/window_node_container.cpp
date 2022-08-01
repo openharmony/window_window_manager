@@ -1210,7 +1210,8 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
         return WMError::WM_ERROR_INVALID_TYPE;
     }
 
-    if (WindowHelper::IsSubWindow(node->GetWindowType())) {
+    if (WindowHelper::IsSubWindow(node->GetWindowType()) ||
+        (node->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
         if (parentNode == nullptr) {
             WLOGFE("window type is invalid");
             return WMError::WM_ERROR_NULLPTR;
@@ -1219,7 +1220,7 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
         if (parentNode->IsSplitMode()) {
             RaiseSplitRelatedWindowToTop(parentNode);
         } else {
-            RaiseWindowToTop(node->GetParentId(), parentNode->parent_->children_); // raise parent window
+            RaiseWindowToTop(parentNode->GetWindowId(), parentNode->parent_->children_); // raise parent window
         }
     } else if (WindowHelper::IsMainWindow(node->GetWindowType())) {
         if (node->IsSplitMode()) {

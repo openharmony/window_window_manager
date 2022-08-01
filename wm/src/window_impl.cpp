@@ -2452,6 +2452,7 @@ void WindowImpl::NotifyTouchOutside()
 void WindowImpl::NotifyTouchDialogTarget()
 {
     std::vector<sptr<IDialogTargetTouchListener>> dialogTargetTouchListeners;
+    SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(), property_, moveDragProperty_);
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         dialogTargetTouchListeners = dialogTargetTouchListeners_;
