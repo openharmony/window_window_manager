@@ -20,9 +20,10 @@
 #include <pixel_map.h>
 #include <surface.h>
 
+#include "display_cutout_controller.h"
+#include "display_info.h"
 #include "dm_common.h"
 #include "screen.h"
-#include "display_info.h"
 #include "screen_info.h"
 #include "screen_group_info.h"
 #include "zidl/display_manager_agent_interface.h"
@@ -74,6 +75,7 @@ public:
         TRANS_ID_IS_SCREEN_ROTATION_LOCKED,
         TRANS_ID_SET_SCREEN_ROTATION_LOCKED,
         TRANS_ID_HAS_PRIVATE_WINDOW,
+        TRANS_ID_GET_CUTOUT_INFO,
     };
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
@@ -111,6 +113,7 @@ public:
     virtual bool SetDisplayState(DisplayState state) = 0;
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
     virtual std::vector<DisplayId> GetAllDisplayIds() = 0;
+    virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) = 0;
     virtual void NotifyDisplayEvent(DisplayEvent event) = 0;
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze) = 0;
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) = 0;

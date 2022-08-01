@@ -17,6 +17,8 @@
 
 #include <cinttypes>
 #include <map>
+
+#include "cutout_info.h"
 #include "display.h"
 #include "display_info.h"
 #include "window_manager_hilog.h"
@@ -24,6 +26,7 @@
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
+constexpr size_t ARGC_ONE = 1;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplay"};
 }
@@ -62,6 +65,37 @@ void JsDisplay::Finalizer(NativeEngine* engine, void* data, void* hint)
     }
 }
 
+NativeValue* JsDisplay::GetCutoutInfo(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("GetCutoutInfo is called");
+    JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(engine, info);
+    return (me != nullptr) ? me->OnGetCutoutInfo(*engine, *info) : nullptr;
+}
+
+NativeValue* JsDisplay::OnGetCutoutInfo(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("OnGetCutoutInfo is called");
+    AsyncTask::CompleteCallback complete =
+        [this](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            sptr<CutoutInfo> cutoutInfo = display_->GetCutoutInfo();
+            if (cutoutInfo != nullptr) {
+                task.Resolve(engine, CreateJsCutoutInfoObject(engine, cutoutInfo));
+                WLOGFI("JsDisplay::OnGetCutoutInfo success");
+            } else {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsDisplay::OnGetCutoutInfo failed."));
+            }
+        };
+    NativeValue* lastParam = nullptr;
+    if (info.argc == ARGC_ONE && info.argv[ARGC_ONE - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[ARGC_ONE - 1];
+    }
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsDisplay::OnGetCutoutInfo",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId)
 {
     WLOGFI("[NAPI]Try to find display %{public}" PRIu64" in g_JsDisplayMap", displayId);
@@ -71,6 +105,61 @@ std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId)
         return nullptr;
     }
     return g_JsDisplayMap[displayId];
+}
+
+NativeValue* CreateJsCutoutInfoObject(NativeEngine& engine, sptr<CutoutInfo> cutoutInfo)
+{
+    WLOGFI("JsDisplay::CreateJsCutoutInfoObject is called");
+    NativeValue* objValue = engine.CreateObject();
+    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to convert prop to jsObject");
+        return engine.CreateUndefined();
+    }
+    if (cutoutInfo == nullptr) {
+        WLOGFE("Get null cutout info");
+        return engine.CreateUndefined();
+    }
+    std::vector<Rect> boundingRects = cutoutInfo->GetBoundingRects();
+    WaterfallDisplayAreaRects waterfallDisplayAreaRects = cutoutInfo->GetWaterfallDisplayAreaRects();
+    object->SetProperty("boundingRects", CreateJsBoundingRectsArrayObject(engine, boundingRects));
+    object->SetProperty("waterfallDisplayAreaRects",
+        CreateJsWaterfallDisplayAreaRectsObject(engine, waterfallDisplayAreaRects));
+    return objValue;
+}
+
+NativeValue* CreateJsRectObject(NativeEngine& engine, Rect rect)
+{
+    NativeValue* objValue = engine.CreateObject();
+    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+    object->SetProperty("left", CreateJsValue(engine, rect.posX_));
+    object->SetProperty("top", CreateJsValue(engine, rect.posY_));
+    object->SetProperty("width", CreateJsValue(engine, rect.width_));
+    object->SetProperty("height", CreateJsValue(engine, rect.height_));
+    return objValue;
+}
+
+NativeValue* CreateJsWaterfallDisplayAreaRectsObject(NativeEngine& engine,
+    WaterfallDisplayAreaRects waterfallDisplayAreaRects)
+{
+    NativeValue* objValue = engine.CreateObject();
+    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+    object->SetProperty("left", CreateJsRectObject(engine, waterfallDisplayAreaRects.left));
+    object->SetProperty("top", CreateJsRectObject(engine, waterfallDisplayAreaRects.top));
+    object->SetProperty("right", CreateJsRectObject(engine, waterfallDisplayAreaRects.right));
+    object->SetProperty("bottom", CreateJsRectObject(engine, waterfallDisplayAreaRects.bottom));
+    return objValue;
+}
+
+NativeValue* CreateJsBoundingRectsArrayObject(NativeEngine& engine, std::vector<Rect> boundingRects)
+{
+    NativeValue* arrayValue = engine.CreateArray(boundingRects.size());
+    NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
+    size_t i = 0;
+    for (auto& rect : boundingRects) {
+        array->SetElement(i++, CreateJsRectObject(engine, rect));
+    }
+    return arrayValue;
 }
 
 NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
@@ -110,6 +199,7 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
     object->SetProperty("scaledDensity", CreateJsValue(engine, info->GetVirtualPixelRatio()));
     object->SetProperty("xDPI", engine.CreateUndefined());
     object->SetProperty("yDPI", engine.CreateUndefined());
+    BindNativeFunction(engine, *object, "getCutoutInfo", JsDisplay::GetCutoutInfo);
     if (jsDisplayObj == nullptr || jsDisplayObj->Get() == nullptr) {
         std::shared_ptr<NativeReference> jsDisplayRef;
         jsDisplayRef.reset(engine.CreateReference(objValue, 1));

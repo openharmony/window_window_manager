@@ -340,6 +340,17 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
     return displayManagerServiceProxy_->GetDisplayInfoById(displayId);
 }
 
+sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
+{
+    WLOGFI("DisplayManagerAdapter::GetCutoutInfo");
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("screen id is invalid");
+        return nullptr;
+    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetCutoutInfo(displayId);
+}
+
 sptr<ScreenGroupInfo> ScreenManagerAdapter::GetScreenGroupInfoById(ScreenId screenId)
 {
     if (screenId == SCREEN_ID_INVALID) {
