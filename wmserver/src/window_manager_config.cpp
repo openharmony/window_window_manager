@@ -224,17 +224,13 @@ void WindowManagerConfig::DumpConfig(const std::map<std::string, ConfigItem>& co
                 WLOGFI("[WmConfig] %{public}s", conf.second.stringValue_.c_str());
                 break;
             case ValueType::INTS:
-                if (conf.second.intsValue_) {
-                    for (auto& num : *conf.second.intsValue_) {
-                        WLOGFI("[WmConfig] Num: %{public}d", num);
-                    }
+                for (auto& num : *conf.second.intsValue_) {
+                    WLOGFI("[WmConfig] Num: %{public}d", num);
                 }
                 break;
             case ValueType::FLOATS:
-                if (conf.second.floatsValue_) {
-                    for (auto& num : *conf.second.floatsValue_) {
-                        WLOGFI("[WmConfig] Num: %{public}f", num);
-                    }
+                for (auto& num : *conf.second.floatsValue_) {
+                    WLOGFI("[WmConfig] Num: %{public}f", num);
                 }
                 break;
             default:
