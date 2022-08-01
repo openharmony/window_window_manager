@@ -156,6 +156,9 @@ private:
     void ConfigKeyboardAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
     RSAnimationTimingCurve CreateCurve(const WindowManagerConfig::ConfigItem& curveConfig);
     void RecordShowTimeEvent(int64_t costTime);
+    void ConfigWindowEffect(const WindowManagerConfig::ConfigItem& effectConfig);
+    bool ConfigAppWindowCornerRadius(const WindowManagerConfig::ConfigItem& item, float& out);
+    bool ConfigAppWindowShadow(const WindowManagerConfig::ConfigItem& shadowConfig, WindowShadowParameters& outShadow);
 
     static inline SingletonDelegator<WindowManagerService> delegator;
     AtomicMap<uint32_t, uint32_t> accessTokenIdMaps_;

@@ -35,6 +35,7 @@ public:
         STRING,
         INTS,
         FLOATS,
+        POSITIVE_FLOATS,
     };
     struct ConfigItem {
         std::map<std::string, ConfigItem>* property_ = nullptr;
@@ -249,7 +250,8 @@ private:
     static bool IsValidNode(const xmlNode& currNode);
     static void ReadProperty(const xmlNodePtr& currNode, std::map<std::string, ConfigItem>& property);
     static void ReadIntNumbersConfigInfo(const xmlNodePtr& currNode, std::vector<int>& intsValue);
-    static void ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode, std::vector<float>& floatsValue);
+    static void ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode, std::vector<float>& floatsValue, bool allowNeg);
+    static void ReadStringConfigInfo(const xmlNodePtr& currNode, std::string& stringValue);
     static void ReadConfig(const xmlNodePtr& rootPtr, std::map<std::string, ConfigItem>& mapValue);
     static std::string GetConfigPath(const std::string& configFileName);
 };
