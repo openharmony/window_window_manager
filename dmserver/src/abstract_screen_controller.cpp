@@ -655,6 +655,17 @@ void AbstractScreenController::SetScreenRotateAnimation(
         x = (h - w) / 2; // 2: used to calculate offset to center display node
         y = (w - h) / 2; // 2: used to calculate offset to center display node
     }
+    auto displayNode = GetRSDisplayNodeByScreenId(screenId);
+    if (displayNode == nullptr) {
+        return;
+    }
+    if (rotationAfter == Rotation::ROTATION_0 && screen->rotation_ == Rotation::ROTATION_270) {
+        // avoid animation 270, 240, 210 ... 30, 0, should play from 90->0
+        displayNode->SetRotation(90.f);
+    } else if (rotationAfter == Rotation::ROTATION_270 && screen->rotation_ == Rotation::ROTATION_0) {
+        // avoid animation 0, 30, 60 ... 270, should play from 360->270
+        displayNode->SetRotation(-360.f);
+    }
     std::weak_ptr<RSDisplayNode> weakNode = GetRSDisplayNodeByScreenId(screenId);
     static const RSAnimationTimingProtocol timingProtocol(600); // animation time
     static const RSAnimationTimingCurve curve_ =
@@ -665,7 +676,7 @@ void AbstractScreenController::SetScreenRotateAnimation(
             WLOGFE("SetScreenRotateAnimation error, cannot get DisplayNode");
             return;
         }
-        displayNode->SetRotation(-90.0f * static_cast<uint32_t>(rotationAfter)); // 90.f is base degree
+        displayNode->SetRotation(-90.f * static_cast<uint32_t>(rotationAfter)); // 90.f is base degree
         displayNode->SetFrame(x, y, w, h);
         displayNode->SetBounds(x, y, w, h);
     });
