@@ -30,14 +30,20 @@ public:
     ~DisplayManagerConfig() = default;
 
     static bool LoadConfigXml();
+    static const std::map<std::string, bool>& GetEnableConfig();
     static const std::map<std::string, std::vector<int>>& GetIntNumbersConfig();
+    static const std::map<std::string, std::string>& GetStringConfig();
     static void DumpConfig();
 
 private:
+    static std::map<std::string, bool> enableConfig_;
     static std::map<std::string, std::vector<int>> intNumbersConfig_;
+    static std::map<std::string, std::string> stringConfig_;
 
     static bool IsValidNode(const xmlNode& currNode);
+    static void ReadEnableConfigInfo(const xmlNodePtr& currNode);
     static void ReadIntNumbersConfigInfo(const xmlNodePtr& currNode);
+    static void ReadStringConfigInfo(const xmlNodePtr& currNode);
     static std::string GetConfigPath(const std::string& configFileName);
 
     static std::vector<std::string> Split(std::string str, std::string pattern);

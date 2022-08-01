@@ -21,4 +21,19 @@
     <defaultDeviceRotationOffset>0</defaultDeviceRotationOffset>
     <!--Cutout area Rect. This is temporary config. To delete when Rs cutout area interface is ready.-->
     <cutoutArea>10 10 100 20</cutoutArea>
+    <!-- format: string -->
+    <!-- default value is an empty string -->
+    <!-- sample: M 205,5 L 795,5 L 595,295 L 5,295 L 205,5 z -->
+    <!-- mandatory: no -->
+    <defaultDisplayCutoutPath>M 100,100 m -75,0 a 75,75 0 1,0 150,0 a 75,75 0 1,0 -150,0 z</defaultDisplayCutoutPath>
+    <!-- format: number(left) number(top) number(right) number(bottom) -->
+    <!-- default value: 0 0 0 0 -->
+    <!-- sample: 150 150 0 0 -->
+    <!-- mandatory: no  -->
+    <curvedScreenBoundary>100 0 100 0</curvedScreenBoundary>
+    <!-- format: boolean -->
+    <!-- default value: false -->
+    <!-- sample: false -->
+    <!-- mandatory: no -->
+    <isWaterfallDisplay>true</isWaterfallDisplay>
  </Configs>

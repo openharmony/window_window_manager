@@ -173,6 +173,42 @@ declare namespace display {
      * DPI on the y-axis.
      */
     yDPI: number;
+
+    /**
+     * Obtain the cutout info of the display.
+     * @devices tv, phone, tablet, wearable
+     */
+    getCutoutInfo(callback: AsyncCallback<void>): void;
+
+    /**
+     * Obtain the cutout info of the display.
+     * @devices tv, phone, tablet, wearable
+     */
+    getCutoutInfo(): Promise<CutoutInfo>;
+  }
+
+  /**
+   * cutout information of the display.
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
+   */
+  interface CutoutInfo {
+    BoundingRects: Array<Rect>;
+    waterfallDisplayAreaRects: WaterfallDisplayAreaRects;
+  }
+
+  interface WaterfallDisplayAreaRects {
+    left: Rect;
+    right: Rect;
+    top: Rect;
+    bottom: Rect;
+  }
+
+  interface Rect {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
   }
 }
 
