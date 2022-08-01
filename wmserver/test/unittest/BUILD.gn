@@ -37,7 +37,7 @@ config("wmserver_unittest_common_public_config") {
     "//foundation/window/window_manager/wmserver/include/window_snapshot",
     "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//foundation/window/window_manager/utils/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
     "//third_party/googletest/googlemock/include",
@@ -75,6 +75,7 @@ ohos_static_library("wmserver_unittest_common") {
 
     # need delete it for abilitycontext
     "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
+    "//commonlibrary/c_utils/base:utils",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
     "//foundation/arkui/napi:ace_napi",
     "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
@@ -88,7 +89,6 @@ ohos_static_library("wmserver_unittest_common") {
     "//foundation/window/window_manager/wmserver:libwms",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [

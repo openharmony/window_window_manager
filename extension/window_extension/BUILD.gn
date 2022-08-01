@@ -59,11 +59,11 @@ ohos_shared_library("libwindow_extension") {
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
     "ability_runtime:runtime",
+    "c_utils:utils",
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "hitrace_native:hitrace_meter",
     "input:libmmi-client",
-    "utils_base:utils",
   ]
 
   part_name = "window_manager"
