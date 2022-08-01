@@ -125,4 +125,9 @@ sptr<DisplayInfo> Display::GetDisplayInfo() const
 {
     return pImpl_->GetDisplayInfo();
 }
+
+sptr<CutoutInfo> Display::GetCutoutInfo() const
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(GetId());
+}
 } // namespace OHOS::Rosen
