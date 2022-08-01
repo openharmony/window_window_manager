@@ -67,7 +67,7 @@ ohos_shared_library("libdms") {
     "hitrace_native:hitrace_meter",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
     "sensor:sensor_interface_native",
   ]
 

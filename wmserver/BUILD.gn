@@ -96,7 +96,7 @@ ohos_shared_library("libwms") {
     "ipc:ipc_core",
     "power_manager:powermgr_client",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   if (is_standard_system) {

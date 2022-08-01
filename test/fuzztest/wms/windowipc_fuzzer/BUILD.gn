@@ -42,7 +42,7 @@ ohos_fuzztest("WindowIPCFuzzTest") {
 
   external_deps = [
     "ability_runtime:ability_manager",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 }
 
