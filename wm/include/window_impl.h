@@ -392,6 +392,11 @@ private:
     WMError PreProcessShow(uint32_t reason, bool withAnimation);
     bool NeedToStopShowing();
     void CalculateStartRectExceptHotZone(float virtualPixelRatio, const TransformHelper::Vector2& hotZoneScale);
+    void SetSystemConfig();
+    bool IsAppMainOrSunOrFloatingWindow();
+    void SetWindowCornerRadiusAccordingToSystemConfig();
+    bool IsAppMainOrSubOrFloatingWindow();
+    void UpdateWindowShadowAccordingToSystemConfig();
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
@@ -439,6 +444,8 @@ private:
     bool needRemoveWindowInputChannel_ = false;
     bool isListenerHandlerRunning_ = false;
     bool isMainHandlerAvailable_ = true;
+    bool isAppFloatingWindow_ = false;
+    bool isFocused_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

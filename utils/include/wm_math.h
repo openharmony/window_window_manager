@@ -41,6 +41,18 @@ inline float ToDegrees(float radians)
     return radians * 180.0f / PI;
 }
 
+inline bool LessNotEqual(double left, double right)
+{
+    static constexpr double eps = -0.001f;
+    return (left - right) < eps;
+}
+
+inline bool GreatNotEqual(double left, double right)
+{
+    static constexpr double eps = 0.001f;
+    return (left - right) > eps;
+}
+
 template <typename T>
 T Max(const T& a, const T& b)
 {

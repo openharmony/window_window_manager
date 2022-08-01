@@ -158,8 +158,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
         case WindowManagerMessage::TRANS_ID_GET_SYSTEM_CONFIG: {
             SystemConfig config;
             WMError errCode = GetSystemConfig(config);
-            reply.WriteBool(config.isSystemDecorEnable_);
-            reply.WriteBool(config.isStretchable_);
+            reply.WriteParcelable(&config);
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
