@@ -33,7 +33,9 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerConfig"};
 }
 
+std::map<std::string, bool> DisplayManagerConfig::enableConfig_;
 std::map<std::string, std::vector<int>> DisplayManagerConfig::intNumbersConfig_;
+std::map<std::string, std::string> DisplayManagerConfig::stringConfig_;
 
 std::vector<std::string> DisplayManagerConfig::Split(std::string str, std::string pattern)
 {
@@ -99,10 +101,19 @@ bool DisplayManagerConfig::LoadConfigXml()
         }
 
         auto nodeName = curNodePtr->name;
+        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("isWaterfallDisplay"))) {
+            ReadEnableConfigInfo(curNodePtr);
+            continue;
+        }
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("dpi")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDeviceRotationOffset")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("cutoutArea"))) {
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("cutoutArea")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curvedScreenBoundary"))) {
             ReadIntNumbersConfigInfo(curNodePtr);
+            continue;
+        }
+        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDisplayCutoutPath"))) {
+            ReadStringConfigInfo(curNodePtr);
             continue;
         }
     }
@@ -143,18 +154,65 @@ void DisplayManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
     xmlFree(context);
 }
 
+void DisplayManagerConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
+{
+    xmlChar* enable = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("enable"));
+    if (enable == nullptr) {
+        WLOGFE("[DmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        return;
+    }
+
+    std::string nodeName = reinterpret_cast<const char *>(currNode->name);
+    if (!xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("true"))) {
+        enableConfig_[nodeName] = true;
+    } else if (!xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("false"))) {
+        enableConfig_[nodeName] = false;
+    }
+    xmlFree(enable);
+}
+
+void DisplayManagerConfig::ReadStringConfigInfo(const xmlNodePtr& currNode)
+{
+    xmlChar* context = xmlNodeGetContent(currNode);
+    if (context == nullptr) {
+        WLOGFE("[DmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        return;
+    }
+
+    std::string inputString = reinterpret_cast<const char*>(context);
+    std::string nodeName = reinterpret_cast<const char*>(currNode->name);
+    stringConfig_[nodeName] = inputString;
+    xmlFree(context);
+}
+
+const std::map<std::string, bool>& DisplayManagerConfig::GetEnableConfig()
+{
+    return enableConfig_;
+}
+
 const std::map<std::string, std::vector<int>>& DisplayManagerConfig::GetIntNumbersConfig()
 {
     return intNumbersConfig_;
 }
 
+const std::map<std::string, std::string>& DisplayManagerConfig::GetStringConfig()
+{
+    return stringConfig_;
+}
+
 void DisplayManagerConfig::DumpConfig()
 {
+    for (auto& enable : enableConfig_) {
+        WLOGFI("[DmConfig] Enable: %{public}s %{public}u", enable.first.c_str(), enable.second);
+    }
     for (auto& numbers : intNumbersConfig_) {
         WLOGFI("[DmConfig] Numbers: %{public}s %{public}zu", numbers.first.c_str(), numbers.second.size());
         for (auto& num : numbers.second) {
             WLOGFI("[DmConfig] Num: %{public}d", num);
         }
+    }
+    for (auto& string : stringConfig_) {
+        WLOGFI("[DmConfig] String: %{public}s", string.first.c_str());
     }
 }
 } // namespace OHOS::Rosen

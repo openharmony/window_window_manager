@@ -29,6 +29,7 @@ config("libwmutil_public_config") {
 ohos_shared_library("libwmutil") {
   sources = [
     "src/agent_death_recipient.cpp",
+    "src/cutout_info.cpp",
     "src/display_info.cpp",
     "src/permission.cpp",
     "src/screen_group_info.cpp",
