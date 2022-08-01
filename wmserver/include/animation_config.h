@@ -21,7 +21,7 @@ namespace Rosen {
 struct AnimationConfig {
     struct WindowAnimationConfig {
         struct AnimationTiming {
-            RSAnimationTimingProtocol timingProtocol_ = 350;
+            RSAnimationTimingProtocol timingProtocol_ = 200;
             RSAnimationTimingCurve timingCurve_ = RSAnimationTimingCurve::EASE_OUT;
         } animationTiming_;
         float opacity_ = 0;
