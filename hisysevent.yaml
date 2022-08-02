@@ -40,7 +40,7 @@
 domain: WINDOWMANAGER
 
 NO_FOCUS_WINDOW:
-  __BASE: {type: FAULT, level: CRITICAL, desc: The event is not consumed }
+  __BASE: {type: FAULT, level: CRITICAL, desc: The event is not consumed}
   PID: {type: INT32, desc: session pid}
   UID: {type: INT32, desc: session uid}
   PACKAGE_NAME: {type: STRING, desc: package name}
@@ -48,11 +48,19 @@ NO_FOCUS_WINDOW:
   MSG: {type: STRING, desc: windowmanager event message}
 
 WINDOW_LIFE_CYCLE_EXCEPTION:
-  __BASE: {type: FAULT, level: CRITICAL, desc: The window life cycle is abnormal }
+  __BASE: {type: FAULT, level: CRITICAL, desc: The window life cycle is abnormal}
   PID: {type: INT32, desc: session pid}
   UID: {type: INT32, desc: session uid}
   MSG: {type: STRING, desc: windowmanager event message}
 
 WINDOW_BOOT_ANIMATION_DONE:
-  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: Boot animation done }
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: Boot animation done}
+  MSG: {type: STRING, desc: windowmanager event message}
+
+SHOW_WINDOW_TIME:
+  __BASE: {type: STATISTIC, level: MINOR, desc: Sow window time performance}
+  MSG: {type: STRING, desc: windowmanager event message}
+
+GET_SNAPSHOT_TIME:
+  __BASE: {type: STATISTIC, level: MINOR, desc: Get snapshot time performance}
   MSG: {type: STRING, desc: windowmanager event message}

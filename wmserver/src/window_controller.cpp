@@ -576,7 +576,7 @@ void WindowController::RecordBootAnimationEvent() const
 {
     uint64_t time = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::steady_clock::now()).
         time_since_epoch().count();
-    WLOGFI("boot animation done duration(s): %{public}" PRIu64"", static_cast<uint64_t>(time));
+    WLOGFI("boot animation done duration(s): %{public}" PRIu64"", time);
     std::ostringstream os;
     os << "boot animation done duration(s): " << time <<";";
     int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
