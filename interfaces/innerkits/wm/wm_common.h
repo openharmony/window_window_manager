@@ -93,6 +93,7 @@ enum class WMError : int32_t {
     WM_ERROR_INVALID_TYPE = 180,
     WM_ERROR_INVALID_PERMISSION = 190,
     WM_ERROR_UNKNOWN,
+    WM_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 };
 
 enum class WindowFlag : uint32_t {
