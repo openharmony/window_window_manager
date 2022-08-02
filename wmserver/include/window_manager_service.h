@@ -30,6 +30,7 @@
 #include "drag_controller.h"
 #include "freeze_controller.h"
 #include "singleton_delegator.h"
+#include "wm_common_inner.h"
 #include "wm_single_instance.h"
 #include "window_common_event.h"
 #include "window_controller.h"
@@ -153,6 +154,7 @@ private:
     void ConfigWindowAnimation(const std::map<std::string, WindowManagerConfig::ConfigItem>& animeMap);
     void ConfigKeyboardAnimation(const std::map<std::string, WindowManagerConfig::ConfigItem>& animeMap);
     RSAnimationTimingCurve CreateCurve(const std::map<std::string, WindowManagerConfig::ConfigItem>& timingMap);
+    void RecordShowTimeEvent(int64_t costTime);
 
     static inline SingletonDelegator<WindowManagerService> delegator;
     AtomicMap<uint32_t, uint32_t> accessTokenIdMaps_;
@@ -172,6 +174,7 @@ private:
     RSInterfaces& rsInterface_;
     bool startingOpen_ = true;
     std::shared_ptr<RSUIDirector> rsUiDirector_;
+    ShowWindowTimeConfig showWindowTimeConfig_ = { 0, 0, 0, 0, 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

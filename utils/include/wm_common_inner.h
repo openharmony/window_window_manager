@@ -80,6 +80,23 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_PRIVACY_MODE = 1 << 15,
 };
 
+struct ShowWindowTimeConfig {
+    std::atomic<uint32_t> showWindowTimes_;
+    std::atomic<uint32_t> below20msTimes_;
+    std::atomic<uint32_t> below35msTimes_;
+    std::atomic<uint32_t> below50msTimes_;
+    std::atomic<uint32_t> above50msTimes_;
+};
+
+struct GetSnapshotTimeConfig {
+    std::atomic<uint32_t> getSnapshotTimes_;
+    std::atomic<uint32_t> below25msTimes_;
+    std::atomic<uint32_t> below35msTimes_;
+    std::atomic<uint32_t> below50msTimes_;
+    std::atomic<uint32_t> below200msTimes_;
+    std::atomic<uint32_t> above200msTimes_;
+};
+
 struct ModeChangeHotZonesConfig {
     bool isModeChangeHotZoneConfigured_;
     uint32_t fullscreenRange_;
