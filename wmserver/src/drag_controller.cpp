@@ -329,7 +329,7 @@ void MoveDragController::HandleDragEvent(int32_t posX, int32_t posY, int32_t poi
     windowProperty_->SetRequestRect(newRect);
     windowProperty_->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
     windowProperty_->SetDragType(moveDragProperty_->dragType_);
-    WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT);
+    WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT, true);
 }
 
 void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId)
@@ -349,7 +349,7 @@ void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY, int32_t poi
         windowProperty_->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
     windowProperty_->SetRequestRect(newRect);
     windowProperty_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
-    WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT);
+    WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT, true);
 }
 
 void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

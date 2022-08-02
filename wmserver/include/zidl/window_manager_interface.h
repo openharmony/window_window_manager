@@ -78,7 +78,8 @@ public:
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError ToggleShownStateForAllAppWindows() = 0;
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode) = 0;
-    virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) = 0;
+    virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
+        bool isAsyncTask = false) = 0;
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
