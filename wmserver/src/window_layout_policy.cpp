@@ -998,11 +998,6 @@ static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const R
 
 void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect)
 {
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT ||
-        node->GetWindowProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        WLOGFI("not need to update bounds");
-        return;
-    }
     wptr<WindowNode> weakNode = node;
     auto SetBoundsFunc = [weakNode, winRect, preRect]() {
         auto winNode = weakNode.promote();
