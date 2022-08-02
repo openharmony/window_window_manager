@@ -33,16 +33,9 @@
         <timing>
             <!--duration of animation when add/remove window, unit is ms-->
             <duration>350</duration>
-            <!--timing curve of animation, config it as below:-->
-            <!--name="ease"-->
-            <!--name="easeIn"-->
-            <!--name="easeOut"-->
-            <!--name="easeInOut"-->
-            <!--name="default"-->
-            <!--name="linear"-->
-            <!--name="spring"-->
-            <!--name="interactiveSpring"-->
-            <!--name="cubic" value=<float float float float>-->
+            <!--timing curve of animation, config it as below:
+            name=ease, easeIn, easeOut, easeInOut, default, linear,
+            spring, interactiveSpring, cubic(float float float float)-->
             <curve name="easeOut"></curve>
         </timing>
         <!--scaleX and scaleY of animation start state-->

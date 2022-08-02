@@ -24,6 +24,7 @@ group("unittest") {
     ":utils_screen_info_test",
     ":utils_window_helper_test",
     ":utils_window_property_test",
+    ":utils_wm_math_test",
   ]
 }
 
@@ -59,6 +60,14 @@ ohos_unittest("utils_window_property_test") {
   module_out_path = module_out_path
 
   sources = [ "window_property_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+}
+
+ohos_unittest("utils_wm_math_test") {
+  module_out_path = module_out_path
+
+  sources = [ "wm_math_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
 }
