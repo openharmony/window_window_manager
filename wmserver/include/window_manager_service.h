@@ -152,9 +152,9 @@ private:
         return ret;
     }
     void ConfigHotZones(const std::vector<int>& hotZones);
-    void ConfigWindowAnimation(const std::map<std::string, WindowManagerConfig::ConfigItem>& animeMap);
-    void ConfigKeyboardAnimation(const std::map<std::string, WindowManagerConfig::ConfigItem>& animeMap);
-    RSAnimationTimingCurve CreateCurve(const std::map<std::string, WindowManagerConfig::ConfigItem>& timingMap);
+    void ConfigWindowAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
+    void ConfigKeyboardAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
+    RSAnimationTimingCurve CreateCurve(const WindowManagerConfig::ConfigItem& curveConfig);
     void RecordShowTimeEvent(int64_t costTime);
 
     static inline SingletonDelegator<WindowManagerService> delegator;
