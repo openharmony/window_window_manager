@@ -70,6 +70,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     property_->SetHitOffset(option->GetHitOffset());
     property_->SetRequestedOrientation(option->GetRequestedOrientation());
     windowTag_ = option->GetWindowTag();
+    isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     property_->SetTurnScreenOn(option->IsTurnScreenOn());
     property_->SetKeepScreenOn(option->IsKeepScreenOn());
     property_->SetBrightness(option->GetBrightness());
@@ -298,6 +299,11 @@ uint32_t WindowImpl::GetRequestModeSupportInfo() const
 uint32_t WindowImpl::GetModeSupportInfo() const
 {
     return property_->GetModeSupportInfo();
+}
+
+bool WindowImpl::IsMainHandlerAvailable() const
+{
+    return isMainHandlerAvailable_;
 }
 
 SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
@@ -2280,9 +2286,19 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
         WLOGFI("Transfer pointer event to uiContent");
         (void)uiContent_->ProcessPointerEvent(pointerEvent);
     } else {
-        WLOGW("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
+        WLOGE("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());
         pointerEvent->MarkProcessed();
     }
+}
+
+void WindowImpl::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (state_ == WindowState::STATE_DESTROYED) {
+        WLOGFE("[WM] Receive Vsync Request failed, window is destroyed");
+        return;
+    }
+    VsyncStation::GetInstance().RequestVsync(vsyncCallback);
 }
 
 void WindowImpl::UpdateFocusStatus(bool focused)

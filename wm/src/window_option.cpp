@@ -150,6 +150,16 @@ WindowTag WindowOption::GetWindowTag() const
     return windowTag_;
 }
 
+void WindowOption::SetMainHandlerAvailable(bool isMainHandlerAvailable)
+{
+    isMainHandlerAvailable_ = isMainHandlerAvailable;
+}
+
+bool WindowOption::GetMainHandlerAvailable() const
+{
+    return isMainHandlerAvailable_;
+}
+
 const PointInfo& WindowOption::GetHitOffset() const
 {
     return hitOffset_;
