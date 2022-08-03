@@ -390,7 +390,8 @@ WMError WindowManagerProxy::SetWindowLayoutMode(WindowLayoutMode mode)
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action)
+WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
+    bool isAsyncTask)
 {
     MessageParcel data;
     MessageParcel reply;

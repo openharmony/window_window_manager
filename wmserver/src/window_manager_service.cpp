@@ -787,27 +787,42 @@ WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
     });
 }
 
-WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action)
+WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
+    bool isAsyncTask)
 {
     if (windowProperty == nullptr) {
         WLOGFE("windowProperty is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
+
     if (action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) {
         PostAsyncTask([this, windowProperty, action]() mutable {
             windowController_->UpdateProperty(windowProperty, action);
         });
         return WMError::WM_OK;
     }
-    PostAsyncTask([this, windowProperty, action]() mutable {
+
+    if (isAsyncTask) {
+        PostAsyncTask([this, windowProperty, action]() mutable {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
+            WMError res = windowController_->UpdateProperty(windowProperty, action);
+            if (action == PropertyChangeAction::ACTION_UPDATE_RECT && res == WMError::WM_OK &&
+                windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
+                dragController_->UpdateDragInfo(windowProperty->GetWindowId());
+            }
+        });
+        return WMError::WM_OK;
+    }
+
+    return PostSyncTask([this, &windowProperty, action]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
         WMError res = windowController_->UpdateProperty(windowProperty, action);
         if (action == PropertyChangeAction::ACTION_UPDATE_RECT && res == WMError::WM_OK &&
             windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
             dragController_->UpdateDragInfo(windowProperty->GetWindowId());
         }
+        return res;
     });
-    return WMError::WM_OK;
 }
 
 WMError WindowManagerService::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
