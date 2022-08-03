@@ -118,7 +118,7 @@ HWTEST_F(WindowTouchOutsideTest, onTouchInside, Function | MediumTest | Level3)
     option->SetWindowMode(firstWindowInfo_.mode);
     option->SetWindowType(firstWindowInfo_.type);
     option->SetWindowRect(firstWindowInfo_.rect);
-    auto firstWindow = new WindowImpl(option);
+    sptr<WindowImpl> firstWindow = new WindowImpl(option);
     firstWindow->Create("");
     firstWindow->RegisterTouchOutsideListener(windowlistener1_);
     firstWindow->Show();
@@ -144,7 +144,7 @@ HWTEST_F(WindowTouchOutsideTest, onTouchOutside, Function | MediumTest | Level3)
     secondOption->SetWindowMode(secondWindowInfo_.mode);
     secondOption->SetWindowType(secondWindowInfo_.type);
     secondOption->SetWindowRect(secondWindowInfo_.rect);
-    auto secondWindow = new WindowImpl(secondOption);
+    sptr<WindowImpl> secondWindow = new WindowImpl(secondOption);
     secondWindow->Create("");
     firstWindow->Show();
     secondWindow->Show();
@@ -171,7 +171,7 @@ HWTEST_F(WindowTouchOutsideTest, onTouchOutsideNotShow, Function | MediumTest | 
     secondOption->SetWindowMode(secondWindowInfo_.mode);
     secondOption->SetWindowType(secondWindowInfo_.type);
     secondOption->SetWindowRect(secondWindowInfo_.rect);
-    auto secondWindow = new WindowImpl(secondOption);
+    sptr<WindowImpl> secondWindow = new WindowImpl(secondOption);
     secondWindow->Create("");
     secondWindow->Show();
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(secondWindow->GetWindowId(),
@@ -202,7 +202,7 @@ HWTEST_F(WindowTouchOutsideTest, onTouchOutsideForAllWindow, Function | MediumTe
     thirdOption->SetWindowMode(thirdWindowInfo_.mode);
     thirdOption->SetWindowType(thirdWindowInfo_.type);
     thirdOption->SetWindowRect(thirdWindowInfo_.rect);
-    auto thirdWindow = new WindowImpl(thirdOption);
+    sptr<WindowImpl> thirdWindow = new WindowImpl(thirdOption);
     thirdWindow->Create("");
     thirdWindow->Show();
     SingletonContainer::Get<WindowAdapter>().ProcessPointDown(thirdWindow->GetWindowId(),
