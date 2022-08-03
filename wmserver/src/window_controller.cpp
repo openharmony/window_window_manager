@@ -949,7 +949,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
             std::vector<Rect> rects;
             property->GetTouchHotAreas(rects);
-            UpdateTouchHotAreas(node, rects);
+            ret = UpdateTouchHotAreas(node, rects);
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG: {
