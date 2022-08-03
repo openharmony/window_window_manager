@@ -349,6 +349,7 @@ public:
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) = 0;
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) = 0;
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
+    virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
     /**
      * @brief register window lifecycle listener.
@@ -400,6 +401,7 @@ public:
     virtual uint32_t GetRequestModeSupportInfo() const = 0;
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) = 0;
     virtual void GetRequestedTouchHotAreas(std::vector<Rect>& rects) const = 0;
+    virtual bool IsMainHandlerAvailable() const = 0;
 
     /**
      * @brief disable main window decoration. It must be callled before loadContent.

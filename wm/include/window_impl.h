@@ -117,6 +117,7 @@ public:
     virtual uint32_t GetWindowId() const override;
     virtual uint32_t GetWindowFlags() const override;
     uint32_t GetRequestModeSupportInfo() const override;
+    bool IsMainHandlerAvailable() const override;
     inline NotifyNativeWinDestroyFunc GetNativeDestroyCallback()
     {
         return notifyNativefunc_;
@@ -214,6 +215,7 @@ public:
     void UpdateModeSupportInfo(uint32_t modeSupportInfo);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
+    virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     void UpdateFocusStatus(bool focused);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
@@ -436,6 +438,7 @@ private:
     bool isOriginRectSet_ = false;
     bool needRemoveWindowInputChannel_ = false;
     bool isListenerHandlerRunning_ = false;
+    bool isMainHandlerAvailable_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS

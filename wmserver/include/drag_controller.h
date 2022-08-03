@@ -88,7 +88,6 @@ private:
     void OnReceiveVsync(int64_t timeStamp);
     void ResetMoveOrDragState();
 
-    std::mutex mtx_;
     sptr<WindowProperty> windowProperty_;
     sptr<MoveDragProperty> moveDragProperty_;
     uint32_t activeWindowId_ = INVALID_WINDOW_ID;
