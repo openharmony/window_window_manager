@@ -1450,7 +1450,7 @@ NativeValue* JsWindow::OnSetDimBehind(NativeEngine& engine, NativeCallbackInfo& 
 {
     AsyncTask::CompleteCallback complete =
         [](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_DEVICE_NOT_SUPPORT)));
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
@@ -1578,7 +1578,7 @@ NativeValue* JsWindow::OnSetOutsideTouchable(NativeEngine& engine, NativeCallbac
 {
     AsyncTask::CompleteCallback complete =
         [](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+            task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_DEVICE_NOT_SUPPORT)));
         };
 
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
