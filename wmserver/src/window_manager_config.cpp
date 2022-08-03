@@ -24,7 +24,29 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerConfig"};
 }
 
-std::map<std::string, WindowManagerConfig::ConfigItem> WindowManagerConfig::config_;
+WindowManagerConfig::ConfigItem WindowManagerConfig::config_;
+const WindowManagerConfig::ConfigItem WindowManagerConfig::ConfigItem::DEFAULT;
+const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig::configItemTypeMap_ = {
+    { "maxAppWindowNumber",     WindowManagerConfig::ValueType::INTS },
+    { "modeChangeHotZones",     WindowManagerConfig::ValueType::INTS },
+    { "duration",               WindowManagerConfig::ValueType::INTS },
+    { "durationIn",             WindowManagerConfig::ValueType::INTS },
+    { "durationOut",            WindowManagerConfig::ValueType::INTS },
+    { "windowAnimation",        WindowManagerConfig::ValueType::MAP },
+    { "keyboardAnimation",      WindowManagerConfig::ValueType::MAP },
+    { "timing",                 WindowManagerConfig::ValueType::MAP },
+    { "curve",                  WindowManagerConfig::ValueType::FLOATS },
+    { "splitRatios",            WindowManagerConfig::ValueType::FLOATS },
+    { "exitSplitRatios",        WindowManagerConfig::ValueType::FLOATS },
+    { "scale",                  WindowManagerConfig::ValueType::FLOATS },
+    { "rotation",               WindowManagerConfig::ValueType::FLOATS },
+    { "translate",              WindowManagerConfig::ValueType::FLOATS },
+    { "opacity",                WindowManagerConfig::ValueType::FLOATS },
+    { "decor",                  WindowManagerConfig::ValueType::UNDIFINED },
+    { "minimizeByOther",        WindowManagerConfig::ValueType::UNDIFINED },
+    { "stretchable",            WindowManagerConfig::ValueType::UNDIFINED },
+    { "remoteAnimation",        WindowManagerConfig::ValueType::UNDIFINED },
+};
 
 std::string WindowManagerConfig::GetConfigPath(const std::string& configFileName)
 {
@@ -45,45 +67,35 @@ void WindowManagerConfig::ReadConfig(const xmlNodePtr& rootPtr, std::map<std::st
             WLOGFE("[WmConfig]: invalid node!");
             continue;
         }
-        auto nodeName = curNodePtr->name;
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("maxAppWindowNumber")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("modeChangeHotZones")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("duration")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("durationIn")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("durationOut"))) {
-            std::vector<int> v;
-            ReadIntNumbersConfigInfo(curNodePtr, v);
-            mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
-            continue;
-        }
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("windowAnimation")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("keyboardAnimation")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("timing"))) {
-            std::map<std::string, ConfigItem> v;
-            ReadConfig(curNodePtr, v);
-            mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
-            continue;
-        }
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curve")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("splitRatios")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("exitSplitRatios")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("scale")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("rotation")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("translate")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("opacity")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("decor")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("minimizeByOther")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("stretchable")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("remoteAnimation"))) {
+        std::string nodeName = reinterpret_cast<const char*>(curNodePtr->name);
+        if (configItemTypeMap_.count(nodeName)) {
             std::map<std::string, ConfigItem> p;
             ReadProperty(curNodePtr, p);
             if (p.size() > 0) {
                 mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetProperty(p);
             }
-            std::vector<float> v;
-            ReadFloatNumbersConfigInfo(curNodePtr, v);
-            mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
-            continue;
+            switch (configItemTypeMap_.at(nodeName)) {
+                case ValueType::INTS: {
+                    std::vector<int> v;
+                    ReadIntNumbersConfigInfo(curNodePtr, v);
+                    mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
+                    break;
+                }
+                case ValueType::FLOATS: {
+                    std::vector<float> v;
+                    ReadFloatNumbersConfigInfo(curNodePtr, v);
+                    mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
+                    break;
+                }
+                case ValueType::MAP: {
+                    std::map<std::string, ConfigItem> v;
+                    ReadConfig(curNodePtr, v);
+                    mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
+                    break;
+                }
+                default:
+                    break;
+            }
         }
     }
 }
@@ -106,7 +118,9 @@ bool WindowManagerConfig::LoadConfigXml()
         return false;
     }
 
-    ReadConfig(rootPtr, config_);
+    std::map<std::string, ConfigItem> configMap;
+    config_.SetValue(configMap);
+    ReadConfig(rootPtr, *config_.mapValue_);
 
     xmlFreeDoc(docPtr);
     return true;
