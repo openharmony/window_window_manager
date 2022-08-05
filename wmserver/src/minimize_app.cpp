@@ -17,6 +17,7 @@
 
 #include <ability_manager_client.h>
 #include "window_manager_hilog.h"
+#include "window_inner_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -60,17 +61,7 @@ void MinimizeApp::ExecuteMinimizeAll()
         WLOGFI("[Minimize] ExecuteMinimizeAll with size: %{public}zu, reason: %{public}u",
             appNodes.second.size(), appNodes.first);
         for (auto& node : appNodes.second) {
-            auto weakNode = node.promote();
-            if (weakNode != nullptr && weakNode->abilityToken_ != nullptr && !weakNode->startingWindowShown_) {
-                WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u",
-                    weakNode->GetWindowId(), appNodes.first);
-                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(weakNode->abilityToken_, isFromUser);
-            } else if (weakNode != nullptr) {
-                WLOGFI("window is not minimize since id:%{public}u, "
-                    "startingWindowShown_:%{public}d, abilityToken:%{public}d, windowToken:%{public}d",
-                    weakNode->GetWindowId(), weakNode->startingWindowShown_, weakNode->abilityToken_ != nullptr,
-                    weakNode->GetWindowToken() != nullptr);
-            }
+            WindowInnerManager::GetInstance().MinimizeAbility(node, isFromUser);
         }
         appNodes.second.clear();
     }
@@ -122,11 +113,7 @@ void MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason reason)
     if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
         bool isFromUser = IsFromUser(reason);
         for (auto& node : needMinimizeAppNodes_.at(reason)) {
-            auto weakNode = node.promote();
-            if (weakNode != nullptr && weakNode->abilityToken_ != nullptr && !weakNode->startingWindowShown_) {
-                WLOGFI("[Minimize] Minimize Window %{public}u, reason %{public}u", weakNode->GetWindowId(), reason);
-                AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(weakNode->abilityToken_, isFromUser);
-            }
+            WindowInnerManager::GetInstance().MinimizeAbility(node, isFromUser);
         }
         needMinimizeAppNodes_.at(reason).clear();
     }

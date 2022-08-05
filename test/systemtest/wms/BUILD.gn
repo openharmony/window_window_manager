@@ -31,7 +31,6 @@ group("systemtest") {
     ":wms_window_input_test",
     ":wms_window_layout_test",
     ":wms_window_mode_support_info_test",
-    ":wms_window_move_drag_test",
     ":wms_window_multi_ability_test",
     ":wms_window_occupied_area_change_test",
     ":wms_window_rotation_test",
@@ -216,7 +215,7 @@ config("wms_systemtest_common_public_config") {
     "//foundation/window/window_manager/wmserver/include",
     "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//foundation/window/window_manager/utils/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
     "//third_party/googletest/googlemock/include",
@@ -246,7 +245,10 @@ ohos_static_library("wms_systemtest_common") {
 
   sources = [ "window_test_utils.cpp" ]
 
-  public_configs = [ ":wms_systemtest_common_public_config" ]
+  public_configs = [
+    ":wms_systemtest_common_public_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_deps = [
     "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
@@ -254,6 +256,7 @@ ohos_static_library("wms_systemtest_common") {
 
     # need delete it for abilitycontext
     "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
+    "//commonlibrary/c_utils/base:utils",
     "//foundation/arkui/napi:ace_napi",
     "//foundation/graphic/graphic_2d/rosen/modules/animation/window_animation:window_animation",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
@@ -264,7 +267,6 @@ ohos_static_library("wms_systemtest_common") {
     "//foundation/window/window_manager/wm:libwm",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
   external_deps = [
     "ability_base:base",

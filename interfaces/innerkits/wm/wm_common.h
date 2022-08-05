@@ -64,6 +64,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_FLOAT_CAMERA,
     WINDOW_TYPE_PLACEHOLDER,
     WINDOW_TYPE_DIALOG,
+    WINDOW_TYPE_SCREENSHOT,
     ABOVE_APP_SYSTEM_WINDOW_END,
     SYSTEM_WINDOW_END = ABOVE_APP_SYSTEM_WINDOW_END,
 };
@@ -119,6 +120,8 @@ enum class WMError : int32_t {
     WM_ERROR_INVALID_OPERATION,
     WM_ERROR_INVALID_PERMISSION,
     WM_ERROR_NO_REMOTE_ANIMATION,
+
+    WM_ERROR_DEVICE_NOT_SUPPORT = 801, // the value do not change.It is defined on all system
 
     WM_ERROR_NEED_REPORT_BASE = 1000, // error code > 1000 means need report
     WM_ERROR_NULLPTR,
@@ -359,11 +362,6 @@ enum class WindowUpdateType : int32_t {
 struct SystemConfig {
     bool isSystemDecorEnable_ = true;
     bool isStretchable_ = false;
-};
-
-enum class CallbackType {
-    CALLBACK_INPUT = 0,
-    CALLBACK_FRAME = 1,
 };
 
 using OnCallback = std::function<void(int64_t)>;

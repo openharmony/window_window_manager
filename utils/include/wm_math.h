@@ -174,6 +174,8 @@ struct Matrix4 {
     void Invert();
     // Extract the scale component from the matrix
     Vector3 GetScale() const;
+    // Get the translation component of the matrix
+    Vector3 GetTranslation() const;
     static const Matrix4 Identity;
     static constexpr int MAT_SIZE = 4;
 };

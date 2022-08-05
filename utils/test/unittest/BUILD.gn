@@ -24,6 +24,7 @@ group("unittest") {
     ":utils_screen_info_test",
     ":utils_window_helper_test",
     ":utils_window_property_test",
+    ":utils_wm_math_test",
   ]
 }
 
@@ -63,6 +64,14 @@ ohos_unittest("utils_window_property_test") {
   deps = [ ":utils_unittest_common" ]
 }
 
+ohos_unittest("utils_wm_math_test") {
+  module_out_path = module_out_path
+
+  sources = [ "wm_math_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+}
+
 ohos_unittest("utils_window_helper_test") {
   module_out_path = module_out_path
 
@@ -89,16 +98,19 @@ ohos_static_library("utils_unittest_common") {
   visibility = [ ":*" ]
   testonly = true
 
-  public_configs = [ ":utils_unittest_common_public_config" ]
+  public_configs = [
+    ":utils_unittest_common_public_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_deps = [
+    "//commonlibrary/c_utils/base:utils",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/utils:libwmutil",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   subsystem_name = "window"

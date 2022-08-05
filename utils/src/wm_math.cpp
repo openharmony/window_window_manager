@@ -178,6 +178,11 @@ Vector3 Matrix4::GetScale() const
     return retVal;
 }
 
+Vector3 Matrix4::GetTranslation() const
+{
+    return Vector3(mat_[3][0], mat_[3][1], mat_[3][2]);
+}
+
 Plane::Plane(const Vector3& normal, float d)
     : normal_(normal), d_(d)
 {

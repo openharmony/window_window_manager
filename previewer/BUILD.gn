@@ -12,26 +12,28 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-config("libtestutil_private_config") {
-  visibility = [ ":*" ]
-  include_dirs = [ "include" ]
-}
 
-## Build libtestutil.a
-ohos_static_library("libtestutil") {
-  sources = [ "src/common_test_utils.cpp" ]
-
-  configs = [ ":libtestutil_private_config" ]
-
-  public_configs = [
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-  ]
-
-  external_deps = [
-    "access_token:libaccesstoken_sdk",
-    "access_token:libtoken_setproc",
-  ]
-
+ohos_shared_library("previewer_shared") {
+  libs = []
+  sources = [ "src/window.cpp" ]
+  include_dirs = [ "src/" ]
+  cflags = [ "-std=c++17" ]
   part_name = "window_manager"
   subsystem_name = "window"
+}
+
+ohos_copy("copy_previewer_library") {
+  if (host_os == "mac") {
+    suffix = ".dylib"
+  } else {
+    suffix = ".dll"
+  }
+  shared_library_path = get_label_info(":previewer_shared", "root_out_dir") +
+                        "/window/window_manager/libpreviewer_shared" + suffix
+  deps = [ ":previewer_shared" ]
+  sources = [ shared_library_path ]
+  outputs =
+      [ target_out_dir + "/previewer/common/bin/libpreviewer_shared" + suffix ]
+  module_source_dir = target_out_dir + "/previewer/common/bin/"
+  module_install_name = ""
 }

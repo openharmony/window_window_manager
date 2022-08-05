@@ -280,7 +280,7 @@ WMError WindowManagerProxy::SetWindowAnimationController(const sptr<RSIWindowAni
     return static_cast<WMError>(ret);
 }
 
-void WindowManagerProxy::ProcessPointDown(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+void WindowManagerProxy::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
     sptr<MoveDragProperty>& moveDragProperty)
 {
     MessageParcel data;
@@ -300,6 +300,25 @@ void WindowManagerProxy::ProcessPointDown(uint32_t windowId, sptr<WindowProperty
     }
     if (!data.WriteParcelable(moveDragProperty.GetRefPtr())) {
         WLOGFE("Failed to write moveDragProperty!");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void WindowManagerProxy::ProcessPointDown(uint32_t windowId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(windowId)) {
+        WLOGFE("Write windowId failed");
         return;
     }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN),
@@ -390,7 +409,8 @@ WMError WindowManagerProxy::SetWindowLayoutMode(WindowLayoutMode mode)
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action)
+WMError WindowManagerProxy::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
+    bool isAsyncTask)
 {
     MessageParcel data;
     MessageParcel reply;

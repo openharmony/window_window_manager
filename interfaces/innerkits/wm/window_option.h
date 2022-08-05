@@ -50,6 +50,7 @@ public:
     void SetBrightness(float brightness);
     void SetRequestedOrientation(Orientation orientation);
     void SetCallingWindow(uint32_t windowId);
+    void SetMainHandlerAvailable(bool isMainHandlerAvailable);
 
     Rect GetWindowRect() const;
     WindowType GetWindowType() const;
@@ -66,6 +67,7 @@ public:
     float GetBrightness() const;
     Orientation GetRequestedOrientation() const;
     uint32_t GetCallingWindow() const;
+    bool GetMainHandlerAvailable() const;
 
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
@@ -81,6 +83,7 @@ private:
     WindowTag windowTag_;
     bool keepScreenOn_ = false;
     bool turnScreenOn_ = false;
+    bool isMainHandlerAvailable_ = true;
     float brightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t callingWindow_ = INVALID_WINDOW_ID;
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {

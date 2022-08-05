@@ -30,6 +30,7 @@
 #include "drag_controller.h"
 #include "freeze_controller.h"
 #include "singleton_delegator.h"
+#include "wm_common_inner.h"
 #include "wm_single_instance.h"
 #include "window_common_event.h"
 #include "window_controller.h"
@@ -89,14 +90,16 @@ public:
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override;
     WMError RequestFocus(uint32_t windowId) override;
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) override;
-    void ProcessPointDown(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+    void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty) override;
+    void ProcessPointDown(uint32_t windowId) override;
     void ProcessPointUp(uint32_t windowId) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
     WMError ToggleShownStateForAllAppWindows() override;
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
-    WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) override;
+    WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
+        bool isAsyncTask = false) override;
     WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
 
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
@@ -150,9 +153,10 @@ private:
         return ret;
     }
     void ConfigHotZones(const std::vector<int>& hotZones);
-    void ConfigWindowAnimation(const std::map<std::string, WindowManagerConfig::ConfigItem>& animeMap);
-    void ConfigKeyboardAnimation(const std::map<std::string, WindowManagerConfig::ConfigItem>& animeMap);
-    RSAnimationTimingCurve CreateCurve(const std::map<std::string, WindowManagerConfig::ConfigItem>& timingMap);
+    void ConfigWindowAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
+    void ConfigKeyboardAnimation(const WindowManagerConfig::ConfigItem& animeConfig);
+    RSAnimationTimingCurve CreateCurve(const WindowManagerConfig::ConfigItem& curveConfig);
+    void RecordShowTimeEvent(int64_t costTime);
 
     static inline SingletonDelegator<WindowManagerService> delegator;
     AtomicMap<uint32_t, uint32_t> accessTokenIdMaps_;
@@ -172,6 +176,7 @@ private:
     RSInterfaces& rsInterface_;
     bool startingOpen_ = true;
     std::shared_ptr<RSUIDirector> rsUiDirector_;
+    ShowWindowTimeConfig showWindowTimeConfig_ = { 0, 0, 0, 0, 0 };
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -23,7 +23,10 @@ ohos_executable("snapshot_display") {
   install_enable = true
   sources = [ "src/snapshot_display.cpp" ]
 
-  configs = [ ":snapshot_config" ]
+  configs = [
+    ":snapshot_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   deps = [
     ":libsnapshot_util",
@@ -31,8 +34,8 @@ ohos_executable("snapshot_display") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "multimedia_image_standard:image_native",
-    "utils_base:utils",
   ]
 
   part_name = "window_manager"
@@ -43,7 +46,10 @@ ohos_executable("snapshot_virtual_screen") {
   install_enable = false
   sources = [ "src/snapshot_virtual_screen.cpp" ]
 
-  configs = [ ":snapshot_config" ]
+  configs = [
+    ":snapshot_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   deps = [
     ":libsnapshot_util",
@@ -57,7 +63,10 @@ ohos_executable("snapshot_virtual_screen") {
 ohos_shared_library("libsnapshot_util") {
   sources = [ "src/snapshot_utils.cpp" ]
 
-  configs = [ ":snapshot_config" ]
+  configs = [
+    ":snapshot_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   deps = [
     "//foundation/window/window_manager/dm:libdm",
@@ -67,9 +76,9 @@ ohos_shared_library("libsnapshot_util") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "hitrace_native:hitrace_meter",
     "multimedia_image_standard:image_native",
-    "utils_base:utils",
   ]
 
   part_name = "window_manager"

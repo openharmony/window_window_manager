@@ -137,6 +137,14 @@ public:
      */
     std::string GetContentInfo() const;
 
+    /**
+     * @brief Handle and notify memory.
+     *
+     * @param level memory level
+     * @return the error code of window
+     */
+    WMError NotifyMemoryLevel(int32_t level) const;
+
 public:
     static const DisplayId DEFAULT_DISPLAY_ID = 0;
     static const std::string MAIN_WINDOW_ID;

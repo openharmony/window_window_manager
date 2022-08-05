@@ -58,6 +58,7 @@ public:
     static NativeValue* SetDimBehind(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetFocusable(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetKeepScreenOn(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* SetWakeUpScreen(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetOutsideTouchable(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetPrivacyMode(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetTouchable(NativeEngine* engine, NativeCallbackInfo* info);
@@ -75,11 +76,11 @@ public:
     static NativeValue* Snapshot(NativeEngine* engine, NativeCallbackInfo* info);
 
     // animation config
-    static NativeValue* SetOpacitySync(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* SetScaleSync(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* SetRotateSync(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* SetTranslateSync(NativeEngine* engine, NativeCallbackInfo* info);
-    static NativeValue* GetTransitionControllerSync(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* Opacity(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* Scale(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* Rotate(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* Translate(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* GetTransitionController(NativeEngine* engine, NativeCallbackInfo* info);
 
     // window effect
     static NativeValue* SetCornerRadius(NativeEngine* engine, NativeCallbackInfo* info);
@@ -123,6 +124,7 @@ private:
     NativeValue* OnSetDimBehind(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetFocusable(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetKeepScreenOn(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnSetWakeUpScreen(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetOutsideTouchable(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetPrivacyMode(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetTouchable(NativeEngine& engine, NativeCallbackInfo& info);
@@ -135,11 +137,11 @@ private:
     NativeValue* OnSetSnapshotSkip(NativeEngine& engine, NativeCallbackInfo& info);
 
     // animation Config
-    NativeValue* OnSetOpacitySync(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnSetScaleSync(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnSetRotateSync(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnSetTranslateSync(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* OnGetTransitionControllerSync(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnOpacity(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnScale(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnRotate(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnTranslate(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnGetTransitionController(NativeEngine& engine, NativeCallbackInfo& info);
     void CreateTransitionController(NativeEngine& engine);
 
     // window effect

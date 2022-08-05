@@ -15,9 +15,10 @@
 
 #include "window_inner_manager.h"
 
+#include "ability_manager_client.h"
 #include "ui_service_mgr_client.h"
-#include "window_manager_hilog.h"
 #include "window.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -92,10 +93,11 @@ void WindowInnerManager::Stop()
 void WindowInnerManager::CreateInnerWindow(std::string name, DisplayId displayId, Rect rect,
     WindowType type, WindowMode mode)
 {
-    eventHandler_->PostTask([this, name, displayId, rect, mode, type]() {
+    bool recentHolderWindowFlag = isRecentHolderEnable_;
+    auto task = [name, displayId, rect, mode, type, recentHolderWindowFlag]() {
         switch (type) {
             case WindowType::WINDOW_TYPE_PLACEHOLDER: {
-                if (isRecentHolderEnable_) {
+                if (recentHolderWindowFlag) {
                     PlaceHolderWindow::GetInstance().Create(name, displayId, rect, mode);
                 }
                 break;
@@ -108,16 +110,18 @@ void WindowInnerManager::CreateInnerWindow(std::string name, DisplayId displayId
             default:
                 break;
         }
-    });
+    };
+    PostTask(task, "CreateInnerWindow");
     return;
 }
 
 void WindowInnerManager::DestroyInnerWindow(DisplayId displayId, WindowType type)
 {
-    eventHandler_->PostTask([this, type]() {
+    bool recentHolderWindowFlag = isRecentHolderEnable_;
+    auto task = [type, recentHolderWindowFlag]() {
         switch (type) {
             case WindowType::WINDOW_TYPE_PLACEHOLDER: {
-                if (isRecentHolderEnable_) {
+                if (recentHolderWindowFlag) {
                     PlaceHolderWindow::GetInstance().Destroy();
                 }
                 break;
@@ -129,16 +133,18 @@ void WindowInnerManager::DestroyInnerWindow(DisplayId displayId, WindowType type
             default:
                 break;
         }
-    });
+    };
+    PostTask(task, "DestroyInnerWindow");
     return;
 }
 
 void WindowInnerManager::UpdateInnerWindow(DisplayId displayId, WindowType type, uint32_t width, uint32_t height)
 {
-    eventHandler_->PostTask([this, type, width, height]() {
+    bool recentHolderWindowFlag = isRecentHolderEnable_;
+    auto task = [type, width, height, recentHolderWindowFlag]() {
         switch (type) {
             case WindowType::WINDOW_TYPE_PLACEHOLDER: {
-                if (isRecentHolderEnable_) {
+                if (recentHolderWindowFlag) {
                     PlaceHolderWindow::GetInstance().Update(width, height);
                 }
                 break;
@@ -150,7 +156,45 @@ void WindowInnerManager::UpdateInnerWindow(DisplayId displayId, WindowType type,
             default:
                 break;
         }
-    });
+    };
+    PostTask(task, "UpdateInnerWindow");
+    return;
+}
+
+void WindowInnerManager::MinimizeAbility(const wptr<WindowNode> &node, bool isFromUser)
+{
+    // asynchronously calls the MinimizeAbility of AbilityManager
+    auto weakNode = node.promote();
+    if (weakNode == nullptr || weakNode->startingWindowShown_) {
+        WLOGE("minimize ability failed, because node is nullptr or start window node.");
+        return;
+    }
+    wptr<IRemoteObject> weakToken(weakNode->abilityToken_);
+    WLOGFD("minimize window %{public}u,  isfromuser: %{public}d", weakNode->GetWindowId(), isFromUser);
+    auto task = [weakToken, isFromUser]() {
+        auto token = weakToken.promote();
+        if (token == nullptr) {
+            WLOGE("minimize ability failed, because window token is nullptr.");
+            return;
+        }
+        AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(token, isFromUser);
+    };
+    PostTask(task, "MinimizeAbility");
+}
+
+void WindowInnerManager::PostTask(InnerTask &&task, std::string name, EventPriority priority)
+{
+    if (eventHandler_ == nullptr) {
+        WLOGFE("listener handler is nullptr");
+        return;
+    }
+    bool ret = eventHandler_->PostTask([task]() {
+            task();
+        }, name, 0, priority); // 0 is task delay time
+    if (!ret) {
+        WLOGFE("post listener callback task failed.");
+        return;
+    }
     return;
 }
 
@@ -159,7 +203,7 @@ pid_t WindowInnerManager::GetPid()
     return pid_;
 }
 
-bool WindowInnerManager::NotifyWindowReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+bool WindowInnerManager::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
     sptr<MoveDragProperty>& moveDragProperty)
 {
     if (moveDragController_->GetActiveWindowId() != INVALID_WINDOW_ID) {
@@ -167,7 +211,7 @@ bool WindowInnerManager::NotifyWindowReadyToMoveOrDrag(uint32_t windowId, sptr<W
         return false;
     }
     moveDragController_->HandleReadyToMoveOrDrag(windowId, windowProperty, moveDragProperty);
-    WLOGFI("NotifyWindowReadyToMoveOrDrag, windowId: %{public}u", windowId);
+    WLOGFI("NotifyServerReadyToMoveOrDrag, windowId: %{public}u", windowId);
     return true;
 }
 

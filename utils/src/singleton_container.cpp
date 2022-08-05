@@ -58,7 +58,7 @@ void SingletonContainer::AddSingleton(const std::string& name, void* instance)
         static int32_t nextId = 0;
         singletonMap[nextId].value = instance;
         singletonMap[nextId].refCount = 0;
-        WLOGFD("add %{public}s", name.c_str());
+        WLOGFI("add %{public}s", name.c_str());
         stringMap[name] = nextId++;
     } else {
         WLOGFE("add failed: %{public}s", name.c_str());
@@ -70,7 +70,7 @@ void SingletonContainer::SetSingleton(const std::string& name, void* instance)
     if (stringMap.find(name) == stringMap.end()) {
         AddSingleton(name, instance);
     } else {
-        WLOGFD("set %{public}s", name.c_str());
+        WLOGFI("set %{public}s", name.c_str());
         singletonMap[stringMap[name]].value = instance;
     }
 }
@@ -78,7 +78,7 @@ void SingletonContainer::SetSingleton(const std::string& name, void* instance)
 void* SingletonContainer::GetSingleton(const std::string& name)
 {
     if (stringMap.find(name) == stringMap.end()) {
-        WLOGFD("cannot get %{public}s", name.c_str());
+        WLOGFE("can not get %{public}s", name.c_str());
         return nullptr;
     }
     return singletonMap[stringMap[name]].value;

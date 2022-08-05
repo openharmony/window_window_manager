@@ -55,7 +55,10 @@ ohos_shared_library("libwm") {
     "src/zidl/window_stub.cpp",
   ]
 
-  configs = [ ":libwm_private_config" ]
+  configs = [
+    ":libwm_private_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_configs = [ ":libwm_public_config" ]
 
@@ -88,10 +91,10 @@ ohos_shared_library("libwm") {
     "napi:ace_napi",
 
     # because appexecfwk_core depends on global_resmgr
+    "c_utils:utils",
     "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
-    "utils_base:utils",
   ]
 
   defines = []

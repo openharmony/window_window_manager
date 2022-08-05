@@ -130,7 +130,15 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
                 NativeValue* argv[] = { avoidAreaValue };
                 thisListener->CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
             } else {
-                NativeValue* argv[] = { CreateJsValue(engine, static_cast<uint32_t>(type)), avoidAreaValue };
+                NativeValue *objValue = engine.CreateObject();
+                NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+                if (object == nullptr) {
+                    WLOGFE("Failed to get object");
+                    return;
+                }
+                object->SetProperty("type", CreateJsValue(engine, static_cast<uint32_t>(type)));
+                object->SetProperty("area", avoidAreaValue);
+                NativeValue* argv[] = { objValue };
                 thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
             }
         }
@@ -248,10 +256,10 @@ void JsWindowListener::OnScreenshot()
         *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsWindowListener::OnDialogTargetTouch()
+void JsWindowListener::OnDialogTargetTouch() const
 {
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = wptr<JsWindowListener>(this)] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+        [self = weakRef_] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
                 WLOGFE("[NAPI]this listener is nullptr");
@@ -267,10 +275,10 @@ void JsWindowListener::OnDialogTargetTouch()
         *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsWindowListener::OnDialogDeathRecipient()
+void JsWindowListener::OnDialogDeathRecipient() const
 {
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback> (
-        [self = wptr<JsWindowListener>(this)] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+        [self = weakRef_] (NativeEngine &engine, AsyncTask &task, int32_t status) {
             auto thisListener = self.promote();
             if (thisListener == nullptr) {
                 WLOGFE("[NAPI]this listener is nullptr");

@@ -40,7 +40,10 @@ ohos_shared_library("libdm") {
     "src/zidl/display_manager_agent_stub.cpp",
   ]
 
-  configs = [ ":libdm_private_config" ]
+  configs = [
+    ":libdm_private_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_configs = [ ":libdm_public_config" ]
 
@@ -51,12 +54,12 @@ ohos_shared_library("libdm") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "hilog_native:libhilog",
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
-    "utils_base:utils",
   ]
 
   part_name = "window_manager"

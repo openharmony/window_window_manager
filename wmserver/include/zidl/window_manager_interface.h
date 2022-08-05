@@ -62,6 +62,7 @@ public:
         TRANS_ID_UPDATE_AVOIDAREA_LISTENER,
         TRANS_ID_UPDATE_RS_TREE,
         TRANS_ID_BIND_DIALOG_TARGET,
+        TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -72,13 +73,15 @@ public:
     virtual WMError RequestFocus(uint32_t windowId) = 0;
     virtual AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
-    virtual void ProcessPointDown(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+    virtual void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty) = 0;
+    virtual void ProcessPointDown(uint32_t windowId) = 0;
     virtual void ProcessPointUp(uint32_t windowId) = 0;
     virtual void MinimizeAllAppWindows(DisplayId displayId) = 0;
     virtual WMError ToggleShownStateForAllAppWindows() = 0;
     virtual WMError SetWindowLayoutMode(WindowLayoutMode mode) = 0;
-    virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) = 0;
+    virtual WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
+        bool isAsyncTask = false) = 0;
     virtual void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
