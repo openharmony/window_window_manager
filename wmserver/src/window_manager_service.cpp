@@ -313,6 +313,13 @@ void WindowManagerService::ConfigureWindowManagerService()
     if (item.IsBool()) {
         systemConfig_.isStretchable_ = item.boolValue_;
     }
+    item = config["defaultWindowMode"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 && numbers[0] > 0) {
+            systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
+        }
+    }
     item = config["remoteAnimation"].GetProp("enable");
     if (item.IsBool()) {
         RemoteAnimation::isRemoteAnimationEnable_ = item.boolValue_;
