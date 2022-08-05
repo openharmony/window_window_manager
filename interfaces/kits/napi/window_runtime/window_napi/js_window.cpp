@@ -53,12 +53,12 @@ JsWindow::JsWindow(const sptr<Window>& window)
         WLOGFI("[NAPI]Destroy window %{public}s in js window", windowName.c_str());
     };
     windowToken_->RegisterWindowDestroyedListener(func);
-    WLOGFI("[NAPI] JsWindow constructorCnt: %{public}d", ++ctorCnt);
+    WLOGFI("[NAPI] constructorCnt: %{public}d", ++ctorCnt);
 }
 
 JsWindow::~JsWindow()
 {
-    WLOGFI("[NAPI]~JsWindow deConstructorCnt:%{public}d", ++dtorCnt);
+    WLOGFI("[NAPI] deConstructorCnt:%{public}d", ++dtorCnt);
     windowToken_ = nullptr;
 }
 
@@ -2441,7 +2441,6 @@ std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 
 NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
 {
-    WLOGFI("[NAPI]CreateJsWindowObject");
     std::string windowName = window->GetWindowName();
     // avoid repeatedly create js window when getWindow
     std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
