@@ -36,6 +36,9 @@ void DisplayCutoutController::SetIsWaterfallDisplay(bool isWaterfallDisplay)
 
 void DisplayCutoutController::SetCurvedScreenBoundary(std::vector<int> curvedScreenBoundary)
 {
+    while (curvedScreenBoundary.size() < 4) { // 4 directions.
+        curvedScreenBoundary.emplace_back(0);
+    }
     WLOGFI("Set curvedScreenBoundary");
     curvedScreenBoundary_ = curvedScreenBoundary;
 }
@@ -57,6 +60,7 @@ void DisplayCutoutController::SetCutoutSvgPath(DisplayId displayId, const std::s
         svgPaths_[displayId] = pathVec;
     }
     Rect boundingRect = CalcCutoutBoundingRect(svgPath);
+    CheckBoudingRectBoundary(displayId, boundingRect);
     if (boundingRects_.count(displayId) == 1) {
         boundingRects_[displayId].emplace_back(boundingRect);
     } else {
@@ -80,6 +84,25 @@ sptr<CutoutInfo> DisplayCutoutController::GetCutoutInfo(DisplayId displayId)
     }
     CutoutInfo *cutoutInfo = new CutoutInfo(boundingRects, waterfallDisplayAreaRects);
     return cutoutInfo;
+}
+
+void DisplayCutoutController::CheckBoudingRectBoundary(DisplayId displayId, Rect& boundingRect)
+{
+    sptr<SupportedScreenModes> modes =
+        DisplayManagerServiceInner::GetInstance().GetScreenModesByDisplayId(displayId);
+    if (modes == nullptr) {
+        WLOGFE("DisplayId is invalid");
+        return;
+    }
+    uint32_t displayHeight = modes->height_;
+    uint32_t displayWidth = modes->width_;
+    if (boundingRect.posX_ < 0 || boundingRect.posY_ < 0 ||
+        boundingRect.width_ + boundingRect.posX_ > displayWidth ||
+        boundingRect.height_ + boundingRect.posY_ > displayHeight) {
+        WLOGFE("boundingRect boundary is invalid");
+        boundingRect = {.posX_ = 0, .posY_ = 0, .width_ = 0, .height_ = 0};
+        return;
+    }
 }
 
 Rect DisplayCutoutController::CalcCutoutBoundingRect(std::string svgPath)
@@ -125,7 +148,10 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRects()
     uint32_t top = curvedScreenBoundary_[1];
     uint32_t right = curvedScreenBoundary_[2];
     uint32_t bottom = curvedScreenBoundary_[3];
-
+    if (left == 0 && top == 0 && right == 0 && bottom == 0) {
+        waterfallDisplayAreaRects_ = emptyRects;
+        return;
+    }
     sptr<SupportedScreenModes> modes =
         DisplayManagerServiceInner::GetInstance().GetScreenModesByDisplayId(
             DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId());

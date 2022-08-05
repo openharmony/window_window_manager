@@ -165,7 +165,7 @@ void DisplayManagerConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
     std::string nodeName = reinterpret_cast<const char *>(currNode->name);
     if (!xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("true"))) {
         enableConfig_[nodeName] = true;
-    } else if (!xmlStrcmp(enable, reinterpret_cast<const xmlChar*>("false"))) {
+    } else {
         enableConfig_[nodeName] = false;
     }
     xmlFree(enable);
