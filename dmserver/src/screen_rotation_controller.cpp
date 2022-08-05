@@ -413,6 +413,9 @@ SensorRotation ScreenRotationController::CalcSensorRotation(int sensorDegree)
 
 DeviceRotation ScreenRotationController::ConvertSensorToDeviceRotation(SensorRotation sensorRotation)
 {
+    if (sensorToDeviceRotationMap_.empty()) {
+        ProcessRotationMapping();
+    }
     return sensorToDeviceRotationMap_.at(sensorRotation);
 }
 
@@ -420,6 +423,9 @@ Rotation ScreenRotationController::ConvertDeviceToDisplayRotation(DeviceRotation
 {
     if (deviceRotation == DeviceRotation::INVALID) {
         return GetCurrentDisplayRotation();
+    }
+    if (deviceToDisplayRotationMap_.empty()) {
+        ProcessRotationMapping();
     }
     return deviceToDisplayRotationMap_.at(deviceRotation);
 }
