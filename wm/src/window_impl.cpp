@@ -764,7 +764,7 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
 
 void WindowImpl::UpdateTitleButtonVisibility()
 {
-    WLOGFI("[Client] UpdateTitleButtonVisibility");
+    WLOGFD("[Client] UpdateTitleButtonVisibility");
     if (uiContent_ == nullptr || !isAppDecorEnable_) {
         return;
     }
@@ -1790,7 +1790,7 @@ void WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& liste
 
 void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
 {
-    WLOGFI("JS RegisterWindowDestroyedListener the listener");
+    WLOGFD("called");
     notifyNativefunc_ = std::move(func);
 }
 
@@ -1985,7 +1985,6 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->SetOriginRect(rect);
         }
     }
-    WLOGFI("sizeChange callback size: %{public}lu", (unsigned long)windowChangeListeners_.size());
 
     NotifySizeChange(rectToAce, reason);
     if (uiContent_ != nullptr) {
@@ -1996,7 +1995,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         config.SetPosition(rectToAce.posX_, rectToAce.posY_);
         config.SetDensity(display->GetVirtualPixelRatio());
         uiContent_->UpdateViewportConfig(config, reason);
-        WLOGFI("notify uiContent window size change end");
+        WLOGFD("notify uiContent window size change end");
     }
 }
 
@@ -2388,7 +2387,7 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
         WLOGFI("Transfer pointer event to inputEventConsumer");
         (void)inputEventConsumer->OnInputEvent(pointerEvent);
     } else if (uiContent_ != nullptr) {
-        WLOGFI("Transfer pointer event to uiContent");
+        WLOGFD("Transfer pointer event to uiContent");
         (void)uiContent_->ProcessPointerEvent(pointerEvent);
     } else {
         WLOGE("pointerEvent is not consumed, windowId: %{public}u", GetWindowId());

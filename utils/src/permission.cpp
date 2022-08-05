@@ -34,7 +34,6 @@ bool Permission::IsSystemCalling()
 
     if (tokenInfo.apl == Security::AccessToken::ATokenAplEnum::APL_SYSTEM_CORE ||
         tokenInfo.apl == Security::AccessToken::ATokenAplEnum::APL_SYSTEM_BASIC) {
-        WLOGFI("Is system calling");
         return true;
     }
     WLOGFI("Is not system calling");

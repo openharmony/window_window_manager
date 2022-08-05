@@ -28,7 +28,7 @@ namespace {
 int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     MessageParcel& reply, MessageOption& option)
 {
-    WLOGFI("WindowManagerAgentStub::OnRemoteRequest code is %{public}u", code);
+    WLOGFI("code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         WLOGFE("InterfaceToken check failed");
         return -1;

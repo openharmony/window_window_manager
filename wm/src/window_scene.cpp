@@ -101,7 +101,7 @@ std::vector<sptr<Window>> WindowScene::GetSubWindow()
 
 WMError WindowScene::GoForeground(uint32_t reason)
 {
-    WLOGFI("GoForeground reason:%{public}u", reason);
+    WLOGFI("reason:%{public}u", reason);
     if (mainWindow_ == nullptr) {
         WLOGFE("Go foreground failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -111,7 +111,7 @@ WMError WindowScene::GoForeground(uint32_t reason)
 
 WMError WindowScene::GoBackground(uint32_t reason)
 {
-    WLOGFI("GoBackground reason:%{public}u", reason);
+    WLOGFI("reason:%{public}u", reason);
     if (mainWindow_ == nullptr) {
         WLOGFE("Go background failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
