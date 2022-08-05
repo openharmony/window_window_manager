@@ -568,7 +568,7 @@ void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChan
         WLOGFE("focusChangeInfo is nullptr.");
         return;
     }
-    WLOGFI("window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
+    WLOGFD("window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
     if (focused) {
 #ifdef EFFICIENCY_MANAGER_ENABLE
         SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(focusChangeInfo->uid_,

@@ -71,7 +71,7 @@ void DisplayGroupController::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, W
         rootType);
     if (rootNodeVectorPtr != nullptr) {
         rootNodeVectorPtr->push_back(node);
-        WLOGFI("add node in node vector of root, displayId: %{public}" PRIu64" windowId: %{public}d, "
+        WLOGFD("add node in node vector of root, displayId: %{public}" PRIu64" windowId: %{public}d, "
             "rootType: %{public}d", node->GetDisplayId(), node->GetWindowId(), rootType);
     } else {
         WLOGFE("add node failed, rootNode vector is empty, windowId: %{public}d, rootType: %{public}d",
