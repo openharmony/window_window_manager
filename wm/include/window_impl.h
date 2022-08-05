@@ -134,7 +134,7 @@ public:
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     virtual WMError SetLayoutFullScreen(bool status) override;
     virtual WMError SetFullScreen(bool status) override;
-    virtual Transform GetTransform() const override;
+    virtual const Transform& GetTransform() const override;
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) override;
     inline void SetWindowState(WindowState state)
     {

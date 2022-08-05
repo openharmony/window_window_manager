@@ -393,7 +393,7 @@ void WindowImpl::SetTransform(const Transform& trans)
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY);
 }
 
-Transform WindowImpl::GetTransform() const
+const Transform& WindowImpl::GetTransform() const
 {
     return property_->GetTransform();
 }

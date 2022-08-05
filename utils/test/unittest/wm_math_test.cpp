@@ -67,9 +67,11 @@ HWTEST_F(WmMathTest, MathHalper, Function | SmallTest | Level2)
         ASSERT_EQ(true, MathHelper::NearZero(MathHelper::ToRadians(degrees) - radians));
     }
     {
-        int a = 1, b = 2, c = 3;
+        int a = 1, b = 2, c = 3, d = 4;
         ASSERT_EQ(true, MathHelper::Max(a, b, c) == c);
         ASSERT_EQ(true, MathHelper::Min(a, b, c) == a);
+        ASSERT_EQ(true, MathHelper::Max(a, b, c, d) == d);
+        ASSERT_EQ(true, MathHelper::Min(a, b, c, d) == a);
         ASSERT_EQ(true, MathHelper::Clamp(a, b, c) == b);
         ASSERT_EQ(true, MathHelper::Clamp(b, a, c) == b);
         ASSERT_EQ(true, MathHelper::Clamp(c, a, b) == b);

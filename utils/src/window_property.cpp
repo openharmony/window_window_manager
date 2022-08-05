@@ -305,7 +305,7 @@ float WindowProperty::GetAlpha() const
     return alpha_;
 }
 
-Transform WindowProperty::GetTransform() const
+const Transform& WindowProperty::GetTransform() const
 {
     return trans_;
 }
