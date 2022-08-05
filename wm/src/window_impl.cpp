@@ -1091,8 +1091,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
             SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(property_->GetDisplayId());
         } else {
             WLOGFI("window is already shown id: %{public}u, raise to top", property_->GetWindowId());
-            SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(),
-                property_, moveDragProperty_);
+            SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
         }
         NotifyAfterForeground(false);
         return WMError::WM_OK;
@@ -1539,7 +1538,8 @@ void WindowImpl::StartMove()
         return;
     }
     moveDragProperty_->startMoveFlag_ = true;
-    SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(), property_, moveDragProperty_);
+    SingletonContainer::Get<WindowAdapter>().NotifyServerReadyToMoveOrDrag(property_->GetWindowId(),
+        property_, moveDragProperty_);
     WLOGFI("[StartMove] windowId %{public}u", GetWindowId());
 }
 
@@ -2151,7 +2151,7 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
 
     if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         moveDragProperty_->startMoveFlag_ = true;
-        SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(),
+        SingletonContainer::Get<WindowAdapter>().NotifyServerReadyToMoveOrDrag(property_->GetWindowId(),
             property_, moveDragProperty_);
     } else if (!WindowHelper::IsPointInTargetRect(moveDragProperty_->startPointPosX_,
         moveDragProperty_->startPointPosY_, moveDragProperty_->startRectExceptFrame_) ||
@@ -2161,7 +2161,7 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
         moveDragProperty_->startPointPosY_, moveDragProperty_->startRectExceptCorner_)))) {
         moveDragProperty_->startDragFlag_ = true;
         UpdateDragType();
-        SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(),
+        SingletonContainer::Get<WindowAdapter>().NotifyServerReadyToMoveOrDrag(property_->GetWindowId(),
             property_, moveDragProperty_);
     }
 
@@ -2256,8 +2256,7 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
                 return;
             }
         }
-        SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(),
-            property_, moveDragProperty_);
+        SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
     }
 
     // If point event type is up, should reset start move flag
@@ -2468,7 +2467,7 @@ void WindowImpl::NotifyTouchOutside()
 void WindowImpl::NotifyTouchDialogTarget()
 {
     std::vector<sptr<IDialogTargetTouchListener>> dialogTargetTouchListeners;
-    SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId(), property_, moveDragProperty_);
+    SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         dialogTargetTouchListeners = dialogTargetTouchListeners_;

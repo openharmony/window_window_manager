@@ -663,7 +663,28 @@ AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType 
     return windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
 }
 
-WMError WindowController::ProcessPointDown(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
+WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFW("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!node->currentVisibility_) {
+        WLOGFE("this window is not visible and not in window tree, windowId: %{public}u", windowId);
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+
+    // if start dragging or start moving dock_slice, need to update size change reason
+    if ((moveDragProperty->startMoveFlag_ && node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) ||
+        moveDragProperty->startDragFlag_) {
+        WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
+        return res;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowController::ProcessPointDown(uint32_t windowId)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
@@ -676,13 +697,6 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, sptr<MoveDragPrope
     }
 
     NotifyTouchOutside(node);
-
-    // if start dragging or start moving dock_slice, need to update size change reason
-    if ((moveDragProperty->startMoveFlag_ && node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) ||
-        moveDragProperty->startDragFlag_) {
-        WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
-        return res;
-    }
 
     WLOGFI("process point down, windowId: %{public}u", windowId);
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
