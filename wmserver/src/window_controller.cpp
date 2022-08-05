@@ -809,7 +809,7 @@ WMError WindowController::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 
 void WindowController::FlushWindowInfo(uint32_t windowId)
 {
-    WLOGFI("FlushWindowInfo");
+    WLOGFD("FlushWindowInfo");
     RSTransaction::FlushImplicitTransaction();
     inputWindowMonitor_->UpdateInputWindow(windowId);
 }

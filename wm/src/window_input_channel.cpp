@@ -76,6 +76,8 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         pointerEvent->MarkProcessed();
         return;
     }
+    WLOGFD("Dispatch move event, windowId: %{public}u, action: %{public}d",
+        window_->GetWindowId(), pointerEvent->GetPointerAction());
     window_->ConsumePointerEvent(pointerEvent);
 }
 
