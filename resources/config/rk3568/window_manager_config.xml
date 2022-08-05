@@ -60,4 +60,32 @@
     </keyboardAnimation>
     <!--enable/disable remote animation-->
     <remoteAnimation enable="true"></remoteAnimation>
+    <!--window effect config-->
+    <windowEffect>
+        <appWindows>
+            <cornerRadius>
+                <!--off: no corner, defaultCornerRadiusXS: 4vp, defaultCornerRadiusS: 8vp-->
+                <!--defaultCornerRadiusM: 12vp, defaultCornerRadiusL: 16vp, defaultCornerRadiusXL: 24vp-->
+                <fullScreen>off</fullScreen>
+                <split>off</split>
+                <float>off</float>
+            </cornerRadius>
+            <shadow>
+                <focused>
+                    <elevation>0</elevation>
+                    <color>#000000</color>
+                    <offsetX>0</offsetX>
+                    <offsetY>0</offsetY>
+                    <alpha>0</alpha>
+                </focused>
+                <unfocused>
+                    <elevation>0</elevation>
+                    <color>#000000</color>
+                    <offsetX>0</offsetX>
+                    <offsetY>0</offsetY>
+                    <alpha>0</alpha>
+                </unfocused>
+            </shadow>
+        </appWindows>
+    </windowEffect>
 </Configs>

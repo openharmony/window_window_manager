@@ -35,13 +35,27 @@ const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig:
     { "windowAnimation",        WindowManagerConfig::ValueType::MAP },
     { "keyboardAnimation",      WindowManagerConfig::ValueType::MAP },
     { "timing",                 WindowManagerConfig::ValueType::MAP },
-    { "curve",                  WindowManagerConfig::ValueType::FLOATS },
-    { "splitRatios",            WindowManagerConfig::ValueType::FLOATS },
-    { "exitSplitRatios",        WindowManagerConfig::ValueType::FLOATS },
-    { "scale",                  WindowManagerConfig::ValueType::FLOATS },
-    { "rotation",               WindowManagerConfig::ValueType::FLOATS },
-    { "translate",              WindowManagerConfig::ValueType::FLOATS },
-    { "opacity",                WindowManagerConfig::ValueType::FLOATS },
+    { "windowEffect",           WindowManagerConfig::ValueType::MAP },
+    { "appWindows",             WindowManagerConfig::ValueType::MAP },
+    { "cornerRadius",           WindowManagerConfig::ValueType::MAP },
+    { "shadow",                 WindowManagerConfig::ValueType::MAP },
+    { "focused",                WindowManagerConfig::ValueType::MAP },
+    { "unfocused",              WindowManagerConfig::ValueType::MAP },
+    { "curve",                  WindowManagerConfig::ValueType::POSITIVE_FLOATS },
+    { "splitRatios",            WindowManagerConfig::ValueType::POSITIVE_FLOATS },
+    { "exitSplitRatios",        WindowManagerConfig::ValueType::POSITIVE_FLOATS },
+    { "scale",                  WindowManagerConfig::ValueType::POSITIVE_FLOATS },
+    { "rotation",               WindowManagerConfig::ValueType::POSITIVE_FLOATS },
+    { "translate",              WindowManagerConfig::ValueType::POSITIVE_FLOATS },
+    { "opacity",                WindowManagerConfig::ValueType::POSITIVE_FLOATS },
+    { "elevation",              WindowManagerConfig::ValueType::POSITIVE_FLOATS },
+    { "alpha",                  WindowManagerConfig::ValueType::POSITIVE_FLOATS },
+    { "offsetX",                WindowManagerConfig::ValueType::FLOATS },
+    { "offsetY",                WindowManagerConfig::ValueType::FLOATS },
+    { "fullScreen",             WindowManagerConfig::ValueType::STRING },
+    { "split",                  WindowManagerConfig::ValueType::STRING },
+    { "float",                  WindowManagerConfig::ValueType::STRING },
+    { "color",                  WindowManagerConfig::ValueType::STRING },
     { "decor",                  WindowManagerConfig::ValueType::UNDIFINED },
     { "minimizeByOther",        WindowManagerConfig::ValueType::UNDIFINED },
     { "stretchable",            WindowManagerConfig::ValueType::UNDIFINED },
@@ -81,15 +95,27 @@ void WindowManagerConfig::ReadConfig(const xmlNodePtr& rootPtr, std::map<std::st
                     mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
                     break;
                 }
+                case ValueType::POSITIVE_FLOATS: {
+                    std::vector<float> v;
+                    ReadFloatNumbersConfigInfo(curNodePtr, v, false);
+                    mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
+                    break;
+                }
                 case ValueType::FLOATS: {
                     std::vector<float> v;
-                    ReadFloatNumbersConfigInfo(curNodePtr, v);
+                    ReadFloatNumbersConfigInfo(curNodePtr, v, true);
                     mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
                     break;
                 }
                 case ValueType::MAP: {
                     std::map<std::string, ConfigItem> v;
                     ReadConfig(curNodePtr, v);
+                    mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
+                    break;
+                }
+                case ValueType::STRING: {
+                    std::string v;
+                    ReadStringConfigInfo(curNodePtr, v);
                     mapValue[reinterpret_cast<const char*>(curNodePtr->name)].SetValue(v);
                     break;
                 }
@@ -180,7 +206,7 @@ void WindowManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode, s
 }
 
 void WindowManagerConfig::ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode,
-    std::vector<float>& floatsValue)
+    std::vector<float>& floatsValue, bool allowNeg)
 {
     xmlChar* context = xmlNodeGetContent(currNode);
     if (context == nullptr) {
@@ -194,13 +220,25 @@ void WindowManagerConfig::ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode,
     }
     auto numbers = WindowHelper::Split(numbersStr, " ");
     for (auto& num : numbers) {
-        if (!WindowHelper::IsFloatingNumber(num)) {
+        if (!WindowHelper::IsFloatingNumber(num, allowNeg)) {
             WLOGFE("[WmConfig] read float number error: nodeName:(%{public}s)", currNode->name);
             xmlFree(context);
             return;
         }
         floatsValue.push_back(std::stof(num));
     }
+    xmlFree(context);
+}
+
+void WindowManagerConfig::ReadStringConfigInfo(const xmlNodePtr& currNode, std::string& stringValue)
+{
+    xmlChar* context = xmlNodeGetContent(currNode);
+    if (context == nullptr) {
+        WLOGFE("[WmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
+        return;
+    }
+
+    stringValue = std::string(reinterpret_cast<const char*>(context));
     xmlFree(context);
 }
 

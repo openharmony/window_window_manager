@@ -29,6 +29,7 @@
 #include <sstream>
 #include "xcollie/watchdog.h"
 
+#include "color_parser.h"
 #include "display_manager_service_inner.h"
 #include "dm_common.h"
 #include "drag_controller.h"
@@ -42,6 +43,7 @@
 #include "window_manager_agent_controller.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "wm_math.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -342,6 +344,10 @@ void WindowManagerService::ConfigureWindowManagerService()
     if (item.IsMap()) {
         ConfigKeyboardAnimation(item);
     }
+    item = config["windowEffect"];
+    if (item.IsMap()) {
+        ConfigWindowEffect(item);
+    }
 }
 
 void WindowManagerService::ConfigHotZones(const std::vector<int>& numbers)
@@ -428,6 +434,105 @@ void WindowManagerService::ConfigKeyboardAnimation(const WindowManagerConfig::Co
         if (numbers.size() == 1) { // duration
             animationConfig.keyboardAnimationConfig_.durationOut_ =
                 RSAnimationTimingProtocol(numbers[0]);
+        }
+    }
+}
+
+bool WindowManagerService::ConfigAppWindowCornerRadius(const WindowManagerConfig::ConfigItem& item, float& out)
+{
+    std::map<std::string, float> stringToCornerRadius = {
+        {"off", 0.0f}, {"defaultCornerRadiusXS", 4.0f}, {"defaultCornerRadiusS", 8.0f},
+        {"defaultCornerRadiusM", 12.0f}, {"defaultCornerRadiusL", 16.0f}, {"defaultCornerRadiusXL", 24.0f}
+    };
+
+    if (item.IsString()) {
+        auto value = item.stringValue_;
+        if (stringToCornerRadius.find(value) != stringToCornerRadius.end()) {
+            out = stringToCornerRadius[value];
+            return true;
+        }
+    }
+    return false;
+}
+
+bool WindowManagerService::ConfigAppWindowShadow(const WindowManagerConfig::ConfigItem& shadowConfig,
+    WindowShadowParameters& outShadow)
+{
+    WindowManagerConfig::ConfigItem item = shadowConfig["elevation"];
+    if (item.IsFloats()) {
+        auto elevation = *item.floatsValue_;
+        if (elevation.size() != 1 || (elevation.size() == 1 && MathHelper::LessNotEqual(elevation[0], 0.0))) {
+            return false;
+        }
+        outShadow.elevation_ = elevation[0];
+    }
+
+    item = shadowConfig["color"];
+    if (item.IsString()) {
+        auto color = item.stringValue_;
+        uint32_t colorValue;
+        if (!ColorParser::Parse(color, colorValue)) {
+            return false;
+        }
+        outShadow.color_ = color;
+    }
+
+    item = shadowConfig["offsetX"];
+    if (item.IsFloats()) {
+        auto offsetX = *item.floatsValue_;
+        if (offsetX.size() != 1) {
+            return false;
+        }
+        outShadow.offsetX_ = offsetX[0];
+    }
+
+    item = shadowConfig["offsetY"];
+    if (item.IsFloats()) {
+        auto offsetY = *item.floatsValue_;
+        if (offsetY.size() != 1) {
+            return false;
+        }
+        outShadow.offsetY_ = offsetY[0];
+    }
+
+    item = shadowConfig["alpha"];
+    if (item.IsFloats()) {
+        auto alpha = *item.floatsValue_;
+        if (alpha.size() != 1 || (alpha.size() == 1 &&
+            MathHelper::LessNotEqual(alpha[0], 0.0) && MathHelper::GreatNotEqual(alpha[0], 1.0))) {
+            return false;
+        }
+        outShadow.alpha_ = alpha[0];
+    }
+    return true;
+}
+
+void WindowManagerService::ConfigWindowEffect(const WindowManagerConfig::ConfigItem& effectConfig)
+{
+    AppWindowEffectConfig config;
+
+    // config corner radius
+    WindowManagerConfig::ConfigItem item = effectConfig["appWindows"]["cornerRadius"];
+    if (item.IsMap()) {
+        if (ConfigAppWindowCornerRadius(item["fullScreen"], config.fullScreenCornerRadius_) &&
+            ConfigAppWindowCornerRadius(item["split"], config.splitCornerRadius_) &&
+            ConfigAppWindowCornerRadius(item["float"], config.floatCornerRadius_)) {
+            systemConfig_.effectConfig_ = config;
+        }
+    }
+
+    // config shadow
+    item = effectConfig["appWindows"]["shadow"]["focused"];
+    if (item.IsMap()) {
+        if (ConfigAppWindowShadow(item, config.focusedShadow_)) {
+            systemConfig_.effectConfig_.focusedShadow_ = config.focusedShadow_;
+        }
+    }
+
+    item = effectConfig["appWindows"]["shadow"]["unfocused"];
+    if (item.IsMap()) {
+        if (ConfigAppWindowShadow(item, config.unfocusedShadow_)) {
+            systemConfig_.effectConfig_.unfocusedShadow_ = config.unfocusedShadow_;
         }
     }
 }
@@ -842,8 +947,7 @@ WMError WindowManagerService::GetAccessibilityWindowInfo(sptr<AccessibilityWindo
 
 WMError WindowManagerService::GetSystemConfig(SystemConfig& systemConfig)
 {
-    systemConfig.isSystemDecorEnable_ = systemConfig_.isSystemDecorEnable_;
-    systemConfig.isStretchable_ = systemConfig_.isStretchable_;
+    systemConfig = systemConfig_;
     return WMError::WM_OK;
 }
 

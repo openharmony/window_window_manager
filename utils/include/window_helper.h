@@ -292,12 +292,18 @@ public:
         return true;
     }
 
-    static inline bool IsFloatingNumber(std::string str)
+    static bool IsFloatingNumber(std::string str, bool allowNeg = false)
     {
         if (str.size() == 0) {
             return false;
         }
-        for (int32_t i = 0; i < static_cast<int32_t>(str.size()); i++) {
+
+        int32_t i = 0;
+        if (allowNeg && str.at(i) == '-') {
+            i++;
+        }
+
+        for (; i < static_cast<int32_t>(str.size()); i++) {
             if ((str.at(i) < '0' || str.at(i) > '9') &&
                 (str.at(i) != '.' || std::count(str.begin(), str.end(), '.') > 1)) {
                 return false;
@@ -480,12 +486,6 @@ public:
             return true;
         }
         return false;
-    }
-
-    static inline bool LessNotEqual(double left, double right)
-    {
-        static constexpr double eps = -0.001f;
-        return (left - right) < eps;
     }
 
 private:

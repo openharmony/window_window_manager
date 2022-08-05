@@ -359,11 +359,6 @@ enum class WindowUpdateType : int32_t {
     WINDOW_UPDATE_PROPERTY,
 };
 
-struct SystemConfig {
-    bool isSystemDecorEnable_ = true;
-    bool isStretchable_ = false;
-};
-
 using OnCallback = std::function<void(int64_t)>;
 struct VsyncCallback {
     OnCallback onCallback;
