@@ -104,6 +104,40 @@ declare namespace display {
   }
 
   /**
+   * Rectangle
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
+   */
+  interface Rect {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  }
+
+  /**
+   * Curved area rects of the waterfall display.
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
+   */
+  interface WaterfallDisplayAreaRects {
+    readonly left: Rect;
+    readonly right: Rect;
+    readonly top: Rect;
+    readonly bottom: Rect;
+  }
+
+  /**
+   * cutout information of the display.
+   * @syscap SystemCapability.WindowManager.WindowManager.Core
+   * @since 9
+   */
+  interface CutoutInfo {
+    readonly boundingRects: Array<Rect>;
+    readonly waterfallDisplayAreaRects: WaterfallDisplayAreaRects;
+  }
+  
+  /**
    * Defines properties of the display. They cannot be updated automatically.
    * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @devices tv, phone, tablet, wearable
@@ -176,39 +210,15 @@ declare namespace display {
 
     /**
      * Obtain the cutout info of the display.
-     * @devices tv, phone, tablet, wearable
+     * @since 9
      */
-    getCutoutInfo(callback: AsyncCallback<void>): void;
+    getCutoutInfo(callback: AsyncCallback<CutoutInfo>): void;
 
     /**
      * Obtain the cutout info of the display.
-     * @devices tv, phone, tablet, wearable
+     * @since 9
      */
     getCutoutInfo(): Promise<CutoutInfo>;
-  }
-
-  /**
-   * cutout information of the display.
-   * @syscap SystemCapability.WindowManager.WindowManager.Core
-   * @since 9
-   */
-  interface CutoutInfo {
-    BoundingRects: Array<Rect>;
-    waterfallDisplayAreaRects: WaterfallDisplayAreaRects;
-  }
-
-  interface WaterfallDisplayAreaRects {
-    left: Rect;
-    right: Rect;
-    top: Rect;
-    bottom: Rect;
-  }
-
-  interface Rect {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
   }
 }
 
