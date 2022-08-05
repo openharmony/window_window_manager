@@ -54,7 +54,6 @@ private:
     void OnVsyncTimeOut();
 
     std::mutex mtx_;
-    uint32_t vsyncCount_ = 0;
     bool hasRequestedVsync_ = false;
     bool hasInitVsyncReceiver_ = false;
     bool isMainHandlerAvailable_ = true;

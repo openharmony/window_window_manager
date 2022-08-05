@@ -98,11 +98,16 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
             break;
         }
-        case WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN: {
+        case WindowManagerMessage::TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG: {
             uint32_t windowId = data.ReadUint32();
             sptr<WindowProperty> windowProperty = data.ReadStrongParcelable<WindowProperty>();
             sptr<MoveDragProperty> moveDragProperty = data.ReadStrongParcelable<MoveDragProperty>();
-            ProcessPointDown(windowId, windowProperty, moveDragProperty);
+            NotifyServerReadyToMoveOrDrag(windowId, windowProperty, moveDragProperty);
+            break;
+        }
+        case WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN: {
+            uint32_t windowId = data.ReadUint32();
+            ProcessPointDown(windowId);
             break;
         }
         case WindowManagerMessage::TRANS_ID_PROCESS_POINT_UP: {
