@@ -22,6 +22,7 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
+#include "wm_math.h"
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 #include "napi_remote_object.h"
@@ -2269,7 +2270,7 @@ NativeValue* JsWindow::OnSetCornerRadius(NativeEngine& engine, NativeCallbackInf
         return engine.CreateUndefined();
     }
     NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
-    if (nativeVal == nullptr || WindowHelper::LessNotEqual(static_cast<double>(*nativeVal), 0.0)) {
+    if (nativeVal == nullptr || MathHelper::LessNotEqual(static_cast<double>(*nativeVal), 0.0)) {
         WLOGFE("[NAPI]SetCornerRadius invalid radius");
         return engine.CreateUndefined();
     }
@@ -2295,7 +2296,7 @@ NativeValue* JsWindow::OnSetShadow(NativeEngine& engine, NativeCallbackInfo& inf
 
     { // parse the 1st param: radius
         NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
-        if (nativeVal == nullptr || WindowHelper::LessNotEqual(static_cast<double>(*nativeVal), 0.0)) {
+        if (nativeVal == nullptr || MathHelper::LessNotEqual(static_cast<double>(*nativeVal), 0.0)) {
             WLOGFE("[NAPI]SetShadow invalid radius");
             return engine.CreateUndefined();
         }
@@ -2350,7 +2351,7 @@ NativeValue* JsWindow::OnSetBlur(NativeEngine& engine, NativeCallbackInfo& info)
         return engine.CreateUndefined();
     }
     NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
-    if (nativeVal == nullptr || WindowHelper::LessNotEqual(static_cast<double>(*nativeVal), 0.0)) {
+    if (nativeVal == nullptr || MathHelper::LessNotEqual(static_cast<double>(*nativeVal), 0.0)) {
         WLOGFE("[NAPI]SetBlur invalid radius");
         return engine.CreateUndefined();
     }
@@ -2374,7 +2375,7 @@ NativeValue* JsWindow::OnSetBackdropBlur(NativeEngine& engine, NativeCallbackInf
         return engine.CreateUndefined();
     }
     NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
-    if (nativeVal == nullptr || WindowHelper::LessNotEqual(static_cast<double>(*nativeVal), 0.0)) {
+    if (nativeVal == nullptr || MathHelper::LessNotEqual(static_cast<double>(*nativeVal), 0.0)) {
         WLOGFE("[NAPI]SetBackdropBlur invalid radius");
         return engine.CreateUndefined();
     }
