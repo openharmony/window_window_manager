@@ -144,12 +144,12 @@ public:
 
 class IDialogTargetTouchListener : virtual public RefBase {
 public:
-    virtual void OnDialogTargetTouch() = 0;
+    virtual void OnDialogTargetTouch() const = 0;
 };
 
 class IDialogDeathRecipientListener : virtual public RefBase {
 public:
-    virtual void OnDialogDeathRecipient() = 0;
+    virtual void OnDialogDeathRecipient() const = 0;
 };
 
 class Window : public RefBase {
@@ -192,6 +192,13 @@ public:
      * @return std::vector<sptr<Window>>
      */
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parentId);
+
+    /**
+     * @brief Update configuration for all windows
+     *
+     * @param configuration configuration for app
+     */
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const = 0;
     virtual const std::shared_ptr<AbilityRuntime::Context> GetContext() const = 0;
     /**
@@ -342,6 +349,7 @@ public:
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) = 0;
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) = 0;
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
+    virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) = 0;
     /**
      * @brief register window lifecycle listener.
@@ -393,6 +401,7 @@ public:
     virtual uint32_t GetRequestModeSupportInfo() const = 0;
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) = 0;
     virtual void GetRequestedTouchHotAreas(std::vector<Rect>& rects) const = 0;
+    virtual bool IsMainHandlerAvailable() const = 0;
 
     /**
      * @brief disable main window decoration. It must be callled before loadContent.
@@ -448,6 +457,14 @@ public:
      * @return std::shared_ptr<Media::PixelMap> snapshot pixel
      */
     virtual std::shared_ptr<Media::PixelMap> Snapshot() = 0;
+
+    /**
+     * @brief Handle and notify memory level.
+     *
+     * @param level memory level
+     * @return the error code of window
+     */
+    virtual WMError NotifyMemoryLevel(int32_t level) const = 0;
 };
 }
 }

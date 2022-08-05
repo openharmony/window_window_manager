@@ -34,7 +34,10 @@ config("wm_napi_common_public_config") {
 ohos_static_library("wm_napi_common") {
   sources = [ "wm_napi_common.cpp" ]
 
-  configs = [ ":wm_napi_common_config" ]
+  configs = [
+    ":wm_napi_common_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_configs = [ ":wm_napi_common_public_config" ]
 

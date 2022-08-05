@@ -92,7 +92,7 @@ const sptr<Window>& WindowScene::GetMainWindow() const
 std::vector<sptr<Window>> WindowScene::GetSubWindow()
 {
     if (mainWindow_ == nullptr) {
-        WLOGFE("WindowScene mainWindow_ is nullptr");
+        WLOGFE("Get sub window failed, because main window is null");
         return std::vector<sptr<Window>>();
     }
     uint32_t parentId = mainWindow_->GetWindowId();
@@ -103,6 +103,7 @@ WMError WindowScene::GoForeground(uint32_t reason)
 {
     WLOGFI("GoForeground reason:%{public}u", reason);
     if (mainWindow_ == nullptr) {
+        WLOGFE("Go foreground failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     return mainWindow_->Show(reason);
@@ -112,6 +113,7 @@ WMError WindowScene::GoBackground(uint32_t reason)
 {
     WLOGFI("GoBackground reason:%{public}u", reason);
     if (mainWindow_ == nullptr) {
+        WLOGFE("Go background failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     return mainWindow_->Hide(reason);
@@ -125,7 +127,7 @@ WMError WindowScene::GoDestroy()
 
     WMError ret = mainWindow_->Destroy();
     if (ret != WMError::WM_OK) {
-        WLOGFE("WindowScene GoDestroy Failed Name: %{public}s", mainWindow_->GetWindowName().c_str());
+        WLOGFE("WindowScene go destroy failed name: %{public}s", mainWindow_->GetWindowName().c_str());
         return ret;
     }
     mainWindow_ = nullptr;
@@ -135,6 +137,7 @@ WMError WindowScene::GoDestroy()
 WMError WindowScene::OnNewWant(const AAFwk::Want& want)
 {
     if (mainWindow_ == nullptr) {
+        WLOGFE("On new want failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     mainWindow_->OnNewWant(want);
@@ -144,6 +147,7 @@ WMError WindowScene::OnNewWant(const AAFwk::Want& want)
 WMError WindowScene::SetSystemBarProperty(WindowType type, const SystemBarProperty& property) const
 {
     if (mainWindow_ == nullptr) {
+        WLOGFE("Set systembar property failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     return mainWindow_->SetSystemBarProperty(type, property);
@@ -152,6 +156,7 @@ WMError WindowScene::SetSystemBarProperty(WindowType type, const SystemBarProper
 WMError WindowScene::RequestFocus() const
 {
     if (mainWindow_ == nullptr) {
+        WLOGFE("Request focus failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
     return mainWindow_->RequestFocus();
@@ -160,7 +165,7 @@ WMError WindowScene::RequestFocus() const
 void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (mainWindow_ == nullptr) {
-        WLOGFE("mainWindow_ is null");
+        WLOGFE("Update configuration failed, because main window is null");
         return;
     }
     WLOGFI("notify mainWindow winId:%{public}u", mainWindow_->GetWindowId());
@@ -170,10 +175,19 @@ void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
 std::string WindowScene::GetContentInfo() const
 {
     if (mainWindow_ == nullptr) {
-        WLOGFE("WindowScene::GetContentInfo mainWindow_ is null");
+        WLOGFE("Get content info failed, because main window is null");
         return "";
     }
     return mainWindow_->GetContentInfo();
+}
+
+WMError WindowScene::NotifyMemoryLevel(int32_t level) const
+{
+    if (mainWindow_ == nullptr) {
+        WLOGFE("Notify memory level failed, because main window is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return mainWindow_->NotifyMemoryLevel(level);
 }
 } // namespace Rosen
 } // namespace OHOS

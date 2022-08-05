@@ -64,7 +64,10 @@ ohos_shared_library("libwms") {
     "src/zidl/window_manager_stub.cpp",
   ]
 
-  configs = [ ":libwms_config" ]
+  configs = [
+    ":libwms_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   deps = [
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
@@ -79,6 +82,7 @@ ohos_shared_library("libwms") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
+    "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
     "display_manager:displaymgr",
@@ -93,7 +97,6 @@ ohos_shared_library("libwms") {
     "power_manager:powermgr_client",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
-    "utils_base:utils",
   ]
 
   if (is_standard_system) {

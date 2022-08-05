@@ -334,7 +334,7 @@ void WindowController::ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>&
         newRect = { 0, static_cast<int32_t>(height - naviBarHeight), width, naviBarHeight };
     }
     if (newRect != node->GetWindowRect()) {
-        ResizeRect(node->GetWindowId(), newRect, WindowSizeChangeReason::DRAG);
+        ResizeRect(node->GetWindowId(), newRect, WindowSizeChangeReason::ROTATION);
     }
 }
 
@@ -435,7 +435,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
         }
     } else if (reason == WindowSizeChangeReason::RESIZE) {
         newRect = { lastRect.posX_, lastRect.posY_, rect.width_, rect.height_ };
-    } else if (reason == WindowSizeChangeReason::DRAG) {
+    } else if (reason == WindowSizeChangeReason::DRAG || reason == WindowSizeChangeReason::ROTATION) {
         newRect = rect;
     }
     property->SetRequestRect(newRect);
@@ -520,13 +520,13 @@ void WindowController::ProcessSystemBarChange(const sptr<DisplayInfo>& displayIn
     if (statusBarNode != nullptr && statusBarNode->GetDisplayId() == displayId) {
         auto statusBarHeight = statusBarNode->GetWindowRect().height_;
         Rect newRect = { 0, 0, width, statusBarHeight };
-        ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::DRAG);
+        ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_STATUS_BAR], newRect, WindowSizeChangeReason::ROTATION);
     }
     const auto& naviBarNode = windowRoot_->GetWindowNode(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR]);
     if (naviBarNode != nullptr && naviBarNode->GetDisplayId() == displayId) {
         auto naviBarHeight = naviBarNode->GetWindowRect().height_;
         Rect newRect = { 0, static_cast<int32_t>(height - naviBarHeight), width, naviBarHeight };
-        ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::DRAG);
+        ResizeRect(sysBarWinId_[WindowType::WINDOW_TYPE_NAVIGATION_BAR], newRect, WindowSizeChangeReason::ROTATION);
     }
 }
 
@@ -576,7 +576,7 @@ void WindowController::RecordBootAnimationEvent() const
 {
     uint64_t time = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::steady_clock::now()).
         time_since_epoch().count();
-    WLOGFI("boot animation done duration(s): %{public}" PRIu64"", static_cast<uint64_t>(time));
+    WLOGFI("boot animation done duration(s): %{public}" PRIu64"", time);
     std::ostringstream os;
     os << "boot animation done duration(s): " << time <<";";
     int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
@@ -663,7 +663,28 @@ AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType 
     return windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
 }
 
-WMError WindowController::ProcessPointDown(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
+WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        WLOGFW("could not find window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!node->currentVisibility_) {
+        WLOGFE("this window is not visible and not in window tree, windowId: %{public}u", windowId);
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+
+    // if start dragging or start moving dock_slice, need to update size change reason
+    if ((moveDragProperty->startMoveFlag_ && node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) ||
+        moveDragProperty->startDragFlag_) {
+        WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
+        return res;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowController::ProcessPointDown(uint32_t windowId)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
@@ -676,13 +697,6 @@ WMError WindowController::ProcessPointDown(uint32_t windowId, sptr<MoveDragPrope
     }
 
     NotifyTouchOutside(node);
-
-    // if start dragging or start moving dock_slice, need to update size change reason
-    if ((moveDragProperty->startMoveFlag_ && node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) ||
-        moveDragProperty->startDragFlag_) {
-        WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
-        return res;
-    }
 
     WLOGFI("process point down, windowId: %{public}u", windowId);
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
@@ -949,7 +963,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         case PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA: {
             std::vector<Rect> rects;
             property->GetTouchHotAreas(rects);
-            UpdateTouchHotAreas(node, rects);
+            ret = UpdateTouchHotAreas(node, rects);
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG: {

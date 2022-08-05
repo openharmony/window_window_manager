@@ -38,14 +38,15 @@ public:
     WMError RequestFocus(uint32_t windowId) override;
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
-    void ProcessPointDown(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+    void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty) override;
+    void ProcessPointDown(uint32_t windowId) override;
     void ProcessPointUp(uint32_t windowId) override;
     void MinimizeAllAppWindows(DisplayId displayId) override;
     WMError ToggleShownStateForAllAppWindows() override;
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
-    WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action) override;
-
+    WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
+        bool isAsyncTask = false) override;
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void UnregisterWindowManagerAgent(WindowManagerAgentType type,

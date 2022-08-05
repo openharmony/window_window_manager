@@ -101,6 +101,7 @@ public:
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parantId);
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     virtual Rect GetRect() const override;
     virtual Rect GetRequestRect() const override;
@@ -116,6 +117,7 @@ public:
     virtual uint32_t GetWindowId() const override;
     virtual uint32_t GetWindowFlags() const override;
     uint32_t GetRequestModeSupportInfo() const override;
+    bool IsMainHandlerAvailable() const override;
     inline NotifyNativeWinDestroyFunc GetNativeDestroyCallback()
     {
         return notifyNativefunc_;
@@ -213,6 +215,7 @@ public:
     void UpdateModeSupportInfo(uint32_t modeSupportInfo);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
+    virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     void UpdateFocusStatus(bool focused);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
@@ -248,6 +251,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     void PostListenerTask(ListenerTaskCallback &&callback, Priority priority = Priority::LOW,
         const std::string taskName = "");
+    virtual WMError NotifyMemoryLevel(int32_t level) const override;
 
 private:
     inline std::vector<sptr<IWindowLifeCycle>> GetLifecycleListeners()
@@ -361,8 +365,6 @@ private:
     void ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId, const Rect& rect);
     void EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId);
-    void HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId);
-    void HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId);
     void ResetMoveOrDragState();
     bool IsPointerEventConsumed();
     void AdjustWindowAnimationFlag(bool withAnimation = false);
@@ -436,6 +438,7 @@ private:
     bool isOriginRectSet_ = false;
     bool needRemoveWindowInputChannel_ = false;
     bool isListenerHandlerRunning_ = false;
+    bool isMainHandlerAvailable_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS

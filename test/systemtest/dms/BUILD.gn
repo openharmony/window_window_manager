@@ -20,6 +20,7 @@ group("systemtest") {
 
   deps = [
     ":dms_display_change_test",
+    ":dms_display_manager_test",
     ":dms_display_minimal_test",
     ":dms_display_power_test",
     ":dms_screen_manager_test",
@@ -31,6 +32,14 @@ ohos_systemtest("dms_display_minimal_test") {
   module_out_path = module_out_path
 
   sources = [ "display_minimal_test.cpp" ]
+
+  deps = [ ":dms_systemtest_common" ]
+}
+
+ohos_systemtest("dms_display_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "display_manager_test.cpp" ]
 
   deps = [ ":dms_systemtest_common" ]
 }
@@ -97,9 +106,13 @@ ohos_static_library("dms_systemtest_common") {
 
   sources = [ "display_test_utils.cpp" ]
 
-  public_configs = [ ":dms_systemtest_common_public_config" ]
+  public_configs = [
+    ":dms_systemtest_common_public_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
 
   public_deps = [
+    "//commonlibrary/c_utils/base:utils",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
     "//foundation/window/window_manager/dm:libdm",
@@ -109,7 +122,6 @@ ohos_static_library("dms_systemtest_common") {
     "//foundation/window/window_manager/wm:libwm",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [

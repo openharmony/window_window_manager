@@ -19,11 +19,14 @@
 
 #include <ability_manager_client.h>
 #include <cinttypes>
+#include <chrono>
+#include <hisysevent.h>
 #include <hitrace_meter.h>
 #include <ipc_skeleton.h>
 #include <parameters.h>
 #include <rs_iwindow_animation_controller.h>
 #include <system_ability_definition.h>
+#include <sstream>
 #include "xcollie/watchdog.h"
 
 #include "display_manager_service_inner.h"
@@ -44,6 +47,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerService"};
+    constexpr int REPORT_SHOW_WINDOW_TIMES = 50;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
@@ -272,7 +276,9 @@ bool WindowManagerService::Init()
         return false;
     }
     if (WindowManagerConfig::LoadConfigXml()) {
-        WindowManagerConfig::DumpConfig(WindowManagerConfig::GetConfig());
+        if (WindowManagerConfig::GetConfig().IsMap()) {
+            WindowManagerConfig::DumpConfig(*WindowManagerConfig::GetConfig().mapValue_);
+        }
         ConfigureWindowManagerService();
     }
     WLOGFI("WindowManagerService::Init success");
@@ -293,52 +299,48 @@ int WindowManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 void WindowManagerService::ConfigureWindowManagerService()
 {
     const auto& config = WindowManagerConfig::GetConfig();
-    if (config.count("decor") != 0 && config.at("decor").property_) {
-        if (config.at("decor").property_->count("enable")) {
-            systemConfig_.isSystemDecorEnable_ =
-                config.at("decor").property_->at("enable").boolValue_;
+    WindowManagerConfig::ConfigItem item = config["decor"].GetProp("enable");
+    if (item.IsBool()) {
+        systemConfig_.isSystemDecorEnable_ = item.boolValue_;
+    }
+    item = config["minimizeByOther"].GetProp("enable");
+    if (item.IsBool()) {
+        MinimizeApp::SetMinimizedByOtherConfig(item.boolValue_);
+    }
+    item = config["stretchable"].GetProp("enable");
+    if (item.IsBool()) {
+        systemConfig_.isStretchable_ = item.boolValue_;
+    }
+    item = config["remoteAnimation"].GetProp("enable");
+    if (item.IsBool()) {
+        RemoteAnimation::isRemoteAnimationEnable_ = item.boolValue_;
+    }
+    item = config["maxAppWindowNumber"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 && numbers[0] > 0) {
+            windowRoot_->SetMaxAppWindowNumber(static_cast<uint32_t>(numbers[0]));
         }
     }
-    if (config.count("minimizeByOther") != 0 && config.at("minimizeByOther").property_) {
-        if (config.at("minimizeByOther").property_->count("enable")) {
-            MinimizeApp::SetMinimizedByOtherConfig(
-                config.at("minimizeByOther").property_->at("enable").boolValue_);
-        }
+    item = config["modeChangeHotZones"];
+    if (item.IsInts()) {
+        ConfigHotZones(*item.intsValue_);
     }
-    if (config.count("stretchable") != 0 && config.at("stretchable").property_) {
-        if (config.at("stretchable").property_->count("enable")) {
-            systemConfig_.isStretchable_ =
-                config.at("stretchable").property_->at("enable").boolValue_;
-        }
+    item = config["splitRatios"];
+    if (item.IsFloats()) {
+        windowRoot_->SetSplitRatios(*item.floatsValue_);
     }
-    if (config.count("remoteAnimation") != 0 && config.at("remoteAnimation").property_) {
-        if (config.at("remoteAnimation").property_->count("enable")) {
-            RemoteAnimation::isRemoteAnimationEnable_ =
-                config.at("remoteAnimation").property_->at("enable").boolValue_;
-        }
+    item = config["exitSplitRatios"];
+    if (item.IsFloats()) {
+        windowRoot_->SetExitSplitRatios(*item.floatsValue_);
     }
-    if (config.count("maxAppWindowNumber") != 0 && config.at("maxAppWindowNumber").IsInts()) {
-        auto numbers = *config.at("maxAppWindowNumber").intsValue_;
-        if (numbers.size() == 1) {
-            if (numbers[0] > 0) {
-                windowRoot_->SetMaxAppWindowNumber(static_cast<uint32_t>(numbers[0]));
-            }
-        }
+    item = config["windowAnimation"];
+    if (item.IsMap()) {
+        ConfigWindowAnimation(item);
     }
-    if (config.count("modeChangeHotZones") != 0 && config.at("modeChangeHotZones").IsInts()) {
-        ConfigHotZones(*config.at("modeChangeHotZones").intsValue_);
-    }
-    if (config.count("splitRatios") != 0 && config.at("splitRatios").IsFloats()) {
-        windowRoot_->SetSplitRatios(*config.at("splitRatios").floatsValue_);
-    }
-    if (config.count("exitSplitRatios") != 0 && config.at("exitSplitRatios").IsFloats()) {
-        windowRoot_->SetExitSplitRatios(*config.at("exitSplitRatios").floatsValue_);
-    }
-    if (config.count("windowAnimation") && config.at("windowAnimation").IsMap()) {
-        ConfigWindowAnimation(*config.at("windowAnimation").mapValue_);
-    }
-    if (config.count("keyboardAnimation") && config.at("keyboardAnimation").IsMap()) {
-        ConfigKeyboardAnimation(*config.at("keyboardAnimation").mapValue_);
+    item = config["keyboardAnimation"];
+    if (item.IsMap()) {
+        ConfigKeyboardAnimation(item);
     }
 }
 
@@ -352,22 +354,24 @@ void WindowManagerService::ConfigHotZones(const std::vector<int>& numbers)
     }
 }
 
-void WindowManagerService::ConfigWindowAnimation(const std::map<std::string, WindowManagerConfig::ConfigItem>& animeMap)
+void WindowManagerService::ConfigWindowAnimation(const WindowManagerConfig::ConfigItem& animeConfig)
 {
     auto& windowAnimationConfig = WindowNodeContainer::GetAnimationConfigRef().windowAnimationConfig_;
-    if (animeMap.count("timing") && animeMap.at("timing").IsMap()) {
-        const auto& timingMap = *animeMap.at("timing").mapValue_;
-        if (timingMap.count("duration") && timingMap.at("duration").IsInts()) {
-            auto numbers = *timingMap.at("duration").intsValue_;
-            if (numbers.size() == 1) { // duration
-                windowAnimationConfig.animationTiming_.timingProtocol_ =
-                    RSAnimationTimingProtocol(numbers[0]);
-            }
-        }
-        windowAnimationConfig.animationTiming_.timingCurve_ = CreateCurve(timingMap);
+    WindowManagerConfig::ConfigItem item = animeConfig["timing"];
+    if (item.IsMap() && item.mapValue_->count("curve")) {
+        windowAnimationConfig.animationTiming_.timingCurve_ = CreateCurve(item["curve"]);
     }
-    if (animeMap.count("scale") && animeMap.at("scale").IsFloats()) {
-        auto numbers = *animeMap.at("scale").floatsValue_;
+    item = animeConfig["timing"]["duration"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) { // duration
+            windowAnimationConfig.animationTiming_.timingProtocol_ =
+                RSAnimationTimingProtocol(numbers[0]);
+        }
+    }
+    item = animeConfig["scale"];
+    if (item.IsFloats()) {
+        auto numbers = *item.floatsValue_;
         if (numbers.size() == 1) { // 1 xy scale
             windowAnimationConfig.scale_.x_ =
             windowAnimationConfig.scale_.y_ = numbers[0]; // 0 xy scale
@@ -378,14 +382,13 @@ void WindowManagerService::ConfigWindowAnimation(const std::map<std::string, Win
             windowAnimationConfig.scale_ = Vector3f(&numbers[0]);
         }
     }
-    if (animeMap.count("rotation") && animeMap.at("rotation").IsFloats()) {
-        auto numbers = *animeMap.at("rotation").floatsValue_;
-        if (numbers.size() == 4) { // 4 (axix,angle)
-            windowAnimationConfig.rotation_ = Vector4f(&numbers[0]);
-        }
+    item = animeConfig["rotation"];
+    if (item.IsFloats() && item.floatsValue_->size() == 4) { // 4 (axix,angle)
+        windowAnimationConfig.rotation_ = Vector4f(item.floatsValue_->data());
     }
-    if (animeMap.count("translate") && animeMap.at("translate").IsFloats()) {
-        auto numbers = *animeMap.at("translate").floatsValue_;
+    item = animeConfig["translate"];
+    if (item.IsFloats()) {
+        auto numbers = *item.floatsValue_;
         if (numbers.size() == 2) { // 2 translate xy
             windowAnimationConfig.translate_.x_ = numbers[0]; // 0 translate x
             windowAnimationConfig.translate_.y_ = numbers[1]; // 1 translate y
@@ -395,47 +398,45 @@ void WindowManagerService::ConfigWindowAnimation(const std::map<std::string, Win
             windowAnimationConfig.translate_.z_ = numbers[2]; // 2 translate z
         }
     }
-    if (animeMap.count("opacity") && animeMap.at("opacity").IsFloats()) {
-        auto numbers = *animeMap.at("opacity").floatsValue_;
+    item = animeConfig["opacity"];
+    if (item.IsFloats()) {
+        auto numbers = *item.floatsValue_;
         if (numbers.size() == 1) {
             windowAnimationConfig.opacity_ = numbers[0]; // 0 opacity
         }
     }
 }
 
-void WindowManagerService::ConfigKeyboardAnimation(const std::map<std::string,
-    WindowManagerConfig::ConfigItem>& animeMap)
+void WindowManagerService::ConfigKeyboardAnimation(const WindowManagerConfig::ConfigItem& animeConfig)
 {
     auto& animationConfig = WindowNodeContainer::GetAnimationConfigRef();
-    if (animeMap.count("timing") && animeMap.at("timing").IsMap()) {
-        const auto& timingMap = *animeMap.at("timing").mapValue_;
-        if (timingMap.count("durationIn") && timingMap.at("durationIn").IsInts()) {
-            auto numbers = *timingMap.at("durationIn").intsValue_;
-            if (numbers.size() == 1) { // duration
-                animationConfig.keyboardAnimationConfig_.durationIn_ =
-                    RSAnimationTimingProtocol(numbers[0]);
-            }
+    WindowManagerConfig::ConfigItem item = animeConfig["timing"];
+    if (item.IsMap() && item.mapValue_->count("curve")) {
+        animationConfig.keyboardAnimationConfig_.curve_ = CreateCurve(item["curve"]);
+    }
+    item = animeConfig["timing"]["durationIn"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) { // duration
+            animationConfig.keyboardAnimationConfig_.durationIn_ =
+                RSAnimationTimingProtocol(numbers[0]);
         }
-        if (timingMap.count("durationOut") && timingMap.at("durationOut").IsInts()) {
-            auto numbers = *timingMap.at("durationOut").intsValue_;
-            if (numbers.size() == 1) { // duration
-                animationConfig.keyboardAnimationConfig_.durationOut_ =
-                    RSAnimationTimingProtocol(numbers[0]);
-            }
+    }
+    item = animeConfig["timing"]["durationOut"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1) { // duration
+            animationConfig.keyboardAnimationConfig_.durationOut_ =
+                RSAnimationTimingProtocol(numbers[0]);
         }
-        animationConfig.keyboardAnimationConfig_.curve_ = CreateCurve(timingMap);
     }
 }
 
-RSAnimationTimingCurve WindowManagerService::CreateCurve(
-    const std::map<std::string, WindowManagerConfig::ConfigItem>& timingMap)
+RSAnimationTimingCurve WindowManagerService::CreateCurve(const WindowManagerConfig::ConfigItem& curveConfig)
 {
-    if (timingMap.count("curve") && timingMap.at("curve").property_) {
-        auto curveProp = *timingMap.at("curve").property_;
-        std::string name;
-        if (curveProp.count("name") && curveProp.at("name").IsString()) {
-                name = curveProp.at("name").stringValue_;
-        }
+    const auto& nameItem = curveConfig.GetProp("name");
+    if (nameItem.IsString()) {
+        std::string name = nameItem.stringValue_;
         if (name == "easeOut") {
             return RSAnimationTimingCurve::EASE_OUT;
         } else if (name == "ease") {
@@ -452,9 +453,9 @@ RSAnimationTimingCurve WindowManagerService::CreateCurve(
             return RSAnimationTimingCurve::SPRING;
         } else if (name == "interactiveSpring") {
             return RSAnimationTimingCurve::INTERACTIVE_SPRING;
-        } else if (name == "cubic" && timingMap.at("curve").IsFloats() &&
-            timingMap.at("curve").floatsValue_->size() == 4) { // 4 curve parameter
-            auto numbers = *timingMap.at("curve").floatsValue_;
+        } else if (name == "cubic" && curveConfig.IsFloats() &&
+            curveConfig.floatsValue_->size() == 4) { // 4 curve parameter
+            const auto& numbers = *curveConfig.floatsValue_;
             return RSAnimationTimingCurve::CreateCubicCurve(numbers[0], // 0 ctrlX1
                 numbers[1], // 1 ctrlY1
                 numbers[2], // 2 ctrlX2
@@ -543,6 +544,7 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
 WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 {
     return PostSyncTask([this, &property]() {
+        auto startTime = std::chrono::steady_clock::now();
         if (property == nullptr) {
             WLOGFE("property is nullptr");
             return WMError::WM_ERROR_NULLPTR;
@@ -556,6 +558,12 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
         WMError res = windowController_->AddWindowNode(property);
         if (property->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
             dragController_->StartDrag(windowId);
+        }
+        if (res == WMError::WM_OK) {
+            showWindowTimeConfig_.showWindowTimes_++;
+            auto currentTime = std::chrono::steady_clock::now();
+            int64_t costTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count();
+            RecordShowTimeEvent(costTime);
         }
         return res;
     });
@@ -703,7 +711,7 @@ void DisplayChangeListener::OnScreenshot(DisplayId displayId)
     WindowManagerService::GetInstance().OnScreenshot(displayId);
 }
 
-void WindowManagerService::ProcessPointDown(uint32_t windowId, sptr<WindowProperty>& windowProperty,
+void WindowManagerService::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
     sptr<MoveDragProperty>& moveDragProperty)
 {
     if (windowProperty == nullptr || moveDragProperty == nullptr) {
@@ -713,7 +721,7 @@ void WindowManagerService::ProcessPointDown(uint32_t windowId, sptr<WindowProper
 
     PostAsyncTask([this, windowId, windowProperty, moveDragProperty]() mutable {
         if (moveDragProperty->startDragFlag_ || moveDragProperty->startMoveFlag_) {
-            bool res = WindowInnerManager::GetInstance().NotifyWindowReadyToMoveOrDrag(windowId,
+            bool res = WindowInnerManager::GetInstance().NotifyServerReadyToMoveOrDrag(windowId,
                 windowProperty, moveDragProperty);
             if (!res) {
                 WLOGFE("invalid operation");
@@ -721,7 +729,14 @@ void WindowManagerService::ProcessPointDown(uint32_t windowId, sptr<WindowProper
             }
             windowController_->InterceptInputEventToServer(windowId);
         }
-        windowController_->ProcessPointDown(windowId, moveDragProperty);
+        windowController_->NotifyServerReadyToMoveOrDrag(windowId, moveDragProperty);
+    });
+}
+
+void WindowManagerService::ProcessPointDown(uint32_t windowId)
+{
+    PostAsyncTask([this, windowId]() {
+        windowController_->ProcessPointDown(windowId);
     });
 }
 
@@ -776,27 +791,42 @@ WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
     });
 }
 
-WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action)
+WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
+    bool isAsyncTask)
 {
     if (windowProperty == nullptr) {
         WLOGFE("windowProperty is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
+
     if (action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) {
         PostAsyncTask([this, windowProperty, action]() mutable {
             windowController_->UpdateProperty(windowProperty, action);
         });
         return WMError::WM_OK;
     }
-    PostAsyncTask([this, windowProperty, action]() mutable {
+
+    if (isAsyncTask) {
+        PostAsyncTask([this, windowProperty, action]() mutable {
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
+            WMError res = windowController_->UpdateProperty(windowProperty, action);
+            if (action == PropertyChangeAction::ACTION_UPDATE_RECT && res == WMError::WM_OK &&
+                windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
+                dragController_->UpdateDragInfo(windowProperty->GetWindowId());
+            }
+        });
+        return WMError::WM_OK;
+    }
+
+    return PostSyncTask([this, &windowProperty, action]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
         WMError res = windowController_->UpdateProperty(windowProperty, action);
         if (action == PropertyChangeAction::ACTION_UPDATE_RECT && res == WMError::WM_OK &&
             windowProperty->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
             dragController_->UpdateDragInfo(windowProperty->GetWindowId());
         }
+        return res;
     });
-    return WMError::WM_OK;
 }
 
 WMError WindowManagerService::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
@@ -892,6 +922,42 @@ void WindowInfoQueriedListener::HasPrivateWindow(DisplayId displayId, bool& hasP
 {
     WLOGFI("called");
     WindowManagerService::GetInstance().HasPrivateWindow(displayId, hasPrivateWindow);
+}
+
+void WindowManagerService::RecordShowTimeEvent(int64_t costTime)
+{
+    WLOGFI("show window cost time(ms): %{public}" PRIu64", show window times: %{public}u", costTime,
+        showWindowTimeConfig_.showWindowTimes_.load());
+    if (costTime <= 20) { // 20: means cost time is 20ms
+        showWindowTimeConfig_.below20msTimes_++;
+    } else if (costTime <= 35) { // 35: means cost time is 35ms
+        showWindowTimeConfig_.below35msTimes_++;
+    } else if (costTime <= 50) { // 50: means cost time is 50ms
+        showWindowTimeConfig_.below50msTimes_++;
+    } else {
+        showWindowTimeConfig_.above50msTimes_++;
+    }
+    if (showWindowTimeConfig_.showWindowTimes_ >= REPORT_SHOW_WINDOW_TIMES) {
+        std::ostringstream oss;
+        oss << "show window: " << "BELOW20(ms): " << showWindowTimeConfig_.below20msTimes_
+            << ", BELOW35(ms):" << showWindowTimeConfig_.below35msTimes_
+            << ", BELOW50(ms): " << showWindowTimeConfig_.below50msTimes_
+            << ", ABOVE50(ms): " << showWindowTimeConfig_.above50msTimes_ << ";";
+        int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
+            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+            "SHOW_WINDOW_TIME",
+            OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+            "MSG", oss.str());
+        if (ret != 0) {
+            WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+        } else {
+            showWindowTimeConfig_.showWindowTimes_ = 0;
+            showWindowTimeConfig_.below20msTimes_ = 0;
+            showWindowTimeConfig_.below35msTimes_ = 0;
+            showWindowTimeConfig_.below50msTimes_ = 0;
+            showWindowTimeConfig_.above50msTimes_ = 0;
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

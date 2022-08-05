@@ -13,7 +13,7 @@
       "name": "window_manager",
       "subsystem": "window",
       "syscap": [],
-      "features": [],
+      "features": [ "window_manager_feature_coverage = false" ],
       "adapted_system_type": [ "standard" ],
       "rom": "8000KB",
       "ram": "8000KB",

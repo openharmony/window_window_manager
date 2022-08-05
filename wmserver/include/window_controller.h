@@ -48,7 +48,8 @@ public:
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
-    WMError ProcessPointDown(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty);
+    WMError NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty);
+    WMError ProcessPointDown(uint32_t windowId);
     WMError ProcessPointUp(uint32_t windowId);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();

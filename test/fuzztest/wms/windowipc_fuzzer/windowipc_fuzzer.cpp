@@ -110,6 +110,8 @@ void IPCSpecificInterfaceFuzzTest1(sptr<IRemoteObject> proxy, MessageParcel& sen
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_GET_TOP_WINDOW_ID),
         sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG),
+        sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_PROCESS_POINT_DOWN),
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_PROCESS_POINT_UP),

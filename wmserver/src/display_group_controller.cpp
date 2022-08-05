@@ -93,8 +93,7 @@ void DisplayGroupController::UpdateDisplayGroupWindowTree()
         WindowRootNodeType::APP_WINDOW_NODE,
         WindowRootNodeType::BELOW_WINDOW_NODE
     };
-    for (size_t index = 0; index < rootNodeType.size(); ++index) {
-        auto rootType = rootNodeType[index];
+    for (auto& rootType : rootNodeType) {
         auto rootNode = windowNodeContainer_->GetRootNode(rootType);
         if (rootNode == nullptr) {
             WLOGFE("rootNode is nullptr, %{public}d", rootType);
@@ -327,8 +326,8 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroyedDisplay(DisplayId di
         WindowRootNodeType::APP_WINDOW_NODE,
         WindowRootNodeType::BELOW_WINDOW_NODE
     };
-    for (size_t index = 0; index < rootNodeType.size(); ++index) {
-        auto& nodesVec = *(displayGroupWindowTree_[displayId][rootNodeType[index]]);
+    for (auto& type : rootNodeType) {
+        auto& nodesVec = *(displayGroupWindowTree_[displayId][type]);
         for (auto& node : nodesVec) {
             if (node->GetDisplayId() != displayId || node->isShowingOnMultiDisplays_) {
                 continue;
@@ -387,6 +386,29 @@ void DisplayGroupController::ProcessDisplayDestroy(DisplayId defaultDisplayId, s
     windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayDestroy(displayId, displayRectMap);
 }
 
+void DisplayGroupController::UpdateNodeSizeChangeReasonWithRotation(DisplayId displayId)
+{
+    std::vector<WindowRootNodeType> rootNodeType = {
+        WindowRootNodeType::ABOVE_WINDOW_NODE,
+        WindowRootNodeType::APP_WINDOW_NODE,
+        WindowRootNodeType::BELOW_WINDOW_NODE
+    };
+    for (auto& rootType : rootNodeType) {
+        std::vector<sptr<WindowNode>>* rootNodeVectorPtr = GetWindowNodesByDisplayIdAndRootType(displayId, rootType);
+        if (rootNodeVectorPtr == nullptr) {
+            WLOGFE("rootNodeVectorPtr is nullptr, %{public}d, displayId: %{public}" PRIu64, rootType, displayId);
+            return;
+        }
+        for (auto& node : (*rootNodeVectorPtr)) {
+            // DOCK_SLICE not need do rotation animation
+            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+                continue;
+            }
+            node->SetWindowSizeChangeReason(WindowSizeChangeReason::ROTATION);
+        }
+    }
+}
+
 void DisplayGroupController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
                                                   const std::map<DisplayId, Rect>& displayRectMap,
                                                   DisplayStateChangeType type)
@@ -419,12 +441,15 @@ void DisplayGroupController::ProcessDisplaySizeChangeOrRotation(DisplayId defaul
     // modify RSTree and window tree of displayGroup for cross-display nodes
     ProcessCrossNodes(defaultDisplayId, type);
     UpdateDisplayGroupWindowTree();
-    if (windowNodeContainer_->GetLayoutPolicy() != nullptr) {
-        windowNodeContainer_->GetLayoutPolicy()->ProcessDisplaySizeChangeOrRotation(displayId, displayRectMap);
-        Rect curDividerRect = windowNodeContainer_->GetLayoutPolicy()->GetDividerRect(displayId);
-        if (windowPairMap_[displayId] != nullptr) {
-            windowPairMap_[displayId]->RotateDividerWindow(curDividerRect);
-        }
+    if (windowNodeContainer_->GetLayoutPolicy() == nullptr) {
+        return;
+    }
+    // update reason after process cross Nodes to get correct display attribution
+    UpdateNodeSizeChangeReasonWithRotation(displayId);
+    windowNodeContainer_->GetLayoutPolicy()->ProcessDisplaySizeChangeOrRotation(displayId, displayRectMap);
+    Rect curDividerRect = windowNodeContainer_->GetLayoutPolicy()->GetDividerRect(displayId);
+    if (windowPairMap_[displayId] != nullptr) {
+        windowPairMap_[displayId]->RotateDividerWindow(curDividerRect);
     }
 }
 

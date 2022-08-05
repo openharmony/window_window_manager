@@ -43,7 +43,7 @@ private:
         { WindowType::WINDOW_TYPE_WALLPAPER,            0 },
         { WindowType::WINDOW_TYPE_DESKTOP,              1 },
         { WindowType::WINDOW_TYPE_APP_COMPONENT,        2 },
-        { WindowType::WINDOW_TYPE_DIALOG,               2 },
+        { WindowType::WINDOW_TYPE_DIALOG,               1 },
         { WindowType::WINDOW_TYPE_APP_LAUNCHING,        101 },
         { WindowType::WINDOW_TYPE_DOCK_SLICE,           0 },
         { WindowType::WINDOW_TYPE_PLACEHOLDER,          0 },
@@ -62,6 +62,7 @@ private:
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR,       113 },
         { WindowType::WINDOW_TYPE_KEYGUARD,             114 },
         // reserve 115 for app window above keyguard, 116 for input method window above keyguard
+        { WindowType::WINDOW_TYPE_SCREENSHOT,           117 },
         { WindowType::WINDOW_TYPE_VOICE_INTERACTION,    117 },
         { WindowType::WINDOW_TYPE_DRAGGING_EFFECT,      118 },
         { WindowType::WINDOW_TYPE_POINTER,              119 },

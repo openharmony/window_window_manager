@@ -216,6 +216,35 @@ HWTEST_F(WindowSceneTest, RequestFocus01, Function | SmallTest | Level2)
     sptr<WindowScene> scene = new WindowScene();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->RequestFocus());
 }
+
+/**
+ * @tc.name: NotifyMemoryLevel01
+ * @tc.desc: NotifyMemoryLevel without mainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, NotifyMemoryLevel01, Function | SmallTest | Level2)
+{
+    sptr<WindowScene> scene = new WindowScene();
+    int32_t level = 0;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->NotifyMemoryLevel(level));
+}
+
+/**
+ * @tc.name: NotifyMemoryLevel02
+ * @tc.desc: NotifyMemoryLevel with level
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, NotifyMemoryLevel02, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 0;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    sptr<WindowOption> option = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(option)));
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->NotifyMemoryLevel(0)); // ui content is null
+}
 }
 } // namespace Rosen
 } // namespace OHOS

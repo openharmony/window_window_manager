@@ -22,21 +22,21 @@ ohos_fuzztest("ScreenManagerFuzzTest") {
   module_out_path = module_output_path
   include_dirs = [
     "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
   ]
-  cflags = [
-    "-g",
-    "-O0",
-    "-Wno-unused-variable",
-    "-fno-omit-frame-pointer",
+
+  configs = [
+    "//foundation/window/window_manager/test/fuzztest:configs_cc_ld",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
   ]
+
   sources = [ "screenmanager_fuzzer.cpp" ]
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/dm:libdm",
-    "//utils/native/base:utils",
   ]
+  external_deps = [ "c_utils:utils" ]
 }
 
 ###############################################################################

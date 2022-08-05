@@ -185,6 +185,7 @@ bool MoveDragController::Init()
     inputListener_ = std::make_shared<InputEventListener>(InputEventListener());
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(inputListener_, inputEventHandler_);
     VsyncStation::GetInstance().SetIsMainHandlerAvailable(false);
+    VsyncStation::GetInstance().SetVsyncEventHandler(inputEventHandler_);
     return true;
 }
 
@@ -205,7 +206,6 @@ void MoveDragController::HandleReadyToMoveOrDrag(uint32_t windowId, sptr<WindowP
 
 void MoveDragController::HandleEndUpMovingOrDragging(uint32_t windowId)
 {
-    std::lock_guard<std::mutex> lock(mtx_);
     if (activeWindowId_ != windowId) {
         WLOGFE("end up moving or dragging failed, windowId: %{public}u", windowId);
         return;
@@ -221,7 +221,7 @@ void MoveDragController::HandleWindowRemovedOrDestroyed(uint32_t windowId)
     if (!(GetMoveDragProperty()->startMoveFlag_ || GetMoveDragProperty()->startDragFlag_)) {
         return;
     }
-    VsyncStation::GetInstance().RemoveCallback(CallbackType::CALLBACK_INPUT, vsyncCallback_);
+    VsyncStation::GetInstance().RemoveCallback();
     ResetMoveOrDragState();
 }
 
@@ -232,16 +232,8 @@ void MoveDragController::ConsumePointerEvent(const std::shared_ptr<MMI::PointerE
         return;
     }
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        std::shared_ptr<MMI::PointerEvent> tempPointerEvent;
-        {
-            std::lock_guard<std::mutex> lock(mtx_);
-            tempPointerEvent = moveEvent_;
-            moveEvent_ = pointerEvent;
-            VsyncStation::GetInstance().RequestVsync(CallbackType::CALLBACK_INPUT, vsyncCallback_);
-        }
-        if (tempPointerEvent != nullptr) {
-            tempPointerEvent->MarkProcessed();
-        }
+        moveEvent_ = pointerEvent;
+        VsyncStation::GetInstance().RequestVsync(vsyncCallback_);
     } else {
         WLOGFI("[WMS] Dispatch non-move event, action: %{public}d", pointerEvent->GetPointerAction());
         HandlePointerEvent(pointerEvent);
@@ -251,19 +243,13 @@ void MoveDragController::ConsumePointerEvent(const std::shared_ptr<MMI::PointerE
 
 void MoveDragController::OnReceiveVsync(int64_t timeStamp)
 {
-    std::shared_ptr<MMI::PointerEvent> pointerEvent;
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        pointerEvent = moveEvent_;
-        moveEvent_ = nullptr;
-    }
-    if (pointerEvent == nullptr) {
+    if (moveEvent_ == nullptr) {
         WLOGFE("moveEvent is nullptr");
         return;
     }
-    WLOGFD("[OnReceiveVsync] receive move event, action: %{public}d", pointerEvent->GetPointerAction());
-    HandlePointerEvent(pointerEvent);
-    pointerEvent->MarkProcessed();
+    WLOGFD("[OnReceiveVsync] receive move event, action: %{public}d", moveEvent_->GetPointerAction());
+    HandlePointerEvent(moveEvent_);
+    moveEvent_->MarkProcessed();
 }
 
 Rect MoveDragController::GetHotZoneRect()
@@ -329,7 +315,7 @@ void MoveDragController::HandleDragEvent(int32_t posX, int32_t posY, int32_t poi
     windowProperty_->SetRequestRect(newRect);
     windowProperty_->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
     windowProperty_->SetDragType(moveDragProperty_->dragType_);
-    WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT);
+    WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT, true);
 }
 
 void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId)
@@ -349,7 +335,7 @@ void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY, int32_t poi
         windowProperty_->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
     windowProperty_->SetRequestRect(newRect);
     windowProperty_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
-    WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT);
+    WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT, true);
 }
 
 void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

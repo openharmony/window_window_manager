@@ -210,19 +210,41 @@ public:
         {
             return type_ == ValueType::MAP;
         }
+        const ConfigItem& operator[](const std::string& key) const
+        {
+            if (type_ != ValueType::MAP) {
+                return DEFAULT;
+            }
+            if (mapValue_->count(key) == 0) {
+                return DEFAULT;
+            }
+            return mapValue_->at(key);
+        }
+        const ConfigItem& GetProp(const std::string& key) const
+        {
+            if (!property_) {
+                return DEFAULT;
+            }
+            if (property_->count(key) == 0) {
+                return DEFAULT;
+            }
+            return property_->at(key);
+        }
+        static const ConfigItem DEFAULT;
     };
     WindowManagerConfig() = delete;
     ~WindowManagerConfig() = default;
 
     static bool LoadConfigXml();
-    static const std::map<std::string, ConfigItem>& GetConfig()
+    static const ConfigItem& GetConfig()
     {
         return config_;
     }
     static void DumpConfig(const std::map<std::string, ConfigItem>& config);
 
 private:
-    static std::map<std::string, ConfigItem> config_;
+    static ConfigItem config_;
+    static const std::map<std::string, ValueType> configItemTypeMap_;
 
     static bool IsValidNode(const xmlNode& currNode);
     static void ReadProperty(const xmlNodePtr& currNode, std::map<std::string, ConfigItem>& property);

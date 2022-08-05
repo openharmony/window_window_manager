@@ -46,7 +46,8 @@ enum class ApiWindowType : uint32_t {
     TYPE_POINTER,
     TYPE_FLOAT_CAMERA,
     TYPE_DIALOG,
-    TYPE_END = TYPE_DIALOG,
+    TYPE_SCREENSHOT,
+    TYPE_END
 };
 
 enum class LifeCycleEventType : uint32_t {
@@ -74,8 +75,9 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_LAUNCHER_DOCK,       ApiWindowType::TYPE_LAUNCHER_DOCK     },
     { WindowType::WINDOW_TYPE_VOICE_INTERACTION,   ApiWindowType::TYPE_VOICE_INTERACTION },
     { WindowType::WINDOW_TYPE_POINTER,             ApiWindowType::TYPE_POINTER           },
-
+    { WindowType::WINDOW_TYPE_SCREENSHOT,          ApiWindowType::TYPE_SCREENSHOT        },
 };
+
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_APP,                 WindowType::WINDOW_TYPE_APP_SUB_WINDOW      },
     { ApiWindowType::TYPE_DIALOG,              WindowType::WINDOW_TYPE_DIALOG              },
@@ -94,8 +96,9 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_LAUNCHER_DOCK,       WindowType::WINDOW_TYPE_LAUNCHER_DOCK       },
     { ApiWindowType::TYPE_VOICE_INTERACTION,   WindowType::WINDOW_TYPE_VOICE_INTERACTION   },
     { ApiWindowType::TYPE_POINTER,             WindowType::WINDOW_TYPE_POINTER             },
-
+    { ApiWindowType::TYPE_SCREENSHOT,          WindowType::WINDOW_TYPE_SCREENSHOT          },
 };
+
 enum class ApiWindowMode : uint32_t {
     UNDEFINED = 1,
     FULLSCREEN,

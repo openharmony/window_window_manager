@@ -37,6 +37,10 @@ gen_js_obj("window_extension_ability_abc") {
 ohos_shared_library("windowextensionability_napi") {
   sources = [ "window_extension_ability_module.cpp" ]
 
+  configs = [
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+  ]
+
   deps = [
     ":window_extension_ability_abc",
     ":window_extension_ability_js",

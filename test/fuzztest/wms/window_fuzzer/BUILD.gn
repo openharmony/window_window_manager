@@ -24,20 +24,18 @@ ohos_fuzztest("WindowFuzzTest") {
   include_dirs = [
     "//foundation/window/window_manager/wmserver/include",
     "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
-  cflags = [
-    "-g",
-    "-O0",
-    "-Wno-unused-variable",
-    "-fno-omit-frame-pointer",
+
+  configs = [
+    "//foundation/window/window_manager/test/fuzztest:configs_cc_ld",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
   ]
+
   sources = [ "window_fuzzer.cpp" ]
-  deps = [
-    "//foundation/window/window_manager/wm:libwm",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "//foundation/window/window_manager/wm:libwm" ]
   external_deps = [
+    "c_utils:utils",
     "ipc:ipc_core",
     "multimedia_image_standard:image",
   ]

@@ -22,6 +22,7 @@
 #include "event_handler.h"
 #include "future.h"
 #include "snapshot_stub.h"
+#include "wm_common_inner.h"
 #include "window_root.h"
 #include "window_manager_hilog.h"
 
@@ -38,6 +39,7 @@ public:
 
 private:
     WMError TakeSnapshot(const std::shared_ptr<RSSurfaceNode>& surfaceNode, AAFwk::Snapshot& snapshot);
+    void RecordGetSnapshotEvent(int64_t costTime);
 
 private:
     float scaleW = 0.5f; // width scaling ratio(0.5)
@@ -45,6 +47,7 @@ private:
     sptr<WindowRoot> windowRoot_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     RSInterfaces& rsInterface_;
+    GetSnapshotTimeConfig getSnapshotTimeConfig_ = { 0, 0, 0, 0, 0, 0 };
 };
 } // Rosen
 } // OHOS
