@@ -20,7 +20,13 @@
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "window.h"
+
+#ifndef WINDOW_PREVIEW
 #include "window_manager.h"
+#else
+#include "mock/window_manager.h"
+#endif
+
 #include "window_option.h"
 #include "wm_common.h"
 namespace OHOS {
