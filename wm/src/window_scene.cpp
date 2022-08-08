@@ -183,6 +183,7 @@ std::string WindowScene::GetContentInfo() const
 
 WMError WindowScene::NotifyMemoryLevel(int32_t level) const
 {
+    WLOGFI("Notify memory level: %{public}d", level);
     if (mainWindow_ == nullptr) {
         WLOGFE("Notify memory level failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
