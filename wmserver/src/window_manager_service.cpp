@@ -407,9 +407,7 @@ void WindowManagerService::ConfigWindowAnimation(const WindowManagerConfig::Conf
     item = animeConfig["opacity"];
     if (item.IsFloats()) {
         auto numbers = *item.floatsValue_;
-        if (numbers.size() == 1) {
-            windowAnimationConfig.opacity_ = numbers[0]; // 0 opacity
-        }
+        numbers.size() == 1 ? (windowAnimationConfig.opacity_ = numbers[0]) : float();
     }
 }
 
