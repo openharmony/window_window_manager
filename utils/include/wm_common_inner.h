@@ -140,7 +140,7 @@ struct SystemConfig : public Parcelable {
             return false;
         }
 
-        if (!parvel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_))) {
+        if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_))) {
             return false;
         }
 
