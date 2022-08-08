@@ -17,14 +17,24 @@ module_out_path = "window_manager/wmserver"
 
 group("unittest") {
   testonly = true
-
-  deps = [ ":wmsever_avoid_area_controller_test" ]
+  deps = [
+    ":wmsever_avoid_area_controller_test",
+    ":wmsever_window_zorder_policy_test",
+  ]
 }
 
 ohos_unittest("wmsever_avoid_area_controller_test") {
   module_out_path = module_out_path
 
   sources = [ "avoid_area_controller_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common" ]
+}
+
+ohos_unittest("wmsever_window_zorder_policy_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_zorder_policy_test.cpp" ]
 
   deps = [ ":wmserver_unittest_common" ]
 }
