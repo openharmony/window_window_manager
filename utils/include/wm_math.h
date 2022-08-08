@@ -60,10 +60,9 @@ T Max(const T& a, const T& b)
 }
 
 template <typename T, typename... Ts>
-T Max(const T& a, Ts... bs)
+T Max(const T& a, const Ts&... bs)
 {
-    T b = Max(bs...);
-    return (a > b ? a : b);
+    return Max(a, Max(bs...));
 }
 
 template <typename T>
@@ -73,10 +72,9 @@ T Min(const T& a, const T& b)
 }
 
 template <typename T, typename... Ts>
-T Min(const T& a, Ts... bs)
+T Min(const T& a, const Ts&... bs)
 {
-    T b = Min(bs...);
-    return (a < b ? a : b);
+    return Min(a, Min(bs...));
 }
 
 template <typename T>

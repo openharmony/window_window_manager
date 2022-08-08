@@ -255,7 +255,7 @@ public:
     virtual WMError SetWindowMode(WindowMode mode) = 0;
     virtual void SetAlpha(float alpha) = 0;
     virtual void SetTransform(const Transform& trans) = 0;
-    virtual Transform GetTransform() const = 0;
+    virtual const Transform& GetTransform() const = 0;
     virtual WMError AddWindowFlag(WindowFlag flag) = 0;
     virtual WMError RemoveWindowFlag(WindowFlag flag) = 0;
     virtual WMError SetWindowFlags(uint32_t flags) = 0;
