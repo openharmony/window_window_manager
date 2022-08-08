@@ -113,7 +113,7 @@ public:
     const Rect& GetOriginRect() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     uint32_t GetAccessTokenId() const;
-    Transform GetTransform() const;
+    const Transform& GetTransform() const;
     WindowSizeLimits GetSizeLimits() const;
     WindowSizeLimits GetUpdatedSizeLimits() const;
     const TransformHelper::Matrix4& GetTransformMat() const;
