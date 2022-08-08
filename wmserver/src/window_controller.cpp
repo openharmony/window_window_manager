@@ -671,7 +671,7 @@ WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<
         return WMError::WM_ERROR_NULLPTR;
     }
     if (!node->currentVisibility_) {
-        WLOGFE("this window is not visible and not in window tree, windowId: %{public}u", windowId);
+        WLOGFE("[NotifyServerReadyToMoveOrDrag] window is not visible, windowId: %{public}u", windowId);
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
@@ -692,7 +692,7 @@ WMError WindowController::ProcessPointDown(uint32_t windowId)
         return WMError::WM_ERROR_NULLPTR;
     }
     if (!node->currentVisibility_) {
-        WLOGFE("this window is not visible and not in window tree, windowId: %{public}u", windowId);
+        WLOGFE("[ProcessPointDown] window is not visible, windowId: %{public}u", windowId);
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
