@@ -385,6 +385,7 @@ private:
     void InitListenerHandler();
     void HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     bool CheckCameraFloatingWindowMultiCreated(WindowType type);
+    void GetConfigurationFromWMS();
     void GetConfigurationFromAbilityInfo();
     void UpdateTitleButtonVisibility();
     void SetModeSupportInfo(uint32_t modeSupportInfo);

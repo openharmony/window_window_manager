@@ -714,7 +714,8 @@ WMError WindowImpl::UpdateProperty(PropertyChangeAction action)
     return SingletonContainer::Get<WindowAdapter>().UpdateProperty(property_, action);
 }
 
-void WindowImpl::GetConfigurationFromWMS() {
+void WindowImpl::GetConfigurationFromWMS()
+{
     if (SingletonContainer::Get<WindowAdapter>().GetSystemConfig(windowSystemConfig_) == WMError::WM_OK) {
         WLOGFI("get system decor enable:%{public}d", windowSystemConfig_.isSystemDecorEnable_);
         if (windowSystemConfig_.isSystemDecorEnable_) {
