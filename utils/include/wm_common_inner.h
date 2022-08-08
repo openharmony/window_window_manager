@@ -18,6 +18,7 @@
 
 #include <cfloat>
 #include <cinttypes>
+#include <unordered_set>
 #include "wm_common.h"
 
 namespace OHOS {
@@ -336,6 +337,11 @@ namespace {
     constexpr unsigned int WMS_WATCHDOG_CHECK_INTERVAL = 6; // actual check interval is 3000ms(6 * 500)
     const Rect INVALID_EMPTY_RECT = {0, 0, 0, 0};
     const Rect DEFAULT_PLACE_HOLDER_RECT = {0, 0, 512, 512};
+    const std::unordered_set<WindowType> INPUT_WINDOW_TYPE_SKIPPED {
+        WindowType::WINDOW_TYPE_POINTER,
+        WindowType::WINDOW_TYPE_DRAGGING_EFFECT,
+        WindowType::WINDOW_TYPE_FREEZE_DISPLAY
+    };
 }
 }
 }

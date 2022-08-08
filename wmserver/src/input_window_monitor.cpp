@@ -47,7 +47,8 @@ void InputWindowMonitor::UpdateInputWindow(uint32_t windowId)
         WLOGFE("window node could not be found.");
         return;
     }
-    if (windowTypeSkipped_.find(windowNode->GetWindowProperty()->GetWindowType()) != windowTypeSkipped_.end()) {
+    if (INPUT_WINDOW_TYPE_SKIPPED.find(windowNode->GetWindowProperty()->GetWindowType()) !=
+        INPUT_WINDOW_TYPE_SKIPPED.end()) {
         return;
     }
     DisplayId displayId = windowNode->GetDisplayId();
@@ -131,7 +132,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
         }
     }
     for (const auto& windowNode: windowNodes) {
-        if (windowTypeSkipped_.find(windowNode->GetWindowType()) != windowTypeSkipped_.end()) {
+        if (INPUT_WINDOW_TYPE_SKIPPED.find(windowNode->GetWindowType()) != INPUT_WINDOW_TYPE_SKIPPED.end()) {
             WLOGFI("skip node[id:%{public}u, type:%{public}d]", windowNode->GetWindowId(), windowNode->GetWindowType());
             continue;
         }
