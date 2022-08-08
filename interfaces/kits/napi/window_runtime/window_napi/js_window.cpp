@@ -2030,6 +2030,10 @@ NativeValue* JsWindow::OnOpacity(NativeEngine& engine, NativeCallbackInfo& info)
         WLOGFE("[NAPI]Failed to convert parameter to alpha");
         return engine.CreateUndefined();
     }
+    if (MathHelper::LessNotEqual(*nativeVal, 0.0) || MathHelper::GreatNotEqual(*nativeVal, 1.0)) {
+        WLOGFE("[NAPI]alpha should greater than 0 or smaller than 1.0");
+        return engine.CreateUndefined();
+    }
     float alpha = static_cast<double>(*nativeVal);
     windowToken_->SetAlpha(alpha);
     WLOGFI("[NAPI]Window [%{public}u, %{public}s] Opacity end, alpha = %{public}f",
@@ -2045,23 +2049,31 @@ bool JsWindow::ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Tr
         return false;
     }
     double data = 0.0f;
+    bool isValid = true;
     if (ParseJsDoubleValue(jsObject, engine, "pivotX", data)) {
         surfaceNode->SetPivotX(data);
+        isValid &= (!MathHelper::LessNotEqual(data, 0.0));
+        isValid &= (!MathHelper::GreatNotEqual(data, 1.0));
         trans.pivotX_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "pivotY", data)) {
         surfaceNode->SetPivotY(data);
+        isValid &= (!MathHelper::LessNotEqual(data, 0.0));
+        isValid &= (!MathHelper::GreatNotEqual(data, 1.0));
         trans.pivotY_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "x", data)) {
         surfaceNode->SetScaleX(data);
+        isValid &= MathHelper::GreatNotEqual(data, 0.0);
         trans.scaleX_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "y", data)) {
         surfaceNode->SetScaleY(data);
+        isValid &= MathHelper::GreatNotEqual(data, 0.0);
         trans.scaleY_ = data;
     }
-    return true;
+    WLOGFE("[NAPI] PivotX or PivotY should between 0.0 ~ 1.0, scale should greater than 0.0");
+    return isValid;
 }
 
 NativeValue* JsWindow::OnScale(NativeEngine& engine, NativeCallbackInfo& info)
@@ -2099,34 +2111,35 @@ bool JsWindow::ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, T
         return false;
     }
     double data = 0.0f;
+    bool isValid = true;
     if (ParseJsDoubleValue(jsObject, engine, "pivotX", data)) {
         surfaceNode->SetPivotX(data);
+        isValid &= (!MathHelper::LessNotEqual(data, 0.0));
+        isValid &= (!MathHelper::GreatNotEqual(data, 1.0));
         trans.pivotX_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "pivotY", data)) {
         surfaceNode->SetPivotY(data);
+        isValid &= (!MathHelper::LessNotEqual(data, 0.0));
+        isValid &= (!MathHelper::GreatNotEqual(data, 1.0));
         trans.pivotY_ = data;
     }
-    double coeff = 0.5 * 3.14 / 180; // 0.5 means half; 3.14 means pi; 180 means degree
     if (ParseJsDoubleValue(jsObject, engine, "x", data)) {
-        float w = std::cos(data * coeff);
-        float x = std::sin(data * coeff);
-        surfaceNode->SetRotation(Quaternion(x, 0, 0, w));
+        surfaceNode->SetRotationX(data);
         trans.rotationX_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "y", data)) {
-        float w = std::cos(data * coeff);
-        float y = std::sin(data * coeff);
-        surfaceNode->SetRotation(Quaternion(0, y, 0, w));
+        surfaceNode->SetRotationY(data);
         trans.rotationY_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "z", data)) {
-        float w = std::cos(data * coeff);
-        float z = std::sin(data * coeff);
-        surfaceNode->SetRotation(Quaternion(0, 0, z, w));
+        surfaceNode->SetRotation(data);
         trans.rotationZ_ = data;
     }
-    return true;
+    if (!isValid) {
+        WLOGFE("[NAPI] PivotX or PivotY should between 0.0 ~ 1.0");
+    }
+    return isValid;
 }
 
 NativeValue* JsWindow::OnRotate(NativeEngine& engine, NativeCallbackInfo& info)
