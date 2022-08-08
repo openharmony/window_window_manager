@@ -2929,6 +2929,7 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
 
 WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
 {
+    WLOGFI("[Client] Window id: %{public}u, notify memory level: %{public}d", property_->GetWindowId(), level);
     if (uiContent_ == nullptr) {
         WLOGFE("[Client] Window %{public}s notify memory level failed, because uicontent is null.", name_.c_str());
         return WMError::WM_ERROR_NULLPTR;
