@@ -16,7 +16,6 @@
 #ifndef OHOS_INPUT_WINDOW_MONITOR_H
 #define OHOS_INPUT_WINDOW_MONITOR_H
 
-#include <unordered_set>
 #include <input_manager.h>
 #include <refbase.h>
 
@@ -36,8 +35,6 @@ public:
 private:
     sptr<WindowRoot> windowRoot_;
     MMI::DisplayGroupInfo displayGroupInfo_;
-    std::unordered_set<WindowType> windowTypeSkipped_ { WindowType::WINDOW_TYPE_POINTER,
-        WindowType::WINDOW_TYPE_DRAGGING_EFFECT, WindowType::WINDOW_TYPE_FREEZE_DISPLAY};
     void TraverseWindowNodes(const std::vector<sptr<WindowNode>>& windowNodes,
                              std::vector<MMI::WindowInfo>& windowsInfo);
     void UpdateDisplayGroupInfo(const sptr<WindowNodeContainer>& windowNodeContainer,

@@ -19,6 +19,7 @@
 #include <event_handler.h>
 #include "vsync_station.h"
 #include "window_manager_hilog.h"
+#include "wm_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -77,6 +78,12 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
 {
     uint32_t windowId = window->GetWindowId();
     WLOGFI("Add input window, windowId: %{public}u", windowId);
+
+    // INPUT_WINDOW_TYPE_SKIPPED should not set input consumer
+    if (INPUT_WINDOW_TYPE_SKIPPED.find(window->GetType()) != INPUT_WINDOW_TYPE_SKIPPED.end()) {
+        WLOGFW("skip window for InputConsumer [id:%{public}u, type:%{public}d]", windowId, window->GetType());
+        return;
+    }
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window);
     std::lock_guard<std::mutex> lock(mtx_);
     windowInputChannels_.insert(std::make_pair(windowId, inputChannel));
@@ -87,7 +94,6 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
         if (mainEventRunner != nullptr && window->IsMainHandlerAvailable()) {
             WLOGFI("MainEventRunner is available");
             eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
-            MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler_);
         } else {
             WLOGFI("MainEventRunner is not available");
             eventHandler_ = AppExecFwk::EventHandler::Current();
@@ -96,10 +102,10 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
                 eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(
                     AppExecFwk::EventRunner::Create(INPUT_AND_VSYNC_THREAD));
             }
-            MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler_);
             VsyncStation::GetInstance().SetIsMainHandlerAvailable(false);
             VsyncStation::GetInstance().SetVsyncEventHandler(eventHandler_);
         }
+        MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler_);
         inputListener_ = listener;
     }
 }
