@@ -52,6 +52,7 @@ private:
     void CalcBuiltInDisplayWaterfallRects();
     void CalcBuiltInDisplayWaterfallRectsByRotation(Rotation rotation, uint32_t displayHeight, uint32_t displayWidth);
     void TransferBoundingRectsByRotation(DisplayId displayId, std::vector<Rect>& boudingRects);
+    Rect CreateWaterfallRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height);
 
     // Raw data
     std::map<DisplayId, std::vector<std::string>> svgPaths_;
