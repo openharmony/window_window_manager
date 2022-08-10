@@ -15,6 +15,7 @@
 
 #include "window_layout_policy.h"
 #include "display_manager_service_inner.h"
+#include "remote_animation.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
@@ -980,9 +981,15 @@ static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const R
             node->surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
         }
     }
+    WLOGFD("name:%{public}s id:%{public}u preRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
+        node->GetWindowName().c_str(), node->GetWindowId(),
+        preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
+    WLOGFD("name:%{public}s id:%{public}u winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
+        node->GetWindowName().c_str(), node->GetWindowId(),
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     if (node->leashWinSurfaceNode_) {
         if (winRect != preRect) {
-            // avoid animation change suddenly when client coming
+            // avoid animation interpreted when client coming
             node->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
         }
         if (node->startingWinSurfaceNode_) {
