@@ -319,7 +319,7 @@ void WindowManagerService::ConfigureWindowManagerService()
         if (numbers.size() == 1 &&
             (numbers[0] == static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
              numbers[0] == static_cast<uint32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
-		    systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
+            systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
         }
     }
     item = config["remoteAnimation"].GetProp("enable");
