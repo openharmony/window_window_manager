@@ -401,7 +401,8 @@ void WindowLayoutPolicy::ComputeDecoratedRequestRect(const sptr<WindowNode>& nod
         return;
     }
     auto reqRect = property->GetRequestRect();
-    if (!property->GetDecorEnable() || property->GetDecoStatus()) {
+    if (!property->GetDecorEnable() || property->GetDecoStatus() ||
+        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
         return;
     }
     float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
