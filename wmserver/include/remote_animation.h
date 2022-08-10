@@ -18,6 +18,7 @@
 
 #include <refbase.h>
 #include <rs_iwindow_animation_controller.h>
+#include <rs_window_animation_finished_callback.h>
 #include <rs_window_animation_target.h>
 
 #include "wm_common.h"
@@ -58,6 +59,9 @@ public:
     static WMError NotifyAnimationScreenUnlock(std::function<void(void)> callback);
     static bool isRemoteAnimationEnable_;
 private:
+	static WMError NotifyAnimationStartApp(sptr<WindowTransitionInfo> srcInfo,
+        const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode,
+        sptr<RSWindowAnimationTarget>& dstTarget, sptr<RSWindowAnimationFinishedCallback>& finishedCallback);
     static sptr<RSWindowAnimationTarget> CreateWindowAnimationTarget(sptr<WindowTransitionInfo> info,
         const sptr<WindowNode>& windowNode);
     static sptr<RSIWindowAnimationController> windowAnimationController_;
