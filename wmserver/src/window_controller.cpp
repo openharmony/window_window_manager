@@ -1020,18 +1020,22 @@ WMError WindowController::UpdateTouchHotAreas(const sptr<WindowNode>& node, cons
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    std::vector<Rect> hotAreas;
+    std::vector<Rect> touchHotAreas;
+    std::vector<Rect> pointerHotAreas;
     if (rects.empty()) {
-        hotAreas.emplace_back(node->GetFullWindowHotArea());
+        touchHotAreas.emplace_back(node->GetEntireWindowTouchHotArea());
+        pointerHotAreas.emplace_back(node->GetEntireWindowPointerHotArea());
     } else {
         Rect windowRect = node->GetWindowRect();
-        if (!WindowHelper::CalculateTouchHotAreas(windowRect, rects, hotAreas)) {
+        if (!WindowHelper::CalculateTouchHotAreas(windowRect, rects, touchHotAreas)) {
             WLOGFE("the requested touch hot areas are incorrect");
             return WMError::WM_ERROR_INVALID_PARAM;
         }
+        pointerHotAreas = touchHotAreas;
     }
     node->GetWindowProperty()->SetTouchHotAreas(rects);
-    node->SetTouchHotAreas(hotAreas);
+    node->SetTouchHotAreas(touchHotAreas);
+    node->SetPointerHotAreas(pointerHotAreas);
     FlushWindowInfo(node->GetWindowId());
     return WMError::WM_OK;
 }

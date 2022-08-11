@@ -33,9 +33,14 @@ void WindowNode::SetDisplayId(DisplayId displayId)
     property_->SetDisplayId(displayId);
 }
 
-void WindowNode::SetFullWindowHotArea(const Rect& rect)
+void WindowNode::SetEntireWindowTouchHotArea(const Rect& rect)
 {
-    fullWindowHotArea_ = rect;
+    entireWindowTouchHotArea_ = rect;
+}
+
+void WindowNode::SetEntireWindowPointerHotArea(const Rect& rect)
+{
+    entireWindowPointerHotArea_ = rect;
 }
 
 void WindowNode::SetWindowRect(const Rect& rect)
@@ -170,6 +175,11 @@ void WindowNode::SetTouchHotAreas(const std::vector<Rect>& rects)
     touchHotAreas_ = rects;
 }
 
+void WindowNode::SetPointerHotAreas(const std::vector<Rect>& rects)
+{
+    pointerHotAreas_ = rects;
+}
+
 void WindowNode::SetWindowSizeLimits(const WindowSizeLimits& sizeLimits)
 {
     property_->SetSizeLimits(sizeLimits);
@@ -235,9 +245,14 @@ uint32_t WindowNode::GetParentId() const
     return property_->GetParentId();
 }
 
-Rect WindowNode::GetFullWindowHotArea() const
+Rect WindowNode::GetEntireWindowTouchHotArea() const
 {
-    return fullWindowHotArea_;
+    return entireWindowTouchHotArea_;
+}
+
+Rect WindowNode::GetEntireWindowPointerHotArea() const
+{
+    return entireWindowPointerHotArea_;
 }
 
 Rect WindowNode::GetWindowRect() const
@@ -345,6 +360,11 @@ uint32_t WindowNode::GetModeSupportInfo() const
 void WindowNode::GetTouchHotAreas(std::vector<Rect>& rects) const
 {
     rects = touchHotAreas_;
+}
+
+void WindowNode::GetPointerHotAreas(std::vector<Rect>& rects) const
+{
+    rects = pointerHotAreas_;
 }
 
 uint32_t WindowNode::GetAccessTokenId() const
