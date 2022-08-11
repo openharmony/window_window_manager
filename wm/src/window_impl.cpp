@@ -871,18 +871,27 @@ void WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
 
 void WindowImpl::SetSystemConfig()
 {
-    if (IsAppMainOrSubOrFloatingWindow()) {
-        if (SingletonContainer::Get<WindowAdapter>().GetSystemConfig(windowSystemConfig_) == WMError::WM_OK) {
-            if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-                WLOGFI("get system decor enable:%{public}d", windowSystemConfig_.isSystemDecorEnable_);
-                property_->SetDecorEnable(windowSystemConfig_.isSystemDecorEnable_);
-                WLOGFI("get stretchable enable:%{public}d", windowSystemConfig_.isStretchable_);
-                property_->SetStretchable(windowSystemConfig_.isStretchable_);
-            }
-            SetWindowCornerRadiusAccordingToSystemConfig();
-        }
-        UpdateWindowShadowAccordingToSystemConfig();
+    if (!IsAppMainOrSubOrFloatingWindow()) {
+        return;
     }
+    if (SingletonContainer::Get<WindowAdapter>().GetSystemConfig(windowSystemConfig_) == WMError::WM_OK) {
+        if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+            WLOGFI("get system decor enable:%{public}d", windowSystemConfig_.isSystemDecorEnable_);
+            property_->SetDecorEnable(windowSystemConfig_.isSystemDecorEnable_);
+            WLOGFI("get stretchable enable:%{public}d", windowSystemConfig_.isStretchable_);
+            property_->SetStretchable(windowSystemConfig_.isStretchable_);
+            // if window mode is undefined, set it from configuration
+            if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_UNDEFINED) {
+                WindowMode mode = windowSystemConfig_.defaultWindowMode_;
+                WLOGFI("get default window mode:%{public}u", mode);
+                property_->SetWindowMode(mode);
+            }
+        } else if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_UNDEFINED) {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+        }
+        SetWindowCornerRadiusAccordingToSystemConfig();
+    }
+    UpdateWindowShadowAccordingToSystemConfig();
 }
 
 WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)

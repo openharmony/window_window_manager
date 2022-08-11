@@ -132,11 +132,16 @@ struct AppWindowEffectConfig {
 struct SystemConfig : public Parcelable {
     bool isSystemDecorEnable_ = true;
     bool isStretchable_ = false;
+    WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     AppWindowEffectConfig effectConfig_;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteBool(isSystemDecorEnable_) || !parcel.WriteBool(isStretchable_)) {
+            return false;
+        }
+
+        if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_))) {
             return false;
         }
 
@@ -169,6 +174,7 @@ struct SystemConfig : public Parcelable {
         SystemConfig* config = new SystemConfig();
         config->isSystemDecorEnable_ = parcel.ReadBool();
         config->isStretchable_ = parcel.ReadBool();
+        config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         config->effectConfig_.fullScreenCornerRadius_ = parcel.ReadFloat();
         config->effectConfig_.splitCornerRadius_ = parcel.ReadFloat();
         config->effectConfig_.floatCornerRadius_ = parcel.ReadFloat();

@@ -32,6 +32,7 @@ const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig:
     { "duration",               WindowManagerConfig::ValueType::INTS },
     { "durationIn",             WindowManagerConfig::ValueType::INTS },
     { "durationOut",            WindowManagerConfig::ValueType::INTS },
+    { "defaultWindowMode",      WindowManagerConfig::ValueType::INTS },
     { "windowAnimation",        WindowManagerConfig::ValueType::MAP },
     { "keyboardAnimation",      WindowManagerConfig::ValueType::MAP },
     { "timing",                 WindowManagerConfig::ValueType::MAP },
