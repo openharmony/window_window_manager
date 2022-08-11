@@ -2134,7 +2134,7 @@ void WindowImpl::UpdatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& po
     }
     Rect winRect = GetRect();
     PointInfo originPos =
-        WindowHelper::CalculateOriginPosition(property_->GetTransformMat(), property_->GetPlane(),
+        WindowHelper::CalculateOriginPosition(property_->GetTransformMat(),
         { pointerItem.GetDisplayX(), pointerItem.GetDisplayY() });
     WLOGI("Pointer event has been updated,window id:%{public}u, before->now:"
         "[%{public}d,%{public}d]->[%{public}d,%{public}d]",
@@ -2244,8 +2244,7 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
     TransformHelper::Vector2 hotZoneScale(1, 1);
     if (property_->GetTransform() != Transform::Identity()) {
         property_->ComputeTransform();
-        hotZoneScale = WindowHelper::CalculateHotZoneScale(property_->GetTransformMat(),
-            property_->GetPlane());
+        hotZoneScale = WindowHelper::CalculateHotZoneScale(property_->GetTransformMat());
     }
     moveDragProperty_->startPointRect_ = rect;
     moveDragProperty_->startPointPosX_ = globalX;

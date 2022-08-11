@@ -451,8 +451,7 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<W
     TransformHelper::Vector2 hotZoneScale(1, 1);
     if (node->GetWindowProperty()->GetTransform() != Transform::Identity()) {
         node->ComputeTransform();
-        hotZoneScale = WindowHelper::CalculateHotZoneScale(node->GetWindowProperty()->GetTransformMat(),
-            node->GetWindowProperty()->GetPlane());
+        hotZoneScale = WindowHelper::CalculateHotZoneScale(node->GetWindowProperty()->GetTransformMat());
     }
 
     auto hotZoneRectTouch = CalcEntireWindowHotZone(node, winRect, HOTZONE_TOUCH, virtualPixelRatio, hotZoneScale);

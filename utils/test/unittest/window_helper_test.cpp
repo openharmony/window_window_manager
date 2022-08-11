@@ -149,18 +149,15 @@ HWTEST_F(WindowHelperTest, CalculateOriginPosition, Function | SmallTest | Level
     transform.translateY_ = 200;
     transform.translateZ_ = 50;
     Rect rect { 50, 50, 240, 320 };
-    TransformHelper::Matrix4 mat = WindowHelper::ComputeRectTransformMat4(transform, rect);
-    TransformHelper::Vector3 a = TransformHelper::Transform(
-        { static_cast<float>(rect.posX_), static_cast<float>(rect.posY_), 0 }, mat);
-    TransformHelper::Vector3 b = TransformHelper::Transform(
-        { static_cast<float>(rect.posX_ + rect.width_), static_cast<float>(rect.posY_), 0 }, mat);
-    TransformHelper::Vector3 c = TransformHelper::Transform(
-        { static_cast<float>(rect.posX_), static_cast<float>(rect.posY_+ rect.height_), 0 }, mat);
-    TransformHelper::Plane plane = TransformHelper::Plane(a, b, c);
+    TransformHelper::Vector3 pivotPos = { rect.posX_ + transform.pivotX_ * rect.width_,
+            rect.posY_ + transform.pivotY_ * rect.height_, 0 };
+    TransformHelper::Matrix4 mat = TransformHelper::CreateTranslation(-pivotPos);
+    mat *= WindowHelper::ComputeWorldTransformMat4(transform);
+    mat *= TransformHelper::CreateTranslation(pivotPos);
 	
     TransformHelper::Vector3 expectOriginPoint(0, 0, 0);
     TransformHelper::Vector3 tranformedPoint = TransformHelper::Transform(expectOriginPoint, mat);
-    PointInfo actialOriginPoint = WindowHelper::CalculateOriginPosition(mat, plane,
+    PointInfo actialOriginPoint = WindowHelper::CalculateOriginPosition(mat,
         { static_cast<int32_t>(tranformedPoint.x_), static_cast<int32_t>(tranformedPoint.y_) });
     const float errorRange = 2.f;
     ASSERT_LT(std::abs(expectOriginPoint.x_ - actialOriginPoint.x), errorRange);
@@ -177,7 +174,11 @@ HWTEST_F(WindowHelperTest, TransformRect, Function | SmallTest | Level1)
     Transform transform;
     Rect rect { 0, 0, 10, 20 };
     transform.scaleX_ = transform.scaleY_ = 2.0f;
-    TransformHelper::Matrix4 mat = WindowHelper::ComputeRectTransformMat4(transform, rect);
+    TransformHelper::Vector3 pivotPos = { rect.posX_ + transform.pivotX_ * rect.width_,
+            rect.posY_ + transform.pivotY_ * rect.height_, 0 };
+    TransformHelper::Matrix4 mat = TransformHelper::CreateTranslation(-pivotPos);
+    mat *= WindowHelper::ComputeWorldTransformMat4(transform);
+    mat *= TransformHelper::CreateTranslation(pivotPos);
     Rect transformRect = WindowHelper::TransformRect(mat, rect);
     ASSERT_EQ(rect.width_ * transform.scaleX_, transformRect.width_);
     ASSERT_EQ(rect.height_ * transform.scaleY_, transformRect.height_);
@@ -193,24 +194,18 @@ HWTEST_F(WindowHelperTest, CalculateHotZoneScale, Function | SmallTest | Level1)
     Transform transform;
     transform.scaleX_ = 0.66f;
     transform.scaleY_ = 1.5f;
-    transform.rotationY_ = 30;
     transform.pivotX_ = transform.pivotY_ = 0.5f;
     Rect rect { -1, -2, 2, 4 };
-    TransformHelper::Matrix4 mat = WindowHelper::ComputeRectTransformMat4(transform, rect);
-    TransformHelper::Vector3 a = TransformHelper::Transform(
-        { static_cast<float>(rect.posX_), static_cast<float>(rect.posY_), 0 }, mat);
-    TransformHelper::Vector3 b = TransformHelper::Transform(
-        { static_cast<float>(rect.posX_ + rect.width_), static_cast<float>(rect.posY_), 0 }, mat);
-    TransformHelper::Vector3 c = TransformHelper::Transform(
-        { static_cast<float>(rect.posX_), static_cast<float>(rect.posY_+ rect.height_), 0 }, mat);
-    TransformHelper::Plane plane = TransformHelper::Plane(a, b, c);
+    TransformHelper::Vector3 pivotPos = { rect.posX_ + transform.pivotX_ * rect.width_,
+            rect.posY_ + transform.pivotY_ * rect.height_, 0 };
+    TransformHelper::Matrix4 mat = TransformHelper::CreateTranslation(-pivotPos);
+    mat *= WindowHelper::ComputeWorldTransformMat4(transform);
+    mat *= TransformHelper::CreateTranslation(pivotPos);
 
     const float errorRange = 0.01f;
-    TransformHelper::Vector2 hotZoneScale = WindowHelper::CalculateHotZoneScale(mat, plane);
-    TransformHelper::Vector3 xv = TransformHelper::Transform(TransformHelper::Vector3(1, 0, 0), mat);
-    TransformHelper::Vector3 yv = TransformHelper::Transform(TransformHelper::Vector3(0, 1, 0), mat);
-    ASSERT_LT(std::abs(TransformHelper::Vector2(xv.x_, xv.y_).Length() - hotZoneScale.x_), errorRange);
-    ASSERT_LT(std::abs(TransformHelper::Vector2(yv.x_, yv.y_).Length() - hotZoneScale.y_), errorRange);
+    TransformHelper::Vector2 hotZoneScale = WindowHelper::CalculateHotZoneScale(mat);
+    ASSERT_LT(std::abs(transform.scaleX_ - hotZoneScale.x_), errorRange);
+    ASSERT_LT(std::abs(transform.scaleY_ - hotZoneScale.y_), errorRange);
 }
 }
 } // namespace Rosen
