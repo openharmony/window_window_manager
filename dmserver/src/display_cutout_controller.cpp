@@ -60,7 +60,6 @@ void DisplayCutoutController::SetCutoutSvgPath(DisplayId displayId, const std::s
         svgPaths_[displayId] = pathVec;
     }
     Rect boundingRect = CalcCutoutBoundingRect(svgPath);
-    CheckBoudingRectBoundary(displayId, boundingRect);
     if (boundingRects_.count(displayId) == 1) {
         boundingRects_[displayId].emplace_back(boundingRect);
     } else {
@@ -86,7 +85,7 @@ sptr<CutoutInfo> DisplayCutoutController::GetCutoutInfo(DisplayId displayId)
     return cutoutInfo;
 }
 
-void DisplayCutoutController::CheckBoudingRectBoundary(DisplayId displayId, Rect& boundingRect)
+void DisplayCutoutController::CheckBoundingRectsBoundary(DisplayId displayId, std::vector<Rect>& boundingRects)
 {
     sptr<SupportedScreenModes> modes =
         DisplayManagerServiceInner::GetInstance().GetScreenModesByDisplayId(displayId);
@@ -96,12 +95,18 @@ void DisplayCutoutController::CheckBoudingRectBoundary(DisplayId displayId, Rect
     }
     uint32_t displayHeight = modes->height_;
     uint32_t displayWidth = modes->width_;
-    if (boundingRect.posX_ < 0 || boundingRect.posY_ < 0 ||
-        boundingRect.width_ + boundingRect.posX_ > displayWidth ||
-        boundingRect.height_ + boundingRect.posY_ > displayHeight) {
-        WLOGFE("boundingRect boundary is invalid");
-        boundingRect = {.posX_ = 0, .posY_ = 0, .width_ = 0, .height_ = 0};
-        return;
+    for (auto iter = boundingRects.begin(); iter != boundingRects.end();) {
+        Rect boundingRect = *iter;
+        if (boundingRect.posX_ < 0 || boundingRect.posY_ < 0 ||
+            boundingRect.width_ + boundingRect.posX_ > displayWidth ||
+            boundingRect.height_ + boundingRect.posY_ > displayHeight ||
+            boundingRect.width_ > displayWidth || boundingRect.height_ > displayHeight ||
+            boundingRect.isUninitializedRect()) {
+            WLOGFE("boundingRect boundary is invalid");
+            iter = boundingRects.erase(iter);
+        } else {
+            iter++;
+        }
     }
 }
 
@@ -214,21 +219,22 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRectsByRotation(
     }
 }
 
-void DisplayCutoutController::TransferBoundingRectsByRotation(DisplayId displayId, std::vector<Rect>& boudingRects)
+void DisplayCutoutController::TransferBoundingRectsByRotation(DisplayId displayId, std::vector<Rect>& boundingRects)
 {
     std::vector<Rect> resultVec;
     if (boundingRects_.count(displayId) == 0) {
-        boudingRects = resultVec;
+        boundingRects = resultVec;
         return;
     }
     std::vector<Rect> displayBoundingRects = boundingRects_[displayId];
     if (displayBoundingRects.empty()) {
-        boudingRects = resultVec;
+        boundingRects = resultVec;
         return;
     }
     Rotation currentRotation = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId)->GetRotation();
+    CheckBoundingRectsBoundary(displayId, displayBoundingRects);
     if (currentRotation == Rotation::ROTATION_0) {
-        boudingRects = displayBoundingRects;
+        boundingRects = displayBoundingRects;
         return;
     }
     sptr<SupportedScreenModes> modes =
@@ -261,7 +267,7 @@ void DisplayCutoutController::TransferBoundingRectsByRotation(DisplayId displayI
         default: {
         }
     }
-    boudingRects = resultVec;
+    boundingRects = resultVec;
 }
 
 Rect DisplayCutoutController::CreateWaterfallRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height)
