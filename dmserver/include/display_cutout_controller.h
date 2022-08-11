@@ -48,10 +48,10 @@ public:
     void SetCurvedScreenBoundary(std::vector<int> curvedScreenBoundary);
 private:
     Rect CalcCutoutBoundingRect(std::string svgPath);
-    void CheckBoudingRectBoundary(DisplayId displayId, Rect& boundingRect);
+    void CheckBoundingRectsBoundary(DisplayId displayId, std::vector<Rect>& boundingRects);
     void CalcBuiltInDisplayWaterfallRects();
     void CalcBuiltInDisplayWaterfallRectsByRotation(Rotation rotation, uint32_t displayHeight, uint32_t displayWidth);
-    void TransferBoundingRectsByRotation(DisplayId displayId, std::vector<Rect>& boudingRects);
+    void TransferBoundingRectsByRotation(DisplayId displayId, std::vector<Rect>& boundingRects);
     Rect CreateWaterfallRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height);
 
     // Raw data
