@@ -26,7 +26,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "StartingWindow"};
-    const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
 }
 
 std::recursive_mutex StartingWindow::mutex_;
@@ -208,16 +207,22 @@ void StartingWindow::UpdateRSTree(sptr<WindowNode>& node, const AnimationConfig&
             }
         }
     };
-    static const bool IsWindowAnimationEnabled = access(DISABLE_WINDOW_ANIMATION_PATH, F_OK) == 0 ? false : true;
-    if ((IsWindowAnimationEnabled && !RemoteAnimation::CheckAnimationController())) {
-        if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            // keyboard animation
-            RSNode::Animate(animationConfig.keyboardAnimationConfig_.durationIn_,
-                animationConfig.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
-        } else { // window animation
-            RSNode::Animate(animationConfig.windowAnimationConfig_.animationTiming_.timingProtocol_,
-                animationConfig.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc);
+    wptr<WindowNode> weakNode = node;
+    auto finishCallBack = [weakNode]() {
+        auto weak = weakNode.promote();
+        if (weak == nullptr) {
+            WLOGFE("window node is nullptr");
         }
+        auto winRect = weak->GetWindowRect();
+        WLOGFI("before setBounds windowRect: %{public}d, %{public}d, %{public}d, %{public}d",
+            winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+        weak->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+        RSTransaction::FlushImplicitTransaction();
+    };
+    static const bool IsWindowAnimationEnabled = WindowHelper::ReadIsWindowAnimationEnabledProperty();
+    if ((IsWindowAnimationEnabled && !RemoteAnimation::CheckAnimationController())) {
+        RSNode::Animate(animationConfig.windowAnimationConfig_.animationTiming_.timingProtocol_,
+            animationConfig.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc, finishCallBack);
     } else {
         // add or remove window without animation
         updateRSTreeFunc();

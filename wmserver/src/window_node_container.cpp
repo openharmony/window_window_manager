@@ -43,7 +43,6 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowNodeContainer"};
     constexpr int WINDOW_NAME_MAX_LENGTH = 10;
-    const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
     constexpr uint32_t MAX_BRIGHTNESS = 255;
     constexpr uint32_t SPLIT_WINDOWS_CNT = 2;
     constexpr uint32_t EXIT_SPLIT_POINTS_NUMBER = 2;
@@ -417,7 +416,7 @@ bool WindowNodeContainer::UpdateRSTree(sptr<WindowNode>& node, DisplayId display
         WLOGFI("WINDOW_TYPE_APP_COMPONENT not need to update RsTree");
         return true;
     }
-    static const bool IsWindowAnimationEnabled = ReadIsWindowAnimationEnabledProperty();
+    static const bool IsWindowAnimationEnabled = WindowHelper::ReadIsWindowAnimationEnabledProperty();
     auto updateRSTreeFunc = [&]() {
         auto& dms = DisplayManagerServiceInner::GetInstance();
         WLOGFI("UpdateRSTree windowId: %{public}d, displayId: %{public}" PRIu64", isAdd: %{public}d",
@@ -1756,14 +1755,6 @@ float WindowNodeContainer::GetVirtualPixelRatio(DisplayId displayId) const
 Rect WindowNodeContainer::GetDisplayGroupRect() const
 {
     return layoutPolicy_->GetDisplayGroupRect();
-}
-
-bool WindowNodeContainer::ReadIsWindowAnimationEnabledProperty()
-{
-    if (access(DISABLE_WINDOW_ANIMATION_PATH, F_OK) == 0) {
-        return false;
-    }
-    return true;
 }
 
 WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)

@@ -16,6 +16,7 @@
 #ifndef OHOS_WM_INCLUDE_WM_HELPER_H
 #define OHOS_WM_INCLUDE_WM_HELPER_H
 
+#include <unistd.h>
 #include <vector>
 #include "ability_info.h"
 #include "wm_common.h"
@@ -24,6 +25,9 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
+}
 class WindowHelper {
 public:
     static inline bool IsMainWindow(WindowType type)
@@ -488,6 +492,13 @@ public:
         return false;
     }
 
+    static inline bool ReadIsWindowAnimationEnabledProperty()
+    {
+        if (access(DISABLE_WINDOW_ANIMATION_PATH, F_OK) == 0) {
+            return false;
+        }
+        return true;
+    }
 private:
     WindowHelper() = default;
     ~WindowHelper() = default;
