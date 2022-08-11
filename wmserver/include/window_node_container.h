@@ -138,7 +138,6 @@ private:
     void RecoverScreenDefaultOrientationIfNeed(DisplayId displayId);
     void RaiseOrderedWindowToTop(std::vector<sptr<WindowNode>>& orderedNodes,
         std::vector<sptr<WindowNode>>& windowNodes);
-    static bool ReadIsWindowAnimationEnabledProperty();
     void DumpScreenWindowTree();
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
     void ReZOrderShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);

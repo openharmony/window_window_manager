@@ -482,6 +482,36 @@ bool WindowRoot::NeedToStopAddingNode(sptr<WindowNode>& node, const sptr<WindowN
     return false;
 }
 
+Rect WindowRoot::GetDisplayRectWithoutSystemBarAreas(DisplayId displayId)
+{
+    std::map<WindowType, Rect> systemBarRects;
+    for (const auto& it : windowNodeMap_) {
+        if (it.second && (it.second->GetDisplayId() == displayId) &&
+            WindowHelper::IsSystemBarWindow(it.second->GetWindowType())) {
+            systemBarRects[it.second->GetWindowType()] = it.second->GetWindowRect();
+        }
+    }
+    auto container = GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("GetDisplayRectWithoutSystemBarAreas failed, window container could not be found");
+        return {0, 0, 0, 0}; // empty rect
+    }
+    auto displayRect = container->GetDisplayRect(displayId);
+    Rect targetRect = displayRect;
+    if (systemBarRects.count(WindowType::WINDOW_TYPE_STATUS_BAR)) {
+        targetRect.posY_ = displayRect.posY_ + systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].height_;
+        targetRect.height_ -= systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].height_;
+        WLOGFD("after status bar winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
+            targetRect.posX_, targetRect.posY_, targetRect.width_, targetRect.height_);
+    }
+    if (systemBarRects.count(WindowType::WINDOW_TYPE_NAVIGATION_BAR)) {
+        targetRect.height_ -= systemBarRects[WindowType::WINDOW_TYPE_NAVIGATION_BAR].height_;
+        WLOGFD("after navi bar winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
+            targetRect.posX_, targetRect.posY_, targetRect.width_, targetRect.height_);
+    }
+    return targetRect;
+}
+
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin)
 {
     if (node == nullptr) {
