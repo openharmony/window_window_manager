@@ -176,9 +176,9 @@ private:
     Transform trans_;
     bool recomputeTransformMat_ { false };
     TransformHelper::Matrix4 transformMat_ = TransformHelper::Matrix4::Identity;
+    TransformHelper::Matrix4 worldTransformMat_ = TransformHelper::Matrix4::Identity;
 
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
-    DEFINE_VAR_FUNC_GET_SET(TransformHelper::Plane, Plane, windowPlane);
     WindowSizeLimits sizeLimits_;
     WindowSizeLimits updatedSizeLimits_;
 };
