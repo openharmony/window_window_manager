@@ -139,6 +139,10 @@ void DisplayManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
 
     std::vector<int> numbersVec;
     std::string numbersStr = reinterpret_cast<const char*>(context);
+    if (numbersStr.empty()) {
+        xmlFree(context);
+        return;
+    }
     auto numbers = Split(numbersStr, " ");
     for (auto& num : numbers) {
         if (!IsNumber(num)) {
