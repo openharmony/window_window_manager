@@ -101,6 +101,8 @@ protected:
     void UpdateWindowSizeLimits(const sptr<WindowNode>& node);
     WindowSizeLimits GetSystemSizeLimits(const sptr<WindowNode>& node,
         const Rect& displayRect, float virtualPixelRatio);
+    Rect CalcEntireWindowHotZone(const sptr<WindowNode>& node, const Rect& winRect, uint32_t hotZone,
+        float vpr, TransformHelper::Vector2 hotZoneScale) const;
 
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,

@@ -42,6 +42,8 @@ private:
     void UpdateDisplayInfo(const sptr<DisplayInfo>& displayInfo,
                            std::vector<MMI::DisplayInfo>& displayInfoVector);
     MMI::Direction GetDisplayDirectionForMmi(Rotation rotation);
+    void TransformWindowRects(const sptr<WindowNode>& windowNode, Rect& areaRect,
+        std::vector<Rect>& touchHotAreas, std::vector<Rect>& pointerHotAreas);
 };
 }
 }

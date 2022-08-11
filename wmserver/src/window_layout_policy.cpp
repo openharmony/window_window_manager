@@ -417,18 +417,12 @@ void WindowLayoutPolicy::ComputeDecoratedRequestRect(const sptr<WindowNode>& nod
     property->SetDecoStatus(true);
 }
 
-void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<WindowNode>& node) const
+Rect WindowLayoutPolicy::CalcEntireWindowHotZone(const sptr<WindowNode>& node, const Rect& winRect, uint32_t hotZone,
+    float vpr, TransformHelper::Vector2 hotZoneScale) const
 {
     Rect rect = winRect;
-    float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
-    TransformHelper::Vector2 hotZoneScale(1, 1);
-    if (node->GetWindowProperty()->GetTransform() != Transform::Identity()) {
-        node->ComputeTransform();
-        hotZoneScale = WindowHelper::CalculateHotZoneScale(node->GetWindowProperty()->GetTransformMat(),
-            node->GetWindowProperty()->GetPlane());
-    }
-    uint32_t hotZoneX = static_cast<uint32_t>(HOTZONE * virtualPixelRatio / hotZoneScale.x_);
-    uint32_t hotZoneY = static_cast<uint32_t>(HOTZONE * virtualPixelRatio / hotZoneScale.y_);
+    uint32_t hotZoneX = static_cast<uint32_t>(hotZone * vpr / hotZoneScale.x_);
+    uint32_t hotZoneY = static_cast<uint32_t>(hotZone * vpr / hotZoneScale.y_);
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         if (rect.width_ < rect.height_) {
@@ -446,18 +440,40 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<W
         rect.width_ += (hotZoneX + hotZoneX);
         rect.height_ += (hotZoneY + hotZoneY);
     }
-    node->SetFullWindowHotArea(rect);
+    return rect;
+}
+
+void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<WindowNode>& node) const
+{
+    float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
+    TransformHelper::Vector2 hotZoneScale(1, 1);
+    if (node->GetWindowProperty()->GetTransform() != Transform::Identity()) {
+        node->ComputeTransform();
+        hotZoneScale = WindowHelper::CalculateHotZoneScale(node->GetWindowProperty()->GetTransformMat(),
+            node->GetWindowProperty()->GetPlane());
+    }
+
+    auto hotZoneRectTouch = CalcEntireWindowHotZone(node, winRect, HOTZONE_TOUCH, virtualPixelRatio, hotZoneScale);
+    auto hotZoneRectPointer = CalcEntireWindowHotZone(node, winRect, HOTZONE_POINTER, virtualPixelRatio, hotZoneScale);
+
+    node->SetEntireWindowTouchHotArea(hotZoneRectTouch);
+    node->SetEntireWindowPointerHotArea(hotZoneRectPointer);
+
     std::vector<Rect> requestedHotAreas;
     node->GetWindowProperty()->GetTouchHotAreas(requestedHotAreas);
-    std::vector<Rect> hotAreas;
+    std::vector<Rect> touchHotAreas;
+    std::vector<Rect> pointerHotAreas;
     if (requestedHotAreas.empty()) {
-        hotAreas.emplace_back(rect);
+        touchHotAreas.emplace_back(hotZoneRectTouch);
+        pointerHotAreas.emplace_back(hotZoneRectPointer);
     } else {
-        if (!WindowHelper::CalculateTouchHotAreas(winRect, requestedHotAreas, hotAreas)) {
+        if (!WindowHelper::CalculateTouchHotAreas(winRect, requestedHotAreas, touchHotAreas)) {
             WLOGFW("some parameters in requestedHotAreas are abnormal");
         }
+        pointerHotAreas = touchHotAreas;
     }
-    node->SetTouchHotAreas(hotAreas);
+    node->SetTouchHotAreas(touchHotAreas);
+    node->SetPointerHotAreas(pointerHotAreas);
 }
 
 void WindowLayoutPolicy::FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect)
