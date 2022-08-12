@@ -29,6 +29,7 @@ namespace {
 }
 
 std::recursive_mutex StartingWindow::mutex_;
+WindowMode StartingWindow::defaultMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
 
 bool StartingWindow::NeedToStopStartingWindow(WindowMode winMode, uint32_t modeSupportInfo,
     const sptr<WindowTransitionInfo>& info)
@@ -55,6 +56,8 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     property->SetRequestRect(info->GetWindowRect());
     if (WindowHelper::IsValidWindowMode(info->GetWindowMode())) {
         property->SetWindowMode(info->GetWindowMode());
+    } else {
+        property->SetWindowMode(defaultMode_);
     }
 
     property->SetDisplayId(info->GetDisplayId());
@@ -230,6 +233,11 @@ void StartingWindow::UpdateRSTree(sptr<WindowNode>& node, const AnimationConfig&
         // add or remove window without animation
         updateRSTreeFunc();
     }
+}
+
+void StartingWindow::SetDefaultWindowMode(WindowMode defaultMode)
+{
+    defaultMode_ = defaultMode;
 }
 } // Rosen
 } // OHOS

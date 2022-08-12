@@ -37,6 +37,7 @@
 #include "permission.h"
 #include "remote_animation.h"
 #include "singleton_container.h"
+#include "starting_window.h"
 #include "ui/rs_ui_director.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
@@ -320,6 +321,7 @@ void WindowManagerService::ConfigureWindowManagerService()
             (numbers[0] == static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
              numbers[0] == static_cast<uint32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
             systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
+            StartingWindow::SetDefaultWindowMode(systemConfig_.defaultWindowMode_);
         }
     }
     item = config["remoteAnimation"].GetProp("enable");
