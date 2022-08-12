@@ -120,6 +120,25 @@ void InputWindowMonitor::UpdateDisplayInfo(const sptr<DisplayInfo>& displayInfo,
     }
 }
 
+void InputWindowMonitor::TransformWindowRects(const sptr<WindowNode>& windowNode, Rect& areaRect,
+                                              std::vector<Rect>& touchHotAreas, std::vector<Rect>& pointerHotAreas)
+{
+    if (windowNode->GetWindowProperty()->GetTransform() != Transform::Identity()) {
+        windowNode->ComputeTransform();
+        for (Rect& rect : touchHotAreas) {
+            rect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), rect);
+        }
+        for (Rect& rect : pointerHotAreas) {
+            rect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), rect);
+        }
+        WLOGFI("area rect befoe tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
+            areaRect.posX_, areaRect.posY_, areaRect.width_, areaRect.height_);
+        areaRect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), areaRect);
+        WLOGFI("area rect after tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
+            areaRect.posX_, areaRect.posY_, areaRect.width_, areaRect.height_);
+    }
+}
+
 void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>> &windowNodes,
                                              std::vector<MMI::WindowInfo>& windowsInfo)
 {
@@ -136,20 +155,15 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
             WLOGFI("skip node[id:%{public}u, type:%{public}d]", windowNode->GetWindowId(), windowNode->GetWindowType());
             continue;
         }
+
         std::vector<Rect> touchHotAreas;
+        std::vector<Rect> pointerHotAreas;
         windowNode->GetTouchHotAreas(touchHotAreas);
+        windowNode->GetPointerHotAreas(pointerHotAreas);
         Rect areaRect = windowNode->GetWindowRect();
-        if (windowNode->GetWindowProperty()->GetTransform() != Transform::Identity()) {
-            windowNode->ComputeTransform();
-            for (Rect& rect : touchHotAreas) {
-                rect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), rect);
-            }
-            WLOGFI("area rect befoe tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
-                areaRect.posX_, areaRect.posY_, areaRect.width_, areaRect.height_);
-            areaRect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), areaRect);
-            WLOGFI("area rect after tranform: [%{public}d, %{public}d, %{public}u, %{public}u]",
-                areaRect.posX_, areaRect.posY_, areaRect.width_, areaRect.height_);
-        }
+
+        TransformWindowRects(windowNode, areaRect, touchHotAreas, pointerHotAreas);
+
         MMI::WindowInfo windowInfo = {
             .id = static_cast<int32_t>(windowNode->GetWindowId()),
             .pid = windowNode->GetInputEventCallingPid(),
@@ -167,7 +181,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetWindowId());
         }
         convertRectsToMmiRects(touchHotAreas, windowInfo.defaultHotAreas);
-        convertRectsToMmiRects(touchHotAreas, windowInfo.pointerHotAreas);
+        convertRectsToMmiRects(pointerHotAreas, windowInfo.pointerHotAreas);
         if (!windowNode->GetWindowProperty()->GetTouchable()) {
             WLOGFI("window is not touchable: %{public}u", windowNode->GetWindowId());
             windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
