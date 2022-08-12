@@ -346,33 +346,19 @@ public:
     }
 
     // Transform a point at screen to its oringin position in 3D world and project to xy plane
-    // A screen point only has x and y component, so we need a plane to calculate its z component.
-    //                                                                | -- -- -- 0 |
-    //                                                                | -- -- -- 0 |
-    // There is no need to unify w component since the matrix is like | -- -- -- 0 |
-    //                                                                | -- -- -- 1 |
-    static PointInfo CalculateOriginPosition(const TransformHelper::Matrix4& transformMat,
-        const TransformHelper::Plane& plane, const PointInfo& pointPos)
+    static PointInfo CalculateOriginPosition(const TransformHelper::Matrix4& transformMat, const PointInfo& pointPos)
     {
-        TransformHelper::Matrix4 invertMat = transformMat;
-        invertMat.Invert();
-        TransformHelper::Vector3 pointAtPlane;
-        pointAtPlane.x_ = static_cast<float>(pointPos.x);
-        pointAtPlane.y_ = static_cast<float>(pointPos.y);
-        pointAtPlane.z_ = plane.ComponentZ(pointAtPlane.x_, pointAtPlane.y_);
-        TransformHelper::Vector3 originPos = TransformHelper::Transform(pointAtPlane, invertMat);
+        TransformHelper::Vector2 p(static_cast<float>(pointPos.x), static_cast<float>(pointPos.y));
+        TransformHelper::Vector2 originPos = TransformHelper::GetOriginScreenPoint(p, transformMat);
         return PointInfo { static_cast<uint32_t>(originPos.x_), static_cast<uint32_t>(originPos.y_) };
     }
 
-    static TransformHelper::Matrix4 ComputeRectTransformMat4(const Transform& transform, const Rect& rect)
+    static TransformHelper::Matrix4 ComputeWorldTransformMat4(const Transform& transform)
     {
-        TransformHelper::Vector3 pivotPos = {
-            rect.posX_ + transform.pivotX_ * rect.width_, rect.posY_ + transform.pivotY_ * rect.height_, 0 };
-        // move pivot point to (0,0,0)
-        TransformHelper::Matrix4 ret = TransformHelper::CreateTranslation(-pivotPos);
+        TransformHelper::Matrix4 ret = TransformHelper::Matrix4::Identity;
         // set scale
-        if ((transform.scaleX_ - 1) || (transform.scaleY_ - 1)) {
-            ret *= TransformHelper::CreateScale(transform.scaleX_, transform.scaleY_, 1.0f);
+        if ((transform.scaleX_ - 1) || (transform.scaleY_ - 1) || (transform.scaleY_ - 1)) {
+            ret *= TransformHelper::CreateScale(transform.scaleX_, transform.scaleY_, transform.scaleZ_);
         }
         // set rotation
         if (transform.rotationX_) {
@@ -389,21 +375,20 @@ public:
             ret *= TransformHelper::CreateTranslation(TransformHelper::Vector3(transform.translateX_,
                 transform.translateY_, transform.translateZ_));
         }
-        // move pivot point to old position
-        ret *= TransformHelper::CreateTranslation(pivotPos);
         return ret;
     }
 
     // Transform rect by matrix and get the circumscribed rect
     static Rect TransformRect(const TransformHelper::Matrix4& transformMat, const Rect& rect)
     {
-        TransformHelper::Vector3 a = TransformHelper::Transform(
+        TransformHelper::Vector3 a = TransformHelper::TransformWithPerspDiv(
             TransformHelper::Vector3(rect.posX_, rect.posY_, 0), transformMat);
-        TransformHelper::Vector3 b = TransformHelper::Transform(
+        TransformHelper::Vector3 b = TransformHelper::TransformWithPerspDiv(
             TransformHelper::Vector3(rect.posX_ + rect.width_, rect.posY_, 0), transformMat);
-        TransformHelper::Vector3 c = TransformHelper::Transform(
+        TransformHelper::Vector3 c = TransformHelper::TransformWithPerspDiv(
             TransformHelper::Vector3(rect.posX_, rect.posY_ + rect.height_, 0), transformMat);
-        TransformHelper::Vector3 d = b + c - a;
+        TransformHelper::Vector3 d = TransformHelper::TransformWithPerspDiv(
+            TransformHelper::Vector3(rect.posX_ + rect.width_, rect.posY_ + rect.height_, 0), transformMat);
         // Return smallest rect involve transformed rect(abcd)
         int32_t xmin = MathHelper::Min(a.x_, b.x_, c.x_, d.x_);
         int32_t ymin = MathHelper::Min(a.y_, b.y_, c.y_, d.y_);
@@ -414,20 +399,22 @@ public:
         return Rect { xmin, ymin, w, h };
     }
 
-    static TransformHelper::Vector2 CalculateHotZoneScale(const TransformHelper::Matrix4& transformMat,
-        const TransformHelper::Plane& plane)
+    static TransformHelper::Vector2 CalculateHotZoneScale(const TransformHelper::Matrix4& transformMat)
     {
         TransformHelper::Vector2 hotZoneScale;
-        TransformHelper::Vector3 a = TransformHelper::Transform(TransformHelper::Vector3(0, 0, 0),
+        TransformHelper::Vector3 a = TransformHelper::TransformWithPerspDiv(TransformHelper::Vector3(0, 0, 0),
             transformMat);
-        TransformHelper::Vector3 b = TransformHelper::Transform(TransformHelper::Vector3(1, 0, 0),
+        TransformHelper::Vector3 b = TransformHelper::TransformWithPerspDiv(TransformHelper::Vector3(1, 0, 0),
             transformMat);
-        TransformHelper::Vector3 c = TransformHelper::Transform(TransformHelper::Vector3(0, 1, 0),
+        TransformHelper::Vector3 c = TransformHelper::TransformWithPerspDiv(TransformHelper::Vector3(0, 1, 0),
             transformMat);
-        TransformHelper::Vector3 scale = transformMat.GetScale();
-        hotZoneScale.x_ = scale.x_ * plane.ParallelDistanceGrad(a, c);
-        hotZoneScale.y_ = scale.y_ * plane.ParallelDistanceGrad(a, b);
-        if (std::isnan(hotZoneScale.x_) || std::isnan(hotZoneScale.y_)) {
+        TransformHelper::Vector2 axy(a.x_, a.y_);
+        TransformHelper::Vector2 bxy(b.x_, b.y_);
+        TransformHelper::Vector2 cxy(c.x_, c.y_);
+        hotZoneScale.x_ = (axy - bxy).Length();
+        hotZoneScale.y_ = (axy - cxy).Length();
+        if (std::isnan(hotZoneScale.x_) || std::isnan(hotZoneScale.y_) ||
+            MathHelper::NearZero(hotZoneScale.x_) || MathHelper::NearZero(hotZoneScale.y_)) {
             return TransformHelper::Vector2(1, 1);
         } else {
             return hotZoneScale;
