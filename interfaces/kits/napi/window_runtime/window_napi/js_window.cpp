@@ -2041,6 +2041,22 @@ NativeValue* JsWindow::OnOpacity(NativeEngine& engine, NativeCallbackInfo& info)
     return engine.CreateUndefined();
 }
 
+static bool IsPivotValid(double data)
+{
+    if (MathHelper::LessNotEqual(data, 0.0) || (MathHelper::GreatNotEqual(data, 1.0))) {
+        return false;
+    }
+    return true;
+}
+
+static bool IsScaleValid(double data)
+{
+    if (!MathHelper::GreatNotEqual(data, 0.0)) {
+        return false;
+    }
+    return true;
+}
+
 bool JsWindow::ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans)
 {
     auto surfaceNode = windowToken_->GetSurfaceNode();
@@ -2049,31 +2065,35 @@ bool JsWindow::ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Tr
         return false;
     }
     double data = 0.0f;
-    bool isValid = true;
     if (ParseJsDoubleValue(jsObject, engine, "pivotX", data)) {
+        if (!IsPivotValid(data)) {
+            return false;
+        }
         surfaceNode->SetPivotX(data);
-        isValid &= (!MathHelper::LessNotEqual(data, 0.0));
-        isValid &= (!MathHelper::GreatNotEqual(data, 1.0));
         trans.pivotX_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "pivotY", data)) {
+        if (!IsPivotValid(data)) {
+            return false;
+        }
         surfaceNode->SetPivotY(data);
-        isValid &= (!MathHelper::LessNotEqual(data, 0.0));
-        isValid &= (!MathHelper::GreatNotEqual(data, 1.0));
         trans.pivotY_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "x", data)) {
+        if (!IsScaleValid(data)) {
+            return false;
+        }
         surfaceNode->SetScaleX(data);
-        isValid &= MathHelper::GreatNotEqual(data, 0.0);
         trans.scaleX_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "y", data)) {
+        if (!IsScaleValid(data)) {
+            return false;
+        }
         surfaceNode->SetScaleY(data);
-        isValid &= MathHelper::GreatNotEqual(data, 0.0);
         trans.scaleY_ = data;
     }
-    WLOGFE("[NAPI] PivotX or PivotY should between 0.0 ~ 1.0, scale should greater than 0.0");
-    return isValid;
+    return true;
 }
 
 NativeValue* JsWindow::OnScale(NativeEngine& engine, NativeCallbackInfo& info)
@@ -2093,6 +2113,7 @@ NativeValue* JsWindow::OnScale(NativeEngine& engine, NativeCallbackInfo& info)
     }
     auto trans = windowToken_->GetTransform();
     if (!ParseScaleOption(engine, nativeObj, trans)) {
+        WLOGFE("[NAPI] PivotX or PivotY should between 0.0 ~ 1.0, scale should greater than 0.0");
         return engine.CreateUndefined();
     }
     windowToken_->SetTransform(trans);
@@ -2111,17 +2132,18 @@ bool JsWindow::ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, T
         return false;
     }
     double data = 0.0f;
-    bool isValid = true;
     if (ParseJsDoubleValue(jsObject, engine, "pivotX", data)) {
+        if (!IsPivotValid(data)) {
+            return false;
+        }
         surfaceNode->SetPivotX(data);
-        isValid &= (!MathHelper::LessNotEqual(data, 0.0));
-        isValid &= (!MathHelper::GreatNotEqual(data, 1.0));
         trans.pivotX_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "pivotY", data)) {
+        if (!IsPivotValid(data)) {
+            return false;
+        }
         surfaceNode->SetPivotY(data);
-        isValid &= (!MathHelper::LessNotEqual(data, 0.0));
-        isValid &= (!MathHelper::GreatNotEqual(data, 1.0));
         trans.pivotY_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "x", data)) {
@@ -2136,10 +2158,7 @@ bool JsWindow::ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, T
         surfaceNode->SetRotation(data);
         trans.rotationZ_ = data;
     }
-    if (!isValid) {
-        WLOGFE("[NAPI] PivotX or PivotY should between 0.0 ~ 1.0");
-    }
-    return isValid;
+    return true;
 }
 
 NativeValue* JsWindow::OnRotate(NativeEngine& engine, NativeCallbackInfo& info)
@@ -2160,6 +2179,7 @@ NativeValue* JsWindow::OnRotate(NativeEngine& engine, NativeCallbackInfo& info)
     // cannot use sync task since next transform base on current transform
     auto trans = windowToken_->GetTransform();
     if (!ParseRotateOption(engine, nativeObj, trans)) {
+        WLOGFE("[NAPI] PivotX or PivotY should between 0.0 ~ 1.0");
         return engine.CreateUndefined();
     }
     windowToken_->SetTransform(trans);
