@@ -108,19 +108,20 @@ void WindowProperty::SetTransform(const Transform& trans)
 void WindowProperty::ComputeTransform()
 {
     if (recomputeTransformMat_ && (trans_ != Transform::Identity())) {
-        // Update transform matrix
-        transformMat_ = WindowHelper::ComputeRectTransformMat4(trans_, windowRect_);
-        // Update window plane
-        TransformHelper::Vector3 a = TransformHelper::Transform(
-            TransformHelper::Vector3 { static_cast<float>(windowRect_.posX_),
-            static_cast<float>(windowRect_.posY_), 0 }, transformMat_);
-        TransformHelper::Vector3 b = TransformHelper::Transform(
-            TransformHelper::Vector3 { static_cast<float>(windowRect_.posX_ + windowRect_.width_),
-            static_cast<float>(windowRect_.posY_), 0 }, transformMat_);
-        TransformHelper::Vector3 c = TransformHelper::Transform(
-            TransformHelper::Vector3 { static_cast<float>(windowRect_.posX_),
-            static_cast<float>(windowRect_.posY_+ windowRect_.height_), 0 }, transformMat_);
-        windowPlane_ = TransformHelper::Plane(a, b, c);
+        TransformHelper::Vector3 pivotPos = { windowRect_.posX_ + trans_.pivotX_ * windowRect_.width_,
+            windowRect_.posY_ + trans_.pivotY_ * windowRect_.height_, 0 };
+        worldTransformMat_ = TransformHelper::CreateTranslation(-pivotPos) *
+                             WindowHelper::ComputeWorldTransformMat4(trans_) *
+                             TransformHelper::CreateTranslation(pivotPos);
+        // transformMat = worldTransformMat * viewProjectionMat
+        transformMat_ = worldTransformMat_;
+        // Z component of camera position is constant value
+        constexpr float cameraZ = -576.f;
+        TransformHelper::Vector3 cameraPos(pivotPos.x_ + trans_.translateX_, pivotPos.y_ + trans_.translateY_, cameraZ);
+        // Concatenate with view projection matrix
+        transformMat_ *= TransformHelper::CreateLookAt(cameraPos,
+            TransformHelper::Vector3(cameraPos.x_, cameraPos.y_, 0), TransformHelper::Vector3(0, 1, 0)) *
+            TransformHelper::CreatePerspective(cameraPos);
         recomputeTransformMat_ = false;
     }
 }

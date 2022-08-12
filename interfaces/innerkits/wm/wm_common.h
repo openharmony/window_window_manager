@@ -193,16 +193,16 @@ namespace {
 class Transform {
 public:
     Transform()
-        : pivotX_(0.5f), pivotY_(0.5f), scaleX_(1.f), scaleY_(1.f), rotationX_(0.f), rotationY_(0.f), rotationZ_(0.f),
-          translateX_(0.f), translateY_(0.f), translateZ_(0.f)
+        : pivotX_(0.5f), pivotY_(0.5f), scaleX_(1.f), scaleY_(1.f), scaleZ_(1.f), rotationX_(0.f),
+          rotationY_(0.f), rotationZ_(0.f), translateX_(0.f), translateY_(0.f), translateZ_(0.f)
     {}
     ~Transform() {}
 
     bool operator!=(const Transform& right) const
     {
         return (pivotX_ - right.pivotX_) || (pivotY_ - right.pivotY_) || (scaleX_ - right.scaleX_) ||
-            (scaleY_ - right.scaleY_) || (rotationX_ - right.rotationX_) || (rotationY_ - right.rotationY_) ||
-            (rotationZ_ - right.rotationZ_) || (translateX_ - right.translateX_) ||
+            (scaleY_ - right.scaleY_) ||(scaleZ_ - right.scaleZ_) || (rotationX_ - right.rotationX_) ||
+            (rotationY_ - right.rotationY_) || (rotationZ_ - right.rotationZ_) || (translateX_ - right.translateX_) ||
             (translateY_ - right.translateY_) || (translateZ_ - right.translateZ_);
     }
 
@@ -215,6 +215,7 @@ public:
     float pivotY_;
     float scaleX_;
     float scaleY_;
+    float scaleZ_;
     float rotationX_;
     float rotationY_;
     float rotationZ_;
