@@ -212,11 +212,14 @@ void StartingWindow::UpdateRSTree(sptr<WindowNode>& node, const AnimationConfig&
         auto weak = weakNode.promote();
         if (weak == nullptr) {
             WLOGFE("window node is nullptr");
+            return;
         }
         auto winRect = weak->GetWindowRect();
         WLOGFI("before setBounds windowRect: %{public}d, %{public}d, %{public}d, %{public}d",
             winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-        weak->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+        if (weak->leashWinSurfaceNode_) {
+            weak->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+        }
         RSTransaction::FlushImplicitTransaction();
     };
     static const bool IsWindowAnimationEnabled = WindowHelper::ReadIsWindowAnimationEnabledProperty();
