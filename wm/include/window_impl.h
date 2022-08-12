@@ -398,6 +398,7 @@ private:
     void SetWindowCornerRadiusAccordingToSystemConfig();
     bool IsAppMainOrSubOrFloatingWindow();
     void UpdateWindowShadowAccordingToSystemConfig();
+    bool WindowCreateCheck(const std::string& parentName);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
