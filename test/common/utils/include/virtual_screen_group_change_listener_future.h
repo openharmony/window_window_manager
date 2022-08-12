@@ -12,17 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "common_test_utils.h"
 
-#include <access_token.h>
-#include <accesstoken_kit.h>
-#include <token_setproc.h>
+#ifndef VIRTUAL_SCREEN_GROUP_CHANGE_LISTENER_FUTURE_H
+#define VIRTUAL_SCREEN_GROUP_CHANGE_LISTENER_FUTURE_H
 
-namespace OHOS::Rosen {
-void CommonTestUtils::InjectTokenInfoByHapName(int userID, const std::string& bundleName, int instIndex)
-{
-    Security::AccessToken::AccessTokenID tokenId =
-        Security::AccessToken::AccessTokenKit::GetHapTokenID(userID, bundleName, instIndex);
-    SetSelfTokenID(tokenId);
-}
-} // namespace OHOS::Rosen
+#include "future.h"
+#include "screen_manager.h"
+
+namespace OHOS {
+namespace Rosen {
+class VirtualScreenGroupChangeListenerFuture : public ScreenManager::IVirtualScreenGroupListener {
+public:
+    virtual void OnMirrorChange(const ChangeInfo& info) override
+    {
+        mirrorChangeFuture_.SetValue(info);
+    }
+    RunnableFuture<ChangeInfo> mirrorChangeFuture_;
+};
+} // Rosen
+} // OHOS
+#endif  // VIRTUAL_SCREEN_GROUP_CHANGE_LISTENER_FUTURE_H

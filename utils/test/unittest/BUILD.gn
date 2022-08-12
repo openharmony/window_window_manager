@@ -22,6 +22,7 @@ group("unittest") {
     ":utils_display_info_test",
     ":utils_screen_group_info_test",
     ":utils_screen_info_test",
+    ":utils_string_test",
     ":utils_window_helper_test",
     ":utils_window_property_test",
     ":utils_wm_math_test",
@@ -54,6 +55,14 @@ ohos_unittest("utils_screen_group_info_test") {
   deps = [ ":utils_unittest_common" ]
 
   external_deps = [ "graphic_standard:surface" ]
+}
+
+ohos_unittest("utils_string_test") {
+  module_out_path = module_out_path
+
+  sources = [ "string_util_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
 }
 
 ohos_unittest("utils_window_property_test") {

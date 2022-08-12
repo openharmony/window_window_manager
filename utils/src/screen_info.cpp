@@ -20,7 +20,7 @@ bool ScreenInfo::Marshalling(Parcel &parcel) const
 {
     bool res = parcel.WriteString(name_) && parcel.WriteUint64(id_) &&
         parcel.WriteUint32(virtualWidth_) && parcel.WriteUint32(virtualHeight_) &&
-        parcel.WriteFloat(virtualPixelRatio_) && parcel.WriteUint64(parent_) &&
+        parcel.WriteFloat(virtualPixelRatio_) && parcel.WriteUint64(lastParent_) && parcel.WriteUint64(parent_) &&
         parcel.WriteBool(isScreenGroup_) && parcel.WriteUint32(static_cast<uint32_t>(rotation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(orientation_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
@@ -62,7 +62,7 @@ bool ScreenInfo::InnerUnmarshalling(Parcel& parcel)
     name_ = parcel.ReadString();
     bool res1 = parcel.ReadUint64(id_) &&
         parcel.ReadUint32(virtualWidth_) && parcel.ReadUint32(virtualHeight_) &&
-        parcel.ReadFloat(virtualPixelRatio_) && parcel.ReadUint64(parent_) &&
+        parcel.ReadFloat(virtualPixelRatio_) && parcel.ReadUint64(lastParent_) && parcel.ReadUint64(parent_) &&
         parcel.ReadBool(isScreenGroup_) && parcel.ReadUint32(rotation) &&
         parcel.ReadUint32(orientation) && parcel.ReadUint32(type) &&
         parcel.ReadUint32(modeId_) && parcel.ReadUint32(size);

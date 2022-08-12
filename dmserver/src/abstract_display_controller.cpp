@@ -25,6 +25,7 @@
 #include "screen_group.h"
 #include "surface_capture_future.h"
 #include "window_manager_hilog.h"
+#include "sys_cap_util.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -123,6 +124,13 @@ std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(Di
     if (screenshot == nullptr) {
         WLOGFE("Failed to get pixelmap from RS, return nullptr!");
     }
+
+    // notify dm listener
+    sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
+    snapshotInfo->SetTrigger(SysCapUtil::GetClientName());
+    snapshotInfo->SetDisplayId(displayId);
+    DisplayManagerAgentController::GetInstance().OnScreenshot(snapshotInfo);
+
     return screenshot;
 }
 

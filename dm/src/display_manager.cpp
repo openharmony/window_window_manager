@@ -46,9 +46,12 @@ public:
     bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
     bool RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     bool UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
+    bool RegisterScreenshotListener(sptr<IScreenshotListener> listener);
+    bool UnregisterScreenshotListener(sptr<IScreenshotListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
 private:
     void ClearDisplayStateCallback();
+    void NotifyScreenshot(sptr<ScreenshotInfo> info);
     void NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status);
     void NotifyDisplayStateChanged(DisplayId id, DisplayState state);
     void NotifyDisplayChangedEvent(sptr<DisplayInfo> info, DisplayChangeEvent event);
@@ -57,16 +60,19 @@ private:
     void NotifyDisplayChange(sptr<DisplayInfo> displayInfo);
     bool UpdateDisplayInfoLocked(sptr<DisplayInfo>);
 
-    class DisplayManagerListener;
-    sptr<DisplayManagerListener> displayManagerListener_;
     std::map<DisplayId, sptr<Display>> displayMap_;
     DisplayStateCallback displayStateCallback_;
     std::recursive_mutex mutex_;
-    std::set<sptr<IDisplayPowerEventListener>> powerEventListeners_;
-    class DisplayManagerAgent;
-    sptr<DisplayManagerAgent> powerEventListenerAgent_;
-    sptr<DisplayManagerAgent> displayStateAgent_;
     std::set<sptr<IDisplayListener>> displayListeners_;
+    std::set<sptr<IDisplayPowerEventListener>> powerEventListeners_;
+    std::set<sptr<IScreenshotListener>> screenshotListeners_;
+    class DisplayManagerListener;
+    sptr<DisplayManagerListener> displayManagerListener_;
+    class DisplayManagerAgent;
+    sptr<DisplayManagerAgent> displayStateAgent_;
+    sptr<DisplayManagerAgent> powerEventListenerAgent_;
+    class DisplayManagerScreenshotAgent;
+    sptr<DisplayManagerScreenshotAgent> screenshotListenerAgent_;
 };
 
 class DisplayManager::Impl::DisplayManagerListener : public DisplayManagerAgentDefault {
@@ -142,6 +148,21 @@ public:
     virtual void NotifyDisplayStateChanged(DisplayId id, DisplayState state) override
     {
         pImpl_->NotifyDisplayStateChanged(id, state);
+    }
+private:
+    sptr<Impl> pImpl_;
+};
+
+class DisplayManager::Impl::DisplayManagerScreenshotAgent : public DisplayManagerAgentDefault {
+public:
+    explicit DisplayManagerScreenshotAgent(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+    ~DisplayManagerScreenshotAgent() = default;
+
+    virtual void OnScreenshot(sptr<ScreenshotInfo> info) override
+    {
+        pImpl_->NotifyScreenshot(info);
     }
 private:
     sptr<Impl> pImpl_;
@@ -504,6 +525,76 @@ bool DisplayManager::UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEvent
         return false;
     }
     return pImpl_->UnregisterDisplayPowerEventListener(listener);
+}
+
+bool DisplayManager::Impl::RegisterScreenshotListener(sptr<IScreenshotListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    bool ret = true;
+    if (screenshotListenerAgent_ == nullptr) {
+        screenshotListenerAgent_ = new DisplayManagerScreenshotAgent(this);
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            screenshotListenerAgent_,
+            DisplayManagerAgentType::SCREENSHOT_EVENT_LISTENER);
+    }
+    if (!ret) {
+        WLOGFW("RegisterDisplayManagerAgent failed !");
+        screenshotListenerAgent_ = nullptr;
+    } else {
+        screenshotListeners_.insert(listener);
+    }
+    return ret;
+}
+
+bool DisplayManager::RegisterScreenshotListener(sptr<IScreenshotListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("RegisterScreenshotListener listener is nullptr.");
+        return false;
+    }
+    return pImpl_->RegisterScreenshotListener(listener);
+}
+
+bool DisplayManager::Impl::UnregisterScreenshotListener(sptr<IScreenshotListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(screenshotListeners_.begin(), screenshotListeners_.end(), listener);
+    if (iter == screenshotListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return false;
+    }
+    screenshotListeners_.erase(iter);
+    bool ret = true;
+    if (screenshotListeners_.empty() && screenshotListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            screenshotListenerAgent_,
+            DisplayManagerAgentType::SCREENSHOT_EVENT_LISTENER);
+        screenshotListenerAgent_ = nullptr;
+    }
+    return ret;
+}
+
+bool DisplayManager::UnregisterScreenshotListener(sptr<IScreenshotListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterScreenshotListener listener is nullptr.");
+        return false;
+    }
+    return pImpl_->UnregisterScreenshotListener(listener);
+}
+
+void DisplayManager::Impl::NotifyScreenshot(sptr<ScreenshotInfo> info)
+{
+    WLOGFI("NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
+        info->GetTrigger().c_str(), info->GetDisplayId(), screenshotListeners_.size());
+    std::set<sptr<IScreenshotListener>> screenshotListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        screenshotListeners = screenshotListeners_;
+    }
+    for (auto& listener : screenshotListeners) {
+        listener->OnScreenshot(*info);
+    }
 }
 
 void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)

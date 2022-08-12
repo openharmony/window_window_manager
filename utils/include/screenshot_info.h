@@ -13,15 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef TEST_UTILS_H
-#define TEST_UTILS_H
+#ifndef FOUNDATION_DMSERVER_SNAPSHOT_INFO_H
+#define FOUNDATION_DMSERVER_SNAPSHOT_INFO_H
 
-#include <string>
+#include <cstdint>
+#include <parcel.h>
+
+#include "class_var_definition.h"
+#include "dm_common.h"
+#include "noncopyable.h"
 
 namespace OHOS::Rosen {
-class CommonTestUtils {
+class ScreenshotInfo : public Parcelable {
 public:
-    static void InjectTokenInfoByHapName(int userID, const std::string& bundleName, int instIndex);
+    ScreenshotInfo() = default;
+    ~ScreenshotInfo() = default;
+
+    virtual bool Marshalling(Parcel& parcel) const override;
+    static ScreenshotInfo *Unmarshalling(Parcel& parcel);
+
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(std::string, Trigger, trigger, "");
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(DisplayId, DisplayId, displayId, DISPLAY_ID_INVALID);
 };
 } // namespace OHOS::Rosen
-#endif // TEST_UTILS_H
+#endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H

@@ -103,18 +103,18 @@ void DisplayManagerAgentController::OnScreenChange(sptr<ScreenInfo> screenInfo, 
     }
 }
 
-void DisplayManagerAgentController::OnScreenGroupChange(const sptr<ScreenInfo>& screenInfo,
-    ScreenGroupChangeEvent groupEvent)
+void DisplayManagerAgentController::OnScreenGroupChange(const std::string& trigger,
+    const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent groupEvent)
 {
     if (screenInfo == nullptr) {
         return;
     }
     std::vector<sptr<ScreenInfo>> screenInfos;
     screenInfos.push_back(screenInfo);
-    OnScreenGroupChange(screenInfos, groupEvent);
+    OnScreenGroupChange(trigger, screenInfos, groupEvent);
 }
 
-void DisplayManagerAgentController::OnScreenGroupChange(
+void DisplayManagerAgentController::OnScreenGroupChange(const std::string& trigger,
     const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenGroupChangeEvent groupEvent)
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
@@ -127,9 +127,8 @@ void DisplayManagerAgentController::OnScreenGroupChange(
     if (agents.empty() || infos.empty()) {
         return;
     }
-    WLOGFI("OnScreenGroupChange");
     for (auto& agent : agents) {
-        agent->OnScreenGroupChange(infos, groupEvent);
+        agent->OnScreenGroupChange(trigger, infos, groupEvent);
     }
 }
 
@@ -173,6 +172,21 @@ void DisplayManagerAgentController::OnDisplayChange(
     WLOGFI("OnDisplayChange");
     for (auto& agent : agents) {
         agent->OnDisplayChange(displayInfo, displayChangeEvent);
+    }
+}
+
+void DisplayManagerAgentController::OnScreenshot(sptr<ScreenshotInfo> info)
+{
+    if (info == nullptr) {
+        return;
+    }
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREENSHOT_EVENT_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    WLOGFI("onScreenshot");
+    for (auto& agent : agents) {
+        agent->OnScreenshot(info);
     }
 }
 }
