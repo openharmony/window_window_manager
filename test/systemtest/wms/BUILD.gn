@@ -219,6 +219,7 @@ config("wms_systemtest_common_public_config") {
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
     "//third_party/googletest/googlemock/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
 
     # for abilityContext
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
