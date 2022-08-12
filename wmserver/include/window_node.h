@@ -47,7 +47,8 @@ public:
     ~WindowNode();
 
     void SetDisplayId(DisplayId displayId);
-    void SetFullWindowHotArea(const Rect& rect);
+    void SetEntireWindowTouchHotArea(const Rect& rect);
+    void SetEntireWindowPointerHotArea(const Rect& rect);
     void SetWindowRect(const Rect& rect);
     void SetDecoStatus(bool decoStatus);
     void SetRequestRect(const Rect& rect);
@@ -72,6 +73,7 @@ public:
     void SetDragType(DragType dragType);
     void SetOriginRect(const Rect& rect);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
+    void SetPointerHotAreas(const std::vector<Rect>& rects);
     void SetWindowSizeLimits(const WindowSizeLimits& sizeLimits);
     void SetWindowUpdatedSizeLimits(const WindowSizeLimits& sizeLimits);
     void ComputeTransform();
@@ -82,7 +84,8 @@ public:
     uint32_t GetParentId() const;
     const std::string& GetWindowName() const;
     DisplayId GetDisplayId() const;
-    Rect GetFullWindowHotArea() const;
+    Rect GetEntireWindowTouchHotArea() const;
+    Rect GetEntireWindowPointerHotArea() const;
     Rect GetWindowRect() const;
     bool GetDecoStatus() const;
     Rect GetRequestRect() const;
@@ -107,6 +110,7 @@ public:
     const Rect& GetOriginRect() const;
     void ResetWindowSizeChangeReason();
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
+    void GetPointerHotAreas(std::vector<Rect>& rects) const;
     uint32_t GetAccessTokenId() const;
     WindowSizeLimits GetWindowSizeLimits() const;
     WindowSizeLimits GetWindowUpdatedSizeLimits() const;
@@ -134,8 +138,10 @@ public:
 private:
     sptr<WindowProperty> property_ = nullptr;
     sptr<IWindow> windowToken_ = nullptr;
-    Rect fullWindowHotArea_ { 0, 0, 0, 0 };
+    Rect entireWindowTouchHotArea_ { 0, 0, 0, 0 };
+    Rect entireWindowPointerHotArea_ { 0, 0, 0, 0 };
     std::vector<Rect> touchHotAreas_; // coordinates relative to display.
+    std::vector<Rect> pointerHotAreas_; // coordinates relative to display.
     int32_t callingPid_ = { 0 };
     int32_t inputCallingPid_ = { 0 };
     int32_t callingUid_ = { 0 };

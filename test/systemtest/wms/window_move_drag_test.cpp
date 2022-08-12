@@ -84,7 +84,7 @@ void WindowMoveDragTest::SetUp()
     Utils::InitByDisplayRect(displayRect);
 
     virtualPixelRatio_ = WindowTestUtils::GetVirtualPixelRatio(0);
-    hotZone_ = static_cast<uint32_t>(HOTZONE * virtualPixelRatio_);
+    hotZone_ = static_cast<uint32_t>(HOTZONE_TOUCH * virtualPixelRatio_);
 
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("WindowMoveDragTest");
