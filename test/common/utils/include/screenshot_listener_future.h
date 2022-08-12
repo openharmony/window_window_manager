@@ -12,17 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "common_test_utils.h"
 
-#include <access_token.h>
-#include <accesstoken_kit.h>
-#include <token_setproc.h>
+#ifndef SCREENSHOT_LISTENER_FUTURE_H
+#define SCREENSHOT_LISTENER_FUTURE_H
 
-namespace OHOS::Rosen {
-void CommonTestUtils::InjectTokenInfoByHapName(int userID, const std::string& bundleName, int instIndex)
-{
-    Security::AccessToken::AccessTokenID tokenId =
-        Security::AccessToken::AccessTokenKit::GetHapTokenID(userID, bundleName, instIndex);
-    SetSelfTokenID(tokenId);
-}
-} // namespace OHOS::Rosen
+#include "display_manager.h"
+#include "future.h"
+
+namespace OHOS {
+namespace Rosen {
+class ScreenshotListenerFuture : public DisplayManager::IScreenshotListener {
+public:
+    virtual void OnScreenshot(const ScreenshotInfo info) override
+    {
+        future_.SetValue(info);
+    }
+    RunnableFuture<ScreenshotInfo> future_;
+};
+} // Rosen
+} // OHOS
+#endif  // SCREENSHOT_LISTENER_FUTURE_H
