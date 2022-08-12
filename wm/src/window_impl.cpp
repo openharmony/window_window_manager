@@ -1161,6 +1161,7 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     SetDefaultOption();
+    SetModeSupportInfo(GetRequestModeSupportInfo());
     AdjustWindowAnimationFlag(withAnimation);
 
     if (NeedToStopShowing()) { // true means stop showing
