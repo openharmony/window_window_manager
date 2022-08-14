@@ -187,9 +187,9 @@ public:
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
 
     virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
-    virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
+    virtual void RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     virtual void UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
-    virtual void UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
+    virtual void UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     virtual void UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     virtual void RegisterDragListener(const sptr<IWindowDragListener>& listener) override;
