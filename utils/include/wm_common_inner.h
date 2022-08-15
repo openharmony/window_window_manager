@@ -335,7 +335,7 @@ namespace {
     constexpr uint32_t WINDOW_FRAME_WIDTH = 5;
     constexpr uint32_t WINDOW_FRAME_CORNER_WIDTH = 16; // the frame width of corner
     constexpr uint32_t HOTZONE_TOUCH = 20;
-    constexpr uint32_t HOTZONE_POINTER = 10;
+    constexpr uint32_t HOTZONE_POINTER = 4;
     constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 240;
     constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 320;
     constexpr uint32_t MIN_VERTICAL_SPLIT_HEIGHT = 240;
