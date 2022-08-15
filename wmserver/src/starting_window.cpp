@@ -73,7 +73,9 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     }
     node->abilityToken_ = info->GetAbilityToken();
     node->SetWindowSizeLimits(info->GetWindowSizeLimits());
-
+    node->abilityInfo_.missionId_ = info->GetMissionId();
+    node->abilityInfo_.bundleName_ = info->GetBundleName();
+    node->abilityInfo_.abilityName_ = info->GetAbilityName();
     uint32_t modeSupportInfo = 0;
     WindowHelper::ConvertSupportModesToSupportInfo(modeSupportInfo, info->GetWindowSupportModes());
     node->SetModeSupportInfo(modeSupportInfo);

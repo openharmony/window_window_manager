@@ -139,14 +139,14 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
             if (dstNode->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
                 windowRoot_->MinimizeStructuredAppWindowsExceptSelf(dstNode); // avoid split/float mode minimize
             }
-            return RemoteAnimation::NotifyAnimationTransition(srcInfo, dstInfo, srcNode, dstNode, windowRoot_);
+            return RemoteAnimation::NotifyAnimationTransition(srcInfo, dstInfo, srcNode, dstNode);
         }
         case TransitionEvent::MINIMIZE:
-            return RemoteAnimation::NotifyAnimationMinimize(srcInfo, srcNode, windowRoot_);
+            return RemoteAnimation::NotifyAnimationMinimize(srcInfo, srcNode);
         case TransitionEvent::CLOSE:
-            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::CLOSE, windowRoot_);
+            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::CLOSE);
         case TransitionEvent::BACK:
-            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::BACK, windowRoot_);
+            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::BACK);
         default:
             return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
@@ -655,7 +655,7 @@ void WindowController::NotifySystemBarTints()
 
 WMError WindowController::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
 {
-    return RemoteAnimation::SetWindowAnimationController(controller);
+    return RemoteAnimation::SetWindowAnimationController(controller, windowRoot_);
 }
 
 AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) const
@@ -789,7 +789,7 @@ WMError WindowController::NotifyWindowClientPointUp(uint32_t windowId,
 void WindowController::MinimizeAllAppWindows(DisplayId displayId)
 {
     windowRoot_->MinimizeAllAppWindows(displayId);
-    if (RemoteAnimation::NotifyAnimationByHome(windowRoot_) != WMError::WM_OK) {
+    if (RemoteAnimation::NotifyAnimationByHome() != WMError::WM_OK) {
         MinimizeApp::ExecuteMinimizeAll();
     }
 }
