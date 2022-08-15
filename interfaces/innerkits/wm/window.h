@@ -357,9 +357,9 @@ public:
      * @param listener
      */
     virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
-    virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
+    virtual void RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
     virtual void UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
-    virtual void UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
+    virtual void UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
     virtual void UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
     virtual void RegisterDragListener(const sptr<IWindowDragListener>& listener) = 0;
