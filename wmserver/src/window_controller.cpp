@@ -24,6 +24,7 @@
 #include <transaction/rs_transaction.h>
 #include <sstream>
 
+#include "display_manager_service_inner.h"
 #include "minimize_app.h"
 #include "remote_animation.h"
 #include "starting_window.h"
@@ -258,7 +259,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         ResizeSoftInputCallingWindowIfNeed(node);
     }
-    StopBootAnimationIfNeed(node->GetWindowType());
+    StopBootAnimationIfNeed(node);
     MinimizeApp::ExecuteMinimizeAll();
     return WMError::WM_OK;
 }
@@ -491,6 +492,7 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
             break;
         }
         case DisplayStateChangeType::CREATE: {
+            SetDefaultDisplayInfo(defaultDisplayId, displayInfo);
             windowRoot_->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayInfoMap);
             break;
         }
@@ -509,6 +511,21 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
             return;
         }
     }
+}
+
+void WindowController::SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo)
+{
+    if (displayInfo == nullptr) {
+        WLOGFE("display is null");
+        return;
+    }
+    if (displayInfo->GetDisplayId() != defaultDisplayId) {
+        return;
+    }
+    WLOGFI("get default display info");
+    auto displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    auto displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
+    defaultDisplayRect_ = { 0, 0, displayWidth, displayHeight };
 }
 
 void WindowController::ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo)
@@ -563,12 +580,46 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     WLOGFI("Finish ProcessDisplayChange");
 }
 
-void WindowController::StopBootAnimationIfNeed(WindowType type) const
+void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)
 {
-    if (WindowType::WINDOW_TYPE_DESKTOP == type) {
-        WLOGFI("stop boot animation");
-        system::SetParameter("persist.window.boot.inited", "1");
-        RecordBootAnimationEvent();
+    if (isBootAnimationStopped_) {
+        return;
+    }
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return;
+    }
+    if (node->GetDisplayId() != DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId()) {
+        return;
+    }
+    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (windowNodeContainer == nullptr) {
+        WLOGFE("window node container is null");
+        return;
+    }
+    std::vector<sptr<WindowNode>> windowNodes;
+    windowNodeContainer->TraverseContainer(windowNodes);
+    Occlusion::Rect defaultDisplayRect = { defaultDisplayRect_.posX_, defaultDisplayRect_.posY_,
+        defaultDisplayRect_.posX_ + defaultDisplayRect_.width_,
+        defaultDisplayRect_.posY_ + defaultDisplayRect_.height_};
+    Occlusion::Region defaultDisplayRegion(defaultDisplayRect);
+    Occlusion::Region allRegion; // Counts the area of all shown windows
+    for (auto& node : windowNodes) {
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
+            continue;
+        }
+        auto windowRect = node->GetWindowRect();
+        Occlusion::Rect curRect = { windowRect.posX_, windowRect.posY_,
+            windowRect.posX_ + windowRect.width_, windowRect.posY_ + windowRect.height_};
+        Occlusion::Region curRegion(curRect);
+        allRegion = curRegion.Or(allRegion);
+        Occlusion::Region subResult = defaultDisplayRegion.Sub(allRegion);
+        if (subResult.GetSize() == 0) {
+            WLOGFI("stop boot animation");
+            system::SetParameter("bootevent.wms.fullscreen.ready", "true");
+            isBootAnimationStopped_ = true;
+            RecordBootAnimationEvent();
+        }
     }
 }
 
