@@ -1693,7 +1693,7 @@ void WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listene
     lifecycleListeners_.emplace_back(listener);
 }
 
-void WindowImpl::RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener)
+void WindowImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
     if (listener == nullptr) {
         return;
@@ -1716,7 +1716,7 @@ void WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& liste
         }), lifecycleListeners_.end());
 }
 
-void WindowImpl::UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener)
+void WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     windowChangeListeners_.erase(std::remove_if(windowChangeListeners_.begin(), windowChangeListeners_.end(),
