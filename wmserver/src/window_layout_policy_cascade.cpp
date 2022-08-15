@@ -131,10 +131,7 @@ void WindowLayoutPolicyCascade::RemoveWindowNode(const sptr<WindowNode>& node)
         InitSplitRects(node->GetDisplayId());
         LayoutWindowTree(node->GetDisplayId());
     }
-    Rect reqRect = node->GetRequestRect();
-    if (node->GetWindowToken()) {
-        node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
-    }
+    UpdateClientRect(node->GetRequestRect(), node, WindowSizeChangeReason::HIDE);
 }
 
 std::vector<int32_t> WindowLayoutPolicyCascade::GetExitSplitPoints(DisplayId displayId) const
@@ -324,7 +321,7 @@ void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
     CalcAndSetNodeHotZone(winRect, node);
     // update node bounds before reset reason
     UpdateSurfaceBounds(node, winRect, lastWinRect);
-    UpdateClientRectAndResetReason(node, lastWinRect, winRect);
+    UpdateClientRectAndResetReason(node, winRect);
 }
 
 void WindowLayoutPolicyCascade::InitLimitRects(DisplayId displayId)

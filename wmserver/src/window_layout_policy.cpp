@@ -297,6 +297,34 @@ void WindowLayoutPolicy::LayoutWindowNodesByRootType(const std::vector<sptr<Wind
     }
 }
 
+void WindowLayoutPolicy::NotifyAnimationSizeChangeIfNeeded()
+{
+    if (!RemoteAnimation::CheckAnimationController()) {
+        WLOGFD("no animation controller!");
+        return;
+    }
+    std::vector<uint32_t> fullScreenWinIds;
+    std::vector<uint32_t> floatMainIds;
+    for (auto& iter : displayGroupWindowTree_) {
+        auto& displayWindowTree = iter.second;
+        auto& nodeVec = *(displayWindowTree[WindowRootNodeType::APP_WINDOW_NODE]);
+        if (nodeVec.empty()) {
+            WLOGE("The node vector is empty!");
+            return;
+        }
+        for (auto& node : nodeVec) {
+            // just has one fullscreen app node on foreground
+            if (WindowHelper::IsMainFullScreenWindow(node->GetWindowType(), node->GetWindowMode())) {
+                fullScreenWinIds.emplace_back(node->GetWindowId());
+            }
+            if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+                floatMainIds.emplace_back(node->GetWindowId());
+            }
+        }
+    }
+    RemoteAnimation::NotifyAnimationTargetsUpdate(fullScreenWinIds, floatMainIds);
+}
+
 void WindowLayoutPolicy::LayoutWindowTree(DisplayId displayId)
 {
     auto& displayWindowTree = displayGroupWindowTree_[displayId];
@@ -338,15 +366,20 @@ bool WindowLayoutPolicy::IsVerticalDisplay(DisplayId displayId) const
     return displayGroupInfo_->GetDisplayRect(displayId).width_ < displayGroupInfo_->GetDisplayRect(displayId).height_;
 }
 
-void WindowLayoutPolicy::UpdateClientRectAndResetReason(const sptr<WindowNode>& node,
-    const Rect& lastLayoutRect, const Rect& winRect)
+void WindowLayoutPolicy::UpdateClientRect(const Rect& rect, const sptr<WindowNode>& node, WindowSizeChangeReason reason)
 {
-    auto reason = node->GetWindowSizeChangeReason();
     if (node->GetWindowToken()) {
         WLOGFI("notify client id: %{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u], reason: "
-            "%{public}u", node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, reason);
-        node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
+            "%{public}u", node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
+        node->GetWindowToken()->UpdateWindowRect(rect, node->GetDecoStatus(), reason);
     }
+    NotifyAnimationSizeChangeIfNeeded();
+}
+
+void WindowLayoutPolicy::UpdateClientRectAndResetReason(const sptr<WindowNode>& node, const Rect& winRect)
+{
+    auto reason = node->GetWindowSizeChangeReason();
+    UpdateClientRect(winRect, node, reason);
     if ((reason != WindowSizeChangeReason::MOVE) && (node->GetWindowType() != WindowType::WINDOW_TYPE_DOCK_SLICE)) {
         node->ResetWindowSizeChangeReason();
     }
@@ -361,10 +394,7 @@ void WindowLayoutPolicy::RemoveWindowNode(const sptr<WindowNode>& node)
     } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
         LayoutWindowTree(node->GetDisplayId());
     }
-    Rect reqRect = node->GetRequestRect();
-    if (node->GetWindowToken()) {
-        node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
-    }
+    UpdateClientRect(node->GetRequestRect(), node, WindowSizeChangeReason::HIDE);
 }
 
 void WindowLayoutPolicy::UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow)
