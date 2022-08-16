@@ -68,7 +68,8 @@ public:
 
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId);
     const std::shared_ptr<RSDisplayNode>& GetRSDisplayNodeByScreenId(ScreenId dmsScreenId) const;
-    void UpdateRSTree(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
+    void UpdateRSTree(ScreenId dmsScreenId, ScreenId parentScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        bool isAdd, bool isMultiDisplay);
     bool MakeMirror(ScreenId, std::vector<ScreenId> screens);
     bool MakeExpand(std::vector<ScreenId> screenIds, std::vector<Point> startPoints);
     void SetShotScreen(ScreenId mainScreenId, std::vector<ScreenId> shotScreenIds);
@@ -147,6 +148,7 @@ private:
     sptr<IRSScreenChangeListener> rSScreenChangeListener_;
     std::shared_ptr<AppExecFwk::EventHandler> controllerHandler_;
     std::atomic<ScreenId> defaultRsScreenId_ {SCREEN_ID_INVALID };
+    bool isExpandCombination_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_SCREEN_CONTROLLER_H

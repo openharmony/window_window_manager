@@ -1454,7 +1454,11 @@ WMError WindowRoot::UpdateRsTree(uint32_t windowId, bool isAdd)
         return WMError::WM_ERROR_NULLPTR;
     }
     for (auto& displayId : node->GetShowingDisplays()) {
-        container->UpdateRSTree(node, displayId, isAdd);
+        if (isAdd) {
+            container->AddNodeOnRSTree(node, displayId, displayId, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
+        } else {
+            container->RemoveNodeFromRSTree(node, displayId, displayId, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
+        }
     }
     RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;

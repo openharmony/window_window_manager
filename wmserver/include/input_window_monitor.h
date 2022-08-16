@@ -39,7 +39,7 @@ private:
                              std::vector<MMI::WindowInfo>& windowsInfo);
     void UpdateDisplayGroupInfo(const sptr<WindowNodeContainer>& windowNodeContainer,
                                 MMI::DisplayGroupInfo& displayGroupInfo);
-    void UpdateDisplayInfo(const sptr<DisplayInfo>& displayInfo,
+    void UpdateDisplayInfo(const std::vector<sptr<DisplayInfo>>& displayInfos,
                            std::vector<MMI::DisplayInfo>& displayInfoVector);
     MMI::Direction GetDisplayDirectionForMmi(Rotation rotation);
     void TransformWindowRects(const sptr<WindowNode>& windowNode, Rect& areaRect,

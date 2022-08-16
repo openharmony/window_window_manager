@@ -19,6 +19,7 @@
 
 #include <cinttypes>
 #include <hitrace_meter.h>
+#include <parameters.h>
 #include <screen_manager/rs_screen_mode_info.h>
 #include <screen_manager/screen_types.h>
 #include <surface.h>
@@ -147,15 +148,28 @@ const std::shared_ptr<RSDisplayNode>& AbstractScreenController::GetRSDisplayNode
     return screen->rsDisplayNode_;
 }
 
-void AbstractScreenController::UpdateRSTree(ScreenId dmsScreenId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    bool isAdd)
+void AbstractScreenController::UpdateRSTree(ScreenId dmsScreenId, ScreenId parentScreenId,
+    std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd, bool isMultiDisplay)
 {
     sptr<AbstractScreen> abstractScreen = GetAbstractScreen(dmsScreenId);
     if (abstractScreen == nullptr) {
-        WLOGE("AbstractScreenController::UpdateRSTree can not find abstractScreen");
+        WLOGE("[UpdateRSTree] can not find abstractScreen");
         return;
     }
-    abstractScreen->UpdateRSTree(surfaceNode, isAdd);
+    if (isMultiDisplay) {
+        sptr<AbstractScreen> parentAbstractScreen = GetAbstractScreen(parentScreenId);
+        if (parentAbstractScreen == nullptr) {
+            WLOGE("[UpdateRSTree] can not find parentAbstractScreen");
+            return;
+        }
+        if (parentAbstractScreen->rsDisplayNode_ == nullptr) {
+            WLOGE("rsDisplayNode of parentAbstractScreen is nullptr");
+            return;
+        }
+        abstractScreen->UpdateDisplayGroupRSTree(surfaceNode, parentAbstractScreen->rsDisplayNode_->GetId(), isAdd);
+    } else {
+        abstractScreen->UpdateRSTree(surfaceNode, isAdd);
+    }
 }
 
 sptr<AbstractScreen> AbstractScreenController::GetAbstractScreen(ScreenId dmsScreenId) const
@@ -447,8 +461,17 @@ sptr<AbstractScreenGroup> AbstractScreenController::AddAsFirstScreenLocked(sptr<
     std::ostringstream buffer;
     buffer<<"ScreenGroup_"<<dmsGroupScreenId;
     std::string name = buffer.str();
-    sptr<AbstractScreenGroup> screenGroup = new(std::nothrow) AbstractScreenGroup(this, dmsGroupScreenId,
-        SCREEN_ID_INVALID, name, ScreenCombination::SCREEN_MIRROR);
+    // default ScreenCombination is mirror
+    isExpandCombination_ = system::GetParameter("persist.display.expand.enabled", "0") == "1";
+    sptr<AbstractScreenGroup> screenGroup;
+    if (isExpandCombination_) {
+        screenGroup = new(std::nothrow) AbstractScreenGroup(this, dmsGroupScreenId,
+            SCREEN_ID_INVALID, name, ScreenCombination::SCREEN_EXPAND);
+    } else {
+        screenGroup = new(std::nothrow) AbstractScreenGroup(this, dmsGroupScreenId,
+            SCREEN_ID_INVALID, name, ScreenCombination::SCREEN_MIRROR);
+    }
+
     if (screenGroup == nullptr) {
         WLOGE("new AbstractScreenGroup failed");
         screenIdManager_.DeleteScreenId(dmsGroupScreenId);

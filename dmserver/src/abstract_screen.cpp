@@ -81,6 +81,24 @@ void AbstractScreen::UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, b
     }
 }
 
+void AbstractScreen::UpdateDisplayGroupRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, NodeId parentNodeId,
+    bool isAdd)
+{
+    if (rsDisplayNode_ == nullptr || surfaceNode == nullptr) {
+        WLOGFE("node is nullptr");
+        return;
+    }
+    WLOGFI("%{public}s surface: %{public}s, %{public}" PRIu64"", (isAdd ? "add" : "remove"),
+        surfaceNode->GetName().c_str(), surfaceNode->GetId());
+
+    if (isAdd) {
+        surfaceNode->SetVisible(true);
+        rsDisplayNode_->AddCrossParentChild(surfaceNode, -1);
+    } else {
+        rsDisplayNode_->RemoveCrossParentChild(surfaceNode, parentNodeId);
+    }
+}
+
 void AbstractScreen::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint)
 {
     std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);

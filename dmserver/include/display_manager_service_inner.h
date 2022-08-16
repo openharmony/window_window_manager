@@ -44,7 +44,8 @@ public:
     ScreenId GetScreenGroupIdByDisplayId(DisplayId displayId) const;
     sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId) const;
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId) const;
-    void UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
+    void UpdateRSTree(DisplayId displayId, DisplayId parentDisplayId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        bool isAdd, bool isMultiDisplay);
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     bool SetOrientationFromWindow(DisplayId displayId, Orientation orientation);
     bool SetRotationFromWindow(DisplayId displayId, Rotation targetRotation);
