@@ -1140,8 +1140,8 @@ void WindowNodeContainer::UpdateWindowState(sptr<WindowNode> node, int32_t topPr
         return;
     }
     if (node->parent_ != nullptr && node->currentVisibility_) {
-        if (node->priority_ < topPriority &&
-            !(node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))) {
+        if (node->priority_ < topPriority && !WindowHelper::IsShowWhenLocked(node->GetWindowFlags()) &&
+            !WindowHelper::IsShowWhenLocked(node->parent_->GetWindowFlags())) {
             if (node->GetWindowToken()) {
                 node->GetWindowToken()->UpdateWindowState(state);
             }
