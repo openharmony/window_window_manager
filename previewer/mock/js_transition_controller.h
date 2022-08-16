@@ -29,12 +29,6 @@ public:
     void AnimationForShown() override;
     void AnimationForHidden() override;
     void SetJsController(std::shared_ptr<NativeReference> jsVal);
-private:
-    NativeEngine& engine_;
-    std::weak_ptr<NativeReference> jsTransControllerObj_;
-    std::weak_ptr<NativeReference> jsWin_;
-    wptr<Window> windowToken_;
-    wptr<JsTransitionController> weakRef_  = nullptr;
 };
 }
 }

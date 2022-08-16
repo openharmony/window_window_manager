@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,12 +13,24 @@
  * limitations under the License.
  */
 
-#include "napi_remote_object.h"
+#ifndef KEY_EVENT_H
+#define KEY_EVENT_H
 
+#include "input_event.h"
 
 namespace OHOS {
-sptr<IRemoteObject> NAPI_ohos_rpc_getNativeRemoteObject(napi_env env, napi_value object)
-{
-    return nullptr;
-}
+namespace MMI {
+class KeyEvent : public InputEvent {
+public:
+    static const int32_t KEYCODE_FN = 0;
+    static const int32_t KEYCODE_NUMPAD_RIGHT_PAREN = 1;
+    static const int32_t KEYCODE_0 = 2;
+
+    int32_t GetKeyCode() const
+    {
+        return 0;
+    }
+};
+} // namespace MMI
 } // namespace OHOS
+#endif // KEY_EVENT_H

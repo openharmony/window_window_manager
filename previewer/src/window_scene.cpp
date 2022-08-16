@@ -13,17 +13,63 @@
  * limitations under the License.
  */
 
+#include <configuration.h>
+
+#include "window_impl.h"
+#include "window_manager_hilog.h"
 #include "window_scene.h"
 
 namespace OHOS {
 namespace Rosen {
+const std::string WindowScene::MAIN_WINDOW_ID = "main window";
+
 WindowScene::~WindowScene()
 {
 }
 
+WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
+    sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option)
+{
+    displayId_ = displayId;
+    if (option == nullptr) {
+        option = new(std::nothrow) WindowOption();
+        if (option == nullptr) {
+            WLOGFW("alloc WindowOption failed");
+            return WMError::WM_ERROR_NULLPTR;
+        }
+    }
+    option->SetDisplayId(displayId);
+    option->SetWindowTag(WindowTag::MAIN_WINDOW);
+
+    mainWindow_ = Window::Create(GenerateMainWindowName(context), option, context);
+    if (mainWindow_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    mainWindow_->RegisterLifeCycleListener(listener);
+
+    return WMError::WM_OK;
+}
+
+std::string WindowScene::GenerateMainWindowName(const std::shared_ptr<AbilityRuntime::Context>& context) const
+{
+    if (context == nullptr) {
+        return MAIN_WINDOW_ID + std::to_string(count++);
+    } else {
+        std::string windowName = context->GetBundleName() + std::to_string(count++);
+        std::size_t pos = windowName.find_last_of('.');
+        return (pos == std::string::npos) ? windowName : windowName.substr(pos + 1); // skip '.'
+    }
+}
+
 sptr<Window> WindowScene::CreateWindow(const std::string& windowName, sptr<WindowOption>& option) const
 {
-    return nullptr;
+    if (windowName.empty() || mainWindow_ == nullptr || option == nullptr) {
+        WLOGFE("WindowScene Name: %{public}s", windowName.c_str());
+        return nullptr;
+    }
+    option->SetParentName(mainWindow_->GetWindowName());
+    option->SetWindowTag(WindowTag::SUB_WINDOW);
+    return Window::Create(windowName, option, mainWindow_->GetContext());
 }
 
 const sptr<Window>& WindowScene::GetMainWindow() const
@@ -33,7 +79,37 @@ const sptr<Window>& WindowScene::GetMainWindow() const
 
 std::vector<sptr<Window>> WindowScene::GetSubWindow()
 {
-    return std::vector<sptr<Window>>();
+    if (mainWindow_ == nullptr) {
+        WLOGFE("Get sub window failed, because main window is null");
+        return std::vector<sptr<Window>>();
+    }
+    uint32_t parentId = mainWindow_->GetWindowId();
+    return Window::GetSubWindow(parentId);
+}
+
+WMError WindowScene::GoDestroy()
+{
+    if (mainWindow_ == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    WMError ret = mainWindow_->Destroy();
+    if (ret != WMError::WM_OK) {
+        WLOGFE("WindowScene go destroy failed name: %{public}s", mainWindow_->GetWindowName().c_str());
+        return ret;
+    }
+    mainWindow_ = nullptr;
+    return WMError::WM_OK;
+}
+
+void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (mainWindow_ == nullptr) {
+        WLOGFE("Update configuration failed, because main window is null");
+        return;
+    }
+    WLOGFI("notify mainWindow winId:%{public}u", mainWindow_->GetWindowId());
+    mainWindow_->UpdateConfiguration(configuration);
 }
 } // namespace Rosen
 } // namespace OHOS

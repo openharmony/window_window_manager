@@ -17,18 +17,21 @@
 #define INTERFACES_INNER_KITS_ACCESSTOKEN_KIT_H
 
 #include <string>
-#include <vector>
-
-#include "access_token.h"
 
 namespace OHOS {
 namespace Security {
 namespace AccessToken {
 class AccessTokenKit {
 public:
-    static int VerifyAccessToken(AccessTokenID tokenID, const std::string& permissionName);
+    static int VerifyAccessToken(unsigned int tokenID, const std::string& permissionName)
+    {
+        return  0;
+    }
     static int VerifyAccessToken(
-        AccessTokenID callerTokenID, AccessTokenID firstTokenID, const std::string& permissionName);
+        unsigned int callerTokenID, unsigned int firstTokenID, const std::string& permissionName)
+    {
+        return  0;
+    }
 };
 } // namespace AccessToken
 } // namespace Security

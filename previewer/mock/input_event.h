@@ -13,30 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_WM_INCLUDE_WM_HELPER_H
-#define OHOS_WM_INCLUDE_WM_HELPER_H
+#ifndef INPUT_EVENT_H
+#define INPUT_EVENT_H
+
+#include "parcel.h"
 
 namespace OHOS {
-namespace Rosen {
-class WindowHelper {
+namespace MMI {
+class InputEvent {
 public:
-    static inline bool IsValidWindowMode(WindowMode mode)
+    int32_t GetTargetWindowId() const
     {
-        return true;
+        return 0;
     }
-    static inline bool IsSystemWindow(WindowType type)
+    int32_t GetAgentWindowId() const
     {
-        return true;
-    }
-    static inline bool LessNotEqual(double left, double right)
-    {
-        return true;
+        return 0;
     }
 
-private:
-    WindowHelper() = default;
-    ~WindowHelper() = default;
+    void MarkProcessed()
+    {
+        return;
+    }
 };
+} // namespace MMI
 } // namespace OHOS
-} // namespace Rosen
-#endif // OHOS_WM_INCLUDE_WM_HELPER_H
+#endif // INPUT_EVENT_H

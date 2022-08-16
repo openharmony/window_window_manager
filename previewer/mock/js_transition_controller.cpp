@@ -16,12 +16,9 @@
 #include "js_transition_controller.h"
 namespace OHOS {
 namespace Rosen {
-
 JsTransitionController::JsTransitionController(NativeEngine& engine, std::shared_ptr<NativeReference> jsWin,
     sptr<Window> window)
-    : engine_(engine), jsWin_(jsWin), windowToken_(window), weakRef_(wptr<JsTransitionController> (this))
 {
-    NativeValue *objValue = engine_.CreateObject();
 }
 JsTransitionController::~JsTransitionController()
 {

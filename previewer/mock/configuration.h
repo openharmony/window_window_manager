@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,21 @@
  * limitations under the License.
  */
 
-#include "ipc_skeleton.h"
+#ifndef OHOS_ABILITY_BASE_CONFIGURATION_H
+#define OHOS_ABILITY_BASE_CONFIGURATION_H
+
+#include <string>
+#include <vector>
+#include <set>
 
 namespace OHOS {
-uint32_t IPCSkeleton::GetCallingTokenID()
-{
-    return 0;
-}
-} // namespace OHOS
+namespace AppExecFwk {
+class Configuration {
+public:
+    Configuration();
+
+    ~Configuration();
+};
+}  // namespace AppExecFwk
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_BASE_CONFIGURATION_H

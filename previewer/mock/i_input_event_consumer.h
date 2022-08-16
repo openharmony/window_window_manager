@@ -12,38 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef I_INPUT_EVENT_CONSUMER_H
+#define I_INPUT_EVENT_CONSUMER_H
 
-#include "parcel.h"
+#include "axis_event.h"
+#include "key_event.h"
+#include "pointer_event.h"
+
 namespace OHOS {
-Parcelable::Parcelable()
-{
-}
+namespace MMI {
+struct IInputEventConsumer {
+public:
+    IInputEventConsumer() = default;
+    virtual ~IInputEventConsumer() = default;
 
-Parcel::Parcel()
-{
-}
-
-Parcel::~Parcel()
-{
-}
-
-bool Parcel::WriteInt32(int32_t value)
-{
-    return true;
-}
-
-bool Parcel::WriteUint32(uint32_t value)
-{
-    return true;
-}
-
-bool Parcel::ReadInt32(int32_t &value)
-{
-    return true;
-}
-
-bool Parcel::ReadUint32(uint32_t &value)
-{
-    return true;
-}
-}  // namespace OHOS
+    virtual void OnInputEvent(std::shared_ptr<KeyEvent> keyEvent) const;
+    virtual void OnInputEvent(std::shared_ptr<PointerEvent> pointerEvent) const;
+    virtual void OnInputEvent(std::shared_ptr<AxisEvent> axisEvent) const;
+};
+} // namespace MMI
+} // namespace OHOS
+#endif // I_INPUT_EVENT_CONSUMER_H

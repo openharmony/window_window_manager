@@ -12,22 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef OHOS_ABILITY_RUNTIME_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_CONTEXT_H
 
-#include "accesstoken_kit.h"
+#include <memory>
 
 namespace OHOS {
-namespace Security {
-namespace AccessToken {
-int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string& permissionName)
-{
-    return  0;
-}
-
-int AccessTokenKit::VerifyAccessToken(
-    AccessTokenID callerTokenID, AccessTokenID firstTokenID, const std::string& permissionName)
-{
-    return 0;
-}
-} // namespace AccessToken
-} // namespace Security
-} // namespace OHOS
+namespace AbilityRuntime {
+class Context {
+public:
+    Context() = default;
+    virtual ~Context() = default;
+    virtual std::string GetBundleName() const = 0;
+};
+}  // namespace AbilityRuntime
+namespace AppExecFwk {
+class Context {
+public:
+    Context() = default;
+    virtual ~Context() = default;
+};
+}  // namespace AppExecFwk
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_CONTEXT_H

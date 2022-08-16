@@ -17,32 +17,40 @@
 #define INTERFACES_INNERKITS_WINDOW_SCENE_H
 
 #include <refbase.h>
+#include <iremote_object.h>
+
 #include "window.h"
 #include "window_option.h"
 
 namespace OHOS::AppExecFwk {
     class Configuration;
 }
+
 namespace OHOS {
 namespace Rosen {
-
 #ifdef CreateWindow
 #undef CreateWindow
 #endif
 class WindowScene : public RefBase {
 public:
     WindowScene() = default;
-
     ~WindowScene();
-
+    WMError Init(DisplayId displayId, const std::shared_ptr<AbilityRuntime::Context>& context,
+        sptr<IWindowLifeCycle>& listener, sptr<WindowOption> option = nullptr);
     sptr<Window> CreateWindow(const std::string& windowName, sptr<WindowOption>& option) const;
-
     const sptr<Window>& GetMainWindow() const;
-    
     std::vector<sptr<Window>> GetSubWindow();
+    WMError GoDestroy();
+    void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
 private:
+    std::string GenerateMainWindowName(const std::shared_ptr<AbilityRuntime::Context>& context) const;
+
     sptr<Window> mainWindow_ = nullptr;
+    static inline std::atomic<uint32_t> count { 0 };
+    static const std::string MAIN_WINDOW_ID;
+    static const DisplayId DEFAULT_DISPLAY_ID = 0;
+    DisplayId displayId_ = DEFAULT_DISPLAY_ID;
 };
 } // namespace Rosen
 } // namespace OHOS

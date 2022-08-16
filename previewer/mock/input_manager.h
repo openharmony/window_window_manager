@@ -13,7 +13,31 @@
  * limitations under the License.
  */
 
+#ifndef INPUT_MANAGER_H
+#define INPUT_MANAGER_H
+
+#include "i_input_event_consumer.h"
+#include "event_handler.h"
+
 namespace OHOS {
-namespace Rosen {
-} // namespace Rosen
+namespace MMI {
+class InputManager : public AppExecFwk::EventHandler {
+public:
+    void SetWindowInputEventConsumer(std::shared_ptr<IInputEventConsumer> inputEventConsumer)
+    {
+        return;
+    }
+    void SetWindowInputEventConsumer(std::shared_ptr<IInputEventConsumer> inputEventConsumer,
+        std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
+    {
+        return;
+    }
+    
+    static InputManager *GetInstance()
+    {
+        return nullptr;
+    }
+};
+} // namespace MMI
 } // namespace OHOS
+#endif // INPUT_MANAGER_H

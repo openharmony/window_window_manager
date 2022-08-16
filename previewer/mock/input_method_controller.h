@@ -13,21 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_IPC_IPC_SKELETON_H
-#define OHOS_IPC_IPC_SKELETON_H
+#ifndef FRAMEWORKS_INPUTMETHOD_CONTROLLER_INCLUDE_INPUT_METHOD_CONTROLLER_H
+#define FRAMEWORKS_INPUTMETHOD_CONTROLLER_INCLUDE_INPUT_METHOD_CONTROLLER_H
 
-#include "refbase.h"
+#include <memory>
 
 namespace OHOS {
-class IPCSkeleton {
-public:
-    IPCSkeleton() = default;
-    ~IPCSkeleton() = default;
-
-    static uint32_t GetCallingTokenID()
-    {
-        return 0;
-    }
-};
-}
-#endif // OHOS_IPC_IPC_SKELETON_H
+namespace MiscServices {
+    class InputMethodController : public RefBase {
+    public:
+        static sptr<InputMethodController> GetInstance()
+        {
+            return nullptr;
+        }
+        bool dispatchKeyEvent(std::shared_ptr<MMI::KeyEvent> keyEvent)
+        {
+            return true;
+        }
+    };
+} // namespace MiscServices
+} // namespace OHOS
+#endif // FRAMEWORKS_INPUTMETHOD_CONTROLLER_INCLUDE_INPUT_METHOD_CONTROLLER_H

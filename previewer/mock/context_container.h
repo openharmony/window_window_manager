@@ -12,30 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef OHOS_ABILITY_RUNTIME_CONTEXT_CONTAINER_H
+#define OHOS_ABILITY_RUNTIME_CONTEXT_CONTAINER_H
 
-#ifndef OHOS_ROSEN_WINDOW_MANAGER_H
-#define OHOS_ROSEN_WINDOW_MANAGER_H
-
-#include <memory>
-#include <refbase.h>
-#include <vector>
-#include "wm_common.h"
+#include "context.h"
 
 namespace OHOS {
-namespace Rosen {
-struct SystemBarRegionTint {
-    WindowType type_;
-    SystemBarProperty prop_;
-    Rect region_;
-    SystemBarRegionTint() : prop_(SystemBarProperty()) {}
-    SystemBarRegionTint(WindowType type, SystemBarProperty prop, Rect region)
-        : type_(type), prop_(prop), region_(region) {}
+namespace AppExecFwk {
+class ContextContainer : public Context {
 };
-using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
-
-class WindowManager {
-};
-} // namespace Rosen
-} // namespace OHOS
-
-#endif // OHOS_ROSEN_WINDOW_MANAGER_H
+}  // namespace AppExecFwk
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_CONTEXT_CONTAINER_H
