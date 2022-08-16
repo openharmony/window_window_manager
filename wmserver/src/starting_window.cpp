@@ -184,7 +184,8 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
     RSTransaction::FlushImplicitTransaction();
 }
 
-void StartingWindow::UpdateRSTree(sptr<WindowNode>& node, const AnimationConfig& animationConfig)
+void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, const AnimationConfig& animationConfig,
+    bool isMultiDisplay)
 {
     auto updateRSTreeFunc = [&]() {
         auto& dms = DisplayManagerServiceInner::GetInstance();
@@ -194,19 +195,19 @@ void StartingWindow::UpdateRSTree(sptr<WindowNode>& node, const AnimationConfig&
                 WLOGFE("window id:%{public}d type: %{public}u is not Main Window!",
                     node->GetWindowId(), static_cast<uint32_t>(node->GetWindowType()));
             }
-            dms.UpdateRSTree(displayId, node->leashWinSurfaceNode_, true);
+            dms.UpdateRSTree(displayId, displayId, node->leashWinSurfaceNode_, true, isMultiDisplay);
             node->leashWinSurfaceNode_->AddChild(node->startingWinSurfaceNode_, -1);
         } else { // hot start
             const auto& displayIdVec = node->GetShowingDisplays();
             for (auto& shownDisplayId : displayIdVec) {
                 if (node->leashWinSurfaceNode_) { // to app
-                    dms.UpdateRSTree(shownDisplayId, node->leashWinSurfaceNode_, true);
+                    dms.UpdateRSTree(shownDisplayId, shownDisplayId, node->leashWinSurfaceNode_, true, isMultiDisplay);
                 } else { // to launcher
-                    dms.UpdateRSTree(shownDisplayId, node->surfaceNode_, true);
+                    dms.UpdateRSTree(shownDisplayId, shownDisplayId, node->surfaceNode_, true, isMultiDisplay);
                 }
                 for (auto& child : node->children_) {
                     if (child->currentVisibility_) {
-                        dms.UpdateRSTree(shownDisplayId, child->surfaceNode_, true);
+                        dms.UpdateRSTree(shownDisplayId, shownDisplayId, child->surfaceNode_, true, isMultiDisplay);
                     }
                 }
             }
@@ -216,7 +217,6 @@ void StartingWindow::UpdateRSTree(sptr<WindowNode>& node, const AnimationConfig&
     auto finishCallBack = [weakNode]() {
         auto weak = weakNode.promote();
         if (weak == nullptr) {
-            WLOGFE("window node is nullptr");
             return;
         }
         auto winRect = weak->GetWindowRect();

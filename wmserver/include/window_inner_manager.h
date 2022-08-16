@@ -51,6 +51,7 @@ public:
     void MinimizeAbility(const wptr<WindowNode> &node, bool isFromUser);
 
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void NotifyDisplayChange(const std::map<DisplayId, Rect>& displayRectMap);
     bool NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty);
     void NotifyWindowEndUpMovingOrDragging(uint32_t windowId);
