@@ -16,6 +16,7 @@
 #define RENDER_SERVICE_CLIENT_CORE_UI_RS_SURFACE_NODE_H
 
 #include "ui/rs_node.h"
+
 namespace OHOS {
 namespace Rosen {
 class RSSurfaceNode : public RSNode {

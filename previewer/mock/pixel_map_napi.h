@@ -31,9 +31,6 @@ public:
     napi_env getEnv();
     napi_ref getWrapper();
 private:
-    static thread_local napi_ref sConstructor_;
-    static std::shared_ptr<PixelMap> sPixelMap_;
-
     napi_env env_ = nullptr;
     napi_ref wrapper_ = nullptr;
 };

@@ -12,3 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef OHOS_ABILITY_RUNTIME_NATIVE_ABILITY_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_NATIVE_ABILITY_CONTEXT_H
+
+#include <map>
+
+#include "context_container.h"
+
+namespace OHOS {
+namespace AppExecFwk {
+class AbilityContext : public ContextContainer {
+};
+}  // namespace AppExecFwk
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_NATIVE_ABILITY_CONTEXT_H

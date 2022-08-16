@@ -18,12 +18,14 @@
 
 namespace OHOS {
 namespace Rosen {
+class Vector4 {
+};
 class Quaternion {
 public:
     Quaternion(float x, float y, float z, float w) : myx(x), myy(y), myz(z), myw(w) {}
     int useXYZW()
     {
-        return myx+myy+myz+myw;
+        return myx + myy + myz + myw;
     };
 private:
     float myx;

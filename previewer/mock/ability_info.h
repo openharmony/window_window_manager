@@ -12,3 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_BASE_INCLUDE_ABILITY_INFO_H
+#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_BASE_INCLUDE_ABILITY_INFO_H
+
+namespace OHOS {
+namespace AppExecFwk {
+enum class SupportWindowMode {
+    FULLSCREEN = 0,
+    SPLIT,
+    FLOATING,
+};
+}  // namespace AppExecFwk
+}  // namespace OHOS
+#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_BASE_INCLUDE_ABILITY_INFO_H

@@ -41,6 +41,14 @@ void RSNode::SetRotation(const Quaternion& quaternion)
 {
 }
 
+void RSNode::SetRotationX(float degree)
+{
+}
+
+void RSNode::SetRotationY(float degree)
+{
+}
+
 void RSNode::SetTranslateX(float translate)
 {
 }
