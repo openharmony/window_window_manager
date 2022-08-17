@@ -42,24 +42,6 @@ ohos_executable("snapshot_display") {
   subsystem_name = "window"
 }
 
-ohos_executable("snapshot_virtual_screen") {
-  install_enable = false
-  sources = [ "src/snapshot_virtual_screen.cpp" ]
-
-  configs = [
-    ":snapshot_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
-  ]
-
-  deps = [
-    ":libsnapshot_util",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
-
-  part_name = "window_manager"
-  subsystem_name = "window"
-}
-
 ohos_shared_library("libsnapshot_util") {
   sources = [ "src/snapshot_utils.cpp" ]
 

@@ -19,11 +19,11 @@ group("demo") {
   deps = [
     ":demo_mirror_screen_listener",
     ":demo_screenshot_listener",
+    ":demo_snapshot_virtual_screen",
   ]
 }
 
 ohos_executable("demo_mirror_screen_listener") {
-  install_enable = true
   sources = [ "demo_mirror_screen_listener.cpp" ]
 
   include_dirs =
@@ -41,7 +41,6 @@ ohos_executable("demo_mirror_screen_listener") {
 }
 
 ohos_executable("demo_screenshot_listener") {
-  install_enable = true
   sources = [ "demo_screenshot_listener.cpp" ]
 
   include_dirs =
@@ -56,6 +55,26 @@ ohos_executable("demo_screenshot_listener") {
     "c_utils:utils",
     "hilog_native:libhilog",
     "multimedia_image_standard:image_native",
+  ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_executable("demo_snapshot_virtual_screen") {
+  sources = [ "demo_snapshot_virtual_screen.cpp" ]
+
+  include_dirs = [
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "//foundation/window/window_manager/snapshot/include",
+    "//foundation/window/window_manager/utils/include",
+  ]
+
+  deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/snapshot:libsnapshot_util",
+    "//foundation/window/window_manager/utils:libwmutil",
   ]
 
   part_name = "window_manager"
