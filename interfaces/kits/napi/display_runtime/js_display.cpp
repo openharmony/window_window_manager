@@ -199,7 +199,8 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
     object->SetProperty("scaledDensity", CreateJsValue(engine, info->GetVirtualPixelRatio()));
     object->SetProperty("xDPI", engine.CreateUndefined());
     object->SetProperty("yDPI", engine.CreateUndefined());
-    BindNativeFunction(engine, *object, "getCutoutInfo", JsDisplay::GetCutoutInfo);
+    const char *moduleName = "JsDisplay";
+    BindNativeFunction(engine, *object, "getCutoutInfo", moduleName, JsDisplay::GetCutoutInfo);
     if (jsDisplayObj == nullptr || jsDisplayObj->Get() == nullptr) {
         std::shared_ptr<NativeReference> jsDisplayRef;
         jsDisplayRef.reset(engine.CreateReference(objValue, 1));

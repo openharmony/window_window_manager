@@ -2476,7 +2476,7 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     std::unique_ptr<JsWindow> jsWindow = std::make_unique<JsWindow>(window);
     object->SetNativePointer(jsWindow.release(), JsWindow::Finalizer, nullptr);
 
-    BindFunctions(engine, object);
+    BindFunctions(engine, object, "JsWindow");
 
     std::shared_ptr<NativeReference> jsWindowRef;
     jsWindowRef.reset(engine.CreateReference(objValue, 1));
@@ -2485,58 +2485,58 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
     return objValue;
 }
 
-void BindFunctions(NativeEngine& engine, NativeObject* object)
+void BindFunctions(NativeEngine& engine, NativeObject* object, const char *moduleName)
 {
-    BindNativeFunction(engine, *object, "show", JsWindow::Show);
-    BindNativeFunction(engine, *object, "showWithAnimation", JsWindow::ShowWithAnimation);
-    BindNativeFunction(engine, *object, "destroy", JsWindow::Destroy);
-    BindNativeFunction(engine, *object, "hide", JsWindow::Hide);
-    BindNativeFunction(engine, *object, "hideWithAnimation", JsWindow::HideWithAnimation);
-    BindNativeFunction(engine, *object, "moveTo", JsWindow::MoveTo);
-    BindNativeFunction(engine, *object, "resetSize", JsWindow::Resize);
-    BindNativeFunction(engine, *object, "setWindowType", JsWindow::SetWindowType);
-    BindNativeFunction(engine, *object, "setWindowMode", JsWindow::SetWindowMode);
-    BindNativeFunction(engine, *object, "getProperties", JsWindow::GetProperties);
-    BindNativeFunction(engine, *object, "on", JsWindow::RegisterWindowCallback);
-    BindNativeFunction(engine, *object, "off", JsWindow::UnregisterWindowCallback);
-    BindNativeFunction(engine, *object, "bindDialogTarget", JsWindow::BindDialogTarget);
-    BindNativeFunction(engine, *object, "loadContent", JsWindow::LoadContent);
-    BindNativeFunction(engine, *object, "setFullScreen", JsWindow::SetFullScreen);
-    BindNativeFunction(engine, *object, "setLayoutFullScreen", JsWindow::SetLayoutFullScreen);
-    BindNativeFunction(engine, *object, "setSystemBarEnable", JsWindow::SetSystemBarEnable);
-    BindNativeFunction(engine, *object, "setSystemBarProperties", JsWindow::SetSystemBarProperties);
-    BindNativeFunction(engine, *object, "getAvoidArea", JsWindow::GetAvoidArea);
-    BindNativeFunction(engine, *object, "isShowing", JsWindow::IsShowing);
-    BindNativeFunction(engine, *object, "isSupportWideGamut", JsWindow::IsSupportWideGamut);
-    BindNativeFunction(engine, *object, "setColorSpace", JsWindow::SetColorSpace);
-    BindNativeFunction(engine, *object, "getColorSpace", JsWindow::GetColorSpace);
-    BindNativeFunction(engine, *object, "setBackgroundColor", JsWindow::SetBackgroundColor);
-    BindNativeFunction(engine, *object, "setBrightness", JsWindow::SetBrightness);
-    BindNativeFunction(engine, *object, "setDimBehind", JsWindow::SetDimBehind);
-    BindNativeFunction(engine, *object, "setFocusable", JsWindow::SetFocusable);
-    BindNativeFunction(engine, *object, "setKeepScreenOn", JsWindow::SetKeepScreenOn);
-    BindNativeFunction(engine, *object, "setWakeUpScreen", JsWindow::SetWakeUpScreen);
-    BindNativeFunction(engine, *object, "setOutsideTouchable", JsWindow::SetOutsideTouchable);
-    BindNativeFunction(engine, *object, "setPrivacyMode", JsWindow::SetPrivacyMode);
-    BindNativeFunction(engine, *object, "setTouchable", JsWindow::SetTouchable);
-    BindNativeFunction(engine, *object, "setTransparent", JsWindow::SetTransparent);
-    BindNativeFunction(engine, *object, "setCallingWindow", JsWindow::SetCallingWindow);
-    BindNativeFunction(engine, *object, "setSnapshotSkip", JsWindow::SetSnapshotSkip);
-    BindNativeFunction(engine, *object, "disableWindowDecor", JsWindow::DisableWindowDecor);
-    BindNativeFunction(engine, *object, "dump", JsWindow::Dump);
-    BindNativeFunction(engine, *object, "setForbidSplitMove", JsWindow::SetForbidSplitMove);
-    BindNativeFunction(engine, *object, "setPreferredOrientation", JsWindow::SetPreferredOrientation);
-    BindNativeFunction(engine, *object, "opacity", JsWindow::Opacity);
-    BindNativeFunction(engine, *object, "scale", JsWindow::Scale);
-    BindNativeFunction(engine, *object, "rotate", JsWindow::Rotate);
-    BindNativeFunction(engine, *object, "translate", JsWindow::Translate);
-    BindNativeFunction(engine, *object, "getTransitionController", JsWindow::GetTransitionController);
-    BindNativeFunction(engine, *object, "snapshot", JsWindow::Snapshot);
-    BindNativeFunction(engine, *object, "setCornerRadius", JsWindow::SetCornerRadius);
-    BindNativeFunction(engine, *object, "setShadow", JsWindow::SetShadow);
-    BindNativeFunction(engine, *object, "setBlur", JsWindow::SetBlur);
-    BindNativeFunction(engine, *object, "setBackdropBlur", JsWindow::SetBackdropBlur);
-    BindNativeFunction(engine, *object, "setBackdropBlurStyle", JsWindow::SetBackdropBlurStyle);
+    BindNativeFunction(engine, *object, "show", moduleName, JsWindow::Show);
+    BindNativeFunction(engine, *object, "showWithAnimation", moduleName, JsWindow::ShowWithAnimation);
+    BindNativeFunction(engine, *object, "destroy", moduleName, JsWindow::Destroy);
+    BindNativeFunction(engine, *object, "hide", moduleName, JsWindow::Hide);
+    BindNativeFunction(engine, *object, "hideWithAnimation", moduleName, JsWindow::HideWithAnimation);
+    BindNativeFunction(engine, *object, "moveTo", moduleName, JsWindow::MoveTo);
+    BindNativeFunction(engine, *object, "resetSize", moduleName, JsWindow::Resize);
+    BindNativeFunction(engine, *object, "setWindowType", moduleName, JsWindow::SetWindowType);
+    BindNativeFunction(engine, *object, "setWindowMode", moduleName, JsWindow::SetWindowMode);
+    BindNativeFunction(engine, *object, "getProperties", moduleName, JsWindow::GetProperties);
+    BindNativeFunction(engine, *object, "on", moduleName, JsWindow::RegisterWindowCallback);
+    BindNativeFunction(engine, *object, "off", moduleName, JsWindow::UnregisterWindowCallback);
+    BindNativeFunction(engine, *object, "bindDialogTarget", moduleName, JsWindow::BindDialogTarget);
+    BindNativeFunction(engine, *object, "loadContent", moduleName, JsWindow::LoadContent);
+    BindNativeFunction(engine, *object, "setFullScreen", moduleName, JsWindow::SetFullScreen);
+    BindNativeFunction(engine, *object, "setLayoutFullScreen", moduleName, JsWindow::SetLayoutFullScreen);
+    BindNativeFunction(engine, *object, "setSystemBarEnable", moduleName, JsWindow::SetSystemBarEnable);
+    BindNativeFunction(engine, *object, "setSystemBarProperties", moduleName, JsWindow::SetSystemBarProperties);
+    BindNativeFunction(engine, *object, "getAvoidArea", moduleName, JsWindow::GetAvoidArea);
+    BindNativeFunction(engine, *object, "isShowing", moduleName, JsWindow::IsShowing);
+    BindNativeFunction(engine, *object, "isSupportWideGamut", moduleName, JsWindow::IsSupportWideGamut);
+    BindNativeFunction(engine, *object, "setColorSpace", moduleName, JsWindow::SetColorSpace);
+    BindNativeFunction(engine, *object, "getColorSpace", moduleName, JsWindow::GetColorSpace);
+    BindNativeFunction(engine, *object, "setBackgroundColor", moduleName, JsWindow::SetBackgroundColor);
+    BindNativeFunction(engine, *object, "setBrightness", moduleName, JsWindow::SetBrightness);
+    BindNativeFunction(engine, *object, "setDimBehind", moduleName, JsWindow::SetDimBehind);
+    BindNativeFunction(engine, *object, "setFocusable", moduleName, JsWindow::SetFocusable);
+    BindNativeFunction(engine, *object, "setKeepScreenOn", moduleName, JsWindow::SetKeepScreenOn);
+    BindNativeFunction(engine, *object, "setWakeUpScreen", moduleName, JsWindow::SetWakeUpScreen);
+    BindNativeFunction(engine, *object, "setOutsideTouchable", moduleName, JsWindow::SetOutsideTouchable);
+    BindNativeFunction(engine, *object, "setPrivacyMode", moduleName, JsWindow::SetPrivacyMode);
+    BindNativeFunction(engine, *object, "setTouchable", moduleName, JsWindow::SetTouchable);
+    BindNativeFunction(engine, *object, "setTransparent", moduleName, JsWindow::SetTransparent);
+    BindNativeFunction(engine, *object, "setCallingWindow", moduleName, JsWindow::SetCallingWindow);
+    BindNativeFunction(engine, *object, "setSnapshotSkip", moduleName, JsWindow::SetSnapshotSkip);
+    BindNativeFunction(engine, *object, "disableWindowDecor", moduleName, JsWindow::DisableWindowDecor);
+    BindNativeFunction(engine, *object, "dump", moduleName, JsWindow::Dump);
+    BindNativeFunction(engine, *object, "setForbidSplitMove", moduleName, JsWindow::SetForbidSplitMove);
+    BindNativeFunction(engine, *object, "setPreferredOrientation", moduleName, JsWindow::SetPreferredOrientation);
+    BindNativeFunction(engine, *object, "opacity", moduleName, JsWindow::Opacity);
+    BindNativeFunction(engine, *object, "scale", moduleName, JsWindow::Scale);
+    BindNativeFunction(engine, *object, "rotate", moduleName, JsWindow::Rotate);
+    BindNativeFunction(engine, *object, "translate", moduleName, JsWindow::Translate);
+    BindNativeFunction(engine, *object, "getTransitionController", moduleName, JsWindow::GetTransitionController);
+    BindNativeFunction(engine, *object, "snapshot", moduleName, JsWindow::Snapshot);
+    BindNativeFunction(engine, *object, "setCornerRadius", moduleName, JsWindow::SetCornerRadius);
+    BindNativeFunction(engine, *object, "setShadow", moduleName, JsWindow::SetShadow);
+    BindNativeFunction(engine, *object, "setBlur", moduleName, JsWindow::SetBlur);
+    BindNativeFunction(engine, *object, "setBackdropBlur", moduleName, JsWindow::SetBackdropBlur);
+    BindNativeFunction(engine, *object, "setBackdropBlurStyle", moduleName, JsWindow::SetBackdropBlurStyle);
 }
 }  // namespace Rosen
 }  // namespace OHOS
