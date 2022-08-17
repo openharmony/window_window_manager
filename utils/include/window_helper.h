@@ -367,10 +367,10 @@ public:
         }
         // set rotation
         if (transform.rotationX_) {
-            ret *= TransformHelper::CreateRotationX(MathHelper::ToRadians(transform.rotationX_));
+            ret *= TransformHelper::CreateRotationX(MathHelper::ToRadians(-transform.rotationX_));
         }
         if (transform.rotationY_) {
-            ret *= TransformHelper::CreateRotationY(MathHelper::ToRadians(transform.rotationY_));
+            ret *= TransformHelper::CreateRotationY(MathHelper::ToRadians(-transform.rotationY_));
         }
         if (transform.rotationZ_) {
             ret *= TransformHelper::CreateRotationZ(MathHelper::ToRadians(transform.rotationZ_));
