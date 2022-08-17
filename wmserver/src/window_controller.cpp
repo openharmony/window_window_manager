@@ -187,7 +187,9 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     int32_t pid, int32_t uid)
 {
     uint32_t parentId = property->GetParentId();
-    if ((parentId != INVALID_WINDOW_ID) && !WindowHelper::IsSubWindow(property->GetWindowType())) {
+    if ((parentId != INVALID_WINDOW_ID) &&
+        !WindowHelper::IsSubWindow(property->GetWindowType()) &&
+        !WindowHelper::IsSystemSubWindow(property->GetWindowType())) {
         WLOGFE("create window failed, type is error");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
