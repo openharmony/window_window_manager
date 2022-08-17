@@ -1070,7 +1070,8 @@ WMError WindowRoot::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
     }
     if (!node->children_.empty()) {
         auto iter = node->children_.rbegin();
-        if (WindowHelper::IsSubWindow((*iter)->GetWindowType())) {
+        if (WindowHelper::IsSubWindow((*iter)->GetWindowType()) ||
+            WindowHelper::IsSystemSubWindow((*iter)->GetWindowType())) {
             topWinId = (*iter)->GetWindowId();
             return WMError::WM_OK;
         }
