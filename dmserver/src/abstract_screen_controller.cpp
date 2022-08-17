@@ -24,6 +24,7 @@
 #include <surface.h>
 #include <thread>
 
+#include "sys_cap_util.h"
 #include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
 #include "event_runner.h"
@@ -997,11 +998,11 @@ void AbstractScreenController::RemoveVirtualScreenFromGroup(std::vector<ScreenId
         if (!originGroup->HasChild(screenId)) {
             continue;
         }
-        removeFromGroup.emplace_back(screen->ConvertToScreenInfo());
         if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(screen)) {
             abstractScreenCallback_->onDisconnect_(screen);
         }
         RemoveFromGroupLocked(screen);
+        removeFromGroup.emplace_back(screen->ConvertToScreenInfo());
     }
     NotifyScreenGroupChanged(removeFromGroup, ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
 }
@@ -1139,12 +1140,13 @@ void AbstractScreenController::NotifyScreenGroupChanged(
     const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent event) const
 {
     if (screenInfo == nullptr) {
-        WLOGFE("NotifyScreenGroupChanged error, screenInfo is nullptr.");
+        WLOGFE("screenInfo is nullptr.");
         return;
     }
+    std::string trigger = SysCapUtil::GetClientName();
     auto task = [=] {
-        WLOGFI("NotifyScreenGroupChanged,  screenId:%{public}" PRIu64"", screenInfo->GetScreenId());
-        DisplayManagerAgentController::GetInstance().OnScreenGroupChange(screenInfo, event);
+        WLOGFI("screenId:%{public}" PRIu64", trigger:[%{public}s]", screenInfo->GetScreenId(), trigger.c_str());
+        DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfo, event);
     };
     controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
 }
@@ -1155,9 +1157,10 @@ void AbstractScreenController::NotifyScreenGroupChanged(
     if (screenInfo.empty()) {
         return;
     }
+    std::string trigger = SysCapUtil::GetClientName();
     auto task = [=] {
-        WLOGFI("NotifyScreenGroupChanged");
-        DisplayManagerAgentController::GetInstance().OnScreenGroupChange(screenInfo, event);
+        WLOGFI("trigger:[%{public}s]", trigger.c_str());
+        DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfo, event);
     };
     controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
 }
