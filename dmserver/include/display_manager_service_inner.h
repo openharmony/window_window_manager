@@ -23,9 +23,10 @@
 
 #include "abstract_display.h"
 #include "display_change_listener.h"
+#include "rsscreen_change_listener.h"
+#include "singleton_delegator.h"
 #include "wm_single_instance.h"
 #include "window_info_queried_listener.h"
-#include "singleton_delegator.h"
 
 namespace OHOS::Rosen {
 class DisplayManagerServiceInner {
@@ -38,6 +39,7 @@ public:
     sptr<DisplayInfo> GetDisplayById(DisplayId displayId) const;
     std::vector<DisplayId> GetAllDisplayIds() const;
     ScreenId GetRSScreenId(DisplayId displayId) const;
+    uint32_t GetRSScreenNum() const;
     sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId) const;
     ScreenId GetScreenGroupIdByDisplayId(DisplayId displayId) const;
     sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId) const;
@@ -49,6 +51,7 @@ public:
     void SetGravitySensorSubscriptionEnabled();
     void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
+    void RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener);
 };
 } // namespace OHOS::Rosen
 

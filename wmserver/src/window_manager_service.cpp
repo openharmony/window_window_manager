@@ -97,6 +97,18 @@ void WindowManagerService::OnStart()
     RegisterWindowManagerServiceHandler();
     RegisterWindowVisibilityChangeCallback();
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    sptr<IRSScreenChangeListener> rSScreenChangeListener = new IRSScreenChangeListener();
+    rSScreenChangeListener->onConnected_
+        = std::bind(&WindowManagerService::OnRSScreenConnected, this);
+    rSScreenChangeListener->onDisconnected_
+        = std::bind(&WindowManagerService::OnRSScreenDisconnected, this);
+    DisplayManagerServiceInner::GetInstance().RegisterRSScreenChangeListener(rSScreenChangeListener);
+    RenderModeChangeCallback renderModeChangeCb
+        = std::bind(&WindowManagerService::OnRenderModeChanged, this, std::placeholders::_1);
+    rsInterface_.SetRenderModeChangeCallback(renderModeChangeCb);
+    if (windowRoot_->GetMaxUniRenderAppWindowNumber() <= 0) {
+        rsInterface_.UpdateRenderMode(false);
+    }
 }
 
 void WindowManagerService::PostAsyncTask(Task task)
@@ -333,6 +345,13 @@ void WindowManagerService::ConfigureWindowManagerService()
         auto numbers = *item.intsValue_;
         if (numbers.size() == 1 && numbers[0] > 0) {
             windowRoot_->SetMaxAppWindowNumber(static_cast<uint32_t>(numbers[0]));
+        }
+    }
+    item = config["maxUniRenderAppWindowNumber"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 && numbers[0] > 0) {
+            windowRoot_->SetMaxUniRenderAppWindowNumber(static_cast<uint32_t>(numbers[0]));
         }
     }
     item = config["modeChangeHotZones"];
@@ -1071,6 +1090,27 @@ void WindowManagerService::RecordShowTimeEvent(int64_t costTime)
             showWindowTimeConfig_.above50msTimes_ = 0;
         }
     }
+}
+
+void WindowManagerService::OnRSScreenConnected()
+{
+    PostAsyncTask([this]() {
+        windowRoot_->SwitchRenderModeIfNeeded(true);
+    });
+}
+
+void WindowManagerService::OnRSScreenDisconnected()
+{
+    PostAsyncTask([this]() {
+        windowRoot_->SwitchRenderModeIfNeeded(false);
+    });
+}
+
+void WindowManagerService::OnRenderModeChanged(bool isUniRender)
+{
+    PostAsyncTask([this, isUniRender]() {
+        windowRoot_->OnRenderModeChanged(isUniRender);
+    });
 }
 } // namespace Rosen
 } // namespace OHOS
