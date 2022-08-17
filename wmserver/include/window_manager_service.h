@@ -29,6 +29,7 @@
 #include "display_change_listener.h"
 #include "drag_controller.h"
 #include "freeze_controller.h"
+#include "rsscreen_change_listener.h"
 #include "singleton_delegator.h"
 #include "wm_common_inner.h"
 #include "wm_single_instance.h"
@@ -160,6 +161,9 @@ private:
     void ConfigWindowEffect(const WindowManagerConfig::ConfigItem& effectConfig);
     bool ConfigAppWindowCornerRadius(const WindowManagerConfig::ConfigItem& item, float& out);
     bool ConfigAppWindowShadow(const WindowManagerConfig::ConfigItem& shadowConfig, WindowShadowParameters& outShadow);
+    void OnRSScreenConnected();
+    void OnRSScreenDisconnected();
+    void OnRenderModeChanged(bool isUniRender);
 
     static inline SingletonDelegator<WindowManagerService> delegator;
     AtomicMap<uint32_t, uint32_t> accessTokenIdMaps_;

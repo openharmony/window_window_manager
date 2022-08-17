@@ -34,6 +34,7 @@
 #include "display_cutout_controller.h"
 #include "display_manager_stub.h"
 #include "display_power_controller.h"
+#include "rsscreen_change_listener.h"
 #include "singleton_delegator.h"
 #include "window_info_queried_listener.h"
 
@@ -63,6 +64,7 @@ public:
     void SetGravitySensorSubscriptionEnabled();
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
     ScreenId GetRSScreenId(DisplayId displayId) const;
+    uint32_t GetRSScreenNum() const;
     DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts) override;
@@ -104,6 +106,7 @@ public:
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
+    void RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener);
 private:
     DisplayManagerService();
     ~DisplayManagerService() = default;

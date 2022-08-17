@@ -76,6 +76,11 @@ std::vector<ScreenId> AbstractScreenController::GetAllScreenIds() const
     return res;
 }
 
+uint32_t AbstractScreenController::GetRSScreenNum() const
+{
+    return screenIdManager_.GetRSScreenNum();
+}
+
 std::vector<ScreenId> AbstractScreenController::GetShotScreenIds(std::vector<ScreenId> mirrorScreenIds) const
 {
     WLOGI("GetShotScreenIds");
@@ -214,6 +219,12 @@ void AbstractScreenController::RegisterAbstractScreenCallback(sptr<AbstractScree
     abstractScreenCallback_ = cb;
 }
 
+void AbstractScreenController::RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    rSScreenChangeListener_ = listener;
+}
+
 void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent)
 {
     WLOGFI("rs screen event. id:%{public}" PRIu64", event:%{public}u", rsScreenId, static_cast<uint32_t>(screenEvent));
@@ -271,6 +282,9 @@ void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
         if (abstractScreenCallback_ != nullptr) {
             abstractScreenCallback_->onConnect_(absScreen);
         }
+        if (rSScreenChangeListener_ != nullptr) {
+            rSScreenChangeListener_->onConnected_();
+        }
     } else {
         WLOGE("reconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
     }
@@ -314,6 +328,9 @@ void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
         auto screen = dmsScreenMapIter->second;
         if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(screen)) {
             abstractScreenCallback_->onDisconnect_(screen);
+        }
+        if (rSScreenChangeListener_ != nullptr) {
+            rSScreenChangeListener_->onDisconnected_();
         }
         screenGroup = RemoveFromGroupLocked(screen);
         if (screenGroup != nullptr) {
@@ -1065,6 +1082,11 @@ bool AbstractScreenController::ScreenIdManager::HasDmsScreenId(ScreenId dmsScree
 bool AbstractScreenController::ScreenIdManager::HasRsScreenId(ScreenId dmsScreenId) const
 {
     return rs2DmsScreenIdMap_.find(dmsScreenId) != rs2DmsScreenIdMap_.end();
+}
+
+uint32_t AbstractScreenController::ScreenIdManager::GetRSScreenNum() const
+{
+    return rs2DmsScreenIdMap_.size();
 }
 
 bool AbstractScreenController::ScreenIdManager::ConvertToRsScreenId(ScreenId dmsScreenId, ScreenId& rsScreenId) const
