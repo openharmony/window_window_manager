@@ -73,6 +73,11 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             break;
         }
         case TRANS_ID_ON_SCREENGROUP_CHANGED: {
+            std::string trigger;
+            if (!data.ReadString(trigger)) {
+                WLOGFE("Read trigger failed");
+                return -1;
+            }
             std::vector<sptr<ScreenInfo>> screenInfos;
             if (!MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
                 WLOGFE("Read ScreenInfo failed");
@@ -83,7 +88,7 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
                 WLOGFE("Read ScreenChangeEvent failed");
                 return -1;
             }
-            OnScreenGroupChange(screenInfos, static_cast<ScreenGroupChangeEvent>(event));
+            OnScreenGroupChange(trigger, screenInfos, static_cast<ScreenGroupChangeEvent>(event));
             break;
         }
         case TRANS_ID_ON_DISPLAY_CONNECT: {
@@ -108,6 +113,11 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
                 return -1;
             }
             OnDisplayChange(displayInfo, static_cast<DisplayChangeEvent>(event));
+            break;
+        }
+        case TRANS_ID_ON_SCREEN_SHOT: {
+            sptr<ScreenshotInfo> snapshotInfo = data.ReadParcelable<ScreenshotInfo>();
+            OnScreenshot(snapshotInfo);
             break;
         }
         default:

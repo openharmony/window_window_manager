@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-// gtest
 #include <gtest/gtest.h>
+
+#include "common_test_utils.h"
 #include "display_test_utils.h"
 #include "future.h"
 #include "screen.h"
 #include "surface_draw.h"
-#include "common_test_utils.h"
+#include "virtual_screen_group_change_listener_future.h"
 #include "window.h"
 #include "window_option.h"
 #include "window_manager_hilog.h"
@@ -45,6 +46,8 @@ public:
     void CheckScreenStateInGroup(bool, sptr<ScreenGroup>, ScreenId, sptr<Screen>, ScreenId);
     void CheckScreenGroupState(ScreenCombination, ScreenGroupChangeEvent event, ScreenId,
         sptr<ScreenGroup>, sptr<ScreenGroupChangeListener>);
+    void CheckScreenGroupStateForMirror(ScreenGroupChangeEvent event, std::vector<ScreenId> mirrorIds,
+        sptr<VirtualScreenGroupChangeListenerFuture> virtualScreenGroupChangeListener);
     static sptr<Display> defaultDisplay_;
     static DisplayId defaultDisplayId_;
     static ScreenId defaultScreenId_;
@@ -184,8 +187,11 @@ sptr<Window> ScreenManagerTest::CreateWindowByDisplayId(DisplayId displayId)
     ASSERT_EQ(groupId, group->GetId()); \
     sptr<ScreenChangeListener> screenListener = new ScreenChangeListener(); \
     sptr<ScreenGroupChangeListener> screenGroupChangeListener = new ScreenGroupChangeListener(); \
+    sptr<VirtualScreenGroupChangeListenerFuture> virtualScreenGroupChangeListener \
+        = new VirtualScreenGroupChangeListenerFuture(); \
     ScreenManager::GetInstance().RegisterScreenListener(screenListener); \
     ScreenManager::GetInstance().RegisterScreenGroupListener(screenGroupChangeListener); \
+    ScreenManager::GetInstance().RegisterVirtualScreenGroupListener(virtualScreenGroupChangeListener); \
 
 #define CHECK_SCREEN_STATE_AFTER_CREATE_VIRTUAL_SCREEN \
     auto virtualScreen = ScreenManager::GetInstance().GetScreenById(virtualScreenId); \
@@ -222,6 +228,16 @@ void ScreenManagerTest::CheckScreenGroupState(ScreenCombination combination, Scr
     ASSERT_EQ(virtualScreenId, pair.first);
     ASSERT_EQ(event, pair.second);
     ASSERT_EQ(combination, group->GetCombination());
+}
+
+void ScreenManagerTest::CheckScreenGroupStateForMirror(ScreenGroupChangeEvent event, std::vector<ScreenId> mirrorIds,
+    sptr<VirtualScreenGroupChangeListenerFuture> virtualScreenGroupChangeListener)
+{
+    auto info = virtualScreenGroupChangeListener->mirrorChangeFuture_.GetResult(TIME_OUT);
+    virtualScreenGroupChangeListener->mirrorChangeFuture_.Reset({ScreenGroupChangeEvent::CHANGE_GROUP, "", {}});
+    ASSERT_EQ(info.event, event);
+    ASSERT_EQ(info.ids, mirrorIds);
+    ASSERT_GE(info.trigger.size(), 0UL);
 }
 
 #define CHECK_SCREEN_STATE_AFTER_DESTROY_VIRTUAL_SCREEN \
@@ -429,6 +445,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager08, Function | MediumTest | Level2)
     CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
+    ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
 }
 
 /**
@@ -468,6 +485,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager09, Function | MediumTest | Level2)
     CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
+    ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
     sleep(TEST_SLEEP_S);
     window->Show();
     sleep(TEST_SLEEP_S_LONG);
@@ -522,6 +540,8 @@ HWTEST_F(ScreenManagerTest, ScreenManager11, Function | MediumTest | Level2)
         ASSERT_EQ(mirrorGroup, groupId);
         CheckScreenGroupState(ScreenCombination::SCREEN_MIRROR, ScreenGroupChangeEvent::ADD_TO_GROUP,
             virtualScreenId, group, screenGroupChangeListener);
+        CheckScreenGroupStateForMirror(ScreenGroupChangeEvent::ADD_TO_GROUP, mirrorIds,
+            virtualScreenGroupChangeListener);
         CheckScreenStateInGroup(true, group, groupId, virtualScreen, virtualScreenId);
 
         auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
@@ -531,9 +551,12 @@ HWTEST_F(ScreenManagerTest, ScreenManager11, Function | MediumTest | Level2)
         CHECK_SCREEN_STATE_AFTER_DESTROY_VIRTUAL_SCREEN
         CheckScreenGroupState(ScreenCombination::SCREEN_MIRROR, ScreenGroupChangeEvent::REMOVE_FROM_GROUP,
             virtualScreenId, group, screenGroupChangeListener);
+        CheckScreenGroupStateForMirror(ScreenGroupChangeEvent::REMOVE_FROM_GROUP, mirrorIds,
+            virtualScreenGroupChangeListener);
         CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
         ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
         ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
+        ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
     }
 }
 
@@ -559,11 +582,15 @@ HWTEST_F(ScreenManagerTest, ScreenManager12, Function | MediumTest | Level2)
     ASSERT_EQ(mirrorGroup, groupId);
     CheckScreenGroupState(ScreenCombination::SCREEN_MIRROR, ScreenGroupChangeEvent::ADD_TO_GROUP,
         virtualScreenId, group, screenGroupChangeListener);
+    CheckScreenGroupStateForMirror(ScreenGroupChangeEvent::ADD_TO_GROUP, mirrorIds,
+        virtualScreenGroupChangeListener);
     CheckScreenStateInGroup(true, group, groupId, virtualScreen, virtualScreenId);
 
     ScreenManager::GetInstance().RemoveVirtualScreenFromGroup(mirrorIds);
     CheckScreenGroupState(ScreenCombination::SCREEN_MIRROR, ScreenGroupChangeEvent::REMOVE_FROM_GROUP,
         virtualScreenId, group, screenGroupChangeListener);
+    CheckScreenGroupStateForMirror(ScreenGroupChangeEvent::REMOVE_FROM_GROUP, mirrorIds,
+        virtualScreenGroupChangeListener);
     CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
 
     ASSERT_EQ(DMError::DM_OK, ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId));
@@ -571,6 +598,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager12, Function | MediumTest | Level2)
     CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
+    ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
 }
 
 /**
@@ -610,6 +638,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager13, Function | MediumTest | Level2)
     CheckScreenStateInGroup(false, group, groupId, virtualScreen, virtualScreenId);
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
+    ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
 }
 
 /**
@@ -653,6 +682,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager14, Function | MediumTest | Level2)
 
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
+    ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
 }
 
 /**
@@ -678,6 +708,8 @@ HWTEST_F(ScreenManagerTest, ScreenManager15, Function | MediumTest | Level2)
     ASSERT_EQ(mirrorGroup, groupId);
     CheckScreenGroupState(ScreenCombination::SCREEN_MIRROR, ScreenGroupChangeEvent::ADD_TO_GROUP,
         virtualScreenId, group, screenGroupChangeListener);
+    CheckScreenGroupStateForMirror(ScreenGroupChangeEvent::ADD_TO_GROUP, mirrorScreens,
+        virtualScreenGroupChangeListener);
     CheckScreenStateInGroup(true, group, groupId, virtualScreen, virtualScreenId);
 
     std::vector<sptr<Screen>> screens = ScreenManager::GetInstance().GetAllScreens();
@@ -697,6 +729,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager15, Function | MediumTest | Level2)
 
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
     ScreenManager::GetInstance().UnregisterScreenGroupListener(screenGroupChangeListener);
+    ScreenManager::GetInstance().UnregisterVirtualScreenGroupListener(virtualScreenGroupChangeListener);
 }
 
 /**

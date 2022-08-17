@@ -139,7 +139,7 @@ void DisplayManagerAgentProxy::OnScreenChange(const sptr<ScreenInfo>& screenInfo
     }
 }
 
-void DisplayManagerAgentProxy::OnScreenGroupChange(
+void DisplayManagerAgentProxy::OnScreenGroupChange(const std::string& trigger,
     const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenGroupChangeEvent event)
 {
     MessageParcel data;
@@ -147,6 +147,11 @@ void DisplayManagerAgentProxy::OnScreenGroupChange(
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteString(trigger)) {
+        WLOGFE("Write trigger failed");
         return;
     }
 
@@ -226,6 +231,24 @@ void DisplayManagerAgentProxy::OnDisplayChange(sptr<DisplayInfo> displayInfo, Di
     }
 
     if (Remote()->SendRequest(TRANS_ID_ON_DISPLAY_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void DisplayManagerAgentProxy::OnScreenshot(sptr<ScreenshotInfo> snapshotInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteParcelable(snapshotInfo.GetRefPtr())) {
+        WLOGFE("Write ScreenshotInfo failed");
+        return;
+    }
+    if (Remote()->SendRequest(TRANS_ID_ON_SCREEN_SHOT, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }

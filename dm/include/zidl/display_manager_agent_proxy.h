@@ -31,10 +31,12 @@ public:
     virtual void OnScreenConnect(sptr<ScreenInfo>) override;
     virtual void OnScreenDisconnect(ScreenId) override;
     virtual void OnScreenChange(const sptr<ScreenInfo>&, ScreenChangeEvent) override;
-    virtual void OnScreenGroupChange(const std::vector<sptr<ScreenInfo>>&, ScreenGroupChangeEvent) override;
+    virtual void OnScreenGroupChange(const std::string& trigger,
+        const std::vector<sptr<ScreenInfo>>&, ScreenGroupChangeEvent) override;
     virtual void OnDisplayCreate(sptr<DisplayInfo>) override;
     virtual void OnDisplayDestroy(DisplayId) override;
     virtual void OnDisplayChange(sptr<DisplayInfo>, DisplayChangeEvent) override;
+    virtual void OnScreenshot(sptr<ScreenshotInfo>) override;
 private:
     static inline BrokerDelegator<DisplayManagerAgentProxy> delegator_;
 };

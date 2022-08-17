@@ -12,17 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "common_test_utils.h"
 
-#include <access_token.h>
-#include <accesstoken_kit.h>
-#include <token_setproc.h>
+#ifndef WM_SYS_CAP_UTIL_H
+#define WM_SYS_CAP_UTIL_H
 
-namespace OHOS::Rosen {
-void CommonTestUtils::InjectTokenInfoByHapName(int userID, const std::string& bundleName, int instIndex)
-{
-    Security::AccessToken::AccessTokenID tokenId =
-        Security::AccessToken::AccessTokenKit::GetHapTokenID(userID, bundleName, instIndex);
-    SetSelfTokenID(tokenId);
-}
-} // namespace OHOS::Rosen
+#include <string>
+
+namespace OHOS {
+namespace Rosen {
+class SysCapUtil {
+public:
+    static std::string GetClientName();
+private:
+    static std::string GetBundleName();
+    static std::string GetProcessName();
+};
+} // Rosen
+} // OHOS
+#endif // WM_BUNDLE_MGR_UTIL_H

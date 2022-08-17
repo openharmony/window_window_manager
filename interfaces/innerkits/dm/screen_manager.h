@@ -39,14 +39,20 @@ public:
         virtual void OnChange(const std::vector<ScreenId>&, ScreenGroupChangeEvent) = 0;
     };
 
+    class IVirtualScreenGroupListener : public virtual RefBase {
+    public:
+        struct ChangeInfo {
+            ScreenGroupChangeEvent event;
+            std::string trigger;
+            std::vector<ScreenId> ids;
+        };
+        virtual void OnMirrorChange(const ChangeInfo& info) {}
+    };
+
     sptr<Screen> GetScreenById(ScreenId screenId);
     sptr<ScreenGroup> GetScreenGroup(ScreenId groupId);
     std::vector<sptr<Screen>> GetAllScreens();
 
-    bool RegisterScreenListener(sptr<IScreenListener> listener);
-    bool UnregisterScreenListener(sptr<IScreenListener> listener);
-    bool RegisterScreenGroupListener(sptr<IScreenGroupListener> listener);
-    bool UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener);
     ScreenId MakeExpand(const std::vector<ExpandOption>& options);
     ScreenId MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId);
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
@@ -57,6 +63,13 @@ public:
     ScreenPowerState GetScreenPower(ScreenId screenId);
     void SetScreenRotationLocked(bool isLocked);
     bool IsScreenRotationLocked();
+
+    bool RegisterScreenListener(sptr<IScreenListener> listener);
+    bool UnregisterScreenListener(sptr<IScreenListener> listener);
+    bool RegisterScreenGroupListener(sptr<IScreenGroupListener> listener);
+    bool UnregisterScreenGroupListener(sptr<IScreenGroupListener> listener);
+    bool RegisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener);
+    bool UnregisterVirtualScreenGroupListener(sptr<IVirtualScreenGroupListener> listener);
 private:
     ScreenManager();
     ~ScreenManager();

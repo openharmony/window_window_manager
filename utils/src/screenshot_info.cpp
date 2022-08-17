@@ -12,17 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "common_test_utils.h"
 
-#include <access_token.h>
-#include <accesstoken_kit.h>
-#include <token_setproc.h>
+#include "screenshot_info.h"
 
 namespace OHOS::Rosen {
-void CommonTestUtils::InjectTokenInfoByHapName(int userID, const std::string& bundleName, int instIndex)
+bool ScreenshotInfo::Marshalling(Parcel &parcel) const
 {
-    Security::AccessToken::AccessTokenID tokenId =
-        Security::AccessToken::AccessTokenKit::GetHapTokenID(userID, bundleName, instIndex);
-    SetSelfTokenID(tokenId);
+    return parcel.WriteString(trigger_) && parcel.WriteUint64(displayId_);
+}
+
+ScreenshotInfo *ScreenshotInfo::Unmarshalling(Parcel &parcel)
+{
+    ScreenshotInfo *info = new(std::nothrow) ScreenshotInfo();
+    if (info == nullptr) {
+        return nullptr;
+    }
+    bool res = parcel.ReadString(info->trigger_) && parcel.ReadUint64(info->displayId_);
+    if (!res) {
+        delete info;
+        return nullptr;
+    }
+    return info;
 }
 } // namespace OHOS::Rosen
