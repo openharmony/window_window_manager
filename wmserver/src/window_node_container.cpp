@@ -1148,7 +1148,7 @@ void WindowNodeContainer::UpdateWindowState(sptr<WindowNode> node, int32_t topPr
             }
             HandleKeepScreenOn(node, state);
             auto surfaceNode = node->surfaceNode_;
-            if (surfaceNode) {
+            if (surfaceNode && node->GetWindowType() != WindowType::WINDOW_TYPE_APP_COMPONENT) {
                 surfaceNode->SetVisible(state == WindowState::STATE_FROZEN ? false : true);
             }
         }
