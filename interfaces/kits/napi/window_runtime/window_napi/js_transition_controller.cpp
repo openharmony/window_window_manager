@@ -126,7 +126,8 @@ static NativeValue* CreateJsTransitionContextObject(NativeEngine& engine, std::s
         return nullptr;
     }
 
-    BindNativeFunction(engine, *object, "completeTransition", JsTransitionContext::CompleteTransition);
+    const char *moduleName = "JsTransitionContext";
+    BindNativeFunction(engine, *object, "completeTransition", moduleName, JsTransitionContext::CompleteTransition);
     return objValue;
 }
 
