@@ -192,10 +192,7 @@ void WindowLayoutPolicyTile::RemoveWindowNode(const sptr<WindowNode>& node)
         AssignNodePropertyForTileWindows(displayId);
         LayoutForegroundNodeQueue(displayId);
     }
-    Rect reqRect = node->GetRequestRect();
-    if (node->GetWindowToken()) {
-        node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
-    }
+    UpdateClientRect(node->GetRequestRect(), node, WindowSizeChangeReason::HIDE);
 }
 
 void WindowLayoutPolicyTile::LayoutForegroundNodeQueue(DisplayId displayId)
@@ -205,10 +202,7 @@ void WindowLayoutPolicyTile::LayoutForegroundNodeQueue(DisplayId displayId)
         Rect lastRect = node->GetWindowRect();
         node->SetWindowRect(winRect);
         CalcAndSetNodeHotZone(winRect, node);
-        if (node->GetWindowToken()) {
-            node->GetWindowToken()->UpdateWindowRect(
-                winRect, node->GetDecoStatus(), node->GetWindowSizeChangeReason());
-        }
+        UpdateClientRect(winRect, node, node->GetWindowSizeChangeReason());
         UpdateSurfaceBounds(node, winRect, lastRect);
         for (auto& childNode : node->children_) {
             LayoutWindowNode(childNode);
@@ -375,7 +369,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
     CalcAndSetNodeHotZone(winRect, node);
     // update Node Bounds before reset Reason
     UpdateSurfaceBounds(node, winRect, lastRect);
-    UpdateClientRectAndResetReason(node, lastRect, winRect);
+    UpdateClientRectAndResetReason(node, winRect);
 }
 } // Rosen
 } // OHOS

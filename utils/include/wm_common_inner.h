@@ -326,6 +326,12 @@ struct MoveDragProperty : public Parcelable {
     }
 };
 
+struct AbilityInfo {
+    std::string bundleName_ = "";
+    std::string abilityName_ = "";
+    int32_t missionId_ = -1;
+};
+
 namespace {
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
     constexpr float DEFAULT_ASPECT_RATIO = 0.66;
