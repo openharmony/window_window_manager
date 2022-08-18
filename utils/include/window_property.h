@@ -49,6 +49,7 @@ public:
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
     void SetPrivacyMode(bool isPrivate);
+    void SetSystemPrivacyMode(bool isSystemPrivate);
     void SetTransparent(bool isTransparent);
     void SetAlpha(float alpha);
     void SetBrightness(float brightness);
@@ -92,6 +93,7 @@ public:
     bool GetTouchable() const;
     uint32_t GetCallingWindow() const;
     bool GetPrivacyMode() const;
+    bool GetSystemPrivacyMode() const;
     bool GetTransparent() const;
     bool GetTokenState() const;
     float GetAlpha() const;
@@ -145,6 +147,7 @@ private:
     bool focusable_ { true };
     bool touchable_ { true };
     bool isPrivacyMode_ { false };
+    bool isSystemPrivacyMode_ { false };
     bool isTransparent_ { false };
     bool tokenState_ { false };
     float alpha_ { 1.0f };

@@ -162,6 +162,7 @@ public:
     virtual WMError SetCallingWindow(uint32_t windowId) override;
     virtual void SetPrivacyMode(bool isPrivacyMode) override;
     virtual bool IsPrivacyMode() const override;
+    virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual void DisableAppWindowDecor() override;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     virtual void SetSnapshotSkip(bool isSkip) override;
