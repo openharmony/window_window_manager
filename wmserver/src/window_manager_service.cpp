@@ -793,6 +793,7 @@ WMError WindowManagerService::SetWindowAnimationController(const sptr<RSIWindowA
         }
     );
     controller->AsObject()->AddDeathRecipient(deathRecipient);
+    RemoteAnimation::SetMainTaskHandler(handler_);
     return PostSyncTask([this, &controller]() {
         return windowController_->SetWindowAnimationController(controller);
     });

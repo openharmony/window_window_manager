@@ -365,15 +365,14 @@ void WindowNodeContainer::UpdateSizeChangeReason(sptr<WindowNode>& node, WindowS
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         for (auto& childNode : appWindowNode_->children_) {
             if (childNode->IsSplitMode()) {
-                childNode->GetWindowToken()->UpdateWindowRect(childNode->GetWindowRect(),
-                    childNode->GetDecoStatus(), reason);
+                layoutPolicy_->UpdateClientRect(childNode->GetWindowRect(), childNode, reason);
                 childNode->ResetWindowSizeChangeReason();
                 WLOGFI("Notify split window that the drag action is start or end, windowId: %{public}d, "
                     "reason: %{public}u", childNode->GetWindowId(), reason);
             }
         }
     } else {
-        node->GetWindowToken()->UpdateWindowRect(node->GetWindowRect(), node->GetDecoStatus(), reason);
+        layoutPolicy_->UpdateClientRect(node->GetWindowRect(), node, reason);
         node->ResetWindowSizeChangeReason();
         WLOGFI("Notify window that the drag action is start or end, windowId: %{public}d, "
             "reason: %{public}u", node->GetWindowId(), reason);

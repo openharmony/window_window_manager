@@ -55,7 +55,8 @@ public:
     virtual Rect GetDividerRect(DisplayId displayId) const;
     virtual std::vector<int32_t> GetExitSplitPoints(DisplayId displayId) const;
     float GetVirtualPixelRatio(DisplayId displayId) const;
-    void UpdateClientRectAndResetReason(const sptr<WindowNode>& node, const Rect& lastLayoutRect, const Rect& winRect);
+    void UpdateClientRectAndResetReason(const sptr<WindowNode>& node, const Rect& winRect);
+    void UpdateClientRect(const Rect& rect, const sptr<WindowNode>& node, WindowSizeChangeReason reason);
     Rect GetDisplayGroupRect() const;
     bool IsMultiDisplay();
     void ProcessDisplayCreate(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
@@ -63,7 +64,6 @@ public:
     void ProcessDisplaySizeChangeOrRotation(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void SetSplitRatioConfig(const SplitRatioConfig& splitRatioConfig);
     virtual bool IsTileRectSatisfiedWithSizeLimits(const sptr<WindowNode>& node);
-
 protected:
     void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
     void UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect);
@@ -103,7 +103,7 @@ protected:
         const Rect& displayRect, float virtualPixelRatio);
     Rect CalcEntireWindowHotZone(const sptr<WindowNode>& node, const Rect& winRect, uint32_t hotZone,
         float vpr, TransformHelper::Vector2 hotZoneScale) const;
-
+    void NotifyAnimationSizeChangeIfNeeded();
     const std::set<WindowType> avoidTypes_ {
         WindowType::WINDOW_TYPE_STATUS_BAR,
         WindowType::WINDOW_TYPE_NAVIGATION_BAR,
