@@ -730,16 +730,20 @@ NativeValue* JsScreenManagerInit(NativeEngine* engine, NativeValue* exportObj)
 
     object->SetProperty("Orientation", InitScreenOrientation(engine));
 
-    BindNativeFunction(*engine, *object, "getAllScreens", JsScreenManager::GetAllScreens);
-    BindNativeFunction(*engine, *object, "on", JsScreenManager::RegisterScreenManagerCallback);
-    BindNativeFunction(*engine, *object, "off", JsScreenManager::UnregisterScreenMangerCallback);
-    BindNativeFunction(*engine, *object, "makeMirror", JsScreenManager::MakeMirror);
-    BindNativeFunction(*engine, *object, "makeExpand", JsScreenManager::MakeExpand);
-    BindNativeFunction(*engine, *object, "createVirtualScreen", JsScreenManager::CreateVirtualScreen);
-    BindNativeFunction(*engine, *object, "destroyVirtualScreen", JsScreenManager::DestroyVirtualScreen);
-    BindNativeFunction(*engine, *object, "setVirtualScreenSurface", JsScreenManager::SetVirtualScreenSurface);
-    BindNativeFunction(*engine, *object, "setScreenRotationLocked", JsScreenManager::SetScreenRotationLocked);
-    BindNativeFunction(*engine, *object, "isScreenRotationLocked", JsScreenManager::IsScreenRotationLocked);
+    const char *moduleName = "JsScreenManager";
+    BindNativeFunction(*engine, *object, "getAllScreens", moduleName, JsScreenManager::GetAllScreens);
+    BindNativeFunction(*engine, *object, "on", moduleName, JsScreenManager::RegisterScreenManagerCallback);
+    BindNativeFunction(*engine, *object, "off", moduleName, JsScreenManager::UnregisterScreenMangerCallback);
+    BindNativeFunction(*engine, *object, "makeMirror", moduleName, JsScreenManager::MakeMirror);
+    BindNativeFunction(*engine, *object, "makeExpand", moduleName, JsScreenManager::MakeExpand);
+    BindNativeFunction(*engine, *object, "createVirtualScreen", moduleName, JsScreenManager::CreateVirtualScreen);
+    BindNativeFunction(*engine, *object, "destroyVirtualScreen", moduleName, JsScreenManager::DestroyVirtualScreen);
+    BindNativeFunction(*engine, *object, "setVirtualScreenSurface", moduleName,
+        JsScreenManager::SetVirtualScreenSurface);
+    BindNativeFunction(*engine, *object, "setScreenRotationLocked", moduleName,
+        JsScreenManager::SetScreenRotationLocked);
+    BindNativeFunction(*engine, *object, "isScreenRotationLocked", moduleName,
+        JsScreenManager::IsScreenRotationLocked);
     return engine->CreateUndefined();
 }
 }  // namespace Rosen

@@ -271,9 +271,10 @@ NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen)
         JsScreenRef.reset(engine.CreateReference(objValue, 1));
         std::lock_guard<std::recursive_mutex> lock(g_mutex);
         g_JsScreenMap[screenId] = JsScreenRef;
-        BindNativeFunction(engine, *object, "setScreenActiveMode", JsScreen::SetScreenActiveMode);
-        BindNativeFunction(engine, *object, "setOrientation", JsScreen::SetOrientation);
-        BindNativeFunction(engine, *object, "setDensityDpi", JsScreen::SetDensityDpi);
+        const char *moduleName = "JsScreen";
+        BindNativeFunction(engine, *object, "setScreenActiveMode", moduleName, JsScreen::SetScreenActiveMode);
+        BindNativeFunction(engine, *object, "setOrientation", moduleName, JsScreen::SetOrientation);
+        BindNativeFunction(engine, *object, "setDensityDpi", moduleName, JsScreen::SetDensityDpi);
     }
     return objValue;
 }

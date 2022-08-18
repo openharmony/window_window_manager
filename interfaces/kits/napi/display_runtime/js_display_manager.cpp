@@ -407,12 +407,13 @@ NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
 
     object->SetProperty("DisplayState", InitDisplayState(engine));
 
-    BindNativeFunction(*engine, *object, "getDefaultDisplay", JsDisplayManager::GetDefaultDisplay);
-    BindNativeFunction(*engine, *object, "getDefaultDisplaySync", JsDisplayManager::GetDefaultDisplaySync);
-    BindNativeFunction(*engine, *object, "getAllDisplay", JsDisplayManager::GetAllDisplay);
-    BindNativeFunction(*engine, *object, "hasPrivateWindow", JsDisplayManager::HasPrivateWindow);
-    BindNativeFunction(*engine, *object, "on", JsDisplayManager::RegisterDisplayManagerCallback);
-    BindNativeFunction(*engine, *object, "off", JsDisplayManager::UnregisterDisplayManagerCallback);
+    const char *moduleName = "JsDisplayManager";
+    BindNativeFunction(*engine, *object, "getDefaultDisplay", moduleName, JsDisplayManager::GetDefaultDisplay);
+    BindNativeFunction(*engine, *object, "getDefaultDisplaySync", moduleName, JsDisplayManager::GetDefaultDisplaySync);
+    BindNativeFunction(*engine, *object, "getAllDisplay", moduleName, JsDisplayManager::GetAllDisplay);
+    BindNativeFunction(*engine, *object, "hasPrivateWindow", moduleName, JsDisplayManager::HasPrivateWindow);
+    BindNativeFunction(*engine, *object, "on", moduleName, JsDisplayManager::RegisterDisplayManagerCallback);
+    BindNativeFunction(*engine, *object, "off", moduleName, JsDisplayManager::UnregisterDisplayManagerCallback);
     return engine->CreateUndefined();
 }
 }  // namespace Rosen
