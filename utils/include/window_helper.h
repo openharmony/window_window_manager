@@ -60,9 +60,14 @@ public:
         return (type >= WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE && type < WindowType::ABOVE_APP_SYSTEM_WINDOW_END);
     }
 
+    static inline bool IsSystemSubWindow(WindowType type)
+    {
+        return (type >= WindowType::SYSTEM_SUB_WINDOW_BASE && type < WindowType::SYSTEM_SUB_WINDOW_END);
+    }
+
     static inline bool IsSystemWindow(WindowType type)
     {
-        return (IsBelowSystemWindow(type) || IsAboveSystemWindow(type));
+        return (IsBelowSystemWindow(type) || IsAboveSystemWindow(type) || IsSystemSubWindow(type));
     }
 
     static inline bool IsMainFloatingWindow(WindowType type, WindowMode mode)
