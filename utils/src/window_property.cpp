@@ -89,6 +89,11 @@ void WindowProperty::SetPrivacyMode(bool isPrivate)
     isPrivacyMode_ = isPrivate;
 }
 
+void WindowProperty::SetSystemPrivacyMode(bool isSystemPrivate)
+{
+    isSystemPrivacyMode_ = isSystemPrivate;
+}
+
 void WindowProperty::SetTransparent(bool isTransparent)
 {
     isTransparent_ = isTransparent;
@@ -294,6 +299,11 @@ uint32_t WindowProperty::GetCallingWindow() const
 bool WindowProperty::GetPrivacyMode() const
 {
     return isPrivacyMode_;
+}
+
+bool WindowProperty::GetSystemPrivacyMode() const
+{
+    return isSystemPrivacyMode_;
 }
 
 bool WindowProperty::GetTransparent() const

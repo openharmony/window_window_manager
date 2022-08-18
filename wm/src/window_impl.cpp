@@ -1510,7 +1510,7 @@ std::string WindowImpl::TransferLifeCycleEventToString(LifeCycleEvent type) cons
 void WindowImpl::SetPrivacyMode(bool isPrivacyMode)
 {
     property_->SetPrivacyMode(isPrivacyMode);
-    surfaceNode_->SetSecurityLayer(isPrivacyMode);
+    surfaceNode_->SetSecurityLayer(isPrivacyMode || property_->GetSystemPrivacyMode());
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
 }
 
@@ -1519,9 +1519,15 @@ bool WindowImpl::IsPrivacyMode() const
     return property_->GetPrivacyMode();
 }
 
+void WindowImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
+{
+    property_->SetSystemPrivacyMode(isSystemPrivacyMode);
+    surfaceNode_->SetSecurityLayer(isSystemPrivacyMode || property_->GetPrivacyMode());
+}
+
 void WindowImpl::SetSnapshotSkip(bool isSkip)
 {
-    surfaceNode_->SetSecurityLayer(isSkip);
+    surfaceNode_->SetSecurityLayer(isSkip || property_->GetSystemPrivacyMode());
 }
 
 void WindowImpl::DisableAppWindowDecor()
