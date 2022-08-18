@@ -320,6 +320,7 @@ void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> o
 {
     std::vector<std::pair<uint64_t, bool>> visibilityChangeInfo = GetWindowVisibilityChangeInfo(occlusionData);
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    bool hasAppWindowChange = false;
     for (const auto& elem : visibilityChangeInfo) {
         uint64_t surfaceId = elem.first;
         bool isVisible = elem.second;
@@ -332,11 +333,17 @@ void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> o
             continue;
         }
         node->isVisible_ = isVisible;
+        WindowType winType = node->GetWindowType();
+        hasAppWindowChange = (winType >= WindowType::APP_WINDOW_BASE && winType < WindowType::APP_WINDOW_END);
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
             node->GetCallingUid(), isVisible, node->GetWindowType()));
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             node->GetWindowId(), isVisible);
     }
+    if (hasAppWindowChange) {
+        SwitchRenderModeIfNeeded();
+    }
+
     if (windowVisibilityInfos.size() != 0) {
         WindowManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
@@ -1528,7 +1535,7 @@ void WindowRoot::SwitchRenderModeIfNeeded(bool isAddNode, const sptr<WindowNode>
         } else {
             if (IsAppWindowExceed()) {
                 // switch to sperate render mode
-                WLOGFI("SwitchRender: notify changing separated to RS");
+                WLOGFI("SwitchRender: notify RS to separated");
                 RSInterfaces::GetInstance().UpdateRenderMode(false);
             }
         }
@@ -1536,12 +1543,13 @@ void WindowRoot::SwitchRenderModeIfNeeded(bool isAddNode, const sptr<WindowNode>
         WLOGFI("SwitchRender: one app window is removed, WindowType=%{public}d", winType);
         uint32_t rsScreenNum = DisplayManagerServiceInner::GetInstance().GetRSScreenNum();
         if (renderMode_ == RenderMode::UNIFIED || rsScreenNum > 1) {
-            WLOGFD("SwitchRender: unified mode neednot change. RSScreenNum=%{public}u", rsScreenNum);
+            WLOGFD("SwitchRender: mode %{public}u neednot change. RSScreenNum=%{public}u",
+                static_cast<uint32_t>(renderMode_), rsScreenNum);
             return;
         } else {
             if (!IsAppWindowExceed()) {
                 // switch to unified render mode
-                WLOGFI("SwitchRender: notify changing unified to RS");
+                WLOGFI("SwitchRender: notify RS to unified");
                 RSInterfaces::GetInstance().UpdateRenderMode(true);
             }
         }
@@ -1562,11 +1570,11 @@ void WindowRoot::SwitchRenderModeIfNeeded(bool connectNewRSScreen)
     }
     if (rsScreenNum <= 1 && !IsAppWindowExceed() && renderMode_ != RenderMode::UNIFIED) {
         // switch to unified render mode
-        WLOGFI("SwitchRender: notify changing unified to RS");
+        WLOGFI("SwitchRender: notify RS to unified");
         RSInterfaces::GetInstance().UpdateRenderMode(true);
     } else if (rsScreenNum > 1 && renderMode_ != RenderMode::SEPARATED) {
         // switch to sperate render mode
-        WLOGFI("SwitchRender: notify changing separated to RS");
+        WLOGFI("SwitchRender: notify RS to separated");
         RSInterfaces::GetInstance().UpdateRenderMode(false);
     } else {
         WLOGFE("SwitchRender: impossible code");
@@ -1575,17 +1583,26 @@ void WindowRoot::SwitchRenderModeIfNeeded(bool connectNewRSScreen)
 
 void WindowRoot::SwitchRenderModeIfNeeded()
 {
+    uint32_t rsScreenNum = DisplayManagerServiceInner::GetInstance().GetRSScreenNum();
+    if (renderMode_ == RenderMode::SEPARATED && rsScreenNum > 1) {
+        WLOGFD("SwitchRender: separated mode neednot change. RSScreenNum=%{public}u", rsScreenNum);
+        return;
+    }
     bool exceed = IsAppWindowExceed();
     if (exceed) {
         if (renderMode_ != RenderMode::SEPARATED) {
             // switch to sperate render mode
-            WLOGFI("SwitchRender: notify changing separated to RS");
+            WLOGFI("SwitchRender: notify RS change separated");
             RSInterfaces::GetInstance().UpdateRenderMode(false);
         }
     } else {
-        if (renderMode_ != RenderMode::UNIFIED) {
+        if (renderMode_ == RenderMode::UNIFIED || rsScreenNum > 1) {
+            WLOGFD("SwitchRender: mode %{public}u neednot change. RSScreenNum=%{public}u",
+                static_cast<uint32_t>(renderMode_), rsScreenNum);
+            return;
+        } else {
             // switch to unified render mode
-            WLOGFI("SwitchRender: notify changing unified to RS");
+            WLOGFI("SwitchRender: notify RS to unified");
             RSInterfaces::GetInstance().UpdateRenderMode(true);
         }
     }
@@ -1600,7 +1617,7 @@ bool WindowRoot::IsAppWindowExceed() const
     for (const auto& it : windowNodeMap_) {
         WindowType winType = it.second->GetWindowType();
         WindowMode winMode = it.second->GetWindowMode();
-        bool isVisible = it.second->currentVisibility_;
+        bool isVisible = it.second->isVisible_;
         bool isPrimarySplitWindow = (winMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
         bool isSencondarySplitWindow = (winMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
         hasPrimarySplitWindow |= isPrimarySplitWindow;
@@ -1609,7 +1626,7 @@ bool WindowRoot::IsAppWindowExceed() const
             && isVisible && !isPrimarySplitWindow && !isSencondarySplitWindow) {
             appWindowNum++;
             if (appWindowNum > maxAppWindowNum) {
-                WLOGFI("SwitchRender: the number of app window is %{public}d/%{public}d",
+                WLOGFI("SwitchRender: the number of app window exceed: %{public}d/%{public}d",
                     appWindowNum, maxAppWindowNum);
                 return true;
             }
@@ -1617,7 +1634,7 @@ bool WindowRoot::IsAppWindowExceed() const
     }
     appWindowNum = (hasPrimarySplitWindow || hasSencondarySplitWindow) ? (appWindowNum + 1) : appWindowNum;
     WLOGFI("SwitchRender: the number of app window is %{public}d/%{public}d", appWindowNum, maxAppWindowNum);
-    return false;
+    return (appWindowNum > maxAppWindowNum);
 }
 } // namespace Rosen
 } // namespace OHOS
