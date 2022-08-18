@@ -25,6 +25,7 @@
 #include "window_root.h"
 #include "window_transition_info.h"
 #include "wm_common.h"
+#include "wm_occlusion_region.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -79,7 +80,7 @@ private:
     void UpdateWindowAnimation(const sptr<WindowNode>& node);
     void ProcessDisplayChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
-    void StopBootAnimationIfNeed(WindowType type) const;
+    void StopBootAnimationIfNeed(const sptr<WindowNode>& node);
     void RecordBootAnimationEvent() const;
     WMError SetWindowType(uint32_t windowId, WindowType type);
     WMError SetWindowFlags(uint32_t windowId, uint32_t flags);
@@ -97,6 +98,7 @@ private:
     uint32_t GetEmbedNodeId(const std::vector<sptr<WindowNode>>& windowNodes, const sptr<WindowNode>& node);
     void NotifyWindowPropertyChanged(const sptr<WindowNode>& node);
     WMError GetFocusWindowNode(DisplayId displayId, sptr<WindowNode>& windowNode);
+    void SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
@@ -110,6 +112,8 @@ private:
     bool isScreenLocked_ { false };
     Rect callingWindowRestoringRect_ { 0, 0, 0, 0 };
     uint32_t callingWindowId_ = 0u;
+    Rect defaultDisplayRect_ = { 0, 0, 0, 0 };
+    bool isBootAnimationStopped_ = false;
 };
 } // Rosen
 } // OHOS
