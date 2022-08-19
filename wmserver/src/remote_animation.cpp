@@ -137,6 +137,10 @@ static sptr<RSWindowAnimationFinishedCallback> GetTransitionFinishedCallback(con
         }
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
             "wms:async:ShowRemoteAnimation");
+        if (weakNode->state_ != WindowNodeState::SHOW_ANIMATION_PLAYING) {
+            WLOGFI("node:%{public}d is not play show animation!", weakNode->GetWindowId());
+            return;
+        }
         RSAnimationTimingProtocol timingProtocol(200); // animation time
         RSNode::Animate(timingProtocol, RSAnimationTimingCurve::EASE_OUT, [weakNode]() {
             auto winRect = weakNode->GetWindowRect();
@@ -199,6 +203,7 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
         finishedCallback->OnAnimationFinished();
         return WMError::WM_ERROR_NO_MEM;
     }
+    dstNode->state_ = WindowNodeState::SHOW_ANIMATION_PLAYING;
     // when exit immersive, startingWindow (0,0,w,h), but app need avoid
     bool needAvoid = (dstNode->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     auto winRoot = windowRoot_.promote();
@@ -221,6 +226,7 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
         auto srcTarget = CreateWindowAnimationTarget(srcInfo, srcNode);
         // to avoid normal animation
         srcNode->isPlayAnimationHide_ = true;
+        srcNode->state_ = WindowNodeState::HIDE_ANIMATION_PLAYING;
         // update snapshot before animation
         AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(srcNode->abilityToken_);
         if (winRoot) {
@@ -242,6 +248,7 @@ WMError RemoteAnimation::NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcI
     }
     WLOGFI("RSWindowAnimation: notify animation minimize Id:%{public}u!", srcNode->GetWindowId());
     srcNode->isPlayAnimationHide_ = true;
+    srcNode->state_ = WindowNodeState::HIDE_ANIMATION_PLAYING;
     // update snapshot before animation
     AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(srcNode->abilityToken_);
     auto winRoot = windowRoot_.promote();
@@ -273,6 +280,7 @@ WMError RemoteAnimation::NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo
     }
     WLOGFI("RSWindowAnimation: notify animation close id:%{public}u!", srcNode->GetWindowId());
     srcNode->isPlayAnimationHide_ = true;
+    srcNode->state_ = WindowNodeState::HIDE_ANIMATION_PLAYING;
     // update snapshot before animation
     AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(srcNode->abilityToken_);
     auto winRoot = windowRoot_.promote();
@@ -323,6 +331,7 @@ WMError RemoteAnimation::NotifyAnimationByHome()
             continue;
         }
         srcNode->isPlayAnimationHide_ = true;
+        srcNode->state_ = WindowNodeState::HIDE_ANIMATION_PLAYING;
         // update snapshot before animation
         AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(srcNode->abilityToken_);
         auto winRoot = windowRoot_.promote();
