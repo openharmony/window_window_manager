@@ -25,6 +25,18 @@
 
 namespace OHOS {
 namespace Rosen {
+enum class WindowNodeState : uint32_t {
+    INITIAL,
+    STARTING_CREATED,
+    SHOW_ANIMATION_PLAYING,
+    SHOW_ANIMATION_DONE,
+    HIDE_ANIMATION_PLAYING,
+    HIDE_ANIMATION_DONE,
+    SHOWN,
+    HIDDEN,
+    DESTROYED
+};
+
 class WindowNode : public RefBase {
 public:
     WindowNode(const sptr<WindowProperty>& property, const sptr<IWindow>& window,
@@ -129,12 +141,13 @@ public:
     bool currentVisibility_ { false };
     bool isVisible_ { false };
     bool isAppCrash_ { false };
-    bool isPlayAnimationShow_ { false };
-    bool isPlayAnimationHide_ { false };
+    bool isPlayAnimationShow_ { false }; // delete when enable state machine
+    bool isPlayAnimationHide_ { false }; // delete when enable state machine
     bool startingWindowShown_ { false };
     bool isShowingOnMultiDisplays_ { false };
     std::vector<DisplayId> showingDisplays_;
     AbilityInfo abilityInfo_;
+    WindowNodeState state_ = WindowNodeState::INITIAL;
 private:
     sptr<WindowProperty> property_ = nullptr;
     sptr<IWindow> windowToken_ = nullptr;
