@@ -14,17 +14,18 @@
  */
 
 #include "surface_draw.h"
-
 #include <algorithm>
 #include <surface.h>
+#include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_extractor.h>
-#include "window_manager_hilog.h"
 
 #include "image/bitmap.h"
 #include "image_source.h"
 #include "image_type.h"
 #include "image_utils.h"
 #include "pixel_map.h"
+#include "surface_capture_future.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -335,6 +336,19 @@ bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, const Rect rect, sptr<Media::Pi
     errno_t ret = memcpy_s(addr, bufferSize, bitmapAddr, bufferSize);
     if (ret != EOK) {
         WLOGFE("draw image rect failed, because copy bitmap to buffer failed.");
+        return false;
+    }
+    return true;
+}
+
+bool SurfaceDraw::GetSurfaceSnapshot(const std::shared_ptr<RSSurfaceNode> surfaceNode,
+    std::shared_ptr<Media::PixelMap>&pixelMap, int32_t timeoutMs, float scaleW, float scaleH)
+{
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, scaleW, scaleH);
+    pixelMap = callback->GetResult(timeoutMs); // get pixelmap time out ms
+    if (pixelMap == nullptr) {
+        WLOGE("get surface snapshot timeout.");
         return false;
     }
     return true;
