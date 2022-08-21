@@ -62,7 +62,6 @@ public:
     WMError MinimizeStructuredAppWindowsExceptSelf(sptr<WindowNode>& node);
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
     WMError SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode);
-    std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();
@@ -108,6 +107,9 @@ public:
     void SwitchRenderModeIfNeeded(bool connectNewRSScreen);
     void SwitchRenderModeIfNeeded();
     void OnRenderModeChanged(bool isUniRender);
+    sptr<WindowNode> GetWindowNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken);
+    bool TakeWindowPairSnapshot(DisplayId displayId);
+    void ClearWindowPairSnapshot(DisplayId displayId);
 
 private:
     enum class RenderMode : uint8_t {

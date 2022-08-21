@@ -1898,5 +1898,21 @@ void WindowNodeContainer::RemoveSingleUserWindowNodes(int accountId)
         RemoveWindowNode(windowNode);
     }
 }
+
+bool WindowNodeContainer::TakeWindowPairSnapshot(DisplayId displayId)
+{
+    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(displayId);
+    return windowPair == nullptr ? false : windowPair->TakePairSnapshot();
+}
+
+void WindowNodeContainer::ClearWindowPairSnapshot(DisplayId displayId)
+{
+    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(displayId);
+    if (windowPair == nullptr) {
+        WLOGFE("Window pair is nullptr");
+        return;
+    }
+    windowPair->ClearPairSnapshot();
+}
 } // namespace Rosen
 } // namespace OHOS

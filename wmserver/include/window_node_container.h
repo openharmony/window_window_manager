@@ -112,6 +112,9 @@ public:
     WMError IsTileRectSatisfiedWithSizeLimits(sptr<WindowNode>& node);
     bool HasPrivateWindow();
     static AnimationConfig& GetAnimationConfigRef();
+    bool TakeWindowPairSnapshot(DisplayId displayId);
+    void ClearWindowPairSnapshot(DisplayId displayId);
+
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
