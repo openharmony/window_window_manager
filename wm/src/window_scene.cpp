@@ -92,7 +92,7 @@ const sptr<Window>& WindowScene::GetMainWindow() const
 std::vector<sptr<Window>> WindowScene::GetSubWindow()
 {
     if (mainWindow_ == nullptr) {
-        WLOGFE("WindowScene mainWindow_ is nullptr id: %{public}d", mainWindow_->GetWindowId());
+        WLOGFE("Get sub window failed, because main window is null");
         return std::vector<sptr<Window>>();
     }
     uint32_t parentId = mainWindow_->GetWindowId();
