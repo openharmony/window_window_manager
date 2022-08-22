@@ -429,7 +429,7 @@ private:
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners_;
     sptr<IDialogDeathRecipientListener> dialogDeathRecipientListener_;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
-    sptr<IAnimationTransitionController> animationTranistionController_;
+    sptr<IAnimationTransitionController> animationTransitionController_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;
