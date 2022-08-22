@@ -503,6 +503,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager10, Function | MediumTest | Level2)
  * @tc.name: ScreenManager11
  * @tc.desc: Create a virtual screen , mirror and destroy it for 10 times, it's not for shot.
  * @tc.type: FUNC
+ * @tc.require: issueI5M2SK
  */
 HWTEST_F(ScreenManagerTest, ScreenManager11, Function | MediumTest | Level2)
 {
@@ -541,6 +542,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager11, Function | MediumTest | Level2)
  * @tc.name: ScreenManager12
  * @tc.desc: Create a virtual screen as expansion of default screen cancel Make mirror, and destroy virtual screen
  * @tc.type: FUNC
+ * @tc.require: issueI5M2SK
  */
 HWTEST_F(ScreenManagerTest, ScreenManager12, Function | MediumTest | Level2)
 {
@@ -659,6 +661,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager14, Function | MediumTest | Level2)
  * @tc.name: ScreenManager15
  * @tc.desc: Create a virtual screen, make mirror to make expand, and destroy virtual screen
  * @tc.type: FUNC
+ * @tc.require: issueI5M2SK
  */
 HWTEST_F(ScreenManagerTest, ScreenManager15, Function | MediumTest | Level2)
 {

@@ -221,6 +221,7 @@ HWTEST_F(WindowSceneTest, RequestFocus01, Function | SmallTest | Level2)
  * @tc.name: NotifyMemoryLevel01
  * @tc.desc: NotifyMemoryLevel without mainWindow
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ04
  */
 HWTEST_F(WindowSceneTest, NotifyMemoryLevel01, Function | SmallTest | Level2)
 {
@@ -233,6 +234,7 @@ HWTEST_F(WindowSceneTest, NotifyMemoryLevel01, Function | SmallTest | Level2)
  * @tc.name: NotifyMemoryLevel02
  * @tc.desc: NotifyMemoryLevel with level
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ04
  */
 HWTEST_F(WindowSceneTest, NotifyMemoryLevel02, Function | SmallTest | Level2)
 {
