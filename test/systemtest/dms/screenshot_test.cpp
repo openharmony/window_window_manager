@@ -227,6 +227,7 @@ HWTEST_F(ScreenshotTest, ScreenShot09, Function | MediumTest | Level2)
  * @tc.name: ScreenShotListener01
  * @tc.desc: Check if screenshot listener info valid
  * @tc.type: FUNC
+ * @tc.require: issueI5G62O
  */
 HWTEST_F(ScreenshotTest, ScreenShotListener01, Function | MediumTest | Level2)
 {
