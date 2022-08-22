@@ -58,7 +58,9 @@ static sptr<Window> CreateBaseWindow(WindowType type, struct Rect rect, uint32_t
     baseOp->SetWindowRect(rect);
     baseOp->SetWindowFlags(flags);
 
-    sptr<Window> window = Window::Create("BaseWindow", baseOp, nullptr);
+    static int baseCount = 0;
+    std::string baseWindowName = "BaseWindow" + std::to_string(baseCount++);
+    sptr<Window> window = Window::Create(baseWindowName, baseOp, nullptr);
     return window;
 }
 
