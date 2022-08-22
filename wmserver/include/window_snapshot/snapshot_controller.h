@@ -31,22 +31,18 @@ namespace Rosen {
 class SnapshotController : public SnapshotStub {
 public:
     SnapshotController(sptr<WindowRoot>& root, std::shared_ptr<AppExecFwk::EventHandler>& handler) : windowRoot_(root),
-        handler_(handler), rsInterface_(RSInterfaces::GetInstance()) {};
-    SnapshotController() : windowRoot_(nullptr), handler_(nullptr), rsInterface_(RSInterfaces::GetInstance()) {};
+        handler_(handler) {};
+    SnapshotController() : windowRoot_(nullptr), handler_(nullptr) {};
     ~SnapshotController() = default;
     void Init(sptr<WindowRoot>& root);
     int32_t GetSnapshot(const sptr<IRemoteObject> &token, AAFwk::Snapshot& snapshot) override;
 
 private:
-    WMError TakeSnapshot(const std::shared_ptr<RSSurfaceNode>& surfaceNode, AAFwk::Snapshot& snapshot);
     void RecordGetSnapshotEvent(int64_t costTime);
 
 private:
-    float scaleW = 0.5f; // width scaling ratio(0.5)
-    float scaleH = 0.5f; // height scaling ratio(0.5)
     sptr<WindowRoot> windowRoot_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
-    RSInterfaces& rsInterface_;
     GetSnapshotTimeConfig getSnapshotTimeConfig_ = { 0, 0, 0, 0, 0, 0 };
 };
 } // Rosen
