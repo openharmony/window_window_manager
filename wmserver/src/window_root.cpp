@@ -762,6 +762,7 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
             if (res != WMError::WM_OK) {
                 WLOGFE("RemoveWindowNode failed");
             }
+            SwitchRenderModeIfNeeded(false, node);
             return DestroyWindowInner(node);
         } else {
             std::vector<uint32_t> windowIds;
@@ -778,6 +779,7 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
                     node->GetWindowToken()->NotifyDestroy();
                 }
             }
+            SwitchRenderModeIfNeeded(false, node);
             return res;
         }
     }
