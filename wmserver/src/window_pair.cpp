@@ -21,6 +21,7 @@
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
+#include "surface_draw.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -171,19 +172,20 @@ void WindowPair::ExitSplitMode()
         return;
     }
     Rect dividerRect = divider_->GetWindowRect();
-    sptr<WindowNode> hideWindow, fullScreenWindow;
+    sptr<WindowNode> hideNode, recoveryNode;
     bool isVertical = (dividerRect.height_ < dividerRect.width_) ? true : false;
     if ((isVertical && (primary_->GetWindowRect().height_ < secondary_->GetWindowRect().height_)) ||
         (!isVertical && (primary_->GetWindowRect().width_ < secondary_->GetWindowRect().width_))) {
-        hideWindow = primary_;
-        fullScreenWindow = secondary_;
+        hideNode = primary_;
+        recoveryNode = secondary_;
     } else {
-        hideWindow = secondary_;
-        fullScreenWindow = primary_;
+        hideNode = secondary_;
+        recoveryNode = primary_;
     }
-    MinimizeApp::AddNeedMinimizeApp(hideWindow, MinimizeReason::SPLIT_QUIT);
+    recoveryNode->SetSnapshot(nullptr);
+    MinimizeApp::AddNeedMinimizeApp(hideNode, MinimizeReason::SPLIT_QUIT);
     MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::SPLIT_QUIT);
-    WLOGFI("Exit Split Mode, Minimize Window %{public}u", hideWindow->GetWindowId());
+    WLOGFI("Exit Split Mode, Minimize Window %{public}u", hideNode->GetWindowId());
 }
 
 void WindowPair::Clear()
@@ -263,18 +265,12 @@ std::vector<sptr<WindowNode>> WindowPair::GetOrderedPair(sptr<WindowNode>& node)
 
 std::vector<sptr<WindowNode>> WindowPair::GetPairedWindows()
 {
-    WLOGI("Get all node of window pair");
-    std::vector<sptr<WindowNode>> orderedPair;
-    if (primary_ != nullptr) {
-        orderedPair.push_back(primary_);
+    WLOGD("Get primary and secondary of window pair");
+    std::vector<sptr<WindowNode>> pairWindows;
+    if (status_ == WindowPairStatus::STATUS_PAIRED_DONE && primary_ != nullptr && secondary_ != nullptr) {
+        pairWindows = {primary_, secondary_};
     }
-    if (secondary_ != nullptr) {
-        orderedPair.push_back(secondary_);
-    }
-    if (divider_ != nullptr) {
-        orderedPair.push_back(divider_);
-    }
-    return orderedPair;
+    return pairWindows;
 }
 
 void WindowPair::UpdateIfSplitRelated(sptr<WindowNode>& node)
@@ -470,6 +466,35 @@ void WindowPair::RotateDividerWindow(const Rect& rect)
 void WindowPair::SetDividerRect(const Rect& rect)
 {
     dividerRect_ = rect;
+}
+
+bool WindowPair::TakePairSnapshot()
+{
+    if (status_ == WindowPairStatus::STATUS_PAIRED_DONE && primary_ != nullptr && secondary_ != nullptr) {
+        WLOGD("Take pair snapshot id:[%{public}u, %{public}u]", primary_->GetWindowId(), secondary_->GetWindowId());
+        std::shared_ptr<Media::PixelMap> pixelMap;
+        // get pixelmap time out 2000ms
+        if (SurfaceDraw::GetSurfaceSnapshot(primary_->surfaceNode_, pixelMap, 2000)) {
+            primary_->SetSnapshot(pixelMap);
+        }
+        // get pixelmap time out 2000ms
+        if (SurfaceDraw::GetSurfaceSnapshot(secondary_->surfaceNode_, pixelMap, 2000)) {
+            secondary_->SetSnapshot(pixelMap);
+        }
+        return true;
+    }
+    return false;
+}
+
+void WindowPair::ClearPairSnapshot()
+{
+    WLOGD("Clear window pair snapshot");
+    if (primary_ != nullptr) {
+        primary_->SetSnapshot(nullptr);
+    }
+    if (secondary_ != nullptr) {
+        secondary_->SetSnapshot(nullptr);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

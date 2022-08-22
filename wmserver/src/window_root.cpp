@@ -981,18 +981,6 @@ WMError WindowRoot::RequestActiveWindow(uint32_t windowId)
     return res;
 }
 
-std::shared_ptr<RSSurfaceNode> WindowRoot::GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const
-{
-    for (const auto& iter : windowNodeMap_) {
-        if (iter.second->abilityToken_ != abilityToken) {
-            continue;
-        }
-        return iter.second->surfaceNode_;
-    }
-    WLOGFE("could not find required abilityToken!");
-    return nullptr;
-}
-
 void WindowRoot::ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason)
 {
     for (auto& elem : windowNodeContainerMap_) {
@@ -1636,6 +1624,33 @@ bool WindowRoot::IsAppWindowExceed() const
     appWindowNum = (hasPrimarySplitWindow || hasSencondarySplitWindow) ? (appWindowNum + 1) : appWindowNum;
     WLOGFI("SwitchRender: the number of app window is %{public}d/%{public}d", appWindowNum, maxAppWindowNum);
     return (appWindowNum > maxAppWindowNum);
+}
+
+sptr<WindowNode> WindowRoot::GetWindowNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken)
+{
+    for (auto& iter : windowNodeMap_) {
+        if (iter.second != nullptr && iter.second->abilityToken_ == abilityToken) {
+            return iter.second;
+        }
+    }
+    WLOGFE("could not find required abilityToken!");
+    return nullptr;
+}
+
+bool WindowRoot::TakeWindowPairSnapshot(DisplayId displayId)
+{
+    auto container = GetWindowNodeContainer(displayId);
+    return container == nullptr ? false : container->TakeWindowPairSnapshot(displayId);
+}
+
+void WindowRoot::ClearWindowPairSnapshot(DisplayId displayId)
+{
+    auto container = GetWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("clear window pair snapshot failed, because container in null");
+        return;
+    }
+    return container->ClearWindowPairSnapshot(displayId);
 }
 } // namespace Rosen
 } // namespace OHOS
