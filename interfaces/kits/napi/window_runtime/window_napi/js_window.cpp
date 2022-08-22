@@ -904,6 +904,8 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         } else {
             avoidAreaType = static_cast<AvoidAreaType>(static_cast<uint32_t>(*nativeMode));
+            errCode = ((avoidAreaType > AvoidAreaType::TYPE_SYSTEM_GESTURE) ||
+                (avoidAreaType < AvoidAreaType::TYPE_SYSTEM)) ? WMError::WM_ERROR_INVALID_PARAM : WMError::WM_OK;
         }
     }
     AsyncTask::CompleteCallback complete =
