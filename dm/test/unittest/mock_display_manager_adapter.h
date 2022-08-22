@@ -40,6 +40,7 @@ public:
     MOCK_METHOD1(GetDisplayState, DisplayState(DisplayId displayId));
     MOCK_METHOD1(NotifyDisplayEvent, void(DisplayEvent event));
     MOCK_METHOD1(GetDisplayInfo, sptr<DisplayInfo>(DisplayId displayId));
+    MOCK_METHOD1(GetCutoutInfo, sptr<CutoutInfo>(DisplayId displayId));
 };
 
 class MockScreenManagerAdapter : public ScreenManagerAdapter {
