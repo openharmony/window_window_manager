@@ -90,6 +90,8 @@ public:
     void SetWindowUpdatedSizeLimits(const WindowSizeLimits& sizeLimits);
     void ComputeTransform();
     void SetTransform(const Transform& trans);
+    void SetSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
+    std::shared_ptr<Media::PixelMap> GetSnapshot();
 
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;
@@ -155,6 +157,7 @@ private:
     Rect entireWindowPointerHotArea_ { 0, 0, 0, 0 };
     std::vector<Rect> touchHotAreas_; // coordinates relative to display.
     std::vector<Rect> pointerHotAreas_; // coordinates relative to display.
+    std::shared_ptr<Media::PixelMap> snapshot_;
     int32_t callingPid_ = { 0 };
     int32_t inputCallingPid_ = { 0 };
     int32_t callingUid_ = { 0 };

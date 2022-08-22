@@ -372,5 +372,15 @@ uint32_t WindowNode::GetAccessTokenId() const
 {
     return property_->GetAccessTokenId();
 }
+
+void WindowNode::SetSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    snapshot_ = pixelMap;
+}
+
+std::shared_ptr<Media::PixelMap> WindowNode::GetSnapshot()
+{
+    return snapshot_;
+}
 } // namespace Rosen
 } // namespace OHOS
