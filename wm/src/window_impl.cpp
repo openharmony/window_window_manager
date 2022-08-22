@@ -1658,7 +1658,11 @@ WMError WindowImpl::Close()
 void WindowImpl::StartMove()
 {
     if (!WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
-        WLOGFI("[StartMove] current window can not be moved, windowId %{public}u", GetWindowId());
+        WLOGFE("[StartMove] current window can not be moved, windowId %{public}u", GetWindowId());
+        return;
+    }
+    if (!moveDragProperty_->pointEventStarted_) {
+        WLOGFE("[StartMove] pointerEvent has not been started");
         return;
     }
     moveDragProperty_->startMoveFlag_ = true;
