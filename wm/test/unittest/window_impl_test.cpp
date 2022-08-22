@@ -1317,6 +1317,113 @@ HWTEST_F(WindowImplTest, SetTouchHotAreas01, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: SetTransform01
+ * @tc.desc: set transform
+ * @tc.type: FUNC
+ * @tc.require: issueI5NDLK
+ */
+HWTEST_F(WindowImplTest, SetTransform01, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetTransform01");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    window->DisableAppWindowDecor();
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
+    Transform trans_;
+    window->SetTransform(trans_);
+    ASSERT_TRUE(trans_ == window->GetTransform());
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: SetTransform02
+ * @tc.desc: set transform and getTransform
+ * @tc.type: FUNC
+ * @tc.require: issueI5NDLK
+ */
+HWTEST_F(WindowImplTest, SetTransform02, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetTransform01");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    window->DisableAppWindowDecor();
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
+    Transform trans_;
+    trans_.pivotX_ = 1.0f;
+    trans_.pivotY_ = 0.6f;
+    window->SetTransform(trans_);
+    ASSERT_TRUE(trans_ != window->GetTransform());
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: SetTransform03
+ * @tc.desc: set transform and getTransform
+ * @tc.type: FUNC
+ * @tc.require: issueI5NDLK
+ */
+HWTEST_F(WindowImplTest, SetTransform03, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetTransform01");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    window->DisableAppWindowDecor();
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    Transform trans_;
+    trans_.pivotX_ = 1.0f;
+    trans_.pivotY_ = 0.6f;
+    window->SetTransform(trans_);
+    ASSERT_TRUE(trans_ == window->GetTransform());
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: SetTransform04
+ * @tc.desc: set transform and getTransform
+ * @tc.type: FUNC
+ * @tc.require: issueI5NDLK
+ */
+HWTEST_F(WindowImplTest, SetTransform04, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetTransform01");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    window->DisableAppWindowDecor();
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    Transform trans_;
+    trans_.pivotX_ = 1.0f;
+    trans_.pivotY_ = 0.6f;
+    Transform defaultTrans_;
+    window->SetTransform(trans_);
+    ASSERT_TRUE(defaultTrans_ != window->GetTransform());
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
