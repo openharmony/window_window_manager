@@ -1210,13 +1210,14 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
     }
     AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
     if (errCode == WMError::WM_OK) {
-        // Parse info->argv[0] as AvoidAreaType
         NativeNumber* nativeMode = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
         if (nativeMode == nullptr) {
             WLOGFE("[NAPI]Failed to convert parameter to AvoidAreaType");
             errCode = WMError::WM_ERROR_INVALID_PARAM;
         } else {
             avoidAreaType = static_cast<AvoidAreaType>(static_cast<uint32_t>(*nativeMode));
+            errCode = ((avoidAreaType > AvoidAreaType::TYPE_KEYBOARD) ||
+                (avoidAreaType < AvoidAreaType::TYPE_SYSTEM)) ? WMError::WM_ERROR_INVALID_PARAM : WMError::WM_OK;
         }
     }
     wptr<Window> weakToken(windowToken_);
@@ -1237,7 +1238,6 @@ NativeValue* JsWindow::OnGetAvoidArea(NativeEngine& engine, NativeCallbackInfo& 
                 avoidArea.rightRect_ = g_emptyRect;
                 avoidArea.bottomRect_ = g_emptyRect;
             }
-            // native avoidArea -> js avoidArea
             NativeValue* avoidAreaObj = ConvertAvoidAreaToJsValue(engine, avoidArea, avoidAreaType);
             if (avoidAreaObj != nullptr) {
                 task.Resolve(engine, avoidAreaObj);
