@@ -51,6 +51,7 @@ namespace {
  * @tc.name: StringUtil Trim
  * @tc.desc: test trim
  * @tc.type: FUNC
+ * @tc.require: issueI5M2SK
  */
 HWTEST_F(StringUtilTest, Trim, Function | SmallTest | Level1)
 {
