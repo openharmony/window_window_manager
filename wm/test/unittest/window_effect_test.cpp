@@ -41,6 +41,7 @@ namespace {
  * @tc.name: WindowEffect01
  * @tc.desc: set window corner radius
  * @tc.type: FUNC
+ * @tc.require: issueI5IUGI
  */
 HWTEST_F(WindowEffectTest, WindowEffect01, Function | SmallTest | Level2)
 {
@@ -64,6 +65,7 @@ HWTEST_F(WindowEffectTest, WindowEffect01, Function | SmallTest | Level2)
  * @tc.name: WindowEffect02
  * @tc.desc: set window shadow radius
  * @tc.type: FUNC
+ * @tc.require: issueI5IUGI
  */
 HWTEST_F(WindowEffectTest, WindowEffect02, Function | SmallTest | Level2)
 {
@@ -87,6 +89,7 @@ HWTEST_F(WindowEffectTest, WindowEffect02, Function | SmallTest | Level2)
  * @tc.name: WindowEffect03
  * @tc.desc: set window shadow color
  * @tc.type: FUNC
+ * @tc.require: issueI5IUGI
  */
 HWTEST_F(WindowEffectTest, WindowEffect03, Function | SmallTest | Level2)
 {
@@ -117,6 +120,7 @@ HWTEST_F(WindowEffectTest, WindowEffect03, Function | SmallTest | Level2)
  * @tc.name: WindowEffect04
  * @tc.desc: set window shadow offset
  * @tc.type: FUNC
+ * @tc.require: issueI5IUGI
  */
 HWTEST_F(WindowEffectTest, WindowEffect04, Function | SmallTest | Level2)
 {
@@ -145,6 +149,7 @@ HWTEST_F(WindowEffectTest, WindowEffect04, Function | SmallTest | Level2)
  * @tc.name: WindowEffect05
  * @tc.desc: set window blur radius
  * @tc.type: FUNC
+ * @tc.require: issueI5IUGI
  */
 HWTEST_F(WindowEffectTest, WindowEffect05, Function | SmallTest | Level2)
 {
@@ -168,6 +173,7 @@ HWTEST_F(WindowEffectTest, WindowEffect05, Function | SmallTest | Level2)
  * @tc.name: WindowEffect06
  * @tc.desc: set window backdrop blur radius
  * @tc.type: FUNC
+ * @tc.require: issueI5IUGI
  */
 HWTEST_F(WindowEffectTest, WindowEffect06, Function | SmallTest | Level2)
 {
@@ -191,6 +197,7 @@ HWTEST_F(WindowEffectTest, WindowEffect06, Function | SmallTest | Level2)
  * @tc.name: WindowEffect07
  * @tc.desc: set window backdrop blur style
  * @tc.type: FUNC
+ * @tc.require: issueI5IUGI
  */
 HWTEST_F(WindowEffectTest, WindowEffect07, Function | SmallTest | Level2)
 {
