@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace Rosen {
 /**
- * Enumerates the status of window pair.
+ * @brief Enumerates the status of window pair.
  */
 enum class WindowPairStatus : uint32_t {
     STATUS_EMPTY,
@@ -37,7 +37,7 @@ enum class WindowPairStatus : uint32_t {
 };
 
 /**
- * Enumerates the message of split event.
+ * @brief Enumerates the message of split event.
  */
 enum class SplitBroadcastMsg : uint32_t {
     MSG_NONE,
@@ -49,61 +49,61 @@ enum class SplitBroadcastMsg : uint32_t {
 class WindowPair : public RefBase {
 public:
     /**
-     * Constructor used to create an empty WindowPair instance.
+     * @brief Constructor used to create an empty WindowPair instance.
      *
      * @param displayId the display of window pair
      */
     explicit WindowPair(const DisplayId& displayId);
 
     /**
-     * Deconstructor used to deconstruct.
+     * @brief Deconstructor used to deconstruct.
      *
      */
     ~WindowPair();
 
     /**
-     * Clear window pair.
+     * @brief Clear window pair.
      *
      */
     void Clear();
 
     /**
-     * Set split ratio.
+     * @brief Set split ratio.
      *
      * @param ratio split ratio
      */
     void SetSplitRatio(float ratio);
 
     /**
-     * Get split ratio.
+     * @brief Get split ratio.
      *
      * @return split ratio
      */
     float GetSplitRatio() const;
 
     /**
-     * Get whether the window pair is paired..
+     * @brief Get whether the window pair is paired..
      *
      * @return the pair state of window pair
      */
     bool IsPaired() const;
 
     /**
-     * Handle changes in the state of the window pair
+     * @brief Handle changes in the state of the window pair
      *
      * @param node trigger window node
      */
     void UpdateIfSplitRelated(sptr<WindowNode>& node);
 
     /**
-     * Handle remove window from pair.
+     * @brief Handle remove window from pair.
      *
      * @param node target node
      */
     void HandleRemoveWindow(sptr<WindowNode>& node);
 
     /**
-     * Find window node from window pair.
+     * @brief Find window node from window pair.
      *
      * @param node target window node
      * @return window node
@@ -111,82 +111,91 @@ public:
     sptr<WindowNode> Find(sptr<WindowNode>& node);
 
     /**
-     * Get primary window node.
+     * @brief Get primary window node.
      *
      * @return primary window node
      */
     sptr<WindowNode> GetPrimaryWindow() const;
 
     /**
-     * Get secondary window node.
+     * @brief Get secondary window node.
      *
      * @return secondary window node
      */
     sptr<WindowNode> GetSecondaryWindow() const;
 
     /**
-     * Get divider window node.
+     * @brief Get divider window node.
      *
      * @return divider window node
      */
     sptr<WindowNode> GetDividerWindow() const;
 
     /**
-     * Get pair status.
+     * @brief Get pair status.
      *
      * @return the pair status of window pair
      */
     WindowPairStatus GetPairStatus() const;
 
     /**
-     * Get all window node form pair in Z order.
+     * @brief Get all window node form pair in Z order.
      *
      * @return the list window form pair
      */
     std::vector<sptr<WindowNode>> GetOrderedPair(sptr<WindowNode>& node);
 
     /**
-     * Get all window node form pair.
+     * @brief Get all window node form pair.
      *
      * @return the list window form pair
      */
     std::vector<sptr<WindowNode>> GetPairedWindows();
 
     /**
-     * Get whether dock slice is forbidden to move.
+     * @brief Get whether dock slice is forbidden to move.
      *
      * @return whether dock slice is forbidden to move
      */
     bool IsForbidDockSliceMove() const;
 
     /**
-     * when dock slice in exit split screen mode area,
-     * exit split screen mode.
+     * @brief Exit split screen mode when dock slice in exit split screen mode area.
      */
     void ExitSplitMode();
 
     /**
-     * whether dock slice in exit split screen mode area
+     * @brief whether dock slice in exit split screen mode area
      */
     bool IsDockSliceInExitSplitModeArea(const std::vector<int32_t>& exitSplitPoints);
 
     /**
-     * Set the initial rect of divider window.
+     * @brief Set the initial rect of divider window.
      *
      * @param rect divider window rect
      */
     void SetDividerRect(const Rect& rect);
 
     /**
-     * Update divider window rect when display orientation changed.
+     * @brief Update divider window rect when display orientation changed.
      *
      * @param rect default divider rect
      */
     void RotateDividerWindow(const Rect& rect);
 
+    /**
+     * @brief Take window pair node snapshot.
+     */
+    bool TakePairSnapshot();
+
+    /**
+     * @brief Clear window pair node snapshot.
+     */
+    void ClearPairSnapshot();
+
 private:
     /**
-     * Gets whether the window is related to split window.
+     * @brief Gets whether the window is related to split window.
      *
      * @param node target node
      * @return Whether target node is related to the split window
@@ -194,38 +203,38 @@ private:
     bool IsSplitRelated(sptr<WindowNode>& node) const;
 
     /**
-     * Replace paired window.
+     * @brief Replace paired window.
      *
      * @param node current node
      */
     void Insert(sptr<WindowNode>& node);
 
     /**
-     * Update paired window node
+     * @brief Update paired window node
      *
      */
     void HandlePairedNodesChange();
 
     /**
-     * Update pair status
+     * @brief Update pair status
      *
      */
     void UpdateWindowPairStatus();
 
     /**
-     * Switch the position of two paired window.
+     * @brief Switch the position of two paired window.
      *
      */
     void SwitchPosition();
 
     /**
-     * Dump the info of pair.
+     * @brief Dump the info of pair.
      *
      */
     void DumpPairInfo();
 
     /**
-     * Send broadcast message of split event.
+     * @brief Send broadcast message of split event.
      *
      * @param node trigger node
      */

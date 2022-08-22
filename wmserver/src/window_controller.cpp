@@ -697,7 +697,9 @@ WMError WindowController::ProcessPointDown(uint32_t windowId)
     }
 
     NotifyTouchOutside(node);
-
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        windowRoot_->TakeWindowPairSnapshot(node->GetDisplayId());
+    }
     WLOGFI("process point down, windowId: %{public}u", windowId);
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     WMError focusRes = windowRoot_->RequestFocus(windowId);
@@ -725,6 +727,7 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
         if (windowRoot_->IsDockSliceInExitSplitModeArea(displayId)) {
             windowRoot_->ExitSplitMode(displayId);
         } else {
+            windowRoot_->ClearWindowPairSnapshot(node->GetDisplayId());
             auto property = node->GetWindowProperty();
             node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG_END);
             property->SetRequestRect(property->GetWindowRect());
