@@ -363,6 +363,24 @@ public:
         return PointInfo { static_cast<uint32_t>(originPos.x_), static_cast<uint32_t>(originPos.y_) };
     }
 
+    // This method is used to update transform when rect changed, but world transform matrix should not change.
+    static void GetTransformFromWorldMat4(const TransformHelper::Matrix4& inWorldMat, const Rect& rect,
+        Transform& transform)
+    {
+        TransformHelper::Vector3 pivotPos = { rect.posX_ + transform.pivotX_ * rect.width_,
+            rect.posY_ + transform.pivotY_ * rect.height_, 0 };
+        TransformHelper::Matrix4 worldMat = TransformHelper::CreateTranslation(pivotPos) * inWorldMat *
+                        TransformHelper::CreateTranslation(-pivotPos);
+        auto scale = worldMat.GetScale();
+        auto translation = worldMat.GetTranslation();
+        transform.scaleX_ = scale.x_;
+        transform.scaleY_ = scale.y_;
+        transform.scaleZ_ = scale.z_;
+        transform.translateX_ = translation.x_;
+        transform.translateY_ = translation.y_;
+        transform.translateZ_ = translation.z_;
+    }
+
     static TransformHelper::Matrix4 ComputeWorldTransformMat4(const Transform& transform)
     {
         TransformHelper::Matrix4 ret = TransformHelper::Matrix4::Identity;
