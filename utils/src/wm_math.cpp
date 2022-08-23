@@ -183,31 +183,6 @@ Vector3 Matrix4::GetTranslation() const
     return Vector3(mat_[3][0], mat_[3][1], mat_[3][2]);
 }
 
-Plane::Plane(const Vector3& normal, float d)
-    : normal_(normal), d_(d)
-{
-}
-
-Plane::Plane(const Vector3& a, const Vector3& b, const Vector3& c)
-{
-    Vector3 ab = b - a;
-    Vector3 ac = c - a;
-    normal_ = Vector3::Cross(ab, ac);
-    normal_.Normalize();
-    d_ = -Vector3::Dot(a, normal_);
-}
-
-float Plane::ComponentZ(float x, float y) const
-{
-    return (-d_ - normal_.x_ * x - normal_.y_ * y) / normal_.z_;
-}
-
-float Plane::ParallelDistanceGrad(const Vector3& a, const Vector3& b) const
-{
-    Vector2 axy(a.x_, a.y_), bxy(b.x_, b.y_);
-    return (b - a).Length() * std::abs(normal_.z_) / (bxy - axy).Length();
-}
-
 // Create a scale matrix with x and y scales
 Matrix3 CreateScale(float xScale, float yScale)
 {
@@ -297,6 +272,34 @@ Matrix4 CreateTranslation(const Vector3& trans)
     } };
 }
 
+Matrix4 CreateLookAt(const Vector3& eye, const Vector3& target, const Vector3& up)
+{
+    Vector3 zaxis = Vector3::Normalize(target - eye);
+    Vector3 xaxis = Vector3::Normalize(Vector3::Cross(up, zaxis));
+    Vector3 yaxis = Vector3::Normalize(Vector3::Cross(zaxis, xaxis));
+    Vector3 trans;
+    trans.x_ = -Vector3::Dot(xaxis, eye);
+    trans.y_ = -Vector3::Dot(yaxis, eye);
+    trans.z_ = -Vector3::Dot(zaxis, eye);
+
+    return { {
+        { xaxis.x_, yaxis.x_, zaxis.x_, 0.0f },
+        { xaxis.y_, yaxis.y_, zaxis.y_, 0.0f },
+        { xaxis.z_, yaxis.z_, zaxis.z_, 0.0f },
+        { trans.x_, trans.y_, trans.z_, 1.0f }
+    } };
+}
+
+Matrix4 CreatePerspective(const Vector3& camera)
+{
+    return { {
+        { std::abs(camera.z_), 0.0f,                0.0f, 0.0f },
+        { 0.0f,                std::abs(camera.z_), 0.0f, 0.0f },
+        { camera.x_,           camera.y_,           0.0f, 1.0f },
+        { 0.0f,                0.0f,                1.0f, 0.0f },
+    } };
+}
+
 // Transform a Vector2 in xy-plane by matrix3
 Vector2 Transform(const Vector2& vec, const Matrix3& mat)
 {
@@ -311,12 +314,48 @@ Vector3 Transform(const Vector3& vec, const Matrix4& mat)
 {
     Vector3 retVal;
     retVal.x_ = vec.x_ * mat.mat_[0][0] + vec.y_ * mat.mat_[1][0] +
-        vec.z_ * mat.mat_[2][0] + mat.mat_[3][0];
+        vec.z_ * mat.mat_[2][0] + mat.mat_[3][0]; // 2: row2, 3: row3
     retVal.y_ = vec.x_ * mat.mat_[0][1] + vec.y_ * mat.mat_[1][1] +
         vec.z_ * mat.mat_[2][1] + mat.mat_[3][1];
     retVal.z_ = vec.x_ * mat.mat_[0][2] + vec.y_ * mat.mat_[1][2] +
         vec.z_ * mat.mat_[2][2] + mat.mat_[3][2];
     return retVal;
+}
+
+// Transform the vector and renormalize the w component
+Vector3 TransformWithPerspDiv(const Vector3& vec, const Matrix4& mat, float w)
+{
+    Vector3 retVal;
+    retVal.x_ = vec.x_ * mat.mat_[0][0] + vec.y_ * mat.mat_[1][0] +
+        vec.z_ * mat.mat_[2][0] + w * mat.mat_[3][0]; // 2: row2, 3: row3
+    retVal.y_ = vec.x_ * mat.mat_[0][1] + vec.y_ * mat.mat_[1][1] +
+        vec.z_ * mat.mat_[2][1] + w * mat.mat_[3][1]; // 2: row2, 3: row3
+    retVal.z_ = vec.x_ * mat.mat_[0][2] + vec.y_ * mat.mat_[1][2] +
+        vec.z_ * mat.mat_[2][2] + w * mat.mat_[3][2]; // 2: row2, 3: row3
+    float transformedW = vec.x_ * mat.mat_[0][3] + vec.y_ * mat.mat_[1][3] +
+        vec.z_ * mat.mat_[2][3] + w * mat.mat_[3][3]; // 2: row2, 3: row3
+    if (!MathHelper::NearZero(transformedW)) {
+        transformedW = 1.0f / transformedW;
+        retVal *= transformedW;
+    }
+    return retVal;
+}
+
+// Given a screen point, unprojects it into origin position at screen,
+// based on the current transform matrix
+Vector2 GetOriginScreenPoint(const Vector2& p, const Matrix4& mat)
+{
+    Matrix4 invertMat = mat;
+    invertMat.Invert();
+    // Get start point
+    Vector3 screenPoint(p.x_, p.y_, 0.1f);
+    Vector3 start = TransformWithPerspDiv(screenPoint, invertMat);
+    // Get end point
+    screenPoint.z_ = 0.9f;
+    Vector3 end = TransformWithPerspDiv(screenPoint, invertMat);
+    // Get the intersection point of line start-end and xy plane
+    float t = end.z_ / (end.z_ - start.z_);
+    return Vector2(t * start.x_ + (1 - t) * end.x_, t * start.y_ + (1 - t) * end.y_);
 }
 } // namespace TransformHelper
 } // namespace OHOS::Rosen

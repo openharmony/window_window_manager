@@ -18,6 +18,7 @@
 
 #include <refbase.h>
 #include <rs_iwindow_animation_controller.h>
+#include <rs_window_animation_finished_callback.h>
 #include <rs_window_animation_target.h>
 
 #include "wm_common.h"
@@ -45,22 +46,30 @@ public:
         sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& dstNode);
     static TransitionEvent GetTransitionEvent(sptr<WindowTransitionInfo> srcInfo,
         sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode);
-    static WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
+    static WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller,
+        const sptr<WindowRoot>& windowRoot);
     static WMError NotifyAnimationTransition(sptr<WindowTransitionInfo> srcInfo, sptr<WindowTransitionInfo> dstInfo,
-        const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode, sptr<WindowRoot>& windowRoot);
-    static WMError NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode,
-        sptr<WindowRoot>& windowRoot);
+        const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode);
+    static WMError NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
     static WMError NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode,
-        TransitionEvent event, sptr<WindowRoot>& windowRoot);
+        TransitionEvent event);
     static void OnRemoteDie(const sptr<IRemoteObject>& remoteObject);
     static bool CheckAnimationController();
-    static WMError NotifyAnimationByHome(sptr<WindowRoot>& windowRoot);
+    static WMError NotifyAnimationByHome();
     static WMError NotifyAnimationScreenUnlock(std::function<void(void)> callback);
+    static void SetMainTaskHandler(std::shared_ptr<AppExecFwk::EventHandler> handler);
+    static void NotifyAnimationTargetsUpdate(std::vector<uint32_t>& fullScreenWinIds,
+        std::vector<uint32_t>& floatWinIds);
     static bool isRemoteAnimationEnable_;
 private:
     static sptr<RSWindowAnimationTarget> CreateWindowAnimationTarget(sptr<WindowTransitionInfo> info,
-        const sptr<WindowNode>& windowNode);
+        const sptr<WindowNode>& windowNode, bool isUpdate = false);
+    static WMError NotifyAnimationStartApp(sptr<WindowTransitionInfo> srcInfo,
+        const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode,
+        sptr<RSWindowAnimationTarget>& dstTarget, sptr<RSWindowAnimationFinishedCallback>& finishedCallback);
     static sptr<RSIWindowAnimationController> windowAnimationController_;
+    static wptr<WindowRoot> windowRoot_;
+    static std::weak_ptr<AppExecFwk::EventHandler> wmsTaskHandler_;
 };
 } // Rosen
 } // OHOS

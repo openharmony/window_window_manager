@@ -37,6 +37,7 @@
 #include "permission.h"
 #include "remote_animation.h"
 #include "singleton_container.h"
+#include "starting_window.h"
 #include "ui/rs_ui_director.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
@@ -96,6 +97,18 @@ void WindowManagerService::OnStart()
     RegisterWindowManagerServiceHandler();
     RegisterWindowVisibilityChangeCallback();
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    sptr<IRSScreenChangeListener> rSScreenChangeListener = new IRSScreenChangeListener();
+    rSScreenChangeListener->onConnected_
+        = std::bind(&WindowManagerService::OnRSScreenConnected, this);
+    rSScreenChangeListener->onDisconnected_
+        = std::bind(&WindowManagerService::OnRSScreenDisconnected, this);
+    DisplayManagerServiceInner::GetInstance().RegisterRSScreenChangeListener(rSScreenChangeListener);
+    RenderModeChangeCallback renderModeChangeCb
+        = std::bind(&WindowManagerService::OnRenderModeChanged, this, std::placeholders::_1);
+    rsInterface_.SetRenderModeChangeCallback(renderModeChangeCb);
+    if (windowRoot_->GetMaxUniRenderAppWindowNumber() <= 0) {
+        rsInterface_.UpdateRenderMode(false);
+    }
 }
 
 void WindowManagerService::PostAsyncTask(Task task)
@@ -313,6 +326,16 @@ void WindowManagerService::ConfigureWindowManagerService()
     if (item.IsBool()) {
         systemConfig_.isStretchable_ = item.boolValue_;
     }
+    item = config["defaultWindowMode"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 &&
+            (numbers[0] == static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
+             numbers[0] == static_cast<uint32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+            systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(numbers[0]));
+            StartingWindow::SetDefaultWindowMode(systemConfig_.defaultWindowMode_);
+        }
+    }
     item = config["remoteAnimation"].GetProp("enable");
     if (item.IsBool()) {
         RemoteAnimation::isRemoteAnimationEnable_ = item.boolValue_;
@@ -322,6 +345,13 @@ void WindowManagerService::ConfigureWindowManagerService()
         auto numbers = *item.intsValue_;
         if (numbers.size() == 1 && numbers[0] > 0) {
             windowRoot_->SetMaxAppWindowNumber(static_cast<uint32_t>(numbers[0]));
+        }
+    }
+    item = config["maxUniRenderAppWindowNumber"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 && numbers[0] > 0) {
+            windowRoot_->SetMaxUniRenderAppWindowNumber(static_cast<uint32_t>(numbers[0]));
         }
     }
     item = config["modeChangeHotZones"];
@@ -763,6 +793,7 @@ WMError WindowManagerService::SetWindowAnimationController(const sptr<RSIWindowA
         }
     );
     controller->AsObject()->AddDeathRecipient(deathRecipient);
+    RemoteAnimation::SetMainTaskHandler(handler_);
     return PostSyncTask([this, &controller]() {
         return windowController_->SetWindowAnimationController(controller);
     });
@@ -1060,6 +1091,27 @@ void WindowManagerService::RecordShowTimeEvent(int64_t costTime)
             showWindowTimeConfig_.above50msTimes_ = 0;
         }
     }
+}
+
+void WindowManagerService::OnRSScreenConnected()
+{
+    PostAsyncTask([this]() {
+        windowRoot_->SwitchRenderModeIfNeeded(true);
+    });
+}
+
+void WindowManagerService::OnRSScreenDisconnected()
+{
+    PostAsyncTask([this]() {
+        windowRoot_->SwitchRenderModeIfNeeded(false);
+    });
+}
+
+void WindowManagerService::OnRenderModeChanged(bool isUniRender)
+{
+    PostAsyncTask([this, isUniRender]() {
+        windowRoot_->OnRenderModeChanged(isUniRender);
+    });
 }
 } // namespace Rosen
 } // namespace OHOS

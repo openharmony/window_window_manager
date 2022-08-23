@@ -37,11 +37,12 @@ public:
     void OnScreenConnect(sptr<ScreenInfo> screenInfo);
     void OnScreenDisconnect(ScreenId);
     void OnScreenChange(sptr<ScreenInfo>, ScreenChangeEvent);
-    void OnScreenGroupChange(const sptr<ScreenInfo>&, ScreenGroupChangeEvent);
-    void OnScreenGroupChange(const std::vector<sptr<ScreenInfo>>&, ScreenGroupChangeEvent);
+    void OnScreenGroupChange(const std::string&, const sptr<ScreenInfo>&, ScreenGroupChangeEvent);
+    void OnScreenGroupChange(const std::string&, const std::vector<sptr<ScreenInfo>>&, ScreenGroupChangeEvent);
     void OnDisplayCreate(sptr<DisplayInfo>);
     void OnDisplayDestroy(DisplayId);
     void OnDisplayChange(sptr<DisplayInfo>, DisplayChangeEvent);
+    void OnScreenshot(sptr<ScreenshotInfo>);
 
 private:
     DisplayManagerAgentController() {}

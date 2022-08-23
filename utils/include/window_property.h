@@ -49,6 +49,7 @@ public:
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
     void SetPrivacyMode(bool isPrivate);
+    void SetSystemPrivacyMode(bool isSystemPrivate);
     void SetTransparent(bool isTransparent);
     void SetAlpha(float alpha);
     void SetBrightness(float brightness);
@@ -92,6 +93,7 @@ public:
     bool GetTouchable() const;
     uint32_t GetCallingWindow() const;
     bool GetPrivacyMode() const;
+    bool GetSystemPrivacyMode() const;
     bool GetTransparent() const;
     bool GetTokenState() const;
     float GetAlpha() const;
@@ -117,6 +119,7 @@ public:
     WindowSizeLimits GetSizeLimits() const;
     WindowSizeLimits GetUpdatedSizeLimits() const;
     const TransformHelper::Matrix4& GetTransformMat() const;
+    const TransformHelper::Matrix4& GetWorldTransformMat() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
@@ -138,13 +141,14 @@ private:
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     bool decoStatus_ { false }; // window has been decorated or not
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
-    WindowMode mode_ { WindowMode::WINDOW_MODE_FULLSCREEN };
-    WindowMode lastMode_ { WindowMode::WINDOW_MODE_FULLSCREEN };
+    WindowMode mode_ { WindowMode::WINDOW_MODE_UNDEFINED };
+    WindowMode lastMode_ { WindowMode::WINDOW_MODE_UNDEFINED };
     uint32_t flags_ { 0 };
     bool isFullScreen_ { true };
     bool focusable_ { true };
     bool touchable_ { true };
     bool isPrivacyMode_ { false };
+    bool isSystemPrivacyMode_ { false };
     bool isTransparent_ { false };
     bool tokenState_ { false };
     float alpha_ { 1.0f };
@@ -176,9 +180,9 @@ private:
     Transform trans_;
     bool recomputeTransformMat_ { false };
     TransformHelper::Matrix4 transformMat_ = TransformHelper::Matrix4::Identity;
+    TransformHelper::Matrix4 worldTransformMat_ = TransformHelper::Matrix4::Identity;
 
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
-    DEFINE_VAR_FUNC_GET_SET(TransformHelper::Plane, Plane, windowPlane);
     WindowSizeLimits sizeLimits_;
     WindowSizeLimits updatedSizeLimits_;
 };

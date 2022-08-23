@@ -320,6 +320,7 @@ void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> o
 {
     std::vector<std::pair<uint64_t, bool>> visibilityChangeInfo = GetWindowVisibilityChangeInfo(occlusionData);
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    bool hasAppWindowChange = false;
     for (const auto& elem : visibilityChangeInfo) {
         uint64_t surfaceId = elem.first;
         bool isVisible = elem.second;
@@ -332,11 +333,17 @@ void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> o
             continue;
         }
         node->isVisible_ = isVisible;
+        WindowType winType = node->GetWindowType();
+        hasAppWindowChange = (winType >= WindowType::APP_WINDOW_BASE && winType < WindowType::APP_WINDOW_END);
         windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
             node->GetCallingUid(), isVisible, node->GetWindowType()));
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, isVisible:%{public}d",
             node->GetWindowId(), isVisible);
     }
+    if (hasAppWindowChange) {
+        SwitchRenderModeIfNeeded();
+    }
+
     if (windowVisibilityInfos.size() != 0) {
         WindowManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
     }
@@ -482,6 +489,36 @@ bool WindowRoot::NeedToStopAddingNode(sptr<WindowNode>& node, const sptr<WindowN
     return false;
 }
 
+Rect WindowRoot::GetDisplayRectWithoutSystemBarAreas(DisplayId displayId)
+{
+    std::map<WindowType, Rect> systemBarRects;
+    for (const auto& it : windowNodeMap_) {
+        if (it.second && (it.second->GetDisplayId() == displayId) &&
+            WindowHelper::IsSystemBarWindow(it.second->GetWindowType())) {
+            systemBarRects[it.second->GetWindowType()] = it.second->GetWindowRect();
+        }
+    }
+    auto container = GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("GetDisplayRectWithoutSystemBarAreas failed, window container could not be found");
+        return {0, 0, 0, 0}; // empty rect
+    }
+    auto displayRect = container->GetDisplayRect(displayId);
+    Rect targetRect = displayRect;
+    if (systemBarRects.count(WindowType::WINDOW_TYPE_STATUS_BAR)) {
+        targetRect.posY_ = displayRect.posY_ + systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].height_;
+        targetRect.height_ -= systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].height_;
+        WLOGFD("after status bar winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
+            targetRect.posX_, targetRect.posY_, targetRect.width_, targetRect.height_);
+    }
+    if (systemBarRects.count(WindowType::WINDOW_TYPE_NAVIGATION_BAR)) {
+        targetRect.height_ -= systemBarRects[WindowType::WINDOW_TYPE_NAVIGATION_BAR].height_;
+        WLOGFD("after navi bar winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
+            targetRect.posX_, targetRect.posY_, targetRect.width_, targetRect.height_);
+    }
+    return targetRect;
+}
+
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin)
 {
     if (node == nullptr) {
@@ -514,6 +551,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
         if (res != WMError::WM_OK) {
             MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
         }
+        SwitchRenderModeIfNeeded(true, node);
         return res;
     }
     // limit number of main window
@@ -537,7 +575,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
         WLOGFE("AddWindowNode failed with ret: %{public}u", static_cast<uint32_t>(res));
         return res;
     }
-
+    SwitchRenderModeIfNeeded(true, node);
     return PostProcessAddWindowNode(node, parentNode, container);
 }
 
@@ -566,6 +604,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
             HandleKeepScreenOn(child->GetWindowId(), false);
         }
         HandleKeepScreenOn(windowId, false);
+        SwitchRenderModeIfNeeded(false, node);
     }
     while (nextOrientationWindow != nullptr && !WindowHelper::IsMainWindow(nextOrientationWindow->GetWindowType())) {
         nextOrientationWindow = nextOrientationWindow->parent_;
@@ -681,7 +720,13 @@ WMError WindowRoot::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
         WLOGFE("set window mode failed, window container could not be found");
         return WMError::WM_ERROR_NULLPTR;
     }
+    WindowMode curWinMode = node->GetWindowMode();
     auto res = container->SetWindowMode(node, dstMode);
+    if (res == WMError::WM_OK
+        && (WindowHelper::IsSplitWindowMode(curWinMode) || WindowHelper::IsSplitWindowMode(dstMode))) {
+        WLOGFI("SwitchRender: split mode changed");
+        SwitchRenderModeIfNeeded();
+    }
     if (WindowHelper::IsRotatableWindow(node->GetWindowType(), node->GetWindowMode())) {
         DisplayManagerServiceInner::GetInstance().
             SetOrientationFromWindow(node->GetDisplayId(), node->GetRequestedOrientation());
@@ -717,6 +762,7 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
             if (res != WMError::WM_OK) {
                 WLOGFE("RemoveWindowNode failed");
             }
+            SwitchRenderModeIfNeeded(false, node);
             return DestroyWindowInner(node);
         } else {
             std::vector<uint32_t> windowIds;
@@ -733,6 +779,7 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
                     node->GetWindowToken()->NotifyDestroy();
                 }
             }
+            SwitchRenderModeIfNeeded(false, node);
             return res;
         }
     }
@@ -936,18 +983,6 @@ WMError WindowRoot::RequestActiveWindow(uint32_t windowId)
     return res;
 }
 
-std::shared_ptr<RSSurfaceNode> WindowRoot::GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const
-{
-    for (const auto& iter : windowNodeMap_) {
-        if (iter.second->abilityToken_ != abilityToken) {
-            continue;
-        }
-        return iter.second->surfaceNode_;
-    }
-    WLOGFE("could not find required abilityToken!");
-    return nullptr;
-}
-
 void WindowRoot::ProcessWindowStateChange(WindowState state, WindowStateChangeReason reason)
 {
     for (auto& elem : windowNodeContainerMap_) {
@@ -1032,7 +1067,8 @@ WMError WindowRoot::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
     }
     if (!node->children_.empty()) {
         auto iter = node->children_.rbegin();
-        if (WindowHelper::IsSubWindow((*iter)->GetWindowType())) {
+        if (WindowHelper::IsSubWindow((*iter)->GetWindowType()) ||
+            WindowHelper::IsSystemSubWindow((*iter)->GetWindowType())) {
             topWinId = (*iter)->GetWindowId();
             return WMError::WM_OK;
         }
@@ -1340,6 +1376,16 @@ void WindowRoot::SetMaxAppWindowNumber(uint32_t windowNum)
     maxAppWindowNumber_ = windowNum;
 }
 
+void WindowRoot::SetMaxUniRenderAppWindowNumber(uint32_t uniAppWindowNum)
+{
+    maxUniRenderAppWindowNumber_ = uniAppWindowNum;
+}
+
+uint32_t WindowRoot::GetMaxUniRenderAppWindowNumber() const
+{
+    return maxUniRenderAppWindowNumber_;
+}
+
 void WindowRoot::SetSplitRatios(const std::vector<float>& splitRatioNumbers)
 {
     auto& splitRatios = splitRatioConfig_.splitRatios;
@@ -1457,6 +1503,156 @@ bool WindowRoot::CheckMultiDialogWindows(WindowType type, sptr<IRemoteObject> to
     }
 
     return false;
+}
+
+void WindowRoot::OnRenderModeChanged(bool isUniRender)
+{
+    WLOGFI("SwitchRender: render mode changed to %{public}d", isUniRender);
+    renderMode_ = isUniRender ? RenderMode::UNIFIED : RenderMode::SEPARATED;
+}
+
+void WindowRoot::SwitchRenderModeIfNeeded(bool isAddNode, const sptr<WindowNode>& node)
+{
+    WindowType winType = node->GetWindowType();
+    if (winType < WindowType::APP_WINDOW_BASE || winType > WindowType::APP_WINDOW_END) {
+        return;
+    }
+
+    if (isAddNode) {
+        WLOGFI("SwitchRender: one app window is added, WindowType=%{public}d", winType);
+        if (renderMode_ == RenderMode::SEPARATED) {
+            WLOGFD("SwitchRender: separated mode neednot change.");
+            return;
+        } else {
+            if (IsAppWindowExceed()) {
+                // switch to sperate render mode
+                WLOGFI("SwitchRender: notify RS to separated");
+                RSInterfaces::GetInstance().UpdateRenderMode(false);
+            }
+        }
+    } else {
+        WLOGFI("SwitchRender: one app window is removed, WindowType=%{public}d", winType);
+        uint32_t rsScreenNum = DisplayManagerServiceInner::GetInstance().GetRSScreenNum();
+        if (renderMode_ == RenderMode::UNIFIED || rsScreenNum > 1) {
+            WLOGFD("SwitchRender: mode %{public}u neednot change. RSScreenNum=%{public}u",
+                static_cast<uint32_t>(renderMode_), rsScreenNum);
+            return;
+        } else {
+            if (!IsAppWindowExceed()) {
+                // switch to unified render mode
+                WLOGFI("SwitchRender: notify RS to unified");
+                RSInterfaces::GetInstance().UpdateRenderMode(true);
+            }
+        }
+    }
+}
+
+void WindowRoot::SwitchRenderModeIfNeeded(bool connectNewRSScreen)
+{
+    uint32_t rsScreenNum = DisplayManagerServiceInner::GetInstance().GetRSScreenNum();
+    WLOGFI("SwitchRender: RSScreen changed, addFlag=%{public}d, num=%{public}u", connectNewRSScreen, rsScreenNum);
+    if (connectNewRSScreen && (renderMode_ == RenderMode::SEPARATED)) {
+        return;
+    }
+    if (!connectNewRSScreen && (renderMode_ == RenderMode::UNIFIED)) {
+        WLOGFE("SwitchRender: previous state of switchRender maybe wrong. connectNewRSScreen:%{public}d",
+            connectNewRSScreen);
+        return;
+    }
+    if (rsScreenNum <= 1 && !IsAppWindowExceed() && renderMode_ != RenderMode::UNIFIED) {
+        // switch to unified render mode
+        WLOGFI("SwitchRender: notify RS to unified");
+        RSInterfaces::GetInstance().UpdateRenderMode(true);
+    } else if (rsScreenNum > 1 && renderMode_ != RenderMode::SEPARATED) {
+        // switch to sperate render mode
+        WLOGFI("SwitchRender: notify RS to separated");
+        RSInterfaces::GetInstance().UpdateRenderMode(false);
+    } else {
+        WLOGFE("SwitchRender: impossible code");
+    }
+}
+
+void WindowRoot::SwitchRenderModeIfNeeded()
+{
+    uint32_t rsScreenNum = DisplayManagerServiceInner::GetInstance().GetRSScreenNum();
+    if (renderMode_ == RenderMode::SEPARATED && rsScreenNum > 1) {
+        WLOGFD("SwitchRender: separated mode neednot change. RSScreenNum=%{public}u", rsScreenNum);
+        return;
+    }
+    bool exceed = IsAppWindowExceed();
+    if (exceed) {
+        if (renderMode_ != RenderMode::SEPARATED) {
+            // switch to sperate render mode
+            WLOGFI("SwitchRender: notify RS change separated");
+            RSInterfaces::GetInstance().UpdateRenderMode(false);
+        }
+    } else {
+        if (renderMode_ == RenderMode::UNIFIED || rsScreenNum > 1) {
+            WLOGFD("SwitchRender: mode %{public}u neednot change. RSScreenNum=%{public}u",
+                static_cast<uint32_t>(renderMode_), rsScreenNum);
+            return;
+        } else {
+            // switch to unified render mode
+            WLOGFI("SwitchRender: notify RS to unified");
+            RSInterfaces::GetInstance().UpdateRenderMode(true);
+        }
+    }
+}
+
+bool WindowRoot::IsAppWindowExceed() const
+{
+    uint32_t appWindowNum = 0;
+    uint32_t maxAppWindowNum = maxUniRenderAppWindowNumber_;
+    bool hasPrimarySplitWindow = false;
+    bool hasSencondarySplitWindow = false;
+    for (const auto& it : windowNodeMap_) {
+        WindowType winType = it.second->GetWindowType();
+        WindowMode winMode = it.second->GetWindowMode();
+        bool isVisible = it.second->isVisible_;
+        bool isPrimarySplitWindow = (winMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+        bool isSencondarySplitWindow = (winMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+        hasPrimarySplitWindow |= isPrimarySplitWindow;
+        hasSencondarySplitWindow |= isSencondarySplitWindow;
+        if (winType >= WindowType::APP_WINDOW_BASE && winType < WindowType::APP_WINDOW_END
+            && isVisible && !isPrimarySplitWindow && !isSencondarySplitWindow) {
+            appWindowNum++;
+            if (appWindowNum > maxAppWindowNum) {
+                WLOGFI("SwitchRender: the number of app window exceed: %{public}d/%{public}d",
+                    appWindowNum, maxAppWindowNum);
+                return true;
+            }
+        }
+    }
+    appWindowNum = (hasPrimarySplitWindow || hasSencondarySplitWindow) ? (appWindowNum + 1) : appWindowNum;
+    WLOGFI("SwitchRender: the number of app window is %{public}d/%{public}d", appWindowNum, maxAppWindowNum);
+    return (appWindowNum > maxAppWindowNum);
+}
+
+sptr<WindowNode> WindowRoot::GetWindowNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken)
+{
+    for (auto& iter : windowNodeMap_) {
+        if (iter.second != nullptr && iter.second->abilityToken_ == abilityToken) {
+            return iter.second;
+        }
+    }
+    WLOGFE("could not find required abilityToken!");
+    return nullptr;
+}
+
+bool WindowRoot::TakeWindowPairSnapshot(DisplayId displayId)
+{
+    auto container = GetWindowNodeContainer(displayId);
+    return container == nullptr ? false : container->TakeWindowPairSnapshot(displayId);
+}
+
+void WindowRoot::ClearWindowPairSnapshot(DisplayId displayId)
+{
+    auto container = GetWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        WLOGFE("clear window pair snapshot failed, because container in null");
+        return;
+    }
+    return container->ClearWindowPairSnapshot(displayId);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -112,6 +112,9 @@ public:
     WMError IsTileRectSatisfiedWithSizeLimits(sptr<WindowNode>& node);
     bool HasPrivateWindow();
     static AnimationConfig& GetAnimationConfigRef();
+    bool TakeWindowPairSnapshot(DisplayId displayId);
+    void ClearWindowPairSnapshot(DisplayId displayId);
+
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
@@ -138,7 +141,6 @@ private:
     void RecoverScreenDefaultOrientationIfNeed(DisplayId displayId);
     void RaiseOrderedWindowToTop(std::vector<sptr<WindowNode>>& orderedNodes,
         std::vector<sptr<WindowNode>>& windowNodes);
-    static bool ReadIsWindowAnimationEnabledProperty();
     void DumpScreenWindowTree();
     void RaiseInputMethodWindowPriorityIfNeeded(const sptr<WindowNode>& node) const;
     void ReZOrderShowWhenLockedWindowIfNeeded(const sptr<WindowNode>& node);

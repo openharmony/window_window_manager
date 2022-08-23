@@ -62,7 +62,6 @@ public:
     WMError MinimizeStructuredAppWindowsExceptSelf(sptr<WindowNode>& node);
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType);
     WMError SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode);
-    std::shared_ptr<RSSurfaceNode> GetSurfaceNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken) const;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     void MinimizeAllAppWindows(DisplayId displayId);
     WMError ToggleShownStateForAllAppWindows();
@@ -86,6 +85,8 @@ public:
     void HandleKeepScreenOn(uint32_t windowId, bool requireLock);
     void UpdateFocusableProperty(uint32_t windowId);
     void SetMaxAppWindowNumber(uint32_t windowNum);
+    void SetMaxUniRenderAppWindowNumber(uint32_t uniAppWindowNum);
+    uint32_t GetMaxUniRenderAppWindowNumber() const;
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     std::vector<DisplayId> GetAllDisplayIds() const;
@@ -101,8 +102,22 @@ public:
     sptr<WindowNode> FindDialogCallerNode(WindowType type, sptr<IRemoteObject> token);
     bool CheckMultiDialogWindows(WindowType type, sptr<IRemoteObject> token);
     bool HasPrivateWindow(DisplayId displayId);
+    Rect GetDisplayRectWithoutSystemBarAreas(DisplayId displayId);
+    void SwitchRenderModeIfNeeded(bool addNode, const sptr<WindowNode>& node);
+    void SwitchRenderModeIfNeeded(bool connectNewRSScreen);
+    void SwitchRenderModeIfNeeded();
+    void OnRenderModeChanged(bool isUniRender);
+    sptr<WindowNode> GetWindowNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken);
+    bool TakeWindowPairSnapshot(DisplayId displayId);
+    void ClearWindowPairSnapshot(DisplayId displayId);
 
 private:
+    enum class RenderMode : uint8_t {
+        UNKNOWN,
+        SEPARATED,
+        UNIFIED,
+    };
+
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
     void UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node,
@@ -125,6 +140,7 @@ private:
     std::vector<std::pair<uint64_t, bool>> GetWindowVisibilityChangeInfo(
         std::shared_ptr<RSOcclusionData> occlusionData);
     bool NeedToStopAddingNode(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container);
+    bool IsAppWindowExceed() const;
 
     std::map<uint32_t, sptr<WindowNode>> windowNodeMap_;
     std::map<sptr<IRemoteObject>, uint32_t> windowIdMap_;
@@ -141,7 +157,9 @@ private:
         this, std::placeholders::_1));
     Callback callback_;
     uint32_t maxAppWindowNumber_ = 100;
+    uint32_t maxUniRenderAppWindowNumber_ { maxAppWindowNumber_ };
     SplitRatioConfig splitRatioConfig_ = {0.1, 0.9, {}};
+    RenderMode renderMode_ { RenderMode::UNKNOWN };
 };
 }
 }

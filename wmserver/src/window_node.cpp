@@ -33,9 +33,14 @@ void WindowNode::SetDisplayId(DisplayId displayId)
     property_->SetDisplayId(displayId);
 }
 
-void WindowNode::SetFullWindowHotArea(const Rect& rect)
+void WindowNode::SetEntireWindowTouchHotArea(const Rect& rect)
 {
-    fullWindowHotArea_ = rect;
+    entireWindowTouchHotArea_ = rect;
+}
+
+void WindowNode::SetEntireWindowPointerHotArea(const Rect& rect)
+{
+    entireWindowPointerHotArea_ = rect;
 }
 
 void WindowNode::SetWindowRect(const Rect& rect)
@@ -170,6 +175,11 @@ void WindowNode::SetTouchHotAreas(const std::vector<Rect>& rects)
     touchHotAreas_ = rects;
 }
 
+void WindowNode::SetPointerHotAreas(const std::vector<Rect>& rects)
+{
+    pointerHotAreas_ = rects;
+}
+
 void WindowNode::SetWindowSizeLimits(const WindowSizeLimits& sizeLimits)
 {
     property_->SetSizeLimits(sizeLimits);
@@ -235,9 +245,14 @@ uint32_t WindowNode::GetParentId() const
     return property_->GetParentId();
 }
 
-Rect WindowNode::GetFullWindowHotArea() const
+Rect WindowNode::GetEntireWindowTouchHotArea() const
 {
-    return fullWindowHotArea_;
+    return entireWindowTouchHotArea_;
+}
+
+Rect WindowNode::GetEntireWindowPointerHotArea() const
+{
+    return entireWindowPointerHotArea_;
 }
 
 Rect WindowNode::GetWindowRect() const
@@ -267,6 +282,7 @@ WindowMode WindowNode::GetWindowMode() const
 
 bool WindowNode::EnableDefaultAnimation(bool propertyEnabled, bool animationPlayed)
 {
+    // system config enabled && not in remote animation && not custom animation && not crash
     bool defaultAnimation = property_->GetAnimationFlag() == (static_cast<uint32_t>(WindowAnimation::DEFAULT));
     return (propertyEnabled && (!animationPlayed) && (defaultAnimation) && (!isAppCrash_));
 }
@@ -347,9 +363,24 @@ void WindowNode::GetTouchHotAreas(std::vector<Rect>& rects) const
     rects = touchHotAreas_;
 }
 
+void WindowNode::GetPointerHotAreas(std::vector<Rect>& rects) const
+{
+    rects = pointerHotAreas_;
+}
+
 uint32_t WindowNode::GetAccessTokenId() const
 {
     return property_->GetAccessTokenId();
+}
+
+void WindowNode::SetSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    snapshot_ = pixelMap;
+}
+
+std::shared_ptr<Media::PixelMap> WindowNode::GetSnapshot()
+{
+    return snapshot_;
 }
 } // namespace Rosen
 } // namespace OHOS

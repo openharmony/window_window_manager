@@ -87,6 +87,11 @@ ScreenId DisplayManagerServiceInner::GetRSScreenId(DisplayId displayId) const
     return DisplayManagerService::GetInstance().GetRSScreenId(displayId);
 }
 
+uint32_t DisplayManagerServiceInner::GetRSScreenNum() const
+{
+    return DisplayManagerService::GetInstance().GetRSScreenNum();
+}
+
 sptr<ScreenInfo> DisplayManagerServiceInner::GetScreenInfoByDisplayId(DisplayId displayId) const
 {
     auto displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
@@ -161,5 +166,10 @@ void DisplayManagerServiceInner::GetWindowPreferredOrientation(DisplayId display
 void DisplayManagerServiceInner::SetGravitySensorSubscriptionEnabled()
 {
     DisplayManagerService::GetInstance().SetGravitySensorSubscriptionEnabled();
+}
+
+void DisplayManagerServiceInner::RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener)
+{
+    DisplayManagerService::GetInstance().RegisterRSScreenChangeListener(listener);
 }
 } // namespace OHOS::Rosen

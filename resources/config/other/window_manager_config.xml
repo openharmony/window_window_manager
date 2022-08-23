@@ -16,6 +16,8 @@
  <Configs>
    <!--decor enable is true means app main window show decoration-->
     <decor enable="true"></decor>
+    <!--maximum number of windows supported by unified rendering -->
+    <maxUniRenderAppWindowNumber>1</maxUniRenderAppWindowNumber>
     <!--minimizeByOther enable is true means fullscreen window will be minmized by other fullscreen window-->
     <minimizeByOther enable="true"></minimizeByOther>
     <!--exit split screen mode ratio config-->

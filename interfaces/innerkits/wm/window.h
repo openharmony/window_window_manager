@@ -331,6 +331,7 @@ public:
     virtual WMError SetCallingWindow(uint32_t windowId) = 0;
     virtual void SetPrivacyMode(bool isPrivacyMode) = 0;
     virtual bool IsPrivacyMode() const = 0;
+    virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) = 0;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) = 0;
     virtual void SetSnapshotSkip(bool isSkip) = 0;
 
@@ -357,9 +358,9 @@ public:
      * @param listener
      */
     virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
-    virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
+    virtual void RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
     virtual void UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) = 0;
-    virtual void UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener) = 0;
+    virtual void UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) = 0;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
     virtual void UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) = 0;
     virtual void RegisterDragListener(const sptr<IWindowDragListener>& listener) = 0;

@@ -23,6 +23,7 @@
 #include "display.h"
 #include "dm_common.h"
 #include "wm_single_instance.h"
+#include "screenshot_info.h"
 
 namespace OHOS::Rosen {
 class DisplayManager {
@@ -35,6 +36,11 @@ public:
         virtual void OnChange(DisplayId) = 0;
     };
 
+    class IScreenshotListener : public virtual RefBase {
+    public:
+        virtual void OnScreenshot(const ScreenshotInfo info) {}
+    };
+
     std::vector<sptr<Display>> GetAllDisplays();
     DisplayId GetDefaultDisplayId();
     sptr<Display> GetDefaultDisplay();
@@ -42,15 +48,10 @@ public:
     sptr<Display> GetDisplayByScreen(ScreenId screenId);
     std::vector<DisplayId> GetAllDisplayIds();
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
-    bool RegisterDisplayListener(sptr<IDisplayListener> listener);
-    bool UnregisterDisplayListener(sptr<IDisplayListener> listener);
 
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId);
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
                                         const Media::Size &size, int rotation);
-
-    bool RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
-    bool UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     bool WakeUpBegin(PowerStateChangeReason reason);
     bool WakeUpEnd();
     bool SuspendBegin(PowerStateChangeReason reason);
@@ -62,6 +63,14 @@ public:
     void NotifyDisplayEvent(DisplayEvent event);
     bool Freeze(std::vector<DisplayId> displayIds);
     bool Unfreeze(std::vector<DisplayId> displayIds);
+
+    bool RegisterDisplayListener(sptr<IDisplayListener> listener);
+    bool UnregisterDisplayListener(sptr<IDisplayListener> listener);
+    bool RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
+    bool UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
+    bool RegisterScreenshotListener(sptr<IScreenshotListener> listener);
+    bool UnregisterScreenshotListener(sptr<IScreenshotListener> listener);
+
     constexpr static int32_t MAX_RESOLUTION_SIZE_SCREENSHOT = 3840; // max resolution, 4K
 
 private:

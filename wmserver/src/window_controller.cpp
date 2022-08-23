@@ -24,6 +24,7 @@
 #include <transaction/rs_transaction.h>
 #include <sstream>
 
+#include "display_manager_service_inner.h"
 #include "minimize_app.h"
 #include "remote_animation.h"
 #include "starting_window.h"
@@ -139,14 +140,14 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
             if (dstNode->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
                 windowRoot_->MinimizeStructuredAppWindowsExceptSelf(dstNode); // avoid split/float mode minimize
             }
-            return RemoteAnimation::NotifyAnimationTransition(srcInfo, dstInfo, srcNode, dstNode, windowRoot_);
+            return RemoteAnimation::NotifyAnimationTransition(srcInfo, dstInfo, srcNode, dstNode);
         }
         case TransitionEvent::MINIMIZE:
-            return RemoteAnimation::NotifyAnimationMinimize(srcInfo, srcNode, windowRoot_);
+            return RemoteAnimation::NotifyAnimationMinimize(srcInfo, srcNode);
         case TransitionEvent::CLOSE:
-            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::CLOSE, windowRoot_);
+            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::CLOSE);
         case TransitionEvent::BACK:
-            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::BACK, windowRoot_);
+            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::BACK);
         default:
             return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
@@ -187,7 +188,9 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     int32_t pid, int32_t uid)
 {
     uint32_t parentId = property->GetParentId();
-    if ((parentId != INVALID_WINDOW_ID) && !WindowHelper::IsSubWindow(property->GetWindowType())) {
+    if ((parentId != INVALID_WINDOW_ID) &&
+        !WindowHelper::IsSubWindow(property->GetWindowType()) &&
+        !WindowHelper::IsSystemSubWindow(property->GetWindowType())) {
         WLOGFE("create window failed, type is error");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
@@ -258,7 +261,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         ResizeSoftInputCallingWindowIfNeed(node);
     }
-    StopBootAnimationIfNeed(node->GetWindowType());
+    StopBootAnimationIfNeed(node);
     MinimizeApp::ExecuteMinimizeAll();
     return WMError::WM_OK;
 }
@@ -491,6 +494,7 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
             break;
         }
         case DisplayStateChangeType::CREATE: {
+            SetDefaultDisplayInfo(defaultDisplayId, displayInfo);
             windowRoot_->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayInfoMap);
             break;
         }
@@ -509,6 +513,21 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
             return;
         }
     }
+}
+
+void WindowController::SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo)
+{
+    if (displayInfo == nullptr) {
+        WLOGFE("display is null");
+        return;
+    }
+    if (displayInfo->GetDisplayId() != defaultDisplayId) {
+        return;
+    }
+    WLOGFI("get default display info");
+    auto displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
+    auto displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
+    defaultDisplayRect_ = { 0, 0, displayWidth, displayHeight };
 }
 
 void WindowController::ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo)
@@ -563,12 +582,46 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     WLOGFI("Finish ProcessDisplayChange");
 }
 
-void WindowController::StopBootAnimationIfNeed(WindowType type) const
+void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)
 {
-    if (WindowType::WINDOW_TYPE_DESKTOP == type) {
-        WLOGFI("stop boot animation");
-        system::SetParameter("persist.window.boot.inited", "1");
-        RecordBootAnimationEvent();
+    if (isBootAnimationStopped_) {
+        return;
+    }
+    if (node == nullptr) {
+        WLOGFE("could not find window");
+        return;
+    }
+    if (node->GetDisplayId() != DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId()) {
+        return;
+    }
+    auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(node->GetDisplayId());
+    if (windowNodeContainer == nullptr) {
+        WLOGFE("window node container is null");
+        return;
+    }
+    std::vector<sptr<WindowNode>> windowNodes;
+    windowNodeContainer->TraverseContainer(windowNodes);
+    Occlusion::Rect defaultDisplayRect = { defaultDisplayRect_.posX_, defaultDisplayRect_.posY_,
+        defaultDisplayRect_.posX_ + defaultDisplayRect_.width_,
+        defaultDisplayRect_.posY_ + defaultDisplayRect_.height_};
+    Occlusion::Region defaultDisplayRegion(defaultDisplayRect);
+    Occlusion::Region allRegion; // Counts the area of all shown windows
+    for (auto& node : windowNodes) {
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
+            continue;
+        }
+        auto windowRect = node->GetWindowRect();
+        Occlusion::Rect curRect = { windowRect.posX_, windowRect.posY_,
+            windowRect.posX_ + windowRect.width_, windowRect.posY_ + windowRect.height_};
+        Occlusion::Region curRegion(curRect);
+        allRegion = curRegion.Or(allRegion);
+        Occlusion::Region subResult = defaultDisplayRegion.Sub(allRegion);
+        if (subResult.GetSize() == 0) {
+            WLOGFI("stop boot animation");
+            system::SetParameter("bootevent.wms.fullscreen.ready", "true");
+            isBootAnimationStopped_ = true;
+            RecordBootAnimationEvent();
+        }
     }
 }
 
@@ -655,7 +708,7 @@ void WindowController::NotifySystemBarTints()
 
 WMError WindowController::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
 {
-    return RemoteAnimation::SetWindowAnimationController(controller);
+    return RemoteAnimation::SetWindowAnimationController(controller, windowRoot_);
 }
 
 AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) const
@@ -671,7 +724,7 @@ WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<
         return WMError::WM_ERROR_NULLPTR;
     }
     if (!node->currentVisibility_) {
-        WLOGFE("this window is not visible and not in window tree, windowId: %{public}u", windowId);
+        WLOGFE("[NotifyServerReadyToMoveOrDrag] window is not visible, windowId: %{public}u", windowId);
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
@@ -692,12 +745,14 @@ WMError WindowController::ProcessPointDown(uint32_t windowId)
         return WMError::WM_ERROR_NULLPTR;
     }
     if (!node->currentVisibility_) {
-        WLOGFE("this window is not visible and not in window tree, windowId: %{public}u", windowId);
+        WLOGFE("[ProcessPointDown] window is not visible, windowId: %{public}u", windowId);
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
     NotifyTouchOutside(node);
-
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        windowRoot_->TakeWindowPairSnapshot(node->GetDisplayId());
+    }
     WLOGFI("process point down, windowId: %{public}u", windowId);
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     WMError focusRes = windowRoot_->RequestFocus(windowId);
@@ -725,6 +780,7 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
         if (windowRoot_->IsDockSliceInExitSplitModeArea(displayId)) {
             windowRoot_->ExitSplitMode(displayId);
         } else {
+            windowRoot_->ClearWindowPairSnapshot(node->GetDisplayId());
             auto property = node->GetWindowProperty();
             node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG_END);
             property->SetRequestRect(property->GetWindowRect());
@@ -789,7 +845,7 @@ WMError WindowController::NotifyWindowClientPointUp(uint32_t windowId,
 void WindowController::MinimizeAllAppWindows(DisplayId displayId)
 {
     windowRoot_->MinimizeAllAppWindows(displayId);
-    if (RemoteAnimation::NotifyAnimationByHome(windowRoot_) != WMError::WM_OK) {
+    if (RemoteAnimation::NotifyAnimationByHome() != WMError::WM_OK) {
         MinimizeApp::ExecuteMinimizeAll();
     }
 }
@@ -1020,18 +1076,22 @@ WMError WindowController::UpdateTouchHotAreas(const sptr<WindowNode>& node, cons
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    std::vector<Rect> hotAreas;
+    std::vector<Rect> touchHotAreas;
+    std::vector<Rect> pointerHotAreas;
     if (rects.empty()) {
-        hotAreas.emplace_back(node->GetFullWindowHotArea());
+        touchHotAreas.emplace_back(node->GetEntireWindowTouchHotArea());
+        pointerHotAreas.emplace_back(node->GetEntireWindowPointerHotArea());
     } else {
         Rect windowRect = node->GetWindowRect();
-        if (!WindowHelper::CalculateTouchHotAreas(windowRect, rects, hotAreas)) {
+        if (!WindowHelper::CalculateTouchHotAreas(windowRect, rects, touchHotAreas)) {
             WLOGFE("the requested touch hot areas are incorrect");
             return WMError::WM_ERROR_INVALID_PARAM;
         }
+        pointerHotAreas = touchHotAreas;
     }
     node->GetWindowProperty()->SetTouchHotAreas(rects);
-    node->SetTouchHotAreas(hotAreas);
+    node->SetTouchHotAreas(touchHotAreas);
+    node->SetPointerHotAreas(pointerHotAreas);
     FlushWindowInfo(node->GetWindowId());
     return WMError::WM_OK;
 }

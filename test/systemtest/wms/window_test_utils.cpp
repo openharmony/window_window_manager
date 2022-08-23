@@ -69,6 +69,11 @@ sptr<Window> WindowTestUtils::CreateTestWindow(const TestWindowInfo& info)
     } else {
         option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
     }
+    if (info.showWhenLocked) {
+        option->AddWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+    } else {
+        option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
+    }
     sptr<Window> window = Window::Create(info.name, option);
     return window;
 }

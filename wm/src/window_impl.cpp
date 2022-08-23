@@ -22,7 +22,6 @@
 #include <hisysevent.h>
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
-#include "xcollie/watchdog.h"
 
 #include "color_parser.h"
 #include "display_manager.h"
@@ -104,10 +103,6 @@ void WindowImpl::InitListenerHandler()
         return;
     }
     isListenerHandlerRunning_ = true;
-    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WM_CALLBACK_THREAD_NAME, eventHandler_);
-    if (ret != 0) {
-        WLOGFE("Add watchdog thread failed");
-    }
     WLOGFD("init window callback runner success.");
 }
 
@@ -396,8 +391,14 @@ void WindowImpl::SetTransform(const Transform& trans)
     if (!IsWindowValid()) {
         return;
     }
+    Transform oriTrans = property_->GetTransform();
     property_->SetTransform(trans);
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY);
+    WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetTransform errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), property_->GetWindowId());
+        property_->SetTransform(oriTrans); // reset to ori transform when update failed
+    }
 }
 
 const Transform& WindowImpl::GetTransform() const
@@ -871,33 +872,41 @@ void WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
 
 void WindowImpl::SetSystemConfig()
 {
-    if (IsAppMainOrSubOrFloatingWindow()) {
-        if (SingletonContainer::Get<WindowAdapter>().GetSystemConfig(windowSystemConfig_) == WMError::WM_OK) {
-            if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-                WLOGFI("get system decor enable:%{public}d", windowSystemConfig_.isSystemDecorEnable_);
-                property_->SetDecorEnable(windowSystemConfig_.isSystemDecorEnable_);
-                WLOGFI("get stretchable enable:%{public}d", windowSystemConfig_.isStretchable_);
-                property_->SetStretchable(windowSystemConfig_.isStretchable_);
-            }
-            SetWindowCornerRadiusAccordingToSystemConfig();
-        }
-        UpdateWindowShadowAccordingToSystemConfig();
+    if (!IsAppMainOrSubOrFloatingWindow()) {
+        return;
     }
+    if (SingletonContainer::Get<WindowAdapter>().GetSystemConfig(windowSystemConfig_) == WMError::WM_OK) {
+        if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+            WLOGFI("get system decor enable:%{public}d", windowSystemConfig_.isSystemDecorEnable_);
+            property_->SetDecorEnable(windowSystemConfig_.isSystemDecorEnable_);
+            WLOGFI("get stretchable enable:%{public}d", windowSystemConfig_.isStretchable_);
+            property_->SetStretchable(windowSystemConfig_.isStretchable_);
+            // if window mode is undefined, set it from configuration
+            if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_UNDEFINED) {
+                WLOGFI("get default window mode:%{public}u", windowSystemConfig_.defaultWindowMode_);
+                property_->SetWindowMode(windowSystemConfig_.defaultWindowMode_);
+            }
+            if (property_->GetLastWindowMode() == WindowMode::WINDOW_MODE_UNDEFINED) {
+                property_->SetLastWindowMode(windowSystemConfig_.defaultWindowMode_);
+            }
+        }
+        SetWindowCornerRadiusAccordingToSystemConfig();
+    }
+    UpdateWindowShadowAccordingToSystemConfig();
 }
 
-WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
+bool WindowImpl::WindowCreateCheck(const std::string& parentName)
 {
-    WLOGFI("[Client] Window [name:%{public}s] Create", name_.c_str());
     // check window name, same window names are forbidden
     if (windowMap_.find(name_) != windowMap_.end()) {
         WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
-        return WMError::WM_ERROR_INVALID_PARAM;
+        return false;
     }
     // check parent name, if create sub window and there is not exist parent Window, then return
     if (parentName != "") {
         if (windowMap_.find(parentName) == windowMap_.end()) {
             WLOGFE("ParentName is empty or valid. ParentName is %{public}s", parentName.c_str());
-            return WMError::WM_ERROR_INVALID_PARAM;
+            return false;
         } else {
             uint32_t parentId = windowMap_[parentName].first;
             property_->SetParentId(parentId);
@@ -906,7 +915,16 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
 
     if (CheckCameraFloatingWindowMultiCreated(property_->GetWindowType())) {
         WLOGFE("Camera Floating Window already exists.");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return false;
+    }
+    return true;
+}
+
+WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
+{
+    WLOGFI("[Client] Window [name:%{public}s] Create", name_.c_str());
+    if (!WindowCreateCheck(parentName)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
 
     context_ = context;
@@ -926,7 +944,10 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
 
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         GetConfigurationFromAbilityInfo();
+    } else if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_UNDEFINED) {
+        property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
+
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
         windowId, token);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, ret);
@@ -1161,6 +1182,7 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     SetDefaultOption();
+    SetModeSupportInfo(GetRequestModeSupportInfo());
     AdjustWindowAnimationFlag(withAnimation);
 
     if (NeedToStopShowing()) { // true means stop showing
@@ -1256,7 +1278,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
     NotifyAfterBackground();
     uint32_t animationFlag = property_->GetAnimationFlag();
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        animationTranistionController_->AnimationForHidden();
+        animationTransitionController_->AnimationForHidden();
     }
     ResetMoveOrDragState();
     return ret;
@@ -1494,7 +1516,7 @@ std::string WindowImpl::TransferLifeCycleEventToString(LifeCycleEvent type) cons
 void WindowImpl::SetPrivacyMode(bool isPrivacyMode)
 {
     property_->SetPrivacyMode(isPrivacyMode);
-    surfaceNode_->SetSecurityLayer(isPrivacyMode);
+    surfaceNode_->SetSecurityLayer(isPrivacyMode || property_->GetSystemPrivacyMode());
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE);
 }
 
@@ -1503,9 +1525,15 @@ bool WindowImpl::IsPrivacyMode() const
     return property_->GetPrivacyMode();
 }
 
+void WindowImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
+{
+    property_->SetSystemPrivacyMode(isSystemPrivacyMode);
+    surfaceNode_->SetSecurityLayer(isSystemPrivacyMode || property_->GetPrivacyMode());
+}
+
 void WindowImpl::SetSnapshotSkip(bool isSkip)
 {
-    surfaceNode_->SetSecurityLayer(isSkip);
+    surfaceNode_->SetSecurityLayer(isSkip || property_->GetSystemPrivacyMode());
 }
 
 void WindowImpl::DisableAppWindowDecor()
@@ -1636,7 +1664,11 @@ WMError WindowImpl::Close()
 void WindowImpl::StartMove()
 {
     if (!WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
-        WLOGFI("[StartMove] current window can not be moved, windowId %{public}u", GetWindowId());
+        WLOGFE("[StartMove] current window can not be moved, windowId %{public}u", GetWindowId());
+        return;
+    }
+    if (!moveDragProperty_->pointEventStarted_) {
+        WLOGFE("[StartMove] pointerEvent has not been started");
         return;
     }
     moveDragProperty_->startMoveFlag_ = true;
@@ -1672,7 +1704,7 @@ void WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listene
     lifecycleListeners_.emplace_back(listener);
 }
 
-void WindowImpl::RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener)
+void WindowImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
     if (listener == nullptr) {
         return;
@@ -1695,7 +1727,7 @@ void WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& liste
         }), lifecycleListeners_.end());
 }
 
-void WindowImpl::UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener)
+void WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     windowChangeListeners_.erase(std::remove_if(windowChangeListeners_.begin(), windowChangeListeners_.end(),
@@ -1848,9 +1880,9 @@ void WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTran
         WLOGFE("listener is nullptr");
         return;
     }
-    animationTranistionController_ = listener;
+    animationTransitionController_ = listener;
     wptr<WindowProperty> propertyToken(property_);
-    wptr<IAnimationTransitionController> animationTransitionControllerToken(animationTranistionController_);
+    wptr<IAnimationTransitionController> animationTransitionControllerToken(animationTransitionController_);
     if (uiContent_) {
         uiContent_->SetNextFrameLayoutCallback([propertyToken, animationTransitionControllerToken]() {
             auto property = propertyToken.promote();
@@ -1860,7 +1892,7 @@ void WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTran
             }
             uint32_t animationFlag = property->GetAnimationFlag();
             if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-                // CustomAnimation is enabled when animationTranistionController_ exists
+                // CustomAnimation is enabled when animationTransitionController_ exists
                 animationTransitionController->AnimationForShown();
             }
         });
@@ -1987,7 +2019,11 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
     }
 
     NotifySizeChange(rectToAce, reason);
-    if (uiContent_ != nullptr) {
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        if (uiContent_ == nullptr) {
+            return;
+        }
         Ace::ViewportConfig config;
         WLOGFI("UpdateViewportConfig Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
             property_->GetWindowId(), rectToAce.posX_, rectToAce.posY_, rectToAce.width_, rectToAce.height_);
@@ -2124,7 +2160,7 @@ void WindowImpl::UpdatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& po
     }
     Rect winRect = GetRect();
     PointInfo originPos =
-        WindowHelper::CalculateOriginPosition(property_->GetTransformMat(), property_->GetPlane(),
+        WindowHelper::CalculateOriginPosition(property_->GetTransformMat(),
         { pointerItem.GetDisplayX(), pointerItem.GetDisplayY() });
     WLOGI("Pointer event has been updated,window id:%{public}u, before->now:"
         "[%{public}d,%{public}d]->[%{public}d,%{public}d]",
@@ -2234,8 +2270,7 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
     TransformHelper::Vector2 hotZoneScale(1, 1);
     if (property_->GetTransform() != Transform::Identity()) {
         property_->ComputeTransform();
-        hotZoneScale = WindowHelper::CalculateHotZoneScale(property_->GetTransformMat(),
-            property_->GetPlane());
+        hotZoneScale = WindowHelper::CalculateHotZoneScale(property_->GetTransformMat());
     }
     moveDragProperty_->startPointRect_ = rect;
     moveDragProperty_->startPointPosX_ = globalX;
@@ -2324,10 +2359,10 @@ void WindowImpl::AdjustWindowAnimationFlag(bool withAnimation)
     // use custom animation when transitionController exists; else use default animation
     WindowType winType = property_->GetWindowType();
     bool isAppWindow = WindowHelper::IsAppWindow(winType);
-    if (withAnimation && !isAppWindow && animationTranistionController_) {
+    if (withAnimation && !isAppWindow && animationTransitionController_) {
         // use custom animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
-    } else if (isAppWindow || (withAnimation && !animationTranistionController_)) {
+    } else if (isAppWindow || (withAnimation && !animationTransitionController_)) {
         // use default animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
     } else if (winType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {

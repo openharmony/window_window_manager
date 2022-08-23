@@ -28,6 +28,7 @@
 #include "agent_death_recipient.h"
 #include "display_manager_agent_controller.h"
 #include "dm_common.h"
+#include "rsscreen_change_listener.h"
 #include "screen.h"
 #include "zidl/display_manager_agent_interface.h"
 
@@ -49,6 +50,7 @@ public:
     void Init();
     void ScreenConnectionInDisplayInit(sptr<AbstractScreenCallback> abstractScreenCallback);
     std::vector<ScreenId> GetAllScreenIds() const;
+    uint32_t GetRSScreenNum() const;
     sptr<AbstractScreen> GetAbstractScreen(ScreenId dmsScreenId) const;
     std::vector<ScreenId> GetShotScreenIds(std::vector<ScreenId>) const;
     std::vector<ScreenId> GetAllExpandOrMirrorScreenIds(std::vector<ScreenId>) const;
@@ -57,6 +59,7 @@ public:
     ScreenId ConvertToRsScreenId(ScreenId dmsScreenId) const;
     ScreenId ConvertToDmsScreenId(ScreenId rsScreenId) const;
     void RegisterAbstractScreenCallback(sptr<AbstractScreenCallback> cb);
+    void RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener);
     ScreenId CreateVirtualScreen(VirtualScreenOption option, const sptr<IRemoteObject>& displayManagerAgent);
     DMError DestroyVirtualScreen(ScreenId screenId);
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
@@ -125,6 +128,7 @@ private:
         ScreenId ConvertToRsScreenId(ScreenId) const;
         bool ConvertToDmsScreenId(ScreenId, ScreenId&) const;
         ScreenId ConvertToDmsScreenId(ScreenId) const;
+        uint32_t GetRSScreenNum() const;
     private:
         std::atomic<ScreenId> dmsScreenCount_ {0};
         std::map<ScreenId, ScreenId> rs2DmsScreenIdMap_;
@@ -140,6 +144,7 @@ private:
     std::map<sptr<IRemoteObject>, std::vector<ScreenId>> screenAgentMap_;
     sptr<AgentDeathRecipient> deathRecipient_ { nullptr };
     sptr<AbstractScreenCallback> abstractScreenCallback_;
+    sptr<IRSScreenChangeListener> rSScreenChangeListener_;
     std::shared_ptr<AppExecFwk::EventHandler> controllerHandler_;
     std::atomic<ScreenId> defaultRsScreenId_ {SCREEN_ID_INVALID };
 };

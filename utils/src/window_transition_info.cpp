@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -159,6 +159,16 @@ bool WindowTransitionInfo::GetIsRecent() const
     return isRecent_;
 }
 
+void WindowTransitionInfo::SetMissionId(int32_t missionId)
+{
+    missionId_ = missionId;
+}
+
+int32_t WindowTransitionInfo::GetMissionId() const
+{
+    return missionId_;
+}
+
 bool WindowTransitionInfo::Marshalling(Parcel& parcel) const
 {
     if (!parcel.WriteString(bundleName_) || !parcel.WriteString(abilityName_)) {
@@ -204,6 +214,9 @@ bool WindowTransitionInfo::Marshalling(Parcel& parcel) const
         return false;
     }
 
+    if (!parcel.WriteInt32(missionId_)) {
+        return false;
+    }
     return true;
 }
 
@@ -228,6 +241,7 @@ WindowTransitionInfo* WindowTransitionInfo::Unmarshalling(Parcel& parcel)
     windowTransitionInfo->isShowWhenLocked_ = parcel.ReadBool();
     windowTransitionInfo->isRecent_ = parcel.ReadBool();
     windowTransitionInfo->reason_ = static_cast<TransitionReason>(parcel.ReadUint32());
+    windowTransitionInfo->missionId_ = parcel.ReadInt32();
     return windowTransitionInfo;
 }
 } // Rosen

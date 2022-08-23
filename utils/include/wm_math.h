@@ -129,6 +129,24 @@ struct Vector3 {
     {
         return Vector3 { a.x_ - b.x_, a.y_ - b.y_, a.z_ - b.z_ };
     }
+    // Scalar multiplication
+    friend Vector3 operator*(const Vector3& vec, float scalar)
+    {
+        return Vector3(vec.x_ * scalar, vec.y_ * scalar, vec.z_ * scalar);
+    }
+    // Scalar multiplication
+    friend Vector3 operator*(float scalar, const Vector3& vec)
+    {
+        return Vector3(vec.x_ * scalar, vec.y_ * scalar, vec.z_ * scalar);
+    }
+    // Scalar *=
+    Vector3& operator*=(float scalar)
+    {
+        x_ *= scalar;
+        y_ *= scalar;
+        z_ *= scalar;
+        return *this;
+    }
     float LengthSq() const
     {
         return (x_ * x_ + y_ * y_ + z_ * z_);
@@ -190,19 +208,6 @@ struct Matrix4 {
     static constexpr int MAT_SIZE = 4;
 };
 
-struct Plane {
-    Plane() : normal_ { 0, 0, 1 }, d_ { 0 } {}
-    Plane(const Vector3& normal, float d);
-    Plane(const Vector3& a, const Vector3& b, const Vector3& c);
-    float ComponentZ(float x, float y) const;
-    // Compute the distance of parallel lines projected from this plane to xy plane
-    // it is assumed that distance of parallel lines in this plane is 1
-    // a, b determine a line in this plane
-    float ParallelDistanceGrad(const Vector3& a, const Vector3& b) const;
-
-    Vector3 normal_; // Normal vector of plane
-    float d_; // Signed distance from (0,0,0) to plane
-};
 // Create a scale matrix with x and y scales(in xy-plane)
 Matrix3 CreateScale(float xScale, float yScale);
 // Create a rotation matrix about the Z axis
@@ -223,10 +228,17 @@ Matrix4 CreateRotationY(float theta);
 Matrix4 CreateRotationZ(float theta);
 // Create a 3D translation matrix
 Matrix4 CreateTranslation(const Vector3& trans);
+Matrix4 CreateLookAt(const Vector3& eye, const Vector3& target, const Vector3& up);
+Matrix4 CreatePerspective(const Vector3& camera);
 // Transform a Vector2 in xy-plane by matrix3
 Vector2 Transform(const Vector2& vec, const Matrix3& mat);
 // Transform a Vector3 in 3D world by matrix4
 Vector3 Transform(const Vector3& vec, const Matrix4& mat);
+// Transform the vector and renormalize the w component
+Vector3 TransformWithPerspDiv(const Vector3& vec, const Matrix4& mat, float w = 1.0f);
+// Given a screen point, unprojects it into origin position at screen,
+// based on the current transform matrix
+Vector2 GetOriginScreenPoint(const Vector2& p, const Matrix4& mat);
 } // namespace TransformHelper
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WM_MATH_H

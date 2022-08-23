@@ -60,7 +60,6 @@ void DisplayCutoutController::SetCutoutSvgPath(DisplayId displayId, const std::s
         svgPaths_[displayId] = pathVec;
     }
     Rect boundingRect = CalcCutoutBoundingRect(svgPath);
-    CheckBoudingRectBoundary(displayId, boundingRect);
     if (boundingRects_.count(displayId) == 1) {
         boundingRects_[displayId].emplace_back(boundingRect);
     } else {
@@ -86,7 +85,7 @@ sptr<CutoutInfo> DisplayCutoutController::GetCutoutInfo(DisplayId displayId)
     return cutoutInfo;
 }
 
-void DisplayCutoutController::CheckBoudingRectBoundary(DisplayId displayId, Rect& boundingRect)
+void DisplayCutoutController::CheckBoundingRectsBoundary(DisplayId displayId, std::vector<Rect>& boundingRects)
 {
     sptr<SupportedScreenModes> modes =
         DisplayManagerServiceInner::GetInstance().GetScreenModesByDisplayId(displayId);
@@ -96,12 +95,18 @@ void DisplayCutoutController::CheckBoudingRectBoundary(DisplayId displayId, Rect
     }
     uint32_t displayHeight = modes->height_;
     uint32_t displayWidth = modes->width_;
-    if (boundingRect.posX_ < 0 || boundingRect.posY_ < 0 ||
-        boundingRect.width_ + boundingRect.posX_ > displayWidth ||
-        boundingRect.height_ + boundingRect.posY_ > displayHeight) {
-        WLOGFE("boundingRect boundary is invalid");
-        boundingRect = {.posX_ = 0, .posY_ = 0, .width_ = 0, .height_ = 0};
-        return;
+    for (auto iter = boundingRects.begin(); iter != boundingRects.end();) {
+        Rect boundingRect = *iter;
+        if (boundingRect.posX_ < 0 || boundingRect.posY_ < 0 ||
+            boundingRect.width_ + boundingRect.posX_ > displayWidth ||
+            boundingRect.height_ + boundingRect.posY_ > displayHeight ||
+            boundingRect.width_ > displayWidth || boundingRect.height_ > displayHeight ||
+            boundingRect.isUninitializedRect()) {
+            WLOGFE("boundingRect boundary is invalid");
+            iter = boundingRects.erase(iter);
+        } else {
+            iter++;
+        }
     }
 }
 
@@ -178,34 +183,34 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRectsByRotation(
     uint32_t bottom = curvedScreenBoundary_[3];
     switch (rotation) {
         case Rotation::ROTATION_0: {
-            Rect leftRect = {0, 0, left, displayHeight};
-            Rect topRect = {0, 0, displayWidth, top};
-            Rect rightRect = {displayWidth - right, 0, right, displayHeight};
-            Rect bottomRect = {0, displayHeight - bottom, displayWidth, bottom};
+            Rect leftRect = CreateWaterfallRect(0, 0, left, displayHeight);
+            Rect topRect = CreateWaterfallRect(0, 0, displayWidth, top);
+            Rect rightRect = CreateWaterfallRect(displayWidth - right, 0, right, displayHeight);
+            Rect bottomRect = CreateWaterfallRect(0, displayHeight - bottom, displayWidth, bottom);
             waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects {leftRect, topRect, rightRect, bottomRect};
             return;
         }
         case Rotation::ROTATION_90: {
-            Rect leftRect = {0, 0, bottom, displayWidth};
-            Rect topRect = {0, 0, displayHeight, left};
-            Rect rightRect = {displayHeight - top, 0, top, displayWidth};
-            Rect bottomRect = {0, displayWidth - right, displayHeight, right};
+            Rect leftRect = CreateWaterfallRect(0, 0, bottom, displayWidth);
+            Rect topRect = CreateWaterfallRect(0, 0, displayHeight, left);
+            Rect rightRect = CreateWaterfallRect(displayHeight - top, 0, top, displayWidth);
+            Rect bottomRect = CreateWaterfallRect(0, displayWidth - right, displayHeight, right);
             waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects {leftRect, topRect, rightRect, bottomRect};
             return;
         }
         case Rotation::ROTATION_180: {
-            Rect leftRect = {0, 0, right, displayHeight};
-            Rect topRect = {0, 0, bottom, displayWidth};
-            Rect rightRect = {displayWidth - left, 0, left, displayHeight};
-            Rect bottomRect = {0, displayHeight - top, displayWidth, top};
+            Rect leftRect = CreateWaterfallRect(0, 0, right, displayHeight);
+            Rect topRect = CreateWaterfallRect(0, 0, bottom, displayWidth);
+            Rect rightRect = CreateWaterfallRect(displayWidth - left, 0, left, displayHeight);
+            Rect bottomRect = CreateWaterfallRect(0, displayHeight - top, displayWidth, top);
             waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects {leftRect, topRect, rightRect, bottomRect};
             return;
         }
         case Rotation::ROTATION_270: {
-            Rect leftRect = {0, 0, top, displayWidth};
-            Rect topRect = {0, 0, displayHeight, right};
-            Rect rightRect = {displayHeight - bottom, 0, bottom, displayWidth};
-            Rect bottomRect = {0, displayWidth - left, displayHeight, left};
+            Rect leftRect = CreateWaterfallRect(0, 0, top, displayWidth);
+            Rect topRect = CreateWaterfallRect(0, 0, displayHeight, right);
+            Rect rightRect = CreateWaterfallRect(displayHeight - bottom, 0, bottom, displayWidth);
+            Rect bottomRect = CreateWaterfallRect(0, displayWidth - left, displayHeight, left);
             waterfallDisplayAreaRects_ = WaterfallDisplayAreaRects {leftRect, topRect, rightRect, bottomRect};
             return;
         }
@@ -214,21 +219,22 @@ void DisplayCutoutController::CalcBuiltInDisplayWaterfallRectsByRotation(
     }
 }
 
-void DisplayCutoutController::TransferBoundingRectsByRotation(DisplayId displayId, std::vector<Rect>& boudingRects)
+void DisplayCutoutController::TransferBoundingRectsByRotation(DisplayId displayId, std::vector<Rect>& boundingRects)
 {
     std::vector<Rect> resultVec;
     if (boundingRects_.count(displayId) == 0) {
-        boudingRects = resultVec;
+        boundingRects = resultVec;
         return;
     }
     std::vector<Rect> displayBoundingRects = boundingRects_[displayId];
     if (displayBoundingRects.empty()) {
-        boudingRects = resultVec;
+        boundingRects = resultVec;
         return;
     }
     Rotation currentRotation = DisplayManagerServiceInner::GetInstance().GetDisplayById(displayId)->GetRotation();
+    CheckBoundingRectsBoundary(displayId, displayBoundingRects);
     if (currentRotation == Rotation::ROTATION_0) {
-        boudingRects = displayBoundingRects;
+        boundingRects = displayBoundingRects;
         return;
     }
     sptr<SupportedScreenModes> modes =
@@ -261,7 +267,15 @@ void DisplayCutoutController::TransferBoundingRectsByRotation(DisplayId displayI
         default: {
         }
     }
-    boudingRects = resultVec;
+    boundingRects = resultVec;
+}
+
+Rect DisplayCutoutController::CreateWaterfallRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height)
+{
+    if (width == 0 || height == 0) {
+        return Rect {0, 0, 0, 0};
+    }
+    return Rect {left, top, width, height};
 }
 } // Rosen
 } // OHOS

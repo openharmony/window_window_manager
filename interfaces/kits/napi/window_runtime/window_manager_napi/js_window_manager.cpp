@@ -588,15 +588,16 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetProperty("WindowLayoutMode", WindowLayoutModeInit(engine));
     object->SetProperty("Orientation", OrientationInit(engine));
     object->SetProperty("BlurStyle", BlurStyleInit(engine));
-    BindNativeFunction(*engine, *object, "create", JsWindowManager::CreateWindow);
-    BindNativeFunction(*engine, *object, "find", JsWindowManager::FindWindow);
-    BindNativeFunction(*engine, *object, "on", JsWindowManager::RegisterWindowManagerCallback);
-    BindNativeFunction(*engine, *object, "off", JsWindowManager::UnregisterWindowMangerCallback);
-    BindNativeFunction(*engine, *object, "getTopWindow", JsWindowManager::GetTopWindow);
-    BindNativeFunction(*engine, *object, "minimizeAll", JsWindowManager::MinimizeAll);
-    BindNativeFunction(*engine, *object, "toggleShownStateForAllAppWindows",
+    const char *moduleName = "JsWindowManager";
+    BindNativeFunction(*engine, *object, "create", moduleName, JsWindowManager::CreateWindow);
+    BindNativeFunction(*engine, *object, "find", moduleName, JsWindowManager::FindWindow);
+    BindNativeFunction(*engine, *object, "on", moduleName, JsWindowManager::RegisterWindowManagerCallback);
+    BindNativeFunction(*engine, *object, "off", moduleName, JsWindowManager::UnregisterWindowMangerCallback);
+    BindNativeFunction(*engine, *object, "getTopWindow", moduleName, JsWindowManager::GetTopWindow);
+    BindNativeFunction(*engine, *object, "minimizeAll", moduleName, JsWindowManager::MinimizeAll);
+    BindNativeFunction(*engine, *object, "toggleShownStateForAllAppWindows", moduleName,
         JsWindowManager::ToggleShownStateForAllAppWindows);
-    BindNativeFunction(*engine, *object, "setWindowLayoutMode", JsWindowManager::SetWindowLayoutMode);
+    BindNativeFunction(*engine, *object, "setWindowLayoutMode", moduleName, JsWindowManager::SetWindowLayoutMode);
     return engine->CreateUndefined();
 }
 }  // namespace Rosen
