@@ -182,7 +182,9 @@ void WindowPair::ExitSplitMode()
         hideNode = secondary_;
         recoveryNode = primary_;
     }
-    recoveryNode->SetSnapshot(nullptr);
+    if (recoveryNode != nullptr) {
+        recoveryNode->SetSnapshot(nullptr);
+    }
     MinimizeApp::AddNeedMinimizeApp(hideNode, MinimizeReason::SPLIT_QUIT);
     MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::SPLIT_QUIT);
     WLOGFI("Exit Split Mode, Minimize Window %{public}u", hideNode->GetWindowId());
