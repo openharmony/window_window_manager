@@ -22,7 +22,7 @@
 namespace OHOS::Rosen {
 class IWindowInfoQueriedListener : public RefBase {
 public:
-    virtual void HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
+    virtual void HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) = 0;
 };
 } // OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_INFO_QUERIED_LISTENER_H
