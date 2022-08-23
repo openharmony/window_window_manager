@@ -467,24 +467,25 @@ NativeValue* CreateJsWindowStage(NativeEngine& engine,
     std::unique_ptr<JsWindowStage> jsWindowStage = std::make_unique<JsWindowStage>(windowScene);
     object->SetNativePointer(jsWindowStage.release(), JsWindowStage::Finalizer, nullptr);
 
+    const char *moduleName = "JsWindowStage";
     BindNativeFunction(engine,
-        *object, "setUIContent", JsWindowStage::SetUIContent);
+        *object, "setUIContent", moduleName, JsWindowStage::SetUIContent);
     BindNativeFunction(engine,
-        *object, "loadContent", JsWindowStage::LoadContent);
+        *object, "loadContent", moduleName, JsWindowStage::LoadContent);
     BindNativeFunction(engine,
-        *object, "getMainWindow", JsWindowStage::GetMainWindow);
+        *object, "getMainWindow", moduleName, JsWindowStage::GetMainWindow);
     BindNativeFunction(engine,
-        *object, "getWindowMode", JsWindowStage::GetWindowMode);
+        *object, "getWindowMode", moduleName, JsWindowStage::GetWindowMode);
     BindNativeFunction(engine,
-        *object, "createSubWindow", JsWindowStage::CreateSubWindow);
+        *object, "createSubWindow", moduleName, JsWindowStage::CreateSubWindow);
     BindNativeFunction(engine,
-        *object, "getSubWindow", JsWindowStage::GetSubWindow);
-    BindNativeFunction(engine, *object, "on", JsWindowStage::On);
-    BindNativeFunction(engine, *object, "off", JsWindowStage::Off);
+        *object, "getSubWindow", moduleName, JsWindowStage::GetSubWindow);
+    BindNativeFunction(engine, *object, "on", moduleName, JsWindowStage::On);
+    BindNativeFunction(engine, *object, "off", moduleName, JsWindowStage::Off);
     BindNativeFunction(engine,
-        *object, "setShowOnLockScreen", JsWindowStage::SetShowOnLockScreen);
+        *object, "setShowOnLockScreen", moduleName, JsWindowStage::SetShowOnLockScreen);
     BindNativeFunction(engine,
-        *object, "disableWindowDecor", JsWindowStage::DisableWindowDecor);
+        *object, "disableWindowDecor", moduleName, JsWindowStage::DisableWindowDecor);
 
     return objValue;
 }

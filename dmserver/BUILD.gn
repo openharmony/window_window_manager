@@ -18,6 +18,7 @@ config("libdms_private_config") {
   include_dirs = [
     "//base/sensors/sensor/interfaces/native/include",
     "//foundation/window/window_manager/dm/include",
+    "//foundation/window/window_manager/utils/include",
     "//foundation/window/window_manager/interfaces/innerkits/dm",
   ]
 }

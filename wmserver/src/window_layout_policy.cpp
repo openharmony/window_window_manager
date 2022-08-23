@@ -15,6 +15,7 @@
 
 #include "window_layout_policy.h"
 #include "display_manager_service_inner.h"
+#include "remote_animation.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
@@ -296,6 +297,34 @@ void WindowLayoutPolicy::LayoutWindowNodesByRootType(const std::vector<sptr<Wind
     }
 }
 
+void WindowLayoutPolicy::NotifyAnimationSizeChangeIfNeeded()
+{
+    if (!RemoteAnimation::CheckAnimationController()) {
+        WLOGFD("no animation controller!");
+        return;
+    }
+    std::vector<uint32_t> fullScreenWinIds;
+    std::vector<uint32_t> floatMainIds;
+    for (auto& iter : displayGroupWindowTree_) {
+        auto& displayWindowTree = iter.second;
+        auto& nodeVec = *(displayWindowTree[WindowRootNodeType::APP_WINDOW_NODE]);
+        if (nodeVec.empty()) {
+            WLOGE("The node vector is empty!");
+            return;
+        }
+        for (auto& node : nodeVec) {
+            // just has one fullscreen app node on foreground
+            if (WindowHelper::IsMainFullScreenWindow(node->GetWindowType(), node->GetWindowMode())) {
+                fullScreenWinIds.emplace_back(node->GetWindowId());
+            }
+            if (WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode())) {
+                floatMainIds.emplace_back(node->GetWindowId());
+            }
+        }
+    }
+    RemoteAnimation::NotifyAnimationTargetsUpdate(fullScreenWinIds, floatMainIds);
+}
+
 void WindowLayoutPolicy::LayoutWindowTree(DisplayId displayId)
 {
     auto& displayWindowTree = displayGroupWindowTree_[displayId];
@@ -337,15 +366,20 @@ bool WindowLayoutPolicy::IsVerticalDisplay(DisplayId displayId) const
     return displayGroupInfo_->GetDisplayRect(displayId).width_ < displayGroupInfo_->GetDisplayRect(displayId).height_;
 }
 
-void WindowLayoutPolicy::UpdateClientRectAndResetReason(const sptr<WindowNode>& node,
-    const Rect& lastLayoutRect, const Rect& winRect)
+void WindowLayoutPolicy::UpdateClientRect(const Rect& rect, const sptr<WindowNode>& node, WindowSizeChangeReason reason)
 {
-    auto reason = node->GetWindowSizeChangeReason();
     if (node->GetWindowToken()) {
         WLOGFI("notify client id: %{public}d, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u], reason: "
-            "%{public}u", node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, reason);
-        node->GetWindowToken()->UpdateWindowRect(winRect, node->GetDecoStatus(), reason);
+            "%{public}u", node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
+        node->GetWindowToken()->UpdateWindowRect(rect, node->GetDecoStatus(), reason);
     }
+    NotifyAnimationSizeChangeIfNeeded();
+}
+
+void WindowLayoutPolicy::UpdateClientRectAndResetReason(const sptr<WindowNode>& node, const Rect& winRect)
+{
+    auto reason = node->GetWindowSizeChangeReason();
+    UpdateClientRect(winRect, node, reason);
     if ((reason != WindowSizeChangeReason::MOVE) && (node->GetWindowType() != WindowType::WINDOW_TYPE_DOCK_SLICE)) {
         node->ResetWindowSizeChangeReason();
     }
@@ -360,10 +394,7 @@ void WindowLayoutPolicy::RemoveWindowNode(const sptr<WindowNode>& node)
     } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
         LayoutWindowTree(node->GetDisplayId());
     }
-    Rect reqRect = node->GetRequestRect();
-    if (node->GetWindowToken()) {
-        node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
-    }
+    UpdateClientRect(node->GetRequestRect(), node, WindowSizeChangeReason::HIDE);
 }
 
 void WindowLayoutPolicy::UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow)
@@ -401,7 +432,8 @@ void WindowLayoutPolicy::ComputeDecoratedRequestRect(const sptr<WindowNode>& nod
         return;
     }
     auto reqRect = property->GetRequestRect();
-    if (!property->GetDecorEnable() || property->GetDecoStatus()) {
+    if (!property->GetDecorEnable() || property->GetDecoStatus() ||
+        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
         return;
     }
     float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
@@ -417,18 +449,12 @@ void WindowLayoutPolicy::ComputeDecoratedRequestRect(const sptr<WindowNode>& nod
     property->SetDecoStatus(true);
 }
 
-void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<WindowNode>& node) const
+Rect WindowLayoutPolicy::CalcEntireWindowHotZone(const sptr<WindowNode>& node, const Rect& winRect, uint32_t hotZone,
+    float vpr, TransformHelper::Vector2 hotZoneScale) const
 {
     Rect rect = winRect;
-    float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
-    TransformHelper::Vector2 hotZoneScale(1, 1);
-    if (node->GetWindowProperty()->GetTransform() != Transform::Identity()) {
-        node->ComputeTransform();
-        hotZoneScale = WindowHelper::CalculateHotZoneScale(node->GetWindowProperty()->GetTransformMat(),
-            node->GetWindowProperty()->GetPlane());
-    }
-    uint32_t hotZoneX = static_cast<uint32_t>(HOTZONE * virtualPixelRatio / hotZoneScale.x_);
-    uint32_t hotZoneY = static_cast<uint32_t>(HOTZONE * virtualPixelRatio / hotZoneScale.y_);
+    uint32_t hotZoneX = static_cast<uint32_t>(hotZone * vpr / hotZoneScale.x_);
+    uint32_t hotZoneY = static_cast<uint32_t>(hotZone * vpr / hotZoneScale.y_);
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         if (rect.width_ < rect.height_) {
@@ -446,18 +472,39 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<W
         rect.width_ += (hotZoneX + hotZoneX);
         rect.height_ += (hotZoneY + hotZoneY);
     }
-    node->SetFullWindowHotArea(rect);
+    return rect;
+}
+
+void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<WindowNode>& node) const
+{
+    float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
+    TransformHelper::Vector2 hotZoneScale(1, 1);
+    if (node->GetWindowProperty()->GetTransform() != Transform::Identity()) {
+        node->ComputeTransform();
+        hotZoneScale = WindowHelper::CalculateHotZoneScale(node->GetWindowProperty()->GetTransformMat());
+    }
+
+    auto hotZoneRectTouch = CalcEntireWindowHotZone(node, winRect, HOTZONE_TOUCH, virtualPixelRatio, hotZoneScale);
+    auto hotZoneRectPointer = CalcEntireWindowHotZone(node, winRect, HOTZONE_POINTER, virtualPixelRatio, hotZoneScale);
+
+    node->SetEntireWindowTouchHotArea(hotZoneRectTouch);
+    node->SetEntireWindowPointerHotArea(hotZoneRectPointer);
+
     std::vector<Rect> requestedHotAreas;
     node->GetWindowProperty()->GetTouchHotAreas(requestedHotAreas);
-    std::vector<Rect> hotAreas;
+    std::vector<Rect> touchHotAreas;
+    std::vector<Rect> pointerHotAreas;
     if (requestedHotAreas.empty()) {
-        hotAreas.emplace_back(rect);
+        touchHotAreas.emplace_back(hotZoneRectTouch);
+        pointerHotAreas.emplace_back(hotZoneRectPointer);
     } else {
-        if (!WindowHelper::CalculateTouchHotAreas(winRect, requestedHotAreas, hotAreas)) {
+        if (!WindowHelper::CalculateTouchHotAreas(winRect, requestedHotAreas, touchHotAreas)) {
             WLOGFW("some parameters in requestedHotAreas are abnormal");
         }
+        pointerHotAreas = touchHotAreas;
     }
-    node->SetTouchHotAreas(hotAreas);
+    node->SetTouchHotAreas(touchHotAreas);
+    node->SetPointerHotAreas(pointerHotAreas);
 }
 
 void WindowLayoutPolicy::FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect)
@@ -979,9 +1026,15 @@ static void SetBounds(const sptr<WindowNode>& node, const Rect& winRect, const R
             node->surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
         }
     }
+    WLOGFD("name:%{public}s id:%{public}u preRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
+        node->GetWindowName().c_str(), node->GetWindowId(),
+        preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
+    WLOGFD("name:%{public}s id:%{public}u winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
+        node->GetWindowName().c_str(), node->GetWindowId(),
+        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     if (node->leashWinSurfaceNode_) {
         if (winRect != preRect) {
-            // avoid animation change suddenly when client coming
+            // avoid animation interpreted when client coming
             node->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
         }
         if (node->startingWinSurfaceNode_) {

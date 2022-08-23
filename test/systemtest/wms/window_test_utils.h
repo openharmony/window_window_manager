@@ -42,6 +42,7 @@ public:
         bool needAvoid;
         bool parentLimit;
         bool forbidSplitMove {false};
+        bool showWhenLocked;
         std::string parentName;
         bool focusable_ { true };
         Orientation orientation_ { Orientation::UNSPECIFIED };

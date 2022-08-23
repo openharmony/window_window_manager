@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,7 +63,7 @@ void WindowExtensionStubImpl::SetBounds(const Rect& rect)
         window_->Resize(rect.width_, rect.height_);
     }
     if (rect.posX_ != orgRect.posX_ || rect.posY_ != orgRect.posY_) {
-        window_->MoveTo(orgRect.posX_, orgRect.posY_);
+        window_->MoveTo(rect.posX_, rect.posY_);
     }
 }
 

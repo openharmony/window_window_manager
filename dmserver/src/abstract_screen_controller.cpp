@@ -24,6 +24,7 @@
 #include <surface.h>
 #include <thread>
 
+#include "sys_cap_util.h"
 #include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
 #include "event_runner.h"
@@ -73,6 +74,11 @@ std::vector<ScreenId> AbstractScreenController::GetAllScreenIds() const
         res.emplace_back(iter.first);
     }
     return res;
+}
+
+uint32_t AbstractScreenController::GetRSScreenNum() const
+{
+    return screenIdManager_.GetRSScreenNum();
 }
 
 std::vector<ScreenId> AbstractScreenController::GetShotScreenIds(std::vector<ScreenId> mirrorScreenIds) const
@@ -213,6 +219,12 @@ void AbstractScreenController::RegisterAbstractScreenCallback(sptr<AbstractScree
     abstractScreenCallback_ = cb;
 }
 
+void AbstractScreenController::RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    rSScreenChangeListener_ = listener;
+}
+
 void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent)
 {
     WLOGFI("rs screen event. id:%{public}" PRIu64", event:%{public}u", rsScreenId, static_cast<uint32_t>(screenEvent));
@@ -270,6 +282,9 @@ void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
         if (abstractScreenCallback_ != nullptr) {
             abstractScreenCallback_->onConnect_(absScreen);
         }
+        if (rSScreenChangeListener_ != nullptr) {
+            rSScreenChangeListener_->onConnected_();
+        }
     } else {
         WLOGE("reconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
     }
@@ -313,6 +328,9 @@ void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
         auto screen = dmsScreenMapIter->second;
         if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(screen)) {
             abstractScreenCallback_->onDisconnect_(screen);
+        }
+        if (rSScreenChangeListener_ != nullptr) {
+            rSScreenChangeListener_->onDisconnected_();
         }
         screenGroup = RemoveFromGroupLocked(screen);
         if (screenGroup != nullptr) {
@@ -997,11 +1015,11 @@ void AbstractScreenController::RemoveVirtualScreenFromGroup(std::vector<ScreenId
         if (!originGroup->HasChild(screenId)) {
             continue;
         }
-        removeFromGroup.emplace_back(screen->ConvertToScreenInfo());
         if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(screen)) {
             abstractScreenCallback_->onDisconnect_(screen);
         }
         RemoveFromGroupLocked(screen);
+        removeFromGroup.emplace_back(screen->ConvertToScreenInfo());
     }
     NotifyScreenGroupChanged(removeFromGroup, ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
 }
@@ -1064,6 +1082,11 @@ bool AbstractScreenController::ScreenIdManager::HasDmsScreenId(ScreenId dmsScree
 bool AbstractScreenController::ScreenIdManager::HasRsScreenId(ScreenId dmsScreenId) const
 {
     return rs2DmsScreenIdMap_.find(dmsScreenId) != rs2DmsScreenIdMap_.end();
+}
+
+uint32_t AbstractScreenController::ScreenIdManager::GetRSScreenNum() const
+{
+    return rs2DmsScreenIdMap_.size();
 }
 
 bool AbstractScreenController::ScreenIdManager::ConvertToRsScreenId(ScreenId dmsScreenId, ScreenId& rsScreenId) const
@@ -1139,12 +1162,13 @@ void AbstractScreenController::NotifyScreenGroupChanged(
     const sptr<ScreenInfo>& screenInfo, ScreenGroupChangeEvent event) const
 {
     if (screenInfo == nullptr) {
-        WLOGFE("NotifyScreenGroupChanged error, screenInfo is nullptr.");
+        WLOGFE("screenInfo is nullptr.");
         return;
     }
+    std::string trigger = SysCapUtil::GetClientName();
     auto task = [=] {
-        WLOGFI("NotifyScreenGroupChanged,  screenId:%{public}" PRIu64"", screenInfo->GetScreenId());
-        DisplayManagerAgentController::GetInstance().OnScreenGroupChange(screenInfo, event);
+        WLOGFI("screenId:%{public}" PRIu64", trigger:[%{public}s]", screenInfo->GetScreenId(), trigger.c_str());
+        DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfo, event);
     };
     controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
 }
@@ -1155,9 +1179,10 @@ void AbstractScreenController::NotifyScreenGroupChanged(
     if (screenInfo.empty()) {
         return;
     }
+    std::string trigger = SysCapUtil::GetClientName();
     auto task = [=] {
-        WLOGFI("NotifyScreenGroupChanged");
-        DisplayManagerAgentController::GetInstance().OnScreenGroupChange(screenInfo, event);
+        WLOGFI("trigger:[%{public}s]", trigger.c_str());
+        DisplayManagerAgentController::GetInstance().OnScreenGroupChange(trigger, screenInfo, event);
     };
     controllerHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
 }

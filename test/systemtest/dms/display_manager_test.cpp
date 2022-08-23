@@ -112,6 +112,7 @@ namespace {
  * @tc.name: HasPrivateWindow
  * @tc.desc: Check whether there is a private window in the current display
  * @tc.type: FUNC
+ * @tc.require I5HF6V
  */
 HWTEST_F(DisplayManagerTest, HasPrivateWindow, Function | SmallTest | Level2)
 {
@@ -134,6 +135,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindow, Function | SmallTest | Level2)
  * @tc.name: HasPrivateWindowCovered
  * @tc.desc: The private window is covered
  * @tc.type: FUNC
+ * @tc.require I5HF6V
  */
 HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered, Function | SmallTest | Level2)
 {
@@ -157,6 +159,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered, Function | SmallTest | Lev
  * @tc.name: HasPrivateWindowCovered01
  * @tc.desc: The private window is partially covered
  * @tc.type: FUNC
+ * @tc.require I5HF6V
  */
 HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered01, Function | SmallTest | Level2)
 {
@@ -180,6 +183,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered01, Function | SmallTest | L
  * @tc.name: HasPrivateWindowCovered02
  * @tc.desc: The private window is covered
  * @tc.type: FUNC
+ * @tc.require I5HF6V
  */
 HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, Function | SmallTest | Level2)
 {
@@ -206,6 +210,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, Function | SmallTest | L
  * @tc.name: HasPrivateWindowCovered03
  * @tc.desc: The private window is partially covered
  * @tc.type: FUNC
+ * @tc.require I5HF6V
  */
 HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered03, Function | SmallTest | Level2)
 {
@@ -232,6 +237,7 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered03, Function | SmallTest | L
  * @tc.name: HasPrivateWindowSkipSnapShot
  * @tc.desc: set snap shot skip
  * @tc.type: FUNC
+ * @tc.require I5HF6V
  */
 HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, Function | SmallTest | Level2)
 {

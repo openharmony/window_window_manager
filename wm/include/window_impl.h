@@ -162,6 +162,7 @@ public:
     virtual WMError SetCallingWindow(uint32_t windowId) override;
     virtual void SetPrivacyMode(bool isPrivacyMode) override;
     virtual bool IsPrivacyMode() const override;
+    virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual void DisableAppWindowDecor() override;
     virtual WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     virtual void SetSnapshotSkip(bool isSkip) override;
@@ -187,9 +188,9 @@ public:
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
 
     virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
-    virtual void RegisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
+    virtual void RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     virtual void UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
-    virtual void UnregisterWindowChangeListener(sptr<IWindowChangeListener>& listener) override;
+    virtual void UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     virtual void RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     virtual void UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
     virtual void RegisterDragListener(const sptr<IWindowDragListener>& listener) override;
@@ -302,6 +303,7 @@ private:
     }
     inline void NotifyBeforeDestroy(std::string windowName)
     {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (uiContent_ != nullptr) {
             auto uiContent = std::move(uiContent_);
             uiContent_ = nullptr;
@@ -397,6 +399,7 @@ private:
     void SetWindowCornerRadiusAccordingToSystemConfig();
     bool IsAppMainOrSubOrFloatingWindow();
     void UpdateWindowShadowAccordingToSystemConfig();
+    bool WindowCreateCheck(const std::string& parentName);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
@@ -426,7 +429,7 @@ private:
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListeners_;
     sptr<IDialogDeathRecipientListener> dialogDeathRecipientListener_;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
-    sptr<IAnimationTransitionController> animationTranistionController_;
+    sptr<IAnimationTransitionController> animationTransitionController_;
     NotifyNativeWinDestroyFunc notifyNativefunc_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::string name_;

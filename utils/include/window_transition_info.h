@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,7 +63,8 @@ public:
     void SetIsRecent(bool isRecent);
     bool GetIsRecent() const;
     WindowSizeLimits GetWindowSizeLimits() const;
-
+    void SetMissionId(int32_t missionId);
+    int32_t GetMissionId() const;
 private:
     std::string bundleName_;
     std::string abilityName_;
@@ -77,6 +78,7 @@ private:
     TransitionReason reason_ = TransitionReason::ABILITY_TRANSITION;
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
     WindowSizeLimits sizeLimits_;
+    int32_t missionId_;
 };
 } // Rosen
 } // OHOS

@@ -192,10 +192,7 @@ void WindowLayoutPolicyTile::RemoveWindowNode(const sptr<WindowNode>& node)
         AssignNodePropertyForTileWindows(displayId);
         LayoutForegroundNodeQueue(displayId);
     }
-    Rect reqRect = node->GetRequestRect();
-    if (node->GetWindowToken()) {
-        node->GetWindowToken()->UpdateWindowRect(reqRect, node->GetDecoStatus(), WindowSizeChangeReason::HIDE);
-    }
+    UpdateClientRect(node->GetRequestRect(), node, WindowSizeChangeReason::HIDE);
 }
 
 void WindowLayoutPolicyTile::LayoutForegroundNodeQueue(DisplayId displayId)
@@ -205,10 +202,7 @@ void WindowLayoutPolicyTile::LayoutForegroundNodeQueue(DisplayId displayId)
         Rect lastRect = node->GetWindowRect();
         node->SetWindowRect(winRect);
         CalcAndSetNodeHotZone(winRect, node);
-        if (node->GetWindowToken()) {
-            node->GetWindowToken()->UpdateWindowRect(
-                winRect, node->GetDecoStatus(), node->GetWindowSizeChangeReason());
-        }
+        UpdateClientRect(winRect, node, node->GetWindowSizeChangeReason());
         UpdateSurfaceBounds(node, winRect, lastRect);
         for (auto& childNode : node->children_) {
             LayoutWindowNode(childNode);
@@ -344,7 +338,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
     auto decorEnable = property->GetDecorEnable();
     bool needAvoid = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     bool parentLimit = (flags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
-    bool subWindow = WindowHelper::IsSubWindow(type);
+    bool subWindow = WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemSubWindow(type);
     bool floatingWindow = (mode == WindowMode::WINDOW_MODE_FLOATING);
     const Rect lastRect = node->GetWindowRect();
     Rect limitRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
@@ -375,7 +369,7 @@ void WindowLayoutPolicyTile::UpdateLayoutRect(const sptr<WindowNode>& node)
     CalcAndSetNodeHotZone(winRect, node);
     // update Node Bounds before reset Reason
     UpdateSurfaceBounds(node, winRect, lastRect);
-    UpdateClientRectAndResetReason(node, lastRect, winRect);
+    UpdateClientRectAndResetReason(node, winRect);
 }
 } // Rosen
 } // OHOS

@@ -35,6 +35,7 @@ private:
         // sub-windows types
         { WindowType::WINDOW_TYPE_MEDIA,                 -1 },
         { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,         1 },
+        { WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW,      1 },
 
         // main window
         { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,        0 },

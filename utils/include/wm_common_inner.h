@@ -18,6 +18,7 @@
 
 #include <cfloat>
 #include <cinttypes>
+#include <unordered_set>
 #include "wm_common.h"
 
 namespace OHOS {
@@ -131,11 +132,16 @@ struct AppWindowEffectConfig {
 struct SystemConfig : public Parcelable {
     bool isSystemDecorEnable_ = true;
     bool isStretchable_ = false;
+    WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     AppWindowEffectConfig effectConfig_;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteBool(isSystemDecorEnable_) || !parcel.WriteBool(isStretchable_)) {
+            return false;
+        }
+
+        if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_))) {
             return false;
         }
 
@@ -168,6 +174,7 @@ struct SystemConfig : public Parcelable {
         SystemConfig* config = new SystemConfig();
         config->isSystemDecorEnable_ = parcel.ReadBool();
         config->isStretchable_ = parcel.ReadBool();
+        config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         config->effectConfig_.fullScreenCornerRadius_ = parcel.ReadFloat();
         config->effectConfig_.splitCornerRadius_ = parcel.ReadFloat();
         config->effectConfig_.floatCornerRadius_ = parcel.ReadFloat();
@@ -319,6 +326,12 @@ struct MoveDragProperty : public Parcelable {
     }
 };
 
+struct AbilityInfo {
+    std::string bundleName_ = "";
+    std::string abilityName_ = "";
+    int32_t missionId_ = -1;
+};
+
 namespace {
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
     constexpr float DEFAULT_ASPECT_RATIO = 0.66;
@@ -327,7 +340,8 @@ namespace {
     constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 37;
     constexpr uint32_t WINDOW_FRAME_WIDTH = 5;
     constexpr uint32_t WINDOW_FRAME_CORNER_WIDTH = 16; // the frame width of corner
-    constexpr uint32_t HOTZONE = 20;
+    constexpr uint32_t HOTZONE_TOUCH = 20;
+    constexpr uint32_t HOTZONE_POINTER = 4;
     constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 240;
     constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 320;
     constexpr uint32_t MIN_VERTICAL_SPLIT_HEIGHT = 240;
@@ -336,6 +350,11 @@ namespace {
     constexpr unsigned int WMS_WATCHDOG_CHECK_INTERVAL = 6; // actual check interval is 3000ms(6 * 500)
     const Rect INVALID_EMPTY_RECT = {0, 0, 0, 0};
     const Rect DEFAULT_PLACE_HOLDER_RECT = {0, 0, 512, 512};
+    const std::unordered_set<WindowType> INPUT_WINDOW_TYPE_SKIPPED {
+        WindowType::WINDOW_TYPE_POINTER,
+        WindowType::WINDOW_TYPE_DRAGGING_EFFECT,
+        WindowType::WINDOW_TYPE_FREEZE_DISPLAY
+    };
 }
 }
 }

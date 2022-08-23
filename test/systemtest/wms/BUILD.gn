@@ -20,6 +20,7 @@ group("systemtest") {
   testonly = true
 
   deps = [
+    ":wms_window_animation_transition_test",
     ":wms_window_app_floating_window_test",
     ":wms_window_dialogwindow_test",
     ":wms_window_drag_test",
@@ -37,6 +38,7 @@ group("systemtest") {
     ":wms_window_split_immersive_test",
     ":wms_window_split_test",
     ":wms_window_subwindow_test",
+    ":wms_window_systemsubwindow_test",
     ":wms_window_touch_outside_test",
     ":wms_window_visibility_info_test",
   ]
@@ -70,6 +72,16 @@ ohos_systemtest("wms_window_subwindow_test") {
   module_out_path = module_out_path
 
   sources = [ "window_subwindow_test.cpp" ]
+
+  deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [ "bundle_framework:appexecfwk_base" ]
+}
+
+ohos_systemtest("wms_window_systemsubwindow_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_systemsubwindow_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
 
@@ -208,6 +220,14 @@ ohos_systemtest("wms_window_app_floating_window_test") {
   deps = [ ":wms_systemtest_common" ]
 }
 
+ohos_systemtest("wms_window_animation_transition_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_animation_transition_test.cpp" ]
+
+  deps = [ ":wms_systemtest_common" ]
+}
+
 ## Build wms_systemtest_common.a {{{
 config("wms_systemtest_common_public_config") {
   include_dirs = [
@@ -219,6 +239,7 @@ config("wms_systemtest_common_public_config") {
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
     "//third_party/googletest/googlemock/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
 
     # for abilityContext
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",

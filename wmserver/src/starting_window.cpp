@@ -26,10 +26,10 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "StartingWindow"};
-    const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_animation";
 }
 
 std::recursive_mutex StartingWindow::mutex_;
+WindowMode StartingWindow::defaultMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
 
 bool StartingWindow::NeedToStopStartingWindow(WindowMode winMode, uint32_t modeSupportInfo,
     const sptr<WindowTransitionInfo>& info)
@@ -56,6 +56,8 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     property->SetRequestRect(info->GetWindowRect());
     if (WindowHelper::IsValidWindowMode(info->GetWindowMode())) {
         property->SetWindowMode(info->GetWindowMode());
+    } else {
+        property->SetWindowMode(defaultMode_);
     }
 
     property->SetDisplayId(info->GetDisplayId());
@@ -71,7 +73,9 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     }
     node->abilityToken_ = info->GetAbilityToken();
     node->SetWindowSizeLimits(info->GetWindowSizeLimits());
-
+    node->abilityInfo_.missionId_ = info->GetMissionId();
+    node->abilityInfo_.bundleName_ = info->GetBundleName();
+    node->abilityInfo_.abilityName_ = info->GetAbilityName();
     uint32_t modeSupportInfo = 0;
     WindowHelper::ConvertSupportModesToSupportInfo(modeSupportInfo, info->GetWindowSupportModes());
     node->SetModeSupportInfo(modeSupportInfo);
@@ -208,20 +212,34 @@ void StartingWindow::UpdateRSTree(sptr<WindowNode>& node, const AnimationConfig&
             }
         }
     };
-    static const bool IsWindowAnimationEnabled = access(DISABLE_WINDOW_ANIMATION_PATH, F_OK) == 0 ? false : true;
-    if ((IsWindowAnimationEnabled && !RemoteAnimation::CheckAnimationController())) {
-        if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
-            // keyboard animation
-            RSNode::Animate(animationConfig.keyboardAnimationConfig_.durationIn_,
-                animationConfig.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
-        } else { // window animation
-            RSNode::Animate(animationConfig.windowAnimationConfig_.animationTiming_.timingProtocol_,
-                animationConfig.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc);
+    wptr<WindowNode> weakNode = node;
+    auto finishCallBack = [weakNode]() {
+        auto weak = weakNode.promote();
+        if (weak == nullptr) {
+            WLOGFE("window node is nullptr");
+            return;
         }
+        auto winRect = weak->GetWindowRect();
+        WLOGFI("before setBounds windowRect: %{public}d, %{public}d, %{public}d, %{public}d",
+            winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+        if (weak->leashWinSurfaceNode_) {
+            weak->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+        }
+        RSTransaction::FlushImplicitTransaction();
+    };
+    static const bool IsWindowAnimationEnabled = WindowHelper::ReadIsWindowAnimationEnabledProperty();
+    if ((IsWindowAnimationEnabled && !RemoteAnimation::CheckAnimationController())) {
+        RSNode::Animate(animationConfig.windowAnimationConfig_.animationTiming_.timingProtocol_,
+            animationConfig.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc, finishCallBack);
     } else {
         // add or remove window without animation
         updateRSTreeFunc();
     }
+}
+
+void StartingWindow::SetDefaultWindowMode(WindowMode defaultMode)
+{
+    defaultMode_ = defaultMode;
 }
 } // Rosen
 } // OHOS

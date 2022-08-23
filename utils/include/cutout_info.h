@@ -67,7 +67,7 @@ struct WaterfallDisplayAreaRects {
 class CutoutInfo : public Parcelable {
 public:
     CutoutInfo() = default;
-    CutoutInfo(const std::vector<Rect>& boudingRects, WaterfallDisplayAreaRects waterfallDisplayAreaRects);
+    CutoutInfo(const std::vector<Rect>& boundingRects, WaterfallDisplayAreaRects waterfallDisplayAreaRects);
     ~CutoutInfo() = default;
     WM_DISALLOW_COPY_AND_MOVE(CutoutInfo);
 

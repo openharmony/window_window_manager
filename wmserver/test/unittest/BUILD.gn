@@ -19,6 +19,9 @@ group("unittest") {
   testonly = true
   deps = [
     ":wmsever_avoid_area_controller_test",
+    ":wmsever_minimize_app_test",
+    ":wmsever_window_manager_config_test",
+    ":wmsever_window_node_container_test",
     ":wmsever_window_zorder_policy_test",
   ]
 }
@@ -31,10 +34,34 @@ ohos_unittest("wmsever_avoid_area_controller_test") {
   deps = [ ":wmserver_unittest_common" ]
 }
 
+ohos_unittest("wmsever_minimize_app_test") {
+  module_out_path = module_out_path
+
+  sources = [ "minimize_app_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common" ]
+}
+
+ohos_unittest("wmsever_window_manager_config_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_manager_config_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common" ]
+}
+
 ohos_unittest("wmsever_window_zorder_policy_test") {
   module_out_path = module_out_path
 
   sources = [ "window_zorder_policy_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common" ]
+}
+
+ohos_unittest("wmsever_window_node_container_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_node_container_test.cpp" ]
 
   deps = [ ":wmserver_unittest_common" ]
 }

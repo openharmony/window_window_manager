@@ -259,9 +259,10 @@ NativeValue* CreateJsVirtualScreenRecorderObject(NativeEngine& engine, sptr<Scre
     JsScreenRef.reset(engine.CreateReference(objValue, 1));
     std::lock_guard<std::recursive_mutex> lock(g_recursive_mutex);
     g_JsScreenRecorderMap[screenId] = JsScreenRef;
-    BindNativeFunction(engine, *object, "getInputSurface", JsVirtualScreenRecorder::GetInputSurface);
-    BindNativeFunction(engine, *object, "start", JsVirtualScreenRecorder::Start);
-    BindNativeFunction(engine, *object, "stop", JsVirtualScreenRecorder::Stop);
+    const char *moduleName = "JsVirtualScreenRecorder";
+    BindNativeFunction(engine, *object, "getInputSurface", moduleName, JsVirtualScreenRecorder::GetInputSurface);
+    BindNativeFunction(engine, *object, "start", moduleName, JsVirtualScreenRecorder::Start);
+    BindNativeFunction(engine, *object, "stop", moduleName, JsVirtualScreenRecorder::Stop);
     return objValue;
 }
 
@@ -344,7 +345,9 @@ NativeValue* JsScreenRecorderInit(NativeEngine* engine, NativeValue* exportObj)
     std::unique_ptr<JsScreenRecorder> jsScreenRecorder = std::make_unique<JsScreenRecorder>(engine);
     object->SetNativePointer(jsScreenRecorder.release(), JsScreenRecorder::Finalizer, nullptr);
 
-    BindNativeFunction(*engine, *object, "getVirtualScreenRecorder", JsScreenRecorder::GetVirtualScreenRecorder);
+    const char *moduleName = "JsScreenRecorder";
+    BindNativeFunction(*engine, *object, "getVirtualScreenRecorder",
+        moduleName, JsScreenRecorder::GetVirtualScreenRecorder);
     return engine->CreateUndefined();
 }
 }  // namespace Rosen

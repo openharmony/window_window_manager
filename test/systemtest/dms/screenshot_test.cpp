@@ -16,9 +16,11 @@
 #include <cinttypes>
 #include <gtest/gtest.h>
 
-#include "display_test_utils.h"
-#include "pixel_map.h"
 #include "common_test_utils.h"
+#include "display_test_utils.h"
+#include "future.h"
+#include "pixel_map.h"
+#include "screenshot_listener_future.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,6 +31,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenshotTest"};
 }
 using Utils = DisplayTestUtils;
+class ScreenshotListener;
 class ScreenshotTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -218,6 +221,28 @@ HWTEST_F(ScreenshotTest, ScreenShot09, Function | MediumTest | Level2)
     invalidSize = {defaultScreen_.width, invalidRect_.height};
     screenshot = dm.GetScreenshot(defaultId_, defaultScreen_, invalidSize, defaultRot_);
     ASSERT_EQ(nullptr, screenshot);
+}
+
+/**
+ * @tc.name: ScreenShotListener01
+ * @tc.desc: Check if screenshot listener info valid
+ * @tc.type: FUNC
+ * @tc.require: issueI5G62O
+ */
+HWTEST_F(ScreenshotTest, ScreenShotListener01, Function | MediumTest | Level2)
+{
+    sptr<ScreenshotListenerFuture> screenShotListener = new ScreenshotListenerFuture();
+
+    auto& dm = DisplayManager::GetInstance();
+    dm.RegisterScreenshotListener(screenShotListener);
+    std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(defaultId_);
+    auto info = screenShotListener->future_.GetResult(1000);
+
+    ASSERT_NE(nullptr, screenshot);
+    ASSERT_EQ(info.GetDisplayId(), defaultId_);
+    ASSERT_GT(info.GetTrigger().size(), 0UL);
+
+    dm.UnregisterScreenshotListener(screenShotListener);
 }
 } // namespace
 } // namespace Rosen

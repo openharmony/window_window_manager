@@ -222,6 +222,7 @@ void AbstractScreen::FillScreenInfo(sptr<ScreenInfo> info) const
     info->virtualPixelRatio_ = virtualPixelRatio;
     info->virtualHeight_ = height / virtualPixelRatio;
     info->virtualWidth_ = width / virtualPixelRatio;
+    info->lastParent_ = lastGroupDmsId_;
     info->parent_ = groupDmsId_;
     info->isScreenGroup_ = isScreenGroup_;
     info->rotation_ = rotation_;
@@ -366,6 +367,7 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
         return false;
     }
     dmsScreen->InitRSDisplayNode(config, startPoint);
+    dmsScreen->lastGroupDmsId_ = dmsScreen->groupDmsId_;
     dmsScreen->groupDmsId_ = dmsId_;
     abstractScreenMap_.insert(std::make_pair(screenId, std::make_pair(dmsScreen, startPoint)));
     return true;
@@ -392,6 +394,7 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
         return false;
     }
     ScreenId screenId = dmsScreen->dmsId_;
+    dmsScreen->lastGroupDmsId_ = dmsScreen->groupDmsId_;
     dmsScreen->groupDmsId_ = SCREEN_ID_INVALID;
     if (dmsScreen->rsDisplayNode_ != nullptr) {
         dmsScreen->rsDisplayNode_->SetDisplayOffset(0, 0);
