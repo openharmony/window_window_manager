@@ -58,12 +58,18 @@ int32_t SnapshotController::GetSnapshot(const sptr<IRemoteObject> &token, Snapsh
             return;
         }
         auto targetNode = windowRoot_->GetWindowNodeByAbilityToken(token);
-        pixelMap = targetNode->GetSnapshot();
-        surfaceNode = targetNode->surfaceNode_;
-        // reset window snapshot after use
-        targetNode->SetSnapshot(nullptr);
+        if (targetNode != nullptr) {
+            pixelMap = targetNode->GetSnapshot();
+            // reset window snapshot after use
+            targetNode->SetSnapshot(nullptr);
+            surfaceNode = targetNode->surfaceNode_;
+        }
     };
     // post sync task to wms main handler
+    if (handler_ == nullptr) {
+        WLOGFE("Get window node failed, because window manager service handler is null");
+        return static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+    }
     handler_->PostSyncTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     if (surfaceNode == nullptr) {
         WLOGFE("Get window node failed, because surfaceNode is null");
