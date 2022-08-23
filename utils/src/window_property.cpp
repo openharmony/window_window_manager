@@ -31,8 +31,11 @@ void WindowProperty::SetWindowName(const std::string& name)
 
 void WindowProperty::SetWindowRect(const struct Rect& rect)
 {
-    recomputeTransformMat_ = true;
+    ComputeTransform();
     windowRect_ = rect;
+    if (trans_ != Transform::Identity()) {
+        WindowHelper::GetTransformFromWorldMat4(worldTransformMat_, windowRect_, trans_);
+    }
 }
 
 void WindowProperty::SetDecoStatus(bool decoStatus)
@@ -112,7 +115,7 @@ void WindowProperty::SetTransform(const Transform& trans)
 
 void WindowProperty::ComputeTransform()
 {
-    if (recomputeTransformMat_ && (trans_ != Transform::Identity())) {
+    if (recomputeTransformMat_) {
         TransformHelper::Vector3 pivotPos = { windowRect_.posX_ + trans_.pivotX_ * windowRect_.width_,
             windowRect_.posY_ + trans_.pivotY_ * windowRect_.height_, 0 };
         worldTransformMat_ = TransformHelper::CreateTranslation(-pivotPos) *
@@ -444,6 +447,11 @@ WindowSizeLimits WindowProperty::GetUpdatedSizeLimits() const
 const TransformHelper::Matrix4& WindowProperty::GetTransformMat() const
 {
     return transformMat_;
+}
+
+const TransformHelper::Matrix4& WindowProperty::GetWorldTransformMat() const
+{
+    return worldTransformMat_;
 }
 
 void WindowProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
