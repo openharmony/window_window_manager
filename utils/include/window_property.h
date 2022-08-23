@@ -119,6 +119,7 @@ public:
     WindowSizeLimits GetSizeLimits() const;
     WindowSizeLimits GetUpdatedSizeLimits() const;
     const TransformHelper::Matrix4& GetTransformMat() const;
+    const TransformHelper::Matrix4& GetWorldTransformMat() const;
 
     virtual bool Marshalling(Parcel& parcel) const override;
     static WindowProperty* Unmarshalling(Parcel& parcel);
