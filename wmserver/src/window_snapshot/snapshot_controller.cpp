@@ -21,6 +21,7 @@
 #include <sstream>
 
 #include "surface_capture_future.h"
+#include "surface_draw.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 
@@ -36,19 +37,6 @@ void SnapshotController::Init(sptr<WindowRoot>& root)
     windowRoot_ = root;
 }
 
-WMError SnapshotController::TakeSnapshot(const std::shared_ptr<RSSurfaceNode>& surfaceNode, Snapshot& snapshot)
-{
-    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    rsInterface_.TakeSurfaceCapture(surfaceNode, callback, scaleW, scaleH);
-    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(2000); // wait for <= 2000ms
-    if (pixelMap == nullptr) {
-        WLOGFE("Failed to get pixelmap, return nullptr!");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    snapshot.SetPixelMap(pixelMap);
-    return WMError::WM_OK;
-}
-
 int32_t SnapshotController::GetSnapshot(const sptr<IRemoteObject> &token, Snapshot& snapshot)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:GetSnapshot");
@@ -61,22 +49,38 @@ int32_t SnapshotController::GetSnapshot(const sptr<IRemoteObject> &token, Snapsh
         WLOGFE("Get snapshot failed, because handler is null.");
         return static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
     }
+    std::shared_ptr<Media::PixelMap> pixelMap;
     std::shared_ptr<RSSurfaceNode> surfaceNode;
-    auto task = [this, &surfaceNode, token] () {
+    auto task = [this, &pixelMap, &surfaceNode, token] () {
         if (windowRoot_ == nullptr || token == nullptr) {
             surfaceNode = nullptr;
             WLOGFE("Get snapshot failed, because windowRoot is null.");
             return;
         }
-        surfaceNode = windowRoot_->GetSurfaceNodeByAbilityToken(token);
+        auto targetNode = windowRoot_->GetWindowNodeByAbilityToken(token);
+        if (targetNode != nullptr) {
+            pixelMap = targetNode->GetSnapshot();
+            // reset window snapshot after use
+            targetNode->SetSnapshot(nullptr);
+            surfaceNode = targetNode->surfaceNode_;
+        }
     };
+    if (handler_ == nullptr) {
+        WLOGFE("Get window node failed, because window manager service handler is null");
+        return static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+    }
     // post sync task to wms main handler
     handler_->PostSyncTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     if (surfaceNode == nullptr) {
-        WLOGFE("Get surfaceNode failed, because surfaceNode is null");
+        WLOGFE("Get window node failed, because surfaceNode is null");
         return static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
     }
-    WMError res = TakeSnapshot(surfaceNode, snapshot);
+    WMError res = WMError::WM_OK;
+    if (pixelMap == nullptr) {
+        // take surface snapshot, time out 2000ms
+        res = SurfaceDraw::GetSurfaceSnapshot(surfaceNode, pixelMap, 2000) ? WMError::WM_OK : WMError::WM_ERROR_NULLPTR;
+    }
+    snapshot.SetPixelMap(pixelMap);
     if (res == WMError::WM_OK) {
         getSnapshotTimeConfig_.getSnapshotTimes_++;
         auto currentTime = std::chrono::steady_clock::now();
