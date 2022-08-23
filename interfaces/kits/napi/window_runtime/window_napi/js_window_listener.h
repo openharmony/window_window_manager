@@ -38,7 +38,7 @@ const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
 const std::string TOUCH_OUTSIDE_CB = "touchOutside";
-const std::string SCREENSHOT_EVENT_CB = "screenshotEvent";
+const std::string SCREENSHOT_EVENT_CB = "screenshot";
 const std::string DIALOG_TARGET_TOUCH_CB = "dialogTargetTouch";
 const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 
