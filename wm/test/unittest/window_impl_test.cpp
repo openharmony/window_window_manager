@@ -854,6 +854,7 @@ HWTEST_F(WindowImplTest, GetColorSpace01, Function | SmallTest | Level3)
  * @tc.name: StartMove01
  * @tc.desc: start move main fullscreen window, test startMoveFlag
  * @tc.type: FUNC
+ * @tc.require: issueI5J8IB
  */
 HWTEST_F(WindowImplTest, StartMove01, Function | SmallTest | Level3)
 {
@@ -877,6 +878,7 @@ HWTEST_F(WindowImplTest, StartMove01, Function | SmallTest | Level3)
  * @tc.name: StartMove02
  * @tc.desc: start move main fullscreen window, test startMoveFlag
  * @tc.type: FUNC
+ * @tc.require: issueI5J8IB
  */
 HWTEST_F(WindowImplTest, StartMove02, Function | SmallTest | Level3)
 {
@@ -902,6 +904,7 @@ HWTEST_F(WindowImplTest, StartMove02, Function | SmallTest | Level3)
  * @tc.name: StartMove03
  * @tc.desc: start move divider, test startMoveFlag
  * @tc.type: FUNC
+ * @tc.require: issueI5J8IB
  */
 HWTEST_F(WindowImplTest, StartMove03, Function | SmallTest | Level3)
 {
