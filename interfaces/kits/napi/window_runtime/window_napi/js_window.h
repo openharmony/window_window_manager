@@ -17,7 +17,13 @@
 #define OHOS_JS_WINDOW_H
 
 #include "js_runtime_utils.h"
+
+#ifndef WINDOW_PREVIEW
 #include "js_window_register_manager.h"
+#else
+#include "mock/js_window_register_manager.h"
+#endif
+
 #include "js_window_utils.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
