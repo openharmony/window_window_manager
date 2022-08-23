@@ -220,6 +220,40 @@ HWTEST_F(WindowHelperTest, WindowType, Function | SmallTest | Level1)
     ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW));
     ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_FLOAT));
 }
+
+/**
+ * @tc.name: GetTransformFromWorldMat4
+ * @tc.desc: GetTransformFromWorldMat4 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowHelperTest, GetTransformFromWorldMat4, Function | SmallTest | Level1)
+{
+    Transform transform1;
+    transform1.scaleX_ = 0.66f;
+    transform1.scaleY_ = 1.5f;
+    transform1.translateX_ = 12.f;
+    transform1.translateY_ = 45.f;
+    Rect rect1 { 0, 0, 300, 400 };
+    TransformHelper::Vector3 pivotPos1 = { rect1.posX_ + transform1.pivotX_ * rect1.width_,
+            rect1.posY_ + transform1.pivotY_ * rect1.height_, 0 };
+    TransformHelper::Matrix4 mat1 = TransformHelper::CreateTranslation(-pivotPos1);
+    mat1 *= WindowHelper::ComputeWorldTransformMat4(transform1);
+    mat1 *= TransformHelper::CreateTranslation(pivotPos1);
+
+    Rect rect2 = WindowHelper::TransformRect(mat1, rect1);
+    Transform transform2;
+    WindowHelper::GetTransformFromWorldMat4(mat1, rect2, transform2);
+    TransformHelper::Vector3 pivotPos2 = { rect2.posX_ + transform2.pivotX_ * rect2.width_,
+            rect2.posY_ + transform2.pivotY_ * rect2.height_, 0 };
+    TransformHelper::Matrix4 mat2 = TransformHelper::CreateTranslation(-pivotPos2);
+    mat2 *= WindowHelper::ComputeWorldTransformMat4(transform2);
+    mat2 *= TransformHelper::CreateTranslation(pivotPos2);
+    for (int i = 0; i < TransformHelper::Matrix4::MAT_SIZE; i++) {
+        for (int j = 0; j < TransformHelper::Matrix4::MAT_SIZE; j++) {
+            ASSERT_EQ(true, MathHelper::NearZero(mat1.mat_[i][j] - mat2.mat_[i][j]));
+        }
+    }
+}
 }
 } // namespace Rosen
 } // namespace OHOS
