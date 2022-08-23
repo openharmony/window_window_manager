@@ -739,6 +739,7 @@ HWTEST_F(ScreenManagerTest, ScreenManager15, Function | MediumTest | Level2)
  * @tc.name: ScreenManager16
  * @tc.desc: Screen orientation.
  * @tc.type: FUNC
+ * @tc.require: issueI5NDLK
  */
 HWTEST_F(ScreenManagerTest, ScreenManager16, Function | MediumTest | Level2)
 {
