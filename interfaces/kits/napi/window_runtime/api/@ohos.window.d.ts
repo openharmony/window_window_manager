@@ -896,20 +896,20 @@ declare namespace window {
     off(type: 'avoidAreaChange', callback?: Callback<{ type: AvoidAreaType, area: AvoidArea }>): void;
 
     /**
-     * register the callback of screenshotEvent, only the focused window called back
-     * @param type: 'screenshotEvent'
+     * register the callback of screenshot, only the focused window called back
+     * @param type: 'screenshot'
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 9
      */
-    on(type: 'screenshotEvent', callback: Callback<void>): void;
+    on(type: 'screenshot', callback: Callback<void>): void;
 
     /**
-     * unregister the callback of screenshotEvent
-     * @param type: 'screenshotEvent'
+     * unregister the callback of screenshot
+     * @param type: 'screenshot'
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 9
      */
-    off(type: 'screenshotEvent', callback?: Callback<void>): void;
+    off(type: 'screenshot', callback?: Callback<void>): void;
 
     /**
      * register the callback of dialogTargetTouch
