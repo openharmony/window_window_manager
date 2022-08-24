@@ -71,17 +71,15 @@ ohos_shared_library("previewer_shared") {
 }
 
 ohos_copy("copy_previewer_library") {
-  if (host_os == "mac") {
-    suffix = ".dylib"
-  } else {
+  if (host_os != "mac") {
     suffix = ".dll"
+    shared_library_path = get_label_info(":previewer_shared", "root_out_dir") +
+                          "/window/window_manager/libpreviewer_shared" + suffix
+    deps = [ ":previewer_shared" ]
+    sources = [ shared_library_path ]
+    outputs = [ target_out_dir + "/previewer/common/bin/libpreviewer_shared" +
+                suffix ]
+    module_source_dir = target_out_dir + "/previewer/common/bin/"
+    module_install_name = ""
   }
-  shared_library_path = get_label_info(":previewer_shared", "root_out_dir") +
-                        "/window/window_manager/libpreviewer_shared" + suffix
-  deps = [ ":previewer_shared" ]
-  sources = [ shared_library_path ]
-  outputs =
-      [ target_out_dir + "/previewer/common/bin/libpreviewer_shared" + suffix ]
-  module_source_dir = target_out_dir + "/previewer/common/bin/"
-  module_install_name = ""
 }
