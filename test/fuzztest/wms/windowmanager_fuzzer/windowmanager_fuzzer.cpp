@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-#include "parcel.h"
+#include <parcel.h>
+
+#include "marshalling_helper.h"
 #include "window_manager.h"
 
 using namespace OHOS::Rosen;
@@ -49,7 +51,7 @@ public:
 
 class WindowUpdateListener : public IWindowUpdateListener {
 public:
-    virtual void OnWindowUpdate(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type) override
+    virtual void OnWindowUpdate(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type) override
     {
     }
 };
@@ -60,11 +62,13 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         return false;
     }
     WindowManager& windowManager = WindowManager::GetInstance();
-    Parcel accessibilityWindowInfoParcel;
-    if (accessibilityWindowInfoParcel.WriteBuffer(data, size)) {
-        sptr<AccessibilityWindowInfo> windowInfo =
-            AccessibilityWindowInfo::Unmarshalling(accessibilityWindowInfoParcel);
-        windowManager.GetAccessibilityWindowInfo(windowInfo);
+    Parcel accessibilityWindowInfosParcel;
+    if (accessibilityWindowInfosParcel.WriteBuffer(data, size)) {
+        std::vector<sptr<AccessibilityWindowInfo>> infos;
+        if (MarshallingHelper::UnmarshallingVectorParcelableObj<AccessibilityWindowInfo>(accessibilityWindowInfosParcel,
+            infos)) {
+            windowManager.GetAccessibilityWindowInfo(infos);
+        }
     }
 
     Parcel focusChangeInfoParcel;
@@ -82,16 +86,11 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     sptr<WindowVisibilityInfo> windowVisibilityInfo = new WindowVisibilityInfo();
     windowVisibilityInfo->Marshalling(parcel);
 
-    Parcel windowInfoParcel;
-    if (windowInfoParcel.WriteBuffer(data, size)) {
-        WindowInfo::Unmarshalling(windowInfoParcel);
+    Parcel accessibilityWindowInfoParcel;
+    if (accessibilityWindowInfoParcel.WriteBuffer(data, size)) {
+        AccessibilityWindowInfo::Unmarshalling(accessibilityWindowInfoParcel);
     }
-    sptr<WindowInfo> windowInfo = new WindowInfo();
-    windowInfo->Marshalling(parcel);
-
     sptr<AccessibilityWindowInfo> accessibilityWindowInfo = new AccessibilityWindowInfo();
-    accessibilityWindowInfo->currentWindowInfo_ = windowInfo;
-    accessibilityWindowInfo->windowList_.emplace_back(windowInfo);
     accessibilityWindowInfo->Marshalling(parcel);
 
     windowManager.MinimizeAllAppWindows(static_cast<DisplayId>(data[0]));
