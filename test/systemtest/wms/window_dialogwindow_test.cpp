@@ -78,6 +78,7 @@ static sptr<Window> CreateDialogWindow(sptr<WindowScene> scene, WindowType type,
  * @tc.name: dialogWindow01
  * @tc.desc: FullScreen Main Window + Floating dialogWindow
  * @tc.type: FUNC
+ * @tc.require: issueI5GKWZ
  */
 HWTEST_F(WindowDialogWindowTest, DialogWindow01, Function | MediumTest | Level2)
 {
@@ -101,6 +102,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow01, Function | MediumTest | Level2)
  * @tc.name: dialogWindow02
  * @tc.desc: FullScreen Main Window + 2 dialogWindow
  * @tc.type: FUNC
+ * @tc.require: issueI5GKWZ
  */
 HWTEST_F(WindowDialogWindowTest, DialogWindow02, Function | MediumTest | Level2)
 {
@@ -127,6 +129,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow02, Function | MediumTest | Level2)
  * @tc.name: dialogWindow03
  * @tc.desc: FullScreen Main Window + 2 dialogWindow with the same name
  * @tc.type: FUNC
+ * @tc.require: issueI5GKWZ
  */
 HWTEST_F(WindowDialogWindowTest, DialogWindow03, Function | MediumTest | Level2)
 {
@@ -152,6 +155,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow03, Function | MediumTest | Level2)
  * @tc.name: dialogWindow04
  * @tc.desc: FullScreen Main Window + 2 dialogWindow with the same name but one create after another destroyed
  * @tc.type: FUNC
+ * @tc.require: issueI5GKWZ
  */
 HWTEST_F(WindowDialogWindowTest, DialogWindow04, Function | MediumTest | Level2)
 {
@@ -178,6 +182,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow04, Function | MediumTest | Level2)
  * @tc.name: dialogWindow05
  * @tc.desc: FullScreen Main Window + dialogWindow & MainWindow First GoBackground
  * @tc.type: FUNC
+ * @tc.require: issueI5GKWZ
  */
 HWTEST_F(WindowDialogWindowTest, DialogWindow05, Function | MediumTest | Level2)
 {
@@ -201,6 +206,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow05, Function | MediumTest | Level2)
  * @tc.name: dialogWindow06
  * @tc.desc: FullScreen Main Window + dialogWindow & first destroy dialogWindow, then destroy MainWindow
  * @tc.type: FUNC
+ * @tc.require: issueI5GKWZ
  */
 HWTEST_F(WindowDialogWindowTest, DialogWindow06, Function | MediumTest | Level2)
 {
@@ -226,6 +232,7 @@ HWTEST_F(WindowDialogWindowTest, DialogWindow06, Function | MediumTest | Level2)
  * @tc.name: dialogWindow07
  * @tc.desc: FullScreen Main Window + dialogWindow & first destroy MainWindow, then destroy dialogWindow
  * @tc.type: FUNC
+ * @tc.require: issueI5GKWZ
  */
 HWTEST_F(WindowDialogWindowTest, DialogWindow07, Function | MediumTest | Level2)
 {

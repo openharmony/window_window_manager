@@ -216,6 +216,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow04, Function | MediumTest
  * @tc.name: AppFloatingWindow05
  * @tc.desc: Camera AppFloatingWindow life cycle
  * @tc.type: FUNC
+ * @tc.require: issueI5NEHO
  */
 HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow05, Function | MediumTest | Level2)
 {
@@ -240,6 +241,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow05, Function | MediumTest
  * @tc.name: AppFloatingWindow06
  * @tc.desc: Camera AppFloatingWindow life cycle, main window hide first
  * @tc.type: FUNC
+ * @tc.require: issueI5NEHO
  */
 HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow06, Function | MediumTest | Level3)
 {
@@ -266,6 +268,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow06, Function | MediumTest
  * @tc.name: AppFloatingWindow07
  * @tc.desc: Camera AppFloatingWindow life cycle, app floating window hide first
  * @tc.type: FUNC
+ * @tc.require: issueI5NEHO
  */
 HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow07, Function | MediumTest | Level3)
 {
@@ -292,6 +295,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow07, Function | MediumTest
  * @tc.name: AppFloatingWindow08
  * @tc.desc: Camera AppFloatingWindow life cycle, main window destroy first
  * @tc.type: FUNC
+ * @tc.require: issueI5NEHO
  */
 HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow08, Function | MediumTest | Level3)
 {
@@ -315,6 +319,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow08, Function | MediumTest
  * @tc.name: AppFloatingWindow09
  * @tc.desc: Camera AppFloatingWindow rect check
  * @tc.type: FUNC
+ * @tc.require: issueI5NEHO
  */
 HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow09, Function | MediumTest | Level3)
 {
@@ -355,6 +360,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow09, Function | MediumTest
  * @tc.name: AppFloatingWindow10
  * @tc.desc: Camera AppFloatingWindow multi create
  * @tc.type: FUNC
+ * @tc.require: issueI5NEHO
  */
 HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow10, Function | MediumTest | Level3)
 {
@@ -380,6 +386,7 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow10, Function | MediumTest
  * @tc.name: AppFloatingWindow11
  * @tc.desc: Camera AppFloatingWindow listener
  * @tc.type: FUNC
+ * @tc.require: issueI5NEHR
  */
 HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow11, Function | MediumTest | Level2)
 {
