@@ -391,8 +391,14 @@ void WindowImpl::SetTransform(const Transform& trans)
     if (!IsWindowValid()) {
         return;
     }
+    Transform oriTrans = property_->GetTransform();
     property_->SetTransform(trans);
-    UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY);
+    WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("SetTransform errCode:%{public}d winId:%{public}u",
+            static_cast<int32_t>(ret), property_->GetWindowId());
+        property_->SetTransform(oriTrans); // reset to ori transform when update failed
+    }
 }
 
 const Transform& WindowImpl::GetTransform() const
@@ -1272,7 +1278,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
     NotifyAfterBackground();
     uint32_t animationFlag = property_->GetAnimationFlag();
     if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-        animationTranistionController_->AnimationForHidden();
+        animationTransitionController_->AnimationForHidden();
     }
     ResetMoveOrDragState();
     return ret;
@@ -1870,9 +1876,9 @@ void WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTran
         WLOGFE("listener is nullptr");
         return;
     }
-    animationTranistionController_ = listener;
+    animationTransitionController_ = listener;
     wptr<WindowProperty> propertyToken(property_);
-    wptr<IAnimationTransitionController> animationTransitionControllerToken(animationTranistionController_);
+    wptr<IAnimationTransitionController> animationTransitionControllerToken(animationTransitionController_);
     if (uiContent_) {
         uiContent_->SetNextFrameLayoutCallback([propertyToken, animationTransitionControllerToken]() {
             auto property = propertyToken.promote();
@@ -1882,7 +1888,7 @@ void WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTran
             }
             uint32_t animationFlag = property->GetAnimationFlag();
             if (animationFlag == static_cast<uint32_t>(WindowAnimation::CUSTOM)) {
-                // CustomAnimation is enabled when animationTranistionController_ exists
+                // CustomAnimation is enabled when animationTransitionController_ exists
                 animationTransitionController->AnimationForShown();
             }
         });
@@ -2350,10 +2356,10 @@ void WindowImpl::AdjustWindowAnimationFlag(bool withAnimation)
     // use custom animation when transitionController exists; else use default animation
     WindowType winType = property_->GetWindowType();
     bool isAppWindow = WindowHelper::IsAppWindow(winType);
-    if (withAnimation && !isAppWindow && animationTranistionController_) {
+    if (withAnimation && !isAppWindow && animationTransitionController_) {
         // use custom animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
-    } else if (isAppWindow || (withAnimation && !animationTranistionController_)) {
+    } else if (isAppWindow || (withAnimation && !animationTransitionController_)) {
         // use default animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
     } else if (winType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
