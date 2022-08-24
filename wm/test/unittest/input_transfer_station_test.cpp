@@ -50,6 +50,7 @@ namespace {
  * @tc.name: AddInputWindow
  * @tc.desc: add input window in station.
  * @tc.type: FUNC
+ * @tc.require: issueI5I5L4
  */
 HWTEST_F(InputTransferStationTest, AddInputWindow, Function | SmallTest | Level2)
 {
@@ -62,6 +63,7 @@ HWTEST_F(InputTransferStationTest, AddInputWindow, Function | SmallTest | Level2
  * @tc.name: RemoveInputWindow
  * @tc.desc: remove input window in station.
  * @tc.type: FUNC
+ * @tc.require: issueI5I5L4
  */
 HWTEST_F(InputTransferStationTest, RemoveInputWindow, Function | SmallTest | Level2)
 {
