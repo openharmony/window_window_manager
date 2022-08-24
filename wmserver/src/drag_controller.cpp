@@ -351,6 +351,12 @@ void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEv
     int32_t pointPosY = pointerItem.GetDisplayY();
     int32_t action = pointerEvent->GetPointerAction();
     switch (action) {
+        case MMI::PointerEvent::POINTER_ACTION_DOWN:
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN: {
+            moveDragProperty_->startMoveFlag_ = false;
+            moveDragProperty_->startDragFlag_ = false;
+            break;
+        }
         // ready to move or drag
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
             HandleMoveEvent(pointPosX, pointPosY, pointId);
