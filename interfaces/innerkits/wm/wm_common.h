@@ -243,7 +243,7 @@ public:
 private:
     static inline bool NearZero(float val)
     {
-        return std::abs(val) < 0.001f;
+        return val < 0.001f && val > -0.001f;
     }
 };
 
