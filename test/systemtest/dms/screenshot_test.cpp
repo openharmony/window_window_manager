@@ -204,6 +204,7 @@ HWTEST_F(ScreenshotTest, ScreenShot08, Function | MediumTest | Level2)
  * @tc.name: ScreenShotValid
  * @tc.desc: Check if screenshot created by invalid imageSize is nullptr
  * @tc.type: FUNC
+ * @tc.require: issueI5G62O
  */
 HWTEST_F(ScreenshotTest, ScreenShot09, Function | MediumTest | Level2)
 {

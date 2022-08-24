@@ -186,6 +186,7 @@ namespace {
 * @tc.name: WindowVisibilityInfoTest01
 * @tc.desc: window show or hide
 * @tc.type: FUNC
+* @tc.require: issueI5FSQW
 */
 HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, Function | MediumTest | Level1)
 {
