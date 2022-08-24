@@ -170,9 +170,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest2, Function | MediumTest | Level3
 
     ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, fullWindow->GetRequestedOrientation());
     DisplayId displayId = displayListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
-    displayListener_->changeFuture_.Reset(-1);
     ScreenId screenId = screenListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
-    screenListener_->changeFuture_.Reset(-1);
     auto screen = ScreenManager::GetInstance().GetScreenById(screenId);
     auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
     ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, screen->GetOrientation());
@@ -180,14 +178,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest2, Function | MediumTest | Level3
     sleep(SPLIT_TEST_SLEEP_S);
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
-    displayId = displayListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
-    displayListener_->changeFuture_.Reset(-1);
-    screenId = screenListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
-    screenListener_->changeFuture_.Reset(-1);
-    screen = ScreenManager::GetInstance().GetScreenById(screenId);
-    display = DisplayManager::GetInstance().GetDisplayById(displayId);
-    ASSERT_EQ(Orientation::UNSPECIFIED, screen->GetOrientation());
-    ASSERT_EQ(Orientation::UNSPECIFIED, display->GetOrientation());
+    screen->SetOrientation(Orientation::UNSPECIFIED);
     sleep(SPLIT_TEST_SLEEP_S);
 }
 
@@ -250,15 +241,6 @@ HWTEST_F(WindowRotationTest, WindowRotationTest4, Function | MediumTest | Level3
     sleep(SPLIT_TEST_SLEEP_S);
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
-    displayId = displayListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
-    displayListener_->changeFuture_.Reset(-1);
-    screenId = screenListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
-    screenListener_->changeFuture_.Reset(-1);
-    screen = ScreenManager::GetInstance().GetScreenById(screenId);
-    display = DisplayManager::GetInstance().GetDisplayById(displayId);
-    ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, screen->GetOrientation());
-    ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, display->GetOrientation());
-    sleep(SPLIT_TEST_SLEEP_S);
     defaultScreen->SetOrientation(Orientation::UNSPECIFIED);
     sleep(SPLIT_TEST_SLEEP_S);
 }
@@ -300,15 +282,6 @@ HWTEST_F(WindowRotationTest, WindowRotationTest5, Function | MediumTest | Level3
     sleep(SPLIT_TEST_SLEEP_S);
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
-    displayId = displayListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
-    displayListener_->changeFuture_.Reset(-1);
-    screenId = screenListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
-    screenListener_->changeFuture_.Reset(-1);
-    screen = ScreenManager::GetInstance().GetScreenById(screenId);
-    display = DisplayManager::GetInstance().GetDisplayById(displayId);
-    ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, screen->GetOrientation());
-    ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, display->GetOrientation());
-    sleep(SPLIT_TEST_SLEEP_S);
     defaultScreen->SetOrientation(Orientation::UNSPECIFIED);
     sleep(SPLIT_TEST_SLEEP_S);
 }
