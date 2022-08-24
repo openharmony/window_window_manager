@@ -2626,7 +2626,6 @@ void WindowImpl::NotifyTouchDialogTarget()
 
 void WindowImpl::NotifyDestroy()
 {
-    Destroy(false);
     sptr<IDialogDeathRecipientListener> dialogDeathRecipientListener;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
