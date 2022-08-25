@@ -17,19 +17,15 @@
 #define FRAMEWORKS_WM_TEST_UT_MOCK_WINDOW_ADAPTER_H
 #include <gmock/gmock.h>
 
-#include "window_adapter.h"
+#include "window_node_container.h"
 
 namespace OHOS {
 namespace Rosen {
-class MockWindowAdapter : public WindowAdapter {
+class MockWindowNodeContainer : public WindowNodeContainer {
 public:
-    MOCK_METHOD5(CreateWindow, WMError(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
-        std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject>& token));
-    MOCK_METHOD1(AddWindow, WMError(sptr<WindowProperty>& windowProperty));
-    MOCK_METHOD1(RemoveWindow, WMError(uint32_t windowId));
-    MOCK_METHOD0(ClearWindowAdapter, void());
-    MOCK_METHOD1(DestroyWindow, WMError(uint32_t windowId));
-    MOCK_METHOD2(UpdateProperty, WMError(sptr<WindowProperty>& windowProperty, PropertyChangeAction action));
+    MOCK_METHOD0(AddWindowNodeOnWindowTree, WMError(sptr<WindowNode>& node, const sptr<WindowNode>& parentNode));
+    MOCK_METHOD1(RemoveWindowNode, WMError(sptr<WindowNode>& node));
+    MOCK_METHOD2(HandleRemoveWindow, WMError(sptr<WindowNode>& node));
 };
 }
 } // namespace OHOS

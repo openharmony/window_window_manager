@@ -23,7 +23,6 @@
 #include "wm_common.h"
 #include "singleton_mocker.h"
 #include "mock_window_node_container.h"
-#include "window_pair.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -206,7 +205,7 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
  * @tc.desc: add windownode, windowType is APP_WINDOW_BASE
  * @tc.type: FUNC
  */
- HWTEST_F(WindowNodeContainerTest, AddWindowNode, Function | SmallTest | Level2)
+ HWTEST_F(WindowNodeContainerTest, AddWindowNode01, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker>m=std::make_unique<Mocker>();
     sptr<WindowProperty> property = CreateWindowProperty(110u, "test1",
@@ -230,7 +229,7 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
  * @tc.desc: add windownode, windowType is SYSTEM_WINDOW_BASE
  * @tc.type: FUNC
  */
- HWTEST_F(WindowNodeContainerTest, AddWindowNode, Function | SmallTest | Level2)
+ HWTEST_F(WindowNodeContainerTest, AddWindowNode02, Function | SmallTest | Level2)
 {
     std::unique_ptr<Mocker>m=std::make_unique<Mocker>();
     sptr<WindowProperty> property = CreateWindowProperty(110u, "test2",
