@@ -70,9 +70,13 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             break;
         }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STATUS: {
-            sptr<AccessibilityWindowInfo> windowInfo = data.ReadParcelable<AccessibilityWindowInfo>();
+            std::vector<sptr<AccessibilityWindowInfo>> infos;
+            if (!MarshallingHelper::UnmarshallingVectorParcelableObj<AccessibilityWindowInfo>(data, infos)) {
+                WLOGFE("read accessibility window infos failed");
+                return -1;
+            }
             WindowUpdateType type = static_cast<WindowUpdateType>(data.ReadUint32());
-            NotifyAccessibilityWindowInfo(windowInfo, type);
+            NotifyAccessibilityWindowInfo(infos, type);
             break;
         }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_VISIBILITY: {
