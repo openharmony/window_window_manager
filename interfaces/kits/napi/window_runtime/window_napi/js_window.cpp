@@ -16,7 +16,13 @@
 #include "js_window.h"
 #include <new>
 #include <ui/rs_surface_node.h>
+
+#ifndef WINDOW_PREVIEW
 #include "js_transition_controller.h"
+#else
+#include "mock/js_transition_controller.h"
+#endif
+
 #include "js_window_utils.h"
 #include "window.h"
 #include "window_helper.h"

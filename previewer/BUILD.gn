@@ -15,25 +15,71 @@ import("//build/ohos.gni")
 
 ohos_shared_library("previewer_shared") {
   libs = []
-  sources = [ "src/window.cpp" ]
-  include_dirs = [ "src/" ]
-  cflags = [ "-std=c++17" ]
+
+  sources = [
+    # js
+    "../../../../commonlibrary/c_utils/base/src/refbase.cpp",
+    "../../../ability/ability_runtime/frameworks/native/runtime/js_runtime_utils.cpp",
+    "../interfaces/kits/napi/window_runtime/window_napi/js_window.cpp",
+    "../interfaces/kits/napi/window_runtime/window_napi/js_window_utils.cpp",
+    "../interfaces/kits/napi/window_runtime/window_stage_napi/js_window_stage.cpp",
+    "../utils/src/window_property.cpp",
+    "../utils/src/window_transition_info.cpp",
+    "../utils/src/wm_math.cpp",
+    "../wm/src/input_transfer_station.cpp",
+    "../wm/src/vsync_station.cpp",
+    "../wm/src/window.cpp",
+    "../wm/src/window_input_channel.cpp",
+    "../wm/src/window_option.cpp",
+    "src/window_impl.cpp",
+    "src/window_scene.cpp",
+
+    # mock
+    "mock/js_transition_controller.cpp",
+    "mock/js_window_register_manager.cpp",
+    "mock/parcel.cpp",
+    "mock/pixel_map_napi.cpp",
+    "mock/ui/rs_node.cpp",
+  ]
+
+  include_dirs = [
+    "./",  # 避免冲突的mock目录
+    "mock/",  # mock目录
+    "mock/ui/",
+    "mock/transaction/",
+    "include/",
+    "../wm/include/",
+    "../wm/include/zidl/",
+    "../utils/include/",
+    "../interfaces/innerkits/wm/",
+    "../interfaces/innerkits/dm/",
+    "../interfaces/kits/napi/window_runtime/window_napi/",
+    "../interfaces/kits/napi/window_runtime/window_stage_napi/",
+    "../../../ability/ability_runtime/interfaces/inner_api/runtime/include/",
+    "../../../../commonlibrary/c_utils/base/include/",
+  ]
+
+  deps = [
+    "//foundation/arkui/napi:ace_napi",
+    "//foundation/arkui/napi:ace_napi_ark",
+  ]
+
+  cflags_cc = [ "-DWINDOW_PREVIEW" ]
+  cflags = [ "-std=c++11" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
 
 ohos_copy("copy_previewer_library") {
-  if (host_os == "mac") {
-    suffix = ".dylib"
-  } else {
+  if (host_os != "mac") {
     suffix = ".dll"
+    shared_library_path = get_label_info(":previewer_shared", "root_out_dir") +
+                          "/window/window_manager/libpreviewer_shared" + suffix
+    deps = [ ":previewer_shared" ]
+    sources = [ shared_library_path ]
+    outputs = [ target_out_dir + "/previewer/common/bin/libpreviewer_shared" +
+                suffix ]
+    module_source_dir = target_out_dir + "/previewer/common/bin/"
+    module_install_name = ""
   }
-  shared_library_path = get_label_info(":previewer_shared", "root_out_dir") +
-                        "/window/window_manager/libpreviewer_shared" + suffix
-  deps = [ ":previewer_shared" ]
-  sources = [ shared_library_path ]
-  outputs =
-      [ target_out_dir + "/previewer/common/bin/libpreviewer_shared" + suffix ]
-  module_source_dir = target_out_dir + "/previewer/common/bin/"
-  module_install_name = ""
 }
