@@ -127,6 +127,7 @@ public:
     sptr<IRemoteObject> abilityToken_ = nullptr;
     std::shared_ptr<PowerMgr::RunningLock> keepScreenLock_;
     int32_t priority_ { 0 };
+    uint32_t zOrder_ { 0 };
     bool requestedVisibility_ { false };
     bool currentVisibility_ { false };
     bool isVisible_ { false };

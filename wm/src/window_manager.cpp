@@ -61,55 +61,34 @@ WindowVisibilityInfo* WindowVisibilityInfo::Unmarshalling(Parcel &parcel)
     return windowVisibilityInfo;
 }
 
-bool WindowInfo::Marshalling(Parcel &parcel) const
+bool AccessibilityWindowInfo::Marshalling(Parcel &parcel) const
 {
     return parcel.WriteInt32(wid_) && parcel.WriteUint32(windowRect_.width_) &&
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(windowRect_.posX_) &&
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteBool(focused_) && parcel.WriteBool(isDecorEnable_) &&
-        parcel.WriteUint64(displayId_) && parcel.WriteUint32(static_cast<uint32_t>(mode_)) &&
-        parcel.WriteUint32(static_cast<uint32_t>(type_));
-}
-
-WindowInfo* WindowInfo::Unmarshalling(Parcel &parcel)
-{
-    auto windowInfo = new (std::nothrow) WindowInfo();
-    if (windowInfo == nullptr) {
-        WLOGFE("window info is nullptr.");
-        return nullptr;
-    }
-    bool res = parcel.ReadInt32(windowInfo->wid_) && parcel.ReadUint32(windowInfo->windowRect_.width_) &&
-        parcel.ReadUint32(windowInfo->windowRect_.height_) && parcel.ReadInt32(windowInfo->windowRect_.posX_) &&
-        parcel.ReadInt32(windowInfo->windowRect_.posY_) && parcel.ReadBool(windowInfo->focused_) &&
-        parcel.ReadBool(windowInfo->isDecorEnable_) && parcel.ReadUint64(windowInfo->displayId_);
-    if (!res) {
-        delete windowInfo;
-        return nullptr;
-    }
-    windowInfo->mode_ = static_cast<WindowMode>(parcel.ReadUint32());
-    windowInfo->type_ = static_cast<WindowType>(parcel.ReadUint32());
-    return windowInfo;
-}
-
-bool AccessibilityWindowInfo::Marshalling(Parcel &parcel) const
-{
-    return parcel.WriteParcelable(currentWindowInfo_) &&
-        MarshallingHelper::MarshallingVectorParcelableObj<WindowInfo>(parcel, windowList_);
+        parcel.WriteUint64(displayId_)  && parcel.WriteUint32(layer_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(type_));
 }
 
 AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel &parcel)
 {
-    auto accessibilityWindowInfo = new (std::nothrow) AccessibilityWindowInfo();
-    if (accessibilityWindowInfo == nullptr) {
+    auto info = new (std::nothrow) AccessibilityWindowInfo();
+    if (info == nullptr) {
         WLOGFE("accessibility window info is nullptr.");
         return nullptr;
     }
-    accessibilityWindowInfo->currentWindowInfo_ = parcel.ReadParcelable<WindowInfo>();
-    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowInfo>(parcel,
-        accessibilityWindowInfo->windowList_)) {
-        delete accessibilityWindowInfo;
+    bool res = parcel.ReadInt32(info->wid_) && parcel.ReadUint32(info->windowRect_.width_) &&
+        parcel.ReadUint32(info->windowRect_.height_) && parcel.ReadInt32(info->windowRect_.posX_) &&
+        parcel.ReadInt32(info->windowRect_.posY_) && parcel.ReadBool(info->focused_) &&
+        parcel.ReadBool(info->isDecorEnable_) && parcel.ReadUint64(info->displayId_) &&
+        parcel.ReadUint32(info->layer_);
+    if (!res) {
+        delete info;
         return nullptr;
     }
-    return accessibilityWindowInfo;
+    info->mode_ = static_cast<WindowMode>(parcel.ReadUint32());
+    info->type_ = static_cast<WindowType>(parcel.ReadUint32());
+    return info;
 }
 
 bool FocusChangeInfo::Marshalling(Parcel &parcel) const
@@ -148,7 +127,7 @@ public:
     void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints);
-    void NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo, WindowUpdateType type);
+    void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type);
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     static inline SingletonDelegator<WindowManager> delegator_;
@@ -261,30 +240,30 @@ void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const Syst
         }, EventPriority::LOW, "SystemBarChangeInfo");
 }
 
-void WindowManager::Impl::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
+void WindowManager::Impl::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
     WindowUpdateType type)
 {
-    if (windowInfo == nullptr) {
-        WLOGFE("windowInfo is nullptr");
+    if (infos.empty()) {
+        WLOGFE("infos is empty");
         return;
     }
-    WLOGFI("NotifyAccessibilityWindowInfo: wid[%{public}u], width[%{public}d]," \
-        "height[%{public}d], positionX[%{public}d], positionY[%{public}d]," \
-        "isFocused[%{public}d], isDecorEnable[%{public}d], displayId[%{public}" PRIu64"]," \
-        "mode[%{public}u], type[%{public}u, updateType[%{public}d]",
-        windowInfo->currentWindowInfo_->wid_, windowInfo->currentWindowInfo_->windowRect_.width_,
-        windowInfo->currentWindowInfo_->windowRect_.height_, windowInfo->currentWindowInfo_->windowRect_.posX_,
-        windowInfo->currentWindowInfo_->windowRect_.posY_, windowInfo->currentWindowInfo_->focused_,
-        windowInfo->currentWindowInfo_->isDecorEnable_, windowInfo->currentWindowInfo_->displayId_,
-        windowInfo->currentWindowInfo_->mode_, windowInfo->currentWindowInfo_->type_, type);
+    for (auto& info : infos) {
+        WLOGFI("NotifyAccessibilityWindowInfo: wid[%{public}u], rect[%{public}d %{public}d %{public}d %{public}d]," \
+            "isFocused[%{public}d], isDecorEnable[%{public}d], displayId[%{public}" PRIu64"], layer[%{public}u]," \
+            "mode[%{public}u], type[%{public}u, updateType[%{public}d]",
+            info->wid_, info->windowRect_.width_, info->windowRect_.height_, info->windowRect_.posX_,
+            info->windowRect_.posY_, info->focused_, info->isDecorEnable_, info->displayId_, info->layer_,
+            info->mode_, info->type_, type);
+    }
+
     std::vector<sptr<IWindowUpdateListener>> windowUpdateListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         windowUpdateListeners = windowUpdateListeners_;
     }
-    PostTask([this, windowInfo, type, windowUpdateListeners]() mutable {
+    PostTask([this, infos, type, windowUpdateListeners]() mutable {
             for (auto& listener : windowUpdateListeners) {
-                listener->OnWindowUpdate(windowInfo, type);
+                listener->OnWindowUpdate(infos, type);
             }
         }, EventPriority::LOW, "AccessibilityWindowInfo");
 }
@@ -581,10 +560,10 @@ void WindowManager::UpdateSystemBarRegionTints(DisplayId displayId,
     pImpl_->NotifySystemBarChanged(displayId, tints);
 }
 
-void WindowManager::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
+void WindowManager::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
     WindowUpdateType type) const
 {
-    pImpl_->NotifyAccessibilityWindowInfo(windowInfo, type);
+    pImpl_->NotifyAccessibilityWindowInfo(infos, type);
 }
 
 void WindowManager::UpdateWindowVisibilityInfo(
@@ -593,9 +572,9 @@ void WindowManager::UpdateWindowVisibilityInfo(
     pImpl_->NotifyWindowVisibilityInfoChanged(windowVisibilityInfos);
 }
 
-WMError WindowManager::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const
+WMError WindowManager::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAccessibilityWindowInfo(windowInfo);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAccessibilityWindowInfo(infos);
     if (ret != WMError::WM_OK) {
         WLOGFE("get window info failed");
     }
