@@ -723,8 +723,8 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     auto node = GetWindowNode(windowId);
     if (node == nullptr) {
-        WLOGFW("Window mode is destroyed or not created");
-        return WMError::WM_OK;
+        WLOGFE("destroy window failed, because window node is not exist.");
+        return WMError::WM_ERROR_NULLPTR;
     }
     WMError res;
     auto token = node->abilityToken_;
