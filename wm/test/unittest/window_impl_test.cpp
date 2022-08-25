@@ -893,7 +893,7 @@ HWTEST_F(WindowImplTest, StartMove02, Function | SmallTest | Level3)
     window->Show();
 
     window->StartMove();
-    ASSERT_TRUE(window->moveDragProperty_->startMoveFlag_);
+    ASSERT_FALSE(window->moveDragProperty_->startMoveFlag_);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
