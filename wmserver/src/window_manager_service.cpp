@@ -943,14 +943,10 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
     });
 }
 
-WMError WindowManagerService::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
+WMError WindowManagerService::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
-    if (windowInfo == nullptr) {
-        WLOGFE("windowInfo is invalid");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    return PostSyncTask([this, &windowInfo]() {
-        return windowController_->GetAccessibilityWindowInfo(windowInfo);
+    return PostSyncTask([this, &infos]() {
+        return windowController_->GetAccessibilityWindowInfo(infos);
     });
 }
 

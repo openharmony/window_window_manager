@@ -16,6 +16,8 @@
 #include "zidl/window_manager_proxy.h"
 #include <ipc_types.h>
 #include <rs_iwindow_animation_controller.h>
+
+#include "marshalling_helper.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -463,7 +465,7 @@ WMError WindowManagerProxy::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinI
     return static_cast<WMError>(ret);
 }
 
-WMError WindowManagerProxy::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
+WMError WindowManagerProxy::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -472,17 +474,15 @@ WMError WindowManagerProxy::GetAccessibilityWindowInfo(sptr<AccessibilityWindowI
         WLOGFE("WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteParcelable(windowInfo)) {
-        WLOGFE("Write windowInfo failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID),
         data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    windowInfo = reply.ReadParcelable<AccessibilityWindowInfo>();
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WMError>(ret);
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<AccessibilityWindowInfo>(reply, infos)) {
+        WLOGFE("read accessibility window infos failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
 }
 
 WMError WindowManagerProxy::GetSystemConfig(SystemConfig& systemConfig)
