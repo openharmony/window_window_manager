@@ -685,7 +685,8 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
             context_.get() == win->GetContext().get()) {
-            appFloatingWindowMap_[win->GetWindowId()].push_back(this);
+            sptr<WindowImpl> selfImpl(this);
+            appFloatingWindowMap_[win->GetWindowId()].push_back(selfImpl);
             WLOGFI("Map FloatingWindow %{public}u to AppMainWindow %{public}u, type is %{public}u",
                 GetWindowId(), win->GetWindowId(), GetType());
             return;
@@ -703,7 +704,8 @@ void WindowImpl::MapDialogWindowToAppIfNeeded()
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
             context_.get() == win->GetContext().get()) {
-            appDialogWindowMap_[win->GetWindowId()].push_back(this);
+            sptr<WindowImpl> selfImpl(this);
+            appDialogWindowMap_[win->GetWindowId()].push_back(selfImpl);
             WLOGFI("Map DialogWindow %{public}u to AppMainWindow %{public}u", GetWindowId(), win->GetWindowId());
             return;
         }
@@ -956,9 +958,10 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
         return ret;
     }
     property_->SetWindowId(windowId);
-    windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, this)));
+    sptr<Window> self(this);
+    windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, self)));
     if (parentName != "") { // add to subWindowMap_
-        subWindowMap_[property_->GetParentId()].push_back(this);
+        subWindowMap_[property_->GetParentId()].push_back(window);
     }
 
     MapFloatingWindowToAppIfNeeded();
@@ -966,7 +969,7 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     MapDialogWindowToAppIfNeeded();
 
     state_ = WindowState::STATE_CREATED;
-    InputTransferStation::GetInstance().AddInputWindow(this);
+    InputTransferStation::GetInstance().AddInputWindow(self);
     needRemoveWindowInputChannel_ = true;
     return ret;
 }
@@ -1083,7 +1086,7 @@ void WindowImpl::PostListenerTask(ListenerTaskCallback &&callback, Priority prio
             InitListenerHandler();
         }
     }
-    bool ret = eventHandler_->PostTask([this, callback]() {
+    bool ret = eventHandler_->PostTask([callback]() {
             callback();
         }, taskName, 0, priority);
     if (!ret) {
