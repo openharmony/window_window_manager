@@ -254,6 +254,7 @@ private:
     static void ReadStringConfigInfo(const xmlNodePtr& currNode, std::string& stringValue);
     static void ReadConfig(const xmlNodePtr& rootPtr, std::map<std::string, ConfigItem>& mapValue);
     static std::string GetConfigPath(const std::string& configFileName);
+    static std::vector<std::string> ReadNumberStrings(const xmlNodePtr& node);
 };
 } // namespace Rosen
 } // namespace OHOS
