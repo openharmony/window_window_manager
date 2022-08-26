@@ -24,6 +24,9 @@ namespace Rosen {
 using ConfigItem = WindowManagerConfig::ConfigItem;
 const std::string XML_STR = R"(<?xml version='1.0' encoding="utf-8"?>
 <Configs>
+    <!--decor enable is true means app main window show decoration-->
+    <decor enable="false"></decor>
+    <maxAppWindowNumber>100</maxAppWindowNumber>
     <windowAnimation>
         <timing>
             <duration>350</duration>
@@ -44,13 +47,17 @@ const std::string XML_STR = R"(<?xml version='1.0' encoding="utf-8"?>
     </keyboardAnimation>
 </Configs>
 )";
+
 class WindowManagerConfigTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+    ConfigItem ReadConfig(const std::string& xmlStr);
+    void ConfigMaxAppWindowNumber(const ConfigItem& config);
     ConfigItem config_;
+    uint32_t maxAppWindowNumber_ = 100;
 };
 
 void WindowManagerConfigTest::SetUpTestCase()
@@ -63,27 +70,44 @@ void WindowManagerConfigTest::TearDownTestCase()
 
 void WindowManagerConfigTest::SetUp()
 {
-    xmlDocPtr docPtr = xmlParseMemory(XML_STR.c_str(), XML_STR.length() + 1);
+    config_ = ReadConfig(XML_STR);
+}
+
+void WindowManagerConfigTest::TearDown()
+{
+}
+
+void WindowManagerConfigTest::ConfigMaxAppWindowNumber(const ConfigItem& config)
+{
+    auto item = config["maxAppWindowNumber"];
+    if (item.IsInts()) {
+        auto numbers = *item.intsValue_;
+        if (numbers.size() == 1 && numbers[0] > 0) {
+            maxAppWindowNumber_ = numbers[0];
+        }
+    }
+}
+
+ConfigItem WindowManagerConfigTest::ReadConfig(const std::string& xmlStr)
+{
+    ConfigItem config;
+    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length() + 1);
     if (docPtr == nullptr) {
-        return;
+        return config;
     }
 
     xmlNodePtr rootPtr = xmlDocGetRootElement(docPtr);
     if (rootPtr == nullptr || rootPtr->name == nullptr ||
         xmlStrcmp(rootPtr->name, reinterpret_cast<const xmlChar*>("Configs"))) {
         xmlFreeDoc(docPtr);
-        return;
+        return config;
     }
 
     std::map<std::string, ConfigItem> configMap;
-    config_.SetValue(configMap);
-    WindowManagerConfig::ReadConfig(rootPtr, *config_.mapValue_);
-
+    config.SetValue(configMap);
+    WindowManagerConfig::ReadConfig(rootPtr, *config.mapValue_);
     xmlFreeDoc(docPtr);
-}
-
-void WindowManagerConfigTest::TearDown()
-{
+    return config;
 }
 namespace {
 /**
@@ -106,13 +130,57 @@ HWTEST_F(WindowManagerConfigTest, AnimationConfig, Function | SmallTest | Level2
     ASSERT_EQ("easeOut", item.stringValue_);
     item = config_["windowAnimation"]["scale"];
     ASSERT_EQ(true, item.IsFloats());
+    ASSERT_EQ(true, item.floatsValue_->size() == 2);
     item = config_["windowAnimation"]["rotation"];
-    ASSERT_EQ(true, item.IsFloats() && (item.floatsValue_->size() == 4));
+    ASSERT_EQ(true, item.IsFloats());
+    ASSERT_EQ(true, item.floatsValue_->size() == 4);
     item = config_["windowAnimation"]["translate"];
     ASSERT_EQ(true, item.IsFloats());
+    ASSERT_EQ(true, item.floatsValue_->size() == 2);
     item = config_["windowAnimation"]["opacity"];
     ASSERT_EQ(true, item.IsFloats());
+    ASSERT_EQ(true, item.floatsValue_->size() == 1);
 }
+
+/**
+ * @tc.name: maxAppWindowNumber
+ * @tc.desc: maxAppWindowNumber test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerConfigTest, maxAppWindowNumber, Function | SmallTest | Level2)
+{
+    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<maxAppWindowNumber>0</maxAppWindowNumber>"
+        "</Configs>";
+    ConfigItem config = ReadConfig(xmlStr);
+    ConfigMaxAppWindowNumber(config);
+    ASSERT_EQ(true, maxAppWindowNumber_ == 100);
+
+    xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<maxAppWindowNumber>-2</maxAppWindowNumber>"
+        "</Configs>";
+    config = ReadConfig(xmlStr);
+    ConfigMaxAppWindowNumber(config);
+    ASSERT_EQ(true, maxAppWindowNumber_ == 100);
+
+    xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<maxAppWindowNumber>4</maxAppWindowNumber>"
+        "</Configs>";
+    config = ReadConfig(xmlStr);
+    ConfigMaxAppWindowNumber(config);
+    ASSERT_EQ(true, maxAppWindowNumber_ == 4);
+
+    xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<maxAppWindowNumber>1000</maxAppWindowNumber>"
+        "</Configs>";
+    config = ReadConfig(xmlStr);
+    ConfigMaxAppWindowNumber(config);
+    ASSERT_EQ(true, maxAppWindowNumber_ == 1000);
 }
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
