@@ -62,8 +62,9 @@ public:
         sptr<AAFwk::AbilityTransitionInfo> from, sptr<AAFwk::AbilityTransitionInfo> to) override;
     int32_t GetFocusWindow(sptr<IRemoteObject>& abilityToken) override;
     virtual void StartingWindow(
-        sptr<AAFwk::AbilityTransitionInfo> info, sptr<Media::PixelMap> pixelMap, uint32_t bgColor) override;
-    virtual void StartingWindow(sptr<AAFwk::AbilityTransitionInfo> info, sptr<Media::PixelMap> pixelMap) override;
+        sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bgColor) override;
+    virtual void StartingWindow(
+        sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap) override;
     virtual void CancelStartingWindow(sptr<IRemoteObject> abilityToken) override;
 };
 
@@ -112,7 +113,7 @@ public:
     WMError GetSystemConfig(SystemConfig& systemConfig) override;
     WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) override;
     WMError UpdateAvoidAreaListener(uint32_t windowId, bool haveAvoidAreaListener) override;
-    void StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
+    void StartingWindow(sptr<WindowTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap,
         bool isColdStart, uint32_t bkgColor = 0xffffffff);
     void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
     void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
