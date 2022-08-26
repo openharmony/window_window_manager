@@ -108,7 +108,7 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
 }
 
 void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
-    sptr<Media::PixelMap> pixelMap, uint32_t bkgColor, bool isColdStart)
+    std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bkgColor, bool isColdStart, bool isUniRender)
 {
     // using snapshot to support hot start since node destroy when hide
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DrawStartingWindow(%u)", node->GetWindowId());
@@ -128,7 +128,19 @@ void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
         SurfaceDraw::DrawColor(node->startingWinSurfaceNode_, rect.width_, rect.height_, bkgColor);
         return;
     }
-    SurfaceDraw::DrawImageRect(node->startingWinSurfaceNode_, rect, pixelMap, bkgColor);
+
+    if (isUniRender) {
+        WLOGFD("draw background in uni");
+        std::shared_ptr<RSSurfaceNode>& startingWindSurfaceNode = node->startingWinSurfaceNode_;
+        std::shared_ptr<RSImage> rsImage = std::make_shared<RSImage>();
+        rsImage->SetPixelMap(pixelMap);
+        startingWindSurfaceNode->SetBgImageSize(rect.width_, rect.height_);
+        startingWindSurfaceNode->SetBgImagePosition(0, 0);
+        startingWindSurfaceNode->SetBgImage(rsImage);
+    } else {
+        WLOGFD("draw background in sperate");
+        SurfaceDraw::DrawImageRect(node->startingWinSurfaceNode_, rect, pixelMap, bkgColor);
+    }
 }
 
 void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,

@@ -45,7 +45,7 @@ uint32_t WindowController::GenWindowId()
     return ++windowId_;
 }
 
-void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
+void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap,
     uint32_t bkgColor, bool isColdStart)
 {
     if (!info || info->GetAbilityToken() == nullptr) {
@@ -91,7 +91,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
     if (windowRoot_->AddWindowNode(0, node, true) != WMError::WM_OK) {
         return;
     }
-    StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart);
+    StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart, windowRoot_->IsUniRender());
     RSTransaction::FlushImplicitTransaction();
     node->startingWindowShown_ = true;
     WLOGFI("StartingWindow show success with id:%{public}u!", node->GetWindowId());
