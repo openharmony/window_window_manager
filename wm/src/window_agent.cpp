@@ -133,7 +133,7 @@ void WindowAgent::NotifyTouchOutside()
         WLOGFI("window is null");
         return;
     }
-    WLOGFI("called");
+    WLOGFD("called");
     window_->NotifyTouchOutside();
 }
 

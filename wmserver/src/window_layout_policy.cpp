@@ -600,8 +600,7 @@ WindowSizeLimits WindowLayoutPolicy::GetSystemSizeLimits(const sptr<WindowNode>&
             std::swap(systemLimits.minWidth_, systemLimits.minHeight_);
         }
     }
-
-    WLOGFI("[System SizeLimits] [maxWidth: %{public}u, minWidth: %{public}u, maxHeight: %{public}u, "
+    WLOGFD("[System SizeLimits] [maxWidth: %{public}u, minWidth: %{public}u, maxHeight: %{public}u, "
         "minHeight: %{public}u]", systemLimits.maxWidth_, systemLimits.minWidth_,
         systemLimits.maxHeight_, systemLimits.minHeight_);
     return systemLimits;
@@ -613,7 +612,7 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
     const auto& virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
     const auto& systemLimits = GetSystemSizeLimits(node, displayRect, virtualPixelRatio);
     const auto& customizedLimits = node->GetWindowSizeLimits();
-
+    
     WindowSizeLimits newLimits = systemLimits;
 
     // configured limits of floating window

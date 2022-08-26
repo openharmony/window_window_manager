@@ -30,7 +30,7 @@ namespace {
 
 NativeValue* WindowTypeInit(NativeEngine* engine)
 {
-    WLOGFI("[NAPI]WindowTypeInit");
+    WLOGFD("[NAPI]WindowTypeInit");
 
     if (engine == nullptr) {
         WLOGFE("[NAPI]Engine is nullptr");
@@ -86,7 +86,7 @@ NativeValue* WindowTypeInit(NativeEngine* engine)
 
 NativeValue* AvoidAreaTypeInit(NativeEngine* engine)
 {
-    WLOGFI("[NAPI]AvoidAreaTypeInit");
+    WLOGFD("[NAPI]AvoidAreaTypeInit");
 
     if (engine == nullptr) {
         WLOGFE("[NAPI]Engine is nullptr");
@@ -112,7 +112,7 @@ NativeValue* AvoidAreaTypeInit(NativeEngine* engine)
 
 NativeValue* WindowModeInit(NativeEngine* engine)
 {
-    WLOGFI("[NAPI]WindowModeInit");
+    WLOGFD("[NAPI]WindowModeInit");
 
     if (engine == nullptr) {
         WLOGFE("[NAPI]Engine is nullptr");
@@ -141,7 +141,7 @@ NativeValue* WindowModeInit(NativeEngine* engine)
 
 NativeValue* ColorSpaceInit(NativeEngine* engine)
 {
-    WLOGFI("[NAPI]ColorSpaceInit");
+    WLOGFD("[NAPI]ColorSpaceInit");
 
     if (engine == nullptr) {
         WLOGFE("[NAPI]Engine is nullptr");
@@ -164,7 +164,7 @@ NativeValue* ColorSpaceInit(NativeEngine* engine)
 
 NativeValue* OrientationInit(NativeEngine* engine)
 {
-    WLOGFI("[NAPI]OrientationInit");
+    WLOGFD("[NAPI]OrientationInit");
 
     if (engine == nullptr) {
         WLOGFE("[NAPI]Engine is nullptr");
@@ -207,7 +207,7 @@ NativeValue* OrientationInit(NativeEngine* engine)
 
 NativeValue* WindowStageEventTypeInit(NativeEngine* engine)
 {
-    WLOGFI("[NAPI]WindowStageEventTypeInit");
+    WLOGFD("[NAPI]WindowStageEventTypeInit");
 
     if (engine == nullptr) {
         WLOGFE("[NAPI]Engine is nullptr");
@@ -234,7 +234,7 @@ NativeValue* WindowStageEventTypeInit(NativeEngine* engine)
 
 NativeValue* WindowLayoutModeInit(NativeEngine* engine)
 {
-    WLOGFI("[NAPI]WindowLayoutModeInit");
+    WLOGFD("[NAPI]WindowLayoutModeInit");
     if (engine == nullptr) {
         WLOGFE("[NAPI]Engine is nullptr");
         return nullptr;
@@ -441,7 +441,6 @@ static uint32_t GetColorFromJs(NativeEngine& engine, NativeObject* jsObject,
             WLOGFE("[NAPI]Invalid color input");
             return defaultColor;
         }
-        WLOGFI("origin color: %{public}s", colorStr.c_str());
         std::string color = colorStr.substr(1);
         if (color.length() == RGB_LENGTH) {
             color = "FF" + color; // ARGB
