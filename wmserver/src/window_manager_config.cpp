@@ -64,6 +64,22 @@ const std::map<std::string, WindowManagerConfig::ValueType> WindowManagerConfig:
     { "remoteAnimation",        WindowManagerConfig::ValueType::UNDIFINED },
 };
 
+std::vector<std::string> WindowManagerConfig::ReadNumberStrings(const xmlNodePtr& node)
+{
+    xmlChar* context = xmlNodeGetContent(node);
+    if (context == nullptr) {
+        WLOGFE("[WmConfig] read xml node error: nodeName:(%{public}s)", node->name);
+        return std::vector<std::string>();
+    }
+
+    std::string numbersStr = reinterpret_cast<const char*>(context);
+    xmlFree(context);
+    if (numbersStr.size() == 0) {
+        return std::vector<std::string>();
+    }
+    return WindowHelper::Split(numbersStr, " ");
+}
+
 std::string WindowManagerConfig::GetConfigPath(const std::string& configFileName)
 {
     char buf[PATH_MAX + 1];
@@ -184,52 +200,27 @@ void WindowManagerConfig::ReadProperty(const xmlNodePtr& currNode,
 
 void WindowManagerConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode, std::vector<int>& intsValue)
 {
-    xmlChar* context = xmlNodeGetContent(currNode);
-    if (context == nullptr) {
-        WLOGFE("[WmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
-        return;
-    }
-
-    std::string numbersStr = reinterpret_cast<const char*>(context);
-    if (numbersStr.size() == 0) {
-        xmlFree(context);
-        return;
-    }
-    auto numbers = WindowHelper::Split(numbersStr, " ");
+    auto numbers = ReadNumberStrings(currNode);
     for (auto& num : numbers) {
         if (!WindowHelper::IsNumber(num)) {
             WLOGFE("[WmConfig] read int number error: nodeName:(%{public}s)", currNode->name);
-            xmlFree(context);
             return;
         }
         intsValue.push_back(std::stoi(num));
     }
-    xmlFree(context);
 }
 
 void WindowManagerConfig::ReadFloatNumbersConfigInfo(const xmlNodePtr& currNode,
     std::vector<float>& floatsValue, bool allowNeg)
 {
-    xmlChar* context = xmlNodeGetContent(currNode);
-    if (context == nullptr) {
-        WLOGFE("[WmConfig] read xml node error: nodeName:(%{public}s)", currNode->name);
-        return;
-    }
-    std::string numbersStr = reinterpret_cast<const char*>(context);
-    if (numbersStr.size() == 0) {
-        xmlFree(context);
-        return;
-    }
-    auto numbers = WindowHelper::Split(numbersStr, " ");
+    auto numbers = ReadNumberStrings(currNode);
     for (auto& num : numbers) {
         if (!WindowHelper::IsFloatingNumber(num, allowNeg)) {
             WLOGFE("[WmConfig] read float number error: nodeName:(%{public}s)", currNode->name);
-            xmlFree(context);
             return;
         }
         floatsValue.push_back(std::stof(num));
     }
-    xmlFree(context);
 }
 
 void WindowManagerConfig::ReadStringConfigInfo(const xmlNodePtr& currNode, std::string& stringValue)
