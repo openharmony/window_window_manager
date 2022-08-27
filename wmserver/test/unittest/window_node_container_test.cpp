@@ -26,12 +26,12 @@
 
 using namespace testing;
 using namespace testing::ext;
-using Mocker = SingletonMocker<WindowNodeContainer,MockWindowNodeContainer>;
 
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowNodeContainerTest"};
+    using Mocker = SingletonMocker<WindowNodeContainer,MockWindowNodeContainer>;
 }
 
 class WindowNodeContainerTest : public testing::Test {
@@ -211,18 +211,19 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
     sptr<WindowProperty> property = CreateWindowProperty(110u, "test1",
         WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    sptr<WindowNode> parentNode = new WindowNode(property, nullptr, nullptr);
 
-    node->startingWindowShown=false;
+    node->startingWindowShown_=false;
     EXPECT_CALL(m->Mock(), AddWindowNodeOnWindowTree(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_TYPE));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, container_->AddWindowNode(node,nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, container_->AddWindowNode(node,parentNode));
     EXPECT_CALL(m->Mock(), AddWindowNodeOnWindowTree(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, container_->AddWindowNode(node,nullptr));
+    ASSERT_EQ(WMError::WM_OK, container_->AddWindowNode(node,parentNode));
 
-    node->startingWindowShown=true;
+    node->startingWindowShown_=true;
     node->SetDisplayId(100);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container_->AddWindowNode(node,nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container_->AddWindowNode(node,parentNode));
     node->SetDisplayId(0);
-    ASSERT_EQ(WMError::WM_OK, container_->AddWindowNode(node,nullptr));
+    ASSERT_EQ(WMError::WM_OK, container_->AddWindowNode(node,parentNode));
 }
 /**
  * @tc.name: AddWindowNode
@@ -235,18 +236,19 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
     sptr<WindowProperty> property = CreateWindowProperty(110u, "test2",
         WindowType::SYSTEM_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    sptr<WindowNode> parentNode = new WindowNode(property, nullptr, nullptr);
 
-    node->startingWindowShown=false;
+    node->startingWindowShown_=false;
     EXPECT_CALL(m->Mock(), AddWindowNodeOnWindowTree(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_TYPE));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, container_->AddWindowNode(node,nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, container_->AddWindowNode(node,parentNode));
     EXPECT_CALL(m->Mock(), AddWindowNodeOnWindowTree(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, container_->AddWindowNode(node,nullptr));
+    ASSERT_EQ(WMError::WM_OK, container_->AddWindowNode(node,parentNode));
 
-    node->startingWindowShown=true;
+    node->startingWindowShown_=true;
     node->SetDisplayId(100);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container_->AddWindowNode(node,nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container_->AddWindowNode(node,parentNode));
     node->SetDisplayId(0);
-    ASSERT_EQ(WMError::WM_OK, container_->AddWindowNode(node,nullptr));
+    ASSERT_EQ(WMError::WM_OK, container_->AddWindowNode(node,parentNode));
 }
 /**
  * @tc.name: RemoveWindowNode
@@ -256,16 +258,16 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
  HWTEST_F(WindowNodeContainerTest, RemoveWindowNode, Function | SmallTest | Level2)
 {
     sptr<WindowNode> node=nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_DESTROYED_OBJECT, container_->RemoveWindowNode(node,nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_DESTROYED_OBJECT, container_->RemoveWindowNode(node));
 
     std::unique_ptr<Mocker>m=std::make_unique<Mocker>();
     sptr<WindowProperty> property = CreateWindowProperty(110u, "test1",
         WindowType::SYSTEM_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
-    sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    sptr<WindowNode> node2 = new WindowNode(property, nullptr, nullptr);
     EXPECT_CALL(m->Mock(), HandleRemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_TYPE));
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container_->RemoveWindowNode(node,nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container_->RemoveWindowNode(node2));
     EXPECT_CALL(m->Mock(), HandleRemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, container_->RemoveWindowNode(node,nullptr));
+    ASSERT_EQ(WMError::WM_OK, container_->RemoveWindowNode(node2));
 }
 /**
  * @tc.name: UpdateWindowNode
