@@ -172,6 +172,14 @@ ohos_systemtest("wms_window_visibility_info_test") {
   deps = [ ":wms_systemtest_common" ]
 }
 
+ohos_systemtest("wms_window_display_zoom_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_display_zoom_test.cpp" ]
+
+  deps = [ ":wms_systemtest_common" ]
+}
+
 ohos_systemtest("wms_window_drag_test") {
   module_out_path = module_out_path
 
