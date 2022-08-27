@@ -202,7 +202,7 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
  * @tc.desc: preprocess node and update RSTree
  * @tc.type: FUNC
  */
- HWTEST_F(WindowNodeContainerTest, UpdateWindowNode, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, UpdateWindowNode, Function | SmallTest | Level2)
 {
     sptr<WindowProperty> property = CreateWindowProperty(110u, "test1",
         WindowType::SYSTEM_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
@@ -215,7 +215,7 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
  * @tc.desc: clear vector cache completely, swap with empty vector
  * @tc.type: FUNC
  */
-  HWTEST_F(WindowNodeContainerTest, Destroy, Function | SmallTest | Level2)
+HWTEST_F(WindowNodeContainerTest, Destroy, Function | SmallTest | Level2)
 {
     ASSERT_EQ(0, container_->Destroy().size());
 }
