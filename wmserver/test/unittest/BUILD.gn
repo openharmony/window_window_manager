@@ -22,8 +22,8 @@ group("unittest") {
     ":wmsever_minimize_app_test",
     ":wmsever_window_manager_config_test",
     ":wmsever_window_node_container_test",
-    ":wmsever_window_zorder_policy_test",
     ":wmsever_window_node_test",
+    ":wmsever_window_zorder_policy_test",
   ]
 }
 

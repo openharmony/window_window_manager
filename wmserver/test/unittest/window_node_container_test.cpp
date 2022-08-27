@@ -207,8 +207,8 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
     sptr<WindowProperty> property = CreateWindowProperty(110u, "test1",
         WindowType::SYSTEM_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
-    ASSERT_EQ(WMError::WM_OK, container_->UpdateWindowNode(node,WindowUpdateReason::UPDATE_ALL));
-    ASSERT_EQ(WMError::WM_OK, container_->UpdateWindowNode(node,WindowUpdateReason::UPDATE_MODE));
+    ASSERT_EQ(WMError::WM_OK, container_->UpdateWindowNode(node, WindowUpdateReason::UPDATE_ALL));
+    ASSERT_EQ(WMError::WM_OK, container_->UpdateWindowNode(node, WindowUpdateReason::UPDATE_MODE));
 }
 /**
  * @tc.name: Destroy

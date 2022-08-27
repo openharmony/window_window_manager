@@ -41,7 +41,6 @@ public:
 
 void WindowNodeTest::SetUpTestCase()
 {
-
 }
 
 void WindowNodeTest::TearDownTestCase()
@@ -67,14 +66,20 @@ public:
     virtual void UpdateDisplayId(DisplayId from, DisplayId to) override {};
     virtual void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override {};
     virtual void UpdateActiveStatus(bool isActive) override {};
-    virtual sptr<WindowProperty> GetWindowProperty() override { return nullptr;};
+    virtual sptr<WindowProperty> GetWindowProperty() override 
+    {
+        return nullptr; 
+    };
     virtual void NotifyTouchOutside() override {};
     virtual void NotifyScreenshot() override {};
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override {};
     virtual void NotifyDestroy(void) override {};
     virtual void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override {};
 
-    virtual sptr<IRemoteObject> AsObject() override { return nullptr; };
+    virtual sptr<IRemoteObject> AsObject() override
+    { 
+        return nullptr; 
+    };
 };
 
 sptr<WindowProperty> CreateWindowProperty(uint32_t windowId, const std::string& windowName)
@@ -85,12 +90,12 @@ sptr<WindowProperty> CreateWindowProperty(uint32_t windowId, const std::string& 
     return property;
 }
 
-RSSurfaceNode::SharedPtr CreateRSSurfaceNode(std::string windowNode) {
+RSSurfaceNode::SharedPtr CreateRSSurfaceNode(std::string windowNode) 
+{
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = windowNode;
     auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
     return surfaceNode;
-
 }
 namespace {
 /**
@@ -510,7 +515,6 @@ HWTEST_F(WindowNodeTest, SetRequestedOrientation01, Function | SmallTest | Level
     windowNode->SetRequestedOrientation(Orientation::REVERSE_VERTICAL);
     ASSERT_EQ(Orientation::REVERSE_VERTICAL, windowNode->GetRequestedOrientation());
 }
-
 }
 }
 }
