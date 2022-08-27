@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_WM_TEST_UT_SINGLETON_MOCKER_H
-#define FRAMEWORKS_WM_TEST_UT_SINGLETON_MOCKER_H
+#ifndef FRAMEWORKS_WMS_TEST_UT_SINGLETON_MOCKER_H
+#define FRAMEWORKS_WMS_TEST_UT_SINGLETON_MOCKER_H
 
 #include "singleton_container.h"
 namespace OHOS {
@@ -43,4 +43,4 @@ private:
 } // namespace Rosen
 } // namespace OHOS
 
-#endif // FRAMEWORKS_WM_TEST_UT_SINGLETON_MOCKER_H
+#endif // FRAMEWORKS_WMS_TEST_UT_SINGLETON_MOCKER_H
