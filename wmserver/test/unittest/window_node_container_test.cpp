@@ -21,12 +21,9 @@
 #include "future.h"
 #include "window_node.h"
 #include "wm_common.h"
-#include "singleton_mocker.h"
-#include "mock_window_node_container.h"
 
 using namespace testing;
 using namespace testing::ext;
-using Mocker = SingletonMocker<WindowNodeContainer,MockWindowNodeContainer>;
 
 namespace OHOS {
 namespace Rosen {
@@ -201,73 +198,6 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
     container_->UpdateCameraFloatWindowStatus(node, true);
 }
 /**
- * @tc.name: AddWindowNode
- * @tc.desc: add windownode, windowType is APP_WINDOW_BASE
- * @tc.type: FUNC
- */
- HWTEST_F(WindowNodeContainerTest, AddWindowNode01, Function | SmallTest | Level2)
-{
-    std::unique_ptr<Mocker>m=std::make_unique<Mocker>();
-    sptr<WindowProperty> property = CreateWindowProperty(110u, "test1",
-        WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
-    sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
-
-    node->startingWindowShown=false;
-    EXPECT_CALL(m->Mock(), AddWindowNodeOnWindowTree(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_TYPE));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, container_->AddWindowNode(node,nullptr));
-    EXPECT_CALL(m->Mock(), AddWindowNodeOnWindowTree(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, container_->AddWindowNode(node,nullptr));
-
-    node->startingWindowShown=true;
-    node->SetDisplayId(100);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container_->AddWindowNode(node,nullptr));
-    node->SetDisplayId(0);
-    ASSERT_EQ(WMError::WM_OK, container_->AddWindowNode(node,nullptr));
-}
-/**
- * @tc.name: AddWindowNode
- * @tc.desc: add windownode, windowType is SYSTEM_WINDOW_BASE
- * @tc.type: FUNC
- */
- HWTEST_F(WindowNodeContainerTest, AddWindowNode02, Function | SmallTest | Level2)
-{
-    std::unique_ptr<Mocker>m=std::make_unique<Mocker>();
-    sptr<WindowProperty> property = CreateWindowProperty(110u, "test2",
-        WindowType::SYSTEM_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
-    sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
-
-    node->startingWindowShown=false;
-    EXPECT_CALL(m->Mock(), AddWindowNodeOnWindowTree(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_TYPE));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, container_->AddWindowNode(node,nullptr));
-    EXPECT_CALL(m->Mock(), AddWindowNodeOnWindowTree(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, container_->AddWindowNode(node,nullptr));
-
-    node->startingWindowShown=true;
-    node->SetDisplayId(100);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container_->AddWindowNode(node,nullptr));
-    node->SetDisplayId(0);
-    ASSERT_EQ(WMError::WM_OK, container_->AddWindowNode(node,nullptr));
-}
-/**
- * @tc.name: RemoveWindowNode
- * @tc.desc: Remove windownode
- * @tc.type: FUNC
- */
- HWTEST_F(WindowNodeContainerTest, RemoveWindowNode, Function | SmallTest | Level2)
-{
-    sptr<WindowNode> node=nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_DESTROYED_OBJECT, container_->RemoveWindowNode(node,nullptr));
-
-    std::unique_ptr<Mocker>m=std::make_unique<Mocker>();
-    sptr<WindowProperty> property = CreateWindowProperty(110u, "test1",
-        WindowType::SYSTEM_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
-    sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
-    EXPECT_CALL(m->Mock(), HandleRemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_TYPE));
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container_->RemoveWindowNode(node,nullptr));
-    EXPECT_CALL(m->Mock(), HandleRemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, container_->RemoveWindowNode(node,nullptr));
-}
-/**
  * @tc.name: UpdateWindowNode
  * @tc.desc: preprocess node and update RSTree
  * @tc.type: FUNC
@@ -279,24 +209,6 @@ HWTEST_F(WindowNodeContainerTest, UpdateCameraFloatWindowStatus, Function | Smal
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
     ASSERT_EQ(WMError::WM_OK, container_->UpdateWindowNode(node,WindowUpdateReason::UPDATE_ALL));
     ASSERT_EQ(WMError::WM_OK, container_->UpdateWindowNode(node,WindowUpdateReason::UPDATE_MODE));
-}
-/**
- * @tc.name: DestroyWindowNode
- * @tc.desc: Destroy WindowNode
- * @tc.type: FUNC
- */
- HWTEST_F(WindowNodeContainerTest, DestroyWindowNode, Function | SmallTest | Level2)
-{
-    std::unique_ptr<Mocker>m=std::make_unique<Mocker>();
-    sptr<WindowProperty> property = CreateWindowProperty(110u, "test1",
-        WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
-    sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
-    std::vector<uint32_t> windowId;
-
-    EXPECT_CALL(m->Mock(), RemoveWindowNode(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, container_->DestroyWindowNode(node,windowId));
-    EXPECT_CALL(m->Mock(), RemoveWindowNode(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_TYPE));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, container_->DestroyWindowNode(node,windowId));
 }
 /**
  * @tc.name: Destroy
