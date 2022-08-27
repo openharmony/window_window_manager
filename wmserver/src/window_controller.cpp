@@ -410,9 +410,11 @@ WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     DisplayId displayId = DISPLAY_ID_INVALID;
     auto node = windowRoot_->GetWindowNode(windowId);
-    if (node != nullptr) {
-        displayId = node->GetDisplayId();
+    if (node == nullptr) {
+        WLOGFE("destroy window failed, because window node is not exist.");
+        return WMError::WM_ERROR_NULLPTR;
     }
+    displayId = node->GetDisplayId();
     WMError res = windowRoot_->DestroyWindow(windowId, onlySelf);
     if (res != WMError::WM_OK) {
         return res;
