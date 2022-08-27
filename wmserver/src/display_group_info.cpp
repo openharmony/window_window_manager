@@ -150,6 +150,15 @@ sptr<DisplayInfo> DisplayGroupInfo::GetDisplayInfo(DisplayId displayId) const
     return nullptr;
 }
 
+std::vector<sptr<DisplayInfo>> DisplayGroupInfo::GetAllDisplayInfo() const
+{
+    std::vector<sptr<DisplayInfo>> displayInfos;
+    for (auto& iter : displayInfosMap_) {
+        displayInfos.push_back(iter.second);
+    }
+    return displayInfos;
+}
+
 DisplayId DisplayGroupInfo::GetLeftDisplayId() const
 {
     return leftDisplayId_;

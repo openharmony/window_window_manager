@@ -66,13 +66,13 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
         return;
     }
 
-    auto displayInfo = container->GetDisplayInfo(displayId);
-    if (displayInfo == nullptr) {
+    auto displayInfos = container->GetAllDisplayInfo();
+    if (displayInfos.empty()) {
         return;
     }
 
     UpdateDisplayGroupInfo(container, displayGroupInfo_);
-    UpdateDisplayInfo(displayInfo, displayGroupInfo_.displaysInfo);
+    UpdateDisplayInfo(displayInfos, displayGroupInfo_.displaysInfo);
     std::vector<sptr<WindowNode>> windowNodes;
     container->TraverseContainer(windowNodes);
     TraverseWindowNodes(windowNodes, displayGroupInfo_.windowsInfo);
@@ -91,32 +91,41 @@ void InputWindowMonitor::UpdateDisplayGroupInfo(const sptr<WindowNodeContainer>&
     displayGroupInfo.displaysInfo.clear();
 }
 
-void InputWindowMonitor::UpdateDisplayInfo(const sptr<DisplayInfo>& displayInfo,
+void InputWindowMonitor::UpdateDisplayInfo(const std::vector<sptr<DisplayInfo>>& displayInfos,
                                            std::vector<MMI::DisplayInfo>& displayInfoVector)
 {
-    uint32_t displayWidth = displayInfo->GetWidth();
-    uint32_t displayHeight = displayInfo->GetHeight();
-    if (displayInfo->GetRotation() == Rotation::ROTATION_90 || displayInfo->GetRotation() == Rotation::ROTATION_270) {
-        std::swap(displayWidth, displayHeight);
-    }
-    MMI::DisplayInfo display = {
-        .id = static_cast<int32_t>(displayInfo->GetDisplayId()),
-        .x = displayInfo->GetOffsetX(),
-        .y = displayInfo->GetOffsetY(),
-        .width = static_cast<int32_t>(displayWidth),
-        .height = static_cast<int32_t>(displayHeight),
-        .name = (std::stringstream("display ")<<displayInfo->GetDisplayId()).str(),
-        .uniq = "default0",
-        .direction = GetDisplayDirectionForMmi(displayInfo->GetRotation()),
-    };
-    auto displayIter = std::find_if(displayInfoVector.begin(), displayInfoVector.end(),
-        [&display](MMI::DisplayInfo& displayInfoTmp) {
-        return displayInfoTmp.id == display.id;
-    });
-    if (displayIter != displayInfoVector.end()) {
-        *displayIter = display;
-    } else {
-        displayInfoVector.emplace_back(display);
+    for (auto& displayInfo : displayInfos) {
+        if (displayInfo == nullptr) {
+            continue;
+        }
+        uint32_t displayWidth = displayInfo->GetWidth();
+        uint32_t displayHeight = displayInfo->GetHeight();
+        if (displayInfo->GetRotation() == Rotation::ROTATION_90 ||
+            displayInfo->GetRotation() == Rotation::ROTATION_270) {
+            std::swap(displayWidth, displayHeight);
+        }
+        MMI::DisplayInfo display = {
+            .id = static_cast<int32_t>(displayInfo->GetDisplayId()),
+            .x = displayInfo->GetOffsetX(),
+            .y = displayInfo->GetOffsetY(),
+            .width = static_cast<int32_t>(displayWidth),
+            .height = static_cast<int32_t>(displayHeight),
+            .name = (std::stringstream("display ")<<displayInfo->GetDisplayId()).str(),
+            .uniq = "default" + std::to_string(displayInfo->GetDisplayId()),
+            .direction = GetDisplayDirectionForMmi(displayInfo->GetRotation()),
+        };
+        auto displayIter = std::find_if(displayInfoVector.begin(), displayInfoVector.end(),
+            [&display](MMI::DisplayInfo& displayInfoTmp) {
+            return displayInfoTmp.id == display.id;
+        });
+        if (displayIter != displayInfoVector.end()) {
+            *displayIter = display;
+        } else {
+            displayInfoVector.emplace_back(display);
+        }
+        WLOGFD("UpdateDisplayInfo, displayId: %{public}d, displayRect: "
+            "[%{public}d, %{public}d, %{public}u, %{public}u]",
+            display.id, display.x, display.y, display.width, display.height);
     }
 }
 

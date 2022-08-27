@@ -95,8 +95,15 @@ public:
     void GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
+    std::vector<sptr<DisplayInfo>> GetAllDisplayInfo();
     float GetDisplayVirtualPixelRatio(DisplayId displayId) const;
-    bool UpdateRSTree(sptr<WindowNode>& node, DisplayId displayId, bool isAdd, bool animationPlayed = false);
+
+    // parentDisplayId is the same as displayId in single-display mode
+    bool AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId displayId, DisplayId parentDisplayId,
+        WindowUpdateType type, bool animationPlayed = false);
+    // parentDisplayId is the same as displayId in single-display mode
+    bool RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId displayId, DisplayId parentDisplayId,
+        WindowUpdateType type, bool animationPlayed = false);
 
     sptr<WindowLayoutPolicy> GetLayoutPolicy() const;
     sptr<AvoidAreaController> GetAvoidController() const;
@@ -121,7 +128,6 @@ private:
     sptr<WindowNode> FindWindowNodeById(uint32_t id) const;
     void UpdateFocusStatus(uint32_t id, bool focused) const;
     void UpdateActiveStatus(uint32_t id, bool isActive) const;
-    void RemoveNodeFromRSTree(sptr<WindowNode>& node);
     void NotifyIfAvoidAreaChanged(const sptr<WindowNode>& node, const AvoidControlType avoidType) const;
     void NotifyIfSystemBarTintChanged(DisplayId displayId) const;
     void NotifyIfSystemBarRegionChanged(DisplayId displayId) const;

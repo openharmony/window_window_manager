@@ -73,6 +73,7 @@ public:
     void HandleWindowRemovedOrDestroyed(uint32_t windowId);
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     uint32_t GetActiveWindowId() const;
+    void HandleDisplayChange(const std::map<DisplayId, Rect>& displayRectMap);
 
 private:
     void SetDragProperty(const sptr<MoveDragProperty>& moveDragProperty);
@@ -81,6 +82,7 @@ private:
     const sptr<MoveDragProperty>& GetMoveDragProperty() const;
     const sptr<WindowProperty>& GetWindowProperty() const;
     Rect GetHotZoneRect();
+    void ConvertPointerPosToDisplayGroupPos(DisplayId displayId, int32_t& posX, int32_t& posY);
 
     void HandlePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId);
@@ -94,6 +96,7 @@ private:
     std::shared_ptr<MMI::PointerEvent> moveEvent_ = nullptr;
     std::shared_ptr<MMI::IInputEventConsumer> inputListener_ = nullptr;
     std::shared_ptr<VsyncCallback> vsyncCallback_ = std::make_shared<VsyncCallback>(VsyncCallback());
+    std::map<DisplayId, Rect> displayRectMap_;
 
     // event handler for input event
     std::shared_ptr<EventHandler> inputEventHandler_;

@@ -203,6 +203,14 @@ pid_t WindowInnerManager::GetPid()
     return pid_;
 }
 
+void WindowInnerManager::NotifyDisplayChange(const std::map<DisplayId, Rect>& displayRectMap)
+{
+    if (moveDragController_ == nullptr) {
+        return;
+    }
+    moveDragController_->HandleDisplayChange(displayRectMap);
+}
+
 bool WindowInnerManager::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
     sptr<MoveDragProperty>& moveDragProperty)
 {

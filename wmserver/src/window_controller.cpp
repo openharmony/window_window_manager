@@ -506,7 +506,7 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
 void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
-    WLOGFD("DisplayStateChangeType:%{public}u", type);
+    WLOGFD("NotifyDisplayStateChange start: %{public}u", type);
     switch (type) {
         case DisplayStateChangeType::BEFORE_SUSPEND: {
             isScreenLocked_ = true;
@@ -521,10 +521,12 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
         case DisplayStateChangeType::CREATE: {
             SetDefaultDisplayInfo(defaultDisplayId, displayInfo);
             windowRoot_->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayInfoMap);
+            FlushWindowInfoWithDisplayId(displayInfo->GetDisplayId());
             break;
         }
         case DisplayStateChangeType::DESTROY: {
             windowRoot_->ProcessDisplayDestroy(defaultDisplayId, displayInfo, displayInfoMap);
+            FlushWindowInfoWithDisplayId(displayInfo->GetDisplayId());
             break;
         }
         case DisplayStateChangeType::SIZE_CHANGE:
@@ -538,6 +540,7 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
             return;
         }
     }
+    WLOGFD("NotifyDisplayStateChange end, type: %{public}u", type);
 }
 
 void WindowController::SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo)
@@ -585,7 +588,6 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     if (windowNodeContainer != nullptr) {
         windowNodeContainer->BeforeProcessWindowAvoidAreaChangeWhenDisplayChange();
     }
-    DisplayId displayId = displayInfo->GetDisplayId();
     switch (type) {
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION:
@@ -600,12 +602,12 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
             return;
         }
     }
+    auto displayId = displayInfo->GetDisplayId();
     FlushWindowInfoWithDisplayId(displayId);
     accessibilityConnection_->NotifyAccessibilityWindowInfo(displayId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     if (windowNodeContainer != nullptr) {
         windowNodeContainer->ProcessWindowAvoidAreaChangeWhenDisplayChange();
     }
-    WLOGFI("Finish ProcessDisplayChange");
 }
 
 void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)
@@ -902,7 +904,7 @@ void WindowController::FlushWindowInfo(uint32_t windowId)
 
 void WindowController::FlushWindowInfoWithDisplayId(DisplayId displayId)
 {
-    WLOGFI("FlushWindowInfoWithDisplayId");
+    WLOGFI("FlushWindowInfoWithDisplayId, displayId: %{public}" PRIu64"", displayId);
     RSTransaction::FlushImplicitTransaction();
     inputWindowMonitor_->UpdateInputWindowByDisplayId(displayId);
 }
