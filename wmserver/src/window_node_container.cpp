@@ -1202,11 +1202,6 @@ void WindowNodeContainer::DumpScreenWindowTree()
     WLOGFI("-------- dump window info end  ---------");
 }
 
-uint64_t WindowNodeContainer::GetScreenId(DisplayId displayId) const
-{
-    return DisplayManagerServiceInner::GetInstance().GetRSScreenId(displayId);
-}
-
 Rect WindowNodeContainer::GetDisplayRect(DisplayId displayId) const
 {
     return displayGroupInfo_->GetDisplayRect(displayId);
