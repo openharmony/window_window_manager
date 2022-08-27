@@ -477,26 +477,6 @@ HWTEST_F(WindowNodeTest, SetCallingUid01, Function | SmallTest | Level1)
     ASSERT_EQ(1, windowNode->GetCallingUid());
 }
 /**
- * @tc.name: SetWindowToken01
- * @tc.desc: SetWindowToken & GetWindowToken
- * @tc.type: FUNC
- */
-HWTEST_F(WindowNodeTest, SetWindowToken01, Function | SmallTest | Level1)
-{
-    std::string windowName = "WindowNode18";
-    auto property = CreateWindowProperty(18, windowName);
-    ASSERT_NE(nullptr, property);
-    sptr<WindowNode> windowNode = new WindowNode(property);
-    ASSERT_NE(nullptr, windowNode);
-
-    ASSERT_EQ(nullptr, windowNode->GetWindowToken());
-
-    sptr<WindowListener> iWindow = new WindowListener();
-    ASSERT_NE(nullptr, iWindow);
-    windowNode->SetWindowToken(iWindow);
-    ASSERT_EQ(iWindow, windowNode->GetWindowToken());
-}
-/**
  * @tc.name: SetWindowSizeChangeReason01
  * @tc.desc: SetWindowSizeChangeReason & GetWindowSizeChangeReason
  * @tc.type: FUNC
@@ -528,28 +508,6 @@ HWTEST_F(WindowNodeTest, SetRequestedOrientation01, Function | SmallTest | Level
 
     ASSERT_EQ(Orientation::UNSPECIFIED, windowNode->GetRequestedOrientation());
     windowNode->SetRequestedOrientation(Orientation::REVERSE_VERTICAL);
-    ASSERT_EQ(Orientation::REVERSE_VERTICAL, windowNode->GetRequestedOrientation());
-}
-/**
- * @tc.name: SetShowingDisplays01
- * @tc.desc: SetShowingDisplays & GetShowingDisplays
- * @tc.type: FUNC
- */
-HWTEST_F(WindowNodeTest, SetShowingDisplays01, Function | SmallTest | Level1)
-{
-    std::string windowName = "WindowNode21";
-    auto property = CreateWindowProperty(21, windowName);
-    ASSERT_NE(nullptr, property);
-    sptr<WindowNode> windowNode = new WindowNode(property);
-    ASSERT_NE(nullptr, windowNode);
-
-    auto displays = windowNode->GetShowingDisplay();
-    ASSERT_TRUE(displays.empty());
-
-    windowNode.SetShowingDisplays(1);
-    ASSERT_FALSE(displays.empty());
-    
-    windowNode->SetShowingDisplays(Orientation::REVERSE_VERTICAL);
     ASSERT_EQ(Orientation::REVERSE_VERTICAL, windowNode->GetRequestedOrientation());
 }
 
