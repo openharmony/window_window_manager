@@ -1116,7 +1116,9 @@ WMError WindowImpl::Destroy(bool needNotifyServer)
         RecordLifeCycleExceptionEvent(LifeCycleEvent::DESTROY_EVENT, ret);
         if (ret != WMError::WM_OK) {
             WLOGFE("destroy window failed with errCode:%{public}d", static_cast<int32_t>(ret));
-            return ret;
+            if (GetType() != WindowType::WINDOW_TYPE_DIALOG) {
+                return ret;
+            }
         }
     } else {
         WLOGFI("Do not need to notify server to destroy window");
@@ -2629,7 +2631,6 @@ void WindowImpl::NotifyTouchDialogTarget()
 
 void WindowImpl::NotifyDestroy()
 {
-    Destroy(false);
     sptr<IDialogDeathRecipientListener> dialogDeathRecipientListener;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
