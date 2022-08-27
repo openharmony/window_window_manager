@@ -264,7 +264,6 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
         node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
         sysBarWinId_[node->GetWindowType()] = node->GetWindowId();
-        ResizeSystemBarPropertySizeIfNeed(node);
     }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         ResizeSoftInputCallingWindowIfNeed(node);
@@ -325,28 +324,6 @@ void WindowController::RestoreCallingWindowSizeIfNeed()
     }
     callingWindowRestoringRect_ = { 0, 0, 0, 0 };
     callingWindowId_ = 0u;
-}
-
-void WindowController::ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>& node)
-{
-    auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(node->GetDisplayId());
-    if (displayInfo == nullptr) {
-        WLOGFE("displayInfo is null");
-        return;
-    }
-    auto width = static_cast<uint32_t>(displayInfo->GetWidth());
-    auto height = static_cast<uint32_t>(displayInfo->GetHeight());
-    Rect newRect = node->GetWindowRect();
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
-        auto statusBarHeight = newRect.height_;
-        newRect = { 0, 0, width, statusBarHeight };
-    } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
-        auto naviBarHeight = newRect.height_;
-        newRect = { 0, static_cast<int32_t>(height - naviBarHeight), width, naviBarHeight };
-    }
-    if (newRect != node->GetWindowRect()) {
-        ResizeRect(node->GetWindowId(), newRect, WindowSizeChangeReason::ROTATION);
-    }
 }
 
 void WindowController::HandleTurnScreenOn(const sptr<WindowNode>& node)
@@ -978,7 +955,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->SetDragType(property->GetDragType());
             ret = ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
             if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && ret == WMError::WM_OK &&
-                callingWindowId_ != 0u && !WindowHelper::IsEmptyRect(callingWindowRestoringRect_)) {
+                callingWindowId_ == windowId && !WindowHelper::IsEmptyRect(callingWindowRestoringRect_)) {
                 if (property->GetWindowSizeChangeReason() != WindowSizeChangeReason::MOVE) {
                     callingWindowId_ = 0u;
                     callingWindowRestoringRect_ = { 0, 0, 0, 0 };
