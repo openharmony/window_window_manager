@@ -66,9 +66,9 @@ public:
     virtual void UpdateDisplayId(DisplayId from, DisplayId to) override {};
     virtual void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override {};
     virtual void UpdateActiveStatus(bool isActive) override {};
-    virtual sptr<WindowProperty> GetWindowProperty() override 
+    virtual sptr<WindowProperty> GetWindowProperty() override
     {
-        return nullptr; 
+        return nullptr;
     };
     virtual void NotifyTouchOutside() override {};
     virtual void NotifyScreenshot() override {};
@@ -77,8 +77,8 @@ public:
     virtual void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override {};
 
     virtual sptr<IRemoteObject> AsObject() override
-    { 
-        return nullptr; 
+    {
+        return nullptr;
     };
 };
 
@@ -90,7 +90,7 @@ sptr<WindowProperty> CreateWindowProperty(uint32_t windowId, const std::string& 
     return property;
 }
 
-RSSurfaceNode::SharedPtr CreateRSSurfaceNode(std::string windowNode) 
+RSSurfaceNode::SharedPtr CreateRSSurfaceNode(std::string windowNode)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = windowNode;
