@@ -156,6 +156,15 @@ void WindowAgent::DumpInfo(const std::vector<std::string>& params, std::vector<s
     window_->DumpInfo(params, info);
 }
 
+void WindowAgent::UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->UpdateZoomTransform(trans, isDisplayZoomOn);
+}
+
 void WindowAgent::NotifyDestroy(void)
 {
     if (window_ == nullptr) {

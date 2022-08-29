@@ -36,6 +36,7 @@ ohos_shared_library("libwms") {
     "src/avoid_area_controller.cpp",
     "src/display_group_controller.cpp",
     "src/display_group_info.cpp",
+    "src/display_zoom_controller.cpp",
     "src/drag_controller.cpp",
     "src/freeze_controller.cpp",
     "src/inner_window.cpp",
