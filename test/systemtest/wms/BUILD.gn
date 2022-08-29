@@ -258,14 +258,6 @@ config("wms_systemtest_common_public_config") {
 
     # abilityContext end
   ]
-
-  cflags = [
-    "-Wall",
-    "-Werror",
-    "-g3",
-    "-Dprivate=public",
-    "-Dprotected=public",
-  ]
 }
 
 ohos_static_library("wms_systemtest_common") {
@@ -277,6 +269,7 @@ ohos_static_library("wms_systemtest_common") {
   public_configs = [
     ":wms_systemtest_common_public_config",
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "//foundation/window/window_manager/resources/config/build:testcase_flags",
   ]
 
   public_deps = [
