@@ -2065,38 +2065,29 @@ static bool IsScaleValid(double data)
 
 bool JsWindow::ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans)
 {
-    auto surfaceNode = windowToken_->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        WLOGFE("[NAPI] surfaceNode is nullptr");
-        return false;
-    }
     double data = 0.0f;
     if (ParseJsDoubleValue(jsObject, engine, "pivotX", data)) {
         if (!IsPivotValid(data)) {
             return false;
         }
-        surfaceNode->SetPivotX(data);
         trans.pivotX_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "pivotY", data)) {
         if (!IsPivotValid(data)) {
             return false;
         }
-        surfaceNode->SetPivotY(data);
         trans.pivotY_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "x", data)) {
         if (!IsScaleValid(data)) {
             return false;
         }
-        surfaceNode->SetScaleX(data);
         trans.scaleX_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "y", data)) {
         if (!IsScaleValid(data)) {
             return false;
         }
-        surfaceNode->SetScaleY(data);
         trans.scaleY_ = data;
     }
     return true;
@@ -2132,36 +2123,26 @@ NativeValue* JsWindow::OnScale(NativeEngine& engine, NativeCallbackInfo& info)
 
 bool JsWindow::ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans)
 {
-    auto surfaceNode = windowToken_->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        WLOGFE("[NAPI] surfaceNode is nullptr");
-        return false;
-    }
     double data = 0.0f;
     if (ParseJsDoubleValue(jsObject, engine, "pivotX", data)) {
         if (!IsPivotValid(data)) {
             return false;
         }
-        surfaceNode->SetPivotX(data);
         trans.pivotX_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "pivotY", data)) {
         if (!IsPivotValid(data)) {
             return false;
         }
-        surfaceNode->SetPivotY(data);
         trans.pivotY_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "x", data)) {
-        surfaceNode->SetRotationX(data);
         trans.rotationX_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "y", data)) {
-        surfaceNode->SetRotationY(data);
         trans.rotationY_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "z", data)) {
-        surfaceNode->SetRotation(data);
         trans.rotationZ_ = data;
     }
     return true;
@@ -2199,22 +2180,14 @@ NativeValue* JsWindow::OnRotate(NativeEngine& engine, NativeCallbackInfo& info)
 
 bool JsWindow::ParseTranslateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans)
 {
-    auto surfaceNode = windowToken_->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        WLOGFE("[NAPI] surfaceNode is nullptr");
-        return false;
-    }
     double data = 0.0f;
     if (ParseJsDoubleValue(jsObject, engine, "x", data)) {
-        surfaceNode->SetTranslateX(data);
         trans.translateX_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "y", data)) {
-        surfaceNode->SetTranslateY(data);
         trans.translateY_ = data;
     }
     if (ParseJsDoubleValue(jsObject, engine, "z", data)) {
-        surfaceNode->SetTranslateZ(data);
         trans.translateZ_ = data;
     }
     return true;

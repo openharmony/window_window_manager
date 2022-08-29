@@ -20,6 +20,7 @@
 #include <rs_iwindow_animation_controller.h>
 
 #include "accessibility_connection.h"
+#include "display_zoom_controller.h"
 #include "input_window_monitor.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "window_root.h"
@@ -32,7 +33,8 @@ namespace Rosen {
 class WindowController : public RefBase {
 public:
     WindowController(sptr<WindowRoot>& root, sptr<InputWindowMonitor> inputWindowMonitor) : windowRoot_(root),
-        inputWindowMonitor_(inputWindowMonitor), accessibilityConnection_(new AccessibilityConnection(windowRoot_)) {}
+        inputWindowMonitor_(inputWindowMonitor), accessibilityConnection_(new AccessibilityConnection(windowRoot_)),
+        displayZoomController_(new DisplayZoomController(root)) {}
     ~WindowController() = default;
 
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
@@ -68,6 +70,9 @@ public:
     Orientation GetWindowPreferredOrientation(DisplayId displayId);
     void OnScreenshot(DisplayId displayId);
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
+    void SetAnchorAndScale(int32_t x, int32_t y, float scale);
+    void SetAnchorOffset(int32_t deltaX, int32_t deltaY);
+    void OffWindowZoom();
     WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken);
     WMError InterceptInputEventToServer(uint32_t windowId);
     WMError RecoverInputEventToClient(uint32_t windowId);
@@ -102,6 +107,7 @@ private:
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
     sptr<AccessibilityConnection> accessibilityConnection_;
+    sptr<DisplayZoomController> displayZoomController_;
     std::atomic<uint32_t> windowId_ { INVALID_WINDOW_ID };
     // Remove 'sysBarWinId_' after SystemUI resize 'systembar', systemBar only exist on default display currently
     std::unordered_map<WindowType, uint32_t> sysBarWinId_ {

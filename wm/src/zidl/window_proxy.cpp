@@ -316,6 +316,29 @@ void WindowProxy::DumpInfo(const std::vector<std::string>& params, std::vector<s
     }
 }
 
+void WindowProxy::UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!trans.Marshalling(data)) {
+        WLOGFE("Write params failed");
+        return;
+    }
+    if (!data.WriteBool(isDisplayZoomOn)) {
+        WLOGFE("Write params failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_UPDATE_ZOOM_TRANSFORM),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
 void WindowProxy::NotifyDestroy(void)
 {
     MessageParcel data;

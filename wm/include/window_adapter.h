@@ -68,6 +68,9 @@ public:
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     virtual void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
+    virtual void SetAnchorAndScale(int32_t x, int32_t y, float scale);
+    virtual void SetAnchorOffset(int32_t deltaX, int32_t deltaY);
+    virtual void OffWindowZoom();
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();

@@ -21,6 +21,8 @@
 #include "future.h"
 #include "screen_manager.h"
 #include "window_manager.h"
+#include "window_accessibility_controller.h"
+#include "window_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -283,6 +285,42 @@ HWTEST_F(WindowRotationTest, WindowRotationTest5, Function | MediumTest | Level3
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     defaultScreen->SetOrientation(Orientation::UNSPECIFIED);
+    sleep(SPLIT_TEST_SLEEP_S);
+}
+
+/**
+* @tc.name: WindowRotationTest6
+* @tc.desc: test window rotation when display is zoomed.
+* @tc.type: FUNC
+* @tc.require: issueI5NGWL
+*/
+HWTEST_F(WindowRotationTest, WindowRotationTest6, Function | MediumTest | Level3)
+{
+    WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    fullInfo_.name  = "fullscreen.2";
+    fullInfo_.orientation_ = Orientation::REVERSE_HORIZONTAL;
+    const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
+    activeWindows_.push_back(fullWindow);
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
+
+    DisplayId displayId = displayListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
+    ScreenId screenId = screenListener_->changeFuture_.GetResult(FUTURE_GET_RESULT_TIMEOUT);
+    auto screen = ScreenManager::GetInstance().GetScreenById(screenId);
+    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+    ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, screen->GetOrientation());
+    ASSERT_EQ(Orientation::REVERSE_HORIZONTAL, display->GetOrientation());
+    sleep(SPLIT_TEST_SLEEP_S);
+
+    Window* ptr = fullWindow.GetRefPtr();
+    WindowImpl* implPtr = (WindowImpl*)ptr;
+    Transform expect;
+    ASSERT_NE(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+
+    WindowAccessibilityController::GetInstance().OffWindowZoom();
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
+    screen->SetOrientation(Orientation::UNSPECIFIED);
     sleep(SPLIT_TEST_SLEEP_S);
 }
 }
