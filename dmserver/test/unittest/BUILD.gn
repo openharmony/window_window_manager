@@ -51,6 +51,7 @@ ohos_static_library("dmserver_unittest_common") {
   public_configs = [
     ":dmserver_unittest_common_public_config",
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "//foundation/window/window_manager/resources/config/build:testcase_flags",
   ]
 
   sources = [ "screen_manager_utils.cpp" ]
