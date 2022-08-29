@@ -957,10 +957,10 @@ NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackIn
     return result;
 }
 
-static void LoadContentTask(std::weak_ptr<NativeReference> contentStorage, std::string contextUrl,
+static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std::string contextUrl,
     sptr<Window> weakWindow, NativeEngine& engine, AsyncTask& task)
 {
-    NativeValue* nativeStorage = (contentStorage.lock() == nullptr) ? nullptr : contentStorage.lock()->Get();
+    NativeValue* nativeStorage =  (contentStorage == nullptr) ? nullptr : contentStorage->Get();
     AppExecFwk::Ability* ability = nullptr;
     GetAPI7Ability(engine, ability);
     WMError ret = weakWindow->SetUIContent(contextUrl, &engine, nativeStorage, false, ability);
@@ -1000,7 +1000,7 @@ NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& i
         // 2: index of callback
         callBack = (info.argv[2]->TypeOf() == NATIVE_FUNCTION ? info.argv[2] : nullptr);
     }
-    std::weak_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
+    std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =

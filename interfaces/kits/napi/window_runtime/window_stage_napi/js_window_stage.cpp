@@ -240,10 +240,10 @@ NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& i
     return engine.CreateUndefined();
 }
 
-static void LoadContentTask(std::weak_ptr<NativeReference> contentStorage, std::string contextUrl,
+static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std::string contextUrl,
     sptr<Window> weakWindow, NativeEngine& engine, AsyncTask& task)
 {
-    NativeValue* nativeStorage = (contentStorage.lock() == nullptr) ? nullptr : contentStorage.lock()->Get();
+    NativeValue* nativeStorage =  (contentStorage == nullptr) ? nullptr : contentStorage->Get();
     WMError ret = weakWindow->SetUIContent(contextUrl, &engine, nativeStorage, false);
     if (ret == WMError::WM_OK) {
         task.Resolve(engine, engine.CreateUndefined());
@@ -275,7 +275,7 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
     if (value2->TypeOf() == NATIVE_FUNCTION) {
         callBack = value2;
     }
-    std::weak_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
+    std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     AsyncTask::CompleteCallback complete =
         [weak = windowScene_, contentStorage, contextUrl, errCode](
