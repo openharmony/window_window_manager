@@ -110,6 +110,10 @@ public:
     sptr<WindowNode> GetWindowNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken);
     bool TakeWindowPairSnapshot(DisplayId displayId);
     void ClearWindowPairSnapshot(DisplayId displayId);
+    bool IsUniRender()
+    {
+        return renderMode_ == RenderMode::UNIFIED;
+    }
 
 private:
     enum class RenderMode : uint8_t {
