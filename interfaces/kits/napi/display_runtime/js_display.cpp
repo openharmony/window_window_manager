@@ -29,6 +29,11 @@ using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisplay"};
+    const std::map<DisplayState, DisplayStateMode> NATIVE_TO_JS_DISPLAY_STATE_MAP {
+        { DisplayState::UNKNOWN, DisplayStateMode::STATE_UNKNOWN },
+        { DisplayState::OFF,     DisplayStateMode::STATE_OFF     },
+        { DisplayState::ON,      DisplayStateMode::STATE_ON      },
+    };
 }
 
 static thread_local std::map<DisplayId, std::shared_ptr<NativeReference>> g_JsDisplayMap;
@@ -191,8 +196,13 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
     object->SetProperty("height", CreateJsValue(engine, info->GetHeight()));
     object->SetProperty("refreshRate", CreateJsValue(engine, info->GetRefreshRate()));
     object->SetProperty("name", CreateJsValue(engine, info->GetName()));
-    object->SetProperty("alive", engine.CreateUndefined());
-    object->SetProperty("state", engine.CreateUndefined());
+    object->SetProperty("alive", CreateJsValue(engine, true));
+    if (NATIVE_TO_JS_DISPLAY_STATE_MAP.count(info->GetDisplayState()) != 0) {
+        object->SetProperty("state", CreateJsValue(engine, NATIVE_TO_JS_DISPLAY_STATE_MAP.at(info->GetDisplayState())));
+    } else {
+        object->SetProperty("state", CreateJsValue(engine, DisplayStateMode::STATE_UNKNOWN));
+    }
+
     object->SetProperty("rotation", CreateJsValue(engine, info->GetRotation()));
     object->SetProperty("densityDPI", CreateJsValue(engine, info->GetVirtualPixelRatio() * DOT_PER_INCH));
     object->SetProperty("densityPixels", CreateJsValue(engine, info->GetVirtualPixelRatio()));
