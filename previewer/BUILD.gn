@@ -14,19 +14,16 @@
 import("//build/ohos.gni")
 
 config("previewer_window_config") {
+  visibility = [ ":*" ]
+
   include_dirs = [
-    "//foundation/window/window_manager/previewer/include",
-    "//foundation/window/window_manager/previewer/mock",
     "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/interfaces/innerkits/dm",
-    "//foundation/window/window_manager/wm/include",
-    "//foundation/window/window_manager/utils/include",
-    "../../../../commonlibrary/c_utils/base/include",
+    "//foundation/window/window_manager/previewer/include",
   ]
 }
 
 ohos_shared_library("previewer_window") {
-  public_configs = [ ":previewer_window_config" ]
+  configs = [ ":previewer_window_config" ]
 
   libs = []
 
@@ -46,12 +43,12 @@ ohos_shared_library("previewer_window") {
   ]
 
   include_dirs = [
-    "mock",  # mock目录
     "include",
-    "../utils/include",
-    "../wm/include",
+    "mock",
     "../interfaces/innerkits/wm",
     "../interfaces/innerkits/dm",
+    "../wm/include",
+    "../utils/include",
     "../../../../commonlibrary/c_utils/base/include",
   ]
 
@@ -68,15 +65,12 @@ ohos_shared_library("previewer_window") {
 config("previewer_window_napi_config") {
   visibility = [ ":*" ]
 
-  include_dirs = [
-    "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_napi",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/wm/include",
-    "//foundation/window/window_manager/utils/include",
-  ]
+  include_dirs = [ "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_napi" ]
 }
 
 ohos_shared_library("previewer_window_napi") {
+  public_configs = [ ":previewer_window_napi_config" ]
+
   libs = []
 
   sources = [
@@ -94,11 +88,17 @@ ohos_shared_library("previewer_window_napi") {
 
   include_dirs = [
     ".",  # 避免冲突的mock目录
+    "include",
+    "mock",
     "mock/ui",
     "mock/transaction",
-    "../interfaces/kits/napi/window_runtime/window_napi",
+    "../wm/include",
+    "../utils/include",
+    "../interfaces/innerkits/wm",
+    "../interfaces/innerkits/dm",
     "../interfaces/kits/napi/window_runtime/window_stage_napi",
     "../../../ability/ability_runtime/interfaces/inner_api/runtime/include",
+    "../../../../commonlibrary/c_utils/base/include",
   ]
 
   deps = [
