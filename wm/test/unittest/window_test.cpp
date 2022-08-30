@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-#include "window_test.h"
+#include <gtest/gtest.h>
+#include "ability_context_impl.h"
+#include "window.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
 
@@ -23,6 +25,14 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
+class WindowTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    virtual void SetUp() override;
+    virtual void TearDown() override;
+    static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
+};
 void WindowTest::SetUpTestCase()
 {
     abilityContext_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();

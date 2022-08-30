@@ -21,6 +21,7 @@ group("unittest") {
   deps = [
     ":wm_input_transfer_station_test",
     ":wm_window_effect_test",
+    ":wm_window_impl_listener_test",
     ":wm_window_impl_test",
     ":wm_window_input_channel_test",
     ":wm_window_option_test",
@@ -85,9 +86,18 @@ ohos_unittest("wm_window_test") {
   deps = [ ":wm_unittest_common" ]
 }
 
+ohos_unittest("wm_window_impl_listener_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_impl_listener_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+}
+
 ## Build wm_unittest_common.a {{{
 config("wm_unittest_common_public_config") {
   include_dirs = [
+    "//foundation/window/window_manager/test/common/mock",
     "//foundation/window/window_manager/wm/include",
     "//foundation/window/window_manager/wmserver/include",
     "//foundation/window/window_manager/wmserver/include/window_snapshot",

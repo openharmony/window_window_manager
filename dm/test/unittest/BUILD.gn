@@ -82,6 +82,8 @@ config("dm_unittest_common_public_config") {
     "//foundation/window/window_manager/dm/include",
     "//foundation/window/window_manager/dmserver/include",
     "//foundation/window/window_manager/snapshot",
+    "//foundation/window/window_manager/test/common/mock",
+    "//foundation/window/window_manager/test/common/utils/include",
     "//foundation/window/window_manager/interfaces/innerkits/dm",
     "//foundation/window/window_manager/test/common/utils/include",
     "//foundation/window/window_manager/utils/include",
@@ -98,8 +100,6 @@ ohos_static_library("dm_unittest_common") {
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
     "//foundation/window/window_manager/resources/config/build:testcase_flags",
   ]
-
-  sources = [ "screen_manager_utils.cpp" ]
 
   public_deps = [
     "//commonlibrary/c_utils/base:utils",
