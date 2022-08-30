@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_WM_TEST_UT_WINDOW_OPTION_TEST_H
-#define FRAMEWORKS_WM_TEST_UT_WINDOW_OPTION_TEST_H
+#ifndef FRAMEWORKS_DM_TEST_UT_SCREEN_MANAGER_UTILS_H
+#define FRAMEWORKS_DM_TEST_UT_SCREEN_MANAGER_UTILS_H
 
-#include <gtest/gtest.h>
-#include "window_option.h"
+#include <cstdint>
+#include <refbase.h>
+#include <string>
+#include <surface.h>
 
-namespace OHOS {
-namespace Rosen {
-class WindowOptionTest : public testing::Test {
+namespace OHOS::Rosen {
+class ScreenManagerUtils {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    bool CreateSurface();
+
+    sptr<Surface> csurface_ = nullptr; // cosumer surface
+    sptr<Surface> psurface_ = nullptr; // producer surface
 };
-} // namespace ROSEN
-} // namespace OHOS
-#endif // FRAMEWORKS_WM_TEST_UT_WINDOW_OPTION_TEST_H
+} // namespace OHOS::Rosen
+
+#endif // FRAMEWORKS_DM_TEST_UT_SCREEN_MANAGER_UTILS_H

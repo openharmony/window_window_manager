@@ -13,13 +13,24 @@
  * limitations under the License.
  */
 
-#include "window_effect_test.h"
+#include <gtest/gtest.h>
+#include "mock_window_adapter.h"
+#include "singleton_mocker.h"
+#include "window_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
+class WindowEffectTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    virtual void SetUp() override;
+    virtual void TearDown() override;
+};
 void WindowEffectTest::SetUpTestCase()
 {
 }

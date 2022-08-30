@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-#include "screen_manager_test.h"
+#include <gtest/gtest.h>
+#include "display_manager.h"
+#include "screen_manager.h"
+#include "screen_manager_utils.h"
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 
@@ -23,16 +26,27 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
+class ScreenManagerTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    virtual void SetUp() override;
+    virtual void TearDown() override;
 
+    const std::string defaultName_ = "virtualScreen01";
+    const float defaultDensity_ = 2.0;
+    const int32_t defaultFlags_ = 0;
+    static sptr<Display> defaultDisplay_;
+    static uint32_t defaultWidth_;
+    static uint32_t defaultHeight_;
+};
 sptr<Display> ScreenManagerTest::defaultDisplay_ = nullptr;
-DisplayId ScreenManagerTest::defaultDisplayId_ = DISPLAY_ID_INVALID;
 uint32_t ScreenManagerTest::defaultWidth_ = 480;
 uint32_t ScreenManagerTest::defaultHeight_ = 320;
 
 void ScreenManagerTest::SetUpTestCase()
 {
     defaultDisplay_ = DisplayManager::GetInstance().GetDefaultDisplay();
-    defaultDisplayId_ = defaultDisplay_->GetId();
     defaultWidth_ = defaultDisplay_->GetWidth();
     defaultHeight_ = defaultDisplay_->GetHeight();
 }

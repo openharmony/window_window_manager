@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "window_option_test.h"
+#include <gtest/gtest.h>
+#include "window_option.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -33,7 +34,13 @@ namespace {
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_DEFAULT },
     };
 }
-
+class WindowOptionTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    virtual void SetUp() override;
+    virtual void TearDown() override;
+};
 void WindowOptionTest::SetUpTestCase()
 {
 }

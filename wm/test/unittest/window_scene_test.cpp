@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "window_scene_test.h"
+#include <gtest/gtest.h>
+#include "window_scene.h"
 #include "ability_context_impl.h"
 #include "mock_static_call.h"
 #include "singleton_mocker.h"
@@ -24,6 +25,16 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<StaticCall, MockStaticCall>;
+class WindowSceneTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    virtual void SetUp() override;
+    virtual void TearDown() override;
+
+    sptr<WindowScene> scene_ = nullptr;
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
+};
 void WindowSceneTest::SetUpTestCase()
 {
 }
