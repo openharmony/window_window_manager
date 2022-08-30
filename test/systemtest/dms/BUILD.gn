@@ -109,6 +109,7 @@ ohos_static_library("dms_systemtest_common") {
   public_configs = [
     ":dms_systemtest_common_public_config",
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "//foundation/window/window_manager/resources/config/build:testcase_flags",
   ]
 
   public_deps = [

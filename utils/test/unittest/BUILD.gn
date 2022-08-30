@@ -20,6 +20,7 @@ group("unittest") {
 
   deps = [
     ":utils_display_info_test",
+    ":utils_perform_reporter_test",
     ":utils_screen_group_info_test",
     ":utils_screen_info_test",
     ":utils_string_test",
@@ -91,6 +92,14 @@ ohos_unittest("utils_window_helper_test") {
   external_deps = [ "bundle_framework:appexecfwk_base" ]
 }
 
+ohos_unittest("utils_perform_reporter_test") {
+  module_out_path = module_out_path
+
+  sources = [ "perform_reporter_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+}
+
 ## Build dm_unittest_common.a {{{
 config("utils_unittest_common_public_config") {
   include_dirs = [
@@ -110,6 +119,7 @@ ohos_static_library("utils_unittest_common") {
   public_configs = [
     ":utils_unittest_common_public_config",
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "//foundation/window/window_manager/resources/config/build:testcase_flags",
   ]
 
   public_deps = [

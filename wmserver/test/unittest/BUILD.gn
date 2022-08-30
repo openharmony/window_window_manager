@@ -18,17 +18,18 @@ module_out_path = "window_manager/wmserver"
 group("unittest") {
   testonly = true
   deps = [
-    ":wmsever_avoid_area_controller_test",
-    ":wmsever_minimize_app_test",
-    ":wmsever_window_layout_policy_test",
-    ":wmsever_window_manager_config_test",
-    ":wmsever_window_node_container_test",
-    ":wmsever_window_node_test",
-    ":wmsever_window_zorder_policy_test",
+    ":wmserver_avoid_area_controller_test",
+    ":wmserver_minimize_app_test",
+    ":wmserver_window_layout_policy_test",
+    ":wmserver_window_manager_config_test",
+    ":wmserver_window_node_container_test",
+    ":wmserver_window_node_test",
+    ":wmserver_window_snapshot_test",
+    ":wmserver_window_zorder_policy_test",
   ]
 }
 
-ohos_unittest("wmsever_avoid_area_controller_test") {
+ohos_unittest("wmserver_avoid_area_controller_test") {
   module_out_path = module_out_path
 
   sources = [ "avoid_area_controller_test.cpp" ]
@@ -36,7 +37,7 @@ ohos_unittest("wmsever_avoid_area_controller_test") {
   deps = [ ":wmserver_unittest_common" ]
 }
 
-ohos_unittest("wmsever_minimize_app_test") {
+ohos_unittest("wmserver_minimize_app_test") {
   module_out_path = module_out_path
 
   sources = [ "minimize_app_test.cpp" ]
@@ -44,7 +45,7 @@ ohos_unittest("wmsever_minimize_app_test") {
   deps = [ ":wmserver_unittest_common" ]
 }
 
-ohos_unittest("wmsever_window_layout_policy_test") {
+ohos_unittest("wmserver_window_layout_policy_test") {
   module_out_path = module_out_path
 
   sources = [ "window_layout_policy_test.cpp" ]
@@ -52,7 +53,7 @@ ohos_unittest("wmsever_window_layout_policy_test") {
   deps = [ ":wmserver_unittest_common" ]
 }
 
-ohos_unittest("wmsever_window_manager_config_test") {
+ohos_unittest("wmserver_window_manager_config_test") {
   module_out_path = module_out_path
 
   sources = [ "window_manager_config_test.cpp" ]
@@ -60,7 +61,17 @@ ohos_unittest("wmsever_window_manager_config_test") {
   deps = [ ":wmserver_unittest_common" ]
 }
 
-ohos_unittest("wmsever_window_zorder_policy_test") {
+ohos_unittest("wmserver_window_snapshot_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_snapshot_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common" ]
+
+  external_deps = [ "multimedia_image_standard:image_native" ]
+}
+
+ohos_unittest("wmserver_window_zorder_policy_test") {
   module_out_path = module_out_path
 
   sources = [ "window_zorder_policy_test.cpp" ]
@@ -68,7 +79,7 @@ ohos_unittest("wmsever_window_zorder_policy_test") {
   deps = [ ":wmserver_unittest_common" ]
 }
 
-ohos_unittest("wmsever_window_node_container_test") {
+ohos_unittest("wmserver_window_node_container_test") {
   module_out_path = module_out_path
 
   sources = [ "window_node_container_test.cpp" ]
@@ -76,7 +87,7 @@ ohos_unittest("wmsever_window_node_container_test") {
   deps = [ ":wmserver_unittest_common" ]
 }
 
-ohos_unittest("wmsever_window_node_test") {
+ohos_unittest("wmserver_window_node_test") {
   module_out_path = module_out_path
 
   sources = [ "window_node_test.cpp" ]
@@ -87,6 +98,8 @@ ohos_unittest("wmsever_window_node_test") {
 ## Build wmserver_unittest_common.a {{{
 config("wmserver_unittest_common_public_config") {
   include_dirs = [
+    "//foundation/window/window_manager/test/common/mock",
+    "//foundation/window/window_manager/test/common/utils/include",
     "//foundation/window/window_manager/wm/include",
     "//foundation/window/window_manager/wmserver/include",
     "//foundation/window/window_manager/wmserver/include/window_snapshot",
@@ -106,14 +119,6 @@ config("wmserver_unittest_common_public_config") {
 
     # abilityContext end
   ]
-
-  cflags = [
-    "-Wall",
-    "-Werror",
-    "-g3",
-    "-Dprivate=public",
-    "-Dprotected=public",
-  ]
 }
 
 ohos_static_library("wmserver_unittest_common") {
@@ -123,6 +128,7 @@ ohos_static_library("wmserver_unittest_common") {
   public_configs = [
     ":wmserver_unittest_common_public_config",
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "//foundation/window/window_manager/resources/config/build:testcase_flags",
   ]
 
   public_deps = [
@@ -139,6 +145,7 @@ ohos_static_library("wmserver_unittest_common") {
     "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/dmserver:libdms",
+    "//foundation/window/window_manager/test/common/utils:libtestutil",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
     "//foundation/window/window_manager/wmserver:libwms",
