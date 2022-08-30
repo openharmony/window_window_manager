@@ -77,6 +77,7 @@ ohos_shared_library("libwms") {
     "//foundation/window/window_manager/dmserver:libdms",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
+    "//third_party/libxml2:libxml2",
   ]
 
   external_deps = [
