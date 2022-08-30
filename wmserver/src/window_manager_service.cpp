@@ -50,14 +50,14 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerService"};
-    constexpr int REPORT_SHOW_WINDOW_TIMES = 50;
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerService)
 
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<WindowManagerService>());
 
 WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true),
-    rsInterface_(RSInterfaces::GetInstance())
+    rsInterface_(RSInterfaces::GetInstance()),
+    windowShowPerformReport_(new PerformReporter("SHOW_WINDOW_TIME", {20, 35, 50}))
 {
     windowRoot_ = new WindowRoot(
         [this](Event event, const sptr<IRemoteObject>& remoteObject) { OnWindowEvent(event, remoteObject); });
@@ -677,11 +677,11 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
 WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 {
     return PostSyncTask([this, &property]() {
-        auto startTime = std::chrono::steady_clock::now();
         if (property == nullptr) {
             WLOGFE("property is nullptr");
             return WMError::WM_ERROR_NULLPTR;
         }
+        windowShowPerformReport_->start();
         Rect rect = property->GetRequestRect();
         uint32_t windowId = property->GetWindowId();
         WLOGFI("[WMS] Add: %{public}5d %{public}4d %{public}4d %{public}4d [%{public}4d %{public}4d " \
@@ -693,10 +693,7 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
             dragController_->StartDrag(windowId);
         }
         if (res == WMError::WM_OK) {
-            showWindowTimeConfig_.showWindowTimes_++;
-            auto currentTime = std::chrono::steady_clock::now();
-            int64_t costTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count();
-            RecordShowTimeEvent(costTime);
+            windowShowPerformReport_->end();
         }
         return res;
     });
@@ -1051,42 +1048,6 @@ void WindowInfoQueriedListener::HasPrivateWindow(DisplayId displayId, bool& hasP
 {
     WLOGFI("called");
     WindowManagerService::GetInstance().HasPrivateWindow(displayId, hasPrivateWindow);
-}
-
-void WindowManagerService::RecordShowTimeEvent(int64_t costTime)
-{
-    WLOGFI("show window cost time(ms): %{public}" PRIu64", show window times: %{public}u", costTime,
-        showWindowTimeConfig_.showWindowTimes_.load());
-    if (costTime <= 20) { // 20: means cost time is 20ms
-        showWindowTimeConfig_.below20msTimes_++;
-    } else if (costTime <= 35) { // 35: means cost time is 35ms
-        showWindowTimeConfig_.below35msTimes_++;
-    } else if (costTime <= 50) { // 50: means cost time is 50ms
-        showWindowTimeConfig_.below50msTimes_++;
-    } else {
-        showWindowTimeConfig_.above50msTimes_++;
-    }
-    if (showWindowTimeConfig_.showWindowTimes_ >= REPORT_SHOW_WINDOW_TIMES) {
-        std::ostringstream oss;
-        oss << "show window: " << "BELOW20(ms): " << showWindowTimeConfig_.below20msTimes_
-            << ", BELOW35(ms):" << showWindowTimeConfig_.below35msTimes_
-            << ", BELOW50(ms): " << showWindowTimeConfig_.below50msTimes_
-            << ", ABOVE50(ms): " << showWindowTimeConfig_.above50msTimes_ << ";";
-        int32_t ret = OHOS::HiviewDFX::HiSysEvent::Write(
-            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
-            "SHOW_WINDOW_TIME",
-            OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
-            "MSG", oss.str());
-        if (ret != 0) {
-            WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
-        } else {
-            showWindowTimeConfig_.showWindowTimes_ = 0;
-            showWindowTimeConfig_.below20msTimes_ = 0;
-            showWindowTimeConfig_.below35msTimes_ = 0;
-            showWindowTimeConfig_.below50msTimes_ = 0;
-            showWindowTimeConfig_.above50msTimes_ = 0;
-        }
-    }
 }
 
 void WindowManagerService::OnRSScreenConnected()

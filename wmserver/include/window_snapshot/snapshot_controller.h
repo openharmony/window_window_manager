@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,25 +25,22 @@
 #include "wm_common_inner.h"
 #include "window_root.h"
 #include "window_manager_hilog.h"
+#include "perform_reporter.h"
 
 namespace OHOS {
 namespace Rosen {
 class SnapshotController : public SnapshotStub {
 public:
-    SnapshotController(sptr<WindowRoot>& root, std::shared_ptr<AppExecFwk::EventHandler>& handler) : windowRoot_(root),
-        handler_(handler) {};
-    SnapshotController() : windowRoot_(nullptr), handler_(nullptr) {};
+    SnapshotController(sptr<WindowRoot>& root, std::shared_ptr<AppExecFwk::EventHandler>& handler)
+        : windowRoot_(root), handler_(handler),
+        performReport_(new PerformReporter("GET_SNAPSHOT_TIME", {25, 35, 50, 200})) {};
     ~SnapshotController() = default;
-    void Init(sptr<WindowRoot>& root);
     int32_t GetSnapshot(const sptr<IRemoteObject> &token, AAFwk::Snapshot& snapshot) override;
-
-private:
-    void RecordGetSnapshotEvent(int64_t costTime);
 
 private:
     sptr<WindowRoot> windowRoot_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
-    GetSnapshotTimeConfig getSnapshotTimeConfig_ = { 0, 0, 0, 0, 0, 0 };
+    std::shared_ptr<PerformReporter> performReport_;
 };
 } // Rosen
 } // OHOS
