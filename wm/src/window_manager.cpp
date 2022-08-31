@@ -187,7 +187,7 @@ void WindowManager::Impl::InitListenerHandler()
 
 void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    WLOGFI("NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
+    WLOGFD("NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
         focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
         static_cast<uint32_t>(focusChangeInfo->windowType_), focusChangeInfo->abilityToken_.GetRefPtr());
     std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
@@ -204,7 +204,7 @@ void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChange
 
 void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
-    WLOGFI("NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
+    WLOGFD("NotifyUnfocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
         focusChangeInfo->windowId_, focusChangeInfo->displayId_, focusChangeInfo->pid_, focusChangeInfo->uid_,
         static_cast<uint32_t>(focusChangeInfo->windowType_), focusChangeInfo->abilityToken_.GetRefPtr());
     std::vector<sptr<IFocusChangedListener>> focusChangeListeners;
@@ -222,7 +222,7 @@ void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChan
 void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints)
 {
     for (auto tint : tints) {
-        WLOGFI("type:%{public}d, enable:%{public}d," \
+        WLOGFD("type:%{public}d, enable:%{public}d," \
             "backgroundColor:%{public}x, contentColor:%{public}x " \
             "region:[%{public}d, %{public}d, %{public}d, %{public}d]",
             tint.type_, tint.prop_.enable_, tint.prop_.backgroundColor_, tint.prop_.contentColor_,
@@ -248,7 +248,7 @@ void WindowManager::Impl::NotifyAccessibilityWindowInfo(const std::vector<sptr<A
         return;
     }
     for (auto& info : infos) {
-        WLOGFI("NotifyAccessibilityWindowInfo: wid[%{public}u], rect[%{public}d %{public}d %{public}d %{public}d]," \
+        WLOGFD("NotifyAccessibilityWindowInfo: wid[%{public}u], rect[%{public}d %{public}d %{public}d %{public}d]," \
             "isFocused[%{public}d], isDecorEnable[%{public}d], displayId[%{public}" PRIu64"], layer[%{public}u]," \
             "mode[%{public}u], type[%{public}u, updateType[%{public}d]",
             info->wid_, info->windowRect_.width_, info->windowRect_.height_, info->windowRect_.posX_,
@@ -285,7 +285,7 @@ void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
 
 void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
-    WLOGFI("Camera float window, accessTokenId = %{public}u, isShowing = %{public}u", accessTokenId, isShowing);
+    WLOGFD("Camera float window, accessTokenId = %{public}u, isShowing = %{public}u", accessTokenId, isShowing);
     std::vector<sptr<ICameraFloatWindowChangedListener>> cameraFloatWindowChangeListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -310,7 +310,7 @@ void WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedListene
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     auto iter = std::find(pImpl_->focusChangedListeners_.begin(), pImpl_->focusChangedListeners_.end(), listener);
     if (iter != pImpl_->focusChangedListeners_.end()) {
-        WLOGFI("Listener is already registered.");
+        WLOGFW("Listener is already registered.");
         return;
     }
     pImpl_->focusChangedListeners_.push_back(listener);
@@ -353,7 +353,7 @@ void WindowManager::RegisterSystemBarChangedListener(const sptr<ISystemBarChange
     auto iter = std::find(pImpl_->systemBarChangedListeners_.begin(), pImpl_->systemBarChangedListeners_.end(),
         listener);
     if (iter != pImpl_->systemBarChangedListeners_.end()) {
-        WLOGFI("Listener is already registered.");
+        WLOGFW("Listener is already registered.");
         return;
     }
     pImpl_->systemBarChangedListeners_.push_back(listener);
@@ -388,19 +388,19 @@ void WindowManager::UnregisterSystemBarChangedListener(const sptr<ISystemBarChan
 
 void WindowManager::MinimizeAllAppWindows(DisplayId displayId)
 {
-    WLOGFI("displayId %{public}" PRIu64"", displayId);
+    WLOGFD("displayId %{public}" PRIu64"", displayId);
     SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(displayId);
 }
 
 WMError WindowManager::ToggleShownStateForAllAppWindows()
 {
-    WLOGFI("ToggleShownStateForAllAppWindows");
+    WLOGFD("ToggleShownStateForAllAppWindows");
     return SingletonContainer::Get<WindowAdapter>().ToggleShownStateForAllAppWindows();
 }
 
 WMError WindowManager::SetWindowLayoutMode(WindowLayoutMode mode)
 {
-    WLOGFI("set window layout mode: %{public}u", mode);
+    WLOGFD("set window layout mode: %{public}u", mode);
     WMError ret  = SingletonContainer::Get<WindowAdapter>().SetWindowLayoutMode(mode);
     if (ret != WMError::WM_OK) {
         WLOGFE("set layout mode failed");
@@ -458,7 +458,7 @@ void WindowManager::RegisterVisibilityChangedListener(const sptr<IVisibilityChan
     auto iter = std::find(pImpl_->windowVisibilityListeners_.begin(), pImpl_->windowVisibilityListeners_.end(),
         listener);
     if (iter != pImpl_->windowVisibilityListeners_.end()) {
-        WLOGFI("Listener is already registered.");
+        WLOGFW("Listener is already registered.");
         return;
     }
     pImpl_->windowVisibilityListeners_.emplace_back(listener);
@@ -500,7 +500,7 @@ void WindowManager::RegisterCameraFloatWindowChangedListener(const sptr<ICameraF
     auto iter = std::find(pImpl_->cameraFloatWindowChangedListeners_.begin(),
         pImpl_->cameraFloatWindowChangedListeners_.end(), listener);
     if (iter != pImpl_->cameraFloatWindowChangedListeners_.end()) {
-        WLOGFI("Listener is already registered.");
+        WLOGFW("Listener is already registered.");
         return;
     }
     pImpl_->cameraFloatWindowChangedListeners_.push_back(listener);
