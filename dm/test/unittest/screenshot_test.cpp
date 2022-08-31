@@ -26,8 +26,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-constexpr int32_t TEST_IMAGE_HEIGHT = 1080;
-constexpr int32_t TEST_IMAGE_WIDTH = 1920;
 using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
 void ScreenshotTest::SetUpTestCase()
 {
@@ -47,44 +45,6 @@ void ScreenshotTest::TearDown()
 }
 
 namespace {
-static std::shared_ptr<Media::PixelMap> CreatePixelMap()
-{
-    // pixel_map testing code
-    Media::InitializationOptions opt;
-    opt.size.width = TEST_IMAGE_WIDTH;
-    opt.size.height = TEST_IMAGE_HEIGHT;
-    opt.pixelFormat = Media::PixelFormat::RGBA_8888;
-    opt.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
-    opt.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
-    opt.editable = false;
-    opt.useSourceIfMatch = false;
-
-    const int bitmapDepth = 8; // color depth
-    const int bpp = 4; // bytes per pixel
-    const int pixelValue = 125;
-
-    const int voulumeSize = opt.size.width * opt.size.height * bpp;
-    auto data = (uint32_t *)malloc(voulumeSize);
-    if (data == nullptr) {
-        return nullptr;
-    }
-
-    uint8_t *pic = (uint8_t *)data;
-    if (memset_s(pic, voulumeSize, pixelValue, voulumeSize) != EOK) {
-        free(data);
-        return nullptr;
-    }
-
-    uint32_t colorLen = voulumeSize * bitmapDepth;
-    auto pixelMap = Media::PixelMap::Create(data, colorLen, opt);
-    free(data);
-    if (pixelMap == nullptr) {
-        return nullptr;
-    }
-    std::shared_ptr<Media::PixelMap> pixelMap_(pixelMap.release());
-    return pixelMap_;
-}
-
 /**
  * @tc.name: GetScreenshot_default
  * @tc.desc: SetWindowRect/GetWindowRect
@@ -110,14 +70,14 @@ HWTEST_F(ScreenshotTest, GetScreenshot_01, Function | MediumTest | Level2)
     EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
     DisplayManager::GetInstance().GetDefaultDisplayId();
 
-    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_)).Times(1).WillOnce(Return(CreatePixelMap()));
+    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_)).Times(1).WillOnce(Return(CommonTestUtils::CreatePixelMap()));
     auto screenshot = DisplayManager::GetInstance().GetScreenshot(0);
     ASSERT_NE(nullptr, screenshot);
 
     uint32_t width = screenshot->GetWidth();
     uint32_t height = screenshot->GetHeight();
-    ASSERT_EQ(width, TEST_IMAGE_WIDTH);
-    ASSERT_EQ(height, TEST_IMAGE_HEIGHT);
+    ASSERT_EQ(width, CommonTestUtils::TEST_IMAGE_WIDTH);
+    ASSERT_EQ(height, CommonTestUtils::TEST_IMAGE_HEIGHT);
 }
 }
 } // namespace Rosen

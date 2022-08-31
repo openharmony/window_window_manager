@@ -485,7 +485,7 @@ bool DisplayManager::Impl::RegisterDisplayPowerEventListener(sptr<IDisplayPowerE
     } else {
         powerEventListeners_.insert(listener);
     }
-    WLOGFI("RegisterDisplayPowerEventListener end");
+    WLOGFD("RegisterDisplayPowerEventListener end");
     return ret;
 }
 
@@ -514,7 +514,7 @@ bool DisplayManager::Impl::UnregisterDisplayPowerEventListener(sptr<IDisplayPowe
             DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
         powerEventListenerAgent_ = nullptr;
     }
-    WLOGFI("UnregisterDisplayPowerEventListener end");
+    WLOGFD("UnregisterDisplayPowerEventListener end");
     return ret;
 }
 
@@ -585,7 +585,7 @@ bool DisplayManager::UnregisterScreenshotListener(sptr<IScreenshotListener> list
 
 void DisplayManager::Impl::NotifyScreenshot(sptr<ScreenshotInfo> info)
 {
-    WLOGFI("NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
+    WLOGFD("NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
         info->GetTrigger().c_str(), info->GetDisplayId(), screenshotListeners_.size());
     std::set<sptr<IScreenshotListener>> screenshotListeners;
     {
@@ -599,7 +599,7 @@ void DisplayManager::Impl::NotifyScreenshot(sptr<ScreenshotInfo> info)
 
 void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
 {
-    WLOGFI("NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu", event, status,
+    WLOGFD("NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu", event, status,
         powerEventListeners_.size());
     std::set<sptr<IDisplayPowerEventListener>> powerEventListeners;
     {
@@ -613,7 +613,7 @@ void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 
 void DisplayManager::Impl::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 {
-    WLOGFI("state:%{public}u", state);
+    WLOGFD("state:%{public}u", state);
     DisplayStateCallback displayStateCallback;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -635,7 +635,7 @@ void DisplayManager::Impl::NotifyDisplayCreate(sptr<DisplayInfo> info)
 
 void DisplayManager::Impl::NotifyDisplayDestroy(DisplayId displayId)
 {
-    WLOGFI("displayId:%{public}" PRIu64".", displayId);
+    WLOGFD("displayId:%{public}" PRIu64".", displayId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayMap_.erase(displayId);
 }
@@ -653,14 +653,14 @@ bool DisplayManager::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo
         return false;
     }
     DisplayId displayId = displayInfo->GetDisplayId();
-    WLOGFI("displayId:%{public}" PRIu64".", displayId);
+    WLOGFD("displayId:%{public}" PRIu64".", displayId);
     if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("displayId is invalid.");
         return false;
     }
     auto iter = displayMap_.find(displayId);
     if (iter != displayMap_.end() && iter->second != nullptr) {
-        WLOGFI("get screen in screen map");
+        WLOGFD("get screen in screen map");
         iter->second->UpdateDisplayInfo(displayInfo);
         return true;
     }
@@ -671,32 +671,32 @@ bool DisplayManager::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo
 
 bool DisplayManager::WakeUpBegin(PowerStateChangeReason reason)
 {
-    WLOGFI("WakeUpBegin start, reason:%{public}u", reason);
+    WLOGFD("WakeUpBegin start, reason:%{public}u", reason);
     return SingletonContainer::Get<DisplayManagerAdapter>().WakeUpBegin(reason);
 }
 
 bool DisplayManager::WakeUpEnd()
 {
-    WLOGFI("WakeUpEnd start");
+    WLOGFD("WakeUpEnd start");
     return SingletonContainer::Get<DisplayManagerAdapter>().WakeUpEnd();
 }
 
 bool DisplayManager::SuspendBegin(PowerStateChangeReason reason)
 {
     // dms->wms notify other windows to hide
-    WLOGFI("SuspendBegin start, reason:%{public}u", reason);
+    WLOGFD("SuspendBegin start, reason:%{public}u", reason);
     return SingletonContainer::Get<DisplayManagerAdapter>().SuspendBegin(reason);
 }
 
 bool DisplayManager::SuspendEnd()
 {
-    WLOGFI("SuspendEnd start");
+    WLOGFD("SuspendEnd start");
     return SingletonContainer::Get<DisplayManagerAdapter>().SuspendEnd();
 }
 
 bool DisplayManager::Impl::SetDisplayState(DisplayState state, DisplayStateCallback callback)
 {
-    WLOGFI("state:%{public}u", state);
+    WLOGFD("state:%{public}u", state);
     bool ret = true;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -732,7 +732,7 @@ DisplayState DisplayManager::GetDisplayState(DisplayId displayId)
 
 bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
-    WLOGFI("screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    WLOGFD("screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
     return true;
 }
@@ -747,7 +747,7 @@ uint32_t DisplayManager::GetScreenBrightness(uint64_t screenId) const
 void DisplayManager::NotifyDisplayEvent(DisplayEvent event)
 {
     // Unlock event dms->wms restore other hidden windows
-    WLOGFI("DisplayEvent:%{public}u", event);
+    WLOGFD("DisplayEvent:%{public}u", event);
     SingletonContainer::Get<DisplayManagerAdapter>().NotifyDisplayEvent(event);
 }
 

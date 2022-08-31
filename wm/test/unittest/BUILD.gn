@@ -26,7 +26,6 @@ group("unittest") {
     ":wm_window_option_test",
     ":wm_window_scene_test",
     ":wm_window_test",
-    ":wms_window_snapshot_test",
   ]
 }
 
@@ -86,14 +85,6 @@ ohos_unittest("wm_window_test") {
   deps = [ ":wm_unittest_common" ]
 }
 
-ohos_unittest("wms_window_snapshot_test") {
-  module_out_path = module_out_path
-
-  sources = [ "window_snapshot_test.cpp" ]
-
-  deps = [ ":wm_unittest_common" ]
-}
-
 ## Build wm_unittest_common.a {{{
 config("wm_unittest_common_public_config") {
   include_dirs = [
@@ -116,14 +107,6 @@ config("wm_unittest_common_public_config") {
 
     # abilityContext end
   ]
-
-  cflags = [
-    "-Wall",
-    "-Werror",
-    "-g3",
-    "-Dprivate=public",
-    "-Dprotected=public",
-  ]
 }
 
 ohos_static_library("wm_unittest_common") {
@@ -133,6 +116,7 @@ ohos_static_library("wm_unittest_common") {
   public_configs = [
     ":wm_unittest_common_public_config",
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "//foundation/window/window_manager/resources/config/build:testcase_flags",
   ]
 
   public_deps = [
