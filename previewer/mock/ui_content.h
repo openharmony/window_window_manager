@@ -20,6 +20,10 @@
 #include <string>
 
 namespace OHOS {
+namespace AbilityRuntime {
+class Context;
+}
+    
 namespace AppExecFwk {
 class Configuration;
 class Ability;
