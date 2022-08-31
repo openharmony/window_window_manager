@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@
 #include "window_manager_config.h"
 #include "window_root.h"
 #include "snapshot_controller.h"
+#include "perform_reporter.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -184,7 +185,7 @@ private:
     RSInterfaces& rsInterface_;
     bool startingOpen_ = true;
     std::shared_ptr<RSUIDirector> rsUiDirector_;
-    ShowWindowTimeConfig showWindowTimeConfig_ = { 0, 0, 0, 0, 0 };
+    std::shared_ptr<PerformReporter> windowShowPerformReport_;
 };
 } // namespace Rosen
 } // namespace OHOS

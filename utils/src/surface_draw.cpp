@@ -344,6 +344,10 @@ bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, const Rect rect, std::shared_pt
 bool SurfaceDraw::GetSurfaceSnapshot(const std::shared_ptr<RSSurfaceNode> surfaceNode,
     std::shared_ptr<Media::PixelMap>&pixelMap, int32_t timeoutMs, float scaleW, float scaleH)
 {
+    if (surfaceNode == nullptr) {
+        WLOGFE("surfaceNode is null");
+        return false;
+    }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, scaleW, scaleH);
     pixelMap = callback->GetResult(timeoutMs); // get pixelmap time out ms
