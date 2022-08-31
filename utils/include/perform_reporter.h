@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WM_UTILS_PERFORM_REPORTER_H
 #define OHOS_ROSEN_WM_UTILS_PERFORM_REPORTER_H
 
+#include <atomic>
+#include <chrono>
 #include <string>
 #include <vector>
 #include <map>
