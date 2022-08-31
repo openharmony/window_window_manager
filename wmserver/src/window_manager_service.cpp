@@ -1092,14 +1092,14 @@ void WindowManagerService::RecordShowTimeEvent(int64_t costTime)
 void WindowManagerService::OnRSScreenConnected()
 {
     PostAsyncTask([this]() {
-        windowRoot_->SwitchRenderModeIfNeeded(true);
+        windowRoot_->SwitchRenderModeIfNeeded();
     });
 }
 
 void WindowManagerService::OnRSScreenDisconnected()
 {
     PostAsyncTask([this]() {
-        windowRoot_->SwitchRenderModeIfNeeded(false);
+        windowRoot_->SwitchRenderModeIfNeeded();
     });
 }
 
