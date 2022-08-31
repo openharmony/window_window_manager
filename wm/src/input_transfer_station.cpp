@@ -35,7 +35,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) c
         return;
     }
     uint32_t windowId = static_cast<uint32_t>(keyEvent->GetAgentWindowId());
-    WLOGFI("Receive keyEvent, windowId: %{public}u", windowId);
+    WLOGFD("Receive keyEvent, windowId: %{public}u", windowId);
     auto channel = InputTransferStation::GetInstance().GetInputChannel(windowId);
     if (channel == nullptr) {
         WLOGFE("WindowInputChannel is nullptr");
@@ -50,7 +50,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent)
         WLOGFE("AxisEvent is nullptr");
         return;
     }
-    WLOGFI("Receive axisEvent, windowId: %{public}d", axisEvent->GetAgentWindowId());
+    WLOGFD("Receive axisEvent, windowId: %{public}d", axisEvent->GetAgentWindowId());
     axisEvent->MarkProcessed();
 }
 
@@ -77,7 +77,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
 void InputTransferStation::AddInputWindow(const sptr<Window>& window)
 {
     uint32_t windowId = window->GetWindowId();
-    WLOGFI("Add input window, windowId: %{public}u", windowId);
+    WLOGFD("Add input window, windowId: %{public}u", windowId);
 
     // INPUT_WINDOW_TYPE_SKIPPED should not set input consumer
     if (INPUT_WINDOW_TYPE_SKIPPED.find(window->GetType()) != INPUT_WINDOW_TYPE_SKIPPED.end()) {
@@ -88,14 +88,14 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
     std::lock_guard<std::mutex> lock(mtx_);
     windowInputChannels_.insert(std::make_pair(windowId, inputChannel));
     if (inputListener_ == nullptr) {
-        WLOGFI("Init input listener, IsMainHandlerAvailable: %{public}u", window->IsMainHandlerAvailable());
+        WLOGFD("Init input listener, IsMainHandlerAvailable: %{public}u", window->IsMainHandlerAvailable());
         std::shared_ptr<MMI::IInputEventConsumer> listener = std::make_shared<InputEventListener>(InputEventListener());
         auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
         if (mainEventRunner != nullptr && window->IsMainHandlerAvailable()) {
-            WLOGFI("MainEventRunner is available");
+            WLOGFD("MainEventRunner is available");
             eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
         } else {
-            WLOGFI("MainEventRunner is not available");
+            WLOGFD("MainEventRunner is not available");
             eventHandler_ = AppExecFwk::EventHandler::Current();
             auto curThreadId = std::this_thread::get_id();
             if (!eventHandler_ || (mainEventRunner->GetThreadId() == *(reinterpret_cast<uint64_t*>(&curThreadId)))) {
@@ -112,7 +112,7 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
 
 void InputTransferStation::RemoveInputWindow(uint32_t windowId)
 {
-    WLOGFI("Remove input window, windowId: %{public}u", windowId);
+    WLOGFD("Remove input window, windowId: %{public}u", windowId);
     sptr<WindowInputChannel> inputChannel = nullptr;
     {
         std::lock_guard<std::mutex> lock(mtx_);
