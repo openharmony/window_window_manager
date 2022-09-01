@@ -185,7 +185,7 @@ void DisplayManagerService::NotifyScreenshot(DisplayId displayId)
 sptr<DisplayInfo> DisplayManagerService::GetDefaultDisplayInfo()
 {
     ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
-    WLOGFI("GetDefaultDisplayInfo %{public}" PRIu64"", dmsScreenId);
+    WLOGFD("GetDefaultDisplayInfo %{public}" PRIu64"", dmsScreenId);
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplayByScreen(dmsScreenId);
     if (display == nullptr) {
         WLOGFE("fail to get displayInfo by id: invalid display");
