@@ -81,23 +81,6 @@ enum class PropertyChangeAction : uint32_t {
     ACTION_UPDATE_PRIVACY_MODE = 1 << 15,
 };
 
-struct ShowWindowTimeConfig {
-    std::atomic<uint32_t> showWindowTimes_;
-    std::atomic<uint32_t> below20msTimes_;
-    std::atomic<uint32_t> below35msTimes_;
-    std::atomic<uint32_t> below50msTimes_;
-    std::atomic<uint32_t> above50msTimes_;
-};
-
-struct GetSnapshotTimeConfig {
-    std::atomic<uint32_t> getSnapshotTimes_;
-    std::atomic<uint32_t> below25msTimes_;
-    std::atomic<uint32_t> below35msTimes_;
-    std::atomic<uint32_t> below50msTimes_;
-    std::atomic<uint32_t> below200msTimes_;
-    std::atomic<uint32_t> above200msTimes_;
-};
-
 struct ModeChangeHotZonesConfig {
     bool isModeChangeHotZoneConfigured_;
     uint32_t fullscreenRange_;
@@ -238,6 +221,7 @@ struct MoveDragProperty : public Parcelable {
     int32_t startPointPosX_;
     int32_t startPointPosY_;
     int32_t startPointerId_;
+    int32_t targetDisplayId_;
     bool startDragFlag_;
     bool startMoveFlag_;
     bool pointEventStarted_;
@@ -246,28 +230,29 @@ struct MoveDragProperty : public Parcelable {
     Rect startRectExceptFrame_;
     Rect startRectExceptCorner_;
 
-    MoveDragProperty() : startPointPosX_(0), startPointPosY_(0), startPointerId_(0), startDragFlag_(false),
-        startMoveFlag_(false), pointEventStarted_(false), dragType_(DragType::DRAG_UNDEFINED)
+    MoveDragProperty() : startPointPosX_(0), startPointPosY_(0), startPointerId_(0), targetDisplayId_(0),
+        startDragFlag_(false), startMoveFlag_(false), pointEventStarted_(false),
+        dragType_(DragType::DRAG_UNDEFINED)
     {
         startPointRect_ = {0, 0, 0, 0};
         startRectExceptFrame_ = {0, 0, 0, 0};
         startRectExceptCorner_ = {0, 0, 0, 0};
     }
 
-    MoveDragProperty(int32_t startPointPosX, int32_t startPointPosY, int32_t startPointerId, bool startDragFlag,
-        bool startMoveFlag, bool pointEventStarted, DragType dragType, Rect startPointRect, Rect startRectExceptFrame,
-        Rect startRectExceptCorner)
+    MoveDragProperty(int32_t startPointPosX, int32_t startPointPosY, int32_t startPointerId, int32_t targetDisplayId,
+        bool startDragFlag, bool startMoveFlag, bool pointEventStarted, DragType dragType, Rect startPointRect,
+        Rect startRectExceptFrame, Rect startRectExceptCorner)
         : startPointPosX_(startPointPosX), startPointPosY_(startPointPosY), startPointerId_(startPointerId),
-        startDragFlag_(startDragFlag), startMoveFlag_(startMoveFlag), pointEventStarted_(pointEventStarted),
-        dragType_(dragType), startPointRect_(startPointRect), startRectExceptFrame_(startRectExceptFrame),
-        startRectExceptCorner_(startRectExceptCorner) {}
+        targetDisplayId_(targetDisplayId), startDragFlag_(startDragFlag), startMoveFlag_(startMoveFlag),
+        pointEventStarted_(pointEventStarted), dragType_(dragType), startPointRect_(startPointRect),
+        startRectExceptFrame_(startRectExceptFrame), startRectExceptCorner_(startRectExceptCorner) {}
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(startPointPosX_) || !parcel.WriteInt32(startPointPosY_) ||
-            !parcel.WriteInt32(startPointerId_) || !parcel.WriteBool(startDragFlag_) ||
-            !parcel.WriteBool(startMoveFlag_)   || !parcel.WriteBool(pointEventStarted_) ||
-            !parcel.WriteUint32(static_cast<uint32_t>(dragType_))) {
+            !parcel.WriteInt32(startPointerId_) || !parcel.WriteInt32(targetDisplayId_) ||
+            !parcel.WriteBool(startDragFlag_) || !parcel.WriteBool(startMoveFlag_) ||
+            !parcel.WriteBool(pointEventStarted_) || !parcel.WriteUint32(static_cast<uint32_t>(dragType_))) {
             return false;
         }
 
@@ -295,6 +280,7 @@ struct MoveDragProperty : public Parcelable {
         info->startPointPosX_ = parcel.ReadInt32();
         info->startPointPosY_ = parcel.ReadInt32();
         info->startPointerId_ = parcel.ReadInt32();
+        info->targetDisplayId_ = parcel.ReadInt32();
         info->startDragFlag_ = parcel.ReadBool();
         info->startMoveFlag_ = parcel.ReadBool();
         info->pointEventStarted_ = parcel.ReadBool();
@@ -316,6 +302,7 @@ struct MoveDragProperty : public Parcelable {
         startPointPosX_ = property->startPointPosX_;
         startPointPosY_ = property->startPointPosY_;
         startPointerId_ = property->startPointerId_;
+        targetDisplayId_ = property->targetDisplayId_;
         startDragFlag_ = property->startDragFlag_;
         startMoveFlag_ = property->startMoveFlag_;
         pointEventStarted_ = property->pointEventStarted_;

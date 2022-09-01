@@ -76,8 +76,8 @@ void WindowAnimationTransitionTest::TearDownTestCase()
 void WindowAnimationTransitionTest::SetUp()
 {
     windowInfo_ = {
-            .name = "TestWindow",
-            .rect = {0, 0, 100, 200},
+            .name = "AnimationTestWindow",
+            .rect = {0, 0, 200, 200},
             .type = WindowType::WINDOW_TYPE_FLOAT,
             .mode = WindowMode::WINDOW_MODE_FLOATING,
             .needAvoid = false,

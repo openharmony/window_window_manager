@@ -263,7 +263,7 @@ bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, uint32_
 }
 
 bool SurfaceDraw::DrawImageRect(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect rect,
-    sptr<Media::PixelMap> pixelMap, uint32_t color)
+    std::shared_ptr<Media::PixelMap> pixelMap, uint32_t color)
 {
     int32_t winHeight = static_cast<int32_t>(rect.height_);
     int32_t winWidth = static_cast<int32_t>(rect.width_);
@@ -295,7 +295,7 @@ bool SurfaceDraw::DrawImageRect(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect
     return true;
 }
 
-bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, const Rect rect, sptr<Media::PixelMap> pixelMap,
+bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, const Rect rect, std::shared_ptr<Media::PixelMap> pixelMap,
     uint32_t color, int32_t bufferStride)
 {
     int32_t winWidth = static_cast<int32_t>(rect.width_);
@@ -344,6 +344,10 @@ bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, const Rect rect, sptr<Media::Pi
 bool SurfaceDraw::GetSurfaceSnapshot(const std::shared_ptr<RSSurfaceNode> surfaceNode,
     std::shared_ptr<Media::PixelMap>&pixelMap, int32_t timeoutMs, float scaleW, float scaleH)
 {
+    if (surfaceNode == nullptr) {
+        WLOGFE("surfaceNode is null");
+        return false;
+    }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, scaleW, scaleH);
     pixelMap = callback->GetResult(timeoutMs); // get pixelmap time out ms

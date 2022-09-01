@@ -225,6 +225,29 @@ void MoveDragController::HandleWindowRemovedOrDestroyed(uint32_t windowId)
     ResetMoveOrDragState();
 }
 
+void MoveDragController::ConvertPointerPosToDisplayGroupPos(DisplayId displayId, int32_t& posX, int32_t& posY)
+{
+    if (displayRectMap_.size() <= 1) {
+        return;
+    }
+
+    auto iter = displayRectMap_.find(displayId);
+    if (iter == displayRectMap_.end()) {
+        return;
+    }
+    auto displayRect = iter->second;
+    posX += displayRect.posX_;
+    posY += displayRect.posY_;
+}
+
+void MoveDragController::HandleDisplayChange(const std::map<DisplayId, Rect>& displayRectMap)
+{
+    displayRectMap_.clear();
+    for (auto& elem : displayRectMap) {
+        displayRectMap_.insert(elem);
+    }
+}
+
 void MoveDragController::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (pointerEvent == nullptr) {
@@ -254,14 +277,18 @@ void MoveDragController::OnReceiveVsync(int64_t timeStamp)
 
 Rect MoveDragController::GetHotZoneRect()
 {
+    auto startPointPosX = moveDragProperty_->startPointPosX_;
+    auto startPointPosY = moveDragProperty_->startPointPosY_;
+    ConvertPointerPosToDisplayGroupPos(moveDragProperty_->targetDisplayId_, startPointPosX, startPointPosY);
+
     Rect hotZoneRect;
     const auto& startRectExceptCorner =  moveDragProperty_->startRectExceptCorner_;
     const auto& startRectExceptFrame =  moveDragProperty_->startRectExceptFrame_;
-    if ((moveDragProperty_->startPointPosX_ > startRectExceptCorner.posX_ &&
-        (moveDragProperty_->startPointPosX_ < startRectExceptCorner.posX_ +
+    if ((startPointPosX > startRectExceptCorner.posX_ &&
+        (startPointPosX < startRectExceptCorner.posX_ +
          static_cast<int32_t>(startRectExceptCorner.width_))) &&
-        (moveDragProperty_->startPointPosY_ > startRectExceptCorner.posY_ &&
-        (moveDragProperty_->startPointPosY_ < startRectExceptCorner.posY_ +
+        (startPointPosY > startRectExceptCorner.posY_ &&
+        (startPointPosY < startRectExceptCorner.posY_ +
         static_cast<int32_t>(startRectExceptCorner.height_)))) {
         hotZoneRect = startRectExceptFrame; // drag type: left/right/top/bottom
     } else {
@@ -278,8 +305,9 @@ void MoveDragController::HandleDragEvent(int32_t posX, int32_t posY, int32_t poi
     if (!moveDragProperty_->startDragFlag_ || (pointId != moveDragProperty_->startPointerId_)) {
         return;
     }
-    const auto& startPointPosX = moveDragProperty_->startPointPosX_;
-    const auto& startPointPosY = moveDragProperty_->startPointPosY_;
+    auto startPointPosX = moveDragProperty_->startPointPosX_;
+    auto startPointPosY = moveDragProperty_->startPointPosY_;
+    ConvertPointerPosToDisplayGroupPos(moveDragProperty_->targetDisplayId_, startPointPosX, startPointPosY);
     const auto& startPointRect = moveDragProperty_->startPointRect_;
     Rect newRect = startPointRect;
     Rect hotZoneRect = GetHotZoneRect();
@@ -326,8 +354,11 @@ void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY, int32_t poi
     if (!moveDragProperty_->startMoveFlag_ || (pointId != moveDragProperty_->startPointerId_)) {
         return;
     }
-    int32_t targetX = moveDragProperty_->startPointRect_.posX_ + (posX - moveDragProperty_->startPointPosX_);
-    int32_t targetY = moveDragProperty_->startPointRect_.posY_ + (posY - moveDragProperty_->startPointPosY_);
+    auto startPointPosX = moveDragProperty_->startPointPosX_;
+    auto startPointPosY = moveDragProperty_->startPointPosY_;
+    ConvertPointerPosToDisplayGroupPos(moveDragProperty_->targetDisplayId_, startPointPosX, startPointPosY);
+    int32_t targetX = moveDragProperty_->startPointRect_.posX_ + (posX - startPointPosX);
+    int32_t targetY = moveDragProperty_->startPointRect_.posY_ + (posY - startPointPosY);
 
     const Rect& oriRect = windowProperty_->GetRequestRect();
     Rect newRect = { targetX, targetY, oriRect.width_, oriRect.height_ };
@@ -350,6 +381,8 @@ void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEv
     int32_t pointPosX = pointerItem.GetDisplayX();
     int32_t pointPosY = pointerItem.GetDisplayY();
     int32_t action = pointerEvent->GetPointerAction();
+    int32_t targetDisplayId = pointerEvent->GetTargetDisplayId();
+    ConvertPointerPosToDisplayGroupPos(targetDisplayId, pointPosX, pointPosY);
     switch (action) {
         case MMI::PointerEvent::POINTER_ACTION_DOWN:
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN: {

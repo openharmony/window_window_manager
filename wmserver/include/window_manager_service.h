@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@
 #include "window_manager_config.h"
 #include "window_root.h"
 #include "snapshot_controller.h"
+#include "perform_reporter.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -62,8 +63,9 @@ public:
         sptr<AAFwk::AbilityTransitionInfo> from, sptr<AAFwk::AbilityTransitionInfo> to) override;
     int32_t GetFocusWindow(sptr<IRemoteObject>& abilityToken) override;
     virtual void StartingWindow(
-        sptr<AAFwk::AbilityTransitionInfo> info, sptr<Media::PixelMap> pixelMap, uint32_t bgColor) override;
-    virtual void StartingWindow(sptr<AAFwk::AbilityTransitionInfo> info, sptr<Media::PixelMap> pixelMap) override;
+        sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bgColor) override;
+    virtual void StartingWindow(
+        sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap) override;
     virtual void CancelStartingWindow(sptr<IRemoteObject> abilityToken) override;
 };
 
@@ -101,7 +103,7 @@ public:
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
         bool isAsyncTask = false) override;
-    WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) override;
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
 
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
@@ -112,7 +114,7 @@ public:
     WMError GetSystemConfig(SystemConfig& systemConfig) override;
     WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) override;
     WMError UpdateAvoidAreaListener(uint32_t windowId, bool haveAvoidAreaListener) override;
-    void StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
+    void StartingWindow(sptr<WindowTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap,
         bool isColdStart, uint32_t bkgColor = 0xffffffff);
     void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
     void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
@@ -183,7 +185,7 @@ private:
     RSInterfaces& rsInterface_;
     bool startingOpen_ = true;
     std::shared_ptr<RSUIDirector> rsUiDirector_;
-    ShowWindowTimeConfig showWindowTimeConfig_ = { 0, 0, 0, 0, 0 };
+    std::shared_ptr<PerformReporter> windowShowPerformReport_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -35,9 +35,9 @@ public:
     static void HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,
         uint32_t& windowId, const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowProperty>& property,
         int32_t pid, int32_t uid);
-    static void DrawStartingWindow(sptr<WindowNode>& node, sptr<Media::PixelMap> pixelMap, uint32_t bkgColor,
-        bool isColdStart);
-    static void UpdateRSTree(sptr<WindowNode>& node, const AnimationConfig& animationConfig);
+    static void DrawStartingWindow(sptr<WindowNode>& node, std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bkgColor,
+        bool isColdStart, bool isUniRender);
+    static void AddNodeOnRSTree(sptr<WindowNode>& node, const AnimationConfig& animationConfig, bool isMultiDisplay);
     static void ReleaseStartWinSurfaceNode(sptr<WindowNode>& node);
     static bool NeedToStopStartingWindow(WindowMode winMode, uint32_t modeSupportInfo,
         const sptr<WindowTransitionInfo>& info);

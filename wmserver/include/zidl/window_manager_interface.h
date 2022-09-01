@@ -86,7 +86,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
-    virtual WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) = 0;
+    virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) = 0;
     virtual WMError GetSystemConfig(SystemConfig& systemConfig) = 0;
     virtual WMError NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to,

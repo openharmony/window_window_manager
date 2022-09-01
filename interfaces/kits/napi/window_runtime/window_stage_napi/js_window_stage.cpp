@@ -46,70 +46,70 @@ void JsWindowStage::Finalizer(NativeEngine* engine, void* data, void* hint)
 
 NativeValue* JsWindowStage::SetUIContent(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetUIContent");
+    WLOGFD("[NAPI]SetUIContent");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnSetUIContent(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::GetMainWindow(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]GetMainWindow");
+    WLOGFD("[NAPI]GetMainWindow");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnGetMainWindow(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::On(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]On");
+    WLOGFD("[NAPI]On");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnEvent(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::Off(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]Off");
+    WLOGFD("[NAPI]Off");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OffEvent(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::LoadContent(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]LoadContent");
+    WLOGFD("[NAPI]LoadContent");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnLoadContent(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::GetWindowMode(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]GetWindowMode");
+    WLOGFD("[NAPI]GetWindowMode");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnGetWindowMode(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::CreateSubWindow(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]CreateSubWindow");
+    WLOGFD("[NAPI]CreateSubWindow");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnCreateSubWindow(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::GetSubWindow(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]GetSubWindow");
+    WLOGFD("[NAPI]GetSubWindow");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnGetSubWindow(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::SetShowOnLockScreen(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]SetShowOnLockScreen");
+    WLOGFD("[NAPI]SetShowOnLockScreen");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnSetShowOnLockScreen(*engine, *info) : nullptr;
 }
 
 NativeValue* JsWindowStage::DisableWindowDecor(NativeEngine* engine, NativeCallbackInfo* info)
 {
-    WLOGFI("[NAPI]DisableWindowDecor");
+    WLOGFD("[NAPI]DisableWindowDecor");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
     return (me != nullptr) ? me->OnDisableWindowDecor(*engine, *info) : nullptr;
 }
@@ -240,10 +240,10 @@ NativeValue* JsWindowStage::OffEvent(NativeEngine& engine, NativeCallbackInfo& i
     return engine.CreateUndefined();
 }
 
-static void LoadContentTask(std::weak_ptr<NativeReference> contentStorage, std::string contextUrl,
+static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std::string contextUrl,
     sptr<Window> weakWindow, NativeEngine& engine, AsyncTask& task)
 {
-    NativeValue* nativeStorage = (contentStorage.lock() == nullptr) ? nullptr : contentStorage.lock()->Get();
+    NativeValue* nativeStorage =  (contentStorage == nullptr) ? nullptr : contentStorage->Get();
     WMError ret = weakWindow->SetUIContent(contextUrl, &engine, nativeStorage, false);
     if (ret == WMError::WM_OK) {
         task.Resolve(engine, engine.CreateUndefined());
@@ -275,7 +275,7 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
     if (value2->TypeOf() == NATIVE_FUNCTION) {
         callBack = value2;
     }
-    std::weak_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
+    std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     AsyncTask::CompleteCallback complete =
         [weak = windowScene_, contentStorage, contextUrl, errCode](
@@ -460,7 +460,7 @@ NativeValue* JsWindowStage::OnDisableWindowDecor(NativeEngine& engine, NativeCal
 NativeValue* CreateJsWindowStage(NativeEngine& engine,
     std::shared_ptr<Rosen::WindowScene> windowScene)
 {
-    WLOGFI("[NAPI]CreateJsWindowStage");
+    WLOGFD("[NAPI]CreateJsWindowStage");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 

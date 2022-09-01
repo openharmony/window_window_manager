@@ -46,7 +46,7 @@ uint32_t WindowController::GenWindowId()
     return ++windowId_;
 }
 
-void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
+void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap,
     uint32_t bkgColor, bool isColdStart)
 {
     if (!info || info->GetAbilityToken() == nullptr) {
@@ -92,7 +92,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, sptr<Medi
     if (windowRoot_->AddWindowNode(0, node, true) != WMError::WM_OK) {
         return;
     }
-    StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart);
+    StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart, windowRoot_->IsUniRender());
     RSTransaction::FlushImplicitTransaction();
     node->startingWindowShown_ = true;
     WLOGFI("StartingWindow show success with id:%{public}u!", node->GetWindowId());
@@ -251,13 +251,20 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     }
     windowRoot_->FocusFaultDetection();
     FlushWindowInfo(property->GetWindowId());
+    std::vector<sptr<WindowNode>> nodes;
+    nodes.emplace_back(node);
+    for (auto& child : node->children_) {
+        if (child->currentVisibility_) {
+            nodes.emplace_back(child);
+        }
+    }
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(node->GetDisplayId(), nodes,
+        WindowUpdateType::WINDOW_UPDATE_ADDED);
     HandleTurnScreenOn(node);
-    accessibilityConnection_->NotifyAccessibilityInfo(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
         node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
         sysBarWinId_[node->GetWindowType()] = node->GetWindowId();
-        ResizeSystemBarPropertySizeIfNeed(node);
     }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         ResizeSoftInputCallingWindowIfNeed(node);
@@ -320,28 +327,6 @@ void WindowController::RestoreCallingWindowSizeIfNeed()
     callingWindowId_ = 0u;
 }
 
-void WindowController::ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>& node)
-{
-    auto displayInfo = DisplayManagerServiceInner::GetInstance().GetDisplayById(node->GetDisplayId());
-    if (displayInfo == nullptr) {
-        WLOGFE("displayInfo is null");
-        return;
-    }
-    auto width = static_cast<uint32_t>(displayInfo->GetWidth());
-    auto height = static_cast<uint32_t>(displayInfo->GetHeight());
-    Rect newRect = node->GetWindowRect();
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
-        auto statusBarHeight = newRect.height_;
-        newRect = { 0, 0, width, statusBarHeight };
-    } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
-        auto naviBarHeight = newRect.height_;
-        newRect = { 0, static_cast<int32_t>(height - naviBarHeight), width, naviBarHeight };
-    }
-    if (newRect != node->GetWindowRect()) {
-        ResizeRect(node->GetWindowId(), newRect, WindowSizeChangeReason::ROTATION);
-    }
-}
-
 void WindowController::HandleTurnScreenOn(const sptr<WindowNode>& node)
 {
     if (node == nullptr) {
@@ -374,7 +359,13 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
         }
         windowRoot_->FocusFaultDetection();
         FlushWindowInfo(windowId);
-        accessibilityConnection_->NotifyAccessibilityInfo(windowNode, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+        std::vector<sptr<WindowNode>> nodes;
+        nodes.emplace_back(windowNode);
+        for (auto& child : windowNode->children_) {
+            nodes.emplace_back(child);
+        }
+        accessibilityConnection_->NotifyAccessibilityWindowInfo(windowNode->GetDisplayId(), nodes,
+            WindowUpdateType::WINDOW_UPDATE_REMOVED);
         return res;
     };
     WMError res = WMError::WM_ERROR_NO_REMOTE_ANIMATION;
@@ -397,16 +388,24 @@ WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     DisplayId displayId = DISPLAY_ID_INVALID;
     auto node = windowRoot_->GetWindowNode(windowId);
-    if (node != nullptr) {
-        displayId = node->GetDisplayId();
+    if (node == nullptr) {
+        WLOGFE("destroy window failed, because window node is not exist.");
+        return WMError::WM_ERROR_NULLPTR;
     }
+    displayId = node->GetDisplayId();
     WMError res = windowRoot_->DestroyWindow(windowId, onlySelf);
     if (res != WMError::WM_OK) {
         return res;
     }
     windowRoot_->FocusFaultDetection();
     FlushWindowInfoWithDisplayId(displayId);
-    accessibilityConnection_->NotifyAccessibilityInfo(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
+    std::vector<sptr<WindowNode>> nodes;
+    nodes.emplace_back(node);
+    for (auto& child : node->children_) {
+        nodes.emplace_back(child);
+    }
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(node->GetDisplayId(), nodes,
+        WindowUpdateType::WINDOW_UPDATE_REMOVED);
     return res;
 }
 
@@ -448,6 +447,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
         return res;
     }
     FlushWindowInfo(windowId);
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     return WMError::WM_OK;
 }
 
@@ -457,7 +457,8 @@ WMError WindowController::RequestFocus(uint32_t windowId)
         return WMError::WM_ERROR_NULLPTR;
     }
     WMError res = windowRoot_->RequestFocus(windowId);
-    accessibilityConnection_->NotifyAccessibilityInfo(windowRoot_->GetWindowNode(windowId),
+    FlushWindowInfo(windowId);
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(windowRoot_->GetWindowNode(windowId),
         WindowUpdateType::WINDOW_UPDATE_FOCUSED);
     return res;
 }
@@ -475,6 +476,7 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
         return ret;
     }
     FlushWindowInfo(windowId);
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     MinimizeApp::ExecuteMinimizeAll();
     return WMError::WM_OK;
 }
@@ -482,7 +484,7 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
 void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
     const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type)
 {
-    WLOGFD("DisplayStateChangeType:%{public}u", type);
+    WLOGFD("NotifyDisplayStateChange start: %{public}u", type);
     switch (type) {
         case DisplayStateChangeType::BEFORE_SUSPEND: {
             isScreenLocked_ = true;
@@ -497,10 +499,12 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
         case DisplayStateChangeType::CREATE: {
             SetDefaultDisplayInfo(defaultDisplayId, displayInfo);
             windowRoot_->ProcessDisplayCreate(defaultDisplayId, displayInfo, displayInfoMap);
+            FlushWindowInfoWithDisplayId(displayInfo->GetDisplayId());
             break;
         }
         case DisplayStateChangeType::DESTROY: {
             windowRoot_->ProcessDisplayDestroy(defaultDisplayId, displayInfo, displayInfoMap);
+            FlushWindowInfoWithDisplayId(displayInfo->GetDisplayId());
             break;
         }
         case DisplayStateChangeType::LAYOUT_COMPRESS:
@@ -515,6 +519,7 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
             return;
         }
     }
+    WLOGFD("NotifyDisplayStateChange end, type: %{public}u", type);
 }
 
 void WindowController::SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo)
@@ -562,7 +567,6 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     if (windowNodeContainer != nullptr) {
         windowNodeContainer->BeforeProcessWindowAvoidAreaChangeWhenDisplayChange();
     }
-    DisplayId displayId = displayInfo->GetDisplayId();
     switch (type) {
         case DisplayStateChangeType::LAYOUT_COMPRESS:
             ProcessLayoutCompress(displayInfo);
@@ -580,11 +584,12 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
             return;
         }
     }
+    auto displayId = displayInfo->GetDisplayId();
     FlushWindowInfoWithDisplayId(displayId);
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(displayId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     if (windowNodeContainer != nullptr) {
         windowNodeContainer->ProcessWindowAvoidAreaChangeWhenDisplayChange();
     }
-    WLOGFI("Finish ProcessDisplayChange");
 }
 
 void WindowController::ProcessLayoutCompress(const sptr<DisplayInfo>& displayInfo)
@@ -697,6 +702,7 @@ WMError WindowController::SetWindowType(uint32_t windowId, WindowType type)
         return res;
     }
     FlushWindowInfo(windowId);
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     WLOGFI("SetWindowType end");
     return res;
 }
@@ -720,6 +726,7 @@ WMError WindowController::SetWindowFlags(uint32_t windowId, uint32_t flags)
         return res;
     }
     FlushWindowInfo(windowId);
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     WLOGFI("SetWindowFlags end");
     return res;
 }
@@ -737,6 +744,7 @@ WMError WindowController::SetSystemBarProperty(uint32_t windowId, WindowType typ
         return res;
     }
     FlushWindowInfo(windowId);
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     WLOGFI("SetSystemBarProperty end");
     return res;
 }
@@ -799,7 +807,7 @@ WMError WindowController::ProcessPointDown(uint32_t windowId)
     windowRoot_->RequestActiveWindow(windowId);
     if (zOrderRes == WMError::WM_OK || focusRes == WMError::WM_OK) {
         FlushWindowInfo(windowId);
-        accessibilityConnection_->NotifyAccessibilityInfo(windowRoot_->GetWindowNode(windowId),
+        accessibilityConnection_->NotifyAccessibilityWindowInfo(windowRoot_->GetWindowNode(windowId),
             WindowUpdateType::WINDOW_UPDATE_FOCUSED);
         WLOGFI("ProcessPointDown end");
         return WMError::WM_OK;
@@ -827,6 +835,7 @@ WMError WindowController::ProcessPointUp(uint32_t windowId)
             WMError res = windowRoot_->UpdateWindowNode(windowId, WindowUpdateReason::UPDATE_RECT);
             if (res == WMError::WM_OK) {
                 FlushWindowInfo(windowId);
+                accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             }
         }
     }
@@ -905,14 +914,14 @@ WMError WindowController::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 
 void WindowController::FlushWindowInfo(uint32_t windowId)
 {
-    WLOGFI("FlushWindowInfo");
+    WLOGFD("FlushWindowInfo");
     RSTransaction::FlushImplicitTransaction();
     inputWindowMonitor_->UpdateInputWindow(windowId);
 }
 
 void WindowController::FlushWindowInfoWithDisplayId(DisplayId displayId)
 {
-    WLOGFI("FlushWindowInfoWithDisplayId");
+    WLOGFI("FlushWindowInfoWithDisplayId, displayId: %{public}" PRIu64"", displayId);
     RSTransaction::FlushImplicitTransaction();
     inputWindowMonitor_->UpdateInputWindowByDisplayId(displayId);
 }
@@ -960,6 +969,7 @@ WMError WindowController::SetWindowLayoutMode(WindowLayoutMode mode)
             return res;
         }
         FlushWindowInfoWithDisplayId(displayId);
+        accessibilityConnection_->NotifyAccessibilityWindowInfo(displayId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     }
     MinimizeApp::ExecuteMinimizeAll();
     return res;
@@ -987,7 +997,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->SetDragType(property->GetDragType());
             ret = ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
             if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && ret == WMError::WM_OK &&
-                callingWindowId_ != 0u && !WindowHelper::IsEmptyRect(callingWindowRestoringRect_)) {
+                callingWindowId_ == windowId && !WindowHelper::IsEmptyRect(callingWindowRestoringRect_)) {
                 if (property->GetWindowSizeChangeReason() != WindowSizeChangeReason::MOVE) {
                     callingWindowId_ = 0u;
                     callingWindowRestoringRect_ = { 0, 0, 0, 0 };
@@ -1018,11 +1028,13 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->SetFocusable(property->GetFocusable());
             windowRoot_->UpdateFocusableProperty(windowId);
             FlushWindowInfo(windowId);
+            accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_TOUCHABLE: {
             node->SetTouchable(property->GetTouchable());
             FlushWindowInfo(windowId);
+            accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             break;
         }
         case PropertyChangeAction::ACTION_UPDATE_CALLING_WINDOW: {
@@ -1080,15 +1092,12 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         default:
             break;
     }
-    if (ret == WMError::WM_OK) {
-        accessibilityConnection_->NotifyAccessibilityInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-    }
     return ret;
 }
 
-WMError WindowController::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const
+WMError WindowController::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const
 {
-    accessibilityConnection_->GetAccessibilityWindowInfo(windowInfo);
+    accessibilityConnection_->GetAccessibilityWindowInfo(infos);
     return WMError::WM_OK;
 }
 
@@ -1133,6 +1142,7 @@ WMError WindowController::UpdateTouchHotAreas(const sptr<WindowNode>& node, cons
     node->SetTouchHotAreas(touchHotAreas);
     node->SetPointerHotAreas(pointerHotAreas);
     FlushWindowInfo(node->GetWindowId());
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     return WMError::WM_OK;
 }
 
@@ -1143,6 +1153,8 @@ WMError WindowController::UpdateTransform(uint32_t windowId)
         return res;
     }
     FlushWindowInfo(windowId);
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(windowRoot_->GetWindowNode(windowId),
+        WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     return WMError::WM_OK;
 }
 

@@ -92,7 +92,7 @@ void WindowManagerAgentProxy::UpdateSystemBarRegionTints(DisplayId displayId, co
     }
 }
 
-void WindowManagerAgentProxy::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
+void WindowManagerAgentProxy::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
     WindowUpdateType type)
 {
     MessageParcel data;
@@ -103,8 +103,8 @@ void WindowManagerAgentProxy::NotifyAccessibilityWindowInfo(const sptr<Accessibi
         return;
     }
 
-    if (!data.WriteParcelable(windowInfo)) {
-        WLOGFE("Write displayId failed");
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<AccessibilityWindowInfo>(data, infos)) {
+        WLOGFE("Write accessibility window infos failed");
         return;
     }
 

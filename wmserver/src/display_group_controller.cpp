@@ -14,6 +14,7 @@
  */
 #include "display_group_controller.h"
 
+#include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "window_node_container.h"
 
@@ -71,7 +72,7 @@ void DisplayGroupController::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, W
         rootType);
     if (rootNodeVectorPtr != nullptr) {
         rootNodeVectorPtr->push_back(node);
-        WLOGFI("add node in node vector of root, displayId: %{public}" PRIu64" windowId: %{public}d, "
+        WLOGFD("add node in node vector of root, displayId: %{public}" PRIu64" windowId: %{public}d, "
             "rootType: %{public}d", node->GetDisplayId(), node->GetWindowId(), rootType);
     } else {
         WLOGFE("add node failed, rootNode vector is empty, windowId: %{public}d, rootType: %{public}d",
@@ -108,10 +109,10 @@ void DisplayGroupController::ProcessCrossNodes(DisplayId defaultDisplayId, Displ
 {
     defaultDisplayId_ = defaultDisplayId;
     for (auto& iter : displayGroupWindowTree_) {
-        auto& nodeVec = *(iter.second[WindowRootNodeType::APP_WINDOW_NODE]);
-        for (auto& node : nodeVec) {
+        auto nodeVec = *(iter.second[WindowRootNodeType::APP_WINDOW_NODE]);
+        for (auto node : nodeVec) {
             if (node->isShowingOnMultiDisplays_) {
-                WLOGFI("process cross node, windowId: %{public}u, displayId: %{public}" PRIu64"",
+                WLOGFD("process cross node, windowId: %{public}u, displayId: %{public}" PRIu64"",
                     node->GetWindowId(), node->GetDisplayId());
                 auto showingDisplays = node->GetShowingDisplays();
 
@@ -127,7 +128,8 @@ void DisplayGroupController::ProcessCrossNodes(DisplayId defaultDisplayId, Displ
                     if (displayId == newDisplayId) {
                         continue;
                     }
-                    windowNodeContainer_->UpdateRSTree(node, displayId, false);
+                    windowNodeContainer_->RemoveNodeFromRSTree(node, displayId, newDisplayId,
+                        WindowUpdateType::WINDOW_UPDATE_ACTIVE);
                 }
                 // update shown displays and displayId
                 MoveCrossNodeToTargetDisplay(node, newDisplayId);
@@ -167,6 +169,8 @@ void DisplayGroupController::UpdateWindowShowingDisplays(const sptr<WindowNode>&
     // mean that this is cross-display window
     if (showingDisplays.size() > 1) {
         node->isShowingOnMultiDisplays_ = true;
+    } else {
+        node->isShowingOnMultiDisplays_ = false;
     }
     node->SetShowingDisplays(showingDisplays);
 }
@@ -207,13 +211,14 @@ void DisplayGroupController::UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode
 
     if (node->GetDisplayId() != newDisplayId) {
         UpdateWindowDisplayId(node, newDisplayId);
+        UpdateDisplayGroupWindowTree();
     }
 }
 
-void DisplayGroupController::ChangeToRectInDisplayGroup(const sptr<WindowNode>& node)
+void DisplayGroupController::ChangeToRectInDisplayGroup(const sptr<WindowNode>& node, DisplayId displayId)
 {
     Rect requestRect = node->GetRequestRect();
-    const Rect& displayRect = displayGroupInfo_->GetDisplayRect(node->GetDisplayId());
+    const Rect& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
     requestRect.posX_ += displayRect.posX_;
     requestRect.posY_ += displayRect.posY_;
     node->SetRequestRect(requestRect);
@@ -232,7 +237,7 @@ void DisplayGroupController::PreProcessWindowNode(const sptr<WindowNode>& node, 
                 PreProcessWindowNode(childNode, type);
             }
         }
-        WLOGFI("Current mode is not multi-display");
+        WLOGFD("Current mode is not multi-display");
         return;
     }
 
@@ -240,21 +245,20 @@ void DisplayGroupController::PreProcessWindowNode(const sptr<WindowNode>& node, 
         case WindowUpdateType::WINDOW_UPDATE_ADDED: {
             if (!node->isShowingOnMultiDisplays_) {
                 // change rect to rect in display group
-                ChangeToRectInDisplayGroup(node);
+                ChangeToRectInDisplayGroup(node, node->GetDisplayId());
             }
             UpdateWindowShowingDisplays(node, node->GetRequestRect());
-            WLOGFI("preprocess node when add window");
+            WLOGFD("preprocess node when add window");
             break;
         }
         case WindowUpdateType::WINDOW_UPDATE_ACTIVE: {
             // MoveTo can be called by user, calculate rect in display group if the reason is move
             if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
-                ChangeToRectInDisplayGroup(node);
+                ChangeToRectInDisplayGroup(node, defaultDisplayId_);
             }
             UpdateWindowShowingDisplays(node, node->GetRequestRect());
-            const auto& curShowingDisplays = node->GetShowingDisplays();
-            UpdateWindowDisplayIdIfNeeded(node, curShowingDisplays);
-            WLOGFI("preprocess node when update window");
+            UpdateWindowDisplayIdIfNeeded(node, node->GetShowingDisplays());
+            WLOGFD("preprocess node when update window");
             break;
         }
         default:
@@ -268,7 +272,7 @@ void DisplayGroupController::PreProcessWindowNode(const sptr<WindowNode>& node, 
 
 void DisplayGroupController::UpdateWindowDisplayId(const sptr<WindowNode>& node, DisplayId newDisplayId)
 {
-    WLOGFI("update node displayId, srcDisplayId: %{public}" PRIu64", newDisplayId: %{public}" PRIu64"",
+    WLOGFD("update node displayId, srcDisplayId: %{public}" PRIu64", newDisplayId: %{public}" PRIu64"",
         node->GetDisplayId(), newDisplayId);
     if (node->GetWindowToken()) {
         node->GetWindowToken()->UpdateDisplayId(node->GetDisplayId(), newDisplayId);
@@ -294,14 +298,19 @@ void DisplayGroupController::MoveCrossNodeToTargetDisplay(const sptr<WindowNode>
 
 void DisplayGroupController::MoveNotCrossNodeToDefaultDisplay(const sptr<WindowNode>& node, DisplayId displayId)
 {
-    WLOGFI("windowId: %{public}d, displayId: %{public}" PRIu64"", node->GetWindowId(), displayId);
-
+    WLOGFD("windowId: %{public}d, displayId: %{public}" PRIu64"", node->GetWindowId(), displayId);
     // update new rect in display group
     const Rect& srcDisplayRect = displayGroupInfo_->GetDisplayRect(displayId);
     const Rect& dstDisplayRect = displayGroupInfo_->GetDisplayRect(defaultDisplayId_);
     Rect newRect = node->GetRequestRect();
-    newRect.posX_ = newRect.posX_ - srcDisplayRect.posX_ + dstDisplayRect.posX_;
-    newRect.posY_ = newRect.posY_ - srcDisplayRect.posY_ + dstDisplayRect.posY_;
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_POINTER) {
+        newRect.posX_ = static_cast<int32_t>(dstDisplayRect.width_ / 2); // default pointerX : displayRect.width / 2
+        newRect.posY_ = static_cast<int32_t>(dstDisplayRect.height_ / 2); // default pointerY : displayRect.height / 2
+    } else {
+        newRect.posX_ = newRect.posX_ - srcDisplayRect.posX_ + dstDisplayRect.posX_;
+        newRect.posY_ = newRect.posY_ - srcDisplayRect.posY_ + dstDisplayRect.posY_;
+    }
+
     node->SetRequestRect(newRect);
     // update showing display
     std::vector<DisplayId> newShowingDisplays = { defaultDisplayId_ };
@@ -328,8 +337,10 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroyedDisplay(DisplayId di
         WindowRootNodeType::BELOW_WINDOW_NODE
     };
     for (auto& type : rootNodeType) {
-        auto& nodesVec = *(displayGroupWindowTree_[displayId][type]);
-        for (auto& node : nodesVec) {
+        auto nodesVec = *(displayGroupWindowTree_[displayId][type]);
+        for (auto node : nodesVec) {
+            WLOGFD("node on destroied display, windowId: %{public}d, isShowingOnMulti: %{public}d",
+                node->GetWindowId(), node->isShowingOnMultiDisplays_);
             if (node->GetDisplayId() != displayId || node->isShowingOnMultiDisplays_) {
                 continue;
             }
@@ -337,7 +348,7 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroyedDisplay(DisplayId di
             if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
                 node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
                 windowNodeContainer_->DestroyWindowNode(node, windowIds);
-                WLOGFI("destroy status or navigation bar on destroyed display, windowId: %{public}d",
+                WLOGFW("destroy status or navigation bar on destroyed display, windowId: %{public}d",
                     node->GetWindowId());
                 continue;
             }
@@ -345,8 +356,10 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroyedDisplay(DisplayId di
             MoveNotCrossNodeToDefaultDisplay(node, displayId);
 
             // update RS tree
-            windowNodeContainer_->UpdateRSTree(node, displayId, false);
-            windowNodeContainer_->UpdateRSTree(node, defaultDisplayId_, true);
+            windowNodeContainer_->RemoveNodeFromRSTree(node, displayId, defaultDisplayId_,
+                WindowUpdateType::WINDOW_UPDATE_ACTIVE);
+            windowNodeContainer_->AddNodeOnRSTree(node, defaultDisplayId_, defaultDisplayId_,
+                WindowUpdateType::WINDOW_UPDATE_ACTIVE);
         }
     }
 }
@@ -354,6 +367,7 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroyedDisplay(DisplayId di
 void DisplayGroupController::ProcessDisplayCreate(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
                                                   const std::map<DisplayId, Rect>& displayRectMap)
 {
+    WindowInnerManager::GetInstance().NotifyDisplayChange(displayRectMap);
     defaultDisplayId_ = defaultDisplayId;
     WLOGFI("defaultDisplay, displayId: %{public}" PRIu64"", defaultDisplayId);
 
@@ -376,6 +390,7 @@ void DisplayGroupController::ProcessDisplayDestroy(DisplayId defaultDisplayId, s
                                                    const std::map<DisplayId, Rect>& displayRectMap,
                                                    std::vector<uint32_t>& windowIds)
 {
+    WindowInnerManager::GetInstance().NotifyDisplayChange(displayRectMap);
     DisplayId displayId = displayInfo->GetDisplayId();
 
     // delete nodes and map element of deleted display
@@ -414,6 +429,7 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId defaultDisplayId, sp
                                                   const std::map<DisplayId, Rect>& displayRectMap,
                                                   DisplayStateChangeType type)
 {
+    WindowInnerManager::GetInstance().NotifyDisplayChange(displayRectMap);
     DisplayId displayId = displayInfo->GetDisplayId();
     WLOGFI("display change, displayId: %{public}" PRIu64", type: %{public}d", displayId, type);
     switch (type) {

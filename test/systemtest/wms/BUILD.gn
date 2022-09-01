@@ -172,6 +172,14 @@ ohos_systemtest("wms_window_visibility_info_test") {
   deps = [ ":wms_systemtest_common" ]
 }
 
+ohos_systemtest("wms_window_display_zoom_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_display_zoom_test.cpp" ]
+
+  deps = [ ":wms_systemtest_common" ]
+}
+
 ohos_systemtest("wms_window_drag_test") {
   module_out_path = module_out_path
 
@@ -250,14 +258,6 @@ config("wms_systemtest_common_public_config") {
 
     # abilityContext end
   ]
-
-  cflags = [
-    "-Wall",
-    "-Werror",
-    "-g3",
-    "-Dprivate=public",
-    "-Dprotected=public",
-  ]
 }
 
 ohos_static_library("wms_systemtest_common") {
@@ -269,6 +269,7 @@ ohos_static_library("wms_systemtest_common") {
   public_configs = [
     ":wms_systemtest_common_public_config",
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "//foundation/window/window_manager/resources/config/build:testcase_flags",
   ]
 
   public_deps = [
