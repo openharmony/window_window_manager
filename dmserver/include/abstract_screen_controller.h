@@ -63,6 +63,7 @@ public:
     ScreenId CreateVirtualScreen(VirtualScreenOption option, const sptr<IRemoteObject>& displayManagerAgent);
     DMError DestroyVirtualScreen(ScreenId screenId);
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    void SetBuildInDefaultOrientation(Orientation orientation);
     bool SetOrientation(ScreenId screenId, Orientation orientation, bool isFromWindow);
     bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
 
@@ -148,6 +149,7 @@ private:
     sptr<IRSScreenChangeListener> rSScreenChangeListener_;
     std::shared_ptr<AppExecFwk::EventHandler> controllerHandler_;
     std::atomic<ScreenId> defaultRsScreenId_ {SCREEN_ID_INVALID };
+    Orientation buildInDefaultOrientation_ { Orientation::UNSPECIFIED };
     bool isExpandCombination_ = false;
 };
 } // namespace OHOS::Rosen
