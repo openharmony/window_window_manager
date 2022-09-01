@@ -50,4 +50,10 @@
     <!-- format: uint32_t, the unit is vp. -->
     <!-- default value: 0 -->
     <waterfallAreaCompressionSizeWhenHorzontal>0</waterfallAreaCompressionSizeWhenHorzontal>
+    
+    <!-- Indicates orientation of the built-in screen -->
+    <!-- 0: Orientation::UNSPECIFIED -->
+    <!-- 1: Orientation::VERTICAL         2: Orientation::HORIZONTAL-->
+    <!-- 3: Orientation::REVERSE_VERTICAL 4: Orientation::REVERSE_HORIZONTAL -->
+    <buildInDefaultOrientation>0</buildInDefaultOrientation>
  </Configs>

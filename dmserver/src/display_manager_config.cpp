@@ -110,7 +110,8 @@ bool DisplayManagerConfig::LoadConfigXml()
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDeviceRotationOffset")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("cutoutArea")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curvedScreenBoundary")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("waterfallAreaCompressionSizeWhenHorzontal"))) {
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("waterfallAreaCompressionSizeWhenHorzontal")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("buildInDefaultOrientation"))) {
             ReadIntNumbersConfigInfo(curNodePtr);
             continue;
         }

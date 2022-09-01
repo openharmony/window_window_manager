@@ -130,6 +130,17 @@ void DisplayManagerService::ConfigureDisplayManagerService()
         displayCutoutController_->SetBuiltInDisplayCutoutSvgPath(
             static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]));
     }
+    ConfigureWaterfallDisplayCompressionParams();
+    if (numbersConfig.count("buildInDefaultOrientation") != 0) {
+        Orientation orientation = static_cast<Orientation>(numbersConfig["buildInDefaultOrientation"][0]);
+        abstractScreenController_->SetBuildInDefaultOrientation(orientation);
+    }
+}
+
+void DisplayManagerService::ConfigureWaterfallDisplayCompressionParams()
+{
+    auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
+    auto enableConfig = DisplayManagerConfig::GetEnableConfig();
     if (enableConfig.count("isWaterfallAreaCompressionEnableWhenHorizontal") != 0) {
         DisplayCutoutController::SetWaterfallCurvedAreaLayoutCompressionEnable(
             static_cast<bool>(enableConfig["isWaterfallAreaCompressionEnableWhenHorizontal"]));

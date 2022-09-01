@@ -294,12 +294,17 @@ void AbstractDisplayController::ProcessDisplayRotationChange(sptr<AbstractScreen
 void AbstractDisplayController::ProcessDefaultDisplayLayoutCompression(sptr<AbstractScreen> absScreen)
 {
     WLOGFI("Enter ProcessDefaultDisplayLayoutCompression");
+    auto absDisplay = GetAbstractDisplayByAbsScreen(absScreen);
+    DisplayId defaultDisplayId = GetDefaultDisplayId();
+    if (absDisplay->GetDisplayId() == defaultDisplayId) {
+        return;
+    }
     if (!DisplayCutoutController::IsWaterfallCurvedAreaLayoutCompressionEnable() ||
         DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal() == 0) {
         WLOGFI("Not enable waterfall display area compression.");
         return;
     }
-    auto absDisplay = GetAbstractDisplayByAbsScreen(absScreen);
+
     Rotation rotation = absDisplay->GetRotation();
     if (ScreenRotationController::IsDisplayRotationHorizontal(rotation)) {
         uint32_t offsetY = DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal();
@@ -500,8 +505,7 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
             std::ostringstream buffer;
             buffer<<"display_"<<displayId;
             std::string name = buffer.str();
-            sptr<AbstractDisplay> display = new(std::nothrow) AbstractDisplay(displayId, realAbsScreen->dmsId_,
-                name, realAbsScreen->groupDmsId_, info);
+            sptr<AbstractDisplay> display = new(std::nothrow) AbstractDisplay(displayId, name, info, realAbsScreen);
             if (display == nullptr) {
                 WLOGFE("create display failed");
                 return;
@@ -570,8 +574,7 @@ void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> abs
     std::ostringstream buffer;
     buffer<<"display_"<<displayId;
     std::string name = buffer.str();
-    sptr<AbstractDisplay> display = new AbstractDisplay(displayId,
-        absScreen->dmsId_, name, absScreen->groupDmsId_, info);
+    sptr<AbstractDisplay> display = new AbstractDisplay(displayId, name, info, absScreen);
     Point point = abstractScreenController_->GetAbstractScreenGroup(absScreen->groupDmsId_)->
         GetChildPosition(absScreen->dmsId_);
     display->SetOffset(point.posX_, point.posY_);
@@ -635,14 +638,20 @@ std::map<DisplayId, sptr<DisplayInfo>> AbstractDisplayController::GetAllDisplayI
 void AbstractDisplayController::SetDisplayStateChangeListener(
     sptr<AbstractDisplay> abstractDisplay, DisplayStateChangeType type)
 {
-    ScreenId defaultDisplayId = DISPLAY_ID_INVALID;
+    ScreenId defaultDisplayId = GetDefaultDisplayId();
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap = GetAllDisplayInfoOfGroup(
+        abstractDisplay->ConvertToDisplayInfo());
+    displayStateChangeListener_(defaultDisplayId, abstractDisplay->ConvertToDisplayInfo(), displayInfoMap, type);
+}
+
+DisplayId AbstractDisplayController::GetDefaultDisplayId()
+{
+    DisplayId defaultDisplayId = DISPLAY_ID_INVALID;
     ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     sptr<AbstractDisplay> defaultDisplay = GetAbstractDisplayByScreen(defaultScreenId);
     if (defaultDisplay != nullptr) {
         defaultDisplayId = defaultDisplay->GetId();
     }
-    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap = GetAllDisplayInfoOfGroup(
-        abstractDisplay->ConvertToDisplayInfo());
-    displayStateChangeListener_(defaultDisplayId, abstractDisplay->ConvertToDisplayInfo(), displayInfoMap, type);
+    return defaultDisplayId;
 }
 } // namespace OHOS::Rosen

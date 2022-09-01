@@ -119,6 +119,7 @@ private:
     ScreenId GetScreenIdByDisplayId(DisplayId displayId) const;
     std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByDisplayId(DisplayId displayId) const;
     void ConfigureDisplayManagerService();
+    void ConfigureWaterfallDisplayCompressionParams();
 
     std::recursive_mutex mutex_;
     static inline SingletonDelegator<DisplayManagerService> delegator_;
