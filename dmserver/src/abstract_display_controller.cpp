@@ -307,12 +307,14 @@ void AbstractDisplayController::ProcessDefaultDisplayLayoutCompression(sptr<Abst
         absDisplay->SetOffsetX(0);
         absDisplay->SetOffsetY(offsetY);
         absDisplay->SetHeight(displayWidthAfter);
+        absDisplay->SetWaterfallDisplayCompressionStatus(true);
     } else {
         auto mode = absScreen->GetActiveScreenMode();
         absDisplay->SetOffsetX(0);
         absDisplay->SetOffsetY(0);
         absDisplay->SetHeight(mode->height_);
         absDisplay->SetWidth(mode->width_);
+        absDisplay->SetWaterfallDisplayCompressionStatus(false);
     }
     SetDisplayStateChangeListener(absDisplay, DisplayStateChangeType::LAYOUT_COMPRESS);
     DisplayManagerAgentController::GetInstance().OnDisplayChange(

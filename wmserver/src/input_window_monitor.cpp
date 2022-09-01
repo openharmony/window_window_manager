@@ -102,8 +102,7 @@ void InputWindowMonitor::UpdateDisplayInfo(const std::vector<sptr<DisplayInfo>>&
         uint32_t displayHeight = displayInfo->GetHeight();
         int32_t offsetX = displayInfo->GetOffsetX();
         int32_t offsetY = displayInfo->GetOffsetY();
-        const auto& dms = DisplayManagerServiceInner::GetInstance();
-        if (dms.GetWaterfallDisplayCurvedAreaAvoidSize(displayInfo->GetDisplayId()) != 0) {
+        if (displayInfo->GetWaterfallDisplayCompressionStatus()) {
             displayWidth = displayWidth + offsetX * 2; // 2: Get full width;
             displayHeight = displayHeight + offsetY * 2; // 2: Get full height;
             offsetX = 0;

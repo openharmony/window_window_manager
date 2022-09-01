@@ -358,7 +358,8 @@ bool SurfaceDraw::GetSurfaceSnapshot(const std::shared_ptr<RSSurfaceNode> surfac
     return true;
 }
 
-bool SurfaceDraw::DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, const Rect screenRect, const Rect transparentRect)
+bool SurfaceDraw::DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, const Rect screenRect,
+    const Rect transparentRect)
 {
     int32_t screenHeight = static_cast<int32_t>(screenRect.height_);
     int32_t screenWidth = static_cast<int32_t>(screenRect.width_);
@@ -386,7 +387,8 @@ bool SurfaceDraw::DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, const 
         Drawing::AlphaType::ALPHATYPE_OPAQUE };
     transBitmap.Build(transparentWidth, transparentHeight, transBitmapFormat);
     transBitmap.ClearWithColor(0);
-    canvas.DrawBitmap(transBitmap, static_cast<Drawing::scalar>(transparentRect.posX_), static_cast<Drawing::scalar>(transparentRect.posY_));
+    canvas.DrawBitmap(transBitmap, static_cast<Drawing::scalar>(transparentRect.posX_),
+        static_cast<Drawing::scalar>(transparentRect.posY_));
 
     uint32_t addrSize = screenWidth * screenHeight * IMAGE_BYTES_STRIDE;
     errno_t ret = memcpy_s(addr, addrSize, fullbitmap.GetPixels(), addrSize);
