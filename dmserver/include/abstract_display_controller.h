@@ -67,6 +67,7 @@ private:
         sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup, sptr<AbstractDisplay>& absDisplay);
     bool UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info);
     void SetDisplayStateChangeListener(sptr<AbstractDisplay> abstractDisplay, DisplayStateChangeType type);
+    DisplayId GetDefaultDisplayId();
 
     std::recursive_mutex& mutex_;
     std::atomic<DisplayId> displayCount_ { 0 };
