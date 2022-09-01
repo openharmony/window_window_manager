@@ -53,6 +53,7 @@ public:
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface) override;
     bool IsScreenRotationLocked() override;
     void SetScreenRotationLocked(bool isLocked) override;
+    uint32_t GetWaterfallDisplayCurvedAreaAvoidSize(DisplayId displayId);
 
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;

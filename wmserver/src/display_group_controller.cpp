@@ -116,7 +116,8 @@ void DisplayGroupController::ProcessCrossNodes(DisplayId defaultDisplayId, Displ
                 auto showingDisplays = node->GetShowingDisplays();
 
                 DisplayId newDisplayId;
-                if (type == DisplayStateChangeType::SIZE_CHANGE || type == DisplayStateChangeType::UPDATE_ROTATION) {
+                if (type == DisplayStateChangeType::SIZE_CHANGE || type == DisplayStateChangeType::UPDATE_ROTATION ||
+                    type == DisplayStateChangeType::LAYOUT_COMPRESS) {
                     newDisplayId = node->GetDisplayId();
                 } else {
                     newDisplayId = defaultDisplayId;
@@ -420,6 +421,7 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId defaultDisplayId, sp
             displayGroupInfo_->SetDisplayRotation(displayId, displayInfo->GetRotation());
             [[fallthrough]];
         }
+        case DisplayStateChangeType::LAYOUT_COMPRESS:
         case DisplayStateChangeType::SIZE_CHANGE: {
             ProcessDisplaySizeChangeOrRotation(defaultDisplayId, displayId, displayRectMap, type);
             break;

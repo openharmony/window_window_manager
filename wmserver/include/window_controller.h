@@ -99,6 +99,7 @@ private:
     void NotifyWindowPropertyChanged(const sptr<WindowNode>& node);
     WMError GetFocusWindowNode(DisplayId displayId, sptr<WindowNode>& windowNode);
     void SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo);
+    void ProcessLayoutCompress(const sptr<DisplayInfo>& displayInfo);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
@@ -114,6 +115,7 @@ private:
     uint32_t callingWindowId_ = 0u;
     Rect defaultDisplayRect_ = { 0, 0, 0, 0 };
     bool isBootAnimationStopped_ = false;
+    std::shared_ptr<RSSurfaceNode> maskingSurfaceNode_ = nullptr;
 };
 } // Rosen
 } // OHOS
