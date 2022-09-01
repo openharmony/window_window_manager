@@ -403,7 +403,7 @@ public:
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) = 0;
     virtual void GetRequestedTouchHotAreas(std::vector<Rect>& rects) const = 0;
     virtual bool IsMainHandlerAvailable() const = 0;
-    virtual WMError SetAPPWindowLable(const std::string& label)=0;
+    virtual WMError SetAPPWindowLabel(const std::string& label)=0;
     virtual WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon)=0;
 
     /**
