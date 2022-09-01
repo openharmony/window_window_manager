@@ -76,10 +76,10 @@ std::vector<sptr<DisplayInfo>> DisplayManagerServiceInner::GetAllDisplays() cons
     return res;
 }
 
-void DisplayManagerServiceInner::UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    bool isAdd)
+void DisplayManagerServiceInner::UpdateRSTree(DisplayId displayId, DisplayId parentDisplayId,
+    std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd, bool isMultiDisplay)
 {
-    DisplayManagerService::GetInstance().UpdateRSTree(displayId, surfaceNode, isAdd);
+    DisplayManagerService::GetInstance().UpdateRSTree(displayId, parentDisplayId, surfaceNode, isAdd, isMultiDisplay);
 }
 
 ScreenId DisplayManagerServiceInner::GetRSScreenId(DisplayId displayId) const

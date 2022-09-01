@@ -30,10 +30,10 @@ void WindowManagerAgent::UpdateSystemBarRegionTints(DisplayId displayId, const S
     SingletonContainer::Get<WindowManager>().UpdateSystemBarRegionTints(displayId, tints);
 }
 
-void WindowManagerAgent::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
+void WindowManagerAgent::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
     WindowUpdateType type)
 {
-    SingletonContainer::Get<WindowManager>().NotifyAccessibilityWindowInfo(windowInfo, type);
+    SingletonContainer::Get<WindowManager>().NotifyAccessibilityWindowInfo(infos, type);
 }
 
 void WindowManagerAgent::UpdateWindowVisibilityInfo(const std::vector<sptr<WindowVisibilityInfo>>& visibilityInfos)

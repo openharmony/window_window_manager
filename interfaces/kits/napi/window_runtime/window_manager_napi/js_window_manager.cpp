@@ -221,7 +221,7 @@ static void CreateSubWindowTask(std::string parentWinName, std::string windowNam
 
 NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("[NAPI]OnCreateWindow");
+    WLOGFD("[NAPI]OnCreateWindow");
     NativeValue* nativeString = nullptr;
     NativeValue* nativeContext = nullptr;
     NativeValue* nativeType = nullptr;
@@ -276,7 +276,7 @@ NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbac
 
 NativeValue* JsWindowManager::OnFindWindow(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("[NAPI]OnFindWindow");
+    WLOGFD("[NAPI]OnFindWindow");
     std::string windowName;
     WMError errCode = WMError::WM_OK;
     if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
@@ -390,7 +390,7 @@ NativeValue* JsWindowManager::OnToggleShownStateForAllAppWindows(NativeEngine& e
 
 NativeValue* JsWindowManager::OnRegisterWindowMangerCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("[NAPI]OnRegisterWindowMangerCallback");
+    WLOGFD("[NAPI]OnRegisterWindowMangerCallback");
     if (info.argc != 2) { // 2: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         return engine.CreateUndefined();
@@ -413,7 +413,7 @@ NativeValue* JsWindowManager::OnRegisterWindowMangerCallback(NativeEngine& engin
 
 NativeValue* JsWindowManager::OnUnregisterWindowManagerCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("[NAPI]OnUnregisterWindowManagerCallback");
+    WLOGFD("[NAPI]OnUnregisterWindowManagerCallback");
     if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         return engine.CreateUndefined();
@@ -482,7 +482,7 @@ static void GetTopWindowTask(void* contextPtr, NativeEngine& engine, AsyncTask& 
 
 NativeValue* JsWindowManager::OnGetTopWindow(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("[NAPI]OnGetTopWindow");
+    WLOGFD("[NAPI]OnGetTopWindow");
     WMError errCode = WMError::WM_OK;
     NativeValue* nativeContext = nullptr;
     NativeValue* nativeCallback = nullptr;
@@ -519,7 +519,7 @@ NativeValue* JsWindowManager::OnGetTopWindow(NativeEngine& engine, NativeCallbac
 
 NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("[NAPI]OnSetWindowLayoutMode");
+    WLOGFD("[NAPI]OnSetWindowLayoutMode");
     WMError errCode = WMError::WM_OK;
     if (info.argc < 1 || info.argc > 2) { // 1: minimum params num; 2: maximum params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
@@ -565,7 +565,7 @@ NativeValue* JsWindowManager::OnSetWindowLayoutMode(NativeEngine& engine, Native
 
 NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
 {
-    WLOGFI("[NAPI]JsWindowManagerInit");
+    WLOGFD("[NAPI]JsWindowManagerInit");
 
     if (engine == nullptr || exportObj == nullptr) {
         WLOGFE("[NAPI]JsWindowManagerInit engine or exportObj is nullptr");

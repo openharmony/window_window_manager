@@ -18,11 +18,14 @@
 
 #include <map>
 
-#include <ability_context.h>
 #include <ui_content.h>
 
 #include "window.h"
 #include "window_property.h"
+
+namespace OHOS::AbilityRuntime {
+    class Context;
+}
 
 namespace OHOS {
 namespace Rosen {

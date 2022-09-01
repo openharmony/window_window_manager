@@ -21,3 +21,13 @@ config("coverage_flags") {
     ldflags = [ "--coverage" ]
   }
 }
+
+config("testcase_flags") {
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-g3",
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+}

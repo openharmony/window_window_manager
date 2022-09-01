@@ -45,7 +45,7 @@ void WindowManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChangeI
 
 void WindowManagerAgentController::UpdateSystemBarRegionTints(DisplayId displayId, const SystemBarRegionTints& tints)
 {
-    WLOGFI("UpdateSystemBarRegionTints, tints size: %{public}u", static_cast<uint32_t>(tints.size()));
+    WLOGFI("tints size: %{public}u", static_cast<uint32_t>(tints.size()));
     if (tints.empty()) {
         return;
     }
@@ -55,13 +55,13 @@ void WindowManagerAgentController::UpdateSystemBarRegionTints(DisplayId displayI
     }
 }
 
-void WindowManagerAgentController::NotifyAccessibilityWindowInfo(const sptr<AccessibilityWindowInfo>& windowInfo,
-    WindowUpdateType type)
+void WindowManagerAgentController::NotifyAccessibilityWindowInfo(
+    const std::vector<sptr<AccessibilityWindowInfo>>& infos, WindowUpdateType type)
 {
     WLOGFI("NotifyAccessibilityWindowInfo");
     for (auto& agent : wmAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE)) {
-        agent->NotifyAccessibilityWindowInfo(windowInfo, type);
+        agent->NotifyAccessibilityWindowInfo(infos, type);
     }
 }
 

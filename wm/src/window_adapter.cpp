@@ -86,11 +86,11 @@ void WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 }
 
-WMError WindowAdapter::GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo)
+WMError WindowAdapter::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
-    return windowManagerServiceProxy_->GetAccessibilityWindowInfo(windowInfo);
+    return windowManagerServiceProxy_->GetAccessibilityWindowInfo(infos);
 }
 
 WMError WindowAdapter::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)

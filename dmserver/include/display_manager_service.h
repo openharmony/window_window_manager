@@ -86,7 +86,8 @@ public:
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
     bool SetDisplayState(DisplayState state) override;
-    void UpdateRSTree(DisplayId displayId, std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd);
+    void UpdateRSTree(DisplayId displayId, DisplayId parentDisplayId, std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        bool isAdd, bool isMultiDisplay);
 
     DisplayState GetDisplayState(DisplayId displayId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;

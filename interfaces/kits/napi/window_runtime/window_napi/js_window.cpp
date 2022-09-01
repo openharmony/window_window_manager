@@ -59,12 +59,12 @@ JsWindow::JsWindow(const sptr<Window>& window)
         WLOGFI("[NAPI]Destroy window %{public}s in js window", windowName.c_str());
     };
     windowToken_->RegisterWindowDestroyedListener(func);
-    WLOGFI("[NAPI] JsWindow constructorCnt: %{public}d", ++ctorCnt);
+    WLOGFI("[NAPI] constructorCnt: %{public}d", ++ctorCnt);
 }
 
 JsWindow::~JsWindow()
 {
-    WLOGFI("[NAPI]~JsWindow deConstructorCnt:%{public}d", ++dtorCnt);
+    WLOGFI("[NAPI] deConstructorCnt:%{public}d", ++dtorCnt);
     windowToken_ = nullptr;
 }
 
@@ -963,10 +963,10 @@ NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackIn
     return result;
 }
 
-static void LoadContentTask(std::weak_ptr<NativeReference> contentStorage, std::string contextUrl,
+static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std::string contextUrl,
     sptr<Window> weakWindow, NativeEngine& engine, AsyncTask& task)
 {
-    NativeValue* nativeStorage = (contentStorage.lock() == nullptr) ? nullptr : contentStorage.lock()->Get();
+    NativeValue* nativeStorage =  (contentStorage == nullptr) ? nullptr : contentStorage->Get();
     AppExecFwk::Ability* ability = nullptr;
     GetAPI7Ability(engine, ability);
     WMError ret = weakWindow->SetUIContent(contextUrl, &engine, nativeStorage, false, ability);
@@ -1006,7 +1006,7 @@ NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& i
         // 2: index of callback
         callBack = (info.argv[2]->TypeOf() == NATIVE_FUNCTION ? info.argv[2] : nullptr);
     }
-    std::weak_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
+    std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
     wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
@@ -2467,7 +2467,6 @@ std::shared_ptr<NativeReference> FindJsWindowObject(std::string windowName)
 
 NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
 {
-    WLOGFI("[NAPI]CreateJsWindowObject");
     std::string windowName = window->GetWindowName();
     // avoid repeatedly create js window when getWindow
     std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);

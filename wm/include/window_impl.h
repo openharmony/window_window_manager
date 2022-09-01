@@ -365,7 +365,8 @@ private:
     static sptr<Window> FindTopWindow(uint32_t topWinId);
     WMError Drag(const Rect& rect);
     void ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId, const Rect& rect);
+    void ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId,
+        int32_t targetDisplayId, const Rect& rect);
     void EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId);
     void ResetMoveOrDragState();
     bool IsPointerEventConsumed();
@@ -383,7 +384,7 @@ private:
     WMError NotifyWindowTransition(TransitionReason reason);
     void UpdatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdatePointerEventForStretchableWindow(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void UpdateDragType();
+    void UpdateDragType(int32_t startPointPosX, int32_t startPointPosY);
     void InitListenerHandler();
     void HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     bool CheckCameraFloatingWindowMultiCreated(WindowType type);

@@ -60,14 +60,14 @@ public:
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
     WMError GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
-    void StartingWindow(sptr<WindowTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
+    void StartingWindow(sptr<WindowTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap,
         uint32_t bkgColor, bool isColdStart);
     void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
     void MinimizeWindowsByLauncher(std::vector<uint32_t>& windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
     Orientation GetWindowPreferredOrientation(DisplayId displayId);
     void OnScreenshot(DisplayId displayId);
-    WMError GetAccessibilityWindowInfo(sptr<AccessibilityWindowInfo>& windowInfo) const;
+    WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
     WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken);
     WMError InterceptInputEventToServer(uint32_t windowId);
     WMError RecoverInputEventToClient(uint32_t windowId);
@@ -87,7 +87,6 @@ private:
     WMError SetSystemBarProperty(uint32_t windowId, WindowType type, const SystemBarProperty& property);
     WMError ResizeRect(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason);
     WMError SetWindowMode(uint32_t windowId, WindowMode dstMode);
-    void ResizeSystemBarPropertySizeIfNeed(const sptr<WindowNode>& node);
     void ResizeSoftInputCallingWindowIfNeed(const sptr<WindowNode>& node);
     void RestoreCallingWindowSizeIfNeed();
     void HandleTurnScreenOn(const sptr<WindowNode>& node);

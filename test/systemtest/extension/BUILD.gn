@@ -27,14 +27,6 @@ config("we_systemtest_common_public_config") {
     "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//third_party/googletest/googlemock/include",
   ]
-
-  cflags = [
-    "-Wall",
-    "-Werror",
-    "-g3",
-    "-Dprivate=public",
-    "-Dprotected=public",
-  ]
 }
 
 ## SystemTest window_extension_connection_test {{{
@@ -46,6 +38,7 @@ ohos_systemtest("window_extension_connection_test") {
   public_configs = [
     ":we_systemtest_common_public_config",
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "//foundation/window/window_manager/resources/config/build:testcase_flags",
   ]
 
   public_deps = [
