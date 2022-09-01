@@ -2867,12 +2867,13 @@ void WindowImpl::GetRequestedTouchHotAreas(std::vector<Rect>& rects) const
     property_->GetTouchHotAreas(rects);
 }
 
-WMError WindowImpl::SetAPPWindowLable(const std::string& label)
+WMError WindowImpl::SetAPPWindowLabel(const std::string& label)
 {
     if (uiContent_==nullptr) {
         WLOGFI("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
+    //uiContent_->SetAppWindowTitle(label);
     WLOGFI("SetAPPWindowLable");
     return WMError::WM_OK;
 }
@@ -2887,6 +2888,7 @@ WMError WindowImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& ico
         WLOGFI("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
+    //uiContent_->SetAppWindowIcon(icon);
     WLOGFI("SetAPPWindowIcon");
     return WMError::WM_OK;
 }

@@ -645,13 +645,13 @@ void WindowImpl::GetRequestedTouchHotAreas(std::vector<Rect>& rects) const
     property_->GetTouchHotAreas(rects);
 }
 
-WMError WindowImpl::SetAPPWindowLable(const std::string& label)
+WMError WindowImpl::SetAPPWindowLabel(const std::string& label)
 {
     if (uiContent_==nullptr) {
         WLOGFI("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFI("SetAPPWindowLable");
+    WLOGFI("SetAPPWindowLabel");
     return WMError::WM_OK;
 }
 
