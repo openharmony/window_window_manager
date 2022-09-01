@@ -26,23 +26,25 @@ namespace {
     constexpr int32_t PHONE_SCREEN_WIDTH = 2160;
 }
 
-AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, std::string name,
-    ScreenId screenGroupId, sptr<SupportedScreenModes> info)
+AbstractDisplay::AbstractDisplay(DisplayId id, std::string name,
+    sptr<SupportedScreenModes>& info, sptr<AbstractScreen>& absScreen)
     : id_(id),
-      screenId_(screenId),
-      screenGroupId_(screenGroupId),
       name_(name),
+      screenId_(absScreen->dmsId_),
+      screenGroupId_(absScreen->groupDmsId_),
       width_(info->width_),
       height_(info->height_),
-      refreshRate_(info->refreshRate_)
+      refreshRate_(info->refreshRate_),
+      orientation_(absScreen->orientation_)
 {
+    RequestRotation(absScreen->rotation_);
     if (DisplayManagerService::GetCustomVirtualPixelRatio() &&
         fabs(DisplayManagerService::GetCustomVirtualPixelRatio() + 1) > 1e-6) {
         virtualPixelRatio_ = DisplayManagerService::GetCustomVirtualPixelRatio();
         return;
     }
-    if ((width_ >= PHONE_SCREEN_WIDTH) || (height_ >= PHONE_SCREEN_WIDTH)) {
-        if ((width_ == PAD_SCREEN_WIDTH) || (height_ == PAD_SCREEN_WIDTH)) {
+    if ((info->width_ >= PHONE_SCREEN_WIDTH) || (info->height_ >= PHONE_SCREEN_WIDTH)) {
+        if ((info->width_ == PAD_SCREEN_WIDTH) || (info->height_ == PAD_SCREEN_WIDTH)) {
             virtualPixelRatio_ = 2.0f; // Pad is 2.0
         } else {
             virtualPixelRatio_ = 3.0f; // Phone is 3.0

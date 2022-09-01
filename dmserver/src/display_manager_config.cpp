@@ -108,7 +108,8 @@ bool DisplayManagerConfig::LoadConfigXml()
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("dpi")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDeviceRotationOffset")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("cutoutArea")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curvedScreenBoundary"))) {
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curvedScreenBoundary")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("buildInDefaultOrientation"))) {
             ReadIntNumbersConfigInfo(curNodePtr);
             continue;
         }
