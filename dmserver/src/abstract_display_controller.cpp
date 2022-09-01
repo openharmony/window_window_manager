@@ -20,9 +20,11 @@
 #include <sstream>
 #include <surface.h>
 
+#include "display_cutout_controller.h"
 #include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
 #include "screen_group.h"
+#include "screen_rotation_controller.h"
 #include "surface_capture_future.h"
 #include "window_manager_hilog.h"
 #include "sys_cap_util.h"
@@ -286,6 +288,35 @@ void AbstractDisplayController::ProcessDisplayRotationChange(sptr<AbstractScreen
     sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
     DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo,
         DisplayChangeEvent::UPDATE_ROTATION);
+    ProcessDefaultDisplayLayoutCompression(absScreen);
+}
+
+void AbstractDisplayController::ProcessDefaultDisplayLayoutCompression(sptr<AbstractScreen> absScreen)
+{
+    WLOGFI("Enter ProcessDefaultDisplayLayoutCompression");
+    if (!DisplayCutoutController::IsWaterfallCurvedAreaLayoutCompressionEnable() ||
+        DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal() == 0) {
+        WLOGFI("Not enable waterfall display area compression.");
+        return;
+    }
+    auto absDisplay = GetAbstractDisplayByAbsScreen(absScreen);
+    Rotation rotation = absDisplay->GetRotation();
+    if (ScreenRotationController::IsDisplayRotationHorizontal(rotation)) {
+        uint32_t offsetY = DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal();
+        uint32_t displayWidthAfter = absDisplay->GetHeight() - offsetY * 2; // *2: for both sides.
+        absDisplay->SetOffsetX(0);
+        absDisplay->SetOffsetY(offsetY);
+        absDisplay->SetHeight(displayWidthAfter);
+    } else {
+        auto mode = absScreen->GetActiveScreenMode();
+        absDisplay->SetOffsetX(0);
+        absDisplay->SetOffsetY(0);
+        absDisplay->SetHeight(mode->height_);
+        absDisplay->SetWidth(mode->width_);
+    }
+    SetDisplayStateChangeListener(absDisplay, DisplayStateChangeType::LAYOUT_COMPRESS);
+    DisplayManagerAgentController::GetInstance().OnDisplayChange(
+        absDisplay->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
 
 sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplayByAbsScreen(sptr<AbstractScreen> absScreen)
@@ -360,6 +391,7 @@ void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScr
     if (abstractDisplay->RequestRotation(absScreen->rotation_)) {
         // Notify rotation event to WMS
         SetDisplayStateChangeListener(abstractDisplay, DisplayStateChangeType::UPDATE_ROTATION);
+        ProcessDefaultDisplayLayoutCompression(absScreen);
     }
     // Notify orientation event to DisplayManager
     DisplayManagerAgentController::GetInstance().OnDisplayChange(abstractDisplay->ConvertToDisplayInfo(),

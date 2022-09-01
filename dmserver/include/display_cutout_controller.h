@@ -43,9 +43,14 @@ public:
 
     // For built-in display
     void SetBuiltInDisplayCutoutSvgPath(const std::string& svgPath);
-    void SetIsWaterfallDisplay(bool isWaterfallDisplay);
-    void SetWaterfallAreaLayoutEnable(bool isEnable);
+    static void SetIsWaterfallDisplay(bool isWaterfallDisplay);
     void SetCurvedScreenBoundary(std::vector<int> curvedScreenBoundary);
+
+    // For waterfall display curved area compression.
+    static void SetWaterfallCurvedAreaLayoutCompressionEnable(bool isEnable);
+    static void SetWaterfallAreaCompressionSizeWhenHorizontal(uint32_t size);
+    static bool IsWaterfallCurvedAreaLayoutCompressionEnable();
+    static uint32_t GetWaterfallAreaCompressionSizeWhenHorizontal();
 private:
     Rect CalcCutoutBoundingRect(std::string svgPath);
     void CheckBoundingRectsBoundary(DisplayId displayId, std::vector<Rect>& boundingRects);
@@ -56,13 +61,16 @@ private:
 
     // Raw data
     std::map<DisplayId, std::vector<std::string>> svgPaths_;
-    bool isWaterfallDisplay_ = false;
+    static bool isWaterfallDisplay_;
     std::vector<int> curvedScreenBoundary_; // Order: left top right bottom
-    bool isWaterfallAreaLayoutEnable_ = true;
 
     // Calulated data
     WaterfallDisplayAreaRects waterfallDisplayAreaRects_;
     std::map<DisplayId, std::vector<Rect>> boundingRects_;
+
+    // For waterfall display curved area compression.
+    static bool isWaterfallCurvedAreaLayoutCompressionEnable_;
+    static uint32_t waterfallAreaCompressionSizeWhenHorizontal_; // The unit is vp.
 };
 } // Rosen
 } // OHOS

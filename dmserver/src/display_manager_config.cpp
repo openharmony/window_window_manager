@@ -101,14 +101,16 @@ bool DisplayManagerConfig::LoadConfigXml()
         }
 
         auto nodeName = curNodePtr->name;
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("isWaterfallDisplay"))) {
+        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("isWaterfallDisplay")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("isWaterfallAreaCompressionEnableWhenHorizontal"))) {
             ReadEnableConfigInfo(curNodePtr);
             continue;
         }
         if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("dpi")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDeviceRotationOffset")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("cutoutArea")) ||
-            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curvedScreenBoundary"))) {
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curvedScreenBoundary")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("waterfallAreaCompressionSizeWhenHorzontal"))) {
             ReadIntNumbersConfigInfo(curNodePtr);
             continue;
         }

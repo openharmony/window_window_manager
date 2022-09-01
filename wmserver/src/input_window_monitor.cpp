@@ -94,21 +94,33 @@ void InputWindowMonitor::UpdateDisplayGroupInfo(const sptr<WindowNodeContainer>&
 void InputWindowMonitor::UpdateDisplayInfo(const sptr<DisplayInfo>& displayInfo,
                                            std::vector<MMI::DisplayInfo>& displayInfoVector)
 {
+    const auto& dms = DisplayManagerServiceInner::GetInstance();
     uint32_t displayWidth = displayInfo->GetWidth();
     uint32_t displayHeight = displayInfo->GetHeight();
+    int32_t offsetX = displayInfo->GetOffsetX();
+    int32_t offsetY = displayInfo->GetOffsetY();
+    if (dms.GetWaterfallDisplayCurvedAreaAvoidSize(displayInfo->GetDisplayId()) != 0) {
+        displayWidth = displayWidth + offsetX * 2; // 2: Get full width;
+        displayHeight = displayHeight + offsetY * 2; // 2: Get full height;
+        offsetX = 0;
+        offsetY = 0;
+    }
     if (displayInfo->GetRotation() == Rotation::ROTATION_90 || displayInfo->GetRotation() == Rotation::ROTATION_270) {
         std::swap(displayWidth, displayHeight);
     }
     MMI::DisplayInfo display = {
         .id = static_cast<int32_t>(displayInfo->GetDisplayId()),
-        .x = displayInfo->GetOffsetX(),
-        .y = displayInfo->GetOffsetY(),
+        .x = offsetX,
+        .y = offsetY,
         .width = static_cast<int32_t>(displayWidth),
         .height = static_cast<int32_t>(displayHeight),
         .name = (std::stringstream("display ")<<displayInfo->GetDisplayId()).str(),
         .uniq = "default0",
         .direction = GetDisplayDirectionForMmi(displayInfo->GetRotation()),
     };
+
+    WLOGFD("MMI::DisplayInfo x: %{public}d, y: %{public}d, width: %{public}d, height: %{public}d ",
+        display.x, display.y, display.width, display.height);
     auto displayIter = std::find_if(displayInfoVector.begin(), displayInfoVector.end(),
         [&display](MMI::DisplayInfo& displayInfoTmp) {
         return displayInfoTmp.id == display.id;

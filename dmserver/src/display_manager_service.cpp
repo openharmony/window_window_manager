@@ -130,6 +130,14 @@ void DisplayManagerService::ConfigureDisplayManagerService()
         displayCutoutController_->SetBuiltInDisplayCutoutSvgPath(
             static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]));
     }
+    if (enableConfig.count("isWaterfallAreaCompressionEnableWhenHorizontal") != 0) {
+        DisplayCutoutController::SetWaterfallCurvedAreaLayoutCompressionEnable(
+            static_cast<bool>(enableConfig["isWaterfallAreaCompressionEnableWhenHorizontal"]));
+    }
+    if (numbersConfig.count("waterfallAreaCompressionSizeWhenHorzontal") != 0) {
+        DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(
+            static_cast<uint32_t>(numbersConfig["waterfallAreaCompressionSizeWhenHorzontal"][0]));
+    }
 }
 
 void DisplayManagerService::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)
@@ -654,5 +662,13 @@ sptr<CutoutInfo> DisplayManagerService::GetCutoutInfo(DisplayId displayId)
 void DisplayManagerService::RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener)
 {
     abstractScreenController_->RegisterRSScreenChangeListener(listener);
+}
+
+uint32_t DisplayManagerService::GetWaterfallDisplayCurvedAreaAvoidSize(DisplayId displayId)
+{
+    if (displayId == GetDefaultDisplayInfo()->GetDisplayId()) {
+        return displayCutoutController_->GetWaterfallAreaCompressionSizeWhenHorizontal();
+    }
+    return 0;
 }
 } // namespace OHOS::Rosen

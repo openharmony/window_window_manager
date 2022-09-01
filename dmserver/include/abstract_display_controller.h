@@ -55,6 +55,7 @@ private:
     void ProcessDisplaySizeChange(sptr<AbstractScreen> absScreen);
     void ProcessVirtualPixelRatioChange(sptr<AbstractScreen> absScreen);
     void ProcessDisplayRotationChange(sptr<AbstractScreen> absScreen);
+    void ProcessDefaultDisplayLayoutCompression(sptr<AbstractScreen> absScreen);
     sptr<AbstractDisplay> GetAbstractDisplayByAbsScreen(sptr<AbstractScreen> absScreen);
     void BindAloneScreenLocked(sptr<AbstractScreen> absScreen);
     void AddScreenToMirrorLocked(sptr<AbstractScreen> absScreen);

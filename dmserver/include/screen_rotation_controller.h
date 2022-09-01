@@ -54,6 +54,9 @@ public:
     static void SetDefaultDeviceRotationOffset(uint32_t defaultDeviceRotationOffset);
     static bool IsGravitySensorEnabled();
     static void ProcessOrientationSwitch(Orientation orientation);
+
+    static bool IsDisplayRotationVertical(Rotation rotation);
+    static bool IsDisplayRotationHorizontal(Rotation rotation);
 private:
     static void HandleGravitySensorEventCallback(SensorEvent *event);
     static bool CheckCallbackTimeInterval();
@@ -72,8 +75,6 @@ private:
     static bool IsDeviceRotationHorizontal(DeviceRotation deviceRotation);
     static bool IsCurrentDisplayVertical();
     static bool IsCurrentDisplayHorizontal();
-    static bool IsDisplayRotationVertical(Rotation rotation);
-    static bool IsDisplayRotationHorizontal(Rotation rotation);
     static bool IsSensorRelatedOrientation(Orientation orientation);
     
     static void ProcessRotationMapping();
