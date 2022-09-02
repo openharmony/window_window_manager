@@ -566,10 +566,11 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayInfo->GetDisplayId());
     if (windowNodeContainer != nullptr) {
         windowNodeContainer->BeforeProcessWindowAvoidAreaChangeWhenDisplayChange();
+        windowNodeContainer->UpdateDisplayInfo(displayInfo);
     }
     switch (type) {
         case DisplayStateChangeType::LAYOUT_COMPRESS:
-            ProcessLayoutCompress(displayInfo);
+            ProcessDefaultDisplayLayoutCompression(displayInfo);
             [[fallthrough]];
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION:
@@ -592,19 +593,26 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     }
 }
 
-void WindowController::ProcessLayoutCompress(const sptr<DisplayInfo>& displayInfo)
+void WindowController::ProcessDefaultDisplayLayoutCompression(const sptr<DisplayInfo>& displayInfo)
 {
-    WLOGFD("Enter processLayoutCompress");
+    WLOGFI("Enter processLayoutCompress");
     auto &dms = DisplayManagerServiceInner::GetInstance();
     DisplayId displayId = displayInfo->GetDisplayId();
+    if (displayId != dms.GetDefaultDisplayId()) {
+        WLOGFI("Not default display");
+        return;
+    }
     if (!displayInfo->GetWaterfallDisplayCompressionStatus()) {
-        if (maskingSurfaceNode_ == null) {
+        if (maskingSurfaceNode_ == nullptr) {
+            WLOGFD("MaskingSurfaceNode is not created");
             return;
         } else {
-            dms.UpdateRSTree(displayId, displayId, maskingSurfaceNode_, false);
+            WLOGFD("Remove maskingSurfaceNode");
+            dms.UpdateRSTree(displayId, displayId, maskingSurfaceNode_, false, false);
             return;
         }
     }
+    WLOGFD("Add maskingSurfaceNode");
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "maskingSurface";
     maskingSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
@@ -633,7 +641,7 @@ void WindowController::ProcessLayoutCompress(const sptr<DisplayInfo>& displayInf
         return;
     }
     maskingSurfaceNode_->SetBounds(0, 0, fullDisplayWidth, fullDisplayHeight);
-    dms.UpdateRSTree(displayId, displayId, maskingSurfaceNode_, true);
+    dms.UpdateRSTree(displayId, displayId, maskingSurfaceNode_, true, false);
 }
 
 void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)

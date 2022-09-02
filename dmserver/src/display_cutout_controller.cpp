@@ -25,7 +25,7 @@ namespace {
 }
 
 bool DisplayCutoutController::isWaterfallDisplay_ = false;
-bool DisplayCutoutController::isWaterfallCurvedAreaLayoutCompressionEnable_ = false;
+bool DisplayCutoutController::isWaterfallAreaCompressionEnableWhenHorizontal_ = false;
 uint32_t DisplayCutoutController::waterfallAreaCompressionSizeWhenHorizontal_ = 0;
 
 void DisplayCutoutController::SetBuiltInDisplayCutoutSvgPath(const std::string& svgPath)
@@ -37,6 +37,11 @@ void DisplayCutoutController::SetIsWaterfallDisplay(bool isWaterfallDisplay)
 {
     WLOGFI("Set isWaterfallDisplay: %{public}u", isWaterfallDisplay);
     isWaterfallDisplay_ = isWaterfallDisplay;
+}
+
+bool DisplayCutoutController::IsWaterfallDisplay()
+{
+    return isWaterfallDisplay_;
 }
 
 void DisplayCutoutController::SetCurvedScreenBoundary(std::vector<int> curvedScreenBoundary)
@@ -277,9 +282,9 @@ Rect DisplayCutoutController::CreateWaterfallRect(uint32_t left, uint32_t top, u
     return Rect {left, top, width, height};
 }
 
-void DisplayCutoutController::SetWaterfallCurvedAreaLayoutCompressionEnable(bool isEnable)
+void DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(bool isEnable)
 {
-    isWaterfallCurvedAreaLayoutCompressionEnable_ = isEnable;
+    isWaterfallAreaCompressionEnableWhenHorizontal_ = isEnable;
 }
 
 void DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(uint32_t size)
@@ -287,16 +292,17 @@ void DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(uint
     waterfallAreaCompressionSizeWhenHorizontal_ = size;
 }
 
-bool DisplayCutoutController::IsWaterfallCurvedAreaLayoutCompressionEnable()
+bool DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal()
 {
-    if (!isWaterfallDisplay_) {
-        return false;
-    }
-    return isWaterfallCurvedAreaLayoutCompressionEnable_;
+    return isWaterfallDisplay_ && isWaterfallAreaCompressionEnableWhenHorizontal_;
 }
 
 uint32_t DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal()
 {
+    if (!isWaterfallDisplay_ || !isWaterfallAreaCompressionEnableWhenHorizontal_) {
+        WLOGFW("Not waterfall display or not enable waterfall compression");
+        return NO_WATERFALL_LAYOUT_COMPRESSION_SIZE;
+    }
     auto& dms = DisplayManagerServiceInner::GetInstance();
     auto mode = dms.GetScreenModesByDisplayId(dms.GetDefaultDisplayId());
     if (mode == nullptr) {
@@ -307,14 +313,13 @@ uint32_t DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal(
     uint32_t screenWidth = mode->width_;
     float vpr = dms.GetDefaultDisplay()->GetVirtualPixelRatio();
     uint32_t sizeInPx = static_cast<uint32_t>(waterfallAreaCompressionSizeWhenHorizontal_ * vpr);
-    if (sizeInPx >= screenHeight / 2 || sizeInPx >= screenWidth / 2) { // 2: for both sides.
+    WLOGFD("Compression size in Px: %{public}u", sizeInPx);
+    // 4: Compression size shall less than 1/4 of the screen size.
+    if (sizeInPx >= screenHeight / 4 || sizeInPx >= screenWidth / 4) {
         WLOGFW("Invalid value for waterfall display curved area avoid size of each sides");
         return NO_WATERFALL_LAYOUT_COMPRESSION_SIZE;
     }
-    if (isWaterfallDisplay_ && isWaterfallCurvedAreaLayoutCompressionEnable_) {
-        return sizeInPx;
-    }
-    return NO_WATERFALL_LAYOUT_COMPRESSION_SIZE;
+    return sizeInPx;
 }
 } // Rosen
 } // OHOS

@@ -172,9 +172,4 @@ void DisplayManagerServiceInner::RegisterRSScreenChangeListener(const sptr<IRSSc
 {
     DisplayManagerService::GetInstance().RegisterRSScreenChangeListener(listener);
 }
-
-uint32_t DisplayManagerServiceInner::GetWaterfallDisplayCurvedAreaAvoidSize(DisplayId displayId) const
-{
-    return DisplayManagerService::GetInstance().GetWaterfallDisplayCurvedAreaAvoidSize(displayId);
-}
 } // namespace OHOS::Rosen

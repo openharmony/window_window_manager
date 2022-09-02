@@ -95,6 +95,7 @@ public:
     void GetModeChangeHotZones(DisplayId displayId,
         ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config);
     sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
+    void UpdateDisplayInfo(sptr<DisplayInfo> displayInfo);
     std::vector<sptr<DisplayInfo>> GetAllDisplayInfo();
     float GetDisplayVirtualPixelRatio(DisplayId displayId) const;
 

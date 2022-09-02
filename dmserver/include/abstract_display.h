@@ -66,7 +66,7 @@ public:
     void SetOrientation(Orientation orientation);
     bool RequestRotation(Rotation rotation);
     void SetFreezeFlag(FreezeFlag);
-
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, WaterfallDisplayCompressionStatus, waterfallDisplayCompressionStatus, false);
 private:
     DisplayId id_ { DISPLAY_ID_INVALID };
     std::string name_ { "" };

@@ -150,6 +150,15 @@ sptr<DisplayInfo> DisplayGroupInfo::GetDisplayInfo(DisplayId displayId) const
     return nullptr;
 }
 
+void DisplayGroupInfo::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo) const
+{
+    DisplayId displayId = displayInfo->GetDisplayId();
+    if (displayInfosMap_.find(displayId) != displayInfosMap_.end()) {
+        displayInfosMap_[displayId] = displayInfo;
+        WLOGFD("Update displayInfo");
+    }
+}
+
 std::vector<sptr<DisplayInfo>> DisplayGroupInfo::GetAllDisplayInfo() const
 {
     std::vector<sptr<DisplayInfo>> displayInfos;
