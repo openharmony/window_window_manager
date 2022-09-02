@@ -92,6 +92,8 @@ public:
     void SetTransform(const Transform& trans);
     void SetSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
     std::shared_ptr<Media::PixelMap> GetSnapshot();
+    Transform GetZoomTransform() const;
+    void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
 
     const sptr<IWindow>& GetWindowToken() const;
     uint32_t GetWindowId() const;

@@ -58,6 +58,7 @@ ohos_shared_library("libdms") {
 
     # RSSurface
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//third_party/libxml2:libxml2",
   ]
 
   external_deps = [

@@ -242,6 +242,23 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case WindowManagerMessage::TRANS_ID_SET_ANCHOR_AND_SCALE : {
+            int32_t x = data.ReadInt32();
+            int32_t y = data.ReadInt32();
+            float scale = data.ReadFloat();
+            SetAnchorAndScale(x, y, scale);
+            break;
+        }
+        case WindowManagerMessage::TRANS_ID_SET_ANCHOR_OFFSET: {
+            int32_t deltaX = data.ReadInt32();
+            int32_t deltaY = data.ReadInt32();
+            SetAnchorOffset(deltaX, deltaY);
+            break;
+        }
+        case WindowManagerMessage::TRANS_ID_OFF_WINDOW_ZOOM: {
+            OffWindowZoom();
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

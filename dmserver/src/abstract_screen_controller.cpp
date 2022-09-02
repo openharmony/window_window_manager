@@ -282,25 +282,48 @@ void AbstractScreenController::ScreenConnectionInDisplayInit(sptr<AbstractScreen
 void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (!screenIdManager_.HasRsScreenId(rsScreenId)) {
-        WLOGFD("connect new screen");
-        auto absScreen = InitAndGetScreen(rsScreenId);
-        if (absScreen == nullptr) {
-            return;
-        }
-        sptr<AbstractScreenGroup> screenGroup = AddToGroupLocked(absScreen);
-        if (screenGroup == nullptr) {
-            return;
-        }
-        NotifyScreenGroupChanged(absScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
-        if (abstractScreenCallback_ != nullptr) {
-            abstractScreenCallback_->onConnect_(absScreen);
-        }
-        if (rSScreenChangeListener_ != nullptr) {
-            rSScreenChangeListener_->onConnected_();
-        }
-    } else {
+    if (screenIdManager_.HasRsScreenId(rsScreenId)) {
         WLOGE("reconnect screen, screenId=%{public}" PRIu64"", rsScreenId);
+        return;
+    }
+    WLOGFD("connect new screen");
+    auto absScreen = InitAndGetScreen(rsScreenId);
+    if (absScreen == nullptr) {
+        return;
+    }
+    sptr<AbstractScreenGroup> screenGroup = AddToGroupLocked(absScreen);
+    if (screenGroup == nullptr) {
+        return;
+    }
+    if (rsScreenId == rsInterface_.GetDefaultScreenId() && absScreen->rsDisplayNode_ != nullptr) {
+        absScreen->screenRequestedOrientation_ = buildInDefaultOrientation_;
+        Rotation rotationAfter = absScreen->CalcRotation(absScreen->screenRequestedOrientation_);
+        WLOGFD("set default rotation to %{public}d for buildin screen", rotationAfter);
+        sptr<SupportedScreenModes> abstractScreenModes = absScreen->GetActiveScreenMode();
+        if (abstractScreenModes != nullptr) {
+            float w = abstractScreenModes->width_;
+            float h = abstractScreenModes->height_;
+            float x = 0;
+            float y = 0;
+            if (!IsVertical(rotationAfter)) {
+                std::swap(w, h);
+                x = (h - w) / 2; // 2: used to calculate offset to center display node
+                y = (w - h) / 2; // 2: used to calculate offset to center display node
+            }
+            // 90.f is base degree
+            absScreen->rsDisplayNode_->SetRotation(-90.0f * static_cast<uint32_t>(rotationAfter));
+            absScreen->rsDisplayNode_->SetFrame(x, y, w, h);
+            absScreen->rotation_ = rotationAfter;
+            absScreen->SetOrientation(absScreen->screenRequestedOrientation_);
+        }
+    }
+    NotifyScreenConnected(absScreen->ConvertToScreenInfo());
+    NotifyScreenGroupChanged(absScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
+    if (abstractScreenCallback_ != nullptr) {
+        abstractScreenCallback_->onConnect_(absScreen);
+    }
+    if (rSScreenChangeListener_ != nullptr) {
+        rSScreenChangeListener_->onConnected_();
     }
 }
 
@@ -323,7 +346,6 @@ sptr<AbstractScreen> AbstractScreenController::InitAndGetScreen(ScreenId rsScree
         return nullptr;
     }
     dmsScreenMap_.insert(std::make_pair(dmsScreenId, absScreen));
-    NotifyScreenConnected(absScreen->ConvertToScreenInfo());
     return absScreen;
 }
 
@@ -633,6 +655,13 @@ DMError AbstractScreenController::SetVirtualScreenSurface(ScreenId screenId, spt
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
     return DMError::DM_OK;
+}
+
+void AbstractScreenController::SetBuildInDefaultOrientation(Orientation orientation)
+{
+    if (orientation >= Orientation::BEGIN && orientation <= Orientation::END) {
+        buildInDefaultOrientation_ = orientation;
+    }
 }
 
 bool AbstractScreenController::SetOrientation(ScreenId screenId, Orientation newOrientation, bool isFromWindow)

@@ -59,7 +59,11 @@ WindowImpl::~WindowImpl()
 
 sptr<Window> WindowImpl::Find(const std::string& name)
 {
-    return nullptr;
+    auto iter = windowMap_.find(name);
+    if (iter == windowMap_.end()) {
+        return nullptr;
+    }
+    return iter->second.second;
 }
 
 const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
@@ -69,12 +73,32 @@ const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
 
 sptr<Window> WindowImpl::GetTopWindowWithId(uint32_t mainWinId)
 {
-    return nullptr;
+    if (windowMap_.empty()) {
+        WLOGFE("Please create mainWindow First!");
+        return nullptr;
+    }
+    for (auto iter = windowMap_.begin(); iter != windowMap_.end(); iter++) {
+        if (mainWinId == iter->second.first) {
+            WLOGFI("FindTopWindow id: %{public}u", mainWinId);
+            return iter->second.second;
+        }
+    }
+    WLOGFE("Cannot find topWindow!");
 }
 
 sptr<Window> WindowImpl::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    return nullptr;
+    if (windowMap_.empty()) {
+        WLOGFE("Please create mainWindow First!");
+        return nullptr;
+    }
+    uint32_t mainWinId = INVALID_WINDOW_ID;
+    WLOGFI("GetTopWindowfinal MainWinId:%{public}u!", mainWinId);
+    if (mainWinId == INVALID_WINDOW_ID) {
+        WLOGFE("Cannot find topWindow!");
+        return nullptr;
+    }
+    return GetTopWindowWithId(mainWinId);
 }
 
 std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
@@ -88,7 +112,10 @@ std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
 
 void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    return;
+    for (auto& winPair : windowMap_) {
+        auto window = winPair.second.second;
+        window->UpdateConfiguration(configuration);
+    }
 }
 
 std::shared_ptr<RSSurfaceNode> WindowImpl::GetSurfaceNode() const
@@ -301,6 +328,11 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
             property_->SetParentId(parentId);
         }
     }
+
+    static std::atomic<uint32_t> tempWindowId = 0;
+    uint32_t windowId = tempWindowId++;
+    property_->SetWindowId(windowId);
+    windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, this)));
 
     state_ = WindowState::STATE_CREATED;
 
@@ -647,7 +679,7 @@ void WindowImpl::GetRequestedTouchHotAreas(std::vector<Rect>& rects) const
 
 WMError WindowImpl::SetAPPWindowLabel(const std::string& label)
 {
-    if (uiContent_==nullptr) {
+    if (uiContent_ == nullptr) {
         WLOGFI("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
@@ -657,11 +689,11 @@ WMError WindowImpl::SetAPPWindowLabel(const std::string& label)
 
 WMError WindowImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
-    if (icon==nullptr) {
+    if (icon == nullptr) {
         WLOGFI("window icon is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (uiContent_==nullptr) {
+    if (uiContent_ == nullptr) {
         WLOGFI("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }

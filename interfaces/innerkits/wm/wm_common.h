@@ -240,6 +240,30 @@ public:
         static Transform I;
         return I;
     }
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteFloat(pivotX_) && parcel.WriteFloat(pivotY_) &&
+            parcel.WriteFloat(scaleX_) && parcel.WriteFloat(scaleY_) && parcel.WriteFloat(scaleZ_) &&
+            parcel.WriteFloat(rotationX_) && parcel.WriteFloat(rotationY_) &&
+            parcel.WriteFloat(rotationZ_) && parcel.WriteFloat(translateX_) &&
+            parcel.WriteFloat(translateY_) && parcel.WriteFloat(translateZ_);
+    }
+
+    void Unmarshalling(Parcel& parcel)
+    {
+        pivotX_ = parcel.ReadFloat();
+        pivotY_ = parcel.ReadFloat();
+        scaleX_ = parcel.ReadFloat();
+        scaleY_ = parcel.ReadFloat();
+        scaleZ_ = parcel.ReadFloat();
+        rotationX_ = parcel.ReadFloat();
+        rotationY_ = parcel.ReadFloat();
+        rotationZ_ = parcel.ReadFloat();
+        translateX_ = parcel.ReadFloat();
+        translateY_ = parcel.ReadFloat();
+        translateZ_ = parcel.ReadFloat();
+    }
 private:
     static inline bool NearZero(float val)
     {
