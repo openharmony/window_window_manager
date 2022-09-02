@@ -118,6 +118,7 @@ public:
     void RemoveSingleUserWindowNodes(int accountId);
     WMError IsTileRectSatisfiedWithSizeLimits(sptr<WindowNode>& node);
     bool HasPrivateWindow();
+    sptr<WindowNode> GetDeskTopWindow();
     static AnimationConfig& GetAnimationConfigRef();
     bool TakeWindowPairSnapshot(DisplayId displayId);
     void ClearWindowPairSnapshot(DisplayId displayId);

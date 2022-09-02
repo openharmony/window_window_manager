@@ -126,6 +126,14 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
                 return -1;
             }
             NotifyWindowClientPointUp(pointerEvent);
+            break;
+        }
+        case WindowMessage::TRANS_ID_UPDATE_ZOOM_TRANSFORM: {
+            Transform trans;
+            trans.Unmarshalling(data);
+            bool isDisplayZoomOn = data.ReadBool();
+            UpdateZoomTransform(trans, isDisplayZoomOn);
+            break;
         }
         default:
             break;

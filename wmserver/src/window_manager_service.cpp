@@ -931,10 +931,10 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
     }
 
     if (action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) {
-        PostAsyncTask([this, windowProperty, action]() mutable {
+        return PostSyncTask([this, windowProperty, action]() mutable {
             windowController_->UpdateProperty(windowProperty, action);
+            return WMError::WM_OK;
         });
-        return WMError::WM_OK;
     }
 
     if (isAsyncTask) {
@@ -1012,6 +1012,27 @@ WMError WindowManagerService::UpdateAvoidAreaListener(uint32_t windowId, bool ha
         }
         container->UpdateAvoidAreaListener(node, haveAvoidAreaListener);
         return WMError::WM_OK;
+    });
+}
+
+void WindowManagerService::SetAnchorAndScale(int32_t x, int32_t y, float scale)
+{
+    PostAsyncTask([this, x, y, scale]() {
+        windowController_->SetAnchorAndScale(x, y, scale);
+    });
+}
+
+void WindowManagerService::SetAnchorOffset(int32_t deltaX, int32_t deltaY)
+{
+    PostAsyncTask([this, deltaX, deltaY]() {
+        windowController_->SetAnchorOffset(deltaX, deltaY);
+    });
+}
+
+void WindowManagerService::OffWindowZoom()
+{
+    PostAsyncTask([this]() {
+        windowController_->OffWindowZoom();
     });
 }
 

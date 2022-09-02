@@ -250,6 +250,23 @@ void WindowRoot::MinimizeTargetWindows(std::vector<uint32_t>& windowIds)
     }
 }
 
+std::vector<sptr<WindowNode>> WindowRoot::GetSplitScreenWindowNodes(DisplayId displayId)
+{
+    auto container = GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr) {
+        return {};
+    }
+    auto displayGroupController = container->GetMultiDisplayController();
+    if (displayGroupController == nullptr) {
+        return {};
+    }
+    auto windowPair = displayGroupController->GetWindowPairByDisplayId(displayId);
+    if (windowPair == nullptr) {
+        return {};
+    }
+    return windowPair->GetPairedWindows();
+}
+
 bool WindowRoot::IsForbidDockSliceMove(DisplayId displayId) const
 {
     auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(displayId);

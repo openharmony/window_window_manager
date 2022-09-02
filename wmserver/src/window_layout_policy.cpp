@@ -479,7 +479,7 @@ void WindowLayoutPolicy::CalcAndSetNodeHotZone(const Rect& winRect, const sptr<W
 {
     float virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
     TransformHelper::Vector2 hotZoneScale(1, 1);
-    if (node->GetWindowProperty()->GetTransform() != Transform::Identity()) {
+    if (node->GetWindowProperty()->isNeedComputerTransform()) {
         node->ComputeTransform();
         hotZoneScale = WindowHelper::CalculateHotZoneScale(node->GetWindowProperty()->GetTransformMat());
     }

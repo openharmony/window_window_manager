@@ -226,6 +226,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
 
     Transform animate;
     animate.translateX_ = -100;
+    animate.translateZ_ = 100;
     window->SetTransform(animate);
     sleep(1);
 
@@ -233,8 +234,36 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
     Rect rect = window->GetRect();
     expect.pivotX_ = (0 - rect.posX_) * 1.0 / rect.width_;
     expect.pivotY_ = (0 - rect.posY_) * 1.0 / rect.height_;
-    expect.scaleX_ = expect.scaleY_ = 2;
-    expect.translateX_ = -200;
+    expect.scaleX_ = expect.scaleY_ = 1.7;
+    expect.translateX_ = -146;
+    expect.translateY_ = 93.6;
+    expect.translateZ_ = 0;
+    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+
+    WindowAccessibilityController::GetInstance().OffWindowZoom();
+    window->Destroy();
+}
+
+/**
+ * @tc.name: DisplayZoom06
+ * @tc.desc: test speical window type
+ * @tc.type: FUNC
+ * @tc.require: issueI5NGWL
+ */
+HWTEST_F(WindowDisplayZoomTest, DisplayZoom06, Function | MediumTest | Level3)
+{
+    WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
+    sleep(1);
+
+    windowInfo_.name = "DisplayZoom06";
+    windowInfo_.type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
+    sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
+    Window* ptr = window.GetRefPtr();
+    WindowImpl* implPtr = (WindowImpl*)ptr;
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    sleep(1);
+
+    Transform expect;
     ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
 
     WindowAccessibilityController::GetInstance().OffWindowZoom();

@@ -200,6 +200,20 @@ void WindowNode::SetTransform(const Transform& trans)
     property_->SetTransform(trans);
 }
 
+Transform WindowNode::GetZoomTransform() const
+{
+    return property_->GetZoomTransform();
+}
+
+void WindowNode::UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn)
+{
+    property_->SetZoomTransform(trans);
+    property_->SetDisplayZoomState(isDisplayZoomOn);
+    if (windowToken_) {
+        windowToken_->UpdateZoomTransform(trans, isDisplayZoomOn);
+    }
+}
+
 WindowSizeLimits WindowNode::GetWindowSizeLimits() const
 {
     return property_->GetSizeLimits();

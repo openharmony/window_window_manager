@@ -371,6 +371,9 @@ void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY, int32_t poi
 
 void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    if (windowProperty_) {
+        windowProperty_->UpdatePointerEvent(pointerEvent);
+    }
     MMI::PointerEvent::PointerItem pointerItem;
     int32_t pointId = pointerEvent->GetPointerId();
     if (!pointerEvent->GetPointerItem(pointId, pointerItem)) {
