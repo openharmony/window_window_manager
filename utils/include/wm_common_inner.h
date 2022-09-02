@@ -322,6 +322,9 @@ struct AbilityInfo {
 namespace {
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
     constexpr float DEFAULT_ASPECT_RATIO = 0.66;
+    constexpr float DISPLAY_ZOOM_OFF_SCALE = 1.0;
+    constexpr float DISPLAY_ZOOM_MIN_SCALE = 2.0;
+    constexpr float DISPLAY_ZOOM_MAX_SCALE = 8.0;
     constexpr int32_t IVALID_DIALOG_WINDOW_ID = -1;
     constexpr uint32_t DIVIDER_WIDTH = 8;
     constexpr uint32_t WINDOW_TITLE_BAR_HEIGHT = 37;

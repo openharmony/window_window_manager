@@ -46,6 +46,57 @@ public:
     {
         return 0;
     }
+
+    class PointerItem {
+    public:
+        int32_t pointerId_ {};
+        int32_t GetDisplayX() const
+        {
+            return 0;
+        }
+
+        int32_t GetDisplayY() const
+        {
+            return 0;
+        }
+
+        void SetDisplayY(int32_t y)
+        {
+            pointerId_ = y;
+        }
+
+        void SetDisplayX(int32_t x)
+        {
+            pointerId_ = x;
+        }
+
+        void SetWindowY(int32_t y)
+        {
+            pointerId_ = y;
+        }
+
+        void SetWindowX(int32_t x)
+        {
+            pointerId_ = x;
+        }
+    };
+
+    bool GetPointerItem(int32_t pointerId, PointerItem &pointerItem)
+    {
+        pointerItem = PointerItem();
+        pointerItem.pointerId_ = pointerId;
+        return true;
+    }
+
+    void UpdatePointerItem(int32_t pointerId, PointerItem &pointerItem)
+    {
+        pointerItem.pointerId_ = pointerId;
+    }
+
+    int32_t GetPointerId() const
+    {
+        return 0;
+    }
 };
 } // namespace MMI
 } // namespace OHOS

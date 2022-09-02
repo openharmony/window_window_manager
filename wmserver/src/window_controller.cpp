@@ -363,6 +363,7 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
         for (auto& child : windowNode->children_) {
             nodes.emplace_back(child);
         }
+        displayZoomController_->ClearZoomTransform(nodes);
         accessibilityConnection_->NotifyAccessibilityWindowInfo(windowNode->GetDisplayId(), nodes,
             WindowUpdateType::WINDOW_UPDATE_REMOVED);
         return res;
@@ -580,6 +581,7 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
         }
     }
     auto displayId = displayInfo->GetDisplayId();
+    displayZoomController_->UpdateAllWindowsZoomInfo(displayId);
     FlushWindowInfoWithDisplayId(displayId);
     accessibilityConnection_->NotifyAccessibilityWindowInfo(displayId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     if (windowNodeContainer != nullptr) {
@@ -875,6 +877,7 @@ WMError WindowController::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)
 void WindowController::FlushWindowInfo(uint32_t windowId)
 {
     WLOGFD("FlushWindowInfo");
+    displayZoomController_->UpdateWindowZoomInfo(windowId);
     RSTransaction::FlushImplicitTransaction();
     inputWindowMonitor_->UpdateInputWindow(windowId);
 }
@@ -928,6 +931,7 @@ WMError WindowController::SetWindowLayoutMode(WindowLayoutMode mode)
         if (res != WMError::WM_OK) {
             return res;
         }
+        displayZoomController_->UpdateAllWindowsZoomInfo(displayId);
         FlushWindowInfoWithDisplayId(displayId);
         accessibilityConnection_->NotifyAccessibilityWindowInfo(displayId, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     }
@@ -1042,6 +1046,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
         case PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY: {
             node->SetTransform(property->GetTransform());
             node->SetWindowSizeChangeReason(WindowSizeChangeReason::TRANSFORM);
+            node->GetWindowProperty()->SetAnimateWindowFlag(true);
             ret = UpdateTransform(windowId);
             break;
         }
@@ -1211,6 +1216,27 @@ void WindowController::OnScreenshot(DisplayId displayId)
         return;
     }
     windowToken->NotifyScreenshot();
+}
+
+void WindowController::SetAnchorOffset(int32_t deltaX, int32_t deltaY)
+{
+    displayZoomController_->SetAnchorOffset(deltaX, deltaY);
+    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    FlushWindowInfoWithDisplayId(displayId);
+}
+
+void WindowController::OffWindowZoom()
+{
+    displayZoomController_->OffWindowZoom();
+    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    FlushWindowInfoWithDisplayId(displayId);
+}
+
+void WindowController::SetAnchorAndScale(int32_t x, int32_t y, float scale)
+{
+    displayZoomController_->SetAnchorAndScale(x, y, scale);
+    DisplayId displayId = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
+    FlushWindowInfoWithDisplayId(displayId);
 }
 
 WMError WindowController::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken)

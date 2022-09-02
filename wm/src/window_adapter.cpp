@@ -269,5 +269,23 @@ WMError WindowAdapter::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> 
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     return windowManagerServiceProxy_->BindDialogTarget(windowId, targetToken);
 }
+
+void WindowAdapter::SetAnchorAndScale(int32_t x, int32_t y, float scale)
+{
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->SetAnchorAndScale(x, y, scale);
+}
+
+void WindowAdapter::SetAnchorOffset(int32_t deltaX, int32_t deltaY)
+{
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->SetAnchorOffset(deltaX, deltaY);
+}
+
+void WindowAdapter::OffWindowZoom()
+{
+    INIT_PROXY_CHECK_RETURN();
+    windowManagerServiceProxy_->OffWindowZoom();
+}
 } // namespace Rosen
 } // namespace OHOS

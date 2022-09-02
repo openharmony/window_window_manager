@@ -1400,6 +1400,20 @@ void WindowNodeContainer::MinimizeAllAppWindows(DisplayId displayId)
     return;
 }
 
+sptr<WindowNode> WindowNodeContainer::GetDeskTopWindow()
+{
+    sptr<WindowNode> deskTop;
+    WindowNodeOperationFunc findDeskTopFunc = [this, &deskTop](sptr<WindowNode> node) {
+        if (node->GetWindowProperty()->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+            deskTop = node;
+            return true;
+        }
+        return false;
+    };
+    TraverseWindowTree(findDeskTopFunc, false);
+    return deskTop;
+}
+
 bool WindowNodeContainer::HasPrivateWindow()
 {
     std::vector<sptr<WindowNode>> windowNodes;
