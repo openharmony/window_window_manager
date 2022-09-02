@@ -1455,7 +1455,7 @@ HWTEST_F(WindowImplTest, SetAPPWindowIcon, Function | SmallTest | Level3)
 
     std::shared_ptr<Media::PixelMap> icon1(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAPPWindowIcon(icon1));
-    std::shared_ptr<Media::PixelMap> icon2=make_shared<Media::PixelMap>();
+    std::shared_ptr<Media::PixelMap> icon2 = std::make_shared<Media::PixelMap>();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAPPWindowIcon(icon2));
 }
 }

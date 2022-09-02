@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <parcel.h>
 #include "class_var_definition.h"
+#include "pointer_event.h"
 #include "dm_common.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
@@ -79,6 +80,12 @@ public:
     WindowSizeChangeReason GetWindowSizeChangeReason() const;
     void SetTransform(const Transform& trans);
     void ComputeTransform();
+    void SetZoomTransform(const Transform& trans);
+    void SetDisplayZoomState(bool isDisplayZoomOn);
+    void SetAnimateWindowFlag(bool isAnimateWindow);
+    void UpdatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    bool isNeedComputerTransform();
+    void ClearTransformZAxisOffset(Transform& trans);
 
     const std::string& GetWindowName() const;
     Rect GetRequestRect() const;
@@ -116,6 +123,9 @@ public:
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     uint32_t GetAccessTokenId() const;
     const Transform& GetTransform() const;
+    Transform GetZoomTransform() const;
+    bool IsDisplayZoomOn() const;
+    bool IsAnimateWindow() const;
     WindowSizeLimits GetSizeLimits() const;
     WindowSizeLimits GetUpdatedSizeLimits() const;
     const TransformHelper::Matrix4& GetTransformMat() const;
@@ -135,6 +145,7 @@ private:
     static void UnmarshallingTransform(Parcel& parcel, WindowProperty* property);
     bool MarshallingWindowSizeLimits(Parcel& parcel) const;
     static void UnmarshallingWindowSizeLimits(Parcel& parcel, WindowProperty* property);
+    void HandleComputeTransform(const Transform& trans);
 
     std::string windowName_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
@@ -181,6 +192,12 @@ private:
     bool recomputeTransformMat_ { false };
     TransformHelper::Matrix4 transformMat_ = TransformHelper::Matrix4::Identity;
     TransformHelper::Matrix4 worldTransformMat_ = TransformHelper::Matrix4::Identity;
+    // Display Zoom transform info
+    Transform zoomTrans_; // Compared with original window rect, including class member trans_
+    bool reCalcuZoomTransformMat_ {true};
+    // if scale of trans_ is less than 1.0, zoomTrans_ may be an identity matrix
+    bool isDisplayZoomOn_ {false};
+    bool isAnimateWindow_ {false};
 
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(Orientation, RequestedOrientation, requestedOrientation, Orientation::UNSPECIFIED);
     WindowSizeLimits sizeLimits_;

@@ -58,7 +58,10 @@ ohos_unittest("wmserver_window_manager_config_test") {
 
   sources = [ "window_manager_config_test.cpp" ]
 
-  deps = [ ":wmserver_unittest_common" ]
+  deps = [
+    ":wmserver_unittest_common",
+    "//third_party/libxml2:libxml2",
+  ]
 }
 
 ohos_unittest("wmserver_window_snapshot_test") {

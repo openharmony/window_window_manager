@@ -690,5 +690,70 @@ WMError WindowManagerProxy::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObj
     int32_t ret = reply.ReadInt32();
     return static_cast<WMError>(ret);
 }
+
+void WindowManagerProxy::SetAnchorAndScale(int32_t x, int32_t y, float scale)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteInt32(x)) {
+        WLOGFE("Write anchor x failed");
+        return;
+    }
+    if (!data.WriteInt32(y)) {
+        WLOGFE("Write anchor y failed");
+        return;
+    }
+    if (!data.WriteFloat(scale)) {
+        WLOGFE("Write scale failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_ANCHOR_AND_SCALE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void WindowManagerProxy::SetAnchorOffset(int32_t deltaX, int32_t deltaY)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteInt32(deltaX)) {
+        WLOGFE("Write anchor delatX failed");
+        return;
+    }
+    if (!data.WriteInt32(deltaY)) {
+        WLOGFE("Write anchor deltaY failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_SET_ANCHOR_OFFSET),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void WindowManagerProxy::OffWindowZoom()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_OFF_WINDOW_ZOOM),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -398,11 +398,21 @@ void WindowImpl::SetTransform(const Transform& trans)
             static_cast<int32_t>(ret), property_->GetWindowId());
         property_->SetTransform(oriTrans); // reset to ori transform when update failed
     }
+    if (property_->IsDisplayZoomOn()) {
+        TransformSurfaceNode(property_->GetZoomTransform());
+    } else {
+        TransformSurfaceNode(trans);
+    }
 }
 
 const Transform& WindowImpl::GetTransform() const
 {
     return property_->GetTransform();
+}
+
+const Transform& WindowImpl::GetZoomTransform() const
+{
+    return property_->GetZoomTransform();
 }
 
 WMError WindowImpl::AddWindowFlag(WindowFlag flag)
@@ -2154,28 +2164,6 @@ void WindowImpl::HandleModeChangeHotZones(int32_t posX, int32_t posY)
     }
 }
 
-void WindowImpl::UpdatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
-{
-    property_->ComputeTransform();
-    MMI::PointerEvent::PointerItem pointerItem;
-    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-        WLOGFW("Point item is invalid");
-        return;
-    }
-    Rect winRect = GetRect();
-    PointInfo originPos =
-        WindowHelper::CalculateOriginPosition(property_->GetTransformMat(),
-        { pointerItem.GetDisplayX(), pointerItem.GetDisplayY() });
-    WLOGI("Pointer event has been updated,window id:%{public}u, before->now:"
-        "[%{public}d,%{public}d]->[%{public}d,%{public}d]",
-        property_->GetWindowId(), pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), originPos.x, originPos.y);
-    pointerItem.SetDisplayX(originPos.x);
-    pointerItem.SetDisplayY(originPos.y);
-    pointerItem.SetWindowX(originPos.x - winRect.posX_);
-    pointerItem.SetWindowY(originPos.y - winRect.posY_);
-    pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), pointerItem);
-}
-
 void WindowImpl::UpdatePointerEventForStretchableWindow(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     MMI::PointerEvent::PointerItem pointerItem;
@@ -2273,7 +2261,7 @@ void WindowImpl::ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32
         return;
     }
     TransformHelper::Vector2 hotZoneScale(1, 1);
-    if (property_->GetTransform() != Transform::Identity()) {
+    if (property_->isNeedComputerTransform()) {
         property_->ComputeTransform();
         hotZoneScale = WindowHelper::CalculateHotZoneScale(property_->GetTransformMat());
     }
@@ -2385,8 +2373,8 @@ void WindowImpl::AdjustWindowAnimationFlag(bool withAnimation)
 void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     // If windowRect transformed, transform event back to its origin position
-    if (property_->GetTransform() != Transform::Identity()) {
-        UpdatePointerEvent(pointerEvent);
+    if (property_) {
+        property_->UpdatePointerEvent(pointerEvent);
     }
     int32_t action = pointerEvent->GetPointerAction();
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
@@ -2646,6 +2634,34 @@ void WindowImpl::NotifyDestroy()
     });
 }
 
+void WindowImpl::TransformSurfaceNode(const Transform& trans)
+{
+    if (surfaceNode_ == nullptr) {
+        return;
+    }
+    surfaceNode_->SetPivotX(trans.pivotX_);
+    surfaceNode_->SetPivotY(trans.pivotY_);
+    surfaceNode_->SetScaleX(trans.scaleX_);
+    surfaceNode_->SetScaleY(trans.scaleY_);
+    surfaceNode_->SetTranslateX(trans.translateX_);
+    surfaceNode_->SetTranslateY(trans.translateY_);
+    surfaceNode_->SetTranslateZ(trans.translateZ_);
+    surfaceNode_->SetRotationX(trans.rotationX_);
+    surfaceNode_->SetRotationY(trans.rotationY_);
+    surfaceNode_->SetRotation(trans.rotationZ_);
+}
+
+void WindowImpl::UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn)
+{
+    WLOGFD("%{public}s zoomTrans, pivotX:%{public}f, pivotY:%{public}f, scaleX:%{public}f, scaleY:%{public}f"
+        ", transX:%{public}f, transY:%{public}f, transZ:%{public}f, rotateX:%{public}f, rotateY:%{public}f "
+        "rotateZ:%{public}f", property_->GetWindowName().c_str(), trans.pivotX_, trans.pivotY_, trans.scaleX_,
+        trans.scaleY_, trans.translateX_, trans.translateY_, trans.translateZ_, trans.rotationX_,
+        trans.rotationY_, trans.rotationZ_);
+    property_->SetZoomTransform(trans);
+    property_->SetDisplayZoomState(isDisplayZoomOn);
+}
+
 void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
 {
     std::vector<sptr<IWindowChangeListener>> windowChangeListeners;
@@ -2869,7 +2885,7 @@ void WindowImpl::GetRequestedTouchHotAreas(std::vector<Rect>& rects) const
 
 WMError WindowImpl::SetAPPWindowLabel(const std::string& label)
 {
-    if (uiContent_==nullptr) {
+    if (uiContent_ == nullptr) {
         WLOGFI("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
@@ -2879,11 +2895,11 @@ WMError WindowImpl::SetAPPWindowLabel(const std::string& label)
 
 WMError WindowImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
-    if (icon==nullptr) {
+    if (icon == nullptr) {
         WLOGFI("window icon is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (uiContent_==nullptr) {
+    if (uiContent_ == nullptr) {
         WLOGFI("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }

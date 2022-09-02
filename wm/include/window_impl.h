@@ -136,6 +136,7 @@ public:
     virtual WMError SetLayoutFullScreen(bool status) override;
     virtual WMError SetFullScreen(bool status) override;
     virtual const Transform& GetTransform() const override;
+    virtual const Transform& GetZoomTransform() const;
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) override;
     inline void SetWindowState(WindowState state)
     {
@@ -230,6 +231,7 @@ public:
     void NotifyScreenshot();
     void NotifyTouchDialogTarget() override;
     void NotifyDestroy();
+    void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
         NativeValue* storage, bool isdistributed, AppExecFwk::Ability* ability) override;
@@ -384,7 +386,6 @@ private:
     Rect GetSystemAlarmWindowDefaultSize(Rect defaultRect);
     void HandleModeChangeHotZones(int32_t posX, int32_t posY);
     WMError NotifyWindowTransition(TransitionReason reason);
-    void UpdatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdatePointerEventForStretchableWindow(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateDragType(int32_t startPointPosX, int32_t startPointPosY);
     void InitListenerHandler();
@@ -398,6 +399,7 @@ private:
     bool NeedToStopShowing();
     void CalculateStartRectExceptHotZone(float virtualPixelRatio, const TransformHelper::Vector2& hotZoneScale);
     void SetSystemConfig();
+    void TransformSurfaceNode(const Transform& trans);
     bool IsAppMainOrSunOrFloatingWindow();
     void SetWindowCornerRadiusAccordingToSystemConfig();
     bool IsAppMainOrSubOrFloatingWindow();

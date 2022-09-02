@@ -132,7 +132,7 @@ void InputWindowMonitor::UpdateDisplayInfo(const std::vector<sptr<DisplayInfo>>&
 void InputWindowMonitor::TransformWindowRects(const sptr<WindowNode>& windowNode, Rect& areaRect,
                                               std::vector<Rect>& touchHotAreas, std::vector<Rect>& pointerHotAreas)
 {
-    if (windowNode->GetWindowProperty()->GetTransform() != Transform::Identity()) {
+    if (windowNode->GetWindowProperty()->isNeedComputerTransform()) {
         windowNode->ComputeTransform();
         for (Rect& rect : touchHotAreas) {
             rect = WindowHelper::TransformRect(windowNode->GetWindowProperty()->GetTransformMat(), rect);

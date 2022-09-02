@@ -127,6 +127,9 @@ public:
     void HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     void NotifyWindowClientPointUp(uint32_t windowId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
+    void SetAnchorAndScale(int32_t x, int32_t y, float scale) override;
+    void SetAnchorOffset(int32_t deltaX, int32_t deltaY) override;
+    void OffWindowZoom() override;
 protected:
     WindowManagerService();
     virtual ~WindowManagerService() = default;

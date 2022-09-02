@@ -63,6 +63,9 @@ public:
         TRANS_ID_UPDATE_RS_TREE,
         TRANS_ID_BIND_DIALOG_TARGET,
         TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG,
+        TRANS_ID_SET_ANCHOR_AND_SCALE,
+        TRANS_ID_SET_ANCHOR_OFFSET,
+        TRANS_ID_OFF_WINDOW_ZOOM,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -97,6 +100,9 @@ public:
     virtual WMError UpdateAvoidAreaListener(uint32_t windowId, bool haveListener) = 0;
     virtual WMError UpdateRsTree(uint32_t windowId, bool isAdd) = 0;
     virtual WMError BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken) = 0;
+    virtual void SetAnchorAndScale(int32_t x, int32_t y, float scale) = 0;
+    virtual void SetAnchorOffset(int32_t deltaX, int32_t deltaY) = 0;
+    virtual void OffWindowZoom() = 0;
 };
 }
 }

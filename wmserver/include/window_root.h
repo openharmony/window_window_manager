@@ -95,6 +95,7 @@ public:
     sptr<WindowNode> GetWindowForDumpAceHelpInfo() const;
     void DestroyLeakStartingWindow();
     void SetSplitRatios(const std::vector<float>& splitRatioNumbers);
+    std::vector<sptr<WindowNode>> GetSplitScreenWindowNodes(DisplayId displayId);
     void SetExitSplitRatios(const std::vector<float>& exitSplitRatios);
     void MinimizeTargetWindows(std::vector<uint32_t>& windowIds);
     WMError UpdateRsTree(uint32_t windowId, bool isAdd);

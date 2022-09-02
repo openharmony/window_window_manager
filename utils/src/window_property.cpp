@@ -33,9 +33,6 @@ void WindowProperty::SetWindowRect(const struct Rect& rect)
 {
     ComputeTransform();
     windowRect_ = rect;
-    if (trans_ != Transform::Identity()) {
-        WindowHelper::GetTransformFromWorldMat4(worldTransformMat_, windowRect_, trans_);
-    }
 }
 
 void WindowProperty::SetDecoStatus(bool decoStatus)
@@ -113,25 +110,111 @@ void WindowProperty::SetTransform(const Transform& trans)
     trans_ = trans;
 }
 
+void WindowProperty::HandleComputeTransform(const Transform& trans)
+{
+    TransformHelper::Vector3 pivotPos = { windowRect_.posX_ + trans.pivotX_ * windowRect_.width_,
+        windowRect_.posY_ + trans.pivotY_ * windowRect_.height_, 0 };
+    worldTransformMat_ = TransformHelper::CreateTranslation(-pivotPos) *
+                            WindowHelper::ComputeWorldTransformMat4(trans) *
+                            TransformHelper::CreateTranslation(pivotPos);
+    // transformMat = worldTransformMat * viewProjectionMat
+    transformMat_ = worldTransformMat_;
+    // Z component of camera position is constant value
+    constexpr float cameraZ = -576.f;
+    TransformHelper::Vector3 cameraPos(pivotPos.x_ + trans.translateX_, pivotPos.y_ + trans.translateY_, cameraZ);
+    // Concatenate with view projection matrix
+    transformMat_ *= TransformHelper::CreateLookAt(cameraPos,
+        TransformHelper::Vector3(cameraPos.x_, cameraPos.y_, 0), TransformHelper::Vector3(0, 1, 0)) *
+        TransformHelper::CreatePerspective(cameraPos);
+}
+
 void WindowProperty::ComputeTransform()
 {
-    if (recomputeTransformMat_) {
-        TransformHelper::Vector3 pivotPos = { windowRect_.posX_ + trans_.pivotX_ * windowRect_.width_,
-            windowRect_.posY_ + trans_.pivotY_ * windowRect_.height_, 0 };
-        worldTransformMat_ = TransformHelper::CreateTranslation(-pivotPos) *
-                             WindowHelper::ComputeWorldTransformMat4(trans_) *
-                             TransformHelper::CreateTranslation(pivotPos);
-        // transformMat = worldTransformMat * viewProjectionMat
-        transformMat_ = worldTransformMat_;
-        // Z component of camera position is constant value
-        constexpr float cameraZ = -576.f;
-        TransformHelper::Vector3 cameraPos(pivotPos.x_ + trans_.translateX_, pivotPos.y_ + trans_.translateY_, cameraZ);
-        // Concatenate with view projection matrix
-        transformMat_ *= TransformHelper::CreateLookAt(cameraPos,
-            TransformHelper::Vector3(cameraPos.x_, cameraPos.y_, 0), TransformHelper::Vector3(0, 1, 0)) *
-            TransformHelper::CreatePerspective(cameraPos);
+    if (isDisplayZoomOn_) {
+        if (reCalcuZoomTransformMat_) {
+            HandleComputeTransform(zoomTrans_);
+            reCalcuZoomTransformMat_ = false;
+        }
+    } else if (recomputeTransformMat_) {
+        HandleComputeTransform(trans_);
         recomputeTransformMat_ = false;
     }
+}
+
+void WindowProperty::SetZoomTransform(const Transform& trans)
+{
+    zoomTrans_ = trans;
+    reCalcuZoomTransformMat_ = true;
+}
+
+void WindowProperty::ClearTransformZAxisOffset(Transform& trans)
+{
+    // replace Z axis translation by scaling
+    TransformHelper::Matrix4 preTransformMat = transformMat_;
+    HandleComputeTransform(trans);
+    Rect rect = WindowHelper::TransformRect(transformMat_, windowRect_);
+    float translateZ = trans.translateZ_;
+    trans.translateZ_ = 0.f;
+    HandleComputeTransform(trans);
+    Rect rectWithoutZAxisOffset = WindowHelper::TransformRect(transformMat_, windowRect_);
+    if (rectWithoutZAxisOffset.width_ == 0) {
+        trans.translateZ_ = translateZ;
+        return;
+    }
+    float scale = rect.width_ * 1.0f / rectWithoutZAxisOffset.width_;
+    trans.scaleX_ *= scale;
+    trans.scaleY_ *= scale;
+    transformMat_ = preTransformMat;
+}
+
+void WindowProperty::UpdatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (trans_ == Transform::Identity() && zoomTrans_ == Transform::Identity()) {
+        return;
+    }
+    ComputeTransform();
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        return;
+    }
+    PointInfo originPos =
+        WindowHelper::CalculateOriginPosition(transformMat_,
+        { pointerItem.GetDisplayX(), pointerItem.GetDisplayY() });
+    pointerItem.SetDisplayX(originPos.x);
+    pointerItem.SetDisplayY(originPos.y);
+    pointerItem.SetWindowX(originPos.x - windowRect_.posX_);
+    pointerItem.SetWindowY(originPos.y - windowRect_.posY_);
+    pointerEvent->UpdatePointerItem(pointerEvent->GetPointerId(), pointerItem);
+}
+
+bool WindowProperty::isNeedComputerTransform()
+{
+    return ((!isDisplayZoomOn_ && trans_ != Transform::Identity()) || zoomTrans_ != Transform::Identity());
+}
+
+void WindowProperty::SetAnimateWindowFlag(bool isAnimateWindow)
+{
+    isAnimateWindow_ = isAnimateWindow;
+}
+
+void WindowProperty::SetDisplayZoomState(bool isDisplayZoomOn)
+{
+    isDisplayZoomOn_ = isDisplayZoomOn;
+}
+
+bool WindowProperty::IsDisplayZoomOn() const
+{
+    return isDisplayZoomOn_;
+}
+
+bool WindowProperty::IsAnimateWindow() const
+{
+    return isAnimateWindow_;
+}
+
+Transform WindowProperty::GetZoomTransform() const
+{
+    return zoomTrans_;
 }
 
 void WindowProperty::SetBrightness(float brightness)
@@ -588,7 +671,8 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(dragType_)) &&
         parcel.WriteUint32(originRect_.width_) && parcel.WriteUint32(originRect_.height_) &&
         parcel.WriteBool(isStretchable_) && MarshallingTouchHotAreas(parcel) && parcel.WriteUint32(accessTokenId_) &&
-        MarshallingTransform(parcel) && MarshallingWindowSizeLimits(parcel);
+        MarshallingTransform(parcel) && MarshallingWindowSizeLimits(parcel) && zoomTrans_.Marshalling(parcel) &&
+        parcel.WriteBool(isDisplayZoomOn_);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -639,6 +723,10 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetAccessTokenId(parcel.ReadUint32());
     UnmarshallingTransform(parcel, property);
     UnmarshallingWindowSizeLimits(parcel, property);
+    Transform zoomTrans;
+    zoomTrans.Unmarshalling(parcel);
+    property->SetZoomTransform(zoomTrans);
+    property->SetDisplayZoomState(parcel.ReadBool());
     return property;
 }
 
@@ -806,6 +894,9 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     accessTokenId_ = property->accessTokenId_;
     trans_ = property->trans_;
     sizeLimits_ = property->sizeLimits_;
+    zoomTrans_ = property->zoomTrans_;
+    isDisplayZoomOn_ = property->isDisplayZoomOn_;
+    reCalcuZoomTransformMat_ = true;
 }
 }
 }

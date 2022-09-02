@@ -36,6 +36,7 @@ ohos_shared_library("libwms") {
     "src/avoid_area_controller.cpp",
     "src/display_group_controller.cpp",
     "src/display_group_info.cpp",
+    "src/display_zoom_controller.cpp",
     "src/drag_controller.cpp",
     "src/freeze_controller.cpp",
     "src/inner_window.cpp",
@@ -77,6 +78,7 @@ ohos_shared_library("libwms") {
     "//foundation/window/window_manager/dmserver:libdms",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
+    "//third_party/libxml2:libxml2",
   ]
 
   external_deps = [
