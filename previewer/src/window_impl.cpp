@@ -651,7 +651,7 @@ WMError WindowImpl::SetAPPWindowLabel(const std::string& label)
         WLOGFI("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFI("SetAPPWindowLabel");
+    uiContent_->SetAppWindowTitle(label);
     return WMError::WM_OK;
 }
 
@@ -665,7 +665,7 @@ WMError WindowImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& ico
         WLOGFI("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGFI("SetAPPWindowIcon");
+    uiContent_->SetAppWindowIcon(icon);
     return WMError::WM_OK;
 }
 

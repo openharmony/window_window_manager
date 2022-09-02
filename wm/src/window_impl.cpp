@@ -2873,8 +2873,7 @@ WMError WindowImpl::SetAPPWindowLabel(const std::string& label)
         WLOGFI("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    //uiContent_->SetAppWindowTitle(label);
-    WLOGFI("SetAPPWindowLable");
+    uiContent_->SetAppWindowTitle(label);
     return WMError::WM_OK;
 }
 
@@ -2888,8 +2887,7 @@ WMError WindowImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& ico
         WLOGFI("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    //uiContent_->SetAppWindowIcon(icon);
-    WLOGFI("SetAPPWindowIcon");
+    uiContent_->SetAppWindowIcon(icon);
     return WMError::WM_OK;
 }
 bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
