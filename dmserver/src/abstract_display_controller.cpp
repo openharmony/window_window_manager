@@ -296,29 +296,39 @@ void AbstractDisplayController::ProcessDefaultDisplayLayoutCompression(sptr<Abst
     WLOGFI("Enter ProcessDefaultDisplayLayoutCompression");
     auto absDisplay = GetAbstractDisplayByAbsScreen(absScreen);
     DisplayId defaultDisplayId = GetDefaultDisplayId();
-    if (absDisplay->GetDisplayId() == defaultDisplayId) {
+    if (absDisplay->GetId() != defaultDisplayId) {
         return;
     }
-    if (!DisplayCutoutController::IsWaterfallCurvedAreaLayoutCompressionEnable() ||
+    if (!DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal() ||
         DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal() == 0) {
         WLOGFI("Not enable waterfall display area compression.");
         return;
     }
 
     Rotation rotation = absDisplay->GetRotation();
+    auto mode = absScreen->GetActiveScreenMode();
+    if (mode == nullptr) {
+        WLOGFE("ScreenMode is nullptr");
+        return;
+    }
+    bool isDefaultRotationVertical = mode->height_ > mode->width_ ? true : false;
     if (ScreenRotationController::IsDisplayRotationHorizontal(rotation)) {
         uint32_t offsetY = DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal();
-        uint32_t displayWidthAfter = absDisplay->GetHeight() - offsetY * 2; // *2: for both sides.
+        uint32_t totalCompressedSize = offsetY * 2; // *2 for both sides.
+        uint32_t displayHeightAfter = isDefaultRotationVertical ? mode->width_ - totalCompressedSize :
+            mode->height_ - totalCompressedSize;
         absDisplay->SetOffsetX(0);
         absDisplay->SetOffsetY(offsetY);
-        absDisplay->SetHeight(displayWidthAfter);
+        absDisplay->SetHeight(displayHeightAfter);
         absDisplay->SetWaterfallDisplayCompressionStatus(true);
     } else {
-        auto mode = absScreen->GetActiveScreenMode();
+        if (!absDisplay->GetWaterfallDisplayCompressionStatus()) {
+            return;
+        }
         absDisplay->SetOffsetX(0);
         absDisplay->SetOffsetY(0);
-        absDisplay->SetHeight(mode->height_);
-        absDisplay->SetWidth(mode->width_);
+        absDisplay->SetHeight(isDefaultRotationVertical ? mode->height_ : mode->width_);
+        absDisplay->SetWidth(isDefaultRotationVertical ? mode->width_ : mode->height_);
         absDisplay->SetWaterfallDisplayCompressionStatus(false);
     }
     SetDisplayStateChangeListener(absDisplay, DisplayStateChangeType::LAYOUT_COMPRESS);

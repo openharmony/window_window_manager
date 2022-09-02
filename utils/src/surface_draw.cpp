@@ -404,7 +404,7 @@ bool SurfaceDraw::DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, const 
     };
     OHOS::SurfaceError surfaceRet = layer->FlushBuffer(buffer, -1, flushConfig);
     if (surfaceRet != OHOS::SurfaceError::SURFACE_ERROR_OK) {
-        WLOGFE("draw pointer FlushBuffer ret:%{public}s", SurfaceErrorStr(surfaceRet).c_str());
+        WLOGFE("draw masking FlushBuffer ret:%{public}s", SurfaceErrorStr(surfaceRet).c_str());
         return false;
     }
     return true;

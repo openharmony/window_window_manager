@@ -51,7 +51,7 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadFloat(displayInfo->xDpi_) && parcel.ReadFloat(displayInfo->yDpi_) &&
         parcel.ReadUint32(rotation) && parcel.ReadUint32(orientation) &&
         parcel.ReadInt32(displayInfo->offsetX_) && parcel.ReadInt32(displayInfo->offsetY_) &&
-        parcel.ReadUint32(displayState) && parcel.ReadBool(waterfallDisplayCompressionStatus_);
+        parcel.ReadUint32(displayState) && parcel.ReadBool(displayInfo->waterfallDisplayCompressionStatus_);
     if (!res) {
         delete displayInfo;
         return nullptr;

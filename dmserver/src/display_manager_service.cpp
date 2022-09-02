@@ -142,7 +142,7 @@ void DisplayManagerService::ConfigureWaterfallDisplayCompressionParams()
     auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
     auto enableConfig = DisplayManagerConfig::GetEnableConfig();
     if (enableConfig.count("isWaterfallAreaCompressionEnableWhenHorizontal") != 0) {
-        DisplayCutoutController::SetWaterfallCurvedAreaLayoutCompressionEnable(
+        DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(
             static_cast<bool>(enableConfig["isWaterfallAreaCompressionEnableWhenHorizontal"]));
     }
     if (numbersConfig.count("waterfallAreaCompressionSizeWhenHorzontal") != 0) {
@@ -681,13 +681,5 @@ sptr<CutoutInfo> DisplayManagerService::GetCutoutInfo(DisplayId displayId)
 void DisplayManagerService::RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener)
 {
     abstractScreenController_->RegisterRSScreenChangeListener(listener);
-}
-
-uint32_t DisplayManagerService::GetWaterfallDisplayCurvedAreaAvoidSize(DisplayId displayId)
-{
-    if (displayId == GetDefaultDisplayInfo()->GetDisplayId()) {
-        return displayCutoutController_->GetWaterfallAreaCompressionSizeWhenHorizontal();
-    }
-    return 0;
 }
 } // namespace OHOS::Rosen

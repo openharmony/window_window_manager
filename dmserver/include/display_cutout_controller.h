@@ -44,12 +44,13 @@ public:
     // For built-in display
     void SetBuiltInDisplayCutoutSvgPath(const std::string& svgPath);
     static void SetIsWaterfallDisplay(bool isWaterfallDisplay);
+    static bool IsWaterfallDisplay();
     void SetCurvedScreenBoundary(std::vector<int> curvedScreenBoundary);
 
     // For waterfall display curved area compression.
-    static void SetWaterfallCurvedAreaLayoutCompressionEnable(bool isEnable);
+    static void SetWaterfallAreaCompressionEnableWhenHorzontal(bool isEnable);
     static void SetWaterfallAreaCompressionSizeWhenHorizontal(uint32_t size);
-    static bool IsWaterfallCurvedAreaLayoutCompressionEnable();
+    static bool IsWaterfallAreaCompressionEnableWhenHorizontal();
     static uint32_t GetWaterfallAreaCompressionSizeWhenHorizontal();
 private:
     Rect CalcCutoutBoundingRect(std::string svgPath);
@@ -69,7 +70,7 @@ private:
     std::map<DisplayId, std::vector<Rect>> boundingRects_;
 
     // For waterfall display curved area compression.
-    static bool isWaterfallCurvedAreaLayoutCompressionEnable_;
+    static bool isWaterfallAreaCompressionEnableWhenHorizontal_;
     static uint32_t waterfallAreaCompressionSizeWhenHorizontal_; // The unit is vp.
 };
 } // Rosen

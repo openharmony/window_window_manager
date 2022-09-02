@@ -53,7 +53,6 @@ public:
     void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
     void RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener);
-    uint32_t GetWaterfallDisplayCurvedAreaAvoidSize(DisplayId displayId) const;
 };
 } // namespace OHOS::Rosen
 
