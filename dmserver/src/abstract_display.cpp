@@ -223,6 +223,7 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->SetRotation(rotation_);
     displayInfo->SetOrientation(orientation_);
     displayInfo->displayState_ = displayState_;
+    displayInfo->SetWaterfallDisplayCompressionStatus(waterfallDisplayCompressionStatus_);
     return displayInfo;
 }
 } // namespace OHOS::Rosen

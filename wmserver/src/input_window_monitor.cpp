@@ -100,14 +100,22 @@ void InputWindowMonitor::UpdateDisplayInfo(const std::vector<sptr<DisplayInfo>>&
         }
         uint32_t displayWidth = displayInfo->GetWidth();
         uint32_t displayHeight = displayInfo->GetHeight();
+        int32_t offsetX = displayInfo->GetOffsetX();
+        int32_t offsetY = displayInfo->GetOffsetY();
+        if (displayInfo->GetWaterfallDisplayCompressionStatus()) {
+            displayWidth = displayWidth + offsetX * 2; // 2: Get full width;
+            displayHeight = displayHeight + offsetY * 2; // 2: Get full height;
+            offsetX = 0;
+            offsetY = 0;
+        }
         if (displayInfo->GetRotation() == Rotation::ROTATION_90 ||
             displayInfo->GetRotation() == Rotation::ROTATION_270) {
             std::swap(displayWidth, displayHeight);
         }
         MMI::DisplayInfo display = {
             .id = static_cast<int32_t>(displayInfo->GetDisplayId()),
-            .x = displayInfo->GetOffsetX(),
-            .y = displayInfo->GetOffsetY(),
+            .x = offsetX,
+            .y = offsetY,
             .width = static_cast<int32_t>(displayWidth),
             .height = static_cast<int32_t>(displayHeight),
             .name = (std::stringstream("display ")<<displayInfo->GetDisplayId()).str(),

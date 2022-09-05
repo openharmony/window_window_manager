@@ -357,5 +357,57 @@ bool SurfaceDraw::GetSurfaceSnapshot(const std::shared_ptr<RSSurfaceNode> surfac
     }
     return true;
 }
+
+bool SurfaceDraw::DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, const Rect screenRect,
+    const Rect transparentRect)
+{
+    int32_t screenHeight = static_cast<int32_t>(screenRect.height_);
+    int32_t screenWidth = static_cast<int32_t>(screenRect.width_);
+    int32_t transparentHeight = static_cast<int32_t>(transparentRect.height_);
+    int32_t transparentWidth = static_cast<int32_t>(transparentRect.width_);
+    sptr<OHOS::Surface> layer = GetLayer(surfaceNode);
+    if (layer == nullptr) {
+        WLOGFE("layer is nullptr");
+        return false;
+    }
+    sptr<OHOS::SurfaceBuffer> buffer = GetSurfaceBuffer(layer, screenWidth, screenHeight);
+    if (buffer == nullptr || buffer->GetVirAddr() == nullptr) {
+        return false;
+    }
+    auto addr = static_cast<uint8_t *>(buffer->GetVirAddr());
+    Drawing::Bitmap fullbitmap;
+    Drawing::BitmapFormat fullBitmapFormat { Drawing::ColorType::COLORTYPE_RGBA_8888,
+        Drawing::AlphaType::ALPHATYPE_OPAQUE };
+    fullbitmap.Build(screenWidth, screenHeight, fullBitmapFormat);
+    Drawing::Canvas canvas;
+    canvas.Bind(fullbitmap);
+    canvas.Clear(0xFF000000);
+    Drawing::Bitmap transBitmap;
+    Drawing::BitmapFormat transBitmapFormat { Drawing::ColorType::COLORTYPE_RGBA_8888,
+        Drawing::AlphaType::ALPHATYPE_OPAQUE };
+    transBitmap.Build(transparentWidth, transparentHeight, transBitmapFormat);
+    transBitmap.ClearWithColor(0);
+    canvas.DrawBitmap(transBitmap, static_cast<Drawing::scalar>(transparentRect.posX_),
+        static_cast<Drawing::scalar>(transparentRect.posY_));
+
+    uint32_t addrSize = screenWidth * screenHeight * IMAGE_BYTES_STRIDE;
+    errno_t ret = memcpy_s(addr, addrSize, fullbitmap.GetPixels(), addrSize);
+    if (ret != EOK) {
+        WLOGFE("draw failed");
+        return false;
+    }
+    OHOS::BufferFlushConfig flushConfig = {
+        .damage = {
+            .w = buffer->GetWidth(),
+            .h = buffer->GetHeight(),
+        },
+    };
+    OHOS::SurfaceError surfaceRet = layer->FlushBuffer(buffer, -1, flushConfig);
+    if (surfaceRet != OHOS::SurfaceError::SURFACE_ERROR_OK) {
+        WLOGFE("draw masking FlushBuffer ret:%{public}s", SurfaceErrorStr(surfaceRet).c_str());
+        return false;
+    }
+    return true;
+}
 } // Rosen
 } // OHOS

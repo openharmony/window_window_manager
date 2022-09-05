@@ -20,9 +20,11 @@
 #include <sstream>
 #include <surface.h>
 
+#include "display_cutout_controller.h"
 #include "display_manager_agent_controller.h"
 #include "display_manager_service.h"
 #include "screen_group.h"
+#include "screen_rotation_controller.h"
 #include "surface_capture_future.h"
 #include "window_manager_hilog.h"
 #include "sys_cap_util.h"
@@ -286,6 +288,52 @@ void AbstractDisplayController::ProcessDisplayRotationChange(sptr<AbstractScreen
     sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
     DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo,
         DisplayChangeEvent::UPDATE_ROTATION);
+    ProcessDisplayCompression(absScreen);
+}
+
+void AbstractDisplayController::ProcessDisplayCompression(sptr<AbstractScreen> absScreen)
+{
+    WLOGFI("Enter ProcessDisplayCompression");
+    auto absDisplay = GetAbstractDisplayByAbsScreen(absScreen);
+    DisplayId defaultDisplayId = GetDefaultDisplayId();
+    if (absDisplay->GetId() != defaultDisplayId) {
+        return;
+    }
+    if (!DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal() ||
+        DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal() == 0) {
+        WLOGFI("Not enable waterfall display area compression.");
+        return;
+    }
+
+    Rotation rotation = absDisplay->GetRotation();
+    auto mode = absScreen->GetActiveScreenMode();
+    if (mode == nullptr) {
+        WLOGFE("ScreenMode is nullptr");
+        return;
+    }
+    bool isDefaultRotationVertical = mode->height_ > mode->width_ ? true : false;
+    if (ScreenRotationController::IsDisplayRotationHorizontal(rotation)) {
+        uint32_t offsetY = DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal();
+        uint32_t totalCompressedSize = offsetY * 2; // *2 for both sides.
+        uint32_t displayHeightAfter = isDefaultRotationVertical ? mode->width_ - totalCompressedSize :
+            mode->height_ - totalCompressedSize;
+        absDisplay->SetOffsetX(0);
+        absDisplay->SetOffsetY(offsetY);
+        absDisplay->SetHeight(displayHeightAfter);
+        absDisplay->SetWaterfallDisplayCompressionStatus(true);
+    } else {
+        if (!absDisplay->GetWaterfallDisplayCompressionStatus()) {
+            return;
+        }
+        absDisplay->SetOffsetX(0);
+        absDisplay->SetOffsetY(0);
+        absDisplay->SetHeight(isDefaultRotationVertical ? mode->height_ : mode->width_);
+        absDisplay->SetWidth(isDefaultRotationVertical ? mode->width_ : mode->height_);
+        absDisplay->SetWaterfallDisplayCompressionStatus(false);
+    }
+    SetDisplayStateChangeListener(absDisplay, DisplayStateChangeType::LAYOUT_COMPRESS);
+    DisplayManagerAgentController::GetInstance().OnDisplayChange(
+        absDisplay->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
 
 sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplayByAbsScreen(sptr<AbstractScreen> absScreen)
@@ -360,6 +408,7 @@ void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScr
     if (abstractDisplay->RequestRotation(absScreen->rotation_)) {
         // Notify rotation event to WMS
         SetDisplayStateChangeListener(abstractDisplay, DisplayStateChangeType::UPDATE_ROTATION);
+        ProcessDisplayCompression(absScreen);
     }
     // Notify orientation event to DisplayManager
     DisplayManagerAgentController::GetInstance().OnDisplayChange(abstractDisplay->ConvertToDisplayInfo(),
@@ -599,14 +648,20 @@ std::map<DisplayId, sptr<DisplayInfo>> AbstractDisplayController::GetAllDisplayI
 void AbstractDisplayController::SetDisplayStateChangeListener(
     sptr<AbstractDisplay> abstractDisplay, DisplayStateChangeType type)
 {
-    ScreenId defaultDisplayId = DISPLAY_ID_INVALID;
+    ScreenId defaultDisplayId = GetDefaultDisplayId();
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap = GetAllDisplayInfoOfGroup(
+        abstractDisplay->ConvertToDisplayInfo());
+    displayStateChangeListener_(defaultDisplayId, abstractDisplay->ConvertToDisplayInfo(), displayInfoMap, type);
+}
+
+DisplayId AbstractDisplayController::GetDefaultDisplayId()
+{
+    DisplayId defaultDisplayId = DISPLAY_ID_INVALID;
     ScreenId defaultScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
     sptr<AbstractDisplay> defaultDisplay = GetAbstractDisplayByScreen(defaultScreenId);
     if (defaultDisplay != nullptr) {
         defaultDisplayId = defaultDisplay->GetId();
     }
-    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap = GetAllDisplayInfoOfGroup(
-        abstractDisplay->ConvertToDisplayInfo());
-    displayStateChangeListener_(defaultDisplayId, abstractDisplay->ConvertToDisplayInfo(), displayInfoMap, type);
+    return defaultDisplayId;
 }
 } // namespace OHOS::Rosen

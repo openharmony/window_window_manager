@@ -41,6 +41,7 @@ public:
     std::map<DisplayId, Rect> GetAllDisplayRects() const;
     Rect GetDisplayRect(DisplayId displayId) const;
     sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId) const;
+    void UpdateDisplayInfo(sptr<DisplayInfo> displayInfo) const;
     std::vector<sptr<DisplayInfo>> GetAllDisplayInfo() const;
     DisplayId GetLeftDisplayId() const;
     DisplayId GetRightDisplayId() const;

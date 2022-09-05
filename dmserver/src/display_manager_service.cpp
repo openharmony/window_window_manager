@@ -130,9 +130,24 @@ void DisplayManagerService::ConfigureDisplayManagerService()
         displayCutoutController_->SetBuiltInDisplayCutoutSvgPath(
             static_cast<std::string>(stringConfig["defaultDisplayCutoutPath"]));
     }
+    ConfigureWaterfallDisplayCompressionParams();
     if (numbersConfig.count("buildInDefaultOrientation") != 0) {
         Orientation orientation = static_cast<Orientation>(numbersConfig["buildInDefaultOrientation"][0]);
         abstractScreenController_->SetBuildInDefaultOrientation(orientation);
+    }
+}
+
+void DisplayManagerService::ConfigureWaterfallDisplayCompressionParams()
+{
+    auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
+    auto enableConfig = DisplayManagerConfig::GetEnableConfig();
+    if (enableConfig.count("isWaterfallAreaCompressionEnableWhenHorizontal") != 0) {
+        DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(
+            static_cast<bool>(enableConfig["isWaterfallAreaCompressionEnableWhenHorizontal"]));
+    }
+    if (numbersConfig.count("waterfallAreaCompressionSizeWhenHorzontal") != 0) {
+        DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(
+            static_cast<uint32_t>(numbersConfig["waterfallAreaCompressionSizeWhenHorzontal"][0]));
     }
 }
 
@@ -189,7 +204,7 @@ void DisplayManagerService::NotifyScreenshot(DisplayId displayId)
 sptr<DisplayInfo> DisplayManagerService::GetDefaultDisplayInfo()
 {
     ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
-    WLOGFI("GetDefaultDisplayInfo %{public}" PRIu64"", dmsScreenId);
+    WLOGFD("GetDefaultDisplayInfo %{public}" PRIu64"", dmsScreenId);
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplayByScreen(dmsScreenId);
     if (display == nullptr) {
         WLOGFE("fail to get displayInfo by id: invalid display");

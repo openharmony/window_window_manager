@@ -1911,6 +1911,11 @@ sptr<DisplayInfo> WindowNodeContainer::GetDisplayInfo(DisplayId displayId)
     return displayGroupInfo_->GetDisplayInfo(displayId);
 }
 
+void WindowNodeContainer::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo)
+{
+    displayGroupInfo_->UpdateDisplayInfo(displayInfo);
+}
+
 std::vector<sptr<DisplayInfo>> WindowNodeContainer::GetAllDisplayInfo()
 {
     return displayGroupInfo_->GetAllDisplayInfo();

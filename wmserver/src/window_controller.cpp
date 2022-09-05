@@ -38,6 +38,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowController"};
     constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 10;
+    constexpr float MASKING_SURFACE_NODE_Z_ORDER = 9999;
 }
 
 uint32_t WindowController::GenWindowId()
@@ -507,6 +508,7 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
             FlushWindowInfoWithDisplayId(displayInfo->GetDisplayId());
             break;
         }
+        case DisplayStateChangeType::LAYOUT_COMPRESS:
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION:
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
@@ -565,8 +567,12 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     auto windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayInfo->GetDisplayId());
     if (windowNodeContainer != nullptr) {
         windowNodeContainer->BeforeProcessWindowAvoidAreaChangeWhenDisplayChange();
+        windowNodeContainer->UpdateDisplayInfo(displayInfo);
     }
     switch (type) {
+        case DisplayStateChangeType::LAYOUT_COMPRESS:
+            ProcessDisplayCompression(displayInfo);
+            [[fallthrough]];
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION:
             ProcessSystemBarChange(displayInfo);
@@ -587,6 +593,58 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     if (windowNodeContainer != nullptr) {
         windowNodeContainer->ProcessWindowAvoidAreaChangeWhenDisplayChange();
     }
+}
+
+void WindowController::ProcessDisplayCompression(const sptr<DisplayInfo>& displayInfo)
+{
+    WLOGFI("Enter processDisplayCompress");
+    auto& dms = DisplayManagerServiceInner::GetInstance();
+    DisplayId displayId = displayInfo->GetDisplayId();
+    if (displayId != dms.GetDefaultDisplayId()) {
+        WLOGFI("Not default display");
+        return;
+    }
+    if (!displayInfo->GetWaterfallDisplayCompressionStatus()) {
+        if (maskingSurfaceNode_ == nullptr) {
+            WLOGFD("MaskingSurfaceNode is not created");
+            return;
+        } else {
+            WLOGFD("Remove maskingSurfaceNode");
+            dms.UpdateRSTree(displayId, displayId, maskingSurfaceNode_, false, false);
+            maskingSurfaceNode_ = nullptr;
+            return;
+        }
+    }
+    WLOGFD("Add maskingSurfaceNode");
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = "maskingSurface";
+    maskingSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    if (maskingSurfaceNode_ == nullptr) {
+        WLOGFE("Create maskingSurfaceNode failed");
+        return;
+    }
+    auto displayWidth = displayInfo->GetWidth();
+    auto displayHeight = displayInfo->GetHeight();
+    auto maskingSizeX = displayInfo->GetOffsetX();
+    auto maskingSizeY = displayInfo->GetOffsetY();
+    auto fullDisplayWidth = displayWidth + maskingSizeX * 2; // *2: Get full width.
+    auto fullDisplayHeight = displayHeight + maskingSizeY * 2; // *2: Get full height.
+
+    Rect screenRect = Rect {0, 0, fullDisplayWidth, fullDisplayHeight};
+    Rect transparentRect = Rect {maskingSizeX, maskingSizeY, displayWidth, displayHeight};
+    WLOGFD("ScreenRect: fullDisplayWidth: %{public}d, fullDisplayHeight: %{public}d",
+        fullDisplayWidth, fullDisplayHeight);
+    WLOGFD("TransparentRect: X: %{public}u, Y: %{public}u, Width: %{public}d, Height: %{public}d",
+        maskingSizeX, maskingSizeY, displayWidth, displayHeight);
+
+    maskingSurfaceNode_->SetPositionZ(MASKING_SURFACE_NODE_Z_ORDER);
+
+    if (!SurfaceDraw::DrawMasking(maskingSurfaceNode_, screenRect, transparentRect)) {
+        WLOGFE("Draw masking surface failed");
+        return;
+    }
+    maskingSurfaceNode_->SetBounds(0, 0, fullDisplayWidth, fullDisplayHeight);
+    dms.UpdateRSTree(displayId, displayId, maskingSurfaceNode_, true, false);
 }
 
 void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)

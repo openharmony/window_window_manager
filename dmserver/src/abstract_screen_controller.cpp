@@ -174,7 +174,7 @@ void AbstractScreenController::UpdateRSTree(ScreenId dmsScreenId, ScreenId paren
 
 sptr<AbstractScreen> AbstractScreenController::GetAbstractScreen(ScreenId dmsScreenId) const
 {
-    WLOGI("GetAbstractScreen: screenId: %{public}" PRIu64"", dmsScreenId);
+    WLOGD("GetAbstractScreen: screenId: %{public}" PRIu64"", dmsScreenId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = dmsScreenMap_.find(dmsScreenId);
     if (iter == dmsScreenMap_.end()) {
@@ -207,7 +207,7 @@ ScreenId AbstractScreenController::GetDefaultAbstractScreenId()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     ScreenId defaultDmsScreenId;
     if (screenIdManager_.ConvertToDmsScreenId(defaultRsScreenId_, defaultDmsScreenId)) {
-        WLOGI("GetDefaultAbstractScreenId, screen:%{public}" PRIu64"", defaultDmsScreenId);
+        WLOGFD("GetDefaultAbstractScreenId, screen:%{public}" PRIu64"", defaultDmsScreenId);
         return defaultDmsScreenId;
     }
     WLOGFI("GetDefaultAbstractScreenId, default screen is null, try to get.");
