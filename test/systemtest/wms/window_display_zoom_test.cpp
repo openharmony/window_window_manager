@@ -235,10 +235,11 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
     expect.pivotX_ = (0 - rect.posX_) * 1.0 / rect.width_;
     expect.pivotY_ = (0 - rect.posY_) * 1.0 / rect.height_;
     expect.scaleX_ = expect.scaleY_ = 1.7;
-    expect.translateX_ = -146;
-    expect.translateY_ = 93.6;
-    expect.translateZ_ = 0;
-    ASSERT_EQ(expect, implPtr->GetWindowProperty()->GetZoomTransform());
+    Transform actual = implPtr->GetWindowProperty()->GetZoomTransform();
+    ASSERT_EQ(expect.pivotX_, actual.pivotX_);
+    ASSERT_EQ(expect.pivotY_, actual.pivotY_);
+    ASSERT_EQ(expect.scaleX_, actual.scaleX_);
+    ASSERT_EQ(expect.scaleY_, actual.scaleY_);
 
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     window->Destroy();
