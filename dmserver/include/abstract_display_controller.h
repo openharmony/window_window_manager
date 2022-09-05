@@ -55,6 +55,7 @@ private:
     void ProcessDisplaySizeChange(sptr<AbstractScreen> absScreen);
     void ProcessVirtualPixelRatioChange(sptr<AbstractScreen> absScreen);
     void ProcessDisplayRotationChange(sptr<AbstractScreen> absScreen);
+    void ProcessDisplayCompression(sptr<AbstractScreen> absScreen);
     sptr<AbstractDisplay> GetAbstractDisplayByAbsScreen(sptr<AbstractScreen> absScreen);
     void BindAloneScreenLocked(sptr<AbstractScreen> absScreen);
     void AddScreenToMirrorLocked(sptr<AbstractScreen> absScreen);
@@ -66,6 +67,7 @@ private:
         sptr<AbstractScreen> absScreen, sptr<AbstractScreenGroup> screenGroup, sptr<AbstractDisplay>& absDisplay);
     bool UpdateDisplaySize(sptr<AbstractDisplay> absDisplay, sptr<SupportedScreenModes> info);
     void SetDisplayStateChangeListener(sptr<AbstractDisplay> abstractDisplay, DisplayStateChangeType type);
+    DisplayId GetDefaultDisplayId();
 
     std::recursive_mutex& mutex_;
     std::atomic<DisplayId> displayCount_ { 0 };

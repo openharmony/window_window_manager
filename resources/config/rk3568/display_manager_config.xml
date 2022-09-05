@@ -36,6 +36,21 @@
     <!-- default value: false -->
     <!-- sample: false -->
     <isWaterfallDisplay enable="false"></isWaterfallDisplay>
+
+    <!-- Indicate whether to enable display area compression for waterfall display when displayed in landscape -->
+    <!-- or landscape_inverted mode. -->
+    <!-- This configuration item takes effect only when isWaterfallDisplay above is true -->
+    <!-- format: boolean -->
+    <!-- default value: false -->
+    <isWaterfallAreaCompressionEnableWhenHorizontal enable="false"></isWaterfallAreaCompressionEnableWhenHorizontal>
+
+    <!-- Indicate the size of both sides of the waterfall display which to be compressed when displayed in landscape -->
+    <!-- or landscape_inverted mode. -->
+    <!-- This configuration item takes effect only when isWaterfallDisplay above is true -->
+    <!-- format: uint32_t, the unit is vp. -->
+    <!-- default value: 0 -->
+    <waterfallAreaCompressionSizeWhenHorzontal>0</waterfallAreaCompressionSizeWhenHorzontal>
+    
     <!-- Indicates orientation of the built-in screen -->
     <!-- 0: Orientation::UNSPECIFIED -->
     <!-- 1: Orientation::VERTICAL         2: Orientation::HORIZONTAL-->

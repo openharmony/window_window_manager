@@ -101,7 +101,8 @@ bool DisplayManagerConfig::LoadConfigXml()
         }
 
         auto nodeName = curNodePtr->name;
-        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("isWaterfallDisplay"))) {
+        if (!xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("isWaterfallDisplay")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("isWaterfallAreaCompressionEnableWhenHorizontal"))) {
             ReadEnableConfigInfo(curNodePtr);
             continue;
         }
@@ -109,6 +110,7 @@ bool DisplayManagerConfig::LoadConfigXml()
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("defaultDeviceRotationOffset")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("cutoutArea")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("curvedScreenBoundary")) ||
+            !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("waterfallAreaCompressionSizeWhenHorzontal")) ||
             !xmlStrcmp(nodeName, reinterpret_cast<const xmlChar*>("buildInDefaultOrientation"))) {
             ReadIntNumbersConfigInfo(curNodePtr);
             continue;

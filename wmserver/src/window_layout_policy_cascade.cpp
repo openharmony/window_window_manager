@@ -144,6 +144,7 @@ void WindowLayoutPolicyCascade::UpdateWindowNode(const sptr<WindowNode>& node, b
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
     auto type = node->GetWindowType();
     const DisplayId& displayId = node->GetDisplayId();
+    UpdateWindowNodeRectOffset(node);
     // affect other windows, trigger off global layout
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
         LayoutWindowTree(displayId);
@@ -182,6 +183,7 @@ void WindowLayoutPolicyCascade::AddWindowNode(const sptr<WindowNode>& node)
     if (WindowHelper::IsEmptyRect(property->GetRequestRect())) {
         SetCascadeRect(node);
     }
+    UpdateWindowNodeRectOffset(node);
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         node->SetRequestRect(cascadeRectsMap_[node->GetDisplayId()].dividerRect_); // init divider bar
         DisplayId displayId = node->GetDisplayId();
@@ -591,6 +593,27 @@ Rect WindowLayoutPolicyCascade::GetDividerRect(DisplayId displayId) const
         dividerRect = cascadeRectsMap_[displayId].dividerRect_;
     }
     return dividerRect;
+}
+
+void WindowLayoutPolicyCascade::UpdateWindowNodeRectOffset(const sptr<WindowNode>& node) const
+{
+    WLOGFD("UpdateWindowNodeRectOffset, windowId: %{public}u", node->GetWindowId());
+    auto displayId = node->GetDisplayId();
+    const Rect& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+    auto type = node->GetWindowType();
+    Rect rect = node->GetRequestRect();
+    WLOGFD("RequestRect before, width: %{public}u, height: %{public}u, posX:%{public}d, posY:%{public}d",
+        rect.width_, rect.height_, rect.posX_, rect.posY_);
+    if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
+        rect.posY_ = displayRect.posY_;
+        node->SetRequestRect(rect);
+    }
+    if (type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+        rect.posY_ = displayRect.height_ + displayRect.posY_ - rect.height_;
+        node->SetRequestRect(rect);
+    }
+    WLOGFD("RequestRect after, width: %{public}u, height: %{public}u, posX:%{public}d, posY:%{public}d",
+        rect.width_, rect.height_, rect.posX_, rect.posY_);
 }
 } // Rosen
 } // OHOS
