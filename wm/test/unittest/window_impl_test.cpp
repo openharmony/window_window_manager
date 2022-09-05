@@ -1441,6 +1441,37 @@ HWTEST_F(WindowImplTest, SetTransform04, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: SetAPPWindowLabel
+ * @tc.desc: set window label to ace
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, SetAPPWindowLabel, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetAPPWindowLabel");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    std::string label = "openharmony";
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAPPWindowLabel(label));
+}
+
+/**
+ * @tc.name: SetAPPWindowIcon
+ * @tc.desc: set window Icon to ace
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, SetAPPWindowIcon, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("SetAPPWindowIcon");
+    sptr<WindowImpl> window = new WindowImpl(option);
+
+    std::shared_ptr<Media::PixelMap> icon1(nullptr);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAPPWindowIcon(icon1));
+    std::shared_ptr<Media::PixelMap> icon2 = std::make_shared<Media::PixelMap>();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAPPWindowIcon(icon2));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
