@@ -303,23 +303,7 @@ uint32_t DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal(
         WLOGFW("Not waterfall display or not enable waterfall compression");
         return NO_WATERFALL_LAYOUT_COMPRESSION_SIZE;
     }
-    auto& dms = DisplayManagerServiceInner::GetInstance();
-    auto mode = dms.GetScreenModesByDisplayId(dms.GetDefaultDisplayId());
-    if (mode == nullptr) {
-        WLOGFW("SupportedScreenModes is null");
-        return NO_WATERFALL_LAYOUT_COMPRESSION_SIZE;
-    }
-    uint32_t screenHeight = mode->height_;
-    uint32_t screenWidth = mode->width_;
-    float vpr = dms.GetDefaultDisplay()->GetVirtualPixelRatio();
-    uint32_t sizeInPx = static_cast<uint32_t>(waterfallAreaCompressionSizeWhenHorizontal_ * vpr);
-    WLOGFD("Compression size in Px: %{public}u", sizeInPx);
-    // 4: Compression size shall less than 1/4 of the screen size.
-    if (sizeInPx >= screenHeight / 4 || sizeInPx >= screenWidth / 4) {
-        WLOGFW("Invalid value for waterfall display curved area avoid size of each sides");
-        return NO_WATERFALL_LAYOUT_COMPRESSION_SIZE;
-    }
-    return sizeInPx;
+    return waterfallAreaCompressionSizeWhenHorizontal_;
 }
 } // Rosen
 } // OHOS
