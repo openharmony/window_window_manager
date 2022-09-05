@@ -20,6 +20,7 @@ group("demo") {
     ":demo_mirror_screen_listener",
     ":demo_screenshot_listener",
     ":demo_snapshot_virtual_screen",
+    ":demo_system_sub_window",
   ]
 }
 
@@ -76,6 +77,25 @@ ohos_executable("demo_snapshot_virtual_screen") {
     "//foundation/window/window_manager/snapshot:libsnapshot_util",
     "//foundation/window/window_manager/utils:libwmutil",
   ]
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_executable("demo_system_sub_window") {
+  sources = [ "demo_system_sub_window.cpp" ]
+
+  include_dirs = [
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "//foundation/window/window_manager/test/common/utils/include",
+  ]
+
+  deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
+    "//foundation/window/window_manager/wm:libwm",
+  ]
+
+  external_deps = [ "c_utils:utils" ]
 
   part_name = "window_manager"
   subsystem_name = "window"
