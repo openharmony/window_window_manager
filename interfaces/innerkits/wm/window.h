@@ -56,10 +56,10 @@ class RSSurfaceNode;
 
 class IWindowLifeCycle : virtual public RefBase {
 public:
-    virtual void AfterForeground() = 0;
-    virtual void AfterBackground() = 0;
-    virtual void AfterFocused() = 0;
-    virtual void AfterUnfocused() = 0;
+    virtual void AfterForeground() {}
+    virtual void AfterBackground() {}
+    virtual void AfterFocused() {}
+    virtual void AfterUnfocused() {}
     virtual void ForegroundFailed() {}
     virtual void ForegroundInvalidMode() {}
     virtual void AfterActive() {}
@@ -68,23 +68,23 @@ public:
 
 class IWindowChangeListener : virtual public RefBase {
 public:
-    virtual void OnSizeChange(Rect rect, WindowSizeChangeReason reason) = 0;
-    virtual void OnModeChange(WindowMode mode) = 0;
+    virtual void OnSizeChange(Rect rect, WindowSizeChangeReason reason) {}
+    virtual void OnModeChange(WindowMode mode) {}
 };
 
 class IAvoidAreaChangedListener : virtual public RefBase {
 public:
-    virtual void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) = 0;
+    virtual void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type) {}
 };
 
 class IWindowDragListener : virtual public RefBase {
 public:
-    virtual void OnDrag(int32_t x, int32_t y, DragEvent event) = 0;
+    virtual void OnDrag(int32_t x, int32_t y, DragEvent event) {}
 };
 
 class IDisplayMoveListener : virtual public RefBase {
 public:
-    virtual void OnDisplayMove(DisplayId from, DisplayId to) = 0;
+    virtual void OnDisplayMove(DisplayId from, DisplayId to) {}
 };
 
 class IDispatchInputEventListener : virtual public RefBase {
@@ -108,7 +108,7 @@ public:
 
 class IOccupiedAreaChangeListener : virtual public RefBase {
 public:
-    virtual void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) = 0;
+    virtual void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info) {}
 };
 
 class IAceAbilityHandler : virtual public RefBase {
@@ -128,7 +128,7 @@ public:
 
 class ITouchOutsideListener : virtual public RefBase {
 public:
-    virtual void OnTouchOutside() const = 0;
+    virtual void OnTouchOutside() const {}
 };
 
 class IAnimationTransitionController : virtual public RefBase {
@@ -139,12 +139,12 @@ public:
 
 class IScreenshotListener : virtual public RefBase {
 public:
-    virtual void OnScreenshot() = 0;
+    virtual void OnScreenshot() {}
 };
 
 class IDialogTargetTouchListener : virtual public RefBase {
 public:
-    virtual void OnDialogTargetTouch() const = 0;
+    virtual void OnDialogTargetTouch() const {}
 };
 
 class IDialogDeathRecipientListener : virtual public RefBase {

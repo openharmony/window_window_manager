@@ -257,6 +257,8 @@ public:
     virtual WMError NotifyMemoryLevel(int32_t level) const override;
 
 private:
+    template<typename T> void RegisterListenerLocked(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+    template<typename T> void UnregisterListenerLocked(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     inline std::vector<sptr<IWindowLifeCycle>> GetLifecycleListeners()
     {
         std::vector<sptr<IWindowLifeCycle>> lifecycleListeners;

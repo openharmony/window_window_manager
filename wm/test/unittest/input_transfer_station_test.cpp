@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-#include "input_transfer_station_test.h"
+#include <gtest/gtest.h>
+#include "input_manager.h"
+#include "input_transfer_station.h"
+#include "window_impl.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
 
@@ -23,6 +26,14 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using WindowMocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
+class InputTransferStationTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    virtual void SetUp() override;
+    virtual void TearDown() override;
+    sptr<WindowImpl> window_;
+};
 void InputTransferStationTest::SetUpTestCase()
 {
 }
