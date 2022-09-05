@@ -1438,7 +1438,7 @@ HWTEST_F(WindowImplTest, SetAPPWindowLabel, Function | SmallTest | Level3)
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("SetAPPWindowLabel");
     sptr<WindowImpl> window = new WindowImpl(option);
-    std::string label="openharmony";
+    std::string label = "openharmony";
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAPPWindowLabel(label));
 }
 
