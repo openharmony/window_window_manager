@@ -50,6 +50,7 @@ public:
     static bool IsNodeNeedMinimize(const sptr<WindowNode>& node);
     static std::vector<wptr<WindowNode>> GetNeedMinimizeAppNodes();
     static sptr<WindowNode> GetRecoverdNodeFromMinimizeList();
+
 private:
     static inline bool IsFromUser(MinimizeReason reason)
     {

@@ -612,7 +612,7 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
     const auto& virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
     const auto& systemLimits = GetSystemSizeLimits(node, displayRect, virtualPixelRatio);
     const auto& customizedLimits = node->GetWindowSizeLimits();
-    
+
     WindowSizeLimits newLimits = systemLimits;
 
     // configured limits of floating window
