@@ -16,6 +16,7 @@
 #include "display_test.h"
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
+#include "display_cutout_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -57,6 +58,71 @@ HWTEST_F(DisplayTest, GetCutoutInfo01, Function | SmallTest | Level1)
 {
     auto cutoutInfo = defaultDisplay_->GetCutoutInfo();
     ASSERT_NE(nullptr, cutoutInfo);
+}
+
+/**
+ * @tc.name: SetWaterfallCompression01
+ * @tc.desc: Set waterfall compression related values with valid input.
+ * @tc.type: FUNC
+ * @tc.require: issueI5P8CI
+ */
+HWTEST_F(DisplayTest, SetWaterfallCompression01, Function | SmallTest | Level1)
+{
+    bool isWaterfallDisplayOrigin = DisplayCutoutController::IsWaterfallDisplay();
+    DisplayCutoutController::SetIsWaterfallDisplay(true);
+    bool isCompressionEnableOrigin =
+        DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal();
+    DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(true);
+    uint32_t testSizeOrigin = DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal();
+    uint32_t testSize = 20;
+    DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(testSize);
+    ASSERT_EQ(true, DisplayCutoutController::IsWaterfallDisplay());
+    ASSERT_EQ(true, DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
+    ASSERT_EQ(testSize, DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal());
+    DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(testSizeOrigin);
+    ASSERT_EQ(testSizeOrigin, DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal());
+    DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(isCompressionEnableOrigin);
+    ASSERT_EQ(isWaterfallDisplayOrigin, DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
+    DisplayCutoutController::SetIsWaterfallDisplay(isWaterfallDisplayOrigin);
+    ASSERT_EQ(isWaterfallDisplayOrigin, DisplayCutoutController::IsWaterfallDisplay());
+}
+
+/**
+ * @tc.name: SetWaterfallCompression02
+ * @tc.desc: Set waterfall compression related values with invalid input.
+ * @tc.type: FUNC
+ * @tc.require: issueI5P8CI
+ */
+HWTEST_F(DisplayTest, SetWaterfallCompression02, Function | SmallTest | Level1)
+{
+    bool isWaterfallDisplayOrigin = DisplayCutoutController::IsWaterfallDisplay();
+    DisplayCutoutController::SetIsWaterfallDisplay(true);
+    bool isCompressionEnableOrigin =
+        DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal();
+    DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(true);
+    uint32_t testSizeOrigin = DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal();
+
+    DisplayCutoutController::SetIsWaterfallDisplay(false);
+    DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(true);
+    ASSERT_EQ(false, DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
+
+    uint32_t testSize = 20;
+    DisplayCutoutController::SetIsWaterfallDisplay(true);
+    DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(false);
+    DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(testSize);
+    ASSERT_EQ(0, DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal());
+
+    DisplayCutoutController::SetIsWaterfallDisplay(false);
+    DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(false);
+    DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(testSize);
+    ASSERT_EQ(0, DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal());
+
+    DisplayCutoutController::SetWaterfallAreaCompressionSizeWhenHorizontal(testSizeOrigin);
+    ASSERT_EQ(testSizeOrigin, DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal());
+    DisplayCutoutController::SetWaterfallAreaCompressionEnableWhenHorzontal(isCompressionEnableOrigin);
+    ASSERT_EQ(isWaterfallDisplayOrigin, DisplayCutoutController::IsWaterfallAreaCompressionEnableWhenHorizontal());
+    DisplayCutoutController::SetIsWaterfallDisplay(isWaterfallDisplayOrigin);
+    ASSERT_EQ(isWaterfallDisplayOrigin, DisplayCutoutController::IsWaterfallDisplay());
 }
 }
 } // namespace Rosen
