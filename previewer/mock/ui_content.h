@@ -43,6 +43,10 @@ class PointerEvent;
 class KeyEvent;
 class AxisEvent;
 } // namespace MMI
+
+namespace Media {
+    class PixelMap;
+}
 } // namespace OHOS
 
 class NativeEngine;
@@ -93,6 +97,10 @@ public:
 
     // Receive memory level notification
     virtual void NotifyMemoryLevel(int32_t level) = 0;
+
+    // receive label and icon
+    virtual void SetAppWindowTitle(const std::string& title) = 0;
+    virtual void SetAppWindowIcon(const std::shared_ptr<OHOS::Media::PixelMap>& pixelMap) = 0;
 };
 } // namespace OHOS::Ace
 
