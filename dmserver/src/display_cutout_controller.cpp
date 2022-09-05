@@ -21,7 +21,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayCutoutController"};
-    const uint32_t NO_WATERFALL_LAYOUT_COMPRESSION_SIZE = 0;
+    const uint32_t NO_WATERFALL_DISPLAY_COMPRESSION_SIZE = 0;
 }
 
 bool DisplayCutoutController::isWaterfallDisplay_ = false;
@@ -301,7 +301,7 @@ uint32_t DisplayCutoutController::GetWaterfallAreaCompressionSizeWhenHorizontal(
 {
     if (!isWaterfallDisplay_ || !isWaterfallAreaCompressionEnableWhenHorizontal_) {
         WLOGFW("Not waterfall display or not enable waterfall compression");
-        return NO_WATERFALL_LAYOUT_COMPRESSION_SIZE;
+        return NO_WATERFALL_DISPLAY_COMPRESSION_SIZE;
     }
     return waterfallAreaCompressionSizeWhenHorizontal_;
 }

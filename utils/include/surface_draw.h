@@ -41,8 +41,8 @@ public:
         std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bkgColor);
     static bool GetSurfaceSnapshot(const std::shared_ptr<RSSurfaceNode> surfaceNode,
         std::shared_ptr<Media::PixelMap>& pixelMap, int32_t timeoutMs, float scaleW = 0.5, float scaleH = 0.5);
-    static bool DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, const Rect screenRect,
-        const Rect transparentRect);
+    static bool DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect screenRect,
+        Rect transparentRect);
 
 private:
     static bool DoDraw(uint8_t *addr, uint32_t width, uint32_t height, const std::string& imagePath);

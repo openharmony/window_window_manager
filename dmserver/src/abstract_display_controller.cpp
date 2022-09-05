@@ -339,7 +339,7 @@ void AbstractDisplayController::ProcessDisplayCompression(sptr<AbstractScreen> a
         absDisplay->SetWidth(isDefaultRotationVertical ? mode->width_ : mode->height_);
         absDisplay->SetWaterfallDisplayCompressionStatus(false);
     }
-    SetDisplayStateChangeListener(absDisplay, DisplayStateChangeType::LAYOUT_COMPRESS);
+    SetDisplayStateChangeListener(absDisplay, DisplayStateChangeType::DISPLAY_COMPRESS);
     DisplayManagerAgentController::GetInstance().OnDisplayChange(
         absDisplay->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
