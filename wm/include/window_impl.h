@@ -25,7 +25,6 @@
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
 
-#include "event_handler.h"
 #include "input_transfer_station.h"
 #include "vsync_station.h"
 #include "window.h"
@@ -74,9 +73,6 @@ const std::map<DisplayOrientation, Orientation> ABILITY_TO_WMS_ORIENTATION_MAP {
 };
 
 class WindowImpl : public Window {
-using ListenerTaskCallback = std::function<void()>;
-using EventHandler = OHOS::AppExecFwk::EventHandler;
-using Priority = OHOS::AppExecFwk::EventQueue::Priority;
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
         for (auto& listener : (listeners)) {                  \
@@ -252,8 +248,6 @@ public:
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
-    void PostListenerTask(ListenerTaskCallback &&callback, Priority priority = Priority::LOW,
-        const std::string taskName = "");
     virtual WMError NotifyMemoryLevel(int32_t level) const override;
 
 private:
@@ -271,39 +265,31 @@ private:
     inline void NotifyAfterForeground(bool needNotifyUiContent = true)
     {
         auto lifecycleListeners = GetLifecycleListeners();
-        PostListenerTask([this, lifecycleListeners, needNotifyUiContent]() {
-            CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
-            if (needNotifyUiContent) {
-                CALL_UI_CONTENT(Foreground);
-            }
-        });
+        CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
+        if (needNotifyUiContent) {
+            CALL_UI_CONTENT(Foreground);
+        }
     }
     inline void NotifyAfterBackground()
     {
         auto lifecycleListeners = GetLifecycleListeners();
-        PostListenerTask([this, lifecycleListeners]() {
-            CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
-            CALL_UI_CONTENT(Background);
-        });
+        CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
+        CALL_UI_CONTENT(Background);
     }
     inline void NotifyAfterFocused()
     {
         auto lifecycleListeners = GetLifecycleListeners();
-        PostListenerTask([this, lifecycleListeners]() {
-            CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
-            CALL_UI_CONTENT(Focus);
-        });
+        CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
+        CALL_UI_CONTENT(Focus);
     }
     inline void NotifyAfterUnfocused(bool needNotifyUiContent = true)
     {
         auto lifecycleListeners = GetLifecycleListeners();
         // use needNotifyUinContent to separate ui content callbacks
-        PostListenerTask([this, lifecycleListeners, needNotifyUiContent]() {
-            CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
-            if (needNotifyUiContent) {
-                CALL_UI_CONTENT(UnFocus);
-            }
-        });
+        CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
+        if (needNotifyUiContent) {
+            CALL_UI_CONTENT(UnFocus);
+        }
     }
     inline void NotifyBeforeDestroy(std::string windowName)
     {
@@ -330,30 +316,22 @@ private:
     inline void NotifyAfterActive()
     {
         auto lifecycleListeners = GetLifecycleListeners();
-        PostListenerTask([lifecycleListeners]() {
-            CALL_LIFECYCLE_LISTENER(AfterActive, lifecycleListeners);
-        });
+        CALL_LIFECYCLE_LISTENER(AfterActive, lifecycleListeners);
     }
     inline void NotifyAfterInactive()
     {
         auto lifecycleListeners = GetLifecycleListeners();
-        PostListenerTask([lifecycleListeners]() {
-            CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners);
-        });
+        CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners);
     }
     inline void NotifyForegroundFailed()
     {
         auto lifecycleListeners = GetLifecycleListeners();
-        PostListenerTask([lifecycleListeners]() {
-            CALL_LIFECYCLE_LISTENER(ForegroundFailed, lifecycleListeners);
-        });
+        CALL_LIFECYCLE_LISTENER(ForegroundFailed, lifecycleListeners);
     }
     inline void NotifyForegroundInvalidWindowMode()
     {
         auto lifecycleListeners = GetLifecycleListeners();
-        PostListenerTask([lifecycleListeners]() {
-            CALL_LIFECYCLE_LISTENER(ForegroundInvalidMode, lifecycleListeners);
-        });
+        CALL_LIFECYCLE_LISTENER(ForegroundInvalidMode, lifecycleListeners);
     }
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
@@ -388,7 +366,6 @@ private:
     WMError NotifyWindowTransition(TransitionReason reason);
     void UpdatePointerEventForStretchableWindow(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateDragType(int32_t startPointPosX, int32_t startPointPosY);
-    void InitListenerHandler();
     void HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     bool CheckCameraFloatingWindowMultiCreated(WindowType type);
     void GetConfigurationFromAbilityInfo();
@@ -440,7 +417,6 @@ private:
     std::string name_;
     std::unique_ptr<Ace::UIContent> uiContent_;
     std::shared_ptr<AbilityRuntime::Context> context_;
-    std::shared_ptr<EventHandler> eventHandler_;
     std::recursive_mutex mutex_;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
@@ -450,7 +426,6 @@ private:
     SystemConfig windowSystemConfig_ ;
     bool isOriginRectSet_ = false;
     bool needRemoveWindowInputChannel_ = false;
-    bool isListenerHandlerRunning_ = false;
     bool isMainHandlerAvailable_ = true;
     bool isAppFloatingWindow_ = false;
     bool isFocused_ = false;
