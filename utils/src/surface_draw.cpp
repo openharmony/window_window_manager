@@ -358,8 +358,8 @@ bool SurfaceDraw::GetSurfaceSnapshot(const std::shared_ptr<RSSurfaceNode> surfac
     return true;
 }
 
-bool SurfaceDraw::DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, const Rect screenRect,
-    const Rect transparentRect)
+bool SurfaceDraw::DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect screenRect,
+    Rect transparentRect)
 {
     int32_t screenHeight = static_cast<int32_t>(screenRect.height_);
     int32_t screenWidth = static_cast<int32_t>(screenRect.width_);
