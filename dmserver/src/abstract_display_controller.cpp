@@ -288,12 +288,12 @@ void AbstractDisplayController::ProcessDisplayRotationChange(sptr<AbstractScreen
     sptr<DisplayInfo> displayInfo = abstractDisplay->ConvertToDisplayInfo();
     DisplayManagerAgentController::GetInstance().OnDisplayChange(displayInfo,
         DisplayChangeEvent::UPDATE_ROTATION);
-    ProcessDefaultDisplayLayoutCompression(absScreen);
+    ProcessDisplayCompression(absScreen);
 }
 
-void AbstractDisplayController::ProcessDefaultDisplayLayoutCompression(sptr<AbstractScreen> absScreen)
+void AbstractDisplayController::ProcessDisplayCompression(sptr<AbstractScreen> absScreen)
 {
-    WLOGFI("Enter ProcessDefaultDisplayLayoutCompression");
+    WLOGFI("Enter ProcessDisplayCompression");
     auto absDisplay = GetAbstractDisplayByAbsScreen(absScreen);
     DisplayId defaultDisplayId = GetDefaultDisplayId();
     if (absDisplay->GetId() != defaultDisplayId) {
@@ -408,7 +408,7 @@ void AbstractDisplayController::ProcessDisplayUpdateOrientation(sptr<AbstractScr
     if (abstractDisplay->RequestRotation(absScreen->rotation_)) {
         // Notify rotation event to WMS
         SetDisplayStateChangeListener(abstractDisplay, DisplayStateChangeType::UPDATE_ROTATION);
-        ProcessDefaultDisplayLayoutCompression(absScreen);
+        ProcessDisplayCompression(absScreen);
     }
     // Notify orientation event to DisplayManager
     DisplayManagerAgentController::GetInstance().OnDisplayChange(abstractDisplay->ConvertToDisplayInfo(),

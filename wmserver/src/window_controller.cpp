@@ -570,7 +570,7 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     }
     switch (type) {
         case DisplayStateChangeType::LAYOUT_COMPRESS:
-            ProcessDefaultDisplayLayoutCompression(displayInfo);
+            ProcessDisplayCompression(displayInfo);
             [[fallthrough]];
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION:
@@ -593,10 +593,10 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     }
 }
 
-void WindowController::ProcessDefaultDisplayLayoutCompression(const sptr<DisplayInfo>& displayInfo)
+void WindowController::ProcessDisplayCompression(const sptr<DisplayInfo>& displayInfo)
 {
-    WLOGFI("Enter processLayoutCompress");
-    auto &dms = DisplayManagerServiceInner::GetInstance();
+    WLOGFI("Enter processDisplayCompress");
+    auto& dms = DisplayManagerServiceInner::GetInstance();
     DisplayId displayId = displayInfo->GetDisplayId();
     if (displayId != dms.GetDefaultDisplayId()) {
         WLOGFI("Not default display");
@@ -609,6 +609,7 @@ void WindowController::ProcessDefaultDisplayLayoutCompression(const sptr<Display
         } else {
             WLOGFD("Remove maskingSurfaceNode");
             dms.UpdateRSTree(displayId, displayId, maskingSurfaceNode_, false, false);
+            maskingSurfaceNode_ = nullptr;
             return;
         }
     }
