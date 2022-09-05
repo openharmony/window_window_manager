@@ -313,6 +313,11 @@ void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId)
             // 90.f is base degree
             absScreen->rsDisplayNode_->SetRotation(-90.0f * static_cast<uint32_t>(rotationAfter));
             absScreen->rsDisplayNode_->SetFrame(x, y, w, h);
+            absScreen->rsDisplayNode_->SetBounds(x, y, w, h);
+            auto transactionProxy = RSTransactionProxy::GetInstance();
+            if (transactionProxy != nullptr) {
+                transactionProxy->FlushImplicitTransaction();
+            }
             absScreen->rotation_ = rotationAfter;
             absScreen->SetOrientation(absScreen->screenRequestedOrientation_);
         }
