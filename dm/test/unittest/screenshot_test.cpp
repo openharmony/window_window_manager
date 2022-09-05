@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-#include "screenshot_test.h"
+#include <gtest/gtest.h>
+#include "png.h"
+#include "display_manager.h"
+#include "pixel_map.h"
 
 #include <securec.h>
 
@@ -27,6 +30,13 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
+class ScreenshotTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    virtual void SetUp() override;
+    virtual void TearDown() override;
+};
 void ScreenshotTest::SetUpTestCase()
 {
     CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);

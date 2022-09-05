@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
-#include "screen_test.h"
+#include <gtest/gtest.h>
+
+#include "display_manager.h"
+#include "screen_manager.h"
+#include "screen_manager_utils.h"
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 
@@ -23,7 +27,17 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
+class ScreenTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    virtual void SetUp() override;
+    virtual void TearDown() override;
 
+    static sptr<Display> defaultDisplay_;
+    static ScreenId defaultScreenId_;
+    static sptr<Screen> screen_;
+};
 sptr<Display> ScreenTest::defaultDisplay_ = nullptr;
 ScreenId ScreenTest::defaultScreenId_ = SCREEN_ID_INVALID;
 sptr<Screen> ScreenTest::screen_ = nullptr;
