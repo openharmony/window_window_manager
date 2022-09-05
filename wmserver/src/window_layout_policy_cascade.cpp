@@ -600,9 +600,9 @@ void WindowLayoutPolicyCascade::UpdateWindowNodeRectOffset(const sptr<WindowNode
     WLOGFD("UpdateWindowNodeRectOffset, windowId: %{public}u", node->GetWindowId());
     auto displayId = node->GetDisplayId();
     const Rect& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
-    const auto type = node->GetWindowType();
+    auto type = node->GetWindowType();
     Rect rect = node->GetRequestRect();
-    WLOGFD("RequestRect before, width: %{public}u, height: %{public}u, offsetX:%{public}d, offsetY:%{public}d",
+    WLOGFD("RequestRect before, width: %{public}u, height: %{public}u, posX:%{public}d, posY:%{public}d",
         rect.width_, rect.height_, rect.posX_, rect.posY_);
     if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
         rect.posY_ = displayRect.posY_;
@@ -612,7 +612,7 @@ void WindowLayoutPolicyCascade::UpdateWindowNodeRectOffset(const sptr<WindowNode
         rect.posY_ = displayRect.height_ + displayRect.posY_ - rect.height_;
         node->SetRequestRect(rect);
     }
-    WLOGFD("RequestRect after, width: %{public}u, height: %{public}u, offsetX:%{public}d, offsetY:%{public}d",
+    WLOGFD("RequestRect after, width: %{public}u, height: %{public}u, posX:%{public}d, posY:%{public}d",
         rect.width_, rect.height_, rect.posX_, rect.posY_);
 }
 } // Rosen
