@@ -37,6 +37,17 @@ void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReaso
         return;
     }
     wptr<WindowNode> weakNode(node);
+    for (auto& appNodes: needMinimizeAppNodes_) {
+        auto windowId = node->GetWindowId();
+        auto iter = std::find_if(appNodes.second.begin(), appNodes.second.end(),
+                                [windowId](wptr<WindowNode> srcNode) {
+                                    return srcNode->GetWindowId() == windowId;
+                                });
+        if (iter != appNodes.second.end()) {
+            WLOGFI("[Minimize] Window %{public}u is already in minimize list", node->GetWindowId());
+            return;
+        }
+    }
     WLOGFI("[Minimize] Add Window %{public}u to minimize list, reason %{public}u", node->GetWindowId(), reason);
     needMinimizeAppNodes_[reason].emplace_back(weakNode);
 }
@@ -111,6 +122,8 @@ void MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason reason)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
+        WLOGFI("[Minimize] ExecuteMinimizeTargetReason with size: %{public}zu, reason: %{public}u",
+            needMinimizeAppNodes_.at(reason).size(), reason);
         bool isFromUser = IsFromUser(reason);
         for (auto& node : needMinimizeAppNodes_.at(reason)) {
             WindowInnerManager::GetInstance().MinimizeAbility(node, isFromUser);
