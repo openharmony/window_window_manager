@@ -360,10 +360,6 @@ WMError RemoteAnimation::NotifyAnimationByHome()
 void RemoteAnimation::NotifyAnimationTargetsUpdate(std::vector<uint32_t>& fullScreenWinIds,
     std::vector<uint32_t>& floatWinIds)
 {
-    if (!CheckAnimationController()) {
-        return;
-    }
-
     auto handler = wmsTaskHandler_.lock();
     if (handler == nullptr) {
         WLOGFE("wmsTaskHandler_ is nullptr");
@@ -371,6 +367,9 @@ void RemoteAnimation::NotifyAnimationTargetsUpdate(std::vector<uint32_t>& fullSc
     }
     // need post task when visit windowRoot node map
     auto task = [fullScreenWinIds, floatWinIds]() {
+        if (!CheckAnimationController()) {
+            return;
+        }
         auto winRoot = windowRoot_.promote();
         if (winRoot == nullptr) {
             WLOGFE("window root is nullptr");
