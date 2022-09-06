@@ -123,7 +123,7 @@ public:
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
     uint32_t GetAccessTokenId() const;
     const Transform& GetTransform() const;
-    Transform GetZoomTransform() const;
+    const Transform& GetZoomTransform() const;
     bool IsDisplayZoomOn() const;
     bool IsAnimateWindow() const;
     WindowSizeLimits GetSizeLimits() const;
