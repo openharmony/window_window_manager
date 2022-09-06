@@ -1907,21 +1907,6 @@ std::vector<sptr<DisplayInfo>> WindowNodeContainer::GetAllDisplayInfo()
     return displayGroupInfo_->GetAllDisplayInfo();
 }
 
-Orientation WindowNodeContainer::GetWindowPreferredOrientation()
-{
-    std::vector<sptr<WindowNode>> windowNodes;
-    TraverseContainer(windowNodes);
-    for (auto node : windowNodes) {
-        if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-            return node->GetRequestedOrientation();
-        }
-        if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-            return Orientation::UNSPECIFIED;
-        }
-    }
-    return Orientation::UNSPECIFIED;
-}
-
 void WindowNodeContainer::UpdateCameraFloatWindowStatus(const sptr<WindowNode>& node, bool isShowing)
 {
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {

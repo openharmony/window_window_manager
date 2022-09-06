@@ -48,7 +48,6 @@ class DisplayChangeListener : public IDisplayChangeListener {
 public:
     virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) override;
-    virtual void OnGetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation) override;
     virtual void OnScreenshot(DisplayId displayId) override;
 };
 
@@ -119,7 +118,6 @@ public:
     void CancelStartingWindow(sptr<IRemoteObject> abilityToken);
     void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback) override;
-    void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
     WMError UpdateRsTree(uint32_t windowId, bool isAdd) override;
     void OnScreenshot(DisplayId displayId);
     void OnAccountSwitched(int accountId);
