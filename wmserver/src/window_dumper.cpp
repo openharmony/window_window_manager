@@ -55,7 +55,7 @@ WMError WindowDumper::Dump(int fd, const std::vector<std::u16string>& args) cons
 
     std::string dumpInfo;
     if (params.empty()) {
-        ShowIllegalArgsInfo(dumpInfo, WMError::WM_ERROR_INVALID_PARAM);
+        ShowHelpInfo(dumpInfo);
     } else if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1: params num
         ShowHelpInfo(dumpInfo);
     } else {
