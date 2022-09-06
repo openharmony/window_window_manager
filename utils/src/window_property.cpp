@@ -212,7 +212,7 @@ bool WindowProperty::IsAnimateWindow() const
     return isAnimateWindow_;
 }
 
-Transform WindowProperty::GetZoomTransform() const
+const Transform& WindowProperty::GetZoomTransform() const
 {
     return zoomTrans_;
 }
