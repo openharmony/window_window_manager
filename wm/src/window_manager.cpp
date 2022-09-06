@@ -18,10 +18,7 @@
 #include <algorithm>
 #include <cinttypes>
 
-#include "event_handler.h"
-#include "event_runner.h"
 #include "marshalling_helper.h"
-
 #include "window_adapter.h"
 #include "window_manager_agent.h"
 #include "window_manager_hilog.h"
@@ -34,7 +31,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManager"};
-    const std::string WINDOW_MANAGER_CALLBACK_THREAD_NAME = "wm_listener";
 }
 
 bool WindowVisibilityInfo::Marshalling(Parcel &parcel) const
@@ -114,12 +110,7 @@ FocusChangeInfo* FocusChangeInfo::Unmarshalling(Parcel &parcel)
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManager)
 
 class WindowManager::Impl {
-using ListenerTaskCallback = std::function<void()>;
-using EventHandler = OHOS::AppExecFwk::EventHandler;
-using EventPriority = OHOS::AppExecFwk::EventQueue::Priority;
 public:
-    void PostTask(ListenerTaskCallback &&callback, EventPriority priority, const std::string name);
-    void InitListenerHandler();
     void NotifyFocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
         WindowType windowType, DisplayId displayId);
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
@@ -132,8 +123,6 @@ public:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     static inline SingletonDelegator<WindowManager> delegator_;
 
-    bool isHandlerRunning_ = false;
-    std::shared_ptr<EventHandler> listenerHandler_;
     std::recursive_mutex mutex_;
     std::vector<sptr<IFocusChangedListener>> focusChangedListeners_;
     sptr<WindowManagerAgent> focusChangedListenerAgent_;
@@ -147,44 +136,6 @@ public:
     sptr<WindowManagerAgent> cameraFloatWindowChangedListenerAgent_;
 };
 
-void WindowManager::Impl::PostTask(ListenerTaskCallback &&callback, EventPriority priority = EventPriority::LOW,
-    const std::string name = "WINDOW_MANAGER_TASK")
-{
-    if (!isHandlerRunning_) {
-        // Ensure that the callback thread is not used when it is initialized
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        InitListenerHandler();
-    }
-    if (listenerHandler_ == nullptr) {
-        WLOGFE("listener handler is nullptr");
-        return;
-    }
-    bool ret = listenerHandler_->PostTask([this, callback]() {
-            callback();
-        }, name, 0, priority); // 0 is task delay time
-    if (!ret) {
-        WLOGFE("post listener callback task failed.");
-        return;
-    }
-    return;
-}
-
-void WindowManager::Impl::InitListenerHandler()
-{
-    auto runner = AppExecFwk::EventRunner::Create(WINDOW_MANAGER_CALLBACK_THREAD_NAME);
-    if (runner == nullptr) {
-        WLOGFE("init window manager callback runner failed.");
-        return;
-    }
-    listenerHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    if (listenerHandler_ == nullptr) {
-        WLOGFE("init window manager callback handler failed.");
-        return;
-    }
-    isHandlerRunning_ = true;
-    WLOGFD("init window manager callback runner success.");
-}
-
 void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo)
 {
     WLOGFD("NotifyFocused [%{public}u; %{public}" PRIu64"; %{public}d; %{public}d; %{public}u; %{public}p]",
@@ -195,11 +146,9 @@ void WindowManager::Impl::NotifyFocused(const sptr<FocusChangeInfo>& focusChange
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         focusChangeListeners = focusChangedListeners_;
     }
-    PostTask([this, focusChangeInfo, focusChangeListeners]() mutable {
-            for (auto& listener : focusChangeListeners) {
-                listener->OnFocused(focusChangeInfo);
-            }
-        }, EventPriority::LOW, "FocusChangeInfo");
+    for (auto& listener : focusChangeListeners) {
+        listener->OnFocused(focusChangeInfo);
+    }
 }
 
 void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo)
@@ -212,11 +161,9 @@ void WindowManager::Impl::NotifyUnfocused(const sptr<FocusChangeInfo>& focusChan
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         focusChangeListeners = focusChangedListeners_;
     }
-    PostTask([this, focusChangeInfo, focusChangeListeners]() mutable {
-            for (auto& listener : focusChangeListeners) {
-                listener->OnUnfocused(focusChangeInfo);
-            }
-        }, EventPriority::LOW, "UnFocusChangeInfo");
+    for (auto& listener : focusChangeListeners) {
+        listener->OnUnfocused(focusChangeInfo);
+    }
 }
 
 void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints)
@@ -233,11 +180,9 @@ void WindowManager::Impl::NotifySystemBarChanged(DisplayId displayId, const Syst
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         systemBarChangeListeners = systemBarChangedListeners_;
     }
-    PostTask([this, displayId, tints, systemBarChangeListeners]() mutable {
-            for (auto& listener : systemBarChangeListeners) {
-                listener->OnSystemBarPropertyChange(displayId, tints);
-            }
-        }, EventPriority::LOW, "SystemBarChangeInfo");
+    for (auto& listener : systemBarChangeListeners) {
+        listener->OnSystemBarPropertyChange(displayId, tints);
+    }
 }
 
 void WindowManager::Impl::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
@@ -261,11 +206,9 @@ void WindowManager::Impl::NotifyAccessibilityWindowInfo(const std::vector<sptr<A
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         windowUpdateListeners = windowUpdateListeners_;
     }
-    PostTask([this, infos, type, windowUpdateListeners]() mutable {
-            for (auto& listener : windowUpdateListeners) {
-                listener->OnWindowUpdate(infos, type);
-            }
-        }, EventPriority::LOW, "AccessibilityWindowInfo");
+    for (auto& listener : windowUpdateListeners) {
+        listener->OnWindowUpdate(infos, type);
+    }
 }
 
 void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
@@ -276,11 +219,9 @@ void WindowManager::Impl::NotifyWindowVisibilityInfoChanged(
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         visibilityChangeListeners = windowVisibilityListeners_;
     }
-    PostTask([this, windowVisibilityInfos, visibilityChangeListeners]() mutable {
-            for (auto& listener : visibilityChangeListeners) {
-                listener->OnWindowVisibilityChanged(windowVisibilityInfos);
-            }
-        }, EventPriority::LOW, "AccessibilityWindowInfo");
+    for (auto& listener : visibilityChangeListeners) {
+        listener->OnWindowVisibilityChanged(windowVisibilityInfos);
+    }
 }
 
 void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
@@ -291,11 +232,9 @@ void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, 
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         cameraFloatWindowChangeListeners = cameraFloatWindowChangedListeners_;
     }
-    PostTask([this, accessTokenId, isShowing, cameraFloatWindowChangeListeners]() mutable {
-            for (auto& listener : cameraFloatWindowChangeListeners) {
-                listener->OnCameraFloatWindowChange(accessTokenId, isShowing);
-            }
-        }, EventPriority::LOW, "CameraFloatWindowStatus");
+    for (auto& listener : cameraFloatWindowChangeListeners) {
+        listener->OnCameraFloatWindowChange(accessTokenId, isShowing);
+    }
 }
 
 WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>()) {}
