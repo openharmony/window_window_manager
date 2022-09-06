@@ -832,11 +832,6 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
     WindowManagerService::GetInstance().NotifyDisplayStateChange(defaultDisplayId, displayInfo, displayInfoMap, type);
 }
 
-void DisplayChangeListener::OnGetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation)
-{
-    WindowManagerService::GetInstance().GetWindowPreferredOrientation(displayId, orientation);
-}
-
 void DisplayChangeListener::OnScreenshot(DisplayId displayId)
 {
     WindowManagerService::GetInstance().OnScreenshot(displayId);
@@ -987,13 +982,6 @@ void WindowManagerService::MinimizeWindowsByLauncher(std::vector<uint32_t> windo
 {
     PostVoidSyncTask([this, windowIds, isAnimated, &finishCallback]() mutable {
         windowController_->MinimizeWindowsByLauncher(windowIds, isAnimated, finishCallback);
-    });
-}
-
-void WindowManagerService::GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation)
-{
-    PostVoidSyncTask([this, displayId, &orientation]() mutable {
-        orientation = windowController_->GetWindowPreferredOrientation(displayId);
     });
 }
 
