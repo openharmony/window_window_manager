@@ -1241,7 +1241,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
 
     ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
-    if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
+    if (ret == WMError::WM_OK) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
     } else if (ret == WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE) {
