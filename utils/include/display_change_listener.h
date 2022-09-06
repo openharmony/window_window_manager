@@ -30,7 +30,7 @@ enum class DisplayStateChangeType : uint32_t {
     FREEZE,
     UNFREEZE,
     VIRTUAL_PIXEL_RATIO_CHANGE,
-    LAYOUT_COMPRESS,
+    DISPLAY_COMPRESS,
 };
 class IDisplayChangeListener : public RefBase {
 public:

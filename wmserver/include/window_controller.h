@@ -103,7 +103,7 @@ private:
     void NotifyWindowPropertyChanged(const sptr<WindowNode>& node);
     WMError GetFocusWindowNode(DisplayId displayId, sptr<WindowNode>& windowNode);
     void SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo);
-    void ProcessDisplayCompression(const sptr<DisplayInfo>& displayInfo);
+    void ProcessDisplayCompression(DisplayId defaultDisplayId, const sptr<DisplayInfo>& displayInfo);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
