@@ -187,13 +187,6 @@ void DisplayManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId,
     }
 }
 
-void DisplayManagerService::GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation)
-{
-    if (displayChangeListener_ != nullptr) {
-        displayChangeListener_->OnGetWindowPreferredOrientation(displayId, orientation);
-    }
-}
-
 void DisplayManagerService::NotifyScreenshot(DisplayId displayId)
 {
     if (displayChangeListener_ != nullptr) {

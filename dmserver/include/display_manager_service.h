@@ -105,7 +105,6 @@ public:
     bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
     static float GetCustomVirtualPixelRatio();
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
-    void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
     void RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener);
 private:
