@@ -271,7 +271,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     }
     StopBootAnimationIfNeed(node);
     if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        WindowHelper::IsAppWindow(node->GetWindowType())) {
+        WindowHelper::IsMainWindow(node->GetWindowType())) {
             MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::OTHER_WINDOW);
     }
     return WMError::WM_OK;
