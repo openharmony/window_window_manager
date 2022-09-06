@@ -508,7 +508,7 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
         }
         case DisplayStateChangeType::DESTROY: {
             windowRoot_->ProcessDisplayDestroy(defaultDisplayId, displayInfo, displayInfoMap);
-            FlushWindowInfoWithDisplayId(displayInfo->GetDisplayId());
+            FlushWindowInfoWithDisplayId(defaultDisplayId);
             break;
         }
         case DisplayStateChangeType::DISPLAY_COMPRESS:
