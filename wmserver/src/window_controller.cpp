@@ -508,7 +508,7 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
             FlushWindowInfoWithDisplayId(displayInfo->GetDisplayId());
             break;
         }
-        case DisplayStateChangeType::LAYOUT_COMPRESS:
+        case DisplayStateChangeType::DISPLAY_COMPRESS:
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION:
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
@@ -570,8 +570,8 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
         windowNodeContainer->UpdateDisplayInfo(displayInfo);
     }
     switch (type) {
-        case DisplayStateChangeType::LAYOUT_COMPRESS:
-            ProcessDisplayCompression(displayInfo);
+        case DisplayStateChangeType::DISPLAY_COMPRESS:
+            ProcessDisplayCompression(defaultDisplayId, displayInfo);
             [[fallthrough]];
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION:
@@ -595,15 +595,15 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
     }
 }
 
-void WindowController::ProcessDisplayCompression(const sptr<DisplayInfo>& displayInfo)
+void WindowController::ProcessDisplayCompression(DisplayId defaultDisplayId, const sptr<DisplayInfo>& displayInfo)
 {
     WLOGFI("Enter processDisplayCompress");
-    auto& dms = DisplayManagerServiceInner::GetInstance();
     DisplayId displayId = displayInfo->GetDisplayId();
-    if (displayId != dms.GetDefaultDisplayId()) {
+    if (displayId != defaultDisplayId) {
         WLOGFI("Not default display");
         return;
     }
+    auto& dms = DisplayManagerServiceInner::GetInstance();
     if (!displayInfo->GetWaterfallDisplayCompressionStatus()) {
         if (maskingSurfaceNode_ == nullptr) {
             WLOGFD("MaskingSurfaceNode is not created");
