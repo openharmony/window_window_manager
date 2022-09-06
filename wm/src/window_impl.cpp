@@ -20,6 +20,7 @@
 #include <hisysevent.h>
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
+#include <transaction/rs_transaction.h>
 
 #include "color_parser.h"
 #include "display_manager.h"
@@ -382,6 +383,7 @@ void WindowImpl::SetAlpha(float alpha)
     }
     property_->SetAlpha(alpha);
     surfaceNode_->SetAlpha(alpha);
+    RSTransaction::FlushImplicitTransaction();
 }
 
 void WindowImpl::SetTransform(const Transform& trans)
@@ -879,6 +881,7 @@ void WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
     surfaceNode_->SetShadowOffsetX(shadow.offsetX_);
     surfaceNode_->SetShadowOffsetY(shadow.offsetY_);
     surfaceNode_->SetShadowAlpha(shadow.alpha_);
+    RSTransaction::FlushImplicitTransaction();
 }
 
 void WindowImpl::SetSystemConfig()
@@ -2826,6 +2829,7 @@ WMError WindowImpl::SetCornerRadius(float cornerRadius)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetCornerRadius(cornerRadius);
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 
@@ -2836,6 +2840,7 @@ WMError WindowImpl::SetShadowRadius(float radius)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetShadowRadius(radius);
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 
@@ -2847,6 +2852,7 @@ WMError WindowImpl::SetShadowColor(std::string color)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetShadowColor(colorValue);
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 
@@ -2854,12 +2860,14 @@ void WindowImpl::SetShadowOffsetX(float offsetX)
 {
     WLOGFI("[Client] Window %{public}s set shadow offsetX %{public}f", name_.c_str(), offsetX);
     surfaceNode_->SetShadowOffsetX(offsetX);
+    RSTransaction::FlushImplicitTransaction();
 }
 
 void WindowImpl::SetShadowOffsetY(float offsetY)
 {
     WLOGFI("[Client] Window %{public}s set shadow offsetY %{public}f", name_.c_str(), offsetY);
     surfaceNode_->SetShadowOffsetY(offsetY);
+    RSTransaction::FlushImplicitTransaction();
 }
 
 WMError WindowImpl::SetBlur(float radius)
@@ -2869,6 +2877,7 @@ WMError WindowImpl::SetBlur(float radius)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetFilter(RSFilter::CreateBlurFilter(radius, radius));
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 
@@ -2879,6 +2888,7 @@ WMError WindowImpl::SetBackdropBlur(float radius)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(radius, radius));
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 
@@ -2901,6 +2911,7 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
         surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle),
                                                                          display->GetVirtualPixelRatio()));
     }
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 
