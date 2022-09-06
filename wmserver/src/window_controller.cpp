@@ -1255,15 +1255,6 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
     }
 }
 
-Orientation WindowController::GetWindowPreferredOrientation(DisplayId displayId)
-{
-    sptr<WindowNodeContainer> windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
-    if (windowNodeContainer != nullptr) {
-        return windowNodeContainer->GetWindowPreferredOrientation();
-    }
-    return Orientation::UNSPECIFIED;
-}
-
 void WindowController::OnScreenshot(DisplayId displayId)
 {
     sptr<WindowNode> windowNode;
