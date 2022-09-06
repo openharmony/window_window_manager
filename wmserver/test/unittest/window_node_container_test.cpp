@@ -47,7 +47,6 @@ Rect WindowNodeContainerTest::windowRect_;
 
 void WindowNodeContainerTest::SetUpTestCase()
 {
-    // DisplayManagerConfig::LoadConfigXml();
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE((display != nullptr));
     WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
