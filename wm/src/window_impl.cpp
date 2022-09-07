@@ -322,7 +322,7 @@ WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 
 WMError WindowImpl::SetWindowType(WindowType type)
 {
-    WLOGFI("window id: %{public}u, type:%{public}u.", property_->GetWindowId(), static_cast<uint32_t>(type));
+    WLOGFD("window id: %{public}u, type:%{public}u.", property_->GetWindowId(), static_cast<uint32_t>(type));
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -737,7 +737,7 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
         WLOGFD("mode config param is 0, all modes is supported");
         modeSupportInfo = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     }
-    WLOGFI("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
+    WLOGFD("winId: %{public}u, modeSupportInfo: %{public}u", GetWindowId(), modeSupportInfo);
     SetRequestModeSupportInfo(modeSupportInfo);
 
     // get window size limits configuration
@@ -816,7 +816,7 @@ void WindowImpl::SetWindowCornerRadiusAccordingToSystemConfig()
     auto splitRadius = windowSystemConfig_.effectConfig_.splitCornerRadius_ * vpr;
     auto floatRadius = windowSystemConfig_.effectConfig_.floatCornerRadius_ * vpr;
 
-    WLOGFI("[WEffect] [name:%{public}s] mode: %{public}u, vpr: %{public}f, [%{public}f, %{public}f, %{public}f]",
+    WLOGFD("[WEffect] [name:%{public}s] mode: %{public}u, vpr: %{public}f, [%{public}f, %{public}f, %{public}f]",
         name_.c_str(), GetMode(), vpr, fullscreenRadius, splitRadius, floatRadius);
 
     if (WindowHelper::IsFullScreenWindow(GetMode()) && MathHelper::GreatNotEqual(fullscreenRadius, 0.0)) {
@@ -879,13 +879,13 @@ void WindowImpl::SetSystemConfig()
     }
     if (SingletonContainer::Get<WindowAdapter>().GetSystemConfig(windowSystemConfig_) == WMError::WM_OK) {
         if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-            WLOGFI("get system decor enable:%{public}d", windowSystemConfig_.isSystemDecorEnable_);
+            WLOGFD("get system decor enable:%{public}d", windowSystemConfig_.isSystemDecorEnable_);
             property_->SetDecorEnable(windowSystemConfig_.isSystemDecorEnable_);
-            WLOGFI("get stretchable enable:%{public}d", windowSystemConfig_.isStretchable_);
+            WLOGFD("get stretchable enable:%{public}d", windowSystemConfig_.isStretchable_);
             property_->SetStretchable(windowSystemConfig_.isStretchable_);
             // if window mode is undefined, set it from configuration
             if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_UNDEFINED) {
-                WLOGFI("get default window mode:%{public}u", windowSystemConfig_.defaultWindowMode_);
+                WLOGFD("get default window mode:%{public}u", windowSystemConfig_.defaultWindowMode_);
                 property_->SetWindowMode(windowSystemConfig_.defaultWindowMode_);
             }
             if (property_->GetLastWindowMode() == WindowMode::WINDOW_MODE_UNDEFINED) {
@@ -1553,7 +1553,7 @@ void WindowImpl::DisableAppWindowDecor()
 
 bool WindowImpl::IsDecorEnable() const
 {
-    WLOGFE("get decor enable %{public}d", property_->GetDecorEnable());
+    WLOGFD("get decor enable %{public}d", property_->GetDecorEnable());
     return property_->GetDecorEnable();
 }
 
@@ -2009,7 +2009,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         property_->SetOriginRect(rect);
         isOriginRectSet_ = true;
     }
-    WLOGFI("winId:%{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u",
+    WLOGFD("winId:%{public}u, rect[%{public}d, %{public}d, %{public}u, %{public}u], reason:%{public}u",
         property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     Rect rectToAce = rect;
     // update rectToAce for stretchable window
@@ -2031,7 +2031,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             return;
         }
         Ace::ViewportConfig config;
-        WLOGFI("UpdateViewportConfig Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+        WLOGFD("UpdateViewportConfig Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
             property_->GetWindowId(), rectToAce.posX_, rectToAce.posY_, rectToAce.width_, rectToAce.height_);
         config.SetSize(rectToAce.width_, rectToAce.height_);
         config.SetPosition(rectToAce.posX_, rectToAce.posY_);
@@ -2572,7 +2572,7 @@ void WindowImpl::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>
 
 void WindowImpl::UpdateActiveStatus(bool isActive)
 {
-    WLOGFI("window active status: %{public}d, id: %{public}u", isActive, property_->GetWindowId());
+    WLOGFD("window active status: %{public}d, id: %{public}u", isActive, property_->GetWindowId());
     if (isActive) {
         NotifyAfterActive();
     } else {
