@@ -18,6 +18,7 @@
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
+#include "mock_uicontent.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1453,6 +1454,10 @@ HWTEST_F(WindowImplTest, SetAPPWindowLabel, Function | SmallTest | Level3)
     option->SetWindowName("SetAPPWindowLabel");
     sptr<WindowImpl> window = new WindowImpl(option);
     std::string label = "openharmony";
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(WMError::WM_OK, window->SetAPPWindowLabel(label));
+    window->uiContent_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAPPWindowLabel(label));
 }
 
@@ -1470,7 +1475,8 @@ HWTEST_F(WindowImplTest, SetAPPWindowIcon, Function | SmallTest | Level3)
     std::shared_ptr<Media::PixelMap> icon1(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAPPWindowIcon(icon1));
     std::shared_ptr<Media::PixelMap> icon2 = std::make_shared<Media::PixelMap>();
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAPPWindowIcon(icon2));
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(WMError::WM_OK, window->SetAPPWindowIcon(icon2));
 }
 }
 } // namespace Rosen
