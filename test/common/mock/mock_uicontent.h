@@ -49,42 +49,42 @@ public:
 
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
     {
-        return ;
+        return;
     }
 
     void Foreground()
     {
-        return ;
+        return;
     }
 
     void Background()
     {
-        return ;
+        return;
     }
 
     void Focus()
     {
-        return ;
+        return;
     }
 
     void UnFocus()
     {
-        return ;
+        return;
     }
 
     void Destroy()
     {
-        return ;
+        return;
     }
 
     void OnNewWant(const OHOS::AAFwk::Want& want)
     {
-        return ;
+        return;
     }
 
     void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
     {
-        return ;
+        return;
     }
 
     std::string GetContentInfo() const
@@ -94,7 +94,7 @@ public:
 
     void DestroyUIDirector()
     {
-        return ;
+        return;
     }
 
     bool ProcessBackPressed()
@@ -121,19 +121,19 @@ public:
     }
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
     {
-        return ;
+        return;
     }
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason)
     {
-        return ;
+        return;
     }
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode)
     {
-        return ;
+        return;
     }
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize)
     {
-        return ;
+        return;
     }
 
     uint32_t GetBackgroundColor()
@@ -142,28 +142,28 @@ public:
     }
     void SetBackgroundColor(uint32_t color)
     {
-        return ;
+        return;
     }
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
     {
-        return ;
+        return;
     }
     void SetNextFrameLayoutCallback(std::function<void()>&& callback)
     {
-        return ;
+        return;
     }
     void NotifyMemoryLevel(int32_t level)
     {
-        return ;
+        return;
     }
 
     void SetAppWindowTitle(const std::string& title)
     {
-        return ;
+        return;
     }
-    void SetAppWindowIcon(std::shared_ptr<Media::PixelMap> pixelMap)
+    void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap)
     {
-        return ;
+        return;
     }
 };
 } // namespace Ace
