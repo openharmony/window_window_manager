@@ -568,7 +568,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
         if (res != WMError::WM_OK) {
             MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
         }
-        SwitchRenderModeIfNeeded(true, node);
+        SwitchRenderModeIfNeeded();
         return res;
     }
     // limit number of main window
@@ -592,7 +592,7 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
         WLOGFE("AddWindowNode failed with ret: %{public}u", static_cast<uint32_t>(res));
         return res;
     }
-    SwitchRenderModeIfNeeded(true, node);
+    SwitchRenderModeIfNeeded();
     return PostProcessAddWindowNode(node, parentNode, container);
 }
 
@@ -621,7 +621,7 @@ WMError WindowRoot::RemoveWindowNode(uint32_t windowId)
             HandleKeepScreenOn(child->GetWindowId(), false);
         }
         HandleKeepScreenOn(windowId, false);
-        SwitchRenderModeIfNeeded(false, node);
+        SwitchRenderModeIfNeeded();
     }
     while (nextOrientationWindow != nullptr && !WindowHelper::IsMainWindow(nextOrientationWindow->GetWindowType())) {
         nextOrientationWindow = nextOrientationWindow->parent_;
@@ -779,7 +779,7 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
             if (res != WMError::WM_OK) {
                 WLOGFE("RemoveWindowNode failed");
             }
-            SwitchRenderModeIfNeeded(false, node);
+            SwitchRenderModeIfNeeded();
             return DestroyWindowInner(node);
         } else {
             std::vector<uint32_t> windowIds;
@@ -796,7 +796,7 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
                     node->GetWindowToken()->NotifyDestroy();
                 }
             }
-            SwitchRenderModeIfNeeded(false, node);
+            SwitchRenderModeIfNeeded();
             return res;
         }
     }
@@ -1528,95 +1528,88 @@ bool WindowRoot::CheckMultiDialogWindows(WindowType type, sptr<IRemoteObject> to
 
 void WindowRoot::OnRenderModeChanged(bool isUniRender)
 {
-    WLOGFI("SwitchRender: render mode changed to %{public}d", isUniRender);
-    renderMode_ = isUniRender ? RenderMode::UNIFIED : RenderMode::SEPARATED;
-}
-
-void WindowRoot::SwitchRenderModeIfNeeded(bool isAddNode, const sptr<WindowNode>& node)
-{
-    WindowType winType = node->GetWindowType();
-    if (winType < WindowType::APP_WINDOW_BASE || winType > WindowType::APP_WINDOW_END) {
-        return;
-    }
-
-    if (isAddNode) {
-        WLOGFI("SwitchRender: one app window is added, WindowType=%{public}d", winType);
-        if (renderMode_ == RenderMode::SEPARATED) {
-            WLOGFD("SwitchRender: separated mode neednot change.");
-            return;
-        } else {
-            if (IsAppWindowExceed()) {
-                // switch to sperate render mode
-                WLOGFI("SwitchRender: notify RS to separated");
+    WLOGFI("SwitchRender: render mode of RS has changed from %{public}u to %{public}s",
+        static_cast<uint32_t>(renderMode_), std::to_string(isUniRender).c_str());
+    if (isUniRender) {
+        switch (renderMode_) {
+            case RenderMode::SEPARATED:
+            case RenderMode::UNIFYING:
+                renderMode_ = RenderMode::UNIFIED;
+                break;
+            case RenderMode::SEPARATING:
                 RSInterfaces::GetInstance().UpdateRenderMode(false);
-            }
+                break;
+            default:
+                WLOGFE("SwitchRender: impossible code");
+                break;
         }
     } else {
-        WLOGFI("SwitchRender: one app window is removed, WindowType=%{public}d", winType);
-        uint32_t rsScreenNum = DisplayManagerServiceInner::GetInstance().GetRSScreenNum();
-        if (renderMode_ == RenderMode::UNIFIED || rsScreenNum > 1) {
-            WLOGFD("SwitchRender: mode %{public}u neednot change. RSScreenNum=%{public}u",
-                static_cast<uint32_t>(renderMode_), rsScreenNum);
-            return;
-        } else {
-            if (!IsAppWindowExceed()) {
-                // switch to unified render mode
-                WLOGFI("SwitchRender: notify RS to unified");
+        switch (renderMode_) {
+            case RenderMode::UNIFIED:
+            case RenderMode::SEPARATING:
+                renderMode_ = RenderMode::SEPARATED;
+                break;
+            case RenderMode::UNIFYING:
                 RSInterfaces::GetInstance().UpdateRenderMode(true);
-            }
+                break;
+            default:
+                WLOGFE("SwitchRender: impossible code");
+                break;
         }
-    }
-}
-
-void WindowRoot::SwitchRenderModeIfNeeded(bool connectNewRSScreen)
-{
-    uint32_t rsScreenNum = DisplayManagerServiceInner::GetInstance().GetRSScreenNum();
-    WLOGFI("SwitchRender: RSScreen changed, addFlag=%{public}d, num=%{public}u", connectNewRSScreen, rsScreenNum);
-    if (connectNewRSScreen && (renderMode_ == RenderMode::SEPARATED)) {
-        return;
-    }
-    if (!connectNewRSScreen && (renderMode_ == RenderMode::UNIFIED)) {
-        WLOGFE("SwitchRender: previous state of switchRender maybe wrong. connectNewRSScreen:%{public}d",
-            connectNewRSScreen);
-        return;
-    }
-    if (rsScreenNum <= 1 && !IsAppWindowExceed() && renderMode_ != RenderMode::UNIFIED) {
-        // switch to unified render mode
-        WLOGFI("SwitchRender: notify RS to unified");
-        RSInterfaces::GetInstance().UpdateRenderMode(true);
-    } else if (rsScreenNum > 1 && renderMode_ != RenderMode::SEPARATED) {
-        // switch to sperate render mode
-        WLOGFI("SwitchRender: notify RS to separated");
-        RSInterfaces::GetInstance().UpdateRenderMode(false);
-    } else {
-        WLOGFE("SwitchRender: impossible code");
     }
 }
 
 void WindowRoot::SwitchRenderModeIfNeeded()
 {
     uint32_t rsScreenNum = DisplayManagerServiceInner::GetInstance().GetRSScreenNum();
-    if (renderMode_ == RenderMode::SEPARATED && rsScreenNum > 1) {
-        WLOGFD("SwitchRender: separated mode neednot change. RSScreenNum=%{public}u", rsScreenNum);
+    if (rsScreenNum > 1) {
+        // switch to sperate render mode
+        ChangeRSRenderModeIfNeeded(false);
         return;
     }
+
     bool exceed = IsAppWindowExceed();
     if (exceed) {
-        if (renderMode_ != RenderMode::SEPARATED) {
-            // switch to sperate render mode
-            WLOGFI("SwitchRender: notify RS change separated");
-            RSInterfaces::GetInstance().UpdateRenderMode(false);
-        }
+        // switch to sperate render mode
+        ChangeRSRenderModeIfNeeded(false);
     } else {
-        if (renderMode_ == RenderMode::UNIFIED || rsScreenNum > 1) {
-            WLOGFD("SwitchRender: mode %{public}u neednot change. RSScreenNum=%{public}u",
-                static_cast<uint32_t>(renderMode_), rsScreenNum);
-            return;
-        } else {
-            // switch to unified render mode
-            WLOGFI("SwitchRender: notify RS to unified");
-            RSInterfaces::GetInstance().UpdateRenderMode(true);
-        }
+        // switch to unified render mode
+        ChangeRSRenderModeIfNeeded(true);
+    }
+}
+
+void WindowRoot::ChangeRSRenderModeIfNeeded(bool isToUnified)
+{
+    switch (renderMode_) {
+        case RenderMode::SEPARATED:
+            if (isToUnified) {
+                WLOGFI("SwitchRender: notify RS from separated to be unifying");
+                renderMode_ = RenderMode::UNIFYING;
+                RSInterfaces::GetInstance().UpdateRenderMode(true);
+            }
+            break;
+        case RenderMode::UNIFIED:
+            if (!isToUnified) {
+                WLOGFI("SwitchRender: notify RS from unified to be separating");
+                renderMode_ = RenderMode::SEPARATING;
+                RSInterfaces::GetInstance().UpdateRenderMode(false);
+            }
+            break;
+        case RenderMode::SEPARATING:
+            if (isToUnified) {
+                WLOGFI("SwitchRender: notify RS from separating to be unifying");
+                renderMode_ = RenderMode::UNIFYING;
+            }
+            break;
+        case RenderMode::UNIFYING:
+            if (!isToUnified) {
+                WLOGFI("SwitchRender: notify RS from unifying to be separating");
+                renderMode_ = RenderMode::SEPARATING;
+            }
+            break;
+        default:
+            WLOGE("SwitchRender: impossible code");
+            break;
     }
 }
 
@@ -1638,14 +1631,13 @@ bool WindowRoot::IsAppWindowExceed() const
             && isVisible && !isPrimarySplitWindow && !isSencondarySplitWindow) {
             appWindowNum++;
             if (appWindowNum > maxAppWindowNum) {
-                WLOGFI("SwitchRender: the number of app window exceed: %{public}d/%{public}d",
-                    appWindowNum, maxAppWindowNum);
+                WLOGFI("SwitchRender: the number of app window exceed. max: %{public}d", maxAppWindowNum);
                 return true;
             }
         }
     }
     appWindowNum = (hasPrimarySplitWindow || hasSencondarySplitWindow) ? (appWindowNum + 1) : appWindowNum;
-    WLOGFI("SwitchRender: the number of app window is %{public}d/%{public}d", appWindowNum, maxAppWindowNum);
+    WLOGFI("SwitchRender: the number of app window is %{public}d", maxAppWindowNum);
     return (appWindowNum > maxAppWindowNum);
 }
 
