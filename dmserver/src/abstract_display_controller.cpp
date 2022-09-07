@@ -198,7 +198,6 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
         }
     } else if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
         SetDisplayStateChangeListener(abstractDisplay, DisplayStateChangeType::DESTROY);
-        
         DisplayManagerAgentController::GetInstance().OnDisplayDestroy(absDisplayId);
         abstractDisplayMap_.erase(absDisplayId);
     } else {
