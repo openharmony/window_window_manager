@@ -270,7 +270,10 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         ResizeSoftInputCallingWindowIfNeed(node);
     }
     StopBootAnimationIfNeed(node);
-    MinimizeApp::ExecuteMinimizeAll();
+    if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        WindowHelper::IsMainWindow(node->GetWindowType())) {
+            MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::OTHER_WINDOW);
+    }
     return WMError::WM_OK;
 }
 
@@ -505,7 +508,7 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
         }
         case DisplayStateChangeType::DESTROY: {
             windowRoot_->ProcessDisplayDestroy(defaultDisplayId, displayInfo, displayInfoMap);
-            FlushWindowInfoWithDisplayId(displayInfo->GetDisplayId());
+            FlushWindowInfoWithDisplayId(defaultDisplayId);
             break;
         }
         case DisplayStateChangeType::DISPLAY_COMPRESS:
@@ -1250,15 +1253,6 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
             return;
         }
     }
-}
-
-Orientation WindowController::GetWindowPreferredOrientation(DisplayId displayId)
-{
-    sptr<WindowNodeContainer> windowNodeContainer = windowRoot_->GetOrCreateWindowNodeContainer(displayId);
-    if (windowNodeContainer != nullptr) {
-        return windowNodeContainer->GetWindowPreferredOrientation();
-    }
-    return Orientation::UNSPECIFIED;
 }
 
 void WindowController::OnScreenshot(DisplayId displayId)

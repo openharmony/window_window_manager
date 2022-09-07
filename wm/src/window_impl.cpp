@@ -20,6 +20,7 @@
 #include <hisysevent.h>
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
+#include <transaction/rs_transaction.h>
 
 #include "color_parser.h"
 #include "display_manager.h"
@@ -39,7 +40,6 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
     const std::string PARAM_DUMP_HELP = "-h";
-    const std::string WM_CALLBACK_THREAD_NAME = "window_listener_handler";
 }
 
 const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
@@ -89,27 +89,8 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
         ++constructorCnt, property_->GetWindowName().c_str());
 }
 
-void WindowImpl::InitListenerHandler()
-{
-    auto runner = AppExecFwk::EventRunner::Create(WM_CALLBACK_THREAD_NAME);
-    if (runner == nullptr) {
-        WLOGFE("init window callback runner failed.");
-        return;
-    }
-    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    if (eventHandler_ == nullptr) {
-        WLOGFE("init window callback handler failed.");
-        return;
-    }
-    isListenerHandlerRunning_ = true;
-    WLOGFD("init window callback runner success.");
-}
-
 WindowImpl::~WindowImpl()
 {
-    if (eventHandler_ != nullptr) {
-        eventHandler_.reset();
-    }
     WLOGFI("windowName: %{public}s, windowId: %{public}d, deConstructorCnt: %{public}d, surfaceNode:%{public}d",
         GetWindowName().c_str(), GetWindowId(), ++deConstructorCnt, static_cast<uint32_t>(surfaceNode_.use_count()));
     Destroy();
@@ -382,6 +363,7 @@ void WindowImpl::SetAlpha(float alpha)
     }
     property_->SetAlpha(alpha);
     surfaceNode_->SetAlpha(alpha);
+    RSTransaction::FlushImplicitTransaction();
 }
 
 void WindowImpl::SetTransform(const Transform& trans)
@@ -879,6 +861,7 @@ void WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
     surfaceNode_->SetShadowOffsetX(shadow.offsetX_);
     surfaceNode_->SetShadowOffsetY(shadow.offsetY_);
     surfaceNode_->SetShadowAlpha(shadow.alpha_);
+    RSTransaction::FlushImplicitTransaction();
 }
 
 void WindowImpl::SetSystemConfig()
@@ -1086,26 +1069,6 @@ WMError WindowImpl::Destroy()
     return Destroy(true);
 }
 
-void WindowImpl::PostListenerTask(ListenerTaskCallback &&callback, Priority priority,
-    const std::string taskName)
-{
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        if (!isListenerHandlerRunning_) {
-            InitListenerHandler();
-        }
-    }
-    bool ret = eventHandler_->PostTask([callback]() {
-            callback();
-        }, taskName, 0, priority);
-    if (!ret) {
-        WLOGE("post listener callback task failed.");
-        return;
-    }
-    WLOGD("post listener callback task: %{public}s success.", taskName.c_str());
-    return;
-}
-
 WMError WindowImpl::Destroy(bool needNotifyServer)
 {
     if (!IsWindowValid()) {
@@ -1241,7 +1204,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation)
 
     ret = SingletonContainer::Get<WindowAdapter>().AddWindow(property_);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
-    if (ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEATH_RECIPIENT) {
+    if (ret == WMError::WM_OK) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
     } else if (ret == WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE) {
@@ -2435,13 +2398,11 @@ void WindowImpl::NotifyDragEvent(const PointInfo& point, DragEvent event)
         windowDragListeners = windowDragListeners_;
     }
     Rect rect = GetRect();
-    PostListenerTask([windowDragListeners, rect, point, event]() {
-        for (auto& listener : windowDragListeners) {
-            if (listener != nullptr) {
-                listener->OnDrag(point.x - rect.posX_, point.y - rect.posY_, event);
-            }
+    for (auto& listener : windowDragListeners) {
+        if (listener != nullptr) {
+            listener->OnDrag(point.x - rect.posX_, point.y - rect.posY_, event);
         }
-    });
+    }
 }
 
 void WindowImpl::UpdateDisplayId(DisplayId from, DisplayId to)
@@ -2474,13 +2435,11 @@ void WindowImpl::NotifyScreenshot()
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         screenshotListeners = screenshotListeners_;
     }
-    PostListenerTask([screenshotListeners]() {
-        for (auto& screenshotListener : screenshotListeners) {
-            if (screenshotListener != nullptr) {
-                screenshotListener->OnScreenshot();
-            }
+    for (auto& screenshotListener : screenshotListeners) {
+        if (screenshotListener != nullptr) {
+            screenshotListener->OnScreenshot();
         }
-    });
+    }
 }
 
 void WindowImpl::NotifyTouchOutside()
@@ -2490,13 +2449,11 @@ void WindowImpl::NotifyTouchOutside()
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         touchOutsideListeners = touchOutsideListeners_;
     }
-    PostListenerTask([touchOutsideListeners]() {
-        for (auto& touchOutsideListener : touchOutsideListeners) {
-            if (touchOutsideListener != nullptr) {
-                touchOutsideListener->OnTouchOutside();
-            }
+    for (auto& touchOutsideListener : touchOutsideListeners) {
+        if (touchOutsideListener != nullptr) {
+            touchOutsideListener->OnTouchOutside();
         }
-    });
+    }
 }
 
 void WindowImpl::NotifyTouchDialogTarget()
@@ -2507,13 +2464,11 @@ void WindowImpl::NotifyTouchDialogTarget()
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         dialogTargetTouchListeners = dialogTargetTouchListeners_;
     }
-    PostListenerTask([dialogTargetTouchListeners]() {
-        for (auto& dialogTargetTouchListener : dialogTargetTouchListeners) {
-            if (dialogTargetTouchListener != nullptr) {
-                dialogTargetTouchListener->OnDialogTargetTouch();
-            }
+    for (auto& dialogTargetTouchListener : dialogTargetTouchListeners) {
+        if (dialogTargetTouchListener != nullptr) {
+            dialogTargetTouchListener->OnDialogTargetTouch();
         }
-    });
+    }
 }
 
 void WindowImpl::NotifyDestroy()
@@ -2523,11 +2478,9 @@ void WindowImpl::NotifyDestroy()
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         dialogDeathRecipientListener = dialogDeathRecipientListener_;
     }
-    PostListenerTask([dialogDeathRecipientListener]() {
-        if (dialogDeathRecipientListener != nullptr) {
-            dialogDeathRecipientListener->OnDialogDeathRecipient();
-        }
-    });
+    if (dialogDeathRecipientListener != nullptr) {
+        dialogDeathRecipientListener->OnDialogDeathRecipient();
+    }
 }
 
 void WindowImpl::TransformSurfaceNode(const Transform& trans)
@@ -2565,13 +2518,11 @@ void WindowImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         windowChangeListeners = windowChangeListeners_;
     }
-    PostListenerTask([windowChangeListeners, rect, reason]() {
-        for (auto& listener : windowChangeListeners) {
-            if (listener != nullptr) {
-                listener->OnSizeChange(rect, reason);
-            }
+    for (auto& listener : windowChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnSizeChange(rect, reason);
         }
-    });
+    }
 }
 
 void WindowImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
@@ -2581,13 +2532,11 @@ void WindowImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAr
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         avoidAreaChangeListeners = avoidAreaChangeListeners_;
     }
-    PostListenerTask([avoidAreaChangeListeners, outAvoidArea = *avoidArea, type]() {
-        for (auto& listener : avoidAreaChangeListeners) {
-            if (listener != nullptr) {
-                listener->OnAvoidAreaChanged(outAvoidArea, type);
-            }
+    for (auto& listener : avoidAreaChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnAvoidAreaChanged(*avoidArea, type);
         }
-    });
+    }
 }
 
 void WindowImpl::NotifyDisplayMoveChange(DisplayId from, DisplayId to)
@@ -2597,13 +2546,11 @@ void WindowImpl::NotifyDisplayMoveChange(DisplayId from, DisplayId to)
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         displayMoveListeners = displayMoveListeners_;
     }
-    PostListenerTask([displayMoveListeners, from, to]() {
-        for (auto& listener : displayMoveListeners) {
-            if (listener != nullptr) {
-                listener->OnDisplayMove(from, to);
-            }
+    for (auto& listener : displayMoveListeners) {
+        if (listener != nullptr) {
+            listener->OnDisplayMove(from, to);
         }
-    });
+    }
 }
 
 void WindowImpl::NotifyModeChange(WindowMode mode)
@@ -2613,13 +2560,11 @@ void WindowImpl::NotifyModeChange(WindowMode mode)
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         windowChangeListeners = windowChangeListeners_;
     }
-    PostListenerTask([windowChangeListeners, mode]() {
-        for (auto& listener : windowChangeListeners) {
-            if (listener != nullptr) {
-                listener->OnModeChange(mode);
-            }
+    for (auto& listener : windowChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnModeChange(mode);
         }
-    });
+    }
 }
 
 void WindowImpl::NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info)
@@ -2629,13 +2574,11 @@ void WindowImpl::NotifyOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& in
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         occupiedAreaChangeListeners = occupiedAreaChangeListeners_;
     }
-    PostListenerTask([occupiedAreaChangeListeners, info]() mutable {
-        for (auto& listener : occupiedAreaChangeListeners) {
-            if (listener != nullptr) {
-                listener->OnSizeChange(info);
-            }
+    for (auto& listener : occupiedAreaChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnSizeChange(info);
         }
-    });
+    }
 }
 
 void WindowImpl::SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel)
@@ -2826,6 +2769,7 @@ WMError WindowImpl::SetCornerRadius(float cornerRadius)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetCornerRadius(cornerRadius);
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 
@@ -2836,6 +2780,7 @@ WMError WindowImpl::SetShadowRadius(float radius)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetShadowRadius(radius);
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 
@@ -2847,6 +2792,7 @@ WMError WindowImpl::SetShadowColor(std::string color)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetShadowColor(colorValue);
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 
@@ -2854,12 +2800,14 @@ void WindowImpl::SetShadowOffsetX(float offsetX)
 {
     WLOGFI("[Client] Window %{public}s set shadow offsetX %{public}f", name_.c_str(), offsetX);
     surfaceNode_->SetShadowOffsetX(offsetX);
+    RSTransaction::FlushImplicitTransaction();
 }
 
 void WindowImpl::SetShadowOffsetY(float offsetY)
 {
     WLOGFI("[Client] Window %{public}s set shadow offsetY %{public}f", name_.c_str(), offsetY);
     surfaceNode_->SetShadowOffsetY(offsetY);
+    RSTransaction::FlushImplicitTransaction();
 }
 
 WMError WindowImpl::SetBlur(float radius)
@@ -2869,6 +2817,7 @@ WMError WindowImpl::SetBlur(float radius)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetFilter(RSFilter::CreateBlurFilter(radius, radius));
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 
@@ -2879,6 +2828,7 @@ WMError WindowImpl::SetBackdropBlur(float radius)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     surfaceNode_->SetBackgroundFilter(RSFilter::CreateBlurFilter(radius, radius));
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 
@@ -2901,6 +2851,7 @@ WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
         surfaceNode_->SetBackgroundFilter(RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle),
                                                                          display->GetVirtualPixelRatio()));
     }
+    RSTransaction::FlushImplicitTransaction();
     return WMError::WM_OK;
 }
 
