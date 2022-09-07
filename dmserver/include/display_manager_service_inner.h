@@ -50,7 +50,6 @@ public:
     bool SetOrientationFromWindow(DisplayId displayId, Orientation orientation);
     bool SetRotationFromWindow(DisplayId displayId, Rotation targetRotation);
     void SetGravitySensorSubscriptionEnabled();
-    void GetWindowPreferredOrientation(DisplayId displayId, Orientation &orientation);
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
     void RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener);
 };

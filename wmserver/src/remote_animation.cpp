@@ -129,7 +129,6 @@ static sptr<RSWindowAnimationFinishedCallback> GetTransitionFinishedCallback(con
     wptr<WindowNode> weak = dstNode;
     auto callback = [weak]() {
         WLOGFI("RSWindowAnimation: on finish transition with minimize pre fullscreen!");
-        MinimizeApp::ExecuteMinimizeAll();
         auto weakNode = weak.promote();
         if (weakNode == nullptr) {
             WLOGFE("windowNode is nullptr!");
@@ -141,6 +140,7 @@ static sptr<RSWindowAnimationFinishedCallback> GetTransitionFinishedCallback(con
             WLOGFI("node:%{public}d is not play show animation!", weakNode->GetWindowId());
             return;
         }
+        MinimizeApp::ExecuteMinimizeAll(); // minimize execute in show animation
         RSAnimationTimingProtocol timingProtocol(200); // animation time
         RSNode::Animate(timingProtocol, RSAnimationTimingCurve::EASE_OUT, [weakNode]() {
             auto winRect = weakNode->GetWindowRect();
@@ -257,6 +257,11 @@ WMError RemoteAnimation::NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcI
     }
     wptr<WindowNode> weak = srcNode;
     auto minimizeFunc = [weak]() {
+        auto weakNode = weak.promote();
+        if (weakNode == nullptr || weakNode->state_ != WindowNodeState::HIDE_ANIMATION_PLAYING) {
+            WLOGFE("windowNode is nullptr or is not play hide animation!");
+            return;
+        }
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
             "wms:async:ShowRemoteAnimation");
         WindowInnerManager::GetInstance().MinimizeAbility(weak, true);
@@ -290,6 +295,10 @@ WMError RemoteAnimation::NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo
     wptr<WindowNode> weak = srcNode;
     auto closeFunc = [weak, event]() {
         auto weakNode = weak.promote();
+        if (weakNode == nullptr || weakNode->state_ != WindowNodeState::HIDE_ANIMATION_PLAYING) {
+            WLOGFE("windowNode is nullptr or is not play hide animation!");
+            return;
+        }
         if (weakNode != nullptr && weakNode->abilityToken_ != nullptr) {
             if (event == TransitionEvent::CLOSE) {
                 WLOGFI("close windowId: %{public}u, name:%{public}s",
@@ -340,8 +349,15 @@ WMError RemoteAnimation::NotifyAnimationByHome()
         }
         animationTargets.emplace_back(srcTarget);
     }
-    auto func = []() {
+    auto func = [needMinimizeAppNodes]() {
         WLOGFI("NotifyAnimationByHome in animation callback");
+        for (auto& weakNode : needMinimizeAppNodes) {
+            auto srcNode = weakNode.promote();
+            if (srcNode == nullptr || srcNode->state_ != WindowNodeState::HIDE_ANIMATION_PLAYING) {
+                WLOGFE("windowNode is nullptr or is not play hide animation!");
+                return;
+            }
+        }
         MinimizeApp::ExecuteMinimizeAll();
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
             "wms:async:ShowRemoteAnimation");
@@ -360,10 +376,6 @@ WMError RemoteAnimation::NotifyAnimationByHome()
 void RemoteAnimation::NotifyAnimationTargetsUpdate(std::vector<uint32_t>& fullScreenWinIds,
     std::vector<uint32_t>& floatWinIds)
 {
-    if (!CheckAnimationController()) {
-        return;
-    }
-
     auto handler = wmsTaskHandler_.lock();
     if (handler == nullptr) {
         WLOGFE("wmsTaskHandler_ is nullptr");
@@ -371,6 +383,9 @@ void RemoteAnimation::NotifyAnimationTargetsUpdate(std::vector<uint32_t>& fullSc
     }
     // need post task when visit windowRoot node map
     auto task = [fullScreenWinIds, floatWinIds]() {
+        if (!CheckAnimationController()) {
+            return;
+        }
         auto winRoot = windowRoot_.promote();
         if (winRoot == nullptr) {
             WLOGFE("window root is nullptr");

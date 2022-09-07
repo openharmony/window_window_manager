@@ -78,6 +78,7 @@ void WindowCommonEvent::UnSubscriberEvent()
 
 void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
+    WLOGFI("receive common event, action = %{public}s", data.GetWant().GetAction().c_str());
     auto task = [this, data] {
         std::string action = data.GetWant().GetAction();
         WLOGFI("called action = %{public}s", action.c_str());
@@ -91,6 +92,7 @@ void WindowCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData& data)
 void WindowCommonEvent::HandleAccountSwitched(const EventFwk::CommonEventData& data) const
 {
     int accountId = data.GetCode();
+    WLOGFI("handle account switch, account id = %{public}d", accountId);
     WindowManagerService::GetInstance().OnAccountSwitched(accountId);
 }
 } // Rosen
