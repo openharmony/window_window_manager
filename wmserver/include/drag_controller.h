@@ -85,8 +85,8 @@ private:
     void ConvertPointerPosToDisplayGroupPos(DisplayId displayId, int32_t& posX, int32_t& posY);
 
     void HandlePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId);
-    void HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId);
+    void HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId, int32_t sourceType);
+    void HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId, int32_t sourceType);
     void OnReceiveVsync(int64_t timeStamp);
     void ResetMoveOrDragState();
 
