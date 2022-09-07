@@ -19,6 +19,7 @@
 #include "ui_content.h"
 #include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"
+#include <gmock/gmock.h>
 namespace OHOS {
 namespace AppExecFwk {
     class Ability;
@@ -39,132 +40,32 @@ namespace OHOS {
 namespace Ace {
 class UIContentMocker : public UIContent {
 public:
-    UIContentMocker() 
-    {
-    }
-
-    ~UIContentMocker()
-    {
-    }
-
-    void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
-    {
-        return ;
-    }
-
-    void Foreground()
-    {
-        return ;
-    }
-
-    void Background()
-    {
-        return ;
-    }
-
-    void Focus()
-    {
-        return ;
-    }
-
-    void UnFocus()
-    {
-        return ;
-    }
-
-    void Destroy()
-    {
-        return ;
-    }
-
-    void OnNewWant(const OHOS::AAFwk::Want& want)
-    {
-        return ;
-    }
-
-    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
-    {
-        return ;
-    }
-
-    std::string GetContentInfo() const
-    {
-        return " ";
-    }
-
-    void DestroyUIDirector()
-    {
-        return ;
-    }
-
-    bool ProcessBackPressed()
-    {
-        return false;
-    }
-
-    bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
-    {
-        return false;
-    }
-
-    bool ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
-    {
-        return false;
-    }
-    bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
-    {
-        return false;
-    }
-    bool ProcessVsyncEvent(uint64_t timeStampNanos)
-    {
-        return false;
-    }
-    void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
-    {
-        return ;
-    }
-    void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason)
-    {
-        return ;
-    }
-    void UpdateWindowMode(OHOS::Rosen::WindowMode mode)
-    {
-        return ;
-    }
-    void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize)
-    {
-        return ;
-    }
-
-    uint32_t GetBackgroundColor()
-    {
-        return 0;
-    }
-    void SetBackgroundColor(uint32_t color)
-    {
-        return ;
-    }
-    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
-    {
-        return ;
-    }
-    void SetNextFrameLayoutCallback(std::function<void()>&& callback)
-    {
-        return ;
-    }
-    void NotifyMemoryLevel(int32_t level)
-    {
-        return ;
-    }
-
-    void SetAppWindowTitle(const std::string& title)
-    {
-        return ;
-    }
-    void SetAppWindowIcon(std::shared_ptr<Media::PixelMap> pixelMap)
-    {
-        return ;
-    }
+    MOCK_METHOD3(Initialize,void(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage));
+    MOCK_METHOD0(Foreground,void());
+    MOCK_METHOD0(Background,void());
+    MOCK_METHOD0(Focus,void());
+    MOCK_METHOD0(UnFocus,void());
+    MOCK_METHOD0(Destroy,void());
+    MOCK_METHOD1(OnNewWant,void(const OHOS::AAFwk::Want& want));
+    MOCK_METHOD3(Restore,void(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage));
+    MOCK_CONST_METHOD0(GetContentInfo,std::string());
+    MOCK_METHOD0(DestroyUIDirector,void());
+    MOCK_METHOD0(ProcessBackPressed,bool());
+    MOCK_METHOD1(ProcessPointerEvent,bool(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent));
+    MOCK_METHOD1(ProcessKeyEvent,bool(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent));
+    MOCK_METHOD1(ProcessAxisEvent,bool(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent));
+    MOCK_METHOD1(ProcessVsyncEvent,bool(uint64_t timeStampNanos));
+    MOCK_METHOD1(UpdateConfiguration,void(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config));
+    MOCK_METHOD2(UpdateViewportConfig,void(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason));
+    MOCK_METHOD1(UpdateWindowMode,void(OHOS::Rosen::WindowMode mode));
+    MOCK_METHOD3(HideWindowTitleButton,void(bool hideSplit, bool hideMaximize, bool hideMinimize));
+    MOCK_METHOD0(GetBackgroundColor,uint32_t());
+    MOCK_METHOD1(SetBackgroundColor,void(uint32_t color));
+    MOCK_METHOD2(DumpInfo,void(const std::vector<std::string>& params, std::vector<std::string>& info));
+    MOCK_METHOD1(SetNextFrameLayoutCallback,void(std::function<void()>&& callback));
+    MOCK_METHOD1(NotifyMemoryLevel,void(int32_t level));
+    MOCK_METHOD1(SetAppWindowTitle,void(const std::string& title));
+    MOCK_METHOD1(SetAppWindowIcon,void(const std::shared_ptr<Media::PixelMap>& pixelMap));
 };
 } // namespace Ace
 } // namespace OHOS
