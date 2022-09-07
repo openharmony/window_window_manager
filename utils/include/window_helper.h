@@ -274,16 +274,16 @@ public:
             (reason < WindowUpdateReason::NEED_SWITCH_CASCADE_END);
     }
 
-    static AvoidPosType GetAvoidPosType(const Rect& rect, uint32_t displayWidth, uint32_t displayHeight)
+    static AvoidPosType GetAvoidPosType(const Rect& rect, const Rect& displayRect)
     {
-        if (rect.width_ ==  displayWidth) {
-            if (rect.posY_ == 0) {
+        if (rect.width_ ==  displayRect.width_) {
+            if (rect.posY_ == displayRect.posY_) {
                 return AvoidPosType::AVOID_POS_TOP;
             } else {
                 return AvoidPosType::AVOID_POS_BOTTOM;
             }
-        } else if (rect.height_ ==  displayHeight) {
-            if (rect.posX_ == 0) {
+        } else if (rect.height_ ==  displayRect.height_) {
+            if (rect.posX_ == displayRect.posX_) {
                 return AvoidPosType::AVOID_POS_LEFT;
             } else {
                 return AvoidPosType::AVOID_POS_RIGHT;
