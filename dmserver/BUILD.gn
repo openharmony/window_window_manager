@@ -65,6 +65,7 @@ ohos_shared_library("libdms") {
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "config_policy:configpolicy_util",
+    "eventhandler:libeventhandler",
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "hitrace_native:hitrace_meter",
