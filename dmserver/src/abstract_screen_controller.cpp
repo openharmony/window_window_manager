@@ -747,7 +747,7 @@ void AbstractScreenController::SetScreenRotateAnimation(
     static const RSAnimationTimingCurve curve_ =
         RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
     //Increase frequency to improve windowRotation perf
-    OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(10013, "");
+    OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(10012, "");
     RSNode::Animate(timingProtocol, curve_, [weakNode, x, y, w, h, rotationAfter]() {
         auto displayNode = weakNode.lock();
         if (displayNode == nullptr) {
