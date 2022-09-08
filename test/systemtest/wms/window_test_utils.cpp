@@ -318,10 +318,10 @@ AvoidPosType WindowTestUtils::GetAvoidPosType(const Rect& rect)
         WLOGFE("GetAvoidPosType fail. Get display fail. displayId: 0");
         return AvoidPosType::AVOID_POS_UNKNOWN;
     }
-    uint32_t displayWidth = display->GetWidth();
-    uint32_t displayHeight = display->GetHeight();
-
-    return WindowHelper::GetAvoidPosType(rect, displayWidth, displayHeight);
+    auto displayInfo = display->GetDisplayInfo();
+    Rect displayRect = {displayInfo->GetOffsetX(), displayInfo->GetOffsetY(), displayInfo->GetWidth(),
+        displayInfo->GetHeight()};
+    return WindowHelper::GetAvoidPosType(rect, displayRect);
 }
 
 bool WindowTestUtils::InitSplitRects()

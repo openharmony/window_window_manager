@@ -941,7 +941,7 @@ AvoidPosType WindowLayoutPolicy::GetAvoidPosType(const Rect& rect, DisplayId dis
         return AvoidPosType::AVOID_POS_UNKNOWN;
     }
     const auto& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
-    return WindowHelper::GetAvoidPosType(rect, displayRect.width_, displayRect.height_);
+    return WindowHelper::GetAvoidPosType(rect, displayRect);
 }
 
 void WindowLayoutPolicy::UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect)
