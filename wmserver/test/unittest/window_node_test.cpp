@@ -14,11 +14,10 @@
  */
 #include <gtest/gtest.h>
 
-#include "future.h"
-#include "wm_math.h"
-
 #include "display_manager.h"
 #include "display_manager_config.h"
+#include "future.h"
+#include "wm_math.h"
 #include "window_node.h"
 #include "window_node_container.h"
 
