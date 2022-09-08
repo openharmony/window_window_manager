@@ -33,6 +33,7 @@
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerService"};
+    const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerService)
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&SingletonContainer::Get<DisplayManagerService>());
@@ -234,6 +235,11 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
         return SCREEN_ID_INVALID;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:CreateVirtualScreen(%s)", option.name_.c_str());
+    if (option.surface_ != nullptr && !Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) &&
+        !Permission::IsStartByHdcd()) {
+        WLOGFE("permission denied");
+        return SCREEN_ID_INVALID;
+    }
     ScreenId screenId = abstractScreenController_->CreateVirtualScreen(option, displayManagerAgent);
     CHECK_SCREEN_AND_RETURN(SCREEN_ID_INVALID);
     accessTokenIdMaps_.insert(std::pair(screenId, IPCSkeleton::GetCallingTokenID()));
@@ -257,7 +263,12 @@ DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<S
 {
     WLOGFI("SetVirtualScreenSurface::ScreenId: %{public}" PRIu64 "", screenId);
     CHECK_SCREEN_AND_RETURN(DMError::DM_ERROR_INVALID_PARAM);
-    return abstractScreenController_->SetVirtualScreenSurface(screenId, surface);
+    if (Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) ||
+        Permission::IsStartByHdcd()) {
+        return abstractScreenController_->SetVirtualScreenSurface(screenId, surface);
+    }
+    WLOGFE("permission denied");
+    return DMError::DM_ERROR_INVALID_CALLING;
 }
 
 bool DisplayManagerService::SetOrientation(ScreenId screenId, Orientation orientation)
@@ -281,7 +292,7 @@ bool DisplayManagerService::SetRotationFromWindow(ScreenId screenId, Rotation ta
 std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:GetDisplaySnapshot(%" PRIu64")", displayId);
-    if (Permission::CheckCallingPermission("ohos.permission.CAPTURE_SCREEN") ||
+    if (Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) ||
         Permission::IsStartByHdcd()) {
         auto res = abstractDisplayController_->GetScreenSnapshot(displayId);
         if (res != nullptr) {
