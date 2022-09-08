@@ -757,6 +757,9 @@ void AbstractScreenController::SetScreenRotateAnimation(
         displayNode->SetRotation(-90.f * static_cast<uint32_t>(rotationAfter)); // 90.f is base degree
         displayNode->SetFrame(x, y, w, h);
         displayNode->SetBounds(x, y, w, h);
+    }, []() {
+        //ClosePerf in finishCallBack
+        OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(10012, false, "");
     });
 }
 
