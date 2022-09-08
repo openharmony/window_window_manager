@@ -18,6 +18,7 @@
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
+#include "mock_uicontent.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1446,6 +1447,7 @@ HWTEST_F(WindowImplTest, SetTransform04, Function | SmallTest | Level3)
  * @tc.name: SetAPPWindowLabel
  * @tc.desc: set window label to ace
  * @tc.type: FUNC
+ * @tc.require: issueI5Q2KW
  */
 HWTEST_F(WindowImplTest, SetAPPWindowLabel, Function | SmallTest | Level3)
 {
@@ -1453,6 +1455,10 @@ HWTEST_F(WindowImplTest, SetAPPWindowLabel, Function | SmallTest | Level3)
     option->SetWindowName("SetAPPWindowLabel");
     sptr<WindowImpl> window = new WindowImpl(option);
     std::string label = "openharmony";
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(WMError::WM_OK, window->SetAPPWindowLabel(label));
+    window->uiContent_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAPPWindowLabel(label));
 }
 
@@ -1460,6 +1466,7 @@ HWTEST_F(WindowImplTest, SetAPPWindowLabel, Function | SmallTest | Level3)
  * @tc.name: SetAPPWindowIcon
  * @tc.desc: set window Icon to ace
  * @tc.type: FUNC
+ * @tc.require: issueI5Q2KW
  */
 HWTEST_F(WindowImplTest, SetAPPWindowIcon, Function | SmallTest | Level3)
 {
@@ -1470,7 +1477,26 @@ HWTEST_F(WindowImplTest, SetAPPWindowIcon, Function | SmallTest | Level3)
     std::shared_ptr<Media::PixelMap> icon1(nullptr);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAPPWindowIcon(icon1));
     std::shared_ptr<Media::PixelMap> icon2 = std::make_shared<Media::PixelMap>();
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->SetAPPWindowIcon(icon2));
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(WMError::WM_OK, window->SetAPPWindowIcon(icon2));
+}
+
+/**
+ * @tc.name: NotifyMemoryLevel01
+ * @tc.desc: NotifyMemoryLevel without mainWindow
+ * @tc.type: FUNC
+ * @tc.require: issueI5JQ04
+ */
+HWTEST_F(WindowImplTest, NotifyMemoryLevel01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("NotifyMemoryLevel01");
+    int32_t level = 0;
+    sptr<WindowImpl> window = new WindowImpl(option);
+
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->NotifyMemoryLevel(level));
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(WMError::WM_OK, window->NotifyMemoryLevel(level));
 }
 }
 } // namespace Rosen
