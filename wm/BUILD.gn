@@ -92,6 +92,7 @@ ohos_shared_library("libwm") {
 
     # because appexecfwk_core depends on global_resmgr
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
