@@ -258,7 +258,7 @@ void MoveDragController::ConsumePointerEvent(const std::shared_ptr<MMI::PointerE
         moveEvent_ = pointerEvent;
         VsyncStation::GetInstance().RequestVsync(vsyncCallback_);
     } else {
-        WLOGFI("[WMS] Dispatch non-move event, action: %{public}d", pointerEvent->GetPointerAction());
+        WLOGFD("[WMS] Dispatch non-move event, action: %{public}d", pointerEvent->GetPointerAction());
         HandlePointerEvent(pointerEvent);
         pointerEvent->MarkProcessed();
     }
@@ -297,12 +297,14 @@ Rect MoveDragController::GetHotZoneRect()
     return hotZoneRect;
 }
 
-void MoveDragController::HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId)
+void MoveDragController::HandleDragEvent(int32_t posX, int32_t posY, int32_t pointId, int32_t sourceType)
 {
     if (moveDragProperty_ == nullptr) {
         return;
     }
-    if (!moveDragProperty_->startDragFlag_ || (pointId != moveDragProperty_->startPointerId_)) {
+    if (!moveDragProperty_->startDragFlag_ ||
+        (pointId != moveDragProperty_->startPointerId_) ||
+        (sourceType != moveDragProperty_->sourceType_)) {
         return;
     }
     auto startPointPosX = moveDragProperty_->startPointPosX_;
@@ -338,7 +340,7 @@ void MoveDragController::HandleDragEvent(int32_t posX, int32_t posY, int32_t poi
         }
         newRect.height_ = static_cast<uint32_t>(static_cast<int32_t>(newRect.height_) + diffY);
     }
-    WLOGFI("[WMS] HandleDragEvent, id: %{public}u, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFD("[WMS] HandleDragEvent, id: %{public}u, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         windowProperty_->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
     windowProperty_->SetRequestRect(newRect);
     windowProperty_->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
@@ -346,12 +348,14 @@ void MoveDragController::HandleDragEvent(int32_t posX, int32_t posY, int32_t poi
     WindowManagerService::GetInstance().UpdateProperty(windowProperty_, PropertyChangeAction::ACTION_UPDATE_RECT, true);
 }
 
-void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId)
+void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY, int32_t pointId, int32_t sourceType)
 {
     if (moveDragProperty_ == nullptr) {
         return;
     }
-    if (!moveDragProperty_->startMoveFlag_ || (pointId != moveDragProperty_->startPointerId_)) {
+    if (!moveDragProperty_->startMoveFlag_ ||
+        (pointId != moveDragProperty_->startPointerId_) ||
+        (sourceType != moveDragProperty_->sourceType_)) {
         return;
     }
     auto startPointPosX = moveDragProperty_->startPointPosX_;
@@ -362,7 +366,7 @@ void MoveDragController::HandleMoveEvent(int32_t posX, int32_t posY, int32_t poi
 
     const Rect& oriRect = windowProperty_->GetRequestRect();
     Rect newRect = { targetX, targetY, oriRect.width_, oriRect.height_ };
-    WLOGFI("[WMS] HandleMoveEvent, id: %{public}u, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFD("[WMS] HandleMoveEvent, id: %{public}u, newRect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         windowProperty_->GetWindowId(), newRect.posX_, newRect.posY_, newRect.width_, newRect.height_);
     windowProperty_->SetRequestRect(newRect);
     windowProperty_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
@@ -376,8 +380,11 @@ void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEv
     }
     MMI::PointerEvent::PointerItem pointerItem;
     int32_t pointId = pointerEvent->GetPointerId();
-    if (!pointerEvent->GetPointerItem(pointId, pointerItem)) {
-        WLOGFE("Point item is invalid");
+    int32_t sourceType = pointerEvent->GetSourceType();
+    if (!pointerEvent->GetPointerItem(pointId, pointerItem) ||
+        (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT)) {
+        WLOGFW("invalid pointerEvent");
         return;
     }
 
@@ -389,14 +396,21 @@ void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEv
     switch (action) {
         case MMI::PointerEvent::POINTER_ACTION_DOWN:
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN: {
-            moveDragProperty_->startMoveFlag_ = false;
-            moveDragProperty_->startDragFlag_ = false;
+            if (pointId == moveDragProperty_->startPointerId_ && sourceType == moveDragProperty_->sourceType_) {
+                moveDragProperty_->startMoveFlag_ = false;
+                moveDragProperty_->startDragFlag_ = false;
+            }
+            WLOGFD("[Server Point Down]: windowId: %{public}u, pointId: %{public}d, sourceType: %{public}d, "
+                   "hasPointStarted: %{public}d, startMove: %{public}d, startDrag: %{public}d, targetDisplayId: "
+                   "%{public}d, pointPos: [%{public}d, %{public}d]", activeWindowId_, pointId, sourceType,
+                   moveDragProperty_->pointEventStarted_, moveDragProperty_->startMoveFlag_,
+                   moveDragProperty_->startDragFlag_, targetDisplayId, pointPosX, pointPosY);
             break;
         }
         // ready to move or drag
         case MMI::PointerEvent::POINTER_ACTION_MOVE: {
-            HandleMoveEvent(pointPosX, pointPosY, pointId);
-            HandleDragEvent(pointPosX, pointPosY, pointId);
+            HandleMoveEvent(pointPosX, pointPosY, pointId, sourceType);
+            HandleDragEvent(pointPosX, pointPosY, pointId, sourceType);
             break;
         }
         // End move or drag
@@ -404,6 +418,8 @@ void MoveDragController::HandlePointerEvent(const std::shared_ptr<MMI::PointerEv
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
         case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
             WindowManagerService::GetInstance().NotifyWindowClientPointUp(activeWindowId_, pointerEvent);
+            WLOGFD("[Server Point Up/Cancel]: windowId: %{public}u, action: %{public}d, sourceType: %{public}d",
+                activeWindowId_, action, sourceType);
             break;
         }
         default:

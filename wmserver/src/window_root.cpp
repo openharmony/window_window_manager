@@ -1320,6 +1320,9 @@ void WindowRoot::ProcessDisplayDestroy(DisplayId defaultDisplayId, sptr<DisplayI
     auto displayRectMap = GetAllDisplayRectsByDisplayInfo(displayInfoMap);
     // erase displayId in displayRectMap
     auto displayRectIter = displayRectMap.find(displayId);
+    if (displayRectIter == displayRectMap.end()) {
+        return;
+    }
     displayRectMap.erase(displayRectIter);
     container->GetMultiDisplayController()->ProcessDisplayDestroy(
         defaultDisplayId, displayInfo, displayRectMap, needDestroyWindows);
