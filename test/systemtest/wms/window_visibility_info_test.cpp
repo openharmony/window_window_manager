@@ -94,22 +94,23 @@ public:
     Utils::TestWindowInfo fullScreenAppInfo_;
     Utils::TestWindowInfo floatAppInfo_;
     Utils::TestWindowInfo subAppInfo_;
-    void FillColor(sptr<Window> window);
+    bool FillColor(sptr<Window> window);
 };
 
-void WindowVisibilityInfoTest::FillColor(sptr<Window> window)
+bool WindowVisibilityInfoTest::FillColor(sptr<Window> window)
 {
     if (window == nullptr) {
-        return;
+        return false;
     }
     auto surfaceNode = window->GetSurfaceNode();
     if (surfaceNode == nullptr) {
-        return;
+        return false;
     }
     Rect rect = window->GetRect();
-    SurfaceDraw::DrawColor(surfaceNode, rect.width_, rect.height_, COLOR_RED);
+    bool isDrawSuccess = SurfaceDraw::DrawColor(surfaceNode, rect.width_, rect.height_, COLOR_RED);
     surfaceNode->SetAbilityBGAlpha(ALPHA);
     RSTransaction::FlushImplicitTransaction();
+    return isDrawSuccess;
 }
 
 void WindowVisibilityInfoTest::SetUpTestCase()
@@ -199,26 +200,34 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, Function | Medium
     subAppInfo_.parentName = window1->GetWindowName();
     sptr<Window> subWindow1 = Utils::CreateTestWindow(subAppInfo_);
 
+    bool isWindowVisible = false;
+    bool isSubWindowVisible = false;
+
+    uint32_t visibilityInfoCount = 0;
     ASSERT_EQ(WMError::WM_OK, window1->Show());
-    FillColor(window1);
+    isWindowVisible = FillColor(window1);
     WaitForCallback();
-    ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    visibilityInfoCount = isWindowVisible ? 1 : 0;
+    ASSERT_EQ(visibilityInfoCount, visibilityChangedListener_->windowVisibilityInfos_.size());
     ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, subWindow1->Show());
-    FillColor(subWindow1);
+    isSubWindowVisible = FillColor(subWindow1);
     WaitForCallback();
-    ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    visibilityInfoCount = isSubWindowVisible ? 1 : 0;
+    ASSERT_EQ(visibilityInfoCount, visibilityChangedListener_->windowVisibilityInfos_.size());
     ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, subWindow1->Hide());
     WaitForCallback();
-    ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    visibilityInfoCount = isSubWindowVisible ? 1 : 0;
+    ASSERT_EQ(visibilityInfoCount, visibilityChangedListener_->windowVisibilityInfos_.size());
     ResetCallbackCalledFLag();
 
     ASSERT_EQ(WMError::WM_OK, window1->Hide());
     WaitForCallback();
-    ASSERT_EQ(1, visibilityChangedListener_->windowVisibilityInfos_.size());
+    visibilityInfoCount = isWindowVisible ? 1 : 0;
+    ASSERT_EQ(visibilityInfoCount, visibilityChangedListener_->windowVisibilityInfos_.size());
     ResetCallbackCalledFLag();
 
     window1->Destroy();
