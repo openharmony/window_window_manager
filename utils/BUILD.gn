@@ -77,7 +77,6 @@ ohos_shared_library("libwmutil") {
     "multimedia_image_standard:image_native",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "utils_base:utils",
   ]
   part_name = "window_manager"
   subsystem_name = "window"
