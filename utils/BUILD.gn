@@ -69,7 +69,6 @@ ohos_shared_library("libwmutil") {
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "c_utils:utils",
     "graphic_standard:surface",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
