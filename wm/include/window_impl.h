@@ -347,13 +347,14 @@ private:
     void SetDefaultOption(); // for api7
     bool IsWindowValid() const;
     static sptr<Window> FindTopWindow(uint32_t topWinId);
-    WMError Drag(const Rect& rect);
+    void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void ReadyToMoveOrDragWindow(int32_t globalX, int32_t globalY, int32_t pointId,
-        int32_t targetDisplayId, const Rect& rect);
-    void EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId);
+    void ReadyToMoveOrDragWindow(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const MMI::PointerEvent::PointerItem& pointerItem);
+    void EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId, int32_t sourceType);
     void ResetMoveOrDragState();
     bool IsPointerEventConsumed();
+    bool IsPointInDragHotZone(int32_t startPointPosX, int32_t startPointPosY);
     void AdjustWindowAnimationFlag(bool withAnimation = false);
     void MapFloatingWindowToAppIfNeeded();
     void MapDialogWindowToAppIfNeeded();
@@ -376,7 +377,7 @@ private:
     uint32_t GetModeSupportInfo() const;
     WMError PreProcessShow(uint32_t reason, bool withAnimation);
     bool NeedToStopShowing();
-    void CalculateStartRectExceptHotZone(float virtualPixelRatio, const TransformHelper::Vector2& hotZoneScale);
+    void CalculateStartRectExceptHotZone(float virtualPixelRatio);
     void SetSystemConfig();
     void TransformSurfaceNode(const Transform& trans);
     bool IsAppMainOrSunOrFloatingWindow();
