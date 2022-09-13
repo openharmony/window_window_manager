@@ -15,6 +15,7 @@
 
 #include "js_screen_manager.h"
 
+#include <cinttypes>
 #include <vector>
 #include <new>
 #include "js_runtime_utils.h"
