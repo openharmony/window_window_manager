@@ -354,6 +354,8 @@ NativeValue* WindowErrorCodeInit(NativeEngine* engine)
         static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY)));
     object->SetProperty("WM_ERROR_INVALID_CALLING", CreateJsValue(*engine,
         static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+    object->SetProperty("WM_ERROR_STAGE_ABNORMALLY", CreateJsValue(*engine,
+        static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY)));
     return objValue;
 }
 
