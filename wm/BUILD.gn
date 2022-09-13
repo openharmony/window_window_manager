@@ -20,9 +20,7 @@ config("libwm_private_config") {
   include_dirs = [
     "include",
     "../wmserver/include",
-    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
-    "${ability_runtime_inner_api_path}/ability_manager/include",
-    "${ability_runtime_inner_api_path}/app_manager/include/appmgr",
+    "//foundation/arkui/napi",  # because of ability_context.h
   ]
 }
 
@@ -66,35 +64,21 @@ ohos_shared_library("libwm") {
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/utils:libwmutil",
-
-    # vsync
-    "//foundation/graphic/graphic_2d/rosen/modules/composer:libcomposer",
   ]
 
   external_deps = [
-    "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ace_engine:ace_uicontent",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "graphic_standard:surface",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
     "graphic_standard:window_animation",
-    "hicollie_native:libhicollie",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
     "imf:inputmethod_client",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "multimedia_image_standard:image",
     "multimedia_image_standard:image_native",
-    "napi:ace_napi",
-
-    # because appexecfwk_core depends on global_resmgr
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
-    "resource_management:global_resmgr",
-    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
 

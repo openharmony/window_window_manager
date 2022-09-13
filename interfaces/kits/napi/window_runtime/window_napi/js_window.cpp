@@ -15,7 +15,6 @@
 
 #include "js_window.h"
 #include <new>
-#include <ui/rs_surface_node.h>
 
 #ifndef WINDOW_PREVIEW
 #include "js_transition_controller.h"

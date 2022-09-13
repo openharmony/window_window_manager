@@ -37,6 +37,9 @@ config("window_native_kit_config") {
     "//foundation/window/window_manager/wm/include",
     "//foundation/window/window_manager/utils/include",
     "//foundation/window/window_manager/wmserver/include",
+
+    # because of pixle_map.h
+    "//foundation/multimedia/image_standard/interfaces/innerkits/include",
   ]
 }
 
@@ -55,7 +58,6 @@ ohos_shared_library("window_native_kit") {
   ]
 
   deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
   ]
@@ -69,6 +71,7 @@ ohos_shared_library("window_native_kit") {
     "ipc:ipc_core",
     "ipc_js:rpc",
     "multimedia_image_standard:image",
+    "multimedia_image_standard:image_native",
     "napi:ace_napi",
   ]
 
@@ -89,17 +92,13 @@ ohos_shared_library("window_napi") {
 
   deps = [
     ":window_native_kit",
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/frameworks/native/appkit:app_context",
-    "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
   ]
 
   external_deps = [
-    "ability_base:want",
     "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
     "ability_runtime:runtime",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
@@ -123,16 +122,13 @@ ohos_shared_library("windowstage_kit") {
   include_dirs = [ "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi" ]
   deps = [
     ":window_native_kit",
-    "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
   ]
 
   external_deps = [
-    "ability_runtime:ability_manager",
     "ability_runtime:runtime",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
     "napi:ace_napi",
   ]
 
