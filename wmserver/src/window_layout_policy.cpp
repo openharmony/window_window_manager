@@ -596,7 +596,7 @@ WindowSizeLimits WindowLayoutPolicy::GetSystemSizeLimits(const sptr<WindowNode>&
     } else {
         systemLimits.minWidth_ = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
         systemLimits.minHeight_ = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
-        if (displayRect.width_ > displayRect.height_) {
+        if (displayRect.width_ > displayRect.height_ && !node->isShowingOnMultiDisplays_) {
             std::swap(systemLimits.minWidth_, systemLimits.minHeight_);
         }
     }
@@ -612,7 +612,7 @@ void WindowLayoutPolicy::UpdateWindowSizeLimits(const sptr<WindowNode>& node)
     const auto& virtualPixelRatio = GetVirtualPixelRatio(node->GetDisplayId());
     const auto& systemLimits = GetSystemSizeLimits(node, displayRect, virtualPixelRatio);
     const auto& customizedLimits = node->GetWindowSizeLimits();
-    
+
     WindowSizeLimits newLimits = systemLimits;
 
     // configured limits of floating window

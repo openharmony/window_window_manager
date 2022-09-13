@@ -138,29 +138,30 @@ void DisplayGroupController::ProcessCrossNodes(DisplayId defaultDisplayId, Displ
     }
 }
 
-void DisplayGroupController::UpdateWindowShowingDisplays(const sptr<WindowNode>& node, const Rect& requestRect)
+void DisplayGroupController::UpdateWindowShowingDisplays(const sptr<WindowNode>& node)
 {
     auto leftDisplayId = displayGroupInfo_->GetLeftDisplayId();
     auto rightDisplayId = displayGroupInfo_->GetRightDisplayId();
     auto displayRectMap = displayGroupInfo_->GetAllDisplayRects();
     auto showingDisplays = std::vector<DisplayId>();
+    const auto& winRect = node->GetWindowRect();
     for (auto& elem : displayRectMap) {
         auto& curDisplayRect = elem.second;
 
         // if window is showing in display region
-        if (((requestRect.posX_ + static_cast<int32_t>(requestRect.width_)) > curDisplayRect.posX_) &&
-            (requestRect.posX_ < (curDisplayRect.posX_ + static_cast<int32_t>(curDisplayRect.width_)))) {
+        if (((winRect.posX_ + static_cast<int32_t>(winRect.width_)) > curDisplayRect.posX_) &&
+            (winRect.posX_ < (curDisplayRect.posX_ + static_cast<int32_t>(curDisplayRect.width_)))) {
             showingDisplays.push_back(elem.first);
         }
     }
 
     // if window is not showing on any display, maybe in the left of minPosX display, or the right of maxPosX display
     if (showingDisplays.empty()) {
-        if (((requestRect.posX_ + static_cast<int32_t>(requestRect.width_)) <=
+        if (((winRect.posX_ + static_cast<int32_t>(winRect.width_)) <=
             displayRectMap[leftDisplayId].posX_)) {
             showingDisplays.push_back(leftDisplayId);
         }
-        if (requestRect.posX_ >=
+        if (winRect.posX_ >=
             (displayRectMap[rightDisplayId].posX_ + static_cast<int32_t>(displayRectMap[rightDisplayId].width_))) {
             showingDisplays.push_back(rightDisplayId);
         }
@@ -175,33 +176,33 @@ void DisplayGroupController::UpdateWindowShowingDisplays(const sptr<WindowNode>&
     node->SetShowingDisplays(showingDisplays);
 }
 
-void DisplayGroupController::UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode>& node,
-                                                           const std::vector<DisplayId>& curShowingDisplays)
+void DisplayGroupController::UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode>& node)
 {
     // current multi-display is only support left-right combination, maxNum is two
     DisplayId newDisplayId = node->GetDisplayId();
+    const auto& curShowingDisplays = node->GetShowingDisplays();
+    const auto& winRect = node->GetWindowRect();
     if (curShowingDisplays.size() == 1) {
         newDisplayId = *(curShowingDisplays.begin());
     } else {
         // if more than half width of the window is showing on the display, means the window belongs to this display
-        const Rect& requestRect = node->GetRequestRect();
-        int32_t halfWidth = static_cast<int32_t>(requestRect.width_ * 0.5);
+        int32_t halfWidth = static_cast<int32_t>(winRect.width_ * 0.5);
         const auto& displayRectMap = displayGroupInfo_->GetAllDisplayRects();
         for (auto& elem : displayRectMap) {
             auto& displayRect = elem.second;
-            if ((requestRect.posX_ < displayRect.posX_) &&
-                (requestRect.posX_ + static_cast<int32_t>(requestRect.width_) >
+            if ((winRect.posX_ < displayRect.posX_) &&
+                (winRect.posX_ + static_cast<int32_t>(winRect.width_) >
                 displayRect.posX_ + static_cast<int32_t>(displayRect.width_))) { // window covers whole display region
                 newDisplayId = elem.first;
                 break;
             }
-            if (requestRect.posX_ >= displayRect.posX_) { // current display is default display
-                if ((displayRect.posX_ + static_cast<int32_t>(displayRect.width_) - requestRect.posX_) >= halfWidth) {
+            if (winRect.posX_ >= displayRect.posX_) { // current display is default display
+                if ((displayRect.posX_ + static_cast<int32_t>(displayRect.width_) - winRect.posX_) >= halfWidth) {
                     newDisplayId = elem.first;
                     break;
                 }
             } else { // current display is expand display
-                if ((requestRect.posX_ + static_cast<int32_t>(requestRect.width_) - displayRect.posX_) >= halfWidth) {
+                if ((winRect.posX_ + static_cast<int32_t>(winRect.width_) - displayRect.posX_) >= halfWidth) {
                     newDisplayId = elem.first;
                     break;
                 }
@@ -209,6 +210,7 @@ void DisplayGroupController::UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode
         }
     }
 
+    // update displayId if needed
     if (node->GetDisplayId() != newDisplayId) {
         UpdateWindowDisplayId(node, newDisplayId);
         UpdateDisplayGroupWindowTree();
@@ -247,7 +249,6 @@ void DisplayGroupController::PreProcessWindowNode(const sptr<WindowNode>& node, 
                 // change rect to rect in display group
                 ChangeToRectInDisplayGroup(node, node->GetDisplayId());
             }
-            UpdateWindowShowingDisplays(node, node->GetRequestRect());
             WLOGFD("preprocess node when add window");
             break;
         }
@@ -256,8 +257,6 @@ void DisplayGroupController::PreProcessWindowNode(const sptr<WindowNode>& node, 
             if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
                 ChangeToRectInDisplayGroup(node, defaultDisplayId_);
             }
-            UpdateWindowShowingDisplays(node, node->GetRequestRect());
-            UpdateWindowDisplayIdIfNeeded(node, node->GetShowingDisplays());
             WLOGFD("preprocess node when update window");
             break;
         }
@@ -268,6 +267,17 @@ void DisplayGroupController::PreProcessWindowNode(const sptr<WindowNode>& node, 
     for (auto& childNode : node->children_) {
         PreProcessWindowNode(childNode, type);
     }
+}
+
+void DisplayGroupController::PostProcessWindowNode(const sptr<WindowNode>& node)
+{
+    if (!windowNodeContainer_->GetLayoutPolicy()->IsMultiDisplay()) {
+        WLOGFD("Current mode is not multi-display");
+        return;
+    }
+
+    UpdateWindowShowingDisplays(node);
+    UpdateWindowDisplayIdIfNeeded(node);
 }
 
 void DisplayGroupController::UpdateWindowDisplayId(const sptr<WindowNode>& node, DisplayId newDisplayId)
@@ -381,8 +391,9 @@ void DisplayGroupController::ProcessDisplayCreate(DisplayId defaultDisplayId, sp
     // modify RSTree and window tree of displayGroup for cross-display nodes
     ProcessCrossNodes(defaultDisplayId, DisplayStateChangeType::CREATE);
     UpdateDisplayGroupWindowTree();
-    windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayCreate(displayId, displayRectMap);
-    Rect initialDividerRect = windowNodeContainer_->GetLayoutPolicy()->GetDividerRect(displayId);
+    const auto& layoutPolicy = windowNodeContainer_->GetLayoutPolicy();
+    layoutPolicy->ProcessDisplayCreate(displayId, displayRectMap);
+    Rect initialDividerRect = layoutPolicy->GetDividerRect(displayId);
     SetDividerRect(displayId, initialDividerRect);
 }
 
@@ -459,13 +470,14 @@ void DisplayGroupController::ProcessDisplaySizeChangeOrRotation(DisplayId defaul
     // modify RSTree and window tree of displayGroup for cross-display nodes
     ProcessCrossNodes(defaultDisplayId, type);
     UpdateDisplayGroupWindowTree();
-    if (windowNodeContainer_->GetLayoutPolicy() == nullptr) {
+    const auto& layoutPolicy = windowNodeContainer_->GetLayoutPolicy();
+    if (layoutPolicy == nullptr) {
         return;
     }
     // update reason after process cross Nodes to get correct display attribution
     UpdateNodeSizeChangeReasonWithRotation(displayId);
-    windowNodeContainer_->GetLayoutPolicy()->ProcessDisplaySizeChangeOrRotation(displayId, displayRectMap);
-    Rect curDividerRect = windowNodeContainer_->GetLayoutPolicy()->GetDividerRect(displayId);
+    layoutPolicy->ProcessDisplaySizeChangeOrRotation(displayId, displayRectMap);
+    Rect curDividerRect = layoutPolicy->GetDividerRect(displayId);
     if (windowPairMap_[displayId] != nullptr) {
         windowPairMap_[displayId]->RotateDividerWindow(curDividerRect);
     }
