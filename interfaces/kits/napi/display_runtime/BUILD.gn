@@ -20,6 +20,9 @@ config("display_config") {
   include_dirs = [
     "//foundation/window/window_manager/interfaces/kits/napi/display_runtime",
     "//foundation/window/window_manager/utils/include",
+
+    # because of pixle_map.h
+    "//foundation/multimedia/image_standard/interfaces/innerkits/include",
   ]
 }
 
@@ -38,21 +41,15 @@ ohos_shared_library("display_napi") {
   ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/frameworks/native/appkit:app_context",
-    "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
     "../common:wm_napi_common",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/utils:libwmutil",
   ]
 
   external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_manager",
     "ability_runtime:runtime",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
-    "multimedia_image_standard:image_native",
     "napi:ace_napi",
   ]
 

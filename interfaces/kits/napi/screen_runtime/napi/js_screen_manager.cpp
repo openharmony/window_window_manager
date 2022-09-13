@@ -17,7 +17,6 @@
 
 #include <vector>
 #include <new>
-#include <ability.h>
 #include "js_runtime_utils.h"
 #include "js_screen.h"
 #include "js_screen_listener.h"

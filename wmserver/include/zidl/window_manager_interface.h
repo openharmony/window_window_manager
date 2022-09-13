@@ -17,7 +17,7 @@
 #define OHOS_WINDOW_MANAGER_INTERFACE_H
 
 #include <iremote_broker.h>
-#include <rs_window_animation_finished_callback.h>
+#include <rs_iwindow_animation_finished_callback.h>
 #include <ui/rs_surface_node.h>
 
 #include "window_property.h"

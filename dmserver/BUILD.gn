@@ -16,9 +16,7 @@ import("//build/ohos.gni")
 ## Build libdms.so
 config("libdms_private_config") {
   include_dirs = [
-    "//base/sensors/sensor/interfaces/native/include",
     "//foundation/window/window_manager/dm/include",
-    "//foundation/window/window_manager/utils/include",
     "//foundation/window/window_manager/interfaces/innerkits/dm",
   ]
 }
@@ -55,13 +53,11 @@ ohos_shared_library("libdms") {
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/resourceschedule/resource_schedule_service/soc_perf:socperf_client",
-    "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/utils:libwmutil",
     "//third_party/libxml2:libxml2",
   ]
 
   external_deps = [
-    "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
@@ -70,7 +66,6 @@ ohos_shared_library("libdms") {
     "hitrace_native:hitrace_meter",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
     "sensor:sensor_interface_native",
   ]
 

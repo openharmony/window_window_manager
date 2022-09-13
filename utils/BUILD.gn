@@ -60,14 +60,13 @@ ohos_shared_library("libwmutil") {
 
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [
     "ability_runtime:ability_manager",
     "access_token:libaccesstoken_sdk",
-    "bundle_framework:appexecfwk_core",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "graphic_standard:surface",
     "hilog_native:libhilog",
@@ -75,7 +74,6 @@ ohos_shared_library("libwmutil") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
-    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
   part_name = "window_manager"

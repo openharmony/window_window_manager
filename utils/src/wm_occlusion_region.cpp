@@ -16,7 +16,6 @@
 
 #include <map>
 #include <set>
-#include <parameters.h>
 
 namespace OHOS::Rosen::Occlusion {
 static Rect _s_empty_rect_ { 0, 0, 0, 0 };

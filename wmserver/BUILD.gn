@@ -72,9 +72,7 @@ ohos_shared_library("libwms") {
 
   deps = [
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/dmserver:libdms",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
@@ -89,7 +87,6 @@ ohos_shared_library("libwms") {
     "config_policy:configpolicy_util",
     "display_manager:displaymgr",
     "eventhandler:libeventhandler",
-    "graphic_standard:surface",
     "graphic_standard:window_animation",
     "hicollie_native:libhicollie",
     "hilog_native:libhilog",
@@ -99,7 +96,6 @@ ohos_shared_library("libwms") {
     "ipc:ipc_core",
     "power_manager:powermgr_client",
     "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
   if (is_standard_system) {
