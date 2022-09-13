@@ -57,7 +57,6 @@ ohos_shared_library("libdm") {
     "hilog_native:libhilog",
     "ipc:ipc_core",
     "multimedia_image_standard:image_native",
-    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
 

@@ -21,9 +21,6 @@ config("screen_runtime_config") {
   include_dirs = [
     "//foundation/window/window_manager/interfaces/kits/napi/screen_runtime/api",
     "//foundation/window/window_manager/interfaces/kits/napi/screen_runtime/napi",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/window/window_manager/wm/include",
-    "//foundation/window/window_manager/utils/include",
   ]
 }
 
@@ -41,18 +38,14 @@ ohos_shared_library("screen_napi") {
   ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/frameworks/native/appkit:app_context",
-    "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/utils:libwmutil",
   ]
 
   external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_manager",
     "ability_runtime:runtime",
+    "c_utils:utils",
+    "graphic_standard:surface",  # use for SurfaceUtils
     "hiviewdfx_hilog_native:libhilog",
     "napi:ace_napi",
   ]

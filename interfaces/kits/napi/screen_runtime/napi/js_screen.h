@@ -15,9 +15,11 @@
 
 #ifndef OHOS_JS_SCREEN_H
 #define OHOS_JS_SCREEN_H
-#include "js_runtime_utils.h"
-#include "native_engine/native_engine.h"
-#include "native_engine/native_value.h"
+#include <js_runtime_utils.h>
+#include <native_engine/native_engine.h>
+#include <native_engine/native_value.h>
+#include <refbase.h>
+
 #include "screen.h"
 
 namespace OHOS {

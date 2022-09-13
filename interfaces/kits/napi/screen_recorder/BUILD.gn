@@ -41,10 +41,7 @@ ohos_shared_library("screenrecorder_napi") {
   ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/frameworks/native/appkit:app_context",
-    "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/snapshot:libsnapshot_util",
     "//foundation/window/window_manager/utils:libwmutil",
@@ -52,10 +49,7 @@ ohos_shared_library("screenrecorder_napi") {
   ]
 
   external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_manager",
     "ability_runtime:runtime",
-    "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "napi:ace_napi",
   ]

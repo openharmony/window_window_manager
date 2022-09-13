@@ -52,8 +52,6 @@ ohos_shared_library("libsnapshot_util") {
 
   deps = [
     "//foundation/window/window_manager/dm:libdm",
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
     "//third_party/libpng:libpng",
   ]
 
