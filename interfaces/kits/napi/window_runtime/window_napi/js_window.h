@@ -40,6 +40,7 @@ public:
     ~JsWindow();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* Show(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* ShowWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* ShowWithAnimation(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* Destroy(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* Hide(NativeEngine* engine, NativeCallbackInfo* info);
@@ -100,6 +101,7 @@ private:
     bool ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
     bool ParseTranslateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
     NativeValue* OnShow(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnShowWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnShowWithAnimation(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnDestroy(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnHide(NativeEngine& engine, NativeCallbackInfo& info);

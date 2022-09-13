@@ -18,59 +18,112 @@ import { AsyncCallback, Callback } from './basic';
 /**
  * Interface of display manager.
  * @syscap SystemCapability.WindowManager.WindowManager.Core
- * @devices tv, phone, tablet, wearable
+ * @since 7
  */
 declare namespace display {
-
+  /**
+   * display error code
+   * @since 7
+   * @deprecated since 9
+   */
+   enum DMError {
+    DM_ERROR_INIT_DMS_PROXY_LOCKED,
+    DM_ERROR_IPC_FAILED,
+    DM_ERROR_REMOTE_CREATE_FAILED,
+    DM_ERROR_NULLPTR,
+    DM_ERROR_INVALID_PARAM,
+    DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED,
+    DM_ERROR_WRITE_DATA_FAILED,
+    DM_ERROR_RENDER_SERVICE_FAILED,
+    DM_ERROR_INVALID_CALLING,
+  }
+  /**
+   * display error code
+   * @since 9
+   */
+   enum DMErrorCode {
+    DM_ERROR_NO_PERMISSION,
+    DM_ERROR_INVALID_PARAM,
+    DM_ERROR_DEVICE_NOT_SUPPORT,
+    DM_ERROR_INVALID_SCREEN,
+    DM_ERROR_SYSTEM_INNORMAL,
+    DM_ERROR_INVALID_CALLING,
+  }
   /**
    * Obtain the default display.
-   * @devices tv, phone, tablet, wearable
+   * @since 7
+   * @deprecated since 9, please use getDefaultDisplaySync instead.
    */
   function getDefaultDisplay(callback: AsyncCallback<Display>): void;
 
   /**
    * Obtain the default display.
-   * @devices tv, phone, tablet, wearable
+   * @since 7
+   * @deprecated since 9, please use getDefaultDisplaySync instead.
    */
   function getDefaultDisplay(): Promise<Display>;
 
   /**
    * Obtain the default display.
-   * @devices tv, phone, tablet, wearable
+   * @since 9
    */
   function getDefaultDisplaySync(): Display;
 
   /**
    * Obtain all displays.
-   * @devices tv, phone, tablet, wearable
-   * @param callback
+   * @since 7
+   * @deprecated since 9, please use getAllDisplays instead.
    */
   function getAllDisplay(callback: AsyncCallback<Array<Display>>): void;
 
   /**
    * Obtain all displays.
-   * @devices tv, phone, tablet, wearable
+   * @since 7
+   * @deprecated since 9, please use getAllDisplays instead.
    */
-  function getAllDisplay() : Promise<Array<Display>>;
+  function getAllDisplay(): Promise<Array<Display>>;
+
+  /**
+   * Obtain all displays.
+   * @since 9
+   */
+   function getAllDisplays(callback: AsyncCallback<Array<Display>>): void;
+
+   /**
+    * Obtain all displays.
+    * @since 9
+    */
+   function getAllDisplays(): Promise<Array<Display>>;
+
+  /**
+   * Check whether there is a privacy window on the current display.
+   * @param displayId Display id to query
+   * @throws DM_ERROR_INVALID_PARAM If param is not valid
+   * @systemapi Hide this for inner system use.
+   * @since 9
+   */
+  function hasPrivateWindow(displayId: number): boolean;
 
   /**
    * Register the callback for display changes.
    * @param type: type of callback
-   * @devices tv, phone, tablet, wearable, car
+   * @since 7
+   * @throws DM_ERROR_INVALID_PARAM If param is not valid
    */
   function on(type: 'add' | 'remove' | 'change', callback: Callback<number>): void;
 
   /**
    * Unregister the callback for display changes.
    * @param type: type of callback
-   * #devices tv, phone, tablet, wearable, car
+   * @since 7
+   * @throws DM_ERROR_INVALID_PARAM If param is not valid
    */
   function off(type: 'add' | 'remove' | 'change', callback?: Callback<number>): void;
 
   /**
    * Enumerates the display states.
    * @syscap SystemCapability.WindowManager.WindowManager.Core
-   * @devices tv, phone, tablet, wearable
+   * @since 7
    */
   enum DisplayState {
     /**
@@ -133,14 +186,21 @@ declare namespace display {
    * @since 9
    */
   interface CutoutInfo {
+    /**
+     * Bounding rectangles of the cutout areas of the display.
+     */
     readonly boundingRects: Array<Rect>;
+
+    /**
+     * Rectangles of curved parts on each side of a waterfall display. 
+     */
     readonly waterfallDisplayAreaRects: WaterfallDisplayAreaRects;
   }
-  
+
   /**
-   * Defines properties of the display. They cannot be updated automatically.
+   * Define properties of the display. They cannot be updated automatically.
    * @syscap SystemCapability.WindowManager.WindowManager.Core
-   * @devices tv, phone, tablet, wearable
+   * @since 7
    */
   interface Display {
     /**

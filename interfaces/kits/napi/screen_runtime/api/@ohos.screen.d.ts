@@ -45,6 +45,7 @@ declare namespace screen {
 
   /**
    * make screens as expand-screen
+   * @throws DM_ERROR_INVALID_PARAM If param is not valid
    * @since 9
    */
   function makeExpand(options:Array<ExpandOption>, callback: AsyncCallback<number>): void;
@@ -52,6 +53,7 @@ declare namespace screen {
 
   /**
    * make screens as mirror-screen
+   * @throws DM_ERROR_INVALID_PARAM If param is not valid
    * @since 9
    */
   function makeMirror(mainScreen:number, mirrorScreen:Array<number>, callback: AsyncCallback<number>): void;
@@ -59,15 +61,19 @@ declare namespace screen {
 
   /**
    * Create virtual screen.
-   * @param option Indicates the option of the virtual screen.
+   * @param options Indicates the options of the virtual screen.
+   * @permission ohos.permission.CAPTURE_SCREEN. if VirtualScreenOption.surfaceId is valid,
+   *             this permission is necessary.
+   * @throws DM_ERROR_INVALID_PARAM If param is not valid
    * @since 9
    */
-  function createVirtualScreen(option:VirtualScreenOption, callback: AsyncCallback<Screen>): void;
-  function createVirtualScreen(option:VirtualScreenOption): Promise<Screen>;
+  function createVirtualScreen(options:VirtualScreenOption, callback: AsyncCallback<Screen>): void;
+  function createVirtualScreen(options:VirtualScreenOption): Promise<Screen>;
 
   /**
    * Destroy virtual screen.
    * @param screenId Indicates the screen id of the virtual screen.
+   * @throws DM_ERROR_INVALID_PARAM If param is not valid
    * @since 9
    */
   function destroyVirtualScreen(screenId:number, callback: AsyncCallback<void>): void;
@@ -77,6 +83,8 @@ declare namespace screen {
    * Set surface for the virtual screen.
    * @param screenId Indicates the screen id of the virtual screen.
    * @param surfaceId Indicates the surface id.
+   * @permission ohos.permission.CAPTURE_SCREEN
+   * @throws DM_ERROR_INVALID_PARAM If param is not valid
    * @since 9
    */
   function setVirtualScreenSurface(screenId:number, surfaceId: string, callback: AsyncCallback<void>): void;
@@ -88,15 +96,16 @@ declare namespace screen {
    */
   function isScreenRotationLocked(callback: AsyncCallback<boolean>): void;
   function isScreenRotationLocked(): Promise<boolean>;
-    
+  
   /**
    * Set screen rotation lock status.
    * @param isLocked Indicates whether the screen rotation switch is locked.
+   * @throws DM_ERROR_INVALID_PARAM If param is not valid
    * @since 9
    */
   function setScreenRotationLocked(isLocked:boolean, callback: AsyncCallback<void>): void;
   function setScreenRotationLocked(isLocked:boolean): Promise<void>;
- 
+
   /**
    * the parameter of making expand screen
    * @syscap SystemCapability.WindowManager.WindowManager.Core
@@ -184,6 +193,7 @@ declare namespace screen {
 
     /**
      * set the orientation of the screen
+     * @throws DM_ERROR_INVALID_PARAM If param is not valid
      * @since 9
      */
     setOrientation(orientation: Orientation, callback: AsyncCallback<void>): void;
@@ -191,42 +201,17 @@ declare namespace screen {
 
     /**
      * active the mode
-     * @since 9
+     * @throws DM_ERROR_INVALID_PARAM If param is not valid
      */
     setScreenActiveMode(modeIndex: number, callback: AsyncCallback<void>): void;
     setScreenActiveMode(modeIndex: number): Promise<void>;
 
     /**
-     * set density of the screen.
-     * @Since 9
+     * set display density of the screen
+     * @throws DM_ERROR_INVALID_PARAM If param is not valid
      */
     setDensityDpi(densityDpi: number, callback: AsyncCallback<void>): void;
     setDensityDpi(densityDpi: number): Promise<void>;
-  }
-
-  /**
-   * interface for screen group
-   * @syscap SystemCapability.WindowManager.WindowManager.Core
-   * @since 9
-   */
-   interface ScreenGroup {
-    /**
-     * get screen group id
-     */
-    id: number;
-
-    combinationInfo: ExpandInfo | MirrorInfo;
-  }
-
-  interface ExpandInfo {
-    screenId: Array<number>;
-    startX: Array<number>;
-    startY: Array<number>;
-  }
-
-  interface MirrorInfo {
-    mainScreenId: number;
-    mirrorScreenId: Array<number>;
   }
 
   /**
