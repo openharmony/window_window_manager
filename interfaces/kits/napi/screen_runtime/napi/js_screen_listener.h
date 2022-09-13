@@ -19,7 +19,6 @@
 #include <mutex>
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
-#include "refbase.h"
 #include "screen_manager.h"
 
 namespace OHOS {
