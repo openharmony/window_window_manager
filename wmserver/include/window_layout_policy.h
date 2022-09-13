@@ -64,6 +64,7 @@ public:
     void ProcessDisplaySizeChangeOrRotation(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void SetSplitRatioConfig(const SplitRatioConfig& splitRatioConfig);
     virtual bool IsTileRectSatisfiedWithSizeLimits(const sptr<WindowNode>& node);
+
 protected:
     void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
     void UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect);
@@ -92,8 +93,6 @@ protected:
     void UpdateFloatingWindowSizeForStretchableWindow(const sptr<WindowNode>& node,
         const Rect& displayRect, Rect& winRect) const;
     void UpdateFloatingWindowSizeBySizeLimits(const sptr<WindowNode>& node,
-        const Rect& displayRect, Rect& winRect) const;
-    void UpdateFloatingWindowSizeBySystemLimits(const sptr<WindowNode>& node,
         const Rect& displayRect, Rect& winRect) const;
     void LimitWindowPositionWhenInitRectOrMove(const sptr<WindowNode>& node, Rect& winRect) const;
     void LimitWindowPositionWhenDrag(const sptr<WindowNode>& node, Rect& winRect) const;
