@@ -280,6 +280,83 @@ NativeValue* BlurStyleInit(NativeEngine* engine)
     return objValue;
 }
 
+NativeValue* WindowErrorInit(NativeEngine* engine)
+{
+    WLOGFD("[NAPI]WindowErrorInit");
+    if (engine == nullptr) {
+        WLOGFE("[NAPI]Engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("[NAPI]Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("WM_DO_NOTHING", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_DO_NOTHING)));
+    object->SetProperty("WM_ERROR_NO_MEM", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_NO_MEM)));
+    object->SetProperty("WM_ERROR_DESTROYED_OBJECT", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_DESTROYED_OBJECT)));
+    object->SetProperty("WM_ERROR_INVALID_WINDOW", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_INVALID_WINDOW)));
+    object->SetProperty("WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE)));
+    object->SetProperty("WM_ERROR_INVALID_OPERATION", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_INVALID_OPERATION)));
+    object->SetProperty("WM_ERROR_INVALID_PERMISSION", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_INVALID_PERMISSION)));
+    object->SetProperty("WM_ERROR_NO_REMOTE_ANIMATION", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_NO_REMOTE_ANIMATION)));
+    object->SetProperty("WM_ERROR_DEVICE_NOT_SUPPORT", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_DEVICE_NOT_SUPPORT)));
+    object->SetProperty("WM_ERROR_NULLPTR", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+    object->SetProperty("WM_ERROR_INVALID_TYPE", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_INVALID_TYPE)));
+    object->SetProperty("WM_ERROR_INVALID_PARAM", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_INVALID_PARAM)));
+    object->SetProperty("WM_ERROR_SAMGR", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_SAMGR)));
+    object->SetProperty("WM_ERROR_IPC_FAILED", CreateJsValue(*engine,
+        static_cast<int32_t>(WMError::WM_ERROR_IPC_FAILED)));
+    return objValue;
+}
+
+NativeValue* WindowErrorCodeInit(NativeEngine* engine)
+{
+    WLOGFD("[NAPI]WindowErrorCodeInit");
+    if (engine == nullptr) {
+        WLOGFE("[NAPI]Engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("[NAPI]Failed to get object");
+        return nullptr;
+    }
+    object->SetProperty("WM_ERROR_NO_PERMISSION", CreateJsValue(*engine,
+        static_cast<int32_t>(WmErrorCode::WM_ERROR_NO_PERMISSION)));
+    object->SetProperty("WM_ERROR_INVALID_PARAM", CreateJsValue(*engine,
+        static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+    object->SetProperty("WM_ERROR_DEVICE_NOT_SUPPORT", CreateJsValue(*engine,
+        static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+    object->SetProperty("WM_ERROR_REPEAT_OPERATION", CreateJsValue(*engine,
+        static_cast<int32_t>(WmErrorCode::WM_ERROR_REPEAT_OPERATION)));
+    object->SetProperty("WM_ERROR_STATE_ABNORMALLY", CreateJsValue(*engine,
+        static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+    object->SetProperty("WM_ERROR_SYSTEM_ABNORMALLY", CreateJsValue(*engine,
+        static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY)));
+    object->SetProperty("WM_ERROR_INVALID_CALLING", CreateJsValue(*engine,
+        static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+    return objValue;
+}
+
 NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect& rect)
 {
     NativeValue* objValue = engine.CreateObject();

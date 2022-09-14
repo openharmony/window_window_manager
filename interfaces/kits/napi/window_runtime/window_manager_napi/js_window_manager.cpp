@@ -588,6 +588,8 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetProperty("WindowLayoutMode", WindowLayoutModeInit(engine));
     object->SetProperty("Orientation", OrientationInit(engine));
     object->SetProperty("BlurStyle", BlurStyleInit(engine));
+    object->SetProperty("WmErrorCode", WindowErrorCodeInit(engine));
+    object->SetProperty("WMError", WindowErrorInit(engine));
     const char *moduleName = "JsWindowManager";
     BindNativeFunction(*engine, *object, "create", moduleName, JsWindowManager::CreateWindow);
     BindNativeFunction(*engine, *object, "find", moduleName, JsWindowManager::FindWindow);

@@ -896,20 +896,20 @@ declare namespace window {
     off(type: 'avoidAreaChange', callback?: Callback<{ type: AvoidAreaType, area: AvoidArea }>): void;
 
     /**
-     * register the callback of screenshot, only the focused window called back
-     * @param type: 'screenshot'
+     * register the callback of screenshotEvent, only the focused window called back
+     * @param type: 'screenshotEvent'
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 9
      */
-    on(type: 'screenshot', callback: Callback<void>): void;
+    on(type: 'screenshotEvent', callback: Callback<void>): void;
 
     /**
-     * unregister the callback of screenshot
-     * @param type: 'screenshot'
+     * unregister the callback of screenshotEvent
+     * @param type: 'screenshotEvent'
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 9
      */
-    off(type: 'screenshot', callback?: Callback<void>): void;
+    off(type: 'screenshotEvent', callback?: Callback<void>): void;
 
     /**
      * register the callback of dialogTargetTouch
@@ -943,7 +943,7 @@ declare namespace window {
      * @systemapi
      * @since 9
      */
-    bindDialogTarget(token: rpc.RemoteObject, deathCallback: Callback<void>, callback: AsyncCallback<void>): void;
+    bindDialogTarget(token: rpc.RemoteObject, deathCallback: Callback<void>, callback: AsyncCallback<void>);
 
     /**
      * Whether the window supports thr wide gamut setting.
