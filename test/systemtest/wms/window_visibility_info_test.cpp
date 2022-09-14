@@ -141,7 +141,7 @@ void WindowVisibilityInfoTest::SetUp()
         .needAvoid = false,
         .parentLimit = false,
         .showWhenLocked = true,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     floatAppInfo_ = {
         .name = "ParentWindow",
@@ -151,7 +151,7 @@ void WindowVisibilityInfoTest::SetUp()
         .needAvoid = false,
         .parentLimit = false,
         .showWhenLocked = true,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     subAppInfo_ = {
         .name = "SubWindow",
@@ -161,7 +161,7 @@ void WindowVisibilityInfoTest::SetUp()
         .needAvoid = false,
         .parentLimit = false,
         .showWhenLocked = true,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 }
 
@@ -196,7 +196,7 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, Function | Medium
 
     subAppInfo_.name = "subWindow1";
     subAppInfo_.rect = {0, 600, 300, 100};
-    subAppInfo_.parentName = window1->GetWindowName();
+    subAppInfo_.parentId = window1->GetWindowId();
     sptr<Window> subWindow1 = Utils::CreateTestWindow(subAppInfo_);
 
     ASSERT_EQ(WMError::WM_OK, window1->Show());

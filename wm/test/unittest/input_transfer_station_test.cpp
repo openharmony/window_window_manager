@@ -47,7 +47,7 @@ void InputTransferStationTest::SetUp()
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("inputwindow");
     window_ = new WindowImpl(option);
-    window_->Create("");
+    window_->Create(INVALID_WINDOW_ID);
 }
 
 void InputTransferStationTest::TearDown()

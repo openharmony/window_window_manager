@@ -72,7 +72,7 @@ static sptr<Window> CreateAppSubWindow(sptr<Window> parentWindow, WindowType typ
     subOp->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     subOp->SetWindowRect(rect);
     subOp->SetWindowFlags(flags);
-    subOp->SetParentName(parentWindow->GetWindowName());
+    subOp->SetParentId(parentWindow->GetWindowId());
 
     static int cnt = 0;
     std::string subWinName = (name == "") ? "AppSubWindow" + std::to_string(cnt++) : name;
@@ -88,7 +88,7 @@ static sptr<Window> CreateSystemSubWindow(sptr<Window> parentWindow, struct Rect
     subOp->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     subOp->SetWindowRect(rect);
     subOp->SetWindowFlags(flags);
-    subOp->SetParentName(parentWindow->GetWindowName());
+    subOp->SetParentId(parentWindow->GetWindowId());
 
     static int cnt = 0;
     std::string subWinName = (name == "") ? "SystemSubWindow" + std::to_string(cnt++) : name;

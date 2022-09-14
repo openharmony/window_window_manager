@@ -889,21 +889,24 @@ void WindowImpl::SetSystemConfig()
     UpdateWindowShadowAccordingToSystemConfig();
 }
 
-bool WindowImpl::WindowCreateCheck(const std::string& parentName)
+bool WindowImpl::WindowCreateCheck(uint32_t parentId)
 {
     // check window name, same window names are forbidden
     if (windowMap_.find(name_) != windowMap_.end()) {
         WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
         return false;
     }
-    // check parent name, if create sub window and there is not exist parent Window, then return
-    if (parentName != "") {
-        if (windowMap_.find(parentName) == windowMap_.end()) {
-            WLOGFE("ParentName is empty or valid. ParentName is %{public}s", parentName.c_str());
+    // check parent id, if create sub window and there is not exist parent Window, then return
+    if (parentId != INVALID_WINDOW_ID) {
+        for (auto& winPair : windowMap_) {
+            if (winPair.second.first == parentId) {
+                property_->SetParentId(parentId);
+                break;
+            }
+        }
+        if (property_->GetParentId() != parentId) {
+            WLOGFE("ParentId is empty or valid. ParentId is %{public}s", std::to_string(parentId).c_str());
             return false;
-        } else {
-            uint32_t parentId = windowMap_[parentName].first;
-            property_->SetParentId(parentId);
         }
     }
 
@@ -914,10 +917,10 @@ bool WindowImpl::WindowCreateCheck(const std::string& parentName)
     return true;
 }
 
-WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<AbilityRuntime::Context>& context)
+WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     WLOGFI("[Client] Window [name:%{public}s] Create", name_.c_str());
-    if (!WindowCreateCheck(parentName)) {
+    if (!WindowCreateCheck(parentId)) {
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
@@ -952,7 +955,7 @@ WMError WindowImpl::Create(const std::string& parentName, const std::shared_ptr<
     property_->SetWindowId(windowId);
     sptr<Window> self(this);
     windowMap_.insert(std::make_pair(name_, std::pair<uint32_t, sptr<Window>>(windowId, self)));
-    if (parentName != "") { // add to subWindowMap_
+    if (parentId != INVALID_WINDOW_ID) {
         subWindowMap_[property_->GetParentId()].push_back(window);
     }
 
