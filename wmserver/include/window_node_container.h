@@ -122,6 +122,7 @@ public:
     static AnimationConfig& GetAnimationConfigRef();
     bool TakeWindowPairSnapshot(DisplayId displayId);
     void ClearWindowPairSnapshot(DisplayId displayId);
+    bool IsScreenLocked();
 
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;

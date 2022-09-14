@@ -1967,5 +1967,10 @@ void WindowNodeContainer::ClearWindowPairSnapshot(DisplayId displayId)
     }
     windowPair->ClearPairSnapshot();
 }
+
+bool WindowNodeContainer::IsScreenLocked()
+{
+    return isScreenLocked_;
+}
 } // namespace Rosen
 } // namespace OHOS
