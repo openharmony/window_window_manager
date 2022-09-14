@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@ declare namespace screenshot {
      * Takes a screenshot and saves it as a PixelMap object.
      * @param options Screenshot options, which consist of screenRect, imageSize, and rotation. You need to set these parameters
      * @permission ohos.permission.CAPTURE_SCREEN
+     * @throws DM_ERROR_INVALID_PARAM If param is not valid
      * @since 7
      */
     function save(options?: ScreenshotOptions, callback: AsyncCallback<image.PixelMap>): void;
@@ -35,6 +36,7 @@ declare namespace screenshot {
      * Takes a screenshot and saves it as a PixelMap object.
      * @param options Screenshot options, which consist of screenRect, imageSize, and rotation. You need to set these parameters
      * @permission ohos.permission.CAPTURE_SCREEN
+     * @throws DM_ERROR_INVALID_PARAM If param is not valid
      * @since 7
      */
     function save(options?: ScreenshotOptions): Promise<image.PixelMap>;

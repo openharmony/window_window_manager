@@ -99,6 +99,13 @@ NativeValue* JsWindow::Show(NativeEngine* engine, NativeCallbackInfo* info)
     return (me != nullptr) ? me->OnShow(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindow::ShowWindow(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFI("[NAPI]Show");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(engine, info);
+    return (me != nullptr) ? me->OnShowWindow(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindow::ShowWithAnimation(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGFI("[NAPI]ShowWithAnimation");
@@ -456,6 +463,35 @@ NativeValue* JsWindow::OnShow(NativeEngine& engine, NativeCallbackInfo& info)
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window show failed"));
+            }
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] show end, ret = %{public}d",
+                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+        };
+    NativeValue* result = nullptr;
+    NativeValue* lastParam = (info.argc == 0) ? nullptr :
+        (info.argv[0]->TypeOf() == NATIVE_FUNCTION ? info.argv[0] : nullptr);
+    AsyncTask::Schedule("JsWindow::OnShow",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnShowWindow(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                WLOGFE("[NAPI]window is nullptr or get invalid param");
+                return;
+            }
+            WMError ret = weakWindow->Show(0, false);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(engine, engine.CreateUndefined());
+            } else {                
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(JS_TO_ERROR_CODE_MAP.at(ret)), "Window show failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] show end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
@@ -2465,6 +2501,7 @@ NativeValue* CreateJsWindowObject(NativeEngine& engine, sptr<Window>& window)
 void BindFunctions(NativeEngine& engine, NativeObject* object, const char *moduleName)
 {
     BindNativeFunction(engine, *object, "show", moduleName, JsWindow::Show);
+    BindNativeFunction(engine, *object, "showWindow", moduleName, JsWindow::ShowWindow);
     BindNativeFunction(engine, *object, "showWithAnimation", moduleName, JsWindow::ShowWithAnimation);
     BindNativeFunction(engine, *object, "destroy", moduleName, JsWindow::Destroy);
     BindNativeFunction(engine, *object, "hide", moduleName, JsWindow::Hide);

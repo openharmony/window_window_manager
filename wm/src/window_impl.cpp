@@ -333,7 +333,7 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
     if (!WindowHelper::IsWindowModeSupported(GetModeSupportInfo(), mode)) {
         WLOGFI("window %{public}u do not support window mode: %{public}u",
                property_->GetWindowId(), static_cast<uint32_t>(mode));
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
         UpdateMode(mode);

@@ -160,6 +160,24 @@ const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
     {ApiOrientation::LOCKED,                                Orientation::LOCKED                             },
 };
 
+const std::map<WMError, WmErrorCode> JS_TO_ERROR_CODE_MAP {
+    {WMError::WM_OK,                                   WmErrorCode::WM_OK                       },
+    {WMError::WM_DO_NOTHING,                           WmErrorCode::WM_ERROR_STATE_ABNORMALLY   },
+    {WMError::WM_ERROR_DESTROYED_OBJECT,               WmErrorCode::WM_ERROR_STATE_ABNORMALLY   },
+    {WMError::WM_ERROR_DEVICE_NOT_SUPPORT,             WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT },
+    {WMError::WM_ERROR_INVALID_OPERATION,              WmErrorCode::WM_ERROR_STATE_ABNORMALLY   },
+    {WMError::WM_ERROR_INVALID_PARAM,                  WmErrorCode::WM_ERROR_INVALID_PARAM      },
+    {WMError::WM_ERROR_INVALID_PERMISSION,             WmErrorCode::WM_ERROR_NO_PERMISSION      },
+    {WMError::WM_ERROR_INVALID_TYPE,                   WmErrorCode::WM_ERROR_STATE_ABNORMALLY   },
+    {WMError::WM_ERROR_INVALID_WINDOW,                 WmErrorCode::WM_ERROR_STATE_ABNORMALLY   },
+    {WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE,    WmErrorCode::WM_ERROR_STATE_ABNORMALLY   },
+    {WMError::WM_ERROR_IPC_FAILED,                     WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY  },
+    {WMError::WM_ERROR_NO_MEM,                         WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY  },
+    {WMError::WM_ERROR_NO_REMOTE_ANIMATION,            WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY  },
+    {WMError::WM_ERROR_NULLPTR,                        WmErrorCode::WM_ERROR_STATE_ABNORMALLY   },
+    {WMError::WM_ERROR_SAMGR,                          WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY  },
+};
+
     NativeValue* GetRectAndConvertToJsValue(NativeEngine& engine, const Rect& rect);
     NativeValue* CreateJsWindowPropertiesObject(NativeEngine& engine, sptr<Window>& window);
     bool SetSystemBarPropertiesFromJs(NativeEngine& engine, NativeObject* jsObject,
@@ -178,6 +196,8 @@ const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
     NativeValue* WindowStageEventTypeInit(NativeEngine* engine);
     NativeValue* WindowLayoutModeInit(NativeEngine* engine);
     NativeValue* BlurStyleInit(NativeEngine* engine);
+    NativeValue* WindowErrorCodeInit(NativeEngine* engine);
+    NativeValue* WindowErrorInit(NativeEngine* engine);
     bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability);
     bool ParseJsDoubleValue(NativeObject* jsObject, NativeEngine& engine, const std::string& name, double& data);
     template<class T>
