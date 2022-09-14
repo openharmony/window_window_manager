@@ -83,13 +83,11 @@ size_t InitWindowOption1(WindowOption &windowOption, const uint8_t *data, size_t
     DisplayId displayId;
     startPos += GetObject<DisplayId>(displayId, data + startPos, size - startPos);
     windowOption.SetDisplayId(displayId);
+    uint32_t parentId;
+    startPos += GetObject<uint32_t>(parentId, data + startPos, size - startPos);
+    windowOption.SetParentId(parentId);
     char name[LEN + 1];
     name[LEN] = END_CHAR;
-    for (int i = 0; i < LEN; i++) {
-        startPos += GetObject<char>(name[i], data + startPos, size - startPos);
-    }
-    std::string parentName(name);
-    windowOption.SetParentName(parentName);
     for (int i = 0; i < LEN; i++) {
         startPos += GetObject<char>(name[i], data + startPos, size - startPos);
     }

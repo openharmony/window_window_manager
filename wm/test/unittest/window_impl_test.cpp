@@ -53,7 +53,7 @@ void WindowImplTest::TearDown()
 namespace {
 /**
  * @tc.name: CreateWindow01
- * @tc.desc: Create window with no parentName
+ * @tc.desc: Create window with no parentId
  * @tc.type: FUNC
  */
 HWTEST_F(WindowImplTest, CreateWindow01, Function | SmallTest | Level2)
@@ -64,7 +64,7 @@ HWTEST_F(WindowImplTest, CreateWindow01, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -72,7 +72,7 @@ HWTEST_F(WindowImplTest, CreateWindow01, Function | SmallTest | Level2)
 
 /**
  * @tc.name: CreateWindow02
- * @tc.desc: Create window with no parentName and no abilityContext
+ * @tc.desc: Create window with no parentId and no abilityContext
  * @tc.type: FUNC
  */
 HWTEST_F(WindowImplTest, CreateWindow02, Function | SmallTest | Level2)
@@ -83,12 +83,12 @@ HWTEST_F(WindowImplTest, CreateWindow02, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
-    ASSERT_EQ(WMError::WM_ERROR_SAMGR, window->Create(""));
+    ASSERT_EQ(WMError::WM_ERROR_SAMGR, window->Create(INVALID_WINDOW_ID));
 }
 
 /**
  * @tc.name: CreateWindow03
- * @tc.desc: Create window with illegal parentName
+ * @tc.desc: Create window with illegal parentId
  * @tc.type: FUNC
  */
 HWTEST_F(WindowImplTest, CreateWindow03, Function | SmallTest | Level2)
@@ -96,7 +96,7 @@ HWTEST_F(WindowImplTest, CreateWindow03, Function | SmallTest | Level2)
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("CreateWindow03");
     sptr<WindowImpl> window = new WindowImpl(option);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->Create("illegal"));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->Create(1234));
 }
 
 /**
@@ -111,13 +111,13 @@ HWTEST_F(WindowImplTest, CreateWindow04, Function | SmallTest | Level2)
     option->SetWindowName("CreateWindow04");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Create("");
+    window->Create(INVALID_WINDOW_ID);
 
     sptr<WindowOption> option_other = new WindowOption();
     option_other->SetWindowName("CreateWindow04");
     sptr<WindowImpl> window_other = new WindowImpl(option_other);
 
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window_other->Create(""));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, window_other->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     ASSERT_EQ(WMError::WM_OK, window_other->Destroy());
@@ -125,7 +125,7 @@ HWTEST_F(WindowImplTest, CreateWindow04, Function | SmallTest | Level2)
 
 /**
  * @tc.name: CreateWindow05
- * @tc.desc: Create window with exist parentName
+ * @tc.desc: Create window with exist parentId
  * @tc.type: FUNC
  */
 HWTEST_F(WindowImplTest, CreateWindow05, Function | SmallTest | Level2)
@@ -136,14 +136,14 @@ HWTEST_F(WindowImplTest, CreateWindow05, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     sptr<WindowOption> option2 = new WindowOption();
     option2->SetWindowName("CreateWindow05");
     sptr<WindowImpl> window2 = new WindowImpl(option2);
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window2->Create("CreateWindow05_parent"));
+    ASSERT_EQ(WMError::WM_OK, window2->Create(window->GetWindowId()));
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -167,7 +167,7 @@ HWTEST_F(WindowImplTest, CreateWindow06, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     ASSERT_EQ(1, window->GetRequestRect().posX_);
     ASSERT_EQ(2, window->GetRequestRect().posY_);
@@ -193,7 +193,7 @@ HWTEST_F(WindowImplTest, FindWindow01, Function | SmallTest | Level2)
     option->SetWindowName("FindWindow01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Create("");
+    window->Create(INVALID_WINDOW_ID);
     ASSERT_NE(nullptr, WindowImpl::Find("FindWindow01"));
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -211,12 +211,12 @@ HWTEST_F(WindowImplTest, FindWindow02, Function | SmallTest | Level2)
     option->SetWindowName("FindWindow02");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     option->SetWindowName("FindWindow02_other");
     sptr<WindowImpl> window2 = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window2->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window2->Create(INVALID_WINDOW_ID));
 
     ASSERT_NE(nullptr, WindowImpl::Find("FindWindow02_other"));
     ASSERT_NE(nullptr, WindowImpl::Find("FindWindow02"));
@@ -259,7 +259,7 @@ HWTEST_F(WindowImplTest, FindWindow05, Function | SmallTest | Level2)
     option->SetWindowName("FindWindow05");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -278,7 +278,7 @@ HWTEST_F(WindowImplTest, FindTopWindow01, Function | SmallTest | Level2)
     option->SetWindowName("FindTopWindow01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     ASSERT_NE(nullptr, window->FindTopWindow(window->property_->GetWindowId()));
 
@@ -298,7 +298,7 @@ HWTEST_F(WindowImplTest, SetWindowType01, Function | SmallTest | Level2)
     option->SetWindowName("SetWindowType01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     ASSERT_EQ(WMError::WM_OK, window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -316,7 +316,7 @@ HWTEST_F(WindowImplTest, SetWindowMode01, Function | SmallTest | Level2)
     option->SetWindowName("SetWindowType01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     ASSERT_EQ(WMError::WM_OK, window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -336,7 +336,7 @@ HWTEST_F(WindowImplTest, SetWindowMode02, Function | SmallTest | Level3)
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
     ASSERT_EQ(WMError::WM_OK, window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, window->GetMode());
@@ -358,7 +358,7 @@ HWTEST_F(WindowImplTest, SetWindowMode03, Function | SmallTest | Level3)
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
     ASSERT_EQ(WMError::WM_OK, window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY));
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, window->GetMode());
@@ -380,7 +380,7 @@ HWTEST_F(WindowImplTest, SetWindowMode04, Function | SmallTest | Level3)
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
     ASSERT_EQ(WMError::WM_OK, window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING));
     ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window->GetMode());
@@ -402,7 +402,7 @@ HWTEST_F(WindowImplTest, SetWindowMode05, Function | SmallTest | Level3)
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetMode());
     ASSERT_EQ(WMError::WM_OK, window->SetWindowMode(WindowMode::WINDOW_MODE_PIP));
     ASSERT_EQ(WindowMode::WINDOW_MODE_PIP, window->GetMode());
@@ -422,7 +422,7 @@ HWTEST_F(WindowImplTest, ShowHideWindow01, Function | SmallTest | Level2)
     option->SetWindowName("ShowHideWindow01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -443,7 +443,7 @@ HWTEST_F(WindowImplTest, ShowHideWindow02, Function | SmallTest | Level2)
     option->SetWindowName("ShowHideWindow02");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
     ASSERT_EQ(WMError::WM_ERROR_SAMGR, window->Show());
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -462,7 +462,7 @@ HWTEST_F(WindowImplTest, ShowHideWindow03, Function | SmallTest | Level3)
     option->SetWindowName("ShowHideWindow03");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_IPC_FAILED));
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, window->Show());
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -481,7 +481,7 @@ HWTEST_F(WindowImplTest, ShowHideWindow04, Function | SmallTest | Level3)
     option->SetWindowName("ShowHideWindow04");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_SAMGR));
@@ -502,7 +502,7 @@ HWTEST_F(WindowImplTest, ShowHideWindow05, Function | SmallTest | Level3)
     option->SetWindowName("ShowHideWindow05");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_IPC_FAILED));
@@ -523,7 +523,7 @@ HWTEST_F(WindowImplTest, ShowHideWindow06, Function | SmallTest | Level3)
     option->SetWindowName("ShowHideWindow06");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     EXPECT_CALL(m->Mock(), RemoveWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -544,7 +544,7 @@ HWTEST_F(WindowImplTest, SetSystemBarProperty01, Function | SmallTest | Level3)
     option->SetWindowName("SetSystemBarProperty01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
     SystemBarProperty prop;
@@ -565,7 +565,7 @@ HWTEST_F(WindowImplTest, SetSystemBarProperty02, Function | SmallTest | Level3)
     option->SetWindowName("SetSystemBarProperty02");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
@@ -606,7 +606,7 @@ HWTEST_F(WindowImplTest, GetSystemBarPropertyByType01, Function | SmallTest | Le
     option->SetWindowName("GetSystemBarPropertyByType01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -633,7 +633,7 @@ HWTEST_F(WindowImplTest, GetSystemBarPropertyByType02, Function | SmallTest | Le
     option->SetWindowName("GetSystemBarPropertyByType02");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
@@ -660,7 +660,7 @@ HWTEST_F(WindowImplTest, GetSystemBarPropertyByType03, Function | SmallTest | Le
     option->SetWindowName("GetSystemBarPropertyByType03");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
@@ -687,7 +687,7 @@ HWTEST_F(WindowImplTest, Maximize02, Function | SmallTest | Level3)
     option->SetWindowName("Maximize02");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -713,7 +713,7 @@ HWTEST_F(WindowImplTest, Recover01, Function | SmallTest | Level3)
     option->SetWindowName("Recover01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Create("");
+    window->Create(INVALID_WINDOW_ID);
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -739,7 +739,7 @@ HWTEST_F(WindowImplTest, Recover02, Function | SmallTest | Level3)
     option->SetWindowName("Recover02");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Create("");
+    window->Create(INVALID_WINDOW_ID);
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -764,7 +764,7 @@ HWTEST_F(WindowImplTest, Minimize01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Create("");
+    window->Create(INVALID_WINDOW_ID);
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -789,7 +789,7 @@ HWTEST_F(WindowImplTest, Minimize02, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Create("");
+    window->Create(INVALID_WINDOW_ID);
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -813,7 +813,7 @@ HWTEST_F(WindowImplTest, IsSupportWideGamut01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Create("");
+    window->Create(INVALID_WINDOW_ID);
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     ASSERT_TRUE(window->IsSupportWideGamut());
@@ -833,7 +833,7 @@ HWTEST_F(WindowImplTest, SetColorSpace01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Create("");
+    window->Create(INVALID_WINDOW_ID);
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
@@ -853,7 +853,7 @@ HWTEST_F(WindowImplTest, GetColorSpace01, Function | SmallTest | Level3)
     sptr<WindowImpl> window = new WindowImpl(option);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    window->Create("");
+    window->Create(INVALID_WINDOW_ID);
     window->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
@@ -879,7 +879,7 @@ HWTEST_F(WindowImplTest, StartMove01, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
     window->StartMove();
@@ -904,7 +904,7 @@ HWTEST_F(WindowImplTest, StartMove02, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
 
@@ -930,7 +930,7 @@ HWTEST_F(WindowImplTest, StartMove03, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
     window->StartMove();
@@ -954,7 +954,7 @@ HWTEST_F(WindowImplTest, SetBackgroundColor01, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     window->Show();
     ASSERT_FALSE(window->IsTransparent());
@@ -981,7 +981,7 @@ HWTEST_F(WindowImplTest, SetTurnScreenOn01, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     ASSERT_FALSE(window->IsTurnScreenOn());
     ASSERT_EQ(WMError::WM_OK, window->SetTurnScreenOn(true));
     ASSERT_TRUE(window->IsTurnScreenOn());
@@ -1007,7 +1007,7 @@ HWTEST_F(WindowImplTest, SetTurnScreenOn02, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_FALSE(window->IsTurnScreenOn());
@@ -1036,7 +1036,7 @@ HWTEST_F(WindowImplTest, SetKeepScreenOn01, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     ASSERT_FALSE(window->IsKeepScreenOn());
     ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(true));
     ASSERT_TRUE(window->IsKeepScreenOn());
@@ -1061,7 +1061,7 @@ HWTEST_F(WindowImplTest, SetKeepScreenOn02, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_FALSE(window->IsKeepScreenOn());
@@ -1091,7 +1091,7 @@ HWTEST_F(WindowImplTest, SetBrightness01, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_EQ(UNDEFINED_BRIGHTNESS, window->GetBrightness());
@@ -1117,7 +1117,7 @@ HWTEST_F(WindowImplTest, SetBrightness02, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_EQ(UNDEFINED_BRIGHTNESS, window->GetBrightness());
@@ -1147,7 +1147,7 @@ HWTEST_F(WindowImplTest, SetBrightness03, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_EQ(UNDEFINED_BRIGHTNESS, window->GetBrightness());
@@ -1173,7 +1173,7 @@ HWTEST_F(WindowImplTest, SetFocusable01, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     ASSERT_TRUE(window->GetFocusable());
     ASSERT_EQ(WMError::WM_OK, window->SetFocusable(false));
     ASSERT_FALSE(window->GetFocusable());
@@ -1199,7 +1199,7 @@ HWTEST_F(WindowImplTest, SetFocusable02, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(window->GetFocusable());
@@ -1229,7 +1229,7 @@ HWTEST_F(WindowImplTest, SetTouchable01, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     ASSERT_TRUE(window->GetTouchable());
     ASSERT_EQ(WMError::WM_OK, window->SetTouchable(false));
     ASSERT_FALSE(window->GetTouchable());
@@ -1255,7 +1255,7 @@ HWTEST_F(WindowImplTest, SetTouchable02, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_TRUE(window->GetTouchable());
@@ -1282,7 +1282,7 @@ HWTEST_F(WindowImplTest, DisableAppWindowDecor01, Function | SmallTest | Level3)
     option->SetWindowName("DisableAppWindowDecor01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     window->DisableAppWindowDecor();
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -1306,7 +1306,7 @@ HWTEST_F(WindowImplTest, SetTouchHotAreas01, Function | SmallTest | Level3)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
 
@@ -1348,7 +1348,7 @@ HWTEST_F(WindowImplTest, SetTransform01, Function | SmallTest | Level3)
     option->SetWindowName("SetTransform01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     window->DisableAppWindowDecor();
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -1373,7 +1373,7 @@ HWTEST_F(WindowImplTest, SetTransform02, Function | SmallTest | Level3)
     option->SetWindowName("SetTransform01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     window->DisableAppWindowDecor();
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -1400,7 +1400,7 @@ HWTEST_F(WindowImplTest, SetTransform03, Function | SmallTest | Level3)
     option->SetWindowName("SetTransform01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     window->DisableAppWindowDecor();
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -1427,7 +1427,7 @@ HWTEST_F(WindowImplTest, SetTransform04, Function | SmallTest | Level3)
     option->SetWindowName("SetTransform01");
     sptr<WindowImpl> window = new WindowImpl(option);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     window->DisableAppWindowDecor();
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());

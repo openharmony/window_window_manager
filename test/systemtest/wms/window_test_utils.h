@@ -43,7 +43,7 @@ public:
         bool parentLimit;
         bool forbidSplitMove {false};
         bool showWhenLocked;
-        std::string parentName;
+        uint32_t parentId;
         bool focusable_ { true };
         Orientation orientation_ { Orientation::UNSPECIFIED };
     };

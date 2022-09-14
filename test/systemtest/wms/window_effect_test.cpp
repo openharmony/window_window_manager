@@ -16,6 +16,7 @@
 // gtest
 #include <gtest/gtest.h>
 #include "window_test_utils.h"
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -48,7 +49,7 @@ void WindowEffectTest::SetUp()
             .mode = WindowMode::WINDOW_MODE_FLOATING,
             .needAvoid = false,
             .parentLimit = false,
-            .parentName = "",
+            .parentId = INVALID_WINDOW_ID,
     };
 }
 
