@@ -46,7 +46,7 @@ namespace {
     constexpr uint32_t MAX_BRIGHTNESS = 255;
     constexpr uint32_t SPLIT_WINDOWS_CNT = 2;
     constexpr uint32_t EXIT_SPLIT_POINTS_NUMBER = 2;
-    constexpr int UID_TRANSFROM_DIVISOR = 20000;
+    constexpr int UID_TRANSFROM_DIVISOR = 200000;
     constexpr int UID_MIN = 100;
 }
 AnimationConfig WindowNodeContainer::animationConfig_;
