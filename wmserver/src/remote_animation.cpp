@@ -77,9 +77,27 @@ bool RemoteAnimation::CheckAnimationController()
     return true;
 }
 
+bool RemoteAnimation::CheckRemoteAnimationEnabled(DisplayId displayId)
+{
+    // When the screen is locked, remote animation cannot take effect because the launcher is frozen.
+    auto winRoot = windowRoot_.promote();
+    if (winRoot == nullptr) {
+        return false;
+    }
+    auto container = winRoot->GetOrCreateWindowNodeContainer(displayId);
+    if (container == nullptr || container->IsScreenLocked()) {
+        return false;
+    }
+    return CheckAnimationController();
+}
+
 bool RemoteAnimation::CheckTransition(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode,
     sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& dstNode)
 {
+    if (srcNode == nullptr && dstNode == nullptr) {
+        return false;
+    }
+
     if (srcNode != nullptr && !srcNode->leashWinSurfaceNode_ && !srcNode->surfaceNode_) {
         WLOGFI("RSWindowAnimation: srcNode has no surface!");
         return false;
@@ -90,7 +108,8 @@ bool RemoteAnimation::CheckTransition(sptr<WindowTransitionInfo> srcInfo, const 
         return false;
     }
 
-    return CheckAnimationController();
+    auto node = (dstNode != nullptr ? dstNode : srcNode);
+    return CheckRemoteAnimationEnabled(node->GetDisplayId());
 }
 
 void RemoteAnimation::OnRemoteDie(const sptr<IRemoteObject>& remoteObject)
