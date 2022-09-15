@@ -2391,6 +2391,17 @@ sptr<WindowProperty> WindowImpl::GetWindowProperty()
     return property_;
 }
 
+void WindowImpl::RestoreSplitWindowMode(uint32_t mode)
+{
+    if (!IsWindowValid()) {
+        return;
+    }
+    auto windowMode = static_cast<WindowMode>(mode);
+    if (windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        UpdateMode(windowMode);
+    }
+}
+
 void WindowImpl::UpdateDragEvent(const PointInfo& point, DragEvent event)
 {
     NotifyDragEvent(point, event);
