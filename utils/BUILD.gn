@@ -66,7 +66,6 @@ ohos_shared_library("libwmutil") {
   external_deps = [
     "ability_runtime:ability_manager",
     "access_token:libaccesstoken_sdk",
-    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "graphic_standard:surface",
     "hilog_native:libhilog",

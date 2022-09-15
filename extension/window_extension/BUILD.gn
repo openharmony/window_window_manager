@@ -85,10 +85,7 @@ ohos_shared_library("window_extension_module") {
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
   ]
 
-  deps = [
-    "//foundation/window/window_manager/extension/window_extension:libwindow_extension",
-    "//foundation/window/window_manager/wm:libwm",
-  ]
+  deps = [ "//foundation/window/window_manager/extension/window_extension:libwindow_extension" ]
 
   external_deps = [
     "ability_runtime:abilitykit_native",
