@@ -28,6 +28,7 @@ config("wm_napi_common_public_config") {
   include_dirs = [
     ".",
     "//third_party/node/src",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
   ]
 }
 
@@ -41,15 +42,16 @@ ohos_static_library("wm_napi_common") {
 
   public_configs = [ ":wm_napi_common_public_config" ]
 
-  public_deps = [
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
+  deps = [
     "//foundation/arkui/napi:ace_napi",
+    "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
   ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
+    "hilog_native:libhilog",
     "ipc:ipc_core",
   ]
 
