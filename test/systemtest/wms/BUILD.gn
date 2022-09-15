@@ -33,6 +33,7 @@ group("systemtest") {
     ":wms_window_input_test",
     ":wms_window_layout_test",
     ":wms_window_mode_support_info_test",
+    ":wms_window_move_drag_test",
     ":wms_window_multi_ability_test",
     ":wms_window_occupied_area_change_test",
     ":wms_window_rotation_test",
