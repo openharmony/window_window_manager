@@ -127,6 +127,15 @@ sptr<WindowProperty> WindowAgent::GetWindowProperty()
     return window_->GetWindowProperty();
 }
 
+void WindowAgent::RestoreSplitWindowMode(uint32_t mode)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->RestoreSplitWindowMode(mode);
+}
+
 void WindowAgent::NotifyTouchOutside()
 {
     if (window_ == nullptr) {

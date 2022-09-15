@@ -424,6 +424,7 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
             if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
                 mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
                 property->SetWindowMode(mode);
+                windowNode->GetWindowToken()->RestoreSplitWindowMode(static_cast<uint32_t>(mode));
             }
             windowNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_SHOWN);
             WindowManagerService::GetInstance().AddWindow(property);

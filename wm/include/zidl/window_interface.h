@@ -46,6 +46,7 @@ public:
         TRANS_ID_NOTIFY_DESTROY,
         TRANS_ID_NOTIFY_CLIENT_POINT_UP,
         TRANS_ID_UPDATE_ZOOM_TRANSFORM,
+        TRANS_ID_RESTORE_SPLIT_WINDOW_MODE,
     };
 
     virtual void UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) = 0;
@@ -65,6 +66,7 @@ public:
     virtual void NotifyDestroy(void) = 0;
     virtual void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
     virtual void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) = 0;
+    virtual void RestoreSplitWindowMode(uint32_t mode) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS
