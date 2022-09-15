@@ -71,6 +71,8 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     if (node == nullptr) {
         return nullptr;
     }
+    // test
+    node->stateMachine_.SetWindowId(winId);
     node->abilityToken_ = info->GetAbilityToken();
     node->SetWindowSizeLimits(info->GetWindowSizeLimits());
     node->abilityInfo_.missionId_ = info->GetMissionId();
@@ -83,6 +85,7 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     if (CreateLeashAndStartingSurfaceNode(node) != WMError::WM_OK) {
         return nullptr;
     }
+    node->stateMachine_.TransitionTo(WindowNodeState::STARTING_CREATED);
     return node;
 }
 
@@ -142,10 +145,12 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
     node->SetCallingPid(pid);
     node->SetCallingUid(uid);
     windowId = node->GetWindowId();
+    // test
+    node->stateMachine_.SetWindowId(windowId);
+    node->stateMachine_.SetWindowType(property->GetWindowType());
     WLOGFI("after set Id:%{public}u, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         node->GetWindowId(), node->GetRequestRect().posX_, node->GetRequestRect().posY_,
         node->GetRequestRect().width_, node->GetRequestRect().height_);
-
     // Register FirstFrame Callback to rs, replace startwin
     wptr<WindowNode> weak = node;
     auto firstFrameCompleteCallback = [weak]() {
@@ -160,9 +165,9 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
         WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
         weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
         weakNode->leashWinSurfaceNode_->AddChild(weakNode->surfaceNode_, -1);
-        weakNode->startingWinSurfaceNode_ = nullptr;
         AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(weakNode->abilityToken_);
         RSTransaction::FlushImplicitTransaction();
+        weakNode->firstFrameAvaliable_ = true;
     };
     node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
     RSTransaction::FlushImplicitTransaction();
