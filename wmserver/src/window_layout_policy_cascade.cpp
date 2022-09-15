@@ -600,18 +600,32 @@ void WindowLayoutPolicyCascade::UpdateWindowNodeRectOffset(const sptr<WindowNode
     WLOGFD("UpdateWindowNodeRectOffset, windowId: %{public}u", node->GetWindowId());
     auto displayId = node->GetDisplayId();
     const Rect& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
+    auto displayInfo = displayGroupInfo_->GetDisplayInfo(displayId);
     auto type = node->GetWindowType();
     Rect rect = node->GetRequestRect();
     WLOGFD("RequestRect before, width: %{public}u, height: %{public}u, posX:%{public}d, posY:%{public}d",
         rect.width_, rect.height_, rect.posX_, rect.posY_);
-    if (type == WindowType::WINDOW_TYPE_STATUS_BAR) {
-        rect.posY_ = displayRect.posY_;
-        node->SetRequestRect(rect);
+    switch (type) {
+        case WindowType::WINDOW_TYPE_STATUS_BAR: {
+            rect.posY_ = displayRect.posY_;
+            break;
+        }
+        case WindowType::WINDOW_TYPE_NAVIGATION_BAR: {
+            rect.posY_ = static_cast<int32_t>(displayRect.height_) + displayRect.posY_ -
+                static_cast<int32_t>(rect.height_);
+            break;
+        }
+        default: {
+            if (displayInfo->GetWaterfallDisplayCompressionStatus()) {
+                if (rect.posY_ < displayRect.posY_) {
+                    rect.posY_ = displayRect.posY_;
+                } else if (rect.posY_ > displayRect.posY_ + static_cast<int32_t>(displayRect.height_)) {
+                    rect.posY_ = displayRect.posY_ + static_cast<int32_t>(displayRect.height_);
+                }
+            }
+        }
     }
-    if (type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
-        rect.posY_ = displayRect.height_ + displayRect.posY_ - rect.height_;
-        node->SetRequestRect(rect);
-    }
+    node->SetRequestRect(rect);
     WLOGFD("RequestRect after, width: %{public}u, height: %{public}u, posX:%{public}d, posY:%{public}d",
         rect.width_, rect.height_, rect.posX_, rect.posY_);
 }
