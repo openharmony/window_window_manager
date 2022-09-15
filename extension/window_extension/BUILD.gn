@@ -62,6 +62,7 @@ ohos_shared_library("libwindow_extension") {
     "hilog_native:libhilog",
     "hitrace_native:hitrace_meter",
     "input:libmmi-client",
+    "ipc:ipc_core",
   ]
 
   part_name = "window_manager"

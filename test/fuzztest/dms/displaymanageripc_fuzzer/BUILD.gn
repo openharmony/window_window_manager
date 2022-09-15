@@ -36,7 +36,10 @@ ohos_fuzztest("DisplayManagerIPCFuzzTest") {
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//foundation/window/window_manager/dm:libdm",
   ]
-  external_deps = [ "samgr:samgr_proxy" ]
+  external_deps = [
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
 }
 
 ###############################################################################
