@@ -373,6 +373,25 @@ void WindowProxy::NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEv
         WLOGFE("SendRequest failed");
     }
 }
+
+void WindowProxy::RestoreSplitWindowMode(uint32_t mode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(mode)) {
+        WLOGFE("mode failed");
+        return;
+    }
+    uint32_t requestCode = static_cast<uint32_t>(WindowMessage::TRANS_ID_RESTORE_SPLIT_WINDOW_MODE);
+    if (Remote()->SendRequest(requestCode, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
 } // namespace Rosen
 } // namespace OHOS
 

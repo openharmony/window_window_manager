@@ -251,7 +251,7 @@ public:
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     virtual WMError NotifyMemoryLevel(int32_t level) const override;
-
+    void RestoreSplitWindowMode(uint32_t mode);
 private:
     template<typename T> void RegisterListenerLocked(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> void UnregisterListenerLocked(std::vector<sptr<T>>& holder, const sptr<T>& listener);
