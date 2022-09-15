@@ -28,7 +28,6 @@ namespace {
 std::map<MinimizeReason, std::vector<wptr<WindowNode>>> MinimizeApp::needMinimizeAppNodes_;
 bool MinimizeApp::isMinimizedByOtherWindow_ = true;
 std::recursive_mutex MinimizeApp::mutex_;
-
 void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReason reason)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -56,12 +55,12 @@ void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReaso
     needMinimizeAppNodes_[reason].emplace_back(weakNode);
 }
 
-std::vector<wptr<WindowNode>> MinimizeApp::GetNeedMinimizeAppNodes()
+std::vector<wptr<WindowNode>> MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason reason)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     std::vector<wptr<WindowNode>> needMinimizeAppNodes;
-    for (auto& appNodes: needMinimizeAppNodes_) {
-        for (auto& node : appNodes.second) {
+    if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
+        for (auto& node : needMinimizeAppNodes_[reason]) {
             needMinimizeAppNodes.emplace_back(node);
         }
     }
@@ -118,6 +117,26 @@ bool MinimizeApp::IsNodeNeedMinimize(const sptr<WindowNode>& node)
         if (std::find(nodes.begin(), nodes.end(), node) != nodes.end()) {
             return true;
         }
+    }
+    return false;
+}
+
+bool MinimizeApp::IsNodeNeedMinimizeWithReason(const sptr<WindowNode>& node, MinimizeReason reason)
+{
+    if (node == nullptr) {
+        WLOGFE("[Minimize] node is nullptr");
+        return false;
+    }
+    if (needMinimizeAppNodes_.find(reason) == needMinimizeAppNodes_.end()) {
+        WLOGFD("[Minimize] no need to minimize with id:%{public}u reason:%{public}u",
+            node->GetWindowId(), reason);
+        return false;
+    }
+    auto nodes = needMinimizeAppNodes_.at(reason);
+    if (std::find(nodes.begin(), nodes.end(), node) != nodes.end()) {
+        WLOGFI("[Minimize] id:%{public}u need to minimize with reason:%{public}u",
+            node->GetWindowId(), reason);
+        return true;
     }
     return false;
 }

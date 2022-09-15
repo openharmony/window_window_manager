@@ -22,6 +22,7 @@
 #include <rs_window_animation_target.h>
 
 #include "wm_common.h"
+#include "window_controller.h"
 #include "window_node.h"
 #include "window_root.h"
 #include "window_transition_info.h"
@@ -61,6 +62,14 @@ public:
     static void SetMainTaskHandler(std::shared_ptr<AppExecFwk::EventHandler> handler);
     static void NotifyAnimationTargetsUpdate(std::vector<uint32_t>& fullScreenWinIds,
         std::vector<uint32_t>& floatWinIds);
+    static void SetAnimationFirst(bool animationFirst);
+    static void SetWindowController(const sptr<WindowController>& windowController);
+    static bool IsRemoteAnimationEnabledAndFirst(DisplayId displayId = 0);
+    static void CallbackTimeOutProcess();
+    static inline bool IsAnimationFirst()
+    {
+        return animationFirst_;
+    }
     static bool isRemoteAnimationEnable_;
 private:
     static sptr<RSWindowAnimationTarget> CreateWindowAnimationTarget(sptr<WindowTransitionInfo> info,
@@ -68,9 +77,21 @@ private:
     static WMError NotifyAnimationStartApp(sptr<WindowTransitionInfo> srcInfo,
         const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode,
         sptr<RSWindowAnimationTarget>& dstTarget, sptr<RSWindowAnimationFinishedCallback>& finishedCallback);
+    static sptr<RSWindowAnimationFinishedCallback> CreateShowAnimationFinishedCallback(
+        const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode);
+    static sptr<RSWindowAnimationFinishedCallback> CreateHideAnimationFinishedCallback(
+        const sptr<WindowNode>& srcNode, TransitionEvent event);
+    static void ProcessNodeStateTask(const sptr<WindowNode>& node);
+    static void GetExpectRect(const sptr<WindowNode>& dstNode, const sptr<RSWindowAnimationTarget>& dstTarget);
+    static void PostProcessShowCallback(const sptr<WindowNode>& node);
+    static void PostFinalStateTask(const sptr<WindowNode>& node);
+    static void GetAnimationTargetsForHome(std::vector<sptr<RSWindowAnimationTarget>>& animationTargets,
+        std::vector<wptr<WindowNode>> needMinimizeAppNodes);
     static sptr<RSIWindowAnimationController> windowAnimationController_;
     static wptr<WindowRoot> windowRoot_;
     static std::weak_ptr<AppExecFwk::EventHandler> wmsTaskHandler_;
+    static wptr<WindowController> windowController_;
+    static bool animationFirst_;
 };
 } // Rosen
 } // OHOS
