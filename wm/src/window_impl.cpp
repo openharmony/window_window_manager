@@ -55,6 +55,9 @@ static int constructorCnt = 0;
 static int deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
+    if (option->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        option->SetWindowName("divider_bar");
+    }
     property_ = new (std::nothrow) WindowProperty();
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
