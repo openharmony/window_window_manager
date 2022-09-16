@@ -45,6 +45,7 @@ public:
     void NotifyDestroy(void) override;
     void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override;
+    void RestoreSplitWindowMode(uint32_t mode) override;
 private:
     static inline BrokerDelegator<WindowProxy> delegator_;
 };
