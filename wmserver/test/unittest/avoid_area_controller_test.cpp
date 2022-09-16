@@ -89,6 +89,7 @@ public:
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override {}
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override {}
     void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override {}
+    void RestoreSplitWindowMode(uint32_t mode) override {}
     RunnableFuture<AvoidArea> statusBarAvoidAreaFuture_;
     RunnableFuture<AvoidArea> keyboardAvoidAreaFuture_;
     RunnableFuture<AvoidArea> cutoutAvoidAreaFuture_;
