@@ -44,6 +44,7 @@ public:
     void InitNewDisplay(DisplayId displayId);
     void UpdateDisplayGroupWindowTree();
     void PreProcessWindowNode(const sptr<WindowNode>& node, WindowUpdateType type);
+    void PostProcessWindowNode(const sptr<WindowNode>& node);
     void ProcessDisplayCreate(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
                               const std::map<DisplayId, Rect>& displayRectMap);
     void ProcessDisplayDestroy(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -68,9 +69,8 @@ private:
     void ProcessCrossNodes(DisplayId defaultDisplayId, DisplayStateChangeType type);
     void MoveCrossNodeToTargetDisplay(const sptr<WindowNode>& node, DisplayId targetDisplayId);
     void MoveNotCrossNodeToDefaultDisplay(const sptr<WindowNode>& node, DisplayId displayId);
-    void UpdateWindowShowingDisplays(const sptr<WindowNode>& node, const Rect& requestRect);
-    void UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode>& node,
-                                       const std::vector<DisplayId>& curShowingDisplays);
+    void UpdateWindowDisplayIdIfNeeded(const sptr<WindowNode>& node);
+    void UpdateWindowShowingDisplays(const sptr<WindowNode>& node);
     void UpdateWindowDisplayId(const sptr<WindowNode>& node, DisplayId newDisplayId);
     void ClearMapOfDestroyedDisplay(DisplayId displayId);
     void ChangeToRectInDisplayGroup(const sptr<WindowNode>& node, DisplayId displayId);
