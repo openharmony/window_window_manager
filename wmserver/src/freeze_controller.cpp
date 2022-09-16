@@ -75,6 +75,7 @@ sptr<Window> FreezeController::CreateCoverWindow(DisplayId displayId)
     }
     option->SetWindowType(WindowType::WINDOW_TYPE_FREEZE_DISPLAY);
     option->SetFocusable(false);
+    option->SetMainHandlerAvailable(false);
     option->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
     option->SetDisplayId(displayId);
     sptr<Window> window = Window::Create("freeze" + std::to_string(displayId), option);
