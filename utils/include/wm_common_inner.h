@@ -347,7 +347,6 @@ namespace {
     const std::unordered_set<WindowType> INPUT_WINDOW_TYPE_SKIPPED {
         WindowType::WINDOW_TYPE_POINTER,
         WindowType::WINDOW_TYPE_DRAGGING_EFFECT,
-        WindowType::WINDOW_TYPE_FREEZE_DISPLAY
     };
 }
 }
