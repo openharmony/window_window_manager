@@ -215,10 +215,14 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
 }
 
 void WindowNodeContainer::UpdateRSTreeWhenShowingDisplaysChange(sptr<WindowNode>& node,
-                                                                const std::vector<DisplayId>& lastShowingDisplays,
-                                                                const std::vector<DisplayId>& curShowingDisplays)
+    const std::vector<DisplayId>& lastShowingDisplays)
 {
+    if (!layoutPolicy_->IsMultiDisplay()) {
+        return;
+    }
+
     // Update RSTree
+    auto curShowingDisplays = node->GetShowingDisplays();
     for (auto& displayId : lastShowingDisplays) {
         if (std::find(curShowingDisplays.begin(), curShowingDisplays.end(), displayId) == curShowingDisplays.end()) {
             RemoveNodeFromRSTree(node, displayId, *(curShowingDisplays.begin()),
@@ -237,18 +241,20 @@ void WindowNodeContainer::UpdateRSTreeWhenShowingDisplaysChange(sptr<WindowNode>
 
 WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpdateReason reason)
 {
-    // Preprocess node
-    const auto lastShowingDisplays = node->GetShowingDisplays();
+    // Get last displayId and last showing displays before layout
+    auto lastShowingDisplays = node->GetShowingDisplays();
+
+    // PreProcess window node and layout node
     displayGroupController_->PreProcessWindowNode(node, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
-    const auto& curShowingDisplays = node->GetShowingDisplays();
-
-    // Update RSTree
-    UpdateRSTreeWhenShowingDisplaysChange(node, lastShowingDisplays, curShowingDisplays);
-
     if (WindowHelper::IsMainWindow(node->GetWindowType()) && WindowHelper::IsSwitchCascadeReason(reason)) {
         SwitchLayoutPolicy(WindowLayoutMode::CASCADE, node->GetDisplayId());
     }
     layoutPolicy_->UpdateWindowNode(node);
+
+    displayGroupController_->PostProcessWindowNode(node);
+    // Get current displayId and showing displays, update RSTree and displayGroupWindowTree
+    UpdateRSTreeWhenShowingDisplaysChange(node, lastShowingDisplays);
+
     NotifyIfAvoidAreaChanged(node, AvoidControlType::AVOID_NODE_UPDATE);
     DumpScreenWindowTree();
     WLOGFI("UpdateWindowNode windowId: %{public}u end", node->GetWindowId());

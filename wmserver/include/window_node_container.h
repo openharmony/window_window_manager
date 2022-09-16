@@ -157,8 +157,7 @@ private:
     WMError AddWindowNodeOnWindowTree(sptr<WindowNode>& node, const sptr<WindowNode>& parentNode);
     void RemoveWindowNodeFromWindowTree(sptr<WindowNode>& node);
     void UpdateRSTreeWhenShowingDisplaysChange(sptr<WindowNode>& node,
-                                               const std::vector<DisplayId>& lastShowingDisplays,
-                                               const std::vector<DisplayId>& curShowingDisplays);
+        const std::vector<DisplayId>& lastShowingDisplays);
     bool CheckWindowNodeWhetherInWindowTree(const sptr<WindowNode>& node) const;
     void UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
 
