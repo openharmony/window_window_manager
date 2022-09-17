@@ -86,7 +86,9 @@ void WindowInnerManager::Stop()
     if (eventHandler_ != nullptr) {
         eventHandler_.reset();
     }
-    moveDragController_->Stop();
+    if (moveDragController_ != nullptr) {
+        moveDragController_->Stop();
+    }
     state_ = InnerWMRunningState::STATE_NOT_START;
 }
 
