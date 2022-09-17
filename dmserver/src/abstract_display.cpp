@@ -25,12 +25,13 @@ namespace {
     constexpr int32_t LARGE_SCREEN_WIDTH = 2160;
 }
 
-AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, int32_t width, int32_t height, uint32_t refreshRate)
+AbstractDisplay::AbstractDisplay(DisplayId id, ScreenId screenId, std::string name, sptr<SupportedScreenModes> info)
     : id_(id),
       screenId_(screenId),
-      width_(width),
-      height_(height),
-      refreshRate_(refreshRate)
+      name_(name),
+      width_(info->width_),
+      height_(info->height_),
+      refreshRate_(info->refreshRate_)
 {
     if ((width_ >= LARGE_SCREEN_WIDTH) || (height_ >= LARGE_SCREEN_WIDTH)) {
         virtualPixelRatio_ = 2.0f;
@@ -155,6 +156,7 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     if (displayInfo == nullptr) {
         return displayInfo;
     }
+    displayInfo->name_ = name_;
     displayInfo->width_ = width_;
     displayInfo->height_ = height_;
     displayInfo->id_ = id_;
@@ -163,6 +165,7 @@ sptr<DisplayInfo> AbstractDisplay::ConvertToDisplayInfo() const
     displayInfo->virtualPixelRatio_ = virtualPixelRatio_;
     displayInfo->rotation_ = rotation_;
     displayInfo->orientation_ = orientation_;
+    displayInfo->displayState_ = displayState_;
     return displayInfo;
 }
 } // namespace OHOS::Rosen
