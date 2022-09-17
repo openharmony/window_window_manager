@@ -267,7 +267,7 @@ void WindowDumper::ShowHelpInfo(std::string& dumpInfo) const
         .append(" -h                             ")
         .append("|help text for the tool\n")
         .append(" -a                             ")
-        .append("|dump all window infomation in the system\n")
+        .append("|dump all window information in the system\n")
         .append(" -w {window id} [ArkUI Option]  ")
         .append("|dump specified window information\n")
         .append(" ------------------------------------[ArkUI Option]------------------------------------ \n");
