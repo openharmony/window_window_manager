@@ -434,7 +434,7 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
             if (windowRoot_->IsForbidDockSliceMove(node->GetDisplayId())) {
                 WLOGFI("dock slice is forbidden to move");
                 newRect = lastRect;
-            } else if (windowRoot_->isVerticalDisplay(node)) {
+            } else if (windowRoot_->IsVerticalDisplay(node)) {
                 newRect.posX_ = lastRect.posX_;
             } else {
                 newRect.posY_ = lastRect.posY_;
