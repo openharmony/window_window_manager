@@ -71,6 +71,7 @@ public:
     virtual void NotifyDestroy(void) override {};
     virtual void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override {};
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override {};
+    virtual void RestoreSplitWindowMode(uint32_t mode) override {}
 
     virtual sptr<IRemoteObject> AsObject() override
     {

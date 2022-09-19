@@ -135,6 +135,10 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             UpdateZoomTransform(trans, isDisplayZoomOn);
             break;
         }
+        case WindowMessage::TRANS_ID_RESTORE_SPLIT_WINDOW_MODE: {
+            RestoreSplitWindowMode(data.ReadUint32());
+            break;
+        }
         default:
             break;
     }
