@@ -50,7 +50,7 @@ public:
     WMError RemoveWindowNode(uint32_t windowId);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);
     WMError UpdateWindowNode(uint32_t windowId, WindowUpdateReason reason);
-    bool isVerticalDisplay(sptr<WindowNode>& node) const;
+    bool IsVerticalDisplay(sptr<WindowNode>& node) const;
     bool IsForbidDockSliceMove(DisplayId displayId) const;
     bool IsDockSliceInExitSplitModeArea(DisplayId displayId) const;
     void ExitSplitMode(DisplayId displayId);

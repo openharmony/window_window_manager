@@ -945,14 +945,14 @@ void WindowRoot::UpdateBrightnessWithWindowRemoved(uint32_t windowId, const sptr
     }
 }
 
-bool WindowRoot::isVerticalDisplay(sptr<WindowNode>& node) const
+bool WindowRoot::IsVerticalDisplay(sptr<WindowNode>& node) const
 {
     auto container = const_cast<WindowRoot*>(this)->GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
         WLOGFE("get display direction failed, window container could not be found");
         return false;
     }
-    return container->isVerticalDisplay(node->GetDisplayId());
+    return container->IsVerticalDisplay(node->GetDisplayId());
 }
 
 WMError WindowRoot::RequestFocus(uint32_t windowId)
