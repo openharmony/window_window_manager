@@ -16,6 +16,7 @@
 #include "abstract_display_controller.h"
 
 #include <cinttypes>
+#include <sstream>
 #include <surface.h>
 
 #include "display_manager_agent_controller.h"
@@ -346,8 +347,11 @@ void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realA
             return;
         }
         if (dummyDisplay_ == nullptr) {
-            sptr<AbstractDisplay> display = new AbstractDisplay(displayCount_.fetch_add(1),
-                realAbsScreen->dmsId_, info->width_, info->height_, info->refreshRate_);
+            DisplayId displayId = displayCount_.fetch_add(1);
+            std::ostringstream buffer;
+            buffer<<"display_"<<displayId;
+            std::string name = buffer.str();
+            sptr<AbstractDisplay> display = new AbstractDisplay(displayId, realAbsScreen->dmsId_, name, info);
             abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
             WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
                 realAbsScreen->dmsId_, display->GetId());
@@ -393,8 +397,11 @@ void AbstractDisplayController::AddScreenToExpandLocked(sptr<AbstractScreen> abs
         WLOGE("bind display error, cannot get info.");
         return;
     }
-    sptr<AbstractDisplay> display = new AbstractDisplay(displayCount_.fetch_add(1),
-        absScreen->dmsId_, info->width_, info->height_, info->refreshRate_);
+    DisplayId displayId = displayCount_.fetch_add(1);
+    std::ostringstream buffer;
+    buffer<<"display_"<<displayId;
+    std::string name = buffer.str();
+    sptr<AbstractDisplay> display = new AbstractDisplay(displayId, absScreen->dmsId_, name, info);
     abstractDisplayMap_.insert((std::make_pair(display->GetId(), display)));
     WLOGI("create display for new screen. screen:%{public}" PRIu64", display:%{public}" PRIu64"",
         absScreen->dmsId_, display->GetId());

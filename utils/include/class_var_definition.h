@@ -84,5 +84,9 @@ public:                                                                         
     DEFINE_VAR_DEFAULT(type, memberName, defaultValue)                             \
     DEFINE_FUNC_GET(type, funcName, memberName)                                    \
     DEFINE_FUNC_SET(type, funcName, memberName)
+
+#define DEFINE_VAR_DEFAULT_FUNC_SET(type, funcName, memberName, defaultValue)      \
+    DEFINE_VAR_DEFAULT(type, memberName, defaultValue)                             \
+    DEFINE_FUNC_SET(type, funcName, memberName)
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_CLASS_VAR_DEFINITION_H

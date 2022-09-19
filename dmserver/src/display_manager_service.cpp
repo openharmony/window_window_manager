@@ -313,6 +313,12 @@ ScreenPowerState DisplayManagerService::GetScreenPower(ScreenId dmsScreenId)
 
 bool DisplayManagerService::SetDisplayState(DisplayState state)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    ScreenId dmsScreenId = abstractScreenController_->GetDefaultAbstractScreenId();
+    sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplayByScreen(dmsScreenId);
+    if (display != nullptr) {
+        display->SetDisplayState(state);
+    }
     return displayPowerController_->SetDisplayState(state);
 }
 
