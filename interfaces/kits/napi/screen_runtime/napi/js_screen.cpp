@@ -83,28 +83,25 @@ NativeValue* JsScreen::OnSetOrientation(NativeEngine& engine, NativeCallbackInfo
             WLOGFE("Failed to convert parameter to orientation");
         }
     }
+    if (!paramValidFlag) {
+        WLOGE("OnSetOrientation paramValidFlag error");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
+        WLOGE("Orientation param error! orientation value must from enum Orientation");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
 
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (!paramValidFlag) {
-                WLOGE("OnSetOrientation paramValidFlag error");
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM),
-                                                  "JsScreen::OnSetOrientation failed."));
-                return;
-            }
-            if (orientation < Orientation::BEGIN || orientation > Orientation::END) {
-                WLOGE("Orientation param error! orientation value must from enum Orientation");
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM),
-                                                  "JsScreen::OnSetOrientation failed."));
-                return;
-            }
-
             bool res = screen_->SetOrientation(orientation);
             if (res) {
                 task.Resolve(engine, engine.CreateUndefined());
                 WLOGFI("OnSetOrientation success");
             } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_UNKNOWN),
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
                                                   "JsScreen::OnSetOrientation failed."));
                 WLOGFE("OnSetOrientation failed");
             }
@@ -141,21 +138,20 @@ NativeValue* JsScreen::OnSetScreenActiveMode(NativeEngine& engine, NativeCallbac
             paramValidFlag = false;
         }
     }
+    if (!paramValidFlag) {
+        WLOGFE("OnSetScreenActiveMode paramValidFlag error");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
 
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (!paramValidFlag) {
-                WLOGFE("OnSetScreenActiveMode paramValidFlag error");
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM),
-                                                  "JsScreen::OnSetScreenActiveMode failed."));
-                return;
-            }
             bool res = screen_->SetScreenActiveMode(modeId);
             if (res) {
                 task.Resolve(engine, engine.CreateUndefined());
                 WLOGFI("OnSetScreenActiveMode success");
             } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_UNKNOWN),
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
                                                 "JsScreen::OnSetScreenActiveMode failed."));
                 WLOGFE("OnSetScreenActiveMode failed");
             }
@@ -191,21 +187,20 @@ NativeValue* JsScreen::OnSetDensityDpi(NativeEngine& engine, NativeCallbackInfo&
             paramValidFlag = false;
         }
     }
+    if (!paramValidFlag) {
+        WLOGFE("OnSetDensityDpi paramValidFlag error");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
 
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (!paramValidFlag) {
-                WLOGFE("OnSetDensityDpi paramValidFlag error");
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM),
-                                                  "JsScreen::OnSetDensityDpi failed."));
-                return;
-            }
             bool res = screen_->SetDensityDpi(densityDpi);
             if (res) {
                 task.Resolve(engine, engine.CreateUndefined());
                 WLOGFI("OnSetDensityDpi success");
             } else {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DMError::DM_ERROR_UNKNOWN),
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
                                                 "JsScreen::OnSetDensityDpi failed."));
                 WLOGFE("OnSetDensityDpi failed");
             }

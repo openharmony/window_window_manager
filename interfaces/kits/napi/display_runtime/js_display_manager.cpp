@@ -127,11 +127,13 @@ NativeValue* OnGetDefaultDisplaySync(NativeEngine& engine, NativeCallbackInfo& i
     WLOGFI("JsDisplayManager::OnGetDefaultDisplaySync is called");
     if (info.argc != 0) {
         WLOGFE("JsDisplayManager::OnGetDefaultDisplaySync params not match");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
     if (display == nullptr) {
         WLOGFE("JsDisplayManager::OnGetDefaultDisplaySync, display is nullptr.");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN)));
         return engine.CreateUndefined();
     }
     return CreateJsDisplayObject(engine, display);
@@ -318,20 +320,25 @@ NativeValue* OnHasPrivateWindow(NativeEngine& engine, NativeCallbackInfo& info)
 {
     bool hasPrivateWindow = false;
     if (info.argc != 1) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (!ConvertFromJsValue(engine, info.argv[0], displayId)) {
         WLOGFE("[NAPI]Failed to convert parameter to displayId");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     if (displayId < 0) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
-    DMError errCode = SingletonContainer::Get<DisplayManager>().HasPrivateWindow(displayId, hasPrivateWindow);
+    DmErrorCode errCode = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<DisplayManager>().HasPrivateWindow(displayId, hasPrivateWindow));
     WLOGFI("[NAPI]Display id = %{public}" PRIu64", hasPrivateWindow = %{public}u err = %{public}d",
         static_cast<uint64_t>(displayId), hasPrivateWindow, errCode);
-    if (errCode != DMError::DM_OK) {
+    if (errCode != DmErrorCode::DM_OK) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(errCode)));
         return engine.CreateUndefined();
     }
     return engine.CreateBoolean(hasPrivateWindow);
@@ -387,6 +394,82 @@ NativeValue* InitDisplayState(NativeEngine* engine)
     return objValue;
 }
 
+NativeValue* InitDisplayErrorCode(NativeEngine* engine)
+{
+    WLOGFI("JsDisplayManager::InitDisplayErrorCode called");
+
+    if (engine == nullptr) {
+        WLOGFE("engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("DM_ERROR_NO_PERMISSION",
+        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_NO_PERMISSION)));
+    object->SetProperty("DM_ERROR_INVALID_PARAM",
+        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+    object->SetProperty("DM_ERROR_DEVICE_NOT_SUPPORT",
+        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT)));
+    object->SetProperty("DM_ERROR_INVALID_SCREEN",
+        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN)));
+    object->SetProperty("DM_ERROR_INVALID_CALLING",
+        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_CALLING)));
+    object->SetProperty("DM_ERROR_SYSTEM_INNORMAL",
+        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL)));
+    return objValue;
+}
+
+NativeValue* InitDisplayError(NativeEngine* engine)
+{
+    WLOGFI("JsDisplayManager::InitDisplayError called");
+
+    if (engine == nullptr) {
+        WLOGFE("engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("DM_ERROR_INIT_DMS_PROXY_LOCKED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED)));
+    object->SetProperty("DM_ERROR_IPC_FAILED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_IPC_FAILED)));
+    object->SetProperty("DM_ERROR_REMOTE_CREATE_FAILED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_REMOTE_CREATE_FAILED)));
+    object->SetProperty("DM_ERROR_NULLPTR",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_NULLPTR)));
+    object->SetProperty("DM_ERROR_INVALID_PARAM",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM)));
+    object->SetProperty("DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED)));
+    object->SetProperty("DM_ERROR_DEATH_RECIPIENT",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_DEATH_RECIPIENT)));
+    object->SetProperty("DM_ERROR_INVALID_MODE_ID",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_MODE_ID)));
+    object->SetProperty("DM_ERROR_WRITE_DATA_FAILED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_WRITE_DATA_FAILED)));
+    object->SetProperty("DM_ERROR_RENDER_SERVICE_FAILED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_RENDER_SERVICE_FAILED)));
+    object->SetProperty("DM_ERROR_UNREGISTER_AGENT_FAILED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_UNREGISTER_AGENT_FAILED)));
+    object->SetProperty("DM_ERROR_INVALID_CALLING",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_CALLING)));
+    object->SetProperty("DM_ERROR_UNKNOWN",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_UNKNOWN)));
+    return objValue;
+}
+
 NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
 {
     WLOGFI("JsDisplayManagerInit is called");
@@ -406,6 +489,8 @@ NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetNativePointer(jsDisplayManager.release(), JsDisplayManager::Finalizer, nullptr);
 
     object->SetProperty("DisplayState", InitDisplayState(engine));
+    object->SetProperty("DmErrorCode", InitDisplayErrorCode(engine));
+    object->SetProperty("DMError", InitDisplayError(engine));
 
     const char *moduleName = "JsDisplayManager";
     BindNativeFunction(*engine, *object, "getDefaultDisplay", moduleName, JsDisplayManager::GetDefaultDisplay);

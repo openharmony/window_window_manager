@@ -33,15 +33,20 @@ declare namespace display {
     DM_ERROR_NULLPTR,
     DM_ERROR_INVALID_PARAM,
     DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED,
+    DM_ERROR_DEATH_RECIPIENT,
+    DM_ERROR_INVALID_MODE_ID,
     DM_ERROR_WRITE_DATA_FAILED,
     DM_ERROR_RENDER_SERVICE_FAILED,
+    DM_ERROR_UNREGISTER_AGENT_FAILED,
     DM_ERROR_INVALID_CALLING,
+    DM_ERROR_UNKNOWN,
   }
+
   /**
    * display error code
    * @since 9
    */
-   enum DMErrorCode {
+   enum DmErrorCode {
     DM_ERROR_NO_PERMISSION,
     DM_ERROR_INVALID_PARAM,
     DM_ERROR_DEVICE_NOT_SUPPORT,
@@ -49,6 +54,7 @@ declare namespace display {
     DM_ERROR_SYSTEM_INNORMAL,
     DM_ERROR_INVALID_CALLING,
   }
+
   /**
    * Obtain the default display.
    * @since 7
