@@ -1166,7 +1166,7 @@ Rect WindowNodeContainer::GetDisplayRect(DisplayId displayId) const
     return displayGroupInfo_->GetDisplayRect(displayId);
 }
 
-bool WindowNodeContainer::isVerticalDisplay(DisplayId displayId) const
+bool WindowNodeContainer::IsVerticalDisplay(DisplayId displayId) const
 {
     return displayGroupInfo_->GetDisplayRect(displayId).width_ < displayGroupInfo_->GetDisplayRect(displayId).height_;
 }
