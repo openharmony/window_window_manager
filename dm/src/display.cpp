@@ -48,6 +48,11 @@ DisplayId Display::GetId() const
     return pImpl_->GetDisplayInfo()->GetDisplayId();
 }
 
+std::string Display::GetName() const
+{
+    return pImpl_->GetDisplayInfo()->GetName();
+}
+
 int32_t Display::GetWidth() const
 {
     UpdateDisplayInfo();
@@ -109,5 +114,11 @@ float Display::GetVirtualPixelRatio() const
 {
     UpdateDisplayInfo();
     return pImpl_->GetDisplayInfo()->GetVirtualPixelRatio();
+}
+
+DisplayState Display::GetDisplayState() const
+{
+    UpdateDisplayInfo();
+    return pImpl_->GetDisplayInfo()->GetDisplayState();
 }
 } // namespace OHOS::Rosen

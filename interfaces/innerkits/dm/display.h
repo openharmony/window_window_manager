@@ -36,6 +36,7 @@ public:
     Display& operator=(const Display&) = delete;
     Display& operator=(Display&&) = delete;
     DisplayId GetId() const;
+    std::string GetName() const;
     int32_t GetWidth() const;
     int32_t GetHeight() const;
     uint32_t GetFreshRate() const;
@@ -44,6 +45,7 @@ public:
     float GetVirtualPixelRatio() const;
     Rotation GetRotation() const;
     Orientation GetOrientation() const;
+    DisplayState GetDisplayState() const;
 
 protected:
     // No more methods or variables can be defined here.

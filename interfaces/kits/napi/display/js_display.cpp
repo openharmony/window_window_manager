@@ -25,6 +25,11 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0, "JsDisplay"};
+    const std::map<DisplayState, DisplayStateMode> NATIVE_TO_JS_DISPLAY_STATE_MAP {
+        { DisplayState::UNKNOWN, DisplayStateMode::STATE_UNKNOWN },
+        { DisplayState::OFF,     DisplayStateMode::STATE_OFF     },
+        { DisplayState::ON,      DisplayStateMode::STATE_ON      },
+    };
 }
 
 static std::map<DisplayId, std::shared_ptr<NativeReference>> g_JsDisplayMap;
@@ -77,15 +82,19 @@ NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display)
     object->SetProperty("width", CreateJsValue(engine, display->GetWidth()));
     object->SetProperty("height", CreateJsValue(engine, display->GetHeight()));
     object->SetProperty("refreshRate", CreateJsValue(engine, display->GetFreshRate()));
-    object->SetProperty("name", engine.CreateUndefined());
-    object->SetProperty("alive", engine.CreateUndefined());
-    object->SetProperty("state", engine.CreateUndefined());
-    object->SetProperty("rotation", engine.CreateUndefined());
-    object->SetProperty("densityDPI", engine.CreateUndefined());
-    object->SetProperty("densityPixels", engine.CreateUndefined());
-    object->SetProperty("scaledDensity", engine.CreateUndefined());
-    object->SetProperty("xDPI", engine.CreateUndefined());
-    object->SetProperty("yDPI", engine.CreateUndefined());
+    object->SetProperty("name", CreateJsValue(engine, display->GetName()));
+    object->SetProperty("alive", CreateJsValue(engine, true));
+    if (NATIVE_TO_JS_DISPLAY_STATE_MAP.count(display->GetDisplayState()) != 0) {
+        object->SetProperty("state", CreateJsValue(engine, NATIVE_TO_JS_DISPLAY_STATE_MAP.at(display->GetDisplayState())));
+    } else {
+        object->SetProperty("state", CreateJsValue(engine, DisplayStateMode::STATE_UNKNOWN));
+    }
+    object->SetProperty("rotation", CreateJsValue(engine, display->GetRotation()));
+    object->SetProperty("densityDPI", CreateJsValue(engine, display->GetVirtualPixelRatio() * DOT_PER_INCH));
+    object->SetProperty("densityPixels", CreateJsValue(engine, display->GetVirtualPixelRatio()));
+    object->SetProperty("scaledDensity", CreateJsValue(engine, display->GetVirtualPixelRatio()));
+    object->SetProperty("xDPI", CreateJsValue(engine, 0.0f));
+    object->SetProperty("yDPI", CreateJsValue(engine, 0.0f));
 
     std::shared_ptr<NativeReference> jsDisplayRef;
     jsDisplayRef.reset(engine.CreateReference(objValue, 1));
