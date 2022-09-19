@@ -50,6 +50,7 @@ ohos_shared_library("screenrecorder_napi") {
 
   external_deps = [
     "ability_runtime:runtime",
+    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "napi:ace_napi",
   ]

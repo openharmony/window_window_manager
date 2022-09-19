@@ -71,7 +71,10 @@ ohos_unittest("wmserver_window_snapshot_test") {
 
   deps = [ ":wmserver_unittest_common" ]
 
-  external_deps = [ "multimedia_image_standard:image_native" ]
+  external_deps = [
+    "eventhandler:libeventhandler",
+    "multimedia_image_standard:image_native",
+  ]
 }
 
 ohos_unittest("wmserver_window_zorder_policy_test") {
