@@ -1344,6 +1344,7 @@ bool AbstractScreenController::SetVirtualPixelRatio(ScreenId screenId, float vir
     if (abstractScreenCallback_ != nullptr) {
         abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED);
     }
+    NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::VIRTUAL_PIXEL_RATIO_CHANGED);
     return true;
 }
 } // namespace OHOS::Rosen
