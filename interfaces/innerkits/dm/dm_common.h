@@ -97,6 +97,7 @@ enum class ScreenChangeEvent : uint32_t {
     UPDATE_ORIENTATION,
     UPDATE_ROTATION,
     CHANGE_MODE,
+    VIRTUAL_PIXEL_RATIO_CHANGED,
 };
 
 enum class ScreenGroupChangeEvent : uint32_t {

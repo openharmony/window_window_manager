@@ -41,6 +41,7 @@ AbstractDisplay::AbstractDisplay(DisplayId id, std::string name,
     if (DisplayManagerService::GetCustomVirtualPixelRatio() &&
         fabs(DisplayManagerService::GetCustomVirtualPixelRatio() + 1) > 1e-6) {
         virtualPixelRatio_ = DisplayManagerService::GetCustomVirtualPixelRatio();
+        absScreen->SetVirtualPixelRatio(virtualPixelRatio_);
         return;
     }
     if ((info->width_ >= PHONE_SCREEN_WIDTH) || (info->height_ >= PHONE_SCREEN_WIDTH)) {
@@ -52,6 +53,7 @@ AbstractDisplay::AbstractDisplay(DisplayId id, std::string name,
     } else {
         virtualPixelRatio_ = 1.0f; // Other is 1.0
     }
+    absScreen->SetVirtualPixelRatio(virtualPixelRatio_);
 }
 
 DisplayId AbstractDisplay::GetId() const
