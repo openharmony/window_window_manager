@@ -22,7 +22,7 @@ config("display_config") {
     "//foundation/window/window_manager/utils/include",
 
     # because of pixle_map.h
-    "//foundation/multimedia/image_standard/interfaces/innerkits/include",
+    "//foundation/multimedia/image_framework/interfaces/innerkits/include",
   ]
 }
 
