@@ -27,6 +27,8 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+
+    sptr<WindowProperty> CreateWindowProperty(uint32_t windowId);
 };
 
 void MinimizeAppTest::SetUpTestCase()
@@ -44,6 +46,13 @@ void MinimizeAppTest::SetUp()
 void MinimizeAppTest::TearDown()
 {
 }
+
+sptr<WindowProperty> MinimizeAppTest::CreateWindowProperty(uint32_t windowId)
+{
+    sptr<WindowProperty> property = new WindowProperty();
+    property->SetWindowId(windowId);
+    return property;
+}
 namespace {
 /**
  * @tc.name: MinimizeAppTest01
@@ -52,18 +61,19 @@ namespace {
  */
 HWTEST_F(MinimizeAppTest, MinimizeAppTest01, Function | SmallTest | Level2)
 {
-    sptr<WindowNode> node1 = new WindowNode();
-    sptr<WindowNode> node2 = new WindowNode();
-    sptr<WindowNode> node3 = new WindowNode();
-    sptr<WindowNode> node4 = new WindowNode();
-    sptr<WindowNode> node5 = new WindowNode();
-    sptr<WindowNode> node6 = new WindowNode();
-    sptr<WindowNode> node7 = new WindowNode();
-    sptr<WindowNode> node8 = new WindowNode();
-    sptr<WindowNode> node9 = new WindowNode();
+    sptr<WindowNode> node1 = new WindowNode(CreateWindowProperty(1));
+    sptr<WindowNode> node2 = new WindowNode(CreateWindowProperty(2));
+    sptr<WindowNode> node3 = new WindowNode(CreateWindowProperty(3));
+    sptr<WindowNode> node4 = new WindowNode(CreateWindowProperty(4));
+    sptr<WindowNode> node5 = new WindowNode(CreateWindowProperty(5));
+    sptr<WindowNode> node6 = new WindowNode(CreateWindowProperty(6));
+    sptr<WindowNode> node7 = new WindowNode(CreateWindowProperty(7));
+    sptr<WindowNode> node8 = new WindowNode(CreateWindowProperty(8));
+    sptr<WindowNode> node9 = new WindowNode(CreateWindowProperty(9));
 
     sptr<WindowNode> node10 = new WindowNode();
     sptr<WindowNode> node11 = nullptr;
+    sptr<WindowNode> conflictNode = new WindowNode(CreateWindowProperty(2));
 
     MinimizeApp::AddNeedMinimizeApp(node1, MinimizeReason::MINIMIZE_BUTTON);
     MinimizeApp::AddNeedMinimizeApp(node2, MinimizeReason::MINIMIZE_ALL);
@@ -74,6 +84,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest01, Function | SmallTest | Level2)
     MinimizeApp::AddNeedMinimizeApp(node7, MinimizeReason::SPLIT_QUIT);
     MinimizeApp::AddNeedMinimizeApp(node8, MinimizeReason::GESTURE_ANIMATION);
     MinimizeApp::AddNeedMinimizeApp(node9, MinimizeReason::OTHER_WINDOW);
+    MinimizeApp::AddNeedMinimizeApp(conflictNode, MinimizeReason::MINIMIZE_ALL);
 
     ASSERT_EQ(true, MinimizeApp::IsNodeNeedMinimize(node1));
     ASSERT_EQ(true, MinimizeApp::IsNodeNeedMinimize(node2));
@@ -87,6 +98,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest01, Function | SmallTest | Level2)
 
     ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimize(node10));
     ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimize(node11));
+    ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimize(conflictNode));
 
     MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::SPLIT_REPLACE);
     MinimizeApp::ExecuteMinimizeAll();
@@ -120,6 +132,8 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest03, Function | SmallTest | Level2)
     MinimizeApp::AddNeedMinimizeApp(node1, MinimizeReason::OTHER_WINDOW);
     ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimize(node1));
     MinimizeApp::SetMinimizedByOtherConfig(true);
+
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::OTHER_WINDOW);
 }
 /**
  * @tc.name: MinimizeAppTest04
@@ -133,6 +147,8 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest04, Function | SmallTest | Level2)
 
     ASSERT_EQ(node1, MinimizeApp::GetRecoverdNodeFromMinimizeList());
     ASSERT_EQ(nullptr, MinimizeApp::GetRecoverdNodeFromMinimizeList());
+
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::LAYOUT_TILE);
 }
 }
 }
