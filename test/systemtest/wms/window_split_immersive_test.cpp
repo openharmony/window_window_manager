@@ -18,6 +18,7 @@
 #include "avoid_area_controller.h"
 #include "window_manager.h"
 #include "window_test_utils.h"
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -59,7 +60,7 @@ void WindowSplitImmersiveTest::SetUp()
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 
     splitInfo_ = {
@@ -69,7 +70,7 @@ void WindowSplitImmersiveTest::SetUp()
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 
     activeWindows_.clear();

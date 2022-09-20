@@ -79,7 +79,7 @@ sptr<Window> WindowScene::CreateWindow(const std::string& windowName, sptr<Windo
         WLOGFE("WindowScene Name: %{public}s", windowName.c_str());
         return nullptr;
     }
-    option->SetParentName(mainWindow_->GetWindowName());
+    option->SetParentId(mainWindow_->GetWindowId());
     option->SetWindowTag(WindowTag::SUB_WINDOW);
     return SingletonContainer::Get<StaticCall>().CreateWindow(windowName, option, mainWindow_->GetContext());
 }
