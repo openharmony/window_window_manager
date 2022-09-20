@@ -83,7 +83,6 @@ ohos_shared_library("libwm") {
     "hicollie_native:libhicollie",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
-    "imf:inputmethod_client",
     "input:libmmi-client",
     "ipc:ipc_core",
     "multimedia_image_standard:image",
@@ -102,6 +101,19 @@ ohos_shared_library("libwm") {
   if (efficiency_manager_enable) {
     external_deps += [ "efficiency_manager:suspend_manager_client" ]
     defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
+  }
+
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.inputmethod_imf)) {
+    imf_enable = true
+  } else {
+    imf_enable = false
+  }
+  print("imf_enable: ", imf_enable)
+
+  if (imf_enable == true) {
+    external_deps += [ "imf:inputmethod_client" ]
+    defines += [ "IMF_ENABLE" ]
   }
 
   part_name = "window_manager"
