@@ -16,6 +16,7 @@
 // gtest
 #include <gtest/gtest.h>
 #include "window_test_utils.h"
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -53,7 +54,7 @@ void WindowSplitTest::SetUp()
         .mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 
     splitInfo_ = {
@@ -63,7 +64,7 @@ void WindowSplitTest::SetUp()
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 
     activeWindows_.clear();

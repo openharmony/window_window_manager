@@ -72,7 +72,7 @@ void WindowDragTest::SetUp()
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 
     firstWindowInfo_ = {
@@ -82,7 +82,7 @@ void WindowDragTest::SetUp()
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = false,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 
     secondWindowInfo_ = {
@@ -92,7 +92,7 @@ void WindowDragTest::SetUp()
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 }
 

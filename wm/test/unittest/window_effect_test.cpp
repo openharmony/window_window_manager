@@ -61,7 +61,7 @@ HWTEST_F(WindowEffectTest, WindowEffect01, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(nullptr, window);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(0.0));
     ASSERT_EQ(WMError::WM_OK, window->SetCornerRadius(16.0));
@@ -85,7 +85,7 @@ HWTEST_F(WindowEffectTest, WindowEffect02, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(nullptr, window);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(0.0));
     ASSERT_EQ(WMError::WM_OK, window->SetShadowRadius(16.0));
@@ -109,7 +109,7 @@ HWTEST_F(WindowEffectTest, WindowEffect03, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(nullptr, window);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#FF22EE44"));
     ASSERT_EQ(WMError::WM_OK, window->SetShadowColor("#22EE44"));
@@ -140,7 +140,7 @@ HWTEST_F(WindowEffectTest, WindowEffect04, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(nullptr, window);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     window->SetShadowOffsetX(0.0);
     window->SetShadowOffsetX(16.0);
@@ -169,7 +169,7 @@ HWTEST_F(WindowEffectTest, WindowEffect05, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(nullptr, window);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     ASSERT_EQ(WMError::WM_OK, window->SetBlur(0.0));
     ASSERT_EQ(WMError::WM_OK, window->SetBlur(16.0));
@@ -193,7 +193,7 @@ HWTEST_F(WindowEffectTest, WindowEffect06, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(nullptr, window);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(0.0));
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlur(16.0));
@@ -217,7 +217,7 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | SmallTest | Level2)
     sptr<WindowImpl> window = new WindowImpl(option);
     ASSERT_NE(nullptr, window);
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(""));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_OFF));
     ASSERT_EQ(WMError::WM_OK, window->SetBackdropBlurStyle(WindowBlurStyle::WINDOW_BLUR_THIN));
