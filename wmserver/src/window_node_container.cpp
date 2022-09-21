@@ -401,6 +401,10 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
     RaiseInputMethodWindowPriorityIfNeeded(node);
     RaiseShowWhenLockedWindowIfNeeded(node);
     auto parentNode = node->parent_;
+    if (parentNode == nullptr) {
+        WLOGFI("Current window node has no parent: %{public}u", node->GetWindowId());
+        return;
+    }
     auto position = parentNode->children_.end();
     int splitWindowCnt = 0;
     for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
@@ -1277,7 +1281,7 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
         RaiseWindowToTop(node->GetWindowId(), parentNode->children_); // raise itself
         if (parentNode->IsSplitMode()) {
             RaiseSplitRelatedWindowToTop(parentNode);
-        } else {
+        } else if (parentNode->parent_ != nullptr) {
             RaiseWindowToTop(parentNode->GetWindowId(), parentNode->parent_->children_); // raise parent window
         }
     } else if (WindowHelper::IsMainWindow(node->GetWindowType())) {
