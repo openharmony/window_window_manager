@@ -125,8 +125,7 @@ TransitionEvent RemoteAnimation::GetTransitionEvent(sptr<WindowTransitionInfo> s
 {
     auto transitionReason = srcInfo->GetTransitionReason(); // src reason same as dst reason
     if (srcNode != nullptr && eventMap_.find(transitionReason) != eventMap_.end()) {
-        if (srcNode->state_ == WindowNodeState::HIDE_ANIMATION_PLAYING ||
-            srcNode->state_ == WindowNodeState::HIDE_ANIMATION_DONE) {
+        if (srcNode->IsWindowNodeHiddenOrHiding()) {
             WLOGFE("window id:%{public}u is already hiding or hidden with state:%{public}u",
                 srcNode->GetWindowId(), static_cast<uint32_t>(srcNode->state_));
             return TransitionEvent::UNKNOWN;
@@ -141,8 +140,7 @@ TransitionEvent RemoteAnimation::GetTransitionEvent(sptr<WindowTransitionInfo> s
         return TransitionEvent::UNKNOWN;
     } else {
         if (WindowHelper::IsMainWindow(dstInfo->GetWindowType())) {
-            if (dstNode->state_ == WindowNodeState::SHOW_ANIMATION_PLAYING ||
-                dstNode->state_ == WindowNodeState::SHOW_ANIMATION_DONE) {
+            if (dstNode->IsWindowNodeShownOrShowing()) {
                 WLOGFE("window id:%{public}u is already shown or showing with state:%{public}u",
                     dstNode->GetWindowId(), static_cast<uint32_t>(dstNode->state_));
                 return TransitionEvent::UNKNOWN;
@@ -169,8 +167,7 @@ static sptr<RSWindowAnimationFinishedCallback> GetTransitionFinishedCallback(con
         }
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
             "wms:async:ShowRemoteAnimation");
-        if (weakNode->state_ != WindowNodeState::SHOW_ANIMATION_PLAYING &&
-            weakNode->state_ != WindowNodeState::SHOW_ANIMATION_DONE) {
+        if (!weakNode->IsWindowNodeShownOrShowing()) {
             WLOGFI("node:%{public}u is not play show animation with state:%{public}d!",
                 weakNode->GetWindowId(), static_cast<uint32_t>(weakNode->state_));
             return;
@@ -179,7 +176,7 @@ static sptr<RSWindowAnimationFinishedCallback> GetTransitionFinishedCallback(con
         if (weakSrcNode) {
             weakSrcNode->state_ = WindowNodeState::HIDE_ANIMATION_DONE;
         }
-        MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::OTHER_WINDOW);
+        MinimizeApp::ExecuteMinimizeAll();
         RSAnimationTimingProtocol timingProtocol(200); // animation time
         RSNode::Animate(timingProtocol, RSAnimationTimingCurve::EASE_OUT, [weakNode]() {
             auto winRect = weakNode->GetWindowRect();
@@ -302,7 +299,7 @@ WMError RemoteAnimation::NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcI
     wptr<WindowNode> weak = srcNode;
     auto minimizeFunc = [weak]() {
         auto weakNode = weak.promote();
-        if (weakNode == nullptr || weakNode->state_ != WindowNodeState::HIDE_ANIMATION_PLAYING) {
+        if (weakNode == nullptr || !weakNode->IsWindowNodeHiddenOrHiding()) {
             WLOGFE("windowNode is nullptr or is not play hide animation!");
             return;
         }
@@ -340,7 +337,7 @@ WMError RemoteAnimation::NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo
     wptr<WindowNode> weak = srcNode;
     auto closeFunc = [weak, event]() {
         auto weakNode = weak.promote();
-        if (weakNode == nullptr || weakNode->state_ != WindowNodeState::HIDE_ANIMATION_PLAYING) {
+        if (weakNode == nullptr || !weakNode->IsWindowNodeHiddenOrHiding()) {
             WLOGFE("windowNode is nullptr or is not play hide animation!");
             return;
         }
@@ -386,8 +383,7 @@ WMError RemoteAnimation::NotifyAnimationByHome()
         if (srcTarget == nullptr) {
             continue;
         }
-        if (srcNode->state_ == WindowNodeState::HIDE_ANIMATION_PLAYING ||
-            srcNode->state_ == WindowNodeState::HIDE_ANIMATION_DONE) {
+        if (srcNode->IsWindowNodeHiddenOrHiding()) {
             WLOGFE("window id:%{public}u is already hiding or hidden with state:%{public}u",
                 srcNode->GetWindowId(), static_cast<uint32_t>(srcNode->state_));
             continue;
@@ -406,9 +402,9 @@ WMError RemoteAnimation::NotifyAnimationByHome()
         WLOGFI("NotifyAnimationByHome in animation callback");
         for (auto& weakNode : needMinimizeAppNodes) {
             auto srcNode = weakNode.promote();
-            if (srcNode == nullptr || srcNode->state_ != WindowNodeState::HIDE_ANIMATION_PLAYING) {
+            if (srcNode == nullptr || !srcNode->IsWindowNodeHiddenOrHiding()) {
                 WLOGFE("windowNode is nullptr or is not play hide animation!");
-                return;
+                continue;
             }
             srcNode->state_ = WindowNodeState::HIDE_ANIMATION_DONE;
         }

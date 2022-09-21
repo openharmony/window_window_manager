@@ -270,11 +270,12 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         ResizeSoftInputCallingWindowIfNeed(node);
     }
     StopBootAnimationIfNeed(node);
-    if (!RemoteAnimation::CheckAnimationController()) {
-        if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-            WindowHelper::IsAppWindow(node->GetWindowType())) {
-                MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::OTHER_WINDOW);
+    if (node->state_ != WindowNodeState::SHOW_ANIMATION_PLAYING &&
+        node->state_ != WindowNodeState::HIDE_ANIMATION_PLAYING) {
+        if (WindowHelper::IsMainWindow(node->GetWindowType())) { // system window no need to execute minimize
+            MinimizeApp::ExecuteMinimizeAll(); // MAX_APP_COUNT/TILE
         }
+        node->state_ = WindowNodeState::SHOWN; // for normal show which not use remote animation
     }
     return WMError::WM_OK;
 }
@@ -386,6 +387,10 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
     }
     if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         RestoreCallingWindowSizeIfNeed();
+    }
+    if (windowNode->state_ != WindowNodeState::SHOW_ANIMATION_PLAYING &&
+        windowNode->state_ != WindowNodeState::HIDE_ANIMATION_PLAYING) {
+        windowNode->state_ = WindowNodeState::HIDDEN;  // for normal hide which not use remote animation
     }
     return res;
 }
