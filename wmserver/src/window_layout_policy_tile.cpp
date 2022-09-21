@@ -73,8 +73,7 @@ uint32_t WindowLayoutPolicyTile::GetMaxTileWinNum(DisplayId displayId) const
     constexpr uint32_t half = 2;
     uint32_t edgeIntervalVp = static_cast<uint32_t>(EDGE_INTERVAL * half * virtualPixelRatio);
     uint32_t midIntervalVp = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio);
-    uint32_t minFloatingW = IsVerticalDisplay(displayId) ? MIN_VERTICAL_FLOATING_WIDTH : MIN_VERTICAL_FLOATING_HEIGHT;
-    minFloatingW = static_cast<uint32_t>(minFloatingW * virtualPixelRatio);
+    uint32_t minFloatingW = static_cast<uint32_t>(MIN_FLOATING_WIDTH * virtualPixelRatio);
     uint32_t drawableW = limitRectMap_[displayId].width_ - edgeIntervalVp + midIntervalVp;
     return static_cast<uint32_t>(drawableW / (minFloatingW + midIntervalVp));
 }

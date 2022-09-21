@@ -326,7 +326,7 @@ struct AbilityInfo {
 
 namespace {
     constexpr float DEFAULT_SPLIT_RATIO = 0.5;
-    constexpr float DEFAULT_ASPECT_RATIO = 0.66;
+    constexpr float DEFAULT_ASPECT_RATIO = 0.67;
     constexpr float DISPLAY_ZOOM_OFF_SCALE = 1.0;
     constexpr float DISPLAY_ZOOM_MIN_SCALE = 2.0;
     constexpr float DISPLAY_ZOOM_MAX_SCALE = 8.0;
@@ -337,8 +337,8 @@ namespace {
     constexpr uint32_t WINDOW_FRAME_CORNER_WIDTH = 16; // the frame width of corner
     constexpr uint32_t HOTZONE_TOUCH = 20;
     constexpr uint32_t HOTZONE_POINTER = 4;
-    constexpr uint32_t MIN_VERTICAL_FLOATING_WIDTH = 240;
-    constexpr uint32_t MIN_VERTICAL_FLOATING_HEIGHT = 320;
+    constexpr uint32_t MIN_FLOATING_WIDTH = 320;
+    constexpr uint32_t MIN_FLOATING_HEIGHT = 240;
     constexpr uint32_t MIN_VERTICAL_SPLIT_HEIGHT = 240;
     constexpr uint32_t MIN_HORIZONTAL_SPLIT_WIDTH = 320;
     constexpr uint32_t MAX_FLOATING_SIZE = 2560;

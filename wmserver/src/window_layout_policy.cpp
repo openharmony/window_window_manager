@@ -594,11 +594,8 @@ WindowSizeLimits WindowLayoutPolicy::GetSystemSizeLimits(const sptr<WindowNode>&
         }
         systemLimits.minHeight_ = static_cast<uint32_t>(systemLimits.minWidth_ * hwRatio);
     } else {
-        systemLimits.minWidth_ = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
-        systemLimits.minHeight_ = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
-        if (displayRect.width_ > displayRect.height_ && !node->isShowingOnMultiDisplays_) {
-            std::swap(systemLimits.minWidth_, systemLimits.minHeight_);
-        }
+        systemLimits.minWidth_ = static_cast<uint32_t>(MIN_FLOATING_WIDTH * virtualPixelRatio);
+        systemLimits.minHeight_ = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * virtualPixelRatio);
     }
     WLOGFD("[System SizeLimits] [maxWidth: %{public}u, minWidth: %{public}u, maxHeight: %{public}u, "
         "minHeight: %{public}u]", systemLimits.maxWidth_, systemLimits.minWidth_,
