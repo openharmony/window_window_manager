@@ -243,7 +243,7 @@ declare namespace screen {
   }
 
   /**
-   * the infomation of the screen
+   * the information of the screen
    * @syscap SystemCapability.WindowManager.WindowManager.Core
    * @since 9
    */
