@@ -1620,29 +1620,18 @@ void WindowRoot::ChangeRSRenderModeIfNeeded(bool isToUnified)
 bool WindowRoot::IsAppWindowExceed() const
 {
     uint32_t appWindowNum = 0;
-    uint32_t maxAppWindowNum = maxUniRenderAppWindowNumber_;
-    bool hasPrimarySplitWindow = false;
-    bool hasSencondarySplitWindow = false;
     for (const auto& it : windowNodeMap_) {
         WindowType winType = it.second->GetWindowType();
         WindowMode winMode = it.second->GetWindowMode();
-        bool isVisible = it.second->isVisible_;
-        bool isPrimarySplitWindow = (winMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-        bool isSencondarySplitWindow = (winMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-        hasPrimarySplitWindow |= isPrimarySplitWindow;
-        hasSencondarySplitWindow |= isSencondarySplitWindow;
-        if (winType >= WindowType::APP_WINDOW_BASE && winType < WindowType::APP_WINDOW_END
-            && isVisible && !isPrimarySplitWindow && !isSencondarySplitWindow) {
+        if (winMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || winMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            return false;
+        }
+        if (winType >= WindowType::APP_WINDOW_BASE && winType < WindowType::APP_WINDOW_END && it.second->isVisible_) {
             appWindowNum++;
-            if (appWindowNum > maxAppWindowNum) {
-                WLOGFI("SwitchRender: the number of app window exceed. max: %{public}d", maxAppWindowNum);
-                return true;
-            }
         }
     }
-    appWindowNum = (hasPrimarySplitWindow || hasSencondarySplitWindow) ? (appWindowNum + 1) : appWindowNum;
-    WLOGFI("SwitchRender: the number of app window is %{public}d", maxAppWindowNum);
-    return (appWindowNum > maxAppWindowNum);
+    WLOGFI("SwitchRender: the number of app window is %{public}u", maxUniRenderAppWindowNumber_);
+    return (appWindowNum > maxUniRenderAppWindowNumber_);
 }
 
 sptr<WindowNode> WindowRoot::GetWindowNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken)
