@@ -129,18 +129,8 @@ void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
         return;
     }
 
-    if (isUniRender) {
-        WLOGFD("draw background in uni");
-        std::shared_ptr<RSSurfaceNode>& startingWindSurfaceNode = node->startingWinSurfaceNode_;
-        std::shared_ptr<RSImage> rsImage = std::make_shared<RSImage>();
-        rsImage->SetPixelMap(pixelMap);
-        startingWindSurfaceNode->SetBgImageSize(rect.width_, rect.height_);
-        startingWindSurfaceNode->SetBgImagePosition(0, 0);
-        startingWindSurfaceNode->SetBgImage(rsImage);
-    } else {
-        WLOGFD("draw background in sperate");
-        SurfaceDraw::DrawImageRect(node->startingWinSurfaceNode_, rect, pixelMap, bkgColor);
-    }
+    WLOGFD("draw background in sperate");
+    SurfaceDraw::DrawImageRect(node->startingWinSurfaceNode_, rect, pixelMap, bkgColor);
 }
 
 void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,
