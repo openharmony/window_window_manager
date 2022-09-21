@@ -207,17 +207,12 @@ public:
     static Rect GetFixedWindowRectByLimitSize(const Rect& oriDstRect, const Rect& lastRect, bool isVertical,
         float virtualPixelRatio)
     {
-        uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
-        uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
+        uint32_t minFloatingW = static_cast<uint32_t>(MIN_FLOATING_WIDTH * virtualPixelRatio);
+        uint32_t minFloatingH = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * virtualPixelRatio);
         Rect dstRect = oriDstRect;
         // fix minimum size
-        if (isVertical) {
-            dstRect.width_ = std::max(minVerticalFloatingW, oriDstRect.width_);
-            dstRect.height_ = std::max(minVerticalFloatingH, oriDstRect.height_);
-        } else {
-            dstRect.width_ = std::max(minVerticalFloatingH, oriDstRect.width_);
-            dstRect.height_ = std::max(minVerticalFloatingW, oriDstRect.height_);
-        }
+        dstRect.width_ = std::max(minFloatingW, oriDstRect.width_);
+        dstRect.height_ = std::max(minFloatingH, oriDstRect.height_);
 
         // fix maximum size
         dstRect.width_ = std::min(static_cast<uint32_t>(MAX_FLOATING_SIZE * virtualPixelRatio), dstRect.width_);
