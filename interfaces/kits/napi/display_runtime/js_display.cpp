@@ -88,7 +88,7 @@ NativeValue* JsDisplay::OnGetCutoutInfo(NativeEngine& engine, NativeCallbackInfo
                 WLOGFI("JsDisplay::OnGetCutoutInfo success");
             } else {
                 task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsDisplay::OnGetCutoutInfo failed."));
+                    static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "JsDisplay::OnGetCutoutInfo failed."));
             }
         };
     NativeValue* lastParam = nullptr;

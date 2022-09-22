@@ -18,6 +18,7 @@
 
 #include <refbase.h>
 #include <string>
+#include <map>
 
 namespace OHOS {
 namespace Rosen {
@@ -73,6 +74,34 @@ enum class DMError : int32_t {
     DM_ERROR_INVALID_CALLING = 200,
     DM_ERROR_UNKNOWN = -1,
 };
+
+enum class DmErrorCode : int32_t {
+    DM_OK = 0,
+    DM_ERROR_NO_PERMISSION = 201,
+    DM_ERROR_INVALID_PARAM = 401,
+    DM_ERROR_DEVICE_NOT_SUPPORT = 801,
+    DM_ERROR_INVALID_SCREEN = 1400001,
+    DM_ERROR_INVALID_CALLING = 1400002,
+    DM_ERROR_SYSTEM_INNORMAL = 1400003,
+};
+
+const std::map<DMError, DmErrorCode> DM_JS_TO_ERROR_CODE_MAP {
+    {DMError::DM_OK,                                    DmErrorCode::DM_OK                          },
+    {DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED,           DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+    {DMError::DM_ERROR_IPC_FAILED,                      DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+    {DMError::DM_ERROR_REMOTE_CREATE_FAILED,            DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+    {DMError::DM_ERROR_NULLPTR,                         DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+    {DMError::DM_ERROR_INVALID_PARAM,                   DmErrorCode::DM_ERROR_INVALID_PARAM         },
+    {DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED,    DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+    {DMError::DM_ERROR_DEATH_RECIPIENT,                 DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+    {DMError::DM_ERROR_INVALID_MODE_ID,                 DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+    {DMError::DM_ERROR_WRITE_DATA_FAILED,               DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+    {DMError::DM_ERROR_RENDER_SERVICE_FAILED,           DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+    {DMError::DM_ERROR_UNREGISTER_AGENT_FAILED,         DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+    {DMError::DM_ERROR_INVALID_CALLING,                 DmErrorCode::DM_ERROR_INVALID_CALLING       },
+    {DMError::DM_ERROR_UNKNOWN,                         DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+};
+
 using DisplayStateCallback = std::function<void(DisplayState)>;
 
 enum class DisplayPowerEvent : uint32_t {
