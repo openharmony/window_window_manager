@@ -491,7 +491,7 @@ NativeValue* JsWindow::OnShowWindow(NativeEngine& engine, NativeCallbackInfo& in
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {                
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(JS_TO_ERROR_CODE_MAP.at(ret)), "Window show failed"));
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "Window show failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] show end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);

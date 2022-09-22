@@ -160,7 +160,7 @@ const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
     {ApiOrientation::LOCKED,                                Orientation::LOCKED                             },
 };
 
-const std::map<WMError, WmErrorCode> JS_TO_ERROR_CODE_MAP {
+const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_OK,                                   WmErrorCode::WM_OK                       },
     {WMError::WM_DO_NOTHING,                           WmErrorCode::WM_ERROR_STATE_ABNORMALLY   },
     {WMError::WM_ERROR_DESTROYED_OBJECT,               WmErrorCode::WM_ERROR_STATE_ABNORMALLY   },
