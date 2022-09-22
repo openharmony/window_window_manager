@@ -1284,6 +1284,10 @@ WMError WindowNodeContainer::RaiseZOrderForAppWindow(sptr<WindowNode>& node, spt
         if (node->IsSplitMode()) {
             RaiseSplitRelatedWindowToTop(node);
         } else {
+            if (node->parent_ == nullptr) {
+                WLOGFW("node parent is nullptr");
+                return WMError::WM_OK;
+            }
             RaiseWindowToTop(node->GetWindowId(), node->parent_->children_);
         }
     } else {

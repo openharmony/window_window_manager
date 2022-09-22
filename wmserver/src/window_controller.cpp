@@ -270,9 +270,8 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         ResizeSoftInputCallingWindowIfNeed(node);
     }
     StopBootAnimationIfNeed(node);
-    if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        WindowHelper::IsMainWindow(node->GetWindowType())) {
-            MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::OTHER_WINDOW);
+    if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+        MinimizeApp::ExecuteMinimizeAll();
     }
     return WMError::WM_OK;
 }
