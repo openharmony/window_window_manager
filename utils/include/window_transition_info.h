@@ -78,7 +78,7 @@ private:
     TransitionReason reason_ = TransitionReason::ABILITY_TRANSITION;
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
     WindowSizeLimits sizeLimits_;
-    int32_t missionId_;
+    int32_t missionId_ = -1;
 };
 } // Rosen
 } // OHOS
