@@ -198,11 +198,6 @@ void WindowLayoutPolicy::PostProcessWhenDisplayChange()
     UpdateMultiDisplayFlag();
     UpdateDisplayGroupRect();
     Launch();
-    for (auto& elem : displayGroupInfo_->GetAllDisplayRects()) {
-        LayoutWindowTree(elem.first);
-        WLOGFI("LayoutWindowTree, displayId: %{public}" PRIu64", displayRect: [ %{public}d, %{public}d, %{public}d, "
-            "%{public}d]", elem.first, elem.second.posX_, elem.second.posY_, elem.second.width_, elem.second.height_);
-    }
 }
 
 void WindowLayoutPolicy::ProcessDisplayCreate(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap)
