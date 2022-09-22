@@ -48,6 +48,12 @@ WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo
 void WindowLayoutPolicyCascade::Launch()
 {
     InitAllRects();
+    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
+        DisplayId displayId = iter.first;
+        auto& displayWindowTree = displayGroupWindowTree_[displayId];
+        LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::APP_WINDOW_NODE]));
+        LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::BELOW_WINDOW_NODE]));
+    }
     WLOGFI("WindowLayoutPolicyCascade::Launch");
 }
 
@@ -147,6 +153,12 @@ void WindowLayoutPolicyCascade::UpdateWindowNode(const sptr<WindowNode>& node, b
     UpdateWindowNodeRectOffset(node);
     // affect other windows, trigger off global layout
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
+        if ((node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) ||
+            (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::RESIZE)) {
+            if (node->GetRequestRect() == node->GetWindowRect()) {
+                return;
+            }
+        }
         LayoutWindowTree(displayId);
     } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
         UpdateLayoutRect(node);
