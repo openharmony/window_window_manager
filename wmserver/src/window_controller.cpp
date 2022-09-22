@@ -319,7 +319,7 @@ void WindowController::ResizeSoftInputCallingWindowIfNeed(const sptr<WindowNode>
     }
     callingWindowRestoringRect_ = callingWindowRect;
     callingWindowId_ = callingWindow->GetWindowId();
-    ResizeRect(callingWindowId_, requestedRect, WindowSizeChangeReason::DRAG);
+    ResizeRectAndFlush(callingWindowId_, requestedRect, WindowSizeChangeReason::DRAG);
 }
 
 void WindowController::RestoreCallingWindowSizeIfNeed()
@@ -327,7 +327,7 @@ void WindowController::RestoreCallingWindowSizeIfNeed()
     auto callingWindow = windowRoot_->GetWindowNode(callingWindowId_);
     if (!WindowHelper::IsEmptyRect(callingWindowRestoringRect_) && callingWindow != nullptr &&
         callingWindow->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        ResizeRect(callingWindowId_, callingWindowRestoringRect_, WindowSizeChangeReason::DRAG);
+        ResizeRectAndFlush(callingWindowId_, callingWindowRestoringRect_, WindowSizeChangeReason::DRAG);
     }
     callingWindowRestoringRect_ = { 0, 0, 0, 0 };
     callingWindowId_ = 0u;
@@ -457,9 +457,19 @@ WMError WindowController::ResizeRect(uint32_t windowId, const Rect& rect, Window
     if (res != WMError::WM_OK) {
         return res;
     }
-    FlushWindowInfo(windowId);
     accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
     return WMError::WM_OK;
+}
+
+WMError WindowController::ResizeRectAndFlush(uint32_t windowId, const Rect& rect, WindowSizeChangeReason reason)
+{
+    WMError res = ResizeRect(windowId, rect, reason);
+    if (res != WMError::WM_OK) {
+        return res;
+    } else {
+        FlushWindowInfo(windowId);
+        return WMError::WM_OK;
+    }
 }
 
 WMError WindowController::RequestFocus(uint32_t windowId)
@@ -585,8 +595,9 @@ void WindowController::ProcessDisplayChange(DisplayId defaultDisplayId, sptr<Dis
             [[fallthrough]];
         case DisplayStateChangeType::SIZE_CHANGE:
         case DisplayStateChangeType::UPDATE_ROTATION:
+            windowRoot_->ProcessDisplayChange(defaultDisplayId, displayInfo, displayInfoMap, type);
             ProcessSystemBarChange(displayInfo);
-            [[fallthrough]];
+            break;
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
             windowRoot_->ProcessDisplayChange(defaultDisplayId, displayInfo, displayInfoMap, type);
             break;
@@ -1027,7 +1038,7 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
             node->SetDecoStatus(property->GetDecoStatus());
             node->SetOriginRect(property->GetOriginRect());
             node->SetDragType(property->GetDragType());
-            ret = ResizeRect(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
+            ret = ResizeRectAndFlush(windowId, property->GetRequestRect(), property->GetWindowSizeChangeReason());
             if (node->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && ret == WMError::WM_OK &&
                 callingWindowId_ == windowId && !WindowHelper::IsEmptyRect(callingWindowRestoringRect_)) {
                 if (property->GetWindowSizeChangeReason() != WindowSizeChangeReason::MOVE) {
