@@ -396,5 +396,23 @@ std::shared_ptr<Media::PixelMap> WindowNode::GetSnapshot()
 {
     return snapshot_;
 }
+
+bool WindowNode::IsWindowNodeShownOrShowing()
+{
+    if (state_ == WindowNodeState::SHOW_ANIMATION_DONE || state_ == WindowNodeState::SHOW_ANIMATION_PLAYING ||
+        state_ == WindowNodeState::SHOWN) {
+            return true;
+    }
+    return false;
+}
+
+bool WindowNode::IsWindowNodeHiddenOrHiding()
+{
+    if (state_ == WindowNodeState::HIDE_ANIMATION_DONE || state_ == WindowNodeState::HIDE_ANIMATION_PLAYING ||
+        state_ == WindowNodeState::HIDDEN) {
+            return true;
+    }
+    return false;
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -130,6 +130,8 @@ public:
     uint32_t GetAccessTokenId() const;
     WindowSizeLimits GetWindowSizeLimits() const;
     WindowSizeLimits GetWindowUpdatedSizeLimits() const;
+    bool IsWindowNodeShownOrShowing();
+    bool IsWindowNodeHiddenOrHiding();
 
     bool EnableDefaultAnimation(bool propertyEnabled, bool animationPlayed);
     sptr<WindowNode> parent_;
