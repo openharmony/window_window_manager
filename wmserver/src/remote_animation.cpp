@@ -227,8 +227,6 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
         // to avoid normal animation
         srcNode->isPlayAnimationHide_ = true;
         srcNode->state_ = WindowNodeState::HIDE_ANIMATION_PLAYING;
-        // update snapshot before animation
-        AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(srcNode->abilityToken_);
         if (winRoot) {
             winRoot->RemoveWindowNode(srcNode->GetWindowId());
         }
@@ -249,8 +247,6 @@ WMError RemoteAnimation::NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcI
     WLOGFI("RSWindowAnimation: notify animation minimize Id:%{public}u!", srcNode->GetWindowId());
     srcNode->isPlayAnimationHide_ = true;
     srcNode->state_ = WindowNodeState::HIDE_ANIMATION_PLAYING;
-    // update snapshot before animation
-    AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(srcNode->abilityToken_);
     auto winRoot = windowRoot_.promote();
     if (winRoot != nullptr) {
         winRoot->RemoveWindowNode(srcNode->GetWindowId());
@@ -286,8 +282,6 @@ WMError RemoteAnimation::NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo
     WLOGFI("RSWindowAnimation: notify animation close id:%{public}u!", srcNode->GetWindowId());
     srcNode->isPlayAnimationHide_ = true;
     srcNode->state_ = WindowNodeState::HIDE_ANIMATION_PLAYING;
-    // update snapshot before animation
-    AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(srcNode->abilityToken_);
     auto winRoot = windowRoot_.promote();
     if (winRoot != nullptr) {
         winRoot->RemoveWindowNode(srcNode->GetWindowId());
@@ -341,8 +335,6 @@ WMError RemoteAnimation::NotifyAnimationByHome()
         }
         srcNode->isPlayAnimationHide_ = true;
         srcNode->state_ = WindowNodeState::HIDE_ANIMATION_PLAYING;
-        // update snapshot before animation
-        AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(srcNode->abilityToken_);
         auto winRoot = windowRoot_.promote();
         if (winRoot != nullptr) {
             winRoot->RemoveWindowNode(srcNode->GetWindowId());
