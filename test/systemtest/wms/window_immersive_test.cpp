@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "window_manager.h"
 #include "window_test_utils.h"
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -216,7 +217,7 @@ void WindowImmersiveTest::SetUp()
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN, // immersive setting
         .needAvoid = false, // immersive setting
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     avoidBarInfo_ = {
         .name = "LeftAvoidTest",

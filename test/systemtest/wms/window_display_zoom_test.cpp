@@ -18,6 +18,7 @@
 #include "window_test_utils.h"
 #include "window_accessibility_controller.h"
 #include "window_impl.h"
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -51,7 +52,7 @@ void WindowDisplayZoomTest::SetUp()
         .needAvoid = false,
         .parentLimit = false,
         .showWhenLocked = true,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 }
 

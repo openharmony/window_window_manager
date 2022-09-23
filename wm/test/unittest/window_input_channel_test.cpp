@@ -46,7 +46,7 @@ void WindowInputChannelTest::SetUp()
     sptr<WindowOption> option = new WindowOption();
     option->SetWindowName("window");
     window_ = new WindowImpl(option);
-    window_->Create("");
+    window_->Create(INVALID_WINDOW_ID);
 }
 
 void WindowInputChannelTest::TearDown()

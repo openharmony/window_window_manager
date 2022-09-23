@@ -16,6 +16,7 @@
 // gtest
 #include <gtest/gtest.h>
 #include "window.h"
+#include "wm_common.h"
 #include "window_test_utils.h"
 using namespace testing;
 using namespace testing::ext;
@@ -82,7 +83,7 @@ void WindowAnimationTransitionTest::SetUp()
             .mode = WindowMode::WINDOW_MODE_FLOATING,
             .needAvoid = false,
             .parentLimit = false,
-            .parentName = "",
+            .parentId = INVALID_WINDOW_ID,
     };
     trans_.pivotX_ = 1.0f;
     trans_.pivotY_ = 0.6f;

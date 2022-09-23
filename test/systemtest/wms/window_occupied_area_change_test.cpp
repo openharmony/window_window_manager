@@ -81,7 +81,7 @@ void WindowOccupiedAreaChangeTest::SetUp()
             .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
             .needAvoid = false,
             .parentLimit = false,
-            .parentName = "",
+            .parentId = INVALID_WINDOW_ID,
     };
     imeAppInfo_ = {
             .name = "ImeWindow",

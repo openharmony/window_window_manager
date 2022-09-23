@@ -90,7 +90,7 @@ public:
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) override;
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) override;
 
-    WMError Create(const std::string& parentName,
+    WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy() override;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) override;
