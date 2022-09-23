@@ -58,6 +58,13 @@ NativeValue* JsWindowStage::GetMainWindow(NativeEngine* engine, NativeCallbackIn
     return (me != nullptr) ? me->OnGetMainWindow(*engine, *info) : nullptr;
 }
 
+NativeValue* JsWindowStage::GetMainWindowSync(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    WLOGFD("[NAPI]GetMainWindowSync");
+    JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(engine, info);
+    return (me != nullptr) ? me->OnGetMainWindowSync(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindowStage::On(NativeEngine* engine, NativeCallbackInfo* info)
 {
     WLOGFD("[NAPI]On");
@@ -149,7 +156,8 @@ NativeValue* JsWindowStage::OnGetMainWindow(NativeEngine& engine, NativeCallback
         [weak = windowScene_](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakScene = weak.lock();
             if (weakScene == nullptr) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY)));
                 WLOGFE("[NAPI]WindowScene_ is nullptr!");
                 return;
             }
@@ -160,7 +168,7 @@ NativeValue* JsWindowStage::OnGetMainWindow(NativeEngine& engine, NativeCallback
                     window->GetWindowId(), window->GetWindowName().c_str());
             } else {
                 task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(Rosen::WMError::WM_ERROR_NULLPTR),
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
                     "Get main window failed."));
             }
         };
@@ -170,6 +178,25 @@ NativeValue* JsWindowStage::OnGetMainWindow(NativeEngine& engine, NativeCallback
         engine, CreateAsyncTaskWithLastParam(engine, callback, nullptr, std::move(complete), &result));
     return result;
 }
+
+NativeValue* JsWindowStage::OnGetMainWindowSync(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr) {
+        WLOGFE("[NAPI]WindowScene is null");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY)));
+        return engine.CreateUndefined();
+    }
+    auto window = weakScene->GetMainWindow();
+    if (window == nullptr) {
+        WLOGFE("[NAPI]window is null");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return engine.CreateUndefined();
+    }
+
+    return OHOS::Rosen::CreateJsWindowObject(engine, window);
+}
+
 
 NativeValue* JsWindowStage::OnEvent(NativeEngine& engine, NativeCallbackInfo& info)
 {
@@ -474,6 +501,8 @@ NativeValue* CreateJsWindowStage(NativeEngine& engine,
         *object, "loadContent", moduleName, JsWindowStage::LoadContent);
     BindNativeFunction(engine,
         *object, "getMainWindow", moduleName, JsWindowStage::GetMainWindow);
+    BindNativeFunction(engine,
+        *object, "getMainWindowSync", moduleName, JsWindowStage::GetMainWindowSync);
     BindNativeFunction(engine,
         *object, "getWindowMode", moduleName, JsWindowStage::GetWindowMode);
     BindNativeFunction(engine,

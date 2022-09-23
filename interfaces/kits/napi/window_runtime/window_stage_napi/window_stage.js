@@ -34,6 +34,10 @@ class WindowStage {
         return this.__window_stage__.getMainWindow(asyncCallback)
     }
 
+    getMainWindowSync() {
+        return this.__window_stage__.getMainWindowSync()
+    }
+
     createSubWindow(windowName, asyncCallback) {
         return this.__window_stage__.createSubWindow(windowName, asyncCallback)
     }

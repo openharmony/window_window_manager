@@ -31,6 +31,7 @@ public:
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* SetUIContent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetMainWindow(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* GetMainWindowSync(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* On(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* Off(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* LoadContent(NativeEngine* engine, NativeCallbackInfo* info);
@@ -43,6 +44,7 @@ public:
 private:
     NativeValue* OnSetUIContent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetMainWindow(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnGetMainWindowSync(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnEvent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OffEvent(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info);
