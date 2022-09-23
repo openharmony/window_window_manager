@@ -62,6 +62,7 @@ ohos_shared_library("libwm") {
 
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/resourceschedule/resource_schedule_service/soc_perf:socperf_client",
     "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/utils:libwmutil",
   ]
