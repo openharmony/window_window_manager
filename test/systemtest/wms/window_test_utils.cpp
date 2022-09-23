@@ -159,12 +159,8 @@ Rect WindowTestUtils::CalcLimitedRect(const Rect& rect, float virtualPixelRatio)
 {
     constexpr uint32_t maxLimitLen = 2560;
     constexpr int32_t maxPosRemain = 48;
-    uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
-    uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
-
-    bool vertical = displayRect_.width_ < displayRect_.height_;
-    uint32_t minFloatingW = vertical ? minVerticalFloatingW : minVerticalFloatingH;
-    uint32_t minFloatingH = vertical ? minVerticalFloatingH : minVerticalFloatingW;
+    uint32_t minFloatingW = static_cast<uint32_t>(MIN_FLOATING_WIDTH * virtualPixelRatio);
+    uint32_t minFloatingH = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * virtualPixelRatio);
     Rect resRect = {
         std::min(std::max(rect.posX_, maxPosRemain - static_cast<int32_t>(rect.width_)),
             static_cast<int32_t>(displayRect_.width_) - maxPosRemain),
@@ -177,12 +173,8 @@ Rect WindowTestUtils::CalcLimitedRect(const Rect& rect, float virtualPixelRatio)
 
 Rect WindowTestUtils::GetFloatingLimitedRect(const Rect& rect, float virtualPixelRatio)
 {
-    uint32_t minVerticalFloatingW = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_WIDTH * virtualPixelRatio);
-    uint32_t minVerticalFloatingH = static_cast<uint32_t>(MIN_VERTICAL_FLOATING_HEIGHT * virtualPixelRatio);
-    bool vertical = displayRect_.width_ < displayRect_.height_;
-
-    uint32_t minFloatingW = vertical ? minVerticalFloatingW : minVerticalFloatingH;
-    uint32_t minFloatingH = vertical ? minVerticalFloatingH : minVerticalFloatingW;
+    uint32_t minFloatingW = static_cast<uint32_t>(MIN_FLOATING_WIDTH * virtualPixelRatio);
+    uint32_t minFloatingH = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * virtualPixelRatio);
     Rect resRect = {
         rect.posX_,
         rect.posY_,
@@ -208,7 +200,6 @@ Rect WindowTestUtils::GetDecorateRect(const Rect& rect, float virtualPixelRatio)
 void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
 {
     const float barRatio = 0.07;
-    const float appRation = 0.6;
     const float spaceRation = 0.125;
     displayRect_ = displayRect;
     limitDisplayRect_ = displayRect;
@@ -221,8 +212,8 @@ void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
     customAppRect_ = {
         displayRect_.width_ * spaceRation,
         displayRect_.height_ * spaceRation,
-        displayRect_.width_ * appRation,
-        displayRect_.height_ * appRation
+        displayRect_.width_ * DEFAULT_ASPECT_RATIO,
+        displayRect_.height_ * DEFAULT_ASPECT_RATIO
     };
 }
 
@@ -248,8 +239,7 @@ uint32_t WindowTestUtils::GetMaxTileWinNum()
     constexpr uint32_t half = 2;
     uint32_t edgeIntervalVp = static_cast<uint32_t>(EDGE_INTERVAL * half * virtualPixelRatio);
     uint32_t midIntervalVp = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio);
-    uint32_t minFloatingW = isVerticalDisplay_ ? MIN_VERTICAL_FLOATING_WIDTH : MIN_VERTICAL_FLOATING_HEIGHT;
-    minFloatingW = static_cast<uint32_t>(minFloatingW * virtualPixelRatio);
+    uint32_t minFloatingW = static_cast<uint32_t>(MIN_FLOATING_WIDTH * virtualPixelRatio);
     uint32_t drawableW = limitDisplayRect_.width_ - edgeIntervalVp + midIntervalVp;
     uint32_t maxNum = static_cast<uint32_t>(drawableW / (minFloatingW + midIntervalVp));
     WLOGFI("maxNum: %{public}d", maxNum);
