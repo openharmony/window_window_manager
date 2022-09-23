@@ -385,6 +385,9 @@ private:
     bool IsAppMainOrSubOrFloatingWindow();
     void UpdateWindowShadowAccordingToSystemConfig();
     bool WindowCreateCheck(const std::string& parentName);
+    void RequestPerfIfNeed(WindowSizeChangeReason reason);
+    void RequestPerf(int32_t code, int64_t timeOut);
+    void ClosePerf(int32_t code);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
@@ -432,6 +435,9 @@ private:
     bool isMainHandlerAvailable_ = true;
     bool isAppFloatingWindow_ = false;
     bool isFocused_ = false;
+    std::chrono::steady_clock::time_point lastRequestPerfTime_ = std::chrono::steady_clock::now();
+    bool windowMovingBoost_ = false;
+    bool windowDragBoost_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
