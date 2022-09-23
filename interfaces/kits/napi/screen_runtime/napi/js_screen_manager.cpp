@@ -252,20 +252,24 @@ NativeValue* OnRegisterScreenMangerCallback(NativeEngine& engine, NativeCallback
     WLOGFI("JsScreenManager::OnRegisterScreenMangerCallback is called");
     if (info.argc != ARGC_TWO) {
         WLOGFE("Params not match");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::string cbType;
     if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
         WLOGFE("Failed to convert parameter to callbackType");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     NativeValue* value = info.argv[INDEX_ONE];
     if (value == nullptr) {
         WLOGFI("JsScreenManager::OnRegisterScreenMangerCallback info->argv[1] is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     if (!value->IsCallable()) {
         WLOGFI("JsScreenManager::OnRegisterScreenMangerCallback info->argv[1] is not callable");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::lock_guard<std::mutex> lock(mtx_);
@@ -278,11 +282,13 @@ NativeValue* OnUnregisterScreenManagerCallback(NativeEngine& engine, NativeCallb
     WLOGFI("JsScreenManager::OnUnregisterScreenCallback is called");
     if (info.argc == 0) {
         WLOGFE("Params not match");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::string cbType;
     if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
         WLOGFE("Failed to convert parameter to callbackType");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::lock_guard<std::mutex> lock(mtx_);
@@ -292,10 +298,12 @@ NativeValue* OnUnregisterScreenManagerCallback(NativeEngine& engine, NativeCallb
         NativeValue* value = info.argv[INDEX_ONE];
         if (value == nullptr) {
             WLOGFI("JsScreenManager::OnUnregisterScreenManagerCallback info->argv[1] is nullptr");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
         }
         if (!value->IsCallable()) {
             WLOGFI("JsScreenManager::OnUnregisterScreenManagerCallback info->argv[1] is not callable");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
         }
         UnRegisterScreenListenerWithType(cbType, value);

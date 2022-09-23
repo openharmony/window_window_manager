@@ -801,17 +801,15 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
 
 NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WMError errCode = WMError::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     if (info.argc < 1 || info.argc > 2) { // 2 is max num of argc
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     WindowMode winMode = WindowMode::WINDOW_MODE_FULLSCREEN;
-    if (errCode == WMError::WM_OK) {
+    if (errCode == WmErrorCode::WM_OK) {
         NativeNumber* nativeMode = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
         if (nativeMode == nullptr) {
-            WLOGFE("[NAPI]Failed to convert parameter to windowMode");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         } else {
             if (static_cast<uint32_t>(*nativeMode) >= static_cast<uint32_t>(WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
                 winMode = static_cast<WindowMode>(static_cast<uint32_t>(*nativeMode));
@@ -820,23 +818,25 @@ NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo&
                 winMode = JS_TO_NATIVE_WINDOW_MODE_MAP.at(
                     static_cast<ApiWindowMode>(static_cast<uint32_t>(*nativeMode)));
             } else {
-                WLOGFE("[NAPI]Do not surppot this mode: %{public}u", static_cast<uint32_t>(*nativeMode));
-                errCode = WMError::WM_ERROR_INVALID_PARAM;
+                errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             }
         }
     }
-
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
     wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
         [weakToken, winMode, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
-                WLOGFE("[NAPI]window is nullptr or get invalid param");
+            if (weakWindow == nullptr) {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
             }
-            WMError ret = weakWindow->SetWindowMode(winMode);
-            if (ret == WMError::WM_OK) {
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowMode(winMode));
+            if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine,
@@ -893,20 +893,24 @@ NativeValue* JsWindow::OnRegisterWindowCallback(NativeEngine& engine, NativeCall
 {
     if (windowToken_ == nullptr) {
         WLOGFE("[NAPI]Window is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     if (info.argc != 2) { // 2: params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::string cbType;
     if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
         WLOGFE("[NAPI]Failed to convert parameter to callbackType");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     NativeValue* value = info.argv[1];
     if (!value->IsCallable()) {
         WLOGFI("[NAPI]Callback(info->argv[1]) is not callable");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     registerManager_->RegisterListener(windowToken_, cbType, CaseType::CASE_WINDOW, engine, value);
@@ -919,11 +923,13 @@ NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCa
 {
     if (windowToken_ == nullptr || info.argc < 1 || info.argc > 2) { // 2: maximum params nums
         WLOGFE("[NAPI]Window is nullptr or argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::string cbType;
     if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
         WLOGFE("[NAPI]Failed to convert parameter to callbackType");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
 
@@ -932,6 +938,7 @@ NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCa
         value = info.argv[1];
         if (!value->IsCallable()) {
             WLOGFI("[NAPI]Callback(info->argv[1]) is not callable");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
         }
     }
@@ -944,10 +951,9 @@ NativeValue* JsWindow::OnUnregisterWindowCallback(NativeEngine& engine, NativeCa
 
 NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WMError errCode = WMError::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     if (windowToken_ == nullptr || info.argc < 2 || info.argc > 3) { // 2 3: invalid params nums
-        WLOGFE("[NAPI]Window is nullptr or argc is invalid: %{public}zu", info.argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
 
     NativeValue* value = nullptr;
@@ -956,18 +962,20 @@ NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackIn
         token = NAPI_ohos_rpc_getNativeRemoteObject(
             reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[0]));
         if (token == nullptr) {
-            WLOGFE("[NAPI]Callback(info->argv[0]) transfer to remoteObject fail");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
-
         value = info.argv[1];
         if (!value->IsCallable()) {
-            WLOGFE("[NAPI]Callback(info->argv[1]) is not callable");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
     }
 
-    if (errCode == WMError::WM_OK) {
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
+    if (errCode == WmErrorCode::WM_OK) {
         registerManager_->RegisterListener(windowToken_, "dialogDeathRecipient", CaseType::CASE_WINDOW, engine, value);
     }
 
@@ -975,14 +983,14 @@ NativeValue* JsWindow::OnBindDialogTarget(NativeEngine& engine, NativeCallbackIn
     AsyncTask::CompleteCallback complete =
         [weakToken, errCode, token](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
-                WLOGFE("[NAPI]window is nullptr or get invalid param");
+            if (weakWindow == nullptr) {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
             }
 
-            WMError ret = weakWindow->BindDialogTarget(token);
-            if (ret == WMError::WM_OK) {
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->BindDialogTarget(token));
+            if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Bind Dialog Target failed"));
@@ -1006,8 +1014,9 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     NativeValue* nativeStorage =  (contentStorage == nullptr) ? nullptr : contentStorage->Get();
     AppExecFwk::Ability* ability = nullptr;
     GetAPI7Ability(engine, ability);
-    WMError ret = weakWindow->SetUIContent(contextUrl, &engine, nativeStorage, false, ability);
-    if (ret == WMError::WM_OK) {
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        weakWindow->SetUIContent(contextUrl, &engine, nativeStorage, false, ability));
+    if (ret == WmErrorCode::WM_OK) {
         task.Resolve(engine, engine.CreateUndefined());
     } else {
         task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window load content failed"));
@@ -1017,10 +1026,10 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     return;
 }
 
-NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsWindow::LoadContentScheduleOld(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WMError errCode = WMError::WM_OK;
-    if (info.argc < 1 || info.argc > 3) { // 3 maximum param num
+    if (info.argc < 1 || info.argc > 2) { // 2 maximum param num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -1031,17 +1040,8 @@ NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& i
     }
     NativeValue* storage = nullptr;
     NativeValue* callBack = nullptr;
-    if (info.argc == 2) { // 2: num of params
-        NativeValue* value = info.argv[1];
-        if (value->TypeOf() == NATIVE_FUNCTION) {
-            callBack = info.argv[1];
-        } else {
-            storage = info.argv[1];
-        }
-    } else if (info.argc == 3) { // 3: num of params
-        storage = info.argv[1];
-        // 2: index of callback
-        callBack = (info.argv[2]->TypeOf() == NATIVE_FUNCTION ? info.argv[2] : nullptr);
+    if (info.argc == 2) { // 2 param num
+        callBack = info.argv[1];
     }
     std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
         std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
@@ -1060,6 +1060,69 @@ NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& i
     AsyncTask::Schedule("JsWindow::OnLoadContent",
         engine, CreateAsyncTaskWithLastParam(engine, callBack, nullptr, std::move(complete), &result));
     return result;
+}
+
+NativeValue* JsWindow::LoadContentScheduleNew(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    if (info.argc < 2 || info.argc > 3) { // 2 3 param num
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    std::string contextUrl;
+    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(engine, info.argv[0], contextUrl)) {
+        WLOGFE("[NAPI]Failed to convert parameter to context url");
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    NativeValue* storage = nullptr;
+    NativeValue* callBack = nullptr;
+    if (info.argc == 2) { // 2: num of params
+        storage = info.argv[1];
+    } else if (info.argc == 3) { // 3: num of params
+        storage = info.argv[1];
+        callBack = (info.argv[2]->TypeOf() == NATIVE_FUNCTION ? info.argv[2] : nullptr); // 2 param num
+    }
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        WLOGFE("[NAPI]Window is nullptr or get invalid param");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    std::shared_ptr<NativeReference> contentStorage = (storage == nullptr) ? nullptr :
+        std::shared_ptr<NativeReference>(engine.CreateReference(storage, 1));
+    wptr<Window> weakToken(windowToken_);
+    AsyncTask::CompleteCallback complete =
+        [weakToken, contentStorage, contextUrl, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                WLOGFE("[NAPI]Window is nullptr or get invalid param");
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                return;
+            }
+            LoadContentTask(contentStorage, contextUrl, weakWindow, engine, task);
+        };
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindow::OnLoadContent",
+        engine, CreateAsyncTaskWithLastParam(engine, callBack, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWindow::OnLoadContent(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    bool oldApi = false;
+    if (info.argc == 1) {
+        oldApi = true;
+    } else if (info.argc == 2) { // 2 param num
+        NativeValue* value = info.argv[1];
+        if (value->TypeOf() == NATIVE_FUNCTION) {
+            oldApi = true;
+        }
+    }
+    if (oldApi) {
+        return LoadContentScheduleOld(engine, info);
+    } else {
+        return LoadContentScheduleNew(engine, info);
+    }
 }
 
 NativeValue* JsWindow::OnSetFullScreen(NativeEngine& engine, NativeCallbackInfo& info)
@@ -1331,33 +1394,39 @@ NativeValue* JsWindow::OnIsShowing(NativeEngine& engine, NativeCallbackInfo& inf
 
 NativeValue* JsWindow::OnSetPreferredOrientation(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WMError errCode = WMError::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     Orientation requestedOrientation = Orientation::UNSPECIFIED;
     if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     } else {
         NativeNumber* nativeType = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
         if (nativeType == nullptr) {
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             WLOGFE("[NAPI]Failed to convert parameter to Orientation");
         } else {
             requestedOrientation = JS_TO_NATIVE_ORIENTATION_MAP.at(
                 static_cast<ApiOrientation>(static_cast<uint32_t>(*nativeType)));
             if (requestedOrientation < Orientation::BEGIN || requestedOrientation > Orientation::END) {
                 WLOGFE("[NAPI]Orientation %{public}u invalid!", static_cast<uint32_t>(requestedOrientation));
-                errCode = WMError::WM_ERROR_INVALID_PARAM;
+                errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             }
         }
     }
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        WLOGFE("[NAPI]get invalid param");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
     wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
         [weakToken, requestedOrientation, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode),
+            if (weakWindow == nullptr) {
+                WLOGFE("[NAPI]Window is nullptr");
+                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
                     "OnSetPreferredOrientation failed"));
-                WLOGFE("[NAPI]Window is nullptr or get invalid param");
                 return;
             }
             weakWindow->SetRequestedOrientation(requestedOrientation);
@@ -1596,16 +1665,18 @@ NativeValue* JsWindow::OnSetKeepScreenOn(NativeEngine& engine, NativeCallbackInf
 
 NativeValue* JsWindow::OnSetWakeUpScreen(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WMError errCode = WMError::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     if (info.argc != 1 || windowToken_ == nullptr) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     bool wakeUp = false;
-    if (errCode == WMError::WM_OK) {
+    if (errCode == WmErrorCode::WM_OK) {
         NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
         if (nativeVal == nullptr) {
             WLOGFE("[NAPI]Failed to convert parameter to keepScreenOn");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
         } else {
             wakeUp = static_cast<bool>(*nativeVal);
@@ -1924,43 +1995,46 @@ NativeValue* JsWindow::Snapshot(NativeEngine* engine, NativeCallbackInfo* info)
 
 NativeValue* JsWindow::OnSetForbidSplitMove(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WMError errCode = WMError::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     bool isForbidSplitMove = false;
-    if (errCode == WMError::WM_OK) {
+    if (errCode == WmErrorCode::WM_OK) {
         NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
         if (nativeVal == nullptr) {
-            WLOGFE("[NAPI]Failed to convert parameter to isForbidSplitMove");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         } else {
             isForbidSplitMove = static_cast<bool>(*nativeVal);
         }
+    }
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
     }
     wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
         [weakToken, isForbidSplitMove, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params."));
+            if (weakWindow == nullptr) {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "Invalidate params."));
                 return;
             }
-            WMError ret;
+            WmErrorCode ret;
             if (isForbidSplitMove) {
-                ret = weakWindow->AddWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
+                ret = WM_JS_TO_ERROR_CODE_MAP.at(
+                    weakWindow->AddWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE));
             } else {
-                ret = weakWindow->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE);
+                ret = WM_JS_TO_ERROR_CODE_MAP.at(
+                    weakWindow->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE));
             }
-            if (ret == WMError::WM_OK) {
+            if (ret == WmErrorCode::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine,
                     static_cast<int32_t>(ret), "Window OnSetForbidSplitMove failed."));
             }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] set forbid split move end, ret = %{public}d",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
     NativeValue* lastParam = (info.argc <= 1) ? nullptr :
         (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
@@ -1972,24 +2046,32 @@ NativeValue* JsWindow::OnSetForbidSplitMove(NativeEngine& engine, NativeCallback
 
 NativeValue* JsWindow::OnSnapshot(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WMError errCode = WMError::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     if (info.argc > 1) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        WLOGFE("[NAPI]get invalid param");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+
     wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
         [weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr || errCode != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
-                WLOGFE("[NAPI]window is nullptr or get invalid param");
+            if (weakWindow == nullptr) {
+                WLOGFE("[NAPI]window is nullptr");
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
             }
 
             std::shared_ptr<Media::PixelMap> pixelMap = weakWindow->Snapshot();
             if (pixelMap == nullptr) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WMError::WM_ERROR_NULLPTR)));
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 WLOGFE("[NAPI]window snapshot get pixelmap is null");
                 return;
             }
@@ -2015,32 +2097,32 @@ NativeValue* JsWindow::OnSnapshot(NativeEngine& engine, NativeCallbackInfo& info
 
 NativeValue* JsWindow::OnSetSnapshotSkip(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WMError errCode = WMError::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     if (info.argc < 1 || info.argc > 2) { // 2 is maximum params num
         WLOGFE("[NAPI] inbalid param");
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     bool isSkip = false;
-    if (errCode == WMError::WM_OK) {
+    if (errCode == WmErrorCode::WM_OK) {
         NativeBoolean* nativeVal = ConvertNativeValueTo<NativeBoolean>(info.argv[0]);
         if (nativeVal == nullptr) {
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         } else {
             isSkip = static_cast<bool>(*nativeVal);
         }
+    }
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
     }
 
     wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
         [weakToken, isSkip, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (errCode != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params"));
-                return;
-            }
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "Invalidate params"));
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "Invalidate params"));
                 return;
             }
 
@@ -2060,21 +2142,30 @@ NativeValue* JsWindow::OnSetSnapshotSkip(NativeEngine& engine, NativeCallbackInf
 
 NativeValue* JsWindow::OnOpacity(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (info.argc != 1 || windowToken_ == nullptr) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
+    if (info.argc != 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("[NAPI]WindowToken_ is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]Opacity is not allowed since window is not system window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
         return engine.CreateUndefined();
     }
     NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
     if (nativeVal == nullptr) {
         WLOGFE("[NAPI]Failed to convert parameter to alpha");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     if (MathHelper::LessNotEqual(*nativeVal, 0.0) || MathHelper::GreatNotEqual(*nativeVal, 1.0)) {
         WLOGFE("[NAPI]alpha should greater than 0 or smaller than 1.0");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     float alpha = static_cast<double>(*nativeVal);
@@ -2132,22 +2223,31 @@ bool JsWindow::ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Tr
 
 NativeValue* JsWindow::OnScale(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (info.argc != 1 || windowToken_ == nullptr) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
+    if (info.argc != 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("[NAPI]WindowToken_ is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]Scale is not allowed since window is not system window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
         return engine.CreateUndefined();
     }
     NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
     if (nativeObj == nullptr) {
         WLOGFE("[NAPI]Failed to convert object to ScaleOptions");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     auto trans = windowToken_->GetTransform();
     if (!ParseScaleOption(engine, nativeObj, trans)) {
         WLOGFE("[NAPI] PivotX or PivotY should between 0.0 ~ 1.0, scale should greater than 0.0");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     windowToken_->SetTransform(trans);
@@ -2187,23 +2287,32 @@ bool JsWindow::ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, T
 
 NativeValue* JsWindow::OnRotate(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (info.argc != 1 || windowToken_ == nullptr) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
+    if (info.argc != 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("[NAPI]WindowToken_ is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]Rotate is not allowed since window is not system window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
         return engine.CreateUndefined();
     }
     NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
     if (nativeObj == nullptr) {
         WLOGFE("[NAPI]Failed to convert object to RotateOptions");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     // cannot use sync task since next transform base on current transform
     auto trans = windowToken_->GetTransform();
     if (!ParseRotateOption(engine, nativeObj, trans)) {
         WLOGFE("[NAPI] PivotX or PivotY should between 0.0 ~ 1.0");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     windowToken_->SetTransform(trans);
@@ -2232,21 +2341,30 @@ bool JsWindow::ParseTranslateOption(NativeEngine& engine, NativeObject* jsObject
 
 NativeValue* JsWindow::OnTranslate(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (info.argc != 1 || windowToken_ == nullptr) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
+    if (info.argc != 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("[NAPI]WindowToken_ is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]Translate is not allowed since window is not system window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
         return engine.CreateUndefined();
     }
     NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
     if (nativeObj == nullptr) {
         WLOGFE("[NAPI]Failed to convert object to TranslateOptions");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     auto trans = windowToken_->GetTransform();
     if (!ParseTranslateOption(engine, nativeObj, trans)) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     windowToken_->SetTransform(trans);
@@ -2294,12 +2412,19 @@ void JsWindow::CreateTransitionController(NativeEngine& engine)
 
 NativeValue* JsWindow::OnGetTransitionController(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (windowToken_ == nullptr || info.argc > 0) {
-        WLOGFE("[NAPI]windowToken_ is nullptr or params %{public}zu not match", info.argc);
+    if (info.argc > 0) {
+        WLOGFE("[NAPI]Params %{public}zu not match", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("[NAPI]WindowToken_ is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]OnGetTransitionController is not allowed since window is not system window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
         return engine.CreateUndefined();
     }
     if (jsTransControllerObj_ == nullptr || jsTransControllerObj_->Get() == nullptr) {
@@ -2310,22 +2435,33 @@ NativeValue* JsWindow::OnGetTransitionController(NativeEngine& engine, NativeCal
 
 NativeValue* JsWindow::OnSetCornerRadius(NativeEngine& engine, NativeCallbackInfo& info)
 {
+    if (info.argc != 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
     if (info.argc != 1 || windowToken_ == nullptr) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
+        WLOGFE("[NAPI]WindowToken_ is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]SetCornerRadius is not allowed since window is not system window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
         return engine.CreateUndefined();
     }
     NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
     if (nativeVal == nullptr || MathHelper::LessNotEqual(static_cast<double>(*nativeVal), 0.0)) {
         WLOGFE("[NAPI]SetCornerRadius invalid radius");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     float radius = static_cast<double>(*nativeVal);
-    if (windowToken_->SetCornerRadius(radius) != WMError::WM_OK) {
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetCornerRadius(radius));
+    if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Window SetCornerRadius failed");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
     }
     WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetCornerRadius end, radius = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
@@ -2334,43 +2470,47 @@ NativeValue* JsWindow::OnSetCornerRadius(NativeEngine& engine, NativeCallbackInf
 
 NativeValue* JsWindow::OnSetShadow(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if ((info.argc < 1 || info.argc > 4) || windowToken_ == nullptr) { // 1: min param num, 4: max param num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (info.argc < 1 || info.argc > 4) { // 1: min param num, 4: max param num
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    if (windowToken_ == nullptr) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        WLOGFE("[NAPI]SetShadow is not allowed since window is not system window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
         return engine.CreateUndefined();
     }
 
     { // parse the 1st param: radius
         NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
         if (nativeVal == nullptr || MathHelper::LessNotEqual(static_cast<double>(*nativeVal), 0.0)) {
-            WLOGFE("[NAPI]SetShadow invalid radius");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
         }
-        if (windowToken_->SetShadowRadius(static_cast<double>(*nativeVal)) != WMError::WM_OK) {
-            WLOGFE("[NAPI]Window SetShadowRadius failed");
-            return engine.CreateUndefined();
-        }
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowRadius(static_cast<double>(*nativeVal)));
     }
 
-    if (info.argc >= 2) { // parse the 2nd param: color
+    if ((ret == WmErrorCode::WM_OK) && (info.argc >= 2)) { // parse the 2nd param: color
         std::string color;
         if (!ConvertFromJsValue(engine, info.argv[1], color)) {
-            WLOGFE("[NAPI]SetShadow invalid color");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
         }
-        if (windowToken_->SetShadowColor(color) != WMError::WM_OK) {
-            WLOGFE("[NAPI]Window SetShadowColor failed");
-            return engine.CreateUndefined();
-        }
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowColor(color));
+    }
+
+    if (ret != WmErrorCode::WM_OK) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
     }
 
     if (info.argc >= 3) { // parse the 3rd param: offsetX
         NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[2]); // 2: the 3rd param
         if (nativeVal == nullptr) {
-            WLOGFE("[NAPI]SetShadow invalid offsetX");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
         }
         windowToken_->SetShadowOffsetX(static_cast<double>(*nativeVal));
@@ -2379,34 +2519,44 @@ NativeValue* JsWindow::OnSetShadow(NativeEngine& engine, NativeCallbackInfo& inf
     if (info.argc == 4) { // parse the 4th param: offsetY
         NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[3]); // 3: the 4th param
         if (nativeVal == nullptr) {
-            WLOGFE("[NAPI]SetShadow invalid offsetY");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
         }
         windowToken_->SetShadowOffsetY(static_cast<double>(*nativeVal));
     }
-    WLOGFI("[NAPI]Window [%{public}u, %{public}s] OnSetShadow end",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    
     return engine.CreateUndefined();
 }
 
 NativeValue* JsWindow::OnSetBlur(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (info.argc != 1 || windowToken_ == nullptr) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
+    if (info.argc != 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("[NAPI]WindowToken_ is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]SetBlur is not allowed since window is not system window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
         return engine.CreateUndefined();
     }
     NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
     if (nativeVal == nullptr || MathHelper::LessNotEqual(static_cast<double>(*nativeVal), 0.0)) {
         WLOGFE("[NAPI]SetBlur invalid radius");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     float radius = static_cast<double>(*nativeVal);
-    if (windowToken_->SetBlur(radius) != WMError::WM_OK) {
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBlur(radius));
+    if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Window SetBlur failed");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
     }
     WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetBlur end, radius = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
@@ -2415,22 +2565,33 @@ NativeValue* JsWindow::OnSetBlur(NativeEngine& engine, NativeCallbackInfo& info)
 
 NativeValue* JsWindow::OnSetBackdropBlur(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (info.argc != 1 || windowToken_ == nullptr) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
+    if (info.argc != 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("[NAPI]WindowToken_ is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]SetBackdropBlur is not allowed since window is not system window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
         return engine.CreateUndefined();
     }
     NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
     if (nativeVal == nullptr || MathHelper::LessNotEqual(static_cast<double>(*nativeVal), 0.0)) {
         WLOGFE("[NAPI]SetBackdropBlur invalid radius");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     float radius = static_cast<double>(*nativeVal);
-    if (windowToken_->SetBackdropBlur(radius) != WMError::WM_OK) {
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackdropBlur(radius));
+    if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Window SetBackdropBlur failed");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
     }
     WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetBackdropBlur end, radius = %{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
@@ -2439,12 +2600,19 @@ NativeValue* JsWindow::OnSetBackdropBlur(NativeEngine& engine, NativeCallbackInf
 
 NativeValue* JsWindow::OnSetBackdropBlurStyle(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    if (info.argc != 1 || windowToken_ == nullptr) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu or windowToken_ is nullptr", info.argc);
+    if (info.argc != 1) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    if (windowToken_ == nullptr) {
+        WLOGFE("[NAPI]WindowToken_ is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]SetBackdropBlurStyle is not allowed since window is not system window");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
         return engine.CreateUndefined();
     }
 
@@ -2452,11 +2620,15 @@ NativeValue* JsWindow::OnSetBackdropBlurStyle(NativeEngine& engine, NativeCallba
     if (nativeMode == nullptr ||
         static_cast<uint32_t>(*nativeMode) > static_cast<uint32_t>(WindowBlurStyle::WINDOW_BLUR_THICK)) {
         WLOGFE("[NAPI]SetBackdropBlurStyle Invalid window blur style");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     WindowBlurStyle style = static_cast<WindowBlurStyle>(static_cast<uint32_t>(*nativeMode));
-    if (windowToken_->SetBackdropBlurStyle(style) != WMError::WM_OK) {
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackdropBlurStyle(style));
+    if (ret != WmErrorCode::WM_OK) {
         WLOGFE("[NAPI]Window SetBackdropBlurStyle failed");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(ret)));
+        return engine.CreateUndefined();
     }
 
     WLOGFI("[NAPI]Window [%{public}u, %{public}s] SetBackdropBlurStyle end, style = %{public}u",
