@@ -100,6 +100,8 @@ private:
     bool ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
     bool ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
     bool ParseTranslateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
+    NativeValue* LoadContentScheduleOld(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* LoadContentScheduleNew(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnShow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnShowWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnShowWithAnimation(NativeEngine& engine, NativeCallbackInfo& info);

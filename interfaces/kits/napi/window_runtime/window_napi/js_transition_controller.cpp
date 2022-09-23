@@ -57,25 +57,26 @@ NativeValue* JsTransitionContext::CompleteTransition(NativeEngine* engine, Nativ
 
 NativeValue* JsTransitionContext::OnCompleteTransition(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFI("[NAPI]OnCompleteTransition");
-    WMError errCode = WMError::WM_OK;
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     if (info.argc < 1 || info.argc > 2) { // 2: maximum params
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     bool transitionCompleted = false;
-    if (errCode == WMError::WM_OK && !ConvertFromJsValue(engine, info.argv[0], transitionCompleted)) {
-        WLOGFE("[NAPI]Failed to convert parameter to transitionCompleted");
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(engine, info.argv[0], transitionCompleted)) {
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
     }
     AsyncTask::CompleteCallback complete =
-        [weakWindow = windowToken_, errCode, transitionCompleted, isShownTransContext = isShownTransContext_](
+        [weakWindow = windowToken_, transitionCompleted, isShownTransContext = isShownTransContext_](
             NativeEngine& engine, AsyncTask& task, int32_t status) {
             HandleScope handleScope(engine);
             auto window = weakWindow.promote();
-            if (window == nullptr || errCode != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode)));
-                WLOGFE("[NAPI]window is nullptr or get invalid param");
+            if (window == nullptr) {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
             }
             WMError ret = WMError::WM_OK;
@@ -90,7 +91,8 @@ NativeValue* JsTransitionContext::OnCompleteTransition(NativeEngine& engine, Nat
                 }
             }
             if (ret != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(ret), "Window destroy failed"));
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "Window destroy failed"));
                 return;
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] CompleteTransition %{public}d end",

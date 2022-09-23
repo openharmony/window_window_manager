@@ -265,20 +265,24 @@ NativeValue* OnRegisterDisplayManagerCallback(NativeEngine& engine, NativeCallba
     WLOGFI("JsDisplayManager::OnRegisterDisplayManagerCallback is called");
     if (info.argc != ARGC_TWO) {
         WLOGFE("JsDisplayManager Params not match: %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::string cbType;
     if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         WLOGFE("Failed to convert parameter to callbackType");
         return engine.CreateUndefined();
     }
     NativeValue* value = info.argv[INDEX_ONE];
     if (value == nullptr) {
         WLOGFI("JsDisplayManager::OnRegisterDisplayManagerCallback info->argv[1] is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     if (!value->IsCallable()) {
         WLOGFI("JsDisplayManager::OnRegisterDisplayManagerCallback info->argv[1] is not callable");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::lock_guard<std::mutex> lock(mtx_);
@@ -291,11 +295,13 @@ NativeValue* OnUnregisterDisplayManagerCallback(NativeEngine& engine, NativeCall
     WLOGFI("JsDisplayManager::OnUnregisterDisplayCallback is called");
     if (info.argc == 0) {
         WLOGFE("JsDisplayManager Params not match %{public}zu", info.argc);
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::string cbType;
     if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
         WLOGFE("Failed to convert parameter to callbackType");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::lock_guard<std::mutex> lock(mtx_);
@@ -305,10 +311,12 @@ NativeValue* OnUnregisterDisplayManagerCallback(NativeEngine& engine, NativeCall
         NativeValue* value = info.argv[INDEX_ONE];
         if (value == nullptr) {
             WLOGFI("JsDisplayManager::OnUnregisterDisplayManagerCallback info->argv[1] is nullptr");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
         }
         if (!value->IsCallable()) {
             WLOGFI("JsDisplayManager::OnUnregisterDisplayManagerCallback info->argv[1] is not callable");
+            engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
             return engine.CreateUndefined();
         }
         UnRegisterDisplayListenerWithType(cbType, value);
