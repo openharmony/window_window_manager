@@ -483,15 +483,17 @@ NativeValue* JsWindow::OnShowWindow(NativeEngine& engine, NativeCallbackInfo& in
         [weakToken, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
                 return;
             }
             WMError ret = weakWindow->Show(0, false);
             if (ret == WMError::WM_OK) {
                 task.Resolve(engine, engine.CreateUndefined());
-            } else {                
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "Window show failed"));
+            } else {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "Window show failed"));
             }
             WLOGFI("[NAPI]Window [%{public}u, %{public}s] show end, ret = %{public}d",
                 weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
