@@ -168,7 +168,8 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
         }
     }
     for (const auto& windowNode: windowNodes) {
-        if (INPUT_WINDOW_TYPE_SKIPPED.find(windowNode->GetWindowType()) != INPUT_WINDOW_TYPE_SKIPPED.end()) {
+        if (INPUT_WINDOW_TYPE_SKIPPED.find(windowNode->GetWindowType()) != INPUT_WINDOW_TYPE_SKIPPED.end() ||
+            windowNode->GetWindowToken() == nullptr) {
             WLOGFI("skip node[id:%{public}u, type:%{public}d]", windowNode->GetWindowId(), windowNode->GetWindowType());
             continue;
         }
