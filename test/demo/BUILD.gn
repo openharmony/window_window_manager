@@ -17,6 +17,7 @@ group("demo") {
   testonly = true
 
   deps = [
+    ":demo_freeze_display",
     ":demo_mirror_screen_listener",
     ":demo_screenshot_listener",
     ":demo_snapshot_virtual_screen",
@@ -97,6 +98,21 @@ ohos_executable("demo_system_sub_window") {
 
   external_deps = [ "c_utils:utils" ]
 
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_executable("demo_freeze_display") {
+  sources = [ "demo_freeze_display.cpp" ]
+
+  include_dirs = [
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
+
+    # pixel_map.h
+    "//foundation/multimedia/image_framework/interfaces/innerkits/include",
+  ]
+  deps = [ "//foundation/window/window_manager/dm:libdm" ]
+  external_deps = [ "multimedia_image_standard:image_native" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
