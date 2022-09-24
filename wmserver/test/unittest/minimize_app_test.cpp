@@ -150,6 +150,24 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest04, Function | SmallTest | Level2)
 
     MinimizeApp::ClearNodesWithReason(MinimizeReason::LAYOUT_TILE);
 }
+/**
+ * @tc.name: MinimizeAppTest05
+ * @tc.desc: insert nullptr to needMinimizeAppNodes_
+ * @tc.type: FUNC
+ */
+HWTEST_F(MinimizeAppTest, MinimizeAppTest05, Function | SmallTest | Level2)
+{
+    MinimizeApp::needMinimizeAppNodes_[MinimizeReason::MINIMIZE_ALL].emplace_back(nullptr);
+    auto getNodes = MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MINIMIZE_ALL);
+    ASSERT_EQ(nullptr, getNodes[0].promote());
+
+    sptr<WindowNode> node1 = new WindowNode();
+    MinimizeApp::AddNeedMinimizeApp(node1, MinimizeReason::MINIMIZE_ALL);
+    auto getNodes2 = MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MINIMIZE_ALL);
+    ASSERT_EQ(node1, getNodes2[1]);
+
+    MinimizeApp::ClearNodesWithReason(MinimizeReason::MINIMIZE_ALL);
+}
 }
 }
 }
