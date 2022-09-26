@@ -28,10 +28,10 @@ namespace Rosen {
 std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId);
 NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& Display);
 NativeValue* CreateJsCutoutInfoObject(NativeEngine& engine, sptr<CutoutInfo> cutoutInfo);
-NativeValue* CreateJsRectObject(NativeEngine& engine, Rect rect);
+NativeValue* CreateJsRectObject(NativeEngine& engine, DMRect rect);
 NativeValue* CreateJsWaterfallDisplayAreaRectsObject(NativeEngine& engine,
     WaterfallDisplayAreaRects waterfallDisplayAreaRects);
-NativeValue* CreateJsBoundingRectsArrayObject(NativeEngine& engine, std::vector<Rect> boundingRects);
+NativeValue* CreateJsBoundingRectsArrayObject(NativeEngine& engine, std::vector<DMRect> boundingRects);
 class JsDisplay final {
 public:
     explicit JsDisplay(const sptr<Display>& Display);
