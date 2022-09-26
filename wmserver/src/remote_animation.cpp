@@ -20,6 +20,8 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
 #include "minimize_app.h"
+#include "parameters.h"
+#include "surface_draw.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
@@ -34,12 +36,25 @@ bool RemoteAnimation::isRemoteAnimationEnable_ = true;
 sptr<RSIWindowAnimationController> RemoteAnimation::windowAnimationController_ = nullptr;
 std::weak_ptr<AppExecFwk::EventHandler> RemoteAnimation::wmsTaskHandler_;
 wptr<WindowRoot> RemoteAnimation::windowRoot_;
+bool RemoteAnimation::animationFirst_ = false;
+wptr<WindowController> RemoteAnimation::windowController_ = nullptr;
 
 std::map<TransitionReason, TransitionEvent> eventMap_ = {
     {TransitionReason::CLOSE, TransitionEvent::CLOSE},
     {TransitionReason::MINIMIZE, TransitionEvent::MINIMIZE},
     {TransitionReason::BACK, TransitionEvent::BACK}
 };
+
+void RemoteAnimation::SetAnimationFirst(bool animationFirst)
+{
+    animationFirst_ = animationFirst;
+    WLOGFI("RSWindowAnimation:animationFirst: %{public}u!", static_cast<uint32_t>(animationFirst_));
+}
+
+bool RemoteAnimation::IsRemoteAnimationEnabledAndFirst(DisplayId displayId)
+{
+    return animationFirst_ && CheckRemoteAnimationEnabled(displayId);
+}
 
 WMError RemoteAnimation::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller,
     const sptr<WindowRoot>& windowRoot)
@@ -66,6 +81,11 @@ WMError RemoteAnimation::SetWindowAnimationController(const sptr<RSIWindowAnimat
 void RemoteAnimation::SetMainTaskHandler(std::shared_ptr<AppExecFwk::EventHandler> handler)
 {
     wmsTaskHandler_ = handler;
+}
+
+void RemoteAnimation::SetWindowController(const sptr<WindowController>& windowController)
+{
+    windowController_ = windowController;
 }
 
 bool RemoteAnimation::CheckAnimationController()
@@ -118,6 +138,9 @@ void RemoteAnimation::OnRemoteDie(const sptr<IRemoteObject>& remoteObject)
     if (windowAnimationController_ != nullptr && windowAnimationController_->AsObject() == remoteObject) {
         windowAnimationController_ = nullptr;
     }
+    if (animationFirst_) {
+        CallbackTimeOutProcess();
+    }
 }
 
 TransitionEvent RemoteAnimation::GetTransitionEvent(sptr<WindowTransitionInfo> srcInfo,
@@ -125,9 +148,10 @@ TransitionEvent RemoteAnimation::GetTransitionEvent(sptr<WindowTransitionInfo> s
 {
     auto transitionReason = srcInfo->GetTransitionReason(); // src reason same as dst reason
     if (srcNode != nullptr && eventMap_.find(transitionReason) != eventMap_.end()) {
-        if (srcNode->IsWindowNodeHiddenOrHiding()) {
-            WLOGFE("window id:%{public}u is already hiding or hidden with state:%{public}u",
-                srcNode->GetWindowId(), static_cast<uint32_t>(srcNode->state_));
+        WLOGFI("current window:%{public}u state: %{public}u", srcNode->GetWindowId(),
+            static_cast<uint32_t>(srcNode->stateMachine_.GetCurrentState()));
+        if (srcNode->stateMachine_.IsWindowNodeHiddenOrHiding()) {
+            WLOGFE("srcNode is hiding or hidden id: %{public}u!", srcNode->GetWindowId());
             return TransitionEvent::UNKNOWN;
         }
         return eventMap_[transitionReason];
@@ -139,10 +163,12 @@ TransitionEvent RemoteAnimation::GetTransitionEvent(sptr<WindowTransitionInfo> s
         }
         return TransitionEvent::UNKNOWN;
     } else {
+        WLOGFI("current window:%{public}u state: %{public}u", dstNode->GetWindowId(),
+            static_cast<uint32_t>(dstNode->stateMachine_.GetCurrentState()));
         if (WindowHelper::IsMainWindow(dstInfo->GetWindowType())) {
-            if (dstNode->IsWindowNodeShownOrShowing()) {
-                WLOGFE("window id:%{public}u is already shown or showing with state:%{public}u",
-                    dstNode->GetWindowId(), static_cast<uint32_t>(dstNode->state_));
+            if (dstNode->stateMachine_.IsWindowNodeShownOrShowing()) {
+                WLOGFE("dstNode is showing or shown id: %{public}d state:%{public}u!",
+                    dstNode->GetWindowId(), static_cast<uint32_t>(dstNode->stateMachine_.GetCurrentState()));
                 return TransitionEvent::UNKNOWN;
             }
             return TransitionEvent::APP_TRANSITION;
@@ -167,16 +193,12 @@ static sptr<RSWindowAnimationFinishedCallback> GetTransitionFinishedCallback(con
         }
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
             "wms:async:ShowRemoteAnimation");
-        if (!weakNode->IsWindowNodeShownOrShowing()) {
-            WLOGFI("node:%{public}u is not play show animation with state:%{public}d!",
-                weakNode->GetWindowId(), static_cast<uint32_t>(weakNode->state_));
+        if (!weakNode->stateMachine_.IsWindowNodeShownOrShowing()) {
+            WLOGFI("node:%{public}u is not play show animation with state:%{public}u!", weakNode->GetWindowId(),
+                static_cast<uint32_t>(weakNode->stateMachine_.GetCurrentState()));
             return;
         }
-        auto weakSrcNode = weakSrc.promote();
-        if (weakSrcNode) {
-            weakSrcNode->state_ = WindowNodeState::HIDE_ANIMATION_DONE;
-        }
-        MinimizeApp::ExecuteMinimizeAll();
+        MinimizeApp::ExecuteMinimizeAll(); // minimize execute in show animation
         RSAnimationTimingProtocol timingProtocol(200); // animation time
         RSNode::Animate(timingProtocol, RSAnimationTimingCurve::EASE_OUT, [weakNode]() {
             auto winRect = weakNode->GetWindowRect();
@@ -189,7 +211,7 @@ static sptr<RSWindowAnimationFinishedCallback> GetTransitionFinishedCallback(con
             weakNode->leashWinSurfaceNode_->SetBounds(
                 winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
             RSTransaction::FlushImplicitTransaction();
-            weakNode->state_ = WindowNodeState::SHOW_ANIMATION_DONE;
+            weakNode->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_DONE);
         });
     };
     sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
@@ -201,6 +223,10 @@ WMError RemoteAnimation::NotifyAnimationStartApp(sptr<WindowTransitionInfo> srcI
     const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode,
     sptr<RSWindowAnimationTarget>& dstTarget, sptr<RSWindowAnimationFinishedCallback>& finishedCallback)
 {
+    if (animationFirst_) {
+        // From Recent also need to minimize window
+        MinimizeApp::ExecuteMinimizeAll();
+    }
     // start app from launcher
     if (srcNode != nullptr && srcNode->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
         WLOGFI("RSWindowAnimation: start app id:%{public}u from launcher!", dstNode->GetWindowId());
@@ -219,28 +245,8 @@ WMError RemoteAnimation::NotifyAnimationStartApp(sptr<WindowTransitionInfo> srcI
     return WMError::WM_OK;
 }
 
-WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> srcInfo,
-    sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode,
-    const sptr<WindowNode>& dstNode)
+void RemoteAnimation::GetExpectRect(const sptr<WindowNode>& dstNode, const sptr<RSWindowAnimationTarget>& dstTarget)
 {
-    if (!dstNode || !dstNode->startingWindowShown_) {
-        WLOGFE("RSWindowAnimation: no startingWindow for dst window id:%{public}u!", dstNode->GetWindowId());
-        return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
-    }
-    WLOGFI("RSWindowAnimation: notify animation transition with dst currId:%{public}u!", dstNode->GetWindowId());
-    auto finishedCallback = GetTransitionFinishedCallback(srcNode, dstNode);
-    if (finishedCallback == nullptr) {
-        WLOGFE("New RSIWindowAnimationFinishedCallback failed");
-        return WMError::WM_ERROR_NO_MEM;
-    }
-
-    auto dstTarget = CreateWindowAnimationTarget(dstInfo, dstNode);
-    if (dstTarget == nullptr) {
-        WLOGFE("RSWindowAnimation: Failed to create dst target!");
-        finishedCallback->OnAnimationFinished();
-        return WMError::WM_ERROR_NO_MEM;
-    }
-    dstNode->state_ = WindowNodeState::SHOW_ANIMATION_PLAYING;
     // when exit immersive, startingWindow (0,0,w,h), but app need avoid
     bool needAvoid = (dstNode->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     auto winRoot = windowRoot_.promote();
@@ -254,22 +260,55 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
             auto boundsRect = RectF(avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_);
             dstTarget->windowBounds_ = RRect(boundsRect, stagingProperties.GetCornerRadius());
             if (dstNode->leashWinSurfaceNode_) {
-                dstNode->leashWinSurfaceNode_->SetBounds(
-                    avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_);
+                dstNode->leashWinSurfaceNode_->SetBounds(avoidRect.posX_, avoidRect.posY_,
+                    avoidRect.width_, avoidRect.height_);
             }
         }
     }
+}
 
+WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> srcInfo,
+    sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode,
+    const sptr<WindowNode>& dstNode)
+{
+    if (!dstNode) {
+        WLOGFI("id:%{public}u startingWindowShown_:%{public}d", dstNode->GetWindowId(), dstNode->startingWindowShown_);
+        return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
+    }
+    WLOGFI("RSWindowAnimation: notify animation transition with dst currId:%{public}u!", dstNode->GetWindowId());
+    auto finishedCallback = CreateShowAnimationFinishedCallback(srcNode, dstNode);
+    if (finishedCallback == nullptr) {
+        WLOGFE("New RSIWindowAnimationFinishedCallback failed");
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    auto dstTarget = CreateWindowAnimationTarget(dstInfo, dstNode);
+    if (dstTarget == nullptr) {
+        WLOGFE("RSWindowAnimation: Failed to create dst target!");
+        finishedCallback->OnAnimationFinished();
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    // when exit immersive, startingWindow (0,0,w,h), but app need avoid
+    GetExpectRect(dstNode, dstTarget);
     dstNode->isPlayAnimationShow_ = true;
-    bool needMinimizeSrcNode = MinimizeApp::IsNodeNeedMinimize(srcNode);
+    // Transition to next state and update task count will success when enable animationFirst_
+    dstNode->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_PLAYING);
+    dstNode->stateMachine_.UpdateAnimationTaskCount(true);
+    bool needMinimizeSrcNode = MinimizeApp::IsNodeNeedMinimizeWithReason(srcNode, MinimizeReason::OTHER_WINDOW);
     // from app to app
     if (needMinimizeSrcNode && srcNode != nullptr) {
         auto srcTarget = CreateWindowAnimationTarget(srcInfo, srcNode);
         // to avoid normal animation
         srcNode->isPlayAnimationHide_ = true;
-        srcNode->state_ = WindowNodeState::HIDE_ANIMATION_PLAYING;
-        if (winRoot) {
-            winRoot->RemoveWindowNode(srcNode->GetWindowId());
+        srcNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_PLAYING);
+        srcNode->stateMachine_.UpdateAnimationTaskCount(true);
+        auto winController = windowController_.promote();
+        if (winController) {
+            winController->RemoveWindowNode(srcNode->GetWindowId(), true);
+        }
+        if (animationFirst_) {
+            // Notify minimize before animation when animationFirst is enable.
+            // Or notify minimize in animation finished callback.
+            MinimizeApp::ExecuteMinimizeAll();
         }
         WLOGFI("RSWindowAnimation: app transition from id:%{public}u to id:%{public}u!",
             srcNode->GetWindowId(), dstNode->GetWindowId());
@@ -287,29 +326,20 @@ WMError RemoteAnimation::NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcI
     }
     WLOGFI("RSWindowAnimation: notify animation minimize Id:%{public}u!", srcNode->GetWindowId());
     srcNode->isPlayAnimationHide_ = true;
-    srcNode->state_ = WindowNodeState::HIDE_ANIMATION_PLAYING;
-    auto winRoot = windowRoot_.promote();
-    if (winRoot != nullptr) {
-        winRoot->RemoveWindowNode(srcNode->GetWindowId());
+    srcNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_PLAYING);
+    auto winController = windowController_.promote();
+    if (winController) {
+        winController->RemoveWindowNode(srcNode->GetWindowId(), true);
     }
-    wptr<WindowNode> weak = srcNode;
-    auto minimizeFunc = [weak]() {
-        auto weakNode = weak.promote();
-        if (weakNode == nullptr || !weakNode->IsWindowNodeHiddenOrHiding()) {
-            WLOGFE("windowNode is nullptr or is not play hide animation!");
-            return;
-        }
-        FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
-            "wms:async:ShowRemoteAnimation");
-        weakNode->state_ = WindowNodeState::HIDE_ANIMATION_DONE;
-        WindowInnerManager::GetInstance().MinimizeAbility(weak, true);
-    };
-    sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
-        minimizeFunc);
+    sptr<RSWindowAnimationFinishedCallback> finishedCallback = CreateHideAnimationFinishedCallback(
+        srcNode, TransitionEvent::MINIMIZE);
     if (finishedCallback == nullptr) {
         WLOGFE("New RSIWindowAnimationFinishedCallback failed");
         return WMError::WM_ERROR_NO_MEM;
     }
+
+    srcNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_PLAYING);
+    srcNode->stateMachine_.UpdateAnimationTaskCount(true);
     windowAnimationController_->OnMinimizeWindow(srcTarget, finishedCallback);
     return WMError::WM_OK;
 }
@@ -323,53 +353,24 @@ WMError RemoteAnimation::NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo
     }
     WLOGFI("RSWindowAnimation: notify animation close id:%{public}u!", srcNode->GetWindowId());
     srcNode->isPlayAnimationHide_ = true;
-    srcNode->state_ = WindowNodeState::HIDE_ANIMATION_PLAYING;
-    auto winRoot = windowRoot_.promote();
-    if (winRoot != nullptr) {
-        winRoot->RemoveWindowNode(srcNode->GetWindowId());
+    auto winController = windowController_.promote();
+    if (winController) {
+        winController->RemoveWindowNode(srcNode->GetWindowId(), true);
     }
-    wptr<WindowNode> weak = srcNode;
-    auto closeFunc = [weak, event]() {
-        auto weakNode = weak.promote();
-        if (weakNode == nullptr || !weakNode->IsWindowNodeHiddenOrHiding()) {
-            WLOGFE("windowNode is nullptr or is not play hide animation!");
-            return;
-        }
-        if (weakNode != nullptr && weakNode->abilityToken_ != nullptr) {
-            if (event == TransitionEvent::CLOSE) {
-                WLOGFI("close windowId: %{public}u, name:%{public}s",
-                    weakNode->GetWindowId(), weakNode->GetWindowName().c_str());
-                weakNode->state_ = WindowNodeState::HIDE_ANIMATION_DONE;
-                AAFwk::AbilityManagerClient::GetInstance()->CloseAbility(weakNode->abilityToken_);
-            } else if (event == TransitionEvent::BACK) {
-                WLOGFI("terminate windowId: %{public}u, name:%{public}s",
-                    weakNode->GetWindowId(), weakNode->GetWindowName().c_str());
-                weakNode->state_ = WindowNodeState::HIDE_ANIMATION_DONE;
-                AAFwk::Want resultWant;
-                AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(weakNode->abilityToken_, -1, &resultWant);
-            }
-            FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
-                "wms:async:ShowRemoteAnimation");
-        }
-    };
-    sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
-        closeFunc);
+    sptr<RSWindowAnimationFinishedCallback> finishedCallback = CreateHideAnimationFinishedCallback(srcNode, event);
     if (finishedCallback == nullptr) {
         WLOGFE("New RSIWindowAnimationFinishedCallback failed");
         return WMError::WM_ERROR_NO_MEM;
     }
+    srcNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_PLAYING);
+    srcNode->stateMachine_.UpdateAnimationTaskCount(true);
     windowAnimationController_->OnCloseWindow(srcTarget, finishedCallback);
     return WMError::WM_OK;
 }
 
-WMError RemoteAnimation::NotifyAnimationByHome()
+void RemoteAnimation::GetAnimationTargetsForHome(std::vector<sptr<RSWindowAnimationTarget>>& animationTargets,
+    std::vector<wptr<WindowNode>> needMinimizeAppNodes)
 {
-    if (!CheckAnimationController()) {
-        return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
-    }
-    WLOGFI("RSWindowAnimation: notify animation by home");
-    auto needMinimizeAppNodes = MinimizeApp::GetNeedMinimizeAppNodes();
-    std::vector<sptr<RSWindowAnimationTarget>> animationTargets;
     for (auto& weakNode : needMinimizeAppNodes) {
         auto srcNode = weakNode.promote();
         sptr<WindowTransitionInfo> srcInfo = new(std::nothrow) WindowTransitionInfo();
@@ -377,33 +378,70 @@ WMError RemoteAnimation::NotifyAnimationByHome()
         if (srcTarget == nullptr) {
             continue;
         }
-        if (srcNode->IsWindowNodeHiddenOrHiding()) {
-            WLOGFE("window id:%{public}u is already hiding or hidden with state:%{public}u",
-                srcNode->GetWindowId(), static_cast<uint32_t>(srcNode->state_));
+        WLOGFI("notify animation by home, need minimize id%{public}u", srcNode->GetWindowId());
+        if (!WindowHelper::IsMainWindow(srcNode->GetWindowType()) ||
+            srcNode->stateMachine_.IsWindowNodeHiddenOrHiding()) {
+            WLOGFE("srcNode is already hiding or hidden id: %{public}d!", srcNode->GetWindowId());
             continue;
         }
         srcNode->isPlayAnimationHide_ = true;
-        srcNode->state_ = WindowNodeState::HIDE_ANIMATION_PLAYING;
-        auto winRoot = windowRoot_.promote();
-        if (winRoot != nullptr) {
-            winRoot->RemoveWindowNode(srcNode->GetWindowId());
+        srcNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_PLAYING);
+        srcNode->stateMachine_.UpdateAnimationTaskCount(true);
+        auto winController = windowController_.promote();
+        if (winController) {
+            winController->RemoveWindowNode(srcNode->GetWindowId(), true);
         }
         animationTargets.emplace_back(srcTarget);
     }
-    auto func = [needMinimizeAppNodes]() {
-        WLOGFI("NotifyAnimationByHome in animation callback");
+}
+
+static void GetAnimationHomeFinishCallback(std::function<void(void)>& func,
+    std::vector<wptr<WindowNode>> needMinimizeAppNodes)
+{
+    func = [needMinimizeAppNodes]() {
+        WLOGFI("NotifyAnimationByHome in animation callback not animationFirst");
         for (auto& weakNode : needMinimizeAppNodes) {
             auto srcNode = weakNode.promote();
-            if (srcNode == nullptr || !srcNode->IsWindowNodeHiddenOrHiding()) {
+            if (srcNode == nullptr || !srcNode->stateMachine_.IsWindowNodeHiddenOrHiding()) {
                 WLOGFE("windowNode is nullptr or is not play hide animation!");
                 continue;
             }
-            srcNode->state_ = WindowNodeState::HIDE_ANIMATION_DONE;
+            srcNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_DONE);
         }
         MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::MINIMIZE_ALL);
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
             "wms:async:ShowRemoteAnimation");
     };
+}
+
+WMError RemoteAnimation::NotifyAnimationByHome()
+{
+    if (!CheckAnimationController()) {
+        return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
+    }
+    auto needMinimizeAppNodes = MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MINIMIZE_ALL);
+    WLOGFI("RSWindowAnimation: notify animation by home, need minimize size: %{public}u",
+        static_cast<uint32_t>(needMinimizeAppNodes.size()));
+    std::vector<sptr<RSWindowAnimationTarget>> animationTargets;
+    GetAnimationTargetsForHome(animationTargets, needMinimizeAppNodes);
+    std::function<void(void)> func;
+    if (animationFirst_) {
+        MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::MINIMIZE_ALL);
+        FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+            "wms:async:ShowRemoteAnimation");
+        func = [needMinimizeAppNodes]() {
+            WLOGFI("NotifyAnimationByHome in animation callback in animationFirst with size:%{public}u",
+                static_cast<uint32_t>(needMinimizeAppNodes.size()));
+            for (auto& weakNode : needMinimizeAppNodes) {
+                auto srcNode = weakNode.promote();
+                ProcessNodeStateTask(srcNode);
+            }
+            FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+                "wms:async:ShowRemoteAnimation");
+        };
+    } else {
+        GetAnimationHomeFinishCallback(func, needMinimizeAppNodes);
+    }
     sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
         func);
     if (finishedCallback == nullptr) {
@@ -521,6 +559,267 @@ sptr<RSWindowAnimationTarget> RemoteAnimation::CreateWindowAnimationTarget(sptr<
     auto boundsRect = RectF(rect.posX_, rect.posY_, rect.width_, rect.height_);
     windowAnimationTarget->windowBounds_ = RRect(boundsRect, stagingProperties.GetCornerRadius());
     return windowAnimationTarget;
+}
+
+void RemoteAnimation::PostProcessShowCallback(const sptr<WindowNode>& node)
+{
+    wptr<WindowNode> weak = node;
+    auto handler = wmsTaskHandler_.lock();
+    if (handler != nullptr) {
+        auto task = [weak] {
+            auto weakNode = weak.promote();
+            if (weakNode == nullptr) {
+                WLOGFD("windowNode is nullptr!");
+                return;
+            }
+            auto winRect = weakNode->GetWindowRect();
+            if (weakNode->leashWinSurfaceNode_) {
+                WLOGFD("name:%{public}s id:%{public}u winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
+                    weakNode->GetWindowName().c_str(), weakNode->GetWindowId(),
+                    winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+                weakNode->leashWinSurfaceNode_->SetBounds(
+                    winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+                RSTransaction::FlushImplicitTransaction();
+            }
+        };
+        handler->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    }
+}
+
+void RemoteAnimation::PostFinalStateTask(const sptr<WindowNode>& node)
+{
+    StateTask task = nullptr;
+    StateTask destroyTask = nullptr;
+    wptr<WindowNode> weakNode = node;
+    if (node->stateMachine_.IsWindowNodeHiddenOrHiding()) {
+        // when no task, need remove from rs Tree
+        task = [weakRoot = windowRoot_, weakNode]() {
+            auto winRoot = weakRoot.promote();
+            auto winNode = weakNode.promote();
+            if (winRoot == nullptr || winNode == nullptr) {
+                WLOGFE("windowRoot or winNode is nullptr");
+                return;
+            }
+            WLOGFI("execute task removing from rs tree id:%{public}u!", winNode->GetWindowId());
+            winRoot->UpdateRsTree(winNode->GetWindowId(), false);
+        };
+    } else if (node->stateMachine_.IsWindowNodeShownOrShowing()) {
+        task = [weakRoot = windowRoot_, weakNode]() {
+            auto winRoot = weakRoot.promote();
+            auto winNode = weakNode.promote();
+            if (winRoot == nullptr || winNode == nullptr) {
+                WLOGFE("windowRoot or winNode is nullptr");
+                return;
+            }
+            WLOGFI("execute task layout after show animation id:%{public}u!", winNode->GetWindowId());
+            winRoot->LayoutWhenAddWindowNode(winNode, true);
+        };
+    } else {
+        WLOGFD("current State:%{public}u invalid", static_cast<uint32_t>(node->stateMachine_.GetCurrentState()));
+    }
+    auto handler = wmsTaskHandler_.lock();
+    if (handler != nullptr) {
+        if (task != nullptr) {
+            bool ret = handler->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+            if (!ret) {
+                WLOGFE("EventHandler PostTask Failed!");
+                task();
+            }
+        }
+        if (node->stateMachine_.GetDestroyTask(destroyTask)) {
+            bool ret = handler->PostTask(destroyTask, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+            if (!ret) {
+                WLOGFE("EventHandler PostTask Failed!");
+                destroyTask();
+            }
+        }
+    }
+}
+
+void RemoteAnimation::CallbackTimeOutProcess()
+{
+    auto winRoot = windowRoot_.promote();
+    if (winRoot == nullptr) {
+        WLOGFE("windowRoot is nullptr");
+        return;
+    }
+    std::vector<wptr<WindowNode>> animationPlayingNodes;
+    winRoot->GetAllAnimationPlayingNodes(animationPlayingNodes);
+    WLOGFI("CallbackTimeOutProcess playingNodes:%{public}u", static_cast<uint32_t>(animationPlayingNodes.size()));
+    for (auto& weakNode : animationPlayingNodes) {
+        auto node = weakNode.promote();
+        if (node == nullptr) {
+            continue;
+        }
+        WLOGFI("callback timeout process windowId:%{public}u", node->GetWindowId());
+        node->stateMachine_.ResetAnimationTaskCount(1);
+        ProcessNodeStateTask(node);
+    }
+}
+
+void RemoteAnimation::ProcessNodeStateTask(const sptr<WindowNode>& node)
+{
+    // when callback come, node maybe destroyed
+    if (node == nullptr) {
+        WLOGFI("node is nullptr!");
+        return;
+    }
+    node->stateMachine_.UpdateAnimationTaskCount(false);
+    int32_t taskCount = node->stateMachine_.GetAnimationCount();
+    WLOGFI("ProcessNodeStateTask windowId: %{public}u, name:%{public}s state: %{public}u, taskCount:%{public}d",
+        node->GetWindowId(), node->GetWindowName().c_str(),
+        static_cast<uint32_t>(node->stateMachine_.GetCurrentState()), taskCount);
+    if (taskCount > 0 || taskCount < 0) {
+        WLOGFI("not last state task of window: %{public}d, %{public}d callback left not be executed!",
+            node->GetWindowId(), taskCount);
+        return;
+    }
+    PostFinalStateTask(node);
+    if (node->stateMachine_.IsWindowNodeShownOrShowing()) {
+        // delete when immersive solution change
+        PostProcessShowCallback(node);
+        node->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_DONE);
+    } else if (node->stateMachine_.IsWindowNodeHiddenOrHiding()) {
+        node->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_DONE);
+    }
+}
+
+sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateShowAnimationFinishedCallback(
+    const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode)
+{
+    wptr<WindowNode> srcNodeWptr = srcNode;
+    wptr<WindowNode> dstNodeWptr = dstNode;
+    // need add timeout check
+    std::function<void(void)> func;
+    if (!animationFirst_) {
+        WLOGFI("RSWindowAnimation: not animationFirst use default callback!");
+        return GetTransitionFinishedCallback(srcNode, dstNode);
+    } else {
+        func = [srcNodeWptr, dstNodeWptr]() {
+            WLOGFI("RSWindowAnimation: animationFirst use state machine process ShowAnimationFinishedCallback!");
+            auto srcNodeSptr = srcNodeWptr.promote();
+            auto dstNodeSptr = dstNodeWptr.promote();
+            if (dstNodeSptr == nullptr) {
+                WLOGFE("dstNode is nullptr!");
+                return;
+            }
+            ProcessNodeStateTask(dstNodeSptr);
+            // launcher not do this
+            if (srcNodeSptr!= nullptr && WindowHelper::IsMainWindow(srcNodeSptr->GetWindowType()) &&
+                WindowHelper::IsFullScreenWindow(srcNodeSptr->GetWindowMode())) {
+                ProcessNodeStateTask(srcNodeSptr);
+            }
+            WLOGFI("current window:%{public}u state: %{public}u", dstNodeSptr->GetWindowId(),
+                static_cast<uint32_t>(dstNodeSptr->stateMachine_.GetCurrentState()));
+            FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+                "wms:async:ShowRemoteAnimation");
+        };
+    }
+    sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
+        func);
+    if (finishedCallback == nullptr) {
+        WLOGFE("New RSIWindowAnimationFinishedCallback failed");
+        return nullptr;
+    }
+    return finishedCallback;
+}
+
+static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
+{
+    if (srcNode == nullptr || srcNode->leashWinSurfaceNode_ == nullptr) {
+        WLOGFD("srcNode or srcNode->leashWinSurfaceNode_ is empty");
+        return;
+    }
+    if (srcNode->firstFrameAvaliable_) {
+        std::shared_ptr<Media::PixelMap> pixelMap;
+        // snapshot time out 2000ms
+        bool snapSucc = SurfaceDraw::GetSurfaceSnapshot(srcNode->surfaceNode_, pixelMap, 2000, 1.0, 1.0);
+        if (!snapSucc) {
+            // need to draw starting window when get pixelmap failed
+            WLOGFE("get surfaceSnapshot failed for window:%{public}u", srcNode->GetWindowId());
+            return;
+        }
+        SurfaceDraw::DrawImageRect(srcNode->startingWinSurfaceNode_, srcNode->GetWindowRect(),
+            pixelMap, 0xffffffff, true);
+        srcNode->leashWinSurfaceNode_->RemoveChild(srcNode->surfaceNode_);
+        srcNode->leashWinSurfaceNode_->AddChild(srcNode->startingWinSurfaceNode_, -1);
+        RSTransaction::FlushImplicitTransaction();
+        WLOGFI("Draw surface snapshot in starting window for window:%{public}u", srcNode->GetWindowId());
+    } else if (srcNode->surfaceNode_) {
+        srcNode->surfaceNode_->SetIsNotifyUIBufferAvailable(true);
+        WLOGFI("Draw startingWindow in starting window for window:%{public}u", srcNode->GetWindowId());
+    }
+}
+
+static void ProcessAbility(const sptr<WindowNode>& srcNode, TransitionEvent event)
+{
+    switch (event) {
+        case TransitionEvent::CLOSE: {
+            WLOGFI("close windowId: %{public}u, name:%{public}s",
+                srcNode->GetWindowId(), srcNode->GetWindowName().c_str());
+            WindowInnerManager::GetInstance().CloseAbility(srcNode);
+            break;
+        }
+        case TransitionEvent::BACK: {
+            WLOGFI("terminate windowId: %{public}u, name:%{public}s",
+                srcNode->GetWindowId(), srcNode->GetWindowName().c_str());
+            WindowInnerManager::GetInstance().TerminateAbility(srcNode);
+            break;
+        }
+        case TransitionEvent::MINIMIZE: {
+            WLOGFI("minimize windowId: %{public}u, name:%{public}s",
+                srcNode->GetWindowId(), srcNode->GetWindowName().c_str());
+            WindowInnerManager::GetInstance().MinimizeAbility(srcNode, true);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateHideAnimationFinishedCallback(
+    const sptr<WindowNode>& srcNode, TransitionEvent event)
+{
+    wptr<WindowNode> srcNodeWptr = srcNode;
+    // need add timeout check
+    std::function<void(void)> func;
+    if (!animationFirst_) {
+        func = [srcNodeWptr, event]() {
+            WLOGFI("RSWindowAnimation: not animationFirst use default callback!");
+            auto weakNode = srcNodeWptr.promote();
+            if (weakNode == nullptr || weakNode->abilityToken_ == nullptr) {
+                WLOGFE("window node or ability token is nullptr");
+                return;
+            }
+            if (!weakNode->stateMachine_.IsWindowNodeHiddenOrHiding()) {
+                WLOGFE("window is not playing hide animation");
+                return;
+            }
+            ProcessAbility(weakNode, event);
+            weakNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_DONE);
+            FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+                "wms:async:ShowRemoteAnimation");
+        };
+    } else {
+        if (event != TransitionEvent::MINIMIZE) {
+            GetAndDrawSnapShot(srcNode);
+        }
+        ProcessAbility(srcNode, event); // execute first when animationFirst
+        func = [srcNodeWptr]() {
+            WLOGFI("RSWindowAnimation: animationFirst use state machine process HideAnimationFinishedCallback!");
+            auto srcNodeSptr = srcNodeWptr.promote();
+            ProcessNodeStateTask(srcNodeSptr);
+            FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+                "wms:async:ShowRemoteAnimation");
+        };
+    }
+    sptr<RSWindowAnimationFinishedCallback> callback = new(std::nothrow) RSWindowAnimationFinishedCallback(
+        func);
+    if (callback == nullptr) {
+        WLOGFE("New RSIWindowAnimationFinishedCallback failed");
+        return nullptr;
+    }
+    return callback;
 }
 } // Rosen
 } // OHOS
