@@ -36,6 +36,7 @@ private:
         { WindowType::WINDOW_TYPE_MEDIA,                 -1 },
         { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,         1 },
         { WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW,      1 },
+        { WindowType::WINDOW_TYPE_APP_COMPONENT,          1 },
 
         // main window
         { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,        0 },
@@ -43,7 +44,6 @@ private:
         // system-specific window
         { WindowType::WINDOW_TYPE_WALLPAPER,            0 },
         { WindowType::WINDOW_TYPE_DESKTOP,              1 },
-        { WindowType::WINDOW_TYPE_APP_COMPONENT,        2 },
         { WindowType::WINDOW_TYPE_DIALOG,               1 },
         { WindowType::WINDOW_TYPE_APP_LAUNCHING,        101 },
         { WindowType::WINDOW_TYPE_DOCK_SLICE,           0 },

@@ -37,8 +37,8 @@ WindowExtensionStubImpl::~WindowExtensionStubImpl()
     }
 }
 
-sptr<Window> WindowExtensionStubImpl::CreateWindow(const Rect& rect,
-                                                   const std::shared_ptr<AbilityRuntime::Context>& context)
+sptr<Window> WindowExtensionStubImpl::CreateWindow(
+    const Rect& rect, uint32_t parentWindowId, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
     sptr<WindowOption> option = new(std::nothrow) WindowOption();
     if (option == nullptr) {
@@ -48,6 +48,7 @@ sptr<Window> WindowExtensionStubImpl::CreateWindow(const Rect& rect,
 
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
     option->SetWindowRect(rect);
+    option->SetParentId(parentWindowId);
     WLOGFI("Window::Create");
     window_ = Window::Create(windowName_, option, context);
     return window_;
