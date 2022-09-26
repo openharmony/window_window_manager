@@ -82,6 +82,7 @@ private:
     Rotation rotation_ { Rotation::ROTATION_0 };
     Orientation orientation_ { Orientation::UNSPECIFIED };
     FreezeFlag freezeFlag_ { FreezeFlag::UNFREEZING };
+    DEFINE_VAR_DEFAULT_FUNC_SET(DisplayState, DisplayState, displayState, DisplayState::UNKNOWN);
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_DISPLAY_H
