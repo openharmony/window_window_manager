@@ -907,7 +907,7 @@ bool WindowImpl::WindowCreateCheck(uint32_t parentId)
     if (CheckCameraFloatingWindowMultiCreated(property_->GetWindowType())) {
         WLOGFE("Camera Floating Window already exists.");
         return false;
-    }    
+    }
     if (parentId == INVALID_WINDOW_ID) {
         return true;
     }
