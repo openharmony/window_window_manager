@@ -57,9 +57,9 @@ void WindowOption::SetDisplayId(DisplayId displayId)
     displayId_ = displayId;
 }
 
-void WindowOption::SetParentName(const std::string& parentName)
+void WindowOption::SetParentId(uint32_t parentId)
 {
-    parentName_ = parentName;
+    parentId_ = parentId;
 }
 
 void WindowOption::SetWindowName(const std::string& windowName)
@@ -119,9 +119,9 @@ DisplayId WindowOption::GetDisplayId() const
     return displayId_;
 }
 
-const std::string& WindowOption::GetParentName() const
+uint32_t WindowOption::GetParentId() const
 {
-    return parentName_;
+    return parentId_;
 }
 
 const std::string& WindowOption::GetWindowName() const

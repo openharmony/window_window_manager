@@ -35,7 +35,7 @@ public:
     void SetFocusable(bool isFocusable);
     void SetTouchable(bool isTouchable);
     void SetDisplayId(DisplayId displayId);
-    void SetParentName(const std::string& parentName);
+    void SetParentId(uint32_t parentId);
     void SetWindowName(const std::string& windowName);
     void AddWindowFlag(WindowFlag flag);
     void RemoveWindowFlag(WindowFlag flag);
@@ -58,7 +58,7 @@ public:
     bool GetFocusable() const;
     bool GetTouchable() const;
     DisplayId GetDisplayId() const;
-    const std::string& GetParentName() const;
+    uint32_t GetParentId() const;
     const std::string& GetWindowName() const;
     uint32_t GetWindowFlags() const;
     const std::unordered_map<WindowType, SystemBarProperty>& GetSystemBarProperty() const;
@@ -76,7 +76,7 @@ private:
     bool focusable_ { true };
     bool touchable_ { true };
     DisplayId displayId_ { 0 };
-    std::string parentName_ { "" };
+    uint32_t parentId_ = INVALID_WINDOW_ID;
     std::string windowName_ { "" };
     uint32_t flags_ { 0 };
     PointInfo hitOffset_ { 0, 0 };

@@ -17,6 +17,7 @@
 #include <ability_context.h>
 #include "window_helper.h"
 #include "wm_common_inner.h"
+#include "wm_common.h"
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -51,8 +52,8 @@ sptr<Window> WindowTestUtils::CreateTestWindow(const TestWindowInfo& info)
     option->SetWindowMode(info.mode);
     option->SetFocusable(info.focusable_);
     option->SetRequestedOrientation(info.orientation_);
-    if (info.parentName != "") {
-        option->SetParentName(info.parentName);
+    if (info.parentId != INVALID_WINDOW_ID) {
+        option->SetParentId(info.parentId);
     }
     if (info.needAvoid) {
         option->AddWindowFlag(WindowFlag::WINDOW_FLAG_NEED_AVOID);
@@ -87,7 +88,7 @@ sptr<Window> WindowTestUtils::CreateDockWindow()
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     return CreateTestWindow(info);
 }
@@ -101,7 +102,7 @@ sptr<Window> WindowTestUtils::CreateStatusBarWindow()
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     return CreateTestWindow(info);
 }
@@ -115,7 +116,7 @@ sptr<Window> WindowTestUtils::CreateNavigationBarWindow()
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     return CreateTestWindow(info);
 }

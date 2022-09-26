@@ -91,7 +91,7 @@ void WindowMoveDragTest::SetUp()
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window_ = new WindowImpl(option);
-    window_->Create("");
+    window_->Create(INVALID_WINDOW_ID);
     usleep(WAIT_SYANC_MS);
     ASSERT_TRUE((window_ != nullptr));
 }

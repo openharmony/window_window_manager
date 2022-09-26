@@ -19,6 +19,7 @@
 #include "ability_context.h"
 #include "display_manager.h"
 #include "dm_common.h"
+#include "wm_common.h"
 #include "js_window.h"
 #include "js_window_utils.h"
 #include "window_helper.h"
@@ -113,7 +114,7 @@ static void GetNativeContext(NativeEngine& engine, NativeValue* nativeContext, v
     }
 }
 
-static bool GetWindowTypeAndParentName(NativeEngine& engine, std::string& parentName, WindowType& winType,
+static bool GetWindowTypeAndParentId(NativeEngine& engine, uint32_t& parentId, WindowType& winType,
     NativeValue* nativeString, NativeValue* nativeType)
 {
     NativeNumber* type = ConvertNativeValueTo<NativeNumber>(nativeType);
@@ -145,7 +146,7 @@ static bool GetWindowTypeAndParentName(NativeEngine& engine, std::string& parent
             WLOGE("[NAPI]Get mainWindow failed");
             return false;
         }
-        parentName = window->GetWindowName();
+        parentId = window->GetWindowId();
     } else {
         if (!WindowHelper::IsSystemWindow(winType)) {
             WLOGFE("[NAPI]Only SystemWindow support create in stage mode, type is %{public}u", winType);
@@ -195,10 +196,10 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
     }
 }
 
-static void CreateSubWindowTask(std::string parentWinName, std::string windowName, WindowType winType,
+static void CreateSubWindowTask(uint32_t parentWinId, std::string windowName, WindowType winType,
     NativeEngine& engine, AsyncTask& task)
 {
-    WLOGFI("[NAPI]CreateSubWindowTask, parent name = %{public}s", parentWinName.c_str());
+    WLOGFI("[NAPI]CreateSubWindowTask, parent id = %{public}u", parentWinId);
     sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
     if (windowOption == nullptr) {
         task.Reject(engine, CreateJsError(engine,
@@ -208,7 +209,7 @@ static void CreateSubWindowTask(std::string parentWinName, std::string windowNam
     }
     windowOption->SetWindowType(winType);
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-    windowOption->SetParentName(parentWinName);
+    windowOption->SetParentId(parentWinId);
     sptr<Window> window = Window::Create(windowName, windowOption);
     if (window != nullptr) {
         task.Resolve(engine, CreateJsWindowObject(engine, window));
@@ -246,10 +247,10 @@ NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbac
         WLOGFE("[NAPI]Failed to convert parameter to windowName");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    std::string parentName;
+    uint32_t parentId = INVALID_WINDOW_ID;
     WindowType winType = WindowType::SYSTEM_WINDOW_BASE;
     if (errCode == WMError::WM_OK &&
-        !GetWindowTypeAndParentName(engine, parentName, winType, nativeString, nativeType)) {
+        !GetWindowTypeAndParentId(engine, parentId, winType, nativeString, nativeType)) {
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     void* contextPtr = nullptr;
@@ -262,10 +263,10 @@ NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbac
                 task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode), "Invalidate params"));
                 return;
             }
-            if (parentName.empty()) {
+            if (parentId == INVALID_WINDOW_ID) {
                 return CreateSystemWindowTask(contextPtr, windowName, winType, engine, task);
             } else {
-                return CreateSubWindowTask(parentName, windowName, winType, engine, task);
+                return CreateSubWindowTask(parentId, windowName, winType, engine, task);
             }
         };
     NativeValue* result = nullptr;

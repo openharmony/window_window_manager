@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "window_manager.h"
 #include "window_test_utils.h"
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -83,7 +84,7 @@ void WindowLayoutTest::InitAvoidArea()
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     window->Show();
@@ -130,7 +131,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow01, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_EQ(true, window != nullptr);
@@ -155,7 +156,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow02, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
@@ -185,7 +186,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow04, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     sptr<Window> appWin = Utils::CreateTestWindow(info);
     activeWindows_.push_back(appWin);
@@ -238,7 +239,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow06, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
         .needAvoid = false,
         .parentLimit = true,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     sptr<Window> sysWin = Utils::CreateTestWindow(info);
     activeWindows_.push_back(sysWin);
@@ -275,7 +276,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
         .parentLimit = true,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     sptr<Window> sysWin = Utils::CreateTestWindow(info);
     activeWindows_.push_back(sysWin);
@@ -303,7 +304,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow08, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
@@ -327,7 +328,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
@@ -357,7 +358,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
@@ -386,7 +387,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 
     const sptr<Window>& window = Utils::CreateTestWindow(info);
@@ -447,7 +448,7 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
@@ -505,7 +506,7 @@ HWTEST_F(WindowLayoutTest, LayoutNegative01, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);
@@ -531,7 +532,7 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = true,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     activeWindows_.push_back(window);

@@ -16,6 +16,7 @@
 // gtest
 #include <gtest/gtest.h>
 #include "window_test_utils.h"
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -51,7 +52,7 @@ void WindowGamutTest::SetUp()
             .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
             .needAvoid = false,
             .parentLimit = false,
-            .parentName = "",
+            .parentId = INVALID_WINDOW_ID,
     };
 }
 

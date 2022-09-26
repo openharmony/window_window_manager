@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "window_manager.h"
 #include "window_test_utils.h"
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -56,7 +57,7 @@ void WindowModeSupportInfoTest::SetUp()
             .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
             .needAvoid = false,
             .parentLimit = false,
-            .parentName = "",
+            .parentId = INVALID_WINDOW_ID,
     };
     fullAppInfo_2_ = {
             .name = "FullWindow2",
@@ -65,7 +66,7 @@ void WindowModeSupportInfoTest::SetUp()
             .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
             .needAvoid = false,
             .parentLimit = false,
-            .parentName = "",
+            .parentId = INVALID_WINDOW_ID,
     };
 }
 

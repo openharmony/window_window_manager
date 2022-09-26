@@ -66,7 +66,7 @@ void WindowTouchOutsideTest::SetUp()
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 
     secondWindowInfo_ = {
@@ -76,7 +76,7 @@ void WindowTouchOutsideTest::SetUp()
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 
     thirdWindowInfo_ = {
@@ -86,7 +86,7 @@ void WindowTouchOutsideTest::SetUp()
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
         .parentLimit = false,
-        .parentName = "",
+        .parentId = INVALID_WINDOW_ID,
     };
 }
 

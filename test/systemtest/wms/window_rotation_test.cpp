@@ -23,6 +23,7 @@
 #include "window_manager.h"
 #include "window_accessibility_controller.h"
 #include "window_impl.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -104,7 +105,7 @@ void WindowRotationTest::SetUp()
             .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
             .needAvoid = true,
             .parentLimit = false,
-            .parentName = "",
+            .parentId = INVALID_WINDOW_ID,
     };
 
     activeWindows_.clear();

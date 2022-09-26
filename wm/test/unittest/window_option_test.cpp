@@ -196,15 +196,15 @@ HWTEST_F(WindowOptionTest, DisplayId01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: ParentName01
- * @tc.desc: SetParentName/GetParentName
+ * @tc.name: ParentId01
+ * @tc.desc: SetParentId/GetParentId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowOptionTest, ParentName01, Function | SmallTest | Level2)
+HWTEST_F(WindowOptionTest, ParentId01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    option->SetParentName("Main Window");
-    ASSERT_EQ("Main Window", option->GetParentName());
+    option->SetParentId(1);
+    ASSERT_EQ(1, option->GetParentId());
 }
 
 /**
