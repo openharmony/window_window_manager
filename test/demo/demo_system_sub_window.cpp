@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     subWindowOp->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
     subWindowOp->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     subWindowOp->SetWindowRect(subWindowRect);
-    subWindowOp->SetParentName("Demo_SSW_BaseWindow");
+    subWindowOp->SetParentId(window->GetWindowId());
 
     sptr<Window> subWindow = Window::Create("Demo_SSW_SubWindow", subWindowOp, nullptr);
     subWindow->Show();

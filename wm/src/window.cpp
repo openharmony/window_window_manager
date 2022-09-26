@@ -49,7 +49,7 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
         WLOGFE("malloc windowImpl failed");
         return nullptr;
     }
-    WMError error = windowImpl->Create(option->GetParentName(), context);
+    WMError error = windowImpl->Create(option->GetParentId(), context);
     if (error != WMError::WM_OK) {
         return nullptr;
     }
