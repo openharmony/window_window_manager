@@ -23,18 +23,18 @@
 #include "dm_common.h"
 
 namespace OHOS::Rosen {
-struct Rect {
+struct DMRect {
     int32_t posX_;
     int32_t posY_;
     uint32_t width_;
     uint32_t height_;
 
-    bool operator==(const Rect& a) const
+    bool operator==(const DMRect& a) const
     {
         return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
     }
 
-    bool operator!=(const Rect& a) const
+    bool operator!=(const DMRect& a) const
     {
         return !this->operator==(a);
     }
@@ -44,7 +44,7 @@ struct Rect {
         return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
     }
 
-    bool IsInsideOf(const Rect& a) const
+    bool IsInsideOf(const DMRect& a) const
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
             posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
@@ -52,10 +52,10 @@ struct Rect {
 };
 
 struct WaterfallDisplayAreaRects {
-    Rect left;
-    Rect top;
-    Rect right;
-    Rect bottom;
+    DMRect left;
+    DMRect top;
+    DMRect right;
+    DMRect bottom;
 
     bool isUninitialized() const
     {
@@ -67,7 +67,7 @@ struct WaterfallDisplayAreaRects {
 class CutoutInfo : public Parcelable {
 public:
     CutoutInfo() = default;
-    CutoutInfo(const std::vector<Rect>& boundingRects, WaterfallDisplayAreaRects waterfallDisplayAreaRects);
+    CutoutInfo(const std::vector<DMRect>& boundingRects, WaterfallDisplayAreaRects waterfallDisplayAreaRects);
     ~CutoutInfo() = default;
     WM_DISALLOW_COPY_AND_MOVE(CutoutInfo);
 
@@ -75,10 +75,10 @@ public:
     static CutoutInfo *Unmarshalling(Parcel& parcel);
 
     DEFINE_VAR_FUNC_GET_SET(WaterfallDisplayAreaRects, WaterfallDisplayAreaRects, waterfallDisplayAreaRects);
-    DEFINE_VAR_FUNC_GET_SET(std::vector<Rect>, BoundingRects, boundingRects);
+    DEFINE_VAR_FUNC_GET_SET(std::vector<DMRect>, BoundingRects, boundingRects);
 private:
-    bool WriteBoundingRectsVector(const std::vector<Rect>& boundingRects, Parcel &parcel) const;
-    static bool ReadBoundingRectsVector(std::vector<Rect>& unmarBoundingRects, Parcel &parcel);
+    bool WriteBoundingRectsVector(const std::vector<DMRect>& boundingRects, Parcel &parcel) const;
+    static bool ReadBoundingRectsVector(std::vector<DMRect>& unmarBoundingRects, Parcel &parcel);
     static bool ReadWaterfallDisplayAreaRects(WaterfallDisplayAreaRects& waterfallDisplayAreaRects, Parcel &parcel);
 };
 } // namespace OHOS::Rosen
