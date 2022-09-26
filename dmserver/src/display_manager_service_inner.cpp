@@ -167,4 +167,9 @@ void DisplayManagerServiceInner::RegisterRSScreenChangeListener(const sptr<IRSSc
 {
     DisplayManagerService::GetInstance().RegisterRSScreenChangeListener(listener);
 }
+
+sptr<CutoutInfo> DisplayManagerServiceInner::GetCutoutInfo(DisplayId displayId) const
+{
+    return DisplayManagerService::GetInstance().GetCutoutInfo(displayId);
+}
 } // namespace OHOS::Rosen

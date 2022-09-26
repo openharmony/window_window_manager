@@ -17,7 +17,7 @@
 
 #include <hitrace_meter.h>
 
-#include "display_manager_config.h"
+#include "display_manager_service_inner.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -289,14 +289,19 @@ AvoidArea AvoidAreaController::GetAvoidAreaByType(const sptr<WindowNode>& node, 
             return GetAvoidAreaKeyboardType(node);
         }
         case AvoidAreaType::TYPE_CUTOUT : {
-            auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
-            if (numbersConfig.count("cutoutArea") == 0) {
+            sptr<CutoutInfo> cutoutInfo = DisplayManagerServiceInner::GetInstance().GetCutoutInfo(node->GetDisplayId());
+            if (cutoutInfo == nullptr) {
+                WLOGFE("there is no cutoutInfo");
+                return {};
+            }
+            std::vector<DMRect> cutoutAreas = cutoutInfo->GetBoundingRects();
+            if (cutoutAreas.empty()) {
                 WLOGFE("there is no cutout");
                 return {};
             }
-            std::vector<int> cutoutArea = numbersConfig["cutoutArea"];
-            // 0, 1, 2, 3 means the index in the vector.
-            Rect cutoutAreaRect { cutoutArea[0], cutoutArea[1], (uint32_t)cutoutArea[2], (uint32_t)cutoutArea[3] };
+            // 0 means the index in the vector.
+            Rect cutoutAreaRect { cutoutAreas[0].posX_, cutoutAreas[0].posY_,
+                cutoutAreas[0].width_, cutoutAreas[0].height_ };
             auto rect = node->GetWindowRect();
             Rect overlayRect = WindowHelper::GetOverlap(cutoutAreaRect, rect, rect.posX_, rect.posY_);
             auto type = GetAvoidPosType(rect, overlayRect);

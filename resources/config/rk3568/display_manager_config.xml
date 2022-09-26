@@ -19,8 +19,6 @@
     <!-- Indicate the deviation between the default device display direction and the direction -->
     <!-- of the sensor. Use 0 in default, available values are {0, 90, 180, 270} -->
     <defaultDeviceRotationOffset>0</defaultDeviceRotationOffset>
-    <!--Cutout area Rect. This is temporary config. To delete when Rs cutout area interface is ready.-->
-    <cutoutArea>10 10 100 20</cutoutArea>
     <!-- Svg path for cutout, use empty string if there is not cutout on the screen -->
     <!-- format: string -->
     <!-- default value: empty string -->

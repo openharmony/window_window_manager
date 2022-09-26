@@ -125,7 +125,7 @@ NativeValue* CreateJsCutoutInfoObject(NativeEngine& engine, sptr<CutoutInfo> cut
         WLOGFE("Get null cutout info");
         return engine.CreateUndefined();
     }
-    std::vector<Rect> boundingRects = cutoutInfo->GetBoundingRects();
+    std::vector<DMRect> boundingRects = cutoutInfo->GetBoundingRects();
     WaterfallDisplayAreaRects waterfallDisplayAreaRects = cutoutInfo->GetWaterfallDisplayAreaRects();
     object->SetProperty("boundingRects", CreateJsBoundingRectsArrayObject(engine, boundingRects));
     object->SetProperty("waterfallDisplayAreaRects",
@@ -133,7 +133,7 @@ NativeValue* CreateJsCutoutInfoObject(NativeEngine& engine, sptr<CutoutInfo> cut
     return objValue;
 }
 
-NativeValue* CreateJsRectObject(NativeEngine& engine, Rect rect)
+NativeValue* CreateJsRectObject(NativeEngine& engine, DMRect rect)
 {
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
@@ -156,7 +156,7 @@ NativeValue* CreateJsWaterfallDisplayAreaRectsObject(NativeEngine& engine,
     return objValue;
 }
 
-NativeValue* CreateJsBoundingRectsArrayObject(NativeEngine& engine, std::vector<Rect> boundingRects)
+NativeValue* CreateJsBoundingRectsArrayObject(NativeEngine& engine, std::vector<DMRect> boundingRects)
 {
     NativeValue* arrayValue = engine.CreateArray(boundingRects.size());
     NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);

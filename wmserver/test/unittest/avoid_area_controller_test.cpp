@@ -54,7 +54,6 @@ sptr<WindowNode> AvoidAreaControllerTest::statusbarWindowNode = nullptr;
 sptr<WindowNode> AvoidAreaControllerTest::navigationBarWindowNode = nullptr;
 sptr<WindowNode> AvoidAreaControllerTest::keyboardWindowNode = nullptr;
 Rect AvoidAreaControllerTest::screenRect;
-Rect AvoidAreaControllerTest::cut_out_rect = { 0, 0, 0, 0 };
 
 class WindowListener : public IWindow {
 public:
@@ -65,9 +64,6 @@ public:
     {
         if (type == AvoidAreaType::TYPE_SYSTEM) {
             statusBarAvoidAreaFuture_.SetValue(*avoidArea);
-        }
-        if (type == AvoidAreaType::TYPE_CUTOUT) {
-            cutoutAvoidAreaFuture_.SetValue(*avoidArea);
         }
         if (type == AvoidAreaType::TYPE_KEYBOARD) {
             keyboardAvoidAreaFuture_.SetValue(*avoidArea);
@@ -92,7 +88,6 @@ public:
     void RestoreSplitWindowMode(uint32_t mode) override {}
     RunnableFuture<AvoidArea> statusBarAvoidAreaFuture_;
     RunnableFuture<AvoidArea> keyboardAvoidAreaFuture_;
-    RunnableFuture<AvoidArea> cutoutAvoidAreaFuture_;
 
     sptr<IRemoteObject> AsObject() override
     {
@@ -102,13 +97,6 @@ public:
 
 void AvoidAreaControllerTest::SetUpTestCase()
 {
-    DisplayManagerConfig::LoadConfigXml();
-    auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
-    if (numbersConfig.count("cutoutArea") > 0) {
-        std::vector<int> cutoutArea = numbersConfig["cutoutArea"];
-        // 0, 1, 2, 3 means the index in the vector.
-        cut_out_rect =  { cutoutArea[0], cutoutArea[1], (uint32_t)cutoutArea[2], (uint32_t)cutoutArea[3] };
-    }
     auto display = DisplayManager::GetInstance().GetDefaultDisplay();
     ASSERT_TRUE((display != nullptr));
     WLOGFI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
@@ -179,11 +167,11 @@ sptr<WindowProperty> createWindowProperty(uint32_t windowId, const std::string& 
 
 namespace {
 /**
- * @tc.name: SystemBarAndCutOutAvoidArea01
- * @tc.desc: Get avoid areas with TYPE_SYSTEM and TYPE_CUTOUT
+ * @tc.name: GetSystemBarAvoidArea01
+ * @tc.desc: Get avoid areas with TYPE_SYSTEM
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea01, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, GetSystemBarAvoidArea01, Function | SmallTest | Level2)
 {
     sptr<WindowProperty> property = createWindowProperty(110u, "test",
         WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
@@ -197,8 +185,6 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea01, Function | Smal
     auto avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(true, CheckSameArea(avoidArea, statusbarWindowNode->GetWindowRect(),
         EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect()));
-    avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_CUTOUT);
-    ASSERT_EQ(true, CheckSameArea(avoidArea, cut_out_rect, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     // set rect
     Rect statusBarRect = statusbarWindowNode->GetWindowRect();
@@ -208,16 +194,12 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea01, Function | Smal
     property->SetWindowRect(windowRect);
     avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
-    avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_CUTOUT);
-    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     // restore rect
     property->SetWindowRect(screenRect);
     avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(true, CheckSameArea(avoidArea, statusbarWindowNode->GetWindowRect(),
         EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect()));
-    avoidArea = avoidAreaController->GetAvoidAreaByType(appWindow, AvoidAreaType::TYPE_CUTOUT);
-    ASSERT_EQ(true, CheckSameArea(avoidArea, cut_out_rect, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
     avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
@@ -227,11 +209,11 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea01, Function | Smal
 }
 
 /**
- * @tc.name: SystemBarAndCutOutAvoidArea02
- * @tc.desc: Get avoid areas with listener, TYPE_SYSTEM and TYPE_CUTOUT.
+ * @tc.name: SystemBarAvoidArea02
+ * @tc.desc: Get avoid areas with listener, TYPE_SYSTEM.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea02, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea02, Function | SmallTest | Level2)
 {
     sptr<WindowProperty> property = createWindowProperty(110u, "test",
         WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
@@ -266,9 +248,6 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea02, Function | Smal
     avoidArea = windowListener->statusBarAvoidAreaFuture_.GetResult(TIME_OUT);
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
     ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
-    avoidArea = windowListener->cutoutAvoidAreaFuture_.GetResult(TIME_OUT);
-    windowListener->cutoutAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     // restore appWindow rect
     property->SetWindowRect(screenRect);
@@ -277,9 +256,6 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea02, Function | Smal
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
     ASSERT_EQ(true, CheckSameArea(avoidArea, statusbarWindowNode->GetWindowRect(),
         EMPTY_RECT, EMPTY_RECT, navigationBarWindowNode->GetWindowRect()));
-    avoidArea = windowListener->cutoutAvoidAreaFuture_.GetResult(TIME_OUT);
-    windowListener->cutoutAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    ASSERT_EQ(true, CheckSameArea(avoidArea, cut_out_rect, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     avoidAreaController->ProcessWindowChange(statusbarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
     avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
@@ -287,11 +263,11 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea02, Function | Smal
 }
 
 /**
- * @tc.name: SystemBarAndCutOutAvoidArea03
- * @tc.desc: Get avoid areas with listener, TYPE_SYSTEM and TYPE_CUTOUT.
+ * @tc.name: SystemBarAvoidArea03
+ * @tc.desc: Get avoid areas with listener, TYPE_SYSTEM.
  * @tc.type: FUNC
  */
-HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea03, Function | SmallTest | Level2)
+HWTEST_F(AvoidAreaControllerTest, SystemBarAvoidArea03, Function | SmallTest | Level2)
 {
     sptr<WindowProperty> property = createWindowProperty(110u, "test",
         WindowType::APP_WINDOW_BASE, WindowMode::WINDOW_MODE_FULLSCREEN, screenRect);
@@ -322,9 +298,6 @@ HWTEST_F(AvoidAreaControllerTest, SystemBarAndCutOutAvoidArea03, Function | Smal
     windowListener->statusBarAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
     ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT,
         navigationBarWindowNode->GetWindowRect()));
-    avoidArea = windowListener->cutoutAvoidAreaFuture_.GetResult(TIME_OUT);
-    windowListener->cutoutAvoidAreaFuture_.Reset(EMPTY_AVOID_AREA);
-    ASSERT_EQ(true, CheckSameArea(avoidArea, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT, EMPTY_RECT));
 
     // remove navigation bar
     avoidAreaController->ProcessWindowChange(navigationBarWindowNode, AvoidControlType::AVOID_NODE_REMOVE, nullptr);
