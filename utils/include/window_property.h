@@ -168,8 +168,8 @@ private:
     bool keepScreenOn_ = false;
     uint32_t callingWindow_ = INVALID_WINDOW_ID;
     DisplayId displayId_ { 0 };
-    uint32_t windowId_ { 0 };
-    uint32_t parentId_ { 0 };
+    uint32_t windowId_ = INVALID_WINDOW_ID;
+    uint32_t parentId_ = INVALID_WINDOW_ID;
     PointInfo hitOffset_ { 0, 0 };
     uint32_t animationFlag_ { static_cast<uint32_t>(WindowAnimation::DEFAULT) };
     // modeSupportInfo_ means supported modes in runtime, which can be changed
