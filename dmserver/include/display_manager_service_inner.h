@@ -22,6 +22,7 @@
 #include <system_ability.h>
 
 #include "abstract_display.h"
+#include "cutout_info.h"
 #include "display_change_listener.h"
 #include "rsscreen_change_listener.h"
 #include "singleton_delegator.h"
@@ -52,6 +53,7 @@ public:
     void SetGravitySensorSubscriptionEnabled();
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
     void RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener);
+    sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) const;
 };
 } // namespace OHOS::Rosen
 

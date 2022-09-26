@@ -16,7 +16,7 @@
 #include "cutout_info.h"
 
 namespace OHOS::Rosen {
-CutoutInfo::CutoutInfo(const std::vector<Rect>& boundingRects,
+CutoutInfo::CutoutInfo(const std::vector<DMRect>& boundingRects,
     WaterfallDisplayAreaRects waterfallDisplayAreaRects) : waterfallDisplayAreaRects_(waterfallDisplayAreaRects),
     boundingRects_(boundingRects)
 {
@@ -46,19 +46,19 @@ bool CutoutInfo::Marshalling(Parcel &parcel) const
 CutoutInfo *CutoutInfo::Unmarshalling(Parcel &parcel)
 {
     WaterfallDisplayAreaRects waterfallDisplayAreaRects;
-    std::vector<Rect> boundingRects;
+    std::vector<DMRect> boundingRects;
     ReadWaterfallDisplayAreaRects(waterfallDisplayAreaRects, parcel);
     ReadBoundingRectsVector(boundingRects, parcel);
     CutoutInfo *cutoutInfo = new CutoutInfo(boundingRects, waterfallDisplayAreaRects);
     return cutoutInfo;
 }
 
-bool CutoutInfo::WriteBoundingRectsVector(const std::vector<Rect>& boundingRects, Parcel &parcel) const
+bool CutoutInfo::WriteBoundingRectsVector(const std::vector<DMRect>& boundingRects, Parcel &parcel) const
 {
     if (!parcel.WriteUint32(static_cast<uint32_t>(boundingRects.size()))) {
         return false;
     }
-    for (Rect rect : boundingRects) {
+    for (DMRect rect : boundingRects) {
         if (!(parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
             parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_))) {
             return false;
@@ -67,7 +67,7 @@ bool CutoutInfo::WriteBoundingRectsVector(const std::vector<Rect>& boundingRects
     return true;
 }
 
-bool CutoutInfo::ReadBoundingRectsVector(std::vector<Rect>& unmarBoundingRects, Parcel &parcel)
+bool CutoutInfo::ReadBoundingRectsVector(std::vector<DMRect>& unmarBoundingRects, Parcel &parcel)
 {
     uint32_t size;
     if (!parcel.ReadUint32(size)) {
@@ -82,7 +82,7 @@ bool CutoutInfo::ReadBoundingRectsVector(std::vector<Rect>& unmarBoundingRects, 
             parcel.ReadUint32(width) && parcel.ReadUint32(height))) {
             return false;
         }
-        Rect rect = {posX, posY, width, height};
+        DMRect rect = {posX, posY, width, height};
         unmarBoundingRects.push_back(rect);
     }
     return true;

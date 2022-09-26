@@ -18,9 +18,11 @@
 #include <ability_manager_client.h>
 #include <algorithm>
 #include <cinttypes>
+#include <cmath>
 #include <ctime>
 #include <display_power_mgr_client.h>
 #include <hitrace_meter.h>
+#include <limits>
 #include <power_mgr_client.h>
 #include "transaction/rs_transaction.h"
 
@@ -646,7 +648,7 @@ void WindowNodeContainer::UpdateBrightness(uint32_t id, bool byRemoved)
         }
     }
     WLOGFI("brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), node->GetBrightness());
-    if (node->GetBrightness() == UNDEFINED_BRIGHTNESS) {
+    if (std::fabs(node->GetBrightness() - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (GetDisplayBrightness() != node->GetBrightness()) {
             WLOGFI("adjust brightness with default value");
             DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
