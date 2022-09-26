@@ -356,6 +356,8 @@ NativeValue* WindowErrorCodeInit(NativeEngine* engine)
         static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
     object->SetProperty("WM_ERROR_STAGE_ABNORMALLY", CreateJsValue(*engine,
         static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY)));
+    object->SetProperty("WM_ERROR_CONTEXT_ABNORMALLY", CreateJsValue(*engine,
+        static_cast<int32_t>(WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY)));
     return objValue;
 }
 
@@ -634,21 +636,6 @@ bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability)
         return false;
     } else {
         WLOGFI("[NAPI]Get ability");
-    }
-    return true;
-}
-
-bool ParseJsDoubleValue(NativeObject* jsObject, NativeEngine& engine, const std::string& name, double& data)
-{
-    NativeValue* value = jsObject->GetProperty(name.c_str());
-    if (value->TypeOf() != NATIVE_UNDEFINED) {
-        if (!ConvertFromJsValue(engine, value, data)) {
-            WLOGFE("[NAPI]Failed to convert parameter to data: %{public}s", name.c_str());
-            return false;
-        }
-    } else {
-        WLOGFI("[NAPI]no property with: %{public}s", name.c_str());
-        return false;
     }
     return true;
 }
