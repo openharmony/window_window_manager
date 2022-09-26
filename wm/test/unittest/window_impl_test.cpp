@@ -32,8 +32,10 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+    void CreateStretchableWindow(sptr<WindowImpl>& window, const Rect& rect);
 
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 };
 void WindowImplTest::SetUpTestCase()
 {
@@ -49,6 +51,23 @@ void WindowImplTest::SetUp()
 
 void WindowImplTest::TearDown()
 {
+}
+
+void WindowImplTest::CreateStretchableWindow(sptr<WindowImpl>& window, const Rect& rect)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("StretchableWindowTest");
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowRect({ 1, 1, 1, 1 });
+    window = new WindowImpl(option);
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+    window->windowSystemConfig_.isStretchable_ = true;
+    EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Show());
+    window->UpdateRect(rect, true, WindowSizeChangeReason::UNDEFINED);
+    ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect);
 }
 
 namespace {
@@ -1497,6 +1516,110 @@ HWTEST_F(WindowImplTest, NotifyMemoryLevel01, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->NotifyMemoryLevel(level));
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_EQ(WMError::WM_OK, window->NotifyMemoryLevel(level));
+}
+
+/**
+ * @tc.name: StretchableUpdateRectDragStartTest
+ * @tc.desc: UpdateRect test for stretchable window when drag start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, StretchableUpdateRectDragStartTest, Function | SmallTest | Level3)
+{
+    Rect rect1 { 10, 10, 10, 10 };
+    sptr<WindowImpl> window;
+    CreateStretchableWindow(window, rect1);
+    Rect rect2 { 100, 100, 100, 100 };
+    window->UpdateRect(rect2, true, WindowSizeChangeReason::DRAG_START);
+    ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect1);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: StretchableUpdateRectDragTest
+ * @tc.desc: UpdateRect test for stretchable window when drag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, StretchableUpdateRectDragTest, Function | SmallTest | Level3)
+{
+    Rect rect1 { 10, 10, 10, 10 };
+    sptr<WindowImpl> window;
+    CreateStretchableWindow(window, rect1);
+    Rect rect2 { 100, 100, 100, 100 };
+    window->UpdateRect(rect2, true, WindowSizeChangeReason::DRAG);
+    ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect1);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: StretchableUpdateRectDragEndTest
+ * @tc.desc: UpdateRect test for stretchable window when drag end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, StretchableUpdateRectDragEndTest, Function | SmallTest | Level3)
+{
+    Rect rect1 { 10, 10, 10, 10 };
+    sptr<WindowImpl> window;
+    CreateStretchableWindow(window, rect1);
+    Rect rect2 { 100, 100, 100, 100 };
+    window->UpdateRect(rect2, true, WindowSizeChangeReason::DRAG_END);
+    ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect1);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: StretchableUpdateRectRecoverTest
+ * @tc.desc: UpdateRect test for stretchable window when recover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, StretchableUpdateRectRecoverTest, Function | SmallTest | Level3)
+{
+    Rect rect1 { 10, 10, 10, 10 };
+    sptr<WindowImpl> window;
+    CreateStretchableWindow(window, rect1);
+    Rect rect2 { 100, 100, 100, 100 };
+    window->UpdateRect(rect2, true, WindowSizeChangeReason::RECOVER);
+    ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect1);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: StretchableUpdateRectRecoverTest
+ * @tc.desc: UpdateRect test for stretchable window when move.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, StretchableUpdateRectMoveTest, Function | SmallTest | Level3)
+{
+    Rect rect1 { 10, 10, 10, 10 };
+    sptr<WindowImpl> window;
+    CreateStretchableWindow(window, rect1);
+    Rect rect2 { 100, 100, 100, 100 };
+    window->UpdateRect(rect2, true, WindowSizeChangeReason::MOVE);
+    ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect1);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: StretchableUpdateRectResizeTest
+ * @tc.desc: UpdateRect test for stretchable window when resize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, StretchableUpdateRectResizeTest, Function | SmallTest | Level3)
+{
+    Rect rect1 { 110, 110, 10, 10 };
+    sptr<WindowImpl> window;
+    CreateStretchableWindow(window, rect1);
+    Rect rect2 { 100, 100, 100, 100 };
+    ASSERT_EQ(true, rect1.IsInsideOf(rect2));
+    ASSERT_EQ(true, rect1 != rect2);
+    window->UpdateRect(rect2, true, WindowSizeChangeReason::RESIZE);
+    ASSERT_EQ(window->GetWindowProperty()->GetOriginRect(), rect2);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 }
 } // namespace Rosen
