@@ -42,7 +42,7 @@ public:
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
 
     int ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
-        uint32_t uid, const sptr<IWindowExtensionCallback>& callback);
+        uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback);
     void DisconnectExtension();
     void Show() const;
     void Hide() const;
@@ -102,7 +102,7 @@ void WindowExtensionConnection::Impl::WindowExtensionClientRecipient::OnRemoteDi
 }
 
 int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementName& element,
-    const Rect& rect, uint32_t uid, const sptr<IWindowExtensionCallback>& callback)
+    const Rect& rect, uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback)
 {
     AAFwk::Want want;
     want.SetElement(element);
@@ -112,12 +112,13 @@ int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementN
     want.SetParam(RECT_FORM_KEY_POS_Y, rect.posY_);
     want.SetParam(RECT_FORM_KEY_WIDTH, static_cast<int>(rect.width_));
     want.SetParam(RECT_FORM_KEY_HEIGHT, static_cast<int>(rect.height_));
+    want.SetParam(WINDOW_ID, static_cast<int>(windowId));
      // 100 default userId
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, nullptr, uid);
     if (ret == ERR_OK) {
         componentCallback_ = callback;
     }
-    WLOGFI("Connection extension end ret = %{public}d", ret);
+    WLOGFI("Connection extension end ret = %{public}d windowId = %{public}u", ret, windowId);
     return ret;
 }
 
@@ -202,9 +203,9 @@ void WindowExtensionConnection::Impl::OnAbilityDisconnectDone(const AppExecFwk::
 }
 
 int WindowExtensionConnection::ConnectExtension(const AppExecFwk::ElementName& element,
-    const Rect& rect, uint32_t uid, const sptr<IWindowExtensionCallback>& callback) const
+    const Rect& rect, uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback) const
 {
-    return pImpl_->ConnectExtension(element, rect, uid, callback);
+    return pImpl_->ConnectExtension(element, rect, uid, windowId, callback);
 }
 
 void WindowExtensionConnection::Show() const
