@@ -36,7 +36,8 @@ public:
     virtual void RequestFocus() override;
     virtual void GetExtensionWindow(sptr<IWindowExtensionClient>& token) override;
 
-    sptr<Window> CreateWindow(const Rect& rect, const std::shared_ptr<AbilityRuntime::Context>& context);
+    sptr<Window> CreateWindow(
+        const Rect& rect, uint32_t parentWindowId, const std::shared_ptr<AbilityRuntime::Context>& context);
     void DestroyWindow();
     sptr<Window> GetWindow() const;
 private:

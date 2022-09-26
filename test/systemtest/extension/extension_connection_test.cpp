@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "window_extension_connection.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -95,7 +96,7 @@ HWTEST_F(ExtensionConnectionTest, WindowExtensionConnection01, Function | SmallT
     element.SetBundleName("com.test.windowextension");
     element.SetAbilityName("WindowExtAbility");
     Rosen::Rect rect {100, 100, 60, 60};
-    ASSERT_TRUE(connection->ConnectExtension(element, rect, 100, nullptr) != ERR_OK);
+    ASSERT_TRUE(connection->ConnectExtension(element, rect, 100, INVALID_WINDOW_ID, nullptr) != ERR_OK);
 }
 }
 } // Rosen
