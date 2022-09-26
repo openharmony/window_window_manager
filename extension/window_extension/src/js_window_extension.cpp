@@ -213,13 +213,14 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want)
     want.GetIntParam(RECT_FORM_KEY_POS_Y, 0),
     want.GetIntParam(RECT_FORM_KEY_WIDTH, 0),
     want.GetIntParam(RECT_FORM_KEY_HEIGHT, 0) };
+    uint32_t windowId = want.GetIntParam(WINDOW_ID, INVALID_WINDOW_ID);
     if (stub_ != nullptr) {
         auto context = GetContext();
         if (context == nullptr) {
             WLOGFE("get context failed");
             return;
         }
-        sptr<Window> window = stub_->CreateWindow(rect, context);
+        sptr<Window> window = stub_->CreateWindow(rect, windowId, context);
         if (window == nullptr) {
             WLOGFE("create window failed");
             return;
