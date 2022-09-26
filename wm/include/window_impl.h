@@ -25,6 +25,7 @@
 #include <string>
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
+#include <struct_multimodal.h>
 
 #include "input_transfer_station.h"
 #include "vsync_station.h"
@@ -386,6 +387,8 @@ private:
     bool IsAppMainOrSubOrFloatingWindow();
     void UpdateWindowShadowAccordingToSystemConfig();
     bool WindowCreateCheck(uint32_t parentId);
+    uint32_t CalculatePointerDirection(int32_t pointerX, int32_t pointerY);
+    void HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
 
     // colorspace, gamut
@@ -434,6 +437,8 @@ private:
     bool isMainHandlerAvailable_ = true;
     bool isAppFloatingWindow_ = false;
     bool isFocused_ = false;
+    uint32_t styleID = 0;
+    bool isPointerStyleChanged_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

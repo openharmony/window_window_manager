@@ -209,6 +209,8 @@ enum class DragType : uint32_t {
     DRAG_WIDTH,
     DRAG_HEIGHT,
     DRAG_CORNER,
+    DRAG_EAST_SOUTH_CORNER,
+    DRAG_EAST_NORTH_CORNER,
 };
 
 enum class TraceTaskId : int32_t {
