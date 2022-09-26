@@ -113,7 +113,7 @@ void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
     // using snapshot to support hot start since node destroy when hide
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DrawStartingWindow(%u)", node->GetWindowId());
     Rect rect = node->GetWindowRect();
-    if (RemoteAnimation::CheckAnimationController() && node->leashWinSurfaceNode_) {
+    if (RemoteAnimation::CheckRemoteAnimationEnabled(node->GetDisplayId()) && node->leashWinSurfaceNode_) {
         // hides this node until RSProxyNode send valid context alpha/matrix
         node->leashWinSurfaceNode_->ResetContextAlpha();
     }
