@@ -328,7 +328,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
         }
         if (property_->GetParentId() != parentId) {
             WLOGFE("ParentId is empty or valid. ParentId is %{public}u", parentId);
-            return WMError::WM_ERROR_INVALID_PARAM;;
+            return WMError::WM_ERROR_INVALID_PARAM;
         }
     }
 

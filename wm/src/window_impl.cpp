@@ -899,24 +899,29 @@ bool WindowImpl::WindowCreateCheck(uint32_t parentId)
         WLOGFE("WindowName(%{public}s) already exists.", name_.c_str());
         return false;
     }
-    // check parent id, if create sub window and there is not exist parent Window, then return
-    if (parentId != INVALID_WINDOW_ID) {
-        for (auto& winPair : windowMap_) {
+    if (CheckCameraFloatingWindowMultiCreated(property_->GetWindowType())) {
+        WLOGFE("Camera Floating Window already exists.");
+        return false;
+    }    
+    if (parentId == INVALID_WINDOW_ID) {
+        return true;
+    }
+
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
+        property_->SetParentId(parentId);
+    } else {
+        for (const auto& winPair : windowMap_) {
             if (winPair.second.first == parentId) {
                 property_->SetParentId(parentId);
                 break;
             }
         }
-        if (property_->GetParentId() != parentId) {
-            WLOGFE("ParentId is empty or valid. ParentId is %{public}s", std::to_string(parentId).c_str());
-            return false;
-        }
     }
-
-    if (CheckCameraFloatingWindowMultiCreated(property_->GetWindowType())) {
-        WLOGFE("Camera Floating Window already exists.");
+    if (property_->GetParentId() != parentId) {
+        WLOGFE("Parent Window does not exist. ParentId is %{public}u", parentId);
         return false;
     }
+
     return true;
 }
 
