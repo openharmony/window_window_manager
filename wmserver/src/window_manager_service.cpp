@@ -895,6 +895,33 @@ void WindowManagerService::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr
         }
         windowController_->NotifyServerReadyToMoveOrDrag(windowId, moveDragProperty);
     });
+    uint32_t styleID = 0;
+    if (windowProperty->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        if (windowProperty->GetWindowRect().width_ > windowProperty->GetWindowRect().height_) {
+            styleID = MMI::MOUSE_ICON::NORTH_SOUTH;
+        } else {
+            styleID = MMI::MOUSE_ICON::WEST_EAST;
+        }
+    } else {
+        if (moveDragProperty->dragType_ == DragType::DRAG_UNDEFINED) {
+            WLOGFD("drag type is undefined");
+        } else if (moveDragProperty->dragType_ == DragType::DRAG_HEIGHT) {
+            styleID = MMI::MOUSE_ICON::NORTH_SOUTH;
+        } else if (moveDragProperty->dragType_ == DragType::DRAG_WIDTH) {
+            styleID = MMI::MOUSE_ICON::WEST_EAST;
+        } else if (moveDragProperty->dragType_ == DragType::DRAG_EAST_SOUTH_CORNER) {
+            styleID = MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST;
+        } else if (moveDragProperty->dragType_ == DragType::DRAG_EAST_NORTH_CORNER) {
+            styleID = MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST;
+        }
+    }
+    int32_t currentStyleID = 0;
+    MMI::InputManager::GetInstance()->SetPointerStyle(windowId, styleID);
+    MMI::InputManager::GetInstance()->GetPointerStyle(windowId, currentStyleID);
+    if (currentStyleID != styleID) {
+        MMI::InputManager::GetInstance()->SetPointerStyle(windowId, styleID);
+    }
+    WLOGFI("Set pointer style success, styleID is %{public}u", styleID);
 }
 
 void WindowManagerService::ProcessPointDown(uint32_t windowId)
