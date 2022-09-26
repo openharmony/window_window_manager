@@ -114,7 +114,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest02, Function | SmallTest | Level2)
 
     MinimizeApp::AddNeedMinimizeApp(node1, MinimizeReason::MINIMIZE_ALL);
 
-    auto getNodes = MinimizeApp::GetNeedMinimizeAppNodes();
+    auto getNodes = MinimizeApp::GetNeedMinimizeAppNodesWithReason(MinimizeReason::MINIMIZE_ALL);
     ASSERT_EQ(node1, getNodes[0]);
 
     MinimizeApp::ClearNodesWithReason(MinimizeReason::MINIMIZE_ALL);

@@ -167,8 +167,8 @@ void WindowInnerManager::MinimizeAbility(const wptr<WindowNode> &node, bool isFr
 {
     // asynchronously calls the MinimizeAbility of AbilityManager
     auto weakNode = node.promote();
-    if (weakNode == nullptr || weakNode->startingWindowShown_) {
-        WLOGE("minimize ability failed, because node is nullptr or start window node.");
+    if (weakNode == nullptr) {
+        WLOGFE("minimize ability failed.");
         return;
     }
     wptr<IRemoteObject> weakToken(weakNode->abilityToken_);
@@ -182,6 +182,50 @@ void WindowInnerManager::MinimizeAbility(const wptr<WindowNode> &node, bool isFr
         AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(token, isFromUser);
     };
     PostTask(task, "MinimizeAbility");
+}
+
+void WindowInnerManager::TerminateAbility(const wptr<WindowNode> &node)
+{
+    // asynchronously calls the TerminateAbility of AbilityManager
+    auto weakNode = node.promote();
+    if (weakNode == nullptr) {
+        WLOGFE("terminate ability failed.");
+        return;
+    }
+    wptr<IRemoteObject> weakToken(weakNode->abilityToken_);
+    WLOGFD("terminate window %{public}u", weakNode->GetWindowId());
+    auto task = [weakToken]() {
+        auto token = weakToken.promote();
+        if (token == nullptr) {
+            WLOGE("terminate ability failed, because window token is nullptr.");
+            return;
+        }
+        AAFwk::Want resultWant;
+        AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token, -1, &resultWant);
+    };
+    PostTask(task, "TerminateAbility");
+}
+
+void WindowInnerManager::CloseAbility(const wptr<WindowNode> &node)
+{
+    // asynchronously calls the CloseAbility of AbilityManager
+    auto weakNode = node.promote();
+    if (weakNode == nullptr) {
+        WLOGFE("close ability failed.");
+        return;
+    }
+    wptr<IRemoteObject> weakToken(weakNode->abilityToken_);
+    WLOGFD("close window %{public}u", weakNode->GetWindowId());
+    auto task = [weakToken]() {
+        auto token = weakToken.promote();
+        if (token == nullptr) {
+            WLOGE("close ability failed, because window token is nullptr.");
+            return;
+        }
+        AAFwk::Want resultWant;
+        AAFwk::AbilityManagerClient::GetInstance()->CloseAbility(token);
+    };
+    PostTask(task, "CloseAbility");
 }
 
 void WindowInnerManager::PostTask(InnerTask &&task, std::string name, EventPriority priority)
