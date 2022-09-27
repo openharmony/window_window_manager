@@ -33,6 +33,7 @@ namespace {
     const std::string RECT_FORM_KEY_POS_Y = "ext_pos_y";
     const std::string RECT_FORM_KEY_HEIGHT = "ext_pos_heigh";
     const std::string RECT_FORM_KEY_WIDTH = "ext_pos_width";
+    const std::string WINDOW_ID = "ext_window_id";
 }
 
 class RSSurfaceNode;
@@ -50,7 +51,7 @@ public:
     WindowExtensionConnection();
     ~WindowExtensionConnection();
     int ConnectExtension(const AppExecFwk::ElementName& element, const Rect& rect,
-        uint32_t uid, const sptr<IWindowExtensionCallback>& callback) const;
+        uint32_t uid, uint32_t windowId, const sptr<IWindowExtensionCallback>& callback) const;
     void DisconnectExtension() const;
     void Show() const;
     void Hide() const;
