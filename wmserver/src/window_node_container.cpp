@@ -1442,7 +1442,7 @@ void WindowNodeContainer::ExitSplitMode(DisplayId displayId)
 
 void WindowNodeContainer::MinimizeAllAppWindows(DisplayId displayId)
 {
-    WMError ret =  MinimizeAppNodeExceptOptions(MinimizeReason::MINIMIZE_ALL);
+    WMError ret = MinimizeAppNodeExceptOptions(MinimizeReason::MINIMIZE_ALL);
     SwitchLayoutPolicy(WindowLayoutMode::CASCADE, displayId);
     if (ret != WMError::WM_OK) {
         WLOGFE("Minimize all app window failed");
@@ -1998,7 +1998,12 @@ void WindowNodeContainer::RemoveSingleUserWindowNodes(int accountId)
         WLOGFI("remove window %{public}s, windowId %{public}d uid %{public}d",
             windowNode->GetWindowName().c_str(), windowNode->GetWindowId(), windowNode->GetCallingUid());
         windowNode->GetWindowProperty()->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
-        RemoveWindowNode(windowNode);
+        if (windowNode->GetWindowToken()) {
+            if (windowNode->surfaceNode_ != nullptr) {
+                windowNode->surfaceNode_->SetVisible(true);
+            }
+            windowNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_HIDDEN);
+        }
     }
 }
 
