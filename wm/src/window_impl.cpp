@@ -17,6 +17,7 @@
 
 
 #include <ability_manager_client.h>
+#include <common/rs_common_def.h>
 #include <hisysevent.h>
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
@@ -90,11 +91,28 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = property_->GetWindowName();
-    surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
 
     moveDragProperty_ = new (std::nothrow) MoveDragProperty();
     WLOGFI("WindowImpl constructorCnt: %{public}d name: %{public}s",
         ++constructorCnt, property_->GetWindowName().c_str());
+}
+
+RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowType type)
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = name;
+    RSSurfaceNodeType rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
+    switch (type) {
+        case WindowType::WINDOW_TYPE_BOOT_ANIMATION:
+        case WindowType::WINDOW_TYPE_POINTER:
+            rsSurfaceNodeType = RSSurfaceNodeType::SELF_DRAWING_WINDOW_NODE;
+            break;
+        default:
+            rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
+            break;
+    }
+    return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
 }
 
 WindowImpl::~WindowImpl()
