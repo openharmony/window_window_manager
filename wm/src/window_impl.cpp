@@ -2914,7 +2914,7 @@ WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
 void WindowImpl::RequestPerfIfNeed(WindowSizeChangeReason reason)
 {
     if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) || WindowHelper::IsSplitWindowMode(GetMode())) {
-        switch(reason) {
+        switch (reason) {
             case WindowSizeChangeReason::DRAG_END: {
                 if (windowDragBoost_) {
                     ClosePerf(PERF_DRAG_CODE);
