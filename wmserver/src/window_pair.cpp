@@ -496,5 +496,42 @@ void WindowPair::ClearPairSnapshot()
         secondary_->SetSnapshot(nullptr);
     }
 }
+
+int32_t WindowPair::GetSplitRatioPoint(float ratio, const Rect& displayRect)
+{
+    if (displayRect.width_ > displayRect.height_) {
+        return displayRect.posX_ +
+            static_cast<uint32_t>((displayRect.width_ - dividerRect_.width_) * ratio);
+    } else {
+        return displayRect.posY_ +
+            static_cast<uint32_t>((displayRect.height_ - dividerRect_.height_) * ratio);
+    }
+}
+
+void WindowPair::CalculateSplitRatioPoints(const Rect& displayRect)
+{
+    exitSplitPoints_.clear();
+    splitRatioPoints_.clear();
+    exitSplitPoints_.push_back(GetSplitRatioPoint(splitRatioConfig_.exitSplitStartRatio, displayRect));
+    exitSplitPoints_.push_back(GetSplitRatioPoint(splitRatioConfig_.exitSplitEndRatio, displayRect));
+    for (const auto& ratio : splitRatioConfig_.splitRatios) {
+        splitRatioPoints_.push_back(GetSplitRatioPoint(ratio, displayRect));
+    }
+}
+
+void WindowPair::SetSplitRatioConfig(const SplitRatioConfig& splitRatioConfig)
+{
+    splitRatioConfig_ = splitRatioConfig;
+}
+
+std::vector<int32_t> WindowPair::GetExitSplitPoints()
+{
+    return exitSplitPoints_;
+}
+
+std::vector<int32_t> WindowPair::GetSplitRatioPoints()
+{
+    return splitRatioPoints_;
+}
 } // namespace Rosen
 } // namespace OHOS

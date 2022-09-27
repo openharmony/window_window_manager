@@ -32,13 +32,11 @@ WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo
     DisplayGroupWindowTree& displayGroupWindowTree)
     : WindowLayoutPolicy(displayGroupInfo, displayGroupWindowTree)
 {
-    LayoutRects cascadeRects {
+    CascadeRects cascadeRects {
         .primaryRect_        = {0, 0, 0, 0},
         .secondaryRect_      = {0, 0, 0, 0},
-        .primaryLimitRect_   = {0, 0, 0, 0},
-        .secondaryLimitRect_ = {0, 0, 0, 0},
         .dividerRect_        = {0, 0, 0, 0},
-        .firstCascadeRect_   = {0, 0, 0, 0},
+        .defaultCascadeRect_ = {0, 0, 0, 0},
     };
     for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
         cascadeRectsMap_.insert(std::make_pair(iter.first, cascadeRects));
@@ -48,182 +46,138 @@ WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo
 void WindowLayoutPolicyCascade::Launch()
 {
     InitAllRects();
-    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
-        DisplayId displayId = iter.first;
-        auto& displayWindowTree = displayGroupWindowTree_[displayId];
-        LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::APP_WINDOW_NODE]));
-        LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::BELOW_WINDOW_NODE]));
-    }
     WLOGFI("WindowLayoutPolicyCascade::Launch");
 }
 
-void WindowLayoutPolicyCascade::Clean()
+void WindowLayoutPolicyCascade::Reorder()
 {
-    WLOGFI("WindowLayoutPolicyCascade::Clean");
-}
-
-void WindowLayoutPolicyCascade::Reset()
-{
-    const auto& displayRectMap = displayGroupInfo_->GetAllDisplayRects();
-    // reset split and limit rects
-    for (auto& iter : displayRectMap) {
-        InitSplitRects(iter.first);
-        InitLimitRects(iter.first);
+    WLOGFD("Cascade reorder start");
+    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
+        DisplayId displayId = iter.first;
+        Rect rect = cascadeRectsMap_[displayId].defaultCascadeRect_;
+        bool isFirstReorderedWindow = true;
+        const auto& appWindowNodeVec = *(displayGroupWindowTree_[displayId][WindowRootNodeType::APP_WINDOW_NODE]);
+        for (auto nodeIter = appWindowNodeVec.begin(); nodeIter != appWindowNodeVec.end(); nodeIter++) {
+            auto node = *nodeIter;
+            if (node == nullptr || node->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+                WLOGFW("get node failed or not app window.");
+                continue;
+            }
+            // if window don't support floating mode, or default rect of cascade is not satisfied with limits
+            if (!WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) ||
+                !WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowUpdatedSizeLimits())) {
+                MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_CASCADE);
+                continue;
+            }
+            if (isFirstReorderedWindow) {
+                isFirstReorderedWindow = false;
+            } else {
+                rect = StepCascadeRect(rect, displayId);
+            }
+            node->SetRequestRect(rect);
+            node->SetDecoStatus(true);
+            if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+                node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+                if (node->GetWindowToken()) {
+                    node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+                }
+            }
+            WLOGFD("Cascade reorder Id: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+                node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+        }
+        LayoutWindowTree(displayId);
     }
-    displayGroupLimitRect_ = displayGroupRect_;
+    WLOGFI("Cascade Reorder end");
 }
 
 void WindowLayoutPolicyCascade::InitAllRects()
 {
-    const auto& displayRectMap = displayGroupInfo_->GetAllDisplayRects();
-    for (auto& iter : displayRectMap) {
-        // init split and limit rects
-        InitSplitRects(iter.first);
-        InitLimitRects(iter.first);
-        // init full displayRect
-        displayGroupLimitRect_ = displayGroupRect_;
-        // init cascade rect
-        auto& displayWindowTree = displayGroupWindowTree_[iter.first];
-        LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::ABOVE_WINDOW_NODE]));
-        InitCascadeRect(iter.first);
+    UpdateDisplayGroupRect();
+    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
+        auto displayId = iter.first;
+        InitSplitRects(displayId);
+        LayoutWindowTree(displayId);
+        InitCascadeRect(displayId);
     }
 }
 
-void WindowLayoutPolicyCascade::LayoutWindowNode(const sptr<WindowNode>& node)
+void WindowLayoutPolicyCascade::LayoutSplitNodes(DisplayId displayId, WindowUpdateType type, bool layoutByDivider)
 {
-    if (node == nullptr) {
-        return;
-    }
-    if (node->parent_ != nullptr) { // isn't root node
-        if (!node->currentVisibility_) {
-            WLOGFI("window[%{public}u] currently not visible, no need layout", node->GetWindowId());
-            return;
-        }
-        UpdateLayoutRect(node);
-        if (avoidTypes_.find(node->GetWindowType()) != avoidTypes_.end()) {
-            const DisplayId& displayId = node->GetDisplayId();
-            Rect& primaryLimitRect = cascadeRectsMap_[displayId].primaryLimitRect_;
-            Rect& secondaryLimitRect = cascadeRectsMap_[displayId].secondaryLimitRect_;
-            UpdateLimitRect(node, limitRectMap_[displayId]);
-            UpdateSplitLimitRect(limitRectMap_[displayId], primaryLimitRect);
-            UpdateSplitLimitRect(limitRectMap_[displayId], secondaryLimitRect);
-            UpdateSplitRatioPoints(displayId);
-            UpdateDisplayGroupLimitRect();
-            WLOGFI("priLimitRect: %{public}d %{public}d %{public}u %{public}u, " \
-                "secLimitRect: %{public}d %{public}d %{public}u %{public}u", primaryLimitRect.posX_,
-                primaryLimitRect.posY_, primaryLimitRect.width_, primaryLimitRect.height_, secondaryLimitRect.posX_,
-                secondaryLimitRect.posY_, secondaryLimitRect.width_, secondaryLimitRect.height_);
-        }
-    }
-    for (auto& childNode : node->children_) {
-        LayoutWindowNode(childNode);
-    }
-}
-
-void WindowLayoutPolicyCascade::LayoutWindowTree(DisplayId displayId)
-{
-    InitLimitRects(displayId);
-    WindowLayoutPolicy::LayoutWindowTree(displayId);
-}
-
-void WindowLayoutPolicyCascade::RemoveWindowNode(const sptr<WindowNode>& node)
-{
-    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
-    auto type = node->GetWindowType();
-    // affect other windows, trigger off global layout
-    if (avoidTypes_.find(type) != avoidTypes_.end()) {
-        LayoutWindowTree(node->GetDisplayId());
-    } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
-        InitSplitRects(node->GetDisplayId());
-        LayoutWindowTree(node->GetDisplayId());
-    }
-    UpdateClientRect(node->GetRequestRect(), node, WindowSizeChangeReason::HIDE);
-}
-
-std::vector<int32_t> WindowLayoutPolicyCascade::GetExitSplitPoints(DisplayId displayId) const
-{
-    return cascadeRectsMap_[displayId].exitSplitPoints_;
-}
-
-bool WindowLayoutPolicyCascade::SpecialReasonProcess(const sptr<WindowNode>& node) const
-{
-    const DisplayId& displayId = node->GetDisplayId();
-    if ((node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) ||
-        (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::RESIZE)) {
-        if (node->GetRequestRect() == node->GetWindowRect()) {
-            return false;
-        }
-    }
-    if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::ROTATION) {
-        const auto& windowNodeVecSptrs = displayGroupWindowTree_[displayId];
-        for (const auto& windowNodeVecSptr : windowNodeVecSptrs) {
-            const auto& windowNodeVec = *(windowNodeVecSptr.second);
-            for (auto& childNode : windowNodeVec) {
-                childNode->SetWindowSizeChangeReason(WindowSizeChangeReason::ROTATION);
+    const auto& appWindowNodeVec = *(displayGroupWindowTree_[displayId][WindowRootNodeType::APP_WINDOW_NODE]);
+    for (auto& childNode : appWindowNodeVec) {
+        if (type == WindowUpdateType::WINDOW_UPDATE_REMOVED) {
+            /*
+             * If updateType is remove we need to layout all appNodes, cause remove split node or
+             * divider means exit split mode, split node may change to other mode
+             */
+            LayoutWindowNode(childNode);
+        } else if (childNode->IsSplitMode()) { // add or update type, layout split node
+            if (layoutByDivider && type == WindowUpdateType::WINDOW_UPDATE_ACTIVE) {
+                childNode->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
             }
+            LayoutWindowNode(childNode);
         }
     }
-    return true;
 }
 
-void WindowLayoutPolicyCascade::UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow)
+void WindowLayoutPolicyCascade::LayoutDivider(const sptr<WindowNode>& node, WindowUpdateType type)
+{
+    auto displayId = node->GetDisplayId();
+    switch (type) {
+        case WindowUpdateType::WINDOW_UPDATE_ADDED:
+            SetInitialDividerRect(node, displayId);
+            [[fallthrough]];
+        case WindowUpdateType::WINDOW_UPDATE_ACTIVE:
+            UpdateDividerPosition(node);
+            LayoutWindowNode(node);
+            SetSplitRectByDivider(node->GetWindowRect(), displayId); // set splitRect by divider
+            break;
+        case WindowUpdateType::WINDOW_UPDATE_REMOVED:
+            InitSplitRects(displayId); // reinit split rects when remove divider
+            break;
+        default:
+            WLOGFW("Unknown update type, type: %{public}u", type);
+    }
+    LayoutSplitNodes(displayId, type, true);
+}
+
+void WindowLayoutPolicyCascade::PerformWindowLayout(const sptr<WindowNode>& node, WindowUpdateType updateType)
 {
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
-    auto type = node->GetWindowType();
-    const DisplayId& displayId = node->GetDisplayId();
-    UpdateWindowNodeRectOffset(node);
-    // affect other windows, trigger off global layout
-    if (avoidTypes_.find(type) != avoidTypes_.end()) {
-        bool ret = SpecialReasonProcess(node);
-        if (ret != true) {
-            return;
-        }
-        LayoutWindowTree(displayId);
-    } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode
-        UpdateLayoutRect(node);
-        auto splitDockerRect = node->GetWindowRect();
-        SetSplitRect(splitDockerRect, displayId); // calculate primary/secondary depend on divider rect
-        WLOGFI("UpdateDividerRects WinId: %{public}u, Rect: %{public}d %{public}d %{public}u %{public}u",
-            node->GetWindowId(), splitDockerRect.posX_, splitDockerRect.posY_,
-            splitDockerRect.width_, splitDockerRect.height_);
-        if (!isAddWindow) {
-            const auto& appWindowNodeVec = *(displayGroupWindowTree_[displayId][WindowRootNodeType::APP_WINDOW_NODE]);
-            for (auto& childNode : appWindowNodeVec) { // update split node size change reason
-                if (childNode->IsSplitMode()) {
-                    childNode->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
-                }
+    const auto& windowType = node->GetWindowType();
+    const auto& requestRect = node->GetRequestRect();
+    WLOGFI("[PerformWindowLayout] windowId: %{public}u, windowType: %{public}u, updateType: %{public}u, requestRect: "
+        "requestRect: [%{public}d, %{public}d, %{public}u, %{public}u]", node->GetWindowId(), windowType, updateType,
+        requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_);
+    SetDefaultCascadeRect(node);
+    FixWindowRectWithinDisplay(node);
+    switch (windowType) {
+        case WindowType::WINDOW_TYPE_DOCK_SLICE:
+            LayoutDivider(node, updateType);
+            break;
+        case WindowType::WINDOW_TYPE_STATUS_BAR:
+        case WindowType::WINDOW_TYPE_NAVIGATION_BAR:
+            LayoutWindowTree(node->GetDisplayId());
+            break;
+        default:
+            if (node->IsSplitMode()) {
+                LayoutSplitNodes(node->GetDisplayId(), updateType);
+            } else {
+                LayoutWindowNode(node);
             }
-        }
-        LayoutWindowTree(displayId);
-    } else if (node->IsSplitMode()) {
-        LayoutWindowTree(displayId);
-    } else { // layout single window
-        LayoutWindowNode(node);
+    }
+    if (updateType == WindowUpdateType::WINDOW_UPDATE_REMOVED) {
+        NotifyClientAndAnimation(node, node->GetRequestRect(), WindowSizeChangeReason::HIDE);
     }
 }
 
-void WindowLayoutPolicyCascade::AddWindowNode(const sptr<WindowNode>& node)
+void WindowLayoutPolicyCascade::SetInitialDividerRect(const sptr<WindowNode>& node, DisplayId displayId)
 {
-    HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
-    auto property = node->GetWindowProperty();
-    if (property == nullptr) {
-        WLOGFE("window property is nullptr.");
-        return;
-    }
-
-    if (WindowHelper::IsEmptyRect(property->GetRequestRect())) {
-        SetCascadeRect(node);
-    }
-    UpdateWindowNodeRectOffset(node);
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        node->SetRequestRect(cascadeRectsMap_[node->GetDisplayId()].dividerRect_); // init divider bar
-        DisplayId displayId = node->GetDisplayId();
-        if (!WindowHelper::IsEmptyRect(restoringDividerWindowRects_[displayId])) {
-            node->SetRequestRect(restoringDividerWindowRects_[displayId]);
-        }
-        restoringDividerWindowRects_.erase(displayId);
-    }
-    UpdateWindowNode(node, true); // currently, update and add do the same process
+    const auto& restoredRect = restoringDividerWindowRects_[displayId];
+    const auto& presetRect = cascadeRectsMap_[node->GetDisplayId()].dividerRect_;
+    auto divRect = WindowHelper::IsEmptyRect(restoredRect) ? presetRect : restoredRect;
+    node->SetRequestRect(divRect);
+    restoringDividerWindowRects_.erase(displayId);
 }
 
 void WindowLayoutPolicyCascade::SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects)
@@ -231,7 +185,7 @@ void WindowLayoutPolicyCascade::SetSplitDividerWindowRects(std::map<DisplayId, R
     restoringDividerWindowRects_ = dividerWindowRects;
 }
 
-void WindowLayoutPolicyCascade::LimitDividerMoveBounds(Rect& rect, DisplayId displayId) const
+void WindowLayoutPolicyCascade::LimitDividerInDisplayRegion(Rect& rect, DisplayId displayId) const
 {
     const Rect& limitRect = limitRectMap_[displayId];
     if (rect.width_ < rect.height_) {
@@ -249,8 +203,30 @@ void WindowLayoutPolicyCascade::LimitDividerMoveBounds(Rect& rect, DisplayId dis
             rect.posY_ = limitRect.posY_ + static_cast<int32_t>(limitRect.height_ - rect.height_);
         }
     }
-    WLOGFI("limit divider move bounds:[%{public}d, %{public}d, %{public}u, %{public}u]",
+    WLOGFD("limit divider move bounds: [%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
+}
+
+void WindowLayoutPolicyCascade::UpdateDividerPosition(const sptr<WindowNode>& node) const
+{
+    auto rect = node->GetRequestRect();
+    auto displayId = node->GetDisplayId();
+    LimitDividerInDisplayRegion(rect, displayId);
+    if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::DRAG_END) {
+        LimitDividerPositionBySplitRatio(displayId, rect);
+    }
+    /*
+     * use the layout orientation of the window and the layout orientation of the screen
+     * to determine whether the screen is rotating
+     */
+    if ((!WindowHelper::IsLandscapeRect(rect) && IsVerticalDisplay(displayId)) ||
+        (WindowHelper::IsLandscapeRect(rect) && !IsVerticalDisplay(displayId))) {
+        // resets the rect of the divider window when the screen is rotating
+        WLOGFD("Reset divider when display rotate rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+            rect.posX_, rect.posY_, rect.width_, rect.height_);
+        rect = cascadeRectsMap_[displayId].dividerRect_;
+    }
+    node->SetRequestRect(rect);
 }
 
 void WindowLayoutPolicyCascade::InitCascadeRect(DisplayId displayId)
@@ -267,172 +243,124 @@ void WindowLayoutPolicyCascade::InitCascadeRect(DisplayId displayId)
     Rect resRect = {0, 0, defaultW, defaultH};
     const Rect& limitRect = limitRectMap_[displayId];
     if (defaultW <= limitRect.width_ && defaultH <= limitRect.height_) {
-        int32_t centerPosX = limitRect.posX_ + static_cast<int32_t>(limitRect.width_ / half);
-        resRect.posX_ = centerPosX - static_cast<int32_t>(defaultW / half);
+        resRect.posX_ = limitRect.posX_ + static_cast<int32_t>((limitRect.width_ - defaultW) / half);
 
-        int32_t centerPosY = limitRect.posY_ + static_cast<int32_t>(limitRect.height_ / half);
-        resRect.posY_ = centerPosY - static_cast<int32_t>(defaultH / half);
+        resRect.posY_ = limitRect.posY_ + static_cast<int32_t>((limitRect.height_ - defaultH) / half);
     }
-    WLOGFI("init CascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
+    WLOGFI("Init CascadeRect :[%{public}d, %{public}d, %{public}d, %{public}d]",
         resRect.posX_, resRect.posY_, resRect.width_, resRect.height_);
-    cascadeRectsMap_[displayId].firstCascadeRect_ = resRect;
+    cascadeRectsMap_[displayId].defaultCascadeRect_ = resRect;
+}
+
+void WindowLayoutPolicyCascade::ComputeDecoratedRequestRect(const sptr<WindowNode>& node) const
+{
+    auto property = node->GetWindowProperty();
+    if (property == nullptr) {
+        WLOGE("window property is nullptr");
+        return;
+    }
+
+    if (!property->GetDecorEnable() || property->GetDecoStatus() ||
+        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
+        return;
+    }
+    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    uint32_t winFrameW = static_cast<uint32_t>(WINDOW_FRAME_WIDTH * virtualPixelRatio);
+    uint32_t winTitleBarH = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
+
+    auto oriRect = property->GetRequestRect();
+    Rect dstRect;
+    dstRect.posX_ = oriRect.posX_;
+    dstRect.posY_ = oriRect.posY_;
+    dstRect.width_ = oriRect.width_ + winFrameW + winFrameW;
+    dstRect.height_ = oriRect.height_ + winTitleBarH + winFrameW;
+    property->SetRequestRect(dstRect);
+    property->SetDecoStatus(true);
 }
 
 void WindowLayoutPolicyCascade::ApplyWindowRectConstraints(const sptr<WindowNode>& node, Rect& winRect) const
 {
-    WLOGFI("Before apply constraints winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-    auto reason = node->GetWindowSizeChangeReason();
-    DisplayId displayId = node->GetDisplayId();
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        // make sure the divider is entirely within display
-        LimitDividerMoveBounds(winRect, displayId);
-        if (reason == WindowSizeChangeReason::DRAG_END) {
-            if (!IsVerticalDisplay(displayId)) {
-                UpdateDockSlicePosition(displayId, winRect.posX_);
-            } else {
-                UpdateDockSlicePosition(displayId, winRect.posY_);
-            }
-        }
-        /*
-         * use the layout orientation of the window and the layout orientation of the screen
-         * to determine whether the screen is rotating
-         */
-        if ((!WindowHelper::IsLandscapeRect(winRect) && IsVerticalDisplay(displayId)) ||
-            (WindowHelper::IsLandscapeRect(winRect) && !IsVerticalDisplay(displayId))) {
-            // resets the rect of the divider window when the screen is rotating
-            WLOGFD("Reset divider when display rotate rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-                winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-            winRect = cascadeRectsMap_[displayId].dividerRect_;
-            node->SetRequestRect(winRect);
-        }
-    }
+    WLOGFD("[Before constraints] windowId: %{public}u, winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+        node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
     LimitFloatingWindowSize(node, displayGroupInfo_->GetDisplayRect(node->GetDisplayId()), winRect);
     LimitMainFloatingWindowPosition(node, winRect);
-    WLOGFI("After apply constraints winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-        winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
+    WLOGFD("[After constraints] windowId: %{public}u, winRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+        node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
 }
 
 void WindowLayoutPolicyCascade::UpdateLayoutRect(const sptr<WindowNode>& node)
 {
-    auto type = node->GetWindowType();
-    auto mode = node->GetWindowMode();
     auto property = node->GetWindowProperty();
     if (property == nullptr) {
         WLOGFE("window property is nullptr.");
         return;
     }
-    UpdateWindowSizeLimits(node);
-    bool needAvoid = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-    bool parentLimit = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_PARENT_LIMIT));
-    bool subWindow = WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemSubWindow(type);
-    bool floatingWindow = (mode == WindowMode::WINDOW_MODE_FLOATING);
-    const Rect lastWinRect = node->GetWindowRect();
-    Rect displayRect = GetDisplayRect(mode, node->GetDisplayId());
-    Rect limitRect = displayRect;
-    ComputeDecoratedRequestRect(node);
+    auto mode = node->GetWindowMode();
     Rect winRect = property->GetRequestRect();
-
-    WLOGFI("Id:%{public}u, avoid:%{public}d parLimit:%{public}d floating:%{public}d, sub:%{public}d, " \
-        "deco:%{public}d, type:%{public}d, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
-        node->GetWindowId(), needAvoid, parentLimit, floatingWindow, subWindow, property->GetDecorEnable(),
-        static_cast<uint32_t>(type), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-    if (needAvoid) {
-        limitRect = GetLimitRect(mode, node->GetDisplayId());
-    }
-
-    if (!floatingWindow) { // fullscreen window
-        winRect = limitRect;
-    } else { // floating window
-        if (subWindow && parentLimit && node->parent_) { // subwindow and limited by parent
-            limitRect = node->parent_->GetWindowRect();
-            UpdateFloatingLayoutRect(limitRect, winRect);
+    auto displayId = node->GetDisplayId();
+    WLOGFI("[Before CascadeLayout] windowId: %{public}u, mode: %{public}u, type: %{public}u requestRect: [%{public}d, "
+        "%{public}d, %{public}u, %{public}u]", node->GetWindowId(), mode, node->GetWindowType(), winRect.posX_,
+        winRect.posY_, winRect.width_, winRect.height_);
+    switch (mode) {
+        case WindowMode::WINDOW_MODE_SPLIT_PRIMARY:
+            winRect = cascadeRectsMap_[displayId].primaryRect_;
+            break;
+        case WindowMode::WINDOW_MODE_SPLIT_SECONDARY:
+            winRect = cascadeRectsMap_[displayId].secondaryRect_;
+            break;
+        case WindowMode::WINDOW_MODE_FULLSCREEN: {
+            bool needAvoid = (node->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
+            winRect = needAvoid ? limitRectMap_[displayId] : displayGroupInfo_->GetDisplayRect(displayId);
+            break;
         }
+        case WindowMode::WINDOW_MODE_FLOATING: {
+            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+                break;
+            }
+            UpdateWindowSizeLimits(node);
+            ComputeDecoratedRequestRect(node);
+            winRect = property->GetRequestRect();
+            ApplyWindowRectConstraints(node, winRect);
+            break;
+        }
+        default:
+            WLOGFW("Layout invalid mode, winId: %{public}u, mode: %{public}u", node->GetWindowId(), mode);
     }
-    ApplyWindowRectConstraints(node, winRect);
+    WLOGFI("[After CascadeLayout] windowId: %{public}u, isDecor: %{public}u, winRect: [%{public}d, %{public}d, "
+        "%{public}u, %{public}u]", node->GetWindowId(), node->GetDecoStatus(), winRect.posX_, winRect.posY_,
+        winRect.width_, winRect.height_);
+
+    const Rect& lastWinRect = node->GetWindowRect();
     node->SetWindowRect(winRect);
+
+    // postProcess after update winRect
     CalcAndSetNodeHotZone(winRect, node);
-    // update node bounds before reset reason
     UpdateSurfaceBounds(node, winRect, lastWinRect);
-    UpdateClientRectAndResetReason(node, winRect);
+    NotifyClientAndAnimation(node, winRect, node->GetWindowSizeChangeReason());
 }
 
-void WindowLayoutPolicyCascade::InitLimitRects(DisplayId displayId)
+void WindowLayoutPolicyCascade::LimitDividerPositionBySplitRatio(DisplayId displayId, Rect& winRect) const
 {
-    limitRectMap_[displayId] = displayGroupInfo_->GetDisplayRect(displayId);
-    cascadeRectsMap_[displayId].primaryLimitRect_ = cascadeRectsMap_[displayId].primaryRect_;
-    cascadeRectsMap_[displayId].secondaryLimitRect_ = cascadeRectsMap_[displayId].secondaryRect_;
-    UpdateSplitRatioPoints(displayId);
-}
-
-Rect WindowLayoutPolicyCascade::GetLimitRect(const WindowMode mode, DisplayId displayId) const
-{
-    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-        return cascadeRectsMap_[displayId].primaryLimitRect_;
-    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        return cascadeRectsMap_[displayId].secondaryLimitRect_;
-    } else {
-        return limitRectMap_[displayId];
-    }
-}
-
-Rect WindowLayoutPolicyCascade::GetDisplayRect(const WindowMode mode, DisplayId displayId) const
-{
-    if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-        return cascadeRectsMap_[displayId].primaryRect_;
-    } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        return cascadeRectsMap_[displayId].secondaryRect_;
-    } else {
-        return displayGroupInfo_->GetDisplayRect(displayId);
-    }
-}
-
-void WindowLayoutPolicyCascade::UpdateSplitRatioPoints(DisplayId displayId)
-{
-    LayoutRects& cascadeRects = cascadeRectsMap_[displayId];
-    cascadeRects.exitSplitPoints_.clear();
-    cascadeRects.splitRatioPoints_.clear();
-    cascadeRects.exitSplitPoints_.push_back(GetSplitRatioPoint(splitRatioConfig_.exitSplitStartRatio, displayId));
-    cascadeRects.exitSplitPoints_.push_back(GetSplitRatioPoint(splitRatioConfig_.exitSplitEndRatio, displayId));
-    for (const auto& ratio : splitRatioConfig_.splitRatios) {
-        cascadeRects.splitRatioPoints_.push_back(GetSplitRatioPoint(ratio, displayId));
-    }
-}
-
-void WindowLayoutPolicyCascade::UpdateDockSlicePosition(DisplayId displayId, int32_t& origin) const
-{
-    const LayoutRects& cascadeRects = cascadeRectsMap_[displayId];
-    if (cascadeRects.splitRatioPoints_.size() == 0) {
+    int32_t oriPos = IsVerticalDisplay(displayId) ? winRect.posY_ : winRect.posX_;
+    int32_t& dstPos = IsVerticalDisplay(displayId) ? winRect.posY_ : winRect.posX_;
+    if (splitRatioPointsMap_[displayId].size() == 0) {
         return;
     }
     uint32_t minDiff = std::max(limitRectMap_[displayId].width_, limitRectMap_[displayId].height_);
-    int32_t closestPoint = origin;
-    for (const auto& elem : cascadeRects.splitRatioPoints_) {
-        uint32_t diff = (origin > elem) ? (origin - elem) : (elem - origin);
+    int32_t closestPoint = oriPos;
+    for (const auto& elem : splitRatioPointsMap_[displayId]) {
+        uint32_t diff = (oriPos > elem) ? (oriPos - elem) : (elem - oriPos);
         if (diff < minDiff) {
             closestPoint = elem;
             minDiff = diff;
         }
     }
-    origin = closestPoint;
-}
-
-void WindowLayoutPolicyCascade::UpdateSplitLimitRect(const Rect& limitRect, Rect& limitSplitRect)
-{
-    Rect curLimitRect = limitSplitRect;
-    limitSplitRect.posX_ = std::max(limitRect.posX_, curLimitRect.posX_);
-    limitSplitRect.posY_ = std::max(limitRect.posY_, curLimitRect.posY_);
-    limitSplitRect.width_ = std::min(limitRect.posX_ + limitRect.width_,
-                                     curLimitRect.posX_ + curLimitRect.width_) -
-                                     limitSplitRect.posX_;
-    limitSplitRect.height_ = std::min(limitRect.posY_ + limitRect.height_,
-                                      curLimitRect.posY_ + curLimitRect.height_) -
-                                      limitSplitRect.posY_;
+    dstPos = closestPoint;
 }
 
 void WindowLayoutPolicyCascade::InitSplitRects(DisplayId displayId)
 {
-    float virtualPixelRatio = GetVirtualPixelRatio(displayId);
+    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
     uint32_t dividerWidth = static_cast<uint32_t>(DIVIDER_WIDTH * virtualPixelRatio);
     auto& dividerRect = cascadeRectsMap_[displayId].dividerRect_;
     const auto& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
@@ -443,25 +371,10 @@ void WindowLayoutPolicyCascade::InitSplitRects(DisplayId displayId)
         dividerRect = { 0, static_cast<uint32_t>((displayRect.height_ - dividerWidth) * DEFAULT_SPLIT_RATIO),
                displayRect.width_, dividerWidth };
     }
-    WLOGFI("init dividerRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
-        dividerRect.posX_, dividerRect.posY_, dividerRect.width_, dividerRect.height_);
-    SetSplitRect(dividerRect, displayId);
+    SetSplitRectByDivider(dividerRect, displayId);
 }
 
-int32_t WindowLayoutPolicyCascade::GetSplitRatioPoint(float ratio, DisplayId displayId)
-{
-    auto dividerRect = cascadeRectsMap_[displayId].dividerRect_;
-    auto displayRect = displayGroupInfo_->GetDisplayRect(displayId);
-    if (!IsVerticalDisplay(displayId)) {
-        return displayRect.posX_ +
-            static_cast<int32_t>((displayRect.width_ - dividerRect.width_) * ratio);
-    } else {
-        return displayRect.posY_ +
-            static_cast<int32_t>((displayRect.height_ - dividerRect.height_) * ratio);
-    }
-}
-
-void WindowLayoutPolicyCascade::SetSplitRect(const Rect& divRect, DisplayId displayId)
+void WindowLayoutPolicyCascade::SetSplitRectByDivider(const Rect& divRect, DisplayId displayId)
 {
     auto& dividerRect = cascadeRectsMap_[displayId].dividerRect_;
     auto& primaryRect = cascadeRectsMap_[displayId].primaryRect_;
@@ -491,47 +404,12 @@ void WindowLayoutPolicyCascade::SetSplitRect(const Rect& divRect, DisplayId disp
         secondaryRect.height_ = displayRect.height_ - secondaryRect.posY_;
         secondaryRect.width_ = displayRect.width_;
     }
-}
-
-void WindowLayoutPolicyCascade::Reorder()
-{
-    WLOGFI("Cascade reorder start");
-    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
-        DisplayId displayId = iter.first;
-        Rect rect = cascadeRectsMap_[displayId].firstCascadeRect_;
-        bool isFirstReorderedWindow = true;
-        const auto& appWindowNodeVec = *(displayGroupWindowTree_[displayId][WindowRootNodeType::APP_WINDOW_NODE]);
-        for (auto nodeIter = appWindowNodeVec.begin(); nodeIter != appWindowNodeVec.end(); nodeIter++) {
-            auto node = *nodeIter;
-            if (node == nullptr || node->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-                WLOGFI("get node failed or not app window.");
-                continue;
-            }
-            // if window don't support floating mode, or default rect of cascade is not satisfied with limits
-            if (!WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) ||
-                !WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowUpdatedSizeLimits())) {
-                MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_CASCADE);
-                continue;
-            }
-            if (isFirstReorderedWindow) {
-                isFirstReorderedWindow = false;
-            } else {
-                rect = StepCascadeRect(rect, displayId);
-            }
-            node->SetRequestRect(rect);
-            node->SetDecoStatus(true);
-            if (node->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
-                node->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-                if (node->GetWindowToken()) {
-                    node->GetWindowToken()->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-                }
-            }
-            WLOGFI("Cascade reorder Id: %{public}d, rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
-                node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
-        }
-        LayoutWindowTree(displayId);
-    }
-    WLOGFI("Reorder end");
+    WLOGFD("DividerRect: [%{public}d %{public}d %{public}u %{public}u] "
+        "PrimaryRect: [%{public}d %{public}d %{public}u %{public}u] "
+        "SecondaryRect: [%{public}d %{public}d %{public}u %{public}u]",
+        dividerRect.posX_, dividerRect.posY_, dividerRect.width_, dividerRect.height_,
+        primaryRect.posX_, primaryRect.posY_, primaryRect.width_, primaryRect.height_,
+        secondaryRect.posX_, secondaryRect.posY_, secondaryRect.width_, secondaryRect.height_);
 }
 
 Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) const
@@ -553,7 +431,7 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
                     cascadeRect = ((*iter)->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ?
                         property->GetWindowRect() : property->GetRequestRect());
                 }
-                WLOGFI("Get current cascadeRect: %{public}u [%{public}d, %{public}d, %{public}u, %{public}u]",
+                WLOGFD("Get current cascadeRect: %{public}u [%{public}d, %{public}d, %{public}u, %{public}u]",
                     (*iter)->GetWindowId(), cascadeRect.posX_, cascadeRect.posY_,
                     cascadeRect.width_, cascadeRect.height_);
                 break;
@@ -562,15 +440,15 @@ Rect WindowLayoutPolicyCascade::GetCurCascadeRect(const sptr<WindowNode>& node) 
     }
 
     if (WindowHelper::IsEmptyRect(cascadeRect)) {
-        WLOGFI("cascade rect is empty use first cascade rect");
-        return cascadeRectsMap_[displayId].firstCascadeRect_;
+        WLOGFD("cascade rect is empty use first cascade rect");
+        return cascadeRectsMap_[displayId].defaultCascadeRect_;
     }
     return StepCascadeRect(cascadeRect, displayId);
 }
 
 Rect WindowLayoutPolicyCascade::StepCascadeRect(Rect rect, DisplayId displayId) const
 {
-    float virtualPixelRatio = GetVirtualPixelRatio(displayId);
+    float virtualPixelRatio = displayGroupInfo_->GetDisplayVirtualPixelRatio(displayId);
     uint32_t cascadeWidth = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
     uint32_t cascadeHeight = static_cast<uint32_t>(WINDOW_TITLE_BAR_HEIGHT * virtualPixelRatio);
 
@@ -586,37 +464,42 @@ Rect WindowLayoutPolicyCascade::StepCascadeRect(Rect rect, DisplayId displayId) 
                         (rect.posY_ + static_cast<int32_t>(rect.height_ + cascadeHeight) <=
                         (limitRect.posY_ + static_cast<int32_t>(limitRect.height_))) ?
                         (rect.posY_ + static_cast<int32_t>(cascadeHeight)) : limitRect.posY_;
-    WLOGFI("step cascadeRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
+    WLOGFD("Step cascadeRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
         cascadeRect.posX_, cascadeRect.posY_, cascadeRect.width_, cascadeRect.height_);
     return cascadeRect;
 }
 
-void WindowLayoutPolicyCascade::SetCascadeRect(const sptr<WindowNode>& node)
+void WindowLayoutPolicyCascade::SetDefaultCascadeRect(const sptr<WindowNode>& node)
 {
-    static bool isFirstAppWindow = true;
-    Rect rect;
     auto property = node->GetWindowProperty();
     if (property == nullptr) {
         WLOGFE("window property is nullptr.");
         return;
     }
+    if (!WindowHelper::IsEmptyRect(property->GetRequestRect())) {
+        return;
+    }
+
+    static bool isFirstAppWindow = true;
+    Rect rect;
     if (WindowHelper::IsAppWindow(property->GetWindowType()) && isFirstAppWindow) {
-        WLOGFI("set first app window cascade rect");
-        rect = cascadeRectsMap_[node->GetDisplayId()].firstCascadeRect_;
+        WLOGFD("Set first app window cascade rect");
+        rect = cascadeRectsMap_[node->GetDisplayId()].defaultCascadeRect_;
         isFirstAppWindow = false;
     } else if (WindowHelper::IsAppWindow(property->GetWindowType()) && !isFirstAppWindow) {
-        WLOGFI("set other app window cascade rect");
+        WLOGFD("Set other app window cascade rect");
         rect = GetCurCascadeRect(node);
     } else {
         // system window
-        WLOGFI("set system window cascade rect");
-        rect = cascadeRectsMap_[node->GetDisplayId()].firstCascadeRect_;
+        WLOGFD("Set system window cascade rect");
+        rect = cascadeRectsMap_[node->GetDisplayId()].defaultCascadeRect_;
     }
-    WLOGFI("set cascadeRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
+    WLOGFD("Set cascadeRect :[%{public}d, %{public}d, %{public}u, %{public}u]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     node->SetRequestRect(rect);
     node->SetDecoStatus(true);
 }
+
 Rect WindowLayoutPolicyCascade::GetDividerRect(DisplayId displayId) const
 {
     Rect dividerRect = {0, 0, 0, 0};
@@ -626,39 +509,31 @@ Rect WindowLayoutPolicyCascade::GetDividerRect(DisplayId displayId) const
     return dividerRect;
 }
 
-void WindowLayoutPolicyCascade::UpdateWindowNodeRectOffset(const sptr<WindowNode>& node) const
+void WindowLayoutPolicyCascade::FixWindowRectWithinDisplay(const sptr<WindowNode>& node) const
 {
-    WLOGFD("UpdateWindowNodeRectOffset, windowId: %{public}u", node->GetWindowId());
     auto displayId = node->GetDisplayId();
     const Rect& displayRect = displayGroupInfo_->GetDisplayRect(displayId);
     auto displayInfo = displayGroupInfo_->GetDisplayInfo(displayId);
     auto type = node->GetWindowType();
     Rect rect = node->GetRequestRect();
-    WLOGFD("RequestRect before, width: %{public}u, height: %{public}u, posX:%{public}d, posY:%{public}d",
-        rect.width_, rect.height_, rect.posX_, rect.posY_);
     switch (type) {
-        case WindowType::WINDOW_TYPE_STATUS_BAR: {
+        case WindowType::WINDOW_TYPE_STATUS_BAR:
             rect.posY_ = displayRect.posY_;
             break;
-        }
-        case WindowType::WINDOW_TYPE_NAVIGATION_BAR: {
+        case WindowType::WINDOW_TYPE_NAVIGATION_BAR:
             rect.posY_ = static_cast<int32_t>(displayRect.height_) + displayRect.posY_ -
                 static_cast<int32_t>(rect.height_);
             break;
-        }
-        default: {
-            if (displayInfo->GetWaterfallDisplayCompressionStatus()) {
-                if (rect.posY_ < displayRect.posY_) {
-                    rect.posY_ = displayRect.posY_;
-                } else if (rect.posY_ > displayRect.posY_ + static_cast<int32_t>(displayRect.height_)) {
-                    rect.posY_ = displayRect.posY_ + static_cast<int32_t>(displayRect.height_);
-                }
+        default:
+            if (!displayInfo->GetWaterfallDisplayCompressionStatus()) {
+                return;
             }
-        }
+            rect.posY_ = std::max(rect.posY_, displayRect.posY_);
+            rect.posY_ = std::min(rect.posY_, displayRect.posY_ + static_cast<int32_t>(displayRect.height_));
     }
     node->SetRequestRect(rect);
-    WLOGFD("RequestRect after, width: %{public}u, height: %{public}u, posX:%{public}d, posY:%{public}d",
-        rect.width_, rect.height_, rect.posX_, rect.posY_);
+    WLOGFD("[After fix rect], winId: %{public}d, requestRect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+        node->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
 } // Rosen
 } // OHOS
