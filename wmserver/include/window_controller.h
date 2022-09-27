@@ -99,7 +99,6 @@ private:
     void ResizeSoftInputCallingWindowIfNeed(const sptr<WindowNode>& node);
     void RestoreCallingWindowSizeIfNeed();
     void HandleTurnScreenOn(const sptr<WindowNode>& node);
-    void ProcessSystemBarChange(const sptr<DisplayInfo>& displayInfo);
     WMError UpdateTouchHotAreas(const sptr<WindowNode>& node, const std::vector<Rect>& rects);
     WMError UpdateTransform(uint32_t windowId);
     void NotifyTouchOutside(const sptr<WindowNode>& node);

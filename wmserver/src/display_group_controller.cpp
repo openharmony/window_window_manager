@@ -14,6 +14,7 @@
  */
 #include "display_group_controller.h"
 
+#include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
 #include "window_node_container.h"
@@ -393,9 +394,11 @@ void DisplayGroupController::ProcessDisplayCreate(DisplayId defaultDisplayId, sp
     ProcessCrossNodes(defaultDisplayId, DisplayStateChangeType::CREATE);
     UpdateDisplayGroupWindowTree();
     const auto& layoutPolicy = windowNodeContainer_->GetLayoutPolicy();
+    if (layoutPolicy == nullptr) {
+        return;
+    }
     layoutPolicy->ProcessDisplayCreate(displayId, displayRectMap);
-    Rect initialDividerRect = layoutPolicy->GetDividerRect(displayId);
-    SetDividerRect(displayId, initialDividerRect);
+    ProcessWindowPairWhenDisplayChange();
 }
 
 void DisplayGroupController::ProcessDisplayDestroy(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -412,9 +415,31 @@ void DisplayGroupController::ProcessDisplayDestroy(DisplayId defaultDisplayId, s
     UpdateDisplayGroupWindowTree();
     ClearMapOfDestroyedDisplay(displayId);
     windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayDestroy(displayId, displayRectMap);
+    ProcessWindowPairWhenDisplayChange();
 }
 
-void DisplayGroupController::UpdateNodeSizeChangeReasonWithRotation(DisplayId displayId)
+void DisplayGroupController::ProcessSystemBarRotation(const sptr<WindowNode>& node,
+    const std::map<DisplayId, Rect>& displayRectMap)
+{
+    auto rect = node->GetWindowRect();
+    auto displayId = node->GetDisplayId();
+    auto iter = displayRectMap.find(displayId);
+    if (iter == displayRectMap.end()) {
+        return;
+    }
+    auto displayRect = iter->second;
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR) {
+        rect.width_ = displayRect.width_;
+    } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+        rect.posY_ = static_cast<int32_t>(displayRect.height_ - rect.height_);
+        rect.width_ = displayRect.width_;
+    }
+
+    node->SetRequestRect(rect);
+}
+
+void DisplayGroupController::UpdateNodeSizeChangeReasonWithRotation(DisplayId displayId,
+    const std::map<DisplayId, Rect>& displayRectMap)
 {
     std::vector<WindowRootNodeType> rootNodeType = {
         WindowRootNodeType::ABOVE_WINDOW_NODE,
@@ -431,6 +456,9 @@ void DisplayGroupController::UpdateNodeSizeChangeReasonWithRotation(DisplayId di
             // DOCK_SLICE not need do rotation animation
             if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
                 continue;
+            }
+            if (WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
+                ProcessSystemBarRotation(node, displayRectMap);
             }
             node->SetWindowSizeChangeReason(WindowSizeChangeReason::ROTATION);
         }
@@ -456,7 +484,7 @@ void DisplayGroupController::ProcessDisplayChange(DisplayId defaultDisplayId, sp
         }
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
             displayGroupInfo_->SetDisplayVirtualPixelRatio(displayId, displayInfo->GetVirtualPixelRatio());
-            windowNodeContainer_->GetLayoutPolicy()->LayoutWindowTree(displayId);
+            windowNodeContainer_->GetLayoutPolicy()->ProcessDisplayVprChange(displayId);
             break;
         }
         default: {
@@ -471,17 +499,14 @@ void DisplayGroupController::ProcessDisplaySizeChangeOrRotation(DisplayId defaul
     // modify RSTree and window tree of displayGroup for cross-display nodes
     ProcessCrossNodes(defaultDisplayId, type);
     UpdateDisplayGroupWindowTree();
+    // update reason after process cross Nodes to get correct display attribution
+    UpdateNodeSizeChangeReasonWithRotation(displayId, displayRectMap);
     const auto& layoutPolicy = windowNodeContainer_->GetLayoutPolicy();
     if (layoutPolicy == nullptr) {
         return;
     }
-    // update reason after process cross Nodes to get correct display attribution
-    UpdateNodeSizeChangeReasonWithRotation(displayId);
     layoutPolicy->ProcessDisplaySizeChangeOrRotation(displayId, displayRectMap);
-    Rect curDividerRect = layoutPolicy->GetDividerRect(displayId);
-    if (windowPairMap_[displayId] != nullptr) {
-        windowPairMap_[displayId]->RotateDividerWindow(curDividerRect);
-    }
+    ProcessWindowPairWhenDisplayChange(true);
 }
 
 void DisplayGroupController::ClearMapOfDestroyedDisplay(DisplayId displayId)
@@ -501,11 +526,62 @@ sptr<WindowPair> DisplayGroupController::GetWindowPairByDisplayId(DisplayId disp
     return nullptr;
 }
 
-void DisplayGroupController::SetDividerRect(DisplayId displayId, const Rect& rect)
+void DisplayGroupController::ProcessWindowPairWhenDisplayChange(bool rotateDisplay)
 {
-    if (windowPairMap_.find(displayId) != windowPairMap_.end()) {
-        windowPairMap_[displayId]->SetDividerRect(rect);
+    for (auto& elem : displayGroupInfo_->GetAllDisplayRects()) {
+        const auto& displayId = elem.first;
+        const auto& windowPair = GetWindowPairByDisplayId(displayId);
+        if (windowPair == nullptr) {
+            WLOGFE("WindowPair is nullptr, displayId: %{public}" PRIu64"", displayId);
+            return;
+        }
+        const auto& layoutPolicy = windowNodeContainer_->GetLayoutPolicy();
+        if (layoutPolicy == nullptr) {
+            WLOGFE("LayoutPolicy is nullptr, displayId: %{public}" PRIu64"", displayId);
+            return;
+        }
+        Rect divRect = layoutPolicy->GetDividerRect(displayId);
+        if (rotateDisplay) {
+            windowPair->RotateDividerWindow(divRect);
+        } else {
+            windowPair->SetDividerRect(divRect);
+        }
+        UpdateSplitRatioPoints(displayId);
     }
+}
+
+void DisplayGroupController::SetSplitRatioConfig(const SplitRatioConfig& splitRatioConfig)
+{
+    for (auto& elem : displayGroupInfo_->GetAllDisplayRects()) {
+        const auto& displayId = elem.first;
+        const auto& windowPair = GetWindowPairByDisplayId(displayId);
+        if (windowPair == nullptr) {
+            WLOGFE("WindowPair is nullptr, displayId: %{public}" PRIu64"", displayId);
+            continue;
+        }
+        windowPair->SetSplitRatioConfig(splitRatioConfig);
+        UpdateSplitRatioPoints(displayId);
+    }
+}
+
+void DisplayGroupController::UpdateSplitRatioPoints(DisplayId displayId)
+{
+    const auto& windowPair = GetWindowPairByDisplayId(displayId);
+    if (windowPair == nullptr) {
+        WLOGFE("WindowPair is nullptr, displayId: %{public}" PRIu64"", displayId);
+        return;
+    }
+    auto displayRects = displayGroupInfo_->GetAllDisplayRects();
+    if (displayRects.find(displayId) == displayRects.end()) {
+        return;
+    }
+    windowPair->CalculateSplitRatioPoints(displayRects[displayId]);
+    const auto& layoutPolicy = windowNodeContainer_->GetLayoutPolicy();
+    if (layoutPolicy == nullptr) {
+        WLOGFE("LayoutPolicy is nullptr, displayId: %{public}" PRIu64"", displayId);
+        return;
+    }
+    layoutPolicy->SetSplitRatioPoints(displayId, windowPair->GetSplitRatioPoints());
 }
 } // namespace Rosen
 } // namespace OHOS

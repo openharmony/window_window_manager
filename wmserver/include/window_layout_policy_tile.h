@@ -34,24 +34,37 @@ public:
         DisplayGroupWindowTree& displayGroupWindowTree);
     ~WindowLayoutPolicyTile() = default;
     void Launch() override;
-    void AddWindowNode(const sptr<WindowNode>& node) override;
-    void UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow = false) override;
-    void RemoveWindowNode(const sptr<WindowNode>& node) override;
-    void UpdateLayoutRect(const sptr<WindowNode>& node) override;
     bool IsTileRectSatisfiedWithSizeLimits(const sptr<WindowNode>& node) override;
+    void PerformWindowLayout(const sptr<WindowNode>& node, WindowUpdateType type) override;
 
 private:
+    /*
+     * methods for calculate maxTileNum and preset tileRects
+     */
+    void InitTileRects(DisplayId displayId);
+    uint32_t GetMaxTileWinNum(DisplayId displayId) const;
+
+    /*
+     * methods for update tile queue
+     */
+    void InitTileQueue(DisplayId displayId);
+    void LayoutTileQueue(DisplayId displayId);
+    void RefreshTileQueue(DisplayId displayId, std::vector<sptr<WindowNode>>& needMinimizeNodes,
+        std::vector<sptr<WindowNode>>& needRecoverNodes);
+    void PushBackNodeInTileQueue(const sptr<WindowNode>& node, DisplayId displayId);
+    void RemoveNodeFromTileQueue(const sptr<WindowNode>& node);
+
+    /*
+     * methods for calculate tile window rect
+     */
+    void ApplyPresetRectForTileWindows(DisplayId displayId);
+    void UpdateLayoutRect(const sptr<WindowNode>& node) override;
+    bool IsWindowAlreadyInTileQueue(const sptr<WindowNode>& node);
+    bool IsValidTileQueueAndPresetRects(DisplayId displayId);
+
     std::map<DisplayId, uint32_t> maxTileWinNumMap_;
     std::map<DisplayId, std::vector<std::vector<Rect>>> presetRectsMap_;
     std::map<DisplayId, std::deque<sptr<WindowNode>>> foregroundNodesMap_;
-    void InitAllRects();
-    uint32_t GetMaxTileWinNum(DisplayId displayId) const;
-    void InitTileWindowRects(DisplayId displayId);
-    void AssignNodePropertyForTileWindows(DisplayId displayId);
-    void LayoutForegroundNodeQueue(DisplayId displayId);
-    void InitForegroundNodeQueue();
-    void ForegroundNodeQueuePushBack(const sptr<WindowNode>& node, DisplayId displayId);
-    void ForegroundNodeQueueRemove(const sptr<WindowNode>& node);
 };
 }
 }

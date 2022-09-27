@@ -54,7 +54,7 @@ public:
                               const std::map<DisplayId, Rect>& displayRectMap,
                               DisplayStateChangeType type);
     sptr<WindowPair> GetWindowPairByDisplayId(DisplayId displayId);
-    void SetDividerRect(DisplayId displayId, const Rect& rect);
+    void SetSplitRatioConfig(const SplitRatioConfig& splitRatioConfig);
 
     DisplayGroupWindowTree displayGroupWindowTree_;
     std::map<DisplayId, SysBarNodeMap> sysBarNodeMaps_;
@@ -74,7 +74,10 @@ private:
     void UpdateWindowDisplayId(const sptr<WindowNode>& node, DisplayId newDisplayId);
     void ClearMapOfDestroyedDisplay(DisplayId displayId);
     void ChangeToRectInDisplayGroup(const sptr<WindowNode>& node, DisplayId displayId);
-    void UpdateNodeSizeChangeReasonWithRotation(DisplayId displayId);
+    void UpdateNodeSizeChangeReasonWithRotation(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
+    void ProcessWindowPairWhenDisplayChange(bool rotateDisplay = false);
+    void UpdateSplitRatioPoints(DisplayId displayId);
+    void ProcessSystemBarRotation(const sptr<WindowNode>& node, const std::map<DisplayId, Rect>& displayRectMap);
 
     sptr<WindowNodeContainer> windowNodeContainer_;
     sptr<DisplayGroupInfo> displayGroupInfo_;
