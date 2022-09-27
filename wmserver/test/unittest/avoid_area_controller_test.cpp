@@ -167,6 +167,20 @@ sptr<WindowProperty> createWindowProperty(uint32_t windowId, const std::string& 
 
 namespace {
 /**
+ * @tc.name: AvoidArea01
+ * @tc.desc: Read and write avoidArea test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AvoidAreaControllerTest, AvoidArea01, Function | SmallTest | Level2)
+{
+    AvoidArea avoidarea;
+    Parcel parcel;
+    AvoidArea* readArea = AvoidArea::Unmarshalling(parcel);
+    ASSERT_EQ(true, readArea == nullptr);
+    ASSERT_EQ(true, avoidarea.Marshalling(parcel));
+}
+
+/**
  * @tc.name: GetSystemBarAvoidArea01
  * @tc.desc: Get avoid areas with TYPE_SYSTEM
  * @tc.type: FUNC

@@ -32,6 +32,7 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+    sptr<WindowNode> CreateDragNode(DragType dragType, const Rect& winRect);
 
     static sptr<WindowNodeContainer> container_;
     static sptr<DisplayGroupInfo> displayGroupInfo_;
@@ -70,6 +71,19 @@ void WindowLayoutPolicyTest::SetUp()
 void WindowLayoutPolicyTest::TearDown()
 {
 }
+
+sptr<WindowNode> WindowLayoutPolicyTest::CreateDragNode(DragType dragType, const Rect& winRect)
+{
+    sptr<WindowProperty> property = new WindowProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->SetWindowRect(winRect);
+    property->SetOriginRect(winRect);
+    sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG);
+    node->SetDragType(dragType);
+    return node;
+}
 namespace {
 /**
  * @tc.name: CalcEntireWindowHotZone
@@ -101,6 +115,51 @@ HWTEST_F(WindowLayoutPolicyTest, CalcEntireWindowHotZone, Function | SmallTest |
     auto actRect2 = policy_->CalcEntireWindowHotZone(node2, winRect, 10, 2.f, hotZoneScale);
     Rect expRect2 = displayGroupInfo_->GetDisplayRect(0);;
     ASSERT_EQ(expRect2, actRect2);
+}
+
+/**
+ * @tc.name: UpdateFloatingWindowSizeForStretchableWindow01
+ * @tc.desc: UpdateFloatingWindowSizeForStretchableWindow test for drag width
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow01, Function | SmallTest | Level2)
+{
+    Rect winRect = {50, 50, 100, 150};
+    Rect newWinRect = { 50, 50, 200, 200 };
+    sptr<WindowNode> node = CreateDragNode(DragType::DRAG_WIDTH, winRect);
+    policy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
+    Rect expRect = { 50, 50, 200, 300 };
+    ASSERT_EQ(expRect, newWinRect);
+}
+
+/**
+ * @tc.name: UpdateFloatingWindowSizeForStretchableWindow02
+ * @tc.desc: UpdateFloatingWindowSizeForStretchableWindow test for drag coner
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow02, Function | SmallTest | Level2)
+{
+    Rect winRect = {50, 50, 100, 150};
+    Rect newWinRect = { 50, 50, 200, 200 };
+    sptr<WindowNode> node = CreateDragNode(DragType::DRAG_CORNER, winRect);
+    policy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
+    Rect expRect = { 50, 50, 200, 300 };
+    ASSERT_EQ(expRect, newWinRect);
+}
+
+/**
+ * @tc.name: UpdateFloatingWindowSizeForStretchableWindow03
+ * @tc.desc: UpdateFloatingWindowSizeForStretchableWindow test for drag height
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow03, Function | SmallTest | Level2)
+{
+    Rect winRect = {50, 50, 100, 150};
+    Rect newWinRect = { 50, 50, 150, 300 };
+    sptr<WindowNode> node = CreateDragNode(DragType::DRAG_HEIGHT, winRect);
+    policy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
+    Rect expRect = { 50, 50, 200, 300 };
+    ASSERT_EQ(expRect, newWinRect);
 }
 }
 }
