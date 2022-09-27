@@ -925,16 +925,30 @@ bool WindowImpl::WindowCreateCheck(uint32_t parentId)
         return false;
     }
     if (parentId == INVALID_WINDOW_ID) {
+        if (WindowHelper::IsSystemSubWindow(property_->GetWindowType()) ||
+            WindowHelper::IsSubWindow(property_->GetWindowType())) {
+            return false;
+        }
         return true;
     }
 
     if (property_->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
         property_->SetParentId(parentId);
     } else {
+        sptr<Window> parentWindow = nullptr;
         for (const auto& winPair : windowMap_) {
             if (winPair.second.first == parentId) {
                 property_->SetParentId(parentId);
+                parentWindow = winPair.second.second;
                 break;
+            }
+        }
+        if (WindowHelper::IsSystemSubWindow(property_->GetWindowType())) {
+            if (parentWindow == nullptr) {
+                return false;
+            }
+            if (!parentWindow->IsAllowHaveSystemSubWindow()) {
+                return false;
             }
         }
     }
@@ -2929,6 +2943,18 @@ WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
     // notify memory level
     uiContent_->NotifyMemoryLevel(level);
     return WMError::WM_OK;
+}
+
+bool WindowImpl::IsAllowHaveSystemSubWindow()
+{
+    auto windowType = property_->GetWindowType();
+    if (WindowHelper::IsSystemSubWindow(windowType) ||
+        WindowHelper::IsSubWindow(windowType) ||
+        windowType == WindowType::WINDOW_TYPE_DIALOG) {
+        WLOGFI("the window of type %{public}u is limited to add a system sub window", windowType);
+        return false;
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS
