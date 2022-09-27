@@ -667,7 +667,7 @@ void WindowLayoutPolicy::UpdateFloatingWindowSizeForStretchableWindow(const sptr
             // if drag height, use height to fix size.
             winRect.width_ = winRect.height_ * originRect.width_ / originRect.height_;
         } else if (dragType == DragType::DRAG_EAST_SOUTH_CORNER || dragType == DragType::DRAG_EAST_NORTH_CORNER ||
-            dragType == DragType::DRAG_WIDTH) {
+                   dragType == DragType::DRAG_WIDTH) {
             // if drag width or corner, use width to fix size.
             winRect.height_ = winRect.width_ * originRect.height_ / originRect.width_;
         }

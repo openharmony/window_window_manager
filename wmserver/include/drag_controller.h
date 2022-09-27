@@ -24,7 +24,6 @@
 #include "pointer_event.h"
 #include "window_root.h"
 #include "wm_common.h"
-#include "struct_multimodal.h"
 
 namespace OHOS {
 namespace Rosen {

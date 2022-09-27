@@ -437,7 +437,7 @@ private:
     bool isMainHandlerAvailable_ = true;
     bool isAppFloatingWindow_ = false;
     bool isFocused_ = false;
-    uint32_t styleID = 0;
+    uint32_t mouseStyleID_ = 0;
     bool isPointerStyleChanged_ = false;
 };
 } // namespace Rosen
