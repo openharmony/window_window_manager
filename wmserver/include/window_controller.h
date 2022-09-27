@@ -27,6 +27,7 @@
 #include "window_transition_info.h"
 #include "wm_common.h"
 #include "wm_occlusion_region.h"
+#include "struct_multimodal.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -76,6 +77,7 @@ public:
     WMError InterceptInputEventToServer(uint32_t windowId);
     WMError RecoverInputEventToClient(uint32_t windowId);
     WMError NotifyWindowClientPointUp(uint32_t windowId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    WMError ChangeMouseStyle(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty);
 
 private:
     uint32_t GenWindowId();

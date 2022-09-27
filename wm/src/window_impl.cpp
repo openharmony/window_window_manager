@@ -2290,19 +2290,17 @@ void WindowImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 uint32_t WindowImpl::CalculatePointerDirection(int32_t pointerX, int32_t pointerY)
 {
     UpdateDragType(pointerX, pointerY);
-    if (moveDragProperty_->dragType_ == DragType::DRAG_UNDEFINED) {
-        WLOGFE("update dragtype failed");
-        return -1;
-    } else if (moveDragProperty_->dragType_ == DragType::DRAG_HEIGHT) {
-        return MMI::MOUSE_ICON::NORTH_SOUTH;
-    } else if (moveDragProperty_->dragType_ == DragType::DRAG_WIDTH) {
-        return MMI::MOUSE_ICON::WEST_EAST;
-    } else if (moveDragProperty_->dragType_ == DragType::DRAG_EAST_SOUTH_CORNER) {
-        return MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST;
-    } else if (moveDragProperty_->dragType_ == DragType::DRAG_EAST_NORTH_CORNER) {
-        return MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST;
-    } else {
-        return 0;
+    switch (moveDragProperty_->dragType_) {
+        case DragType::DRAG_HEIGHT:
+            return MMI::MOUSE_ICON::NORTH_SOUTH;
+        case DragType::DRAG_WIDTH:
+            return MMI::MOUSE_ICON::WEST_EAST;
+        case DragType::DRAG_EAST_SOUTH_CORNER:
+            return MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST;
+        case DragType::DRAG_EAST_NORTH_CORNER:
+            return MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST;
+        default:
+            return 0;
     }
 }
 
@@ -2325,12 +2323,12 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
         CalculateStartRectExceptHotZone(vpr);
 
         if (IsPointInDragHotZone(pointerItem.GetDisplayX(), pointerItem.GetDisplayY())) {
-            uint32_t tempStyleID = styleID;
+            uint32_t tempStyleID = mouseStyleID_;
             // calculate pointer style
-            styleID = CalculatePointerDirection(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-            if (tempStyleID != styleID) {
+            mouseStyleID_ = CalculatePointerDirection(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+            if (tempStyleID != mouseStyleID_) {
                 MMI::InputManager::GetInstance()->SetPointerStyle(
-                    static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), styleID);
+                    static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), mouseStyleID_);
             }
             isPointerStyleChanged_ = true;
         }
@@ -2350,7 +2348,7 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
         MMI::InputManager::GetInstance()->SetPointerStyle(static_cast<uint32_t>(pointerEvent->GetAgentWindowId()),
             MMI::MOUSE_ICON::DEFAULT);
         isPointerStyleChanged_ = false;
-        styleID = 0;
+        mouseStyleID_ = 0;
     }
 }
 

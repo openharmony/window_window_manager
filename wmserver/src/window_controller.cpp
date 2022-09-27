@@ -815,6 +815,45 @@ AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType 
     return windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
 }
 
+WMError WindowController::ChangeMouseStyle(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    uint32_t styleID = 0;
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        if (node->GetWindowRect().width_ > node->GetWindowRect().height_) {
+            styleID = MMI::MOUSE_ICON::NORTH_SOUTH;
+        } else {
+            styleID = MMI::MOUSE_ICON::WEST_EAST;
+        }
+    } else {
+        switch (moveDragProperty->dragType_) {
+            case DragType::DRAG_HEIGHT:
+                styleID = MMI::MOUSE_ICON::NORTH_SOUTH;
+                break;
+            case DragType::DRAG_WIDTH:
+                styleID = MMI::MOUSE_ICON::WEST_EAST;
+                break;
+            case DragType::DRAG_EAST_SOUTH_CORNER:
+                styleID = MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST;
+                break;
+            case DragType::DRAG_EAST_NORTH_CORNER:
+                styleID = MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST;
+                break;
+            default:
+                WLOGFD("drag type is undefined");
+                break;
+        }
+    }
+    int32_t currentStyleID = 0;
+    MMI::InputManager::GetInstance()->SetPointerStyle(windowId, styleID);
+    MMI::InputManager::GetInstance()->GetPointerStyle(windowId, currentStyleID);
+    if (currentStyleID != styleID) {
+        MMI::InputManager::GetInstance()->SetPointerStyle(windowId, styleID);
+    }
+    WLOGFI("Set pointer style success, styleID is %{public}u", styleID);
+    return WMError::WM_OK;
+}
+
 WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
@@ -827,12 +866,16 @@ WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
+    // change mouse style if needed
+    ChangeMouseStyle(windowId, moveDragProperty);
+
     // if start dragging or start moving dock_slice, need to update size change reason
     if ((moveDragProperty->startMoveFlag_ && node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) ||
         moveDragProperty->startDragFlag_) {
         WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
         return res;
     }
+
     return WMError::WM_OK;
 }
 
