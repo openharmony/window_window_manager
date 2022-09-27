@@ -748,5 +748,10 @@ WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
 {
     return WMError::WM_OK;
 }
+
+bool WindowImpl::IsAllowHaveSystemSubWindow()
+{
+    return true;
+}
 } // namespace Rosen
 } // namespace OHOS
