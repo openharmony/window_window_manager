@@ -56,7 +56,7 @@ ohos_executable("demo_screenshot_listener") {
   external_deps = [
     "c_utils:utils",
     "hilog_native:libhilog",
-    "multimedia_image_standard:image_native",
+    "multimedia_image_framework:image_native",
   ]
 
   part_name = "window_manager"
@@ -112,7 +112,7 @@ ohos_executable("demo_freeze_display") {
     "//foundation/multimedia/image_framework/interfaces/innerkits/include",
   ]
   deps = [ "//foundation/window/window_manager/dm:libdm" ]
-  external_deps = [ "multimedia_image_standard:image_native" ]
+  external_deps = [ "multimedia_image_framework:image_native" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
