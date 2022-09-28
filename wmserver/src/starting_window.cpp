@@ -15,6 +15,7 @@
 
 #include "starting_window.h"
 #include <ability_manager_client.h>
+#include <common/rs_common_def.h>
 #include <display_manager_service_inner.h>
 #include <hitrace_meter.h>
 #include <transaction/rs_transaction.h>
@@ -90,14 +91,14 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "leashWindow" + std::to_string(node->GetWindowId());
-    node->leashWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    node->leashWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::LEASH_WINDOW_NODE);
     if (node->leashWinSurfaceNode_ == nullptr) {
         WLOGFE("create leashWinSurfaceNode failed");
         return WMError::WM_ERROR_NULLPTR;
     }
 
     rsSurfaceNodeConfig.SurfaceNodeName = "startingWindow" + std::to_string(node->GetWindowId());
-    node->startingWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    node->startingWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::STARTING_WINDOW_NODE);
     if (node->startingWinSurfaceNode_ == nullptr) {
         WLOGFE("create startingWinSurfaceNode failed");
         node->leashWinSurfaceNode_ = nullptr;
