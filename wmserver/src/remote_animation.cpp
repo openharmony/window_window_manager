@@ -42,7 +42,7 @@ wptr<WindowController> RemoteAnimation::windowController_ = nullptr;
 std::map<TransitionReason, TransitionEvent> eventMap_ = {
     {TransitionReason::CLOSE, TransitionEvent::CLOSE},
     {TransitionReason::MINIMIZE, TransitionEvent::MINIMIZE},
-    {TransitionReason::BACK, TransitionEvent::BACK}
+    {TransitionReason::BACK_TRANSITION, TransitionEvent::BACK_TRANSITION}
 };
 
 void RemoteAnimation::SetAnimationFirst(bool animationFirst)
@@ -140,6 +140,33 @@ void RemoteAnimation::OnRemoteDie(const sptr<IRemoteObject>& remoteObject)
     }
     if (animationFirst_) {
         CallbackTimeOutProcess();
+    }
+}
+
+static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
+{
+    if (srcNode == nullptr || srcNode->leashWinSurfaceNode_ == nullptr) {
+        WLOGFD("srcNode or srcNode->leashWinSurfaceNode_ is empty");
+        return;
+    }
+    if (srcNode->firstFrameAvaliable_) {
+        std::shared_ptr<Media::PixelMap> pixelMap;
+        // snapshot time out 2000ms
+        bool snapSucc = SurfaceDraw::GetSurfaceSnapshot(srcNode->surfaceNode_, pixelMap, 2000, 1.0, 1.0);
+        if (!snapSucc) {
+            // need to draw starting window when get pixelmap failed
+            WLOGFE("get surfaceSnapshot failed for window:%{public}u", srcNode->GetWindowId());
+            return;
+        }
+        SurfaceDraw::DrawImageRect(srcNode->startingWinSurfaceNode_, srcNode->GetWindowRect(),
+            pixelMap, 0xffffffff, true);
+        srcNode->leashWinSurfaceNode_->RemoveChild(srcNode->surfaceNode_);
+        srcNode->leashWinSurfaceNode_->AddChild(srcNode->startingWinSurfaceNode_, -1);
+        RSTransaction::FlushImplicitTransaction();
+        WLOGFI("Draw surface snapshot in starting window for window:%{public}u", srcNode->GetWindowId());
+    } else if (srcNode->surfaceNode_) {
+        srcNode->surfaceNode_->SetIsNotifyUIBufferAvailable(true);
+        WLOGFI("Draw startingWindow in starting window for window:%{public}u", srcNode->GetWindowId());
     }
 }
 
@@ -275,8 +302,7 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
     const sptr<WindowNode>& dstNode)
 {
     if (!dstNode) {
-        WLOGFI("id:%{public}u startingWindowShown_:%{public}d", dstNode->GetWindowId(), dstNode->startingWindowShown_);
-        return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
+        return WMError::WM_ERROR_NULLPTR;
     }
     WLOGFI("RSWindowAnimation: notify animation transition with dst currId:%{public}u!", dstNode->GetWindowId());
     auto finishedCallback = CreateShowAnimationFinishedCallback(srcNode, dstNode);
@@ -368,6 +394,57 @@ WMError RemoteAnimation::NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo
     srcNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_PLAYING);
     srcNode->stateMachine_.UpdateAnimationTaskCount(true);
     windowAnimationController_->OnCloseWindow(srcTarget, finishedCallback);
+    return WMError::WM_OK;
+}
+
+WMError RemoteAnimation::NotifyAnimationBackTransition(sptr<WindowTransitionInfo> srcInfo,
+    sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode,
+    const sptr<WindowNode>& dstNode)
+{
+    if (!animationFirst_) {
+        WLOGFE("not animation first!");
+        return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
+    }
+    if (!dstNode || !srcNode) {
+        WLOGFE("dstNode or srcNode is nullptr, no need transition animation");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    WLOGFI("RSWindowAnimation: app back transition from id:%{public}u to id:%{public}u!",
+        srcNode->GetWindowId(), dstNode->GetWindowId());
+    sptr<RSWindowAnimationTarget> srcTarget = CreateWindowAnimationTarget(srcInfo, srcNode);
+    sptr<RSWindowAnimationTarget> dstTarget = CreateWindowAnimationTarget(dstInfo, dstNode);
+    if (srcTarget == nullptr || dstTarget == nullptr) {
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    srcNode->isPlayAnimationHide_ = true;
+    srcNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_PLAYING);
+    srcNode->stateMachine_.UpdateAnimationTaskCount(true);
+    auto winController = windowController_.promote();
+    if (winController) {
+        winController->RemoveWindowNode(srcNode->GetWindowId(), true);
+        GetAndDrawSnapShot(srcNode);
+    }
+    dstNode->isPlayAnimationShow_ = true;
+    dstNode->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_PLAYING);
+    dstNode->stateMachine_.UpdateAnimationTaskCount(true);
+    wptr<WindowNode> srcNodeWptr = srcNode;
+    wptr<WindowNode> dstNodeWptr = dstNode;
+    auto func = [srcNodeWptr, dstNodeWptr]() {
+        WLOGFI("RSWindowAnimation: animationFirst use state machine process AnimationBackTransition!");
+        auto srcNodeSptr = srcNodeWptr.promote();
+        auto dstNodeSptr = dstNodeWptr.promote();
+        ProcessNodeStateTask(srcNodeSptr);
+        ProcessNodeStateTask(dstNodeSptr);
+        FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
+            "wms:async:ShowRemoteAnimation");
+    };
+    sptr<RSWindowAnimationFinishedCallback> finishedCallback = new(std::nothrow) RSWindowAnimationFinishedCallback(
+        func);
+    if (finishedCallback == nullptr) {
+        WLOGFE("New RSIWindowAnimationFinishedCallback failed");
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    windowAnimationController_->OnAppTransition(srcTarget, dstTarget, finishedCallback);
     return WMError::WM_OK;
 }
 
@@ -727,33 +804,6 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateShowAnimationFini
     return finishedCallback;
 }
 
-static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
-{
-    if (srcNode == nullptr || srcNode->leashWinSurfaceNode_ == nullptr) {
-        WLOGFD("srcNode or srcNode->leashWinSurfaceNode_ is empty");
-        return;
-    }
-    if (srcNode->firstFrameAvaliable_) {
-        std::shared_ptr<Media::PixelMap> pixelMap;
-        // snapshot time out 2000ms
-        bool snapSucc = SurfaceDraw::GetSurfaceSnapshot(srcNode->surfaceNode_, pixelMap, 2000, 1.0, 1.0);
-        if (!snapSucc) {
-            // need to draw starting window when get pixelmap failed
-            WLOGFE("get surfaceSnapshot failed for window:%{public}u", srcNode->GetWindowId());
-            return;
-        }
-        SurfaceDraw::DrawImageRect(srcNode->startingWinSurfaceNode_, srcNode->GetWindowRect(),
-            pixelMap, 0xffffffff, true);
-        srcNode->leashWinSurfaceNode_->RemoveChild(srcNode->surfaceNode_);
-        srcNode->leashWinSurfaceNode_->AddChild(srcNode->startingWinSurfaceNode_, -1);
-        RSTransaction::FlushImplicitTransaction();
-        WLOGFI("Draw surface snapshot in starting window for window:%{public}u", srcNode->GetWindowId());
-    } else if (srcNode->surfaceNode_) {
-        srcNode->surfaceNode_->SetIsNotifyUIBufferAvailable(true);
-        WLOGFI("Draw startingWindow in starting window for window:%{public}u", srcNode->GetWindowId());
-    }
-}
-
 static void ProcessAbility(const sptr<WindowNode>& srcNode, TransitionEvent event)
 {
     switch (event) {
@@ -761,12 +811,6 @@ static void ProcessAbility(const sptr<WindowNode>& srcNode, TransitionEvent even
             WLOGFI("close windowId: %{public}u, name:%{public}s",
                 srcNode->GetWindowId(), srcNode->GetWindowName().c_str());
             WindowInnerManager::GetInstance().CloseAbility(srcNode);
-            break;
-        }
-        case TransitionEvent::BACK: {
-            WLOGFI("terminate windowId: %{public}u, name:%{public}s",
-                srcNode->GetWindowId(), srcNode->GetWindowName().c_str());
-            WindowInnerManager::GetInstance().TerminateAbility(srcNode);
             break;
         }
         case TransitionEvent::MINIMIZE: {
