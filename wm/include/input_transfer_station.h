@@ -41,7 +41,7 @@ private:
     std::unordered_map<uint32_t, sptr<WindowInputChannel>> windowInputChannels_;
     std::shared_ptr<MMI::IInputEventConsumer> inputListener_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
-    const std::string INPUT_AND_VSYNC_THREAD = "input_and_vsync_thread";
+    const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
 };
 
 class InputEventListener : public MMI::IInputEventConsumer {
