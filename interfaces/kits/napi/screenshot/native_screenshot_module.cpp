@@ -31,8 +31,8 @@
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
-#include "wm_napi_common.h"
+#include "dm_common.h"
+#include "dm_napi_common.h"
 
 namespace OHOS::Rosen {
 namespace save {
@@ -44,7 +44,7 @@ struct Option {
 };
 
 struct Param {
-    WMError wret;
+    DmErrorCode wret;
     Option option;
     std::string errMessage;
     bool useInputOption;
@@ -178,7 +178,7 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
     if (!param->validInputParam) {
         WLOGFE("Invalid Input Param!");
         param->image = nullptr;
-        param->wret = WMError::WM_ERROR_INVALID_PARAM;
+        param->wret = DmErrorCode::DM_ERROR_INVALID_PARAM;
         param->errMessage = "Get Screenshot Failed: Invalid input param";
         return;
     }
@@ -192,17 +192,25 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
     }
     if (param->image == nullptr) {
         GNAPI_LOG("Get Screenshot failed!");
-        param->wret = WMError::WM_ERROR_NULLPTR;
+        param->wret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         param->errMessage = "Get Screenshot failed: Screenshot image is nullptr";
         return;
     }
-    param->wret = WMError::WM_OK;
+    param->wret = DmErrorCode::DM_OK;
 }
 
 napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
 {
     napi_value result;
-    if (param->wret != WMError::WM_OK) {
+    napi_value error;
+    napi_value code;
+    if (param->wret == DmErrorCode::DM_ERROR_INVALID_PARAM) {
+        napi_create_error(env, nullptr, nullptr, &error);
+        napi_create_int32(env, (int32_t)DmErrorCode::DM_ERROR_INVALID_PARAM, &code);
+        napi_set_named_property(env, error, "DM_ERROR_INVALID_PARAM", code);
+        napi_throw(env, error);
+        return error;
+    } else if (param->wret != DmErrorCode::DM_OK) {
         NAPI_CALL(env, napi_get_undefined(env, &result));
         return result;
     }
@@ -227,36 +235,95 @@ napi_value MainFunc(napi_env env, napi_callback_info info)
     }
     param->option.displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     napi_ref ref = nullptr;
-    if (argc == 0) {
+    if (argc == 0) { // 0 valid parameters
         GNAPI_LOG("argc == 0");
         param->validInputParam = true;
-    } else if (argc == 1 && GetType(env, argv[0]) == napi_object) {
-        GNAPI_LOG("argc == 1, argv[0]'s type is napi_object");
-        param->validInputParam = true;
-        param->useInputOption = true;
-        GetScreenshotParam(env, param, argv[0]);
-    } else if (argc == 1 && GetType(env, argv[0]) == napi_function) {
-        GNAPI_LOG("argc == 1, argv[0]'s type is napi_function");
+    } else if (GetType(env, argv[0]) == napi_function) { // 1 valid parameters napi_function
+        GNAPI_LOG("argc >= 1, argv[0]'s type is napi_function");
         param->validInputParam = true;
         NAPI_CALL(env, napi_create_reference(env, argv[0], 1, &ref));
-    } else if (argc == 2 &&  // the number of input parameters is 2
-        GetType(env, argv[0]) == napi_object && GetType(env, argv[1]) == napi_function) {
-        GNAPI_LOG("argc == 2, argv[0]'s type is napi_object, argv[1]'s type is napi_function");
+    } else if (GetType(env, argv[0]) == napi_object) {
+        if ((argc >= 2) && (GetType(env, argv[1]) == napi_function)) { // 2 valid parameters napi_object napi_function
+            GNAPI_LOG("argc >= 2, argv[0]'s type is napi_object, argv[1]'s type is napi_function");
+            param->validInputParam = true;
+            param->useInputOption = true;
+            GetScreenshotParam(env, param, argv[0]);
+            NAPI_CALL(env, napi_create_reference(env, argv[1], 1, &ref));
+        } else { // 1 valid parameters napi_object
+            GNAPI_LOG("argc >= 1, argv[0]'s type is napi_object");
+            param->validInputParam = true;
+            param->useInputOption = true;
+            GetScreenshotParam(env, param, argv[0]);
+        }
+    } else { // 0 valid parameters
+        GNAPI_LOG("argc == 0");
         param->validInputParam = true;
-        param->useInputOption = true;
-        GetScreenshotParam(env, param, argv[0]);
-        NAPI_CALL(env, napi_create_reference(env, argv[1], 1, &ref));
     }
+
     return AsyncProcess<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshot, Resolve, ref, param);
 }
 } // namespace save
+
+void SetNamedProperty(napi_env env, napi_value dstObj, const int32_t objValue, const char *propName)
+{
+    napi_value prop = nullptr;
+    napi_create_int32(env, objValue, &prop);
+    napi_set_named_property(env, dstObj, propName, prop);
+}
 
 napi_value ScreenshotModuleInit(napi_env env, napi_value exports)
 {
     GNAPI_LOG("%{public}s called", __PRETTY_FUNCTION__);
 
+    napi_value errorCode = nullptr;
+    napi_value dmErrorCode = nullptr;
+    napi_create_object(env, &errorCode);
+    napi_create_object(env, &dmErrorCode);
+
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED, "DM_ERROR_INIT_DMS_PROXY_LOCKED");
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_IPC_FAILED, "DM_ERROR_IPC_FAILED");
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_REMOTE_CREATE_FAILED, "DM_ERROR_REMOTE_CREATE_FAILED");
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_NULLPTR, "DM_ERROR_NULLPTR");
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_INVALID_PARAM, "DM_ERROR_INVALID_PARAM");
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED, "DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED");
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_DEATH_RECIPIENT, "DM_ERROR_DEATH_RECIPIENT");
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_INVALID_MODE_ID, "DM_ERROR_INVALID_MODE_ID");
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_WRITE_DATA_FAILED, "DM_ERROR_WRITE_DATA_FAILED");
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_RENDER_SERVICE_FAILED, "DM_ERROR_RENDER_SERVICE_FAILED");
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_UNREGISTER_AGENT_FAILED, "DM_ERROR_UNREGISTER_AGENT_FAILED");
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_INVALID_CALLING, "DM_ERROR_INVALID_CALLING");
+    SetNamedProperty(env, errorCode,
+        (int32_t)DMError::DM_ERROR_UNKNOWN, "DM_ERROR_UNKNOWN");
+
+    SetNamedProperty(env, dmErrorCode,
+        (int32_t)DmErrorCode::DM_ERROR_NO_PERMISSION, "DM_ERROR_NO_PERMISSION");
+    SetNamedProperty(env, dmErrorCode,
+        (int32_t)DmErrorCode::DM_ERROR_INVALID_PARAM, "DM_ERROR_INVALID_PARAM");
+    SetNamedProperty(env, dmErrorCode,
+        (int32_t)DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT, "DM_ERROR_DEVICE_NOT_SUPPORT");
+    SetNamedProperty(env, dmErrorCode,
+        (int32_t)DmErrorCode::DM_ERROR_INVALID_SCREEN, "DM_ERROR_INVALID_SCREEN");
+    SetNamedProperty(env, dmErrorCode,
+        (int32_t)DmErrorCode::DM_ERROR_INVALID_CALLING, "DM_ERROR_INVALID_CALLING");
+    SetNamedProperty(env, dmErrorCode,
+        (int32_t)DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, "DM_ERROR_SYSTEM_INNORMAL");
+
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("save", save::MainFunc),
+        DECLARE_NAPI_PROPERTY("DMError", errorCode),
+        DECLARE_NAPI_PROPERTY("DmErrorCode", dmErrorCode),
     };
 
     NAPI_CALL(env, napi_define_properties(env,

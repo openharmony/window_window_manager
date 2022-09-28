@@ -66,6 +66,12 @@ static NativeValue* GetAllDisplay(NativeEngine* engine, NativeCallbackInfo* info
     return (me != nullptr) ? me->OnGetAllDisplay(*engine, *info) : nullptr;
 }
 
+static NativeValue* GetAllDisplays(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
+    return (me != nullptr) ? me->OnGetAllDisplays(*engine, *info) : nullptr;
+}
+
 static NativeValue* RegisterDisplayManagerCallback(NativeEngine* engine, NativeCallbackInfo* info)
 {
     JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(engine, info);
@@ -125,11 +131,6 @@ NativeValue* OnGetDefaultDisplay(NativeEngine& engine, NativeCallbackInfo& info)
 NativeValue* OnGetDefaultDisplaySync(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsDisplayManager::OnGetDefaultDisplaySync is called");
-    if (info.argc != 0) {
-        WLOGFE("JsDisplayManager::OnGetDefaultDisplaySync params not match");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
-    }
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
     if (display == nullptr) {
         WLOGFE("JsDisplayManager::OnGetDefaultDisplaySync, display is nullptr.");
@@ -170,6 +171,34 @@ NativeValue* OnGetAllDisplay(NativeEngine& engine, NativeCallbackInfo& info)
     }
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsDisplayManager::OnGetAllDisplay",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* OnGetAllDisplays(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFI("JsDisplayManager::OnGetAllDisplays is called");
+
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
+            if (!displays.empty()) {
+                task.Resolve(engine, CreateJsDisplayArrayObject(engine, displays));
+                WLOGFI("JsDisplayManager::GetAllDisplays success");
+            } else {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
+                    "JsDisplayManager::OnGetAllDisplays failed."));
+            }
+        };
+
+    NativeValue* lastParam = nullptr;
+    if (info.argc >= ARGC_ONE && info.argv[ARGC_ONE - 1] != nullptr &&
+        info.argv[ARGC_ONE - 1]->TypeOf() == NATIVE_FUNCTION) {
+        lastParam = info.argv[0];
+    }
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsDisplayManager::OnGetAllDisplays",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -263,7 +292,7 @@ void UnRegisterDisplayListenerWithType(const std::string& type, NativeValue* val
 NativeValue* OnRegisterDisplayManagerCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsDisplayManager::OnRegisterDisplayManagerCallback is called");
-    if (info.argc != ARGC_TWO) {
+    if (info.argc < ARGC_TWO) {
         WLOGFE("JsDisplayManager Params not match: %{public}zu", info.argc);
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
@@ -293,7 +322,7 @@ NativeValue* OnRegisterDisplayManagerCallback(NativeEngine& engine, NativeCallba
 NativeValue* OnUnregisterDisplayManagerCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsDisplayManager::OnUnregisterDisplayCallback is called");
-    if (info.argc == 0) {
+    if (info.argc < ARGC_ONE) {
         WLOGFE("JsDisplayManager Params not match %{public}zu", info.argc);
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
@@ -309,17 +338,11 @@ NativeValue* OnUnregisterDisplayManagerCallback(NativeEngine& engine, NativeCall
         UnregisterAllDisplayListenerWithType(cbType);
     } else {
         NativeValue* value = info.argv[INDEX_ONE];
-        if (value == nullptr) {
-            WLOGFI("JsDisplayManager::OnUnregisterDisplayManagerCallback info->argv[1] is nullptr");
-            engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-            return engine.CreateUndefined();
+        if ((value == nullptr) || (!value->IsCallable())) {
+            UnregisterAllDisplayListenerWithType(cbType);
+        } else {
+            UnRegisterDisplayListenerWithType(cbType, value);
         }
-        if (!value->IsCallable()) {
-            WLOGFI("JsDisplayManager::OnUnregisterDisplayManagerCallback info->argv[1] is not callable");
-            engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-            return engine.CreateUndefined();
-        }
-        UnRegisterDisplayListenerWithType(cbType, value);
     }
     return engine.CreateUndefined();
 }
@@ -327,7 +350,7 @@ NativeValue* OnUnregisterDisplayManagerCallback(NativeEngine& engine, NativeCall
 NativeValue* OnHasPrivateWindow(NativeEngine& engine, NativeCallbackInfo& info)
 {
     bool hasPrivateWindow = false;
-    if (info.argc != 1) {
+    if (info.argc < ARGC_ONE) {
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
@@ -430,6 +453,7 @@ NativeValue* InitDisplayErrorCode(NativeEngine* engine)
         CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_CALLING)));
     object->SetProperty("DM_ERROR_SYSTEM_INNORMAL",
         CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL)));
+
     return objValue;
 }
 
@@ -475,6 +499,7 @@ NativeValue* InitDisplayError(NativeEngine* engine)
         CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_CALLING)));
     object->SetProperty("DM_ERROR_UNKNOWN",
         CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_UNKNOWN)));
+
     return objValue;
 }
 
@@ -504,6 +529,7 @@ NativeValue* JsDisplayManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "getDefaultDisplay", moduleName, JsDisplayManager::GetDefaultDisplay);
     BindNativeFunction(*engine, *object, "getDefaultDisplaySync", moduleName, JsDisplayManager::GetDefaultDisplaySync);
     BindNativeFunction(*engine, *object, "getAllDisplay", moduleName, JsDisplayManager::GetAllDisplay);
+    BindNativeFunction(*engine, *object, "getAllDisplays", moduleName, JsDisplayManager::GetAllDisplays);
     BindNativeFunction(*engine, *object, "hasPrivateWindow", moduleName, JsDisplayManager::HasPrivateWindow);
     BindNativeFunction(*engine, *object, "on", moduleName, JsDisplayManager::RegisterDisplayManagerCallback);
     BindNativeFunction(*engine, *object, "off", moduleName, JsDisplayManager::UnregisterDisplayManagerCallback);

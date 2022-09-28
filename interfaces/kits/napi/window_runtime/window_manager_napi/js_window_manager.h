@@ -33,22 +33,26 @@ public:
     static NativeValue* Create(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* CreateWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* FindWindow(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* FindWindowSync(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* MinimizeAll(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* ToggleShownStateForAllAppWindows(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* RegisterWindowManagerCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* UnregisterWindowMangerCallback(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* GetTopWindow(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* GetLastWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* SetWindowLayoutMode(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     NativeValue* OnCreate(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnFindWindow(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnFindWindowSync(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnMinimizeAll(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnToggleShownStateForAllAppWindows(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnRegisterWindowMangerCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnUnregisterWindowManagerCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetTopWindow(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* OnGetLastWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetWindowLayoutMode(NativeEngine& engine, NativeCallbackInfo& info);
     bool ParseConfigOption(NativeEngine& engine, NativeObject* jsObject, WindowOption& option, void*& contextPtr);
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
