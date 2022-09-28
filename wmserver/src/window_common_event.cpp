@@ -28,7 +28,7 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowCommonEvent"};
     constexpr int RETRY_MAX_COUNT = 3;
-    const std::string THREAD_ID = "window_common_event_handler";
+    const std::string THREAD_ID = "WindowCommonEventHandler";
 }
 
 WindowCommonEvent::WindowCommonEvent()
