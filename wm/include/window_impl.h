@@ -22,6 +22,7 @@
 #include <i_input_event_consumer.h>
 #include <key_event.h>
 #include <refbase.h>
+#include <string>
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
 
@@ -388,6 +389,7 @@ private:
     void RequestPerfIfNeed(WindowSizeChangeReason reason);
     void RequestPerf(int32_t code, int64_t timeOut);
     void ClosePerf(int32_t code);
+    RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
 
     // colorspace, gamut
     using ColorSpaceConvertMap = struct {
