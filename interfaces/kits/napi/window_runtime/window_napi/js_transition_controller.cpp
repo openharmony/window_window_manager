@@ -58,7 +58,7 @@ NativeValue* JsTransitionContext::CompleteTransition(NativeEngine* engine, Nativ
 NativeValue* JsTransitionContext::OnCompleteTransition(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
-    if (info.argc < 1 || info.argc > 2) { // 2: maximum params
+    if (info.argc < 1) {
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     bool transitionCompleted = false;
