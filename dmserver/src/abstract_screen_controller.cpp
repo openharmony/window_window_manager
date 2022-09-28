@@ -36,7 +36,7 @@
 namespace OHOS::Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "AbstractScreenController"};
-    const std::string CONTROLLER_THREAD_ID = "abstract_screen_controller_thread";
+    const std::string CONTROLLER_THREAD_ID = "AbstractScreenControllerThread";
 }
 
 AbstractScreenController::AbstractScreenController(std::recursive_mutex& mutex)
