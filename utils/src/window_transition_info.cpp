@@ -42,6 +42,7 @@ WindowTransitionInfo::WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> in
     sizeLimits_.minWidth_ = info->minWindowWidth_;
     sizeLimits_.maxHeight_ = info->maxWindowHeight_;
     sizeLimits_.minHeight_ = info->minWindowHeight_;
+    reason_ = static_cast<TransitionReason>(info->reason_);
 }
 
 void WindowTransitionInfo::SetBundleName(std::string name)
