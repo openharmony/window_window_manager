@@ -366,7 +366,7 @@ WMError RemoteAnimation::NotifyAnimationByHome()
             auto srcNode = weakNode.promote();
             if (srcNode == nullptr || srcNode->state_ != WindowNodeState::HIDE_ANIMATION_PLAYING) {
                 WLOGFE("windowNode is nullptr or is not play hide animation!");
-                return;
+                continue;
             }
         }
         MinimizeApp::ExecuteMinimizeAll();
