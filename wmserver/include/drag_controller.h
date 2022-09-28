@@ -100,7 +100,7 @@ private:
 
     // event handler for input event
     std::shared_ptr<EventHandler> inputEventHandler_;
-    const std::string INNER_WM_INPUT_THREAD_NAME = "inner_input_manager";
+    const std::string INNER_WM_INPUT_THREAD_NAME = "InnerInputManager";
 };
 }
 }

@@ -74,7 +74,7 @@ private:
     std::shared_ptr<EventHandler> eventHandler_;
     std::shared_ptr<EventRunner> eventLoop_;
     InnerWMRunningState state_;
-    const std::string INNER_WM_THREAD_NAME = "inner_window_manager";
+    const std::string INNER_WM_THREAD_NAME = "InnerWindowManager";
 };
 } // namespace Rosen
 } // namespace OHOS
