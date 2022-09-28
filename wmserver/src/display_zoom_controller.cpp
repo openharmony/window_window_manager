@@ -325,7 +325,6 @@ void DisplayZoomController::HandleUpdateWindowZoomInfo(sptr<WindowNode> node)
         return;
     }
     Transform zoomTrans;
-    Transform animateTrans = node->GetWindowProperty()->GetTransform();
     if (node->GetWindowProperty()->IsAnimateWindow()) {
         zoomTrans = CalcuAnimateZoomTrans(node);
     } else {

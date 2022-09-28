@@ -99,8 +99,8 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
         case TRANS_ID_ON_DISPLAY_DISCONNECT: {
             DisplayId displayId;
             if (!data.ReadUint64(displayId)) {
-                return -1;
                 WLOGFE("Read DisplayId failed");
+                return -1;
             }
             OnDisplayDestroy(displayId);
             break;
