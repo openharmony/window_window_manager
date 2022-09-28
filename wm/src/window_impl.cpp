@@ -2402,6 +2402,17 @@ void WindowImpl::UpdateWindowState(WindowState state)
             }
             break;
         }
+        case WindowState::STATE_HIDDEN: {
+            if (abilityContext != nullptr && windowTag_ == WindowTag::MAIN_WINDOW &&
+                state_ == WindowState::STATE_SHOWN) {
+                WLOGFI("WindowState: STATE_SHOWN, id: %{public}u", GetWindowId());
+                AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(abilityContext->GetToken(),
+                    static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
+            } else {
+                Hide(static_cast<uint32_t>(WindowStateChangeReason::NORMAL), false);
+            }
+            break;
+        }
         default: {
             WLOGFE("windowState to set is invalid");
             break;
