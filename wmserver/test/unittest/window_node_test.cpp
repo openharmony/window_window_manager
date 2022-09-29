@@ -569,8 +569,8 @@ HWTEST_F(WindowNodeTest, SetDragType01, Function | SmallTest | Level1)
     ASSERT_NE(nullptr, windowNode);
 
     ASSERT_EQ(DragType::DRAG_UNDEFINED, windowNode->GetDragType());
-    windowNode->SetDragType(DragType::DRAG_HEIGHT);
-    ASSERT_EQ(DragType::DRAG_HEIGHT, windowNode->GetDragType());
+    windowNode->SetDragType(DragType::DRAG_BOTTOM_OR_TOP);
+    ASSERT_EQ(DragType::DRAG_BOTTOM_OR_TOP, windowNode->GetDragType());
 }
 /**
  * @tc.name: SetOriginRect01
