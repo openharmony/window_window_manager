@@ -277,7 +277,6 @@ void WindowDumper::ShowHelpInfo(std::string& dumpInfo) const
 
 void WindowDumper::ShowAceDumpHelp(std::string& dumpInfo) const
 {
-    std::vector<std::string> infos;
     auto node = windowRoot_->GetWindowForDumpAceHelpInfo();
     if (node == nullptr) {
         WLOGFE("invalid window");
