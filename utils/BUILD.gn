@@ -25,6 +25,7 @@ config("libwmutil_public_config") {
   include_dirs = [
     "//foundation/window/window_manager/utils/include",
     "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
+    "//foundation/multimodalinput/input/util/common/include",
   ]
 }
 

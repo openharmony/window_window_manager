@@ -663,11 +663,11 @@ void WindowLayoutPolicy::UpdateFloatingWindowSizeForStretchableWindow(const sptr
             return;
         }
         auto dragType = node->GetDragType();
-        if (dragType == DragType::DRAG_HEIGHT) {
+        if (dragType == DragType::DRAG_BOTTOM_OR_TOP) {
             // if drag height, use height to fix size.
             winRect.width_ = winRect.height_ * originRect.width_ / originRect.height_;
-        } else if (dragType == DragType::DRAG_EAST_SOUTH_CORNER || dragType == DragType::DRAG_EAST_NORTH_CORNER ||
-                   dragType == DragType::DRAG_WIDTH) {
+        } else if (dragType == DragType::DRAG_LEFT_TOP_CORNER || dragType == DragType::DRAG_RIGHT_TOP_CORNER ||
+                   dragType == DragType::DRAG_LEFT_OR_RIGHT) {
             // if drag width or corner, use width to fix size.
             winRect.height_ = winRect.width_ * originRect.height_ / originRect.width_;
         }
@@ -733,7 +733,7 @@ void WindowLayoutPolicy::UpdateFloatingWindowSizeBySizeLimits(const sptr<WindowN
     }
 
     auto dragType = node->GetDragType();
-    if (dragType == DragType::DRAG_HEIGHT) {
+    if (dragType == DragType::DRAG_BOTTOM_OR_TOP) {
         // if drag height, use height to fix size.
         winRect.width_ = static_cast<uint32_t>(static_cast<float>(winRect.height_) * newRatio);
     } else {

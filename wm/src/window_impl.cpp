@@ -2071,17 +2071,17 @@ void WindowImpl::UpdateDragType(int32_t startPointPosX, int32_t startPointPosY)
     if (startPointPosX > startRectExceptCorner.posX_ &&
         (startPointPosX < startRectExceptCorner.posX_ +
         static_cast<int32_t>(startRectExceptCorner.width_))) {
-        moveDragProperty_->dragType_ = DragType::DRAG_HEIGHT;
+        moveDragProperty_->dragType_ = DragType::DRAG_BOTTOM_OR_TOP;
     } else if (startPointPosY > startRectExceptCorner.posY_ &&
         (startPointPosY < startRectExceptCorner.posY_ +
         static_cast<int32_t>(startRectExceptCorner.height_))) {
-        moveDragProperty_->dragType_ = DragType::DRAG_WIDTH;
+        moveDragProperty_->dragType_ = DragType::DRAG_LEFT_OR_RIGHT;
     } else if ((startPointPosX <= startRectExceptCorner.posX_ && startPointPosY <= startRectExceptCorner.posY_) ||
         (startPointPosX >= startRectExceptCorner.posX_ + static_cast<int32_t>(startRectExceptCorner.width_) &&
          startPointPosY >= startRectExceptCorner.posY_ + static_cast<int32_t>(startRectExceptCorner.height_))) {
-        moveDragProperty_->dragType_ = DragType::DRAG_EAST_SOUTH_CORNER;
+        moveDragProperty_->dragType_ = DragType::DRAG_LEFT_TOP_CORNER;
     } else {
-        moveDragProperty_->dragType_ = DragType::DRAG_EAST_NORTH_CORNER;
+        moveDragProperty_->dragType_ = DragType::DRAG_RIGHT_TOP_CORNER;
     }
 }
 
@@ -2290,18 +2290,7 @@ void WindowImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 uint32_t WindowImpl::CalculatePointerDirection(int32_t pointerX, int32_t pointerY)
 {
     UpdateDragType(pointerX, pointerY);
-    switch (moveDragProperty_->dragType_) {
-        case DragType::DRAG_HEIGHT:
-            return MMI::MOUSE_ICON::NORTH_SOUTH;
-        case DragType::DRAG_WIDTH:
-            return MMI::MOUSE_ICON::WEST_EAST;
-        case DragType::DRAG_EAST_SOUTH_CORNER:
-            return MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST;
-        case DragType::DRAG_EAST_NORTH_CORNER:
-            return MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST;
-        default:
-            return 0;
-    }
+    return STYLEID_MAP.at(moveDragProperty_->dragType_);
 }
 
 void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

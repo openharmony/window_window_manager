@@ -818,39 +818,15 @@ AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType 
 WMError WindowController::ChangeMouseStyle(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
-    uint32_t styleID = 0;
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         if (node->GetWindowRect().width_ > node->GetWindowRect().height_) {
-            styleID = MMI::MOUSE_ICON::NORTH_SOUTH;
+            MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::NORTH_SOUTH);
         } else {
-            styleID = MMI::MOUSE_ICON::WEST_EAST;
-        }
-    } else {
-        switch (moveDragProperty->dragType_) {
-            case DragType::DRAG_HEIGHT:
-                styleID = MMI::MOUSE_ICON::NORTH_SOUTH;
-                break;
-            case DragType::DRAG_WIDTH:
-                styleID = MMI::MOUSE_ICON::WEST_EAST;
-                break;
-            case DragType::DRAG_EAST_SOUTH_CORNER:
-                styleID = MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST;
-                break;
-            case DragType::DRAG_EAST_NORTH_CORNER:
-                styleID = MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST;
-                break;
-            default:
-                WLOGFD("drag type is undefined");
-                break;
+            MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::WEST_EAST);
         }
     }
-    int32_t currentStyleID = 0;
-    MMI::InputManager::GetInstance()->SetPointerStyle(windowId, styleID);
-    MMI::InputManager::GetInstance()->GetPointerStyle(windowId, currentStyleID);
-    if (currentStyleID != styleID) {
-        MMI::InputManager::GetInstance()->SetPointerStyle(windowId, styleID);
-    }
-    WLOGFI("Set pointer style success, styleID is %{public}u", styleID);
+    MMI::InputManager::GetInstance()->SetPointerStyle(windowId, STYLEID_MAP.at(moveDragProperty->dragType_));
+    WLOGFI("Set pointer style success, styleID is %{public}u", STYLEID_MAP.at(moveDragProperty->dragType_));
     return WMError::WM_OK;
 }
 

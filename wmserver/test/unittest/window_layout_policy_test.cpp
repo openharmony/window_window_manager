@@ -126,7 +126,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow01,
 {
     Rect winRect = {50, 50, 100, 150};
     Rect newWinRect = { 50, 50, 200, 200 };
-    sptr<WindowNode> node = CreateDragNode(DragType::DRAG_WIDTH, winRect);
+    sptr<WindowNode> node = CreateDragNode(DragType::DRAG_LEFT_OR_RIGHT, winRect);
     policy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
     Rect expRect = { 50, 50, 200, 300 };
     ASSERT_EQ(expRect, newWinRect);
@@ -156,7 +156,7 @@ HWTEST_F(WindowLayoutPolicyTest, UpdateFloatingWindowSizeForStretchableWindow03,
 {
     Rect winRect = {50, 50, 100, 150};
     Rect newWinRect = { 50, 50, 150, 300 };
-    sptr<WindowNode> node = CreateDragNode(DragType::DRAG_HEIGHT, winRect);
+    sptr<WindowNode> node = CreateDragNode(DragType::DRAG_BOTTOM_OR_TOP, winRect);
     policy_->UpdateFloatingWindowSizeForStretchableWindow(node, { 0, 0, 0, 0 }, newWinRect);
     Rect expRect = { 50, 50, 200, 300 };
     ASSERT_EQ(expRect, newWinRect);

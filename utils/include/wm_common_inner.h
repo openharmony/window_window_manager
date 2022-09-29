@@ -19,7 +19,9 @@
 #include <cfloat>
 #include <cinttypes>
 #include <unordered_set>
+#include <map>
 #include "wm_common.h"
+#include <struct_multimodal.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -206,11 +208,10 @@ struct SplitRatioConfig {
 
 enum class DragType : uint32_t {
     DRAG_UNDEFINED,
-    DRAG_WIDTH,
-    DRAG_HEIGHT,
-    DRAG_CORNER,
-    DRAG_EAST_SOUTH_CORNER,
-    DRAG_EAST_NORTH_CORNER,
+    DRAG_LEFT_OR_RIGHT,
+    DRAG_BOTTOM_OR_TOP,
+    DRAG_LEFT_TOP_CORNER,
+    DRAG_RIGHT_TOP_CORNER,
 };
 
 enum class TraceTaskId : int32_t {
@@ -350,6 +351,13 @@ namespace {
     const std::unordered_set<WindowType> INPUT_WINDOW_TYPE_SKIPPED {
         WindowType::WINDOW_TYPE_POINTER,
         WindowType::WINDOW_TYPE_DRAGGING_EFFECT,
+    };
+    const std::map<DragType, uint32_t> STYLEID_MAP = {
+        {DragType::DRAG_UNDEFINED, MMI::MOUSE_ICON::DEFAULT},
+        {DragType::DRAG_BOTTOM_OR_TOP, MMI::MOUSE_ICON::NORTH_SOUTH},
+        {DragType::DRAG_LEFT_OR_RIGHT, MMI::MOUSE_ICON::WEST_EAST},
+        {DragType::DRAG_LEFT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
+        {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
     };
 }
 }
