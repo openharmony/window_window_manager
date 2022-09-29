@@ -386,9 +386,6 @@ private:
     bool IsAppMainOrSubOrFloatingWindow();
     void UpdateWindowShadowAccordingToSystemConfig();
     bool WindowCreateCheck(uint32_t parentId);
-    void RequestPerfIfNeed(WindowSizeChangeReason reason);
-    void RequestPerf(int32_t code, int64_t timeOut);
-    void ClosePerf(int32_t code);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
 
     // colorspace, gamut
@@ -437,9 +434,6 @@ private:
     bool isMainHandlerAvailable_ = true;
     bool isAppFloatingWindow_ = false;
     bool isFocused_ = false;
-    std::chrono::steady_clock::time_point lastRequestPerfTime_ = std::chrono::steady_clock::now();
-    bool windowMovingBoost_ = false;
-    bool windowDragBoost_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
