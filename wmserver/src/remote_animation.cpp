@@ -454,7 +454,7 @@ void RemoteAnimation::GetAnimationTargetsForHome(std::vector<sptr<RSWindowAnimat
     for (auto& weakNode : needMinimizeAppNodes) {
         auto srcNode = weakNode.promote();
         sptr<WindowTransitionInfo> srcInfo = new(std::nothrow) WindowTransitionInfo();
-        sptr<RSWindowAnimationTarget> srcTarget = CreateWindowAnimationTarget(srcInfo, srcNode, true);
+        sptr<RSWindowAnimationTarget> srcTarget = CreateWindowAnimationTarget(srcInfo, srcNode);
         if (srcTarget == nullptr) {
             continue;
         }
@@ -555,14 +555,14 @@ void RemoteAnimation::NotifyAnimationTargetsUpdate(std::vector<uint32_t>& fullSc
         std::vector<sptr<RSWindowAnimationTarget>> fullScreenAnimationTargets;
         for (auto& id : fullScreenWinIds) {
             auto fullScreenNode = winRoot->GetWindowNode(id);
-            sptr<RSWindowAnimationTarget> fullScreenTarget = CreateWindowAnimationTarget(nullptr, fullScreenNode, true);
+            sptr<RSWindowAnimationTarget> fullScreenTarget = CreateWindowAnimationTarget(nullptr, fullScreenNode);
             if (fullScreenTarget != nullptr) {
                 fullScreenAnimationTargets.emplace_back(fullScreenTarget);
             }
         }
         for (auto& id : floatWinIds) {
             auto floatNode = winRoot->GetWindowNode(id);
-            sptr<RSWindowAnimationTarget> floatTarget = CreateWindowAnimationTarget(nullptr, floatNode, true);
+            sptr<RSWindowAnimationTarget> floatTarget = CreateWindowAnimationTarget(nullptr, floatNode);
             if (floatTarget != nullptr) {
                 floatAnimationTargets.emplace_back(floatTarget);
             }
@@ -599,7 +599,7 @@ WMError RemoteAnimation::NotifyAnimationScreenUnlock(std::function<void(void)> c
 }
 
 sptr<RSWindowAnimationTarget> RemoteAnimation::CreateWindowAnimationTarget(sptr<WindowTransitionInfo> info,
-    const sptr<WindowNode>& windowNode, bool isUpdate)
+    const sptr<WindowNode>& windowNode)
 {
     if (windowNode == nullptr) {
         WLOGFW("Failed to create window animation target, window node is null!");
@@ -612,7 +612,7 @@ sptr<RSWindowAnimationTarget> RemoteAnimation::CreateWindowAnimationTarget(sptr<
         return nullptr;
     }
 
-    if (isUpdate) {
+    if (WindowHelper::IsMainWindow(windowNode->GetWindowType())) { // only starting window has abilityInfo
         windowAnimationTarget->bundleName_ = windowNode->abilityInfo_.bundleName_;
         windowAnimationTarget->abilityName_ = windowNode->abilityInfo_.abilityName_;
     } else if (info) { // use for back, minimize, close
@@ -823,6 +823,17 @@ static void ProcessAbility(const sptr<WindowNode>& srcNode, TransitionEvent even
         default:
             break;
     }
+}
+
+void RemoteAnimation::NotifyAnimationUpdateWallpaper(sptr<WindowNode> node)
+{
+    if (!CheckAnimationController()) {
+        return;
+    }
+    WLOGFI("NotifyAnimationUpdateWallpaper");
+    sptr<RSWindowAnimationTarget> srcTarget = CreateWindowAnimationTarget(nullptr, node);
+    // when wallpaper destroy, update with nullptr
+    windowAnimationController_->OnWallpaperUpdate(srcTarget);
 }
 
 sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateHideAnimationFinishedCallback(
