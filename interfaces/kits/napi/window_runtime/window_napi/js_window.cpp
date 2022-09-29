@@ -86,10 +86,8 @@ void JsWindow::Finalizer(NativeEngine* engine, void* data, void* hint)
     std::string windowName = jsWin->GetWindowName();
     WLOGFI("[NAPI]Window %{public}s", windowName.c_str());
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
-    if (g_jsWindowMap.find(windowName) != g_jsWindowMap.end()) {
-        g_jsWindowMap.erase(windowName);
-        WLOGFI("[NAPI]Remove window %{public}s from g_jsWindowMap", windowName.c_str());
-    }
+    g_jsWindowMap.erase(windowName);
+    WLOGFI("[NAPI]Remove window %{public}s from g_jsWindowMap", windowName.c_str());
 }
 
 NativeValue* JsWindow::Show(NativeEngine* engine, NativeCallbackInfo* info)
@@ -3349,7 +3347,7 @@ NativeValue* JsWindow::OnGetTransitionController(NativeEngine& engine, NativeCal
     if (jsTransControllerObj_ == nullptr || jsTransControllerObj_->Get() == nullptr) {
         CreateTransitionController(engine);
     }
-    return jsTransControllerObj_->Get();
+    return jsTransControllerObj_ == nullptr ? nullptr : jsTransControllerObj_->Get();
 }
 
 NativeValue* JsWindow::OnSetCornerRadius(NativeEngine& engine, NativeCallbackInfo& info)

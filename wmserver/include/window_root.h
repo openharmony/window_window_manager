@@ -126,6 +126,8 @@ private:
 
     void OnRemoteDied(const sptr<IRemoteObject>& remoteObject);
     WMError DestroyWindowInner(sptr<WindowNode>& node);
+    WMError DestroyWindowSelf(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container);
+    WMError DestroyWindowWithChild(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container);
     void UpdateFocusWindowWithWindowRemoved(const sptr<WindowNode>& node,
         const sptr<WindowNodeContainer>& container) const;
     sptr<WindowNode> UpdateActiveWindowWithWindowRemoved(const sptr<WindowNode>& node,

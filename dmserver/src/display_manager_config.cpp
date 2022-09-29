@@ -39,12 +39,11 @@ std::map<std::string, std::string> DisplayManagerConfig::stringConfig_;
 
 std::vector<std::string> DisplayManagerConfig::Split(std::string str, std::string pattern)
 {
-    int32_t position;
     std::vector<std::string> result;
     str += pattern;
     int32_t length = static_cast<int32_t>(str.size());
     for (int32_t i = 0; i < length; i++) {
-        position = static_cast<int32_t>(str.find(pattern, i));
+        int32_t position = static_cast<int32_t>(str.find(pattern, i));
         if (position < length) {
             std::string tmp = str.substr(i, position - i);
             result.push_back(tmp);

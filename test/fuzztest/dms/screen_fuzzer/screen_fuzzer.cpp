@@ -57,7 +57,7 @@ bool ScreenFuzzTest(const uint8_t *data, size_t size)
     uint32_t modifiedDensityDpi = static_cast<uint32_t>(
         originalDensityDpi + 80 >= 640 ? originalDensityDpi - 80 : originalDensityDpi + 80);
     startPos += GetObject<uint32_t>(modeId, data + startPos, size - startPos);
-    startPos += GetObject<Orientation>(orientation, data + startPos, size - startPos);
+    GetObject<Orientation>(orientation, data + startPos, size - startPos);
     screen->SetScreenActiveMode(modeId);
     screen->SetOrientation(orientation);
     screen->SetDensityDpi(modifiedDensityDpi);
@@ -86,7 +86,7 @@ bool ColorGamutsFuzzTest(const uint8_t *data, size_t size)
     }
     size_t startPos = 0;
     startPos += GetObject<int32_t>(colorGamutIdx, data + startPos, size - startPos);
-    startPos += GetObject<uint32_t>(gamutMap, data + startPos, size - startPos);
+    GetObject<uint32_t>(gamutMap, data + startPos, size - startPos);
     std::vector<ScreenColorGamut> colorGamuts;
     screen->GetScreenSupportedColorGamuts(colorGamuts);
     size_t colorGamutsSize = colorGamuts.size();

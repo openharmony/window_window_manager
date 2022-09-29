@@ -181,7 +181,6 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
         WLOGFI("cannot release leashwindow since leash is null, id:%{public}u", node->GetWindowId());
         return;
     }
-    auto leashName = node->leashWinSurfaceNode_->GetName();
     node->leashWinSurfaceNode_->RemoveChild(node->startingWinSurfaceNode_);
     node->leashWinSurfaceNode_->RemoveChild(node->surfaceNode_);
     node->leashWinSurfaceNode_ = nullptr;
