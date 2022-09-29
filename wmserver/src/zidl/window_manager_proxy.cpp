@@ -48,7 +48,7 @@ WMError WindowManagerProxy::CreateWindow(sptr<IWindow>& window, sptr<WindowPrope
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    if (!surfaceNode->Marshalling(data)) {
+    if (surfaceNode == nullptr || !surfaceNode->Marshalling(data)) {
         WLOGFE("Write windowProperty failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
