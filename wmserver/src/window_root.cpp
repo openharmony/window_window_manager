@@ -787,6 +787,47 @@ WMError WindowRoot::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
     return res;
 }
 
+WMError WindowRoot::DestroyWindowSelf(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container)
+{
+    for (auto& child : node->children_) {
+        if (child == nullptr) {
+            continue;
+        }
+        child->parent_ = nullptr;
+        if ((child->GetWindowToken() != nullptr) && (child->abilityToken_ != node->abilityToken_) &&
+            (child->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
+            child->GetWindowToken()->NotifyDestroy();
+        }
+    }
+    WMError res = container->RemoveWindowNode(node);
+    if (res != WMError::WM_OK) {
+        WLOGFE("RemoveWindowNode failed");
+    }
+    SwitchRenderModeIfNeeded();
+    return DestroyWindowInner(node);
+}
+
+WMError WindowRoot::DestroyWindowWithChild(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container)
+{
+    auto token = node->abilityToken_;
+    std::vector<uint32_t> windowIds;
+    WMError res = container->DestroyWindowNode(node, windowIds);
+    for (auto id : windowIds) {
+        node = GetWindowNode(id);
+        if (!node) {
+            continue;
+        }
+        HandleKeepScreenOn(id, false);
+        DestroyWindowInner(node);
+        if ((node->GetWindowToken() != nullptr) && (node->abilityToken_ != token) &&
+            (node->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
+            node->GetWindowToken()->NotifyDestroy();
+        }
+    }
+    SwitchRenderModeIfNeeded();
+    return res;
+}
+
 WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     auto node = GetWindowNode(windowId);
@@ -795,49 +836,21 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
         return WMError::WM_ERROR_NULLPTR;
     }
     WLOGFI("destroy window %{public}u, onlySelf:%{public}u.", windowId, onlySelf);
-    WMError res;
-    auto token = node->abilityToken_;
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
-    if (container != nullptr) {
-        UpdateFocusWindowWithWindowRemoved(node, container);
-        UpdateActiveWindowWithWindowRemoved(node, container);
-        UpdateBrightnessWithWindowRemoved(windowId, container);
-        HandleKeepScreenOn(windowId, false);
-        if (onlySelf) {
-            for (auto& child : node->children_) {
-                child->parent_ = nullptr;
-                if ((child != nullptr) && (child->GetWindowToken() != nullptr) && (child->abilityToken_ != token) &&
-                    (child->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
-                    child->GetWindowToken()->NotifyDestroy();
-                }
-            }
-            res = container->RemoveWindowNode(node);
-            if (res != WMError::WM_OK) {
-                WLOGFE("RemoveWindowNode failed");
-            }
-            SwitchRenderModeIfNeeded();
-            return DestroyWindowInner(node);
-        } else {
-            std::vector<uint32_t> windowIds;
-            res = container->DestroyWindowNode(node, windowIds);
-            for (auto id : windowIds) {
-                node = GetWindowNode(id);
-                if (node != nullptr) {
-                    HandleKeepScreenOn(id, false);
-                    DestroyWindowInner(node);
-                }
-                if ((node != nullptr) && (node->GetWindowToken() != nullptr) && (node->abilityToken_ != token) &&
-                    (node->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
-                    node->GetWindowToken()->NotifyDestroy();
-                }
-            }
-            SwitchRenderModeIfNeeded();
-            return res;
-        }
+    if (!container) {
+        WLOGFW("destroy window failed, window container could not be found");
+        return DestroyWindowInner(node);
     }
-    res = DestroyWindowInner(node);
-    WLOGFI("destroy window failed, window container could not be found");
-    return res;
+
+    UpdateFocusWindowWithWindowRemoved(node, container);
+    UpdateActiveWindowWithWindowRemoved(node, container);
+    UpdateBrightnessWithWindowRemoved(windowId, container);
+    HandleKeepScreenOn(windowId, false);
+    if (onlySelf) {
+        return DestroyWindowSelf(node, container);
+    } else {
+        return DestroyWindowWithChild(node, container);
+    }
 }
 
 WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
@@ -1236,6 +1249,7 @@ void WindowRoot::ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<Dis
     auto container = windowNodeContainerMap_[displayGroupId];
     if (container == nullptr) {
         WLOGFE("window node container is nullptr, displayId :%{public}" PRIu64 "", displayId);
+        return;
     }
 
     WLOGFI("[Display Create] before add new display, displayId: %{public}" PRIu64"", displayId);

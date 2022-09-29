@@ -98,6 +98,7 @@ void DisplayGroupController::UpdateDisplayGroupWindowTree()
         auto rootNode = windowNodeContainer_->GetRootNode(rootType);
         if (rootNode == nullptr) {
             WLOGFE("rootNode is nullptr, %{public}d", rootType);
+            continue;
         }
         for (auto& node : rootNode->children_) {
             AddWindowNodeOnWindowTree(node, rootType);

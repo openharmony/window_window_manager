@@ -289,9 +289,6 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
 
 void WindowNodeContainer::RemoveWindowNodeFromWindowTree(sptr<WindowNode>& node)
 {
-    // remove this node from node vector of display
-    sptr<WindowNode> root = FindRoot(node->GetWindowType());
-
     // remove this node from parent
     auto iter = std::find(node->parent_->children_.begin(), node->parent_->children_.end(), node);
     if (iter != node->parent_->children_.end()) {

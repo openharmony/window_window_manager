@@ -59,10 +59,10 @@ bool DisplayFuzzTest(const uint8_t* data, size_t size)
     size_t startPos = 0;
     DisplayManager& displayManager = DisplayManager::GetInstance();
     sptr<DisplayListener> displayListener = new DisplayListener();
-    std::vector<sptr<Display>> displays = displayManager.GetAllDisplays();
-    std::vector<DisplayId> displayIds = displayManager.GetAllDisplayIds();
+    displayManager.GetAllDisplays();
+    displayManager.GetAllDisplayIds();
     displayManager.GetDefaultDisplayId();
-    sptr<Display> defaultDisplay = displayManager.GetDefaultDisplay();
+    displayManager.GetDefaultDisplay();
 
     startPos += GetObject<DisplayId>(displayId, data + startPos, size - startPos);
     displayManager.GetDisplayById(displayId);
@@ -88,7 +88,7 @@ bool GetScreenshotFuzzTest(const uint8_t* data, size_t size)
     displayManager.GetScreenshot(displayId);
     startPos += GetObject<Media::Rect>(rect, data + startPos, size - startPos);
     startPos += GetObject<Media::Size>(mediaSize, data + startPos, size - startPos);
-    startPos += GetObject<int>(rotation, data + startPos, size - startPos);
+    GetObject<int>(rotation, data + startPos, size - startPos);
     displayManager.GetScreenshot(displayId, rect, mediaSize, rotation);
     return true;
 }
@@ -134,7 +134,7 @@ bool ScreenBrightnessFuzzTest(const uint8_t* data, size_t size)
     DisplayManager& displayManager = DisplayManager::GetInstance();
 
     startPos += GetObject<uint64_t>(screenId, data + startPos, size - startPos);
-    startPos += GetObject<uint32_t>(level, data + startPos, size - startPos);
+    GetObject<uint32_t>(level, data + startPos, size - startPos);
     displayManager.SetScreenBrightness(screenId, level);
     displayManager.GetScreenBrightness(screenId);
     return true;
@@ -167,7 +167,7 @@ bool NotifyDisplayEventFuzzTest(const uint8_t* data, size_t size)
     size_t startPos = 0;
     DisplayManager& displayManager = DisplayManager::GetInstance();
     uint32_t event;
-    startPos += GetObject<uint32_t>(event, data + startPos, size - startPos);
+    GetObject<uint32_t>(event, data + startPos, size - startPos);
     displayManager.NotifyDisplayEvent(static_cast<DisplayEvent>(event));
     return true;
 }
