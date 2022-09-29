@@ -252,6 +252,9 @@ void RemoteAnimation::GetExpectRect(const sptr<WindowNode>& dstNode, const sptr<
     auto winRoot = windowRoot_.promote();
     if (needAvoid && winRoot) {
         auto avoidRect = winRoot->GetDisplayRectWithoutSystemBarAreas(dstNode->GetDisplayId());
+        if (WindowHelper::IsEmptyRect(avoidRect)) {
+            return;
+        }
         WLOGFI("name:%{public}s id:%{public}u avoidRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
             dstNode->GetWindowName().c_str(), dstNode->GetWindowId(),
             avoidRect.posX_, avoidRect.posY_, avoidRect.width_, avoidRect.height_);
