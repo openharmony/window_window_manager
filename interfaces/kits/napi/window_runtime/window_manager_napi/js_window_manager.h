@@ -30,6 +30,7 @@ public:
     JsWindowManager();
     ~JsWindowManager();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
+    static NativeValue* Create(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* CreateWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* FindWindow(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* MinimizeAll(NativeEngine* engine, NativeCallbackInfo* info);
@@ -40,6 +41,7 @@ public:
     static NativeValue* SetWindowLayoutMode(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
+    NativeValue* OnCreate(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnFindWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnMinimizeAll(NativeEngine& engine, NativeCallbackInfo& info);
@@ -48,6 +50,7 @@ private:
     NativeValue* OnUnregisterWindowManagerCallback(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetTopWindow(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetWindowLayoutMode(NativeEngine& engine, NativeCallbackInfo& info);
+    bool ParseConfigOption(NativeEngine& engine, NativeObject* jsObject, WindowOption& option, void*& contextPtr);
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
 };
 }  // namespace Rosen

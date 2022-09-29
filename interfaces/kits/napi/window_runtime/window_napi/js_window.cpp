@@ -2103,25 +2103,25 @@ static bool IsScaleValid(double data)
 bool JsWindow::ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans)
 {
     double data = 0.0f;
-    if (ParseJsDoubleValue(jsObject, engine, "pivotX", data)) {
+    if (ParseJsValue(jsObject, engine, "pivotX", data)) {
         if (!IsPivotValid(data)) {
             return false;
         }
         trans.pivotX_ = data;
     }
-    if (ParseJsDoubleValue(jsObject, engine, "pivotY", data)) {
+    if (ParseJsValue(jsObject, engine, "pivotY", data)) {
         if (!IsPivotValid(data)) {
             return false;
         }
         trans.pivotY_ = data;
     }
-    if (ParseJsDoubleValue(jsObject, engine, "x", data)) {
+    if (ParseJsValue(jsObject, engine, "x", data)) {
         if (!IsScaleValid(data)) {
             return false;
         }
         trans.scaleX_ = data;
     }
-    if (ParseJsDoubleValue(jsObject, engine, "y", data)) {
+    if (ParseJsValue(jsObject, engine, "y", data)) {
         if (!IsScaleValid(data)) {
             return false;
         }
@@ -2161,25 +2161,25 @@ NativeValue* JsWindow::OnScale(NativeEngine& engine, NativeCallbackInfo& info)
 bool JsWindow::ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans)
 {
     double data = 0.0f;
-    if (ParseJsDoubleValue(jsObject, engine, "pivotX", data)) {
+    if (ParseJsValue(jsObject, engine, "pivotX", data)) {
         if (!IsPivotValid(data)) {
             return false;
         }
         trans.pivotX_ = data;
     }
-    if (ParseJsDoubleValue(jsObject, engine, "pivotY", data)) {
+    if (ParseJsValue(jsObject, engine, "pivotY", data)) {
         if (!IsPivotValid(data)) {
             return false;
         }
         trans.pivotY_ = data;
     }
-    if (ParseJsDoubleValue(jsObject, engine, "x", data)) {
+    if (ParseJsValue(jsObject, engine, "x", data)) {
         trans.rotationX_ = data;
     }
-    if (ParseJsDoubleValue(jsObject, engine, "y", data)) {
+    if (ParseJsValue(jsObject, engine, "y", data)) {
         trans.rotationY_ = data;
     }
-    if (ParseJsDoubleValue(jsObject, engine, "z", data)) {
+    if (ParseJsValue(jsObject, engine, "z", data)) {
         trans.rotationZ_ = data;
     }
     return true;
@@ -2218,13 +2218,13 @@ NativeValue* JsWindow::OnRotate(NativeEngine& engine, NativeCallbackInfo& info)
 bool JsWindow::ParseTranslateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans)
 {
     double data = 0.0f;
-    if (ParseJsDoubleValue(jsObject, engine, "x", data)) {
+    if (ParseJsValue(jsObject, engine, "x", data)) {
         trans.translateX_ = data;
     }
-    if (ParseJsDoubleValue(jsObject, engine, "y", data)) {
+    if (ParseJsValue(jsObject, engine, "y", data)) {
         trans.translateY_ = data;
     }
-    if (ParseJsDoubleValue(jsObject, engine, "z", data)) {
+    if (ParseJsValue(jsObject, engine, "z", data)) {
         trans.translateZ_ = data;
     }
     return true;
