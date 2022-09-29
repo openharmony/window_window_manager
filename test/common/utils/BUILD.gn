@@ -38,7 +38,7 @@ ohos_static_library("libtestutil") {
     "c_utils:utils",
     "graphic_standard:surface",
     "hilog_native:libhilog",
-    "multimedia_image_standard:image_native",
+    "multimedia_image_framework:image_native",
   ]
 
   part_name = "window_manager"

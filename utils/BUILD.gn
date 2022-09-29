@@ -72,7 +72,7 @@ ohos_shared_library("libwmutil") {
     "hisysevent_native:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "multimedia_image_standard:image_native",
+    "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
   ]
   part_name = "window_manager"
