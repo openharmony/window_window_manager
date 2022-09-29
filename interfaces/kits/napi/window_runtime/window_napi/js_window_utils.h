@@ -199,7 +199,19 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     NativeValue* WindowErrorCodeInit(NativeEngine* engine);
     NativeValue* WindowErrorInit(NativeEngine* engine);
     bool GetAPI7Ability(NativeEngine& engine, AppExecFwk::Ability* &ability);
-    bool ParseJsDoubleValue(NativeObject* jsObject, NativeEngine& engine, const std::string& name, double& data);
+    template<class T>
+    bool ParseJsValue(NativeObject* jsObject, NativeEngine& engine, const std::string& name, T& data)
+    {
+        NativeValue* value = jsObject->GetProperty(name.c_str());
+        if (value->TypeOf() != NATIVE_UNDEFINED) {
+            if (!AbilityRuntime::ConvertFromJsValue(engine, value, data)) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+        return true;
+    }
     template<class T>
     inline bool ConvertNativeValueToVector(NativeEngine& engine, NativeValue* nativeValue, std::vector<T>& out)
     {

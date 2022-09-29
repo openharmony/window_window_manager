@@ -47,6 +47,12 @@ void JsWindowManager::Finalizer(NativeEngine* engine, void* data, void* hint)
     std::unique_ptr<JsWindowManager>(static_cast<JsWindowManager*>(data));
 }
 
+NativeValue* JsWindowManager::Create(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(engine, info);
+    return (me != nullptr) ? me->OnCreate(*engine, *info) : nullptr;
+}
+
 NativeValue* JsWindowManager::CreateWindow(NativeEngine* engine, NativeCallbackInfo* info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(engine, info);
@@ -157,13 +163,14 @@ static bool GetWindowTypeAndParentId(NativeEngine& engine, uint32_t& parentId, W
 }
 
 static void CreateSystemWindowTask(void* contextPtr, std::string windowName, WindowType winType,
-    NativeEngine& engine, AsyncTask& task)
+    NativeEngine& engine, AsyncTask& task, bool newErrorCode = false)
 {
     WLOGFI("[NAPI]CreateSystemWindowTask");
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
     if (contextPtr == nullptr || context == nullptr) {
-        task.Reject(engine, CreateJsError(engine,
-            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "Context is nullptr"));
+        int32_t err = newErrorCode ? static_cast<int32_t>(WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY)
+            : static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+        task.Reject(engine, CreateJsError(engine, err, "Context is nullptr"));
         WLOGFE("[NAPI]Context is nullptr");
         return;
     }
@@ -171,17 +178,18 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
         auto abilityContext = Context::ConvertTo<AbilityRuntime::AbilityContext>(context->lock());
         if (abilityContext != nullptr) {
             if (!CheckCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
-                task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(WMError::WM_ERROR_INVALID_PERMISSION),
-                    "TYPE_FLOAT CheckCallingPermission failed"));
+                int32_t err = newErrorCode ? static_cast<int32_t>(WmErrorCode::WM_ERROR_NO_PERMISSION)
+                    : static_cast<int32_t>(WMError::WM_ERROR_INVALID_PERMISSION);
+                task.Reject(engine, CreateJsError(engine, err, "TYPE_FLOAT CheckCallingPermission failed"));
                 return;
             }
         }
     }
     sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
     if (windowOption == nullptr) {
-        task.Reject(engine, CreateJsError(engine,
-            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "New window option failed"));
+        int32_t err = newErrorCode ? static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY)
+            : static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+        task.Reject(engine, CreateJsError(engine, err, "New window option failed"));
         WLOGFE("[NAPI]New window option failed");
         return;
     }
@@ -191,19 +199,21 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
         task.Resolve(engine, CreateJsWindowObject(engine, window));
     } else {
         WLOGFE("[NAPI]Create window failed");
-        task.Reject(engine, CreateJsError(engine,
-            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "Create window failed"));
+        int32_t err = newErrorCode ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)
+            : static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+        task.Reject(engine, CreateJsError(engine, err, "Create window failed"));
     }
 }
 
 static void CreateSubWindowTask(uint32_t parentWinId, std::string windowName, WindowType winType,
-    NativeEngine& engine, AsyncTask& task)
+    NativeEngine& engine, AsyncTask& task, bool newErrorCode = false)
 {
     WLOGFI("[NAPI]CreateSubWindowTask, parent id = %{public}u", parentWinId);
     sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
     if (windowOption == nullptr) {
-        task.Reject(engine, CreateJsError(engine,
-            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "New window option failed"));
+        int32_t err = newErrorCode ? static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY)
+            : static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+        task.Reject(engine, CreateJsError(engine, err, "New window option failed"));
         WLOGFE("[NAPI]New window option failed");
         return;
     }
@@ -215,14 +225,15 @@ static void CreateSubWindowTask(uint32_t parentWinId, std::string windowName, Wi
         task.Resolve(engine, CreateJsWindowObject(engine, window));
     } else {
         WLOGFE("[NAPI]Create window failed");
-        task.Reject(engine, CreateJsError(engine,
-            static_cast<int32_t>(WMError::WM_ERROR_NULLPTR), "Create window failed"));
+        int32_t err = newErrorCode ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)
+            : static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+        task.Reject(engine, CreateJsError(engine, err, "Create window failed"));
     }
 }
 
-NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsWindowManager::OnCreate(NativeEngine& engine, NativeCallbackInfo& info)
 {
-    WLOGFD("[NAPI]OnCreateWindow");
+    WLOGFD("[NAPI]OnCreate");
     NativeValue* nativeString = nullptr;
     NativeValue* nativeContext = nullptr;
     NativeValue* nativeType = nullptr;
@@ -269,6 +280,96 @@ NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbac
                 return CreateSubWindowTask(parentId, windowName, winType, engine, task);
             }
         };
+    NativeValue* result = nullptr;
+    AsyncTask::Schedule("JsWindowManager::OnCreate", engine,
+        CreateAsyncTaskWithLastParam(engine, callback, nullptr, std::move(complete), &result));
+    return result;
+}
+
+bool JsWindowManager::ParseConfigOption(NativeEngine& engine, NativeObject* jsObject,
+    WindowOption& option, void*& contextPtr)
+{
+    std::string windowName;
+    if (ParseJsValue(jsObject, engine, "name", windowName)) {
+        option.SetWindowName(windowName);
+    } else {
+        WLOGFE("[NAPI]Failed to convert parameter to windowName");
+        return false;
+    }
+
+    WindowType winType = WindowType::SYSTEM_WINDOW_BASE;
+    if (ParseJsValue(jsObject, engine, "windowType", winType)) {
+        option.SetWindowType(winType);
+    } else {
+        WLOGFE("[NAPI]Failed to convert parameter to winType");
+        return false;
+    }
+
+    NativeValue* value = jsObject->GetProperty("ctx");
+    if (value->TypeOf() == NATIVE_UNDEFINED) {
+        return true;
+    }
+    WMError errCode = WMError::WM_OK;
+    GetNativeContext(engine, value, contextPtr, errCode);
+    if (errCode != WMError::WM_OK) {
+        return false;
+    }
+
+    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
+    if (ParseJsValue(jsObject, engine, "displayId", displayId)) {
+        if (displayId < 0 ||
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
+            return false;
+        }
+        option.SetDisplayId(displayId);
+    } else {
+        return true;
+    }
+
+    int64_t parentId = -1;
+    if (ParseJsValue(jsObject, engine, "parentId", parentId)) {
+        option.SetParentId(parentId);
+    }
+
+    return true;
+}
+
+NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbackInfo& info)
+{
+    WLOGFD("[NAPI]Called");
+    if (info.argc < 1) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
+    if (nativeObj == nullptr) {
+        WLOGFE("[NAPI]Failed to convert object to CreateWindow");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    WindowOption option;
+    void* contextPtr = nullptr;
+    if(!ParseConfigOption(engine, nativeObj, option, contextPtr)) {
+        WLOGFE("[NAPI]Failed to parse config");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return engine.CreateUndefined();
+    }
+    NativeValue* callback = nullptr;
+    if (info.argc > 1) {
+        callback = (info.argc == 1) ? nullptr :
+            (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr); // 1: index of callback
+    }
+    AsyncTask::CompleteCallback complete =
+        [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (option.GetParentId() == INVALID_WINDOW_ID) {
+                return CreateSystemWindowTask(contextPtr, option.GetWindowName(),
+                    option.GetWindowType(), engine, task, true);
+            } else {
+                return CreateSubWindowTask(option.GetParentId(), option.GetWindowName(),
+                    option.GetWindowType(), engine, task, true);
+            }
+        };
+
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsWindowManager::OnCreateWindow", engine,
         CreateAsyncTaskWithLastParam(engine, callback, nullptr, std::move(complete), &result));
@@ -592,7 +693,8 @@ NativeValue* JsWindowManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetProperty("WmErrorCode", WindowErrorCodeInit(engine));
     object->SetProperty("WMError", WindowErrorInit(engine));
     const char *moduleName = "JsWindowManager";
-    BindNativeFunction(*engine, *object, "create", moduleName, JsWindowManager::CreateWindow);
+    BindNativeFunction(*engine, *object, "create", moduleName, JsWindowManager::Create);
+    BindNativeFunction(*engine, *object, "createWindow", moduleName, JsWindowManager::CreateWindow);
     BindNativeFunction(*engine, *object, "find", moduleName, JsWindowManager::FindWindow);
     BindNativeFunction(*engine, *object, "on", moduleName, JsWindowManager::RegisterWindowManagerCallback);
     BindNativeFunction(*engine, *object, "off", moduleName, JsWindowManager::UnregisterWindowMangerCallback);
