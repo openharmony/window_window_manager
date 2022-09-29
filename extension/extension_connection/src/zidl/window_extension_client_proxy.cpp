@@ -36,7 +36,7 @@ void WindowExtensionClientProxy::OnWindowReady(const std::shared_ptr<RSSurfaceNo
         return;
     }
 
-    if ((!surfaceNode->Marshalling(data))) {
+    if (surfaceNode == nullptr || (!surfaceNode->Marshalling(data))) {
         WLOGFE("write surfaceNode failed");
         return;
     }
