@@ -177,6 +177,8 @@ public:
     virtual void GetRequestedTouchHotAreas(std::vector<Rect>& rects) const override;
     virtual WMError SetAPPWindowLabel(const std::string& label) override;
     virtual WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
+    virtual uint32_t CalculatePointerDirection(int32_t pointerX, int32_t pointerY);
+    virtual void HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     // colorspace, gamut
     virtual bool IsSupportWideGamut() override;

@@ -704,6 +704,16 @@ WMError WindowImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& ico
     return WMError::WM_OK;
 }
 
+uint32_t CalculatePointerDirection(int32_t pointerX, int32_t pointerY)
+{
+    return 0;
+}
+
+void HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return;
+}
+
 WMError WindowImpl::SetCornerRadius(float cornerRadius)
 {
     return WMError::WM_OK;

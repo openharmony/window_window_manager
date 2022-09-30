@@ -27,7 +27,6 @@
 #include "window_transition_info.h"
 #include "wm_common.h"
 #include "wm_occlusion_region.h"
-#include "struct_multimodal.h"
 
 namespace OHOS {
 namespace Rosen {
