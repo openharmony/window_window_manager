@@ -439,6 +439,13 @@ private:
     bool isFocused_ = false;
     uint32_t mouseStyleID_ = 0;
     bool isPointerStyleChanged_ = false;
+    const std::map<DragType, uint32_t> STYLEID_MAP = {
+        {DragType::DRAG_UNDEFINED, MMI::MOUSE_ICON::DEFAULT},
+        {DragType::DRAG_BOTTOM_OR_TOP, MMI::MOUSE_ICON::NORTH_SOUTH},
+        {DragType::DRAG_LEFT_OR_RIGHT, MMI::MOUSE_ICON::WEST_EAST},
+        {DragType::DRAG_LEFT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
+        {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
+    };
 };
 } // namespace Rosen
 } // namespace OHOS
