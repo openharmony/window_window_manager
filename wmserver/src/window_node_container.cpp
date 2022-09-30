@@ -311,8 +311,11 @@ void WindowNodeContainer::RemoveFromRsTreeWhenRemoveWindowNode(sptr<WindowNode>&
     }
     // When RemoteAnimation exists, remove node from rs tree after animation
     WLOGFD("remove from rs tree id:%{public}u", node->GetWindowId());
+    // subwindow or no remote animation also exit with animation
+    bool isAnimationPlayed = RemoteAnimation::CheckAnimationController() &&
+        WindowHelper::IsMainWindow(node->GetWindowType());
     for (auto& displayId : node->GetShowingDisplays()) {
-        RemoveNodeFromRSTree(node, displayId, displayId, WindowUpdateType::WINDOW_UPDATE_REMOVED, true);
+        RemoveNodeFromRSTree(node, displayId, displayId, WindowUpdateType::WINDOW_UPDATE_REMOVED, isAnimationPlayed);
     }
 }
 
