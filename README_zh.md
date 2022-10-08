@@ -1,4 +1,4 @@
-# windowmanager
+# window_manager
 
 -   [简介](#简介)
 -   [目录](#目录)
