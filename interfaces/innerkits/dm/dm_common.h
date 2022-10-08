@@ -90,7 +90,7 @@ const std::map<DMError, DmErrorCode> DM_JS_TO_ERROR_CODE_MAP {
     {DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED,           DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
     {DMError::DM_ERROR_IPC_FAILED,                      DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
     {DMError::DM_ERROR_REMOTE_CREATE_FAILED,            DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
-    {DMError::DM_ERROR_NULLPTR,                         DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
+    {DMError::DM_ERROR_NULLPTR,                         DmErrorCode::DM_ERROR_INVALID_SCREEN        },
     {DMError::DM_ERROR_INVALID_PARAM,                   DmErrorCode::DM_ERROR_INVALID_PARAM         },
     {DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED,    DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
     {DMError::DM_ERROR_DEATH_RECIPIENT,                 DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
