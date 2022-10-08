@@ -970,7 +970,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         });
     }
 
-    if (isAsyncTask) {
+    if (isAsyncTask || action == PropertyChangeAction::ACTION_UPDATE_RECT) {
         PostAsyncTask([this, windowProperty, action]() mutable {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
             WMError res = windowController_->UpdateProperty(windowProperty, action);

@@ -41,6 +41,7 @@
 #include "window_root.h"
 #include "snapshot_controller.h"
 #include "perform_reporter.h"
+#include "struct_multimodal.h"
 
 namespace OHOS {
 namespace Rosen {

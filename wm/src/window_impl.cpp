@@ -2081,21 +2081,21 @@ void WindowImpl::UpdatePointerEventForStretchableWindow(const std::shared_ptr<MM
 
 void WindowImpl::UpdateDragType(int32_t startPointPosX, int32_t startPointPosY)
 {
-    if (!moveDragProperty_->startDragFlag_) {
-        moveDragProperty_->dragType_ = DragType::DRAG_UNDEFINED;
-        return;
-    }
     const auto& startRectExceptCorner = moveDragProperty_->startRectExceptCorner_;
     if (startPointPosX > startRectExceptCorner.posX_ &&
         (startPointPosX < startRectExceptCorner.posX_ +
         static_cast<int32_t>(startRectExceptCorner.width_))) {
-        moveDragProperty_->dragType_ = DragType::DRAG_HEIGHT;
+        moveDragProperty_->dragType_ = DragType::DRAG_BOTTOM_OR_TOP;
     } else if (startPointPosY > startRectExceptCorner.posY_ &&
         (startPointPosY < startRectExceptCorner.posY_ +
         static_cast<int32_t>(startRectExceptCorner.height_))) {
-        moveDragProperty_->dragType_ = DragType::DRAG_WIDTH;
+        moveDragProperty_->dragType_ = DragType::DRAG_LEFT_OR_RIGHT;
+    } else if ((startPointPosX <= startRectExceptCorner.posX_ && startPointPosY <= startRectExceptCorner.posY_) ||
+        (startPointPosX >= startRectExceptCorner.posX_ + static_cast<int32_t>(startRectExceptCorner.width_) &&
+         startPointPosY >= startRectExceptCorner.posY_ + static_cast<int32_t>(startRectExceptCorner.height_))) {
+        moveDragProperty_->dragType_ = DragType::DRAG_LEFT_TOP_CORNER;
     } else {
-        moveDragProperty_->dragType_ = DragType::DRAG_CORNER;
+        moveDragProperty_->dragType_ = DragType::DRAG_RIGHT_TOP_CORNER;
     }
 }
 
@@ -2107,7 +2107,7 @@ void WindowImpl::CalculateStartRectExceptHotZone(float vpr)
         hotZoneScale = WindowHelper::CalculateHotZoneScale(property_->GetTransformMat());
     }
 
-    const auto& startPointRect = moveDragProperty_->startPointRect_;
+    const auto& startPointRect = GetRect();
     auto& startRectExceptFrame = moveDragProperty_->startRectExceptFrame_;
     startRectExceptFrame.posX_ = startPointRect.posX_ +
         static_cast<int32_t>(WINDOW_FRAME_WIDTH * vpr / hotZoneScale.x_);
@@ -2301,6 +2301,60 @@ void WindowImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
 }
 
+uint32_t WindowImpl::CalculatePointerDirection(int32_t pointerX, int32_t pointerY)
+{
+    UpdateDragType(pointerX, pointerY);
+    return STYLEID_MAP.at(moveDragProperty_->dragType_);
+}
+
+void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        WLOGFE("Get pointeritem failed");
+        pointerEvent->MarkProcessed();
+        return;
+    }
+    if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
+        auto display = DisplayManager::GetInstance().GetDisplayById(moveDragProperty_->targetDisplayId_);
+        if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+            WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u",
+                property_->GetDisplayId(), property_->GetWindowId());
+            return;
+        }
+        float vpr = display->GetVirtualPixelRatio();
+        CalculateStartRectExceptHotZone(vpr);
+
+        if (IsPointInDragHotZone(pointerItem.GetDisplayX(), pointerItem.GetDisplayY())) {
+            uint32_t tempStyleID = mouseStyleID_;
+            // calculate pointer style
+            mouseStyleID_ = CalculatePointerDirection(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+            if (tempStyleID != mouseStyleID_) {
+                MMI::InputManager::GetInstance()->SetPointerStyle(
+                    static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), mouseStyleID_);
+            }
+            isPointerStyleChanged_ = true;
+        }
+    } else if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE && isPointerStyleChanged_ == false) {
+        if (GetRect().width_ > GetRect().height_) {
+            MMI::InputManager::GetInstance()->SetPointerStyle(
+                static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), MMI::MOUSE_ICON::NORTH_SOUTH);
+        } else {
+            MMI::InputManager::GetInstance()->SetPointerStyle(
+                static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), MMI::MOUSE_ICON::WEST_EAST);
+        }
+        isPointerStyleChanged_ = true;
+    }
+    auto action = pointerEvent->GetPointerAction();
+    if (isPointerStyleChanged_ && (action == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
+        !IsPointInDragHotZone(pointerItem.GetDisplayX(), pointerItem.GetDisplayY()))) {
+        MMI::InputManager::GetInstance()->SetPointerStyle(static_cast<uint32_t>(pointerEvent->GetAgentWindowId()),
+            MMI::MOUSE_ICON::DEFAULT);
+        isPointerStyleChanged_ = false;
+        mouseStyleID_ = 0;
+    }
+}
+
 void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     // If windowRect transformed, transform event back to its origin position
@@ -2308,6 +2362,10 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
         property_->UpdatePointerEvent(pointerEvent);
     }
     int32_t action = pointerEvent->GetPointerAction();
+    if (action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
+        pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        HandlePointerStyle(pointerEvent);
+    }
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         WLOGI("WMS process point down, window: [name:%{public}s, id:%{public}u], action: %{public}d",
             name_.c_str(), GetWindowId(), action);

@@ -27,6 +27,7 @@
 #include "window_transition_info.h"
 #include "wm_common.h"
 #include "wm_occlusion_region.h"
+#include "struct_multimodal.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -76,6 +77,7 @@ public:
     WMError InterceptInputEventToServer(uint32_t windowId);
     WMError RecoverInputEventToClient(uint32_t windowId);
     WMError NotifyWindowClientPointUp(uint32_t windowId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    WMError ChangeMouseStyle(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty);
 
 private:
     uint32_t GenWindowId();
@@ -121,6 +123,13 @@ private:
     Rect defaultDisplayRect_ = { 0, 0, 0, 0 };
     bool isBootAnimationStopped_ = false;
     std::shared_ptr<RSSurfaceNode> maskingSurfaceNode_ = nullptr;
+    const std::map<DragType, uint32_t> STYLEID_MAP = {
+        {DragType::DRAG_UNDEFINED, MMI::MOUSE_ICON::DEFAULT},
+        {DragType::DRAG_BOTTOM_OR_TOP, MMI::MOUSE_ICON::NORTH_SOUTH},
+        {DragType::DRAG_LEFT_OR_RIGHT, MMI::MOUSE_ICON::WEST_EAST},
+        {DragType::DRAG_LEFT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
+        {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
+    };
 };
 } // Rosen
 } // OHOS
