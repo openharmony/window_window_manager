@@ -19,7 +19,6 @@
 #include <cfloat>
 #include <cinttypes>
 #include <unordered_set>
-#include <map>
 #include "wm_common.h"
 
 namespace OHOS {

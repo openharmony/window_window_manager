@@ -824,6 +824,7 @@ WMError WindowController::ChangeMouseStyle(uint32_t windowId, sptr<MoveDragPrope
         } else {
             MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::WEST_EAST);
         }
+        return WMError::WM_OK;
     }
     MMI::InputManager::GetInstance()->SetPointerStyle(windowId, STYLEID_MAP.at(moveDragProperty->dragType_));
     return WMError::WM_OK;
@@ -841,13 +842,11 @@ WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
-    // change mouse style if needed
-    ChangeMouseStyle(windowId, moveDragProperty);
-
     // if start dragging or start moving dock_slice, need to update size change reason
     if ((moveDragProperty->startMoveFlag_ && node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) ||
         moveDragProperty->startDragFlag_) {
         WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
+        ChangeMouseStyle(windowId, moveDragProperty);
         return res;
     }
     return WMError::WM_OK;
