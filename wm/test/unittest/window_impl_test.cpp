@@ -1621,6 +1621,39 @@ HWTEST_F(WindowImplTest, StretchableUpdateRectResizeTest, Function | SmallTest |
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: PrivacyMode01
+ * @tc.desc: Set window privacy mode
+ * @tc.type: FUNC
+ * @tc.require: issueI5MYNX
+ */
+HWTEST_F(WindowImplTest, PrivacyMode01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("PrivacyMode01");
+    sptr<WindowImpl> window = new WindowImpl(option);
+    ASSERT_NE(nullptr, window);
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(4).WillRepeatedly(Return(WMError::WM_OK));
+
+    window->SetPrivacyMode(true);
+    window->SetSystemPrivacyMode(true);
+    ASSERT_EQ(true, window->IsPrivacyMode());
+
+    window->SetPrivacyMode(true);
+    window->SetSystemPrivacyMode(false);
+    ASSERT_EQ(true, window->IsPrivacyMode());
+
+    window->SetPrivacyMode(false);
+    window->SetSystemPrivacyMode(true);
+    ASSERT_EQ(false, window->IsPrivacyMode());
+
+    window->SetPrivacyMode(false);
+    window->SetSystemPrivacyMode(false);
+    ASSERT_EQ(false, window->IsPrivacyMode());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
