@@ -25,7 +25,7 @@
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 #include "window_manager_hilog.h"
-#include "wm_common.h"
+#include "dm_common.h"
 
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, OHOS::Rosen::HILOG_DOMAIN_WINDOW,
                                                 "NapiWindowManagerCommonLayer" };
@@ -58,9 +58,9 @@ napi_status SetMemberUint32(napi_env env, napi_value result, const char *key, ui
 napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key);
 
 bool CheckCallingPermission(const std::string &permission);
-void SetErrorInfo(napi_env env, Rosen::WMError wret, std::string errMessage,
+void SetErrorInfo(napi_env env, Rosen::DmErrorCode wret, std::string errMessage,
     napi_value result[], int count);
-void ProcessPromise(napi_env env, Rosen::WMError wret, napi_deferred deferred,
+void ProcessPromise(napi_env env, Rosen::DmErrorCode wret, napi_deferred deferred,
     napi_value result[], int cout);
 void ProcessCallback(napi_env env, napi_ref ref, napi_value result[], int count);
 bool NAPICall(napi_env env, napi_status status);
@@ -119,7 +119,7 @@ napi_value AsyncProcess(napi_env env,
     auto completeFunc = [](napi_env env, napi_status status, void *data) {
         AsyncCallbackInfo *info = reinterpret_cast<AsyncCallbackInfo *>(data);
         napi_value result[PARAM_NUMBER] = {0};
-        if (info->param->wret == Rosen::WMError::WM_OK) {
+        if (info->param->wret == Rosen::DmErrorCode::DM_OK) {
             napi_get_undefined(env, &result[0]);
             result[1] = info->resolve(env, info->param);
         } else {

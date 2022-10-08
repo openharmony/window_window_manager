@@ -130,7 +130,8 @@ NativeValue* OnGetAllScreens(NativeEngine& engine, NativeCallbackInfo& info)
             }
         };
     NativeValue* lastParam = nullptr;
-    if (info.argc == ARGC_ONE && info.argv[ARGC_ONE - 1]->TypeOf() == NATIVE_FUNCTION) {
+    if (info.argc >= ARGC_ONE && info.argv[ARGC_ONE - 1] != nullptr && 
+        info.argv[ARGC_ONE - 1]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[ARGC_ONE - 1];
     }
     NativeValue* result = nullptr;
@@ -250,22 +251,26 @@ void UnRegisterScreenListenerWithType(const std::string& type, NativeValue* valu
 NativeValue* OnRegisterScreenMangerCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsScreenManager::OnRegisterScreenMangerCallback is called");
-    if (info.argc != ARGC_TWO) {
+    if (info.argc < ARGC_TWO) {
         WLOGFE("Params not match");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::string cbType;
     if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
         WLOGFE("Failed to convert parameter to callbackType");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     NativeValue* value = info.argv[INDEX_ONE];
     if (value == nullptr) {
         WLOGFI("JsScreenManager::OnRegisterScreenMangerCallback info->argv[1] is nullptr");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     if (!value->IsCallable()) {
         WLOGFI("JsScreenManager::OnRegisterScreenMangerCallback info->argv[1] is not callable");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::lock_guard<std::mutex> lock(mtx_);
@@ -276,13 +281,15 @@ NativeValue* OnRegisterScreenMangerCallback(NativeEngine& engine, NativeCallback
 NativeValue* OnUnregisterScreenManagerCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("JsScreenManager::OnUnregisterScreenCallback is called");
-    if (info.argc == 0) {
+    if (info.argc < ARGC_ONE) {
         WLOGFE("Params not match");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::string cbType;
     if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
         WLOGFE("Failed to convert parameter to callbackType");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
     std::lock_guard<std::mutex> lock(mtx_);
@@ -290,15 +297,11 @@ NativeValue* OnUnregisterScreenManagerCallback(NativeEngine& engine, NativeCallb
         UnregisterAllScreenListenerWithType(cbType);
     } else {
         NativeValue* value = info.argv[INDEX_ONE];
-        if (value == nullptr) {
-            WLOGFI("JsScreenManager::OnUnregisterScreenManagerCallback info->argv[1] is nullptr");
-            return engine.CreateUndefined();
+        if ((value == nullptr) || (!value->IsCallable())) {
+            UnregisterAllScreenListenerWithType(cbType);
+        } else {
+            UnRegisterScreenListenerWithType(cbType, value);
         }
-        if (!value->IsCallable()) {
-            WLOGFI("JsScreenManager::OnUnregisterScreenManagerCallback info->argv[1] is not callable");
-            return engine.CreateUndefined();
-        }
-        UnRegisterScreenListenerWithType(cbType, value);
     }
     return engine.CreateUndefined();
 }
@@ -306,7 +309,7 @@ NativeValue* OnUnregisterScreenManagerCallback(NativeEngine& engine, NativeCallb
 NativeValue* OnMakeMirror(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("OnMakeMirror is called");
-    if (info.argc != ARGC_TWO && info.argc != ARGC_THREE) {
+    if (info.argc < ARGC_TWO) {
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
@@ -345,7 +348,8 @@ NativeValue* OnMakeMirror(NativeEngine& engine, NativeCallbackInfo& info)
             }
         };
     NativeValue* lastParam = nullptr;
-    if (info.argc == ARGC_THREE && info.argv[ARGC_THREE - 1]->TypeOf() == NATIVE_FUNCTION) {
+    if (info.argc >= ARGC_THREE && info.argv[ARGC_THREE - 1] != nullptr &&
+        info.argv[ARGC_THREE - 1]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[ARGC_THREE - 1];
     }
     NativeValue* result = nullptr;
@@ -357,7 +361,7 @@ NativeValue* OnMakeMirror(NativeEngine& engine, NativeCallbackInfo& info)
 NativeValue* OnMakeExpand(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("OnMakeExpand is called");
-    if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
+    if (info.argc < ARGC_ONE) {
         WLOGFE("Params not match");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
@@ -397,7 +401,8 @@ NativeValue* OnMakeExpand(NativeEngine& engine, NativeCallbackInfo& info)
             }
         };
     NativeValue* lastParam = nullptr;
-    if (info.argc == ARGC_TWO && info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
+    if (info.argc >= ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
+        info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[ARGC_TWO - 1];
     }
     NativeValue* result = nullptr;
@@ -435,7 +440,7 @@ NativeValue* OnCreateVirtualScreen(NativeEngine& engine, NativeCallbackInfo& inf
     WLOGFI("JsScreenManager::OnCreateVirtualScreen is called");
     DmErrorCode errCode = DmErrorCode::DM_OK;
     VirtualScreenOption option;
-    if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
+    if (info.argc < ARGC_ONE) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
     } else {
@@ -452,27 +457,21 @@ NativeValue* OnCreateVirtualScreen(NativeEngine& engine, NativeCallbackInfo& inf
         return engine.CreateUndefined();
     }
     AsyncTask::CompleteCallback complete =
-        [option, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (errCode != DmErrorCode::DM_OK) {
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(errCode),
-                    "JsScreenManager::OnCreateVirtualScreen, Invalidate params."));
-                WLOGFE("JsScreenManager::OnCreateVirtualScreen failed, Invalidate params.");
-            } else {
-                auto screenId = SingletonContainer::Get<ScreenManager>().CreateVirtualScreen(option);
-                auto screen = SingletonContainer::Get<ScreenManager>().GetScreenById(screenId);
-                if (screen == nullptr) {
-                    task.Reject(engine, CreateJsError(engine,
-                        static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
-                        "ScreenManager::CreateVirtualScreen failed."));
-                    WLOGFE("ScreenManager::CreateVirtualScreen failed.");
-                    return;
-                }
-                task.Resolve(engine, CreateJsScreenObject(engine, screen));
-                WLOGFI("JsScreenManager::OnCreateVirtualScreen success");
+        [option](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            auto screenId = SingletonContainer::Get<ScreenManager>().CreateVirtualScreen(option);
+            auto screen = SingletonContainer::Get<ScreenManager>().GetScreenById(screenId);
+            if (screen == nullptr) {
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
+                    "ScreenManager::CreateVirtualScreen failed."));
+                WLOGFE("ScreenManager::CreateVirtualScreen failed.");
+                return;
             }
+            task.Resolve(engine, CreateJsScreenObject(engine, screen));
+            WLOGFI("JsScreenManager::OnCreateVirtualScreen success");
         };
     NativeValue* lastParam = nullptr;
-    if (info.argc == ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
+    if (info.argc >= ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
         info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[ARGC_TWO - 1];
     }
@@ -543,7 +542,7 @@ NativeValue* OnDestroyVirtualScreen(NativeEngine& engine, NativeCallbackInfo& in
     WLOGFI("JsScreenManager::OnDestroyVirtualScreen is called");
     DmErrorCode errCode = DmErrorCode::DM_OK;
     int64_t screenId = -1LL;
-    if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
+    if (info.argc < ARGC_ONE) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
     } else {
@@ -558,7 +557,7 @@ NativeValue* OnDestroyVirtualScreen(NativeEngine& engine, NativeCallbackInfo& in
         return engine.CreateUndefined();
     }
     AsyncTask::CompleteCallback complete =
-        [screenId, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [screenId](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto res = DM_JS_TO_ERROR_CODE_MAP.at(
                 SingletonContainer::Get<ScreenManager>().DestroyVirtualScreen(screenId));
             if (res != DmErrorCode::DM_OK) {
@@ -571,7 +570,7 @@ NativeValue* OnDestroyVirtualScreen(NativeEngine& engine, NativeCallbackInfo& in
             WLOGFI("JsScreenManager::OnDestroyVirtualScreen success");
         };
     NativeValue* lastParam = nullptr;
-    if (info.argc == ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
+    if (info.argc >= ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
         info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[ARGC_TWO - 1];
     }
@@ -587,7 +586,7 @@ NativeValue* OnSetVirtualScreenSurface(NativeEngine& engine, NativeCallbackInfo&
     DmErrorCode errCode = DmErrorCode::DM_OK;
     int64_t screenId = -1LL;
     sptr<Surface> surface;
-    if (info.argc != ARGC_TWO && info.argc != ARGC_THREE) {
+    if (info.argc < ARGC_TWO) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
     } else {
@@ -606,7 +605,7 @@ NativeValue* OnSetVirtualScreenSurface(NativeEngine& engine, NativeCallbackInfo&
         return engine.CreateUndefined();
     }
     AsyncTask::CompleteCallback complete =
-        [screenId, surface, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [screenId, surface](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto res = DM_JS_TO_ERROR_CODE_MAP.at(
                 SingletonContainer::Get<ScreenManager>().SetVirtualScreenSurface(screenId, surface));
             if (res != DmErrorCode::DM_OK) {
@@ -619,7 +618,7 @@ NativeValue* OnSetVirtualScreenSurface(NativeEngine& engine, NativeCallbackInfo&
             WLOGFI("JsScreenManager::OnSetVirtualScreenSurface success");
         };
     NativeValue* lastParam = nullptr;
-    if (info.argc == ARGC_THREE && info.argv[ARGC_TWO - 1] != nullptr &&
+    if (info.argc >= ARGC_THREE && info.argv[ARGC_THREE - 1] != nullptr &&
         info.argv[ARGC_THREE - 1]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[ARGC_THREE - 1];
     }
@@ -632,23 +631,14 @@ NativeValue* OnSetVirtualScreenSurface(NativeEngine& engine, NativeCallbackInfo&
 NativeValue* OnIsScreenRotationLocked(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WLOGFI("OnIsScreenRotationLocked is called");
-    DmErrorCode errCode = DmErrorCode::DM_OK;
-    if (info.argc > 1) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
-        errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
-    }
-    if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM) {
-        WLOGFE("JsScreenManager::OnIsScreenRotationLocked failed, Invalidate params.");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
-        return engine.CreateUndefined();
-    }
     AsyncTask::CompleteCallback complete =
-        [errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [](NativeEngine& engine, AsyncTask& task, int32_t status) {
             bool isLocked = SingletonContainer::Get<ScreenManager>().IsScreenRotationLocked();
             task.Resolve(engine, CreateJsValue(engine, isLocked));
         };
     NativeValue* lastParam = nullptr;
-    if (info.argc == ARGC_ONE && info.argv[ARGC_ONE - 1]->TypeOf() == NATIVE_FUNCTION) {
+    if (info.argc >= ARGC_ONE && info.argv[ARGC_ONE - 1] == nullptr &&
+        info.argv[ARGC_ONE - 1]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[ARGC_ONE - 1];
     }
     NativeValue* result = nullptr;
@@ -661,7 +651,7 @@ NativeValue* OnSetScreenRotationLocked(NativeEngine& engine, NativeCallbackInfo&
 {
     WLOGFI("JsScreenManager::OnSetScreenRotationLocked is called");
     DmErrorCode errCode = DmErrorCode::DM_OK;
-    if (info.argc < 1 || info.argc > 2) { // 2: maximum params num
+    if (info.argc < ARGC_ONE) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
@@ -682,12 +672,13 @@ NativeValue* OnSetScreenRotationLocked(NativeEngine& engine, NativeCallbackInfo&
     }
 
     AsyncTask::CompleteCallback complete =
-        [isLocked, errCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        [isLocked](NativeEngine& engine, AsyncTask& task, int32_t status) {
             SingletonContainer::Get<ScreenManager>().SetScreenRotationLocked(isLocked);
             task.Resolve(engine, engine.CreateUndefined());
         };
-    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
-        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
+    NativeValue* lastParam = (info.argc <= ARGC_ONE) ? nullptr :
+        ((info.argv[ARGC_TWO - 1] != nullptr && info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) ?
+        info.argv[1] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsScreenManager::OnSetScreenRotationLocked",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -721,6 +712,82 @@ NativeValue* InitScreenOrientation(NativeEngine* engine)
     return objValue;
 }
 
+NativeValue* InitDisplayErrorCode(NativeEngine* engine)
+{
+    WLOGFI("JsDisplayManager::InitDisplayErrorCode called");
+
+    if (engine == nullptr) {
+        WLOGFE("engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("DM_ERROR_NO_PERMISSION",
+        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_NO_PERMISSION)));
+    object->SetProperty("DM_ERROR_INVALID_PARAM",
+        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+    object->SetProperty("DM_ERROR_DEVICE_NOT_SUPPORT",
+        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT)));
+    object->SetProperty("DM_ERROR_INVALID_SCREEN",
+        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN)));
+    object->SetProperty("DM_ERROR_INVALID_CALLING",
+        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_CALLING)));
+    object->SetProperty("DM_ERROR_SYSTEM_INNORMAL",
+        CreateJsValue(*engine, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL)));
+    return objValue;
+}
+
+NativeValue* InitDisplayError(NativeEngine* engine)
+{
+    WLOGFI("JsDisplayManager::InitDisplayError called");
+
+    if (engine == nullptr) {
+        WLOGFE("engine is nullptr");
+        return nullptr;
+    }
+
+    NativeValue *objValue = engine->CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        WLOGFE("Failed to get object");
+        return nullptr;
+    }
+
+    object->SetProperty("DM_ERROR_INIT_DMS_PROXY_LOCKED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED)));
+    object->SetProperty("DM_ERROR_IPC_FAILED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_IPC_FAILED)));
+    object->SetProperty("DM_ERROR_REMOTE_CREATE_FAILED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_REMOTE_CREATE_FAILED)));
+    object->SetProperty("DM_ERROR_NULLPTR",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_NULLPTR)));
+    object->SetProperty("DM_ERROR_INVALID_PARAM",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM)));
+    object->SetProperty("DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED)));
+    object->SetProperty("DM_ERROR_DEATH_RECIPIENT",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_DEATH_RECIPIENT)));
+    object->SetProperty("DM_ERROR_INVALID_MODE_ID",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_MODE_ID)));
+    object->SetProperty("DM_ERROR_WRITE_DATA_FAILED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_WRITE_DATA_FAILED)));
+    object->SetProperty("DM_ERROR_RENDER_SERVICE_FAILED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_RENDER_SERVICE_FAILED)));
+    object->SetProperty("DM_ERROR_UNREGISTER_AGENT_FAILED",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_UNREGISTER_AGENT_FAILED)));
+    object->SetProperty("DM_ERROR_INVALID_CALLING",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_INVALID_CALLING)));
+    object->SetProperty("DM_ERROR_UNKNOWN",
+        CreateJsValue(*engine, static_cast<int32_t>(DMError::DM_ERROR_UNKNOWN)));
+    return objValue;
+}
+
 NativeValue* JsScreenManagerInit(NativeEngine* engine, NativeValue* exportObj)
 {
     WLOGFI("JsScreenManagerInit is called");
@@ -740,6 +807,8 @@ NativeValue* JsScreenManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetNativePointer(jsScreenManager.release(), JsScreenManager::Finalizer, nullptr);
 
     object->SetProperty("Orientation", InitScreenOrientation(engine));
+    object->SetProperty("DmErrorCode", InitDisplayErrorCode(engine));
+    object->SetProperty("DMError", InitDisplayError(engine));
 
     const char *moduleName = "JsScreenManager";
     BindNativeFunction(*engine, *object, "getAllScreens", moduleName, JsScreenManager::GetAllScreens);

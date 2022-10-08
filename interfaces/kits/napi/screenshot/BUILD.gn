@@ -22,7 +22,7 @@ ohos_shared_library("screenshot") {
   ]
 
   deps = [
-    "../common:wm_napi_common",
+    "../common:dm_napi_common",
     "//foundation/window/window_manager/dm:libdm",
   ]
 
