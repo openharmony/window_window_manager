@@ -106,14 +106,12 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow01, Function | MediumTest | L
     std::vector<WindowType> windowTypes = {
         WindowType::WINDOW_TYPE_WALLPAPER,
         WindowType::WINDOW_TYPE_DESKTOP,
-        WindowType::WINDOW_TYPE_APP_COMPONENT,
     };
     for (auto itor = windowTypes.begin(); itor != windowTypes.end(); itor++) {
         struct Rect baseRect = {0, 0, 100, 200};
         uint32_t baseFlags = 0;
         sptr<Window> baseWindow = CreateBaseWindow(static_cast<WindowType>(*itor), baseRect, baseFlags);
         ASSERT_NE(nullptr, baseWindow);
-
         struct Rect rect = {0, 0, 100, 200};
         uint32_t flags = 0;
         sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
@@ -132,7 +130,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow01, Function | MediumTest | L
 
 /**
  * @tc.name: SystemSubWindow02
- * @tc.desc: create sub windows with above system Windows
+ * @tc.desc: create sub windows with above system Windows except WINDOW_TYPE_DIALOG
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, Function | MediumTest | Level2)
@@ -160,7 +158,6 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, Function | MediumTest | L
         WindowType::WINDOW_TYPE_VOICE_INTERACTION,
         WindowType::WINDOW_TYPE_FLOAT_CAMERA,
         WindowType::WINDOW_TYPE_PLACEHOLDER,
-        WindowType::WINDOW_TYPE_DIALOG,
         WindowType::WINDOW_TYPE_SCREENSHOT,
     };
     for (auto itor = windowTypes.begin(); itor != windowTypes.end(); itor++) {
@@ -175,11 +172,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, Function | MediumTest | L
         ASSERT_NE(nullptr, subWindow);
 
         ASSERT_EQ(WMError::WM_OK, baseWindow->Show());
-        if ((*itor) == WindowType::WINDOW_TYPE_DIALOG) {
-            ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, subWindow->Show());
-        } else {
-            ASSERT_EQ(WMError::WM_OK, subWindow->Show());
-        }
+        ASSERT_EQ(WMError::WM_OK, subWindow->Show());
 
         ASSERT_EQ(WMError::WM_OK, subWindow->Hide());
         ASSERT_EQ(WMError::WM_OK, baseWindow->Hide());
@@ -229,6 +222,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow04, Function | MediumTest | L
     std::vector<WindowType> windowTypes = {
         WindowType::WINDOW_TYPE_MEDIA,
         WindowType::WINDOW_TYPE_APP_SUB_WINDOW,
+        WindowType::WINDOW_TYPE_APP_COMPONENT,
     };
     for (auto itor = windowTypes.begin(); itor != windowTypes.end(); itor++) {
         struct Rect baseRect = {0, 0, 100, 200};
@@ -242,17 +236,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow04, Function | MediumTest | L
         struct Rect rect = {0, 0, 100, 200};
         uint32_t flags = 0;
         sptr<Window> subWindow = CreateSystemSubWindow(appSubWindow, rect, flags);
-        ASSERT_NE(nullptr, subWindow);
-
-        ASSERT_EQ(WMError::WM_OK, baseWindow->Show());
-        ASSERT_EQ(WMError::WM_OK, appSubWindow->Show());
-        ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, subWindow->Show());
-
-        ASSERT_EQ(WMError::WM_OK, subWindow->Hide());
-        ASSERT_EQ(WMError::WM_OK, appSubWindow->Hide());
-        ASSERT_EQ(WMError::WM_OK, baseWindow->Hide());
-
-        ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
+        ASSERT_EQ(nullptr, subWindow);
         ASSERT_EQ(WMError::WM_OK, appSubWindow->Destroy());
         ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
     }
@@ -276,17 +260,14 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow05, Function | MediumTest | L
     struct Rect rect = {0, 0, 100, 200};
     uint32_t flags = 0;
     sptr<Window> subWindow = CreateSystemSubWindow(systemSubWindow, rect, flags);
-    ASSERT_NE(nullptr, subWindow);
+    ASSERT_EQ(nullptr, subWindow);
 
     ASSERT_EQ(WMError::WM_OK, baseWindow->Show());
     ASSERT_EQ(WMError::WM_OK, systemSubWindow->Show());
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, subWindow->Show());
 
-    ASSERT_EQ(WMError::WM_OK, subWindow->Hide());
     ASSERT_EQ(WMError::WM_OK, systemSubWindow->Hide());
     ASSERT_EQ(WMError::WM_OK, baseWindow->Hide());
 
-    ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
     ASSERT_EQ(WMError::WM_OK, systemSubWindow->Destroy());
     ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
 }
@@ -324,6 +305,24 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow06, Function | MediumTest | L
     ASSERT_EQ(WMError::WM_OK, baseWindow->Hide());
 
     ASSERT_EQ(WMError::WM_OK, subWindow->Destroy());
+    ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
+}
+/**
+ * @tc.name: SystemSubWindow07
+ * @tc.desc: create sub windows with dialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow07, Function | MediumTest | Level3)
+{
+    struct Rect baseRect = {0, 0, 100, 200};
+    uint32_t baseFlags = 0;
+    sptr<Window> baseWindow = CreateBaseWindow(WindowType::WINDOW_TYPE_DIALOG, baseRect, baseFlags);
+    ASSERT_NE(nullptr, baseWindow);
+
+    struct Rect rect = {0, 0, 100, 200};
+    uint32_t flags = 0;
+    sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
+    ASSERT_EQ(nullptr, subWindow);
     ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
 }
 } // namespace Rosen
