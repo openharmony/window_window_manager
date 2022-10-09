@@ -1305,7 +1305,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
     if (WindowHelper::IsSystemWindow(property_->GetWindowType())) {
         AdjustWindowAnimationFlag(withAnimation);
         // when show(true) with default, hide() with None, to adjust animationFlag to disabled default animation
-        WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+        ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
         if (ret != WMError::WM_OK) {
             WLOGFE("UpdateProperty failed with errCode:%{public}d", static_cast<int32_t>(ret));
             return ret;
@@ -2133,10 +2133,8 @@ bool WindowImpl::IsPointInDragHotZone(int32_t startPointPosX, int32_t startPoint
 {
     if (!WindowHelper::IsPointInTargetRect(startPointPosX,
         startPointPosY, moveDragProperty_->startRectExceptFrame_) ||
-        (WindowHelper::IsPointInTargetRect(startPointPosX, startPointPosY,
-        moveDragProperty_->startRectExceptFrame_) &&
         (!WindowHelper::IsPointInWindowExceptCorner(startPointPosX,
-        startPointPosY, moveDragProperty_->startRectExceptCorner_)))) {
+        startPointPosY, moveDragProperty_->startRectExceptCorner_))) {
         return true;
     }
     return false;
