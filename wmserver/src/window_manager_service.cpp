@@ -248,8 +248,14 @@ void WindowManagerService::RegisterWindowManagerServiceHandler()
 void WindowManagerServiceHandler::NotifyWindowTransition(
     sptr<AAFwk::AbilityTransitionInfo> from, sptr<AAFwk::AbilityTransitionInfo> to)
 {
-    sptr<WindowTransitionInfo> fromInfo = new WindowTransitionInfo(from);
-    sptr<WindowTransitionInfo> toInfo = new WindowTransitionInfo(to);
+    sptr<WindowTransitionInfo> fromInfo = nullptr;
+    sptr<WindowTransitionInfo> toInfo = nullptr;
+    if (from) { // if exists, transition to window transition info
+        fromInfo = new WindowTransitionInfo(from);
+    }
+    if (to) {
+        toInfo = new WindowTransitionInfo(to);
+    }
     WindowManagerService::GetInstance().NotifyWindowTransition(fromInfo, toInfo, false);
 }
 

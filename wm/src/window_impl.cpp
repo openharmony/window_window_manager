@@ -1997,16 +1997,16 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
     }
     // TerminateAbility will invoke last ability, CloseAbility will not.
     bool shouldTerminateAbility = WindowHelper::IsFullScreenWindow(property_->GetWindowMode());
-    WMError ret = NotifyWindowTransition(shouldTerminateAbility ? TransitionReason::BACK : TransitionReason::CLOSE);
-    if (ret != WMError::WM_OK) {
-        if (shouldTerminateAbility) {
-            abilityContext->TerminateSelf();
-        } else {
+    if (shouldTerminateAbility) {
+        abilityContext->TerminateSelf();
+    } else {
+        WMError ret = NotifyWindowTransition(TransitionReason::CLOSE);
+        if (ret != WMError::WM_OK) {
             abilityContext->CloseAbility();
         }
     }
-    WLOGFI("Window %{public}u will be closed, WindowTransition ret: %{public}u, shouldTerminateAbility: %{public}u",
-        property_->GetWindowId(), static_cast<uint32_t>(ret), static_cast<uint32_t>(shouldTerminateAbility));
+    WLOGFI("Window %{public}u will be closed, shouldTerminateAbility: %{public}u",
+        property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
 }
 
 void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)

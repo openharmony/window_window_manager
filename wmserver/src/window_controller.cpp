@@ -125,12 +125,14 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
     sptr<WindowTransitionInfo>& dstInfo)
 {
     WLOGFI("NotifyWindowTransition begin!");
-    if (!srcInfo || !dstInfo) {
-        WLOGFE("srcInfo or dstInfo is nullptr!");
-        return WMError::WM_ERROR_NULLPTR;
+    sptr<WindowNode> dstNode = nullptr;
+    sptr<WindowNode> srcNode = nullptr;
+    if (srcInfo) {
+        srcNode = windowRoot_->FindWindowNodeWithToken(srcInfo->GetAbilityToken());
     }
-    auto dstNode = windowRoot_->FindWindowNodeWithToken(dstInfo->GetAbilityToken());
-    auto srcNode = windowRoot_->FindWindowNodeWithToken(srcInfo->GetAbilityToken());
+    if (dstInfo) {
+        dstNode = windowRoot_->FindWindowNodeWithToken(dstInfo->GetAbilityToken());
+    }
     if (!RemoteAnimation::CheckTransition(srcInfo, srcNode, dstInfo, dstNode)) {
         return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
@@ -148,8 +150,8 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
             return RemoteAnimation::NotifyAnimationMinimize(srcInfo, srcNode);
         case TransitionEvent::CLOSE:
             return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::CLOSE);
-        case TransitionEvent::BACK:
-            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::BACK);
+        case TransitionEvent::BACK_TRANSITION:
+            return RemoteAnimation::NotifyAnimationBackTransition(srcInfo, dstInfo, srcNode, dstNode);
         default:
             return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
