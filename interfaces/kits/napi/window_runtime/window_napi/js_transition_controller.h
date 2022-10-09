@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Rosen {
 class JsTransitionContext {
 public:
-    JsTransitionContext(sptr<Window> window, bool shownState);
+    JsTransitionContext(sptr<Window> window, bool isShownTransContext);
     ~JsTransitionContext();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* CompleteTransition(NativeEngine* engine, NativeCallbackInfo* info);

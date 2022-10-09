@@ -61,7 +61,7 @@ public:
     static std::vector<Rect> tripleTileRects_;
     static AvoidArea systemAvoidArea_;
 
-    static void InitByDisplayRect(const Rect& screenRect);
+    static void InitByDisplayRect(const Rect& displayRect);
     static sptr<Window> CreateTestWindow(const TestWindowInfo& info);
     static sptr<Window> CreateStatusBarWindow();
     static sptr<Window> CreateNavigationBarWindow();

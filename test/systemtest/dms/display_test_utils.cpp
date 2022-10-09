@@ -23,17 +23,18 @@ namespace {
 
 DisplayTestUtils::~DisplayTestUtils()
 {
-    if (prevBuffer_ != nullptr) {
-        SurfaceError ret = csurface_->ReleaseBuffer(prevBuffer_, -1);
-        if (ret != SURFACE_ERROR_OK) {
-            WLOGFE("buffer release failed");
-            return;
-        }
-        WLOGFI("prevBuffer_ release success");
-    }
     if (csurface_ != nullptr) {
+        if (prevBuffer_ != nullptr) {
+            SurfaceError ret = csurface_->ReleaseBuffer(prevBuffer_, -1);
+            if (ret != SURFACE_ERROR_OK) {
+                WLOGFE("buffer release failed");
+                return;
+            }
+            WLOGFI("prevBuffer_ release success");
+        }
         csurface_->UnregisterConsumerListener();
     }
+
     csurface_ = nullptr;
     psurface_ = nullptr;
     listener_ = nullptr;
