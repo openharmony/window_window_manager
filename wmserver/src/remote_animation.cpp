@@ -785,7 +785,9 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateShowAnimationFini
             }
             ProcessNodeStateTask(dstNodeSptr);
             // launcher not do this
-            if (MinimizeApp::IsNodeNeedMinimizeWithReason(srcNodeSptr, MinimizeReason::OTHER_WINDOW)) {
+            if (srcNodeSptr!= nullptr && WindowHelper::IsMainWindow(srcNodeSptr->GetWindowType()) &&
+                WindowHelper::IsFullScreenWindow(srcNodeSptr->GetWindowMode()) &&
+                MinimizeApp::EnableMinimize(MinimizeReason::OTHER_WINDOW)) {
                 ProcessNodeStateTask(srcNodeSptr);
             }
             WLOGFI("current window:%{public}u state: %{public}u", dstNodeSptr->GetWindowId(),
