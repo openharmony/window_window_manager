@@ -56,8 +56,10 @@ void VsyncStation::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallb
             return;
         }
         hasRequestedVsync_ = true;
-        vsyncHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
-        vsyncHandler_->PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_TASK, VSYNC_TIME_OUT_MILLISECONDS);
+        if (vsyncHandler_) {
+            vsyncHandler_->RemoveTask(VSYNC_TIME_OUT_TASK);
+            vsyncHandler_->PostTask(vsyncTimeoutCallback_, VSYNC_TIME_OUT_TASK, VSYNC_TIME_OUT_MILLISECONDS);
+        }
     }
     receiver_->RequestNextVSync(frameCallback_);
 }

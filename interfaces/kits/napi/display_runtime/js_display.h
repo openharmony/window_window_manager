@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace Rosen {
 std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId);
-NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& Display);
+NativeValue* CreateJsDisplayObject(NativeEngine& engine, sptr<Display>& display);
 NativeValue* CreateJsCutoutInfoObject(NativeEngine& engine, sptr<CutoutInfo> cutoutInfo);
 NativeValue* CreateJsRectObject(NativeEngine& engine, DMRect rect);
 NativeValue* CreateJsWaterfallDisplayAreaRectsObject(NativeEngine& engine,
@@ -34,7 +34,7 @@ NativeValue* CreateJsWaterfallDisplayAreaRectsObject(NativeEngine& engine,
 NativeValue* CreateJsBoundingRectsArrayObject(NativeEngine& engine, std::vector<DMRect> boundingRects);
 class JsDisplay final {
 public:
-    explicit JsDisplay(const sptr<Display>& Display);
+    explicit JsDisplay(const sptr<Display>& display);
     ~JsDisplay();
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* GetCutoutInfo(NativeEngine* engine, NativeCallbackInfo* info);
