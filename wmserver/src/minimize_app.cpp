@@ -31,8 +31,7 @@ std::recursive_mutex MinimizeApp::mutex_;
 void MinimizeApp::AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReason reason)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    bool isFromUser = IsFromUser(reason);
-    if (!isMinimizedByOtherWindow_ && !isFromUser) {
+    if (!EnableMinimize(reason)) {
         return;
     }
     wptr<WindowNode> weakNode(node);
@@ -139,6 +138,15 @@ bool MinimizeApp::IsNodeNeedMinimizeWithReason(const sptr<WindowNode>& node, Min
         return true;
     }
     return false;
+}
+
+bool MinimizeApp::EnableMinimize(MinimizeReason reason)
+{
+    bool isFromUser = IsFromUser(reason);
+    if (!isMinimizedByOtherWindow_ && !isFromUser) {
+        return false;
+    }
+    return true;
 }
 
 void MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason reason)
