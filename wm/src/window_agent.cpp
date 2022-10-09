@@ -28,94 +28,104 @@ WindowAgent::WindowAgent(sptr<WindowImpl>& windowImpl)
     window_ = windowImpl;
 }
 
-void WindowAgent::UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
+WMError WindowAgent::UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->UpdateRect(rect, decoStatus, reason);
+    return WMError::WM_OK;
 }
 
-void WindowAgent::UpdateWindowMode(WindowMode mode)
+WMError WindowAgent::UpdateWindowMode(WindowMode mode)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->UpdateMode(mode);
+    return WMError::WM_OK;
 }
 
-void WindowAgent::UpdateWindowModeSupportInfo(uint32_t modeSupportInfo)
+WMError WindowAgent::UpdateWindowModeSupportInfo(uint32_t modeSupportInfo)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->UpdateModeSupportInfo(modeSupportInfo);
+    return WMError::WM_OK;
 }
 
-void WindowAgent::UpdateFocusStatus(bool focused)
+WMError WindowAgent::UpdateFocusStatus(bool focused)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->UpdateFocusStatus(focused);
+    return WMError::WM_OK;
 }
 
-void WindowAgent::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+WMError WindowAgent::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     if (window_ == nullptr || avoidArea == nullptr) {
         WLOGFE("window_ or avoidArea is nullptr.");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->UpdateAvoidArea(avoidArea, type);
+    return WMError::WM_OK;
 }
 
-void WindowAgent::UpdateWindowState(WindowState state)
+WMError WindowAgent::UpdateWindowState(WindowState state)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->UpdateWindowState(state);
+    return WMError::WM_OK;
 }
 
-void WindowAgent::UpdateWindowDragInfo(const PointInfo& point, DragEvent event)
+WMError WindowAgent::UpdateWindowDragInfo(const PointInfo& point, DragEvent event)
 {
     if (window_ == nullptr) {
         WLOGFE("window is null");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->UpdateDragEvent(point, event);
+    return WMError::WM_OK;
 }
 
-void WindowAgent::UpdateDisplayId(DisplayId from, DisplayId to)
+WMError WindowAgent::UpdateDisplayId(DisplayId from, DisplayId to)
 {
     if (window_ == nullptr) {
         WLOGFE("window is null");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->UpdateDisplayId(from, to);
+    return WMError::WM_OK;
 }
 
-void WindowAgent::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info)
+WMError WindowAgent::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info)
 {
     if (window_ == nullptr) {
         WLOGFE("window is null");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->UpdateOccupiedAreaChangeInfo(info);
+    return WMError::WM_OK;
 }
 
-void WindowAgent::UpdateActiveStatus(bool isActive)
+WMError WindowAgent::UpdateActiveStatus(bool isActive)
 {
     if (window_ == nullptr) {
         WLOGFE("window is null");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->UpdateActiveStatus(isActive);
+    return WMError::WM_OK;
 }
 
 sptr<WindowProperty> WindowAgent::GetWindowProperty()
@@ -127,87 +137,96 @@ sptr<WindowProperty> WindowAgent::GetWindowProperty()
     return window_->GetWindowProperty();
 }
 
-void WindowAgent::RestoreSplitWindowMode(uint32_t mode)
+WMError WindowAgent::RestoreSplitWindowMode(uint32_t mode)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->RestoreSplitWindowMode(mode);
+    return WMError::WM_OK;
 }
 
-void WindowAgent::NotifyTouchOutside()
+WMError WindowAgent::NotifyTouchOutside()
 {
     if (window_ == nullptr) {
         WLOGFI("window is null");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     WLOGFD("called");
     window_->NotifyTouchOutside();
+    return WMError::WM_OK;
 }
 
-void WindowAgent::NotifyScreenshot()
+WMError WindowAgent::NotifyScreenshot()
 {
     if (window_ == nullptr) {
         WLOGFE("notify screenshot failed: window is null.");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     WLOGFI("called");
     window_->NotifyScreenshot();
+    return WMError::WM_OK;
 }
 
-void WindowAgent::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+WMError WindowAgent::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->DumpInfo(params, info);
+    return WMError::WM_OK;
 }
 
-void WindowAgent::UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn)
+WMError WindowAgent::UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->UpdateZoomTransform(trans, isDisplayZoomOn);
+    return WMError::WM_OK;
 }
 
-void WindowAgent::NotifyDestroy(void)
+WMError WindowAgent::NotifyDestroy(void)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->NotifyDestroy();
+    return WMError::WM_OK;
 }
 
-void WindowAgent::NotifyForeground(void)
+WMError WindowAgent::NotifyForeground(void)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->NotifyForeground();
+    return WMError::WM_OK;
 }
 
-void WindowAgent::NotifyBackground(void)
+WMError WindowAgent::NotifyBackground(void)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->NotifyBackground();
+    return WMError::WM_OK;
 }
 
-void WindowAgent::NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+WMError WindowAgent::NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (window_ == nullptr) {
         WLOGFE("window_ is nullptr");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     window_->ConsumePointerEvent(pointerEvent);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
