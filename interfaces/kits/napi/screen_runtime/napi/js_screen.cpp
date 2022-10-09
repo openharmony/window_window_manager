@@ -74,7 +74,7 @@ NativeValue* JsScreen::OnSetOrientation(NativeEngine& engine, NativeCallbackInfo
     WLOGFI("OnSetOrientation is called");
     bool paramValidFlag = true;
     Orientation orientation = Orientation::UNSPECIFIED;
-    if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
+    if (info.argc < ARGC_ONE) {
         WLOGFE("OnSetOrientation Params not match, info argc: %{public}zu", info.argc);
         paramValidFlag = false;
     } else {
@@ -107,7 +107,8 @@ NativeValue* JsScreen::OnSetOrientation(NativeEngine& engine, NativeCallbackInfo
             }
         };
     NativeValue* lastParam = nullptr;
-    if (info.argc == ARGC_TWO && info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
+    if (info.argc >= ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
+        info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[ARGC_TWO - 1];
     }
     NativeValue* result = nullptr;
@@ -129,7 +130,7 @@ NativeValue* JsScreen::OnSetScreenActiveMode(NativeEngine& engine, NativeCallbac
     WLOGFI("OnSetScreenActiveMode is called");
     bool paramValidFlag = true;
     uint32_t modeId = 0;
-    if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
+    if (info.argc < ARGC_ONE) {
         WLOGFE("OnSetScreenActiveMode Params not match %{public}zu", info.argc);
         paramValidFlag = false;
     } else {
@@ -157,7 +158,8 @@ NativeValue* JsScreen::OnSetScreenActiveMode(NativeEngine& engine, NativeCallbac
             }
         };
     NativeValue* lastParam = nullptr;
-    if (info.argc == ARGC_TWO && info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
+    if (info.argc >= ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
+        info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[ARGC_TWO - 1];
     }
     NativeValue* result = nullptr;
@@ -178,7 +180,7 @@ NativeValue* JsScreen::OnSetDensityDpi(NativeEngine& engine, NativeCallbackInfo&
     WLOGFI("OnSetDensityDpi is called");
     bool paramValidFlag = true;
     uint32_t densityDpi = 0;
-    if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
+    if (info.argc < ARGC_ONE) {
         WLOGFE("OnSetDensityDpi Params not match %{public}zu", info.argc);
         paramValidFlag = false;
     } else {
@@ -206,7 +208,8 @@ NativeValue* JsScreen::OnSetDensityDpi(NativeEngine& engine, NativeCallbackInfo&
             }
         };
     NativeValue* lastParam = nullptr;
-    if (info.argc == ARGC_TWO && info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
+    if (info.argc >= ARGC_TWO && info.argv[ARGC_TWO - 1] != nullptr &&
+        info.argv[ARGC_TWO - 1]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[ARGC_TWO - 1];
     }
     NativeValue* result = nullptr;

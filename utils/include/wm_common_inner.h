@@ -206,9 +206,10 @@ struct SplitRatioConfig {
 
 enum class DragType : uint32_t {
     DRAG_UNDEFINED,
-    DRAG_WIDTH,
-    DRAG_HEIGHT,
-    DRAG_CORNER,
+    DRAG_LEFT_OR_RIGHT,
+    DRAG_BOTTOM_OR_TOP,
+    DRAG_LEFT_TOP_CORNER,
+    DRAG_RIGHT_TOP_CORNER,
 };
 
 enum class TraceTaskId : int32_t {

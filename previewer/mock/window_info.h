@@ -42,6 +42,8 @@ struct AbilityTransitionInfo : public Parcelable {
     uint32_t maxWindowHeight_;
     uint32_t minWindowHeight_;
     TransitionReason reason_ = TransitionReason::ABILITY_TRANSITION;
+    int32_t missionId_ = -1;
+
     virtual bool Marshalling(Parcel& parcel) const override
     {
         return true;

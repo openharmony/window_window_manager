@@ -101,7 +101,7 @@ bool MakeMirrorWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     startPos += GetObject<uint32_t>(option.height_, data + startPos, size - startPos);
     startPos += GetObject<float>(option.density_, data + startPos, size - startPos);
     startPos += GetObject<int32_t>(option.flags_, data + startPos, size - startPos);
-    startPos += GetObject<bool>(option.isForShot_, data + startPos, size - startPos);
+    GetObject<bool>(option.isForShot_, data + startPos, size - startPos);
     ScreenId screenId = screenManager.CreateVirtualScreen(option);
     if (screenId == SCREEN_ID_INVALID) {
         return false;
@@ -145,7 +145,7 @@ bool MakeExpandWithVirtualScreenFuzzTest(const uint8_t *data, size_t size)
     startPos += GetObject<uint32_t>(option.height_, data + startPos, size - startPos);
     startPos += GetObject<float>(option.density_, data + startPos, size - startPos);
     startPos += GetObject<int32_t>(option.flags_, data + startPos, size - startPos);
-    startPos += GetObject<bool>(option.isForShot_, data + startPos, size - startPos);
+    GetObject<bool>(option.isForShot_, data + startPos, size - startPos);
     ScreenId screenId = screenManager.CreateVirtualScreen(option);
     if (screenId == SCREEN_ID_INVALID) {
         return false;
@@ -195,7 +195,7 @@ bool CreateAndDestroyVirtualScreenFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     screenManager.DestroyVirtualScreen(screenId);
-    startPos += GetObject<ScreenId>(screenId, data + startPos, size - startPos);
+    GetObject<ScreenId>(screenId, data + startPos, size - startPos);
     screenManager.DestroyVirtualScreen(screenId);
     screenManager.UnregisterScreenGroupListener(screenGroupListener);
     screenManager.UnregisterScreenListener(screenListener);
@@ -210,7 +210,7 @@ bool SetVirtualScreenSurfaceFuzzTest(const uint8_t *data, size_t size)
     }
     size_t startPos = 0;
     ScreenManager &screenManager = ScreenManager::GetInstance();
-    startPos += GetObject<ScreenId>(screenId, data + startPos, size - startPos);
+    GetObject<ScreenId>(screenId, data + startPos, size - startPos);
     screenManager.SetVirtualScreenSurface(screenId, nullptr);
     return true;
 }
@@ -223,7 +223,7 @@ bool RemoveVirtualScreenFromGroupFuzzTest(const uint8_t *data, size_t size)
     }
     size_t startPos = 0;
     ScreenManager &screenManager = ScreenManager::GetInstance();
-    startPos += GetObject<ScreenId>(screenId, data + startPos, size - startPos);
+    GetObject<ScreenId>(screenId, data + startPos, size - startPos);
     std::vector<ScreenId> screenIds = {screenId, screenId, screenId};
     screenManager.RemoveVirtualScreenFromGroup(screenIds);
     return true;
@@ -249,7 +249,7 @@ bool MakeMirrorFuzzTest(const uint8_t *data, size_t size)
         startPos += GetObject<ScreenId>(screenId, data + startPos, size - startPos);
         screenIds.emplace_back(screenId);
     }
-    startPos += GetObject<ScreenId>(screenId, data + startPos, size - startPos);
+    GetObject<ScreenId>(screenId, data + startPos, size - startPos);
     screenManager.MakeMirror(screenId, screenIds);
     screenManager.UnregisterScreenGroupListener(screenGroupListener);
     screenManager.UnregisterScreenListener(screenListener);

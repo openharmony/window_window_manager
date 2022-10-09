@@ -817,6 +817,21 @@ AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType 
     return windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
 }
 
+WMError WindowController::ChangeMouseStyle(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        if (node->GetWindowRect().width_ > node->GetWindowRect().height_) {
+            MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::NORTH_SOUTH);
+        } else {
+            MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::WEST_EAST);
+        }
+        return WMError::WM_OK;
+    }
+    MMI::InputManager::GetInstance()->SetPointerStyle(windowId, STYLEID_MAP.at(moveDragProperty->dragType_));
+    return WMError::WM_OK;
+}
+
 WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
@@ -833,6 +848,7 @@ WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<
     if ((moveDragProperty->startMoveFlag_ && node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) ||
         moveDragProperty->startDragFlag_) {
         WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
+        ChangeMouseStyle(windowId, moveDragProperty);
         return res;
     }
     return WMError::WM_OK;

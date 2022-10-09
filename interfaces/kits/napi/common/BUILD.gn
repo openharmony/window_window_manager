@@ -13,8 +13,8 @@
 
 import("//build/ohos.gni")
 
-## Build wm_napi_common.a {{{
-config("wm_napi_common_config") {
+## Build dm_napi_common.a {{{
+config("dm_napi_common_config") {
   visibility = [ ":*" ]
 
   cflags = [
@@ -24,23 +24,23 @@ config("wm_napi_common_config") {
   ]
 }
 
-config("wm_napi_common_public_config") {
+config("dm_napi_common_public_config") {
   include_dirs = [
     ".",
     "//third_party/node/src",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
   ]
 }
 
-ohos_static_library("wm_napi_common") {
-  sources = [ "wm_napi_common.cpp" ]
+ohos_static_library("dm_napi_common") {
+  sources = [ "dm_napi_common.cpp" ]
 
   configs = [
-    ":wm_napi_common_config",
+    ":dm_napi_common_config",
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
   ]
 
-  public_configs = [ ":wm_napi_common_public_config" ]
+  public_configs = [ ":dm_napi_common_public_config" ]
 
   deps = [
     "//foundation/arkui/napi:ace_napi",
@@ -58,4 +58,4 @@ ohos_static_library("wm_napi_common") {
   subsystem_name = "window"
   part_name = "window_manager"
 }
-## Build wm_napi_common.a }}}
+## Build dm_napi_common.a }}}

@@ -25,6 +25,7 @@
 #include <string>
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
+#include <struct_multimodal.h>
 
 #include "input_transfer_station.h"
 #include "vsync_station.h"
@@ -252,6 +253,7 @@ public:
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     virtual WMError NotifyMemoryLevel(int32_t level) const override;
+    virtual bool IsAllowHaveSystemSubWindow() override;
     void RestoreSplitWindowMode(uint32_t mode);
 private:
     template<typename T> void RegisterListenerLocked(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -386,6 +388,8 @@ private:
     bool IsAppMainOrSubOrFloatingWindow();
     void UpdateWindowShadowAccordingToSystemConfig();
     bool WindowCreateCheck(uint32_t parentId);
+    uint32_t CalculatePointerDirection(int32_t pointerX, int32_t pointerY);
+    void HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(std::string name, WindowType type);
 
     // colorspace, gamut
@@ -434,6 +438,15 @@ private:
     bool isMainHandlerAvailable_ = true;
     bool isAppFloatingWindow_ = false;
     bool isFocused_ = false;
+    uint32_t mouseStyleID_ = 0;
+    bool isPointerStyleChanged_ = false;
+    const std::map<DragType, uint32_t> STYLEID_MAP = {
+        {DragType::DRAG_UNDEFINED, MMI::MOUSE_ICON::DEFAULT},
+        {DragType::DRAG_BOTTOM_OR_TOP, MMI::MOUSE_ICON::NORTH_SOUTH},
+        {DragType::DRAG_LEFT_OR_RIGHT, MMI::MOUSE_ICON::WEST_EAST},
+        {DragType::DRAG_LEFT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
+        {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
+    };
 };
 } // namespace Rosen
 } // namespace OHOS

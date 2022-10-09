@@ -493,7 +493,7 @@ bool WindowManagerService::ConfigAppWindowShadow(const WindowManagerConfig::Conf
     WindowManagerConfig::ConfigItem item = shadowConfig["elevation"];
     if (item.IsFloats()) {
         auto elevation = *item.floatsValue_;
-        if (elevation.size() != 1 || (elevation.size() == 1 && MathHelper::LessNotEqual(elevation[0], 0.0))) {
+        if (elevation.size() != 1 || MathHelper::LessNotEqual(elevation[0], 0.0)) {
             return false;
         }
         outShadow.elevation_ = elevation[0];
@@ -660,12 +660,8 @@ void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token)
 {
-    if (window == nullptr || property == nullptr || surfaceNode == nullptr) {
+    if (!window || property == nullptr || surfaceNode == nullptr || !window->AsObject()) {
         WLOGFE("window is invalid");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if ((!window) || (!window->AsObject())) {
-        WLOGFE("failed to get window agent");
         return WMError::WM_ERROR_NULLPTR;
     }
     int pid = IPCSkeleton::GetCallingPid();
@@ -976,7 +972,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         });
     }
 
-    if (isAsyncTask) {
+    if (isAsyncTask || action == PropertyChangeAction::ACTION_UPDATE_RECT) {
         PostAsyncTask([this, windowProperty, action]() mutable {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
             WMError res = windowController_->UpdateProperty(windowProperty, action);

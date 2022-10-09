@@ -482,8 +482,8 @@ void WindowLayoutPolicyCascade::Reorder()
         Rect rect = cascadeRectsMap_[displayId].firstCascadeRect_;
         bool isFirstReorderedWindow = true;
         const auto& appWindowNodeVec = *(displayGroupWindowTree_[displayId][WindowRootNodeType::APP_WINDOW_NODE]);
-        for (auto iter = appWindowNodeVec.begin(); iter != appWindowNodeVec.end(); iter++) {
-            auto node = *iter;
+        for (auto nodeIter = appWindowNodeVec.begin(); nodeIter != appWindowNodeVec.end(); nodeIter++) {
+            auto node = *nodeIter;
             if (node == nullptr || node->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                 WLOGFI("get node failed or not app window.");
                 continue;
@@ -575,7 +575,7 @@ Rect WindowLayoutPolicyCascade::StepCascadeRect(Rect rect, DisplayId displayId) 
 void WindowLayoutPolicyCascade::SetCascadeRect(const sptr<WindowNode>& node)
 {
     static bool isFirstAppWindow = true;
-    Rect rect = {0, 0, 0, 0};
+    Rect rect;
     auto property = node->GetWindowProperty();
     if (property == nullptr) {
         WLOGFE("window property is nullptr.");
