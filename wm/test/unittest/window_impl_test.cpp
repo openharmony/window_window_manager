@@ -1654,6 +1654,25 @@ HWTEST_F(WindowImplTest, PrivacyMode01, Function | SmallTest | Level3)
     window->SetSystemPrivacyMode(false);
     ASSERT_EQ(false, window->IsPrivacyMode());
 }
+
+/**
+ * @tc.name: CalculatePointerDirection
+ * @tc.desc: calculate mouse style id
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, CalculatePointerDirection, Function | SmallTest | Level3)
+{
+    Rect rect1 { 1, 1, 100, 100 };
+    sptr<WindowOption> option = new WindowOption();
+    option->SetWindowName("CalculatePointerDirection");
+    sptr<WindowImpl> window = new WindowImpl(option);
+
+    window->moveDragProperty_->startRectExceptCorner_ = rect1;
+    ASSERT_EQ(12, window->CalculatePointerDirection(0, 0));
+    ASSERT_EQ(6, window->CalculatePointerDirection(50, 0));
+    ASSERT_EQ(11, window->CalculatePointerDirection(102, 0));
+    ASSERT_EQ(5, window->CalculatePointerDirection(102, 50));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
