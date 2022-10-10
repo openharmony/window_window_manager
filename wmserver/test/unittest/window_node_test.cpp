@@ -69,6 +69,8 @@ public:
     virtual void NotifyScreenshot() override {};
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override {};
     virtual void NotifyDestroy(void) override {};
+    void NotifyForeground(void) override {}
+    void NotifyBackground(void) override {}
     virtual void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override {};
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override {};
     virtual void RestoreSplitWindowMode(uint32_t mode) override {}
