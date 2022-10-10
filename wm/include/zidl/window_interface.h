@@ -44,6 +44,8 @@ public:
         TRANS_ID_NOTIFY_SCREEN_SHOT,
         TRANS_ID_DUMP_INFO,
         TRANS_ID_NOTIFY_DESTROY,
+        TRANS_ID_NOTIFY_FOREGROUND,
+        TRANS_ID_NOTIFY_BACKGROUND,
         TRANS_ID_NOTIFY_CLIENT_POINT_UP,
         TRANS_ID_UPDATE_ZOOM_TRANSFORM,
         TRANS_ID_RESTORE_SPLIT_WINDOW_MODE,
@@ -64,6 +66,8 @@ public:
     virtual void NotifyScreenshot() = 0;
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
     virtual void NotifyDestroy(void) = 0;
+    virtual void NotifyForeground(void) = 0;
+    virtual void NotifyBackground(void) = 0;
     virtual void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
     virtual void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) = 0;
     virtual void RestoreSplitWindowMode(uint32_t mode) = 0;
