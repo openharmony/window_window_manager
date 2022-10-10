@@ -371,15 +371,15 @@ void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
         if (abstractScreenCallback_ != nullptr && CheckScreenInScreenGroup(screen)) {
             abstractScreenCallback_->onDisconnect_(screen);
         }
-        if (rSScreenChangeListener_ != nullptr) {
-            rSScreenChangeListener_->onDisconnected_();
-        }
         screenGroup = RemoveFromGroupLocked(screen);
         if (screenGroup != nullptr) {
             NotifyScreenGroupChanged(screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
         }
         dmsScreenMap_.erase(dmsScreenMapIter);
         NotifyScreenDisconnected(dmsScreenId);
+        if (rSScreenChangeListener_ != nullptr) {
+            rSScreenChangeListener_->onDisconnected_();
+        }
         if (screenGroup != nullptr && screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR &&
             screen->dmsId_ == screenGroup->mirrorScreenId_ && screenGroup->GetChildCount() != 0) {
             auto defaultScreenId = GetDefaultAbstractScreenId();
@@ -1007,6 +1007,9 @@ void AbstractScreenController::AddScreenToGroup(sptr<AbstractScreenGroup> group,
         }
         if (group != nullptr && abstractScreenCallback_ != nullptr) {
             abstractScreenCallback_->onConnect_(screen);
+        }
+        if (rSScreenChangeListener_ != nullptr) {
+            rSScreenChangeListener_->onConnected_();
         }
     }
 
