@@ -183,6 +183,24 @@ void WindowAgent::NotifyDestroy(void)
     window_->NotifyDestroy();
 }
 
+void WindowAgent::NotifyForeground(void)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->NotifyForeground();
+}
+
+void WindowAgent::NotifyBackground(void)
+{
+    if (window_ == nullptr) {
+        WLOGFE("window_ is nullptr");
+        return;
+    }
+    window_->NotifyBackground();
+}
+
 void WindowAgent::NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (window_ == nullptr) {

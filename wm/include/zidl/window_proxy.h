@@ -43,6 +43,8 @@ public:
     void NotifyScreenshot() override;
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     void NotifyDestroy(void) override;
+    void NotifyForeground(void) override;
+    void NotifyBackground(void) override;
     void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override;
     void RestoreSplitWindowMode(uint32_t mode) override;

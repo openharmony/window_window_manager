@@ -229,6 +229,8 @@ public:
     void NotifyScreenshot();
     void NotifyTouchDialogTarget() override;
     void NotifyDestroy();
+    void NotifyForeground();
+    void NotifyBackground();
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
 
     virtual WMError SetUIContent(const std::string& contentInfo, NativeEngine* engine,
