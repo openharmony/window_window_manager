@@ -873,6 +873,7 @@ WMError WindowController::ProcessPointDown(uint32_t windowId)
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     WMError focusRes = windowRoot_->RequestFocus(windowId);
     windowRoot_->RequestActiveWindow(windowId);
+    windowRoot_->FocusFaultDetection();
     if (zOrderRes == WMError::WM_OK || focusRes == WMError::WM_OK) {
         FlushWindowInfo(windowId);
         accessibilityConnection_->NotifyAccessibilityWindowInfo(windowRoot_->GetWindowNode(windowId),
@@ -880,7 +881,6 @@ WMError WindowController::ProcessPointDown(uint32_t windowId)
         WLOGFI("ProcessPointDown end");
         return WMError::WM_OK;
     }
-    windowRoot_->FocusFaultDetection();
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
