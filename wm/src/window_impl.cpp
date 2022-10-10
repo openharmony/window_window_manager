@@ -2556,6 +2556,16 @@ void WindowImpl::NotifyDestroy()
     }
 }
 
+void WindowImpl::NotifyForeground()
+{
+    NotifyAfterForeground();
+}
+
+void WindowImpl::NotifyBackground()
+{
+    NotifyAfterBackground();
+}
+
 void WindowImpl::TransformSurfaceNode(const Transform& trans)
 {
     if (surfaceNode_ == nullptr) {

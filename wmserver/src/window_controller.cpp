@@ -220,6 +220,25 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     return windowRoot_->SaveWindow(node);
 }
 
+void WindowController::NotifyAfterAddWindow(sptr<WindowNode>& node)
+{
+    std::vector<sptr<WindowNode>> nodes;
+    nodes.emplace_back(node);
+    for (auto& child : node->children_) {
+        if (child->currentVisibility_) {
+            nodes.emplace_back(child);
+        }
+    }
+    for (auto& iter : nodes) {
+        if ((iter->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
+            (node->abilityToken_ != iter->abilityToken_)) {
+            iter->GetWindowToken()->NotifyForeground();
+        }
+    }
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(node->GetDisplayId(), nodes,
+        WindowUpdateType::WINDOW_UPDATE_ADDED);
+}
+
 WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
 {
     auto node = windowRoot_->GetWindowNode(property->GetWindowId());
@@ -251,15 +270,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     }
     windowRoot_->FocusFaultDetection();
     FlushWindowInfo(property->GetWindowId());
-    std::vector<sptr<WindowNode>> nodes;
-    nodes.emplace_back(node);
-    for (auto& child : node->children_) {
-        if (child->currentVisibility_) {
-            nodes.emplace_back(child);
-        }
-    }
-    accessibilityConnection_->NotifyAccessibilityWindowInfo(node->GetDisplayId(), nodes,
-        WindowUpdateType::WINDOW_UPDATE_ADDED);
+    NotifyAfterAddWindow(node);
     HandleTurnScreenOn(node);
 
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
@@ -365,6 +376,12 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
         nodes.emplace_back(windowNode);
         for (auto& child : windowNode->children_) {
             nodes.emplace_back(child);
+        }
+        for (auto& iter : nodes) {
+            if ((iter->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
+                (windowNode->abilityToken_ != iter->abilityToken_)) {
+                iter->GetWindowToken()->NotifyBackground();
+            }
         }
         displayZoomController_->ClearZoomTransform(nodes);
         accessibilityConnection_->NotifyAccessibilityWindowInfo(windowNode->GetDisplayId(), nodes,
