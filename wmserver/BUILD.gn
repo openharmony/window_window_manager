@@ -56,6 +56,7 @@ ohos_shared_library("libwms") {
     "src/window_manager_service.cpp",
     "src/window_node.cpp",
     "src/window_node_container.cpp",
+    "src/window_node_state_machine.cpp",
     "src/window_pair.cpp",
     "src/window_root.cpp",
     "src/window_snapshot/snapshot_controller.cpp",

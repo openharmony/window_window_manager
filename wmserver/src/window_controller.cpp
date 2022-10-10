@@ -72,8 +72,9 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
             UpdateWindowAnimation(node);
         }
     } else {
-        if (isColdStart) {
-            WLOGFE("windowNode exists but is cold start!");
+        if (node->stateMachine_.IsWindowNodeShownOrShowing()) {
+            WLOGFI("current window is visible, windowId:%{public}u state:%{public}u!",
+                node->GetWindowId(), static_cast<uint32_t>(node->stateMachine_.GetCurrentState()));
             return;
         }
         if (WindowHelper::IsValidWindowMode(info->GetWindowMode()) &&
@@ -217,6 +218,9 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     UpdateWindowAnimation(node);
     WLOGFI("createWindow name:%{public}u, windowName:%{public}s",
         windowId, node->GetWindowName().c_str());
+    // test
+    node->stateMachine_.SetWindowId(windowId);
+    node->stateMachine_.SetWindowType(property->GetWindowType());
     return windowRoot_->SaveWindow(node);
 }
 
@@ -240,7 +244,6 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         property->SetDecoStatus(true);
     }
     node->GetWindowProperty()->CopyFrom(property);
-
     // Need 'check permission'
     // Need 'adjust property'
     UpdateWindowAnimation(node);
@@ -270,8 +273,14 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
         ResizeSoftInputCallingWindowIfNeed(node);
     }
     StopBootAnimationIfNeed(node);
-    if (WindowHelper::IsMainWindow(node->GetWindowType())) {
-        MinimizeApp::ExecuteMinimizeAll();
+    // when hide with remote animation first and show with default animation, need transform state
+    // minimize should execute in finish callback when remote animation enabled
+    if (!node->stateMachine_.IsShowAnimationPlaying()) {
+        if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+            MinimizeApp::ExecuteMinimizeAll();
+            WLOGFI("id:%{public}u execute minimize all", node->GetWindowId());
+        }
+        node->stateMachine_.TransitionTo(WindowNodeState::SHOWN); // for normal show which not use remote animation
     }
     return WMError::WM_OK;
 }
@@ -346,15 +355,15 @@ void WindowController::HandleTurnScreenOn(const sptr<WindowNode>& node)
     IPCSkeleton::SetCallingIdentity(identity);
 }
 
-WMError WindowController::RemoveWindowNode(uint32_t windowId)
+WMError WindowController::RemoveWindowNode(uint32_t windowId, bool fromAnimation)
 {
     auto windowNode = windowRoot_->GetWindowNode(windowId);
     if (windowNode == nullptr) {
         WLOGFE("windowNode is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    auto removeFunc = [this, windowId, windowNode]() {
-        WMError res = windowRoot_->RemoveWindowNode(windowId);
+    auto removeFunc = [this, windowId, windowNode, fromAnimation]() {
+        WMError res = windowRoot_->RemoveWindowNode(windowId, fromAnimation);
         if (res != WMError::WM_OK) {
             WLOGFE("RemoveWindowNode failed");
             return res;
@@ -384,6 +393,9 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId)
     if (windowNode->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         RestoreCallingWindowSizeIfNeed();
     }
+    if (!windowNode->stateMachine_.IsHideAnimationPlaying()) {
+        windowNode->stateMachine_.TransitionTo(WindowNodeState::HIDDEN);
+    }
     return res;
 }
 
@@ -392,7 +404,7 @@ WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
     DisplayId displayId = DISPLAY_ID_INVALID;
     auto node = windowRoot_->GetWindowNode(windowId);
     if (node == nullptr) {
-        WLOGFE("destroy window failed, because window node is not exist.");
+        WLOGFE("destroy window id:%{public}u failed, because window node is not exist.", windowId);
         return WMError::WM_ERROR_NULLPTR;
     }
     displayId = node->GetDisplayId();
@@ -409,6 +421,7 @@ WMError WindowController::DestroyWindow(uint32_t windowId, bool onlySelf)
     }
     accessibilityConnection_->NotifyAccessibilityWindowInfo(node->GetDisplayId(), nodes,
         WindowUpdateType::WINDOW_UPDATE_REMOVED);
+    node->stateMachine_.TransitionTo(WindowNodeState::DESTROYED);
     return res;
 }
 
@@ -490,7 +503,12 @@ WMError WindowController::SetWindowMode(uint32_t windowId, WindowMode dstMode)
     }
     FlushWindowInfo(windowId);
     accessibilityConnection_->NotifyAccessibilityWindowInfo(node, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
-    MinimizeApp::ExecuteMinimizeAll();
+    if (!node->stateMachine_.IsShowAnimationPlaying()) {
+        if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+            MinimizeApp::ExecuteMinimizeAll();
+            WLOGFI("id:%{public}u execute minimize all", node->GetWindowId());
+        }
+    }
     return WMError::WM_OK;
 }
 
