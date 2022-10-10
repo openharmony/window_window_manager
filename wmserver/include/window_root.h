@@ -21,6 +21,7 @@
 
 #include "agent_death_recipient.h"
 #include "display_manager_service_inner.h"
+#include "parameters.h"
 #include "window_node_container.h"
 #include "zidl/window_manager_agent_interface.h"
 
@@ -47,7 +48,7 @@ public:
     void AddDeathRecipient(sptr<WindowNode> node);
     sptr<WindowNode> FindWindowNodeWithToken(const sptr<IRemoteObject>& token) const;
     WMError AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin = false);
-    WMError RemoveWindowNode(uint32_t windowId);
+    WMError RemoveWindowNode(uint32_t windowId, bool fromAnimation = false);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf);
     WMError UpdateWindowNode(uint32_t windowId, WindowUpdateReason reason);
     bool isVerticalDisplay(sptr<WindowNode>& node) const;
@@ -113,7 +114,8 @@ public:
     {
         return renderMode_ == RenderMode::UNIFIED;
     }
-
+    void LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool afterAnimation = false);
+    void GetAllAnimationPlayingNodes(std::vector<wptr<WindowNode>>& windowNodes);
 private:
     enum class RenderMode : uint8_t {
         SEPARATED,

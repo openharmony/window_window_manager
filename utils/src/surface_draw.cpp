@@ -263,7 +263,7 @@ bool SurfaceDraw::DoDraw(uint8_t *addr, uint32_t width, uint32_t height, uint32_
 }
 
 bool SurfaceDraw::DrawImageRect(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect rect,
-    std::shared_ptr<Media::PixelMap> pixelMap, uint32_t color)
+    std::shared_ptr<Media::PixelMap> pixelMap, uint32_t color, bool fillWindow)
 {
     int32_t winHeight = static_cast<int32_t>(rect.height_);
     int32_t winWidth = static_cast<int32_t>(rect.width_);
@@ -276,8 +276,7 @@ bool SurfaceDraw::DrawImageRect(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect
     if (buffer == nullptr || buffer->GetVirAddr() == nullptr) {
         return false;
     }
-    auto addr = static_cast<uint8_t *>(buffer->GetVirAddr());
-    if (!DoDrawImageRect(addr, rect, pixelMap, color, buffer->GetStride())) {
+    if (!DoDrawImageRect(buffer, rect, pixelMap, color, fillWindow)) {
         WLOGE("draw image rect failed.");
         return false;
     }
@@ -295,12 +294,13 @@ bool SurfaceDraw::DrawImageRect(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect
     return true;
 }
 
-bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, const Rect rect, std::shared_ptr<Media::PixelMap> pixelMap,
-    uint32_t color, int32_t bufferStride)
+bool SurfaceDraw::DoDrawImageRect(sptr<OHOS::SurfaceBuffer> buffer, const Rect& rect,
+    std::shared_ptr<Media::PixelMap> pixelMap, uint32_t color, bool fillWindow)
 {
     int32_t winWidth = static_cast<int32_t>(rect.width_);
     int32_t winHeight = static_cast<int32_t>(rect.height_);
     // actual width of the surface buffer after alignment
+    auto bufferStride = buffer->GetStride();
     int32_t alignWidth = bufferStride / static_cast<int32_t>(IMAGE_BYTES_STRIDE);
     WLOGFD("drawing image rect win width: %{public}d win height: %{public}d align width:%{public}d.",
         winWidth, winHeight, alignWidth);
@@ -312,16 +312,21 @@ bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, const Rect rect, std::shared_pt
         WLOGFE("drawing pixel map failed, because width or height is invalid.");
         return false;
     }
-    float xAxis = static_cast<float>(alignWidth) / pixelMap->GetWidth();
+    float xAxis = static_cast<float>(winWidth) / pixelMap->GetWidth();
     float yAxis = static_cast<float>(winHeight) / pixelMap->GetHeight();
     float axis = std::min(xAxis, yAxis);
     if (axis < 1.0) {
         // scale when the size of the pixel map is larger than the window
         // use axis to scale equally
         pixelMap->scale(axis, axis);
+    } else if (fillWindow) {
+        // scale snapshot to whole window
+        pixelMap->scale(xAxis, yAxis);
     }
-    int left = (alignWidth - pixelMap->GetWidth()) / 2; // 2 is the left and right boundaries of the window
+    int left = (winWidth - pixelMap->GetWidth()) / 2; // 2 is the left and right boundaries of the window
     int top = (winHeight - pixelMap->GetHeight()) / 2; // 2 is the top and bottom boundaries of the window
+    WLOGFD("pixelMap width: %{public}d win height: %{public}d left:%{public}d top:%{public}d.",
+        pixelMap->GetWidth(), pixelMap->GetHeight(), left, top);
     Drawing::Bitmap bitmap;
     Drawing::BitmapFormat format { Drawing::ColorType::COLORTYPE_RGBA_8888,
         Drawing::AlphaType::ALPHATYPE_OPAQUE };
@@ -333,6 +338,7 @@ bool SurfaceDraw::DoDrawImageRect(uint8_t *addr, const Rect rect, std::shared_pt
     // bufferSize is actual size of the surface buffer after alignment
     int32_t bufferSize = bufferStride * winHeight;
     uint8_t* bitmapAddr = static_cast<uint8_t*>(bitmap.GetPixels());
+    auto addr = static_cast<uint8_t *>(buffer->GetVirAddr());
     errno_t ret = memcpy_s(addr, bufferSize, bitmapAddr, bufferSize);
     if (ret != EOK) {
         WLOGFE("draw image rect failed, because copy bitmap to buffer failed.");
