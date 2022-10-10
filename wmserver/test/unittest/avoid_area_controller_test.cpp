@@ -86,6 +86,8 @@ public:
     void NotifyTouchOutside() override {}
     void NotifyScreenshot() override {}
     void NotifyDestroy(void) override {}
+    void NotifyForeground(void) override {}
+    void NotifyBackground(void) override {}
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override {}
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override {}
     void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override {}
