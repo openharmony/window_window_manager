@@ -107,6 +107,14 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             NotifyDestroy();
             break;
         }
+        case WindowMessage::TRANS_ID_NOTIFY_FOREGROUND: {
+            NotifyForeground();
+            break;
+        }
+        case WindowMessage::TRANS_ID_NOTIFY_BACKGROUND: {
+            NotifyBackground();
+            break;
+        }
         case WindowMessage::TRANS_ID_DUMP_INFO: {
             std::vector<std::string> params;
             if (!data.ReadStringVector(&params)) {

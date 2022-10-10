@@ -106,6 +106,7 @@ private:
     WMError GetFocusWindowNode(DisplayId displayId, sptr<WindowNode>& windowNode);
     void SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo);
     void ProcessDisplayCompression(DisplayId defaultDisplayId, const sptr<DisplayInfo>& displayInfo);
+    void NotifyAfterAddWindow(sptr<WindowNode>& node);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
