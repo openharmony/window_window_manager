@@ -54,7 +54,9 @@ DMError DisplayDumper::Dump(int fd, const std::vector<std::u16string>& args) con
     UniqueFd ufd = UniqueFd(fd); // auto close
     fd = ufd.Get();
     std::vector<std::string> params;
-    std::transform(args.begin(), args.end(), params.begin(), [](std::u16string arg) { return Str16ToStr8(arg); });
+    for (auto& arg : args) {
+        params.emplace_back(Str16ToStr8(arg));
+    }
 
     std::string dumpInfo;
     if (params.empty()) {

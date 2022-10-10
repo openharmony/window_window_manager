@@ -248,21 +248,24 @@ void DisplayCutoutController::TransferBoundingRectsByRotation(DisplayId displayI
     
     switch (currentRotation) {
         case Rotation::ROTATION_90: {
-            std::transform(displayBoundingRects.begin(), displayBoundingRects.end(), resultVec.begin(),
-                [displayHeight](DMRect rect) { return DMRect {.posX_ = displayHeight - rect.posY_ - rect.height_,
-                    .posY_ = rect.posX_, .width_ = rect.height_, .height_ = rect.width_}; });
+            for (DMRect rect : displayBoundingRects) {
+                resultVec.emplace_back(DMRect {.posX_ = displayHeight - rect.posY_ - rect.height_,
+                    .posY_ = rect.posX_, .width_ = rect.height_, .height_ = rect.width_});
+            }
             break;
         }
         case Rotation::ROTATION_180: {
-            std::transform(displayBoundingRects.begin(), displayBoundingRects.end(), resultVec.begin(),
-                [displayWidth, displayHeight](DMRect rect) { return DMRect {displayWidth - rect.posX_ - rect.width_,
-                    displayHeight - rect.posY_ - rect.height_, rect.width_, rect.height_}; });
+            for (DMRect rect : displayBoundingRects) {
+                resultVec.emplace_back(DMRect {displayWidth - rect.posX_ - rect.width_,
+                    displayHeight - rect.posY_ - rect.height_, rect.width_, rect.height_});
+            }
             break;
         }
         case Rotation::ROTATION_270: {
-            std::transform(displayBoundingRects.begin(), displayBoundingRects.end(), resultVec.begin(),
-                [displayWidth](DMRect rect) { return DMRect {rect.posY_, displayWidth - rect.posX_ - rect.width_,
-                    rect.height_, rect.width_}; });
+            for (DMRect rect : displayBoundingRects) {
+                resultVec.emplace_back(DMRect {rect.posY_, displayWidth - rect.posX_ - rect.width_,
+                    rect.height_, rect.width_});
+            }
             break;
         }
         default: {
