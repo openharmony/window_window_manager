@@ -27,6 +27,7 @@ group("unittest") {
     ":utils_window_helper_test",
     ":utils_window_property_test",
     ":utils_wm_math_test",
+    ":utils_wm_occlusion_region_test",
   ]
 }
 
@@ -96,6 +97,14 @@ ohos_unittest("utils_perform_reporter_test") {
   module_out_path = module_out_path
 
   sources = [ "perform_reporter_test.cpp" ]
+
+  deps = [ ":utils_unittest_common" ]
+}
+
+ohos_unittest("utils_wm_occlusion_region_test") {
+  module_out_path = module_out_path
+
+  sources = [ "wm_occlusion_region_test.cpp" ]
 
   deps = [ ":utils_unittest_common" ]
 }
