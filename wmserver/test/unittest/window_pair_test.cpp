@@ -342,6 +342,354 @@ HWTEST_F(WindowPairTest, IsSplitRelated02, Function | SmallTest | Level2)
     sptr<WindowNode> node3 = new WindowNode(property1);
     ASSERT_EQ(false, windowPair->IsSplitRelated(node3));
 }
+
+/**
+ * @tc.name: GetOrderedPair
+ * @tc.desc: Get all window node form pair in Z order.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, GetOrderedPair01, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowNode> node1 = nullptr;
+    std::vector<sptr<WindowNode>> vec;
+    vec.clear();
+    ASSERT_EQ(vec, windowPair->GetOrderedPair(node1));
+}
+
+/**
+ * @tc.name: GetOrderedPair
+ * @tc.desc: Get all window node form pair in Z order.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, GetOrderedPair02, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+
+    // create window property
+    sptr<WindowProperty> property0 = new WindowProperty();
+    property0->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    property0->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowProperty> property1 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    property1->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+
+    // define primary_, secondary_, divider_
+    sptr<WindowNode> node1 = new WindowNode(property1);
+    windowPair->primary_ = new WindowNode(property0);
+    windowPair->secondary_ = new WindowNode(property1);
+    windowPair->divider_ = new WindowNode(property0);
+    
+    ASSERT_EQ(3, windowPair->GetOrderedPair(node1).size());
+    ASSERT_EQ(windowPair->secondary_, windowPair->GetOrderedPair(node1).at(1));
+    ASSERT_EQ(windowPair->primary_, windowPair->GetOrderedPair(node1).at(0));
+}
+
+/**
+ * @tc.name: GetOrderedPair
+ * @tc.desc: Get all window node form pair in Z order.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, GetOrderedPair03, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+
+    // create window property
+    sptr<WindowProperty> property0 = new WindowProperty();
+    property0->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    property0->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowProperty> property1 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    property1->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+
+    // define primary_, secondary_, divider_
+    sptr<WindowNode> node1 = new WindowNode(property0);
+    windowPair->primary_ = new WindowNode(property0);
+    windowPair->secondary_ = new WindowNode(property1);
+    windowPair->divider_ = new WindowNode(property0);
+    
+    ASSERT_EQ(3, windowPair->GetOrderedPair(node1).size());
+    ASSERT_EQ(windowPair->secondary_, windowPair->GetOrderedPair(node1).at(0));
+    ASSERT_EQ(windowPair->primary_, windowPair->GetOrderedPair(node1).at(1));
+}
+
+/**
+ * @tc.name: GetPairedWindows
+ * @tc.desc: Get all window node form pair.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, GetPairedWindows01, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property0 = new WindowProperty();
+    property0->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowProperty> property1 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+
+    // define primary_, secondary_
+    windowPair->primary_ = new WindowNode(property0);
+    windowPair->secondary_ = new WindowNode(property1);
+
+    // define status_
+    windowPair->status_ = WindowPairStatus::STATUS_EMPTY;
+
+    ASSERT_EQ(0, windowPair->GetPairedWindows().size());
+    windowPair->status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+    ASSERT_EQ(2, windowPair->GetPairedWindows().size());
+    ASSERT_EQ(windowPair->secondary_, windowPair->GetPairedWindows().at(1));
+    ASSERT_EQ(windowPair->primary_, windowPair->GetPairedWindows().at(0));
+}
+
+/**
+ * @tc.name: Clear
+ * @tc.desc: Clear window pair.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, Clear01, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property0 = new WindowProperty();
+    property0->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+
+    // define divider
+    windowPair->divider_ = new WindowNode(property0);
+    windowPair->Clear();
+    ASSERT_EQ(nullptr, windowPair->divider_);
+    ASSERT_EQ(WindowPairStatus::STATUS_EMPTY, windowPair->status_);
+}
+
+/**
+ * @tc.name: UpdateWindowPairStatus
+ * @tc.desc: Update pair status
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, UpdateWindowPairStatus01, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property0 = new WindowProperty();
+
+    // define primary_, secondary_, divider_
+    windowPair->primary_ = new WindowNode(property0);
+    windowPair->secondary_ = new WindowNode(property0);
+    windowPair->divider_ = new WindowNode(property0);
+
+    // define status_
+    windowPair->status_ = WindowPairStatus::STATUS_SINGLE_PRIMARY;
+
+    windowPair->UpdateWindowPairStatus();
+    ASSERT_EQ(WindowPairStatus::STATUS_PAIRED_DONE, windowPair->status_);
+}
+
+/**
+ * @tc.name: UpdateWindowPairStatus
+ * @tc.desc: Update pair status
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, UpdateWindowPairStatus02, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property0 = new WindowProperty();
+
+    // define primary_, secondary_, divider_
+    windowPair->primary_ = new WindowNode(property0);
+    windowPair->secondary_ = new WindowNode(property0);
+    windowPair->divider_ = nullptr;
+
+    // define status_
+    windowPair->status_ = WindowPairStatus::STATUS_SINGLE_PRIMARY;
+
+    windowPair->UpdateWindowPairStatus();
+    ASSERT_EQ(WindowPairStatus::STATUS_PAIRING, windowPair->status_);
+}
+
+/**
+ * @tc.name: UpdateWindowPairStatus
+ * @tc.desc: Update pair status
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, UpdateWindowPairStatus03, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property0 = new WindowProperty();
+
+    // define primary_, secondary_, divider_
+    windowPair->primary_ = new WindowNode(property0);
+    windowPair->secondary_ = nullptr;
+    windowPair->divider_ = new WindowNode(property0);
+
+    // define status_
+    windowPair->status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+
+    windowPair->UpdateWindowPairStatus();
+    ASSERT_EQ(WindowPairStatus::STATUS_EMPTY, windowPair->status_);
+    ASSERT_EQ(nullptr, windowPair->primary_);
+    ASSERT_EQ(nullptr, windowPair->secondary_);
+    ASSERT_EQ(nullptr, windowPair->divider_);
+}
+
+/**
+ * @tc.name: UpdateWindowPairStatus
+ * @tc.desc: Update pair status
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, UpdateWindowPairStatus04, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property0 = new WindowProperty();
+
+    // define primary_, secondary_, divider_
+    windowPair->primary_ = nullptr;
+    windowPair->secondary_ = new WindowNode(property0);
+    windowPair->divider_ = new WindowNode(property0);
+
+    // define status_
+    windowPair->status_ = WindowPairStatus::STATUS_EMPTY;
+
+    sptr<WindowNode> node1 = windowPair->secondary_;
+    sptr<WindowNode> node2 = windowPair->divider_;
+    windowPair->UpdateWindowPairStatus();
+    ASSERT_EQ(WindowPairStatus::STATUS_SINGLE_SECONDARY, windowPair->status_);
+    ASSERT_EQ(nullptr, windowPair->primary_);
+    ASSERT_EQ(node1, windowPair->secondary_);
+    ASSERT_EQ(node2, windowPair->divider_);
+}
+
+/**
+ * @tc.name: UpdateWindowPairStatus
+ * @tc.desc: Update pair status
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, UpdateWindowPairStatus05, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property0 = new WindowProperty();
+
+    // define primary_, secondary_, divider_
+    windowPair->primary_ = nullptr;
+    windowPair->secondary_ = nullptr;
+    windowPair->divider_ = new WindowNode(property0);
+
+    // define status_
+    windowPair->status_ = WindowPairStatus::STATUS_SINGLE_PRIMARY;
+
+    sptr<WindowNode> node1 = windowPair->divider_;
+    windowPair->UpdateWindowPairStatus();
+    ASSERT_EQ(WindowPairStatus::STATUS_EMPTY, windowPair->status_);
+    ASSERT_EQ(nullptr, windowPair->primary_);
+    ASSERT_EQ(nullptr, windowPair->secondary_);
+    ASSERT_EQ(node1, windowPair->divider_);
+}
+
+/**
+ * @tc.name: SwitchPosition
+ * @tc.desc: Switch the position of two paired window.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, SwitchPosition01, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property0 = new WindowProperty();
+
+    // define primary_, secondary_, divider_
+    windowPair->primary_ = nullptr;
+    windowPair->secondary_ = nullptr;
+    windowPair->divider_ = new WindowNode(property0);
+
+    sptr<WindowNode> node1 = windowPair->divider_;
+    ASSERT_EQ(nullptr, windowPair->primary_);
+    ASSERT_EQ(nullptr, windowPair->secondary_);
+    ASSERT_EQ(node1, windowPair->divider_);
+}
+
+/**
+ * @tc.name: SwitchPosition
+ * @tc.desc: Switch the position of two paired window.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, SwitchPosition02, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property0 = new WindowProperty();
+    property0->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowProperty> property1 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+
+    // define primary_, secondary_
+    windowPair->primary_ = new WindowNode(property0);
+    windowPair->secondary_ = new WindowNode(property1);
+
+    windowPair->SwitchPosition();
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, windowPair->primary_->GetWindowMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, windowPair->secondary_->GetWindowMode());
+}
+
+/**
+ * @tc.name: SwitchPosition
+ * @tc.desc: Switch the position of two paired window.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, SwitchPosition03, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property0 = new WindowProperty();
+    property0->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    sptr<WindowProperty> property1 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+
+    // define primary_, secondary_
+    windowPair->primary_ = new WindowNode(property0);
+    windowPair->secondary_ = new WindowNode(property1);
+
+    windowPair->SwitchPosition();
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, windowPair->primary_->GetWindowMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, windowPair->secondary_->GetWindowMode());
+}
+
+/**
+ * @tc.name: HandlePairedNodesChange
+ * @tc.desc: Update paired window node
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, HandlePairedNodesChange01, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property0 = new WindowProperty();
+    property0->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowProperty> property1 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+
+    // define primary_, secondary_
+    windowPair->primary_ = new WindowNode(property0);
+    windowPair->secondary_ = new WindowNode(property0);
+
+    windowPair->HandlePairedNodesChange();
+    ASSERT_EQ(nullptr, windowPair->primary_);
+    ASSERT_EQ(nullptr, windowPair->secondary_);
+    ASSERT_EQ(WindowPairStatus::STATUS_EMPTY, windowPair->status_);
+}
+
+/**
+ * @tc.name: HandlePairedNodesChange
+ * @tc.desc: Update paired window node
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, HandlePairedNodesChange02, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property0 = new WindowProperty();
+    property0->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowProperty> property1 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+
+    // define primary_, secondary_
+    windowPair->primary_ = new WindowNode(property0);
+    windowPair->secondary_ = new WindowNode(property0);
+
+    windowPair->HandlePairedNodesChange();
+    ASSERT_EQ(nullptr, windowPair->primary_);
+    ASSERT_EQ(nullptr, windowPair->secondary_);
+    ASSERT_EQ(WindowPairStatus::STATUS_EMPTY, windowPair->status_);
+}
 }
 }
 }
