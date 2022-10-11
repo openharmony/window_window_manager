@@ -361,7 +361,7 @@ NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbac
     }
     WindowOption option;
     void* contextPtr = nullptr;
-    if(!ParseConfigOption(engine, nativeObj, option, contextPtr)) {
+    if (!ParseConfigOption(engine, nativeObj, option, contextPtr)) {
         WLOGFE("[NAPI]Failed to parse config");
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
