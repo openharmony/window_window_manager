@@ -26,6 +26,7 @@ WindowTransitionInfo::WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> in
     displayId_ = info->displayId_;
     isShowWhenLocked_ = info->isShowWhenLocked_;
     isRecent_ = info->isRecent_;
+    missionId_ = info->missionId_;
     if (info->windowModes_.empty()) {
         supportWindowModes_ = {
             AppExecFwk::SupportWindowMode::FULLSCREEN,

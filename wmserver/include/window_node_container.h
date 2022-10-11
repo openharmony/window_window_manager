@@ -38,8 +38,8 @@ public:
     WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, ScreenId displayGroupId);
     ~WindowNodeContainer();
     WMError ShowStartingWindow(sptr<WindowNode>& node);
-    WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode);
-    WMError RemoveWindowNode(sptr<WindowNode>& node);
+    WMError AddWindowNode(sptr<WindowNode>& node, sptr<WindowNode>& parentNode, bool afterAnimation = false);
+    WMError RemoveWindowNode(sptr<WindowNode>& node, bool fromAnimation = false);
     WMError HandleRemoveWindow(sptr<WindowNode>& node);
     WMError UpdateWindowNode(sptr<WindowNode>& node, WindowUpdateReason reason);
     WMError DestroyWindowNode(sptr<WindowNode>& node, std::vector<uint32_t>& windowIds);
@@ -123,7 +123,7 @@ public:
     bool TakeWindowPairSnapshot(DisplayId displayId);
     void ClearWindowPairSnapshot(DisplayId displayId);
     bool IsScreenLocked();
-
+    void LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool afterAnimation = false);
 private:
     void TraverseWindowNode(sptr<WindowNode>& root, std::vector<sptr<WindowNode>>& windowNodes) const;
     sptr<WindowNode> FindRoot(WindowType type) const;
@@ -161,7 +161,7 @@ private:
         const std::vector<DisplayId>& lastShowingDisplays);
     bool CheckWindowNodeWhetherInWindowTree(const sptr<WindowNode>& node) const;
     void UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
-
+    void RemoveFromRsTreeWhenRemoveWindowNode(sptr<WindowNode>& node, bool fromAnimation);
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     uint32_t brightnessWindow_ = INVALID_WINDOW_ID;
     uint32_t zOrder_ { 0 };

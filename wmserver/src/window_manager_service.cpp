@@ -75,7 +75,6 @@ WindowManagerService::WindowManagerService() : SystemAbility(WINDOW_MANAGER_SERV
     if (ret != 0) {
         WLOGFE("Add watchdog thread failed");
     }
-
     // init RSUIDirector, it will handle animation callback
     rsUiDirector_ = RSUIDirector::Create();
     rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task) { PostAsyncTask(task); });
@@ -130,7 +129,6 @@ void WindowManagerService::PostVoidSyncTask(Task task)
         }
     }
 }
-
 
 void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
@@ -719,7 +717,12 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
         WLOGFI("Operation rejected");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    return PostSyncTask([this, windowId, onlySelf]() {
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    node->stateMachine_.SetDestroyTaskParam(onlySelf);
+    auto func = [this, windowId]() {
         WLOGFI("[WMS] Destroy: %{public}u", windowId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DestroyWindow(%u)", windowId);
         WindowInnerManager::GetInstance().NotifyWindowRemovedOrDestroyed(windowId);
@@ -727,8 +730,18 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
         if (node != nullptr && node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
             dragController_->FinishDrag(windowId);
         }
-        return windowController_->DestroyWindow(windowId, onlySelf);
-    });
+        return windowController_->DestroyWindow(windowId, node->stateMachine_.GetDestroyTaskParam());
+    };
+    if (RemoteAnimation::IsRemoteAnimationEnabledAndFirst(node->GetDisplayId()) &&
+        node->stateMachine_.IsRemoteAnimationPlaying()) {
+        WLOGFI("SetDestroyTask id:%{public}u", node->GetWindowId());
+        node->stateMachine_.SetDestroyTask(func);
+        return WMError::WM_OK;
+    }
+    WLOGFI("DestroyWindow windowId: %{public}u, name:%{public}s state: %{public}u",
+        node->GetWindowId(), node->GetWindowName().c_str(),
+        static_cast<uint32_t>(node->stateMachine_.GetCurrentState()));
+    return PostSyncTask(func);
 }
 
 WMError WindowManagerService::RequestFocus(uint32_t windowId)
@@ -790,23 +803,48 @@ WMError WindowManagerService::SetWindowAnimationController(const sptr<RSIWindowA
         }
     );
     controller->AsObject()->AddDeathRecipient(deathRecipient);
+    RemoteAnimation::SetWindowController(windowController_);
     RemoteAnimation::SetMainTaskHandler(handler_);
     return PostSyncTask([this, &controller]() {
-        return windowController_->SetWindowAnimationController(controller);
+        WMError ret = windowController_->SetWindowAnimationController(controller);
+        RemoteAnimation::SetAnimationFirst(system::GetParameter("persist.window.af.enabled", "1") == "1");
+        return ret;
     });
 }
 
 void WindowManagerService::OnWindowEvent(Event event, const sptr<IRemoteObject>& remoteObject)
 {
     if (event == Event::REMOTE_DIED) {
-        PostVoidSyncTask([this, &remoteObject, event]() {
-            uint32_t windowId = windowRoot_->GetWindowIdByObject(remoteObject);
+        uint32_t windowId = windowRoot_->GetWindowIdByObject(remoteObject);
+        auto node = windowRoot_->GetWindowNode(windowId);
+        if (node == nullptr) {
+            WLOGFD("window node is nullptr, REMOTE_DIED no need to destroy");
+            return;
+        }
+        node->stateMachine_.SetDestroyTaskParam(true);
+        auto func = [this, windowId]() {
             auto node = windowRoot_->GetWindowNode(windowId);
-            if (node != nullptr && node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
+            if (node == nullptr) {
+                WLOGFD("window node is nullptr");
+                return;
+            }
+            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
                 dragController_->FinishDrag(windowId);
             }
-            windowController_->DestroyWindow(windowId, true);
-        });
+            windowController_->DestroyWindow(windowId, node->stateMachine_.GetDestroyTaskParam());
+        };
+
+        if (node->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+            PostVoidSyncTask([&remoteObject] { RemoteAnimation::OnRemoteDie(remoteObject); });
+        }
+        if (RemoteAnimation::IsRemoteAnimationEnabledAndFirst(node->GetDisplayId()) &&
+            node->stateMachine_.IsRemoteAnimationPlaying()) {
+            WLOGFI("set destroy task windowId:%{public}u", node->GetWindowId());
+            node->stateMachine_.SetDestroyTask(func);
+            handler_->PostTask(func, "destroyTimeOutTask", 6000); // 6000 is time out 6s
+            return;
+        }
+        return PostVoidSyncTask(func);
     }
 }
 
