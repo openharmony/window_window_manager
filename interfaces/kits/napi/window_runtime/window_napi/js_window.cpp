@@ -655,7 +655,8 @@ NativeValue* JsWindow::OnShowWithAnimation(NativeEngine& engine, NativeCallbackI
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 WLOGFE("[NAPI]window is nullptr");
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                task.Reject(engine, CreateJsError(engine,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Show(0, true));
@@ -753,7 +754,8 @@ NativeValue* JsWindow::OnHide(NativeEngine& engine, NativeCallbackInfo& info)
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
                 WLOGFE("[NAPI]window is nullptr or get invalid param");
-                task.Reject(engine, CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                task.Reject(engine,
+                    CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Hide(0, false));
@@ -1375,7 +1377,7 @@ NativeValue* JsWindow::LoadContentScheduleNew(NativeEngine& engine, NativeCallba
         storage = info.argv[1];
     } else if (info.argc >= 3) { // 3: num of params
         storage = info.argv[1];
-        callBack = ((info.argv[2] != nullptr && info.argv[2]->TypeOf() == NATIVE_FUNCTION) ?
+        callBack = ((info.argv[2] != nullptr && info.argv[2]->TypeOf() == NATIVE_FUNCTION) ? // 2 param num
             info.argv[2] : nullptr); // 2 param num
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
@@ -1652,18 +1654,15 @@ NativeValue* JsWindow::OnSetSystemBarEnable(NativeEngine& engine, NativeCallback
 NativeValue* JsWindow::OnSetWindowSystemBarEnable(NativeEngine& engine, NativeCallbackInfo& info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
-    if (info.argc < 1 || windowToken_ == nullptr) { // 1: params num
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
     std::map<WindowType, SystemBarProperty> systemBarProperties;
-    if (errCode == WmErrorCode::WM_OK && !GetSystemBarStatus(systemBarProperties, engine, info, windowToken_)) {
+    if (info.argc < 1 || windowToken_ == nullptr || // 1: params num
+        !GetSystemBarStatus(systemBarProperties, engine, info, windowToken_)) {
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
-
     wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
         [weakToken, systemBarProperties](NativeEngine& engine, AsyncTask& task, int32_t status) {
@@ -1690,11 +1689,11 @@ NativeValue* JsWindow::OnSetWindowSystemBarEnable(NativeEngine& engine, NativeCa
                     static_cast<int32_t>(ret), "JsWindow::OnSetWindowSystemBarEnable failed"));
             }
         };
-
     NativeValue* lastParam = nullptr;
     if (info.argc >= 1 && info.argv[0] != nullptr && info.argv[0]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[0];
-    } else if (info.argc >= 2 && info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) {
+    } else if (info.argc >= 2 && // 2 arg count
+        info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[1];
     }
     NativeValue* result = nullptr;
