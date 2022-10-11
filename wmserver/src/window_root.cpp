@@ -598,6 +598,29 @@ void WindowRoot::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool afterAnima
     return;
 }
 
+WMError WindowRoot::BindDialogToParent(sptr<WindowNode>& node, sptr<WindowNode>& parentNode)
+{
+    if (node->GetWindowType() != WindowType::WINDOW_TYPE_DIALOG) {
+        return WMError::WM_OK;
+    }
+    sptr<WindowNode> callerNode = FindDialogCallerNode(node->GetWindowType(), node->dialogTargetToken_);
+    parentNode = (callerNode != nullptr) ? callerNode : nullptr;
+    if (parentNode == nullptr) {
+        node->GetWindowToken()->NotifyDestroy();
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    auto position = parentNode->children_.end();
+    for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
+        if ((*iter)->priority_ > node->priority_) {
+            position = iter;
+            break;
+        }
+    }
+    parentNode->children_.insert(position, node);
+    node->parent_ = parentNode;
+    return WMError::WM_OK;
+}
+
 WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, bool fromStartingWin)
 {
     if (node == nullptr) {
@@ -641,12 +664,12 @@ WMError WindowRoot::AddWindowNode(uint32_t parentId, sptr<WindowNode>& node, boo
 
     auto parentNode = GetWindowNode(parentId);
 
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
-        sptr<WindowNode> callerNode = FindDialogCallerNode(node->GetWindowType(), node->dialogTargetToken_);
-        parentNode = (callerNode != nullptr) ? callerNode : nullptr;
+    WMError res = BindDialogToParent(node, parentNode);
+    if (res != WMError::WM_OK) {
+        return res;
     }
 
-    WMError res = container->AddWindowNode(node, parentNode);
+    res = container->AddWindowNode(node, parentNode);
     if (res != WMError::WM_OK) {
         WLOGFE("AddWindowNode failed with ret: %{public}u", static_cast<uint32_t>(res));
         return res;

@@ -1389,18 +1389,6 @@ WMError WindowController::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObjec
 
     node->dialogTargetToken_ = targetToken;
 
-    sptr<WindowNode> parentNode = windowRoot_->FindDialogCallerNode(node->GetWindowType(), node->dialogTargetToken_);
-    if (parentNode != nullptr) {
-        auto position = parentNode->children_.end();
-        for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
-            if ((*iter)->priority_ > node->priority_) {
-                position = iter;
-                break;
-            }
-        }
-        parentNode->children_.insert(position, node);
-    }
-
     return WMError::WM_OK;
 }
 } // namespace OHOS
