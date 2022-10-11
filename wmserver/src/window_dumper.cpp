@@ -184,6 +184,7 @@ WMError WindowDumper::DumpSpecifiedWindowInfo(uint32_t windowId, const std::vect
     oss << "Flag: " << node->GetWindowFlags() << std::endl;
     oss << "Orientation: " << static_cast<uint32_t>(node->GetRequestedOrientation()) << std::endl;
     oss << "IsStartingWindow: " << isShown_ << std::endl;
+    oss << "FirstFrameCallbackCalled: " << node->firstFrameAvaliable_ << std::endl;
     oss << "IsVisible: " << isVisible << std::endl;
     oss << "WindowRect: " << "[ "
         << rect.posX_ << ", " << rect.posY_ << ", " << rect.width_ << ", " << rect.height_
