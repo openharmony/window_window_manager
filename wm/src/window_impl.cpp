@@ -26,8 +26,8 @@
 #include "color_parser.h"
 #include "display_manager.h"
 #include "display_info.h"
+#include "ressched_report.h"
 #include "singleton_container.h"
-#include "socperf_client.h"
 #include "surface_capture_future.h"
 #include "window_adapter.h"
 #include "window_agent.h"
@@ -42,11 +42,9 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
     const std::string PARAM_DUMP_HELP = "-h";
-    constexpr int64_t PERF_TIME_OUT = 200;
-    constexpr int32_t PERF_CLICK_NORMAL_CODE = 10006;
-    constexpr int32_t PERF_DRAG_CODE = 10018;
-    constexpr int32_t PERF_MOVE_CODE = 10019;
 }
+
+WM_IMPLEMENT_SINGLE_INSTANCE(ResSchedReport);
 
 const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
     { ColorSpace::COLOR_SPACE_DEFAULT, ColorGamut::COLOR_GAMUT_SRGB },
@@ -1916,7 +1914,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->SetOriginRect(rect);
         }
     }
-    RequestPerfIfNeed(reason);
+    ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
     NotifySizeChange(rectToAce, reason);
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -2212,14 +2210,7 @@ void WindowImpl::EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId
         HandleModeChangeHotZones(posX, posY);
     }
     moveDragProperty_->pointEventStarted_ = false;
-    if (windowDragBoost_) {
-        ClosePerf(PERF_DRAG_CODE);
-        windowDragBoost_ = false;
-    }
-    if (windowMovingBoost_) {
-        ClosePerf(PERF_MOVE_CODE);
-        windowMovingBoost_ = false;
-    }
+    ResSchedReport::GetInstance().StopPerfIfNeed();
 }
 
 void WindowImpl::ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -2244,7 +2235,7 @@ void WindowImpl::ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>
             const auto& rect = GetRect();
             ReadyToMoveOrDragWindow(pointerEvent, pointerItem);
             if (IsPointerEventConsumed()) {
-                OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_CLICK_NORMAL_CODE, "");
+                ResSchedReport::GetInstance().TrigClick();
             }
             WLOGFI("[Client Point Down]: windowId: %{public}u, pointId: %{public}d, sourceType: %{public}d, "
                    "hasPointStarted: %{public}d, startMove: %{public}d, startDrag: %{public}d, targetDisplayId: "
@@ -2948,52 +2939,6 @@ WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
     // notify memory level
     uiContent_->NotifyMemoryLevel(level);
     return WMError::WM_OK;
-}
-
-void WindowImpl::RequestPerfIfNeed(WindowSizeChangeReason reason)
-{
-    if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) || WindowHelper::IsSplitWindowMode(GetMode())) {
-        switch (reason) {
-            case WindowSizeChangeReason::DRAG_END: {
-                if (windowDragBoost_) {
-                    ClosePerf(PERF_DRAG_CODE);
-                    windowDragBoost_ = false;
-                }
-                break;
-            }
-            case WindowSizeChangeReason::DRAG_START:
-                [[fallthrough]];
-            case WindowSizeChangeReason::DRAG: {
-                RequestPerf(PERF_DRAG_CODE, PERF_TIME_OUT);
-                windowDragBoost_ = true;
-                break;
-            }
-            case WindowSizeChangeReason::MOVE: {
-                RequestPerf(PERF_MOVE_CODE, PERF_TIME_OUT);
-                windowMovingBoost_ = true;
-                break;
-            }
-            default: {
-                WLOGFI("doing nothing");
-            }
-        }
-    }
-}
-void WindowImpl::RequestPerf(int32_t code, int64_t timeOut)
-{
-    auto currentTime = std::chrono::steady_clock::now();
-    bool isTimeOut = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRequestPerfTime_).
-        count() > timeOut;
-    if (isTimeOut) {
-        WLOGFI("WindowImpl::RequestPerf");
-        OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(code, "");
-        lastRequestPerfTime_ = currentTime;
-    }
-}
-
-void WindowImpl::ClosePerf(int32_t code)
-{
-    OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(code, false, "");
 }
 } // namespace Rosen
 } // namespace OHOS
