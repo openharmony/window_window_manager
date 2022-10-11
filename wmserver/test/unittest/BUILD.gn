@@ -24,6 +24,7 @@ group("unittest") {
     ":wmserver_window_manager_config_test",
     ":wmserver_window_node_container_test",
     ":wmserver_window_node_test",
+    ":wmserver_window_pair_test",
     ":wmserver_window_snapshot_test",
     ":wmserver_window_zorder_policy_test",
   ]
@@ -97,6 +98,14 @@ ohos_unittest("wmserver_window_node_test") {
   module_out_path = module_out_path
 
   sources = [ "window_node_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common" ]
+}
+
+ohos_unittest("wmserver_window_pair_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_pair_test.cpp" ]
 
   deps = [ ":wmserver_unittest_common" ]
 }
