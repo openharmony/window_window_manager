@@ -238,6 +238,9 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         isScreenLocked_ = true;
     }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
+        RemoteAnimation::NotifyAnimationUpdateWallpaper(node);
+    }
     WLOGFI("AddWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
@@ -394,6 +397,9 @@ WMError WindowNodeContainer::DestroyWindowNode(sptr<WindowNode>& node, std::vect
     // clear vector cache completely, swap with empty vector
     auto emptyVector = std::vector<sptr<WindowNode>>();
     node->children_.swap(emptyVector);
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
+        RemoteAnimation::NotifyAnimationUpdateWallpaper(nullptr);
+    }
     WLOGFI("DestroyWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }

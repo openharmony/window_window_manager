@@ -278,8 +278,7 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     NotifyAfterAddWindow(node);
     HandleTurnScreenOn(node);
 
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
-        node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+    if (WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
         sysBarWinId_[node->GetWindowType()] = node->GetWindowId();
     }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
