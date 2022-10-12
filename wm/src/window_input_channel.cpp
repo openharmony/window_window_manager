@@ -48,6 +48,10 @@ void WindowInputChannel::HandleKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
             keyEvent->MarkProcessed();
             return;
         }
+        if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_BACK) {
+            keyEvent->MarkProcessed();
+            return;
+        }
     }
 
     bool inputMethodHasProcessed = false;

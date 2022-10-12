@@ -1346,7 +1346,9 @@ WMError WindowController::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObjec
     if (windowRoot_->CheckMultiDialogWindows(node->GetWindowType(), targetToken)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+
     node->dialogTargetToken_ = targetToken;
+
     return WMError::WM_OK;
 }
 } // namespace OHOS
