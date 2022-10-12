@@ -956,6 +956,7 @@ WMError WindowController::RecoverInputEventToClient(uint32_t windowId)
         WLOGFD("There is no need to recover input event to client");
         return WMError::WM_OK;
     }
+    MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::DEFAULT);
     node->SetInputEventCallingPid(node->GetCallingPid());
     FlushWindowInfo(windowId);
     return WMError::WM_OK;
