@@ -69,6 +69,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
         if (windowId != invalidId) {
             WLOGFE("WindowInputChannel is nullptr");
         }
+        pointerEvent->MarkProcessed();
         return;
     }
     channel->HandlePointerEvent(pointerEvent);
