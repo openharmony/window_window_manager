@@ -25,6 +25,7 @@ public:
     static const int32_t KEYCODE_FN = 0;
     static const int32_t KEYCODE_NUMPAD_RIGHT_PAREN = 1;
     static const int32_t KEYCODE_0 = 2;
+    static const int32_t KEYCODE_BACK = 3;
 
     int32_t GetKeyCode() const
     {
