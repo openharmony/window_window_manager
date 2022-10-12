@@ -615,15 +615,16 @@ ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds
         WLOGFE("allExpandScreenIds is empty. make expand failed.");
         return SCREEN_ID_INVALID;
     }
+    if (startPointIter != startPoints.end()) {
+        startPoints.erase(startPointIter);
+    }
+
     std::shared_ptr<RSDisplayNode> rsDisplayNode;
     for (uint32_t i = 0; i < allExpandScreenIds.size(); i++) {
         rsDisplayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(allExpandScreenIds[i]);
         if (rsDisplayNode != nullptr) {
             rsDisplayNode->SetDisplayOffset(startPoints[i].posX_, startPoints[i].posY_);
         }
-    }
-    if (startPointIter != startPoints.end()) {
-        startPoints.erase(startPointIter);
     }
     abstractScreenController_->SetShotScreen(defaultScreenId, shotScreenIds);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeExpand");
