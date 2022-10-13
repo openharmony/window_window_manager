@@ -57,10 +57,19 @@ Rect AvoidAreaControllerTest::screenRect;
 
 class WindowListener : public IWindow {
 public:
-    void UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) override {}
-    void UpdateWindowMode(WindowMode mode) override {}
-    void UpdateFocusStatus(bool focused) override {}
-    void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override
+    WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UpdateWindowMode(WindowMode mode) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UpdateFocusStatus(bool focused) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override
     {
         if (type == AvoidAreaType::TYPE_SYSTEM) {
             statusBarAvoidAreaFuture_.SetValue(*avoidArea);
@@ -68,26 +77,72 @@ public:
         if (type == AvoidAreaType::TYPE_KEYBOARD) {
             keyboardAvoidAreaFuture_.SetValue(*avoidArea);
         }
+        return WMError::WM_OK;
     }
-    void UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override {}
-    void UpdateWindowState(WindowState state) override {}
-    void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override {}
-    void UpdateDisplayId(DisplayId from, DisplayId to) override {}
-    void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override {}
-    void UpdateActiveStatus(bool isActive) override {}
+    WMError UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UpdateWindowState(WindowState state) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UpdateDisplayId(DisplayId from, DisplayId to) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UpdateActiveStatus(bool isActive) override
+    {
+        return WMError::WM_OK;
+    }
     sptr<WindowProperty> GetWindowProperty() override
     {
         return nullptr;
     }
-    void NotifyTouchOutside() override {}
-    void NotifyScreenshot() override {}
-    void NotifyDestroy(void) override {}
-    void NotifyForeground(void) override {}
-    void NotifyBackground(void) override {}
-    void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override {}
-    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override {}
-    void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override {}
-    void RestoreSplitWindowMode(uint32_t mode) override {}
+    WMError NotifyTouchOutside() override
+    {
+        return WMError::WM_OK;
+    }
+    WMError NotifyScreenshot() override
+    {
+        return WMError::WM_OK;
+    }
+    WMError NotifyDestroy(void) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError NotifyForeground(void) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError NotifyBackground(void) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError RestoreSplitWindowMode(uint32_t mode) override
+    {
+        return WMError::WM_OK;
+    }
     RunnableFuture<AvoidArea> statusBarAvoidAreaFuture_;
     RunnableFuture<AvoidArea> keyboardAvoidAreaFuture_;
 

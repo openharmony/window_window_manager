@@ -51,29 +51,86 @@ void WindowNodeTest::TearDown()
 }
 class WindowListener : public IWindow {
 public:
-    virtual void UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) override {};
-    virtual void UpdateWindowMode(WindowMode mode) override {};
-    virtual void UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override {};
-    virtual void UpdateFocusStatus(bool focused) override {};
-    virtual void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override {};
-    virtual void UpdateWindowState(WindowState state) override {};
-    virtual void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override {};
-    virtual void UpdateDisplayId(DisplayId from, DisplayId to) override {};
-    virtual void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override {};
-    virtual void UpdateActiveStatus(bool isActive) override {};
+    virtual WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError UpdateWindowMode(WindowMode mode) override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError UpdateFocusStatus(bool focused) override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError UpdateWindowState(WindowState state) override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError UpdateDisplayId(DisplayId from, DisplayId to) override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError UpdateActiveStatus(bool isActive) override
+    {
+        return WMError::WM_OK;
+    };
     virtual sptr<WindowProperty> GetWindowProperty() override
     {
         return nullptr;
     };
-    virtual void NotifyTouchOutside() override {};
-    virtual void NotifyScreenshot() override {};
-    virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override {};
-    virtual void NotifyDestroy(void) override {};
-    void NotifyForeground(void) override {}
-    void NotifyBackground(void) override {}
-    virtual void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override {};
-    void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override {};
-    virtual void RestoreSplitWindowMode(uint32_t mode) override {}
+    virtual WMError NotifyTouchOutside() override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError NotifyScreenshot() override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError NotifyDestroy(void) override
+    {
+        return WMError::WM_OK;
+    };
+    WMError NotifyForeground(void) override
+    {
+        return WMError::WM_OK;
+    };
+    WMError NotifyBackground(void) override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override
+    {
+        return WMError::WM_OK;
+    };
+    WMError UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override
+    {
+        return WMError::WM_OK;
+    };
+    virtual WMError RestoreSplitWindowMode(uint32_t mode) override
+    {
+        return WMError::WM_OK;
+    };
 
     virtual sptr<IRemoteObject> AsObject() override
     {
