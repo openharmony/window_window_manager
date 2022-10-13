@@ -1068,6 +1068,12 @@ void WindowLayoutPolicy::UpdateSurfaceBounds(const sptr<WindowNode>& node, const
             RSNode::Animate(timingProtocol, curve_, SetBoundsFunc);
             break;
         }
+        case WindowSizeChangeReason::FULL_TO_SPLIT:
+        case WindowSizeChangeReason::SPLIT_TO_FULL: {
+            const RSAnimationTimingProtocol timingProtocol(350); // animation time
+            RSNode::Animate(timingProtocol, RSAnimationTimingCurve::EASE_OUT, SetBoundsFunc);
+            break;
+        }
         case WindowSizeChangeReason::UNDEFINED:
             [[fallthrough]];
         default:
