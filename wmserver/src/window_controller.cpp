@@ -956,10 +956,19 @@ WMError WindowController::RecoverInputEventToClient(uint32_t windowId)
         WLOGFD("There is no need to recover input event to client");
         return WMError::WM_OK;
     }
-    MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::DEFAULT);
     node->SetInputEventCallingPid(node->GetCallingPid());
-    FlushWindowInfo(windowId);
+    RecoverDefaultMouseStyle(windowId);
     return WMError::WM_OK;
+}
+
+void WindowController::RecoverDefaultMouseStyle(uint32_t windowId)
+{
+    // asynchronously calls SetMouseStyle of MultiModalInput
+    auto task = [this, windowId]() {
+        MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::DEFAULT);
+        FlushWindowInfo(windowId);
+    };
+    WindowInnerManager::GetInstance().PostTask(task, "RecoverDefaultMouseStyle");
 }
 
 WMError WindowController::NotifyWindowClientPointUp(uint32_t windowId,

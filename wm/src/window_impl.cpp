@@ -2339,6 +2339,13 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
                     static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), mouseStyleID_);
             }
             isPointerStyleChanged_ = true;
+        } else {
+            int32_t currentStyleID;
+            MMI::InputManager::GetInstance()->GetPointerStyle(pointerEvent->GetAgentWindowId(), currentStyleID);
+            if (currentStyleID != MMI::MOUSE_ICON::DEFAULT) {
+                MMI::InputManager::GetInstance()->SetPointerStyle(
+                    static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), MMI::MOUSE_ICON::DEFAULT);
+            }
         }
     } else if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE && isPointerStyleChanged_ == false) {
         if (GetRect().width_ > GetRect().height_) {
@@ -2367,7 +2374,7 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
         property_->UpdatePointerEvent(pointerEvent);
     }
     int32_t action = pointerEvent->GetPointerAction();
-    if (action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
+    if ((action == MMI::PointerEvent::POINTER_ACTION_MOVE || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) &&
         pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         HandlePointerStyle(pointerEvent);
     }
