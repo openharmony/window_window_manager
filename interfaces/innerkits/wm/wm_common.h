@@ -188,6 +188,7 @@ enum class WindowSizeChangeReason : uint32_t {
     MOVE,
     HIDE,
     TRANSFORM,
+    CUSTOM_ANIMATION_SHOW,
 };
 
 enum class WindowLayoutMode : uint32_t {
