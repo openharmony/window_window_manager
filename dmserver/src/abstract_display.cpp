@@ -16,6 +16,7 @@
 #include "abstract_display.h"
 
 #include "abstract_screen_controller.h"
+#include "display_manager_config.h"
 #include "display_manager_service.h"
 #include "window_manager_hilog.h"
 
@@ -38,11 +39,14 @@ AbstractDisplay::AbstractDisplay(DisplayId id, std::string name,
       orientation_(absScreen->orientation_)
 {
     RequestRotation(absScreen->rotation_);
-    if (DisplayManagerService::GetCustomVirtualPixelRatio() &&
-        fabs(DisplayManagerService::GetCustomVirtualPixelRatio() + 1) > 1e-6) {
-        virtualPixelRatio_ = DisplayManagerService::GetCustomVirtualPixelRatio();
-        absScreen->SetVirtualPixelRatio(virtualPixelRatio_);
-        return;
+    auto numbersConfig = DisplayManagerConfig::GetIntNumbersConfig();
+    if (numbersConfig.count("dpi") != 0) {
+        uint32_t densityDpi = static_cast<uint32_t>(numbersConfig["dpi"][0]);
+        if (densityDpi >= DOT_PER_INCH_MINIMUM_VALUE && densityDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
+            virtualPixelRatio_ = static_cast<float>(densityDpi) / BASELINE_DENSITY;
+            absScreen->SetVirtualPixelRatio(virtualPixelRatio_);
+            return;
+        }
     }
     if ((info->width_ >= PHONE_SCREEN_WIDTH) || (info->height_ >= PHONE_SCREEN_WIDTH)) {
         if ((info->width_ == PAD_SCREEN_WIDTH) || (info->height_ == PAD_SCREEN_WIDTH)) {

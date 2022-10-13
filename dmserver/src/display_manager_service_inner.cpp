@@ -82,11 +82,6 @@ void DisplayManagerServiceInner::UpdateRSTree(DisplayId displayId, DisplayId par
     DisplayManagerService::GetInstance().UpdateRSTree(displayId, parentDisplayId, surfaceNode, isAdd, isMultiDisplay);
 }
 
-ScreenId DisplayManagerServiceInner::GetRSScreenId(DisplayId displayId) const
-{
-    return DisplayManagerService::GetInstance().GetRSScreenId(displayId);
-}
-
 uint32_t DisplayManagerServiceInner::GetRSScreenNum() const
 {
     return DisplayManagerService::GetInstance().GetRSScreenNum();
