@@ -18,7 +18,10 @@ module_out_path = "window_manager/dmserver"
 group("unittest") {
   testonly = true
 
-  deps = [ ":dmserver_display_manager_service_test" ]
+  deps = [
+    ":dmserver_display_manager_proxy_test",
+    ":dmserver_display_manager_service_test",
+  ]
 }
 
 ohos_unittest("dmserver_display_manager_service_test") {
@@ -29,6 +32,16 @@ ohos_unittest("dmserver_display_manager_service_test") {
   deps = [ ":dmserver_unittest_common" ]
 }
 
+ohos_unittest("dmserver_display_manager_proxy_test") {
+  module_out_path = module_out_path
+
+  sources = [ "display_manager_proxy_test.cpp" ]
+
+  deps = [ ":dmserver_unittest_common" ]
+
+  external_deps = [ "graphic_standard:surface" ]
+}
+
 ## Build dmserver_unittest_common.a {{{
 config("dmserver_unittest_common_public_config") {
   include_dirs = [
@@ -36,6 +49,7 @@ config("dmserver_unittest_common_public_config") {
     "//foundation/window/window_manager/dmserver/include",
     "//foundation/window/window_manager/snapshot",
     "//foundation/window/window_manager/interfaces/innerkits/dm",
+    "//foundation/window/window_manager/test/common/mock",
     "//foundation/window/window_manager/test/common/utils/include",
     "//foundation/window/window_manager/utils/include",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client",  # RSSurface
