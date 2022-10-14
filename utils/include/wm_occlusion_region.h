@@ -21,7 +21,7 @@
 #include <vector>
 #include <string>
 
-namespace OHOS::Rosen::Occlusion {
+namespace OHOS::Rosen::WmOcclusion {
 class Rect {
 public:
     int left_ = 0;

@@ -715,21 +715,21 @@ void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)
     }
     std::vector<sptr<WindowNode>> windowNodes;
     windowNodeContainer->TraverseContainer(windowNodes);
-    Occlusion::Rect defaultDisplayRect = { defaultDisplayRect_.posX_, defaultDisplayRect_.posY_,
+    WmOcclusion::Rect defaultDisplayRect = { defaultDisplayRect_.posX_, defaultDisplayRect_.posY_,
         defaultDisplayRect_.posX_ + defaultDisplayRect_.width_,
         defaultDisplayRect_.posY_ + defaultDisplayRect_.height_};
-    Occlusion::Region defaultDisplayRegion(defaultDisplayRect);
-    Occlusion::Region allRegion; // Counts the area of all shown windows
+    WmOcclusion::Region defaultDisplayRegion(defaultDisplayRect);
+    WmOcclusion::Region allRegion; // Counts the area of all shown windows
     for (auto& node : windowNodes) {
         if (node->GetWindowType() == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
             continue;
         }
         auto windowRect = node->GetWindowRect();
-        Occlusion::Rect curRect = { windowRect.posX_, windowRect.posY_,
+        WmOcclusion::Rect curRect = { windowRect.posX_, windowRect.posY_,
             windowRect.posX_ + windowRect.width_, windowRect.posY_ + windowRect.height_};
-        Occlusion::Region curRegion(curRect);
+        WmOcclusion::Region curRegion(curRect);
         allRegion = curRegion.Or(allRegion);
-        Occlusion::Region subResult = defaultDisplayRegion.Sub(allRegion);
+        WmOcclusion::Region subResult = defaultDisplayRegion.Sub(allRegion);
         if (subResult.GetSize() == 0) {
             WLOGFI("stop boot animation");
             system::SetParameter("bootevent.wms.fullscreen.ready", "true");
