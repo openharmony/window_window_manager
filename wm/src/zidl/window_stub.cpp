@@ -119,11 +119,13 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             std::vector<std::string> params;
             if (!data.ReadStringVector(&params)) {
                 WLOGFE("Fail to read params");
+                return -1;
             }
             std::vector<std::string> info;
             DumpInfo(params, info);
             if (!reply.WriteStringVector(info)) {
                 WLOGFE("Fail to write info");
+                return -1;
             }
             break;
         }
