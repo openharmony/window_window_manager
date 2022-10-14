@@ -108,6 +108,7 @@ private:
     void SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo);
     void ProcessDisplayCompression(DisplayId defaultDisplayId, const sptr<DisplayInfo>& displayInfo);
     void NotifyAfterAddWindow(sptr<WindowNode>& node);
+    void AsyncFlushInputInfo(uint32_t windowId);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;

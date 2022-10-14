@@ -16,6 +16,7 @@
 #include "window_controller.h"
 #include <ability_manager_client.h>
 #include <chrono>
+#include <cstdint>
 #include <hisysevent.h>
 #include <hitrace_meter.h>
 #include <parameters.h>
@@ -958,7 +959,20 @@ WMError WindowController::RecoverInputEventToClient(uint32_t windowId)
     }
     node->SetInputEventCallingPid(node->GetCallingPid());
     RecoverDefaultMouseStyle(windowId);
+    AsyncFlushInputInfo(windowId);
     return WMError::WM_OK;
+}
+
+void WindowController::AsyncFlushInputInfo(uint32_t windowId)
+{
+    WLOGFD("AsyncFlushWindowInfo");
+    displayZoomController_->UpdateWindowZoomInfo(windowId);
+    RSTransaction::FlushImplicitTransaction();
+    MMI::DisplayGroupInfo displayInfo_ = inputWindowMonitor_->GetDisplayInfo(windowId);
+    auto task = [this, displayInfo_]() {
+        MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayInfo_);
+    };
+    WindowInnerManager::GetInstance().PostTask(task, "UpdateDisplayInfo");
 }
 
 void WindowController::RecoverDefaultMouseStyle(uint32_t windowId)
@@ -966,7 +980,6 @@ void WindowController::RecoverDefaultMouseStyle(uint32_t windowId)
     // asynchronously calls SetMouseStyle of MultiModalInput
     auto task = [this, windowId]() {
         MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::DEFAULT);
-        FlushWindowInfo(windowId);
     };
     WindowInnerManager::GetInstance().PostTask(task, "RecoverDefaultMouseStyle");
 }
