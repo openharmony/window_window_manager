@@ -431,14 +431,14 @@ void WindowLayoutPolicyCascade::InitSplitRects(DisplayId displayId)
 
 int32_t WindowLayoutPolicyCascade::GetSplitRatioPoint(float ratio, DisplayId displayId)
 {
-    const auto& dividerRect = cascadeRectsMap_[displayId].dividerRect_;
-    const auto& limitRect = limitRectMap_[displayId];
+    auto dividerRect = cascadeRectsMap_[displayId].dividerRect_;
+    auto displayRect = displayGroupInfo_->GetDisplayRect(displayId);
     if (!IsVerticalDisplay(displayId)) {
-        return limitRect.posX_ +
-            static_cast<uint32_t>((limitRect.width_ - dividerRect.width_) * ratio);
+        return displayRect.posX_ +
+            static_cast<int32_t>((displayRect.width_ - dividerRect.width_) * ratio);
     } else {
-        return limitRect.posY_ +
-            static_cast<uint32_t>((limitRect.height_ - dividerRect.height_) * ratio);
+        return displayRect.posY_ +
+            static_cast<int32_t>((displayRect.height_ - dividerRect.height_) * ratio);
     }
 }
 
