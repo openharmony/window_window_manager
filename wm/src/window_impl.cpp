@@ -2329,7 +2329,6 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
         }
         float vpr = display->GetVirtualPixelRatio();
         CalculateStartRectExceptHotZone(vpr);
-
         if (IsPointInDragHotZone(pointerItem.GetDisplayX(), pointerItem.GetDisplayY())) {
             uint32_t tempStyleID = mouseStyleID_;
             // calculate pointer style
@@ -2348,13 +2347,10 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
             }
         }
     } else if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE && isPointerStyleChanged_ == false) {
-        if (GetRect().width_ > GetRect().height_) {
-            MMI::InputManager::GetInstance()->SetPointerStyle(
-                static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), MMI::MOUSE_ICON::NORTH_SOUTH);
-        } else {
-            MMI::InputManager::GetInstance()->SetPointerStyle(
-                static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), MMI::MOUSE_ICON::WEST_EAST);
-        }
+        uint32_t mouseStyle = (GetRect().width_ > GetRect().height_) ?
+                                MMI::MOUSE_ICON::NORTH_SOUTH : MMI::MOUSE_ICON::WEST_EAST;
+        MMI::InputManager::GetInstance()->SetPointerStyle(
+            static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), mouseStyle);
         isPointerStyleChanged_ = true;
     }
     auto action = pointerEvent->GetPointerAction();
