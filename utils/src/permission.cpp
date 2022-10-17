@@ -18,6 +18,9 @@
 #include <accesstoken_kit.h>
 #include <bundle_constants.h>
 #include <ipc_skeleton.h>
+#include <bundle_mgr_proxy.h>
+#include <system_ability_definition.h>
+#include <iservice_registry.h>
 
 #include "window_manager_hilog.h"
 
@@ -27,17 +30,49 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WMPermission"};
 }
 
-bool Permission::IsSystemCalling()
+bool Permission::IsSystemServiceCalling()
 {
     Security::AccessToken::NativeTokenInfo tokenInfo;
     Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(), tokenInfo);
-
     if (tokenInfo.apl == Security::AccessToken::ATokenAplEnum::APL_SYSTEM_CORE ||
         tokenInfo.apl == Security::AccessToken::ATokenAplEnum::APL_SYSTEM_BASIC) {
         return true;
     }
-    WLOGFI("Is not system calling");
+    WLOGFE("Is not system service calling. native apl: %{public}d", tokenInfo.apl);
     return false;
+}
+
+bool Permission::IsSystemCalling()
+{
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    if (uid < 0) {
+        WLOGFE("Is not system calling app caller uid is: %d,", uid);
+        return false;
+    }
+
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityManager == nullptr) {
+        WLOGFE("Is not system calling failed to get system ability mgr.");
+        return false;
+    }
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObject == nullptr) {
+        WLOGFE("Is not system calling failed to get bundle manager proxy.");
+        return false;
+    }
+    sptr<AppExecFwk::IBundleMgr> iBundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (iBundleMgr == nullptr) {
+        WLOGFE("Is not system calling iBundleMgr is nullptr");
+        return false;
+    }
+    bool isSystemAppCalling = iBundleMgr->CheckIsSystemAppByUid(uid);
+    WLOGFI("UID:%{public}d  IsSystemApp:%{public}d", uid, isSystemAppCalling);
+    bool isSystemCalling = isSystemAppCalling || IsSystemServiceCalling();
+    if (!isSystemCalling) {
+        WLOGFE("Is not system calling");
+    }
+    return isSystemCalling;
 }
 
 bool Permission::CheckCallingPermission(const std::string& permission)
