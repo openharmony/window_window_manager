@@ -26,6 +26,7 @@
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
 #include "window_manager_agent_controller.h"
+#include "permission.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -300,6 +301,26 @@ void WindowRoot::ExitSplitMode(DisplayId displayId)
 void WindowRoot::AddSurfaceNodeIdWindowNodePair(uint64_t surfaceNodeId, sptr<WindowNode> node)
 {
     surfaceIdWindowNodeMap_.insert(std::make_pair(surfaceNodeId, node));
+}
+
+void WindowRoot::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
+{
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("Get Visible Window Permission Denied");
+    }
+    VisibleData& VisibleWindow = lastOcclusionData_->GetVisibleData();
+    for (auto surfaceId : VisibleWindow) {
+        auto iter = surfaceIdWindowNodeMap_.find(surfaceId);
+        if (iter == surfaceIdWindowNodeMap_.end()) {
+            continue;
+        }
+        sptr<WindowNode> node = iter->second;
+        if (node == nullptr) {
+            continue;
+        }
+        infos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
+            node->GetCallingUid(), true, node->GetWindowType()));
+    }
 }
 
 std::vector<std::pair<uint64_t, bool>> WindowRoot::GetWindowVisibilityChangeInfo(

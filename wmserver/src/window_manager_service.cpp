@@ -1049,6 +1049,13 @@ WMError WindowManagerService::GetAccessibilityWindowInfo(std::vector<sptr<Access
     });
 }
 
+WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
+{
+    return PostSyncTask([this, &infos]() {
+        return windowController_->GetVisibilityWindowInfo(infos);
+    });
+}
+
 WMError WindowManagerService::GetSystemConfig(SystemConfig& systemConfig)
 {
     systemConfig = systemConfig_;

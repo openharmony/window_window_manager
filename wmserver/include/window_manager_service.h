@@ -104,6 +104,7 @@ public:
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
         bool isAsyncTask = false) override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
+    WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
 
     void RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
