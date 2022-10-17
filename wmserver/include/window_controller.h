@@ -78,6 +78,7 @@ public:
     WMError RecoverInputEventToClient(uint32_t windowId);
     WMError NotifyWindowClientPointUp(uint32_t windowId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WMError ChangeMouseStyle(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty);
+    void RecoverDefaultMouseStyle(uint32_t windowId);
 
 private:
     uint32_t GenWindowId();
@@ -107,6 +108,7 @@ private:
     void SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo);
     void ProcessDisplayCompression(DisplayId defaultDisplayId, const sptr<DisplayInfo>& displayInfo);
     void NotifyAfterAddWindow(sptr<WindowNode>& node);
+    void AsyncFlushInputInfo(uint32_t windowId);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
