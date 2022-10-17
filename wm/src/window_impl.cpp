@@ -22,6 +22,7 @@
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 
+#include "permission.h"
 #include "color_parser.h"
 #include "display_manager.h"
 #include "display_info.h"
@@ -311,6 +312,10 @@ WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 WMError WindowImpl::SetWindowType(WindowType type)
 {
     WLOGFD("window id: %{public}u, type:%{public}u.", property_->GetWindowId(), static_cast<uint32_t>(type));
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set window type permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -335,6 +340,10 @@ WMError WindowImpl::SetWindowType(WindowType type)
 WMError WindowImpl::SetWindowMode(WindowMode mode)
 {
     WLOGFI("[Client] Window %{public}u mode %{public}u", property_->GetWindowId(), static_cast<uint32_t>(mode));
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set window mode permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -366,6 +375,10 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
 void WindowImpl::SetAlpha(float alpha)
 {
     WLOGFI("[Client] Window %{public}u alpha %{public}f", property_->GetWindowId(), alpha);
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set alpha permission denied!");
+        return;
+    }
     if (!IsWindowValid()) {
         return;
     }
@@ -1360,6 +1373,10 @@ bool WindowImpl::IsKeepScreenOn() const
 
 WMError WindowImpl::SetTurnScreenOn(bool turnScreenOn)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set wake up screen permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1546,11 +1563,19 @@ void WindowImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
 
 void WindowImpl::SetSnapshotSkip(bool isSkip)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set snapshot skip permission denied!");
+        return;
+    }
     surfaceNode_->SetSecurityLayer(isSkip || property_->GetSystemPrivacyMode());
 }
 
 void WindowImpl::DisableAppWindowDecor()
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("disable app window decor permission denied!");
+        return;
+    }
     if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
         WLOGFE("window decoration is invalid on sub window");
         return;
@@ -2808,6 +2833,10 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
 
 WMError WindowImpl::SetCornerRadius(float cornerRadius)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set corner radius permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WLOGFI("[Client] Window %{public}s set corner radius %{public}f", name_.c_str(), cornerRadius);
     if (MathHelper::LessNotEqual(cornerRadius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -2819,6 +2848,10 @@ WMError WindowImpl::SetCornerRadius(float cornerRadius)
 
 WMError WindowImpl::SetShadowRadius(float radius)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set shadow radius permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WLOGFI("[Client] Window %{public}s set shadow radius %{public}f", name_.c_str(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -2830,6 +2863,10 @@ WMError WindowImpl::SetShadowRadius(float radius)
 
 WMError WindowImpl::SetShadowColor(std::string color)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set shadow color permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WLOGFI("[Client] Window %{public}s set shadow color %{public}s", name_.c_str(), color.c_str());
     uint32_t colorValue;
     if (!ColorParser::Parse(color, colorValue)) {
@@ -2842,6 +2879,10 @@ WMError WindowImpl::SetShadowColor(std::string color)
 
 void WindowImpl::SetShadowOffsetX(float offsetX)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set shadow offset x permission denied!");
+        return;
+    }
     WLOGFI("[Client] Window %{public}s set shadow offsetX %{public}f", name_.c_str(), offsetX);
     surfaceNode_->SetShadowOffsetX(offsetX);
     RSTransaction::FlushImplicitTransaction();
@@ -2849,6 +2890,10 @@ void WindowImpl::SetShadowOffsetX(float offsetX)
 
 void WindowImpl::SetShadowOffsetY(float offsetY)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set shadow offset y permission denied!");
+        return;
+    }
     WLOGFI("[Client] Window %{public}s set shadow offsetY %{public}f", name_.c_str(), offsetY);
     surfaceNode_->SetShadowOffsetY(offsetY);
     RSTransaction::FlushImplicitTransaction();
@@ -2856,6 +2901,10 @@ void WindowImpl::SetShadowOffsetY(float offsetY)
 
 WMError WindowImpl::SetBlur(float radius)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set blur permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WLOGFI("[Client] Window %{public}s set blur radius %{public}f", name_.c_str(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -2867,6 +2916,10 @@ WMError WindowImpl::SetBlur(float radius)
 
 WMError WindowImpl::SetBackdropBlur(float radius)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set backdrop blur permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WLOGFI("[Client] Window %{public}s set backdrop blur radius %{public}f", name_.c_str(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -2878,6 +2931,10 @@ WMError WindowImpl::SetBackdropBlur(float radius)
 
 WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set backdrop blur style permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WLOGFI("[Client] Window %{public}s set backdrop blur style %{public}u", name_.c_str(), blurStyle);
     if (blurStyle < WindowBlurStyle::WINDOW_BLUR_OFF || blurStyle > WindowBlurStyle::WINDOW_BLUR_THICK) {
         return WMError::WM_ERROR_INVALID_PARAM;

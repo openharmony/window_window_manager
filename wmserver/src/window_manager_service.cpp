@@ -654,6 +654,10 @@ void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token)
 {
+    if (WindowHelper::IsSystemWindow(property->GetWindowType()) && !Permission::IsSystemCalling()) {
+        WLOGFE("create system window permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     if (window == nullptr || property == nullptr || surfaceNode == nullptr) {
         WLOGFE("window is invalid");
         return WMError::WM_ERROR_NULLPTR;
@@ -674,6 +678,12 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
 
 WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 {
+    if ((WindowHelper::IsSystemWindow(property->GetWindowType()) ||
+        property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) &&
+        !Permission::IsSystemCalling()) {
+        WLOGFE("add window with animation permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     return PostSyncTask([this, &property]() {
         if (property == nullptr) {
             WLOGFE("property is nullptr");
@@ -764,6 +774,10 @@ AvoidArea WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaT
 void WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("register windowManager agent permission denied!");
+        return;
+    }
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
         WLOGFE("windowManagerAgent is null");
         return;
@@ -779,6 +793,10 @@ void WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType typ
 void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("unregister windowManager agent permission denied!");
+        return;
+    }
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
         WLOGFE("windowManagerAgent is null");
         return;
@@ -790,6 +808,10 @@ void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType t
 
 WMError WindowManagerService::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set window animation controller permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     if (controller == nullptr) {
         WLOGFE("RSWindowAnimation: Failed to set window animation controller, controller is null!");
         return WMError::WM_ERROR_NULLPTR;
@@ -923,6 +945,10 @@ void WindowManagerService::NotifyWindowClientPointUp(uint32_t windowId,
 
 void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("minimize all appWindows permission denied!");
+        return;
+    }
     PostAsyncTask([this, displayId]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:MinimizeAllAppWindows(%" PRIu64")", displayId);
         WLOGFI("displayId %{public}" PRIu64"", displayId);
@@ -932,6 +958,10 @@ void WindowManagerService::MinimizeAllAppWindows(DisplayId displayId)
 
 WMError WindowManagerService::ToggleShownStateForAllAppWindows()
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("toggle shown state for all appwindows permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     PostAsyncTask([this]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:ToggleShownStateForAllAppWindows");
         return windowController_->ToggleShownStateForAllAppWindows();
@@ -948,6 +978,10 @@ WMError WindowManagerService::GetTopWindowId(uint32_t mainWinId, uint32_t& topWi
 
 WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set window layout mode permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     return PostSyncTask([this, mode]() {
         WLOGFI("layoutMode: %{public}u", mode);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:SetWindowLayoutMode");
@@ -958,6 +992,15 @@ WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
 WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
     bool isAsyncTask)
 {
+    if ((windowProperty->GetWindowFlags() == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE) ||
+        windowProperty->GetWindowFlags() == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED) ||
+        action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY ||
+        action == PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON ||
+        action == PropertyChangeAction::ACTION_UPDATE_MODE) &&
+        !Permission::IsSystemCalling()) {
+        WLOGFE("SetForbidSplitMove or SetShowWhenLocked or SetTranform or SetTurnScreenOn permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     if (windowProperty == nullptr) {
         WLOGFE("windowProperty is nullptr");
         return WMError::WM_ERROR_NULLPTR;
@@ -995,6 +1038,10 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
 
 WMError WindowManagerService::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos)
 {
+    if (!Permission::IsSystemServiceCalling()) {
+        WLOGFE("get accessibility window info permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     return PostSyncTask([this, &infos]() {
         return windowController_->GetAccessibilityWindowInfo(infos);
     });
@@ -1018,6 +1065,10 @@ WMError WindowManagerService::GetModeChangeHotZones(DisplayId displayId, ModeCha
 void WindowManagerService::MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
     sptr<RSIWindowAnimationFinishedCallback>& finishCallback)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("minimize windows by launcher permission denied!");
+        return;
+    }
     PostVoidSyncTask([this, windowIds, isAnimated, &finishCallback]() mutable {
         windowController_->MinimizeWindowsByLauncher(windowIds, isAnimated, finishCallback);
     });
@@ -1078,6 +1129,10 @@ void WindowManagerService::OnScreenshot(DisplayId displayId)
 
 WMError WindowManagerService::BindDialogTarget(uint32_t& windowId, sptr<IRemoteObject> targetToken)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("bind dialog target permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     return PostSyncTask([this, &windowId, targetToken]() {
         return windowController_->BindDialogTarget(windowId, targetToken);
     });
