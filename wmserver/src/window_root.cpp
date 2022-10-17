@@ -470,7 +470,9 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
         container->SetFocusWindow(node->GetWindowId());
         needCheckFocusWindow = true;
     }
-    container->SetActiveWindow(node->GetWindowId(), false);
+    if (!WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
+        container->SetActiveWindow(node->GetWindowId(), false);
+    }
 
     for (auto& child : node->children_) {
         if (child == nullptr || !child->currentVisibility_) {
@@ -1030,6 +1032,10 @@ WMError WindowRoot::RequestActiveWindow(uint32_t windowId)
     if (node == nullptr) {
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
+        WLOGFE("window could not be active window");
+        return WMError::WM_ERROR_INVALID_TYPE;
     }
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {
