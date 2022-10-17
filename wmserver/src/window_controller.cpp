@@ -1212,6 +1212,12 @@ WMError WindowController::GetAccessibilityWindowInfo(std::vector<sptr<Accessibil
     return WMError::WM_OK;
 }
 
+WMError WindowController::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
+{
+    windowRoot_->GetVisibilityWindowInfo(infos);
+    return WMError::WM_OK;
+}
+
 WMError WindowController::GetModeChangeHotZones(DisplayId displayId,
     ModeChangeHotZones& hotZones, const ModeChangeHotZonesConfig& config)
 {
