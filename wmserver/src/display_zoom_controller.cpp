@@ -151,8 +151,8 @@ void DisplayZoomController::UpdateWindowZoomInfo(uint32_t windowId)
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
         windowNodes = windowRoot_->GetSplitScreenWindowNodes(node->GetDisplayId());
     }
-    for (auto& node: windowNodes) {
-        HandleUpdateWindowZoomInfo(node);
+    for (auto& windowNode: windowNodes) {
+        HandleUpdateWindowZoomInfo(windowNode);
     }
 }
 
@@ -325,7 +325,6 @@ void DisplayZoomController::HandleUpdateWindowZoomInfo(sptr<WindowNode> node)
         return;
     }
     Transform zoomTrans;
-    Transform animateTrans = node->GetWindowProperty()->GetTransform();
     if (node->GetWindowProperty()->IsAnimateWindow()) {
         zoomTrans = CalcuAnimateZoomTrans(node);
     } else {

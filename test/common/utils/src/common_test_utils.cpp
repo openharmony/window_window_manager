@@ -16,6 +16,7 @@
 
 #include <access_token.h>
 #include <accesstoken_kit.h>
+#include <nativetoken_kit.h>
 #include <token_setproc.h>
 #include <securec.h>
 
@@ -63,5 +64,23 @@ std::shared_ptr<Media::PixelMap> CommonTestUtils::CreatePixelMap()
     }
     std::shared_ptr<Media::PixelMap> pixelMap_(pixelMap.release());
     return pixelMap_;
+}
+
+void CommonTestUtils::SetAceessTokenPermission(const std::string processName)
+{
+    uint64_t tokenId;
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 0,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = nullptr,
+        .acls = nullptr,
+        .processName = processName.c_str(),
+        .aplStr = "system_basic",
+    };
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
 } // namespace OHOS::Rosen

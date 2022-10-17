@@ -57,7 +57,7 @@ private:
     bool hasRequestedVsync_ = false;
     bool hasInitVsyncReceiver_ = false;
     bool isMainHandlerAvailable_ = true;
-    const std::string VSYNC_THREAD_ID = "vsync_thread";
+    const std::string VSYNC_THREAD_ID = "VsyncThread";
     std::shared_ptr<OHOS::Rosen::VSyncReceiver> receiver_ = nullptr;
     std::unordered_set<std::shared_ptr<VsyncCallback>> vsyncCallbacks_;
     VSyncReceiver::FrameCallback frameCallback_ = {

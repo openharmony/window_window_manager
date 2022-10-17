@@ -31,11 +31,11 @@ namespace OHOS {
 namespace Rosen {
 enum class TransitionEvent : uint32_t {
     APP_TRANSITION,
-    BACK,
     HOME,
     MINIMIZE,
     CLOSE,
     UNKNOWN,
+    BACK_TRANSITION,
 };
 
 class RemoteAnimation : public RefBase {
@@ -54,6 +54,10 @@ public:
     static WMError NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
     static WMError NotifyAnimationClose(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode,
         TransitionEvent event);
+    static WMError NotifyAnimationBackTransition(sptr<WindowTransitionInfo> srcInfo,
+        sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode,
+        const sptr<WindowNode>& dstNode);
+    static void NotifyAnimationUpdateWallpaper(sptr<WindowNode> node);
     static void OnRemoteDie(const sptr<IRemoteObject>& remoteObject);
     static bool CheckAnimationController();
     static bool CheckRemoteAnimationEnabled(DisplayId displayId);
@@ -73,7 +77,7 @@ public:
     static bool isRemoteAnimationEnable_;
 private:
     static sptr<RSWindowAnimationTarget> CreateWindowAnimationTarget(sptr<WindowTransitionInfo> info,
-        const sptr<WindowNode>& windowNode, bool isUpdate = false);
+        const sptr<WindowNode>& windowNode);
     static WMError NotifyAnimationStartApp(sptr<WindowTransitionInfo> srcInfo,
         const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode,
         sptr<RSWindowAnimationTarget>& dstTarget, sptr<RSWindowAnimationFinishedCallback>& finishedCallback);

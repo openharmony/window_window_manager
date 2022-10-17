@@ -17,6 +17,7 @@
 
 
 #include <ability_manager_client.h>
+#include <common/rs_common_def.h>
 #include <hisysevent.h>
 #include <ipc_skeleton.h>
 #include <transaction/rs_interfaces.h>
@@ -26,8 +27,8 @@
 #include "color_parser.h"
 #include "display_manager.h"
 #include "display_info.h"
+#include "ressched_report.h"
 #include "singleton_container.h"
-#include "socperf_client.h"
 #include "surface_capture_future.h"
 #include "window_adapter.h"
 #include "window_agent.h"
@@ -42,11 +43,9 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowImpl"};
     const std::string PARAM_DUMP_HELP = "-h";
-    constexpr int64_t PERF_TIME_OUT = 200;
-    constexpr int32_t PERF_CLICK_NORMAL_CODE = 10006;
-    constexpr int32_t PERF_DRAG_CODE = 10018;
-    constexpr int32_t PERF_MOVE_CODE = 10019;
 }
+
+WM_IMPLEMENT_SINGLE_INSTANCE(ResSchedReport);
 
 const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
     { ColorSpace::COLOR_SPACE_DEFAULT, ColorGamut::COLOR_GAMUT_SRGB },
@@ -61,9 +60,6 @@ static int constructorCnt = 0;
 static int deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
-    if (option->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        option->SetWindowName("divider_bar");
-    }
     property_ = new (std::nothrow) WindowProperty();
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
@@ -91,11 +87,28 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = property_->GetWindowName();
-    surfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
 
     moveDragProperty_ = new (std::nothrow) MoveDragProperty();
     WLOGFI("WindowImpl constructorCnt: %{public}d name: %{public}s",
         ++constructorCnt, property_->GetWindowName().c_str());
+}
+
+RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowType type)
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = name;
+    RSSurfaceNodeType rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
+    switch (type) {
+        case WindowType::WINDOW_TYPE_BOOT_ANIMATION:
+        case WindowType::WINDOW_TYPE_POINTER:
+            rsSurfaceNodeType = RSSurfaceNodeType::SELF_DRAWING_WINDOW_NODE;
+            break;
+        default:
+            rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
+            break;
+    }
+    return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
 }
 
 WindowImpl::~WindowImpl()
@@ -922,16 +935,30 @@ bool WindowImpl::WindowCreateCheck(uint32_t parentId)
         return false;
     }
     if (parentId == INVALID_WINDOW_ID) {
+        if (WindowHelper::IsSystemSubWindow(property_->GetWindowType()) ||
+            WindowHelper::IsSubWindow(property_->GetWindowType())) {
+            return false;
+        }
         return true;
     }
 
     if (property_->GetWindowType() == WindowType::WINDOW_TYPE_APP_COMPONENT) {
         property_->SetParentId(parentId);
     } else {
+        sptr<Window> parentWindow = nullptr;
         for (const auto& winPair : windowMap_) {
             if (winPair.second.first == parentId) {
                 property_->SetParentId(parentId);
+                parentWindow = winPair.second.second;
                 break;
+            }
+        }
+        if (WindowHelper::IsSystemSubWindow(property_->GetWindowType())) {
+            if (parentWindow == nullptr) {
+                return false;
+            }
+            if (!parentWindow->IsAllowHaveSystemSubWindow()) {
+                return false;
             }
         }
     }
@@ -1288,7 +1315,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation)
     if (WindowHelper::IsSystemWindow(property_->GetWindowType())) {
         AdjustWindowAnimationFlag(withAnimation);
         // when show(true) with default, hide() with None, to adjust animationFlag to disabled default animation
-        WMError ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
+        ret = UpdateProperty(PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG);
         if (ret != WMError::WM_OK) {
             WLOGFE("UpdateProperty failed with errCode:%{public}d", static_cast<int32_t>(ret));
             return ret;
@@ -1327,6 +1354,11 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
                "movePos: [%{public}d, %{public}d]", property_->GetWindowId(), rect.posX_, rect.posY_, x, y);
         return WMError::WM_OK;
     }
+
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        WLOGFE("fullscreen window could not resize, winId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
@@ -1349,6 +1381,11 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
                "resizeRect: [%{public}u, %{public}u]", property_->GetWindowId(), rect.width_,
                rect.height_, width, height);
         return WMError::WM_OK;
+    }
+
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        WLOGFE("fullscreen window could not resize, winId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
     }
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
@@ -1923,7 +1960,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
             property_->SetOriginRect(rect);
         }
     }
-    RequestPerfIfNeed(reason);
+    ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
     NotifySizeChange(rectToAce, reason);
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -1992,16 +2029,16 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
     }
     // TerminateAbility will invoke last ability, CloseAbility will not.
     bool shouldTerminateAbility = WindowHelper::IsFullScreenWindow(property_->GetWindowMode());
-    WMError ret = NotifyWindowTransition(shouldTerminateAbility ? TransitionReason::BACK : TransitionReason::CLOSE);
-    if (ret != WMError::WM_OK) {
-        if (shouldTerminateAbility) {
-            abilityContext->TerminateSelf();
-        } else {
+    if (shouldTerminateAbility) {
+        abilityContext->TerminateSelf();
+    } else {
+        WMError ret = NotifyWindowTransition(TransitionReason::CLOSE);
+        if (ret != WMError::WM_OK) {
             abilityContext->CloseAbility();
         }
     }
-    WLOGFI("Window %{public}u will be closed, WindowTransition ret: %{public}u, shouldTerminateAbility: %{public}u",
-        property_->GetWindowId(), static_cast<uint32_t>(ret), static_cast<uint32_t>(shouldTerminateAbility));
+    WLOGFI("Window %{public}u will be closed, shouldTerminateAbility: %{public}u",
+        property_->GetWindowId(), static_cast<uint32_t>(shouldTerminateAbility));
 }
 
 void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -2076,21 +2113,21 @@ void WindowImpl::UpdatePointerEventForStretchableWindow(const std::shared_ptr<MM
 
 void WindowImpl::UpdateDragType(int32_t startPointPosX, int32_t startPointPosY)
 {
-    if (!moveDragProperty_->startDragFlag_) {
-        moveDragProperty_->dragType_ = DragType::DRAG_UNDEFINED;
-        return;
-    }
     const auto& startRectExceptCorner = moveDragProperty_->startRectExceptCorner_;
     if (startPointPosX > startRectExceptCorner.posX_ &&
         (startPointPosX < startRectExceptCorner.posX_ +
         static_cast<int32_t>(startRectExceptCorner.width_))) {
-        moveDragProperty_->dragType_ = DragType::DRAG_HEIGHT;
+        moveDragProperty_->dragType_ = DragType::DRAG_BOTTOM_OR_TOP;
     } else if (startPointPosY > startRectExceptCorner.posY_ &&
         (startPointPosY < startRectExceptCorner.posY_ +
         static_cast<int32_t>(startRectExceptCorner.height_))) {
-        moveDragProperty_->dragType_ = DragType::DRAG_WIDTH;
+        moveDragProperty_->dragType_ = DragType::DRAG_LEFT_OR_RIGHT;
+    } else if ((startPointPosX <= startRectExceptCorner.posX_ && startPointPosY <= startRectExceptCorner.posY_) ||
+        (startPointPosX >= startRectExceptCorner.posX_ + static_cast<int32_t>(startRectExceptCorner.width_) &&
+         startPointPosY >= startRectExceptCorner.posY_ + static_cast<int32_t>(startRectExceptCorner.height_))) {
+        moveDragProperty_->dragType_ = DragType::DRAG_LEFT_TOP_CORNER;
     } else {
-        moveDragProperty_->dragType_ = DragType::DRAG_CORNER;
+        moveDragProperty_->dragType_ = DragType::DRAG_RIGHT_TOP_CORNER;
     }
 }
 
@@ -2102,7 +2139,7 @@ void WindowImpl::CalculateStartRectExceptHotZone(float vpr)
         hotZoneScale = WindowHelper::CalculateHotZoneScale(property_->GetTransformMat());
     }
 
-    const auto& startPointRect = moveDragProperty_->startPointRect_;
+    const auto& startPointRect = GetRect();
     auto& startRectExceptFrame = moveDragProperty_->startRectExceptFrame_;
     startRectExceptFrame.posX_ = startPointRect.posX_ +
         static_cast<int32_t>(WINDOW_FRAME_WIDTH * vpr / hotZoneScale.x_);
@@ -2128,10 +2165,8 @@ bool WindowImpl::IsPointInDragHotZone(int32_t startPointPosX, int32_t startPoint
 {
     if (!WindowHelper::IsPointInTargetRect(startPointPosX,
         startPointPosY, moveDragProperty_->startRectExceptFrame_) ||
-        (WindowHelper::IsPointInTargetRect(startPointPosX, startPointPosY,
-        moveDragProperty_->startRectExceptFrame_) &&
         (!WindowHelper::IsPointInWindowExceptCorner(startPointPosX,
-        startPointPosY, moveDragProperty_->startRectExceptCorner_)))) {
+        startPointPosY, moveDragProperty_->startRectExceptCorner_))) {
         return true;
     }
     return false;
@@ -2219,14 +2254,7 @@ void WindowImpl::EndMoveOrDragWindow(int32_t posX, int32_t posY, int32_t pointId
         HandleModeChangeHotZones(posX, posY);
     }
     moveDragProperty_->pointEventStarted_ = false;
-    if (windowDragBoost_) {
-        ClosePerf(PERF_DRAG_CODE);
-        windowDragBoost_ = false;
-    }
-    if (windowMovingBoost_) {
-        ClosePerf(PERF_MOVE_CODE);
-        windowMovingBoost_ = false;
-    }
+    ResSchedReport::GetInstance().StopPerfIfNeed();
 }
 
 void WindowImpl::ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -2251,7 +2279,7 @@ void WindowImpl::ConsumeMoveOrDragEvent(const std::shared_ptr<MMI::PointerEvent>
             const auto& rect = GetRect();
             ReadyToMoveOrDragWindow(pointerEvent, pointerItem);
             if (IsPointerEventConsumed()) {
-                OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_CLICK_NORMAL_CODE, "");
+                ResSchedReport::GetInstance().TrigClick();
             }
             WLOGFI("[Client Point Down]: windowId: %{public}u, pointId: %{public}d, sourceType: %{public}d, "
                    "hasPointStarted: %{public}d, startMove: %{public}d, startDrag: %{public}d, targetDisplayId: "
@@ -2303,6 +2331,63 @@ void WindowImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
 }
 
+uint32_t WindowImpl::CalculatePointerDirection(int32_t pointerX, int32_t pointerY)
+{
+    UpdateDragType(pointerX, pointerY);
+    return STYLEID_MAP.at(moveDragProperty_->dragType_);
+}
+
+void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        WLOGFE("Get pointeritem failed");
+        pointerEvent->MarkProcessed();
+        return;
+    }
+    if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
+        auto display = DisplayManager::GetInstance().GetDisplayById(moveDragProperty_->targetDisplayId_);
+        if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+            WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u",
+                property_->GetDisplayId(), property_->GetWindowId());
+            return;
+        }
+        float vpr = display->GetVirtualPixelRatio();
+        CalculateStartRectExceptHotZone(vpr);
+        if (IsPointInDragHotZone(pointerItem.GetDisplayX(), pointerItem.GetDisplayY())) {
+            uint32_t tempStyleID = mouseStyleID_;
+            // calculate pointer style
+            mouseStyleID_ = CalculatePointerDirection(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+            if (tempStyleID != mouseStyleID_) {
+                MMI::InputManager::GetInstance()->SetPointerStyle(
+                    static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), mouseStyleID_);
+            }
+            isPointerStyleChanged_ = true;
+        } else {
+            int32_t currentStyleID;
+            MMI::InputManager::GetInstance()->GetPointerStyle(pointerEvent->GetAgentWindowId(), currentStyleID);
+            if (currentStyleID != MMI::MOUSE_ICON::DEFAULT) {
+                MMI::InputManager::GetInstance()->SetPointerStyle(
+                    static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), MMI::MOUSE_ICON::DEFAULT);
+            }
+        }
+    } else if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE && isPointerStyleChanged_ == false) {
+        uint32_t mouseStyle = (GetRect().width_ > GetRect().height_) ?
+                                MMI::MOUSE_ICON::NORTH_SOUTH : MMI::MOUSE_ICON::WEST_EAST;
+        MMI::InputManager::GetInstance()->SetPointerStyle(
+            static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), mouseStyle);
+        isPointerStyleChanged_ = true;
+    }
+    auto action = pointerEvent->GetPointerAction();
+    if (isPointerStyleChanged_ && (action == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW ||
+        !IsPointInDragHotZone(pointerItem.GetDisplayX(), pointerItem.GetDisplayY()))) {
+        MMI::InputManager::GetInstance()->SetPointerStyle(static_cast<uint32_t>(pointerEvent->GetAgentWindowId()),
+            MMI::MOUSE_ICON::DEFAULT);
+        isPointerStyleChanged_ = false;
+        mouseStyleID_ = 0;
+    }
+}
+
 void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     // If windowRect transformed, transform event back to its origin position
@@ -2310,6 +2395,10 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
         property_->UpdatePointerEvent(pointerEvent);
     }
     int32_t action = pointerEvent->GetPointerAction();
+    if ((action == MMI::PointerEvent::POINTER_ACTION_MOVE || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) &&
+        pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        HandlePointerStyle(pointerEvent);
+    }
     if (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         WLOGI("WMS process point down, window: [name:%{public}s, id:%{public}u], action: %{public}d",
             name_.c_str(), GetWindowId(), action);
@@ -2424,6 +2513,17 @@ void WindowImpl::UpdateWindowState(WindowState state)
             } else {
                 state_ = WindowState::STATE_SHOWN;
                 NotifyAfterForeground();
+            }
+            break;
+        }
+        case WindowState::STATE_HIDDEN: {
+            if (abilityContext != nullptr && windowTag_ == WindowTag::MAIN_WINDOW &&
+                state_ == WindowState::STATE_SHOWN) {
+                WLOGFI("WindowState: STATE_SHOWN, id: %{public}u", GetWindowId());
+                AAFwk::AbilityManagerClient::GetInstance()->DoAbilityBackground(abilityContext->GetToken(),
+                    static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
+            } else {
+                Hide(static_cast<uint32_t>(WindowStateChangeReason::NORMAL), false);
             }
             break;
         }
@@ -2550,6 +2650,16 @@ void WindowImpl::NotifyDestroy()
     if (dialogDeathRecipientListener != nullptr) {
         dialogDeathRecipientListener->OnDialogDeathRecipient();
     }
+}
+
+void WindowImpl::NotifyForeground()
+{
+    NotifyAfterForeground();
+}
+
+void WindowImpl::NotifyBackground()
+{
+    NotifyAfterBackground();
 }
 
 void WindowImpl::TransformSurfaceNode(const Transform& trans)
@@ -2968,50 +3078,16 @@ WMError WindowImpl::NotifyMemoryLevel(int32_t level) const
     return WMError::WM_OK;
 }
 
-void WindowImpl::RequestPerfIfNeed(WindowSizeChangeReason reason)
+bool WindowImpl::IsAllowHaveSystemSubWindow()
 {
-    if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) || WindowHelper::IsSplitWindowMode(GetMode())) {
-        switch (reason) {
-            case WindowSizeChangeReason::DRAG_END: {
-                if (windowDragBoost_) {
-                    ClosePerf(PERF_DRAG_CODE);
-                    windowDragBoost_ = false;
-                }
-                break;
-            }
-            case WindowSizeChangeReason::DRAG_START:
-                [[fallthrough]];
-            case WindowSizeChangeReason::DRAG: {
-                RequestPerf(PERF_DRAG_CODE, PERF_TIME_OUT);
-                windowDragBoost_ = true;
-                break;
-            }
-            case WindowSizeChangeReason::MOVE: {
-                RequestPerf(PERF_MOVE_CODE, PERF_TIME_OUT);
-                windowMovingBoost_ = true;
-                break;
-            }
-            default: {
-                WLOGFI("doing nothing");
-            }
-        }
+    auto windowType = property_->GetWindowType();
+    if (WindowHelper::IsSystemSubWindow(windowType) ||
+        WindowHelper::IsSubWindow(windowType) ||
+        windowType == WindowType::WINDOW_TYPE_DIALOG) {
+        WLOGFI("the window of type %{public}u is limited to add a system sub window", windowType);
+        return false;
     }
-}
-void WindowImpl::RequestPerf(int32_t code, int64_t timeOut)
-{
-    auto currentTime = std::chrono::steady_clock::now();
-    bool isTimeOut = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastRequestPerfTime_).
-        count() > timeOut;
-    if (isTimeOut) {
-        WLOGFI("WindowImpl::RequestPerf");
-        OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(code, "");
-        lastRequestPerfTime_ = currentTime;
-    }
-}
-
-void WindowImpl::ClosePerf(int32_t code)
-{
-    OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequestEx(code, false, "");
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

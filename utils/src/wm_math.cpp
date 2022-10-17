@@ -132,9 +132,8 @@ void Matrix4::Invert()
     // Inverse matrix with Gauss-Jordan method
     Matrix4 tmp = Matrix4::Identity;
     int i, j, k;
-    float t, u;
     for (k = 0; k < MAT_SIZE; k++) {
-        t = mat_[k][k];
+        float t = mat_[k][k];
         if (t < MathHelper::POS_ZERO && t > MathHelper::NAG_ZERO) {
             for (i = k + 1; i < MAT_SIZE; i++) {
                 if (mat_[i][k] < MathHelper::NAG_ZERO || mat_[i][k] > MathHelper::POS_ZERO) {
@@ -156,7 +155,7 @@ void Matrix4::Invert()
             if (i == k) {
                 continue;
             }
-            u = mat_[i][k];
+            float u = mat_[i][k];
             for (j = 0; j <= k; j++) {
                 tmp.mat_[i][j] -= tmp.mat_[k][j] * u;
             }

@@ -62,7 +62,6 @@ ohos_shared_library("libwm") {
 
   deps = [
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//foundation/resourceschedule/resource_schedule_service/soc_perf:socperf_client",
     "//foundation/window/window_manager/dm:libdm",
     "//foundation/window/window_manager/utils:libwmutil",
   ]
@@ -78,7 +77,7 @@ ohos_shared_library("libwm") {
     "hisysevent_native:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "multimedia_image_standard:image_native",
+    "multimedia_image_framework:image_native",
     "samgr:samgr_proxy",
   ]
 
@@ -86,6 +85,19 @@ ohos_shared_library("libwm") {
   if (efficiency_manager_enable) {
     external_deps += [ "efficiency_manager:suspend_manager_client" ]
     defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
+  }
+
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.resourceschedule_resource_schedule_service)) {
+    soc_perf_enable = true
+  } else {
+    soc_perf_enable = false
+  }
+  print("soc_perf_enable: ", soc_perf_enable)
+
+  if (soc_perf_enable == true) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+    defines += [ "SOC_PERF_ENABLE" ]
   }
 
   if (!defined(global_parts_info) ||

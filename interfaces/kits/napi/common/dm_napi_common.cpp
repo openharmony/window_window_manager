@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "wm_napi_common.h"
+#include "dm_napi_common.h"
 
 #include <securec.h>
 #include <string>
@@ -62,7 +62,7 @@ bool CheckCallingPermission(const std::string &permission)
     return true;
 }
 
-void SetErrorInfo(napi_env env, Rosen::WMError wret, std::string errMessage, napi_value result[], int count)
+void SetErrorInfo(napi_env env, Rosen::DmErrorCode wret, std::string errMessage, napi_value result[], int count)
 {
     if (count != 2 || result == nullptr) { // input param number is 2
         GNAPI_LOG("Error, input param number must be 2");
@@ -78,14 +78,14 @@ void SetErrorInfo(napi_env env, Rosen::WMError wret, std::string errMessage, nap
     napi_get_undefined(env, &result[1]);
 }
 
-void ProcessPromise(napi_env env, Rosen::WMError wret, napi_deferred deferred, napi_value result[], int count)
+void ProcessPromise(napi_env env, Rosen::DmErrorCode wret, napi_deferred deferred, napi_value result[], int count)
 {
     if (count != 2 || result == nullptr) { // input param number is 2
         GNAPI_LOG("Error, input param number must be 2");
         return;
     }
     GNAPI_LOG("AsyncProcess: Promise");
-    if (wret == Rosen::WMError::WM_OK) {
+    if (wret == Rosen::DmErrorCode::DM_OK) {
         GNAPI_LOG("AsyncProcess: Promise resolve");
         napi_resolve_deferred(env, deferred, result[1]);
     } else {

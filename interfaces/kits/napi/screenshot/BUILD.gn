@@ -22,14 +22,14 @@ ohos_shared_library("screenshot") {
   ]
 
   deps = [
-    "../common:wm_napi_common",
+    "../common:dm_napi_common",
     "//foundation/window/window_manager/dm:libdm",
   ]
 
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
-    "multimedia_image_standard:image",
-    "multimedia_image_standard:image_native",
+    "multimedia_image_framework:image",
+    "multimedia_image_framework:image_native",
     "napi:ace_napi",
   ]
 

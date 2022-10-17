@@ -278,8 +278,11 @@ DeviceRotation ScreenRotationController::CalcDeviceRotation(SensorRotation senso
     }
     if (defaultDeviceRotation_ == 1) {
         deviceRotationValue += defaultDeviceRotation_;
-        // if device's default rotation is landscape, swap 0 and 90, 180 and 270, use %2 to adjust range.
-        (deviceRotationValue % 2 == 0) && (deviceRotationValue -= 2);
+        // %2 to determine whether the rotation is horizontal or vertical.
+        if (deviceRotationValue % 2 == 0) {
+            // if device's default rotation is landscape, use -2 to swap 0 and 90, 180 and 270.
+            deviceRotationValue -= 2;
+        }
     }
     return static_cast<DeviceRotation>(deviceRotationValue);
 }

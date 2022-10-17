@@ -248,8 +248,14 @@ void WindowManagerService::RegisterWindowManagerServiceHandler()
 void WindowManagerServiceHandler::NotifyWindowTransition(
     sptr<AAFwk::AbilityTransitionInfo> from, sptr<AAFwk::AbilityTransitionInfo> to)
 {
-    sptr<WindowTransitionInfo> fromInfo = new WindowTransitionInfo(from);
-    sptr<WindowTransitionInfo> toInfo = new WindowTransitionInfo(to);
+    sptr<WindowTransitionInfo> fromInfo = nullptr;
+    sptr<WindowTransitionInfo> toInfo = nullptr;
+    if (from) { // if exists, transition to window transition info
+        fromInfo = new WindowTransitionInfo(from);
+    }
+    if (to) {
+        toInfo = new WindowTransitionInfo(to);
+    }
     WindowManagerService::GetInstance().NotifyWindowTransition(fromInfo, toInfo, false);
 }
 
@@ -487,7 +493,7 @@ bool WindowManagerService::ConfigAppWindowShadow(const WindowManagerConfig::Conf
     WindowManagerConfig::ConfigItem item = shadowConfig["elevation"];
     if (item.IsFloats()) {
         auto elevation = *item.floatsValue_;
-        if (elevation.size() != 1 || (elevation.size() == 1 && MathHelper::LessNotEqual(elevation[0], 0.0))) {
+        if (elevation.size() != 1 || MathHelper::LessNotEqual(elevation[0], 0.0)) {
             return false;
         }
         outShadow.elevation_ = elevation[0];
@@ -658,12 +664,8 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
         WLOGFE("create system window permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    if (window == nullptr || property == nullptr || surfaceNode == nullptr) {
+    if (!window || property == nullptr || surfaceNode == nullptr || !window->AsObject()) {
         WLOGFE("window is invalid");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if ((!window) || (!window->AsObject())) {
-        WLOGFE("failed to get window agent");
         return WMError::WM_ERROR_NULLPTR;
     }
     int pid = IPCSkeleton::GetCallingPid();
@@ -1013,7 +1015,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         });
     }
 
-    if (isAsyncTask) {
+    if (isAsyncTask || action == PropertyChangeAction::ACTION_UPDATE_RECT) {
         PostAsyncTask([this, windowProperty, action]() mutable {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:UpdateProperty");
             WMError res = windowController_->UpdateProperty(windowProperty, action);

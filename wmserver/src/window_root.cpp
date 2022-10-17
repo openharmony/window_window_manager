@@ -509,11 +509,12 @@ bool WindowRoot::NeedToStopAddingNode(sptr<WindowNode>& node, const sptr<WindowN
 
 Rect WindowRoot::GetDisplayRectWithoutSystemBarAreas(DisplayId displayId)
 {
-    std::map<WindowType, Rect> systemBarRects;
+    std::map<WindowType, std::pair<bool, Rect>> systemBarRects;
     for (const auto& it : windowNodeMap_) {
-        if (it.second && (it.second->GetDisplayId() == displayId) &&
-            WindowHelper::IsSystemBarWindow(it.second->GetWindowType())) {
-            systemBarRects[it.second->GetWindowType()] = it.second->GetWindowRect();
+        auto& node = it.second;
+        if (node && (node->GetDisplayId() == displayId) &&
+            WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
+            systemBarRects[node->GetWindowType()] = std::make_pair(node->currentVisibility_, node->GetWindowRect());
         }
     }
     auto container = GetOrCreateWindowNodeContainer(displayId);
@@ -523,14 +524,19 @@ Rect WindowRoot::GetDisplayRectWithoutSystemBarAreas(DisplayId displayId)
     }
     auto displayRect = container->GetDisplayRect(displayId);
     Rect targetRect = displayRect;
+    bool isStatusShow = true;
     if (systemBarRects.count(WindowType::WINDOW_TYPE_STATUS_BAR)) {
-        targetRect.posY_ = displayRect.posY_ + systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].height_;
-        targetRect.height_ -= systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].height_;
+        isStatusShow = systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].first;
+        targetRect.posY_ = displayRect.posY_ + systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].second.height_;
+        targetRect.height_ -= systemBarRects[WindowType::WINDOW_TYPE_STATUS_BAR].second.height_;
         WLOGFD("after status bar winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
             targetRect.posX_, targetRect.posY_, targetRect.width_, targetRect.height_);
     }
     if (systemBarRects.count(WindowType::WINDOW_TYPE_NAVIGATION_BAR)) {
-        targetRect.height_ -= systemBarRects[WindowType::WINDOW_TYPE_NAVIGATION_BAR].height_;
+        if (isStatusShow && !(systemBarRects[WindowType::WINDOW_TYPE_NAVIGATION_BAR].first)) {
+            return targetRect;
+        }
+        targetRect.height_ -= systemBarRects[WindowType::WINDOW_TYPE_NAVIGATION_BAR].second.height_;
         WLOGFD("after navi bar winRect:[x:%{public}d, y:%{public}d, w:%{public}d, h:%{public}d]",
             targetRect.posX_, targetRect.posY_, targetRect.width_, targetRect.height_);
     }
@@ -781,6 +787,47 @@ WMError WindowRoot::SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode)
     return res;
 }
 
+WMError WindowRoot::DestroyWindowSelf(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container)
+{
+    for (auto& child : node->children_) {
+        if (child == nullptr) {
+            continue;
+        }
+        child->parent_ = nullptr;
+        if ((child->GetWindowToken() != nullptr) && (child->abilityToken_ != node->abilityToken_) &&
+            (child->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
+            child->GetWindowToken()->NotifyDestroy();
+        }
+    }
+    WMError res = container->RemoveWindowNode(node);
+    if (res != WMError::WM_OK) {
+        WLOGFE("RemoveWindowNode failed");
+    }
+    SwitchRenderModeIfNeeded();
+    return DestroyWindowInner(node);
+}
+
+WMError WindowRoot::DestroyWindowWithChild(sptr<WindowNode>& node, const sptr<WindowNodeContainer>& container)
+{
+    auto token = node->abilityToken_;
+    std::vector<uint32_t> windowIds;
+    WMError res = container->DestroyWindowNode(node, windowIds);
+    for (auto id : windowIds) {
+        node = GetWindowNode(id);
+        if (!node) {
+            continue;
+        }
+        HandleKeepScreenOn(id, false);
+        DestroyWindowInner(node);
+        if ((node->GetWindowToken() != nullptr) && (node->abilityToken_ != token) &&
+            (node->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
+            node->GetWindowToken()->NotifyDestroy();
+        }
+    }
+    SwitchRenderModeIfNeeded();
+    return res;
+}
+
 WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
 {
     auto node = GetWindowNode(windowId);
@@ -789,49 +836,21 @@ WMError WindowRoot::DestroyWindow(uint32_t windowId, bool onlySelf)
         return WMError::WM_ERROR_NULLPTR;
     }
     WLOGFI("destroy window %{public}u, onlySelf:%{public}u.", windowId, onlySelf);
-    WMError res;
-    auto token = node->abilityToken_;
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
-    if (container != nullptr) {
-        UpdateFocusWindowWithWindowRemoved(node, container);
-        UpdateActiveWindowWithWindowRemoved(node, container);
-        UpdateBrightnessWithWindowRemoved(windowId, container);
-        HandleKeepScreenOn(windowId, false);
-        if (onlySelf) {
-            for (auto& child : node->children_) {
-                child->parent_ = nullptr;
-                if ((child != nullptr) && (child->GetWindowToken() != nullptr) && (child->abilityToken_ != token) &&
-                    (child->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
-                    child->GetWindowToken()->NotifyDestroy();
-                }
-            }
-            res = container->RemoveWindowNode(node);
-            if (res != WMError::WM_OK) {
-                WLOGFE("RemoveWindowNode failed");
-            }
-            SwitchRenderModeIfNeeded();
-            return DestroyWindowInner(node);
-        } else {
-            std::vector<uint32_t> windowIds;
-            res = container->DestroyWindowNode(node, windowIds);
-            for (auto id : windowIds) {
-                node = GetWindowNode(id);
-                if (node != nullptr) {
-                    HandleKeepScreenOn(id, false);
-                    DestroyWindowInner(node);
-                }
-                if ((node != nullptr) && (node->GetWindowToken() != nullptr) && (node->abilityToken_ != token) &&
-                    (node->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG)) {
-                    node->GetWindowToken()->NotifyDestroy();
-                }
-            }
-            SwitchRenderModeIfNeeded();
-            return res;
-        }
+    if (!container) {
+        WLOGFW("destroy window failed, window container could not be found");
+        return DestroyWindowInner(node);
     }
-    res = DestroyWindowInner(node);
-    WLOGFI("destroy window failed, window container could not be found");
-    return res;
+
+    UpdateFocusWindowWithWindowRemoved(node, container);
+    UpdateActiveWindowWithWindowRemoved(node, container);
+    UpdateBrightnessWithWindowRemoved(windowId, container);
+    HandleKeepScreenOn(windowId, false);
+    if (onlySelf) {
+        return DestroyWindowSelf(node, container);
+    } else {
+        return DestroyWindowWithChild(node, container);
+    }
 }
 
 WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
@@ -1230,6 +1249,7 @@ void WindowRoot::ProcessExpandDisplayCreate(DisplayId defaultDisplayId, sptr<Dis
     auto container = windowNodeContainerMap_[displayGroupId];
     if (container == nullptr) {
         WLOGFE("window node container is nullptr, displayId :%{public}" PRIu64 "", displayId);
+        return;
     }
 
     WLOGFI("[Display Create] before add new display, displayId: %{public}" PRIu64"", displayId);
