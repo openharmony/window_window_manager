@@ -55,7 +55,27 @@ void InputWindowMonitor::UpdateInputWindow(uint32_t windowId)
     UpdateInputWindowByDisplayId(displayId);
 }
 
-void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
+MMI::DisplayGroupInfo InputWindowMonitor::GetDisplayInfo(uint32_t windowId)
+{
+    if (windowRoot_ == nullptr) {
+        WLOGFE("windowRoot is null.");
+        return displayGroupInfo_;
+    }
+    sptr<WindowNode> windowNode = windowRoot_->GetWindowNode(windowId);
+    if (windowNode == nullptr) {
+        WLOGFE("window node could not be found.");
+        return displayGroupInfo_;
+    }
+    if (INPUT_WINDOW_TYPE_SKIPPED.find(windowNode->GetWindowProperty()->GetWindowType()) !=
+        INPUT_WINDOW_TYPE_SKIPPED.end()) {
+        return displayGroupInfo_;
+    }
+    DisplayId displayId = windowNode->GetDisplayId();
+    HandleDisplayInfo(displayId);
+    return displayGroupInfo_;
+}
+
+void InputWindowMonitor::HandleDisplayInfo(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALID) {
         return;
@@ -76,6 +96,11 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
     std::vector<sptr<WindowNode>> windowNodes;
     container->TraverseContainer(windowNodes);
     TraverseWindowNodes(windowNodes, displayGroupInfo_.windowsInfo);
+}
+
+void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
+{
+    HandleDisplayInfo(displayId);
     WLOGFI("update display info to IMS, displayId: %{public}" PRIu64"", displayId);
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo_);
 }
