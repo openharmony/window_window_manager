@@ -22,7 +22,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-using namespace Occlusion;
+namespace WmOcclusion {
 class WmOcclusionRegionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -50,43 +50,43 @@ void WmOcclusionRegionTest::TearDown()
 namespace {
 /**
  * @tc.name: EventSortByY01
- * @tc.desc: test Occlusion::EventSortByY
+ * @tc.desc: test WmOcclusion::EventSortByY
  * @tc.type: FUNC
  */
 HWTEST_F(WmOcclusionRegionTest, EventSortByY, Function | SmallTest | Level2)
 {
-    Occlusion::Event event1{ 0, Occlusion::Event::Type::OPEN, 0, 0 };
-    Occlusion::Event event2{ 0, Occlusion::Event::Type::OPEN, 0, 0 };
+    Event event1{ 0, Event::Type::OPEN, 0, 0 };
+    Event event2{ 0, Event::Type::OPEN, 0, 0 };
     bool result = true;
 
     event1.y_ = 1;
-    event1.type_ = Occlusion::Event::Type::CLOSE;
+    event1.type_ = Event::Type::CLOSE;
     event2.y_ = 1;
-    event2.type_ = Occlusion::Event::Type::OPEN;
-    result = Occlusion::EventSortByY(event1, event2);
+    event2.type_ = Event::Type::OPEN;
+    result = EventSortByY(event1, event2);
     ASSERT_EQ(true, result);
 
     event1.y_ = 1;
-    event1.type_ = Occlusion::Event::Type::OPEN;
+    event1.type_ = Event::Type::OPEN;
     event2.y_ = 1;
-    event2.type_ = Occlusion::Event::Type::CLOSE;
-    result = Occlusion::EventSortByY(event1, event2);
+    event2.type_ = Event::Type::CLOSE;
+    result = EventSortByY(event1, event2);
     ASSERT_EQ(false, result);
 
     event1.y_ = 1;
     event2.y_ = 2;
-    result = Occlusion::EventSortByY(event1, event2);
+    result = EventSortByY(event1, event2);
     ASSERT_EQ(true, result);
 
     event1.y_ = 2;
     event2.y_ = 1;
-    result = Occlusion::EventSortByY(event1, event2);
+    result = EventSortByY(event1, event2);
     ASSERT_EQ(false, result);
 }
 
 /**
  * @tc.name: Node::Update01
- * @tc.desc: test Occlusion::Node::Update
+ * @tc.desc: test WmOcclusion::Node::Update
  * @tc.type: FUNC
  */
 HWTEST_F(WmOcclusionRegionTest, Update01, Function | SmallTest | Level2)
@@ -129,7 +129,7 @@ HWTEST_F(WmOcclusionRegionTest, Update01, Function | SmallTest | Level2)
 }
 /**
  * @tc.name: Node::GetAndRange01
- * @tc.desc: test WmOcclusionRegion Occlusion::Node::GetAndRange
+ * @tc.desc: test WmOcclusionRegion WmOcclusion::Node::GetAndRange
  * @tc.type: FUNC
  */
 HWTEST_F(WmOcclusionRegionTest, GetAndRange01, Function | SmallTest | Level2)
@@ -173,7 +173,7 @@ HWTEST_F(WmOcclusionRegionTest, GetAndRange01, Function | SmallTest | Level2)
 }
 /**
  * @tc.name: Node::GetOrRange01
- * @tc.desc: test WmOcclusionRegion Occlusion::Node::GetOrRange
+ * @tc.desc: test WmOcclusionRegion WmOcclusion::Node::GetOrRange
  * @tc.type: FUNC
  */
 HWTEST_F(WmOcclusionRegionTest, GetOrRange01, Function | SmallTest | Level2)
@@ -227,7 +227,7 @@ HWTEST_F(WmOcclusionRegionTest, GetOrRange01, Function | SmallTest | Level2)
 }
 /**
  * @tc.name: Node::GetXOrRange01
- * @tc.desc: test WmOcclusionRegion Occlusion::Node::GetXOrRange
+ * @tc.desc: test WmOcclusionRegion WmOcclusion::Node::GetXOrRange
  * @tc.type: FUNC
  */
 HWTEST_F(WmOcclusionRegionTest, GetXOrRange01, Function | SmallTest | Level2)
@@ -279,7 +279,7 @@ HWTEST_F(WmOcclusionRegionTest, GetXOrRange01, Function | SmallTest | Level2)
 }
 /**
  * @tc.name: Node::GetSubRange01
- * @tc.desc: test WmOcclusionRegion Occlusion::Node::GetSubRange
+ * @tc.desc: test WmOcclusionRegion WmOcclusion::Node::GetSubRange
  * @tc.type: FUNC
  */
 HWTEST_F(WmOcclusionRegionTest, GetSubRange01, Function | SmallTest | Level2)
@@ -328,7 +328,7 @@ HWTEST_F(WmOcclusionRegionTest, GetSubRange01, Function | SmallTest | Level2)
 }
 /**
  * @tc.name: Region::UpdateRects01
- * @tc.desc: test WmOcclusionRegion Occlusion::Region::UpdateRects
+ * @tc.desc: test WmOcclusionRegion WmOcclusion::Region::UpdateRects
  * @tc.type: FUNC
  */
 HWTEST_F(WmOcclusionRegionTest, UpdateRects01, Function | SmallTest | Level2)
@@ -367,7 +367,7 @@ HWTEST_F(WmOcclusionRegionTest, UpdateRects01, Function | SmallTest | Level2)
 }
 /**
  * @tc.name: Region::MakeBound01
- * @tc.desc: test WmOcclusionRegion Occlusion::Region::MakeBound
+ * @tc.desc: test WmOcclusionRegion WmOcclusion::Region::MakeBound
  * @tc.type: FUNC
  */
 HWTEST_F(WmOcclusionRegionTest, MakeBound01, Function | SmallTest | Level2)
@@ -398,7 +398,7 @@ HWTEST_F(WmOcclusionRegionTest, MakeBound01, Function | SmallTest | Level2)
 }
 /**
  * @tc.name: Region::RegionOpLocal01
- * @tc.desc: test WmOcclusionRegion Occlusion::Region::RegionOpLocal
+ * @tc.desc: test WmOcclusionRegion WmOcclusion::Region::RegionOpLocal
  * @tc.type: FUNC
  */
 HWTEST_F(WmOcclusionRegionTest, RegionOpLocal01, Function | SmallTest | Level2)
@@ -418,6 +418,7 @@ HWTEST_F(WmOcclusionRegionTest, RegionOpLocal01, Function | SmallTest | Level2)
     region1.rects_.emplace_back(Rect{ 11, 10, 9, 8, });
     regionBase.RegionOpLocal(region1, region2, regionRes, op);
     ASSERT_EQ(3, regionRes.GetRegionRects().size());
+}
 }
 }
 } // namespace Rosen
