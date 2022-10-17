@@ -94,7 +94,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
     if (windowRoot_->AddWindowNode(0, node, true) != WMError::WM_OK) {
         return;
     }
-    StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart, windowRoot_->IsUniRender());
+    StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart);
     FlushWindowInfo(node->GetWindowId());
     node->startingWindowShown_ = true;
     WLOGFI("StartingWindow show success with id:%{public}u!", node->GetWindowId());
@@ -826,7 +826,7 @@ void WindowController::NotifySystemBarTints()
 
 WMError WindowController::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
 {
-    return RemoteAnimation::SetWindowAnimationController(controller, windowRoot_);
+    return RemoteAnimation::SetWindowAnimationController(controller);
 }
 
 AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) const
