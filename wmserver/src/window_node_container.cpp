@@ -238,6 +238,9 @@ WMError WindowNodeContainer::AddWindowNode(sptr<WindowNode>& node, sptr<WindowNo
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
         isScreenLocked_ = true;
     }
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
+        RemoteAnimation::NotifyAnimationUpdateWallpaper(node);
+    }
     WLOGFI("AddWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
@@ -289,9 +292,6 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
 
 void WindowNodeContainer::RemoveWindowNodeFromWindowTree(sptr<WindowNode>& node)
 {
-    // remove this node from node vector of display
-    sptr<WindowNode> root = FindRoot(node->GetWindowType());
-
     // remove this node from parent
     auto iter = std::find(node->parent_->children_.begin(), node->parent_->children_.end(), node);
     if (iter != node->parent_->children_.end()) {
@@ -311,8 +311,11 @@ void WindowNodeContainer::RemoveFromRsTreeWhenRemoveWindowNode(sptr<WindowNode>&
     }
     // When RemoteAnimation exists, remove node from rs tree after animation
     WLOGFD("remove from rs tree id:%{public}u", node->GetWindowId());
+    // subwindow or no remote animation also exit with animation
+    bool isAnimationPlayed = RemoteAnimation::CheckAnimationController() &&
+        WindowHelper::IsMainWindow(node->GetWindowType());
     for (auto& displayId : node->GetShowingDisplays()) {
-        RemoveNodeFromRSTree(node, displayId, displayId, WindowUpdateType::WINDOW_UPDATE_REMOVED, true);
+        RemoveNodeFromRSTree(node, displayId, displayId, WindowUpdateType::WINDOW_UPDATE_REMOVED, isAnimationPlayed);
     }
 }
 
@@ -394,6 +397,9 @@ WMError WindowNodeContainer::DestroyWindowNode(sptr<WindowNode>& node, std::vect
     // clear vector cache completely, swap with empty vector
     auto emptyVector = std::vector<sptr<WindowNode>>();
     node->children_.swap(emptyVector);
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER) {
+        RemoteAnimation::NotifyAnimationUpdateWallpaper(nullptr);
+    }
     WLOGFI("DestroyWindowNode windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
@@ -1196,11 +1202,6 @@ void WindowNodeContainer::DumpScreenWindowTree()
     WLOGFI("-------- dump window info end  ---------");
 }
 
-uint64_t WindowNodeContainer::GetScreenId(DisplayId displayId) const
-{
-    return DisplayManagerServiceInner::GetInstance().GetRSScreenId(displayId);
-}
-
 Rect WindowNodeContainer::GetDisplayRect(DisplayId displayId) const
 {
     return displayGroupInfo_->GetDisplayRect(displayId);
@@ -1442,7 +1443,7 @@ void WindowNodeContainer::ExitSplitMode(DisplayId displayId)
 
 void WindowNodeContainer::MinimizeAllAppWindows(DisplayId displayId)
 {
-    WMError ret =  MinimizeAppNodeExceptOptions(MinimizeReason::MINIMIZE_ALL);
+    WMError ret = MinimizeAppNodeExceptOptions(MinimizeReason::MINIMIZE_ALL);
     SwitchLayoutPolicy(WindowLayoutMode::CASCADE, displayId);
     if (ret != WMError::WM_OK) {
         WLOGFE("Minimize all app window failed");
@@ -1998,7 +1999,12 @@ void WindowNodeContainer::RemoveSingleUserWindowNodes(int accountId)
         WLOGFI("remove window %{public}s, windowId %{public}d uid %{public}d",
             windowNode->GetWindowName().c_str(), windowNode->GetWindowId(), windowNode->GetCallingUid());
         windowNode->GetWindowProperty()->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::NONE));
-        RemoveWindowNode(windowNode);
+        if (windowNode->GetWindowToken()) {
+            if (windowNode->surfaceNode_ != nullptr) {
+                windowNode->surfaceNode_->SetVisible(true);
+            }
+            windowNode->GetWindowToken()->UpdateWindowState(WindowState::STATE_HIDDEN);
+        }
     }
 }
 

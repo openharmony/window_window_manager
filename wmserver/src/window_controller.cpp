@@ -16,6 +16,7 @@
 #include "window_controller.h"
 #include <ability_manager_client.h>
 #include <chrono>
+#include <cstdint>
 #include <hisysevent.h>
 #include <hitrace_meter.h>
 #include <parameters.h>
@@ -125,12 +126,14 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
     sptr<WindowTransitionInfo>& dstInfo)
 {
     WLOGFI("NotifyWindowTransition begin!");
-    if (!srcInfo || !dstInfo) {
-        WLOGFE("srcInfo or dstInfo is nullptr!");
-        return WMError::WM_ERROR_NULLPTR;
+    sptr<WindowNode> dstNode = nullptr;
+    sptr<WindowNode> srcNode = nullptr;
+    if (srcInfo) {
+        srcNode = windowRoot_->FindWindowNodeWithToken(srcInfo->GetAbilityToken());
     }
-    auto dstNode = windowRoot_->FindWindowNodeWithToken(dstInfo->GetAbilityToken());
-    auto srcNode = windowRoot_->FindWindowNodeWithToken(srcInfo->GetAbilityToken());
+    if (dstInfo) {
+        dstNode = windowRoot_->FindWindowNodeWithToken(dstInfo->GetAbilityToken());
+    }
     if (!RemoteAnimation::CheckTransition(srcInfo, srcNode, dstInfo, dstNode)) {
         return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
@@ -148,8 +151,8 @@ WMError WindowController::NotifyWindowTransition(sptr<WindowTransitionInfo>& src
             return RemoteAnimation::NotifyAnimationMinimize(srcInfo, srcNode);
         case TransitionEvent::CLOSE:
             return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::CLOSE);
-        case TransitionEvent::BACK:
-            return RemoteAnimation::NotifyAnimationClose(srcInfo, srcNode, TransitionEvent::BACK);
+        case TransitionEvent::BACK_TRANSITION:
+            return RemoteAnimation::NotifyAnimationBackTransition(srcInfo, dstInfo, srcNode, dstNode);
         default:
             return WMError::WM_ERROR_NO_REMOTE_ANIMATION;
     }
@@ -224,6 +227,25 @@ WMError WindowController::CreateWindow(sptr<IWindow>& window, sptr<WindowPropert
     return windowRoot_->SaveWindow(node);
 }
 
+void WindowController::NotifyAfterAddWindow(sptr<WindowNode>& node)
+{
+    std::vector<sptr<WindowNode>> nodes;
+    nodes.emplace_back(node);
+    for (auto& child : node->children_) {
+        if (child->currentVisibility_) {
+            nodes.emplace_back(child);
+        }
+    }
+    for (auto& iter : nodes) {
+        if ((iter->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
+            (node->abilityToken_ != iter->abilityToken_)) {
+            iter->GetWindowToken()->NotifyForeground();
+        }
+    }
+    accessibilityConnection_->NotifyAccessibilityWindowInfo(node->GetDisplayId(), nodes,
+        WindowUpdateType::WINDOW_UPDATE_ADDED);
+}
+
 WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
 {
     auto node = windowRoot_->GetWindowNode(property->GetWindowId());
@@ -254,19 +276,10 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
     }
     windowRoot_->FocusFaultDetection();
     FlushWindowInfo(property->GetWindowId());
-    std::vector<sptr<WindowNode>> nodes;
-    nodes.emplace_back(node);
-    for (auto& child : node->children_) {
-        if (child->currentVisibility_) {
-            nodes.emplace_back(child);
-        }
-    }
-    accessibilityConnection_->NotifyAccessibilityWindowInfo(node->GetDisplayId(), nodes,
-        WindowUpdateType::WINDOW_UPDATE_ADDED);
+    NotifyAfterAddWindow(node);
     HandleTurnScreenOn(node);
 
-    if (node->GetWindowType() == WindowType::WINDOW_TYPE_STATUS_BAR ||
-        node->GetWindowType() == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
+    if (WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
         sysBarWinId_[node->GetWindowType()] = node->GetWindowId();
     }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
@@ -374,6 +387,12 @@ WMError WindowController::RemoveWindowNode(uint32_t windowId, bool fromAnimation
         nodes.emplace_back(windowNode);
         for (auto& child : windowNode->children_) {
             nodes.emplace_back(child);
+        }
+        for (auto& iter : nodes) {
+            if ((iter->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
+                (windowNode->abilityToken_ != iter->abilityToken_)) {
+                iter->GetWindowToken()->NotifyBackground();
+            }
         }
         displayZoomController_->ClearZoomTransform(nodes);
         accessibilityConnection_->NotifyAccessibilityWindowInfo(windowNode->GetDisplayId(), nodes,
@@ -815,6 +834,21 @@ AvoidArea WindowController::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType 
     return windowRoot_->GetAvoidAreaByType(windowId, avoidAreaType);
 }
 
+WMError WindowController::ChangeMouseStyle(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
+{
+    auto node = windowRoot_->GetWindowNode(windowId);
+    if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
+        if (node->GetWindowRect().width_ > node->GetWindowRect().height_) {
+            MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::NORTH_SOUTH);
+        } else {
+            MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::WEST_EAST);
+        }
+        return WMError::WM_OK;
+    }
+    MMI::InputManager::GetInstance()->SetPointerStyle(windowId, STYLEID_MAP.at(moveDragProperty->dragType_));
+    return WMError::WM_OK;
+}
+
 WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty)
 {
     auto node = windowRoot_->GetWindowNode(windowId);
@@ -831,6 +865,7 @@ WMError WindowController::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<
     if ((moveDragProperty->startMoveFlag_ && node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) ||
         moveDragProperty->startDragFlag_) {
         WMError res = windowRoot_->UpdateSizeChangeReason(windowId, WindowSizeChangeReason::DRAG_START);
+        ChangeMouseStyle(windowId, moveDragProperty);
         return res;
     }
     return WMError::WM_OK;
@@ -923,8 +958,30 @@ WMError WindowController::RecoverInputEventToClient(uint32_t windowId)
         return WMError::WM_OK;
     }
     node->SetInputEventCallingPid(node->GetCallingPid());
-    FlushWindowInfo(windowId);
+    RecoverDefaultMouseStyle(windowId);
+    AsyncFlushInputInfo(windowId);
     return WMError::WM_OK;
+}
+
+void WindowController::AsyncFlushInputInfo(uint32_t windowId)
+{
+    WLOGFD("AsyncFlushWindowInfo");
+    displayZoomController_->UpdateWindowZoomInfo(windowId);
+    RSTransaction::FlushImplicitTransaction();
+    MMI::DisplayGroupInfo displayInfo_ = inputWindowMonitor_->GetDisplayInfo(windowId);
+    auto task = [this, displayInfo_]() {
+        MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayInfo_);
+    };
+    WindowInnerManager::GetInstance().PostTask(task, "UpdateDisplayInfo");
+}
+
+void WindowController::RecoverDefaultMouseStyle(uint32_t windowId)
+{
+    // asynchronously calls SetMouseStyle of MultiModalInput
+    auto task = [this, windowId]() {
+        MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::DEFAULT);
+    };
+    WindowInnerManager::GetInstance().PostTask(task, "RecoverDefaultMouseStyle");
 }
 
 WMError WindowController::NotifyWindowClientPointUp(uint32_t windowId,

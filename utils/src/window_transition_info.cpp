@@ -26,6 +26,7 @@ WindowTransitionInfo::WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> in
     displayId_ = info->displayId_;
     isShowWhenLocked_ = info->isShowWhenLocked_;
     isRecent_ = info->isRecent_;
+    missionId_ = info->missionId_;
     if (info->windowModes_.empty()) {
         supportWindowModes_ = {
             AppExecFwk::SupportWindowMode::FULLSCREEN,
@@ -42,6 +43,7 @@ WindowTransitionInfo::WindowTransitionInfo(sptr<AAFwk::AbilityTransitionInfo> in
     sizeLimits_.minWidth_ = info->minWindowWidth_;
     sizeLimits_.maxHeight_ = info->maxWindowHeight_;
     sizeLimits_.minHeight_ = info->minWindowHeight_;
+    reason_ = static_cast<TransitionReason>(info->reason_);
 }
 
 void WindowTransitionInfo::SetBundleName(std::string name)

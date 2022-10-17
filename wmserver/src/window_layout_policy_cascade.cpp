@@ -431,14 +431,14 @@ void WindowLayoutPolicyCascade::InitSplitRects(DisplayId displayId)
 
 int32_t WindowLayoutPolicyCascade::GetSplitRatioPoint(float ratio, DisplayId displayId)
 {
-    const auto& dividerRect = cascadeRectsMap_[displayId].dividerRect_;
-    const auto& limitRect = limitRectMap_[displayId];
+    auto dividerRect = cascadeRectsMap_[displayId].dividerRect_;
+    auto displayRect = displayGroupInfo_->GetDisplayRect(displayId);
     if (!IsVerticalDisplay(displayId)) {
-        return limitRect.posX_ +
-            static_cast<uint32_t>((limitRect.width_ - dividerRect.width_) * ratio);
+        return displayRect.posX_ +
+            static_cast<int32_t>((displayRect.width_ - dividerRect.width_) * ratio);
     } else {
-        return limitRect.posY_ +
-            static_cast<uint32_t>((limitRect.height_ - dividerRect.height_) * ratio);
+        return displayRect.posY_ +
+            static_cast<int32_t>((displayRect.height_ - dividerRect.height_) * ratio);
     }
 }
 
@@ -482,8 +482,8 @@ void WindowLayoutPolicyCascade::Reorder()
         Rect rect = cascadeRectsMap_[displayId].firstCascadeRect_;
         bool isFirstReorderedWindow = true;
         const auto& appWindowNodeVec = *(displayGroupWindowTree_[displayId][WindowRootNodeType::APP_WINDOW_NODE]);
-        for (auto iter = appWindowNodeVec.begin(); iter != appWindowNodeVec.end(); iter++) {
-            auto node = *iter;
+        for (auto nodeIter = appWindowNodeVec.begin(); nodeIter != appWindowNodeVec.end(); nodeIter++) {
+            auto node = *nodeIter;
             if (node == nullptr || node->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
                 WLOGFI("get node failed or not app window.");
                 continue;
@@ -575,7 +575,7 @@ Rect WindowLayoutPolicyCascade::StepCascadeRect(Rect rect, DisplayId displayId) 
 void WindowLayoutPolicyCascade::SetCascadeRect(const sptr<WindowNode>& node)
 {
     static bool isFirstAppWindow = true;
-    Rect rect = {0, 0, 0, 0};
+    Rect rect;
     auto property = node->GetWindowProperty();
     if (property == nullptr) {
         WLOGFE("window property is nullptr.");

@@ -1,4 +1,4 @@
-# windowmanager
+# window_manager
 
 -   [简介](#简介)
 -   [目录](#目录)
@@ -33,17 +33,62 @@
 ## 目录
 ```
 foundation/window/window_manager/
-├── dm                      # Dislplay Manager Client实现代码
-├── dmserver                # Dislplay Manager Service实现代码
-├── interfaces              # 对外接口存放目录
-│   ├── innerkits           # native接口存放目录
-│   └── kits                # js/napi接口存放目录
-├── resources               # 框架使用资源文件存放目录
-├── sa_profile              # 系统服务配置文件
-├── snapshot                # 截屏命令行工具实现代码
-├── utils                   # 工具类存放目录
-├── wm                      # Window Manager Client实现代码
-├── wmserver                # Window Manager Service实现代码
+├── dm                              # Dislplay Manager Client实现代码    
+│   ├── BUILD.gn                    
+│   ├── include                      
+│   ├── src                          
+│   └── test                         
+├── dmserver                        # Dislplay Manager Service实现代码  
+│   ├── BUILD.gn                      
+│   ├── include                       
+│   ├── src                           
+│   └── test                          
+├── extension                       # Ability Component 窗口相关代码实现目录  
+│   ├── extension_connection        # Ability Component 嵌入部分 
+│   └── window_extension            # Ability Component 被嵌入部分                                                  
+├── interfaces                      # 对外接口存放目录   
+│   ├── innerkits                   # native接口存放目录   
+│   └── kits                        # js/napi接口存放目录  
+├── previewer                       # IDE轻量模拟器窗口代码实现目录   
+│   ├── BUILD.gn                      
+│   ├── include                       
+│   ├── mock                          
+│   └── src                           
+├── resources                       # 框架使用资源文件存放目录   
+│   ├── BUILD.gn                      
+│   ├── config                        
+│   ├── dialog_ui                     
+│   └── media                       
+├── sa_profile                      # 系统服务配置文件
+│   ├── 4606.xml                   
+│   ├── 4607.xml                   
+│   └── BUILD.gn                   
+├── snapshot                        # 截屏命令行工具实现代码 
+│   ├── BUILD.gn                     
+│   ├── include                      
+│   ├── src                          
+│   └── test                         
+├── test                            # Fuzz测试和系统测试用例存放目录 
+│   ├── BUILD.gn                    
+│   ├── common                      
+│   ├── demo                        
+│   ├── fuzztest                    
+│   └── systemtest                                                      
+├── utils                           # 工具类存放目录  
+│   ├── BUILD.gn                      
+│   ├── include                       
+│   ├── src                           
+│   └── test                                              
+├── wm                              # Window Manager Client实现代码  
+│   ├── BUILD.gn                      
+│   ├── include                       
+│   ├── src                           
+│   └── test                          
+└── wmserver                        # Window Manager Service实现代码  
+    ├── BUILD.gn                      
+    ├── include                       
+    ├── src                           
+    └── test   
 ```
 
 ## 约束

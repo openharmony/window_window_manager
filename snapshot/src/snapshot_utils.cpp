@@ -52,13 +52,13 @@ std::string SnapShotUtils::GenerateFileName(int offset)
 {
     timeval tv;
     std::string fileName = VALID_SNAPSHOT_PATH;
-    char timeStr[MAX_TIME_STR_LEN] = { 0 };
 
     fileName += DEFAULT_SNAPSHOT_PREFIX;
     if (gettimeofday(&tv, nullptr) == 0) {
         tv.tv_sec += offset; // add offset second
         struct tm *tmVal = localtime(&tv.tv_sec);
         if (tmVal != nullptr) {
+            char timeStr[MAX_TIME_STR_LEN] = { 0 };
             snprintf_s(timeStr, sizeof(timeStr), sizeof(timeStr) - 1,
                 "_%04d-%02d-%02d_%02d-%02d-%02d",
                 tmVal->tm_year + YEAR_SINCE, tmVal->tm_mon + 1, tmVal->tm_mday,

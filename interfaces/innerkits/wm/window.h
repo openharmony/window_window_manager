@@ -468,6 +468,13 @@ public:
      * @return the error code of window
      */
     virtual WMError NotifyMemoryLevel(int32_t level) const = 0;
+
+    /**
+     * @brief Update configuration for all windows
+     *
+     * @param configuration configuration for app
+     */
+    virtual bool IsAllowHaveSystemSubWindow() = 0;
 };
 }
 }

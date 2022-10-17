@@ -31,6 +31,8 @@ public:
     ~InputWindowMonitor() = default;
     void UpdateInputWindow(uint32_t windowId);
     void UpdateInputWindowByDisplayId(DisplayId displayId);
+    MMI::DisplayGroupInfo GetDisplayInfo(uint32_t windowId);
+    void HandleDisplayInfo(DisplayId displayId);
 
 private:
     sptr<WindowRoot> windowRoot_;

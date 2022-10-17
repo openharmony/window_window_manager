@@ -28,8 +28,8 @@ namespace Rosen {
 enum class TransitionReason : uint32_t {
     MINIMIZE = 0,
     CLOSE,
-    BACK,
-    ABILITY_TRANSITION
+    ABILITY_TRANSITION,
+    BACK_TRANSITION,
 };
 
 class WindowTransitionInfo : public Parcelable {

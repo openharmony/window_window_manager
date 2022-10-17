@@ -69,6 +69,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
         if (windowId != invalidId) {
             WLOGFE("WindowInputChannel is nullptr");
         }
+        pointerEvent->MarkProcessed();
         return;
     }
     channel->HandlePointerEvent(pointerEvent);
@@ -98,7 +99,8 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
             WLOGFD("MainEventRunner is not available");
             eventHandler_ = AppExecFwk::EventHandler::Current();
             auto curThreadId = std::this_thread::get_id();
-            if (!eventHandler_ || (mainEventRunner->GetThreadId() == *(reinterpret_cast<uint64_t*>(&curThreadId)))) {
+            if (!eventHandler_ || (mainEventRunner != nullptr &&
+                mainEventRunner->GetThreadId() == *(reinterpret_cast<uint64_t*>(&curThreadId)))) {
                 eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(
                     AppExecFwk::EventRunner::Create(INPUT_AND_VSYNC_THREAD));
             }
