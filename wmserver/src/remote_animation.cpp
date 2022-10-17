@@ -56,8 +56,7 @@ bool RemoteAnimation::IsRemoteAnimationEnabledAndFirst(DisplayId displayId)
     return animationFirst_ && CheckRemoteAnimationEnabled(displayId);
 }
 
-WMError RemoteAnimation::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller,
-    const sptr<WindowRoot>& windowRoot)
+WMError RemoteAnimation::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
 {
     WLOGFI("RSWindowAnimation: set window animation controller!");
     if (!isRemoteAnimationEnable_) {
@@ -74,7 +73,6 @@ WMError RemoteAnimation::SetWindowAnimationController(const sptr<RSIWindowAnimat
     }
 
     windowAnimationController_ = controller;
-    windowRoot_ = windowRoot;
     return WMError::WM_OK;
 }
 
@@ -83,9 +81,11 @@ void RemoteAnimation::SetMainTaskHandler(std::shared_ptr<AppExecFwk::EventHandle
     wmsTaskHandler_ = handler;
 }
 
-void RemoteAnimation::SetWindowController(const sptr<WindowController>& windowController)
+void RemoteAnimation::SetWindowControllerAndRoot(const sptr<WindowController>& windowController,
+    const sptr<WindowRoot>& windowRoot)
 {
     windowController_ = windowController;
+    windowRoot_ = windowRoot;
 }
 
 bool RemoteAnimation::CheckAnimationController()

@@ -111,9 +111,12 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
     return WMError::WM_OK;
 }
 
-void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
-    std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bkgColor, bool isColdStart, bool isUniRender)
+WMError StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
+    std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bkgColor, bool isColdStart)
 {
+    if (node == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
     // using snapshot to support hot start since node destroy when hide
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DrawStartingWindow(%u)", node->GetWindowId());
     Rect rect = node->GetWindowRect();
@@ -122,25 +125,30 @@ void StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
         node->leashWinSurfaceNode_->ResetContextAlpha();
     }
     if (!isColdStart) {
-        return;
+        return WMError::WM_OK;
     }
     if (node->startingWinSurfaceNode_ == nullptr) {
         WLOGFE("no starting Window SurfaceNode!");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
     if (pixelMap == nullptr) {
         SurfaceDraw::DrawColor(node->startingWinSurfaceNode_, rect.width_, rect.height_, bkgColor);
-        return;
+        return WMError::WM_OK;
     }
 
     WLOGFD("draw background in sperate");
     SurfaceDraw::DrawImageRect(node->startingWinSurfaceNode_, rect, pixelMap, bkgColor);
+    return WMError::WM_OK;
 }
 
 void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWindow>& window,
     uint32_t& windowId, const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowProperty>& property,
     int32_t pid, int32_t uid)
 {
+    if (node == nullptr) {
+        WLOGFE("node is nullptr");
+        return;
+    }
     node->surfaceNode_ = surfaceNode;
     node->SetWindowToken(window);
     node->SetCallingPid(pid);
@@ -234,8 +242,7 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, const AnimationConf
         }
         RSTransaction::FlushImplicitTransaction();
     };
-    static const bool IsWindowAnimationEnabled = WindowHelper::ReadIsWindowAnimationEnabledProperty();
-    if ((IsWindowAnimationEnabled && !RemoteAnimation::CheckAnimationController())) {
+    if (!RemoteAnimation::CheckAnimationController()) {
         RSNode::Animate(animationConfig.windowAnimationConfig_.animationTiming_.timingProtocol_,
             animationConfig.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc, finishCallBack);
     } else {
