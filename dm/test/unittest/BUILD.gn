@@ -22,6 +22,7 @@ group("unittest") {
     ":dm_display_change_unit_test",
     ":dm_display_power_unit_test",
     ":dm_display_test",
+    ":dm_screen_group_test",
     ":dm_screen_manager_test",
     ":dm_screen_test",
     ":dm_screenshot_test",
@@ -72,6 +73,14 @@ ohos_unittest("dm_screen_test") {
   module_out_path = module_out_path
 
   sources = [ "screen_test.cpp" ]
+
+  deps = [ ":dm_unittest_common" ]
+}
+
+ohos_unittest("dm_screen_group_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_group_test.cpp" ]
 
   deps = [ ":dm_unittest_common" ]
 }
