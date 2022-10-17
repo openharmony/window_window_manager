@@ -150,6 +150,10 @@ void DisplayManagerService::RegisterWindowInfoQueriedListener(const sptr<IWindow
 
 DMError DisplayManagerService::HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("check has private window permission denied!");
+        return DMError::DM_ERROR_INVALID_PERMISSION;
+    }
     std::vector<DisplayId> displayIds = GetAllDisplayIds();
     auto iter = std::find(displayIds.begin(), displayIds.end(), displayId);
     if (iter == displayIds.end()) {
@@ -233,6 +237,10 @@ ScreenId DisplayManagerService::CreateVirtualScreen(VirtualScreenOption option,
 
 DMError DisplayManagerService::DestroyVirtualScreen(ScreenId screenId)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("destory virtual screen permission denied!");
+        return DMError::DM_ERROR_INVALID_PERMISSION;
+    }
     if (!accessTokenIdMaps_.isExistAndRemove(screenId, IPCSkeleton::GetCallingTokenID())) {
         return DMError::DM_ERROR_INVALID_CALLING;
     }
@@ -258,6 +266,10 @@ DMError DisplayManagerService::SetVirtualScreenSurface(ScreenId screenId, sptr<S
 
 bool DisplayManagerService::SetOrientation(ScreenId screenId, Orientation orientation)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set orientation permission denied!");
+        return false;
+    }
     if (orientation < Orientation::UNSPECIFIED || orientation > Orientation::REVERSE_HORIZONTAL) {
         WLOGFE("SetOrientation::orientation: %{public}u", static_cast<uint32_t>(orientation));
         return false;
@@ -349,6 +361,10 @@ void DisplayManagerService::OnStop()
 bool DisplayManagerService::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
+    if (type == DisplayManagerAgentType::DISPLAY_EVENT_LISTENER && !Permission::IsSystemCalling()) {
+        WLOGFE("register display manager agent permission denied!");
+        return false;
+    }
     if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
         WLOGFE("displayManagerAgent invalid");
         return false;
@@ -359,6 +375,10 @@ bool DisplayManagerService::RegisterDisplayManagerAgent(const sptr<IDisplayManag
 bool DisplayManagerService::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
+    if (type == DisplayManagerAgentType::DISPLAY_EVENT_LISTENER && !Permission::IsSystemCalling()) {
+        WLOGFE("unregister display manager agent permission denied!");
+        return false;
+    }
     if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
         WLOGFE("displayManagerAgent invalid");
         return false;
@@ -369,8 +389,8 @@ bool DisplayManagerService::UnregisterDisplayManagerAgent(const sptr<IDisplayMan
 bool DisplayManagerService::WakeUpBegin(PowerStateChangeReason reason)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:WakeUpBegin(%u)", reason);
-    if (!Permission::IsSystemCalling()) {
-        WLOGFI("permission denied!");
+    if (!Permission::IsSystemServiceCalling()) {
+        WLOGFE("wake up begin permission denied!");
         return false;
     }
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP,
@@ -379,8 +399,8 @@ bool DisplayManagerService::WakeUpBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerService::WakeUpEnd()
 {
-    if (!Permission::IsSystemCalling()) {
-        WLOGFI("permission denied!");
+    if (!Permission::IsSystemServiceCalling()) {
+        WLOGFE("wake up end permission denied!");
         return false;
     }
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::WAKE_UP,
@@ -390,8 +410,8 @@ bool DisplayManagerService::WakeUpEnd()
 bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SuspendBegin(%u)", reason);
-    if (!Permission::IsSystemCalling()) {
-        WLOGFI("permission denied!");
+    if (!Permission::IsSystemServiceCalling()) {
+        WLOGFE("suspend begin permission denied!");
         return false;
     }
     displayPowerController_->SuspendBegin(reason);
@@ -401,8 +421,8 @@ bool DisplayManagerService::SuspendBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerService::SuspendEnd()
 {
-    if (!Permission::IsSystemCalling()) {
-        WLOGFI("permission denied!");
+    if (!Permission::IsSystemServiceCalling()) {
+        WLOGFE("suspend end permission denied!");
         return false;
     }
     return DisplayManagerAgentController::GetInstance().NotifyDisplayPowerEvent(DisplayPowerEvent::SLEEP,
@@ -412,8 +432,8 @@ bool DisplayManagerService::SuspendEnd()
 bool DisplayManagerService::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     WLOGFI("SetScreenPowerForAll");
-    if (!Permission::IsSystemCalling()) {
-        WLOGFI("permission denied!");
+    if (!Permission::IsSystemServiceCalling()) {
+        WLOGFE("set screen power for all permission denied!");
         return false;
     }
     return abstractScreenController_->SetScreenPowerForAll(state, reason);
@@ -426,8 +446,8 @@ ScreenPowerState DisplayManagerService::GetScreenPower(ScreenId dmsScreenId)
 
 bool DisplayManagerService::SetDisplayState(DisplayState state)
 {
-    if (!Permission::IsSystemCalling()) {
-        WLOGFI("permission denied!");
+    if (!Permission::IsSystemServiceCalling()) {
+        WLOGFE("set display state permission denied!");
         return false;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -457,17 +477,29 @@ DisplayState DisplayManagerService::GetDisplayState(DisplayId displayId)
 
 void DisplayManagerService::NotifyDisplayEvent(DisplayEvent event)
 {
+    if (!Permission::IsSystemServiceCalling()) {
+        WLOGFE("notify display event permission denied!");
+        return;
+    }
     displayPowerController_->NotifyDisplayEvent(event);
 }
 
 bool DisplayManagerService::SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set freeze permission denied!");
+        return false;
+    }
     abstractDisplayController_->SetFreeze(displayIds, isFreeze);
     return true;
 }
 
 ScreenId DisplayManagerService::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("make mirror permission denied!");
+        return SCREEN_ID_INVALID;
+    }
     WLOGFI("MakeMirror. mainScreenId :%{public}" PRIu64"", mainScreenId);
     auto allMirrorScreenIds = abstractScreenController_->GetAllValidScreenIds(mirrorScreenIds);
     auto iter = std::find(allMirrorScreenIds.begin(), allMirrorScreenIds.end(), mainScreenId);
@@ -546,6 +578,10 @@ std::vector<DisplayId> DisplayManagerService::GetAllDisplayIds()
 
 std::vector<sptr<ScreenInfo>> DisplayManagerService::GetAllScreenInfos()
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("get all screen infos permission denied!");
+        return std::vector<sptr<ScreenInfo>>();
+    }
     std::vector<ScreenId> screenIds = abstractScreenController_->GetAllScreenIds();
     std::vector<sptr<ScreenInfo>> screenInfos;
     for (auto screenId: screenIds) {
@@ -561,6 +597,10 @@ std::vector<sptr<ScreenInfo>> DisplayManagerService::GetAllScreenInfos()
 
 ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds, std::vector<Point> startPoints)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("make expand permission denied!");
+        return SCREEN_ID_INVALID;
+    }
     if (expandScreenIds.empty() || startPoints.empty() || expandScreenIds.size() != startPoints.size()) {
         WLOGFI("create expand fail, input params is invalid. "
             "screenId vector size :%{public}ud, startPoint vector size :%{public}ud",
@@ -611,12 +651,20 @@ ScreenId DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds
 
 bool DisplayManagerService::SetScreenActiveMode(ScreenId screenId, uint32_t modeId)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set screen active permission denied!");
+        return false;
+    }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetScreenActiveMode(%" PRIu64", %u)", screenId, modeId);
     return abstractScreenController_->SetScreenActiveMode(screenId, modeId);
 }
 
 bool DisplayManagerService::SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set virtual pixel permission denied!");
+        return false;
+    }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:SetVirtualPixelRatio(%" PRIu64", %f)", screenId,
         virtualPixelRatio);
     return abstractScreenController_->SetVirtualPixelRatio(screenId, virtualPixelRatio);
@@ -624,11 +672,19 @@ bool DisplayManagerService::SetVirtualPixelRatio(ScreenId screenId, float virtua
 
 bool DisplayManagerService::IsScreenRotationLocked()
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("is screen rotation locked permission denied!");
+        return false;
+    }
     return ScreenRotationController::IsScreenRotationLocked();
 }
 
 void DisplayManagerService::SetScreenRotationLocked(bool isLocked)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set screen rotation locked permission denied!");
+        return;
+    }
     ScreenRotationController::SetScreenRotationLocked(isLocked);
 }
 
