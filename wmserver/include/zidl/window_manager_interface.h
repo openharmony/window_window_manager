@@ -54,6 +54,7 @@ public:
         TRANS_ID_UPDATE_LAYOUT_MODE,
         TRANS_ID_UPDATE_PROPERTY,
         TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID,
+        TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ANIMATION_SET_CONTROLLER,
         TRANS_ID_GET_SYSTEM_CONFIG,
         TRANS_ID_NOTIFY_WINDOW_TRANSITION,
@@ -90,6 +91,7 @@ public:
     virtual void UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
+    virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) = 0;
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) = 0;
     virtual WMError GetSystemConfig(SystemConfig& systemConfig) = 0;
     virtual WMError NotifyWindowTransition(sptr<WindowTransitionInfo>& from, sptr<WindowTransitionInfo>& to,
