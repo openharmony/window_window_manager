@@ -998,6 +998,10 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
         property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     }
 
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_VOLUME_OVERLAY) {
+        surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
+    }
+
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
         windowId, token);
     RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, ret);
