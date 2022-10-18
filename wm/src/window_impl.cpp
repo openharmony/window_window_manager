@@ -818,13 +818,13 @@ bool WindowImpl::IsAppMainOrSubOrFloatingWindow()
     return false;
 }
 
-void WindowImpl::SetWindowCornerRadiusAccordingToSystemConfig()
+WMError WindowImpl::SetWindowCornerRadiusAccordingToSystemConfig()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto vpr = display->GetVirtualPixelRatio();
     auto fullscreenRadius = windowSystemConfig_.effectConfig_.fullScreenCornerRadius_ * vpr;
@@ -835,45 +835,46 @@ void WindowImpl::SetWindowCornerRadiusAccordingToSystemConfig()
         name_.c_str(), GetMode(), vpr, fullscreenRadius, splitRadius, floatRadius);
 
     if (WindowHelper::IsFullScreenWindow(GetMode()) && MathHelper::GreatNotEqual(fullscreenRadius, 0.0)) {
-        SetCornerRadius(fullscreenRadius);
+        return SetCornerRadius(fullscreenRadius);
     } else if (WindowHelper::IsSplitWindowMode(GetMode()) && MathHelper::GreatNotEqual(splitRadius, 0.0)) {
-        SetCornerRadius(splitRadius);
+        return SetCornerRadius(splitRadius);
     } else if (WindowHelper::IsFloatingWindow(GetMode()) && MathHelper::GreatNotEqual(floatRadius, 0.0)) {
-        SetCornerRadius(floatRadius);
+        return SetCornerRadius(floatRadius);
     }
+    return WMError::WM_DO_NOTHING;
 }
 
-void WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
+WMError WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
 {
     if (!WindowHelper::IsAppWindow(GetType()) && !isAppFloatingWindow_) {
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
     auto& shadow = isFocused_ ? windowSystemConfig_.effectConfig_.focusedShadow_ :
         windowSystemConfig_.effectConfig_.unfocusedShadow_;
 
     if (MathHelper::NearZero(shadow.elevation_)) {
-        return;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
 
     if (!WindowHelper::IsFloatingWindow(GetMode())) {
         surfaceNode_->SetShadowElevation(0.f);
         WLOGFI("[WEffect][%{public}s]close shadow", name_.c_str());
-        return;
+        return WMError::WM_OK;
     }
 
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto vpr = display->GetVirtualPixelRatio();
 
     uint32_t colorValue;
     if (!ColorParser::Parse(shadow.color_, colorValue)) {
         WLOGFE("[WEffect]invalid color string: %{public}s", shadow.color_.c_str());
-        return;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
 
     WLOGFI("[WEffect][%{public}s]focused: %{public}u, [%{public}f, %{public}s, %{public}f, %{public}f, %{public}f]",
@@ -886,6 +887,7 @@ void WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
     surfaceNode_->SetShadowOffsetY(shadow.offsetY_);
     surfaceNode_->SetShadowAlpha(shadow.alpha_);
     RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
 }
 
 void WindowImpl::SetSystemConfig()

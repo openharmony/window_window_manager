@@ -88,7 +88,7 @@ size_t InitWindowOption1(WindowOption &windowOption, const uint8_t *data, size_t
     windowOption.SetParentId(parentId);
     char name[LEN + 1];
     name[LEN] = END_CHAR;
-    for (int i = 0; i < LEN; i++) {
+    for (size_t i = 0; i < LEN; i++) {
         startPos += GetObject<char>(name[i], data + startPos, size - startPos);
     }
     std::string windowName(name);
@@ -154,7 +154,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     windowScene->Init(displayId, nullptr, listener, option);
     char name[LEN + 1];
     name[LEN] = END_CHAR;
-    for (int i = 0; i < LEN; i++) {
+    for (size_t i = 0; i < LEN; i++) {
         startPos += GetObject<char>(name[i], data + startPos, size - startPos);
     }
     std::string windowName(name);
