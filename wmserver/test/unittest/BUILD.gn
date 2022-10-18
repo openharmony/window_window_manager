@@ -19,6 +19,7 @@ group("unittest") {
   testonly = true
   deps = [
     ":wmserver_avoid_area_controller_test",
+    ":wmserver_input_window_monitor_test",
     ":wmserver_minimize_app_test",
     ":wmserver_window_layout_policy_test",
     ":wmserver_window_manager_config_test",
@@ -28,6 +29,14 @@ group("unittest") {
     ":wmserver_window_snapshot_test",
     ":wmserver_window_zorder_policy_test",
   ]
+}
+
+ohos_unittest("wmserver_input_window_monitor_test") {
+  module_out_path = module_out_path
+
+  sources = [ "input_window_monitor_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common" ]
 }
 
 ohos_unittest("wmserver_avoid_area_controller_test") {
