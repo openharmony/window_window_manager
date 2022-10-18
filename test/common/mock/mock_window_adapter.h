@@ -42,6 +42,7 @@ public:
     MOCK_METHOD2(GetModeChangeHotZones, WMError(DisplayId displayId, ModeChangeHotZones& hotZones));
     MOCK_METHOD3(NotifyServerReadyToMoveOrDrag, void(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty));
+    MOCK_METHOD1(GetVisibilityWindowInfo, WMError(std::vector<sptr<WindowVisibilityInfo>>& infos));
 };
 }
 } // namespace OHOS
