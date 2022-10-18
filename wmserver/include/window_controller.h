@@ -70,6 +70,7 @@ public:
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
     void OnScreenshot(DisplayId displayId);
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
+    WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
     void SetAnchorAndScale(int32_t x, int32_t y, float scale);
     void SetAnchorOffset(int32_t deltaX, int32_t deltaY);
     void OffWindowZoom();

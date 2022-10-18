@@ -158,6 +158,16 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case WindowManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID: {
+            std::vector<sptr<WindowVisibilityInfo>> infos;
+            WMError errCode = GetVisibilityWindowInfo(infos);
+            if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowVisibilityInfo>(reply, infos)) {
+                WLOGFE("Write visibility window infos failed");
+                return -1;
+            }
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
         case WindowManagerMessage::TRANS_ID_ANIMATION_SET_CONTROLLER: {
             sptr<IRemoteObject> controllerObject = data.ReadRemoteObject();
             sptr<RSIWindowAnimationController> controller = iface_cast<RSIWindowAnimationController>(controllerObject);
