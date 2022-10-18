@@ -72,12 +72,12 @@ sptr<DisplayPowerEventListener> DisplayPowerTest::listener_ = new DisplayPowerEv
 
 void DisplayPowerTest::SetUpTestCase()
 {
+    CommonTestUtils::SetAceessTokenPermission("SetDisplayState");
     defaultId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
     if (defaultId_ == DISPLAY_ID_INVALID) {
         WLOGFE("GetDefaultDisplayId failed!");
     }
     DisplayManager::GetInstance().RegisterDisplayPowerEventListener(listener_);
-    CommonTestUtils::SetAceessTokenPermission("SetDisplayState");
 }
 
 void DisplayPowerTest::TearDownTestCase()

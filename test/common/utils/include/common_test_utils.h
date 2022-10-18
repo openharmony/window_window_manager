@@ -27,6 +27,8 @@ public:
     static constexpr int32_t TEST_IMAGE_HEIGHT = 1080;
     static constexpr int32_t TEST_IMAGE_WIDTH = 1920;
     static void SetAceessTokenPermission(const std::string processName);
+    static void SetAceessTokenPermission(const std::string processName,
+                                        const char** perms, const int permCount);
 };
 } // namespace OHOS::Rosen
 #endif // TEST_UTILS_H
