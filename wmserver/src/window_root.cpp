@@ -451,7 +451,7 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
             WindowManagerService::GetInstance().AddWindow(property);
             return true;
         };
-        WMError tmpRes = tmpRes = container->ToggleShownStateForAllAppWindows(restoreFunc, isAllAppWindowsEmpty);
+        WMError tmpRes = container->ToggleShownStateForAllAppWindows(restoreFunc, isAllAppWindowsEmpty);
         res = (res == WMError::WM_OK) ? tmpRes : res;
     });
     return res;
