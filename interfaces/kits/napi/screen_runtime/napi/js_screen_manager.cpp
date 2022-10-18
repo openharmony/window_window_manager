@@ -637,7 +637,7 @@ NativeValue* OnIsScreenRotationLocked(NativeEngine& engine, NativeCallbackInfo& 
             task.Resolve(engine, CreateJsValue(engine, isLocked));
         };
     NativeValue* lastParam = nullptr;
-    if (info.argc >= ARGC_ONE && info.argv[ARGC_ONE - 1] == nullptr &&
+    if (info.argc >= ARGC_ONE && info.argv[ARGC_ONE - 1] != nullptr &&
         info.argv[ARGC_ONE - 1]->TypeOf() == NATIVE_FUNCTION) {
         lastParam = info.argv[ARGC_ONE - 1];
     }

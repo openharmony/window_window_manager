@@ -405,6 +405,11 @@ bool JsWindowManager::ParseConfigOption(NativeEngine& engine, NativeObject* jsOb
         WLOGFE("[NAPI]Failed to convert parameter to winType");
         return false;
     }
+    if (!(WindowHelper::IsSystemWindow(option.GetWindowType()) ||
+        WindowHelper::IsSubWindow(option.GetWindowType()))) {
+        WLOGFE("[NAPI]Convert parameter to invalid winType");
+        return false;
+    }
 
     NativeValue* value = jsObject->GetProperty("ctx");
     if (value->TypeOf() == NATIVE_UNDEFINED) {
