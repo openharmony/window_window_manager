@@ -61,6 +61,8 @@ HWTEST_F(WindowStubTest, OnRemoteRequest01, Function | SmallTest | Level2)
     MessageParcel reply;
     MessageOption option;
 
+    data.WriteInterfaceToken(u"error.GetDescriptor");
+
     data.WriteInt32(0);
     data.WriteInt32(0);
     data.WriteUint32(100);

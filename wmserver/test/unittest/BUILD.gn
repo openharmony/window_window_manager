@@ -22,6 +22,7 @@ group("unittest") {
     ":wmserver_minimize_app_test",
     ":wmserver_window_layout_policy_test",
     ":wmserver_window_manager_config_test",
+    ":wmserver_window_manager_stub_test",
     ":wmserver_window_node_container_test",
     ":wmserver_window_node_test",
     ":wmserver_window_pair_test",
@@ -110,6 +111,14 @@ ohos_unittest("wmserver_window_pair_test") {
   deps = [ ":wmserver_unittest_common" ]
 }
 
+ohos_unittest("wmserver_window_manager_stub_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_manager_stub_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common" ]
+}
+
 ## Build wmserver_unittest_common.a {{{
 config("wmserver_unittest_common_public_config") {
   include_dirs = [
@@ -117,6 +126,7 @@ config("wmserver_unittest_common_public_config") {
     "//foundation/window/window_manager/test/common/utils/include",
     "//foundation/window/window_manager/wm/include",
     "//foundation/window/window_manager/wmserver/include",
+    "//foundation/window/window_manager/wmserver/include/zidl",
     "//foundation/window/window_manager/wmserver/include/window_snapshot",
     "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//foundation/window/window_manager/utils/include",
