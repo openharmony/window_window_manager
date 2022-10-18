@@ -18,6 +18,8 @@
 #include "display_manager_config.h"
 #include "display_manager_service.h"
 #include "display_manager_agent_default.h"
+#include "common_test_utils.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -31,6 +33,7 @@ public:
     void SetUp() override;
     void TearDown() override;
 
+    void SetAceessTokenPermission(const std::string processName);
     static sptr<DisplayManagerService> dms_;
 };
 
@@ -49,6 +52,9 @@ void DisplayManagerServiceTest::SetUpTestCase()
     dms_->abstractScreenController_->screenIdManager_.dms2RsScreenIdMap_ = {
         {0, 0}
     };
+    const char** perms = new const char *[1];
+    perms[0] = "ohos.permission.CAPTURE_SCREEN";
+    CommonTestUtils::SetAceessTokenPermission("DisplayManagerServiceTest", perms, 1);
 }
 
 void DisplayManagerServiceTest::TearDownTestCase()
