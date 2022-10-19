@@ -198,8 +198,11 @@ void AbstractScreenController::RegisterAbstractScreenCallback(sptr<AbstractScree
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     abstractScreenCallback_ = cb;
+    if (abstractScreenCallback_ == nullptr) {
+        return;
+    }
     for (auto& iter : dmsScreenMap_) {
-        if (iter.second != nullptr && abstractScreenCallback_ != nullptr) {
+        if (iter.second != nullptr) {
             WLOGFI("dmsScreenId :%{public}" PRIu64"", iter.first);
             abstractScreenCallback_->onConnect_(iter.second);
         }
@@ -337,9 +340,9 @@ void AbstractScreenController::ProcessScreenDisconnected(ScreenId rsScreenId)
             screen->dmsId_ == screenGroup->mirrorScreenId_ && screenGroup->GetChildCount() != 0) {
             auto defaultScreenId = GetDefaultAbstractScreenId();
             std::vector<ScreenId> screens;
-            for (auto screen : screenGroup->GetChildren()) {
-                if (screen->dmsId_ != defaultScreenId) {
-                    screens.emplace_back(screen->dmsId_);
+            for (auto& screenItem : screenGroup->GetChildren()) {
+                if (screenItem->dmsId_ != defaultScreenId) {
+                    screens.emplace_back(screenItem->dmsId_);
                 }
             }
             MakeMirror(defaultScreenId, screens);
@@ -875,7 +878,7 @@ bool AbstractScreenController::MakeMirror(ScreenId screenId, std::vector<ScreenI
     auto group = GetAbstractScreenGroup(screen->groupDmsId_);
     if (group == nullptr) {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
-        sptr<AbstractScreenGroup> group = AddToGroupLocked(screen);
+        group = AddToGroupLocked(screen);
         if (group == nullptr) {
             WLOGFE("group is nullptr");
             return false;
@@ -957,7 +960,7 @@ void AbstractScreenController::AddScreenToGroup(sptr<AbstractScreenGroup> group,
         } else {
             WLOGFI("default, AddChild failed");
         }
-        if (group != nullptr && abstractScreenCallback_ != nullptr) {
+        if (abstractScreenCallback_ != nullptr) {
             abstractScreenCallback_->onConnect_(screen);
         }
         if (rSScreenChangeListener_ != nullptr) {
@@ -1229,21 +1232,12 @@ bool AbstractScreenController::SetScreenPowerForAll(ScreenPowerState state, Powe
 
 ScreenPowerState AbstractScreenController::GetScreenPower(ScreenId dmsScreenId) const
 {
-    if (dmsScreenMap_.empty()) {
-        WLOGFE("no screen info");
-        return ScreenPowerState::INVALID_STATE;
-    }
-
-    ScreenId rsId = SCREEN_ID_INVALID;
-    auto iter = dmsScreenMap_.find(dmsScreenId);
-    if (iter != dmsScreenMap_.end()) {
-        rsId = ConvertToRsScreenId(dmsScreenId);
-    }
-
-    if (rsId == SCREEN_ID_INVALID) {
+    if (dmsScreenMap_.find(dmsScreenId) == dmsScreenMap_.end()) {
         WLOGFE("cannot find screen %{public}" PRIu64"", dmsScreenId);
         return ScreenPowerState::INVALID_STATE;
     }
+
+    ScreenId rsId = ConvertToRsScreenId(dmsScreenId);
     auto state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(rsId));
     WLOGFI("GetScreenPower:%{public}u, rsscreen:%{public}" PRIu64".", state, rsId);
     return state;
