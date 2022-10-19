@@ -60,6 +60,8 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest01, Function | SmallTest | L
     MessageParcel reply;
     MessageOption option;
 
+    data.WriteInterfaceToken(u"error.GetDescriptor");
+
     uint32_t code = static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
