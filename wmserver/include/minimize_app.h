@@ -25,16 +25,16 @@
 
 namespace OHOS {
 namespace Rosen {
-enum class MinimizeReason : uint32_t {
-    MINIMIZE_BUTTON,
-    MINIMIZE_ALL,
-    LAYOUT_TILE,
-    LAYOUT_CASCADE,
-    MAX_APP_COUNT,
-    SPLIT_REPLACE,
-    SPLIT_QUIT,
-    GESTURE_ANIMATION,
-    OTHER_WINDOW,
+enum MinimizeReason : uint32_t {
+    MINIMIZE_BUTTON = 1,
+    MINIMIZE_ALL = 1 << 1,
+    LAYOUT_TILE = 1 << 2,
+    LAYOUT_CASCADE = 1 << 3,
+    MAX_APP_COUNT = 1 << 4,
+    SPLIT_REPLACE = 1 << 5,
+    SPLIT_QUIT = 1 << 6,
+    GESTURE_ANIMATION = 1 << 7,
+    OTHER_WINDOW = 1 << 8,
 };
 
 class MinimizeApp : public RefBase {
@@ -44,7 +44,7 @@ public:
 
     static void AddNeedMinimizeApp(const sptr<WindowNode>& node, MinimizeReason reason);
     static void ExecuteMinimizeAll();
-    static void ExecuteMinimizeTargetReason(MinimizeReason reason);
+    static void ExecuteMinimizeTargetReasons(uint32_t reasons);
     static void SetMinimizedByOtherConfig(bool isMinimizedByOther);
     static void ClearNodesWithReason(MinimizeReason reason);
     static bool IsNodeNeedMinimize(const sptr<WindowNode>& node);
