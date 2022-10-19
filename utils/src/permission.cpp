@@ -30,7 +30,7 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WMPermission"};
 }
 
-bool Permission::IsSystemServiceCalling()
+bool Permission::IsSystemServiceCalling(bool needPrintLog)
 {
     Security::AccessToken::NativeTokenInfo tokenInfo;
     Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(), tokenInfo);
@@ -38,41 +38,44 @@ bool Permission::IsSystemServiceCalling()
         tokenInfo.apl == Security::AccessToken::ATokenAplEnum::APL_SYSTEM_BASIC) {
         return true;
     }
-    WLOGFE("Is not system service calling. native apl: %{public}d", tokenInfo.apl);
+    if (needPrintLog) {
+        WLOGFE("Is not system service calling, native apl: %{public}d", tokenInfo.apl);
+    }
     return false;
 }
 
 bool Permission::IsSystemCalling()
 {
+    if (IsSystemServiceCalling(false)) {
+        return true;
+    }
     int32_t uid = IPCSkeleton::GetCallingUid();
     if (uid < 0) {
-        WLOGFE("Is not system calling app caller uid is: %d,", uid);
+        WLOGFE("Is not system calling, app caller uid is: %d,", uid);
         return false;
     }
 
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
-        WLOGFE("Is not system calling failed to get system ability mgr.");
+        WLOGFE("Is not system calling, failed to get system ability mgr.");
         return false;
     }
     sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (remoteObject == nullptr) {
-        WLOGFE("Is not system calling failed to get bundle manager proxy.");
+        WLOGFE("Is not system calling, failed to get bundle manager proxy.");
         return false;
     }
     sptr<AppExecFwk::IBundleMgr> iBundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     if (iBundleMgr == nullptr) {
-        WLOGFE("Is not system calling iBundleMgr is nullptr");
+        WLOGFE("Is not system calling, iBundleMgr is nullptr");
         return false;
     }
     bool isSystemAppCalling = iBundleMgr->CheckIsSystemAppByUid(uid);
-    WLOGFI("UID:%{public}d  IsSystemApp:%{public}d", uid, isSystemAppCalling);
-    bool isSystemCalling = isSystemAppCalling || IsSystemServiceCalling();
-    if (!isSystemCalling) {
-        WLOGFE("Is not system calling");
+    if (!isSystemAppCalling) {
+        WLOGFE("Is not system calling, UID:%{public}d  IsSystemApp:%{public}d", uid, isSystemAppCalling);
     }
-    return isSystemCalling;
+    return isSystemAppCalling;
 }
 
 bool Permission::CheckCallingPermission(const std::string& permission)
