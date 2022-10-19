@@ -95,7 +95,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
         return;
     }
     StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart, windowRoot_->IsUniRender());
-    RSTransaction::FlushImplicitTransaction();
+    FlushWindowInfo(node->GetWindowId());
     node->startingWindowShown_ = true;
     WLOGFI("StartingWindow show success with id:%{public}u!", node->GetWindowId());
 }
@@ -116,7 +116,7 @@ void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
         "wms:async:ShowStartingWindow");
     WLOGFI("CancelStartingWindow with id:%{public}u!", node->GetWindowId());
     node->isAppCrash_ = true;
-    WMError res = windowRoot_->DestroyWindow(node->GetWindowId(), false);
+    WMError res = DestroyWindow(node->GetWindowId(), false);
     if (res != WMError::WM_OK) {
         WLOGFE("DestroyWindow failed!");
     }
