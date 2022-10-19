@@ -294,6 +294,8 @@ WMError WindowController::AddWindowNode(sptr<WindowProperty>& property)
             WLOGFI("id:%{public}u execute minimize all", node->GetWindowId());
         }
         node->stateMachine_.TransitionTo(WindowNodeState::SHOWN); // for normal show which not use remote animation
+    } else if (WindowHelper::IsMainWindow(node->GetWindowType())) {
+        MinimizeApp::ExecuteMinimizeTargetReasons(~MinimizeReason::OTHER_WINDOW);
     }
     return WMError::WM_OK;
 }
@@ -1304,7 +1306,7 @@ void WindowController::MinimizeWindowsByLauncher(std::vector<uint32_t>& windowId
 {
     windowRoot_->MinimizeTargetWindows(windowIds);
     auto func = []() {
-        MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::GESTURE_ANIMATION);
+        MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::GESTURE_ANIMATION);
     };
     if (!isAnimated) {
         func();

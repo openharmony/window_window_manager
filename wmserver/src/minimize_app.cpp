@@ -149,17 +149,21 @@ bool MinimizeApp::EnableMinimize(MinimizeReason reason)
     return true;
 }
 
-void MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason reason)
+void MinimizeApp::ExecuteMinimizeTargetReasons(uint32_t reasons)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
-        WLOGFI("[Minimize] ExecuteMinimizeTargetReason with size: %{public}zu, reason: %{public}u",
-            needMinimizeAppNodes_.at(reason).size(), reason);
-        bool isFromUser = IsFromUser(reason);
-        for (auto& node : needMinimizeAppNodes_.at(reason)) {
-            WindowInnerManager::GetInstance().MinimizeAbility(node, isFromUser);
+    while (reasons) {
+        MinimizeReason reason = static_cast<MinimizeReason>(reasons & (~reasons + 1));
+        if (needMinimizeAppNodes_.find(reason) != needMinimizeAppNodes_.end()) {
+            WLOGFI("[Minimize] ExecuteMinimizeTargetReason with size: %{public}zu, reason: %{public}u",
+                needMinimizeAppNodes_.at(reason).size(), reason);
+            bool isFromUser = IsFromUser(reason);
+            for (auto& node : needMinimizeAppNodes_.at(reason)) {
+                WindowInnerManager::GetInstance().MinimizeAbility(node, isFromUser);
+            }
+            needMinimizeAppNodes_.at(reason).clear();
         }
-        needMinimizeAppNodes_.at(reason).clear();
+        reasons -= reason;
     }
 }
 
