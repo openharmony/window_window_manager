@@ -49,7 +49,11 @@ int32_t SnapshotController::GetSnapshot(const sptr<IRemoteObject> &token, Snapsh
         if (targetNode != nullptr) {
             pixelMap = targetNode->GetSnapshot();
             targetNode->SetSnapshot(nullptr); // reset window snapshot after use
-            surfaceNode = targetNode->surfaceNode_;
+            if (targetNode->surfaceNode_ && targetNode->firstFrameAvailable_) {
+                surfaceNode = targetNode->surfaceNode_;
+            } else {
+                surfaceNode = targetNode->startingWinSurfaceNode_;
+            }
         }
     };
     handler_->PostSyncTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);

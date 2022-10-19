@@ -144,7 +144,7 @@ public:
     bool isPlayAnimationShow_ { false }; // delete when enable state machine
     bool isPlayAnimationHide_ { false }; // delete when enable state machine
     bool startingWindowShown_ { false };
-    bool firstFrameAvaliable_ { false };
+    bool firstFrameAvailable_ { false };
     bool isShowingOnMultiDisplays_ { false };
     std::vector<DisplayId> showingDisplays_;
     AbilityInfo abilityInfo_;
