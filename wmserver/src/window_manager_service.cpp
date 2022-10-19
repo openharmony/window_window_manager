@@ -660,7 +660,9 @@ void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token)
 {
-    if (WindowHelper::IsSystemWindow(property->GetWindowType()) && !Permission::IsSystemCalling()) {
+    bool isSystemWindowExceptAlarmWindow = property->GetWindowType() != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW &&
+        WindowHelper::IsSystemWindow(property->GetWindowType());
+    if (isSystemWindowExceptAlarmWindow && !Permission::IsSystemCalling()) {
         WLOGFE("create system window permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
@@ -680,7 +682,9 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
 
 WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 {
-    if ((WindowHelper::IsSystemWindow(property->GetWindowType()) ||
+    bool isSystemWindowExceptAlarmWindow = property->GetWindowType() != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW &&
+        WindowHelper::IsSystemWindow(property->GetWindowType());
+    if ((isSystemWindowExceptAlarmWindow ||
         property->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM)) &&
         !Permission::IsSystemCalling()) {
         WLOGFE("add window with animation permission denied!");

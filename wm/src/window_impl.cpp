@@ -325,7 +325,7 @@ WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 WMError WindowImpl::SetWindowType(WindowType type)
 {
     WLOGFD("window id: %{public}u, type:%{public}u.", property_->GetWindowId(), static_cast<uint32_t>(type));
-    if (!Permission::IsSystemCalling()) {
+    if (type != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW && !Permission::IsSystemCalling()) {
         WLOGFE("set window type permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
