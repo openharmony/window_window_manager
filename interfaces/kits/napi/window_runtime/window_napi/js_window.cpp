@@ -1123,7 +1123,7 @@ NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo&
         };
 
     NativeValue* lastParam = (info.argc == 1) ? nullptr :
-        ((info.argv[1] == nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ?
+        ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ?
         info.argv[1] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsWindow::OnSetWindowMode",
