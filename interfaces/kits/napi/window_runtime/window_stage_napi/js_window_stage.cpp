@@ -340,7 +340,7 @@ NativeValue* JsWindowStage::OnLoadContent(NativeEngine& engine, NativeCallbackIn
             if (weakScene == nullptr) {
                 WLOGFE("[NAPI]Window scene is null");
                 task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY)));
                 return;
             }
             auto win = weakScene->GetMainWindow();
@@ -517,12 +517,16 @@ NativeValue* JsWindowStage::OnSetShowOnLockScreen(NativeEngine& engine, NativeCa
 NativeValue* JsWindowStage::OnDisableWindowDecor(NativeEngine& engine, NativeCallbackInfo& info)
 {
     auto weakScene = windowScene_.lock();
-    if (weakScene == nullptr || weakScene->GetMainWindow() == nullptr) {
-        WLOGFE("[NAPI]WindowScene is null or window is null");
-        return CreateJsValue(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+    if (weakScene == nullptr) {
+        WLOGFE("[NAPI]WindowScene is null");
+        return CreateJsValue(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
     }
 
     auto window = weakScene->GetMainWindow();
+    if (window == nullptr) {
+        WLOGFE("[NAPI]Window is null");
+        return CreateJsValue(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+    }
     window->DisableAppWindowDecor();
     WLOGFI("[NAPI]Window [%{public}u, %{public}s] disable app window decor end",
         window->GetWindowId(), window->GetWindowName().c_str());
