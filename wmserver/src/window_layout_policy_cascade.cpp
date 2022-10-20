@@ -145,6 +145,27 @@ std::vector<int32_t> WindowLayoutPolicyCascade::GetExitSplitPoints(DisplayId dis
     return cascadeRectsMap_[displayId].exitSplitPoints_;
 }
 
+bool WindowLayoutPolicyCascade::SpecialReasonProcess(const sptr<WindowNode>& node) const
+{
+    const DisplayId& displayId = node->GetDisplayId();
+    if ((node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) ||
+        (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::RESIZE)) {
+        if (node->GetRequestRect() == node->GetWindowRect()) {
+            return false;
+        }
+    }
+    if (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::ROTATION) {
+        const auto& windowNodeVecSptrs = displayGroupWindowTree_[displayId];
+        for (const auto& windowNodeVecSptr : windowNodeVecSptrs) {
+            const auto& windowNodeVec = *(windowNodeVecSptr.second);
+            for (auto& childNode : windowNodeVec) {
+                childNode->SetWindowSizeChangeReason(WindowSizeChangeReason::ROTATION);
+            }
+        }
+    }
+    return true;
+}
+
 void WindowLayoutPolicyCascade::UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow)
 {
     HITRACE_METER(HITRACE_TAG_WINDOW_MANAGER);
@@ -153,11 +174,9 @@ void WindowLayoutPolicyCascade::UpdateWindowNode(const sptr<WindowNode>& node, b
     UpdateWindowNodeRectOffset(node);
     // affect other windows, trigger off global layout
     if (avoidTypes_.find(type) != avoidTypes_.end()) {
-        if ((node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) ||
-            (node->GetWindowSizeChangeReason() == WindowSizeChangeReason::RESIZE)) {
-            if (node->GetRequestRect() == node->GetWindowRect()) {
-                return;
-            }
+        bool ret = SpecialReasonProcess(node);
+        if (ret != true) {
+            return;
         }
         LayoutWindowTree(displayId);
     } else if (type == WindowType::WINDOW_TYPE_DOCK_SLICE) { // split screen mode

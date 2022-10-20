@@ -405,8 +405,8 @@ bool JsWindowManager::ParseConfigOption(NativeEngine& engine, NativeObject* jsOb
         WLOGFE("[NAPI]Failed to convert parameter to winType");
         return false;
     }
-    if (!(WindowHelper::IsSystemWindow(static_cast<WindowType>(winType)) ||
-        WindowHelper::IsSubWindow(static_cast<WindowType>(winType)))) {
+    if (!(WindowHelper::IsSystemWindow(option.GetWindowType()) ||
+        WindowHelper::IsSubWindow(option.GetWindowType()))) {
         WLOGFE("[NAPI]Convert parameter to invalid winType");
         return false;
     }
