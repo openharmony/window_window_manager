@@ -100,7 +100,7 @@ HWTEST_F(MinimizeAppTest, MinimizeAppTest01, Function | SmallTest | Level2)
     ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimize(node11));
     ASSERT_EQ(false, MinimizeApp::IsNodeNeedMinimize(conflictNode));
 
-    MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::SPLIT_REPLACE);
+    MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::SPLIT_REPLACE);
     MinimizeApp::ExecuteMinimizeAll();
 }
 /**
