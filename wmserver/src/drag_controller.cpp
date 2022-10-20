@@ -26,6 +26,7 @@
 #include "window_node.h"
 #include "window_node_container.h"
 #include "window_property.h"
+#include "xcollie/watchdog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -181,6 +182,10 @@ bool MoveDragController::Init()
         AppExecFwk::EventRunner::Create(INNER_WM_INPUT_THREAD_NAME));
     if (inputEventHandler_ == nullptr) {
         return false;
+    }
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(INNER_WM_INPUT_THREAD_NAME, inputEventHandler_);
+    if (ret != 0) {
+        WLOGFE("Add watchdog thread failed");
     }
     inputListener_ = std::make_shared<InputEventListener>(InputEventListener());
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(inputListener_, inputEventHandler_);
