@@ -127,8 +127,8 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindow, Function | SmallTest | Level2)
     window->SetPrivacyMode(false);
     usleep(WAIT_FOR_SYNC_US);
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
-    ASSERT_TRUE(!hasPrivateWindow);
     window->Destroy();
+    ASSERT_TRUE(!hasPrivateWindow);
 }
 
 /**
@@ -145,14 +145,17 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered, Function | SmallTest | Lev
     window2->SetPrivacyMode(true);
     // 10:rect.posX_, 110:rect.posY_, 650:rect.width, 500:rect.height
     sptr<Window> window3 = CreateWindow("covered", WindowMode::WINDOW_MODE_FLOATING, Rect {10, 120, 650, 500});
+    ASSERT_NE(nullptr, window1);
+    ASSERT_NE(nullptr, window2);
+    ASSERT_NE(nullptr, window3);
     usleep(WAIT_FOR_SYNC_US);
     bool hasPrivateWindow = false;
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
-    ASSERT_TRUE(!hasPrivateWindow);
     window1->Destroy();
     window2->Destroy();
     window3->Destroy();
+    ASSERT_TRUE(!hasPrivateWindow);
 }
 
 /**
@@ -169,14 +172,17 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered01, Function | SmallTest | L
     window2->SetPrivacyMode(true);
     // 5:rect.posX_, 110:rect.posY_, 650:rect.width, 500:rect.height
     sptr<Window> window3 = CreateWindow("covered", WindowMode::WINDOW_MODE_FLOATING, Rect {5, 110, 650, 500});
+    ASSERT_NE(nullptr, window1);
+    ASSERT_NE(nullptr, window2);
+    ASSERT_NE(nullptr, window3);
     usleep(WAIT_FOR_SYNC_US);
     bool hasPrivateWindow = false;
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
-    ASSERT_TRUE(hasPrivateWindow);
     window1->Destroy();
     window2->Destroy();
     window3->Destroy();
+    ASSERT_TRUE(hasPrivateWindow);
 }
 
 /**
@@ -195,15 +201,19 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered02, Function | SmallTest | L
     sptr<Window> window3 = CreateWindow("covered1", WindowMode::WINDOW_MODE_FLOATING, Rect {5, 110, 655, 500});
     // 5:rect.posX_, 300:rect.posY_, 655:rect.width, 500:rect.height
     sptr<Window> window4 = CreateWindow("covered2", WindowMode::WINDOW_MODE_FLOATING, Rect {5, 300, 655, 500});
+    ASSERT_NE(nullptr, window1);
+    ASSERT_NE(nullptr, window2);
+    ASSERT_NE(nullptr, window3);
+    ASSERT_NE(nullptr, window4);
     usleep(WAIT_FOR_SYNC_US);
     bool hasPrivateWindow = false;
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
-    ASSERT_TRUE(!hasPrivateWindow);
     window1->Destroy();
     window2->Destroy();
     window3->Destroy();
     window4->Destroy();
+    ASSERT_TRUE(!hasPrivateWindow);
 }
 
 /**
@@ -222,15 +232,19 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowCovered03, Function | SmallTest | L
     sptr<Window> window3 = CreateWindow("covered1", WindowMode::WINDOW_MODE_FLOATING, Rect {5, 110, 655, 500});
     // 5:rect.posX_, 700:rect.pos_Y, rect.width_:655, rect.height_:500
     sptr<Window> window4 = CreateWindow("covered2", WindowMode::WINDOW_MODE_FLOATING, Rect {5, 700, 655, 500});
+    ASSERT_NE(nullptr, window1);
+    ASSERT_NE(nullptr, window2);
+    ASSERT_NE(nullptr, window3);
+    ASSERT_NE(nullptr, window4);
     usleep(WAIT_FOR_SYNC_US);
     bool hasPrivateWindow = false;
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
-    ASSERT_TRUE(hasPrivateWindow);
     window1->Destroy();
     window2->Destroy();
     window3->Destroy();
     window4->Destroy();
+    ASSERT_TRUE(hasPrivateWindow);
 }
 
 /**
@@ -244,14 +258,16 @@ HWTEST_F(DisplayManagerTest, HasPrivateWindowSkipSnapShot, Function | SmallTest 
     sptr<Window> window1 = CreateWindow("test", WindowMode::WINDOW_MODE_FULLSCREEN, Rect {0, 0, 0, 0});
     // 10:rect.posX_, 120:rect.posY_, 650:rect.width, 500:rect.height
     sptr<Window> window2 = CreateWindow("private", WindowMode::WINDOW_MODE_FLOATING, Rect {10, 120, 650, 500});
+    ASSERT_NE(nullptr, window1);
+    ASSERT_NE(nullptr, window2);
     window2->SetSnapshotSkip(true);
     usleep(WAIT_FOR_SYNC_US);
     bool hasPrivateWindow = false;
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     DisplayManager::GetInstance().HasPrivateWindow(id, hasPrivateWindow);
-    ASSERT_TRUE(!hasPrivateWindow);
     window1->Destroy();
     window2->Destroy();
+    ASSERT_TRUE(!hasPrivateWindow);
 }
 }
 } // namespace OHOS::Rosen
