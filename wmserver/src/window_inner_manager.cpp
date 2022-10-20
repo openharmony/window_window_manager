@@ -19,6 +19,7 @@
 #include "ui_service_mgr_client.h"
 #include "window.h"
 #include "window_manager_hilog.h"
+#include "xcollie/watchdog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -48,7 +49,10 @@ bool WindowInnerManager::Init()
     if (eventHandler_ == nullptr) {
         return false;
     }
-
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(INNER_WM_THREAD_NAME, eventHandler_);
+    if (ret != 0) {
+        WLOGFE("Add watchdog thread failed");
+    }
     moveDragController_ = new MoveDragController();
     if (!moveDragController_->Init()) {
         WLOGFE("Init window drag controller failed");
