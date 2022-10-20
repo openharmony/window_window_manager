@@ -72,6 +72,7 @@ enum class DMError : int32_t {
     DM_ERROR_RENDER_SERVICE_FAILED = 180,
     DM_ERROR_UNREGISTER_AGENT_FAILED = 190,
     DM_ERROR_INVALID_CALLING = 200,
+    DM_ERROR_INVALID_PERMISSION = 201,
     DM_ERROR_UNKNOWN = -1,
 };
 
@@ -87,6 +88,7 @@ enum class DmErrorCode : int32_t {
 
 const std::map<DMError, DmErrorCode> DM_JS_TO_ERROR_CODE_MAP {
     {DMError::DM_OK,                                    DmErrorCode::DM_OK                          },
+    {DMError::DM_ERROR_INVALID_PERMISSION,              DmErrorCode::DM_ERROR_NO_PERMISSION         },
     {DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED,           DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
     {DMError::DM_ERROR_IPC_FAILED,                      DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
     {DMError::DM_ERROR_REMOTE_CREATE_FAILED,            DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },

@@ -39,7 +39,6 @@ public:
     sptr<DisplayInfo> GetDefaultDisplay() const;
     sptr<DisplayInfo> GetDisplayById(DisplayId displayId) const;
     std::vector<DisplayId> GetAllDisplayIds() const;
-    ScreenId GetRSScreenId(DisplayId displayId) const;
     uint32_t GetRSScreenNum() const;
     sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId) const;
     ScreenId GetScreenGroupIdByDisplayId(DisplayId displayId) const;

@@ -22,6 +22,7 @@ namespace OHOS {
 namespace Rosen {
 class Permission {
 public:
+    static bool IsSystemServiceCalling(bool needPrintLog = true);
     static bool IsSystemCalling();
     static bool CheckCallingPermission(const std::string& permission);
     static bool IsStartByHdcd();

@@ -69,43 +69,35 @@ NativeValue* JsTransitionContext::OnCompleteTransition(NativeEngine& engine, Nat
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
-    AsyncTask::CompleteCallback complete =
-        [weakWindow = windowToken_, transitionCompleted, isShownTransContext = isShownTransContext_](
-            NativeEngine& engine, AsyncTask& task, int32_t status) {
-            HandleScope handleScope(engine);
-            auto window = weakWindow.promote();
-            if (window == nullptr) {
-                task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-                return;
-            }
-            WMError ret = WMError::WM_OK;
-            if (!isShownTransContext) {
-                window->UpdateSurfaceNodeAfterCustomAnimation(false); // remove from rs tree after animation
-                if (!transitionCompleted) {
-                    ret = window->Show(); // hide success
-                }
-            } else {
-                if (!transitionCompleted) {
-                    ret = window->Hide(); // hide success
-                }
-            }
-            if (ret != WMError::WM_OK) {
-                task.Reject(engine, CreateJsError(engine,
-                    static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret)), "Window destroy failed"));
-                return;
-            }
-            WLOGFI("[NAPI]Window [%{public}u, %{public}s] CompleteTransition %{public}d end",
-                window->GetWindowId(), window->GetWindowName().c_str(), transitionCompleted);
-            task.Resolve(engine, engine.CreateUndefined());
-        };
-
-    NativeValue* lastParam = (info.argc <= 1) ? nullptr :
-        (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr);
-    NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsTransitionContext::OnCompleteTransition",
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    WMError ret = WMError::WM_OK;
+    auto state = windowToken_->GetWindowState();
+    if (!isShownTransContext_) {
+        if (state != WindowState::STATE_HIDDEN) {
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] Hidden context called but window is not hidden: %{public}u",
+                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<uint32_t>(state));
+            return engine.CreateUndefined();
+        }
+        windowToken_->UpdateSurfaceNodeAfterCustomAnimation(false); // remove from rs tree after animation
+        if (!transitionCompleted) {
+            ret = windowToken_->Show(); // hide aborted
+        }
+    } else {
+        if (state != WindowState::STATE_SHOWN) {
+            WLOGFI("[NAPI]Window [%{public}u, %{public}s] shown context called but window is not shown: %{public}u",
+                windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<uint32_t>(state));
+            return engine.CreateUndefined();
+        }
+        if (!transitionCompleted) {
+            ret = windowToken_->Hide(); // show aborted
+        }
+    }
+    if (ret != WMError::WM_OK) {
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(ret))));
+        return engine.CreateUndefined();
+    }
+    WLOGFI("[NAPI]Window [%{public}u, %{public}s] CompleteTransition %{public}d end",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), transitionCompleted);
+    return engine.CreateUndefined();
 }
 
 static NativeValue* CreateJsTransitionContextObject(NativeEngine& engine, std::shared_ptr<NativeReference> jsWin,

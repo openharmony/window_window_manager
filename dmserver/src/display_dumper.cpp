@@ -311,7 +311,7 @@ std::string DisplayDumper::TransferTypeToString(ScreenType type) const
             screenType = "VIRTUAL";
             break;
         default:
-            screenType = "UNDEFINE";
+            screenType = "UNDEFINED";
             break;
     }
     return screenType;

@@ -23,6 +23,7 @@
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
 
+#include "permission.h"
 #include "color_parser.h"
 #include "display_manager.h"
 #include "display_info.h"
@@ -59,9 +60,6 @@ static int constructorCnt = 0;
 static int deConstructorCnt = 0;
 WindowImpl::WindowImpl(const sptr<WindowOption>& option)
 {
-    if (option->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        option->SetWindowName("divider_bar");
-    }
     property_ = new (std::nothrow) WindowProperty();
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
@@ -107,7 +105,7 @@ RSSurfaceNode::SharedPtr WindowImpl::CreateSurfaceNode(std::string name, WindowT
             rsSurfaceNodeType = RSSurfaceNodeType::SELF_DRAWING_WINDOW_NODE;
             break;
         default:
-            rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
+            rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
     }
     return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
@@ -327,6 +325,10 @@ WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 WMError WindowImpl::SetWindowType(WindowType type)
 {
     WLOGFD("window id: %{public}u, type:%{public}u.", property_->GetWindowId(), static_cast<uint32_t>(type));
+    if (type != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW && !Permission::IsSystemCalling()) {
+        WLOGFE("set window type permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -351,6 +353,10 @@ WMError WindowImpl::SetWindowType(WindowType type)
 WMError WindowImpl::SetWindowMode(WindowMode mode)
 {
     WLOGFI("[Client] Window %{public}u mode %{public}u", property_->GetWindowId(), static_cast<uint32_t>(mode));
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set window mode permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -382,6 +388,10 @@ WMError WindowImpl::SetWindowMode(WindowMode mode)
 void WindowImpl::SetAlpha(float alpha)
 {
     WLOGFI("[Client] Window %{public}u alpha %{public}f", property_->GetWindowId(), alpha);
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set alpha permission denied!");
+        return;
+    }
     if (!IsWindowValid()) {
         return;
     }
@@ -818,13 +828,13 @@ bool WindowImpl::IsAppMainOrSubOrFloatingWindow()
     return false;
 }
 
-void WindowImpl::SetWindowCornerRadiusAccordingToSystemConfig()
+WMError WindowImpl::SetWindowCornerRadiusAccordingToSystemConfig()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto vpr = display->GetVirtualPixelRatio();
     auto fullscreenRadius = windowSystemConfig_.effectConfig_.fullScreenCornerRadius_ * vpr;
@@ -835,45 +845,46 @@ void WindowImpl::SetWindowCornerRadiusAccordingToSystemConfig()
         name_.c_str(), GetMode(), vpr, fullscreenRadius, splitRadius, floatRadius);
 
     if (WindowHelper::IsFullScreenWindow(GetMode()) && MathHelper::GreatNotEqual(fullscreenRadius, 0.0)) {
-        SetCornerRadius(fullscreenRadius);
+        return SetCornerRadius(fullscreenRadius);
     } else if (WindowHelper::IsSplitWindowMode(GetMode()) && MathHelper::GreatNotEqual(splitRadius, 0.0)) {
-        SetCornerRadius(splitRadius);
+        return SetCornerRadius(splitRadius);
     } else if (WindowHelper::IsFloatingWindow(GetMode()) && MathHelper::GreatNotEqual(floatRadius, 0.0)) {
-        SetCornerRadius(floatRadius);
+        return SetCornerRadius(floatRadius);
     }
+    return WMError::WM_DO_NOTHING;
 }
 
-void WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
+WMError WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
 {
     if (!WindowHelper::IsAppWindow(GetType()) && !isAppFloatingWindow_) {
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
     auto& shadow = isFocused_ ? windowSystemConfig_.effectConfig_.focusedShadow_ :
         windowSystemConfig_.effectConfig_.unfocusedShadow_;
 
     if (MathHelper::NearZero(shadow.elevation_)) {
-        return;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
 
     if (!WindowHelper::IsFloatingWindow(GetMode())) {
         surfaceNode_->SetShadowElevation(0.f);
         WLOGFI("[WEffect][%{public}s]close shadow", name_.c_str());
-        return;
+        return WMError::WM_OK;
     }
 
     auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
         WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
             property_->GetWindowId());
-        return;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto vpr = display->GetVirtualPixelRatio();
 
     uint32_t colorValue;
     if (!ColorParser::Parse(shadow.color_, colorValue)) {
         WLOGFE("[WEffect]invalid color string: %{public}s", shadow.color_.c_str());
-        return;
+        return WMError::WM_ERROR_INVALID_PARAM;
     }
 
     WLOGFI("[WEffect][%{public}s]focused: %{public}u, [%{public}f, %{public}s, %{public}f, %{public}f, %{public}f]",
@@ -886,6 +897,7 @@ void WindowImpl::UpdateWindowShadowAccordingToSystemConfig()
     surfaceNode_->SetShadowOffsetY(shadow.offsetY_);
     surfaceNode_->SetShadowAlpha(shadow.alpha_);
     RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
 }
 
 void WindowImpl::SetSystemConfig()
@@ -986,6 +998,10 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
         GetConfigurationFromAbilityInfo();
     } else if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_UNDEFINED) {
         property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    }
+
+    if (property_->GetWindowType() == WindowType::WINDOW_TYPE_VOLUME_OVERLAY) {
+        surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
     }
 
     WMError ret = SingletonContainer::Get<WindowAdapter>().CreateWindow(windowAgent, property_, surfaceNode_,
@@ -1344,6 +1360,11 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y)
                "movePos: [%{public}d, %{public}d]", property_->GetWindowId(), rect.posX_, rect.posY_, x, y);
         return WMError::WM_OK;
     }
+
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        WLOGFE("fullscreen window could not resize, winId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
@@ -1366,6 +1387,11 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height)
                "resizeRect: [%{public}u, %{public}u]", property_->GetWindowId(), rect.width_,
                rect.height_, width, height);
         return WMError::WM_OK;
+    }
+
+    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        WLOGFE("fullscreen window could not resize, winId: %{public}u", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
     }
     property_->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
@@ -1390,6 +1416,10 @@ bool WindowImpl::IsKeepScreenOn() const
 
 WMError WindowImpl::SetTurnScreenOn(bool turnScreenOn)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set wake up screen permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1576,11 +1606,19 @@ void WindowImpl::SetSystemPrivacyMode(bool isSystemPrivacyMode)
 
 void WindowImpl::SetSnapshotSkip(bool isSkip)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set snapshot skip permission denied!");
+        return;
+    }
     surfaceNode_->SetSecurityLayer(isSkip || property_->GetSystemPrivacyMode());
 }
 
 void WindowImpl::DisableAppWindowDecor()
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("disable app window decor permission denied!");
+        return;
+    }
     if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
         WLOGFE("window decoration is invalid on sub window");
         return;
@@ -2322,7 +2360,6 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
         }
         float vpr = display->GetVirtualPixelRatio();
         CalculateStartRectExceptHotZone(vpr);
-
         if (IsPointInDragHotZone(pointerItem.GetDisplayX(), pointerItem.GetDisplayY())) {
             uint32_t tempStyleID = mouseStyleID_;
             // calculate pointer style
@@ -2332,15 +2369,19 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
                     static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), mouseStyleID_);
             }
             isPointerStyleChanged_ = true;
+        } else {
+            int32_t currentStyleID;
+            MMI::InputManager::GetInstance()->GetPointerStyle(pointerEvent->GetAgentWindowId(), currentStyleID);
+            if (currentStyleID != MMI::MOUSE_ICON::DEFAULT) {
+                MMI::InputManager::GetInstance()->SetPointerStyle(
+                    static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), MMI::MOUSE_ICON::DEFAULT);
+            }
         }
     } else if (GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE && isPointerStyleChanged_ == false) {
-        if (GetRect().width_ > GetRect().height_) {
-            MMI::InputManager::GetInstance()->SetPointerStyle(
-                static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), MMI::MOUSE_ICON::NORTH_SOUTH);
-        } else {
-            MMI::InputManager::GetInstance()->SetPointerStyle(
-                static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), MMI::MOUSE_ICON::WEST_EAST);
-        }
+        uint32_t mouseStyle = (GetRect().width_ > GetRect().height_) ?
+                                MMI::MOUSE_ICON::NORTH_SOUTH : MMI::MOUSE_ICON::WEST_EAST;
+        MMI::InputManager::GetInstance()->SetPointerStyle(
+            static_cast<uint32_t>(pointerEvent->GetAgentWindowId()), mouseStyle);
         isPointerStyleChanged_ = true;
     }
     auto action = pointerEvent->GetPointerAction();
@@ -2360,7 +2401,7 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
         property_->UpdatePointerEvent(pointerEvent);
     }
     int32_t action = pointerEvent->GetPointerAction();
-    if (action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
+    if ((action == MMI::PointerEvent::POINTER_ACTION_MOVE || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) &&
         pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         HandlePointerStyle(pointerEvent);
     }
@@ -2908,6 +2949,10 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
 
 WMError WindowImpl::SetCornerRadius(float cornerRadius)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set corner radius permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WLOGFI("[Client] Window %{public}s set corner radius %{public}f", name_.c_str(), cornerRadius);
     if (MathHelper::LessNotEqual(cornerRadius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -2919,6 +2964,10 @@ WMError WindowImpl::SetCornerRadius(float cornerRadius)
 
 WMError WindowImpl::SetShadowRadius(float radius)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set shadow radius permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WLOGFI("[Client] Window %{public}s set shadow radius %{public}f", name_.c_str(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -2930,6 +2979,10 @@ WMError WindowImpl::SetShadowRadius(float radius)
 
 WMError WindowImpl::SetShadowColor(std::string color)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set shadow color permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WLOGFI("[Client] Window %{public}s set shadow color %{public}s", name_.c_str(), color.c_str());
     uint32_t colorValue;
     if (!ColorParser::Parse(color, colorValue)) {
@@ -2942,6 +2995,10 @@ WMError WindowImpl::SetShadowColor(std::string color)
 
 void WindowImpl::SetShadowOffsetX(float offsetX)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set shadow offset x permission denied!");
+        return;
+    }
     WLOGFI("[Client] Window %{public}s set shadow offsetX %{public}f", name_.c_str(), offsetX);
     surfaceNode_->SetShadowOffsetX(offsetX);
     RSTransaction::FlushImplicitTransaction();
@@ -2949,6 +3006,10 @@ void WindowImpl::SetShadowOffsetX(float offsetX)
 
 void WindowImpl::SetShadowOffsetY(float offsetY)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set shadow offset y permission denied!");
+        return;
+    }
     WLOGFI("[Client] Window %{public}s set shadow offsetY %{public}f", name_.c_str(), offsetY);
     surfaceNode_->SetShadowOffsetY(offsetY);
     RSTransaction::FlushImplicitTransaction();
@@ -2956,6 +3017,10 @@ void WindowImpl::SetShadowOffsetY(float offsetY)
 
 WMError WindowImpl::SetBlur(float radius)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set blur permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WLOGFI("[Client] Window %{public}s set blur radius %{public}f", name_.c_str(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -2967,6 +3032,10 @@ WMError WindowImpl::SetBlur(float radius)
 
 WMError WindowImpl::SetBackdropBlur(float radius)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set backdrop blur permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WLOGFI("[Client] Window %{public}s set backdrop blur radius %{public}f", name_.c_str(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0)) {
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -2978,6 +3047,10 @@ WMError WindowImpl::SetBackdropBlur(float radius)
 
 WMError WindowImpl::SetBackdropBlurStyle(WindowBlurStyle blurStyle)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set backdrop blur style permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     WLOGFI("[Client] Window %{public}s set backdrop blur style %{public}u", name_.c_str(), blurStyle);
     if (blurStyle < WindowBlurStyle::WINDOW_BLUR_OFF || blurStyle > WindowBlurStyle::WINDOW_BLUR_THICK) {
         return WMError::WM_ERROR_INVALID_PARAM;

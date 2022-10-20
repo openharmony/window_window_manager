@@ -26,6 +26,7 @@
 #include "window_manager_hilog.h"
 #include "window_manager_service.h"
 #include "window_manager_agent_controller.h"
+#include "permission.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -302,6 +303,26 @@ void WindowRoot::AddSurfaceNodeIdWindowNodePair(uint64_t surfaceNodeId, sptr<Win
     surfaceIdWindowNodeMap_.insert(std::make_pair(surfaceNodeId, node));
 }
 
+void WindowRoot::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
+{
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("Get Visible Window Permission Denied");
+    }
+    VisibleData& VisibleWindow = lastOcclusionData_->GetVisibleData();
+    for (auto surfaceId : VisibleWindow) {
+        auto iter = surfaceIdWindowNodeMap_.find(surfaceId);
+        if (iter == surfaceIdWindowNodeMap_.end()) {
+            continue;
+        }
+        sptr<WindowNode> node = iter->second;
+        if (node == nullptr) {
+            continue;
+        }
+        infos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
+            node->GetCallingUid(), true, node->GetWindowType()));
+    }
+}
+
 std::vector<std::pair<uint64_t, bool>> WindowRoot::GetWindowVisibilityChangeInfo(
     std::shared_ptr<RSOcclusionData> occlusionData)
 {
@@ -430,7 +451,7 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
             WindowManagerService::GetInstance().AddWindow(property);
             return true;
         };
-        WMError tmpRes = tmpRes = container->ToggleShownStateForAllAppWindows(restoreFunc, isAllAppWindowsEmpty);
+        WMError tmpRes = container->ToggleShownStateForAllAppWindows(restoreFunc, isAllAppWindowsEmpty);
         res = (res == WMError::WM_OK) ? tmpRes : res;
     });
     return res;
@@ -470,7 +491,9 @@ WMError WindowRoot::PostProcessAddWindowNode(sptr<WindowNode>& node, sptr<Window
         container->SetFocusWindow(node->GetWindowId());
         needCheckFocusWindow = true;
     }
-    container->SetActiveWindow(node->GetWindowId(), false);
+    if (!WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
+        container->SetActiveWindow(node->GetWindowId(), false);
+    }
 
     for (auto& child : node->children_) {
         if (child == nullptr || !child->currentVisibility_) {
@@ -1030,6 +1053,10 @@ WMError WindowRoot::RequestActiveWindow(uint32_t windowId)
     if (node == nullptr) {
         WLOGFE("could not find window");
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (WindowHelper::IsSystemBarWindow(node->GetWindowType())) {
+        WLOGFE("window could not be active window");
+        return WMError::WM_ERROR_INVALID_TYPE;
     }
     auto container = GetOrCreateWindowNodeContainer(node->GetDisplayId());
     if (container == nullptr) {

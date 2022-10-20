@@ -17,7 +17,7 @@
 #include <map>
 #include <set>
 
-namespace OHOS::Rosen::Occlusion {
+namespace OHOS::Rosen::WmOcclusion {
 static Rect _s_empty_rect_ { 0, 0, 0, 0 };
 static Rect _s_invalid_rect_ { 0, 0, -1, -1 };
 bool Region::_s_so_loaded_ = false;

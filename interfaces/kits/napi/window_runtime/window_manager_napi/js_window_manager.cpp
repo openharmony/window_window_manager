@@ -132,6 +132,26 @@ static void GetNativeContext(NativeEngine& engine, NativeValue* nativeContext, v
     }
 }
 
+static uint32_t GetParentId(NativeEngine& engine)
+{
+    AppExecFwk::Ability* ability = nullptr;
+    uint32_t parentId = 0;
+    bool isOldApi = GetAPI7Ability(engine, ability);
+    if (isOldApi) {
+        if (ability == nullptr) {
+            WLOGE("[NAPI]FA mode GetAPI7Ability failed");
+            return parentId;
+        }
+        auto window = ability->GetWindow();
+        if (window == nullptr) {
+            WLOGE("[NAPI]Get mainWindow failed");
+            return parentId;
+        }
+        parentId = window->GetWindowId();
+    }
+    return parentId;
+}
+
 static bool GetWindowTypeAndParentId(NativeEngine& engine, uint32_t& parentId, WindowType& winType,
     NativeValue* nativeString, NativeValue* nativeType)
 {
@@ -174,14 +194,52 @@ static bool GetWindowTypeAndParentId(NativeEngine& engine, uint32_t& parentId, W
     return true;
 }
 
+static void CreateNewSystemWindowTask(void* contextPtr, sptr<WindowOption> windowOption,
+    NativeEngine& engine, AsyncTask& task)
+{
+    WLOGFI("[NAPI]CreateSystemWindowTask");
+    if (windowOption == nullptr) {
+        int32_t err = static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+        task.Reject(engine, CreateJsError(engine, err, "New window option failed"));
+        WLOGFE("[NAPI]New window option failed");
+        return;
+    }
+    auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
+    if (contextPtr == nullptr || context == nullptr) {
+        int32_t err = static_cast<int32_t>(WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY);
+        task.Reject(engine, CreateJsError(engine, err, "Context is nullptr"));
+        WLOGFE("[NAPI]Context is nullptr");
+        return;
+    }
+    if (windowOption->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT ||
+        windowOption->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
+        auto abilityContext = Context::ConvertTo<AbilityRuntime::AbilityContext>(context->lock());
+        if (abilityContext != nullptr) {
+            if (!CheckCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
+                int32_t err = static_cast<int32_t>(WmErrorCode::WM_ERROR_NO_PERMISSION);
+                task.Reject(engine, CreateJsError(engine, err, "TYPE_FLOAT CheckCallingPermission failed"));
+                return;
+            }
+        }
+    }
+
+    sptr<Window> window = Window::Create(windowOption->GetWindowName(), windowOption, context->lock());
+    if (window != nullptr) {
+        task.Resolve(engine, CreateJsWindowObject(engine, window));
+    } else {
+        WLOGFE("[NAPI]Create window failed");
+        int32_t err = static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        task.Reject(engine, CreateJsError(engine, err, "Create window failed"));
+    }
+}
+
 static void CreateSystemWindowTask(void* contextPtr, std::string windowName, WindowType winType,
-    NativeEngine& engine, AsyncTask& task, bool newErrorCode = false)
+    NativeEngine& engine, AsyncTask& task)
 {
     WLOGFI("[NAPI]CreateSystemWindowTask");
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
     if (contextPtr == nullptr || context == nullptr) {
-        int32_t err = newErrorCode ? static_cast<int32_t>(WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY)
-            : static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+        int32_t err = static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
         task.Reject(engine, CreateJsError(engine, err, "Context is nullptr"));
         WLOGFE("[NAPI]Context is nullptr");
         return;
@@ -190,8 +248,7 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
         auto abilityContext = Context::ConvertTo<AbilityRuntime::AbilityContext>(context->lock());
         if (abilityContext != nullptr) {
             if (!CheckCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW")) {
-                int32_t err = newErrorCode ? static_cast<int32_t>(WmErrorCode::WM_ERROR_NO_PERMISSION)
-                    : static_cast<int32_t>(WMError::WM_ERROR_INVALID_PERMISSION);
+                int32_t err = static_cast<int32_t>(WMError::WM_ERROR_INVALID_PERMISSION);
                 task.Reject(engine, CreateJsError(engine, err, "TYPE_FLOAT CheckCallingPermission failed"));
                 return;
             }
@@ -199,8 +256,7 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
     }
     sptr<WindowOption> windowOption = new(std::nothrow) WindowOption();
     if (windowOption == nullptr) {
-        int32_t err = newErrorCode ? static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY)
-            : static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+        int32_t err = static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
         task.Reject(engine, CreateJsError(engine, err, "New window option failed"));
         WLOGFE("[NAPI]New window option failed");
         return;
@@ -211,8 +267,36 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
         task.Resolve(engine, CreateJsWindowObject(engine, window));
     } else {
         WLOGFE("[NAPI]Create window failed");
-        int32_t err = newErrorCode ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)
-            : static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+        int32_t err = static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+        task.Reject(engine, CreateJsError(engine, err, "Create window failed"));
+    }
+}
+
+static void CreateNewSubWindowTask(sptr<WindowOption> windowOption, NativeEngine& engine, AsyncTask& task)
+{
+    if (windowOption == nullptr) {
+        int32_t err = static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+        task.Reject(engine, CreateJsError(engine, err, "New window option failed"));
+        WLOGFE("[NAPI]New window option failed");
+        return;
+    }
+    windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    if (windowOption->GetParentId() == INVALID_WINDOW_ID) {
+        uint32_t parentId = GetParentId(engine);
+        if (!parentId) {
+            int32_t err = static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+            task.Reject(engine, CreateJsError(engine, err, "parent window missed"));
+            WLOGFE("[NAPI]can not find parent window");
+            return;
+        }
+        windowOption->SetParentId(parentId);
+    }
+    sptr<Window> window = Window::Create(windowOption->GetWindowName(), windowOption);
+    if (window != nullptr) {
+        task.Resolve(engine, CreateJsWindowObject(engine, window));
+    } else {
+        WLOGFE("[NAPI]Create window failed");
+        int32_t err = static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         task.Reject(engine, CreateJsError(engine, err, "Create window failed"));
     }
 }
@@ -309,9 +393,14 @@ bool JsWindowManager::ParseConfigOption(NativeEngine& engine, NativeObject* jsOb
         return false;
     }
 
-    WindowType winType = WindowType::SYSTEM_WINDOW_BASE;
+    uint32_t winType;
     if (ParseJsValue(jsObject, engine, "windowType", winType)) {
-        option.SetWindowType(winType);
+        if (winType >= static_cast<uint32_t>(ApiWindowType::TYPE_BASE) &&
+            winType < static_cast<uint32_t>(ApiWindowType::TYPE_END)) {
+            option.SetWindowType(JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(winType)));
+        } else {
+            option.SetWindowType(static_cast<WindowType>(winType));
+        }
     } else {
         WLOGFE("[NAPI]Failed to convert parameter to winType");
         return false;
@@ -373,12 +462,12 @@ NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbac
     }
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (option.GetParentId() == INVALID_WINDOW_ID) {
-                return CreateSystemWindowTask(contextPtr, option.GetWindowName(),
-                    option.GetWindowType(), engine, task, true);
-            } else {
-                return CreateSubWindowTask(option.GetParentId(), option.GetWindowName(),
-                    option.GetWindowType(), engine, task, true);
+            sptr<WindowOption> windowOption = new WindowOption(option);
+            if (WindowHelper::IsSystemWindow(option.GetWindowType())) {
+                return CreateNewSystemWindowTask(contextPtr, windowOption, engine, task);
+            }
+            if (WindowHelper::IsSubWindow(option.GetWindowType())) {
+                return CreateNewSubWindowTask(windowOption, engine, task);
             }
         };
 

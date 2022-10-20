@@ -70,6 +70,7 @@ public:
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
     void OnScreenshot(DisplayId displayId);
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
+    WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
     void SetAnchorAndScale(int32_t x, int32_t y, float scale);
     void SetAnchorOffset(int32_t deltaX, int32_t deltaY);
     void OffWindowZoom();
@@ -78,6 +79,7 @@ public:
     WMError RecoverInputEventToClient(uint32_t windowId);
     WMError NotifyWindowClientPointUp(uint32_t windowId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WMError ChangeMouseStyle(uint32_t windowId, sptr<MoveDragProperty>& moveDragProperty);
+    void RecoverDefaultMouseStyle(uint32_t windowId);
 
 private:
     uint32_t GenWindowId();
@@ -107,6 +109,7 @@ private:
     void SetDefaultDisplayInfo(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo);
     void ProcessDisplayCompression(DisplayId defaultDisplayId, const sptr<DisplayInfo>& displayInfo);
     void NotifyAfterAddWindow(sptr<WindowNode>& node);
+    void AsyncFlushInputInfo(uint32_t windowId);
 
     sptr<WindowRoot> windowRoot_;
     sptr<InputWindowMonitor> inputWindowMonitor_;
