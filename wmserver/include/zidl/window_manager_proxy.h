@@ -54,6 +54,7 @@ public:
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override;
 
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
+    WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WMError GetSystemConfig(SystemConfig& systemConfig) override;
     WMError GetModeChangeHotZones(DisplayId displayId, ModeChangeHotZones& hotZones) override;
     void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,

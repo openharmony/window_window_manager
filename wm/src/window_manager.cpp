@@ -520,6 +520,15 @@ WMError WindowManager::GetAccessibilityWindowInfo(std::vector<sptr<Accessibility
     return ret;
 }
 
+WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetVisibilityWindowInfo(infos);
+    if (ret != WMError::WM_OK) {
+        WLOGFE("get window visibility info failed");
+    }
+    return ret;
+}
+
 void WindowManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing) const
 {
     pImpl_->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);

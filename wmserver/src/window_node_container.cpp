@@ -192,6 +192,10 @@ void WindowNodeContainer::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool a
             layoutPolicy_->UpdateClientRect(node->GetWindowRect(), node, WindowSizeChangeReason::UNDEFINED);
         }
     } else {
+        if (node->GetWindowProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM) &&
+            WindowHelper::IsSystemWindow(node->GetWindowType())) {
+                node->SetWindowSizeChangeReason(WindowSizeChangeReason::CUSTOM_ANIMATION_SHOW);
+        }
         layoutPolicy_->AddWindowNode(node);
     }
 }
@@ -1200,11 +1204,6 @@ void WindowNodeContainer::DumpScreenWindowTree()
     };
     TraverseWindowTree(func, true);
     WLOGFI("-------- dump window info end  ---------");
-}
-
-uint64_t WindowNodeContainer::GetScreenId(DisplayId displayId) const
-{
-    return DisplayManagerServiceInner::GetInstance().GetRSScreenId(displayId);
 }
 
 Rect WindowNodeContainer::GetDisplayRect(DisplayId displayId) const

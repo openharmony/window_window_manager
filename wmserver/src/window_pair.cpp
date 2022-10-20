@@ -28,53 +28,53 @@ namespace Rosen {
 namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowPair"};
     const std::string SPLIT_SCREEN_EVENT_NAME = "common.event.SPLIT_SCREEN";
-}
-
-WindowPair::WindowPair(const DisplayId& displayId) : displayId_(displayId)
-{
+    const std::map<SplitEventMsgType, std::string> splitEventDataMap {
+        {SplitEventMsgType::MSG_SHOW_PRIMARY,                                           "Primary"},
+        {SplitEventMsgType::MSG_SHOW_SECONDARY,                                       "Secondary"},
+        {SplitEventMsgType::MSG_SHOW_DIVIDER,       "common.event.SPLIT_SCREEN.data.show.divider"},
+        {SplitEventMsgType::MSG_DESTROY_DIVIDER, "common.event.SPLIT_SCREEN.data.destroy.divider"}
+    };
 }
 
 WindowPair::~WindowPair()
 {
-    WLOGI("~WindowPair");
+    WLOGD("~WindowPair");
     Clear();
 }
 
-void WindowPair::SendBroadcastMsg(sptr<WindowNode>& node)
+void WindowPair::SendSplitScreenCommonEvent(SplitEventMsgType msgType, int32_t missionId)
 {
-    if (node == nullptr) {
-        return;
-    }
-    // reset ipc identity
+    std::string data = splitEventDataMap.at(msgType);
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     AAFwk::Want want;
     want.SetAction(SPLIT_SCREEN_EVENT_NAME);
-    int32_t missionId = -1;
-    AAFwk::AbilityManagerClient::GetInstance()->GetMissionIdByToken(node->abilityToken_, missionId);
-    std::string modeData = "";
-    auto msg = (node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) ?
-            SplitBroadcastMsg::MSG_START_PRIMARY : SplitBroadcastMsg::MSG_START_SECONDARY;
-    switch (msg) {
-        case SplitBroadcastMsg::MSG_START_PRIMARY :
-            modeData = "Primary";
-            break;
-        case SplitBroadcastMsg::MSG_START_SECONDARY :
-            modeData = "Secondary";
-            break;
-        case SplitBroadcastMsg::MSG_START_DIVIDER :
-            modeData = "Divider";
-            break;
-        default:
-            break;
-    }
-    want.SetParam("windowMode", modeData);
+    want.SetParam("windowMode", data);
     want.SetParam("missionId", missionId);
     EventFwk::CommonEventData commonEventData;
     commonEventData.SetWant(want);
     EventFwk::CommonEventManager::PublishCommonEvent(commonEventData);
     // set ipc identity to raw
     IPCSkeleton::SetCallingIdentity(identity);
-    WLOGI("Send broadcast msg: %{public}s", modeData.c_str());
+    WLOGD("Send split screen event: %{public}s", data.c_str());
+}
+
+void WindowPair::NotifyShowRecent(sptr<WindowNode> node)
+{
+    if (node == nullptr) {
+        return;
+    }
+    auto msgType = (node->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) ?
+        SplitEventMsgType::MSG_SHOW_PRIMARY : SplitEventMsgType::MSG_SHOW_SECONDARY;
+    SendSplitScreenCommonEvent(msgType, node->abilityInfo_.missionId_);
+}
+
+void WindowPair::NotifyCreateOrDestroyDivider(sptr<WindowNode> node, bool isDestroy)
+{
+    if (node == nullptr) {
+        return;
+    }
+    auto msgType = isDestroy ? SplitEventMsgType::MSG_DESTROY_DIVIDER : SplitEventMsgType::MSG_SHOW_DIVIDER;
+    SendSplitScreenCommonEvent(msgType, node->abilityInfo_.missionId_);
 }
 
 sptr<WindowNode> WindowPair::Find(sptr<WindowNode>& node)
@@ -123,16 +123,6 @@ WindowPairStatus WindowPair::GetPairStatus() const
 sptr<WindowNode> WindowPair::GetDividerWindow() const
 {
     return divider_;
-}
-
-sptr<WindowNode> WindowPair::GetPrimaryWindow() const
-{
-    return primary_;
-}
-
-sptr<WindowNode> WindowPair::GetSecondaryWindow() const
-{
-    return secondary_;
 }
 
 bool WindowPair::IsForbidDockSliceMove() const
@@ -224,10 +214,11 @@ void WindowPair::Clear()
             secondary_->GetWindowToken()->UpdateWindowMode(secondary_->GetWindowMode());
         }
     }
+
     primary_ = nullptr;
     secondary_ = nullptr;
     if (divider_ != nullptr) {
-        WindowInnerManager::GetInstance().DestroyInnerWindow(displayId_, WindowType::WINDOW_TYPE_DOCK_SLICE);
+        NotifyCreateOrDestroyDivider(divider_, true);
         divider_ = nullptr;
     }
     status_ = WindowPairStatus::STATUS_EMPTY;
@@ -286,7 +277,6 @@ std::vector<sptr<WindowNode>> WindowPair::GetPairedWindows()
 void WindowPair::UpdateIfSplitRelated(sptr<WindowNode>& node)
 {
     if (node == nullptr) {
-        WLOGI("Window is nullptr.");
         return;
     }
     if (Find(node) == nullptr && !IsSplitRelated(node)) {
@@ -308,7 +298,8 @@ void WindowPair::UpdateIfSplitRelated(sptr<WindowNode>& node)
                 WindowMode::WINDOW_MODE_SPLIT_SECONDARY : WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
             WindowInnerManager::GetInstance().CreateInnerWindow("place_holder", displayId_, DEFAULT_PLACE_HOLDER_RECT,
                 WindowType::WINDOW_TYPE_PLACEHOLDER, holderMode);
-            SendBroadcastMsg(node);
+            // notity systemui to create divider window
+            NotifyShowRecent(node);
         }
     } else {
         if (Find(node) == nullptr) {
@@ -339,9 +330,8 @@ void WindowPair::UpdateWindowPairStatus()
     if ((prevStatus == WindowPairStatus::STATUS_SINGLE_PRIMARY ||
         prevStatus == WindowPairStatus::STATUS_SINGLE_SECONDARY || prevStatus == WindowPairStatus::STATUS_EMPTY) &&
         status_ == WindowPairStatus::STATUS_PAIRING) {
-        // create divider
-        WindowInnerManager::GetInstance().CreateInnerWindow("dialog_divider_ui", displayId_, dividerRect_,
-            WindowType::WINDOW_TYPE_DOCK_SLICE, WindowMode::WINDOW_MODE_FLOATING);
+        // notify systemui to create divider
+        NotifyCreateOrDestroyDivider(primary_, false);
     } else if ((prevStatus == WindowPairStatus::STATUS_PAIRED_DONE || prevStatus == WindowPairStatus::STATUS_PAIRING) &&
         (status_ != WindowPairStatus::STATUS_PAIRED_DONE && status_ != WindowPairStatus::STATUS_PAIRING)) {
         // clear pair

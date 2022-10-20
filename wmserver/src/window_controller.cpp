@@ -16,6 +16,7 @@
 #include "window_controller.h"
 #include <ability_manager_client.h>
 #include <chrono>
+#include <cstdint>
 #include <hisysevent.h>
 #include <hitrace_meter.h>
 #include <parameters.h>
@@ -94,7 +95,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
         return;
     }
     StartingWindow::DrawStartingWindow(node, pixelMap, bkgColor, isColdStart, windowRoot_->IsUniRender());
-    RSTransaction::FlushImplicitTransaction();
+    FlushWindowInfo(node->GetWindowId());
     node->startingWindowShown_ = true;
     WLOGFI("StartingWindow show success with id:%{public}u!", node->GetWindowId());
 }
@@ -115,7 +116,7 @@ void WindowController::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
         "wms:async:ShowStartingWindow");
     WLOGFI("CancelStartingWindow with id:%{public}u!", node->GetWindowId());
     node->isAppCrash_ = true;
-    WMError res = windowRoot_->DestroyWindow(node->GetWindowId(), false);
+    WMError res = DestroyWindow(node->GetWindowId(), false);
     if (res != WMError::WM_OK) {
         WLOGFE("DestroyWindow failed!");
     }
@@ -715,21 +716,21 @@ void WindowController::StopBootAnimationIfNeed(const sptr<WindowNode>& node)
     }
     std::vector<sptr<WindowNode>> windowNodes;
     windowNodeContainer->TraverseContainer(windowNodes);
-    Occlusion::Rect defaultDisplayRect = { defaultDisplayRect_.posX_, defaultDisplayRect_.posY_,
+    WmOcclusion::Rect defaultDisplayRect = { defaultDisplayRect_.posX_, defaultDisplayRect_.posY_,
         defaultDisplayRect_.posX_ + defaultDisplayRect_.width_,
         defaultDisplayRect_.posY_ + defaultDisplayRect_.height_};
-    Occlusion::Region defaultDisplayRegion(defaultDisplayRect);
-    Occlusion::Region allRegion; // Counts the area of all shown windows
+    WmOcclusion::Region defaultDisplayRegion(defaultDisplayRect);
+    WmOcclusion::Region allRegion; // Counts the area of all shown windows
     for (auto& node : windowNodes) {
         if (node->GetWindowType() == WindowType::WINDOW_TYPE_BOOT_ANIMATION) {
             continue;
         }
         auto windowRect = node->GetWindowRect();
-        Occlusion::Rect curRect = { windowRect.posX_, windowRect.posY_,
+        WmOcclusion::Rect curRect = { windowRect.posX_, windowRect.posY_,
             windowRect.posX_ + windowRect.width_, windowRect.posY_ + windowRect.height_};
-        Occlusion::Region curRegion(curRect);
+        WmOcclusion::Region curRegion(curRect);
         allRegion = curRegion.Or(allRegion);
-        Occlusion::Region subResult = defaultDisplayRegion.Sub(allRegion);
+        WmOcclusion::Region subResult = defaultDisplayRegion.Sub(allRegion);
         if (subResult.GetSize() == 0) {
             WLOGFI("stop boot animation");
             system::SetParameter("bootevent.wms.fullscreen.ready", "true");
@@ -890,6 +891,7 @@ WMError WindowController::ProcessPointDown(uint32_t windowId)
     WMError zOrderRes = windowRoot_->RaiseZOrderForAppWindow(node);
     WMError focusRes = windowRoot_->RequestFocus(windowId);
     windowRoot_->RequestActiveWindow(windowId);
+    windowRoot_->FocusFaultDetection();
     if (zOrderRes == WMError::WM_OK || focusRes == WMError::WM_OK) {
         FlushWindowInfo(windowId);
         accessibilityConnection_->NotifyAccessibilityWindowInfo(windowRoot_->GetWindowNode(windowId),
@@ -897,7 +899,6 @@ WMError WindowController::ProcessPointDown(uint32_t windowId)
         WLOGFI("ProcessPointDown end");
         return WMError::WM_OK;
     }
-    windowRoot_->FocusFaultDetection();
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
@@ -957,8 +958,30 @@ WMError WindowController::RecoverInputEventToClient(uint32_t windowId)
         return WMError::WM_OK;
     }
     node->SetInputEventCallingPid(node->GetCallingPid());
-    FlushWindowInfo(windowId);
+    RecoverDefaultMouseStyle(windowId);
+    AsyncFlushInputInfo(windowId);
     return WMError::WM_OK;
+}
+
+void WindowController::AsyncFlushInputInfo(uint32_t windowId)
+{
+    WLOGFD("AsyncFlushWindowInfo");
+    displayZoomController_->UpdateWindowZoomInfo(windowId);
+    RSTransaction::FlushImplicitTransaction();
+    MMI::DisplayGroupInfo displayInfo_ = inputWindowMonitor_->GetDisplayInfo(windowId);
+    auto task = [this, displayInfo_]() {
+        MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayInfo_);
+    };
+    WindowInnerManager::GetInstance().PostTask(task, "UpdateDisplayInfo");
+}
+
+void WindowController::RecoverDefaultMouseStyle(uint32_t windowId)
+{
+    // asynchronously calls SetMouseStyle of MultiModalInput
+    auto task = [this, windowId]() {
+        MMI::InputManager::GetInstance()->SetPointerStyle(windowId, MMI::MOUSE_ICON::DEFAULT);
+    };
+    WindowInnerManager::GetInstance().PostTask(task, "RecoverDefaultMouseStyle");
 }
 
 WMError WindowController::NotifyWindowClientPointUp(uint32_t windowId,
@@ -1186,6 +1209,12 @@ WMError WindowController::UpdateProperty(sptr<WindowProperty>& property, Propert
 WMError WindowController::GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const
 {
     accessibilityConnection_->GetAccessibilityWindowInfo(infos);
+    return WMError::WM_OK;
+}
+
+WMError WindowController::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
+{
+    windowRoot_->GetVisibilityWindowInfo(infos);
     return WMError::WM_OK;
 }
 

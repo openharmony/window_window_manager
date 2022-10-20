@@ -28,26 +28,26 @@ public:
 
     ~WindowProxy() {};
 
-    void UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) override;
-    void UpdateWindowMode(WindowMode mode) override;
-    void UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override;
-    void UpdateFocusStatus(bool focused) override;
-    void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
-    void UpdateWindowState(WindowState state) override;
-    void UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override;
-    void UpdateDisplayId(DisplayId from, DisplayId to) override;
-    void UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override;
-    void UpdateActiveStatus(bool isActive) override;
+    WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason) override;
+    WMError UpdateWindowMode(WindowMode mode) override;
+    WMError UpdateWindowModeSupportInfo(uint32_t modeSupportInfo) override;
+    WMError UpdateFocusStatus(bool focused) override;
+    WMError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
+    WMError UpdateWindowState(WindowState state) override;
+    WMError UpdateWindowDragInfo(const PointInfo& point, DragEvent event) override;
+    WMError UpdateDisplayId(DisplayId from, DisplayId to) override;
+    WMError UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>& info) override;
+    WMError UpdateActiveStatus(bool isActive) override;
     sptr<WindowProperty> GetWindowProperty() override;
-    void NotifyTouchOutside() override;
-    void NotifyScreenshot() override;
-    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
-    void NotifyDestroy(void) override;
-    void NotifyForeground(void) override;
-    void NotifyBackground(void) override;
-    void NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override;
-    void RestoreSplitWindowMode(uint32_t mode) override;
+    WMError NotifyTouchOutside() override;
+    WMError NotifyScreenshot() override;
+    WMError DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    WMError NotifyDestroy(void) override;
+    WMError NotifyForeground(void) override;
+    WMError NotifyBackground(void) override;
+    WMError NotifyWindowClientPointUp(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WMError UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn) override;
+    WMError RestoreSplitWindowMode(uint32_t mode) override;
 private:
     static inline BrokerDelegator<WindowProxy> delegator_;
 };

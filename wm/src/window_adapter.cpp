@@ -93,6 +93,13 @@ WMError WindowAdapter::GetAccessibilityWindowInfo(std::vector<sptr<Accessibility
     return windowManagerServiceProxy_->GetAccessibilityWindowInfo(infos);
 }
 
+WMError WindowAdapter::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+
+    return windowManagerServiceProxy_->GetVisibilityWindowInfo(infos);
+}
+
 WMError WindowAdapter::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

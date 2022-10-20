@@ -39,11 +39,11 @@ enum class WindowPairStatus : uint32_t {
 /**
  * @brief Enumerates the message of split event.
  */
-enum class SplitBroadcastMsg : uint32_t {
-    MSG_NONE,
-    MSG_START_PRIMARY,
-    MSG_START_SECONDARY,
-    MSG_START_DIVIDER
+enum class SplitEventMsgType : uint32_t {
+    MSG_SHOW_PRIMARY,
+    MSG_SHOW_SECONDARY,
+    MSG_SHOW_DIVIDER,
+    MSG_DESTROY_DIVIDER,
 };
 
 class WindowPair : public RefBase {
@@ -53,7 +53,7 @@ public:
      *
      * @param displayId the display of window pair
      */
-    explicit WindowPair(const DisplayId& displayId);
+    explicit WindowPair(const DisplayId& displayId) : displayId_(displayId) {};
 
     /**
      * @brief Deconstructor used to deconstruct.
@@ -109,20 +109,6 @@ public:
      * @return window node
      */
     sptr<WindowNode> Find(sptr<WindowNode>& node);
-
-    /**
-     * @brief Get primary window node.
-     *
-     * @return primary window node
-     */
-    sptr<WindowNode> GetPrimaryWindow() const;
-
-    /**
-     * @brief Get secondary window node.
-     *
-     * @return secondary window node
-     */
-    sptr<WindowNode> GetSecondaryWindow() const;
 
     /**
      * @brief Get divider window node.
@@ -234,11 +220,27 @@ private:
     void DumpPairInfo();
 
     /**
-     * @brief Send broadcast message of split event.
+     * @brief Send split screen event.
      *
-     * @param node trigger node
+     * @param msgType split event message type
+     * @param missionId mission id
      */
-    void SendBroadcastMsg(sptr<WindowNode>& node);
+    void SendSplitScreenCommonEvent(SplitEventMsgType msgType, int32_t missionId);
+
+    /**
+     * @brief Send split screen event to notify create recent view.
+     *
+     * @param node split node
+     */
+    void NotifyShowRecent(sptr<WindowNode> node);
+
+    /**
+     * @brief Send split screen event to notify create or destroy divider window.
+     *
+     * @param node split node
+     * @param isDestroy destroy or create divider window flag
+     */
+    void NotifyCreateOrDestroyDivider(sptr<WindowNode> node, bool isDestroy);
 
 private:
     float ratio_ = DEFAULT_SPLIT_RATIO;

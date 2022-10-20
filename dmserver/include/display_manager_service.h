@@ -63,7 +63,6 @@ public:
     bool SetRotationFromWindow(ScreenId screenId, Rotation targetRotation);
     void SetGravitySensorSubscriptionEnabled();
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId) override;
-    ScreenId GetRSScreenId(DisplayId displayId) const;
     uint32_t GetRSScreenNum() const;
     DMError HasPrivateWindow(DisplayId id, bool& hasPrivateWindow) override;
     // colorspace, gamut
@@ -103,7 +102,6 @@ public:
     std::vector<DisplayId> GetAllDisplayIds() override;
     bool SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     bool SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
-    static float GetCustomVirtualPixelRatio();
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
     void RegisterRSScreenChangeListener(const sptr<IRSScreenChangeListener>& listener);
@@ -115,7 +113,6 @@ private:
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     void NotifyScreenshot(DisplayId displayId);
     ScreenId GetScreenIdByDisplayId(DisplayId displayId) const;
-    std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByDisplayId(DisplayId displayId) const;
     void ConfigureDisplayManagerService();
     void ConfigureWaterfallDisplayCompressionParams();
 
@@ -128,7 +125,6 @@ private:
     sptr<IDisplayChangeListener> displayChangeListener_;
     sptr<IWindowInfoQueriedListener> windowInfoQueriedListener_;
     sptr<DisplayDumper> displayDumper_;
-    static float customVirtualPixelRatio_;
     AtomicMap<ScreenId, uint32_t> accessTokenIdMaps_;
     bool isAutoRotationOpen_;
 };
