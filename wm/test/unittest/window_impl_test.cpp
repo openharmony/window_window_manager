@@ -2687,7 +2687,7 @@ HWTEST_F(WindowImplTest, NotifyAvoidAreaChange, Function | SmallTest | Level3)
     listener = new MockAvoidAreaChangedListener;
     window->avoidAreaChangeListeners_.push_back(sptr<IAvoidAreaChangedListener>(listener));
     EXPECT_CALL(*listener, OnAvoidAreaChanged(_, _));
-    sptr<AvoidArea> avoidArea;
+    sptr<AvoidArea> avoidArea = new AvoidArea;
     window->NotifyAvoidAreaChange(avoidArea, AvoidAreaType::TYPE_CUTOUT);
 }
 
