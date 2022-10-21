@@ -1903,6 +1903,10 @@ WMError WindowNodeContainer::SetWindowMode(sptr<WindowNode>& node, WindowMode ds
         if (srcMode == WindowMode::WINDOW_MODE_FLOATING) {
             node->SetRequestRect(node->GetWindowRect());
         }
+    } else if (WindowHelper::IsFullScreenWindow(srcMode) && WindowHelper::IsSplitWindowMode(dstMode)) {
+        node->SetWindowSizeChangeReason(WindowSizeChangeReason::FULL_TO_SPLIT);
+    } else if (WindowHelper::IsSplitWindowMode(srcMode) && WindowHelper::IsFullScreenWindow(dstMode)) {
+        node->SetWindowSizeChangeReason(WindowSizeChangeReason::SPLIT_TO_FULL);
     } else {
         node->SetWindowSizeChangeReason(WindowSizeChangeReason::RESIZE);
     }

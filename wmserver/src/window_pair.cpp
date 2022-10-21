@@ -192,6 +192,10 @@ void WindowPair::Clear()
             MinimizeApp::AddNeedMinimizeApp(primary_, MinimizeReason::SPLIT_QUIT);
             MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::SPLIT_QUIT);
         } else {
+            if (WindowHelper::IsFullScreenWindow(primary_->GetWindowProperty()->GetLastWindowMode()) &&
+                WindowHelper::IsSplitWindowMode(primary_->GetWindowProperty()->GetWindowMode())) {
+                primary_->SetWindowSizeChangeReason(WindowSizeChangeReason::SPLIT_TO_FULL);
+            }
             primary_->GetWindowProperty()->ResumeLastWindowMode();
             primary_->GetWindowToken()->UpdateWindowMode(primary_->GetWindowMode());
         }
@@ -202,6 +206,10 @@ void WindowPair::Clear()
             MinimizeApp::AddNeedMinimizeApp(secondary_, MinimizeReason::SPLIT_QUIT);
             MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::SPLIT_QUIT);
         } else {
+            if (WindowHelper::IsFullScreenWindow(secondary_->GetWindowProperty()->GetLastWindowMode()) &&
+                WindowHelper::IsSplitWindowMode(secondary_->GetWindowProperty()->GetWindowMode())) {
+                secondary_->SetWindowSizeChangeReason(WindowSizeChangeReason::SPLIT_TO_FULL);
+            }
             secondary_->GetWindowProperty()->ResumeLastWindowMode();
             secondary_->GetWindowToken()->UpdateWindowMode(secondary_->GetWindowMode());
         }
