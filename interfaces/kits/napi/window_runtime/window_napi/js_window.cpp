@@ -643,7 +643,7 @@ NativeValue* JsWindow::OnShowWithAnimation(NativeEngine& engine, NativeCallbackI
     auto winType = windowToken_->GetType();
     if (!WindowHelper::IsSystemWindow(winType)) {
         WLOGFE("[NAPI]window Type %{public}u is not supported", static_cast<uint32_t>(winType));
-        errCode = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+        errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
     wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
@@ -782,7 +782,7 @@ NativeValue* JsWindow::OnHideWithAnimation(NativeEngine& engine, NativeCallbackI
     auto winType = windowToken_->GetType();
     if (!WindowHelper::IsSystemWindow(winType)) {
         WLOGFE("[NAPI]window Type %{public}u is not supported", static_cast<uint32_t>(winType));
-        errCode = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+        errCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
     wptr<Window> weakToken(windowToken_);
     AsyncTask::CompleteCallback complete =
@@ -1123,7 +1123,7 @@ NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo&
         };
 
     NativeValue* lastParam = (info.argc == 1) ? nullptr :
-        ((info.argv[1] == nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ?
+        ((info.argv[1] != nullptr && info.argv[1]->TypeOf() == NATIVE_FUNCTION) ?
         info.argv[1] : nullptr);
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JsWindow::OnSetWindowMode",
@@ -1172,7 +1172,7 @@ NativeValue* JsWindow::OnGetWindowPropertiesSync(NativeEngine& engine, NativeCal
     auto window = weakToken.promote();
     if (window == nullptr) {
         WLOGFE("[NAPI]window is nullptr or get invalid param");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
     auto objValue = CreateJsWindowPropertiesObject(engine, window);
@@ -1571,7 +1571,7 @@ NativeValue* JsWindow::OnSetWindowLayoutFullScreen(NativeEngine& engine, NativeC
             isLayoutFullScreen = static_cast<bool>(*nativeVal);
         }
     }
-    if (errCode == WmErrorCode::WM_OK) {
+    if (errCode != WmErrorCode::WM_OK) {
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
         return engine.CreateUndefined();
     }
@@ -1885,7 +1885,7 @@ NativeValue* JsWindow::OnGetWindowAvoidAreaSync(NativeEngine& engine, NativeCall
     wptr<Window> weakToken(windowToken_);
     auto window = weakToken.promote();
     if (window == nullptr) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return engine.CreateUndefined();
     }
     // getAvoidRect by avoidAreaType
@@ -3075,7 +3075,7 @@ NativeValue* JsWindow::OnOpacity(NativeEngine& engine, NativeCallbackInfo& info)
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]Opacity is not allowed since window is not system window");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
         return engine.CreateUndefined();
     }
     NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
@@ -3156,7 +3156,7 @@ NativeValue* JsWindow::OnScale(NativeEngine& engine, NativeCallbackInfo& info)
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]Scale is not allowed since window is not system window");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
         return engine.CreateUndefined();
     }
     NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
@@ -3220,7 +3220,7 @@ NativeValue* JsWindow::OnRotate(NativeEngine& engine, NativeCallbackInfo& info)
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]Rotate is not allowed since window is not system window");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
         return engine.CreateUndefined();
     }
     NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
@@ -3274,7 +3274,7 @@ NativeValue* JsWindow::OnTranslate(NativeEngine& engine, NativeCallbackInfo& inf
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]Translate is not allowed since window is not system window");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
         return engine.CreateUndefined();
     }
     NativeObject* nativeObj = ConvertNativeValueTo<NativeObject>(info.argv[0]);
@@ -3340,7 +3340,7 @@ NativeValue* JsWindow::OnGetTransitionController(NativeEngine& engine, NativeCal
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]OnGetTransitionController is not allowed since window is not system window");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
         return engine.CreateUndefined();
     }
     if (jsTransControllerObj_ == nullptr || jsTransControllerObj_->Get() == nullptr) {
@@ -3363,7 +3363,7 @@ NativeValue* JsWindow::OnSetCornerRadius(NativeEngine& engine, NativeCallbackInf
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]SetCornerRadius is not allowed since window is not system window");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
         return engine.CreateUndefined();
     }
     NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
@@ -3396,7 +3396,7 @@ NativeValue* JsWindow::OnSetShadow(NativeEngine& engine, NativeCallbackInfo& inf
         return engine.CreateUndefined();
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
         return engine.CreateUndefined();
     }
 
@@ -3458,7 +3458,7 @@ NativeValue* JsWindow::OnSetBlur(NativeEngine& engine, NativeCallbackInfo& info)
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]SetBlur is not allowed since window is not system window");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
         return engine.CreateUndefined();
     }
     NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
@@ -3493,7 +3493,7 @@ NativeValue* JsWindow::OnSetBackdropBlur(NativeEngine& engine, NativeCallbackInf
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]SetBackdropBlur is not allowed since window is not system window");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
         return engine.CreateUndefined();
     }
     NativeNumber* nativeVal = ConvertNativeValueTo<NativeNumber>(info.argv[0]);
@@ -3528,7 +3528,7 @@ NativeValue* JsWindow::OnSetBackdropBlurStyle(NativeEngine& engine, NativeCallba
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         WLOGFE("[NAPI]SetBackdropBlurStyle is not allowed since window is not system window");
-        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT)));
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
         return engine.CreateUndefined();
     }
 
