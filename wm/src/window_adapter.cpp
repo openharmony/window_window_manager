@@ -70,18 +70,18 @@ WMError WindowAdapter::RequestFocus(uint32_t windowId)
     return windowManagerServiceProxy_->RequestFocus(windowId);
 }
 
-void WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
+bool WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    INIT_PROXY_CHECK_RETURN();
+    INIT_PROXY_CHECK_RETURN(false);
 
     return windowManagerServiceProxy_->RegisterWindowManagerAgent(type, windowManagerAgent);
 }
 
-void WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+bool WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    INIT_PROXY_CHECK_RETURN();
+    INIT_PROXY_CHECK_RETURN(false);
 
     return windowManagerServiceProxy_->UnregisterWindowManagerAgent(type, windowManagerAgent);
 }

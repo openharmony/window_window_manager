@@ -1737,60 +1737,62 @@ void WindowImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer
     inputEventConsumer_ = inputEventConsumer;
 }
 
-void WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
+bool WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
-    RegisterListenerLocked(lifecycleListeners_, listener);
+    return RegisterListenerLocked(lifecycleListeners_, listener);
 }
 
-void WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
+bool WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
-    UnregisterListenerLocked(lifecycleListeners_, listener);
+    return UnregisterListenerLocked(lifecycleListeners_, listener);
 }
 
-void WindowImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
+bool WindowImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
-    RegisterListenerLocked(windowChangeListeners_, listener);
+    return RegisterListenerLocked(windowChangeListeners_, listener);
 }
 
-void WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
+bool WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
-    UnregisterListenerLocked(windowChangeListeners_, listener);
+    return UnregisterListenerLocked(windowChangeListeners_, listener);
 }
 
-void WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+bool WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    RegisterListenerLocked(avoidAreaChangeListeners_, listener);
+    bool ret = RegisterListenerLocked(avoidAreaChangeListeners_, listener);
     if (avoidAreaChangeListeners_.size() == 1) {
         SingletonContainer::Get<WindowAdapter>().UpdateAvoidAreaListener(property_->GetWindowId(), true);
     }
+    return ret;
 }
 
-void WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+bool WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    UnregisterListenerLocked(avoidAreaChangeListeners_, listener);
+    bool ret = UnregisterListenerLocked(avoidAreaChangeListeners_, listener);
     if (avoidAreaChangeListeners_.empty()) {
         SingletonContainer::Get<WindowAdapter>().UpdateAvoidAreaListener(property_->GetWindowId(), false);
     }
+    return ret;
 }
 
-void WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
+bool WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
 {
-    RegisterListenerLocked(windowDragListeners_, listener);
+    return RegisterListenerLocked(windowDragListeners_, listener);
 }
 
-void WindowImpl::UnregisterDragListener(const sptr<IWindowDragListener>& listener)
+bool WindowImpl::UnregisterDragListener(const sptr<IWindowDragListener>& listener)
 {
-    UnregisterListenerLocked(windowDragListeners_, listener);
+    return UnregisterListenerLocked(windowDragListeners_, listener);
 }
 
-void WindowImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+bool WindowImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
-    RegisterListenerLocked(displayMoveListeners_, listener);
+    return RegisterListenerLocked(displayMoveListeners_, listener);
 }
 
-void WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+bool WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
-    UnregisterListenerLocked(displayMoveListeners_, listener);
+    return UnregisterListenerLocked(displayMoveListeners_, listener);
 }
 
 void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
@@ -1799,31 +1801,31 @@ void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFun
     notifyNativefunc_ = std::move(func);
 }
 
-void WindowImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+bool WindowImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
-    RegisterListenerLocked(occupiedAreaChangeListeners_, listener);
+    return RegisterListenerLocked(occupiedAreaChangeListeners_, listener);
 }
 
-void WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+bool WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
-    UnregisterListenerLocked(occupiedAreaChangeListeners_, listener);
+    return UnregisterListenerLocked(occupiedAreaChangeListeners_, listener);
 }
 
-void WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
+bool WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    RegisterListenerLocked(touchOutsideListeners_, listener);
+    return RegisterListenerLocked(touchOutsideListeners_, listener);
 }
 
-void WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
+bool WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    UnregisterListenerLocked(touchOutsideListeners_, listener);
+    return UnregisterListenerLocked(touchOutsideListeners_, listener);
 }
 
-void WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener)
+bool WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
-        return;
+        return false;
     }
     animationTransitionController_ = listener;
     wptr<WindowProperty> propertyToken(property_);
@@ -1842,26 +1844,27 @@ void WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTran
             }
         });
     }
+    return true;
 }
 
-void WindowImpl::RegisterScreenshotListener(const sptr<IScreenshotListener>& listener)
+bool WindowImpl::RegisterScreenshotListener(const sptr<IScreenshotListener>& listener)
 {
-    RegisterListenerLocked(screenshotListeners_, listener);
+    return RegisterListenerLocked(screenshotListeners_, listener);
 }
 
-void WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener)
+bool WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener)
 {
-    UnregisterListenerLocked(screenshotListeners_, listener);
+    return UnregisterListenerLocked(screenshotListeners_, listener);
 }
 
-void WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
+bool WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
-    RegisterListenerLocked(dialogTargetTouchListeners_, listener);
+    return RegisterListenerLocked(dialogTargetTouchListeners_, listener);
 }
 
-void WindowImpl::UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
+bool WindowImpl::UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
-    UnregisterListenerLocked(dialogTargetTouchListeners_, listener);
+    return UnregisterListenerLocked(dialogTargetTouchListeners_, listener);
 }
 
 void WindowImpl::RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener)
@@ -1881,28 +1884,34 @@ void WindowImpl::UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathR
 }
 
 template<typename T>
-void WindowImpl::RegisterListenerLocked(std::vector<sptr<T>>& holder, const sptr<T>& listener)
+bool WindowImpl::RegisterListenerLocked(std::vector<sptr<T>>& holder, const sptr<T>& listener)
 {
     if (listener == nullptr) {
         WLOGFE("listener is nullptr");
-        return;
+        return false;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         WLOGFE("Listener already registered");
-        return;
+        return true;
     }
     holder.emplace_back(listener);
+    return true;
 }
 
 template<typename T>
-void WindowImpl::UnregisterListenerLocked(std::vector<sptr<T>>& holder, const sptr<T>& listener)
+bool WindowImpl::UnregisterListenerLocked(std::vector<sptr<T>>& holder, const sptr<T>& listener)
 {
+    if (listener == nullptr) {
+        WLOGFE("listener could not be null");
+        return false;
+    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     holder.erase(std::remove_if(holder.begin(), holder.end(),
         [listener](sptr<T> registeredListener) {
             return registeredListener == listener;
         }), holder.end());
+    return true;
 }
 
 void WindowImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)

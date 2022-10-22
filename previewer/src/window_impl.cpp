@@ -497,54 +497,54 @@ void WindowImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer
     return;
 }
 
-void WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
+bool WindowImpl::RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
+bool WindowImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
+bool WindowImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
+bool WindowImpl::UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+bool WindowImpl::RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
+bool WindowImpl::UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
+bool WindowImpl::RegisterDragListener(const sptr<IWindowDragListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::UnregisterDragListener(const sptr<IWindowDragListener>& listener)
+bool WindowImpl::UnregisterDragListener(const sptr<IWindowDragListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+bool WindowImpl::RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
+bool WindowImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener)
 {
-    return;
+    return true;
 }
 
 void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func)
@@ -552,49 +552,49 @@ void WindowImpl::RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFun
     return;
 }
 
-void WindowImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+bool WindowImpl::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+bool WindowImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
+bool WindowImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
+bool WindowImpl::UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener)
+bool WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationTransitionController>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::RegisterScreenshotListener(const sptr<IScreenshotListener>& listener)
+bool WindowImpl::RegisterScreenshotListener(const sptr<IScreenshotListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener)
+bool WindowImpl::UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
+bool WindowImpl::RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
-    return;
+    return true;
 }
 
-void WindowImpl::UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
+bool WindowImpl::UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener)
 {
-    return;
+    return true;
 }
 
 void WindowImpl::RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener)
