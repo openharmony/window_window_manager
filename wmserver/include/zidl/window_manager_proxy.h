@@ -47,9 +47,9 @@ public:
     WMError SetWindowLayoutMode(WindowLayoutMode mode) override;
     WMError UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
         bool isAsyncTask = false) override;
-    void RegisterWindowManagerAgent(WindowManagerAgentType type,
+    bool RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
-    void UnregisterWindowManagerAgent(WindowManagerAgentType type,
+    bool UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override;
 
