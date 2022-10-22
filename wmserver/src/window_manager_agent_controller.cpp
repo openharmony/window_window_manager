@@ -24,16 +24,16 @@ namespace {
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(WindowManagerAgentController)
 
-void WindowManagerAgentController::RegisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
+bool WindowManagerAgentController::RegisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
     WindowManagerAgentType type)
 {
-    wmAgentContainer_.RegisterAgent(windowManagerAgent, type);
+    return wmAgentContainer_.RegisterAgent(windowManagerAgent, type);
 }
 
-void WindowManagerAgentController::UnregisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
+bool WindowManagerAgentController::UnregisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
     WindowManagerAgentType type)
 {
-    wmAgentContainer_.UnregisterAgent(windowManagerAgent, type);
+    return wmAgentContainer_.UnregisterAgent(windowManagerAgent, type);
 }
 
 void WindowManagerAgentController::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused)

@@ -89,7 +89,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
-            RegisterWindowManagerAgent(type, windowManagerAgentProxy);
+            bool ret = RegisterWindowManagerAgent(type, windowManagerAgentProxy);
+            reply.WriteBool(ret);
             break;
         }
         case WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT: {
@@ -97,7 +98,8 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
             sptr<IWindowManagerAgent> windowManagerAgentProxy =
                 iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
-            UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
+            bool ret = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
+            reply.WriteBool(ret);
             break;
         }
         case WindowManagerMessage::TRANS_ID_NOTIFY_READY_MOVE_OR_DRAG: {
