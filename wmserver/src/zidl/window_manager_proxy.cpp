@@ -196,7 +196,7 @@ AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaTyp
     return *area;
 }
 
-void WindowManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,
+bool WindowManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     MessageParcel data;
@@ -204,26 +204,29 @@ void WindowManagerProxy::RegisterWindowManagerAgent(WindowManagerAgentType type,
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return;
+        return false;
     }
 
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         WLOGFE("Write type failed");
-        return;
+        return false;
     }
 
     if (!data.WriteRemoteObject(windowManagerAgent->AsObject())) {
         WLOGFE("Write IWindowManagerAgent failed");
-        return;
+        return false;
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
+        return false;
     }
+
+    return reply.ReadBool();
 }
 
-void WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+bool WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     MessageParcel data;
@@ -231,23 +234,26 @@ void WindowManagerProxy::UnregisterWindowManagerAgent(WindowManagerAgentType typ
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("WriteInterfaceToken failed");
-        return;
+        return false;
     }
 
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         WLOGFE("Write type failed");
-        return;
+        return false;
     }
 
     if (!data.WriteRemoteObject(windowManagerAgent->AsObject())) {
         WLOGFE("Write IWindowManagerAgent failed");
-        return;
+        return false;
     }
 
     if (Remote()->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
+        return false;
     }
+
+    return reply.ReadBool();
 }
 
 WMError WindowManagerProxy::SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller)

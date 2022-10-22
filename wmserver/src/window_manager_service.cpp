@@ -779,38 +779,39 @@ AvoidArea WindowManagerService::GetAvoidAreaByType(uint32_t windowId, AvoidAreaT
     });
 }
 
-void WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType type,
+bool WindowManagerService::RegisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     if (!Permission::IsSystemCalling()) {
         WLOGFE("register windowManager agent permission denied!");
-        return;
+        return false;
     }
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
         WLOGFE("windowManagerAgent is null");
-        return;
+        return false;
     }
-    PostVoidSyncTask([this, &windowManagerAgent, type]() {
-        WindowManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
+    return PostSyncTask([this, &windowManagerAgent, type]() {
+        bool ret = WindowManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type);
         if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR) { // if system bar, notify once
             windowController_->NotifySystemBarTints();
         }
+        return ret;
     });
 }
 
-void WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType type,
+bool WindowManagerService::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     if (!Permission::IsSystemCalling()) {
         WLOGFE("unregister windowManager agent permission denied!");
-        return;
+        return false;
     }
     if ((windowManagerAgent == nullptr) || (windowManagerAgent->AsObject() == nullptr)) {
         WLOGFE("windowManagerAgent is null");
-        return;
+        return false;
     }
-    PostVoidSyncTask([this, &windowManagerAgent, type]() {
-        WindowManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
+    return PostSyncTask([this, &windowManagerAgent, type]() {
+        return WindowManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type);
     });
 }
 

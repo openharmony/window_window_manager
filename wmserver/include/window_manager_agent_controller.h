@@ -26,9 +26,9 @@ namespace Rosen {
 class WindowManagerAgentController {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManagerAgentController)
 public:
-    void RegisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
+    bool RegisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
         WindowManagerAgentType type);
-    void UnregisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
+    bool UnregisterWindowManagerAgent(const sptr<IWindowManagerAgent>& windowManagerAgent,
         WindowManagerAgentType type);
 
     void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused);
