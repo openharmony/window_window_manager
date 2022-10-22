@@ -17,23 +17,30 @@ import("//build/test.gni")
 module_output_path = "window_manager/wms"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("WindowManagerFuzzTest") {
-  fuzz_config_file = "//foundation/window/window_manager/test/fuzztest/wms/windowmanager_fuzzer"
+ohos_fuzztest("WindowUtilMathFuzzTest") {
+  fuzz_config_file = "//foundation/window/window_manager/test/fuzztest/wms/windowutilmath_fuzzer"
   module_out_path = module_output_path
   include_dirs = [
     "//foundation/window/window_manager/wmserver/include",
+    "//foundation/window/window_manager/utils/include",
+    "//foundation/window/window_manager/interfaces/innerkits/dm",
     "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
     "//commonlibrary/c_utils/base/include",
   ]
 
   configs = [
     "//foundation/window/window_manager/test/fuzztest:configs_cc_ld",
     "//foundation/window/window_manager/resources/config/build:coverage_flags",
-    "//foundation/window/window_manager/resources/config/build:testcase_flags",
   ]
 
-  sources = [ "windowmanager_fuzzer.cpp" ]
-  deps = [ "//foundation/window/window_manager/wm:libwm" ]
+  sources = [ "windowutilmath_fuzzer.cpp" ]
+  deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/utils:libwmutil",
+    "//foundation/window/window_manager/wm:libwm",
+  ]
 
   external_deps = [
     "c_utils:utils",
@@ -48,7 +55,7 @@ group("fuzztest") {
 
   deps += [
     # deps file
-    ":WindowManagerFuzzTest",
+    ":WindowUtilMathFuzzTest",
   ]
 }
 ###############################################################################
