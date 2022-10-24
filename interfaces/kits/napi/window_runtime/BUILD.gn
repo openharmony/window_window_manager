@@ -122,6 +122,7 @@ ohos_shared_library("windowstage_kit") {
   include_dirs = [ "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi" ]
   deps = [
     ":window_native_kit",
+    "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
   ]
 
