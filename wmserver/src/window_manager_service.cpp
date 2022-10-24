@@ -999,10 +999,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
     bool isAsyncTask)
 {
     if ((windowProperty->GetWindowFlags() == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE) ||
-        windowProperty->GetWindowFlags() == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED) ||
-        action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY ||
-        action == PropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON ||
-        action == PropertyChangeAction::ACTION_UPDATE_MODE) &&
+        action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) &&
         !Permission::IsSystemCalling()) {
         WLOGFE("SetForbidSplitMove or SetShowWhenLocked or SetTranform or SetTurnScreenOn permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;

@@ -20,6 +20,8 @@
 #include "js_window_register_manager.h"
 #include "js_window_utils.h"
 #include "window_manager_hilog.h"
+#include "permission.h"
+
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
@@ -477,6 +479,11 @@ NativeValue* JsWindowStage::OnGetSubWindow(NativeEngine& engine, NativeCallbackI
 
 NativeValue* JsWindowStage::OnSetShowOnLockScreen(NativeEngine& engine, NativeCallbackInfo& info)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set show on lock screen permission denied!");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+        return CreateJsValue(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING));
+    }
     if (info.argc < 1) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
         engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));

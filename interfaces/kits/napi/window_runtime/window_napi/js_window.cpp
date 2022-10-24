@@ -31,6 +31,7 @@
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 #include "napi_remote_object.h"
+#include "permission.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -1077,6 +1078,11 @@ NativeValue* JsWindow::OnSetWindowType(NativeEngine& engine, NativeCallbackInfo&
 
 NativeValue* JsWindow::OnSetWindowMode(NativeEngine& engine, NativeCallbackInfo& info)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set window mode permission denied!");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+        return engine.CreateUndefined();
+    }
     WmErrorCode errCode = WmErrorCode::WM_OK;
     if (info.argc < 1) {
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
@@ -2440,6 +2446,11 @@ NativeValue* JsWindow::OnSetWindowKeepScreenOn(NativeEngine& engine, NativeCallb
 
 NativeValue* JsWindow::OnSetWakeUpScreen(NativeEngine& engine, NativeCallbackInfo& info)
 {
+    if (!Permission::IsSystemCalling()) {
+        WLOGFE("set wake up screen permission denied!");
+        engine.Throw(CreateJsError(engine, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+        return engine.CreateUndefined();
+    }
     WmErrorCode errCode = WmErrorCode::WM_OK;
     if (info.argc < 1 || windowToken_ == nullptr) {
         WLOGFE("[NAPI]Argc is invalid: %{public}zu", info.argc);
@@ -3440,7 +3451,6 @@ NativeValue* JsWindow::OnSetShadow(NativeEngine& engine, NativeCallbackInfo& inf
         }
         windowToken_->SetShadowOffsetY(static_cast<double>(*nativeVal));
     }
-    
     return engine.CreateUndefined();
 }
 
