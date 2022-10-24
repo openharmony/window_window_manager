@@ -132,6 +132,7 @@ public:
     virtual void StartMove() override;
 
     virtual WMError RequestFocus() const override;
+    virtual bool IsFocused() const override;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
 
     virtual void RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;

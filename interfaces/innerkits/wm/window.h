@@ -346,6 +346,7 @@ public:
     virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) = 0;
 
     virtual WMError RequestFocus() const = 0;
+    virtual bool IsFocused() const = 0;
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) = 0;
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) = 0;
