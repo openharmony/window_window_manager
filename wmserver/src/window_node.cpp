@@ -294,11 +294,11 @@ WindowMode WindowNode::GetWindowMode() const
     return property_->GetWindowMode();
 }
 
-bool WindowNode::EnableDefaultAnimation(bool propertyEnabled, bool animationPlayed)
+bool WindowNode::EnableDefaultAnimation(bool animationPlayed)
 {
     // system config enabled && not in remote animation && not custom animation && not crash
     bool defaultAnimation = property_->GetAnimationFlag() == (static_cast<uint32_t>(WindowAnimation::DEFAULT));
-    return (propertyEnabled && (!animationPlayed) && (defaultAnimation) && (!isAppCrash_));
+    return ((!animationPlayed) && (defaultAnimation) && (!isAppCrash_));
 }
 
 float WindowNode::GetBrightness() const

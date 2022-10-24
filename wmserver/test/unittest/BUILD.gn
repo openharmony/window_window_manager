@@ -20,6 +20,7 @@ group("unittest") {
   deps = [
     ":wmserver_avoid_area_controller_test",
     ":wmserver_minimize_app_test",
+    ":wmserver_starting_window_test",
     ":wmserver_window_layout_policy_test",
     ":wmserver_window_manager_config_test",
     ":wmserver_window_manager_stub_test",
@@ -119,6 +120,39 @@ ohos_unittest("wmserver_window_manager_stub_test") {
   deps = [ ":wmserver_unittest_common" ]
 }
 
+ohos_unittest("wmserver_starting_window_test") {
+  module_out_path = module_out_path
+
+  sources = [ "starting_window_test.cpp" ]
+
+  public_configs = [
+    ":wmserver_unittest_common_public_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "//foundation/window/window_manager/resources/config/build:testcase_flags",
+  ]
+
+  public_deps = [
+    "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
+    "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
+    "//foundation/graphic/graphic_2d/rosen/modules/animation/window_animation:window_animation",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
+    "//foundation/window/window_manager/dm:libdm",
+    "//foundation/window/window_manager/dmserver:libdms",
+    "//foundation/window/window_manager/test/common/utils:libtestutil",
+    "//foundation/window/window_manager/utils:libwmutil",
+    "//foundation/window/window_manager/wm:libwm",
+    "//foundation/window/window_manager/wmserver:libwms",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "hilog_native:libhilog",
+    "ipc:ipc_core",
+  ]
+}
+
 ## Build wmserver_unittest_common.a {{{
 config("wmserver_unittest_common_public_config") {
   include_dirs = [
@@ -141,6 +175,7 @@ config("wmserver_unittest_common_public_config") {
     "//base/global/resource_management/interfaces/inner_api/include",
     "//third_party/node/deps/icu-small/source/common",
     "${ability_runtime_inner_api_path}/ability_manager/include",
+    "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/",
 
     # abilityContext end
   ]
@@ -157,11 +192,9 @@ ohos_static_library("wmserver_unittest_common") {
   ]
 
   public_deps = [
-    "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
-
     # need delete it for abilitycontext
     "${ability_runtime_inner_api_path}/ability_manager:ability_manager",
-    "//commonlibrary/c_utils/base:utils",
+    "//base/powermgr/power_manager/interfaces/innerkits:powermgr_client",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
     "//foundation/arkui/napi:ace_napi",
     "//foundation/graphic/graphic_2d/rosen/modules/animation/window_animation:window_animation",
@@ -182,6 +215,7 @@ ohos_static_library("wmserver_unittest_common") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "bundle_framework:appexecfwk_base",
+    "hilog_native:libhilog",
     "ipc:ipc_core",
   ]
 }
