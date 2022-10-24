@@ -82,6 +82,7 @@ ohos_shared_library("previewer_window_napi") {
     # mock
     "mock/js_transition_controller.cpp",
     "mock/js_window_register_manager.cpp",
+    "mock/permission.cpp",
     "mock/pixel_map_napi.cpp",
     "mock/ui/rs_node.cpp",
   ]
