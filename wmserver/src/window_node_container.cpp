@@ -475,7 +475,6 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
         return true;
     }
     bool isMultiDisplay = layoutPolicy_->IsMultiDisplay();
-    static const bool IsWindowAnimationEnabled = WindowHelper::ReadIsWindowAnimationEnabledProperty();
     WLOGFI("AddNodeOnRSTree windowId: %{public}d, displayId: %{public}" PRIu64", parentDisplayId: %{public}" PRIu64", "
         "isMultiDisplay: %{public}d, animationPlayed: %{public}d",
         node->GetWindowId(), displayId, parentDisplayId, isMultiDisplay, animationPlayed);
@@ -499,13 +498,13 @@ bool WindowNodeContainer::AddNodeOnRSTree(sptr<WindowNode>& node, DisplayId disp
         return true;
     }
 
-    if (node->EnableDefaultAnimation(IsWindowAnimationEnabled, animationPlayed)) {
+    if (node->EnableDefaultAnimation(animationPlayed)) {
         WLOGFI("add window with animation");
         StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
         RSNode::Animate(animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
             animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc);
         FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
-    } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && IsWindowAnimationEnabled &&
+    } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         !animationPlayed) { // add keyboard with animation
         auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationIn_;
         RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
@@ -526,7 +525,6 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         return true;
     }
     bool isMultiDisplay = layoutPolicy_->IsMultiDisplay();
-    static const bool IsWindowAnimationEnabled = WindowHelper::ReadIsWindowAnimationEnabledProperty();
     WLOGFI("RemoveNodeFromRSTree  windowId: %{public}d, displayId: %{public}" PRIu64", isMultiDisplay: %{public}d, "
         "parentDisplayId: %{public}" PRIu64", animationPlayed: %{public}d",
         node->GetWindowId(), displayId, isMultiDisplay, parentDisplayId, animationPlayed);
@@ -546,13 +544,13 @@ bool WindowNodeContainer::RemoveNodeFromRSTree(sptr<WindowNode>& node, DisplayId
         return true;
     }
 
-    if (node->EnableDefaultAnimation(IsWindowAnimationEnabled, animationPlayed)) {
+    if (node->EnableDefaultAnimation(animationPlayed)) {
         WLOGFI("remove window with animation");
         StartTraceArgs(HITRACE_TAG_WINDOW_MANAGER, "Animate(%u)", node->GetWindowId());
         RSNode::Animate(animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
             animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_, updateRSTreeFunc);
         FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
-    } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && IsWindowAnimationEnabled &&
+    } else if (node->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
         !animationPlayed) { // remove keyboard with animation
         auto timingProtocol = animationConfig_.keyboardAnimationConfig_.durationOut_;
         RSNode::Animate(timingProtocol, animationConfig_.keyboardAnimationConfig_.curve_, updateRSTreeFunc);
