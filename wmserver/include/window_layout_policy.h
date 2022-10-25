@@ -43,53 +43,60 @@ public:
     WindowLayoutPolicy(const sptr<DisplayGroupInfo>& displayGroupInfo, DisplayGroupWindowTree& displayGroupWindowTree);
     ~WindowLayoutPolicy() = default;
     virtual void Launch();
-    virtual void Clean();
-    virtual void Reset();
     virtual void Reorder();
-    virtual void AddWindowNode(const sptr<WindowNode>& node) = 0;
-    virtual void LayoutWindowTree(DisplayId displayId);
-    virtual void RemoveWindowNode(const sptr<WindowNode>& node);
-    virtual void UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow = false);
-    virtual void UpdateLayoutRect(const sptr<WindowNode>& node) = 0;
-    virtual void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) {};
-    virtual Rect GetDividerRect(DisplayId displayId) const;
-    virtual std::vector<int32_t> GetExitSplitPoints(DisplayId displayId) const;
-    float GetVirtualPixelRatio(DisplayId displayId) const;
-    void UpdateClientRectAndResetReason(const sptr<WindowNode>& node, const Rect& winRect);
-    void UpdateClientRect(const Rect& rect, const sptr<WindowNode>& node, WindowSizeChangeReason reason);
-    Rect GetDisplayGroupRect() const;
-    bool IsMultiDisplay();
+    virtual void PerformWindowLayout(const sptr<WindowNode>& node, WindowUpdateType type) = 0;
     void ProcessDisplayCreate(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void ProcessDisplayDestroy(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
     void ProcessDisplaySizeChangeOrRotation(DisplayId displayId, const std::map<DisplayId, Rect>& displayRectMap);
-    void SetSplitRatioConfig(const SplitRatioConfig& splitRatioConfig);
+    void ProcessDisplayVprChange(DisplayId displayId);
+
+    virtual void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) {};
+    virtual Rect GetDividerRect(DisplayId displayId) const;
     virtual bool IsTileRectSatisfiedWithSizeLimits(const sptr<WindowNode>& node);
+    bool IsMultiDisplay();
+    Rect GetDisplayGroupRect() const;
+    void SetSplitRatioPoints(DisplayId displayId, const std::vector<int32_t>& splitRatioPoints);
+    void NotifyClientAndAnimation(const sptr<WindowNode>& node, const Rect& winRect, WindowSizeChangeReason reason);
 
 protected:
-    void UpdateFloatingLayoutRect(Rect& limitRect, Rect& winRect);
-    void UpdateLimitRect(const sptr<WindowNode>& node, Rect& limitRect);
-    virtual void LayoutWindowNode(const sptr<WindowNode>& node);
+    /*
+     * methods for calculate window rect
+     */
+    virtual void UpdateLayoutRect(const sptr<WindowNode>& node) = 0;
+    void LayoutWindowTree(DisplayId displayId);
+    void LayoutWindowNode(const sptr<WindowNode>& node);
+    void LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec);
+
+    /*
+     * methods for get/update display information or limit information
+     */
     AvoidPosType GetAvoidPosType(const Rect& rect, DisplayId displayId) const;
-    void CalcAndSetNodeHotZone(const Rect& winRect, const sptr<WindowNode>& node) const;
-    void ComputeDecoratedRequestRect(const sptr<WindowNode>& node) const;
+    void UpdateDisplayLimitRect(const sptr<WindowNode>& node, Rect& limitRect);
     bool IsVerticalDisplay(DisplayId displayId) const;
     bool IsFullScreenRecentWindowExist(const std::vector<sptr<WindowNode>>& nodeVec) const;
-    void LayoutWindowNodesByRootType(const std::vector<sptr<WindowNode>>& nodeVec);
-    virtual void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect);
-    void UpdateRectInDisplayGroupForAllNodes(DisplayId displayId,
-        const Rect& oriDisplayRect, const Rect& newDisplayRect);
-    void UpdateRectInDisplayGroup(const sptr<WindowNode>& node,
-        const Rect& oriDisplayRect, const Rect& newDisplayRect);
-    void LimitWindowToBottomRightCorner(const sptr<WindowNode>& node);
+    void UpdateWindowSizeLimits(const sptr<WindowNode>& node);
+    WindowSizeLimits GetSystemSizeLimits(const sptr<WindowNode>& node, const Rect& displayRect, float vpr);
+
+    /*
+     * methods for multiDisplay
+     */
+    void UpdateMultiDisplayFlag();
     void UpdateDisplayGroupRect();
     void UpdateDisplayGroupLimitRect();
-    void UpdateMultiDisplayFlag();
     void PostProcessWhenDisplayChange();
+    void LimitWindowToBottomRightCorner(const sptr<WindowNode>& node);
+    void UpdateRectInDisplayGroupForAllNodes(DisplayId displayId, const Rect& oriDisplayRect,
+        const Rect& newDisplayRect);
+    void UpdateRectInDisplayGroup(const sptr<WindowNode>& node, const Rect& oriDisplayRect,
+        const Rect& newDisplayRect);
     void UpdateDisplayRectAndDisplayGroupInfo(const std::map<DisplayId, Rect>& displayRectMap);
+
+    /*
+     * methods for floating window limitSize and position
+     */
     DockWindowShowState GetDockWindowShowState(DisplayId displayId, Rect& dockWinRect) const;
     void LimitFloatingWindowSize(const sptr<WindowNode>& node, const Rect& displayRect, Rect& winRect) const;
     void LimitMainFloatingWindowPosition(const sptr<WindowNode>& node, Rect& winRect) const;
-
     void UpdateFloatingWindowSizeForStretchableWindow(const sptr<WindowNode>& node,
         const Rect& displayRect, Rect& winRect) const;
     void UpdateFloatingWindowSizeBySizeLimits(const sptr<WindowNode>& node,
@@ -97,33 +104,27 @@ protected:
     void LimitWindowPositionWhenInitRectOrMove(const sptr<WindowNode>& node, Rect& winRect) const;
     void LimitWindowPositionWhenDrag(const sptr<WindowNode>& node, Rect& winRect) const;
     void FixWindowSizeByRatioIfDragBeyondLimitRegion(const sptr<WindowNode>& node, Rect& winRect);
-    void UpdateWindowSizeLimits(const sptr<WindowNode>& node);
-    WindowSizeLimits GetSystemSizeLimits(const sptr<WindowNode>& node,
-        const Rect& displayRect, float virtualPixelRatio);
+
+    /*
+     * methods for update node latest information, include:
+     * 1. notify client and animation
+     * 2. update hot zone
+     * 3. update surface bounds
+     */
+    void NotifyAnimationSizeChangeIfNeeded();
+    void CalcAndSetNodeHotZone(const Rect& winRect, const sptr<WindowNode>& node) const;
     Rect CalcEntireWindowHotZone(const sptr<WindowNode>& node, const Rect& winRect, uint32_t hotZone,
         float vpr, TransformHelper::Vector2 hotZoneScale) const;
-    void NotifyAnimationSizeChangeIfNeeded();
-    const std::set<WindowType> avoidTypes_ {
-        WindowType::WINDOW_TYPE_STATUS_BAR,
-        WindowType::WINDOW_TYPE_NAVIGATION_BAR,
-    };
-    struct LayoutRects {
-        Rect primaryRect_;
-        Rect secondaryRect_;
-        Rect primaryLimitRect_;
-        Rect secondaryLimitRect_;
-        Rect dividerRect_;
-        Rect firstCascadeRect_;
-        std::vector<int32_t> exitSplitPoints_; // 2 element, first element < second element
-        std::vector<int32_t> splitRatioPoints_;
-    };
-    sptr<DisplayGroupInfo> displayGroupInfo_;
-    mutable std::map<DisplayId, Rect> limitRectMap_;
-    DisplayGroupWindowTree& displayGroupWindowTree_;
+    void UpdateSurfaceBounds(const sptr<WindowNode>& node, const Rect& winRect, const Rect& preRect);
+
     Rect displayGroupRect_;
     Rect displayGroupLimitRect_;
     bool isMultiDisplay_ = false;
-    SplitRatioConfig splitRatioConfig_;
+    sptr<DisplayGroupInfo> displayGroupInfo_;
+    mutable std::map<DisplayId, Rect> limitRectMap_;
+    DisplayGroupWindowTree& displayGroupWindowTree_;
+    std::map<DisplayId, Rect> restoringDividerWindowRects_;
+    mutable std::map<DisplayId, std::vector<int32_t>> splitRatioPointsMap_;
 };
 }
 }

@@ -179,6 +179,26 @@ public:
      */
     void ClearPairSnapshot();
 
+    /**
+     * @brief Set split ratio config.
+     */
+    void SetSplitRatioConfig(const SplitRatioConfig& splitRatioConfig);
+
+    /**
+     * @brief Calculate split ratio points.
+     */
+    void CalculateSplitRatioPoints(const Rect& displayRect);
+
+    /**
+     * @brief Get exit split points.
+     */
+    std::vector<int32_t> GetExitSplitPoints();
+
+    /**
+     * @brief Get split ratio points.
+     */
+    std::vector<int32_t> GetSplitRatioPoints();
+
 private:
     /**
      * @brief Gets whether the window is related to split window.
@@ -242,6 +262,11 @@ private:
      */
     void NotifyCreateOrDestroyDivider(sptr<WindowNode> node, bool isDestroy);
 
+    /**
+     * @brief Calculate and Get split ratio point
+     */
+    int32_t GetSplitRatioPoint(float ratio, const Rect& displayRect);
+
 private:
     float ratio_ = DEFAULT_SPLIT_RATIO;
     DisplayId displayId_;
@@ -250,6 +275,9 @@ private:
     sptr<WindowNode> divider_;
     WindowPairStatus status_ = {WindowPairStatus::STATUS_EMPTY};
     Rect dividerRect_ {0, 0, 0, 0};
+    std::vector<int32_t> exitSplitPoints_; // 2 element, first element < second element
+    std::vector<int32_t> splitRatioPoints_;
+    SplitRatioConfig splitRatioConfig_;
     DEFINE_VAR_DEFAULT_FUNC_SET(bool, AllSplitAppWindowsRestoring, isAllSplitAppWindowsRestoring, false)
 };
 } // namespace Rosen
