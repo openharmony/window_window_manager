@@ -145,11 +145,8 @@ Rect WindowTestUtils::GetDefaultFloatingRect(const sptr<Window>& window)
     // calculate default x and y
     Rect resRect = {0, 0, defaultW, defaultH};
     if (defaultW <= limitDisplayRect_.width_ && defaultH <= limitDisplayRect_.height_) {
-        int32_t centerPosX = limitDisplayRect_.posX_ + static_cast<int32_t>(limitDisplayRect_.width_ / half);
-        resRect.posX_ = centerPosX - static_cast<int32_t>(defaultW / half);
-
-        int32_t centerPosY = limitDisplayRect_.posY_ + static_cast<int32_t>(limitDisplayRect_.height_ / half);
-        resRect.posY_ = centerPosY - static_cast<int32_t>(defaultH / half);
+        resRect.posX_ = limitDisplayRect_.posX_ + static_cast<int32_t>((limitDisplayRect_.width_ - defaultW) / half);
+        resRect.posY_ = limitDisplayRect_.posY_ + static_cast<int32_t>((limitDisplayRect_.height_ - defaultH) / half);
     }
 
     return resRect;
