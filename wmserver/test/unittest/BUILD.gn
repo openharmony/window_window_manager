@@ -23,6 +23,7 @@ group("unittest") {
     ":wmserver_starting_window_test",
     ":wmserver_window_layout_policy_test",
     ":wmserver_window_manager_config_test",
+    ":wmserver_window_manager_proxy_test",
     ":wmserver_window_manager_stub_test",
     ":wmserver_window_node_container_test",
     ":wmserver_window_node_test",
@@ -151,6 +152,14 @@ ohos_unittest("wmserver_starting_window_test") {
     "hilog_native:libhilog",
     "ipc:ipc_core",
   ]
+}
+
+ohos_unittest("wmserver_window_manager_proxy_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_manager_proxy_test.cpp" ]
+
+  deps = [ ":wmserver_unittest_common" ]
 }
 
 ## Build wmserver_unittest_common.a {{{
