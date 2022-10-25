@@ -70,8 +70,13 @@ WindowNodeContainer::WindowNodeContainer(const sptr<DisplayInfo>& displayInfo, S
     layoutPolicy_ = layoutPolicies_[WindowLayoutMode::CASCADE];
     layoutPolicy_->Launch();
 
-    Rect initalDividerRect = layoutPolicies_[WindowLayoutMode::CASCADE]->GetDividerRect(displayId);
-    displayGroupController_->SetDividerRect(displayId, initalDividerRect);
+    // set initial divider rect in windowPair
+    Rect initialDivRect = layoutPolicies_[WindowLayoutMode::CASCADE]->GetDividerRect(displayId);
+    auto windowPair = displayGroupController_->GetWindowPairByDisplayId(displayId);
+    if (windowPair != nullptr) {
+        windowPair->SetDividerRect(initialDivRect);
+    }
+
     // init avoidAreaController
     avoidController_ = new AvoidAreaController(focusedWindow_);
 }
@@ -150,7 +155,7 @@ WMError WindowNodeContainer::ShowStartingWindow(sptr<WindowNode>& node)
     displayGroupController_->PreProcessWindowNode(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     StartingWindow::AddNodeOnRSTree(node, animationConfig_, layoutPolicy_->IsMultiDisplay());
     AssignZOrder();
-    layoutPolicy_->AddWindowNode(node);
+    layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     WLOGFI("ShowStartingWindow windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
@@ -174,7 +179,7 @@ AnimationConfig& WindowNodeContainer::GetAnimationConfigRef()
 void WindowNodeContainer::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool afterAnimation)
 {
     if (afterAnimation) {
-        layoutPolicy_->AddWindowNode(node);
+        layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
         return;
     }
     WLOGFI("AddWindowNode windowId:%{public}u, name:%{public}s currState:%{public}u",
@@ -187,16 +192,16 @@ void WindowNodeContainer::LayoutWhenAddWindowNode(sptr<WindowNode>& node, bool a
         auto winRect = node->GetWindowRect();
         if (node->surfaceNode_) {
             node->surfaceNode_->SetBounds(0, 0, winRect.width_, winRect.height_);
-            WLOGFI("notify client and SetBounds id:%{public}u, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+            WLOGFI("SetBounds id:%{public}u, rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
                 node->GetWindowId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
-            layoutPolicy_->UpdateClientRect(node->GetWindowRect(), node, WindowSizeChangeReason::UNDEFINED);
+            layoutPolicy_->NotifyClientAndAnimation(node, winRect, WindowSizeChangeReason::UNDEFINED);
         }
     } else {
         if (node->GetWindowProperty()->GetAnimationFlag() == static_cast<uint32_t>(WindowAnimation::CUSTOM) &&
             WindowHelper::IsSystemWindow(node->GetWindowType())) {
                 node->SetWindowSizeChangeReason(WindowSizeChangeReason::CUSTOM_ANIMATION_SHOW);
         }
-        layoutPolicy_->AddWindowNode(node);
+        layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
     }
 }
 
@@ -284,7 +289,7 @@ WMError WindowNodeContainer::UpdateWindowNode(sptr<WindowNode>& node, WindowUpda
     if (WindowHelper::IsMainWindow(node->GetWindowType()) && WindowHelper::IsSwitchCascadeReason(reason)) {
         SwitchLayoutPolicy(WindowLayoutMode::CASCADE, node->GetDisplayId());
     }
-    layoutPolicy_->UpdateWindowNode(node);
+    layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ACTIVE);
     displayGroupController_->PostProcessWindowNode(node);
     // Get current displayId and showing displays, update RSTree and displayGroupWindowTree
     UpdateRSTreeWhenShowingDisplaysChange(node, lastShowingDisplays);
@@ -339,8 +344,7 @@ WMError WindowNodeContainer::RemoveWindowNode(sptr<WindowNode>& node, bool fromA
     node->currentVisibility_ = false;
     RemoveFromRsTreeWhenRemoveWindowNode(node, fromAnimation);
     displayGroupController_->UpdateDisplayGroupWindowTree();
-
-    layoutPolicy_->RemoveWindowNode(node);
+    layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_REMOVED);
     WindowMode lastMode = node->GetWindowMode();
     if (HandleRemoveWindow(node) != WMError::WM_OK) {
         return WMError::WM_ERROR_NULLPTR;
@@ -415,17 +419,15 @@ void WindowNodeContainer::UpdateSizeChangeReason(sptr<WindowNode>& node, WindowS
         return;
     }
     if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE) {
-        for (auto& childNode : appWindowNode_->children_) {
-            if (childNode->IsSplitMode()) {
-                layoutPolicy_->UpdateClientRect(childNode->GetWindowRect(), childNode, reason);
-                childNode->ResetWindowSizeChangeReason();
-                WLOGFI("Notify split window that the drag action is start or end, windowId: %{public}d, "
-                    "reason: %{public}u", childNode->GetWindowId(), reason);
+        for (auto& child : appWindowNode_->children_) {
+            if (child->IsSplitMode() && child->GetWindowToken()) {
+                layoutPolicy_->NotifyClientAndAnimation(child, child->GetWindowRect(), reason);
+                WLOGFI("Notify split window that the drag action is start or end, windowId: "
+                    "%{public}d, reason: %{public}u", child->GetWindowId(), reason);
             }
         }
     } else {
-        layoutPolicy_->UpdateClientRect(node->GetWindowRect(), node, reason);
-        node->ResetWindowSizeChangeReason();
+        layoutPolicy_->NotifyClientAndAnimation(node, node->GetWindowRect(), reason);
         WLOGFI("Notify window that the drag action is start or end, windowId: %{public}d, "
             "reason: %{public}u", node->GetWindowId(), reason);
     }
@@ -797,7 +799,7 @@ sptr<AvoidAreaController> WindowNodeContainer::GetAvoidController() const
     return avoidController_;
 }
 
-sptr<DisplayGroupController> WindowNodeContainer::GetMultiDisplayController() const
+sptr<DisplayGroupController> WindowNodeContainer::GetDisplayGroupController() const
 {
     return displayGroupController_;
 }
@@ -1426,7 +1428,7 @@ bool WindowNodeContainer::IsDockSliceInExitSplitModeArea(DisplayId displayId) co
         WLOGFE("window pair is nullptr");
         return false;
     }
-    std::vector<int32_t> exitSplitPoints = layoutPolicy_->GetExitSplitPoints(displayId);
+    std::vector<int32_t> exitSplitPoints = windowPair->GetExitSplitPoints();
     if (exitSplitPoints.size() != EXIT_SPLIT_POINTS_NUMBER) {
         return false;
     }
@@ -1628,11 +1630,6 @@ WMError WindowNodeContainer::MinimizeStructuredAppWindowsExceptSelf(const sptr<W
     return MinimizeAppNodeExceptOptions(MinimizeReason::OTHER_WINDOW, exceptionalIds, exceptionalModes);
 }
 
-void WindowNodeContainer::ResetLayoutPolicy()
-{
-    layoutPolicy_->Reset();
-}
-
 WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, DisplayId displayId, bool reorder)
 {
     WLOGFI("SwitchLayoutPolicy src: %{public}d dst: %{public}d, reorder: %{public}d, displayId: %{public}" PRIu64"",
@@ -1648,11 +1645,9 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, Displa
     }
     if (layoutMode_ != dstMode) {
         if (layoutMode_ == WindowLayoutMode::CASCADE) {
-            layoutPolicy_->Reset();
             windowPair->Clear();
         }
         layoutMode_ = dstMode;
-        layoutPolicy_->Clean();
         layoutPolicy_ = layoutPolicies_[dstMode];
         layoutPolicy_->Launch();
         DumpScreenWindowTree();
@@ -1865,11 +1860,6 @@ bool WindowNodeContainer::TraverseFromBottomToTop(sptr<WindowNode> node, const W
         }
     }
     return false;
-}
-
-float WindowNodeContainer::GetVirtualPixelRatio(DisplayId displayId) const
-{
-    return layoutPolicy_->GetVirtualPixelRatio(displayId);
 }
 
 Rect WindowNodeContainer::GetDisplayGroupRect() const

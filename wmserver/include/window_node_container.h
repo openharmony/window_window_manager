@@ -83,7 +83,6 @@ public:
     WMError SetWindowMode(sptr<WindowNode>& node, WindowMode dstMode);
     WMError SwitchLayoutPolicy(WindowLayoutMode mode, DisplayId displayId, bool reorder = false);
     void RaiseSplitRelatedWindowToTop(sptr<WindowNode>& node);
-    float GetVirtualPixelRatio(DisplayId displayId) const;
     Rect GetDisplayGroupRect() const;
     void TraverseWindowTree(const WindowNodeOperationFunc& func, bool isFromTopToBottom = true) const;
     void UpdateSizeChangeReason(sptr<WindowNode>& node, WindowSizeChangeReason reason);
@@ -106,7 +105,7 @@ public:
 
     sptr<WindowLayoutPolicy> GetLayoutPolicy() const;
     sptr<AvoidAreaController> GetAvoidController() const;
-    sptr<DisplayGroupController> GetMultiDisplayController() const;
+    sptr<DisplayGroupController> GetDisplayGroupController() const;
     sptr<WindowNode> GetRootNode(WindowRootNodeType type) const;
     void NotifyDockWindowStateChanged(sptr<WindowNode>& node, bool isEnable);
     void UpdateCameraFloatWindowStatus(const sptr<WindowNode>& node, bool isShowing);
@@ -140,7 +139,6 @@ private:
     bool IsTopWindow(uint32_t windowId, sptr<WindowNode>& rootNode) const;
     sptr<WindowNode> FindDividerNode() const;
     void RaiseWindowToTop(uint32_t windowId, std::vector<sptr<WindowNode>>& windowNodes);
-    void ResetLayoutPolicy();
     bool IsAboveSystemBarNode(sptr<WindowNode> node) const;
     bool IsSplitImmersiveNode(sptr<WindowNode> node) const;
     bool TraverseFromTopToBottom(sptr<WindowNode> node, const WindowNodeOperationFunc& func) const;
@@ -172,6 +170,7 @@ private:
     std::map<uint32_t, WindowMode> backupWindowMode_;
     std::map<DisplayId, Rect> backupDividerWindowRect_;
     std::map<DisplayId, std::set<WindowMode>> backupDisplaySplitWindowMode_;
+
     sptr<WindowZorderPolicy> zorderPolicy_ = new WindowZorderPolicy();
     std::unordered_map<WindowLayoutMode, sptr<WindowLayoutPolicy>> layoutPolicies_;
     WindowLayoutMode layoutMode_ = WindowLayoutMode::CASCADE;

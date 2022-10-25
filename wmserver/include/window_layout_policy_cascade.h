@@ -33,50 +33,46 @@ public:
         DisplayGroupWindowTree& displayGroupWindowTree);
     ~WindowLayoutPolicyCascade() = default;
     void Launch() override;
-    void Clean() override;
-    void Reset() override;
     void Reorder() override;
-    void AddWindowNode(const sptr<WindowNode>& node) override;
-    void UpdateWindowNode(const sptr<WindowNode>& node, bool isAddWindow = false) override;
-    void UpdateLayoutRect(const sptr<WindowNode>& node) override;
-    void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) override;
-    void RemoveWindowNode(const sptr<WindowNode>& node) override;
     Rect GetDividerRect(DisplayId displayId) const override;
-    std::vector<int32_t> GetExitSplitPoints(DisplayId displayId) const override;
+    void SetSplitDividerWindowRects(std::map<DisplayId, Rect> dividerWindowRects) override;
+    void PerformWindowLayout(const sptr<WindowNode>& node, WindowUpdateType updateType) override;
 
 private:
+    /*
+     * methods for calculate cascadeRect and splitRect
+     */
     void InitAllRects();
     void InitSplitRects(DisplayId displayId);
-    int32_t GetSplitRatioPoint(float ratio, DisplayId displayId);
-    void SetSplitRect(const Rect& rect, DisplayId displayId);
-    void UpdateSplitLimitRect(const Rect& limitRect, Rect& limitSplitRect);
-    void UpdateSplitRatioPoints(DisplayId displayId);
-    void UpdateDockSlicePosition(DisplayId displayId, int32_t& origin) const;
-    void LayoutWindowNode(const sptr<WindowNode>& node) override;
-    void LayoutWindowTree(DisplayId displayId) override;
-    void InitLimitRects(DisplayId displayId);
-    void LimitDividerMoveBounds(Rect& rect, DisplayId displayId) const;
+    void SetSplitRectByDivider(const Rect& divRect, DisplayId displayId);
+    void SetInitialDividerRect(const sptr<WindowNode>& node, DisplayId displayId);
     void InitCascadeRect(DisplayId displayId);
-    void SetCascadeRect(const sptr<WindowNode>& node);
-    void ApplyWindowRectConstraints(const sptr<WindowNode>& node, Rect& winRect) const;
-    void UpdateWindowNodeRectOffset(const sptr<WindowNode>& node) const;
-    bool SpecialReasonProcess(const sptr<WindowNode>& node) const;
-
-    Rect GetRectByWindowMode(const WindowMode& mode) const;
-    Rect GetLimitRect(const WindowMode mode, DisplayId displayId) const;
-    Rect GetDisplayRect(const WindowMode mode, DisplayId displayId) const;
-    Rect GetCurCascadeRect(const sptr<WindowNode>& node) const;
+    void SetDefaultCascadeRect(const sptr<WindowNode>& node);
     Rect StepCascadeRect(Rect rect, DisplayId displayId) const;
+    Rect GetCurCascadeRect(const sptr<WindowNode>& node) const;
+
+    // methods for limit divider position by display and split ratio
+    void UpdateDividerPosition(const sptr<WindowNode>& node) const;
+    void LimitDividerInDisplayRegion(Rect& rect, DisplayId displayId) const;
+    void LimitDividerPositionBySplitRatio(DisplayId displayId, Rect& winRect) const;
+
+    /*
+     * methods for calculate window rect
+     */
+    void LayoutDivider(const sptr<WindowNode>& node, WindowUpdateType type);
+    void LayoutSplitNodes(DisplayId displayId, WindowUpdateType type, bool layoutByDivider = false);
+    void UpdateLayoutRect(const sptr<WindowNode>& node) override;
+    void FixWindowRectWithinDisplay(const sptr<WindowNode>& node) const;
+    void ComputeDecoratedRequestRect(const sptr<WindowNode>& node) const;
+    void ApplyWindowRectConstraints(const sptr<WindowNode>& node, Rect& winRect) const;
 
     struct CascadeRects {
         Rect primaryRect_;
         Rect secondaryRect_;
-        Rect primaryLimitRect_;
-        Rect secondaryLimitRect_;
         Rect dividerRect_;
-        Rect firstCascadeRect_;
+        Rect defaultCascadeRect_;
     };
-    mutable std::map<DisplayId, LayoutRects> cascadeRectsMap_;
+    mutable std::map<DisplayId, CascadeRects> cascadeRectsMap_;
     std::map<DisplayId, Rect> restoringDividerWindowRects_;
 };
 }
