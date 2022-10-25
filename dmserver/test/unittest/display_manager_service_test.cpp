@@ -95,19 +95,6 @@ HWTEST_F(DisplayManagerServiceTest, Dump, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: StartAndStop
- * @tc.desc: DMS start and stop
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerServiceTest, OnStart, Function | SmallTest | Level3)
-{
-    ASSERT_NE(nullptr, dms_->abstractScreenController_);
-    ASSERT_NE(nullptr, dms_->abstractDisplayController_);
-    dms_->OnStart();
-    dms_->OnStop();
-}
-
-/**
  * @tc.name: Config
  * @tc.desc: DMS config
  * @tc.type: FUNC
