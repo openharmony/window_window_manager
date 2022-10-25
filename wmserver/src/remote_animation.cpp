@@ -494,7 +494,7 @@ static void GetAnimationHomeFinishCallback(std::function<void(void)>& func,
             }
             srcNode->stateMachine_.TransitionTo(WindowNodeState::HIDE_ANIMATION_DONE);
         }
-        MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::MINIMIZE_ALL);
+        MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::MINIMIZE_ALL);
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
             "wms:async:ShowRemoteAnimation");
     };
@@ -512,7 +512,7 @@ WMError RemoteAnimation::NotifyAnimationByHome()
     GetAnimationTargetsForHome(animationTargets, needMinimizeAppNodes);
     std::function<void(void)> func;
     if (animationFirst_) {
-        MinimizeApp::ExecuteMinimizeTargetReason(MinimizeReason::MINIMIZE_ALL);
+        MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::MINIMIZE_ALL);
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::REMOTE_ANIMATION),
             "wms:async:ShowRemoteAnimation");
         func = [needMinimizeAppNodes]() {
