@@ -743,6 +743,12 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
             WLOGFE("get surfaceSnapshot failed for window:%{public}u", srcNode->GetWindowId());
             return;
         }
+        struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+        rsSurfaceNodeConfig.SurfaceNodeName = "startingWindow" + std::to_string(srcNode->GetWindowId());
+        srcNode->startingWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig,
+            RSSurfaceNodeType::STARTING_WINDOW_NODE);
+        auto rect = srcNode->GetWindowRect();
+        srcNode->startingWinSurfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
         SurfaceDraw::DrawImageRect(srcNode->startingWinSurfaceNode_, srcNode->GetWindowRect(),
             pixelMap, 0xffffffff, true);
         srcNode->leashWinSurfaceNode_->RemoveChild(srcNode->surfaceNode_);
