@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "window_pair.h"
 #include "common_test_utils.h"
+#include "mock_IWindow.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -803,6 +804,120 @@ HWTEST_F(WindowPairTest, HandlePairedNodesChange05, Function | SmallTest | Level
     windowPair->HandlePairedNodesChange();
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, windowPair->primary_->GetWindowMode());
     ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, windowPair->secondary_->GetWindowMode());
+}
+
+/**
+ * @tc.name: HandleRemoveWindow
+ * @tc.desc: Handle removed window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, HandleRemoveWindow01, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+    sptr<WindowProperty> property1 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    windowPair->primary_ = new WindowNode(property1);
+
+    sptr<WindowNode> node = nullptr;
+    windowPair->HandleRemoveWindow(node);
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, windowPair->primary_->GetWindowMode());
+}
+
+/**
+ * @tc.name: HandleRemoveWindow
+ * @tc.desc: Handle removed window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, HandleRemoveWindow02, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+
+    sptr<WindowProperty> property1 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+
+    sptr<WindowNode> node1 = new WindowNode(property1);
+    sptr<WindowNode> node2 = new WindowNode(property1);
+
+    // define primary_, secondary_, status_
+    windowPair->primary_ = nullptr;
+    windowPair->secondary_ = nullptr;
+    windowPair->divider_ = nullptr;
+    windowPair->status_ = WindowPairStatus::STATUS_PAIRING;
+
+    sptr<IWindow> window = new IWindowMocker();
+    node1->SetWindowToken(window);
+    windowPair->HandleRemoveWindow(node1);
+    ASSERT_EQ(nullptr, windowPair->primary_);
+    sptr<IWindow> window1 = nullptr;
+    node1->SetWindowToken(window1);
+    windowPair->HandleRemoveWindow(node1);
+    ASSERT_EQ(nullptr, windowPair->primary_);
+}
+
+/**
+ * @tc.name: TakePairSnapshot
+ * @tc.desc: take pair snapsht
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, TakePairSnapshot01, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+
+    sptr<WindowProperty> property1 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowProperty> property2 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+
+    sptr<WindowNode> node1 = new WindowNode(property1);
+    sptr<WindowNode> node2 = new WindowNode(property2);
+
+    // define primary_, secondary_, status_
+    windowPair->primary_ = node1;
+    windowPair->secondary_ = node2;
+    windowPair->status_ = WindowPairStatus::STATUS_PAIRED_DONE;
+
+    ASSERT_EQ(true, windowPair->TakePairSnapshot());
+    windowPair->primary_ = nullptr;
+    ASSERT_EQ(false, windowPair->TakePairSnapshot());
+    windowPair->primary_ = node1;
+    windowPair->secondary_ = nullptr;
+    ASSERT_EQ(false, windowPair->TakePairSnapshot());
+    windowPair->status_ = WindowPairStatus::STATUS_PAIRING;
+    ASSERT_EQ(false, windowPair->TakePairSnapshot());
+}
+
+/**
+ * @tc.name: ClearPairSnapshot
+ * @tc.desc: Clear Pair Snapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPairTest, ClearPairSnapshot01, Function | SmallTest | Level2)
+{
+    sptr<WindowPair> windowPair = new WindowPair(0);
+
+    sptr<WindowProperty> property1 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
+    sptr<WindowProperty> property2 = new WindowProperty();
+    property1->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+
+    sptr<WindowNode> node1 = new WindowNode(property1);
+    sptr<WindowNode> node2 = new WindowNode(property2);
+
+    // define primary_, secondary_,
+    windowPair->primary_ = node1;
+    windowPair->secondary_ = node2;
+
+    windowPair->ClearPairSnapshot();
+    ASSERT_EQ(nullptr, windowPair->primary_->snapshot_);
+    ASSERT_EQ(nullptr, windowPair->secondary_->snapshot_);
+
+    windowPair->primary_ = nullptr;
+    ASSERT_EQ(false, windowPair->TakePairSnapshot());
+    windowPair->primary_ = node1;
+    windowPair->secondary_ = nullptr;
+    ASSERT_EQ(false, windowPair->TakePairSnapshot());
+    windowPair->status_ = WindowPairStatus::STATUS_PAIRING;
+    ASSERT_EQ(false, windowPair->TakePairSnapshot());
 }
 }
 }
