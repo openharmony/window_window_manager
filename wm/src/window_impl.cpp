@@ -2354,6 +2354,11 @@ void WindowImpl::UpdateFocusStatus(bool focused)
     UpdateWindowShadowAccordingToSystemConfig();
 }
 
+bool WindowImpl::IsFocused() const
+{
+    return isFocused_;
+}
+
 void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
     if (uiContent_ != nullptr) {
