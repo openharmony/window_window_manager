@@ -487,6 +487,11 @@ WMError WindowImpl::RequestFocus() const
     return WMError::WM_OK;
 }
 
+bool WindowImpl::IsFocused() const
+{
+    return true;
+}
+
 void WindowImpl::SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer)
 {
     return;
