@@ -353,10 +353,6 @@ WMError WindowImpl::SetWindowType(WindowType type)
 WMError WindowImpl::SetWindowMode(WindowMode mode)
 {
     WLOGFI("[Client] Window %{public}u mode %{public}u", property_->GetWindowId(), static_cast<uint32_t>(mode));
-    if (!Permission::IsSystemCalling()) {
-        WLOGFE("set window mode permission denied!");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -462,6 +458,7 @@ WMError WindowImpl::SetWindowFlags(uint32_t flags)
     if (property_->GetWindowFlags() == flags) {
         return WMError::WM_OK;
     }
+    auto oriFlags = property_->GetWindowFlags();
     property_->SetWindowFlags(flags);
     if (state_ == WindowState::STATE_CREATED || state_ == WindowState::STATE_HIDDEN) {
         return WMError::WM_OK;
@@ -470,6 +467,7 @@ WMError WindowImpl::SetWindowFlags(uint32_t flags)
     if (ret != WMError::WM_OK) {
         WLOGFE("SetWindowFlags errCode:%{public}d winId:%{public}u",
             static_cast<int32_t>(ret), property_->GetWindowId());
+        property_->SetWindowFlags(oriFlags);
     }
     return ret;
 }
@@ -1414,10 +1412,6 @@ bool WindowImpl::IsKeepScreenOn() const
 
 WMError WindowImpl::SetTurnScreenOn(bool turnScreenOn)
 {
-    if (!Permission::IsSystemCalling()) {
-        WLOGFE("set wake up screen permission denied!");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
