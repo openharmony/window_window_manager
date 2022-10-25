@@ -92,7 +92,12 @@ public:
             return;
         }
         pImpl_->NotifyDisplayCreate(displayInfo);
-        for (auto listener : pImpl_->displayListeners_) {
+        std::set<sptr<IDisplayListener>> displayListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+            displayListeners = pImpl_->displayListeners_;
+        }
+        for (auto listener : displayListeners) {
             listener->OnCreate(displayInfo->GetDisplayId());
         }
     };
@@ -108,7 +113,12 @@ public:
             return;
         }
         pImpl_->NotifyDisplayDestroy(displayId);
-        for (auto listener : pImpl_->displayListeners_) {
+        std::set<sptr<IDisplayListener>> displayListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+            displayListeners = pImpl_->displayListeners_;
+        }
+        for (auto listener : displayListeners) {
             listener->OnDestroy(displayId);
         }
     };
@@ -125,7 +135,12 @@ public:
         }
         WLOGD("OnDisplayChange. display %{public}" PRIu64", event %{public}u", displayInfo->GetDisplayId(), event);
         pImpl_->NotifyDisplayChange(displayInfo);
-        for (auto listener : pImpl_->displayListeners_) {
+        std::set<sptr<IDisplayListener>> displayListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+            displayListeners = pImpl_->displayListeners_;
+        }
+        for (auto listener : displayListeners) {
             listener->OnChange(displayInfo->GetDisplayId());
         }
     };
