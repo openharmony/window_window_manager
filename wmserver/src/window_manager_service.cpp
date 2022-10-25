@@ -719,31 +719,33 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
         WLOGFI("Operation rejected");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    auto node = windowRoot_->GetWindowNode(windowId);
-    if (node == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    node->stateMachine_.SetDestroyTaskParam(onlySelf);
-    auto func = [this, windowId]() {
-        WLOGFI("[WMS] Destroy: %{public}u", windowId);
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DestroyWindow(%u)", windowId);
-        WindowInnerManager::GetInstance().NotifyWindowRemovedOrDestroyed(windowId);
+    return PostSyncTask([this, windowId, onlySelf]() {
         auto node = windowRoot_->GetWindowNode(windowId);
-        if (node != nullptr && node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
-            dragController_->FinishDrag(windowId);
+        if (node == nullptr) {
+            return WMError::WM_ERROR_NULLPTR;
         }
-        return windowController_->DestroyWindow(windowId, node->stateMachine_.GetDestroyTaskParam());
-    };
-    if (RemoteAnimation::IsRemoteAnimationEnabledAndFirst(node->GetDisplayId()) &&
-        node->stateMachine_.IsRemoteAnimationPlaying()) {
-        WLOGFI("SetDestroyTask id:%{public}u", node->GetWindowId());
-        node->stateMachine_.SetDestroyTask(func);
-        return WMError::WM_OK;
-    }
-    WLOGFI("DestroyWindow windowId: %{public}u, name:%{public}s state: %{public}u",
-        node->GetWindowId(), node->GetWindowName().c_str(),
-        static_cast<uint32_t>(node->stateMachine_.GetCurrentState()));
-    return PostSyncTask(func);
+        node->stateMachine_.SetDestroyTaskParam(onlySelf);
+        auto func = [this, windowId]() {
+            WLOGFI("[WMS] Destroy: %{public}u", windowId);
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "wms:DestroyWindow(%u)", windowId);
+            WindowInnerManager::GetInstance().NotifyWindowRemovedOrDestroyed(windowId);
+            auto node = windowRoot_->GetWindowNode(windowId);
+            if (node != nullptr && node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
+                dragController_->FinishDrag(windowId);
+            }
+            return windowController_->DestroyWindow(windowId, node->stateMachine_.GetDestroyTaskParam());
+        };
+        if (RemoteAnimation::IsRemoteAnimationEnabledAndFirst(node->GetDisplayId()) &&
+            node->stateMachine_.IsRemoteAnimationPlaying()) {
+            WLOGFI("SetDestroyTask id:%{public}u", node->GetWindowId());
+            node->stateMachine_.SetDestroyTask(func);
+            return WMError::WM_OK;
+        }
+        WLOGFI("DestroyWindow windowId: %{public}u, name:%{public}s state: %{public}u",
+            node->GetWindowId(), node->GetWindowName().c_str(),
+            static_cast<uint32_t>(node->stateMachine_.GetCurrentState()));
+        return func();
+    });
 }
 
 WMError WindowManagerService::RequestFocus(uint32_t windowId)
@@ -817,36 +819,38 @@ WMError WindowManagerService::SetWindowAnimationController(const sptr<RSIWindowA
 void WindowManagerService::OnWindowEvent(Event event, const sptr<IRemoteObject>& remoteObject)
 {
     if (event == Event::REMOTE_DIED) {
-        uint32_t windowId = windowRoot_->GetWindowIdByObject(remoteObject);
-        auto node = windowRoot_->GetWindowNode(windowId);
-        if (node == nullptr) {
-            WLOGFD("window node is nullptr, REMOTE_DIED no need to destroy");
-            return;
-        }
-        node->stateMachine_.SetDestroyTaskParam(true);
-        auto func = [this, windowId]() {
+        PostVoidSyncTask([this, &remoteObject]() {
+            uint32_t windowId = windowRoot_->GetWindowIdByObject(remoteObject);
             auto node = windowRoot_->GetWindowNode(windowId);
             if (node == nullptr) {
-                WLOGFD("window node is nullptr");
+                WLOGFD("window node is nullptr, REMOTE_DIED no need to destroy");
                 return;
             }
-            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
-                dragController_->FinishDrag(windowId);
-            }
-            windowController_->DestroyWindow(windowId, node->stateMachine_.GetDestroyTaskParam());
-        };
+            node->stateMachine_.SetDestroyTaskParam(true);
+            auto func = [this, windowId]() {
+                auto node = windowRoot_->GetWindowNode(windowId);
+                if (node == nullptr) {
+                    WLOGFD("window node is nullptr");
+                    return;
+                }
+                if (node->GetWindowType() == WindowType::WINDOW_TYPE_DRAGGING_EFFECT) {
+                    dragController_->FinishDrag(windowId);
+                }
+                windowController_->DestroyWindow(windowId, node->stateMachine_.GetDestroyTaskParam());
+            };
 
-        if (node->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
-            PostVoidSyncTask([&remoteObject] { RemoteAnimation::OnRemoteDie(remoteObject); });
-        }
-        if (RemoteAnimation::IsRemoteAnimationEnabledAndFirst(node->GetDisplayId()) &&
-            node->stateMachine_.IsRemoteAnimationPlaying()) {
-            WLOGFI("set destroy task windowId:%{public}u", node->GetWindowId());
-            node->stateMachine_.SetDestroyTask(func);
-            handler_->PostTask(func, "destroyTimeOutTask", 6000); // 6000 is time out 6s
-            return;
-        }
-        return PostVoidSyncTask(func);
+            if (node->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP) {
+                RemoteAnimation::OnRemoteDie(remoteObject);
+            }
+            if (RemoteAnimation::IsRemoteAnimationEnabledAndFirst(node->GetDisplayId()) &&
+                node->stateMachine_.IsRemoteAnimationPlaying()) {
+                WLOGFI("set destroy task windowId:%{public}u", node->GetWindowId());
+                node->stateMachine_.SetDestroyTask(func);
+                handler_->PostTask(func, "destroyTimeOutTask", 6000); // 6000 is time out 6s
+                return;
+            }
+            func();
+        });
     }
 }
 
