@@ -169,6 +169,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
         AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(weakNode->abilityToken_);
         RSTransaction::FlushImplicitTransaction();
         weakNode->firstFrameAvaliable_ = true;
+        weakNode->startingWinSurfaceNode_ = nullptr;
     };
     node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
     RSTransaction::FlushImplicitTransaction();
