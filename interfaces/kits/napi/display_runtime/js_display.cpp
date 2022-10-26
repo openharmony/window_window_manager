@@ -162,7 +162,7 @@ NativeValue* CreateJsBoundingRectsArrayObject(NativeEngine& engine, std::vector<
     NativeValue* arrayValue = engine.CreateArray(boundingRects.size());
     NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
     size_t i = 0;
-    for (auto& rect : boundingRects) {
+    for (const auto& rect : boundingRects) {
         array->SetElement(i++, CreateJsRectObject(engine, rect));
     }
     return arrayValue;

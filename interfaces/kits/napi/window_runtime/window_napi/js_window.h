@@ -116,9 +116,9 @@ public:
     static NativeValue* SetBackdropBlurStyle(NativeEngine* engine, NativeCallbackInfo* info);
 private:
     std::string GetWindowName();
-    bool ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
-    bool ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
-    bool ParseTranslateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
+    static bool ParseScaleOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
+    static bool ParseRotateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
+    static bool ParseTranslateOption(NativeEngine& engine, NativeObject* jsObject, Transform& trans);
     NativeValue* LoadContentScheduleOld(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* LoadContentScheduleNew(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnShow(NativeEngine& engine, NativeCallbackInfo& info);
