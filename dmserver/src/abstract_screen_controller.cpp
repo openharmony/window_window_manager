@@ -957,7 +957,7 @@ void AbstractScreenController::AddScreenToGroup(sptr<AbstractScreenGroup> group,
         } else {
             WLOGFI("default, AddChild failed");
         }
-        if (group != nullptr && abstractScreenCallback_ != nullptr) {
+        if (abstractScreenCallback_ != nullptr) {
             abstractScreenCallback_->onConnect_(screen);
         }
         if (rSScreenChangeListener_ != nullptr) {

@@ -48,7 +48,7 @@ WindowLayoutPolicyCascade::WindowLayoutPolicyCascade(const sptr<DisplayGroupInfo
 void WindowLayoutPolicyCascade::Launch()
 {
     InitAllRects();
-    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
+    for (const auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
         DisplayId displayId = iter.first;
         auto& displayWindowTree = displayGroupWindowTree_[displayId];
         LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::APP_WINDOW_NODE]));
@@ -477,7 +477,7 @@ void WindowLayoutPolicyCascade::SetSplitRect(const Rect& divRect, DisplayId disp
 void WindowLayoutPolicyCascade::Reorder()
 {
     WLOGFI("Cascade reorder start");
-    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
+    for (const auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
         DisplayId displayId = iter.first;
         Rect rect = cascadeRectsMap_[displayId].firstCascadeRect_;
         bool isFirstReorderedWindow = true;

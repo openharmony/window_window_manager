@@ -30,7 +30,7 @@ namespace {
 }
 class ScreenGroup::Impl : public RefBase {
 public:
-    Impl(sptr<ScreenGroupInfo> info)
+    explicit Impl(sptr<ScreenGroupInfo> info)
     {
         screenGroupInfo_ = info;
     }
