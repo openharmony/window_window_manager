@@ -86,7 +86,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
         }
     }
 
-    if (StartingWindow::NeedToStopStartingWindow(node->GetWindowMode(), node->GetModeSupportInfo(), info)) {
+    if (!WindowHelper::CheckSupportWindowMode(node->GetWindowMode(), node->GetModeSupportInfo(), info)) {
         WLOGFE("need to cancel starting window");
         return;
     }
