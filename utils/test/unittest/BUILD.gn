@@ -91,7 +91,10 @@ ohos_unittest("utils_window_helper_test") {
 
   deps = [ ":utils_unittest_common" ]
 
-  external_deps = [ "bundle_framework:appexecfwk_base" ]
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "bundle_framework:appexecfwk_base",
+  ]
 }
 
 ohos_unittest("utils_perform_reporter_test") {

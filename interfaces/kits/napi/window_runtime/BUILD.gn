@@ -63,6 +63,7 @@ ohos_shared_library("window_native_kit") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "ability_runtime:runtime",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
