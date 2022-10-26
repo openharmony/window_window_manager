@@ -366,7 +366,7 @@ void WindowTestUtils::UpdateSplitRects(const sptr<Window>& window)
     }
 }
 
-void WindowTestUtils::UpdateLimitDisplayRect(Rect& avoidRect)
+void WindowTestUtils::UpdateLimitDisplayRect(const Rect& avoidRect)
 {
     if (((avoidRect.posX_ == 0) && (avoidRect.posY_ == 0) &&
         (avoidRect.width_ == 0) && (avoidRect.height_ == 0))) {

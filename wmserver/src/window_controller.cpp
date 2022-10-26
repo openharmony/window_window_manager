@@ -1067,7 +1067,7 @@ WMError WindowController::SetWindowLayoutMode(WindowLayoutMode mode)
     WMError res = WMError::WM_OK;
     auto displayIds = windowRoot_->GetAllDisplayIds();
     for (auto displayId : displayIds) {
-        WMError res = windowRoot_->SetWindowLayoutMode(displayId, mode);
+        res = windowRoot_->SetWindowLayoutMode(displayId, mode);
         if (res != WMError::WM_OK) {
             return res;
         }

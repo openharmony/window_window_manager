@@ -85,8 +85,6 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     name_ = option->GetWindowName();
 
-    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    rsSurfaceNodeConfig.SurfaceNodeName = property_->GetWindowName();
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
 
     moveDragProperty_ = new (std::nothrow) MoveDragProperty();
@@ -199,7 +197,7 @@ std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
 
 void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    for (auto& winPair : windowMap_) {
+    for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
         window->UpdateConfiguration(configuration);
     }
@@ -704,7 +702,7 @@ void WindowImpl::MapFloatingWindowToAppIfNeeded()
         return;
     }
 
-    for (auto& winPair : windowMap_) {
+    for (const auto& winPair : windowMap_) {
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
             context_.get() == win->GetContext().get()) {
@@ -723,7 +721,7 @@ void WindowImpl::MapDialogWindowToAppIfNeeded()
         return;
     }
 
-    for (auto& winPair : windowMap_) {
+    for (const auto& winPair : windowMap_) {
         auto win = winPair.second.second;
         if (win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
             context_.get() == win->GetContext().get()) {
@@ -814,7 +812,7 @@ bool WindowImpl::IsAppMainOrSubOrFloatingWindow()
     }
 
     if (WindowHelper::IsAppFloatingWindow(GetType())) {
-        for (auto& winPair : windowMap_) {
+        for (const auto& winPair : windowMap_) {
             auto win = winPair.second.second;
             if (win != nullptr && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
                 context_.get() == win->GetContext().get()) {
@@ -2415,7 +2413,9 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
                 return;
             }
         }
-        SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
+        if (property_ != nullptr) {
+            SingletonContainer::Get<WindowAdapter>().ProcessPointDown(property_->GetWindowId());
+        }
     }
 
     // If point event type is up, should reset start move flag
