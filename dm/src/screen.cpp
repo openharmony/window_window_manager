@@ -31,7 +31,7 @@ namespace {
 }
 class Screen::Impl : public RefBase {
 public:
-    Impl(sptr<ScreenInfo> info)
+    explicit Impl(sptr<ScreenInfo> info)
     {
         screenInfo_ = info;
     }

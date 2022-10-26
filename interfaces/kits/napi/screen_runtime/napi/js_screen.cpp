@@ -288,7 +288,7 @@ NativeValue* CreateJsScreenModeArrayObject(NativeEngine& engine, std::vector<spt
     return arrayValue;
 }
 
-NativeValue* CreateJsScreenModeObject(NativeEngine& engine, sptr<SupportedScreenModes>& mode)
+NativeValue* CreateJsScreenModeObject(NativeEngine& engine, const sptr<SupportedScreenModes>& mode)
 {
     WLOGFI("JsScreen::CreateJsScreenMode is called");
     NativeValue* objValue = engine.CreateObject();

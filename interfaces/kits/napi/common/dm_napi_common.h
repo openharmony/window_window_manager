@@ -58,7 +58,7 @@ napi_status SetMemberUint32(napi_env env, napi_value result, const char *key, ui
 napi_status SetMemberUndefined(napi_env env, napi_value result, const char *key);
 
 bool CheckCallingPermission(const std::string &permission);
-void SetErrorInfo(napi_env env, Rosen::DmErrorCode wret, std::string errMessage,
+void SetErrorInfo(napi_env env, Rosen::DmErrorCode wret, const std::string errMessage,
     napi_value result[], int count);
 void ProcessPromise(napi_env env, Rosen::DmErrorCode wret, napi_deferred deferred,
     napi_value result[], int count);
@@ -67,7 +67,7 @@ bool NAPICall(napi_env env, napi_status status);
 
 template<typename ParamT>
 napi_value AsyncProcess(napi_env env,
-                        std::string funcname,
+                        const std::string funcname,
                         void(*async)(napi_env env, std::unique_ptr<ParamT>& param),
                         napi_value(*resolve)(napi_env env, std::unique_ptr<ParamT>& param),
                         napi_ref& callbackRef,
