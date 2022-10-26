@@ -40,9 +40,19 @@ void WindowLayoutPolicyTile::Launch()
 {
     for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
         const auto& displayId = iter.first;
+        /*
+         * Init tile rects and layout tile queue
+         */
         InitTileRects(displayId);
         InitTileQueue(displayId);
         LayoutTileQueue(displayId);
+
+        /*
+         * Layout above and below nodes, it is necessary when display rotatation or size change
+         */
+        auto& displayWindowTree = displayGroupWindowTree_[displayId];
+        LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::ABOVE_WINDOW_NODE]));
+        LayoutWindowNodesByRootType(*(displayWindowTree[WindowRootNodeType::BELOW_WINDOW_NODE]));
         WLOGFD("[Launch TileLayout], displayId: %{public}" PRIu64"", displayId);
     }
     WLOGFI("[Launch TileLayout Finished]");

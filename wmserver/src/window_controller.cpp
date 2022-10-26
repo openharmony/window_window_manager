@@ -573,6 +573,10 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
         case DisplayStateChangeType::UPDATE_ROTATION:
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
             ProcessDisplayChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+            /*
+             * Window tile num may change when display rotate or change size, need to execute minimize
+             */
+            MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::LAYOUT_TILE);
             break;
         }
         default: {
