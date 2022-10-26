@@ -96,12 +96,12 @@ HWTEST_F(SnapshotUtilsTest, Write01, Function | MediumTest | Level3)
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
     ASSERT_NE(nullptr, pixelMap);
-    ASSERT_EQ(true, SnapShotUtils::WriteToPngWithPixelMap(defaultFile_, *pixelMap));
+    ASSERT_EQ(true, SnapShotUtils::WriteToJpegWithPixelMap(defaultFile_, *pixelMap));
 }
 
 /**
  * @tc.name: Write02
- * @tc.desc: Write default png using valid file names and valid WriteToPngParam
+ * @tc.desc: Write default png using valid file names and valid WriteToJpegParam
  * @tc.type: FUNC
  */
 HWTEST_F(SnapshotUtilsTest, Write02, Function | MediumTest | Level3)
@@ -109,19 +109,19 @@ HWTEST_F(SnapshotUtilsTest, Write02, Function | MediumTest | Level3)
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
     ASSERT_NE(nullptr, pixelMap);
-    WriteToPngParam param = {
+    WriteToJpegParam param = {
         .width = pixelMap->GetWidth(),
         .height = pixelMap->GetHeight(),
         .stride = pixelMap->GetRowBytes(),
         .bitDepth = defaultBitDepth_,
         .data = pixelMap->GetPixels()
     };
-    ASSERT_EQ(true, SnapShotUtils::WriteToPng(defaultFile_, param));
+    ASSERT_EQ(true, SnapShotUtils::WriteToJpeg(defaultFile_, param));
 }
 
 /**
  * @tc.name: Write03
- * @tc.desc: Write custom png using valid file names and valid WriteToPngParam
+ * @tc.desc: Write custom png using valid file names and valid WriteToJpegParam
  * @tc.type: FUNC
  */
 HWTEST_F(SnapshotUtilsTest, Write03, Function | MediumTest | Level3)
@@ -129,14 +129,14 @@ HWTEST_F(SnapshotUtilsTest, Write03, Function | MediumTest | Level3)
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
     ASSERT_NE(nullptr, pixelMap);
-    WriteToPngParam param = {
+    WriteToJpegParam param = {
         .width = (pixelMap->GetWidth() / 2),
         .height = (pixelMap->GetWidth() / 2),
         .stride = pixelMap->GetRowBytes(),
         .bitDepth = defaultBitDepth_,
         .data = pixelMap->GetPixels()
     };
-    ASSERT_EQ(true, SnapShotUtils::WriteToPng(defaultFile_, param));
+    ASSERT_EQ(true, SnapShotUtils::WriteToJpeg(defaultFile_, param));
 }
 
 /**
@@ -148,7 +148,7 @@ HWTEST_F(SnapshotUtilsTest, Write04, Function | MediumTest | Level3)
 {
     DisplayId id = DisplayManager::GetInstance().GetDefaultDisplayId();
     std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenshot(id);
-    ASSERT_EQ(true, SnapShotUtils::WriteToPngWithPixelMap(0, *pixelMap));
+    ASSERT_EQ(true, SnapShotUtils::WriteToJpegWithPixelMap(0, *pixelMap));
 }
 
 /**
@@ -170,7 +170,7 @@ HWTEST_F(SnapshotUtilsTest, CheckWHValid, Function | SmallTest | Level3)
  */
 HWTEST_F(SnapshotUtilsTest, CheckParamValid01, Function | SmallTest | Level3)
 {
-    WriteToPngParam paramInvalidWidth = {
+    WriteToJpegParam paramInvalidWidth = {
         .width = DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT + 1,
         .height = 0,
         .stride = 0,
@@ -187,7 +187,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid01, Function | SmallTest | Level3)
  */
 HWTEST_F(SnapshotUtilsTest, CheckParamValid02, Function | SmallTest | Level3)
 {
-    WriteToPngParam paramInvalidHeight = {
+    WriteToJpegParam paramInvalidHeight = {
         .width = DisplayManager::MAX_RESOLUTION_SIZE_SCREENSHOT,
         .height = 0,
         .stride = 0,
@@ -204,7 +204,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid02, Function | SmallTest | Level3)
  */
 HWTEST_F(SnapshotUtilsTest, CheckParamValid03, Function | SmallTest | Level3)
 {
-    WriteToPngParam paramInvalidStride = {
+    WriteToJpegParam paramInvalidStride = {
         .width = 256,
         .height = 256,
         .stride = 1,
@@ -221,7 +221,7 @@ HWTEST_F(SnapshotUtilsTest, CheckParamValid03, Function | SmallTest | Level3)
  */
 HWTEST_F(SnapshotUtilsTest, CheckParamValid04, Function | SmallTest | Level3)
 {
-    WriteToPngParam paramInvalidData = {
+    WriteToJpegParam paramInvalidData = {
         .width = 256,
         .height = 256,
         .stride = 256 * BPP,
