@@ -175,7 +175,7 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
         auto rect = srcNode->GetWindowRect();
         srcNode->startingWinSurfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
         SurfaceDraw::DrawImageRect(srcNode->startingWinSurfaceNode_, srcNode->GetWindowRect(),
-            pixelMap, 0xffffffff, true);
+            pixelMap, 0x00ffffff, true);
         srcNode->leashWinSurfaceNode_->RemoveChild(srcNode->surfaceNode_);
         srcNode->leashWinSurfaceNode_->AddChild(srcNode->startingWinSurfaceNode_, -1);
         RSTransaction::FlushImplicitTransaction();
@@ -321,7 +321,8 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
         return WMError::WM_ERROR_NULLPTR;
     }
     WLOGFI("RSWindowAnimation: notify animation transition with dst currId:%{public}u!", dstNode->GetWindowId());
-    auto finishedCallback = CreateShowAnimationFinishedCallback(srcNode, dstNode);
+    bool needMinimizeSrcNode = MinimizeApp::IsNodeNeedMinimizeWithReason(srcNode, MinimizeReason::OTHER_WINDOW);
+    auto finishedCallback = CreateShowAnimationFinishedCallback(srcNode, dstNode, needMinimizeSrcNode);
     if (finishedCallback == nullptr) {
         WLOGFE("New RSIWindowAnimationFinishedCallback failed");
         return WMError::WM_ERROR_NO_MEM;
@@ -338,7 +339,6 @@ WMError RemoteAnimation::NotifyAnimationTransition(sptr<WindowTransitionInfo> sr
     // Transition to next state and update task count will success when enable animationFirst_
     dstNode->stateMachine_.TransitionTo(WindowNodeState::SHOW_ANIMATION_PLAYING);
     dstNode->stateMachine_.UpdateAnimationTaskCount(true);
-    bool needMinimizeSrcNode = MinimizeApp::IsNodeNeedMinimizeWithReason(srcNode, MinimizeReason::OTHER_WINDOW);
     // from app to app
     if (needMinimizeSrcNode && srcNode != nullptr) {
         auto srcTarget = CreateWindowAnimationTarget(srcInfo, srcNode);
@@ -781,7 +781,7 @@ void RemoteAnimation::ProcessNodeStateTask(const sptr<WindowNode>& node)
 }
 
 sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateShowAnimationFinishedCallback(
-    const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode)
+    const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode, bool needMinimizeSrcNode)
 {
     wptr<WindowNode> srcNodeWptr = srcNode;
     wptr<WindowNode> dstNodeWptr = dstNode;
@@ -791,7 +791,7 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateShowAnimationFini
         WLOGFI("RSWindowAnimation: not animationFirst use default callback!");
         return GetTransitionFinishedCallback(srcNode, dstNode);
     } else {
-        func = [srcNodeWptr, dstNodeWptr]() {
+        func = [srcNodeWptr, dstNodeWptr, needMinimizeSrcNode]() {
             WLOGFI("RSWindowAnimation: animationFirst use state machine process ShowAnimationFinishedCallback!");
             auto srcNodeSptr = srcNodeWptr.promote();
             auto dstNodeSptr = dstNodeWptr.promote();
@@ -801,9 +801,7 @@ sptr<RSWindowAnimationFinishedCallback> RemoteAnimation::CreateShowAnimationFini
             }
             ProcessNodeStateTask(dstNodeSptr);
             // launcher not do this
-            if (srcNodeSptr!= nullptr && WindowHelper::IsMainWindow(srcNodeSptr->GetWindowType()) &&
-                WindowHelper::IsFullScreenWindow(srcNodeSptr->GetWindowMode()) &&
-                MinimizeApp::EnableMinimize(MinimizeReason::OTHER_WINDOW)) {
+            if (needMinimizeSrcNode) {
                 ProcessNodeStateTask(srcNodeSptr);
             }
             WLOGFI("current window:%{public}u state: %{public}u", dstNodeSptr->GetWindowId(),
