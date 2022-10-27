@@ -47,8 +47,7 @@ public:
         sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& dstNode);
     static TransitionEvent GetTransitionEvent(sptr<WindowTransitionInfo> srcInfo,
         sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode);
-    static WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller,
-        const sptr<WindowRoot>& windowRoot);
+    static WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
     static WMError NotifyAnimationTransition(sptr<WindowTransitionInfo> srcInfo, sptr<WindowTransitionInfo> dstInfo,
         const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode);
     static WMError NotifyAnimationMinimize(sptr<WindowTransitionInfo> srcInfo, const sptr<WindowNode>& srcNode);
@@ -67,7 +66,8 @@ public:
     static void NotifyAnimationTargetsUpdate(std::vector<uint32_t>& fullScreenWinIds,
         std::vector<uint32_t>& floatWinIds);
     static void SetAnimationFirst(bool animationFirst);
-    static void SetWindowController(const sptr<WindowController>& windowController);
+    static void SetWindowControllerAndRoot(const sptr<WindowController>& windowController,
+    const sptr<WindowRoot>& windowRoot);
     static bool IsRemoteAnimationEnabledAndFirst(DisplayId displayId = 0);
     static void CallbackTimeOutProcess();
     static inline bool IsAnimationFirst()
