@@ -120,7 +120,7 @@ public:
     WindowSizeLimits GetWindowSizeLimits() const;
     WindowSizeLimits GetWindowUpdatedSizeLimits() const;
 
-    bool EnableDefaultAnimation(bool propertyEnabled, bool animationPlayed);
+    bool EnableDefaultAnimation(bool animationPlayed);
     sptr<WindowNode> parent_;
     std::vector<sptr<WindowNode>> children_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;

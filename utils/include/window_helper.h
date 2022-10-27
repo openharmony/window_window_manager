@@ -502,13 +502,6 @@ public:
         return false;
     }
 
-    static inline bool ReadIsWindowAnimationEnabledProperty()
-    {
-        if (access(DISABLE_WINDOW_ANIMATION_PATH, F_OK) == 0) {
-            return false;
-        }
-        return true;
-    }
 private:
     WindowHelper() = default;
     ~WindowHelper() = default;
