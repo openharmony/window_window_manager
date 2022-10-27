@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <vector>
 #include "ability_info.h"
+#include "window_transition_info.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
 #include "wm_math.h"
@@ -189,9 +190,10 @@ public:
         }
     }
 
-    static void ConvertSupportModesToSupportInfo(uint32_t& modeSupportInfo,
-                                                 const std::vector<AppExecFwk::SupportWindowMode>& supportModes)
+    static uint32_t ConvertSupportModesToSupportInfo(const std::vector<AppExecFwk::SupportWindowMode>& supportModes)
+
     {
+        uint32_t modeSupportInfo = 0;
         for (auto& mode : supportModes) {
             if (mode == AppExecFwk::SupportWindowMode::FULLSCREEN) {
                 modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN;
@@ -202,6 +204,7 @@ public:
                 modeSupportInfo |= WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
             }
         }
+        return modeSupportInfo;
     }
 
     static Rect GetFixedWindowRectByLimitSize(const Rect& oriDstRect, const Rect& lastRect, bool isVertical,
@@ -502,6 +505,20 @@ public:
             return true;
         }
         return false;
+    }
+
+    static bool CheckSupportWindowMode(WindowMode winMode, uint32_t modeSupportInfo,
+        const sptr<WindowTransitionInfo>& info)
+    {
+        if (!WindowHelper::IsMainWindow(info->GetWindowType())) {
+            return true;
+        }
+
+        if ((!IsWindowModeSupported(modeSupportInfo, winMode)) ||
+            (IsOnlySupportSplitAndShowWhenLocked(info->GetShowFlagWhenLocked(), modeSupportInfo))) {
+            return false;
+        }
+        return true;
     }
 
 private:
