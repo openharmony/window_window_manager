@@ -82,7 +82,7 @@ private:
         const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode,
         sptr<RSWindowAnimationTarget>& dstTarget, sptr<RSWindowAnimationFinishedCallback>& finishedCallback);
     static sptr<RSWindowAnimationFinishedCallback> CreateShowAnimationFinishedCallback(
-        const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode);
+        const sptr<WindowNode>& srcNode, const sptr<WindowNode>& dstNode, bool needMinimizeSrcNode);
     static sptr<RSWindowAnimationFinishedCallback> CreateHideAnimationFinishedCallback(
         const sptr<WindowNode>& srcNode, TransitionEvent event);
     static void ProcessNodeStateTask(const sptr<WindowNode>& node);
