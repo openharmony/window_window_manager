@@ -115,16 +115,26 @@ bool RemoteAnimation::CheckTransition(sptr<WindowTransitionInfo> srcInfo, const 
     sptr<WindowTransitionInfo> dstInfo, const sptr<WindowNode>& dstNode)
 {
     if (srcNode == nullptr && dstNode == nullptr) {
+        WLOGFE("RSWindowAnimation: srcNode and dstNode are nullptr");
         return false;
     }
 
     if (srcNode != nullptr && !srcNode->leashWinSurfaceNode_ && !srcNode->surfaceNode_) {
-        WLOGFI("RSWindowAnimation: srcNode has no surface!");
+        WLOGFE("RSWindowAnimation: srcNode has no surface, winId: %{public}u", srcNode->GetWindowId());
         return false;
     }
 
     if (dstNode != nullptr && !dstNode->leashWinSurfaceNode_ && !dstNode->surfaceNode_) {
-        WLOGFI("RSWindowAnimation: dstNode has no surface!");
+        WLOGFE("RSWindowAnimation: dstNode has no surface, winId: %{public}u", dstNode->GetWindowId());
+        return false;
+    }
+
+    // check support window mode when one app starts another app
+    if ((dstNode != nullptr && dstInfo != nullptr) &&
+        !WindowHelper::CheckSupportWindowMode(dstNode->GetWindowMode(), dstNode->GetModeSupportInfo(), dstInfo)) {
+        WLOGFE("RSWindowAnimation: the mode of dstNode isn't supported, winId: %{public}u, mode: %{public}u, "
+            "modeSupportInfo: %{public}u", dstNode->GetWindowId(), dstNode->GetWindowMode(),
+            dstNode->GetModeSupportInfo());
         return false;
     }
 
