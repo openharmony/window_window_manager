@@ -361,7 +361,7 @@ void DisplayManagerService::OnStop()
 bool DisplayManagerService::RegisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    if (type == DisplayManagerAgentType::DISPLAY_EVENT_LISTENER && !Permission::IsSystemCalling()) {
+    if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !Permission::IsSystemCalling()) {
         WLOGFE("register display manager agent permission denied!");
         return false;
     }
@@ -375,7 +375,7 @@ bool DisplayManagerService::RegisterDisplayManagerAgent(const sptr<IDisplayManag
 bool DisplayManagerService::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
     DisplayManagerAgentType type)
 {
-    if (type == DisplayManagerAgentType::DISPLAY_EVENT_LISTENER && !Permission::IsSystemCalling()) {
+    if (type == DisplayManagerAgentType::SCREEN_EVENT_LISTENER && !Permission::IsSystemCalling()) {
         WLOGFE("unregister display manager agent permission denied!");
         return false;
     }
