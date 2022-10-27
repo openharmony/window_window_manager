@@ -1995,7 +1995,7 @@ HWTEST_F(WindowImplTest, WindowFlag, Function | SmallTest | Level3)
     ASSERT_EQ(WindowState::STATE_SHOWN, window->GetWindowState());
     EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetWindowFlags(static_cast<uint32_t>(0)));
-    ASSERT_EQ(static_cast<uint32_t>(0), window->GetWindowFlags());
+    ASSERT_EQ(static_cast<uint32_t>(1), window->GetWindowFlags());
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
