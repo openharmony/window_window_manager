@@ -76,6 +76,10 @@ RSScreenModeInfo AbstractDisplayController::GetScreenActiveMode(ScreenId id)
 
 sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplay(DisplayId displayId) const
 {
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("display id is invalid.");
+        return nullptr;
+    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = abstractDisplayMap_.find(displayId);
     if (iter == abstractDisplayMap_.end()) {
@@ -87,6 +91,10 @@ sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplay(DisplayId di
 
 sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplayByScreen(ScreenId screenId) const
 {
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screen id is invalid.");
+        return nullptr;
+    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto iter : abstractDisplayMap_) {
         sptr<AbstractDisplay> display = iter.second;
