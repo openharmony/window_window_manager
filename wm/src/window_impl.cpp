@@ -754,8 +754,7 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
     }
 
     // get support modes configuration
-    uint32_t modeSupportInfo = 0;
-    WindowHelper::ConvertSupportModesToSupportInfo(modeSupportInfo, abilityInfo->windowModes);
+    uint32_t modeSupportInfo = WindowHelper::ConvertSupportModesToSupportInfo(abilityInfo->windowModes);
     if (modeSupportInfo == 0) {
         WLOGFD("mode config param is 0, all modes is supported");
         modeSupportInfo = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
