@@ -82,10 +82,10 @@ public:
     static uint32_t GetMaxTileWinNum();
 
 private:
-    void UpdateLimitDisplayRect(Rect& avoidRect);
+    void UpdateLimitDisplayRect(const Rect& avoidRect);
     void UpdateLimitSplitRects(int32_t divPos);
     void UpdateLimitSplitRect(Rect& limitSplitRect);
-    AvoidPosType GetAvoidPosType(const Rect& rect);
+    static AvoidPosType GetAvoidPosType(const Rect& rect);
     AvoidArea avoidArea_;
 };
 } // namespace ROSEN

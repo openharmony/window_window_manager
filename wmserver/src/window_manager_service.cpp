@@ -660,15 +660,15 @@ void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken
 WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, uint32_t& windowId, sptr<IRemoteObject> token)
 {
+    if (!window || property == nullptr || surfaceNode == nullptr || !window->AsObject()) {
+        WLOGFE("window is invalid");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     bool isSystemWindowExceptAlarmWindow = property->GetWindowType() != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW &&
         WindowHelper::IsSystemWindow(property->GetWindowType());
     if (isSystemWindowExceptAlarmWindow && !Permission::IsSystemCalling()) {
         WLOGFE("create system window permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
-    if (!window || property == nullptr || surfaceNode == nullptr || !window->AsObject()) {
-        WLOGFE("window is invalid");
-        return WMError::WM_ERROR_NULLPTR;
     }
     int pid = IPCSkeleton::GetCallingPid();
     int uid = IPCSkeleton::GetCallingUid();
@@ -682,6 +682,10 @@ WMError WindowManagerService::CreateWindow(sptr<IWindow>& window, sptr<WindowPro
 
 WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
 {
+    if (property == nullptr) {
+        WLOGFE("property is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     bool isSystemWindowExceptAlarmWindow = property->GetWindowType() != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW &&
         WindowHelper::IsSystemWindow(property->GetWindowType());
     if ((isSystemWindowExceptAlarmWindow ||
@@ -691,10 +695,6 @@ WMError WindowManagerService::AddWindow(sptr<WindowProperty>& property)
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     return PostSyncTask([this, &property]() {
-        if (property == nullptr) {
-            WLOGFE("property is nullptr");
-            return WMError::WM_ERROR_NULLPTR;
-        }
         windowShowPerformReport_->start();
         Rect rect = property->GetRequestRect();
         uint32_t windowId = property->GetWindowId();
@@ -1002,15 +1002,15 @@ WMError WindowManagerService::SetWindowLayoutMode(WindowLayoutMode mode)
 WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowProperty, PropertyChangeAction action,
     bool isAsyncTask)
 {
+    if (windowProperty == nullptr) {
+        WLOGFE("windowProperty is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     if ((windowProperty->GetWindowFlags() == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE) ||
         action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) &&
         !Permission::IsSystemCalling()) {
         WLOGFE("SetForbidSplitMove or SetShowWhenLocked or SetTranform or SetTurnScreenOn permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
-    if (windowProperty == nullptr) {
-        WLOGFE("windowProperty is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
     }
 
     if (action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) {

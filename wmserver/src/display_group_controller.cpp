@@ -348,7 +348,7 @@ void DisplayGroupController::ProcessNotCrossNodesOnDestroyedDisplay(DisplayId di
         WindowRootNodeType::APP_WINDOW_NODE,
         WindowRootNodeType::BELOW_WINDOW_NODE
     };
-    for (auto& type : rootNodeType) {
+    for (const auto& type : rootNodeType) {
         auto nodesVec = *(displayGroupWindowTree_[displayId][type]);
         for (auto node : nodesVec) {
             WLOGFD("node on destroied display, windowId: %{public}d, isShowingOnMulti: %{public}d",

@@ -73,7 +73,7 @@ bool PerformReporter::report()
     std::ostringstream oss;
     oss << tag_ << ": ";
     auto maxSplit = 0;
-    for (auto& iter: timeSplitCount_) {
+    for (const auto& iter: timeSplitCount_) {
         if (iter.first != BARRIER) {
             oss << "BELLOW" << iter.first << "(ms): " << iter.second << ", ";
             maxSplit = iter.first;
