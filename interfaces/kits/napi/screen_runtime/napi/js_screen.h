@@ -26,7 +26,7 @@ namespace OHOS {
 namespace Rosen {
 NativeValue* CreateJsScreenObject(NativeEngine& engine, sptr<Screen>& screen);
 NativeValue* CreateJsScreenModeArrayObject(NativeEngine& engine, std::vector<sptr<SupportedScreenModes>> screenModes);
-NativeValue* CreateJsScreenModeObject(NativeEngine &engine, sptr<SupportedScreenModes>& mode);
+NativeValue* CreateJsScreenModeObject(NativeEngine &engine, const sptr<SupportedScreenModes>& mode);
 class JsScreen final {
 public:
     explicit JsScreen(const sptr<Screen>& screen);

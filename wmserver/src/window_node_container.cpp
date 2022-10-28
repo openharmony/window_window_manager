@@ -449,16 +449,16 @@ void WindowNodeContainer::UpdateWindowTree(sptr<WindowNode>& node)
     }
     auto position = parentNode->children_.end();
     int splitWindowCnt = 0;
-    for (auto iter = parentNode->children_.begin(); iter < parentNode->children_.end(); ++iter) {
+    for (auto child = parentNode->children_.begin(); child < parentNode->children_.end(); ++child) {
         if (node->GetWindowType() == WindowType::WINDOW_TYPE_DOCK_SLICE && splitWindowCnt == SPLIT_WINDOWS_CNT) {
-            position = iter;
+            position = child;
             break;
         }
-        if (WindowHelper::IsSplitWindowMode((*iter)->GetWindowMode())) {
+        if (WindowHelper::IsSplitWindowMode((*child)->GetWindowMode())) {
             splitWindowCnt++;
         }
-        if ((*iter)->priority_ > node->priority_) {
-            position = iter;
+        if ((*child)->priority_ > node->priority_) {
+            position = child;
             break;
         }
     }
@@ -622,7 +622,7 @@ sptr<WindowNode> WindowNodeContainer::FindRoot(WindowType type) const
 sptr<WindowNode> WindowNodeContainer::FindWindowNodeById(uint32_t id) const
 {
     std::vector<sptr<WindowNode>> rootNodes = { aboveAppWindowNode_, appWindowNode_, belowAppWindowNode_ };
-    for (auto& rootNode : rootNodes) {
+    for (const auto& rootNode : rootNodes) {
         for (auto& node : rootNode->children_) {
             if (node->GetWindowId() == id) {
                 return node;
@@ -869,7 +869,7 @@ std::unordered_map<WindowType, SystemBarProperty> WindowNodeContainer::GetExpect
     };
 
     std::vector<sptr<WindowNode>> rootNodes = { aboveAppWindowNode_, appWindowNode_, belowAppWindowNode_ };
-    for (auto& node : rootNodes) {
+    for (const auto& node : rootNodes) {
         for (auto iter = node->children_.rbegin(); iter < node->children_.rend(); ++iter) {
             auto& sysBarPropMapNode = (*iter)->GetSystemBarProperty();
             if (IsAboveSystemBarNode(*iter)) {
@@ -1800,7 +1800,7 @@ void WindowNodeContainer::TraverseWindowTree(const WindowNodeOperationFunc& func
         std::reverse(rootNodes.begin(), rootNodes.end());
     }
 
-    for (auto& node : rootNodes) {
+    for (const auto& node : rootNodes) {
         if (isFromTopToBottom) {
             for (auto iter = node->children_.rbegin(); iter != node->children_.rend(); ++iter) {
                 if (TraverseFromTopToBottom(*iter, func)) {

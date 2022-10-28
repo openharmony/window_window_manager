@@ -1216,7 +1216,7 @@ std::string WindowRoot::GenAllWindowsLogInfo() const
             continue;
         }
         std::vector<DisplayId>& displayIdVec = const_cast<WindowRoot*>(this)->displayIdMap_[elem.first];
-        for (auto& displayId : displayIdVec) {
+        for (const auto& displayId : displayIdVec) {
             os << "Display " << displayId << ":";
         }
         elem.second->TraverseWindowTree(func, true);
@@ -1315,7 +1315,7 @@ std::map<DisplayId, Rect> WindowRoot::GetAllDisplayRectsByDisplayInfo(
 {
     std::map<DisplayId, Rect> displayRectMap;
 
-    for (auto& iter : displayInfoMap) {
+    for (const auto& iter : displayInfoMap) {
         auto id = iter.first;
         auto info = iter.second;
         Rect displayRect = { info->GetOffsetX(), info->GetOffsetY(), info->GetWidth(), info->GetHeight() };
@@ -1711,7 +1711,7 @@ bool WindowRoot::IsAppWindowExceed() const
 
 sptr<WindowNode> WindowRoot::GetWindowNodeByAbilityToken(const sptr<IRemoteObject>& abilityToken)
 {
-    for (auto& iter : windowNodeMap_) {
+    for (const auto& iter : windowNodeMap_) {
         if (iter.second != nullptr && iter.second->abilityToken_ == abilityToken) {
             return iter.second;
         }

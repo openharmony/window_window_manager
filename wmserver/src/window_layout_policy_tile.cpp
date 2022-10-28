@@ -45,7 +45,7 @@ void WindowLayoutPolicyTile::Launch()
     InitAllRects();
     // select app min win in queue, and minimize others
     InitForegroundNodeQueue();
-    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
+    for (const auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
         DisplayId displayId = iter.first;
         AssignNodePropertyForTileWindows(displayId);
         LayoutForegroundNodeQueue(displayId);
@@ -58,7 +58,7 @@ void WindowLayoutPolicyTile::Launch()
 void WindowLayoutPolicyTile::InitAllRects()
 {
     displayGroupLimitRect_ = displayGroupRect_;
-    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
+    for (const auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
         DisplayId displayId = iter.first;
         limitRectMap_[displayId] = iter.second;
         auto& displayWindowTree = displayGroupWindowTree_[displayId];
@@ -211,7 +211,7 @@ void WindowLayoutPolicyTile::LayoutForegroundNodeQueue(DisplayId displayId)
 
 void WindowLayoutPolicyTile::InitForegroundNodeQueue()
 {
-    for (auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
+    for (const auto& iter : displayGroupInfo_->GetAllDisplayRects()) {
         DisplayId displayId = iter.first;
         foregroundNodesMap_[displayId].clear();
         const auto& appWindowNodes = *(displayGroupWindowTree_[displayId][WindowRootNodeType::APP_WINDOW_NODE]);
