@@ -355,8 +355,9 @@ bool SurfaceDraw::GetSurfaceSnapshot(const std::shared_ptr<RSSurfaceNode> surfac
         return false;
     }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, scaleW, scaleH);
-    pixelMap = callback->GetResult(timeoutMs); // get pixelmap time out ms
+    if (RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, scaleW, scaleH)) {
+        pixelMap = callback->GetResult(timeoutMs); // get pixelmap time out ms
+    }
     if (pixelMap == nullptr) {
         WLOGE("get surface snapshot timeout.");
         return false;
