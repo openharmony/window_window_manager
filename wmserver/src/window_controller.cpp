@@ -86,7 +86,7 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
         }
     }
 
-    if (StartingWindow::NeedToStopStartingWindow(node->GetWindowMode(), node->GetModeSupportInfo(), info)) {
+    if (!WindowHelper::CheckSupportWindowMode(node->GetWindowMode(), node->GetModeSupportInfo(), info)) {
         WLOGFE("need to cancel starting window");
         return;
     }
@@ -564,6 +564,10 @@ void WindowController::NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr
         case DisplayStateChangeType::UPDATE_ROTATION:
         case DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE: {
             ProcessDisplayChange(defaultDisplayId, displayInfo, displayInfoMap, type);
+            /*
+             * Window tile num may change when display rotate or change size, need to execute minimize
+             */
+            MinimizeApp::ExecuteMinimizeTargetReasons(MinimizeReason::LAYOUT_TILE);
             break;
         }
         default: {

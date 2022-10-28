@@ -32,21 +32,6 @@ namespace {
 std::recursive_mutex StartingWindow::mutex_;
 WindowMode StartingWindow::defaultMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
 
-bool StartingWindow::NeedToStopStartingWindow(WindowMode winMode, uint32_t modeSupportInfo,
-    const sptr<WindowTransitionInfo>& info)
-{
-    if (!WindowHelper::IsMainWindow(info->GetWindowType())) {
-        return false;
-    }
-
-    if ((!WindowHelper::IsWindowModeSupported(modeSupportInfo, winMode)) ||
-        (WindowHelper::IsOnlySupportSplitAndShowWhenLocked(info->GetShowFlagWhenLocked(), modeSupportInfo))) {
-        WLOGFE("window mode is not be supported or not support floating mode in tile, cancel starting window");
-        return true;
-    }
-    return false;
-}
-
 sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInfo>& info, uint32_t winId)
 {
     sptr<WindowProperty> property = new(std::nothrow) WindowProperty();
@@ -79,8 +64,7 @@ sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInf
     node->abilityInfo_.missionId_ = info->GetMissionId();
     node->abilityInfo_.bundleName_ = info->GetBundleName();
     node->abilityInfo_.abilityName_ = info->GetAbilityName();
-    uint32_t modeSupportInfo = 0;
-    WindowHelper::ConvertSupportModesToSupportInfo(modeSupportInfo, info->GetWindowSupportModes());
+    uint32_t modeSupportInfo = WindowHelper::ConvertSupportModesToSupportInfo(info->GetWindowSupportModes());
     node->SetModeSupportInfo(modeSupportInfo);
 
     if (CreateLeashAndStartingSurfaceNode(node) != WMError::WM_OK) {
