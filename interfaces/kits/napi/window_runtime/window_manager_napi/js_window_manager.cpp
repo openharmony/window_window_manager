@@ -462,8 +462,7 @@ NativeValue* JsWindowManager::OnCreateWindow(NativeEngine& engine, NativeCallbac
     }
     NativeValue* callback = nullptr;
     if (info.argc > 1) {
-        callback = (info.argc == 1) ? nullptr :
-            (info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr); // 1: index of callback
+        callback = info.argv[1]->TypeOf() == NATIVE_FUNCTION ? info.argv[1] : nullptr; // 1: index of callback
     }
     AsyncTask::CompleteCallback complete =
         [=](NativeEngine& engine, AsyncTask& task, int32_t status) {

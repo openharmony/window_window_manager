@@ -642,7 +642,7 @@ std::map<DisplayId, sptr<DisplayInfo>> AbstractDisplayController::GetAllDisplayI
     ScreenId screenGroupId = info->GetScreenGroupId();
     std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto& iter : abstractDisplayMap_) {
+    for (const auto& iter : abstractDisplayMap_) {
         sptr<AbstractDisplay> display = iter.second;
         if (display->GetAbstractScreenGroupId() == screenGroupId) {
             displayInfoMap.insert(std::make_pair(display->GetId(), display->ConvertToDisplayInfo()));

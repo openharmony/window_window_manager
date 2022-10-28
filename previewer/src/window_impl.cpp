@@ -112,7 +112,7 @@ std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
 
 void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    for (auto& winPair : windowMap_) {
+    for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
         window->UpdateConfiguration(configuration);
     }
@@ -320,7 +320,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     }
     // check parent id, if create sub window and there is not exist parent Window, then return
     if (parentId != INVALID_WINDOW_ID) {
-        for (auto& winPair : windowMap_) {
+        for (const auto& winPair : windowMap_) {
             if (winPair.second.first == parentId) {
                 property_->SetParentId(parentId);
                 break;

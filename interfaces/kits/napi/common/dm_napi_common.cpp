@@ -62,7 +62,7 @@ bool CheckCallingPermission(const std::string &permission)
     return true;
 }
 
-void SetErrorInfo(napi_env env, Rosen::DmErrorCode wret, std::string errMessage, napi_value result[], int count)
+void SetErrorInfo(napi_env env, Rosen::DmErrorCode wret, const std::string errMessage, napi_value result[], int count)
 {
     if (count != 2 || result == nullptr) { // input param number is 2
         GNAPI_LOG("Error, input param number must be 2");

@@ -411,7 +411,7 @@ NativeValue* OnMakeExpand(NativeEngine& engine, NativeCallbackInfo& info)
     return result;
 }
 
-int32_t GetExpandOptionFromJs(NativeEngine& engine, NativeObject* optionObject, ExpandOption& option)
+static int32_t GetExpandOptionFromJs(NativeEngine& engine, NativeObject* optionObject, ExpandOption& option)
 {
     NativeValue* screedIdValue = optionObject->GetProperty("screenId");
     NativeValue* startXValue = optionObject->GetProperty("startX");
